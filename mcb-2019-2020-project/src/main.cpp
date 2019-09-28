@@ -6,7 +6,7 @@ int main()
 
     while (1)
     {
-        Board::LEDS::toggle();
+        Board::Leds::toggle();
         modm::delayMilliseconds(1000);
     }
     return 0;
