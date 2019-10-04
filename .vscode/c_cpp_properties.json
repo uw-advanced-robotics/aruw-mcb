@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "rm-type-board-a",
             "includePath": [
                 "${workspaceRoot}",
                 "./mcb-2019-2020-project/modm/src",

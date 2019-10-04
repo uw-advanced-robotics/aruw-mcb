@@ -15,12 +15,9 @@
   <modules>
     <module>modm:architecture:delay</module>
     <module>modm:architecture:clock</module>
-    <!--module>modm:driver:l3gd20</module-->
     <module>modm:platform:clock</module>
     <module>modm:platform:core</module>
     <module>modm:platform:gpio</module>
-    <!--module>modm:platform:spi:1</module-->
-    <!-- include the SCons build module -->
     <module>modm:build:scons</module>
   </modules>
 </library>

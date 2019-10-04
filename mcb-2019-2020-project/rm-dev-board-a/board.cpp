@@ -9,21 +9,22 @@
  */
 // ----------------------------------------------------------------------------
 
-#include "board.hpp"
+#include "rm-dev-board-a/board.hpp"
+
 #include <modm/architecture/interface/delay.hpp>
 
 modm_extern_c void
 modm_abandon(const char *,
-			 const char *,
-			 const char *,
-			 uintptr_t)
+        const char *,
+        const char *,
+        uintptr_t)
 {
-	Board::LEDS::setOutput();
-	for(int times=10; times>=0; times--)
-	{
-        Board::LEDS::toggle();
-		modm::delayMilliseconds(100);
-        Board::LEDS::toggle();
-		modm::delayMilliseconds(100);
-	}
+    Board::Leds::setOutput();
+    for (int times=10; times >= 0; times--)
+    {
+        Board::Leds::toggle();
+        modm::delayMilliseconds(100);
+        Board::Leds::toggle();
+        modm::delayMilliseconds(100);
+    }
 }
