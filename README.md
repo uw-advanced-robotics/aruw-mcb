@@ -5,7 +5,14 @@ compiler, openocd debugger, and vscode editor.
 
 ## New user guide
 
-1. Download [openocd](https://drive.google.com/file/d/14LnGVDfvSiih2daIdglWiC25xgwJkTM7/view?usp=sharing), [arm-gcc-toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads),and [anaconda](https://www.anaconda.com/distribution/). To download the 7zip files, if you do not have a 7zip extractor, you can use
+
+1. Download [openocd](https://drive.google.com/file/d/14LnGVDfvSiih2daIdglWiC25xgwJkTM7/view?usp=sharing),
+   [arm-gcc-toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads),
+   and [anaconda](https://www.anaconda.com/distribution/). (During installation, make sure to check the 'Add to PATH' box) If you perfer, rather
+   than downloading openocd and the arm-gcc-toolchain from the provided links, I
+   have created a 7zip file containing both, which can be downloaded
+   [here](https://drive.google.com/file/d/1-GCnAhZSidhW827O36aBPIegsX6G6-6S/view?usp=sharing).
+   To download the 7zip files, if you do not have a 7zip extractor, you can use
    [this](https://extract.me/) website to extract the file. 
 2. Add the /bin of openocd and the gcc-toolchain to your path. <br><br>
 
@@ -71,8 +78,9 @@ The modm website provides a great number of examples that can be very useful whe
 
 #### How to build code
 
-1. In anaconda, cd into mcb-2019-2020/mcb-2019-2020-project.
-2. In anaconda, type `scons build`.
+1. In VSCode, open the Command Palette (Ctrl + Shift + P)
+2. Find `Tasks: Run Task`
+3. Select `Build - Release` or `Build - Debug`
 
 #### How to add your own files
 
@@ -81,18 +89,25 @@ The modm website provides a great number of examples that can be very useful whe
 
 #### How to program an MCB
 
-1. In anaconda, cd into mcb-2019-2020/mcb-2019-2020-project.
-2. In anaconda, type `scons program`.
+1. In VSCode, open the Command Palette (Ctrl + Shift + P)
+2. Find `Tasks: Run Task`
+3. Select `Program - Release` or `Program - Debug`
+
+ALTERNATIVELY, if just programming, not debugging:
+
+1. In VSCode, press Ctrl + Shift + B
 
 #### How to debug
 
-1. In anaconda, cd into mcb-2019-2020/mcb-2019-2020-project.
-2. In anaconda, type `scons build profile=debug`. This will create a debug folder in the build folder.
-3. In anaconda, type `scons program profile=debug`. This will deploy using the newly create debug folder.
-4. Open the folder "mcb-2019-2020" in vscode. Hit the debug tab on the left side. or type "ctrl + shift + D".
-5. Hit the green play arrow on the left top of the screen.
+1. Open the folder `mcb-2019-2020` in VSCode. Hit the debug tab on the left side. or type "ctrl + shift + D".
+2. Hit the green play arrow on the left top of the screen.
 
 ![debug-image](https://i.imgur.com/l78vKh0.png)
+
+ALTERNATIVELY...
+
+1. Open the folder `mcb-2019-2020` in VSCode. Press F5.
+
 
 ### Special cases guide
 
@@ -100,8 +115,7 @@ The modm website provides a great number of examples that can be very useful whe
 
 1. Open `mcb-2019-2020/mcb-2019-2020-project/project.xml`.
 2. Here you will see a list of items that look like this: `<module>modm:platform:gpio</module>`. See modm [examples](https://modm.io/#examples), where .xml files can be found. Add in items you would like. you must enclose the specified item in `<module> </module>`. Also, the first word enclosed will most likely be modm. Generally speaking, the next word (platform in the example above) signifies the file in the modm submodule's 'src' file. This, however, is not always true, and it can sometimes be difficult to find what exactly to type to include something from the modm submodule. This is why looking at modm's examples are very useful because they include project.xml files. 
-2. `cd` into mcb-2019-2020-project.
-3. type `lbuild build` The dependencies should be created in mcb-2019-2020/mcb-2019-2020-project/modm subdirectory.
+2. Run the `Setup Build` task in VSCode.
 
 ## Useful Commands when using Anaconda
 
