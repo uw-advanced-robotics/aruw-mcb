@@ -26,7 +26,7 @@ namespace CVCommunication {
     bool getLastAimData(TurretAimData_t* aim_data);
     void sendIMUData();
     void sendRobotID();
-    void sendTurrentData(TurretAimData_t);
+    void sendTurrentData(float pitch, float yaw);
     bool decodeToTurrentAimData(uint8_t* buffer, uint16_t length,TurretAimData_t* aim_data);
 
 
@@ -46,7 +46,16 @@ namespace CVCommunication {
     
     void sendIMUData();
     void sendRobotID();
-    void sendTurrentData(TurretAimData_t);
+    void sendTurrentData(float pitch, float yaw) {
+        int16_t data[2] = 
+	    { 
+		    (int16_t)(pitch * 100), 
+    		(int16_t)(yaw * 100)
+	    };
+	    if(send(CV_MESSAGE_TYPE_TURRET_TELEMETRY, 4, (uint8_t*)data)){
+            inc_msg_switch();
+        }
+    }
     bool decodeToTurrentAimData(uint8_t* buffer, uint16_t length,TurretAimData_t* aim_data);
     
     void handleTurrentAim(TurretAimData_t *aim_data) {
@@ -82,7 +91,7 @@ namespace CVCommunication {
     }
     void sendTaskRequest(void) {
 	    if (!request_sent && !is_align_active) {
-		    serial_transmit(SERIAL_HUART2, CV_MESSAGE_TYPE_REQUEST_TASK, 1, (uint8_t*)(&curr_request), &cv_comms_task_request_success);	
+		    send(CV_MESSAGE_TYPE_REQUEST_TASK, 1, (uint8_t*)(&curr_request), &cv_comms_task_request_success);	
     	} else { // no need to request again, increment serial cycle
     		inc_msg_switch();
     	}
@@ -174,9 +183,39 @@ namespace CVCommunication {
         Usart2::initialize<Board::SystemClock,115200>();
         
     }
-    
-    void send(uint16_t message_type,uint16_t length,uint8_t* message_data){
-        
+
+    uint8_t tx_sequence_num;
+
+    bool send(uint16_t message_type,uint16_t length,uint8_t* message_data){
+        uint8_t buff[SERIAL_TX_BUF_SIZE];
+        buff[0] = SERIAL_HEAD_BYTE;
+	    buff[1] = length & 0xFF;
+	    buff[2] = length >> 8;
+	    buff[3] = tx_sequence_num;
+	    buff[4] = CRC8(buff, 4, CRC8_INIT);
+	    buff[5] = message_type & 0xFF;
+	    buff[6] = message_type >> 8;
+
+        uint8_t* next_tx_buf = &(buff[7]);
+
+        if (next_tx_buf + length + SERIAL_FOOTER_LENGTH >= buff + SERIAL_TX_BUF_SIZE) {
+		    return false;
+        }
+        for (uint16_t i = 0; i < length; i++) {
+		    *next_tx_buf = message_data[i];
+    		next_tx_buf++;
+	    }
+        uint16_t CRC16_val = CRC16(buff, 7 + length, CRC16_INIT);
+	    next_tx_buf[0] = CRC16_val & 0xFF;
+	    next_tx_buf[1] = CRC16_val >> 8;
+	    next_tx_buf += SERIAL_FOOTER_LENGTH;
+        uint16_t total_size = next_tx_buf - buff;
+        bool status=Usart2::write(buff, total_size);
+        if (status) {
+		    return false;
+    	}
+        tx_sequence_num++;
+        return true;
     }
 
     void update(){}

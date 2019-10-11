@@ -78,6 +78,7 @@ namespace CVCommunication{
     //and Send Referee Data and IMU Data(Non-Engineer) or Task Request(Engineer) to Xavier
     void update();
     //Send Message to Xavier Via UART
-    void send(uint16_t message_type,uint16_t length,uint8_t* message_data);
+    bool send(uint16_t message_type,uint16_t length,uint8_t* message_data);
+
 }
 #endif

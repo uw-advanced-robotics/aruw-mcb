@@ -187,6 +187,7 @@ files = [
     env.File(r"src\modm\platform\core\vectors.c"),
     env.File(r"src\modm\platform\gpio\enable.cpp"),
     env.File(r"src\modm\platform\uart\uart_2.cpp"),
+    env.File(r"src\modm\platform\uart\uart_6.cpp"),
     env.File(r"src\modm\utils\dummy.cpp"),
 ]
 library = env.StaticLibrary(target="modm", source=files)

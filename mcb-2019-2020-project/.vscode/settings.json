@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "xiosbase": "cpp",
-        "xlocale": "cpp"
+        "xlocale": "cpp",
+        "iosfwd": "cpp",
+        "xstring": "cpp"
     }
 }
