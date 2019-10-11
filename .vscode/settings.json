@@ -1,4 +1,11 @@
 {
     "C_Cpp.errorSquiggles": "Enabled",
-    "editor.tabSize": 4
+    "editor.tabSize": 4,
+    "files.associations": {
+        "array": "cpp",
+        "string_view": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp"
+    }
 }
