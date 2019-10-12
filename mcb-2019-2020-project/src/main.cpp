@@ -1,6 +1,6 @@
 #include <rm-dev-board-a/board.hpp>
-int size=0;
-uint8_t buff[1024];
+uint8_t buff[1024]={"a"};
+uint16_t size=0;
 
 int main()
 {
@@ -9,13 +9,14 @@ int main()
     Usart6::initialize<Board::SystemClock,115200>();
     while (1)
     {
-        size=Usart6::RxBufferSize;
-        modm::delayMilliseconds(1);
-        if (Usart6::RxBufferSize)
-        {
-            Usart6::read(buff,size);
-            Usart6::writeBlocking(buff,size);
+        size=Usart6::getRxBufferSize();
+        if(size){
+            Usart6::write(buff,1);
+            Usart6::read(&buff[2],1);
+            
         }
+        modm::delayMilliseconds(1);
+
         
     }
     return 0;

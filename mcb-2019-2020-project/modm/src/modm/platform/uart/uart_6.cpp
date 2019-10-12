@@ -24,8 +24,10 @@
 
 namespace
 {
-	static modm::atomic::Queue<uint8_t, 16> rxBuffer;
+	static modm::atomic::Queue<uint8_t, 250> rxBuffer;
 	static modm::atomic::Queue<uint8_t, 250> txBuffer;
+	static std::size_t TxBufferLength=0;
+	static std::size_t RxBufferLength=0;
 }
 void
 modm::platform::Usart6::initializeBuffered(uint32_t interruptPriority)
@@ -62,6 +64,7 @@ modm::platform::Usart6::write(uint8_t data)
 	} else {
 		if (!txBuffer.push(data))
 			return false;
+		TxBufferLength+=1;
 		// Disable interrupts while enabling the transmit interrupt
 		atomic::Lock lock;
 		// Transmit Data Register Empty Interrupt Enable
@@ -98,6 +101,7 @@ modm::platform::Usart6::discardTransmitBuffer()
 	while(!txBuffer.isEmpty()) {
 		++count;
 		txBuffer.pop();
+		TxBufferLength-=1;
 	}
 	return count;
 }
@@ -110,6 +114,7 @@ modm::platform::Usart6::read(uint8_t &data)
 	} else {
 		data = rxBuffer.get();
 		rxBuffer.pop();
+		RxBufferLength-=1;
 		return true;
 	}
 }
@@ -125,10 +130,22 @@ modm::platform::Usart6::read(uint8_t *data, std::size_t length)
 		} else {
 			*data++ = rxBuffer.get();
 			rxBuffer.pop();
+			RxBufferLength-=1;
 		}
 	}
 	return i;
 }
+
+std::size_t
+modm::platform::Usart6::getRxBufferSize(){
+	return RxBufferLength;
+}
+
+std::size_t
+modm::platform::Usart6::getTxBufferSize(){
+	return TxBufferLength;
+}
+
 
 std::size_t
 modm::platform::Usart6::discardReceiveBuffer()
@@ -137,6 +154,7 @@ modm::platform::Usart6::discardReceiveBuffer()
 	while(!rxBuffer.isEmpty()) {
 		++count;
 		rxBuffer.pop();
+		RxBufferLength-=1;
 	}
 	return count;
 }
@@ -149,6 +167,7 @@ MODM_ISR(USART6)
 		uint8_t data;
 		modm::platform::UsartHal6::read(data);
 		rxBuffer.push(data);
+		RxBufferLength+=1;
 	}
 	if (modm::platform::UsartHal6::isTransmitRegisterEmpty()) {
 		if (txBuffer.isEmpty()) {
@@ -158,6 +177,7 @@ MODM_ISR(USART6)
 		else {
 			modm::platform::UsartHal6::write(txBuffer.get());
 			txBuffer.pop();
+			TxBufferLength-=1;
 		}
 	}
 }

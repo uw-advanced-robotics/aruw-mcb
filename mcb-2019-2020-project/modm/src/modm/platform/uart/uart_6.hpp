@@ -47,7 +47,6 @@ public:
 	// Expose jinja template parameters to be checked by e.g. drivers or application
 	static constexpr size_t RxBufferSize = 16;
 	static constexpr size_t TxBufferSize = 250;
-
 public:
 	template< template<Peripheral _> class... Signals >
 	static void
@@ -111,6 +110,11 @@ public:
 	static std::size_t
 	discardReceiveBuffer();
 
+	static std::size_t
+	getRxBufferSize();
+
+	static std::size_t
+	getTxBufferSize();
 };
 
 }	// namespace platform

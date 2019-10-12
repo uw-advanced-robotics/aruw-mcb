@@ -15,6 +15,7 @@
   <modules>
     <module>modm:architecture:delay</module>
     <module>modm:architecture:clock</module>
+    <module>modm:architecture:interrupt</module>
     <module>modm:platform:clock</module>
     <module>modm:platform:core</module>
     <module>modm:platform:uart:2</module>
