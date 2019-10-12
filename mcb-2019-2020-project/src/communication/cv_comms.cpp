@@ -18,14 +18,17 @@ namespace CVCommunication {
     bool autoAimRequestQueued = false;
     bool autoAimRequestState = false;
 
+    uint8_t robotID = 0;
+    void sendIMUData();
+    void sendRobotID();
+
+
 
     #if !defined (TARGET_ENGINEER)
     //////////////////////////////////////////////////////////////////////////////
     static TurretAimData_t lastAimData;
     static bool hasAimData = false;
     bool getLastAimData(TurretAimData_t* aim_data);
-    void sendIMUData();
-    void sendRobotID();
     void sendTurrentData(float pitch, float yaw);
     bool decodeToTurrentAimData(uint8_t* buffer, uint16_t length,TurretAimData_t* aim_data);
 
@@ -44,8 +47,7 @@ namespace CVCommunication {
 	    return false;
     }
     
-    void sendIMUData();
-    void sendRobotID();
+    
     void sendTurrentData(float pitch, float yaw) {
         int16_t data[2] = 
 	    { 
@@ -80,7 +82,9 @@ namespace CVCommunication {
     static AlignData_t alignControlData;
     static bool hasAlighControlData = false;
 
-    void cv_comms_new_task_request(char task) {
+    
+
+    void newTaskRequest(char task) {
     	requestSent = false;
     	currentRequest = task;
     }
@@ -142,6 +146,7 @@ namespace CVCommunication {
     ////////////////////////////////////////////////////////////////////////////
     #endif
 
+
     void serialHandler(uint16_t message_type, uint8_t* buffer, uint16_t length) {
 	    switch (message_type) {
 		    #if !defined (TARGET_ENGINEER)
@@ -178,7 +183,8 @@ namespace CVCommunication {
     	}
     }
 
-    void initialize(){
+    void initialize(uint8_t RobotID){
+        robotID = RobotID;
         Usart2::connect<GpioA2::Tx,GpioA3::Rx>();
         Usart2::initialize<Board::SystemClock,115200>();
         
@@ -218,6 +224,38 @@ namespace CVCommunication {
         return true;
     }
 
-    void update(){}
+    void sendIMUChassisData(IMUData_t* imu_data, ChassisData_t* chassis_data) {
+        int16_t data[13] = {
+		// Accelerometer readings in static frame
+		(int16_t) (imu_data -> ax * 100),
+		(int16_t) (imu_data -> ay * 100),
+		(int16_t) (imu_data -> az * 100),
+		// MCB IMU angles are in degrees
+		(int16_t) (imu_data -> rol * 100),
+		(int16_t) (imu_data -> pit * 100),
+		(int16_t) (imu_data -> yaw * 100), 
+		// MCB IMU angular velocities are in radians/s
+		(int16_t) (imu_data -> wx * 100), 
+		(int16_t) (imu_data -> wy * 100), 
+		(int16_t) (imu_data -> wz * 100), 
+		// Wheel RPMs
+		chassis_data -> rightFrontWheelRPM,
+		chassis_data -> leftFrontWheelRPM,
+		chassis_data -> leftBackWheeRPM,
+		chassis_data -> rightBackWheelRPM
+	    };
+        if (send(CV_MESSAGE_TYPE_IMU, 26, (uint8_t*)data))
+        {
+            inc_msg_switch();
+        }
+        
+    }
+
+    void sendRobotID() {
+        uint8_t data[1] = {robotID};
+        send(CV_MESSAGE_TYPE_ROBOT_ID, 1, data);
+    }
+
+    void update(IMUData_t* imu_data, ChassisData_t* chassis_data) {}
 
 } // CV
