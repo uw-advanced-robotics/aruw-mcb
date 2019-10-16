@@ -38,6 +38,8 @@
 #define SERIAL_HEAD_BYTE 0xA5
 #define SERIAL_FOOTER_LENGTH 2
 
+#define CRC8_INIT 0xff
+#define CRC16_INIT 0xffff
 
 namespace CVCommunication{
     //#if !defined (TARGET_ENGINEER) //With Turrent

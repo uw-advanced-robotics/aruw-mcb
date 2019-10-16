@@ -60,7 +60,7 @@ const uint16_t CRC16_table[256] =
 };
 
 
-uint8_t CRC8(uint8_t *message, uint32_t message_length, uint8_t CRC8) {
+uint8_t calculateCRC8(uint8_t *message, uint32_t message_length, uint8_t CRC8) {
 	if (message == NULL) { 
 		return (uint8_t) CRC8_INIT;
 	}
@@ -72,7 +72,7 @@ uint8_t CRC8(uint8_t *message, uint32_t message_length, uint8_t CRC8) {
 	return CRC8;
 }
 
-uint16_t CRC16(uint8_t *message, uint32_t message_length, uint16_t CRC16) {
+uint16_t calculateCRC16(uint8_t *message, uint32_t message_length, uint16_t CRC16) {
 	if (message == NULL) { 
 		return CRC16_INIT;
 	}
