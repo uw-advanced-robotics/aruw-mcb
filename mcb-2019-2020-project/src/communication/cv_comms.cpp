@@ -23,8 +23,7 @@ namespace CVCommunication {
     bool autoAimRequestState = false;
 
     uint8_t robotID = 0;
-    void sendIMUData();
-    void sendRobotID();
+    bool sendRobotID();
 
 	void inc_msg_switch() {
 	    msg_switch_index = (msg_switch_index + 1) % CV_MESSAGE_TYPE_SIZE;
@@ -163,7 +162,7 @@ namespace CVCommunication {
 		    {
 		        TurretAimData_t aim_data;
 			    bool decoded_data = decodeToTurrentAimData(buffer, length, &aim_data);
-			    aim_data.Timestamp = 0;//osKernelSysTick();
+			    aim_data.Timestamp = modm::Timestamp.getTime();
 			    handleTurrentAim(&aim_data);
 			    return;
 		    }
@@ -228,16 +227,87 @@ namespace CVCommunication {
         
     }
 
-    void sendRobotID() {
+    bool sendRobotID() {
         uint8_t data[1] = {robotID};
-        serial.send(CV_MESSAGE_TYPE_ROBOT_ID, 1, data);
+        return serial.send(CV_MESSAGE_TYPE_ROBOT_ID, 1, data);
     }
 
 
 
+	#if defined(TARGET_SENTINEL) || defined(TARGET_SOLDIER) || defined(TARGET_HERO)
+	void update(IMUData_t* imu_data, ChassisData_t* chassis_data, TurretAimData_t* turrent_data, uint8_t RobotID) {
+	#else
+	void update(IMUData_t* imu_data, ChassisData_t* chassis_data, uint8_t RobotID) {
+	#endif
 
-	void update(IMUData_t* imu_data, ChassisData_t* chassis_data) {
 		serial.update();
+		switch (msg_switch_arr[msg_switch_index]) {
+			#if defined(TARGET_SENTINEL) || defined(TARGET_SOLDIER)
+			case CV_MESSAGE_TYPE_TURRET_TELEMETRY:
+			{
+				sendTurrentData(
+					turrent_data -> pitch,
+					turrent_data -> yaw;
+				);
+				break;
+			}
+			#elif defined (TARGET_HERO)
+			case CV_MESSAGE_TYPE_TURRET_TELEMETRY:
+			{
+				sendTurrentData(
+					turrent_data -> pitch,
+					turrent_data -> yaw;
+				);
+				break;
+			}
+			#else
+			case CV_MESSAGE_TYPE_REQUEST_TASK:
+			{
+				sendTaskRequest();
+				break;
+			}
+			#endif
+				
+			case CV_MESSAGE_TYPE_IMU:
+			{
+				sendIMUChassisData(imu_data, chassis_data);
+				break;
+			}
+			
+			case CV_MESSAGE_TYPE_ROBOT_ID:
+			{
+				robotID = RobotID;
+				if (1)//modm::Timestamp.getTime() - PreviousIDTimestamp > TIME_BETWEEN_ROBOT_ID_SEND_MS)
+					  //&& referee.online) 
+				{
+					if (sendRobotID()) {
+						//PreviousIDTimestamp = modm::Timestamp.getTime();
+						inc_msg_switch();
+					}
+					break;
+				} else {
+					inc_msg_switch();
+				}
+			}
+			
+			case CV_MESSAGE_TYPE_AUTO_AIM_REQUEST:
+			{
+				if (autoAimRequestQueued) {
+					uint8_t data = autoAimRequestState;
+					if(serial.send(CV_MESSAGE_TYPE_AUTO_AIM_REQUEST, 1, &data)){
+						autoAimRequestQueued = false;
+						inc_msg_switch();
+					}
+					break;
+				} else {
+					inc_msg_switch();
+				}
+			}
+		}
+	}
+
+	bool send(uint16_t message_type,uint16_t length,uint8_t* message_data) {
+		return serial.send(message_type, length, message_data);
 	}
 
 } // CV

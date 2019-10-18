@@ -21,7 +21,7 @@ int main()
         //     Usart6::read(&buff[2],1);
             
         // }
-        CVCommunication::update(&imu, &chassis);
+        //CVCommunication::update(&imu, &chassis);
         modm::delayMilliseconds(1);
 
         

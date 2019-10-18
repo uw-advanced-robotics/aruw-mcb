@@ -7,13 +7,6 @@
 
 
 
-typedef struct {
-	// time in ms of the last message transmitted
-	uint32_t prev_tx_msg_timestamp;
-	// minimum time in milliseconds between transmitting a message
-	uint32_t min_time_between_tx_msgs_ms; 
-} serial_tx_msg_rate;
-
 uint32_t verifyCRC8(uint8_t *message, uint32_t message_length) {
     uint8_t CRC8_expected = 0;
     if ((message == NULL) || (message_length <= 0)) {return 0;}
@@ -216,4 +209,16 @@ void Serial::update() {
 	if (Usart6::getRxBufferSize() > 0) {
 		process_receive();
 	}
+}
+
+bool Serial::TXMessageRateReady(uint32_t previousTxMessageTimestamp,  uint32_t minTxMessageInterval) {
+	//uint32_t currentTime = 0; //modm::Timestamp.getTime(); //osKernelSysTick();
+	//if (previousTxMessageTimestamp == 0
+	//	  || currentTime - previousTxMessageTimestamp > minTxMessageInterval)
+	//{
+	//	previousTxMessageTimestamp = currentTime;
+		return true;
+	//} else {
+	//	return false;
+	//}
 }

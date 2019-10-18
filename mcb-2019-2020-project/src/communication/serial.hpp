@@ -33,6 +33,7 @@ public:
     bool send(uint16_t message_type, uint16_t length, uint8_t* message_data);
     void update();
     void enableRXCRCEnforcement();
+	bool TXMessageRateReady(uint32_t previousTxMessageTimestamp, uint32_t minTxMessageInterval);
 
 private:
 
@@ -62,6 +63,8 @@ private:
     void serial_transition_to_mode(SERIAL_MODE new_mode);
     void process_receive();
     bool verifyCRC();
+
+	
 
 };
 
