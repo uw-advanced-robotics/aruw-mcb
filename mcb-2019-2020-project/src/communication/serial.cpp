@@ -90,6 +90,59 @@ void Serial::process_receive() {
 	}
 }
 
+void Serial::serial_transition_to_mode(SERIAL_MODE new_mode) {
+	switch (new_mode) {
+		case WAITING_FOR_HEAD_BYTE:
+			Board::Led1::setOutput(modm::Gpio::High);
+			Board::Led3::setOutput(modm::Gpio::Low);
+			Board::Led6::setOutput(modm::Gpio::Low);
+			current_mode = WAITING_FOR_HEAD_BYTE;
+			// search through first byte for head byte
+			if (Usart6::getRxBufferSize() >= 1) {
+				Usart6::read(buff_rx, 1);
+			}
+			else { //data not yet available
+				current_mode = WAITING_FOR_HEAD_BYTE; //go back to previous mode
+			}
+			
+			break;
+
+		case WAITING_FOR_MESSAGE_LENGTH:
+			Board::Led1::setOutput(modm::Gpio::Low);
+			Board::Led3::setOutput(modm::Gpio::High);
+			Board::Led6::setOutput(modm::Gpio::Low);
+			current_mode = WAITING_FOR_MESSAGE_LENGTH;
+			// zero out the first 16 bits of the rx buffer so we can validate we got data
+			buff_rx[0] = 0;
+			buff_rx[1] = 0;
+			// get next 2 bytes for the message length
+			if (Usart6::getRxBufferSize() >= 2) {
+				Usart6::read(buff_rx, 2);
+			}
+			else { //data not yet available
+				current_mode = WAITING_FOR_MESSAGE_LENGTH; //go back to previous mode
+			}
+			
+			break;
+
+		case WAITING_FOR_MESSAGE_DATA:
+			Board::Led1::setOutput(modm::Gpio::Low);
+			Board::Led3::setOutput(modm::Gpio::Low);
+			Board::Led6::setOutput(modm::Gpio::High);
+			current_mode = WAITING_FOR_MESSAGE_DATA;
+			// get the rest of the packet (1-byte sequence, 1-byte CRC8, 2-byte message type, message data, 2-byte CRC16)
+			if (Usart6::getRxBufferSize() >= expected_message_length + 6) {
+				Usart6::read(buff_rx, expected_message_length + 6);
+			}
+			else { //data not yet available
+				current_mode = WAITING_FOR_MESSAGE_DATA; //go back to previous mode
+			}
+			break;
+		
+		default:
+			break;
+	}
+}
 
 bool Serial::send(uint16_t message_type,uint16_t length,uint8_t* message_data){
     uint8_t buff[SERIAL_TX_BUFF_SIZE];
@@ -115,7 +168,7 @@ bool Serial::send(uint16_t message_type,uint16_t length,uint8_t* message_data){
     next_tx_buff[1] = CRC16_val >> 8;
     next_tx_buff += SERIAL_FOOTER_LENGTH;
     uint16_t total_size = next_tx_buff - buff;
-    bool status = Usart2::write(buff, total_size);
+    bool status = Usart6::write(buff, total_size);
     if (status) {
         return false;
     }
@@ -125,8 +178,8 @@ bool Serial::send(uint16_t message_type,uint16_t length,uint8_t* message_data){
 
 Serial::Serial(SERIAL_PORT port, serial_message_handler_t message_handler) {
 
-    Usart2::connect<GpioA2::Tx,GpioA3::Rx>();
-    Usart2::initialize<Board::SystemClock,115200>();
+    Usart6::connect<GpioG14::Tx,GpioG9::Rx>();
+    Usart6::initialize<Board::SystemClock,115200>();
     this->port = port;
 	this->expected_message_length = 0;
 	this->handler = message_handler;
@@ -159,4 +212,8 @@ void Serial::enableRXCRCEnforcement() {
 	rxCRCEnforcementEnabled = true;
 }
 
-void Serial::update() {}
+void Serial::update() {
+	if (Usart6::getRxBufferSize() > 0) {
+		process_receive();
+	}
+}

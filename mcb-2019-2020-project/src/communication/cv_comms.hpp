@@ -103,7 +103,7 @@ namespace CVCommunication{
 
     //Decoding serial buffer, Update current aiming or align data,
     //and Send Referee Data and IMU Data(Non-Engineer) or Task Request(Engineer) to Xavier
-    void update(IMUData_t imu_data, ChassisData_t chassis_data);
+    void update(IMUData_t* imu_data, ChassisData_t* chassis_data);
     //Send Message to Xavier Via UART
     bool send(uint16_t message_type,uint16_t length,uint8_t* message_data);
 

@@ -136,12 +136,12 @@ modm::platform::Usart6::read(uint8_t *data, std::size_t length)
 	return i;
 }
 
-std::size_t
+uint16_t
 modm::platform::Usart6::getRxBufferSize(){
 	return RxBufferLength;
 }
 
-std::size_t
+uint16_t
 modm::platform::Usart6::getTxBufferSize(){
 	return TxBufferLength;
 }

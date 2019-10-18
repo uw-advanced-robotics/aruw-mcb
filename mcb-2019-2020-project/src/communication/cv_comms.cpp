@@ -156,6 +156,7 @@ namespace CVCommunication {
 
 
     void messageHandler(uint16_t message_type, uint8_t* buffer, uint16_t length) {
+		
 	    switch (message_type) {
 		    #if !defined (TARGET_ENGINEER)
 		    case CV_MESSAGE_TYPE_TURRET_AIM:
@@ -236,9 +237,7 @@ namespace CVCommunication {
 
 
 	void update(IMUData_t* imu_data, ChassisData_t* chassis_data) {
-
 		serial.update();
-		
 	}
 
 } // CV
