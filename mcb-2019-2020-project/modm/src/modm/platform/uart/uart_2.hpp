@@ -110,6 +110,12 @@ public:
 
 	static std::size_t
 	discardReceiveBuffer();
+	
+	static uint16_t
+	getRxBufferSize();
+
+	static uint16_t
+	getTxBufferSize();
 
 };
 

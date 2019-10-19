@@ -86,13 +86,10 @@ void Serial::process_receive() {
 void Serial::serial_transition_to_mode(SERIAL_MODE new_mode) {
 	switch (new_mode) {
 		case WAITING_FOR_HEAD_BYTE:
-			Board::Led1::setOutput(modm::Gpio::High);
-			Board::Led3::setOutput(modm::Gpio::Low);
-			Board::Led6::setOutput(modm::Gpio::Low);
 			current_mode = WAITING_FOR_HEAD_BYTE;
 			// search through first byte for head byte
-			if (Usart6::getRxBufferSize() >= 1) {
-				Usart6::read(buff_rx, 1);
+			if (this->getRxBufferSize() >= 1) {
+				this->read(buff_rx, 1);
 			}
 			else { //data not yet available
 				current_mode = WAITING_FOR_HEAD_BYTE; //go back to previous mode
@@ -101,16 +98,13 @@ void Serial::serial_transition_to_mode(SERIAL_MODE new_mode) {
 			break;
 
 		case WAITING_FOR_MESSAGE_LENGTH:
-			Board::Led1::setOutput(modm::Gpio::Low);
-			Board::Led3::setOutput(modm::Gpio::High);
-			Board::Led6::setOutput(modm::Gpio::Low);
 			current_mode = WAITING_FOR_MESSAGE_LENGTH;
 			// zero out the first 16 bits of the rx buffer so we can validate we got data
 			buff_rx[0] = 0;
 			buff_rx[1] = 0;
 			// get next 2 bytes for the message length
-			if (Usart6::getRxBufferSize() >= 2) {
-				Usart6::read(buff_rx, 2);
+			if (this->getRxBufferSize() >= 2) {
+				this->read(buff_rx, 2);
 			}
 			else { //data not yet available
 				current_mode = WAITING_FOR_MESSAGE_LENGTH; //go back to previous mode
@@ -119,13 +113,10 @@ void Serial::serial_transition_to_mode(SERIAL_MODE new_mode) {
 			break;
 
 		case WAITING_FOR_MESSAGE_DATA:
-			Board::Led1::setOutput(modm::Gpio::Low);
-			Board::Led3::setOutput(modm::Gpio::Low);
-			Board::Led6::setOutput(modm::Gpio::High);
 			current_mode = WAITING_FOR_MESSAGE_DATA;
 			// get the rest of the packet (1-byte sequence, 1-byte CRC8, 2-byte message type, message data, 2-byte CRC16)
-			if (Usart6::getRxBufferSize() >= expected_message_length + 6) {
-				Usart6::read(buff_rx, expected_message_length + 6);
+			if (this->getRxBufferSize() >= expected_message_length + 6) {
+				this->read(buff_rx, expected_message_length + 6);
 			}
 			else { //data not yet available
 				current_mode = WAITING_FOR_MESSAGE_DATA; //go back to previous mode
@@ -161,7 +152,7 @@ bool Serial::send(uint16_t message_type,uint16_t length,uint8_t* message_data){
     next_tx_buff[1] = CRC16_val >> 8;
     next_tx_buff += SERIAL_FOOTER_LENGTH;
     uint16_t total_size = next_tx_buff - buff;
-    bool status = Usart6::write(buff, total_size);
+    bool status = this->write(buff, total_size);
     if (status) {
         return false;
     }
@@ -170,10 +161,10 @@ bool Serial::send(uint16_t message_type,uint16_t length,uint8_t* message_data){
 }
 
 Serial::Serial(SERIAL_PORT port, serial_message_handler_t message_handler) {
-
-    Usart6::connect<GpioG14::Tx,GpioG9::Rx>();
-    Usart6::initialize<Board::SystemClock,115200>();
-    this->port = port;
+	
+	this->port = port;
+    this->initialize();
+    
 	this->expected_message_length = 0;
 	this->handler = message_handler;
 	this->message_type = 0;
@@ -207,19 +198,67 @@ void Serial::enableRXCRCEnforcement() {
 }
 
 void Serial::update() {
-	if (Usart6::getRxBufferSize() > 0) {
+	if (this->getRxBufferSize() > 0) {
 		process_receive();
 	}
 }
 
 bool Serial::TXMessageRateReady(uint32_t previousTxMessageTimestamp,  uint32_t minTxMessageInterval) {
-	//uint32_t currentTime = 0; //modm::Timestamp.getTime(); //osKernelSysTick();
-	//if (previousTxMessageTimestamp == 0
-	//	  || currentTime - previousTxMessageTimestamp > minTxMessageInterval)
-	//{
-	//	previousTxMessageTimestamp = currentTime;
+	modm::Timestamp t;
+	uint32_t currentTime = t.getTime(); 
+	if (previousTxMessageTimestamp == 0
+		  || currentTime - previousTxMessageTimestamp > minTxMessageInterval)
+	{
+		previousTxMessageTimestamp = currentTime;
 		return true;
-	//} else {
-	//	return false;
-	//}
+	} else {
+		return false;
+	}
+}
+
+bool Serial::read(uint8_t *data, uint16_t length){
+	switch (this->port)
+	{
+	case PORT_UART2:
+		return Usart2::read(data, length);
+	case PORT_UART6:
+		return Usart6::read(data, length);
+	default:
+		return false;
+	}
+}
+bool Serial::write(const uint8_t *data, uint16_t length){
+	switch (this->port)
+	{
+	case PORT_UART2:
+		return Usart2::write(data, length);
+	case PORT_UART6:
+		return Usart6::write(data, length);
+	default:
+		return false;
+	}
+}
+void Serial::initialize(){
+	switch (this->port)
+	{
+	case PORT_UART2:
+		Usart2::connect<GpioA2::Tx,GpioA3::Rx>();
+		Usart2::initialize<Board::SystemClock,115200>();
+	case PORT_UART6:
+		Usart6::connect<GpioG14::Tx,GpioG9::Rx>();	
+		Usart6::initialize<Board::SystemClock,115200>();
+	default:
+		break;
+	}
+}
+uint16_t Serial::getRxBufferSize(){
+	switch (this->port)
+	{
+	case PORT_UART2:
+		return Usart2::getRxBufferSize();
+	case PORT_UART6:
+		return Usart6::getRxBufferSize();
+	default:
+		return 0;
+	}
 }

@@ -24,8 +24,10 @@
 
 namespace
 {
-	static modm::atomic::Queue<uint8_t, 16> rxBuffer;
+	static modm::atomic::Queue<uint8_t, 250> rxBuffer;
 	static modm::atomic::Queue<uint8_t, 250> txBuffer;
+	static std::size_t TxBufferLength=0;
+	static std::size_t RxBufferLength=0;
 }
 void
 modm::platform::Usart2::initializeBuffered(uint32_t interruptPriority)
@@ -62,6 +64,7 @@ modm::platform::Usart2::write(uint8_t data)
 	} else {
 		if (!txBuffer.push(data))
 			return false;
+		TxBufferLength+=1;
 		// Disable interrupts while enabling the transmit interrupt
 		atomic::Lock lock;
 		// Transmit Data Register Empty Interrupt Enable
@@ -79,6 +82,7 @@ modm::platform::Usart2::write(const uint8_t *data, std::size_t length)
 		if (!write(*data++)) {
 			return i;
 		}
+		TxBufferLength-=1;
 	}
 	return i;
 }
@@ -98,6 +102,7 @@ modm::platform::Usart2::discardTransmitBuffer()
 	while(!txBuffer.isEmpty()) {
 		++count;
 		txBuffer.pop();
+		TxBufferLength-=1;
 	}
 	return count;
 }
@@ -110,6 +115,7 @@ modm::platform::Usart2::read(uint8_t &data)
 	} else {
 		data = rxBuffer.get();
 		rxBuffer.pop();
+		RxBufferLength-=1;
 		return true;
 	}
 }
@@ -125,6 +131,7 @@ modm::platform::Usart2::read(uint8_t *data, std::size_t length)
 		} else {
 			*data++ = rxBuffer.get();
 			rxBuffer.pop();
+			RxBufferLength-=1;
 		}
 	}
 	return i;
@@ -137,10 +144,20 @@ modm::platform::Usart2::discardReceiveBuffer()
 	while(!rxBuffer.isEmpty()) {
 		++count;
 		rxBuffer.pop();
+		RxBufferLength -= 1;
 	}
 	return count;
 }
 
+uint16_t
+modm::platform::Usart2::getRxBufferSize(){
+	return RxBufferLength;
+}
+
+uint16_t
+modm::platform::Usart2::getTxBufferSize(){
+	return TxBufferLength;
+}
 
 MODM_ISR(USART2)
 {
@@ -149,6 +166,7 @@ MODM_ISR(USART2)
 		uint8_t data;
 		modm::platform::UsartHal2::read(data);
 		rxBuffer.push(data);
+		RxBufferLength += 1;
 	}
 	if (modm::platform::UsartHal2::isTransmitRegisterEmpty()) {
 		if (txBuffer.isEmpty()) {
@@ -158,6 +176,7 @@ MODM_ISR(USART2)
 		else {
 			modm::platform::UsartHal2::write(txBuffer.get());
 			txBuffer.pop();
+			TxBufferLength-=1;
 		}
 	}
 }

@@ -276,12 +276,13 @@ namespace CVCommunication {
 			
 			case CV_MESSAGE_TYPE_ROBOT_ID:
 			{
+				modm::Timestamp t;
 				robotID = RobotID;
-				if (1)//modm::Timestamp.getTime() - PreviousIDTimestamp > TIME_BETWEEN_ROBOT_ID_SEND_MS)
+				if (t.getTime() - PreviousIDTimestamp > TIME_BETWEEN_ROBOT_ID_SEND_MS)
 					  //&& referee.online) 
 				{
 					if (sendRobotID()) {
-						//PreviousIDTimestamp = modm::Timestamp.getTime();
+						PreviousIDTimestamp = t.getTime();
 						inc_msg_switch();
 					}
 					break;

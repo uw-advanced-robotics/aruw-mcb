@@ -12,7 +12,7 @@
 typedef void (*serial_message_handler_t)(uint16_t message_type, uint8_t* data_buffer, uint16_t length);
 
 typedef enum {
-	PORT_UART1 = 0,
+	//PORT_UART1 = 0,
 	PORT_UART2 = 1,
 	PORT_UART6 = 2,
 } SERIAL_PORT;
@@ -65,8 +65,10 @@ private:
     void process_receive();
     bool verifyCRC();
 
-	
-
+	bool read(uint8_t *data, uint16_t length);
+	bool write(const uint8_t *data, uint16_t length);
+	void initialize();
+	uint16_t getRxBufferSize();
 };
 
 

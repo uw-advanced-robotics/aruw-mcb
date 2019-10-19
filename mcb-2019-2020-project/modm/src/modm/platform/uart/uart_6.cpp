@@ -82,6 +82,7 @@ modm::platform::Usart6::write(const uint8_t *data, std::size_t length)
 		if (!write(*data++)) {
 			return i;
 		}
+		TxBufferLength-=1;
 	}
 	return i;
 }
