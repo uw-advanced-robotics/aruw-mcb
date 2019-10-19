@@ -53,7 +53,7 @@ void Serial::process_receive() {
 			break;
 			
 		case WAITING_FOR_MESSAGE_DATA:
-			tx_sequence_num =  buff_rx[0];
+			rx_sequence_num =  buff_rx[0];
 			CRC8 = buff_rx[1];
 			message_type = (buff_rx[3] << 8) | buff_rx[2];
 			CRC16 = (buff_rx[5 + expected_message_length] << 8) | buff_rx[4 + expected_message_length];
@@ -178,6 +178,7 @@ Serial::Serial(SERIAL_PORT port, serial_message_handler_t message_handler) {
 	this->handler = message_handler;
 	this->message_type = 0;
 	this->tx_sequence_num = 0;
+	this->rx_sequence_num = 0;
 	this->CRC8 = 0;
 	this->CRC16 = 0;
 	this->rxCRCEnforcementEnabled = false;

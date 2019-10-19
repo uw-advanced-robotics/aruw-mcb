@@ -53,6 +53,7 @@ private:
 	// handle electrical noise
 	bool rxCRCEnforcementEnabled;
 	uint8_t tx_sequence_num;
+	uint8_t rx_sequence_num;
 	uint8_t CRC8;
 	uint16_t CRC16;
 	uint8_t buff_CRC[SERIAL_RX_BUFF_SIZE];
