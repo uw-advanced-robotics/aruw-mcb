@@ -61,7 +61,7 @@ const uint16_t CRC16_table[256] =
 
 uint8_t calculateCRC8(uint8_t *message, uint32_t message_length, uint8_t CRC8) {
 	if (message == NULL) { 
-		return (uint8_t) CRC8_INIT;
+		return static_cast<uint8_t>(CRC8_INIT);
 	}
 	uint8_t curr_byte;
 	while (message_length-- > 0) {
@@ -78,7 +78,7 @@ uint16_t calculateCRC16(uint8_t *message, uint32_t message_length, uint16_t CRC1
 	uint8_t curr_byte;
 	while(message_length-- > 0) {
 		curr_byte = *message++;
-		CRC16 = ((uint16_t)(CRC16) >> 8) ^ CRC16_table[((uint16_t)(CRC16) ^ (uint16_t)(curr_byte)) & 0x00ff];
+		CRC16 = (static_cast<uint16_t>(CRC16) >> 8) ^ CRC16_table[(static_cast<uint16_t>(CRC16) ^ static_cast<uint16_t>(curr_byte)) & 0x00ff];
 	}
 	return CRC16;
 }
