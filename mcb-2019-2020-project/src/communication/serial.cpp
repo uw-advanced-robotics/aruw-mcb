@@ -26,27 +26,27 @@ bool Serial::verifyCRC() {
 		verifyCRC16(buff_CRC, 7 + expected_message_length);
 }
 
-void Serial::process_receive() {
+void Serial::processReceive() {
 	if (this->getRxBufferSize() > 0) {
 		switch(current_mode) {
 			case WAITING_FOR_HEAD_BYTE:
 				if (buff_rx[0] != SERIAL_HEAD_BYTE) {
 					// if this byte isn't the header byte, just keep scanning
-					serial_transition_to_mode(WAITING_FOR_HEAD_BYTE);
+					switchToMode(WAITING_FOR_HEAD_BYTE);
 					break;
 				}
-				serial_transition_to_mode(WAITING_FOR_MESSAGE_LENGTH);
+				switchToMode(WAITING_FOR_MESSAGE_LENGTH);
 				break;
 				
 			case WAITING_FOR_MESSAGE_LENGTH:
 				expected_message_length = (buff_rx[1] << 8) | buff_rx[0];
 				// the message length must be greater than 0 and less than the max size of the buffer	 - 9 (9 bytes are used for the packet header and CRC)
 				if (expected_message_length > 0 && expected_message_length <= SERIAL_RX_BUFF_SIZE - 9) {
-					serial_transition_to_mode(WAITING_FOR_MESSAGE_DATA);
+					switchToMode(WAITING_FOR_MESSAGE_DATA);
 				} else {
 					expected_message_length = 0;
 					// if the length isn't valid, throw out the message and go back to scanning for messages
-					serial_transition_to_mode(WAITING_FOR_HEAD_BYTE);
+					switchToMode(WAITING_FOR_HEAD_BYTE);
 				}
 				break;
 				
@@ -73,7 +73,7 @@ void Serial::process_receive() {
 					expected_message_length = 0;
 				}
 				
-				serial_transition_to_mode(WAITING_FOR_HEAD_BYTE);
+				switchToMode(WAITING_FOR_HEAD_BYTE);
 				break;
 				
 			default:
@@ -82,7 +82,7 @@ void Serial::process_receive() {
 	}
 }
 
-void Serial::serial_transition_to_mode(SERIAL_MODE new_mode) {
+void Serial::switchToMode(SERIAL_MODE new_mode) {
 	switch (new_mode) {
 
 		case WAITING_FOR_HEAD_BYTE: {
@@ -172,7 +172,7 @@ Serial::Serial(SERIAL_PORT port, serial_message_handler_t message_handler) {
 	this->CRC8 = 0;
 	this->CRC16 = 0;
 	this->rxCRCEnforcementEnabled = false;
-	serial_transition_to_mode(WAITING_FOR_HEAD_BYTE);
+	switchToMode(WAITING_FOR_HEAD_BYTE);
 
 }
 
@@ -185,7 +185,7 @@ Serial::Serial() {
 	this->CRC8 = 0;
 	this->CRC16 = 0;
 	this->rxCRCEnforcementEnabled = false;
-	serial_transition_to_mode(WAITING_FOR_HEAD_BYTE);
+	switchToMode(WAITING_FOR_HEAD_BYTE);
 
 }
 
@@ -199,7 +199,7 @@ void Serial::enableRXCRCEnforcement() {
 }
 
 void Serial::update() {
-	process_receive();
+	processReceive();
 }
 
 bool Serial::TXMessageRateReady(uint32_t previousTxMessageTimestamp,  uint32_t minTxMessageInterval) {

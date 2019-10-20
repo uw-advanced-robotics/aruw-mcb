@@ -61,8 +61,8 @@ private:
     // message handler
 	serial_message_handler_t handler;
 
-    void serial_transition_to_mode(SERIAL_MODE new_mode);
-    void process_receive();
+    void switchToMode(SERIAL_MODE new_mode);
+    void processReceive();
     bool verifyCRC();
 
 	bool read(uint8_t *data, uint16_t length);
