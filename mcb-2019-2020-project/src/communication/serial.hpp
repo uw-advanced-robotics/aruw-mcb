@@ -69,6 +69,9 @@ private:
 	bool write(const uint8_t *data, uint16_t length);
 	void initialize();
 	uint16_t getRxBufferSize();
+
+	uint32_t verifyCRC16(uint8_t *message, uint32_t message_length);
+	uint32_t verifyCRC8(uint8_t *message, uint32_t message_length);
 };
 
 
