@@ -30,7 +30,7 @@
 #define CV_TASK_TYPE_ALL_AMMO_BOX 0x03
 //#endif
 
-#define TIME_BETWEEN_ROBOT_ID_SEND_MS (5000) // time between each robot id send to CV in milliseconds 
+#define TIME_BETWEEN_ROBOT_ID_SEND_MS (5000) // time between each robot id send to CV in milliseconds
 
 #define SERIAL_RX_BUF_SIZE 256
 #define SERIAL_TX_BUF_SIZE 256
@@ -41,75 +41,77 @@
 #define CRC8_INIT 0xff
 #define CRC16_INIT 0xffff
 
-namespace CVCommunication{
-    //#if !defined (TARGET_ENGINEER) //With Turrent
-    //AutoAim Data
-    typedef struct {
-        bool hasTarget;
-        float pitch;
-        float yaw;
-        uint32_t Timestamp;
-    } TurretAimData_t;
+namespace CVCommunication
+{
+//#if !defined (TARGET_ENGINEER) //With Turrent
+//AutoAim Data
+typedef struct
+{
+    bool hasTarget;
+    float pitch;
+    float yaw;
+    uint32_t Timestamp;
+} TurretAimData_t;
 
-    //Initialize UART communication
-    void initialize(uint8_t RobotID);
-    //Get latest aiming data for Turrent
-    bool getLastAimData(TurretAimData_t* aim_data);
-    //Start Requesting Xavier to Track Target
-    void beginTargetTracking();
-    //Stop Requesting Xavier to Track Target
-    void stopTargetTracking();
+//Initialize UART communication
+void initialize(uint8_t RobotID);
+//Get latest aiming data for Turrent
+bool getLastAimData(TurretAimData_t *aim_data);
+//Start Requesting Xavier to Track Target
+void beginTargetTracking();
+//Stop Requesting Xavier to Track Target
+void stopTargetTracking();
 
-    //#else //Engineer Without Turrent
-    //
-    typedef struct {
-	    int16_t x;
-    	int16_t y;
-    	int16_t r;
-    } AlignData_t;
+//#else //Engineer Without Turrent
+//
+typedef struct
+{
+    int16_t x;
+    int16_t y;
+    int16_t r;
+} AlignData_t;
 
-    
-    //Get latest align data for Engineer
-    bool getLastControlData(AlignData_t* align_data);
-    //Whether Xavier got Align data
-    bool isAlignCompleted();
-    //Set Task Request to Send to Xavier during Next update
-    void newTaskRequest(char task);
-    //#endif
+//Get latest align data for Engineer
+bool getLastControlData(AlignData_t *align_data);
+//Whether Xavier got Align data
+bool isAlignCompleted();
+//Set Task Request to Send to Xavier during Next update
+void newTaskRequest(char task);
+//#endif
 
-    // DO reference this struct if you want imu data
-    typedef struct	
-    {
-        float ax;			// acceleration
-        float ay;
-        float az;
+// DO reference this struct if you want imu data
+typedef struct
+{
+    float ax; // acceleration
+    float ay;
+    float az;
 
-        float wx;				// flux calculations
-        float wy;
-        float wz;
-    
-        float rol;			// measured in degrees
-        float pit;
-        float yaw;
-    } IMUData_t;
+    float wx; // flux calculations
+    float wy;
+    float wz;
 
-    typedef struct	
-    {
-        int16_t rightFrontWheelRPM;
-        int16_t leftFrontWheelRPM;
-        int16_t leftBackWheeRPM;
-        int16_t rightBackWheelRPM;
-    } ChassisData_t;
+    float rol; // measured in degrees
+    float pit;
+    float yaw;
+} IMUData_t;
 
-    //Decoding serial buffer, Update current aiming or align data,
-    //and Send Referee Data and IMU Data(Non-Engineer) or Task Request(Engineer) to Xavier
-	#if defined(TARGET_SENTINEL) || defined(TARGET_SOLDIER) || defined(TARGET_HERO)
-	void update(IMUData_t* imu_data, ChassisData_t* chassis_data, TurretAimData_t* turrent_data, uint8_t RobotID);
-	#else
-	void update(IMUData_t* imu_data, ChassisData_t* chassis_data, uint8_t RobotID);
-	#endif
-    //Send Message to Xavier Via UART
-    bool send(uint16_t message_type,uint16_t length,uint8_t* message_data);
+typedef struct
+{
+    int16_t rightFrontWheelRPM;
+    int16_t leftFrontWheelRPM;
+    int16_t leftBackWheeRPM;
+    int16_t rightBackWheelRPM;
+} ChassisData_t;
 
-}
+//Decoding serial buffer, Update current aiming or align data,
+//and Send Referee Data and IMU Data(Non-Engineer) or Task Request(Engineer) to Xavier
+#if defined(TARGET_SENTINEL) || defined(TARGET_SOLDIER) || defined(TARGET_HERO)
+void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID);
+#else
+void update(IMUData_t *imu_data, ChassisData_t *chassis_data, uint8_t RobotID);
+#endif
+//Send Message to Xavier Via UART
+bool send(uint16_t message_type, uint16_t length, uint8_t *message_data);
+
+} // namespace CVCommunication
 #endif
