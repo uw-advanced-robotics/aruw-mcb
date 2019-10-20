@@ -9,27 +9,28 @@
 
 #include "stdbool.h"
 
-typedef void (*serial_message_handler_t)(uint16_t message_type, uint8_t* data_buffer, uint16_t length);
+typedef void (*message_handler_t)(uint16_t message_type, uint8_t* data_buffer, uint16_t length);
 
 typedef enum {
 	//PORT_UART1 = 0,
 	PORT_UART2 = 1,
 	PORT_UART6 = 2,
-} SERIAL_PORT;
+} SerialPort;
 
 typedef enum {
 	WAITING_FOR_HEAD_BYTE = 0, 			// head byte (1-byte)
 	WAITING_FOR_MESSAGE_LENGTH = 1,	// length of message (2-byte)
 	WAITING_FOR_MESSAGE_DATA = 2,		// rest of data in packet [1-byte sequence num, 1-byte CRC8, message_length-byte message, 2-byte CRC16]
-} SERIAL_MODE;
+} SerialMode;
 
 class Serial
 {
 public:
-    Serial(SERIAL_PORT port, serial_message_handler_t message_handler);
+    Serial(SerialPort port, message_handler_t message_handler);
     Serial();
     ~Serial();
 
+	void initialize();
     bool send(uint16_t message_type, uint16_t length, uint8_t* message_data);
     void update();
     void enableRXCRCEnforcement();
@@ -37,14 +38,14 @@ public:
 
 private:
 
-    SERIAL_PORT port;
+    SerialPort port;
 
     // tx/rx buffers
 	uint8_t buff_rx[SERIAL_RX_BUFF_SIZE];
 	uint8_t buff_tx[SERIAL_TX_BUFF_SIZE];
 	
 	// state information
-	SERIAL_MODE current_mode;
+	SerialMode current_mode;
 
 	// data read from an incoming message header
 	uint16_t expected_message_length;
@@ -59,15 +60,14 @@ private:
 	uint8_t buff_CRC[SERIAL_RX_BUFF_SIZE];
 
     // message handler
-	serial_message_handler_t handler;
+	message_handler_t handler;
 
-    void switchToMode(SERIAL_MODE new_mode);
+    void switchToMode(SerialMode new_mode);
     void processReceive();
     bool verifyCRC();
 
 	bool read(uint8_t *data, uint16_t length);
 	bool write(const uint8_t *data, uint16_t length);
-	void initialize();
 	uint16_t getRxBufferSize();
 
 	uint32_t verifyCRC16(uint8_t *message, uint32_t message_length);

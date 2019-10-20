@@ -7,7 +7,8 @@
 
 namespace CVCommunication {
 
-Serial serial;
+void messageHandler(uint16_t message_type, uint8_t* buffer, uint16_t length);
+static Serial serial = Serial(PORT_UART6, messageHandler);
 
 static uint8_t msg_switch_index;
 
@@ -186,7 +187,7 @@ void messageHandler(uint16_t message_type, uint8_t* buffer, uint16_t length) {
 
 void initialize(uint8_t RobotID){
 	robotID = RobotID;
-	serial=Serial(PORT_UART6, messageHandler);
+	serial.initialize();
 	
 }
 

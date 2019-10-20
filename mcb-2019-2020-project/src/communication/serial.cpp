@@ -4,6 +4,29 @@
 #include <rm-dev-board-a/board.hpp>
 #include "../algorithms/crc.hpp"
 
+
+
+Serial::Serial(SerialPort port, message_handler_t message_handler) {
+	
+	this->port = port;
+	
+	this->expected_message_length = 0;
+	this->handler = message_handler;
+	this->message_type = 0;
+	this->tx_sequence_num = 0;
+	this->rx_sequence_num = 0;
+	this->CRC8 = 0;
+	this->CRC16 = 0;
+	this->rxCRCEnforcementEnabled = false;
+	switchToMode(WAITING_FOR_HEAD_BYTE);
+
+}
+
+Serial::~Serial(){
+	
+}
+
+
 uint32_t Serial::verifyCRC8(uint8_t *message, uint32_t message_length) {
 	uint8_t CRC8_expected = 0;
 	if ((message == NULL) || (message_length <= 0)) {return 0;}
@@ -82,7 +105,7 @@ void Serial::processReceive() {
 	}
 }
 
-void Serial::switchToMode(SERIAL_MODE new_mode) {
+void Serial::switchToMode(SerialMode new_mode) {
 	switch (new_mode) {
 
 		case WAITING_FOR_HEAD_BYTE: {
@@ -157,40 +180,6 @@ bool Serial::send(uint16_t message_type, uint16_t length, uint8_t* message_data)
 	}
 	tx_sequence_num++;
 	return true;
-}
-
-Serial::Serial(SERIAL_PORT port, serial_message_handler_t message_handler) {
-	
-	this->port = port;
-	this->initialize();
-	
-	this->expected_message_length = 0;
-	this->handler = message_handler;
-	this->message_type = 0;
-	this->tx_sequence_num = 0;
-	this->rx_sequence_num = 0;
-	this->CRC8 = 0;
-	this->CRC16 = 0;
-	this->rxCRCEnforcementEnabled = false;
-	switchToMode(WAITING_FOR_HEAD_BYTE);
-
-}
-
-Serial::Serial() {
-	this->port = PORT_UART2;
-	this->initialize();
-	this->expected_message_length = 0;
-	this->message_type = 0;
-	this->tx_sequence_num = 0;
-	this->CRC8 = 0;
-	this->CRC16 = 0;
-	this->rxCRCEnforcementEnabled = false;
-	switchToMode(WAITING_FOR_HEAD_BYTE);
-
-}
-
-Serial::~Serial(){
-	
 }
 
 
