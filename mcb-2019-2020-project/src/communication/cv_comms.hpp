@@ -104,12 +104,8 @@ typedef struct
 } ChassisData_t;
 
 //Decoding serial buffer, Update current aiming or align data,
-//and Send Referee Data and IMU Data(Non-Engineer) or Task Request(Engineer) to Xavier
-#if defined(TARGET_SENTINEL) || defined(TARGET_SOLDIER) || defined(TARGET_HERO)
+//and Send Turrent Data and IMU Data to Xavier
 void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID);
-#else
-void update(IMUData_t *imu_data, ChassisData_t *chassis_data, uint8_t RobotID);
-#endif
 //Send Message to Xavier Via UART
 bool send(uint16_t message_type, uint16_t length, uint8_t *message_data);
 

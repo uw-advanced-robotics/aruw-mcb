@@ -3,7 +3,6 @@
 #include "../algorithms/crc.hpp"
 #include "serial.hpp"
 
-#define TARGET_ENGINEER
 
 namespace CVCommunication
 {
@@ -13,11 +12,8 @@ static Serial serial = Serial(PORT_UART6, messageHandler);
 
 static uint8_t msg_switch_index;
 
-#if !defined(TARGET_ENGINEER)
 static uint8_t msg_switch_arr[CV_MESSAGE_TYPE_SIZE] = {CV_MESSAGE_TYPE_TURRET_TELEMETRY, CV_MESSAGE_TYPE_IMU, CV_MESSAGE_TYPE_ROBOT_ID, CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
-#else
-static uint8_t msg_switch_arr[CV_MESSAGE_TYPE_SIZE] = {CV_MESSAGE_TYPE_IMU, CV_MESSAGE_TYPE_REQUEST_TASK, CV_MESSAGE_TYPE_ROBOT_ID};
-#endif
+
 
 static uint32_t PreviousIDTimestamp = 0; // tracks previous ms that robot id was sent to CV
 bool autoAimRequestQueued = false;
@@ -31,8 +27,6 @@ void inc_msg_switch()
 	msg_switch_index = (msg_switch_index + 1) % CV_MESSAGE_TYPE_SIZE;
 }
 
-#if !defined(TARGET_ENGINEER)
-//////////////////////////////////////////////////////////////////////////////
 static TurretAimData_t lastAimData;
 static bool hasAimData = false;
 bool getLastAimData(TurretAimData_t *aim_data);
@@ -78,134 +72,21 @@ void stopTargetTracking()
 	autoAimRequestQueued = false;
 	autoAimRequestState = false;
 }
-////////////////////////////////////////////////////////////////////////////
-#else
-////////////////////////////////////////////////////////////////////////////
-static bool requestSent = true;
-static char currentRequest;
-static bool isAlignActive = false;
-static AlignData_t alignControlData;
-static bool hasAlignControlData = false;
-
-void newTaskRequest(char task)
-{
-	requestSent = false;
-	currentRequest = task;
-}
-
-void taskRequestSuccess(void)
-{
-	requestSent = true;
-	isAlignActive = true;
-	inc_msg_switch();
-}
-
-void sendTaskRequest(void)
-{
-	if (!requestSent && !isAlignActive)
-	{
-		if (serial.send(CV_MESSAGE_TYPE_REQUEST_TASK, 1, (uint8_t *)(&currentRequest)))
-		{
-			taskRequestSuccess();
-		}
-	}
-	else
-	{ // no need to request again, increment serial cycle
-		inc_msg_switch();
-	}
-}
-
-void handleAlignControl(AlignData_t *align_data)
-{
-	alignControlData = *align_data;
-	hasAlignControlData = true;
-}
-
-bool decodeToAlignControlData(uint8_t *buffer, uint16_t length, AlignData_t *align_data)
-{
-	if (length != 6)
-	{
-		return false;
-	}
-
-	uint16_t raw_x = *((uint16_t *)buffer);
-	uint16_t raw_y = *((uint16_t *)buffer + 1);
-	uint16_t raw_r = *((uint16_t *)buffer + 2);
-
-	align_data->x = (float)raw_x / 100;
-	align_data->y = (float)raw_y / 100;
-	align_data->r = (float)raw_r / 100;
-
-	return true;
-}
-
-void setAlignCompleted(void)
-{
-	isAlignActive = false;
-}
-
-bool isAlignCompleted(void)
-{
-	return !isAlignActive;
-}
-
-bool decodeAlignCompletedData(uint8_t *buffer, uint16_t length)
-{
-	if (length != 1)
-	{
-		return false;
-	}
-	return *((bool *)buffer);
-}
-
-bool getLastControlData(AlignData_t *out)
-{
-	if (hasAlignControlData && isAlignActive)
-	{
-		*out = alignControlData;
-		return true;
-	}
-	return false;
-}
-////////////////////////////////////////////////////////////////////////////
-#endif
 
 void messageHandler(uint16_t message_type, uint8_t *buffer, uint16_t length)
 {
 
 	switch (message_type)
 	{
-#if !defined(TARGET_ENGINEER)
 	case CV_MESSAGE_TYPE_TURRET_AIM:
 	{
 		TurretAimData_t aim_data;
+		modm::Timestamp t;
 		bool decoded_data = decodeToTurrentAimData(buffer, length, &aim_data);
-		aim_data.Timestamp = modm::Timestamp.getTime();
+		aim_data.Timestamp = t.getTime();
 		handleTurrentAim(&aim_data);
 		return;
 	}
-#else
-	case CV_MESSAGE_TYPE_ALIGN_CONTROL:
-	{
-		AlignData_t align_data;
-		bool decoded_data = decodeToAlignControlData(buffer, length, &align_data);
-		if (!decoded_data)
-		{
-			return;
-		}
-		handleAlignControl(&align_data);
-		return;
-	}
-
-	case CV_MESSAGE_TYPE_ALIGN_COMPLETE:
-	{
-		if (decodeAlignCompletedData(buffer, length))
-		{
-			setAlignCompleted();
-		}
-		return;
-	}
-#endif
 	default:
 		return;
 	}
@@ -249,40 +130,18 @@ bool sendRobotID()
 	return serial.send(CV_MESSAGE_TYPE_ROBOT_ID, 1, data);
 }
 
-#if defined(TARGET_SENTINEL) || defined(TARGET_SOLDIER) || defined(TARGET_HERO)
-void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID)
-{
-#else
-void update(IMUData_t *imu_data, ChassisData_t *chassis_data, uint8_t RobotID)
-{
-#endif
+void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID){
 
 	serial.update();
 	switch (msg_switch_arr[msg_switch_index])
 	{
-#if defined(TARGET_SENTINEL) || defined(TARGET_SOLDIER)
 	case CV_MESSAGE_TYPE_TURRET_TELEMETRY:
 	{
 		sendTurrentData(
 			turrent_data->pitch,
-			turrent_data->yaw;);
+			turrent_data->yaw);
 		break;
 	}
-#elif defined(TARGET_HERO)
-	case CV_MESSAGE_TYPE_TURRET_TELEMETRY:
-	{
-		sendTurrentData(
-			turrent_data->pitch,
-			turrent_data->yaw;);
-		break;
-	}
-#else
-case CV_MESSAGE_TYPE_REQUEST_TASK:
-{
-	sendTaskRequest();
-	break;
-}
-#endif
 
 	case CV_MESSAGE_TYPE_IMU:
 	{

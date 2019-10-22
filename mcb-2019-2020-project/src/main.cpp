@@ -14,7 +14,7 @@ int main()
     while (1)
     {
 
-        CVCommunication::update(&imu, &chassis, 1);
+        //CVCommunication::update(&imu, &chassis, 1);
         modm::delayMilliseconds(interval);
 
         
