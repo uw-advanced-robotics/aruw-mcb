@@ -98,7 +98,7 @@ void messageHandler(uint16_t message_type, uint8_t *buffer, uint16_t length)
 		if(decodeToTurrentAimData(buffer, length, &aim_data)) {
 			return;
 		}
-		aim_data.Timestamp = t.getTime();
+		aim_data.timestamp = t.getTime();
 		handleTurrentAim(&aim_data);
 		return;
 	}

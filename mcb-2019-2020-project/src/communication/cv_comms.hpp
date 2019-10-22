@@ -48,7 +48,7 @@ typedef struct
     bool hasTarget;
     float pitch;
     float yaw;
-    uint32_t Timestamp;
+    uint32_t timestamp;
 } TurretAimData_t;
 
 //Initialize UART communication
