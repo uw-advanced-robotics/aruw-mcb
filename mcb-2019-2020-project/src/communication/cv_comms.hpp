@@ -2,6 +2,8 @@
 #define _cv_comms_h_
 #include <stdint.h>
 
+namespace CVCommunication
+{
 // TX message headers
 // CV_MESSAGE_TYPEs for transmission should be defined incrementally from 0x01
 #define CV_MESSAGE_TYPE_IMU 0x02
@@ -40,10 +42,6 @@
 
 #define CRC8_INIT 0xff
 #define CRC16_INIT 0xffff
-
-namespace CVCommunication
-{
-//#if !defined (TARGET_ENGINEER) //With Turrent
 //AutoAim Data
 typedef struct
 {
@@ -62,24 +60,7 @@ void beginTargetTracking();
 //Stop Requesting Xavier to Track Target
 void stopTargetTracking();
 
-//#else //Engineer Without Turrent
-//
-typedef struct
-{
-    int16_t x;
-    int16_t y;
-    int16_t r;
-} AlignData_t;
-
-//Get latest align data for Engineer
-bool getLastControlData(AlignData_t *align_data);
-//Whether Xavier got Align data
-bool isAlignCompleted();
-//Set Task Request to Send to Xavier during Next update
-void newTaskRequest(char task);
-//#endif
-
-// DO reference this struct if you want imu data
+// DO reference this struct if you want send imu data
 typedef struct
 {
     float ax; // acceleration
@@ -106,8 +87,6 @@ typedef struct
 //Decoding serial buffer, Update current aiming or align data,
 //and Send Turrent Data and IMU Data to Xavier
 void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID);
-//Send Message to Xavier Via UART
-bool send(uint16_t message_type, uint16_t length, uint8_t *message_data);
 
 } // namespace CVCommunication
 #endif

@@ -8,6 +8,7 @@ namespace CVCommunication
 {
 
 void messageHandler(uint16_t message_type, uint8_t *buffer, uint16_t length);
+
 static Serial serial = Serial(PORT_UART6, messageHandler);
 
 static uint8_t msg_switch_index;
@@ -20,7 +21,6 @@ bool autoAimRequestQueued = false;
 bool autoAimRequestState = false;
 
 uint8_t robotID = 0;
-bool sendRobotID();
 
 void inc_msg_switch()
 {
@@ -29,9 +29,22 @@ void inc_msg_switch()
 
 static TurretAimData_t lastAimData;
 static bool hasAimData = false;
-bool getLastAimData(TurretAimData_t *aim_data);
-void sendTurrentData(float pitch, float yaw);
-bool decodeToTurrentAimData(uint8_t *buffer, uint16_t length, TurretAimData_t *aim_data) {}
+
+bool decodeToTurrentAimData(uint8_t *buffer, uint16_t length, TurretAimData_t *aim_data) {
+	if (length != 5) {
+		return false;
+	}
+
+	int16_t raw_pitch = *((int16_t*)buffer);
+	int16_t raw_yaw = *((int16_t*)buffer + 1);
+	uint8_t raw_has_target = buffer[4];
+
+	aim_data->pitch = (float)raw_pitch / 100;
+	aim_data->yaw = (float)raw_yaw / 100;
+	aim_data->hasTarget = raw_has_target;
+
+	return true;
+}
 
 bool getLastAimData(TurretAimData_t *aim_data)
 {
@@ -82,7 +95,9 @@ void messageHandler(uint16_t message_type, uint8_t *buffer, uint16_t length)
 	{
 		TurretAimData_t aim_data;
 		modm::Timestamp t;
-		bool decoded_data = decodeToTurrentAimData(buffer, length, &aim_data);
+		if(decodeToTurrentAimData(buffer, length, &aim_data)) {
+			return;
+		}
 		aim_data.Timestamp = t.getTime();
 		handleTurrentAim(&aim_data);
 		return;
