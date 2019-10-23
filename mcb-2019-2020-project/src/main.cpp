@@ -10,7 +10,7 @@ int main()
 {
     Board::initialize();
     Board::Leds::toggle();
-    CVCommunication::initialize(1);
+    //CVCommunication::initialize(1);
     while (1)
     {
 

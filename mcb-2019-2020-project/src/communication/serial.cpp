@@ -17,7 +17,10 @@ Serial::Serial(SerialPort port, message_handler_t message_handler)
 	this->CRC8 = 0;
 	this->CRC16 = 0;
 	this->rxCRCEnforcementEnabled = true;
+	this->timestamp = modm::Timestamp();
+	
 	switchToMode(WAITING_FOR_HEAD_BYTE);
+	
 }
 
 Serial::~Serial()
@@ -273,7 +276,6 @@ void Serial::initialize()
 	default:
 		break;
 	}
-	this->timestamp = modm::Timestamp();
 }
 uint16_t Serial::getRxBufferSize()
 {

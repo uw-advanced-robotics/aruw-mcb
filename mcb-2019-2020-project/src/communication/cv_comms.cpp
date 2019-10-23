@@ -27,6 +27,7 @@ void inc_msg_switch()
 }
 
 static TurretAimData_t lastAimData;
+static turrent_data_handler_t turrent_data_handler;
 static bool hasAimData = false;
 
 bool decodeToTurrentAimData(Serial_Message_t* message, TurretAimData_t *aim_data) {
@@ -98,6 +99,7 @@ void messageHandler(Serial_Message_t* message)
 	{
 		TurretAimData_t aim_data;
 		if(decodeToTurrentAimData(message, &aim_data)) {
+			turrent_data_handler(&aim_data);
 			return;
 		}
 		aim_data.timestamp = serial.getTimestamp();
@@ -109,9 +111,10 @@ void messageHandler(Serial_Message_t* message)
 	}
 }
 
-void initialize(uint8_t RobotID)
+void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback)
 {
 	robotID = RobotID;
+	turrent_data_handler = turrent_data_callback;
 	serial.initialize();
 }
 

@@ -51,10 +51,12 @@ typedef struct
     uint32_t timestamp;
 } TurretAimData_t;
 
+typedef void (*turrent_data_handler_t)(TurretAimData_t* aim_data);
+
 //Initialize UART communication
-void initialize(uint8_t RobotID);
+void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback);
 //Get latest aiming data for Turrent
-bool getLastAimData(TurretAimData_t *aim_data);
+bool getLastAimData(TurretAimData_t* aim_data);
 //Start Requesting Xavier to Track Target
 void beginTargetTracking();
 //Stop Requesting Xavier to Track Target
