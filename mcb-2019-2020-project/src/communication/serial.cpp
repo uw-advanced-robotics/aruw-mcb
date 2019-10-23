@@ -60,67 +60,85 @@ void Serial::processReceive()
 		switch (current_mode)
 		{
 		case WAITING_FOR_HEAD_BYTE:
-			if (buff_rx[0] != SERIAL_HEAD_BYTE)
+			if (this->getRxBufferSize() >= 1)
 			{
-				// if this byte isn't the header byte, just keep scanning
-				switchToMode(WAITING_FOR_HEAD_BYTE);
-				break;
+				this->read(buff_rx, 1);
+				if (buff_rx[0] != SERIAL_HEAD_BYTE)
+				{
+					// if this byte isn't the header byte, just keep scanning
+					switchToMode(WAITING_FOR_HEAD_BYTE);
+					break;
+				}
+				switchToMode(WAITING_FOR_MESSAGE_LENGTH);
 			}
-			switchToMode(WAITING_FOR_MESSAGE_LENGTH);
 			break;
 
 		case WAITING_FOR_MESSAGE_LENGTH:
-			expected_message_length = (buff_rx[1] << 8) | buff_rx[0];
-			// the message length must be greater than 0 and less than the max size of the buffer	 - 9 (9 bytes are used for the packet header and CRC)
-			if (expected_message_length > 0 && expected_message_length <= SERIAL_RX_BUFF_SIZE - 9)
+			// zero out the first 16 bits of the rx buffer so we can validate we got data
+			buff_rx[0] = 0;
+			buff_rx[1] = 0;
+			// get next 2 bytes for the message length
+			if (this->getRxBufferSize() >= 2)
 			{
-				switchToMode(WAITING_FOR_MESSAGE_DATA);
-			}
-			else
-			{
-				expected_message_length = 0;
-				// if the length isn't valid, throw out the message and go back to scanning for messages
-				switchToMode(WAITING_FOR_HEAD_BYTE);
+				this->read(buff_rx, 2);
+				expected_message_length = (buff_rx[1] << 8) | buff_rx[0];
+				// the message length must be greater than 0 and less than the max size of the buffer	 - 9 (9 bytes are used for the packet header and CRC)
+				if (expected_message_length > 0 && expected_message_length <= SERIAL_RX_BUFF_SIZE - 9)
+				{
+					switchToMode(WAITING_FOR_MESSAGE_DATA);
+				}
+				else
+				{
+					expected_message_length = 0;
+					// if the length isn't valid, throw out the message and go back to scanning for messages
+					switchToMode(WAITING_FOR_HEAD_BYTE);
+				}
 			}
 			break;
 
 		case WAITING_FOR_MESSAGE_DATA:
-			rx_sequence_num = buff_rx[0];
-			CRC8 = buff_rx[1];
-			message_type = (buff_rx[3] << 8) | buff_rx[2];
-			CRC16 = (buff_rx[5 + expected_message_length] << 8) | buff_rx[4 + expected_message_length];
-
-			// set CRC bufffer to get CRC8 and CRC16 values
-			buff_CRC[0] = SERIAL_HEAD_BYTE;
-			*((uint16_t *)(buff_CRC + 1)) = expected_message_length;
-			memcpy(buff_CRC + 3, buff_rx, 6 + expected_message_length);
-
-			// if CRC checking is not enabled, process the message, otherwise check if CRC8/CRC16 are valid
-			if (!rxCRCEnforcementEnabled)
+			// get the rest of the packet (1-byte sequence, 1-byte CRC8, 2-byte message type, message data, 2-byte CRC16)
+			if (this->getRxBufferSize() >= expected_message_length + 6)
 			{
-				// CRC checking is disabled for this huart port
-				Serial_Message_t message;
-				message.length = expected_message_length;
-				message.data = buff_rx + 4;
-				message.type = message_type;
-				handler(&message);
-			}
-			else if (verifyCRC())
-			{
-				// CRC checking is enabled and CRC8/CRC16 were valid
-				Serial_Message_t message;
-				message.length = expected_message_length;
-				message.data = buff_rx + 4;
-				message.type = message_type;
-				handler(&message);
-			}
-			else
-			{
-				// CRC checking is enabled but CRC8/CRC16 were invalid
-				expected_message_length = 0;
-			}
+				this->read(buff_rx, expected_message_length + 6);
+				rx_sequence_num = buff_rx[0];
+				CRC8 = buff_rx[1];
+				message_type = (buff_rx[3] << 8) | buff_rx[2];
+				CRC16 = (buff_rx[5 + expected_message_length] << 8) | buff_rx[4 + expected_message_length];
 
-			switchToMode(WAITING_FOR_HEAD_BYTE);
+				// set CRC bufffer to get CRC8 and CRC16 values
+				buff_CRC[0] = SERIAL_HEAD_BYTE;
+				buff_CRC[1] = expected_message_length >> 8;
+				buff_CRC[2] = expected_message_length;
+				memcpy(buff_CRC + 3, buff_rx, 6 + expected_message_length);
+
+				// if CRC checking is not enabled, process the message, otherwise check if CRC8/CRC16 are valid
+				if (!rxCRCEnforcementEnabled)
+				{
+					// CRC checking is disabled for this huart port
+					Serial_Message_t message;
+					message.length = expected_message_length;
+					message.data = buff_rx + 4;
+					message.type = message_type;
+					handler(&message);
+				}
+				else if (verifyCRC())
+				{
+					// CRC checking is enabled and CRC8/CRC16 were valid
+					Serial_Message_t message;
+					message.length = expected_message_length;
+					message.data = buff_rx + 4;
+					message.type = message_type;
+					handler(&message);
+				}
+				else
+				{
+					// CRC checking is enabled but CRC8/CRC16 were invalid
+					expected_message_length = 0;
+				}
+
+				switchToMode(WAITING_FOR_HEAD_BYTE);
+			}
 			break;
 
 		default:
@@ -137,49 +155,18 @@ void Serial::switchToMode(SerialMode new_mode)
 	case WAITING_FOR_HEAD_BYTE:
 	{
 		current_mode = WAITING_FOR_HEAD_BYTE;
-		// search through first byte for head byte
-		if (this->getRxBufferSize() >= 1)
-		{
-			this->read(buff_rx, 1);
-		}
-		else
-		{										  //data not yet available
-			current_mode = WAITING_FOR_HEAD_BYTE; //go back to previous mode
-		}
 		break;
 	}
 	case WAITING_FOR_MESSAGE_LENGTH:
 	{
 		current_mode = WAITING_FOR_MESSAGE_LENGTH;
-		// zero out the first 16 bits of the rx buffer so we can validate we got data
-		buff_rx[0] = 0;
-		buff_rx[1] = 0;
-		// get next 2 bytes for the message length
-		if (this->getRxBufferSize() >= 2)
-		{
-			this->read(buff_rx, 2);
-		}
-		else
-		{											   //data not yet available
-			current_mode = WAITING_FOR_MESSAGE_LENGTH; //go back to previous mode
-		}
 		break;
 	}
 	case WAITING_FOR_MESSAGE_DATA:
 	{
 		current_mode = WAITING_FOR_MESSAGE_DATA;
-		// get the rest of the packet (1-byte sequence, 1-byte CRC8, 2-byte message type, message data, 2-byte CRC16)
-		if (this->getRxBufferSize() >= expected_message_length + 6)
-		{
-			this->read(buff_rx, expected_message_length + 6);
-		}
-		else
-		{											 //data not yet available
-			current_mode = WAITING_FOR_MESSAGE_DATA; //go back to previous mode
-		}
 		break;
 	}
-
 	default:
 		break;
 	}
