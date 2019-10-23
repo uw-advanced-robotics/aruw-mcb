@@ -7,7 +7,7 @@
 namespace CVCommunication
 {
 
-void messageHandler(uint16_t message_type, uint8_t *buffer, uint16_t length);
+void messageHandler(Serial_Message_t* message);
 
 static Serial serial = Serial(PORT_UART6, messageHandler);
 
@@ -30,14 +30,14 @@ void inc_msg_switch()
 static TurretAimData_t lastAimData;
 static bool hasAimData = false;
 
-bool decodeToTurrentAimData(uint8_t *buffer, uint16_t length, TurretAimData_t *aim_data) {
-	if (length != 5) {
+bool decodeToTurrentAimData(Serial_Message_t* message, TurretAimData_t *aim_data) {
+	if (message->length != 5) {
 		return false;
 	}
-
-	int16_t raw_pitch = *((int16_t*)buffer);
-	int16_t raw_yaw = *((int16_t*)buffer + 1);
-	uint8_t raw_has_target = buffer[4];
+	
+	int16_t raw_pitch =	(int16_t)(message->data[0]) << 8 | (int16_t)(message->data[1]);
+	int16_t raw_yaw = (int16_t)(message->data[2]) << 8 | (int16_t)(message->data[3]);
+	uint8_t raw_has_target = message->data[4];
 
 	aim_data->pitch = (float)raw_pitch / 100;
 	aim_data->yaw = (float)raw_yaw / 100;
@@ -62,7 +62,11 @@ void sendTurrentData(float pitch, float yaw)
 		{
 			(int16_t)(pitch * 100),
 			(int16_t)(yaw * 100)};
-	if (serial.send(CV_MESSAGE_TYPE_TURRET_TELEMETRY, 4, (uint8_t *)data))
+	Serial_Message_t message;
+	message.data = (uint8_t*)data;
+	message.length = 4;
+	message.type = CV_MESSAGE_TYPE_TURRET_TELEMETRY;
+	if (serial.send(&message))
 	{
 		inc_msg_switch();
 	}
@@ -86,16 +90,16 @@ void stopTargetTracking()
 	autoAimRequestState = false;
 }
 
-void messageHandler(uint16_t message_type, uint8_t *buffer, uint16_t length)
+void messageHandler(Serial_Message_t* message)
 {
 
-	switch (message_type)
+	switch (message->type)
 	{
 	case CV_MESSAGE_TYPE_TURRET_AIM:
 	{
 		TurretAimData_t aim_data;
 		modm::Timestamp t;
-		if(decodeToTurrentAimData(buffer, length, &aim_data)) {
+		if(decodeToTurrentAimData(message, &aim_data)) {
 			return;
 		}
 		aim_data.timestamp = t.getTime();
@@ -115,6 +119,7 @@ void initialize(uint8_t RobotID)
 
 void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data)
 {
+	
 	int16_t data[13] = {
 		// Accelerometer readings in static frame
 		(int16_t)(imu_data->ax * 100),
@@ -133,7 +138,12 @@ void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data)
 		chassis_data->leftFrontWheelRPM,
 		chassis_data->leftBackWheeRPM,
 		chassis_data->rightBackWheelRPM};
-	if (serial.send(CV_MESSAGE_TYPE_IMU, 26, (uint8_t *)data))
+		Serial_Message_t message;
+		message.data = (uint8_t*)data;
+		message.length = 4;
+		message.type = CV_MESSAGE_TYPE_IMU;
+
+	if (serial.send(&message))
 	{
 		inc_msg_switch();
 	}
@@ -141,8 +151,11 @@ void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data)
 
 bool sendRobotID()
 {
-	uint8_t data[1] = {robotID};
-	return serial.send(CV_MESSAGE_TYPE_ROBOT_ID, 1, data);
+	Serial_Message_t message;
+	message.data = &robotID;
+	message.length = 1;
+	message.type = CV_MESSAGE_TYPE_ROBOT_ID;
+	return serial.send(&message);
 }
 
 void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID){
@@ -189,7 +202,11 @@ void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *t
 		if (autoAimRequestQueued)
 		{
 			uint8_t data = autoAimRequestState;
-			if (serial.send(CV_MESSAGE_TYPE_AUTO_AIM_REQUEST, 1, &data))
+			Serial_Message_t message;
+			message.data = &data;
+			message.length = 1;
+			message.type = CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
+			if (serial.send(&message))
 			{
 				autoAimRequestQueued = false;
 				inc_msg_switch();
@@ -202,11 +219,7 @@ void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *t
 		}
 	}
 	}
-} // namespace CVCommunication
-
-bool send(uint16_t message_type, uint16_t length, uint8_t *message_data)
-{
-	return serial.send(message_type, length, message_data);
 }
+
 
 } // namespace CVCommunication

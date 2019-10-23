@@ -9,8 +9,6 @@
 
 #include "stdbool.h"
 
-typedef void (*message_handler_t)(uint16_t message_type, uint8_t *data_buffer, uint16_t length);
-
 typedef enum
 {
 	//PORT_UART1 = 0,
@@ -25,6 +23,14 @@ typedef enum
 	WAITING_FOR_MESSAGE_DATA = 2,   // rest of data in packet [1-byte sequence num, 1-byte CRC8, message_length-byte message, 2-byte CRC16]
 } SerialMode;
 
+typedef struct{
+	uint16_t type;
+	uint16_t length;
+	uint8_t* data;
+}Serial_Message_t;
+
+typedef void (*message_handler_t)(Serial_Message_t* message);
+
 class Serial
 {
 public:
@@ -33,7 +39,7 @@ public:
 	~Serial();
 
 	void initialize();
-	bool send(uint16_t message_type, uint16_t length, uint8_t *message_data);
+	bool send(Serial_Message_t* message);
 	void update();
 	void enableRXCRCEnforcement();
 	bool TXMessageRateReady(uint32_t previousTxMessageTimestamp, uint32_t minTxMessageInterval);

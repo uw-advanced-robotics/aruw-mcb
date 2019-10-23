@@ -16,7 +16,7 @@ Serial::Serial(SerialPort port, message_handler_t message_handler)
 	this->rx_sequence_num = 0;
 	this->CRC8 = 0;
 	this->CRC16 = 0;
-	this->rxCRCEnforcementEnabled = false;
+	this->rxCRCEnforcementEnabled = true;
 	switchToMode(WAITING_FOR_HEAD_BYTE);
 }
 
@@ -99,12 +99,20 @@ void Serial::processReceive()
 			if (!rxCRCEnforcementEnabled)
 			{
 				// CRC checking is disabled for this huart port
-				handler(message_type, (buff_rx + 4), expected_message_length);
+				Serial_Message_t message;
+				message.length = expected_message_length;
+				message.data = buff_rx + 4;
+				message.type = message_type;
+				handler(&message);
 			}
 			else if (verifyCRC())
 			{
 				// CRC checking is enabled and CRC8/CRC16 were valid
-				handler(message_type, (buff_rx + 4), expected_message_length);
+				Serial_Message_t message;
+				message.length = expected_message_length;
+				message.data = buff_rx + 4;
+				message.type = message_type;
+				handler(&message);
 			}
 			else
 			{
@@ -177,29 +185,29 @@ void Serial::switchToMode(SerialMode new_mode)
 	}
 }
 
-bool Serial::send(uint16_t message_type, uint16_t length, uint8_t *message_data)
+bool Serial::send(Serial_Message_t* message)
 {
 	uint8_t buff[SERIAL_TX_BUFF_SIZE];
 	buff[0] = SERIAL_HEAD_BYTE;
-	buff[1] = length & 0xFF;
-	buff[2] = length >> 8;
+	buff[1] = message->length & 0xFF;
+	buff[2] = message->length >> 8;
 	buff[3] = tx_sequence_num;
 	buff[4] = calculateCRC8(buff, 4, CRC8_INIT);
-	buff[5] = message_type & 0xFF;
-	buff[6] = message_type >> 8;
+	buff[5] = message->type & 0xFF;
+	buff[6] = message->type >> 8;
 
 	uint8_t *next_tx_buff = &(buff[7]);
 
-	if (next_tx_buff + length + SERIAL_FOOTER_LENGTH >= buff + SERIAL_TX_BUFF_SIZE)
+	if (next_tx_buff + message->length + SERIAL_FOOTER_LENGTH >= buff + SERIAL_TX_BUFF_SIZE)
 	{
 		return false;
 	}
-	for (uint16_t i = 0; i < length; i++)
+	for (uint16_t i = 0; i < message->length; i++)
 	{
-		*next_tx_buff = message_data[i];
+		*next_tx_buff = message->data[i];
 		next_tx_buff++;
 	}
-	uint16_t CRC16_val = calculateCRC16(buff, 7 + length, CRC16_INIT);
+	uint16_t CRC16_val = calculateCRC16(buff, 7 + message->length, CRC16_INIT);
 	next_tx_buff[0] = CRC16_val & 0xFF;
 	next_tx_buff[1] = CRC16_val >> 8;
 	next_tx_buff += SERIAL_FOOTER_LENGTH;
