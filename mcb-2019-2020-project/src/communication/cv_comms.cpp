@@ -15,7 +15,6 @@ static uint8_t msg_switch_index;
 
 static uint8_t msg_switch_arr[CV_MESSAGE_TYPE_SIZE] = {CV_MESSAGE_TYPE_TURRET_TELEMETRY, CV_MESSAGE_TYPE_IMU, CV_MESSAGE_TYPE_ROBOT_ID, CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
 
-
 static uint32_t PreviousIDTimestamp = 0; // tracks previous ms that robot id was sent to CV
 bool autoAimRequestQueued = false;
 bool autoAimRequestState = false;
@@ -98,11 +97,10 @@ void messageHandler(Serial_Message_t* message)
 	case CV_MESSAGE_TYPE_TURRET_AIM:
 	{
 		TurretAimData_t aim_data;
-		modm::Timestamp t;
 		if(decodeToTurrentAimData(message, &aim_data)) {
 			return;
 		}
-		aim_data.timestamp = t.getTime();
+		aim_data.timestamp = serial.getTimestamp();
 		handleTurrentAim(&aim_data);
 		return;
 	}
@@ -179,14 +177,13 @@ void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *t
 
 	case CV_MESSAGE_TYPE_ROBOT_ID:
 	{
-		modm::Timestamp t;
 		robotID = RobotID;
-		if (t.getTime() - PreviousIDTimestamp > TIME_BETWEEN_ROBOT_ID_SEND_MS)
+		if (serial.getTimestamp() - PreviousIDTimestamp > TIME_BETWEEN_ROBOT_ID_SEND_MS)
 		//&& referee.online)
 		{
 			if (sendRobotID())
 			{
-				PreviousIDTimestamp = t.getTime();
+				PreviousIDTimestamp = serial.getTimestamp();
 				inc_msg_switch();
 			}
 			break;

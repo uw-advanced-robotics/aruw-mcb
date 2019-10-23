@@ -218,10 +218,13 @@ void Serial::update()
 	processReceive();
 }
 
+uint32_t Serial::getTimestamp() {
+	return timestamp.getTime();
+}
+
 bool Serial::TXMessageRateReady(uint32_t previousTxMessageTimestamp, uint32_t minTxMessageInterval)
 {
-	modm::Timestamp t;
-	uint32_t currentTime = t.getTime();
+	uint32_t currentTime = timestamp.getTime();
 	if (previousTxMessageTimestamp == 0 || currentTime - previousTxMessageTimestamp > minTxMessageInterval)
 	{
 		previousTxMessageTimestamp = currentTime;
@@ -270,6 +273,7 @@ void Serial::initialize()
 	default:
 		break;
 	}
+	timestamp = modm::Timestamp();
 }
 uint16_t Serial::getRxBufferSize()
 {

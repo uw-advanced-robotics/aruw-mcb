@@ -43,7 +43,7 @@ public:
 	void update();
 	void enableRXCRCEnforcement();
 	bool TXMessageRateReady(uint32_t previousTxMessageTimestamp, uint32_t minTxMessageInterval);
-
+	uint32_t getTimestamp();
 private:
 	SerialPort port;
 
@@ -79,6 +79,8 @@ private:
 
 	uint32_t verifyCRC16(uint8_t *message, uint32_t message_length);
 	uint32_t verifyCRC8(uint8_t *message, uint32_t message_length);
+
+	modm::Timestamp timestamp;
 };
 
 #endif
