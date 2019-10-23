@@ -7,6 +7,7 @@
 #define SERIAL_HEAD_BYTE 0xA5
 #define SERIAL_FOOTER_LENGTH 2
 
+#include <rm-dev-board-a/board.hpp>
 #include "stdbool.h"
 
 typedef enum

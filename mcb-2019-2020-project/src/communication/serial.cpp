@@ -273,7 +273,7 @@ void Serial::initialize()
 	default:
 		break;
 	}
-	timestamp = modm::Timestamp();
+	this->timestamp = modm::Timestamp();
 }
 uint16_t Serial::getRxBufferSize()
 {
