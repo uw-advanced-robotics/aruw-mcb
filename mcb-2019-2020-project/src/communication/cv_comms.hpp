@@ -94,5 +94,5 @@ void update(
     uint8_t RobotID
 );
 
-} //  namespace CVCommunication
+}  // namespace CVCommunication
 #endif

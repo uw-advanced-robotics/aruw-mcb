@@ -126,7 +126,6 @@ void Serial::processReceive() {
                 switchToMode(WAITING_FOR_HEAD_BYTE);
             }
             break;
-
         default:
             break;
         }
@@ -135,7 +134,6 @@ void Serial::processReceive() {
 
 void Serial::switchToMode(SerialMode new_mode) {
     switch (new_mode) {
-
     case WAITING_FOR_HEAD_BYTE: {
         current_mode = WAITING_FOR_HEAD_BYTE;
         break;
@@ -203,7 +201,7 @@ bool Serial::TXMessageRateReady(
 ) {
     uint32_t currentTime = timestamp.getTime();
     if (
-        previousTxMessageTimestamp == 0 
+        previousTxMessageTimestamp == 0
         || currentTime - previousTxMessageTimestamp > minTxMessageInterval
     ) {
         previousTxMessageTimestamp = currentTime;

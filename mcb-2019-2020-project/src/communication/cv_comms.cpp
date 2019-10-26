@@ -64,10 +64,10 @@ bool getLastAimData(TurretAimData_t *aim_data) {
 void sendTurrentData(float pitch, float yaw) {
     int16_t data[2] =
         {
-            (int16_t)(pitch * 100),
-            (int16_t)(yaw * 100)};
+            static_cast<int16_t>(pitch * 100),
+            static_cast<int16_t>(yaw * 100)};
     Serial_Message_t message;
-    message.data = (uint8_t*)data;
+    message.data = reinterpret_cast<uint8_t*>(data);
     message.length = 4;
     message.type = CV_MESSAGE_TYPE_TURRET_TELEMETRY;
     if (serial.send(&message)) {
@@ -116,24 +116,24 @@ void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback) {
 void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data) {
     int16_t data[13] = {
         // Accelerometer readings in static frame
-        (int16_t)(imu_data->ax * 100),
-        (int16_t)(imu_data->ay * 100),
-        (int16_t)(imu_data->az * 100),
+        static_cast<int16_t>(imu_data->ax * 100),
+        static_cast<int16_t>(imu_data->ay * 100),
+        static_cast<int16_t>(imu_data->az * 100),
         // MCB IMU angles are in degrees
-        (int16_t)(imu_data->rol * 100),
-        (int16_t)(imu_data->pit * 100),
-        (int16_t)(imu_data->yaw * 100),
+        static_cast<int16_t>(imu_data->rol * 100),
+        static_cast<int16_t>(imu_data->pit * 100),
+        static_cast<int16_t>(imu_data->yaw * 100),
         // MCB IMU angular velocities are in radians/s
-        (int16_t)(imu_data->wx * 100),
-        (int16_t)(imu_data->wy * 100),
-        (int16_t)(imu_data->wz * 100),
+        static_cast<int16_t>(imu_data->wx * 100),
+        static_cast<int16_t>(imu_data->wy * 100),
+        static_cast<int16_t>(imu_data->wz * 100),
         // Wheel RPMs
         chassis_data->rightFrontWheelRPM,
         chassis_data->leftFrontWheelRPM,
         chassis_data->leftBackWheeRPM,
         chassis_data->rightBackWheelRPM};
         Serial_Message_t message;
-        message.data = (uint8_t*)data;
+        message.data = reinterpret_cast<uint8_t*>(data);
         message.length = 4;
         message.type = CV_MESSAGE_TYPE_IMU;
 

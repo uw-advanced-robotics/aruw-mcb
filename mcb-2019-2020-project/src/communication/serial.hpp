@@ -7,8 +7,8 @@
 #define SERIAL_HEAD_BYTE 0xA5
 #define SERIAL_FOOTER_LENGTH 2
 
-#include <rm-dev-board-a/board.hpp>
 #include <stdbool.h>
+#include <rm-dev-board-a/board.hpp>
 
 typedef enum
 {
@@ -19,10 +19,10 @@ typedef enum
 
 typedef enum
 {
-    WAITING_FOR_HEAD_BYTE = 0,      // head byte (1-byte)
-    WAITING_FOR_MESSAGE_LENGTH = 1, // length of message (2-byte)
-    WAITING_FOR_MESSAGE_DATA = 2,   // rest of data in packet [1-byte sequence num,
-                                    // 1-byte CRC8, message_length-byte message, 2-byte CRC16]
+    WAITING_FOR_HEAD_BYTE = 0,       // head byte (1-byte)
+    WAITING_FOR_MESSAGE_LENGTH = 1,  // length of message (2-byte)
+    WAITING_FOR_MESSAGE_DATA = 2,    // rest of data in packet [1-byte sequence num,
+                                     // 1-byte CRC8, message_length-byte message, 2-byte CRC16]
 } SerialMode;
 
 typedef struct{
