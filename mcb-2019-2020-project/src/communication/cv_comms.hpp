@@ -9,30 +9,29 @@ namespace CVCommunication
 #define CV_MESSAGE_TYPE_IMU 0x02
 #define CV_MESSAGE_TYPE_ROBOT_ID 0x04
 #define CV_MESSAGE_TYPE_AUTO_AIM_REQUEST 0x05
-//#if !defined (TARGET_ENGINEER)
+
 #define CV_MESSAGE_TYPE_TURRET_TELEMETRY 0x01
-//#else
+
 #define CV_MESSAGE_TYPE_REQUEST_TASK 0x03
-//#endif
+
 #define CV_MESSAGE_TYPE_SIZE 4
 
 // RX message headers
-#define TIME_OFFLINE_CV_AIM_DATA_MS (5000) // time in ms since last CV aim data was received before deciding CV is offline
-//#if !defined (TARGET_ENGINEER)
+#define TIME_OFFLINE_CV_AIM_DATA_MS (5000)  // time in ms since last CV aim data was
+                                            // received before deciding CV is offline
+
 #define CV_MESSAGE_TYPE_TURRET_AIM 0x01
-//#else
+
 #define CV_MESSAGE_TYPE_ALIGN_CONTROL 0x02
 #define CV_MESSAGE_TYPE_ALIGN_COMPLETE 0x03
-//#endif
 
 // Engineer task types
-//#if defined (TARGET_ENGINEER)
 #define CV_TASK_TYPE_TOWING 0x01
 #define CV_TASK_TYPE_ONE_AMMO_BOX 0x02
 #define CV_TASK_TYPE_ALL_AMMO_BOX 0x03
-//#endif
 
-#define TIME_BETWEEN_ROBOT_ID_SEND_MS (5000) // time between each robot id send to CV in milliseconds
+// time between each robot id send to CV in milliseconds
+#define TIME_BETWEEN_ROBOT_ID_SEND_MS (5000)
 
 #define SERIAL_RX_BUF_SIZE 256
 #define SERIAL_TX_BUF_SIZE 256
@@ -42,7 +41,7 @@ namespace CVCommunication
 
 #define CRC8_INIT 0xff
 #define CRC16_INIT 0xffff
-//AutoAim Data
+// AutoAim Data
 typedef struct
 {
     bool hasTarget;
@@ -53,27 +52,27 @@ typedef struct
 
 typedef void (*turrent_data_handler_t)(TurretAimData_t* aim_data);
 
-//Initialize UART communication
+// Initialize UART communication
 void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback);
-//Get latest aiming data for Turrent
+// Get latest aiming data for Turrent
 bool getLastAimData(TurretAimData_t* aim_data);
-//Start Requesting Xavier to Track Target
+// Start Requesting Xavier to Track Target
 void beginTargetTracking();
-//Stop Requesting Xavier to Track Target
+// Stop Requesting Xavier to Track Target
 void stopTargetTracking();
 
 // DO reference this struct if you want send imu data
 typedef struct
 {
-    float ax; // acceleration
+    float ax;  // acceleration
     float ay;
     float az;
 
-    float wx; // flux calculations
+    float wx;  // flux calculations
     float wy;
     float wz;
 
-    float rol; // measured in degrees
+    float rol;  // measured in degrees
     float pit;
     float yaw;
 } IMUData_t;
@@ -86,9 +85,14 @@ typedef struct
     int16_t rightBackWheelRPM;
 } ChassisData_t;
 
-//Decoding serial buffer, Update current aiming or align data,
-//and Send Turrent Data and IMU Data to Xavier
-void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID);
+// Decoding serial buffer, Update current aiming or align data,
+// and Send Turrent Data and IMU Data to Xavier
+void update(
+    IMUData_t *imu_data,
+    ChassisData_t *chassis_data,
+    TurretAimData_t *turrent_data,
+    uint8_t RobotID
+);
 
-} // namespace CVCommunication
+} //  namespace CVCommunication
 #endif
