@@ -253,3 +253,7 @@ uint16_t Serial::getRxBufferSize() {
         return 0;
     }
 }
+
+uint8_t Serial::getTxSequenceNumber(){
+    return this->tx_sequence_num;
+}

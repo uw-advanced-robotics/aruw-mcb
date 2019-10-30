@@ -8,6 +8,7 @@
 #define SERIAL_FOOTER_LENGTH 2
 
 #include <stdbool.h>
+
 #include <rm-dev-board-a/board.hpp>
 
 typedef enum
@@ -46,6 +47,8 @@ class Serial
     void enableRXCRCEnforcement();
     bool TXMessageRateReady(uint32_t previousTxMessageTimestamp, uint32_t minTxMessageInterval);
     uint32_t getTimestamp();
+    uint8_t getTxSequenceNumber();
+
  private:
     SerialPort port;
 
