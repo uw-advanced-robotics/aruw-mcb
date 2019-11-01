@@ -1,9 +1,7 @@
 #ifndef _cv_comms_h_
 #define _cv_comms_h_
 #include <stdint.h>
-
-namespace CVCommunication
-{
+#include "serial.hpp"
 // TX message headers
 // CV_MESSAGE_TYPEs for transmission should be defined incrementally from 0x01
 #define CV_MESSAGE_TYPE_IMU 0x02
@@ -52,15 +50,6 @@ typedef struct
 
 typedef void (*turrent_data_handler_t)(TurretAimData_t* aim_data);
 
-// Initialize UART communication
-void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback);
-// Get latest aiming data for Turrent
-bool getLastAimData(TurretAimData_t* aim_data);
-// Start Requesting Xavier to Track Target
-void beginTargetTracking();
-// Stop Requesting Xavier to Track Target
-void stopTargetTracking();
-
 // DO reference this struct if you want send imu data
 typedef struct
 {
@@ -87,12 +76,54 @@ typedef struct
 
 // Decoding serial buffer, Update current aiming or align data,
 // and Send Turrent Data and IMU Data to Xavier
-void update(
-    IMUData_t *imu_data,
-    ChassisData_t *chassis_data,
-    TurretAimData_t *turrent_data,
-    uint8_t RobotID
-);
 
-}  // namespace CVCommunication
+
+class CVCommunication
+{
+private:
+    static uint32_t PreviousIDTimestamp;  // tracks previous ms that robot id was sent to CV
+    static bool autoAimRequestQueued;
+    static bool autoAimRequestState;
+    static bool hasAimData;
+    static Serial serial;
+    static TurretAimData_t lastAimData;
+    static turrent_data_handler_t turrent_data_handler;
+    static uint8_t robotID;
+    static uint8_t msg_switch_index;
+    static uint8_t msg_switch_arr[CV_MESSAGE_TYPE_SIZE];
+
+    static void messageHandler(Serial_Message_t* message);
+     
+    
+    static void inc_msg_switch();
+    static bool decodeToTurrentAimData(Serial_Message_t* message, TurretAimData_t *aim_data);
+    static void sendTurrentData(float pitch, float yaw);
+    static void handleTurrentAim(TurretAimData_t *aim_data);
+    static void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data);
+    static bool sendRobotID();
+
+    
+
+public:
+    CVCommunication();
+    ~CVCommunication();
+
+    void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback);
+
+    void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID);
+
+    // Get latest aiming data for Turrent
+    bool getLastAimData(TurretAimData_t* aim_data);
+    // Start Requesting Xavier to Track Target
+    void beginTargetTracking();
+    // Stop Requesting Xavier to Track Target
+    void stopTargetTracking();
+
+
+};
+
+
+
+
+
 #endif

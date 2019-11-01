@@ -3,8 +3,8 @@
 
 uint8_t buff[1024] = {"a"};
 uint16_t size = 0;
-CVCommunication::IMUData_t imu = {0};
-CVCommunication::ChassisData_t chassis = {0};
+IMUData_t imu = {0};
+ChassisData_t chassis = {0};
 uint16_t interval = 5;  // 3ms is the minimum time for a successfully imu data sending
 
 int main()
