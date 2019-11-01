@@ -3,39 +3,11 @@
 #include "../algorithms/crc.hpp"
 #include "serial.hpp"
 
-
-namespace CVCommunication
-{
-
-void messageHandler(Serial_Message_t* message);
-
-static Serial serial = Serial(PORT_UART6, messageHandler);
-
-static uint8_t msg_switch_index;
-
-static uint8_t msg_switch_arr[CV_MESSAGE_TYPE_SIZE] =
-{
-    CV_MESSAGE_TYPE_TURRET_TELEMETRY,
-    CV_MESSAGE_TYPE_IMU,
-    CV_MESSAGE_TYPE_ROBOT_ID,
-    CV_MESSAGE_TYPE_AUTO_AIM_REQUEST
-};
-
-static uint32_t PreviousIDTimestamp = 0;  // tracks previous ms that robot id was sent to CV
-bool autoAimRequestQueued = false;
-bool autoAimRequestState = false;
-
-uint8_t robotID = 0;
-
-void inc_msg_switch() {
+void CVCommunication::inc_msg_switch() {
     msg_switch_index = (msg_switch_index + 1) % CV_MESSAGE_TYPE_SIZE;
 }
 
-static TurretAimData_t lastAimData;
-static turrent_data_handler_t turrent_data_handler;
-static bool hasAimData = false;
-
-bool decodeToTurrentAimData(Serial_Message_t* message, TurretAimData_t *aim_data) {
+bool CVCommunication::decodeToTurrentAimData(Serial_Message_t* message, TurretAimData_t *aim_data) {
     if (message->length != 5) {
         return false;
     }
@@ -53,7 +25,7 @@ bool decodeToTurrentAimData(Serial_Message_t* message, TurretAimData_t *aim_data
     return true;
 }
 
-bool getLastAimData(TurretAimData_t *aim_data) {
+bool CVCommunication::getLastAimData(TurretAimData_t *aim_data) {
     if (hasAimData) {
         *aim_data = lastAimData;
         return true;
@@ -61,7 +33,7 @@ bool getLastAimData(TurretAimData_t *aim_data) {
     return false;
 }
 
-void sendTurrentData(float pitch, float yaw) {
+void CVCommunication::sendTurrentData(float pitch, float yaw) {
     int16_t data[2] =
         {
             static_cast<int16_t>(pitch * 100),
@@ -75,22 +47,22 @@ void sendTurrentData(float pitch, float yaw) {
     }
 }
 
-void handleTurrentAim(TurretAimData_t *aim_data) {
+void CVCommunication::handleTurrentAim(TurretAimData_t *aim_data) {
     lastAimData = *aim_data;
     hasAimData = true;
 }
 
-void beginTargetTracking() {
+void CVCommunication::beginTargetTracking() {
     autoAimRequestQueued = true;
     autoAimRequestState = true;
 }
 
-void stopTargetTracking() {
+void CVCommunication::stopTargetTracking() {
     autoAimRequestQueued = false;
     autoAimRequestState = false;
 }
 
-void messageHandler(Serial_Message_t* message) {
+void CVCommunication::messageHandler(Serial_Message_t* message) {
     switch (message->type) {
     case CV_MESSAGE_TYPE_TURRET_AIM: {
         TurretAimData_t aim_data;
@@ -107,13 +79,13 @@ void messageHandler(Serial_Message_t* message) {
     }
 }
 
-void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback) {
+void CVCommunication::initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback) {
     robotID = RobotID;
     turrent_data_handler = turrent_data_callback;
     serial.initialize();
 }
 
-void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data) {
+void CVCommunication::sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data) {
     int16_t data[13] = {
         // Accelerometer readings in static frame
         static_cast<int16_t>(imu_data->ax * 100),
@@ -142,7 +114,7 @@ void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data) {
     }
 }
 
-bool sendRobotID() {
+bool CVCommunication::sendRobotID() {
     Serial_Message_t message;
     message.data = &robotID;
     message.length = 1;
@@ -150,7 +122,7 @@ bool sendRobotID() {
     return serial.send(&message);
 }
 
-void update(
+void CVCommunication::update(
     IMUData_t *imu_data,
     ChassisData_t *chassis_data,
     TurretAimData_t *turrent_data,
@@ -202,5 +174,23 @@ void update(
     }
 }
 
+CVCommunication::CVCommunication()
+{
+    PreviousIDTimestamp = 0;  // tracks previous ms that robot id was sent to CV
+    autoAimRequestQueued = false;
+    autoAimRequestState = false;
+    hasAimData = false;
+    serial = Serial(PORT_UART6, messageHandler);
+    robotID = 0;
 
-}  // namespace CVCommunication
+    msg_switch_arr[0] = CV_MESSAGE_TYPE_TURRET_TELEMETRY;
+    msg_switch_arr[1] = CV_MESSAGE_TYPE_IMU;
+    msg_switch_arr[2] = CV_MESSAGE_TYPE_ROBOT_ID;
+    msg_switch_arr[3] = CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
+
+}
+
+CVCommunication::~CVCommunication()
+{
+}
+

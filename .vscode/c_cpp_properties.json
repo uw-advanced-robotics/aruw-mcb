@@ -11,7 +11,7 @@
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "compilerPath": "C:/Users/Matthew/Documents/UW/ARUW/Summer-Projects-2019/8 2019-q3-update/bin/arm-none-eabi-gcc.exe"
+            "compilerPath": "C:/Program Files (x86)/GNU Tools ARM Embedded/8 2019-q3-update/bin/arm-none-eabi-gcc.exe"
         }
     ],
     "version": 4
