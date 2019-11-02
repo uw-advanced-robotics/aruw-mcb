@@ -37,7 +37,7 @@ class Scheduler
 
     static bool isScheduled(const Command* command);
 
-    static void addSubsystem(Subsystem* subsystem);
+    static bool addSubsystem(Subsystem* subsystem);
 
  private:
     static modm::LinkedList<Command*> commandList;

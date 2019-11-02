@@ -123,9 +123,24 @@ namespace control
         return scheduled;
     }
 
-    void Scheduler::addSubsystem(Subsystem* subsystem)
+    bool Scheduler::addSubsystem(Subsystem* subsystem)
     {
-        subsystemList.append(subsystem);
+        bool subsystemAlreadyAdded = false;
+        for (int i = subsystemList.getSize(); i > 0; i--)
+        {
+            Subsystem* currSubsystem = subsystemList.getFront();
+            subsystemList.removeFront();
+            subsystemList.append(currSubsystem);
+            if (currSubsystem == subsystem)
+            {
+                subsystemAlreadyAdded = true;
+            }
+        }
+        if (!subsystemAlreadyAdded)
+        {
+            subsystemList.append(subsystem);
+        }
+        return subsystemAlreadyAdded;
     }
 }  // namespace control
 
