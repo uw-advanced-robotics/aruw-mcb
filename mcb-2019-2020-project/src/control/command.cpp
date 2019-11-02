@@ -8,7 +8,7 @@ namespace control
 {    
     void Command::schedule(bool interruptible)
     {
-        isInterruptiable = interruptible;
+        m_isInterruptiable = interruptible;
         Scheduler::addCommand(this);
     }
 
@@ -45,11 +45,15 @@ namespace control
         commandRequirements->append(requirement);
     }
 
-    const modm::LinkedList<Subsystem*>* Command::getRequirements(void) const
+    modm::LinkedList<Subsystem*>* Command::getRequirements(void)
     {
         return commandRequirements;
     }
 
+    bool Command::isInterruptiable() const
+    {
+        return m_isInterruptiable;
+    }
 }  // namespace command
 
 }  // namespace aruwlib

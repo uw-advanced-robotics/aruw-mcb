@@ -20,16 +20,12 @@ void Subsystem::SetDefaultCommand(Command* command)
 
 Command* Subsystem::GetDefaultCommand() const
 {
-  return defaultCommand;
+    return defaultCommand;
 }
 
 void Subsystem::SetCurrentCommand(Command* command)
 {
-    if (command != nullptr)
-    {
-        currentCommand = command;
-        currentCommandChanged = true;
-    }
+    currentCommand = command;
 }
 
 Command* Subsystem::GetCurrentCommand() const

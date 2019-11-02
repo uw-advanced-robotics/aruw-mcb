@@ -67,7 +67,7 @@ class Command {
      *
      * @return the set of subsystems that are required
      */
-    const modm::LinkedList<Subsystem*>* getRequirements() const; //<- pointer stuff rough for now
+    modm::LinkedList<Subsystem*>* getRequirements(); //<- pointer stuff rough for now
 
     virtual void interrupted(void) = 0;
 
@@ -124,8 +124,10 @@ class Command {
      */
     virtual bool runsWhenDisabled() const { return false; }
 
+    bool isInterruptiable(void) const;
+
  private:
-    bool isInterruptiable = true;
+    bool m_isInterruptiable = true;
 
     modm::LinkedList<Subsystem*>* commandRequirements;
 };

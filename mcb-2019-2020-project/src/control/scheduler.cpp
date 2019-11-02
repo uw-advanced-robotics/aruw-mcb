@@ -11,10 +11,41 @@ namespace control
 
     void Scheduler::addCommand(Command* control)
     {
-        // TODO(matthew) adding command logic
-        // check to see if the current command can be ran, check
-        // subsystem dependencies
-        commandList.append(control);
+        modm::LinkedList<Subsystem*>* commandDependencies = control->getRequirements();
+
+        // Check to make sure the control you are trying to add to the scheduler can be added.
+        bool dependencyInUse = false;
+
+        for (int i = subsystemList.getSize(); i > 0; i--)
+        {
+            for (int j = commandDependencies->getSize(); j > 0; j--)
+            {
+                Subsystem* subsystemDependency = commandDependencies->getFront();
+                commandDependencies->removeFront();
+                commandDependencies->append(subsystemDependency);
+                if (
+                    subsystemDependency->GetCurrentCommand() != nullptr
+                    && !subsystemDependency->GetCurrentCommand()->isInterruptiable()
+                ) {
+                    dependencyInUse = true;
+                }
+            }
+        }
+
+        // If we can replace the command based of the command dependencies, do so.
+        if (!dependencyInUse)
+        {
+            // for all subsystems that this command is depend upon, end the current command
+            // being run.
+            for (int i = commandDependencies->getSize(); i > 0; i--)
+            {
+                // The current command has been interrupted. End it.
+                commandDependencies->getFront()->GetCurrentCommand()->end(true);
+                // Set current command to something new.
+                commandDependencies->getFront()->SetCurrentCommand(control);
+            }
+            commandList.append(control);
+        }
     }
 
     void Scheduler::run()
