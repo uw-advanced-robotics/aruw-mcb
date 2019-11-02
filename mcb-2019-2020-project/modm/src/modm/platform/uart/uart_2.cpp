@@ -82,7 +82,6 @@ modm::platform::Usart2::write(const uint8_t *data, std::size_t length)
 		if (!write(*data++)) {
 			return i;
 		}
-		TxBufferLength-=1;
 	}
 	return i;
 }
@@ -151,12 +150,12 @@ modm::platform::Usart2::discardReceiveBuffer()
 
 uint16_t
 modm::platform::Usart2::getRxBufferSize(){
-	return RxBufferLength;
+	return (RxBufferLength > 250 ? 250 : RxBufferLength);
 }
 
 uint16_t
 modm::platform::Usart2::getTxBufferSize(){
-	return TxBufferLength;
+	return (TxBufferLength > 250 ? 250 : TxBufferLength);
 }
 
 MODM_ISR(USART2)
@@ -165,8 +164,7 @@ MODM_ISR(USART2)
 		// TODO: save the errors
 		uint8_t data;
 		modm::platform::UsartHal2::read(data);
-		rxBuffer.push(data);
-		RxBufferLength += 1;
+		RxBufferLength = (rxBuffer.push(data) ? RxBufferLength + 1 : RxBufferLength);
 	}
 	if (modm::platform::UsartHal2::isTransmitRegisterEmpty()) {
 		if (txBuffer.isEmpty()) {
@@ -176,7 +174,7 @@ MODM_ISR(USART2)
 		else {
 			modm::platform::UsartHal2::write(txBuffer.get());
 			txBuffer.pop();
-			TxBufferLength-=1;
+			TxBufferLength -= 1;
 		}
 	}
 }

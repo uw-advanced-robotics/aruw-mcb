@@ -3,6 +3,8 @@
 
 #include <rm-dev-board-a/board.hpp>
 #include <stdbool.h>
+#include <functional>
+
 #include <time.h>
 
 #define	REF_MESSAGE_TYPE_GAME_STATUS (0x1)
@@ -177,7 +179,7 @@ typedef enum {
 
 class RefereeSystem
 {
-private:
+public://private:
     static ref_game_data_t game_data; /* game stats 	(e.g. remaining time, current stage, winner)*/
     static ref_robot_data_t robot_data; /* robot stats	(e.g. current HP, power draw, turret info)*/
     static received_dps_tracker_t received_dps_tracker;
@@ -196,25 +198,28 @@ private:
     static bool decodeToProjectileLaunch(Serial_Message_t* message);
     static bool decodeToSentinelDroneBulletsRemain(Serial_Message_t* message);
     static void message_handler(Serial_Message_t* message);
+	
     static uint8_t packboolIndicators(
 	bool bool1, bool bool2, bool bool3, bool bool4, bool bool5, bool bool6);
+
 	static void sendUIDisplay(bool is_cv_online, ref_robot_mode_t robot_mode, bool is_hopper_open, bool is_agitator_jammed);
 
 	static uint16_t getRobotClientID(ref_robot_id_t robot_id);
 	static void updateReceivedDamage();
 
-public:
+//public:
     RefereeSystem();
     ~RefereeSystem();
 
     static void initialize();
 
-	static void getRobotData(ref_robot_data_t* data);
-	static void getGameData(ref_game_data_t* data);
+	static ref_robot_data_t getRobotData();
+	static ref_game_data_t getGameData();
 	static void update(bool is_cv_online, ref_robot_mode_t robot_mode, bool is_hopper_open, bool is_agitator_jammed);
 
 	static ref_robot_id_t getRobotID();
 
 };
+
 
 #endif

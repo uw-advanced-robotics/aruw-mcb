@@ -43,12 +43,12 @@ class Serial
 
     void initialize();
     bool send(Serial_Message_t* message);
-    void update();
+    Serial_Message_t update();
     void enableRXCRCEnforcement();
     bool TXMessageRateReady(uint32_t previousTxMessageTimestamp, uint32_t minTxMessageInterval);
     uint32_t getTimestamp();
     uint8_t getTxSequenceNumber();
-
+    uint16_t getRxBufferSize();
  private:
     SerialPort port;
 
@@ -80,10 +80,12 @@ class Serial
 
     bool read(uint8_t *data, uint16_t length);
     bool write(const uint8_t *data, uint16_t length);
-    uint16_t getRxBufferSize();
+    
 
     uint32_t verifyCRC16(uint8_t *message, uint32_t message_length);
     uint32_t verifyCRC8(uint8_t *message, uint32_t message_length);
+
+    Serial_Message_t lastMessage;
 
     modm::Timestamp timestamp;
 };

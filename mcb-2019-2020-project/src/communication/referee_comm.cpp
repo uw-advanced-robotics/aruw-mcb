@@ -1,17 +1,24 @@
+#include <functional>
 #include "serial.hpp"
 #include <rm-dev-board-a/board.hpp>
 #include "referee_comm.hpp"
 #include "cv_comms.hpp"
 
-
+ref_game_data_t RefereeSystem::game_data; /* game stats 	(e.g. remaining time, current stage, winner)*/
+ref_robot_data_t RefereeSystem::robot_data; /* robot stats	(e.g. current HP, power draw, turret info)*/
+received_dps_tracker_t RefereeSystem::received_dps_tracker;
+Serial RefereeSystem::serial = Serial(PORT_UART6, (RefereeSystem::message_handler));
+bool RefereeSystem::online;
 
 RefereeSystem::RefereeSystem()
 {
+	
 	this->online = false; // initially sets referee system to be offline
 	this->robot_data.received_dps = 0.0f;
 	this->received_dps_tracker.head = 0;
 	this->received_dps_tracker.tail = 0;
-    RefereeSystem::serial = Serial(PORT_UART6, RefereeSystem::message_handler);
+    RefereeSystem::serial = Serial(PORT_UART6, (RefereeSystem::message_handler));
+	
 }
 
 RefereeSystem::~RefereeSystem()
@@ -158,7 +165,7 @@ void RefereeSystem::processReceivedDamage(int32_t damage_taken) {
 }
 
 void RefereeSystem::message_handler(Serial_Message_t* message){
-bool ref_received_data = false;
+	bool ref_received_data = false;
 	RefereeSystem::online = true;
 	switch(message->type) {
 		case REF_MESSAGE_TYPE_GAME_STATUS:
@@ -341,8 +348,19 @@ void RefereeSystem::sendUIDisplay(bool is_cv_online, ref_robot_mode_t robot_mode
 	RefereeSystem::serial.send(&message);
 
 }
-
+Serial_Message_t aaa;
 void RefereeSystem::update(bool is_cv_online, ref_robot_mode_t robot_mode, bool is_hopper_open, bool is_agitator_jammed){
     RefereeSystem::updateReceivedDamage();
     RefereeSystem::sendUIDisplay(is_cv_online, robot_mode, is_hopper_open, is_agitator_jammed);
+	aaa = serial.update();
+	message_handler(&aaa);//temporary solution
+}
+
+
+ref_robot_data_t RefereeSystem::getRobotData(){
+	return robot_data;
+}
+
+ref_game_data_t RefereeSystem::getGameData(){
+	return game_data;
 }

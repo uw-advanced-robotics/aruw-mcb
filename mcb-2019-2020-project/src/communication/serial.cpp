@@ -110,14 +110,17 @@ void Serial::processReceive() {
                     message.length = expected_message_length;
                     message.data = buff_rx + 4;
                     message.type = message_type;
-                    handler(&message);
+                    message.type = message_type;
+                    this->lastMessage = message;//Currently Doesn't Work
+                    //handler(&message);
                 } else if (verifyCRC()) {
                     // CRC checking is enabled and CRC8/CRC16 were valid
                     Serial_Message_t message;
                     message.length = expected_message_length;
                     message.data = buff_rx + 4;
                     message.type = message_type;
-                    handler(&message);
+                    this->lastMessage = message;
+                    //handler(&message);//Currently Doesn't Work
                 } else {
                     // CRC checking is enabled but CRC8/CRC16 were invalid
                     expected_message_length = 0;
@@ -187,8 +190,9 @@ void Serial::enableRXCRCEnforcement() {
     rxCRCEnforcementEnabled = true;
 }
 
-void Serial::update() {
+Serial_Message_t Serial::update() {
     processReceive();
+    return this->lastMessage;//temporary solution
 }
 
 uint32_t Serial::getTimestamp() {
