@@ -1,13 +1,22 @@
 #include <rm-dev-board-a/board.hpp>
+#include "src/control/scheduler.hpp"
+
+#include "src/control/command-example.hpp"
+#include "src/control/subsystem-example.hpp"
+
+aruwsrc::control::CommandExample frictionWheelDefaultCommand;
+
+aruwsrc::control::SubsystemExample frictionWheelSystem(8, 0, 0, 10000);
 
 int main()
 {
+    frictionWheelDefaultCommand.schedule();
+    
     Board::initialize();
 
     while (1)
     {
-        Board::Leds::toggle();
-        modm::delayMilliseconds(1000);
+        aruwlib::control::Scheduler::run();
     }
     return 0;
 }

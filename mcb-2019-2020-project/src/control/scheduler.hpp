@@ -26,18 +26,18 @@ namespace control
 class Scheduler
 {
  public:
-   static void addCommand(aruwlib::control::Command* command); // smart pointer, memory allocation
+    static void addCommand(aruwlib::control::Command* command); // smart pointer, memory allocation
 
-   static void run(void);
+    static void run(void);
 
-   static void removeCommand(Command* command);
+    static void removeCommand(Command* command);
 
-   static void resetAll(void);
+    static void resetAll(void);
 
-   static bool isScheduled(const Command* command);
+    static bool isScheduled(const Command* command);
 
  private:
-   static modm::LinkedList<Command*> commandList;
+    static modm::LinkedList<Command*> commandList;
 };
 
 }  // namespace control

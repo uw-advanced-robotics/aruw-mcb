@@ -7,13 +7,11 @@ namespace control
 {
 
     void CommandExample::initialize()
-    {
-        
-    }
+    {}
     
     void CommandExample::execute()
     {
-
+        
     }
 
     void CommandExample::end(bool interrupted)

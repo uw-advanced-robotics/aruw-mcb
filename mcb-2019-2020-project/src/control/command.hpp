@@ -20,9 +20,6 @@ namespace control
 
 class Command {
  public:
-    Command(void)
-    {}
-    
     /**
       * The initial subroutine of a command.  Called once when the command is
       * initially scheduled.
@@ -118,7 +115,7 @@ class Command {
 
  private:
     bool isInterruptiable = true;
-    
+
     bool isGrouped = false;
 };
 

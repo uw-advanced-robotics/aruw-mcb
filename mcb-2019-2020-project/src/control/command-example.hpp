@@ -11,8 +11,6 @@ namespace aruwsrc
 namespace control
 {
 
-class aruwlib::control::Subsystem;
-
 class CommandExample : public Command
 {
     /**
@@ -57,6 +55,9 @@ class CommandExample : public Command
       * @return the set of subsystems that are required
       */
     modm::LinkedList<Subsystem*> getRequirements(void) const; //<- pointer stuff rough for now
+
+    void interrupted(void)
+    {}
 
     /**
       * Whether the given command should run when the robot is disabled.  Override
