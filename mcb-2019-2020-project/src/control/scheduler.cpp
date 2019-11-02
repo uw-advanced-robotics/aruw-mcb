@@ -7,6 +7,8 @@ namespace control
 {
     modm::LinkedList<Command*> Scheduler::commandList;
 
+    modm::LinkedList<Subsystem*> Scheduler::subsystemList;
+
     void Scheduler::addCommand(Command* control)
     {
         commandList.append(control);
@@ -15,7 +17,7 @@ namespace control
     void Scheduler::run()
     {
         // loop through commands.
-        for (int i = commandList.getSize(); i >= 0; i--)
+        for (int i = commandList.getSize(); i > 0; i--)
         {
             Command* currCommand = commandList.getFront();
             commandList.removeFront();
@@ -26,11 +28,20 @@ namespace control
                 commandList.append(currCommand);
             }
         }
+
+        // refresh all subsystems (i.e. run control loops where necessary)
+        for (int i = subsystemList.getSize(); i > 0; i--)
+        {
+            Subsystem* currSubsystem = subsystemList.getFront();
+            subsystemList.removeFront();
+            subsystemList.append(currSubsystem);
+            currSubsystem->refresh();
+        }
     }
 
     void Scheduler::resetAll(void)
     {
-        for (int i = commandList.getSize(); i >= 0; i--)
+        for (int i = commandList.getSize(); i > 0; i--)
         {
             Command* currCommand = commandList.getFront();
             commandList.removeFront();
@@ -38,24 +49,33 @@ namespace control
         }
     }
 
-    static void removeCommand(Command* command)
+    void Scheduler::removeCommand(const Command* command)
     {
-        // TODO(matthew)
+        for (int i = commandList.getSize(); i > 0; i--)
+        {
+            Command* currCommand = commandList.getFront();
+            commandList.removeFront();
+            if (currCommand != command)
+            {
+                commandList.append(currCommand);
+            }
+        }
     }
 
     bool Scheduler::isScheduled(const Command* command)
     {
         bool scheduled = false;
-        for (int i = commandList.getSize(); i >= 0; i--)
+        for (int i = commandList.getSize(); i > 0; i--)
         {
             Command* currCommand = commandList.getFront();
-            if (command = currCommand)
+            if (command == currCommand)
             {
                 scheduled = true;
             }
             commandList.removeFront();
             commandList.append(currCommand);
         }
+        return scheduled;
     }
 
 }  // namespace control

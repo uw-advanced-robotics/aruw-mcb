@@ -30,7 +30,7 @@ class Scheduler
 
     static void run(void);
 
-    static void removeCommand(Command* command);
+    static void removeCommand(const Command* command);
 
     static void resetAll(void);
 
@@ -38,6 +38,8 @@ class Scheduler
 
  private:
     static modm::LinkedList<Command*> commandList;
+
+    static modm::LinkedList<Subsystem*> subsystemList;
 };
 
 }  // namespace control

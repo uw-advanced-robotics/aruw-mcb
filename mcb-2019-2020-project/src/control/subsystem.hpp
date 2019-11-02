@@ -30,6 +30,8 @@ class Command;
 
 class Subsystem {
  public:
+    Subsystem() = default;
+
     /**
      * Sets the default Command of the subsystem. The default command will be
      * automatically scheduled when no other commands are scheduled that require
@@ -47,7 +49,7 @@ class Subsystem {
      *
      * @return the default command associated with this subsystem
      */
-    Command* GetDefaultCommand() const;
+    Command* GetDefaultCommand(void) const;
 
     /**
      * Returns the command currently running on this subsystem.  Returns null if
@@ -55,7 +57,7 @@ class Subsystem {
      *
      * @return the scheduled command currently requiring this subsystem
      */
-    Command* GetCurrentCommand() const;
+    Command* GetCurrentCommand(void) const;
 
     /**
      * Sets the current command. Only one command can control a subsystem at a time.
@@ -74,9 +76,9 @@ class Subsystem {
      *
      * This should be overridden by a Subsystem that has a default Command
      */
-    virtual void InitDefaultCommand();
+    virtual void InitDefaultCommand(void) = 0;
 
-    virtual void refresh();
+    virtual void refresh(void) = 0;
  private:
     Command* defaultCommand = nullptr;
 

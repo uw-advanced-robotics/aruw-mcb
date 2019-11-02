@@ -19,21 +19,21 @@ namespace control
 {
 
 class Command {
- public:
-    Command()
-    {}
-    
+ public:    
+
+   Command(){}
+
     /**
      * The initial subroutine of a command.  Called once when the command is
      * initially scheduled.
      */
-    virtual void initialize(void);
+    virtual void initialize(void) = 0;
 
     /**
      * The main body of a command.  Called repeatedly while the command is
      * scheduled.
      */
-    virtual void execute(void);
+    virtual void execute(void) = 0;
 
     /**
      * The action to take when the command ends.  Called when either the command
@@ -41,7 +41,7 @@ class Command {
      *
      * @param interrupted whether the command was interrupted/canceled
      */
-    virtual void end(bool interrupted);
+    virtual void end(bool interrupted) = 0;
 
     /**
      * Whether the command has finished.  Once a command finishes, the scheduler

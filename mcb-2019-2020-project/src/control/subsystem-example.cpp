@@ -6,7 +6,7 @@ namespace aruwsrc
 namespace control // should there be some sort of update function for a subsystem. other alternative is a default command.
 { // should a subsystem store a default command?
 
-    void InitDefaultCommand(void)
+    void SubsystemExample::InitDefaultCommand(void)
     {
 
     }

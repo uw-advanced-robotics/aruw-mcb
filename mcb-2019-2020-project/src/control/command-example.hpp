@@ -1,3 +1,9 @@
+/**
+ * This code is part of aruw's repository
+ * 
+ * Example code for a default command for the subsystem-example subsystem.
+ */
+
 #ifndef __COMMAND_EXAMPLE_HPP__
 #define __COMMAND_EXAMPLE_HPP__
 
@@ -49,8 +55,7 @@ class CommandExample : public Command
       */
     bool isFinished(void);
 
-    void interrupted(void)
-    {}
+    void interrupted(void);
 
     /**
       * Whether the given command should run when the robot is disabled.  Override

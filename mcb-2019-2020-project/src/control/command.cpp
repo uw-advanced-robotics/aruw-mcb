@@ -26,7 +26,7 @@ namespace control
     bool Command::hasRequirement(Subsystem* requirement) const
     {
         bool hasRequirement = false;
-        for (int i = commandRequirements->getSize(); i >= 0; i--)
+        for (int i = commandRequirements->getSize(); i > 0; i--)
         {
             Subsystem* currSubsystem = commandRequirements->getFront();
             commandRequirements->removeFront();

@@ -6,7 +6,6 @@ namespace aruwsrc
 
 namespace control
 {
-
     void CommandExample::initialize()
     {}
     
@@ -28,11 +27,15 @@ namespace control
         return false;
     }
 
+    void CommandExample::interrupted(void)
+    {
+        end(true);
+    }
+
     bool CommandExample::runsWhenDisabled(void) const
     {
         return false;
     }
-
 }  // namespace control
 
 }  // namespace aruwsrc
