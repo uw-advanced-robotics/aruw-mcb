@@ -30,9 +30,6 @@ class Command;
 
 class Subsystem {
  public:
-    Subsystem() = default;
-    ~Subsystem();
-
     /**
      * Sets the default Command of the subsystem. The default command will be
      * automatically scheduled when no other commands are scheduled that require
@@ -79,6 +76,7 @@ class Subsystem {
      */
     virtual void InitDefaultCommand();
 
+    virtual void refresh();
  private:
     Command* defaultCommand = nullptr;
 

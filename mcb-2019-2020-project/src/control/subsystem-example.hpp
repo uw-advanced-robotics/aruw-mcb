@@ -17,6 +17,7 @@
 #include "src/control/subsystem.hpp"
 #include <modm/math/filter/pid.hpp>
 #include "src/motor/dji_motor.hpp"
+#include "src/control/command-example.hpp"
 
 using namespace aruwlib::control;
 
@@ -42,9 +43,13 @@ class SubsystemExample : public Subsystem
 
     void InitDefaultCommand(void);
 
-    void updatevelocityPidLeftWheelLoop(float desRpm);
+    void setDesiredRpm(float desRpm);
+
+    void refresh(void);
 
  private:
+    float desiredRpm;
+
     aruwlib::motor::DjiMotor* frictionWheelLeft;
 
     aruwlib::motor::DjiMotor* frictionWheelRight;

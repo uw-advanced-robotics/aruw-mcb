@@ -3,18 +3,25 @@
 namespace aruwsrc
 {
 
-namespace control
-{
+namespace control // should there be some sort of update function for a subsystem. other alternative is a default command.
+{ // should a subsystem store a default command?
 
     void InitDefaultCommand(void)
     {
-        
+
     }
 
-    void SubsystemExample::updatevelocityPidLeftWheelLoop(float desRpm)
+    void SubsystemExample::setDesiredRpm(float desRpm)
     {
-        velocityPidLeftWheel->update(desRpm - frictionWheelLeft->getShaftRPM());
-        velocityPidRightWheel->update(desRpm - frictionWheelRight->getShaftRPM());
+        desiredRpm = desRpm;
+    }
+
+    void SubsystemExample::refresh()
+    {
+        velocityPidLeftWheel->update(desiredRpm - frictionWheelLeft->getShaftRPM());
+        velocityPidRightWheel->update(desiredRpm - frictionWheelRight->getShaftRPM());
+        frictionWheelLeft->setDesiredOutput(velocityPidLeftWheel->getValue());
+        frictionWheelRight->setDesiredOutput(velocityPidRightWheel->getValue());
     }
 
 }  // namespace control

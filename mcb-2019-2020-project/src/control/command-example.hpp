@@ -10,9 +10,17 @@ namespace aruwsrc
 
 namespace control
 {
+    class SubsystemExample;
 
 class CommandExample : public Command
 {
+ public:
+    CommandExample(SubsystemExample* subsystem)
+    {
+        this->addSubsystemRequirement((Subsystem*) (subsystem));
+        subsystemExample = subsystem;
+    }
+
     /**
       * The initial subroutine of a command.  Called once when the command is
       * initially scheduled.
@@ -41,21 +49,6 @@ class CommandExample : public Command
       */
     bool isFinished(void);
 
-    /**
-      * Specifies the set of subsystems used by this command.  Two commands cannot
-      * use the same subsystem at the same time.  If the command is scheduled as
-      * interruptible and another command is scheduled that shares a requirement,
-      * the command will be interrupted.  Else, the command will not be scheduled.
-      * If no subsystems are required, return an empty set.
-      *
-      * <p>Note: it is recommended that user implementations contain the
-      * requirements as a field, and return that field here, rather than allocating
-      * a new set every time this is called.
-      *
-      * @return the set of subsystems that are required
-      */
-    modm::LinkedList<Subsystem*> getRequirements(void) const; //<- pointer stuff rough for now
-
     void interrupted(void)
     {}
 
@@ -66,6 +59,10 @@ class CommandExample : public Command
       * @return whether the command should run when the robot is disabled
       */
     bool runsWhenDisabled(void) const;
+ private:
+    #define DEFAULT_WHEEL_RPM 6000
+
+    SubsystemExample* subsystemExample;
 };
 
 }  // namespace control

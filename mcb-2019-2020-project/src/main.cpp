@@ -4,19 +4,19 @@
 #include "src/control/command-example.hpp"
 #include "src/control/subsystem-example.hpp"
 
-aruwsrc::control::CommandExample frictionWheelDefaultCommand;
 
-aruwsrc::control::SubsystemExample frictionWheelSystem(8, 0, 0, 10000);
+//aruwsrc::control::SubsystemExample frictionWheelSystem(8, 0, 0, 10000);
+//aruwsrc::control::CommandExample frictionWheelDefaultCommand();///&frictionWheelSystem);
 
 int main()
 {
-    frictionWheelDefaultCommand.schedule();
+  ///  frictionWheelDefaultCommand.schedule();
     
     Board::initialize();
 
     while (1)
     {
-        aruwlib::control::Scheduler::run();
+       // aruwlib::control::Scheduler::run();
     }
     return 0;
 }
