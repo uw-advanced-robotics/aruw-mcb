@@ -78,6 +78,10 @@ namespace control
         return scheduled;
     }
 
+    void Scheduler::addSubsystem(Subsystem* subsystem)
+    {
+        subsystemList.append(subsystem);
+    }
 }  // namespace control
 
 }  // namespace aruwlib

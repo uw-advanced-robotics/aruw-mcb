@@ -30,12 +30,18 @@ namespace control
 class SubsystemExample : public Subsystem
 {
  public:
-    SubsystemExample(float p, float i, float d, float maxOut)
-    {
+    SubsystemExample(
+        float p,
+        float i,
+        float d,
+        float maxOut,
+        aruwlib::motor::MotorId leftMotorId,
+        aruwlib::motor::MotorId rightMotorId
+    ) {
         frictionWheelLeft = new aruwlib::motor::DjiMotor(
-            aruwlib::motor::MotorId::MOTOR1, aruwlib::can::CanBus::CAN_BUS1);
+            leftMotorId, aruwlib::can::CanBus::CAN_BUS1);
         frictionWheelRight = new aruwlib::motor::DjiMotor(
-            aruwlib::motor::MotorId::MOTOR2, aruwlib::can::CanBus::CAN_BUS1);
+            rightMotorId, aruwlib::can::CanBus::CAN_BUS1);
     
         velocityPidLeftWheel = new modm::Pid<float>(p, i, d, maxOut);
         velocityPidRightWheel = new modm::Pid<float>(p, i, d, maxOut);
