@@ -37,6 +37,11 @@ Command* Subsystem::GetCurrentCommand() const
     return currentCommand;
 }
 
+void Subsystem::removeCurrentCommand()
+{
+    currentCommand = nullptr;
+}
+
 void Subsystem::InitDefaultCommand() {}
 
 }  // namespace control

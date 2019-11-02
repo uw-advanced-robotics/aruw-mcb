@@ -66,6 +66,8 @@ class Subsystem {
      */
     void SetCurrentCommand(Command* command);
 
+    void removeCurrentCommand(void);
+
     /**
      * Initialize the default command for this subsystem.
      *

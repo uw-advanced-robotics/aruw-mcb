@@ -11,6 +11,9 @@ namespace control
 
     void Scheduler::addCommand(Command* control)
     {
+        // TODO(matthew) adding command logic
+        // check to see if the current command can be ran, check
+        // subsystem dependencies
         commandList.append(control);
     }
 
@@ -30,11 +33,22 @@ namespace control
         }
 
         // refresh all subsystems (i.e. run control loops where necessary)
+        // additionally, check if no command is running, in which case run the
+        // default command.
         for (int i = subsystemList.getSize(); i > 0; i--)
         {
             Subsystem* currSubsystem = subsystemList.getFront();
             subsystemList.removeFront();
             subsystemList.append(currSubsystem);
+            if (currSubsystem->GetCurrentCommand() == nullptr)
+            {
+                if (currSubsystem->GetDefaultCommand() != nullptr)
+                {
+                    currSubsystem->GetDefaultCommand()->schedule();
+                    // execute here so no execution cycles are skipped
+                    currSubsystem->GetDefaultCommand()->execute(); 
+                }
+            }
             currSubsystem->refresh();
         }
     }

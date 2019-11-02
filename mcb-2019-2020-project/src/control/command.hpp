@@ -21,7 +21,10 @@ namespace control
 class Command {
  public:    
 
-   Command(){}
+    Command()
+    {
+       commandRequirements = new modm::LinkedList<Subsystem*>();
+    }
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -123,8 +126,6 @@ class Command {
 
  private:
     bool isInterruptiable = true;
-
-    bool isGrouped = false;
 
     modm::LinkedList<Subsystem*>* commandRequirements;
 };

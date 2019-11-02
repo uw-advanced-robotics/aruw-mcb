@@ -16,6 +16,7 @@
 #include "src/control/command.hpp"
 #include <modm/container/linked_list.hpp>
 #include "src/control/subsystem.hpp"
+#include "src/algorithms/hash_map.h"
 
 namespace aruwlib
 {
@@ -26,9 +27,9 @@ namespace control
 class Scheduler
 {
  public:
-    static void addCommand(aruwlib::control::Command* command); // smart pointer, memory allocation
-
     static void run(void);
+
+    static void addCommand(aruwlib::control::Command* command); // smart pointer, memory allocation
 
     static void removeCommand(const Command* command);
 
