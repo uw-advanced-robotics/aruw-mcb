@@ -128,8 +128,13 @@ void CVCommunication::update(
     TurretAimData_t *turrent_data,
     uint8_t RobotID
 ) {
-    Serial_Message_t message = serial.update();
-    messageHandler(&message);//temporary solution
+    Serial_Message_t message;
+    bool updated = serial.update(&message);
+    if (updated)
+    {
+        messageHandler(&message);
+    }
+    
     switch (msg_switch_arr[msg_switch_index]) {
     case CV_MESSAGE_TYPE_TURRET_TELEMETRY: {
         sendTurrentData(

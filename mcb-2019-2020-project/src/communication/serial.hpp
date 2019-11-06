@@ -43,7 +43,7 @@ class Serial
 
     void initialize();
     bool send(Serial_Message_t* message);
-    Serial_Message_t update();
+    bool update(Serial_Message_t* message);
     void enableRXCRCEnforcement();
     bool TXMessageRateReady(uint32_t previousTxMessageTimestamp, uint32_t minTxMessageInterval);
     uint32_t getTimestamp();
@@ -75,15 +75,16 @@ class Serial
     message_handler_t handler;
 
     void switchToMode(SerialMode new_mode);
-    void processReceive();
+    bool processFrameHeader();
+    bool processFrameData();
     bool verifyCRC();
 
     bool read(uint8_t *data, uint16_t length);
     bool write(const uint8_t *data, uint16_t length);
     
 
-    uint32_t verifyCRC16(uint8_t *message, uint32_t message_length);
-    uint32_t verifyCRC8(uint8_t *message, uint32_t message_length);
+    bool verifyCRC16(uint8_t *message, uint32_t message_length);
+    bool verifyCRC8(uint8_t *message, uint32_t message_length);
 
     Serial_Message_t lastMessage;
 

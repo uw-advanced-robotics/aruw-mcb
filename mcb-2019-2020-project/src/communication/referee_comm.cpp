@@ -348,12 +348,14 @@ void RefereeSystem::sendUIDisplay(bool is_cv_online, ref_robot_mode_t robot_mode
 	RefereeSystem::serial.send(&message);
 
 }
-Serial_Message_t aaa;
 void RefereeSystem::update(bool is_cv_online, ref_robot_mode_t robot_mode, bool is_hopper_open, bool is_agitator_jammed){
     RefereeSystem::updateReceivedDamage();
     RefereeSystem::sendUIDisplay(is_cv_online, robot_mode, is_hopper_open, is_agitator_jammed);
-	aaa = serial.update();
-	message_handler(&aaa);//temporary solution
+	Serial_Message_t message;
+	bool updated = serial.update(&message);
+	if(updated) {
+		message_handler(&message);//temporary solution
+	}
 }
 
 
