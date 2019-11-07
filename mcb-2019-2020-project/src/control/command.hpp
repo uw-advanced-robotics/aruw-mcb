@@ -24,9 +24,7 @@ class Command {
 
     Command()
     {
-       modm::SmartPointer(new modm::LinkedList<modm::SmartPointer>());
-       
-       commandRequirements3 = new modm::SmartPointer(new modm::LinkedList<modm::SmartPointer>);
+       commandRequirements = new modm::LinkedList<const Subsystem*>();
     }
 
     /**
@@ -70,7 +68,7 @@ class Command {
      *
      * @return the set of subsystems that are required
      */
-    modm::LinkedList<Subsystem*>* getRequirements(); //<- pointer stuff rough for now
+    modm::LinkedList<const Subsystem*>& getRequirements() const;
 
     virtual void interrupted(void) = 0;
 
@@ -117,7 +115,7 @@ class Command {
     /**
      * Adds the required subsystem to a list of required subsystems
      */
-    void addSubsystemRequirement(Subsystem* requirement);
+    void addSubsystemRequirement(const Subsystem* requirement);
 
     /**
      * Whether the given command should run when the robot is disabled.  Override
@@ -131,12 +129,10 @@ class Command {
 
  private:
     bool m_isInterruptiable = true;
-
-    modm::SmartPointer commandRequirements3(new modm::LinkedList<modm::SmartPointer>);
-
-    modm::LinkedList<modm::SmartPointer>* commandRequirements2;
-
-    modm::LinkedList<Subsystem*>* commandRequirements;
+    
+    // I don't want people modifying the subsystems, these are merely references
+    // to the subsystems this command can access.
+    modm::LinkedList<const Subsystem*>* commandRequirements;
 };
 
 }  // namespace aruwlib

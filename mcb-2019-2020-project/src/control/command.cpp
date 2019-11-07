@@ -28,7 +28,7 @@ namespace control
         bool hasRequirement = false;
         for (int i = commandRequirements->getSize(); i > 0; i--)
         {
-            Subsystem* currSubsystem = commandRequirements->getFront();
+            const Subsystem* currSubsystem = commandRequirements->getFront();
             commandRequirements->removeFront();
             commandRequirements->append(currSubsystem);
             if (requirement == commandRequirements->getFront())
@@ -39,15 +39,15 @@ namespace control
         return hasRequirement;
     }
 
-    void Command::addSubsystemRequirement(Subsystem* requirement)
+    void Command::addSubsystemRequirement(const Subsystem* requirement)
     {
         // TODO(matthew) check for repeated subsystems
         commandRequirements->append(requirement);
     }
 
-    modm::LinkedList<Subsystem*>* Command::getRequirements(void)
+    modm::LinkedList<const Subsystem*>& Command::getRequirements() const
     {
-        return commandRequirements;
+        return *commandRequirements;
     }
 
     bool Command::isInterruptiable() const
