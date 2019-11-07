@@ -11,6 +11,7 @@
 #include "rm-dev-board-a/board.hpp"
 #include <modm/container/linked_list.hpp>
 #include "src/control/subsystem.hpp"
+#include <modm/container/smart_pointer.hpp>
 
 namespace aruwlib
 {
@@ -23,6 +24,7 @@ class Command {
 
     Command()
     {
+       commandRequirements2 = new modm::LinkedList<modm::SmartPointer>();
        commandRequirements = new modm::LinkedList<Subsystem*>();
     }
 
@@ -128,6 +130,8 @@ class Command {
 
  private:
     bool m_isInterruptiable = true;
+
+    modm::LinkedList<modm::SmartPointer>* commandRequirements2;
 
     modm::LinkedList<Subsystem*>* commandRequirements;
 };
