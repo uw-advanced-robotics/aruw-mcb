@@ -24,8 +24,9 @@ class Command {
 
     Command()
     {
-       commandRequirements2 = new modm::LinkedList<modm::SmartPointer>();
-       commandRequirements = new modm::LinkedList<Subsystem*>();
+       modm::SmartPointer(new modm::LinkedList<modm::SmartPointer>());
+       
+       commandRequirements3 = new modm::SmartPointer(new modm::LinkedList<modm::SmartPointer>);
     }
 
     /**
@@ -130,6 +131,8 @@ class Command {
 
  private:
     bool m_isInterruptiable = true;
+
+    modm::SmartPointer commandRequirements3(new modm::LinkedList<modm::SmartPointer>);
 
     modm::LinkedList<modm::SmartPointer>* commandRequirements2;
 
