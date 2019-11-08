@@ -28,34 +28,6 @@ class Command {
     }
 
     /**
-     * The initial subroutine of a command.  Called once when the command is
-     * initially scheduled.
-     */
-    virtual void initialize(void) = 0;
-
-    /**
-     * The main body of a command.  Called repeatedly while the command is
-     * scheduled.
-     */
-    virtual void execute(void) = 0;
-
-    /**
-     * The action to take when the command ends.  Called when either the command
-     * finishes normally, or when it interrupted/canceled.
-     *
-     * @param interrupted whether the command was interrupted/canceled
-     */
-    virtual void end(bool interrupted) = 0;
-
-    /**
-     * Whether the command has finished.  Once a command finishes, the scheduler
-     * will call its end() method and un-schedule it.
-     *
-     * @return whether the command has finished.
-     */
-    virtual bool isFinished(void) { return false; }
-
-    /**
      * Specifies the set of subsystems used by this command.  Two commands cannot
      * use the same subsystem at the same time.  If the command is scheduled as
      * interruptible and another command is scheduled that shares a requirement,
@@ -70,8 +42,6 @@ class Command {
      */
     modm::LinkedList<const Subsystem*>& getRequirements() const;
 
-    virtual void interrupted(void) = 0;
-
     /**
      * Schedules this command.
      *
@@ -83,7 +53,10 @@ class Command {
     /**
      * Schedules this command, defaulting to interruptible.
      */
-    void schedule() { schedule(true); }
+    void schedule() 
+    {
+       schedule(true);
+    }
 
     /**
      * Cancels this command.  Will call the command's interrupted() method.
@@ -110,12 +83,18 @@ class Command {
      * @param requirement the subsystem to inquire about
      * @return whether the subsystem is required
      */
-    bool hasRequirement(Subsystem* requirement) const;
+    bool hasRequirement(const Subsystem* requirement) const;
 
     /**
      * Adds the required subsystem to a list of required subsystems
      */
-    void addSubsystemRequirement(const Subsystem* requirement);
+    //void addSubsystemRequirement(const Subsystem* requirement);
+    void addSubsystemRequirement(const modm::SmartPointer<Subsystem*> requirement);
+
+    /**
+     * Returns m_isInterruptiable
+     */
+    bool isInterruptiable(void) const;
 
     /**
      * Whether the given command should run when the robot is disabled.  Override
@@ -125,14 +104,54 @@ class Command {
      */
     virtual bool runsWhenDisabled() const { return false; }
 
-    bool isInterruptiable(void) const;
+    /**
+     * The initial subroutine of a command.  Called once when the command is
+     * initially scheduled.
+     */
+    virtual void initialize(void) = 0;
+
+    /**
+     * The main body of a command.  Called repeatedly while the command is
+     * scheduled.
+     */
+    virtual void execute(void) = 0;
+
+    /**
+     * The action to take when the command ends.  Called when either the command
+     * finishes normally, or when it interrupted/canceled.
+     *
+     * @param interrupted whether the command was interrupted/canceled
+     */
+    virtual void end(bool interrupted) = 0;
+
+    /**
+     * Whether the command has finished.  Once a command finishes, the scheduler
+     * will call its end() method and un-schedule it.
+     *
+     * @return whether the command has finished.
+     */
+    virtual bool isFinished(void) {
+       return false;
+    }
+
+    /**
+     * Override if you want the command to do something special if it is
+     * interrupted. This function will be called when the subsystem is
+     * interrupted.
+     */
+    virtual bool interrupted(void) = 0;
 
  private:
     bool m_isInterruptiable = true;
     
     // I don't want people modifying the subsystems, these are merely references
     // to the subsystems this command can access.
-    modm::LinkedList<const Subsystem*>* commandRequirements;
+    
+    //modm::SmartPointer<modm::LinkedList<const Subsystem*>> cmdRequirements2;
+    
+    modm::LinkedList<const Subsystem*>* commandRequirements; // why does this have to be a pointer? can't access anything if it isn't, very stupid.
+
+    // HashMap<const Subsystem*>* cmdRequirements; 
 };
 
 }  // namespace aruwlib

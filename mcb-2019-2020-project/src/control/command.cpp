@@ -23,24 +23,28 @@ namespace control
         return Scheduler::isScheduled(this);
     }
 
-    bool Command::hasRequirement(Subsystem* requirement) const
+    bool Command::hasRequirement(const Subsystem* requirement) const
     {
         bool hasRequirement = false;
         for (int i = commandRequirements->getSize(); i > 0; i--)
         {
             const Subsystem* currSubsystem = commandRequirements->getFront();
-            commandRequirements->removeFront();
-            commandRequirements->append(currSubsystem);
             if (requirement == commandRequirements->getFront())
             {
                 hasRequirement = true;
             }
+            commandRequirements->removeFront();
+            commandRequirements->append(currSubsystem);
         }
         return hasRequirement;
     }
 
     void Command::addSubsystemRequirement(const Subsystem* requirement)
     {
+        for (int i = commandRequirements->getSize(); i > 0; i--)
+        {
+            
+        }
         // TODO(matthew) check for repeated subsystems
         commandRequirements->append(requirement);
     }

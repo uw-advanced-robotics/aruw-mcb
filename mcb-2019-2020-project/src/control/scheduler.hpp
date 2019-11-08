@@ -6,7 +6,12 @@
  * to determine if a command should be completed. Unlike FRC, currently 
  * there subsystems do not have periodic functions that are called in
  * the scheduler. Instead, commands handle subsystem updates when
- * necessary. 
+ * necessary.
+ *
+ * The goal of this class is for the user to interace with this as little
+ * as possible. Aside from run, the user should be interacting with the
+ * command class and subsystem class to add and remove commands from the
+ * sehcduler.
  */
 
 #ifndef __SCHEDULER_HPP__
