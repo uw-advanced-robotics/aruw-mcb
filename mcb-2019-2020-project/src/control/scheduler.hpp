@@ -21,7 +21,8 @@
 #include "src/control/command.hpp"
 #include <modm/container/linked_list.hpp>
 #include "src/control/subsystem.hpp"
-#include "src/algorithms/hash_map.h"
+#include <modm/container/dynamic_array.hpp>
+#include <modm/container/queue.hpp>
 
 namespace aruwlib
 {

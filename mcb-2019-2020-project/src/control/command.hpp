@@ -9,9 +9,8 @@
 #define __COMMAND_HPP__
 
 #include "rm-dev-board-a/board.hpp"
-#include <modm/container/linked_list.hpp>
 #include "src/control/subsystem.hpp"
-#include <modm/container/smart_pointer.hpp>
+#include <modm/container/dynamic_array.hpp>
 
 namespace aruwlib
 {
@@ -24,12 +23,12 @@ class Command {
 
     Command()
     {       
-       commandRequirements = new modm::LinkedList<const Subsystem*>();
+       commandRequirements = new modm::DynamicArray<const Subsystem*>(5);
     }
 
     ~Command()
     {
-       commandRequirements->~LinkedList();
+       commandRequirements->~DynamicArray();
     }
 
     /**
@@ -45,7 +44,7 @@ class Command {
      *
      * @return the set of subsystems that are required
      */
-    modm::LinkedList<const Subsystem*>& getRequirements() const;
+    const modm::DynamicArray<const Subsystem*>& getRequirements() const;
 
     /**
      * Schedules this command.
@@ -154,8 +153,7 @@ class Command {
     
     // I don't want people modifying the subsystems, these are merely references
     // to the subsystems this command can access.
-    //modm::SmartPointer* commandRequirements;
-    modm::LinkedList<const Subsystem*>* commandRequirements; // why does this have to be a pointer? can't access anything if it isn't, very stupid.
+    modm::DynamicArray<const Subsystem*>* commandRequirements;
 };
 
 }  // namespace aruwlib

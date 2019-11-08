@@ -25,39 +25,33 @@ namespace control
 
     bool Command::hasRequirement(const Subsystem* requirement) const
     {
-        bool hasRequirement = false;
         for (int i = commandRequirements->getSize(); i > 0; i--)
         {
-            const Subsystem* currSubsystem = commandRequirements->getFront();
-            if (requirement == commandRequirements->getFront())
+            if (requirement == commandRequirements->operator[](i))
             {
-                hasRequirement = true;
+                return true;
             }
-            commandRequirements->removeFront();
-            commandRequirements->append(currSubsystem);
         }
-        return hasRequirement;
+        return false;
     }
 
     bool Command::addSubsystemRequirement(const Subsystem* requirement)
     {
+        // Insure the requirement you are trying to add is not already a
+        // command requirement.
         for (int i = commandRequirements->getSize(); i > 0; i--)
         {
-            const Subsystem* currSubsystem = commandRequirements->getFront();
-            if (currSubsystem == requirement)
+            if (commandRequirements->operator[](i) == requirement)
             {
-                commandRequirements->removeFront();
-                commandRequirements->append(currSubsystem);
                 return false;
             }
-            commandRequirements->removeFront();
-            commandRequirements->append(currSubsystem);
+            
         }
         commandRequirements->append(requirement);
         return true;
     }
 
-    modm::LinkedList<const Subsystem*>& Command::getRequirements() const
+    const modm::DynamicArray<const Subsystem*>& Command::getRequirements() const
     {
         return *commandRequirements;
     }

@@ -55,6 +55,7 @@ class SubsystemExample : public Subsystem
     {
         frictionWheelLeft->~DjiMotor();
         frictionWheelRight->~DjiMotor();
+        // no destructor for pid stuff
     }
 
     void setDesiredRpm(float desRpm);

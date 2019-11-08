@@ -22,47 +22,39 @@ namespace control
 
     bool Scheduler::addCommand(Command* control)
     {
-        modm::LinkedList<const Subsystem*>& commandDependencies = control->getRequirements();
+        const modm::DynamicArray<const Subsystem*>& commandDependencies = control->getRequirements();
 
-        // Check to make sure the control you are trying to add to the scheduler can be added.
-        bool dependencyInUse = false;
-        
+        // Check to make sure the control you are trying to add to the scheduler can be added.        
         for (int i = commandDependencies.getSize(); i > 0; i--)
         {
-            const Subsystem* subsystemDependency = commandDependencies.getFront();
-            commandDependencies.removeFront();
-            commandDependencies.append(subsystemDependency);
+            const Subsystem* subsystemDependency = commandDependencies[i];
             if (
                 subsystemDependency->GetCurrentCommand() != nullptr
                 && !subsystemDependency->GetCurrentCommand()->isInterruptiable()
             ) {
-                dependencyInUse = true;
+                return false;
             }
         }
 
         // If we can replace the command based of the command dependencies, do so.
-        if (!dependencyInUse)
+        // O(n^2) :`(
+        for (int i = subsystemList.getSize(); i > 0; i--)
         {
-            for (int i = subsystemList.getSize(); i > 0; i--)
+            Subsystem* currSubsystem = subsystemList.getFront();
+            subsystemList.removeFront();
+            subsystemList.append(currSubsystem);
+            for (int j = commandDependencies.getSize(); j > 0; j--)
             {
-                Subsystem* currSubsystem = subsystemList.getFront();
-                subsystemList.removeFront();
-                subsystemList.append(currSubsystem);
-                for (int j = commandDependencies.getSize(); j > 0; j--)
+                if (commandDependencies[j] == currSubsystem)
                 {
-                    const Subsystem* subsystemDependency = commandDependencies.getFront();
-                    commandDependencies.removeFront();
-                    commandDependencies.append(subsystemDependency);
-                    if (subsystemDependency == currSubsystem)
-                    {
-                        currSubsystem->SetCurrentCommand(control);
-                    }
+                    currSubsystem->SetCurrentCommand(control);
                 }
             }
-            commandList.append(control);
-            control->initialize();
         }
-        return !dependencyInUse;
+
+        commandList.append(control);
+        control->initialize();
+        return true;
     }
 
     void Scheduler::run()

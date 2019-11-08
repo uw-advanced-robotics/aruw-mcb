@@ -6,12 +6,19 @@
 /*----------------------------------------------------------------------------*/
 
 #include "src/control/subsystem.hpp"
+#include "src/control/command.hpp"
 
 namespace aruwlib
 {
 
 namespace control
 {
+    Subsystem::~Subsystem()
+    {
+        defaultCommand->~Command();
+        currentCommand->~Command();
+    }
+
     void Subsystem::SetDefaultCommand(Command* command)
     {
         defaultCommand = command;

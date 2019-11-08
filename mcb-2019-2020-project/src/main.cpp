@@ -18,9 +18,8 @@ aruwsrc::control::CommandExample frictionWheelDefaultCommand(&frictionWheelSyste
 int main()
 {
     frictionWheelSystem.SetDefaultCommand(&frictionWheelDefaultCommand);
-
     Scheduler::addSubsystem(&frictionWheelSystem);
-    Scheduler::motorSendReceiveRatio(100);
+    Scheduler::motorSendReceiveRatio(30); // send every 3 ms, assuming 100 microsecond delay
 
     Board::initialize();
 
