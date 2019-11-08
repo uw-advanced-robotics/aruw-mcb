@@ -5,22 +5,41 @@ uint8_t buff[1024] = {"a"};
 uint16_t size = 0;
 IMUData_t imu = {0};
 ChassisData_t chassis = {0};
+TurretAimData_t turret = {0};
+
+TurretAimData_t turretOut = {0};
+
 uint16_t interval = 3000;
+
 ref_game_data_t game;
 ref_robot_data_t robot;
 static RefereeSystem ref;
+int count = 0;
+
+
+
+void boom(TurretAimData_t* d){
+    count = count + 1;
+
+}
+
 int main()
 {
+    turret.yaw = 0;
+    turret.pitch = 0;
     Board::initialize();
     Board::Leds::toggle();
+    CVCommunication::initialize(3,boom);
+    CVCommunication::beginTargetTracking();
     ref.initialize();
     // CVCommunication::initialize(1);
     while (1)
     {
-        // CVCommunication::update(&imu, &chassis, 1);
         game = ref.getGameData();
         robot = ref.getRobotData();
         ref.update(false,BASE_CTRL_MODE ,false, false);
+        CVCommunication::update(&imu, &chassis, &turret, robot.robot_id);
+        CVCommunication::getLastAimData(&turretOut);
         modm::delayMicroseconds(interval);
         
     }

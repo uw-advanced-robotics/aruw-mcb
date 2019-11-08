@@ -225,7 +225,7 @@ bool Serial::write(const uint8_t *data, uint16_t length) {
 void Serial::initialize() {
     switch (this->port) {
     case PORT_UART2:
-        Usart2::connect<GpioA2::Tx, GpioA3::Rx>();
+        Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
         Usart2::initialize<Board::SystemClock, 115200>();
     case PORT_UART6:
         Usart6::connect<GpioG14::Tx, GpioG9::Rx>();

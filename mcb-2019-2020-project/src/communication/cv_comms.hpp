@@ -80,6 +80,23 @@ typedef struct
 
 class CVCommunication
 {
+    
+public:
+    CVCommunication();
+    ~CVCommunication();
+
+    static void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback);
+
+    static void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID);
+
+    // Get latest aiming data for Turrent
+    static bool getLastAimData(TurretAimData_t* aim_data);
+    // Start Requesting Xavier to Track Target
+    static void beginTargetTracking();
+    // Stop Requesting Xavier to Track Target
+    static void stopTargetTracking();
+
+
 private:
     static uint32_t PreviousIDTimestamp;  // tracks previous ms that robot id was sent to CV
     static bool autoAimRequestQueued;
@@ -101,23 +118,6 @@ private:
     static void handleTurrentAim(TurretAimData_t *aim_data);
     static void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data);
     static bool sendRobotID();
-
-    
-
-public:
-    CVCommunication();
-    ~CVCommunication();
-
-    void initialize(uint8_t RobotID, turrent_data_handler_t turrent_data_callback);
-
-    void update(IMUData_t *imu_data, ChassisData_t *chassis_data, TurretAimData_t *turrent_data, uint8_t RobotID);
-
-    // Get latest aiming data for Turrent
-    bool getLastAimData(TurretAimData_t* aim_data);
-    // Start Requesting Xavier to Track Target
-    void beginTargetTracking();
-    // Stop Requesting Xavier to Track Target
-    void stopTargetTracking();
 
 
 };
