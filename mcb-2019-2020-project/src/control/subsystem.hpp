@@ -32,6 +32,10 @@ class Subsystem {
  public:
     Subsystem() = default;
 
+    ~Subsystem()
+    {
+    }
+
     /**
      * Sets the default Command of the subsystem. The default command will be
      * automatically scheduled when no other commands are scheduled that require
@@ -67,18 +71,6 @@ class Subsystem {
     void SetCurrentCommand(Command* command);
 
     void removeCurrentCommand(void);
-
-    /**
-     * Initialize the default command for this subsystem.
-     *
-     * This is meant to be the place to call SetDefaultCommand in a subsystem and
-     * will be called on all the subsystems by the CommandBase method before the
-     * program starts running by using the list of all registered Subsystems
-     * inside the Scheduler.
-     *
-     * This should be overridden by a Subsystem that has a default Command
-     */
-    virtual void InitDefaultCommand(void) = 0;
 
     virtual void refresh(void) = 0;
  private:

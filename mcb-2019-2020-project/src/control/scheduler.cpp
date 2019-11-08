@@ -1,4 +1,6 @@
 #include "src/control/scheduler.hpp"
+#include "src/motor/dji_motor_tx_handler.hpp"
+#include "src/communication/can/can_rx_handler.hpp"
 
 namespace aruwlib
 {
@@ -9,59 +11,64 @@ namespace control
 
     modm::LinkedList<Subsystem*> Scheduler::subsystemList;
 
-    void Scheduler::addCommand(Command* control)
+    uint16_t Scheduler::sendReceiveRatio = 1;
+
+    uint16_t Scheduler::updateCounter = 0;
+
+    void Scheduler::motorSendReceiveRatio(uint16_t motorSendReceiveRatio)
+    {
+        sendReceiveRatio = motorSendReceiveRatio;
+    }
+
+    bool Scheduler::addCommand(Command* control)
     {
         modm::LinkedList<const Subsystem*>& commandDependencies = control->getRequirements();
 
         // Check to make sure the control you are trying to add to the scheduler can be added.
         bool dependencyInUse = false;
-
-        for (int i = subsystemList.getSize(); i > 0; i--)
+        
+        for (int i = commandDependencies.getSize(); i > 0; i--)
         {
-            for (int j = commandDependencies.getSize(); j > 0; j--)
-            {
-                const Subsystem* subsystemDependency = commandDependencies.getFront();
-                commandDependencies.removeFront();
-                commandDependencies.append(subsystemDependency);
-                if (
-                    subsystemDependency->GetCurrentCommand() != nullptr
-                    && !subsystemDependency->GetCurrentCommand()->isInterruptiable()
-                ) {
-                    dependencyInUse = true;
-                }
+            const Subsystem* subsystemDependency = commandDependencies.getFront();
+            commandDependencies.removeFront();
+            commandDependencies.append(subsystemDependency);
+            if (
+                subsystemDependency->GetCurrentCommand() != nullptr
+                && !subsystemDependency->GetCurrentCommand()->isInterruptiable()
+            ) {
+                dependencyInUse = true;
             }
         }
 
         // If we can replace the command based of the command dependencies, do so.
         if (!dependencyInUse)
         {
-            // // for all subsystems that this command is depend upon, end the current command
-            // // being run.
-            // for (int i = commandDependencies.getSize(); i > 0; i--)
-            // {
-            //     // The current command has been interrupted. End it.
-            //     commandDependencies.getFront()->GetCurrentCommand()->end(true);
-            //     // Set current command to something new.
-            //     commandDependencies.getFront()->SetCurrentCommand(control);
-            // }
-            // commandList.append(control);
+            for (int i = subsystemList.getSize(); i > 0; i--)
+            {
+                Subsystem* currSubsystem = subsystemList.getFront();
+                subsystemList.removeFront();
+                subsystemList.append(currSubsystem);
+                for (int j = commandDependencies.getSize(); j > 0; j--)
+                {
+                    const Subsystem* subsystemDependency = commandDependencies.getFront();
+                    commandDependencies.removeFront();
+                    commandDependencies.append(subsystemDependency);
+                    if (subsystemDependency == currSubsystem)
+                    {
+                        currSubsystem->SetCurrentCommand(control);
+                    }
+                }
+            }
+            commandList.append(control);
+            control->initialize();
         }
+        return !dependencyInUse;
     }
 
     void Scheduler::run()
     {
-        // loop through commands.
-        for (int i = commandList.getSize(); i > 0; i--)
-        {
-            Command* currCommand = commandList.getFront();
-            commandList.removeFront();
-            currCommand->execute();
-            // only add back to list if the command is not finished
-            if (!currCommand->isFinished())
-            {
-                commandList.append(currCommand);
-            }
-        }
+        // update dji motors
+        aruwlib::can::CanRxHandler::pollCanData();
 
         // refresh all subsystems (i.e. run control loops where necessary)
         // additionally, check if no command is running, in which case run the
@@ -76,12 +83,32 @@ namespace control
                 if (currSubsystem->GetDefaultCommand() != nullptr)
                 {
                     currSubsystem->GetDefaultCommand()->schedule();
-                    // execute here so no execution cycles are skipped
-                    currSubsystem->GetDefaultCommand()->execute(); 
                 }
             }
             currSubsystem->refresh();
         }
+
+        // loop through commands.
+        for (int i = commandList.getSize(); i > 0; i--)
+        {
+           // modm::SmartPointer currCommand(commandList.getFront());
+            Command* currCommand = commandList.getFront();
+            commandList.removeFront();
+            currCommand->execute();
+            // only add back to list if the command is not finished
+            if (!currCommand->isFinished())
+            {
+                commandList.append(currCommand);
+            }
+        }
+
+        // send stuff to dji motors based on sendReceiveRatio
+        if (updateCounter == 0)
+        {
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        }
+
+        updateCounter = (updateCounter + 1) % sendReceiveRatio;
     }
 
     void Scheduler::resetAll(void)

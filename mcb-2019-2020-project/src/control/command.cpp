@@ -39,14 +39,22 @@ namespace control
         return hasRequirement;
     }
 
-    void Command::addSubsystemRequirement(const Subsystem* requirement)
+    bool Command::addSubsystemRequirement(const Subsystem* requirement)
     {
         for (int i = commandRequirements->getSize(); i > 0; i--)
         {
-            
+            const Subsystem* currSubsystem = commandRequirements->getFront();
+            if (currSubsystem == requirement)
+            {
+                commandRequirements->removeFront();
+                commandRequirements->append(currSubsystem);
+                return false;
+            }
+            commandRequirements->removeFront();
+            commandRequirements->append(currSubsystem);
         }
-        // TODO(matthew) check for repeated subsystems
         commandRequirements->append(requirement);
+        return true;
     }
 
     modm::LinkedList<const Subsystem*>& Command::getRequirements() const

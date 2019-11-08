@@ -12,34 +12,30 @@ namespace aruwlib
 
 namespace control
 {
+    void Subsystem::SetDefaultCommand(Command* command)
+    {
+        defaultCommand = command;
+    }
 
-void Subsystem::SetDefaultCommand(Command* command)
-{
-    defaultCommand = command;
-}
+    Command* Subsystem::GetDefaultCommand() const
+    {
+        return defaultCommand;
+    }
 
-Command* Subsystem::GetDefaultCommand() const
-{
-    return defaultCommand;
-}
+    void Subsystem::SetCurrentCommand(Command* command)
+    {
+        currentCommand = command;
+    }
 
-void Subsystem::SetCurrentCommand(Command* command)
-{
-    currentCommand = command;
-}
+    Command* Subsystem::GetCurrentCommand() const
+    {
+        return currentCommand;
+    }
 
-Command* Subsystem::GetCurrentCommand() const
-{
-    return currentCommand;
-}
-
-void Subsystem::removeCurrentCommand()
-{
-    currentCommand = nullptr;
-}
-
-void Subsystem::InitDefaultCommand() {}
-
+    void Subsystem::removeCurrentCommand()
+    {
+        currentCommand = nullptr;
+    }
 }  // namespace control
 
 }  // namespace aruwlib

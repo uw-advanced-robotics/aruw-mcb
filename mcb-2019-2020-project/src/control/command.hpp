@@ -23,8 +23,13 @@ class Command {
  public:    
 
     Command()
-    {
+    {       
        commandRequirements = new modm::LinkedList<const Subsystem*>();
+    }
+
+    ~Command()
+    {
+       commandRequirements->~LinkedList();
     }
 
     /**
@@ -88,8 +93,7 @@ class Command {
     /**
      * Adds the required subsystem to a list of required subsystems
      */
-    //void addSubsystemRequirement(const Subsystem* requirement);
-    void addSubsystemRequirement(const modm::SmartPointer<Subsystem*> requirement);
+    bool addSubsystemRequirement(const Subsystem* requirement);
 
     /**
      * Returns m_isInterruptiable
@@ -102,7 +106,10 @@ class Command {
      *
      * @return whether the command should run when the robot is disabled
      */
-    virtual bool runsWhenDisabled() const { return false; }
+    virtual bool runsWhenDisabled() const
+    {
+       return false;
+    }
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -130,7 +137,8 @@ class Command {
      *
      * @return whether the command has finished.
      */
-    virtual bool isFinished(void) {
+    virtual bool isFinished(void)
+    {
        return false;
     }
 
@@ -139,19 +147,15 @@ class Command {
      * interrupted. This function will be called when the subsystem is
      * interrupted.
      */
-    virtual bool interrupted(void) = 0;
+    virtual void interrupted(void) = 0;
 
  private:
     bool m_isInterruptiable = true;
     
     // I don't want people modifying the subsystems, these are merely references
     // to the subsystems this command can access.
-    
-    //modm::SmartPointer<modm::LinkedList<const Subsystem*>> cmdRequirements2;
-    
+    //modm::SmartPointer* commandRequirements;
     modm::LinkedList<const Subsystem*>* commandRequirements; // why does this have to be a pointer? can't access anything if it isn't, very stupid.
-
-    // HashMap<const Subsystem*>* cmdRequirements; 
 };
 
 }  // namespace aruwlib

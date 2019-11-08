@@ -27,6 +27,10 @@ class CommandExample : public Command
         subsystemExample = subsystem;
     }
 
+    ~CommandExample()
+    {
+    }
+
     /**
       * The initial subroutine of a command.  Called once when the command is
       * initially scheduled.

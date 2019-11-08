@@ -38,16 +38,24 @@ class SubsystemExample : public Subsystem
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId
     ) {
-        frictionWheelLeft = new aruwlib::motor::DjiMotor(
-            leftMotorId, aruwlib::can::CanBus::CAN_BUS1);
-        frictionWheelRight = new aruwlib::motor::DjiMotor(
-            rightMotorId, aruwlib::can::CanBus::CAN_BUS1);
-    
-        velocityPidLeftWheel = new modm::Pid<float>(p, i, d, maxOut);
-        velocityPidRightWheel = new modm::Pid<float>(p, i, d, maxOut);
+        frictionWheelLeft =
+            new aruwlib::motor::DjiMotor(leftMotorId,
+            aruwlib::can::CanBus::CAN_BUS1);
+        frictionWheelRight =
+            new aruwlib::motor::DjiMotor(rightMotorId,
+            aruwlib::can::CanBus::CAN_BUS1);
+
+        velocityPidLeftWheel =
+            new modm::Pid<float>(p, i, d, maxOut);
+        velocityPidRightWheel =
+            new modm::Pid<float>(p, i, d, maxOut);
     }
 
-    void InitDefaultCommand(void);
+    ~SubsystemExample()
+    {
+        frictionWheelLeft->~DjiMotor();
+        frictionWheelRight->~DjiMotor();
+    }
 
     void setDesiredRpm(float desRpm);
 

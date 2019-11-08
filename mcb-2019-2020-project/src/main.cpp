@@ -12,19 +12,20 @@ aruwsrc::control::SubsystemExample frictionWheelSystem(
     aruwlib::motor::MotorId::MOTOR5,
     aruwlib::motor::MotorId::MOTOR6
 );
+
 aruwsrc::control::CommandExample frictionWheelDefaultCommand(&frictionWheelSystem);
 
-int value;
-bool result;
 int main()
 {
     frictionWheelSystem.SetDefaultCommand(&frictionWheelDefaultCommand);
+
     Scheduler::addSubsystem(&frictionWheelSystem);
+    Scheduler::motorSendReceiveRatio(100);
+
     Board::initialize();
 
     while (1)
     {
-        aruwlib::can::CanRxHandler::pollCanData();
         aruwlib::control::Scheduler::run();
         modm::delayMicroseconds(100);
     }
