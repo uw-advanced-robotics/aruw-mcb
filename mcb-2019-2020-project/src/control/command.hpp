@@ -23,7 +23,11 @@ class Command {
 
     Command()
     {       
-       commandRequirements = new modm::DynamicArray<const Subsystem*>(5);
+    }
+
+    void initCommand()
+    {
+         commandRequirements = new modm::DynamicArray<const Subsystem*>(5);
     }
 
     ~Command()

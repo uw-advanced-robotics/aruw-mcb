@@ -33,6 +33,10 @@ namespace control
 
         frictionWheelLeft->setDesiredOutput(velocityPidLeftWheel->getValue());
         frictionWheelRight->setDesiredOutput(velocityPidRightWheel->getValue());
+
+        
+        // frictionWheelLeft->setDesiredOutput(desiredRpm);
+        // frictionWheelRight->setDesiredOutput(desiredRpm);
     }
 
 }  // namespace control

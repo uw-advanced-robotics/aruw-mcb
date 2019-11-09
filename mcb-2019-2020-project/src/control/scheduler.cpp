@@ -36,8 +36,8 @@ namespace control
             }
         }
 
-        // If we can replace the command based of the command dependencies, do so.
-        // O(n^2) :`(
+        // // If we can replace the command based of the command dependencies, do so.
+        // // O(n^2) :`(
         for (int i = subsystemList.getSize(); i > 0; i--)
         {
             Subsystem* currSubsystem = subsystemList.getFront();
@@ -80,7 +80,7 @@ namespace control
             currSubsystem->refresh();
         }
 
-        // loop through commands.
+        // // loop through commands.
         for (int i = commandList.getSize(); i > 0; i--)
         {
            // modm::SmartPointer currCommand(commandList.getFront());
@@ -100,7 +100,7 @@ namespace control
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
-        updateCounter = (updateCounter + 1) % sendReceiveRatio;
+        //updateCounter = (updateCounter + 1) % sendReceiveRatio;
     }
 
     void Scheduler::resetAll(void)

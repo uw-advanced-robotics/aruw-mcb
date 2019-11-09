@@ -55,6 +55,7 @@ class Scheduler
     static uint16_t sendReceiveRatio;
 
     static uint16_t updateCounter;
+
 };
 
 }  // namespace control
