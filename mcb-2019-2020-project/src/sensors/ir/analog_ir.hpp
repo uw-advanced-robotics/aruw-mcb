@@ -17,7 +17,7 @@ class AnalogIR: public IRSensor {
   AnalogIR(float minDistance, float maxDistance, float m, float b);
 
   // Read sensor and updates current distance
-  virtual void read();
+  float read();
 
  private:
     // Distance calulation values for linear model y=mx+b

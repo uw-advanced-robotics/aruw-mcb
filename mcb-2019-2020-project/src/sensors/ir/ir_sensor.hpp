@@ -23,7 +23,7 @@ class IRSensor {
     virtual void init();
 
     // Read sensor and updates current distance
-    virtual void read(); 
+    virtual float read(); 
 
     // Get current distance
     float getDistance();

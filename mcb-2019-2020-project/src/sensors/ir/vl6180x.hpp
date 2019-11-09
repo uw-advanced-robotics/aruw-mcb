@@ -6,6 +6,7 @@
 #define VL6180X_H
 
 #include "ir_sensor.hpp"
+#include "vl6180x_reg.hpp"
 
 namespace aruwlib {
 
@@ -18,7 +19,7 @@ class VL6180X: public IRSensor {
     virtual void init();
 
     // Read sensor and updates current distance
-    virtual void read();
+    virtual float read();
 
  private:
     // Write 8 bits to the given address
