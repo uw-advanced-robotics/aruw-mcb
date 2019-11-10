@@ -22,12 +22,12 @@ class Command {
  public:    
 
     Command()
-    {       
+    {
+       commandRequirements = new modm::DynamicArray<const Subsystem*>(5);       
     }
 
     void initCommand()
     {
-         commandRequirements = new modm::DynamicArray<const Subsystem*>(5);
     }
 
     ~Command()
@@ -154,6 +154,8 @@ class Command {
 
  private:
     bool m_isInterruptiable = true;
+
+    bool isCommandScheduled = false;
     
     // I don't want people modifying the subsystems, these are merely references
     // to the subsystems this command can access.

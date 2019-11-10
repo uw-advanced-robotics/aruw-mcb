@@ -29,7 +29,6 @@ namespace control
 
     void CommandExample::interrupted(void)
     {
-        end(true);
     }
 
     bool CommandExample::runsWhenDisabled(void) const

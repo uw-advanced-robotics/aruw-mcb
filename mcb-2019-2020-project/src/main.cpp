@@ -7,36 +7,44 @@
 #include "src/motor/dji_motor_tx_handler.hpp"
 #include "src/communication/can/can_rx_listener.hpp"
 
+#include <modm/container/smart_pointer.hpp>
+
 aruwsrc::control::SubsystemExample frictionWheelSystem(
-    4, 0, 0, 5000,
+    10, 0, 0, 5000,
     aruwlib::motor::MotorId::MOTOR5,
     aruwlib::motor::MotorId::MOTOR6
 );
 
 aruwsrc::control::CommandExample frictionWheelDefaultCommand(&frictionWheelSystem);
 
-modm::DynamicArray<int>* i;
-int ii;
 int main()
 {
-    i = new modm::DynamicArray<int>(10);
-    i->append(10);
-    
-    ii = i->operator[](0);
-      //  frictionWheelSystem.SetDefaultCommand(&frictionWheelDefaultCommand);
+    frictionWheelSystem.SetDefaultCommand(&frictionWheelDefaultCommand);
     Scheduler::addSubsystem(&frictionWheelSystem);
-    frictionWheelDefaultCommand.CommandExampleInit(&frictionWheelSystem);
     Scheduler::motorSendReceiveRatio(30); // send every 3 ms, assuming 100 microsecond delay
 
     frictionWheelDefaultCommand.schedule();
 
     Board::initialize();
-
+    frictionWheelSystem.setDesiredRpm(1000);
+    int updateCounter = 0;
+    int sendReceiveRatio = 30;
     while (1)
     {
-        aruwlib::control::Scheduler::run();
+        aruwlib::can::CanRxHandler::pollCanData();
+
+        frictionWheelSystem.refresh();
+        //aruwlib::control::Scheduler::run();
         //modm::delayMilliseconds(1);
         modm::delayMicroseconds(10);
+
+        // send stuff to dji motors based on sendReceiveRatio
+        if (updateCounter == 0)
+        {
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        }
+
+        updateCounter = (updateCounter + 1) % sendReceiveRatio;
     }
     return 0;
 }

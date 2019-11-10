@@ -9,7 +9,7 @@ namespace control
     void Command::schedule(bool interruptible)
     {
         m_isInterruptiable = interruptible;
-        Scheduler::addCommand(this);
+        isCommandScheduled = Scheduler::addCommand(this);
     }
 
     void Command::cancel(void)
@@ -20,7 +20,8 @@ namespace control
 
     bool Command::isScheduled() const
     {
-        return Scheduler::isScheduled(this);
+        return isCommandScheduled;
+        // return Scheduler::isScheduled(this);
     }
 
     bool Command::hasRequirement(const Subsystem* requirement) const

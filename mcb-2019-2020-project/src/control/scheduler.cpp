@@ -22,10 +22,17 @@ namespace control
 
     bool Scheduler::addCommand(Command* control)
     {
-        const modm::DynamicArray<const Subsystem*>& commandDependencies = control->getRequirements();
+        // only add the command if (a) command is not already being run and (b) all
+        // subsystem dependencies can be interrupted.
+        if (control->isScheduled())
+        {
+            return false;
+        }
 
-        // Check to make sure the control you are trying to add to the scheduler can be added.        
-        for (int i = commandDependencies.getSize(); i > 0; i--)
+        const modm::DynamicArray<const Subsystem*>& commandDependencies = control->getRequirements();
+        // Check to make sure the control you are trying to add to the scheduler can be added.
+        // If there are command dependencies that can't be interrupted, don't schedule.       
+        for (int i = 0; i < static_cast<int>(commandDependencies.getSize()); i++)
         {
             const Subsystem* subsystemDependency = commandDependencies[i];
             if (
@@ -43,7 +50,7 @@ namespace control
             Subsystem* currSubsystem = subsystemList.getFront();
             subsystemList.removeFront();
             subsystemList.append(currSubsystem);
-            for (int j = commandDependencies.getSize(); j > 0; j--)
+            for (int j = 0; j < static_cast<int>(commandDependencies.getSize()); j++)
             {
                 if (commandDependencies[j] == currSubsystem)
                 {
@@ -92,6 +99,10 @@ namespace control
             {
                 commandList.append(currCommand);
             }
+            else
+            {
+                commandList.end();
+            }
         }
 
         // send stuff to dji motors based on sendReceiveRatio
@@ -100,7 +111,7 @@ namespace control
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
-        //updateCounter = (updateCounter + 1) % sendReceiveRatio;
+        updateCounter = (updateCounter + 1) % sendReceiveRatio;
     }
 
     void Scheduler::resetAll(void)

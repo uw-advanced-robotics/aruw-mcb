@@ -23,14 +23,8 @@ class CommandExample : public Command
  public:
     CommandExample(SubsystemExample* subsystem)
     {
-        //this->addSubsystemRequirement((Subsystem*) (subsystem));
+        addSubsystemRequirement((Subsystem*) (subsystem));
         subsystemExample = subsystem;
-    }
-
-    void CommandExampleInit(SubsystemExample* subsystem)
-    {
-      this->initCommand();
-        this->addSubsystemRequirement((Subsystem*) (subsystem));
     }
 
     ~CommandExample()
