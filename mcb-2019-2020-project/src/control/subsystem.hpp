@@ -71,6 +71,7 @@ class Subsystem {
     void removeCurrentCommand(void);
 
     virtual void refresh(void) = 0;
+
  private:
     Command* defaultCommand = nullptr;
 

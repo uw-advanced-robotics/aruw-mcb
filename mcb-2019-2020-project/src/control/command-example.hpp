@@ -16,14 +16,14 @@ namespace aruwsrc
 
 namespace control
 {
-    class SubsystemExample;
+class SubsystemExample;
 
 class CommandExample : public Command
 {
  public:
-    CommandExample(SubsystemExample* subsystem)
+    explicit CommandExample(SubsystemExample* subsystem)
     {
-        addSubsystemRequirement((Subsystem*) (subsystem));
+        addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
         subsystemExample = subsystem;
     }
 

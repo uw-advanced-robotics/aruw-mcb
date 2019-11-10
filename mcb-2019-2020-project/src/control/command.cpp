@@ -5,7 +5,7 @@ namespace aruwlib
 {
 
 namespace control
-{    
+{
     void Command::schedule(bool interruptible)
     {
         m_isInterruptiable = interruptible;
@@ -46,7 +46,6 @@ namespace control
             {
                 return false;
             }
-            
         }
         commandRequirements->append(requirement);
         return true;
@@ -61,6 +60,6 @@ namespace control
     {
         return m_isInterruptiable;
     }
-}  // namespace command
+}  // namespace control
 
 }  // namespace aruwlib

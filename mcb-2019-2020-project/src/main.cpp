@@ -21,7 +21,7 @@ int main()
 {
     frictionWheelSystem.SetDefaultCommand(&frictionWheelDefaultCommand);
     Scheduler::addSubsystem(&frictionWheelSystem);
-    Scheduler::motorSendReceiveRatio(30); // send every 3 ms, assuming 100 microsecond delay
+    Scheduler::motorSendReceiveRatio(30);  // send every 3 ms, assuming 100 microsecond delay
 
     frictionWheelDefaultCommand.schedule();
 

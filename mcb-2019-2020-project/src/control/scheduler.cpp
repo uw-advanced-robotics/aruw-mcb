@@ -29,9 +29,11 @@ namespace control
             return false;
         }
 
-        const modm::DynamicArray<const Subsystem*>& commandDependencies = control->getRequirements();
-        // Check to make sure the control you are trying to add to the scheduler can be added.
-        // If there are command dependencies that can't be interrupted, don't schedule.       
+        const modm::DynamicArray<const Subsystem*>& commandDependencies =
+            control->getRequirements();
+        // Check to make sure the control you are trying to add to the scheduler
+        // can be added.
+        // If there are command dependencies that can't be interrupted, don't schedule.
         for (int i = 0; i < static_cast<int>(commandDependencies.getSize()); i++)
         {
             const Subsystem* subsystemDependency = commandDependencies[i];

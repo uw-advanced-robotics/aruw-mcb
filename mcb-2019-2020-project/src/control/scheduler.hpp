@@ -35,7 +35,8 @@ class Scheduler
  public:
     static void run(void);
 
-    static bool addCommand(aruwlib::control::Command* command); // smart pointer, memory allocation
+    // smart pointer, memory allocation
+    static bool addCommand(aruwlib::control::Command* command);
 
     static void removeCommand(const Command* command);
 
@@ -44,7 +45,7 @@ class Scheduler
     static bool isScheduled(const Command* command);
 
     static bool addSubsystem(Subsystem* subsystem);
-    
+
     static void motorSendReceiveRatio(uint16_t motorSendReceiveRatio);
 
  private:
@@ -55,7 +56,6 @@ class Scheduler
     static uint16_t sendReceiveRatio;
 
     static uint16_t updateCounter;
-
 };
 
 }  // namespace control

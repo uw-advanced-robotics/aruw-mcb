@@ -8,7 +8,7 @@ namespace control
 {
     void CommandExample::initialize()
     {}
-    
+
     void CommandExample::execute()
     {
         subsystemExample->setDesiredRpm(DEFAULT_WHEEL_RPM);
@@ -21,7 +21,7 @@ namespace control
             subsystemExample->setDesiredRpm(0);
         }
     }
-    
+
     bool CommandExample::isFinished(void)
     {
         return false;
