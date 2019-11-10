@@ -54,6 +54,10 @@ namespace control
             {
                 if (commandDependencies[j] == currSubsystem)
                 {
+                    if (currSubsystem->GetCurrentCommand() != nullptr)
+                    {
+                        currSubsystem->GetCurrentCommand()->end(true);
+                    }
                     currSubsystem->SetCurrentCommand(control);
                 }
             }

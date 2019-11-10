@@ -69,8 +69,7 @@ class CommandExample : public Command
       */
     bool runsWhenDisabled(void) const;
  private:
-    static const int16_t DEFAULT_WHEEL_RPM = 1000;
-   // #define DEFAULT_WHEEL_RPM 1000
+    static const int16_t DEFAULT_WHEEL_RPM = 5000;
 
     SubsystemExample* subsystemExample;
 };

@@ -10,7 +10,7 @@
 #include <modm/container/smart_pointer.hpp>
 
 aruwsrc::control::SubsystemExample frictionWheelSystem(
-    10, 0, 0, 5000,
+    10, 0, 0, 0, 5000,
     aruwlib::motor::MotorId::MOTOR5,
     aruwlib::motor::MotorId::MOTOR6
 );
@@ -26,25 +26,11 @@ int main()
     frictionWheelDefaultCommand.schedule();
 
     Board::initialize();
-    frictionWheelSystem.setDesiredRpm(1000);
-    int updateCounter = 0;
-    int sendReceiveRatio = 30;
+
     while (1)
     {
-        aruwlib::can::CanRxHandler::pollCanData();
-
-        frictionWheelSystem.refresh();
-        //aruwlib::control::Scheduler::run();
-        //modm::delayMilliseconds(1);
+        aruwlib::control::Scheduler::run();
         modm::delayMicroseconds(10);
-
-        // send stuff to dji motors based on sendReceiveRatio
-        if (updateCounter == 0)
-        {
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-        }
-
-        updateCounter = (updateCounter + 1) % sendReceiveRatio;
     }
     return 0;
 }

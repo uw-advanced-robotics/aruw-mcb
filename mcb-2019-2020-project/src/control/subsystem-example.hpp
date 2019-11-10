@@ -34,6 +34,7 @@ class SubsystemExample : public Subsystem
         float p,
         float i,
         float d,
+        float maxErrorSum,
         float maxOut,
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId
@@ -46,9 +47,9 @@ class SubsystemExample : public Subsystem
             aruwlib::can::CanBus::CAN_BUS1);
 
         velocityPidLeftWheel =
-            new modm::Pid<float>(p, i, d, maxOut);
+            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut);
         velocityPidRightWheel =
-            new modm::Pid<float>(p, i, d, maxOut);
+            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut);
     }
 
     ~SubsystemExample()
