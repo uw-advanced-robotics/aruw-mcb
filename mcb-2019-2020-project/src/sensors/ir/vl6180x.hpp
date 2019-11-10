@@ -15,11 +15,16 @@ namespace sensors {
 // Adafruit short distance IR sensor
 class VL6180X: public IRSensor {
  public:
+   // Constructor to init boundaries
+   VL6180X(float minDistance, float maxDistance);
+
     // Initialize sensor and I2C
     virtual void init();
 
     // Read sensor and updates current distance
     virtual float read();
+
+    //void write8(uint16_t address, uint8_t data);
 
  private:
     // Write 8 bits to the given address
