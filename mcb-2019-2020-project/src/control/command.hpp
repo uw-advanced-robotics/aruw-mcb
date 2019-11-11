@@ -1,7 +1,7 @@
 /**
  * A generic extendable class for implementing a command. Each 
  * command is attached to a subsystem. To create a new command,
- * extend the Command class and instantiate the firtual functions
+ * extend the Command class and instantiate the virtual functions
  * in this class.
  */
 
@@ -22,7 +22,8 @@ class Command {
  public:
     Command()
     {
-       commandRequirements = new modm::DynamicArray<const Subsystem*>(5);
+       commandRequirements = new modm::DynamicArray
+         <const Subsystem*>(SUBSYSTEM_REQUIREMENT_LIST_SIZE);
     }
 
     void initCommand()
@@ -31,7 +32,7 @@ class Command {
 
     ~Command()
     {
-       commandRequirements->~DynamicArray();
+       delete[] commandRequirements;
     }
 
     /**
@@ -41,9 +42,9 @@ class Command {
      * the command will be interrupted.  Else, the command will not be scheduled.
      * If no subsystems are required, return an empty set.
      *
-     * <p>Note: it is recommended that user implementations contain the
-     * requirements as a field, and return that field here, rather than allocating
-     * a new set every time this is called.
+     * The generic Command class contains a list of the requrements. The user
+     * should add requirements to this list accordingly (typically in the constructor
+     * of a class extending the Command class).
      *
      * @return the set of subsystems that are required
      */
@@ -152,6 +153,8 @@ class Command {
     virtual void interrupted(void) = 0;
 
  private:
+    const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
+
     bool m_isInterruptiable = true;
 
     bool isCommandScheduled = false;

@@ -26,7 +26,7 @@ namespace control
 
     bool Command::hasRequirement(const Subsystem* requirement) const
     {
-        for (int i = commandRequirements->getSize(); i > 0; i--)
+        for (int i = 0; i < static_cast<int>(commandRequirements->getSize()); i++)
         {
             if (requirement == commandRequirements->operator[](i))
             {
@@ -40,7 +40,7 @@ namespace control
     {
         // Insure the requirement you are trying to add is not already a
         // command requirement.
-        for (int i = commandRequirements->getSize(); i > 0; i--)
+        for (int i = 0; i < static_cast<int>(commandRequirements->getSize()); i++)
         {
             if (commandRequirements->operator[](i) == requirement)
             {

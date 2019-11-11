@@ -159,7 +159,7 @@ namespace control
         return scheduled;
     }
 
-    bool Scheduler::addSubsystem(Subsystem* subsystem)
+    bool Scheduler::registerSubsystem(Subsystem* subsystem)
     {
         bool subsystemAlreadyAdded = false;
         for (int i = subsystemList.getSize(); i > 0; i--)

@@ -1,12 +1,11 @@
 /**
  * Class for handling all the commands you would like to currently runs.
- * Only knows how to run commands and nothing else.
- * Contains list of all commands that need to be run currently, runs these
- * commands every time run is called. Uses isFinished function from command
- * to determine if a command should be completed. Unlike FRC, currently 
- * there subsystems do not have periodic functions that are called in
- * the scheduler. Instead, commands handle subsystem updates when
- * necessary.
+ * Only knows how to run commands and refresh subsystems and nothing else.
+ * 
+ * Contains list of all commands and subsystems that need to be run
+ * currently, runs these commands and refresh the subsystems  every time
+ * run is called. Uses isFinished function from command to determine if
+ * a command should be completed.
  *
  * The goal of this class is for the user to interace with this as little
  * as possible. Aside from run, the user should be interacting with the
@@ -21,8 +20,6 @@
 #include "src/control/command.hpp"
 #include <modm/container/linked_list.hpp>
 #include "src/control/subsystem.hpp"
-#include <modm/container/dynamic_array.hpp>
-#include <modm/container/queue.hpp>
 
 namespace aruwlib
 {
@@ -44,7 +41,7 @@ class Scheduler
 
     static bool isScheduled(const Command* command);
 
-    static bool addSubsystem(Subsystem* subsystem);
+    static bool registerSubsystem(Subsystem* subsystem);
 
     static void motorSendReceiveRatio(uint16_t motorSendReceiveRatio);
 
