@@ -54,9 +54,10 @@ class SubsystemExample : public Subsystem
 
     ~SubsystemExample()
     {
-        frictionWheelLeft->~DjiMotor();
-        frictionWheelRight->~DjiMotor();
-        // no destructor for pid stuff
+        delete[] frictionWheelLeft;
+        delete[] frictionWheelRight;
+        delete[] velocityPidLeftWheel;
+        delete[] velocityPidRightWheel;
     }
 
     void setDesiredRpm(float desRpm);
