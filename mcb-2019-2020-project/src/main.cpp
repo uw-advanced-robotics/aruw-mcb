@@ -15,6 +15,8 @@ aruwsrc::control::SubsystemExample frictionWheelSystem(
     aruwlib::motor::MotorId::MOTOR6
 );
 
+
+
 aruwsrc::control::CommandExample frictionWheelDefaultCommand(&frictionWheelSystem);
 
 int main()

@@ -39,26 +39,17 @@ class SubsystemExample : public Subsystem
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId
     ) {
-        frictionWheelLeft =
-            new aruwlib::motor::DjiMotor(leftMotorId,
-            aruwlib::can::CanBus::CAN_BUS1);
-        frictionWheelRight =
-            new aruwlib::motor::DjiMotor(rightMotorId,
-            aruwlib::can::CanBus::CAN_BUS1);
+        frictionWheelLeft = modm::SmartPointer(new aruwlib::motor::DjiMotor(leftMotorId,
+            aruwlib::can::CanBus::CAN_BUS1));
+        frictionWheelRight = modm::SmartPointer(new aruwlib::motor::DjiMotor(rightMotorId,
+            aruwlib::can::CanBus::CAN_BUS1));
 
-        velocityPidLeftWheel =
-            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut);
-        velocityPidRightWheel =
-            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut);
+        velocityPidLeftWheel = modm::SmartPointer(new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
+        velocityPidRightWheel = modm::SmartPointer(new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
     }
 
     ~SubsystemExample()
-    {
-        delete[] frictionWheelLeft;
-        delete[] frictionWheelRight;
-        delete[] velocityPidLeftWheel;
-        delete[] velocityPidRightWheel;
-    }
+    {}
 
     void setDesiredRpm(float desRpm);
 
@@ -67,13 +58,23 @@ class SubsystemExample : public Subsystem
  private:
     float desiredRpm;
 
-    aruwlib::motor::DjiMotor* frictionWheelLeft;
+    modm::SmartPointer frictionWheelLeft;
+    
+    modm::SmartPointer frictionWheelRight;
 
-    aruwlib::motor::DjiMotor* frictionWheelRight;
+    modm::SmartPointer velocityPidLeftWheel;
 
-    modm::Pid<float>* velocityPidLeftWheel;
+    modm::SmartPointer velocityPidRightWheel;
 
-    modm::Pid<float>* velocityPidRightWheel;
+    void updateMotorRpmPid(
+        modm::Pid<float>* pid,
+        aruwlib::motor::DjiMotor* motor,
+        float desiredRpm
+    );
+
+    modm::Pid<float>* getPidPointer(modm::SmartPointer smrtPtr);
+
+    aruwlib::motor::DjiMotor* getMotorPointer(modm::SmartPointer smrtPtr);
 };
 
 }  // namespace control

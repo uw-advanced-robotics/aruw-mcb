@@ -11,6 +11,7 @@
 #include "rm-dev-board-a/board.hpp"
 #include "src/control/subsystem.hpp"
 #include <modm/container/dynamic_array.hpp>
+#include <modm/container/smart_pointer.hpp>
 
 namespace aruwlib
 {
@@ -22,8 +23,9 @@ class Command {
  public:
     Command()
     {
-       commandRequirements = new modm::DynamicArray
-         <const Subsystem*>(SUBSYSTEM_REQUIREMENT_LIST_SIZE);
+
+       commandRequirements2 = modm::SmartPointer(new modm::DynamicArray
+          <const Subsystem*>(SUBSYSTEM_REQUIREMENT_LIST_SIZE));
     }
 
     void initCommand()
@@ -32,7 +34,6 @@ class Command {
 
     ~Command()
     {
-       delete[] commandRequirements;
     }
 
     /**
@@ -159,9 +160,8 @@ class Command {
 
     bool isCommandScheduled = false;
 
-    // I don't want people modifying the subsystems, these are merely references
-    // to the subsystems this command can access.
-    modm::DynamicArray<const Subsystem*>* commandRequirements;
+    // contains pointers to const Subsystem pointers that this command requires
+    modm::SmartPointer commandRequirements2;
 };
 
 }  // namespace control

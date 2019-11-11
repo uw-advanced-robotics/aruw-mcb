@@ -26,9 +26,9 @@ namespace control
 
     bool Command::hasRequirement(const Subsystem* requirement) const
     {
-        for (int i = 0; i < static_cast<int>(commandRequirements->getSize()); i++)
+        for (int i = 0; i < static_cast<int>(getRequirements().getSize()); i++)
         {
-            if (requirement == commandRequirements->operator[](i))
+            if (requirement == getRequirements()[i])
             {
                 return true;
             }
@@ -38,22 +38,24 @@ namespace control
 
     bool Command::addSubsystemRequirement(const Subsystem* requirement)
     {
+
         // Insure the requirement you are trying to add is not already a
         // command requirement.
-        for (int i = 0; i < static_cast<int>(commandRequirements->getSize()); i++)
+        for (int i = 0; i < static_cast<int>(getRequirements().getSize()); i++)
         {
-            if (commandRequirements->operator[](i) == requirement)
+            if (getRequirements()[i] == requirement)
             {
                 return false;
             }
         }
-        commandRequirements->append(requirement);
+        (*reinterpret_cast<modm::DynamicArray<const Subsystem*>*>(
+            commandRequirements2.getPointer())).append(requirement);
         return true;
     }
 
     const modm::DynamicArray<const Subsystem*>& Command::getRequirements() const
     {
-        return *commandRequirements;
+        return *reinterpret_cast<const modm::DynamicArray<const Subsystem*>*>(commandRequirements2.getPointer());
     }
 
     bool Command::isInterruptiable() const
