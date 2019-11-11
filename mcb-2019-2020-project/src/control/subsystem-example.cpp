@@ -12,11 +12,13 @@ namespace control
 
     void SubsystemExample::refresh()
     {        
-        updateMotorRpmPid(
-            getPidPointer(velocityPidLeftWheel),
-            getMotorPointer(frictionWheelLeft),
-            desiredRpm
-        );
+        // updateMotorRpmPid(
+        //     getPidPointer(velocityPidLeftWheel),
+        //     getMotorPointer(frictionWheelLeft),
+        //     desiredRpm
+        // );
+        // getPidPointer(velocityPidLeftWheel)->update(desiredRpm - m1->getShaftRPM());
+        // m1->setDesiredOutput(getPidPointer(velocityPidLeftWheel)->getValue());
         updateMotorRpmPid(
             getPidPointer(velocityPidRightWheel),
             getMotorPointer(frictionWheelRight),
