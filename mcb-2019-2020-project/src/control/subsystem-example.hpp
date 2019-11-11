@@ -30,6 +30,8 @@ namespace control
 class SubsystemExample : public Subsystem
 {
  public:
+
+    aruwlib::motor::DjiMotor* m1;
     SubsystemExample(
         float p,
         float i,
@@ -39,8 +41,9 @@ class SubsystemExample : public Subsystem
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId
     ) {
-        frictionWheelLeft = modm::SmartPointer(new aruwlib::motor::DjiMotor(leftMotorId,
-            aruwlib::can::CanBus::CAN_BUS1));
+        m1 = new aruwlib::motor::DjiMotor(leftMotorId,
+            aruwlib::can::CanBus::CAN_BUS1);
+        frictionWheelLeft = modm::SmartPointer(m1);
         frictionWheelRight = modm::SmartPointer(new aruwlib::motor::DjiMotor(rightMotorId,
             aruwlib::can::CanBus::CAN_BUS1));
 
@@ -55,10 +58,12 @@ class SubsystemExample : public Subsystem
 
     void refresh(void);
 
+        modm::SmartPointer frictionWheelLeft;
+
+
  private:
     float desiredRpm;
 
-    modm::SmartPointer frictionWheelLeft;
     
     modm::SmartPointer frictionWheelRight;
 

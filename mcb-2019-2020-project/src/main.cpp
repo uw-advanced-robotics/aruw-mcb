@@ -19,6 +19,7 @@ aruwsrc::control::SubsystemExample frictionWheelSystem(
 
 aruwsrc::control::CommandExample frictionWheelDefaultCommand(&frictionWheelSystem);
 
+aruwlib::motor::DjiMotor* m3;
 int main()
 {
     frictionWheelSystem.SetDefaultCommand(&frictionWheelDefaultCommand);
@@ -26,6 +27,8 @@ int main()
     Scheduler::motorSendReceiveRatio(30);  // send every 3 ms, assuming 100 microsecond delay
 
     frictionWheelDefaultCommand.schedule();
+    
+    m3 = reinterpret_cast<aruwlib::motor::DjiMotor*>(frictionWheelSystem.frictionWheelLeft.getPointer());
 
     Board::initialize();
 
