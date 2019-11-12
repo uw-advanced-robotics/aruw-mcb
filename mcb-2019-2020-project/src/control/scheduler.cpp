@@ -2,14 +2,20 @@
 #include "src/motor/dji_motor_tx_handler.hpp"
 #include "src/communication/can/can_rx_handler.hpp"
 
+using namespace std;
+
 namespace aruwlib
 {
 
 namespace control
 {
-    modm::LinkedList<Command*> Scheduler::commandList;
+    // modm::LinkedList<Command*> Scheduler::commandList;
 
-    modm::LinkedList<Subsystem*> Scheduler::subsystemList;
+    // modm::LinkedList<Subsystem*> Scheduler::subsystemList;
+
+    set<Subsystem*> Scheduler::subsystemList1;
+
+    set<Command*> Scheduler::commandList1; 
 
     bool Scheduler::addCommand(Command* control)
     {
@@ -33,130 +39,172 @@ namespace control
             }
         }
 
+        for (const Subsystem* dependentSubsystem : control->getRequirements())
+        {
+            Subsystem* isDependentSubsystem = (*subsystemList1.find(
+                const_cast<Subsystem*>(dependentSubsystem)));  // im sry
+            if (isDependentSubsystem == nullptr)
+            {
+                if (dependentSubsystem->GetCurrentCommand() != nullptr)
+                {
+                    // end and indicate command was interrupted
+                    isDependentSubsystem->GetCurrentCommand()->end(true);
+                }
+                control->initialize();
+                control->execute();
+            }
+        }
+
         // // If we can replace the command based of the command dependencies, do so.
         // // O(n^2) :`( At least it looks cleaner now, (:
         // this is an iterator to a pointer to a Subsystem pointer. Whoo hoo!
-        modm::LinkedList<Subsystem*>::iterator subsystemListItr = subsystemList.begin();
-        while ((*subsystemListItr) != nullptr)
-        {
-            Subsystem* currSubsystem = (*subsystemListItr);
-            ++subsystemListItr;
-            // set the command to the desired command for every subsystem dependency
-            for (const Subsystem* dependentSubsystem : control->getRequirements())
-            {
-                if (dependentSubsystem == currSubsystem)
-                {
-                    if (currSubsystem->GetCurrentCommand() != nullptr)
-                    {
-                        // end and indicate the command was interrupted
-                        currSubsystem->GetCurrentCommand()->end(true);
-                    }
-                    control->initialize();
-                    currSubsystem->SetCurrentCommand(control);
-                }
-            }
-        }
-        commandList.append(control);
-        control->initialize();
-        return true;
+        // modm::LinkedList<Subsystem*>::iterator subsystemListItr = subsystemList.begin();
+        // while ((*subsystemListItr) != nullptr)
+        // {
+        //     Subsystem* currSubsystem = (*subsystemListItr);
+        //     // set the command to the desired command for every subsystem dependency
+        //     for (const Subsystem* dependentSubsystem : control->getRequirements())
+        //     {
+        //         if (dependentSubsystem == currSubsystem)
+        //         {
+        //             if (currSubsystem->GetCurrentCommand() != nullptr)
+        //             {
+        //                 // end and indicate the command was interrupted
+        //                 currSubsystem->GetCurrentCommand()->end(true);
+        //             }
+        //             control->initialize();
+        //             currSubsystem->SetCurrentCommand(control);
+        //         }
+        //     }
+        //     ++subsystemListItr;
+        // }
+        // commandList.append(control);
+        // control->initialize();
+        // return true;
     }
 
     void Scheduler::run()
     {
+        for (auto subsystemListItr1 = subsystemList1.begin();
+            subsystemListItr1 != subsystemList1.end();
+        ) {
+           if (
+               (*subsystemListItr1)->GetCurrentCommand() == nullptr
+                && (*subsystemListItr1)->GetDefaultCommand() != nullptr
+            ) {
+                (*subsystemListItr1)->GetDefaultCommand()->schedule();
+            }
+            (*subsystemListItr1)->refresh();
+        }
         // refresh all subsystems (i.e. run control loops where necessary)
         // additionally, check if no command is running, in which case run the
         // default command.
-        modm::LinkedList<Subsystem*>::iterator subsystemListItr = subsystemList.begin();
-        while ((*subsystemListItr) != nullptr)
-        {
-            Subsystem* currSubsystem = *(subsystemListItr);
-            ++subsystemListItr;
-            // schedule default command if necessary
-            if (
-                currSubsystem->GetCurrentCommand() == nullptr
-                && currSubsystem->GetDefaultCommand() != nullptr)
+        // modm::LinkedList<Subsystem*>::iterator subsystemListItr = subsystemList.begin();
+        // while ((*subsystemListItr) != nullptr)
+        // {
+        //     Subsystem* currSubsystem = *(subsystemListItr);
+        //     // schedule default command if necessary
+        //     if (
+        //         currSubsystem->GetCurrentCommand() == nullptr
+        //         && currSubsystem->GetDefaultCommand() != nullptr)
+        //     {
+        //         currSubsystem->GetDefaultCommand()->schedule();
+        //     }
+        //     currSubsystem->refresh();
+        //     ++subsystemListItr;
+        // }
+
+        for (auto commandList1Itr = commandList1.begin();
+            commandList1Itr != commandList1.end();
+        ) {
+            (*commandList1Itr)->execute();
+            if ((*commandList1Itr)->isFinished())
             {
-                currSubsystem->GetDefaultCommand()->schedule();
+                commandList1Itr = commandList1.erase(commandList1Itr);
             }
-            currSubsystem->refresh();
+            else
+            {
+                ++commandList1Itr;
+            }
         }
 
-        // // loop through commands.
-        modm::LinkedList<Command*>::iterator commandListItr = commandList.begin();
-        while (*(commandListItr) != nullptr)
-        {
-            Command* currCommand = *(commandListItr);
-            currCommand->execute();
-            // only add back to list if the command is not finished
-            if (!currCommand->isFinished())
-            {
-                ++currCommand;
-                commandList.append(currCommand);
-            }
-            else  // end and remove command from the commandList
-            {
-                currCommand->end(false);
-                commandListItr = commandList.remove(commandListItr);
-            }
-        }
+        // loop through commands.
+        // modm::LinkedList<Command*>::iterator commandListItr = commandList.begin();
+        // while (*(commandListItr) != nullptr)
+        // {
+        //     Command* currCommand = *(commandListItr);
+        //     currCommand->execute();
+        //     // end command if finished executing
+        //     if (currCommand->isFinished())
+        //     {
+        //         currCommand->end(false);
+        //         commandListItr = commandList.remove(commandListItr);
+        //     }
+        //     ++commandListItr;
+        // }
     }
 
-    void Scheduler::resetAll(void)
+    void Scheduler::removeCommand(Command* command)
     {
-        for (int i = commandList.getSize(); i > 0; i--)
+        set<Command*>::iterator commandList1Itr = commandList1.find(command);
+        if (*commandList1Itr != nullptr)
         {
-            Command* currCommand = commandList.getFront();
-            commandList.removeFront();
-            commandList.append(currCommand);
+            (*commandList1Itr)->end(false);
+            commandList1.erase(commandList1Itr);
         }
+
+        // modm::LinkedList<Command*>::iterator commandListItr = commandList.begin();
+        // while (*(commandListItr) != nullptr)
+        // {
+        //     Command* currCommand = *(commandListItr);
+        //     if (currCommand == command)
+        //     {
+        //         commandListItr = commandList.remove(commandListItr);
+        //     }
+        //     ++commandListItr;
+        // }
     }
 
-    void Scheduler::removeCommand(const Command* command)
+    bool Scheduler::isScheduled(Command* command)
     {
-        for (int i = commandList.getSize(); i > 0; i--)
-        {
-            Command* currCommand = commandList.getFront();
-            commandList.removeFront();
-            if (currCommand != command)
-            {
-                commandList.append(currCommand);
-            }
-        }
+        return *(commandList1.find(command)) != nullptr;
+
+        // modm::LinkedList<Command*>::const_iterator commandListItr = commandList.begin();
+        // while ((*commandListItr) != nullptr)
+        // {
+        //     Command* currCommand = commandList.getFront();
+        //     if (command == currCommand)
+        //     {
+        //         return true;
+        //     }
+        //     ++commandListItr;
+        // }
+        // return false;
     }
 
-    bool Scheduler::isScheduled(const Command* command)
+    void Scheduler::registerSubsystem(Subsystem* subsystem)
     {
-        modm::LinkedList<Command*>::const_iterator commandListItr = commandList.begin();
-        while ((*commandListItr) != nullptr)
+        auto subsystemListItr1 = subsystemList1.find(subsystem);
+        if (*subsystemListItr1 != nullptr)
         {
-            Command* currCommand = commandList.getFront();
-            ++commandListItr;
-            if (command == currCommand)
-            {
-                return true;
-            }
+            subsystemList1.insert(subsystem);
         }
-        return false;
-    }
 
-    bool Scheduler::registerSubsystem(Subsystem* subsystem)
-    {
-        bool subsystemAlreadyAdded = false;
-        for (int i = subsystemList.getSize(); i > 0; i--)
-        {
-            Subsystem* currSubsystem = subsystemList.getFront();
-            subsystemList.removeFront();
-            subsystemList.append(currSubsystem);
-            if (currSubsystem == subsystem)
-            {
-                subsystemAlreadyAdded = true;
-            }
-        }
-        if (!subsystemAlreadyAdded)
-        {
-            subsystemList.append(subsystem);
-        }
-        return subsystemAlreadyAdded;
+        // bool subsystemAlreadyAdded = false;
+        // modm::LinkedList<Subsystem*>::iterator subsystemListItr = subsystemList.begin();
+        // while (*subsystemListItr != nullptr)
+        // {
+        //     Subsystem* currSubsystem = *subsystemListItr;
+        //     if (currSubsystem == subsystem)
+        //     {
+        //         subsystemAlreadyAdded = true;
+        //     }
+        //     ++subsystemListItr;
+        // }
+        // if (!subsystemAlreadyAdded)
+        // {
+        //     subsystemList.append(subsystem);
+        // }
     }
 }  // namespace control
 

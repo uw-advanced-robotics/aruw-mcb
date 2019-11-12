@@ -20,10 +20,11 @@
 #include "src/control/command.hpp"
 #include <modm/container/linked_list.hpp>
 #include "src/control/subsystem.hpp"
+#include <set>
 
 namespace aruwlib
 {
-
+ 
 namespace control
 {
 
@@ -35,18 +36,20 @@ class Scheduler
     // smart pointer, memory allocation
     static bool addCommand(aruwlib::control::Command* command);
 
-    static void removeCommand(const Command* command);
+    static void removeCommand(Command* command);
 
-    static void resetAll(void);
+    static bool isScheduled(Command* command);
 
-    static bool isScheduled(const Command* command);
-
-    static bool registerSubsystem(Subsystem* subsystem);
+    static void registerSubsystem(Subsystem* subsystem);
 
  private:
-    static modm::LinkedList<Command*> commandList;
+    static std::set<Subsystem*> subsystemList1;
 
-    static modm::LinkedList<Subsystem*> subsystemList;
+    static std::set<Command*> commandList1;
+
+   //  static modm::LinkedList<Command*> commandList;
+
+   //  static modm::LinkedList<Subsystem*> subsystemList;
 };
 
 }  // namespace control
