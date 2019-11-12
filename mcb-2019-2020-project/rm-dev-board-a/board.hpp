@@ -16,6 +16,7 @@
 
 #include <modm/platform.hpp>
 #include <modm/architecture/interface/clock.hpp>
+#include "robot-type/robot.hpp"
 
 using namespace modm::platform;
 
@@ -150,6 +151,13 @@ using DigitalInPins = SoftwareGpioPort
     DigitalInPinW, DigitalInPinX,
     DigitalInPinY, DigitalInPinZ
 >;
+
+// gpio pins used for SPI communication to the onboard MPU6500 IMU
+using ImuSck = GpioF7;
+using ImuMiso = GpioF8;
+using ImuMosi = GpioF9;
+using ImuNcc = GpioF6;
+using ImuSpiMaster = SpiMaster5;
 
 inline void
 killAllGpioOutput()
