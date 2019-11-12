@@ -21,7 +21,7 @@ namespace control
 
 class Command {
  public:
-    Command()
+    Command(bool isInterruptiable) : isCommandInterruptiable(isInterruptiable)
     {
        commandRequirements = modm::SmartPointer(new modm::DynamicArray
           <const Subsystem*>(SUBSYSTEM_REQUIREMENT_LIST_SIZE));
@@ -52,19 +52,8 @@ class Command {
 
     /**
      * Schedules this command.
-     *
-     * @param interruptible whether this command can be interrupted by another
-     * command that shares one of its requirements
      */
-    void schedule(bool interruptible);
-
-    /**
-     * Schedules this command, defaulting to interruptible.
-     */
-    void schedule()
-    {
-       schedule(true);
-    }
+    void schedule();
 
     /**
      * Whether the command requires a given subsystem.  Named "hasRequirement"

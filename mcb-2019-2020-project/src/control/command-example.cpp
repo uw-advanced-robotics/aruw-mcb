@@ -7,7 +7,7 @@ namespace aruwsrc
 namespace control
 {
     CommandExample::CommandExample(SubsystemExample* subsystem)
-        : subsystemExample(subsystem)
+        : subsystemExample(subsystem), Command(false)
     {
         addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
     }
@@ -22,7 +22,7 @@ namespace control
 
     void CommandExample::end(bool interrupted)
     {
-        if (!interrupted)
+        if (interrupted)
         {
             subsystemExample->setDesiredRpm(0);
         }

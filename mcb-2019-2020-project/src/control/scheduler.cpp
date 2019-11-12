@@ -20,17 +20,14 @@ namespace control
             return false;
         }
 
-        const modm::DynamicArray<const Subsystem*>& commandDependencies =
-            control->getRequirements();
         // Check to make sure the control you are trying to add to the scheduler
         // can be added.
         // If there are command dependencies that can't be interrupted, don't schedule.
-        for (int i = 0; i < static_cast<int>(commandDependencies.getSize()); i++)
+        for (const Subsystem* dependentSubsystem : control->getRequirements())
         {
-            const Subsystem* subsystemDependency = commandDependencies[i];
             if (
-                subsystemDependency->GetCurrentCommand() != nullptr
-                && !subsystemDependency->GetCurrentCommand()->isInterruptiable()
+                dependentSubsystem->GetCurrentCommand() != nullptr
+                && !dependentSubsystem->GetCurrentCommand()->isInterruptiable()
             ) {
                 return false;
             }
@@ -38,14 +35,16 @@ namespace control
 
         // // If we can replace the command based of the command dependencies, do so.
         // // O(n^2) :`(
-        for (int i = subsystemList.getSize(); i > 0; i--)
+
+        modm::LinkedList<Subsystem*>::iterator subsystemListItr = subsystemList.begin();
+
+        while (subsystemListItr.operator!=(subsystemList.end()))
         {
-            Subsystem* currSubsystem = subsystemList.getFront();
-            subsystemList.removeFront();
-            subsystemList.append(currSubsystem);
-            for (int j = 0; j < static_cast<int>(commandDependencies.getSize()); j++)
+            subsystemListItr.operator++;
+            Subsystem* currSubsystem = subsystemListItr.operator->;
+            for (const Subsystem* dependentSubsystem : control->getRequirements())
             {
-                if (commandDependencies[j] == currSubsystem)
+                if (dependentSubsystem == currSubsystem)
                 {
                     if (currSubsystem->GetCurrentCommand() != nullptr)
                     {
@@ -55,7 +54,6 @@ namespace control
                 }
             }
         }
-
         commandList.append(control);
         control->initialize();
         return true;

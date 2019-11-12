@@ -6,9 +6,9 @@ namespace aruwlib
 
 namespace control
 {
-    void Command::schedule(bool interruptible)
+    void Command::schedule()
     {
-        isCommandInterruptiable = interruptible;
+        // schedule the command add command to scheduler
     }
 
     bool Command::hasRequirement(const Subsystem* requirement) const
