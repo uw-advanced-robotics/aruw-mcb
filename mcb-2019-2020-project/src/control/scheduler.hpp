@@ -43,16 +43,10 @@ class Scheduler
 
     static bool registerSubsystem(Subsystem* subsystem);
 
-    static void motorSendReceiveRatio(uint16_t motorSendReceiveRatio);
-
  private:
     static modm::LinkedList<Command*> commandList;
 
     static modm::LinkedList<Subsystem*> subsystemList;
-
-    static uint16_t sendReceiveRatio;
-
-    static uint16_t updateCounter;
 };
 
 }  // namespace control

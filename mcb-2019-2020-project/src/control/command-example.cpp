@@ -6,6 +6,12 @@ namespace aruwsrc
 
 namespace control
 {
+    CommandExample::CommandExample(SubsystemExample* subsystem)
+        : subsystemExample(subsystem)
+    {
+        addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
+    }
+
     void CommandExample::initialize()
     {}
 
@@ -29,11 +35,6 @@ namespace control
 
     void CommandExample::interrupted(void)
     {
-    }
-
-    bool CommandExample::runsWhenDisabled(void) const
-    {
-        return false;
     }
 }  // namespace control
 

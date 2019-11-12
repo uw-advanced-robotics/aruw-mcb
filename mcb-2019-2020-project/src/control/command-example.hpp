@@ -21,15 +21,7 @@ class SubsystemExample;
 class CommandExample : public Command
 {
  public:
-    explicit CommandExample(SubsystemExample* subsystem)
-    {
-        addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
-        subsystemExample = subsystem;
-    }
-
-    ~CommandExample()
-    {
-    }
+    explicit CommandExample(SubsystemExample* subsystem);
 
     /**
       * The initial subroutine of a command.  Called once when the command is
@@ -61,13 +53,6 @@ class CommandExample : public Command
 
     void interrupted(void);
 
-    /**
-      * Whether the given command should run when the robot is disabled.  Override
-      * to return true if the command should run when disabled.
-      *
-      * @return whether the command should run when the robot is disabled
-      */
-    bool runsWhenDisabled(void) const;
  private:
     static const int16_t DEFAULT_WHEEL_RPM = 5000;
 

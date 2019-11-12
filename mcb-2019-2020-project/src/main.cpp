@@ -9,7 +9,7 @@
 
 #include <modm/container/smart_pointer.hpp>
 
-aruwsrc::control::SubsystemExample frictionWheelSystem(
+aruwsrc::control::SubsystemExample subsystemFrictionWheel(
     10, 0, 0, 0, 5000,
     aruwlib::motor::MotorId::MOTOR5,
     aruwlib::motor::MotorId::MOTOR6
@@ -17,21 +17,23 @@ aruwsrc::control::SubsystemExample frictionWheelSystem(
 
 
 
-aruwsrc::control::CommandExample frictionWheelDefaultCommand(&frictionWheelSystem);
+aruwsrc::control::CommandExample CommandFrictionWheelDefault(&subsystemFrictionWheel);
 
 aruwlib::motor::DjiMotor* m3;
 
+using namespace std;
+
 int main()
 {
-    frictionWheelSystem.SetDefaultCommand(&frictionWheelDefaultCommand);
-    Scheduler::registerSubsystem(&frictionWheelSystem);
-    Scheduler::motorSendReceiveRatio(30);  // send every 3 ms, assuming 100 microsecond delay
+    subsystemFrictionWheel.SetDefaultCommand(&CommandFrictionWheelDefault);
+    Scheduler::registerSubsystem(&subsystemFrictionWheel);
 
-    frictionWheelDefaultCommand.schedule();
+    CommandFrictionWheelDefault.schedule();
 
     Board::initialize();
-              
-    m3 = reinterpret_cast<aruwlib::motor::DjiMotor*>(frictionWheelSystem.frictionWheelLeft.getPointer());
+
+    m3 = reinterpret_cast<aruwlib::motor::DjiMotor*>(
+        subsystemFrictionWheel.frictionWheelLeft.getPointer());
 
     while (1)
     {

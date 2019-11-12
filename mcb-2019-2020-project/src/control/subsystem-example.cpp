@@ -11,7 +11,7 @@ namespace control
     }
 
     void SubsystemExample::refresh()
-    {        
+    {
         // updateMotorRpmPid(
         //     getPidPointer(velocityPidLeftWheel),
         //     getMotorPointer(frictionWheelLeft),

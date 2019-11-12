@@ -23,8 +23,7 @@ class Command {
  public:
     Command()
     {
-
-       commandRequirements2 = modm::SmartPointer(new modm::DynamicArray
+       commandRequirements = modm::SmartPointer(new modm::DynamicArray
           <const Subsystem*>(SUBSYSTEM_REQUIREMENT_LIST_SIZE));
     }
 
@@ -68,21 +67,6 @@ class Command {
     }
 
     /**
-     * Cancels this command.  Will call the command's interrupted() method.
-     * Commands will be canceled even if they are not marked as interruptible.
-     */
-    void cancel();
-
-    /**
-     * Whether or not the command is currently scheduled.  Note that this does not
-     * detect whether the command is being run by a CommandGroup, only whether it
-     * is directly being run by the scheduler.
-     *
-     * @return Whether the command is scheduled.
-     */
-    bool isScheduled() const;
-
-    /**
      * Whether the command requires a given subsystem.  Named "hasRequirement"
      * rather than "requires" to avoid confusion with
      * {@link
@@ -97,23 +81,12 @@ class Command {
     /**
      * Adds the required subsystem to a list of required subsystems
      */
-    bool addSubsystemRequirement(const Subsystem* requirement);
+    void addSubsystemRequirement(const Subsystem* requirement);
 
     /**
-     * Returns m_isInterruptiable
+     * Returns isCommandInterruptiable
      */
     bool isInterruptiable(void) const;
-
-    /**
-     * Whether the given command should run when the robot is disabled.  Override
-     * to return true if the command should run when disabled.
-     *
-     * @return whether the command should run when the robot is disabled
-     */
-    virtual bool runsWhenDisabled() const
-    {
-       return false;
-    }
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -146,22 +119,19 @@ class Command {
        return false;
     }
 
-    /**
-     * Override if you want the command to do something special if it is
-     * interrupted. This function will be called when the subsystem is
-     * interrupted.
-     */
-    virtual void interrupted(void) = 0;
-
  private:
     const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
 
-    bool m_isInterruptiable = true;
-
-    bool isCommandScheduled = false;
+    bool isCommandInterruptiable = true;
 
     // contains pointers to const Subsystem pointers that this command requires
-    modm::SmartPointer commandRequirements2;
+    modm::SmartPointer commandRequirements;
+
+    /**
+     * An internal helper method that returns the contents of the
+     * commandRequirements smart pointer in a modifiable form
+     */
+    modm::DynamicArray<const Subsystem*>* getRequirementsModifiable(void);
 };
 
 }  // namespace control

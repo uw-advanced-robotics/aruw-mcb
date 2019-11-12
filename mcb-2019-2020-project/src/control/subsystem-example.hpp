@@ -46,8 +46,10 @@ class SubsystemExample : public Subsystem
         frictionWheelLeft = modm::SmartPointer(m1);
         frictionWheelRight = modm::SmartPointer(m2);
 
-        velocityPidLeftWheel = modm::SmartPointer(new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
-        velocityPidRightWheel = modm::SmartPointer(new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
+        velocityPidLeftWheel = modm::SmartPointer(
+            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
+        velocityPidRightWheel = modm::SmartPointer(
+            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
     }
 
     ~SubsystemExample()
@@ -66,7 +68,7 @@ class SubsystemExample : public Subsystem
     aruwlib::motor::DjiMotor* m2;
 
     float desiredRpm;
-    
+
     modm::SmartPointer frictionWheelRight;
 
     modm::SmartPointer velocityPidLeftWheel;

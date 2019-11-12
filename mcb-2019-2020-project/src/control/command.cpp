@@ -8,27 +8,14 @@ namespace control
 {
     void Command::schedule(bool interruptible)
     {
-        m_isInterruptiable = interruptible;
-        isCommandScheduled = Scheduler::addCommand(this);
-    }
-
-    void Command::cancel(void)
-    {
-        this->interrupted();
-        Scheduler::removeCommand(this);
-    }
-
-    bool Command::isScheduled() const
-    {
-        return isCommandScheduled;
-        // return Scheduler::isScheduled(this);
+        isCommandInterruptiable = interruptible;
     }
 
     bool Command::hasRequirement(const Subsystem* requirement) const
     {
-        for (int i = 0; i < static_cast<int>(getRequirements().getSize()); i++)
+        for (const Subsystem* subsystemRequirement : getRequirements())
         {
-            if (requirement == getRequirements()[i])
+            if (requirement == subsystemRequirement)
             {
                 return true;
             }
@@ -36,31 +23,35 @@ namespace control
         return false;
     }
 
-    bool Command::addSubsystemRequirement(const Subsystem* requirement)
+    void Command::addSubsystemRequirement(const Subsystem* requirement)
     {
-
-        // Insure the requirement you are trying to add is not already a
+        // Ensure the requirement you are trying to add is not already a
         // command requirement.
-        for (int i = 0; i < static_cast<int>(getRequirements().getSize()); i++)
+        for (const Subsystem* subsystemRequirement : getRequirements())
         {
-            if (getRequirements()[i] == requirement)
+            if (subsystemRequirement == requirement)
             {
-                return false;
+                return;
             }
         }
-        (*reinterpret_cast<modm::DynamicArray<const Subsystem*>*>(
-            commandRequirements2.getPointer())).append(requirement);
-        return true;
+        getRequirementsModifiable()->append(requirement);
     }
 
     const modm::DynamicArray<const Subsystem*>& Command::getRequirements() const
     {
-        return *reinterpret_cast<const modm::DynamicArray<const Subsystem*>*>(commandRequirements2.getPointer());
+        return *reinterpret_cast<const modm::DynamicArray<const Subsystem*>*>(
+            commandRequirements.getPointer());
+    }
+
+    modm::DynamicArray<const Subsystem*>* Command::getRequirementsModifiable()
+    {
+        return reinterpret_cast<modm::DynamicArray<const Subsystem*>*>(
+            commandRequirements.getPointer());
     }
 
     bool Command::isInterruptiable() const
     {
-        return m_isInterruptiable;
+        return isCommandInterruptiable;
     }
 }  // namespace control
 

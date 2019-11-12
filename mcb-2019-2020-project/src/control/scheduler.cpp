@@ -11,20 +11,11 @@ namespace control
 
     modm::LinkedList<Subsystem*> Scheduler::subsystemList;
 
-    uint16_t Scheduler::sendReceiveRatio = 1;
-
-    uint16_t Scheduler::updateCounter = 0;
-
-    void Scheduler::motorSendReceiveRatio(uint16_t motorSendReceiveRatio)
-    {
-        sendReceiveRatio = motorSendReceiveRatio;
-    }
-
     bool Scheduler::addCommand(Command* control)
     {
         // only add the command if (a) command is not already being run and (b) all
         // subsystem dependencies can be interrupted.
-        if (control->isScheduled())
+        if (isScheduled(control))
         {
             return false;
         }
@@ -72,9 +63,6 @@ namespace control
 
     void Scheduler::run()
     {
-        // update dji motors
-        aruwlib::can::CanRxHandler::pollCanData();
-
         // refresh all subsystems (i.e. run control loops where necessary)
         // additionally, check if no command is running, in which case run the
         // default command.
@@ -107,17 +95,9 @@ namespace control
             }
             else
             {
-                commandList.end();
+                currCommand->end(false);
             }
         }
-
-        // send stuff to dji motors based on sendReceiveRatio
-        if (updateCounter == 0)
-        {
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-        }
-
-        updateCounter = (updateCounter + 1) % sendReceiveRatio;
     }
 
     void Scheduler::resetAll(void)
