@@ -6,6 +6,12 @@ namespace aruwlib
 
 namespace control
 {
+    Command::Command(bool isInterruptiable) : isCommandInterruptiable(isInterruptiable)
+    {
+       commandRequirements = modm::SmartPointer(new modm::DynamicArray
+          <const Subsystem*>(SUBSYSTEM_REQUIREMENT_LIST_SIZE));
+    }
+
     void Command::schedule()
     {
         // schedule the command add command to scheduler

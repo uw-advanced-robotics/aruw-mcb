@@ -21,11 +21,7 @@ namespace control
 
 class Command {
  public:
-    Command(bool isInterruptiable) : isCommandInterruptiable(isInterruptiable)
-    {
-       commandRequirements = modm::SmartPointer(new modm::DynamicArray
-          <const Subsystem*>(SUBSYSTEM_REQUIREMENT_LIST_SIZE));
-    }
+    explicit Command(bool isInterruptiable);
 
     void initCommand()
     {
