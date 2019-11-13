@@ -32,9 +32,6 @@ int main()
 
     Board::initialize();
 
-    m3 = reinterpret_cast<aruwlib::motor::DjiMotor*>(
-        subsystemFrictionWheel.frictionWheelLeft.getPointer());
-
     while (1)
     {
         aruwlib::control::Scheduler::run();

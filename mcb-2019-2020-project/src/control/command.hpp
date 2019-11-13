@@ -12,6 +12,7 @@
 #include "src/control/subsystem.hpp"
 #include <modm/container/dynamic_array.hpp>
 #include <modm/container/smart_pointer.hpp>
+#include <set>
 
 namespace aruwlib
 {
@@ -45,7 +46,7 @@ class Command {
      * @return the set of subsystems that are required
      */
    //  const modm::DynamicArray<const Subsystem*>& getRequirements() const;
-    const set<const Subsystem*>& getRequirements() const;
+    const std::set<const Subsystem*>& getRequirements() const;
 
     /**
      * Schedules this command.
@@ -119,7 +120,7 @@ class Command {
      * commandRequirements smart pointer in a modifiable form
      */
    //  modm::DynamicArray<const Subsystem*>* getRequirementsModifiable(void);
-    set<const Subsystem*>* Command::getRequirementsModifiable(void);
+    std::set<const Subsystem*>* getRequirementsModifiable(void);
 };
 
 }  // namespace control
