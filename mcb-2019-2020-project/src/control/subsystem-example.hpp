@@ -59,15 +59,14 @@ class SubsystemExample : public Subsystem
 
     void refresh(void);
 
-        modm::SmartPointer frictionWheelLeft;
-
-
  private:
     aruwlib::motor::DjiMotor* m1;
 
     aruwlib::motor::DjiMotor* m2;
 
     float desiredRpm;
+
+    modm::SmartPointer frictionWheelLeft;
 
     modm::SmartPointer frictionWheelRight;
 

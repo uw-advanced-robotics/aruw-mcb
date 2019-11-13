@@ -7,7 +7,7 @@ namespace aruwsrc
 namespace control
 {
     CommandExample::CommandExample(SubsystemExample* subsystem)
-        : subsystemExample(subsystem), Command(false)
+        : Command(false), subsystemExample(subsystem)
     {
         addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
     }

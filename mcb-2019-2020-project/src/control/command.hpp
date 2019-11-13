@@ -44,7 +44,8 @@ class Command {
      *
      * @return the set of subsystems that are required
      */
-    const modm::DynamicArray<const Subsystem*>& getRequirements() const;
+   //  const modm::DynamicArray<const Subsystem*>& getRequirements() const;
+    const set<const Subsystem*>& getRequirements() const;
 
     /**
      * Schedules this command.
@@ -105,6 +106,7 @@ class Command {
     }
 
  private:
+    // initial size of commandRequirements
     const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
 
     bool isCommandInterruptiable = true;
@@ -116,7 +118,8 @@ class Command {
      * An internal helper method that returns the contents of the
      * commandRequirements smart pointer in a modifiable form
      */
-    modm::DynamicArray<const Subsystem*>* getRequirementsModifiable(void);
+   //  modm::DynamicArray<const Subsystem*>* getRequirementsModifiable(void);
+    set<const Subsystem*>* Command::getRequirementsModifiable(void);
 };
 
 }  // namespace control

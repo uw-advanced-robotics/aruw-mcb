@@ -19,10 +19,18 @@ namespace control
         // );
         // getPidPointer(velocityPidLeftWheel)->update(desiredRpm - m1->getShaftRPM());
         // m1->setDesiredOutput(getPidPointer(velocityPidLeftWheel)->getValue());
+        // updateMotorRpmPid(
+        //     getPidPointer(velocityPidRightWheel),
+        //     getMotorPointer(frictionWheelRight),
+        //     desiredRpm
+        // );
+        updateMotorRpmPid(
+            getPidPointer(velocityPidLeftWheel),
+            m1, desiredRpm
+        );
         updateMotorRpmPid(
             getPidPointer(velocityPidRightWheel),
-            getMotorPointer(frictionWheelRight),
-            desiredRpm
+            m2, desiredRpm
         );
     }
 
