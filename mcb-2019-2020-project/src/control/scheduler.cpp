@@ -41,14 +41,14 @@ namespace control
 
         for (const Subsystem* dependentSubsystem : control->getRequirements())
         {
-            Subsystem* isDependentSubsystem = (*subsystemList1.find(
-                const_cast<Subsystem*>(dependentSubsystem)));  // im sry
-            if (isDependentSubsystem == nullptr)
+            set<Subsystem*>::iterator isDependentSubsystem = subsystemList1.find(
+                const_cast<Subsystem*>(dependentSubsystem));  // im sry
+            if (isDependentSubsystem == subsystemList1.end())
             {
                 if (dependentSubsystem->GetCurrentCommand() != nullptr)
                 {
                     // end and indicate command was interrupted
-                    isDependentSubsystem->GetCurrentCommand()->end(true);
+                    (*isDependentSubsystem)->GetCurrentCommand()->end(true);
                 }
                 control->initialize();
                 control->execute();
@@ -86,7 +86,7 @@ namespace control
     void Scheduler::run()
     {
         for (auto subsystemListItr1 = subsystemList1.begin();
-            subsystemListItr1 != subsystemList1.end();
+            subsystemListItr1 != subsystemList1.end(); ++subsystemListItr1
         ) {
            if (
                (*subsystemListItr1)->GetCurrentCommand() == nullptr
@@ -147,7 +147,7 @@ namespace control
     void Scheduler::removeCommand(Command* command)
     {
         set<Command*>::iterator commandList1Itr = commandList1.find(command);
-        if (*commandList1Itr != nullptr)
+        if (commandList1Itr != commandList1.end())
         {
             (*commandList1Itr)->end(false);
             commandList1.erase(commandList1Itr);
@@ -167,7 +167,7 @@ namespace control
 
     bool Scheduler::isScheduled(Command* command)
     {
-        return *(commandList1.find(command)) != nullptr;
+        return commandList1.find(command) != commandList1.end();
 
         // modm::LinkedList<Command*>::const_iterator commandListItr = commandList.begin();
         // while ((*commandListItr) != nullptr)
@@ -185,7 +185,7 @@ namespace control
     void Scheduler::registerSubsystem(Subsystem* subsystem)
     {
         auto subsystemListItr1 = subsystemList1.find(subsystem);
-        if (*subsystemListItr1 != nullptr)
+        if (subsystemListItr1 == subsystemList1.end())
         {
             subsystemList1.insert(subsystem);
         }
