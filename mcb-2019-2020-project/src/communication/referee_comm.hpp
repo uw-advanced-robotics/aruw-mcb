@@ -21,6 +21,8 @@
 #define REF_DAMAGE_EVENT_SIZE (10)
 #define TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS (100) // time between each referee ui display send in milliseconds 
 
+namespace aruwlib
+{
 
 typedef enum 
 {
@@ -223,5 +225,6 @@ private:
 
 };
 
+}
 
 #endif

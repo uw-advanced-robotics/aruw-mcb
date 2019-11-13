@@ -39,6 +39,10 @@
 
 #define CRC8_INIT 0xff
 #define CRC16_INIT 0xffff
+
+namespace aruwlib
+{
+
 // AutoAim Data
 typedef struct
 {
@@ -140,8 +144,7 @@ private:
     static void handleTurrentAim(TurretAimData_t *aim_data);
     static void sendIMUChassisData(IMUData_t *imu_data, ChassisData_t *chassis_data);
     static bool sendRobotID();
-
-
 };
 
+}
 #endif

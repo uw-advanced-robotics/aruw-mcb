@@ -4,6 +4,9 @@
 #include <rm-dev-board-a/board.hpp>
 #include "../algorithms/crc.hpp"
 
+namespace aruwlib
+{
+
 Serial::Serial(SerialPort port, message_handler_t message_handler) {
     this->port = port;
     this->expected_message_length = 0;
@@ -241,4 +244,6 @@ void Serial::initialize() {
 
 uint8_t Serial::getTxSequenceNumber(){
     return this->tx_sequence_num;
+}
+
 }
