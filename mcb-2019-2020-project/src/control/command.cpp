@@ -10,14 +10,10 @@ namespace control
 {
     Command::Command(bool isInterruptiable) : isCommandInterruptiable(isInterruptiable)
     {
+        cmdRequirements = new set<const Subsystem*>();
         commandRequirements = modm::SmartPointer(new set<const Subsystem*>);
         // commandRequirements = modm::SmartPointer(new modm::DynamicArray
         //     <const Subsystem*>(SUBSYSTEM_REQUIREMENT_LIST_SIZE));
-    }
-
-    void Command::schedule()
-    {
-        // schedule the command add command to scheduler TODO(matthew)
     }
 
     bool Command::hasRequirement(const Subsystem* requirement) const
@@ -53,6 +49,7 @@ namespace control
 
     const set<const Subsystem*>& Command::getRequirements() const
     {
+        return *cmdRequirements;
         return *reinterpret_cast<const set<const Subsystem*>*>(
             commandRequirements.getPointer());
     }
@@ -65,6 +62,7 @@ namespace control
 
     set<const Subsystem*>* Command::getRequirementsModifiable()
     {
+        return cmdRequirements;
         return reinterpret_cast<set<const Subsystem*>*>(commandRequirements.getPointer());
 
     }

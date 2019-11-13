@@ -9,6 +9,7 @@ namespace aruwlib
 
 namespace control
 {
+    Subsystem* s;
     // modm::LinkedList<Command*> Scheduler::commandList;
 
     // modm::LinkedList<Subsystem*> Scheduler::subsystemList;
@@ -35,13 +36,11 @@ namespace control
             ++requirementsItr
         ) {
         // for (const Subsystem* dependentSubsystem : control->getRequirements())
-            if (
-                (*requirementsItr)->GetCurrentCommand() != nullptr
-                && !(*requirementsItr)->GetCurrentCommand()->isInterruptiable()
+            if ((*requirementsItr)->GetCurrentCommand() != nullptr
+                && !((*requirementsItr)->GetCurrentCommand()->isInterruptiable())
             ) {
                 return false;
             }
-            return true;
             // if (
             //     dependentSubsystem->GetCurrentCommand() != nullptr
             //     && !dependentSubsystem->GetCurrentCommand()->isInterruptiable()
@@ -60,13 +59,17 @@ namespace control
                 const_cast<Subsystem*>(/*dependentSubsystem*/*requirementsItr));  // im sry
             if (isDependentSubsystem != subsystemList1.end())
             {
-                if (/*dependentSubsystem*/(*requirementsItr)->GetCurrentCommand() != nullptr)
-                {
-                    // end and indicate command was interrupted
-                    (*isDependentSubsystem)->GetCurrentCommand()->end(true);
-                }
-                control->initialize();
-                control->execute();
+                // s = *isDependentSubsystem;
+                // if (s->GetCurrentCommand() != nullptr)
+                // {
+                //     s->GetCurrentCommand()->end(true);
+                // }
+                // if (/*dependentSubsystem*/(*isDependentSubsystem)->GetCurrentCommand() != nullptr)
+                // {
+                //     // end and indicate command was interrupted
+                //     (*isDependentSubsystem)->GetCurrentCommand()->end(true);
+                // }
+                // control->initialize();
             }
         }
 
@@ -107,7 +110,7 @@ namespace control
                (*subsystemListItr1)->GetCurrentCommand() == nullptr
                 && (*subsystemListItr1)->GetDefaultCommand() != nullptr
             ) {
-                (*subsystemListItr1)->GetDefaultCommand()->schedule();
+                addCommand((*subsystemListItr1)->GetDefaultCommand());
             }
             (*subsystemListItr1)->refresh();
         }

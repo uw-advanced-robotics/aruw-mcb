@@ -49,11 +49,6 @@ class Command {
     const std::set<const Subsystem*>& getRequirements() const;
 
     /**
-     * Schedules this command.
-     */
-    void schedule();
-
-    /**
      * Whether the command requires a given subsystem.  Named "hasRequirement"
      * rather than "requires" to avoid confusion with
      * {@link
@@ -113,6 +108,8 @@ class Command {
     bool isCommandInterruptiable = true;
 
     // contains pointers to const Subsystem pointers that this command requires
+    std::set<const Subsystem*>* cmdRequirements;
+
     modm::SmartPointer commandRequirements;
 
     /**

@@ -23,19 +23,24 @@ aruwlib::motor::DjiMotor* m3;
 
 using namespace std;
 
+Subsystem* s2;
+
 int main()
 {
     subsystemFrictionWheel.SetDefaultCommand(&CommandFrictionWheelDefault);
     Scheduler::registerSubsystem(&subsystemFrictionWheel);
 
-    CommandFrictionWheelDefault.schedule();
-
     Board::initialize();
+
+    s2 = &subsystemFrictionWheel;
 
     while (1)
     {
         aruwlib::control::Scheduler::run();
         modm::delayMicroseconds(10);
+
+        modm::delayMilliseconds(1000);
+        Board::Leds::toggle();
     }
     return 0;
 }
