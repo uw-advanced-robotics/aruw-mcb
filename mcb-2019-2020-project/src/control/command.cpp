@@ -22,7 +22,7 @@ namespace control
 
     bool Command::hasRequirement(const Subsystem* requirement) const
     {
-        getRequirements().find(requirement);
+        return getRequirements().find(requirement) != getRequirements().end();
         // for (const Subsystem* subsystemRequirement : getRequirements())
         // {
         //     if (requirement == subsystemRequirement)
@@ -35,16 +35,20 @@ namespace control
 
     void Command::addSubsystemRequirement(const Subsystem* requirement)
     {
+        if (getRequirements().find(requirement) == getRequirements().end())
+        {
+            getRequirementsModifiable()->insert(requirement);
+        }
         // Ensure the requirement you are trying to add is not already a
         // command requirement.
-        for (const Subsystem* subsystemRequirement : getRequirements())
-        {
-            if (subsystemRequirement == requirement)
-            {
-                return;
-            }
-        }
-        getRequirementsModifiable()->append(requirement);
+        // for (const Subsystem* subsystemRequirement : getRequirements())
+        // {
+        //     if (subsystemRequirement == requirement)
+        //     {
+        //         return;
+        //     }
+        // }
+        // getRequirementsModifiable()->append(requirement);
     }
 
     const set<const Subsystem*>& Command::getRequirements() const
@@ -64,7 +68,6 @@ namespace control
         return reinterpret_cast<set<const Subsystem*>*>(commandRequirements.getPointer());
 
     }
-    
 
     // modm::DynamicArray<const Subsystem*>* Command::getRequirementsModifiable()
     // {
