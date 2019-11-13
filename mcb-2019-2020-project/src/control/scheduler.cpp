@@ -29,23 +29,38 @@ namespace control
         // Check to make sure the control you are trying to add to the scheduler
         // can be added.
         // If there are command dependencies that can't be interrupted, don't schedule.
-        for (const Subsystem* dependentSubsystem : control->getRequirements())
-        {
+        for (
+            auto requirementsItr = control->getRequirements().begin();
+            requirementsItr != control->getRequirements().end();
+            ++requirementsItr
+        ) {
+        // for (const Subsystem* dependentSubsystem : control->getRequirements())
             if (
-                dependentSubsystem->GetCurrentCommand() != nullptr
-                && !dependentSubsystem->GetCurrentCommand()->isInterruptiable()
+                (*requirementsItr)->GetCurrentCommand() != nullptr
+                && !(*requirementsItr)->GetCurrentCommand()->isInterruptiable()
             ) {
                 return false;
             }
+            return true;
+            // if (
+            //     dependentSubsystem->GetCurrentCommand() != nullptr
+            //     && !dependentSubsystem->GetCurrentCommand()->isInterruptiable()
+            // ) {
+            //     return false;
+            // }
         }
 
-        for (const Subsystem* dependentSubsystem : control->getRequirements())
-        {
+        // for (const Subsystem* dependentSubsystem : control->getRequirements())
+        for (
+            auto requirementsItr = control->getRequirements().begin();
+            requirementsItr != control->getRequirements().end();
+            ++requirementsItr
+        ) {
             set<Subsystem*>::iterator isDependentSubsystem = subsystemList1.find(
-                const_cast<Subsystem*>(dependentSubsystem));  // im sry
-            if (isDependentSubsystem == subsystemList1.end())
+                const_cast<Subsystem*>(/*dependentSubsystem*/*requirementsItr));  // im sry
+            if (isDependentSubsystem != subsystemList1.end())
             {
-                if (dependentSubsystem->GetCurrentCommand() != nullptr)
+                if (/*dependentSubsystem*/(*requirementsItr)->GetCurrentCommand() != nullptr)
                 {
                     // end and indicate command was interrupted
                     (*isDependentSubsystem)->GetCurrentCommand()->end(true);
