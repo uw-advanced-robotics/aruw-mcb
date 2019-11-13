@@ -4,6 +4,9 @@
 #include "referee_comm.hpp"
 #include "cv_comms.hpp"
 
+namespace aruwlib
+{
+
 ref_game_data_t RefereeSystem::game_data; /* game stats 	(e.g. remaining time, current stage, winner)*/
 ref_robot_data_t RefereeSystem::robot_data; /* robot stats	(e.g. current HP, power draw, turret info)*/
 received_dps_tracker_t RefereeSystem::received_dps_tracker;
@@ -365,4 +368,6 @@ ref_robot_data_t RefereeSystem::getRobotData(){
 
 ref_game_data_t RefereeSystem::getGameData(){
 	return game_data;
+}
+
 }

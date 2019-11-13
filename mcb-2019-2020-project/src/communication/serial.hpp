@@ -11,6 +11,9 @@
 
 #include <rm-dev-board-a/board.hpp>
 
+namespace aruwlib
+{
+
 typedef enum
 {
     // PORT_UART1 = 0,
@@ -126,4 +129,5 @@ class Serial
     modm::Timestamp timestamp;
 };
 
+}
 #endif

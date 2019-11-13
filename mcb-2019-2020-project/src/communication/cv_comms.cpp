@@ -3,6 +3,9 @@
 #include "../algorithms/crc.hpp"
 #include "serial.hpp"
 
+namespace aruwlib
+{
+
 uint32_t CVCommunication::PreviousIDTimestamp;  // tracks previous ms that robot id was sent to CV
 bool CVCommunication::autoAimRequestQueued;
 bool CVCommunication::autoAimRequestState;
@@ -208,3 +211,4 @@ CVCommunication::~CVCommunication()
 {
 }
 
+}

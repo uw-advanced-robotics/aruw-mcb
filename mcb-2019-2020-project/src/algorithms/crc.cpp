@@ -2,6 +2,9 @@
 #include <cstddef>
 #include "crc.hpp"
 
+namespace aruwlib
+{
+
 
 const uint8_t CRC8_table[256] =
 {
@@ -82,4 +85,6 @@ uint16_t calculateCRC16(uint8_t *message, uint32_t message_length, uint16_t CRC1
             ^ static_cast<uint16_t>(curr_byte)) & 0x00ff];
     }
     return CRC16;
+}
+
 }
