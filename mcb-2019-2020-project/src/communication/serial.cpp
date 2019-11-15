@@ -6,70 +6,79 @@
 
 namespace aruwlib
 {
+namespace serial
+{
 
-Serial::Serial(SerialPort port, message_handler_t message_handler) {
+DJISerial::DJISerial(Serial_Port port, SerialMessageHandler_t messageHandler, bool isRxCRCEnforcementEnabled) {
     this->port = port;
     this->expected_message_length = 0;
-    this->handler = message_handler;
+    this->handler = messageHandler;
     this->message_type = 0;
     this->tx_sequence_num = 0;
     this->rx_sequence_num = 0;
     this->CRC8 = 0;
     this->CRC16 = 0;
-    this->rxCRCEnforcementEnabled = true;
+    this->rxCRCEnforcementEnabled = isRxCRCEnforcementEnabled;
     this->timestamp = modm::Timestamp();
 }
 
-Serial::~Serial() {
+DJISerial::~DJISerial() {
 }
-bool Serial::verifyCRC8(uint8_t *message, uint32_t message_length) {
-    uint8_t CRC8_expected = 0;
-    if ((message == NULL) || (message_length <= 0))
+
+
+/**
+ * Calculate CRC8 of given array and compare against expectedCRC8
+ * @param data array to calculate CRC8
+ * @param length length of array to check
+ * @param expectedCRC8 expected CRC8
+ * @return if the calculated CRC8 matches CRC8 given
+ */
+bool DJISerial::verifyCRC8(uint8_t *data, uint32_t length, uint8_t expectedCRC8) {
+    uint8_t tempCRC8 = 0;
+    if ((data == NULL) || (length <= 0))
     {
         return 0;
     }
-    CRC8_expected = calculateCRC8(message, message_length, CRC8_INIT);
-    return CRC8_expected == CRC8;
+    tempCRC8 = aruwlib::math::calculateCRC8(data, length, CRC8_INIT);
+    return tempCRC8 == expectedCRC8;
 }
-bool Serial::verifyCRC16(uint8_t *message, uint32_t message_length) {
-    uint16_t CRC16_expected = 0;
-    if ((message == NULL) || (message_length <= 0))
+
+/**
+ * Calculate CRC16 of given array and compare against expectedCRC16
+ * @param data array to calculate CRC16
+ * @param length length of array to check
+ * @param expectedCRC16 expected CRC16
+ * @return if the calculated CRC16 matches CRC16 given
+ */
+bool DJISerial::verifyCRC16(uint8_t *data, uint32_t length, uint16_t expectedCRC16) {
+    uint16_t tempCRC16 = 0;
+    if ((data == NULL) || (length <= 0))
     {
         return false;
     }
-    CRC16_expected = calculateCRC16(message, message_length, CRC16_INIT);
-    return CRC16_expected == CRC16;
+    tempCRC16 = aruwlib::math::calculateCRC16(data, length, CRC16_INIT);
+    return tempCRC16 == expectedCRC16;
 }
 
-bool Serial::verifyCRC() {
-    return verifyCRC8(buff_CRC, 5) &&
-           verifyCRC16(buff_CRC, 7 + expected_message_length);
-}
 
-bool Serial::processFrameHeader() {
-    buff_rx[0] = 0;
+bool DJISerial::processFrameHeader() {
     buff_rx[1] = 0;
     buff_rx[2] = 0;
     buff_rx[3] = 0;
-    this->read(buff_rx, 4);
-    expected_message_length = (buff_rx[1] << 8) | buff_rx[0];
-    rx_sequence_num = buff_rx[2];
-    CRC8 = buff_rx[3];
+    buff_rx[4] = 0;
+    this->read(buff_rx + 1, FRAME_HEADER_LENGTH - 1);// Skip the head byte
+    expected_message_length = (buff_rx[FRAME_DATA_LENGTH_OFFSET + 1] << 8) | buff_rx[FRAME_DATA_LENGTH_OFFSET];
+    rx_sequence_num = buff_rx[FRAME_SEQUENCENUM_OFFSET];
+    CRC8 = buff_rx[FRAME_CRC8_OFFSET];
     // the message length must be greater than 0 and less than the max
     // size of the buffer - 9 (9 bytes are used for the packet header and CRC)
-    if (expected_message_length > 0 && expected_message_length
-        <= SERIAL_RX_BUFF_SIZE - 9) {
-        buff_CRC[0] = SERIAL_HEAD_BYTE;
-        buff_CRC[1] = buff_rx[0];
-        buff_CRC[2] = buff_rx[1];
-        buff_CRC[3] = buff_rx[2];
+    if (expected_message_length > 0){// && expected_message_length
+        //<= SERIAL_RX_BUFF_SIZE - (FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH)) {
         if(!rxCRCEnforcementEnabled) {
-            modm::delayMicroseconds(500);
             return processFrameData();
         }
         else{
-            if(calculateCRC8(buff_CRC,4,CRC8_INIT) == CRC8){
-                modm::delayMicroseconds(500);
+            if(verifyCRC8(buff_rx, FRAME_HEADER_LENGTH - 1, CRC8)){
                 return processFrameData();
             }
             else{ 
@@ -78,7 +87,6 @@ bool Serial::processFrameHeader() {
             }
             
         }
-        
     } else {
         expected_message_length = 0;
         return false;
@@ -88,17 +96,17 @@ bool Serial::processFrameHeader() {
 }
 
 
-
-bool Serial::processFrameData() {
+bool DJISerial::processFrameData() {
     // get the rest of the packet (1-byte sequence, 1-byte CRC8, 2-byte
     // message type, message data, 2-byte CRC16)
-    this->read(buff_rx, expected_message_length + 4);
-    message_type = (buff_rx[1] << 8) | buff_rx[0];
-    CRC16 = (buff_rx[2 + expected_message_length] << 8)
-        | buff_rx[2 + expected_message_length + 1];
+    // skip frame header
+    this->read((buff_rx + FRAME_HEADER_LENGTH), expected_message_length +
+            FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH);
 
-    // set CRC bufffer to get CRC8 and CRC16 values
-    memcpy(buff_CRC + 4, buff_rx, 4 + expected_message_length);
+    message_type = (buff_rx[FRAME_TYPE_OFFSET + 1] << 8) | buff_rx[FRAME_TYPE_OFFSET];
+    
+    CRC16 = ((buff_rx[FRAME_DATA_OFFSET + expected_message_length + 1] << 8)
+        | buff_rx[FRAME_DATA_OFFSET + expected_message_length]);
 
     // if CRC checking is not enabled, process the message, otherwise
     // check if CRC8/CRC16 are valid
@@ -106,21 +114,22 @@ bool Serial::processFrameData() {
         // CRC checking is disabled for this huart port
         Serial_Message_t message;
         message.length = expected_message_length;
-        message.data = buff_rx + 2;
-        message.type = message_type;
+        message.data = buff_rx + FRAME_DATA_OFFSET;
         message.type = message_type;
         this->lastMessage = message;
+        handler(&message);
         return true;
-        //handler(&message);//Currently Doesn't Work
-    } else if (verifyCRC()) {
+    } else if (verifyCRC16(buff_rx, FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH +
+                        expected_message_length, CRC16)) {
         // CRC checking is enabled and CRC8/CRC16 were valid
         Serial_Message_t message;
         message.length = expected_message_length;
-        message.data = buff_rx + 2;
+        message.data = buff_rx + FRAME_DATA_OFFSET;
         message.type = message_type;
         this->lastMessage = message;
+        handler(&message);
+
         return true;
-        //handler(&message);//Currently Doesn't Work
     } else {
         // CRC checking is enabled but CRC8/CRC16 were invalid
         expected_message_length = 0;
@@ -128,13 +137,13 @@ bool Serial::processFrameData() {
     }
 }
 
-bool Serial::send(Serial_Message_t* message) {
+bool DJISerial::send(Serial_Message_t* message) {
     uint8_t buff[SERIAL_TX_BUFF_SIZE];
     buff[0] = SERIAL_HEAD_BYTE;
     buff[1] = message->length & 0xFF;
     buff[2] = message->length >> 8;
     buff[3] = tx_sequence_num;
-    buff[4] = calculateCRC8(buff, 4, CRC8_INIT);
+    buff[4] = aruwlib::math::calculateCRC8(buff, 4, CRC8_INIT);
     buff[5] = message->type & 0xFF;
     buff[6] = message->type >> 8;
 
@@ -147,7 +156,7 @@ bool Serial::send(Serial_Message_t* message) {
         *next_tx_buff = message->data[i];
         next_tx_buff++;
     }
-    uint16_t CRC16_val = calculateCRC16(buff, 7 + message->length, CRC16_INIT);
+    uint16_t CRC16_val = aruwlib::math::calculateCRC16(buff, FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + message->length, CRC16_INIT);
     next_tx_buff[0] = CRC16_val & 0xFF;
     next_tx_buff[1] = CRC16_val >> 8;
     next_tx_buff += SERIAL_FOOTER_LENGTH;
@@ -160,19 +169,20 @@ bool Serial::send(Serial_Message_t* message) {
     return true;
 }
 
-void Serial::enableRXCRCEnforcement() {
+void DJISerial::enableRxCRCEnforcement() {
     rxCRCEnforcementEnabled = true;
 }
-void Serial::disableRXCRCEnforcement() {
+void DJISerial::disableRxCRCEnforcement() {
     rxCRCEnforcementEnabled = false;
 }
 
-bool Serial::update(Serial_Message_t* message) {
+bool DJISerial::update(Serial_Message_t* message) {
     uint8_t data;
     while (read(&data, 1))
     {
         if (data == SERIAL_HEAD_BYTE)
         {
+            buff_rx[0] = SERIAL_HEAD_BYTE;
             if(processFrameHeader()) {
                 message->type = lastMessage.type;
                 message->length = lastMessage.length;
@@ -189,11 +199,11 @@ bool Serial::update(Serial_Message_t* message) {
     //temporary solution
 }
 
-uint32_t Serial::getTimestamp() {
+uint32_t DJISerial::getTimestamp() {
     return timestamp.getTime();
 }
 
-bool Serial::TXMessageRateReady(
+bool DJISerial::TxMessageRateReady(
     uint32_t previousTxMessageTimestamp,
     uint32_t minTxMessageInterval
 ) {
@@ -209,7 +219,7 @@ bool Serial::TXMessageRateReady(
     }
 }
 
-bool Serial::read(uint8_t *data, uint16_t length) {
+bool DJISerial::read(uint8_t *data, uint16_t length) {
     switch (this->port) {
     case PORT_UART2:
         return Usart2::read(data, length);
@@ -219,7 +229,7 @@ bool Serial::read(uint8_t *data, uint16_t length) {
         return false;
     }
 }
-bool Serial::write(const uint8_t *data, uint16_t length) {
+bool DJISerial::write(const uint8_t *data, uint16_t length) {
     switch (this->port) {
     case PORT_UART2:
         return Usart2::write(data, length);
@@ -229,7 +239,7 @@ bool Serial::write(const uint8_t *data, uint16_t length) {
         return false;
     }
 }
-void Serial::initialize() {
+void DJISerial::initialize() {
     switch (this->port) {
     case PORT_UART2:
         Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
@@ -242,8 +252,9 @@ void Serial::initialize() {
     }
 }
 
-uint8_t Serial::getTxSequenceNumber(){
+uint8_t DJISerial::getTxSequenceNumber(){
     return this->tx_sequence_num;
 }
 
+}
 }
