@@ -10,7 +10,7 @@ FROM python:3.8.0
 
 RUN apt-get update
 
-RUN apt-get install -y scons git
+RUN apt-get install -y scons git cppcheck
 
 RUN pip install modm cpplint
 

@@ -1,0 +1,17 @@
+#!/bin/bash
+listTests=(
+  "echo cpplint checks:  ================================================================"
+  "cpplint --recursive ./mcb-2019-2020-project/src"
+  "cpplint ./mcb-2019-2020-project/rm-dev-board-a/* ./mcb-2019-2020-project/*",
+  "echo",
+  "echo cppcheck checks:  ================================================================"
+  "cppcheck ./mcb-2019-2020-project/src ./mcb-2019-2020-project/robot-type ./mcb-2019-2020-project/rm-dev-board-a --enable=all"
+)
+for test in "${listTests[@]}"
+do
+  eval $test
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+done
+echo LINT PASSED  ================================================================
