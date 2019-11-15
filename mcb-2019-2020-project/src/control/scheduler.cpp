@@ -30,14 +30,16 @@ namespace control
         // Check to make sure the control you are trying to add to the scheduler
         // can be added.
         // If there are command dependencies that can't be interrupted, don't schedule.
-        for (
-            auto requirementsItr = control->getRequirements().begin();
-            requirementsItr != control->getRequirements().end();
-            ++requirementsItr
-        ) {
+        for (auto requirement : control->getRequirements())
+        {
+        // for (
+        //     auto requirementsItr = control->getRequirements().begin();
+        //     requirementsItr != control->getRequirements().end();
+        //     ++requirementsItr
+        // ) {
         // for (const Subsystem* dependentSubsystem : control->getRequirements())
-            if ((*requirementsItr)->GetCurrentCommand() != nullptr
-                && !((*requirementsItr)->GetCurrentCommand()->isInterruptiable())
+            if (requirement->GetCurrentCommand() != nullptr
+                && !(requirement->GetCurrentCommand()->isInterruptiable())
             ) {
                 return false;
             }
@@ -50,28 +52,28 @@ namespace control
         }
 
         // for (const Subsystem* dependentSubsystem : control->getRequirements())
-        for (
-            auto requirementsItr = control->getRequirements().begin();
-            requirementsItr != control->getRequirements().end();
-            ++requirementsItr
-        ) {
+
+
+        // auto c = control->getRequirements();
+        for (auto requirement : control->getRequirements())
+        {
+        // for (
+        //     auto requirementsItr = c.begin();
+        //     requirementsItr != c.end();
+        //     ++requirementsItr
+        // ) {
             set<Subsystem*>::iterator isDependentSubsystem = subsystemList1.find(
-                const_cast<Subsystem*>(/*dependentSubsystem*/*requirementsItr));  // im sry
+                const_cast<Subsystem*>(/*dependentSubsystem*/requirement));  // im sry
             if (isDependentSubsystem != subsystemList1.end())
             {
-                // s = *isDependentSubsystem;
-                // if (s->GetCurrentCommand() != nullptr)
-                // {
-                //     s->GetCurrentCommand()->end(true);
-                // }
-                // if (/*dependentSubsystem*/(*isDependentSubsystem)->GetCurrentCommand() != nullptr)
-                // {
-                //     // end and indicate command was interrupted
-                //     (*isDependentSubsystem)->GetCurrentCommand()->end(true);
-                // }
-                // control->initialize();
+                if (requirement->GetCurrentCommand() != nullptr)
+                {
+                    requirement->GetCurrentCommand()->end(true);
+                }
+                control->initialize();
             }
         }
+        return false;
 
         // // If we can replace the command based of the command dependencies, do so.
         // // O(n^2) :`( At least it looks cleaner now, (:
@@ -132,19 +134,19 @@ namespace control
         //     ++subsystemListItr;
         // }
 
-        for (auto commandList1Itr = commandList1.begin();
-            commandList1Itr != commandList1.end();
-        ) {
-            (*commandList1Itr)->execute();
-            if ((*commandList1Itr)->isFinished())
-            {
-                commandList1Itr = commandList1.erase(commandList1Itr);
-            }
-            else
-            {
-                ++commandList1Itr;
-            }
-        }
+        // for (auto commandList1Itr = commandList1.begin();
+        //     commandList1Itr != commandList1.end();
+        // ) {
+        //     (*commandList1Itr)->execute();
+        //     if ((*commandList1Itr)->isFinished())
+        //     {
+        //         commandList1Itr = commandList1.erase(commandList1Itr);
+        //     }
+        //     else
+        //     {
+        //         ++commandList1Itr;
+        //     }
+        // }
 
         // loop through commands.
         // modm::LinkedList<Command*>::iterator commandListItr = commandList.begin();

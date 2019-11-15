@@ -12,7 +12,7 @@
 #include "src/control/subsystem.hpp"
 #include <modm/container/dynamic_array.hpp>
 #include <modm/container/smart_pointer.hpp>
-#include "src/algorithms/include/bits/stl_set.h"
+#include <set>
 
 namespace aruwlib
 {

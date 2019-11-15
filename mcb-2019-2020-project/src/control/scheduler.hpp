@@ -20,7 +20,7 @@
 #include "src/control/command.hpp"
 #include <modm/container/linked_list.hpp>
 #include "src/control/subsystem.hpp"
-#include "src/algorithms/include/bits/stl_set.h"
+#include <set>
 
 namespace aruwlib
 {

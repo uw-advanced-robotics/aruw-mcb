@@ -15,8 +15,6 @@ aruwsrc::control::SubsystemExample subsystemFrictionWheel(
     aruwlib::motor::MotorId::MOTOR6
 );
 
-
-
 aruwsrc::control::CommandExample CommandFrictionWheelDefault(&subsystemFrictionWheel);
 
 aruwlib::motor::DjiMotor* m3;
