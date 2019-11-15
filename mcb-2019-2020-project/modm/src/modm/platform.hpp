@@ -15,6 +15,8 @@
 
 #include <modm/architecture/utils.hpp>
 
+#include "platform\adc\adc_1.hpp"
+#include "platform\adc\adc_interrupt_1.hpp"
 #include "platform\can\can_1.hpp"
 #include "platform\can\can_2.hpp"
 #include "platform\can\can_bit_timings.hpp"
@@ -177,4 +179,15 @@
 #include "platform\gpio\set.hpp"
 #include "platform\gpio\software_port.hpp"
 #include "platform\gpio\unused.hpp"
+#include "platform\spi\spi_base.hpp"
+#include "platform\spi\spi_hal_5.hpp"
+#include "platform\spi\spi_master_5.hpp"
+#include "platform\timer\advanced_base.hpp"
+#include "platform\timer\basic_base.hpp"
+#include "platform\timer\general_purpose_base.hpp"
+#include "platform\timer\timer_8.hpp"
+#include "platform\uart\uart_1.hpp"
+#include "platform\uart\uart_base.hpp"
+#include "platform\uart\uart_baudrate.hpp"
+#include "platform\uart\uart_hal_1.hpp"
 #endif // MODM_PLATFORM_HPP
