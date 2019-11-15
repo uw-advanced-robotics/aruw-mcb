@@ -8,41 +8,42 @@ Planned sensors: basic analog IR, Adafruit VL6180X, and Seeed IR
 
 #include "rm-dev-board-a/board.hpp"
 
-using namespace modm::literals;
-
 namespace aruwlib {
 
 namespace sensors {
 
 class IRSensor {
  public:
-    // Constructor to init boundaries
-    IRSensor(float _minDistance, float _maxDistance);
+   // Constructor to init boundaries
+   IRSensor(float minDistance, float maxDistance);
 
-    // Init sensor
-    virtual void init();
+   // Destructor
+   virtual ~IRSensor() = 0;
 
-    // Read sensor and updates current distance
-    virtual float read(); 
+   // Init sensor
+   virtual void init() = 0;
 
-    // Get current distance
-    float getDistance();
+   // Read sensor and updates current distance
+   virtual float read() = 0; 
 
-    // Get minumum distance boundary
-    float getMinDistance();
+   // Get current distance
+   float getDistance();
 
-    // Get maximun distance boundary
-    float getMaxDistance();
+   // Get minumum distance boundary
+   float getMinDistance();
+
+   // Get maximun distance boundary
+   float getMaxDistance();
 
  protected:
-    // Distance from sensor
-    float distance;
+   // Distance from sensor
+   float m_distance;
 
-    // Lower boundary for reliable readings
-    float minDistance;
+   // Lower boundary for reliable readings
+   float m_minDistance;
 
-    // Upper boundary for reliable readings
-    float maxDistance;
+   // Upper boundary for reliable readings
+   float m_maxDistance;
 };
 
 } // namespace sensors

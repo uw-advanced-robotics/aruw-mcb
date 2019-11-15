@@ -4,24 +4,25 @@ namespace aruwlib {
 
 namespace sensors {
     // Constructor to init boundaries
-    IRSensor::IRSensor(float _minDistance, float _maxDistance) {
-        minDistance = _minDistance;
-        maxDistance = _maxDistance;
-    }
+    IRSensor::IRSensor(float minDistance, float maxDistance):
+        m_minDistance(minDistance), m_maxDistance(maxDistance) {}
+
+    // Destructor
+    IRSensor::~IRSensor() {}
 
     // Get current distance
     float IRSensor::getDistance() {
-        return distance;
+        return m_distance;
     }
 
     // Get minumum distance boundary
     float IRSensor::getMinDistance() {
-        return minDistance;
+        return m_minDistance;
     }
 
     // Get maximun distance boundary
     float IRSensor::getMaxDistance() {
-        return maxDistance;
+        return m_maxDistance;
     }
 } // namespace sensors
 

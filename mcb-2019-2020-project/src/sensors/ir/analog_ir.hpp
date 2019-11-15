@@ -15,21 +15,21 @@ namespace sensors {
 class AnalogIR: public IRSensor {
  public:
     // Constructor to init boundaries and disance calculation values
-    AnalogIR(float _minDistance, float _maxDistance, float _m, float _b, gpio::Analog::Pin _pin);
+    AnalogIR(float minDistance, float maxDistance, float m, float b, gpio::Analog::Pin pin);
 
     // Initialize sensor and ADC
-    virtual void init();
+    void init();
 
     // Read sensor and updates current distance
     float read();
 
  private:
     // Distance calulation values for linear model y=mx+b
-    float m;
-    float b;
+    float m_m;
+    float m_b;
 
     // Analog pin
-    gpio::Analog::Pin pin;
+    gpio::Analog::Pin m_pin;
 };
 
 } // namespace sensors

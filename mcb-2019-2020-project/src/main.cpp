@@ -7,7 +7,7 @@ int main()
 {
     Board::initialize();
 
-    aruwlib::sensors::AnalogIR test(0, 30, 137500, 1125, aruwlib::gpio::Analog::Pin::T);
+    aruwlib::sensors::AnalogIR test(0, 30, 137500, 1125, aruwlib::gpio::Analog::Pin::U);
     test.init();
 
     while (1)
