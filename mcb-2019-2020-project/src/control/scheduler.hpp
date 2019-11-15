@@ -20,7 +20,6 @@
 #include <set>
 #include "rm-dev-board-a/board.hpp"
 #include "src/control/command.hpp"
-#include "src/control/subsystem.hpp"
 
 namespace aruwlib
 {
@@ -37,9 +36,11 @@ class CommandScheduler
 
     static void removeCommand(Command* command);
 
-    static bool isScheduled(Command* command);
+    static bool isCommandScheduled(Command* command);
 
     static void registerSubsystem(Subsystem* subsystem);
+
+    static bool isSubsystemRegistered(const Subsystem* subsystem);
 
  private:
     static std::set<Subsystem*> subsystemList;

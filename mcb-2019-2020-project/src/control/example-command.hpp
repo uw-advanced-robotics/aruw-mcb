@@ -16,12 +16,12 @@ namespace aruwsrc
 
 namespace control
 {
-class SubsystemExample;
+class ExampleSubsystem;
 
-class CommandExample : public Command
+class ExampleCommand : public Command
 {
  public:
-    explicit CommandExample(SubsystemExample* subsystem);
+    explicit ExampleCommand(ExampleSubsystem* subsystem);
 
     /**
       * The initial subroutine of a command.  Called once when the command is
@@ -56,7 +56,7 @@ class CommandExample : public Command
  private:
     static const int16_t DEFAULT_WHEEL_RPM = 5000;
 
-    SubsystemExample* subsystemExample;
+    ExampleSubsystem* subsystemExample;
 };
 
 }  // namespace control

@@ -17,7 +17,7 @@
 #include <modm/math/filter/pid.hpp>
 #include "src/control/subsystem.hpp"
 #include "src/motor/dji_motor.hpp"
-#include "src/control/command-example.hpp"
+#include "src/control/example-command.hpp"
 
 using namespace aruwlib::control;
 
@@ -27,10 +27,10 @@ namespace aruwsrc
 namespace control
 {
 
-class SubsystemExample : public Subsystem
+class ExampleSubsystem : public Subsystem
 {
  public:
-    SubsystemExample(
+    ExampleSubsystem(
         float p,
         float i,
         float d,
@@ -40,7 +40,7 @@ class SubsystemExample : public Subsystem
         aruwlib::motor::MotorId rightMotorId
     );
 
-    ~SubsystemExample()
+    ~ExampleSubsystem()
     {
         delete[] m1;
         delete[] m2;

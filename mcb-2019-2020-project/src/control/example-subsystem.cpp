@@ -1,11 +1,11 @@
-#include "src/control/subsystem-example.hpp"
+#include "src/control/example-subsystem.hpp"
 
 namespace aruwsrc
 {
 
 namespace control
 {
-    SubsystemExample::SubsystemExample(
+    ExampleSubsystem::ExampleSubsystem(
         float p,
         float i,
         float d,
@@ -24,12 +24,12 @@ namespace control
             new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
     }
 
-    void SubsystemExample::setDesiredRpm(float desRpm)
+    void ExampleSubsystem::setDesiredRpm(float desRpm)
     {
         desiredRpm = desRpm;
     }
 
-    void SubsystemExample::refresh()
+    void ExampleSubsystem::refresh()
     {
         updateMotorRpmPid(
             getPidPointer(velocityPidLeftWheel),
@@ -41,7 +41,7 @@ namespace control
         );
     }
 
-    void SubsystemExample::updateMotorRpmPid(
+    void ExampleSubsystem::updateMotorRpmPid(
         modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* motor,
         float desiredRpm
@@ -50,7 +50,7 @@ namespace control
         motor->setDesiredOutput(pid->getValue());
     }
 
-    modm::Pid<float>* SubsystemExample::getPidPointer(modm::SmartPointer smrtPtr)
+    modm::Pid<float>* ExampleSubsystem::getPidPointer(modm::SmartPointer smrtPtr)
     {
         return reinterpret_cast<modm::Pid<float>*>(smrtPtr.getPointer());
     }

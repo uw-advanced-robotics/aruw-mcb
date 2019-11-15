@@ -13,21 +13,22 @@ namespace control
 
     set<Command*> CommandScheduler::commandList;
 
-    bool CommandScheduler::addCommand(Command* control)
+    bool CommandScheduler::addCommand(Command* commandToAdd)
     {
         // only add the command if (a) command is not already being run and (b) all
         // subsystem dependencies can be interrupted.
-        if (isScheduled(control))
+        if (isCommandScheduled(commandToAdd))
         {
             return false;
         }
 
-        // Check to make sure the control you are trying to add to the scheduler
+        // Check to make sure the commandToAdd you are trying to add to the scheduler
         // can be added.
         // If there are command dependencies that can't be interrupted, don't schedule.
-        for (auto requirement : control->getRequirements())
+        for (auto requirement : commandToAdd->getRequirements())
         {
-            if (requirement->GetCurrentCommand() != nullptr
+            if (!isSubsystemRegistered(requirement)
+                && requirement->GetCurrentCommand() != nullptr
                 && !(requirement->GetCurrentCommand()->isInterruptible())
             ) {
                 return false;
@@ -35,7 +36,7 @@ namespace control
         }
 
         // end all commands running on the subsystem requirements. 
-        for (auto requirement : control->getRequirements())
+        for (auto requirement : commandToAdd->getRequirements())
         {
             set<Subsystem*>::iterator isDependentSubsystem = subsystemList.find(
                 const_cast<Subsystem*>(requirement));  // im sry
@@ -45,11 +46,11 @@ namespace control
                 {
                     requirement->GetCurrentCommand()->end(true);
                 }
-                (*isDependentSubsystem)->SetCurrentCommand(control);
+                (*isDependentSubsystem)->SetCurrentCommand(commandToAdd);
             }
         }
-        commandList.insert(control);
-        control->initialize();
+        commandList.insert(commandToAdd);
+        commandToAdd->initialize();
         return true;
     }
 
@@ -90,15 +91,19 @@ namespace control
         }
     }
 
-    bool CommandScheduler::isScheduled(Command* command)
+    bool CommandScheduler::isSubsystemRegistered(const Subsystem* subsystem)
+    {
+        return subsystemList.find(const_cast<Subsystem*>(subsystem)) != subsystemList.end();
+    }
+
+    bool CommandScheduler::isCommandScheduled(Command* command)
     {
         return commandList.find(command) != commandList.end();
     }
 
     void CommandScheduler::registerSubsystem(Subsystem* subsystem)
     {
-        auto subsystemListItr1 = subsystemList.find(subsystem);
-        if (subsystemListItr1 == subsystemList.end())
+        if (!isSubsystemRegistered(subsystem))
         {
             subsystemList.insert(subsystem);
         }

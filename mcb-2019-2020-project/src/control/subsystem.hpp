@@ -32,7 +32,7 @@ class Command;
 
 class Subsystem {
  public:
-    Subsystem() = default;
+    Subsystem();
 
     /**
      * Sets the default Command of the subsystem. The default command will be

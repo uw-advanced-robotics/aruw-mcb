@@ -1,26 +1,26 @@
-#include "src/control/command-example.hpp"
-#include "src/control/subsystem-example.hpp"
+#include "src/control/example-command.hpp"
+#include "src/control/example-subsystem.hpp"
 
 namespace aruwsrc
 {
 
 namespace control
 {
-    CommandExample::CommandExample(SubsystemExample* subsystem)
+    ExampleCommand::ExampleCommand(ExampleSubsystem* subsystem)
         : Command(false), subsystemExample(subsystem)
     {
         addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
     }
 
-    void CommandExample::initialize()
+    void ExampleCommand::initialize()
     {}
 
-    void CommandExample::execute()
+    void ExampleCommand::execute()
     {
         subsystemExample->setDesiredRpm(DEFAULT_WHEEL_RPM);
     }
 
-    void CommandExample::end(bool interrupted)
+    void ExampleCommand::end(bool interrupted)
     {
         if (interrupted)
         {
@@ -29,13 +29,13 @@ namespace control
     }
 
 int count = 0;
-    bool CommandExample::isFinished(void)
+    bool ExampleCommand::isFinished(void)
     {
         return ++count == 5;
         return false;
     }
 
-    void CommandExample::interrupted(void)
+    void ExampleCommand::interrupted(void)
     {
     }
 }  // namespace control
