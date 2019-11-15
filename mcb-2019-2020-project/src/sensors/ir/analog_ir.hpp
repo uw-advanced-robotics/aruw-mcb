@@ -6,7 +6,7 @@
 #define ANALOGIR_H
 
 #include "ir_sensor.hpp"
-#include "analog.hpp"
+#include "src/communication/gpio/analog.hpp"
 
 namespace aruwlib {
 
@@ -14,11 +14,14 @@ namespace sensors {
 
 class AnalogIR: public IRSensor {
  public:
-  // Constructor to init boundaries and disance calculation values
-  AnalogIR(float minDistance, float maxDistance, float m, float b, Analog::Pin pin);
+    // Constructor to init boundaries and disance calculation values
+    AnalogIR(float _minDistance, float _maxDistance, float _m, float _b, gpio::Analog::Pin _pin);
 
-  // Read sensor and updates current distance
-  float read();
+    // Initialize sensor and ADC
+    virtual void init();
+
+    // Read sensor and updates current distance
+    float read();
 
  private:
     // Distance calulation values for linear model y=mx+b
@@ -26,7 +29,7 @@ class AnalogIR: public IRSensor {
     float b;
 
     // Analog pin
-    Analog::Pin pin;
+    gpio::Analog::Pin pin;
 };
 
 } // namespace sensors

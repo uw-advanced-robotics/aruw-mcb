@@ -17,7 +17,7 @@ namespace sensors {
 class IRSensor {
  public:
     // Constructor to init boundaries
-    IRSensor(float minDistance, float maxDistance);
+    IRSensor(float _minDistance, float _maxDistance);
 
     // Init sensor
     virtual void init();

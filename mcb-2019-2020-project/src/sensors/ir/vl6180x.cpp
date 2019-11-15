@@ -13,7 +13,7 @@ namespace sensors {
 
     // Read sensor and updates current distance
     float VL6180X::read() {
-
+        return 0;
     }
 
     // Write 8 bits to the given address
@@ -28,12 +28,12 @@ namespace sensors {
 
     // Read 8 bits to the given address
     uint8_t read8(uint16_t address) {
-
+        return 0;
     }
 
     // Read 16 bits to the given address
     uint16_t read16(uint16_t address) {
-
+        return 0;
     }
 } // namespace sensors
 
