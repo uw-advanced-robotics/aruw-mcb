@@ -8,11 +8,11 @@
 #ifndef __COMMAND_HPP__
 #define __COMMAND_HPP__
 
-#include "rm-dev-board-a/board.hpp"
-#include "src/control/subsystem.hpp"
 #include <modm/container/dynamic_array.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include <set>
+#include "rm-dev-board-a/board.hpp"
+#include "src/control/subsystem.hpp"
 
 namespace aruwlib
 {
@@ -22,7 +22,7 @@ namespace control
 
 class Command {
  public:
-    explicit Command(bool isInterruptiable);
+    explicit Command(bool isInterruptible);
 
     void initCommand()
     {
@@ -30,6 +30,7 @@ class Command {
 
     ~Command()
     {
+        delete[] cmdRequirements;
     }
 
     /**
@@ -45,7 +46,6 @@ class Command {
      *
      * @return the set of subsystems that are required
      */
-   //  const modm::DynamicArray<const Subsystem*>& getRequirements() const;
     const std::set<const Subsystem*>& getRequirements() const;
 
     /**
@@ -68,7 +68,7 @@ class Command {
     /**
      * Returns isCommandInterruptiable
      */
-    bool isInterruptiable(void) const;
+    bool isInterruptible(void) const;
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -116,7 +116,6 @@ class Command {
      * An internal helper method that returns the contents of the
      * commandRequirements smart pointer in a modifiable form
      */
-   //  modm::DynamicArray<const Subsystem*>* getRequirementsModifiable(void);
     std::set<const Subsystem*>* getRequirementsModifiable(void);
 };
 

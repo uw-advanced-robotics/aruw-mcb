@@ -28,8 +28,10 @@ namespace control
         }
     }
 
+int count = 0;
     bool CommandExample::isFinished(void)
     {
+        return ++count == 5;
         return false;
     }
 

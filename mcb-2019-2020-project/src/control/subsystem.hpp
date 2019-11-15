@@ -34,9 +34,6 @@ class Subsystem {
  public:
     Subsystem() = default;
 
-    ~Subsystem()
-    {}
-
     /**
      * Sets the default Command of the subsystem. The default command will be
      * automatically scheduled when no other commands are scheduled that require
@@ -72,21 +69,19 @@ class Subsystem {
      */
     void SetCurrentCommand(Command* command);
 
-   /**
-    * Called in the scheduler's run method assuming this command
-    * has been registered with the scheduler. This method should
-    * contain code that must be periodically updated and is generic
-    * to the subsystem (i.e. updating a control loop generic to this
-    * subsystem). This method should not contain command specific
-    * control code. When you create a subclass of Subsystem, you
-    * should overwrite this virtual method.
-    */
+    /**
+     * Called in the scheduler's run method assuming this command
+     * has been registered with the scheduler. This method should
+     * contain code that must be periodically updated and is generic
+     * to the subsystem (i.e. updating a control loop generic to this
+     * subsystem). This method should not contain command specific
+     * control code. When you create a subclass of Subsystem, you
+     * should overwrite this virtual method.
+     */
     virtual void refresh(void) = 0;
 
  private:
     Command* defaultCommand = nullptr;
-
-    bool currentCommandChanged = false;
 
     Command* currentCommand = nullptr;
 };

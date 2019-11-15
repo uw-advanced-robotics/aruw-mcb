@@ -5,6 +5,25 @@ namespace aruwsrc
 
 namespace control
 {
+    SubsystemExample::SubsystemExample(
+        float p,
+        float i,
+        float d,
+        float maxErrorSum,
+        float maxOut,
+        aruwlib::motor::MotorId leftMotorId,
+        aruwlib::motor::MotorId rightMotorId
+    ) {
+        m1 = new aruwlib::motor::DjiMotor(leftMotorId,
+            aruwlib::can::CanBus::CAN_BUS1);
+        m2 = new aruwlib::motor::DjiMotor(rightMotorId,
+            aruwlib::can::CanBus::CAN_BUS1);
+        velocityPidLeftWheel = modm::SmartPointer(
+            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
+        velocityPidRightWheel = modm::SmartPointer(
+            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
+    }
+
     void SubsystemExample::setDesiredRpm(float desRpm)
     {
         desiredRpm = desRpm;
@@ -12,18 +31,6 @@ namespace control
 
     void SubsystemExample::refresh()
     {
-        // updateMotorRpmPid(
-        //     getPidPointer(velocityPidLeftWheel),
-        //     getMotorPointer(frictionWheelLeft),
-        //     desiredRpm
-        // );
-        // getPidPointer(velocityPidLeftWheel)->update(desiredRpm - m1->getShaftRPM());
-        // m1->setDesiredOutput(getPidPointer(velocityPidLeftWheel)->getValue());
-        // updateMotorRpmPid(
-        //     getPidPointer(velocityPidRightWheel),
-        //     getMotorPointer(frictionWheelRight),
-        //     desiredRpm
-        // );
         updateMotorRpmPid(
             getPidPointer(velocityPidLeftWheel),
             m1, desiredRpm
@@ -46,11 +53,6 @@ namespace control
     modm::Pid<float>* SubsystemExample::getPidPointer(modm::SmartPointer smrtPtr)
     {
         return reinterpret_cast<modm::Pid<float>*>(smrtPtr.getPointer());
-    }
-
-    aruwlib::motor::DjiMotor* SubsystemExample::getMotorPointer(modm::SmartPointer smrtPtr)
-    {
-        return reinterpret_cast<aruwlib::motor::DjiMotor*>(smrtPtr.getPointer());
     }
 }  // namespace control
 

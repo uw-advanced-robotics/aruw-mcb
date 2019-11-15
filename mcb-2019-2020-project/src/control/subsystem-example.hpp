@@ -14,8 +14,8 @@
 #ifndef __SUBSYSTEM_EXAMPLE_HPP__
 #define __SUBSYSTEM_EXAMPLE_HPP__
 
-#include "src/control/subsystem.hpp"
 #include <modm/math/filter/pid.hpp>
+#include "src/control/subsystem.hpp"
 #include "src/motor/dji_motor.hpp"
 #include "src/control/command-example.hpp"
 
@@ -38,22 +38,13 @@ class SubsystemExample : public Subsystem
         float maxOut,
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId
-    ) {
-        m1 = new aruwlib::motor::DjiMotor(leftMotorId,
-            aruwlib::can::CanBus::CAN_BUS1);
-        m2 = new aruwlib::motor::DjiMotor(rightMotorId,
-            aruwlib::can::CanBus::CAN_BUS1);
-        frictionWheelLeft = modm::SmartPointer(m1);
-        frictionWheelRight = modm::SmartPointer(m2);
-
-        velocityPidLeftWheel = modm::SmartPointer(
-            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
-        velocityPidRightWheel = modm::SmartPointer(
-            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
-    }
+    );
 
     ~SubsystemExample()
-    {}
+    {
+        delete[] m1;
+        delete[] m2;
+    }
 
     void setDesiredRpm(float desRpm);
 
@@ -65,10 +56,6 @@ class SubsystemExample : public Subsystem
     aruwlib::motor::DjiMotor* m2;
 
     float desiredRpm;
-
-    modm::SmartPointer frictionWheelLeft;
-
-    modm::SmartPointer frictionWheelRight;
 
     modm::SmartPointer velocityPidLeftWheel;
 

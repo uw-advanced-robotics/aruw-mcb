@@ -15,18 +15,29 @@ aruwsrc::control::SubsystemExample subsystemFrictionWheel(
     aruwlib::motor::MotorId::MOTOR6
 );
 
+aruwsrc::control::SubsystemExample subsystemFrictionWheel2(
+    10, 0, 0, 0, 5000,
+    aruwlib::motor::MotorId::MOTOR1,
+    aruwlib::motor::MotorId::MOTOR2
+);
+
 aruwsrc::control::CommandExample CommandFrictionWheelDefault(&subsystemFrictionWheel);
+aruwsrc::control::CommandExample CommandFrictionWheelDefault2(&subsystemFrictionWheel2);
 
 aruwlib::motor::DjiMotor* m3;
 
 using namespace std;
 
 Subsystem* s2;
+Subsystem* s3;
 
 int main()
 {
+    subsystemFrictionWheel2.SetDefaultCommand(&CommandFrictionWheelDefault2);
     subsystemFrictionWheel.SetDefaultCommand(&CommandFrictionWheelDefault);
-    Scheduler::registerSubsystem(&subsystemFrictionWheel);
+    CommandScheduler::registerSubsystem(&subsystemFrictionWheel);
+    CommandScheduler::registerSubsystem(&subsystemFrictionWheel2);
+
 
     Board::initialize();
 
@@ -34,7 +45,7 @@ int main()
 
     while (1)
     {
-        aruwlib::control::Scheduler::run();
+        aruwlib::control::CommandScheduler::run();
         modm::delayMicroseconds(10);
 
         modm::delayMilliseconds(1000);
