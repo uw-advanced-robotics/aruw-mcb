@@ -11,6 +11,7 @@ for test in "${listTests[@]}"
 do
   eval $test
   if [ $? -ne 0 ]; then
+    echo LINT FAILED  ================================================================
     exit 1
   fi
 done
