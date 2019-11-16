@@ -29,6 +29,9 @@ using namespace std;
 Subsystem* s2;
 Subsystem* s3;
 
+Command* c;
+Command* c1;
+
 int main()
 {
     frictionWheelSubsystem2.SetDefaultCommand(&frictionWheelDefaultCommand2);
@@ -37,10 +40,15 @@ int main()
     Board::initialize();
 
     s2 = &frictionWheelSubsystem;
+    c = &frictionWheelDefaultCommand;
+    c1 = &frictionWheelDefaultCommand2;
 
     while (1)
     {
         aruwlib::control::CommandScheduler::run();
+
+        aruwlib::control::CommandScheduler::run1();
+
         modm::delayMicroseconds(10);
 
         modm::delayMilliseconds(1000);

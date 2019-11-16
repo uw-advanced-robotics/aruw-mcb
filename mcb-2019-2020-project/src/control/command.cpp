@@ -37,8 +37,7 @@ namespace control
     set<const Subsystem*>* Command::getRequirementsModifiable()
     {
         return cmdRequirements;
-        return reinterpret_cast<set<const Subsystem*>*>(commandRequirements.getPointer());
-
+        // return reinterpret_cast<set<const Subsystem*>*>(commandRequirements.getPointer());
     }
 
     bool Command::isInterruptible() const

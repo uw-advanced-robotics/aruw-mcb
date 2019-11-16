@@ -51,9 +51,6 @@ class Command {
     /**
      * Whether the command requires a given subsystem.  Named "hasRequirement"
      * rather than "requires" to avoid confusion with
-     * {@link
-     * edu.wpi.first.wpilibj.command.Command#requires(edu.wpi.first.wpilibj.command.Subsystem)}
-     *  - this may be able to be changed in a few years.
      *
      * @param requirement the subsystem to inquire about
      * @return whether the subsystem is required
@@ -102,11 +99,17 @@ class Command {
     }
 
  private:
+    friend class CommandScheduler;
+
     // initial size of commandRequirements
     const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
 
     bool isCommandInterruptiable = true;
 
+    uint32_t prevSchedulerExecuteTimestamp = 0;
+
+
+// figure out smart pointer
     // contains pointers to const Subsystem pointers that this command requires
     std::set<const Subsystem*>* cmdRequirements;
 

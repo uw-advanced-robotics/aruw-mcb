@@ -16,6 +16,7 @@ namespace aruwsrc
 
 namespace control
 {
+
 class ExampleSubsystem;
 
 class ExampleCommand : public Command

@@ -17,9 +17,11 @@
 #define __SCHEDULER_HPP__
 
 #include <modm/container/linked_list.hpp>
+#include <modm/container/smart_pointer.hpp>
 #include <set>
 #include "rm-dev-board-a/board.hpp"
 #include "src/control/command.hpp"
+#include <map>
 
 namespace aruwlib
 {
@@ -32,20 +34,40 @@ class CommandScheduler
  public:
     static void run(void);
 
+    static void run1(void);
+
     static bool addCommand(aruwlib::control::Command* command);
 
     static void removeCommand(Command* command);
+
+    void removeCommand1(Command* command);
 
     static bool isCommandScheduled(Command* command);
 
     static void registerSubsystem(Subsystem* subsystem);
 
+    static bool registerSubsystem1(Subsystem* subsystem);
+
+    static bool isSubsystemRegistered1(Subsystem* subsystem);
+
     static bool isSubsystemRegistered(const Subsystem* subsystem);
+
+    static bool isSubsystemRegistered1(const Subsystem* subsystem);
+
+    static bool isCommandScheduled1(Command* command);
+
+    static bool addCommand1(Command* commandToAdd);
 
  private:
     static std::set<Subsystem*> subsystemList;
 
+    static std::set<modm::SmartPointer> subsystemList1;
+
     static std::set<Command*> commandList;
+
+    static std::map<Subsystem*, Command*> subsystemToCommandMap;
+
+    static uint32_t commandSchedulerTimestamp;
 };
 
 }  // namespace control

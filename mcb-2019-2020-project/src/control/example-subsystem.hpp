@@ -42,8 +42,8 @@ class ExampleSubsystem : public Subsystem
 
     ~ExampleSubsystem()
     {
-        delete[] m1;
-        delete[] m2;
+        delete[] leftWheel;
+        delete[] rightWheel;
     }
 
     void setDesiredRpm(float desRpm);
@@ -51,15 +51,15 @@ class ExampleSubsystem : public Subsystem
     void refresh(void);
 
  private:
-    aruwlib::motor::DjiMotor* m1;
+    aruwlib::motor::DjiMotor* leftWheel;
 
-    aruwlib::motor::DjiMotor* m2;
-
-    float desiredRpm;
+    aruwlib::motor::DjiMotor* rightWheel;
 
     modm::SmartPointer velocityPidLeftWheel;
 
     modm::SmartPointer velocityPidRightWheel;
+
+    float desiredRpm;
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,

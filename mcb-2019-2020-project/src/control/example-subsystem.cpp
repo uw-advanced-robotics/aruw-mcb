@@ -13,10 +13,10 @@ namespace control
         float maxOut,
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId
-    ) {
-        m1 = new aruwlib::motor::DjiMotor(leftMotorId,
+    ) : desiredRpm(0) {
+        leftWheel = new aruwlib::motor::DjiMotor(leftMotorId,
             aruwlib::can::CanBus::CAN_BUS1);
-        m2 = new aruwlib::motor::DjiMotor(rightMotorId,
+        rightWheel = new aruwlib::motor::DjiMotor(rightMotorId,
             aruwlib::can::CanBus::CAN_BUS1);
         velocityPidLeftWheel = modm::SmartPointer(
             new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
@@ -33,11 +33,11 @@ namespace control
     {
         updateMotorRpmPid(
             getPidPointer(velocityPidLeftWheel),
-            m1, desiredRpm
+            leftWheel, desiredRpm
         );
         updateMotorRpmPid(
             getPidPointer(velocityPidRightWheel),
-            m2, desiredRpm
+            rightWheel, desiredRpm
         );
     }
 
