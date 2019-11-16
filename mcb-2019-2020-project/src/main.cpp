@@ -43,14 +43,19 @@ int main()
     c = &frictionWheelDefaultCommand;
     c1 = &frictionWheelDefaultCommand2;
 
+    int count = 0;
+
     while (1)
     {
+        aruwlib::can::CanRxHandler::pollCanData();
         aruwlib::control::CommandScheduler::run();
-
+        count++;
+        if (count > 300)
+        {
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            count = 0;
+        }
         modm::delayMicroseconds(10);
-
-        modm::delayMilliseconds(1000);
-        Board::Leds::toggle();
     }
     return 0;
 }
