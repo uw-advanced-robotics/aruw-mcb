@@ -21,16 +21,6 @@ namespace control
     {
         return defaultCommand;
     }
-
-    void Subsystem::SetCurrentCommand(Command* command)
-    {
-        currentCommand = command;
-    }
-
-    Command* Subsystem::GetCurrentCommand() const
-    {
-        return currentCommand;
-    }
 }  // namespace control
 
 }  // namespace aruwlib

@@ -32,25 +32,13 @@ namespace control
 class CommandScheduler
 {
  public:
-    static void run(void);
-
     static void run1(void);
 
-    static bool addCommand(aruwlib::control::Command* command);
-
-    static void removeCommand(Command* command);
-
     void removeCommand1(Command* command);
-
-    static bool isCommandScheduled(Command* command);
-
-    static void registerSubsystem(Subsystem* subsystem);
 
     static bool registerSubsystem1(Subsystem* subsystem);
 
     static bool isSubsystemRegistered1(Subsystem* subsystem);
-
-    static bool isSubsystemRegistered(const Subsystem* subsystem);
 
     static bool isSubsystemRegistered1(const Subsystem* subsystem);
 
@@ -59,12 +47,6 @@ class CommandScheduler
     static bool addCommand1(Command* commandToAdd);
 
  private:
-    static std::set<Subsystem*> subsystemList;
-
-    static std::set<modm::SmartPointer> subsystemList1;
-
-    static std::set<Command*> commandList;
-
     static std::map<Subsystem*, Command*> subsystemToCommandMap;
 
     static uint32_t commandSchedulerTimestamp;

@@ -55,21 +55,6 @@ class Subsystem {
     Command* GetDefaultCommand(void) const;
 
     /**
-     * Returns the command currently running on this subsystem.  Returns null if
-     * no command is currently scheduled that requires this subsystem.
-     *
-     * @return the scheduled command currently requiring this subsystem
-     */
-    Command* GetCurrentCommand(void) const;
-
-    /**
-     * Sets the current command. Only one command can control a subsystem at a time.
-     *
-     * @param command the new current command
-     */
-    void SetCurrentCommand(Command* command);
-
-    /**
      * Called in the scheduler's run method assuming this command
      * has been registered with the scheduler. This method should
      * contain code that must be periodically updated and is generic
@@ -82,8 +67,6 @@ class Subsystem {
 
  private:
     Command* defaultCommand = nullptr;
-
-    Command* currentCommand = nullptr;
 };
 
 }  // namespace control
