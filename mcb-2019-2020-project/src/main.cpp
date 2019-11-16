@@ -45,7 +45,7 @@ int main()
 
     while (1)
     {
-        aruwlib::control::CommandScheduler::run1();
+        aruwlib::control::CommandScheduler::run();
 
         modm::delayMicroseconds(10);
 

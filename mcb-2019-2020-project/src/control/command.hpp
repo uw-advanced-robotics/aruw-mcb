@@ -8,9 +8,9 @@
 #ifndef __COMMAND_HPP__
 #define __COMMAND_HPP__
 
+#include <set>
 #include <modm/container/dynamic_array.hpp>
 #include <modm/container/smart_pointer.hpp>
-#include <set>
 #include "rm-dev-board-a/board.hpp"
 #include "src/control/subsystem.hpp"
 
@@ -23,10 +23,6 @@ namespace control
 class Command {
  public:
     explicit Command(bool isInterruptible);
-
-    void initCommand()
-    {
-    }
 
     ~Command()
     {

@@ -1,3 +1,4 @@
+#include <utility>
 #include "src/control/scheduler.hpp"
 #include "src/motor/dji_motor_tx_handler.hpp"
 #include "src/communication/can/can_rx_handler.hpp"
@@ -13,11 +14,11 @@ namespace control
 
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
-    bool CommandScheduler::addCommand1(Command* commandToAdd)
+    bool CommandScheduler::addCommand(Command* commandToAdd)
     {
         // only add the command if (a) command is not already being run and (b) all
         // subsystem dependencies can be interrupted.
-        if (isCommandScheduled1(commandToAdd))
+        if (isCommandScheduled(commandToAdd))
         {
             return false;
         }
@@ -61,7 +62,7 @@ namespace control
         return true;
     }
 
-    void CommandScheduler::run1()
+    void CommandScheduler::run()
     {
         // timestamp for reference and for disallowing a command from running
         // multiple times during the same call to run
@@ -71,7 +72,7 @@ namespace control
             // add default command if no command is currently being run
             if (currSubsystemCommandPair.second == NULL
                 && currSubsystemCommandPair.first->GetDefaultCommand() != nullptr) {
-                addCommand1(currSubsystemCommandPair.first->GetDefaultCommand());
+                addCommand(currSubsystemCommandPair.first->GetDefaultCommand());
             }
             // only run the command if it hasn't been run this time run has been called
             if (currSubsystemCommandPair.second != NULL)
@@ -95,7 +96,7 @@ namespace control
         }
     }
 
-    void CommandScheduler::removeCommand1(Command* command)
+    void CommandScheduler::removeCommand(Command* command)
     {
         for (auto subsystemCommandPair = subsystemToCommandMap.begin();
             subsystemCommandPair != subsystemToCommandMap.end();)
@@ -107,7 +108,7 @@ namespace control
         }
     }
 
-    bool CommandScheduler::isCommandScheduled1(Command* command)
+    bool CommandScheduler::isCommandScheduled(Command* command)
     {
         for (pair<Subsystem*, Command*> subsystemCommandPair : subsystemToCommandMap)
         {
@@ -119,9 +120,9 @@ namespace control
         return false;
     }
 
-    bool CommandScheduler::registerSubsystem1(Subsystem* subsystem)
+    bool CommandScheduler::registerSubsystem(Subsystem* subsystem)
     {
-        if (!isSubsystemRegistered1(subsystem))
+        if (!isSubsystemRegistered(subsystem))
         {
             subsystemToCommandMap.insert(pair<Subsystem*, Command*>(subsystem, NULL));
             return true;
@@ -129,7 +130,7 @@ namespace control
         return false;
     }
 
-    bool CommandScheduler::isSubsystemRegistered1(Subsystem* subsystem)
+    bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem)
     {
         return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
     }

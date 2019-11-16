@@ -9,7 +9,7 @@ namespace control
 {
     Subsystem::Subsystem()
     {
-        CommandScheduler::registerSubsystem1(this);
+        CommandScheduler::registerSubsystem(this);
     }
 
     void Subsystem::SetDefaultCommand(Command* command)

@@ -16,35 +16,36 @@
 #ifndef __SCHEDULER_HPP__
 #define __SCHEDULER_HPP__
 
+#include <map>
+#include <set>
 #include <modm/container/linked_list.hpp>
 #include <modm/container/smart_pointer.hpp>
-#include <set>
 #include "rm-dev-board-a/board.hpp"
 #include "src/control/command.hpp"
-#include <map>
+
 
 namespace aruwlib
 {
- 
+
 namespace control
 {
 
 class CommandScheduler
 {
  public:
-    static void run1(void);
+    static void run(void);
 
-    void removeCommand1(Command* command);
+    void removeCommand(Command* command);
 
-    static bool registerSubsystem1(Subsystem* subsystem);
+    static bool registerSubsystem(Subsystem* subsystem);
 
-    static bool isSubsystemRegistered1(Subsystem* subsystem);
+    static bool isSubsystemRegistered(Subsystem* subsystem);
 
-    static bool isSubsystemRegistered1(const Subsystem* subsystem);
+    static bool isSubsystemRegistered(const Subsystem* subsystem);
 
-    static bool isCommandScheduled1(Command* command);
+    static bool isCommandScheduled(Command* command);
 
-    static bool addCommand1(Command* commandToAdd);
+    static bool addCommand(Command* commandToAdd);
 
  private:
     static std::map<Subsystem*, Command*> subsystemToCommandMap;

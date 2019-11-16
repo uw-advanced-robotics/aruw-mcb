@@ -23,7 +23,9 @@ namespace control
     void ExampleCommand::end(bool interrupted)
     {
         if (interrupted)
-        {}
+        {
+            subsystemExample->setDesiredRpm(0);
+        }
         subsystemExample->setDesiredRpm(0);
     }
 
