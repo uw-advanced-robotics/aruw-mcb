@@ -17,7 +17,7 @@ class SeeedIR: public IRSensor {
     void init();
 
     // Read sensor and update current distance
-    virtual float read();
+    float read();
 };
 
 } // namespace sensors

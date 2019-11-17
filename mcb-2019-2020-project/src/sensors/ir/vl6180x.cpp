@@ -4,7 +4,8 @@ namespace aruwlib {
 
 namespace sensors {
     // Constructor to init boundaries
-    VL6180X::VL6180X(float minDistance, float maxDistance): IRSensor(minDistance, maxDistance) {}
+    VL6180X::VL6180X(float minDistance, float maxDistance): 
+        IRSensor(minDistance, maxDistance) {}
 
     // Initialize sensor and I2C
     void VL6180X::init() {
