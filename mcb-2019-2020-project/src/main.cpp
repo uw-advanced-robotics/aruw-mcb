@@ -7,14 +7,12 @@ int main()
 {
     Board::initialize();
 
-    aruwlib::sensors::AnalogIR test(0, 30, 137500, 1125, aruwlib::gpio::Analog::Pin::U);
-    test.init();
+    aruwlib::sensors::AnalogIR sharpIR(4, 30);
+    sharpIR.init();
 
     while (1)
     {
-        //Board::Leds::toggle();
-        //modm::delayMilliseconds(1000);
-        distance = test.read();
+        distance = sharpIR.read();
     }
     return 0;
 }

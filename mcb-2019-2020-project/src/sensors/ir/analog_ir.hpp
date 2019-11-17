@@ -1,5 +1,6 @@
 /*
-
+Basic Analog IR Sensor via analog input
+The distance conversion can be tweaked depending on the sensor
 */
 
 #ifndef ANALOGIR_H
@@ -14,22 +15,39 @@ namespace sensors {
 
 class AnalogIR: public IRSensor {
  public:
-    // Constructor to init boundaries and disance calculation values
-    AnalogIR(float minDistance, float maxDistance, float m, float b, gpio::Analog::Pin pin);
+   // Constructor to init boundaries
+   // By default set m/b/offset values to SHARP IR and analog pin to S
+   AnalogIR(float minDistance, float maxDistance);
 
-    // Initialize sensor and ADC
-    void init();
+   // Constructor to init boundaries and analog pin
+   // By default set m/b/offset values to SHARP IR
+   AnalogIR(float minDistance, float maxDistance, gpio::Analog::Pin pin);
 
-    // Read sensor and updates current distance
-    float read();
+   // Constructor to init boundaries, disance calculation values, and analog pin
+   AnalogIR(float minDistance, float maxDistance, float m, float b, float offset, gpio::Analog::Pin pin);
+
+   // Initialize sensor and ADC
+   void init();
+
+   // Read sensor and updates current distance
+   float read();
 
  private:
-    // Distance calulation values for linear model y=mx+b
-    float m_m;
-    float m_b;
+   // Distance calculation values for SHARP 0A41SK F IR Sensor
+   // Subject to change
+   #define SHARPIR_m 0.072
+   #define SHARPIR_b -0.008
+   #define SHARPIR_offset -0.42
 
-    // Analog pin
-    gpio::Analog::Pin m_pin;
+   // Distance calulation values for linear model y=mx+b
+   float m_m;
+   float m_b;
+
+   // Offset value of inverse
+   float m_offset;
+
+   // Analog pin
+   gpio::Analog::Pin m_pin;
 };
 
 } // namespace sensors

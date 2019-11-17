@@ -5,7 +5,8 @@ namespace aruwlib {
 namespace sensors {
     // Constructor to init boundaries
     IRSensor::IRSensor(float minDistance, float maxDistance):
-        m_minDistance(minDistance), m_maxDistance(maxDistance) {}
+        m_minDistance(minDistance), 
+        m_maxDistance(maxDistance) {}
 
     // Destructor
     IRSensor::~IRSensor() {}

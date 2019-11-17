@@ -3,27 +3,51 @@
 namespace aruwlib {
 
 namespace sensors {
-    // Constructor to init boundaries and disance calculation values
-    // y = 137500x + 1125 recommended for SHARP
-    AnalogIR::AnalogIR(float minDistance, float maxDistance, float m, float b, gpio::Analog::Pin pin): 
-        IRSensor(minDistance, maxDistance), m_m(m), m_b(b), m_pin(pin) {}
+    // Constructor to init boundaries
+    // By default set m/b/offset values to SHARP IR and analog pin to S
+    AnalogIR::AnalogIR(float minDistance, float maxDistance):
+        IRSensor(minDistance, maxDistance),
+        m_m(SHARPIR_m),
+        m_b(SHARPIR_b),
+        m_offset(SHARPIR_offset),
+        m_pin(gpio::Analog::Pin::S) {}
+
+    // Constructor to init boundaries and analog pin
+    // By default set m/b/offset values to SHARP IR
+    AnalogIR::AnalogIR(float minDistance, float maxDistance, gpio::Analog::Pin pin):
+        IRSensor(minDistance, maxDistance),
+        m_m(SHARPIR_m),
+        m_b(SHARPIR_b),
+        m_offset(SHARPIR_offset),
+        m_pin(pin) {}
+
+    // Constructor to init boundaries, disance calculation values, and analog pin
+    AnalogIR::AnalogIR(float minDistance, float maxDistance, float m, float b, float offset, gpio::Analog::Pin pin): 
+        IRSensor(minDistance, maxDistance),
+        m_m(m),
+        m_b(b),
+        m_offset(offset),
+        m_pin(pin) {}
 
     // Initialize ADC
     void AnalogIR::init() {
         gpio::Analog::init();
-        modm::delayMilliseconds(50); // init delay before first reading
+
+        // init delay before first reading
+        modm::delayMilliseconds(50);
     }
 
-    // Read sensor and updates current distance
+    // Read sensor and update current distance
     float AnalogIR::read() {
-        // TODO: mV is the analog input reading in mV
-        //m_distance = 1 / ((gpio::Analog::Read(m_pin) - m_b) / m_m);
-        
+        // Read analog pin and convert to volts
         m_distance = aruwlib::gpio::Analog::Read(m_pin);
-        m_distance /= 1000; // volts
-        m_distance = 0.0857 * m_distance - 0.0103;
+        m_distance /= 1000;
 
-        m_distance = 1 / m_distance - 0.42;
+        // Linear model
+        m_distance = m_m * m_distance + m_b;
+
+        // Convert to cm distance
+        m_distance = 1 / m_distance + m_offset;
         
         return getDistance();
     }

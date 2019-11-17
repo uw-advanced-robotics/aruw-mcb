@@ -6,7 +6,7 @@ Planned sensors: basic analog IR, Adafruit VL6180X, and Seeed IR
 #ifndef IRSENSOR_H
 #define IRSENSOR_H
 
-#include "rm-dev-board-a/board.hpp"
+#include <rm-dev-board-a/board.hpp>
 
 namespace aruwlib {
 
