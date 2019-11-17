@@ -23,7 +23,6 @@
 #include "rm-dev-board-a/board.hpp"
 #include "src/control/command.hpp"
 
-
 namespace aruwlib
 {
 
@@ -35,7 +34,7 @@ class CommandScheduler
  public:
     static void run(void);
 
-    void removeCommand(Command* command);
+    void removeCommand(modm::SmartPointer command);
 
     static bool registerSubsystem(Subsystem* subsystem);
 
@@ -43,14 +42,18 @@ class CommandScheduler
 
     static bool isSubsystemRegistered(const Subsystem* subsystem);
 
-    static bool isCommandScheduled(Command* command);
+    static bool isCommandScheduled(modm::SmartPointer command);
 
-    static bool addCommand(Command* commandToAdd);
+    static bool addCommand(modm::SmartPointer commandToAdd);
 
  private:
-    static std::map<Subsystem*, Command*> subsystemToCommandMap;
+   //  static std::map<Subsystem*, Command*> subsystemToCommandMap;
+
+    static std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
 
     static uint32_t commandSchedulerTimestamp;
+
+    static Command* getCmdPtr(modm::SmartPointer smrtPtr);
 };
 
 }  // namespace control

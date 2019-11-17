@@ -50,7 +50,7 @@ class ExampleCommand : public Command
       *
       * @return whether the command has finished.
       */
-    bool isFinished(void);
+    bool isFinished(void) const;
 
     void interrupted(void);
 

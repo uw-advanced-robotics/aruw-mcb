@@ -30,46 +30,38 @@ namespace control
 class ExampleSubsystem : public Subsystem
 {
  public:
-    ExampleSubsystem(
-        float p,
-        float i,
-        float d,
-        float maxErrorSum,
-        float maxOut,
-        aruwlib::motor::MotorId leftMotorId,
-        aruwlib::motor::MotorId rightMotorId
-    );
-
-    ~ExampleSubsystem()
-    {
-        delete[] leftWheel;
-        delete[] rightWheel;
-    }
+    ExampleSubsystem();
 
     void setDesiredRpm(float desRpm);
 
     void refresh(void);
 
  private:
-    aruwlib::motor::DjiMotor* leftWheel;
+    const float PID_P = 10.0f;
+    const float PID_I = 0.0f;
+    const float PID_D = 0.0f;
+    const float PID_MAX_ERROR_SUM = 0.0f;
+    const float PID_MAX_OUTPUT = 16000;
 
-    aruwlib::motor::DjiMotor* rightWheel;
+    const aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR4;
+    const aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
+    const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
-    modm::SmartPointer velocityPidLeftWheel;
+    aruwlib::motor::DjiMotor leftWheel;
 
-    modm::SmartPointer velocityPidRightWheel;
+    aruwlib::motor::DjiMotor rightWheel;
+
+    modm::Pid<float> velocityPidLeftWheel;
+
+    modm::Pid<float> velocityPidRightWheel;
 
     float desiredRpm;
 
     void updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        aruwlib::motor::DjiMotor* motor,
+        modm::Pid<float>& pid,
+        aruwlib::motor::DjiMotor& motor,
         float desiredRpm
     );
-
-    modm::Pid<float>* getPidPointer(modm::SmartPointer smrtPtr);
-
-    aruwlib::motor::DjiMotor* getMotorPointer(modm::SmartPointer smrtPtr);
 };
 
 }  // namespace control

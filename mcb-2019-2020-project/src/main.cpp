@@ -7,24 +7,13 @@
 #include "src/motor/dji_motor_tx_handler.hpp"
 #include "src/communication/can/can_rx_listener.hpp"
 
-aruwsrc::control::ExampleSubsystem frictionWheelSubsystem(
-    10, 0, 0, 0, 5000,
-    aruwlib::motor::MotorId::MOTOR5,
-    aruwlib::motor::MotorId::MOTOR6
-);
-
-aruwsrc::control::ExampleSubsystem frictionWheelSubsystem2(
-    10, 0, 0, 0, 5000,
-    aruwlib::motor::MotorId::MOTOR1,
-    aruwlib::motor::MotorId::MOTOR2
-);
-
-aruwsrc::control::ExampleCommand frictionWheelDefaultCommand(&frictionWheelSubsystem);
-aruwsrc::control::ExampleCommand frictionWheelDefaultCommand2(&frictionWheelSubsystem2);
+aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
 
 aruwlib::motor::DjiMotor* m3;
 
 using namespace std;
+
+int count = 0;
 
 Subsystem* s2;
 Subsystem* s3;
@@ -32,21 +21,25 @@ Subsystem* s3;
 Command* c;
 Command* c1;
 
+int error()
+{
+    return 0;
+}
+
 int main()
 {
-    frictionWheelSubsystem2.SetDefaultCommand(&frictionWheelDefaultCommand2);
-    frictionWheelSubsystem.SetDefaultCommand(&frictionWheelDefaultCommand);
+    modm::SmartPointer frictionWheelDefaultCommand(new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
+    frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
 
     Board::initialize();
 
     s2 = &frictionWheelSubsystem;
-    c = &frictionWheelDefaultCommand;
-    c1 = &frictionWheelDefaultCommand2;
-
-    int count = 0;
 
     while (1)
     {
+        // reinterpret_cast<aruwlib::control::Command*>(frictionWheelDefaultCommand.getPointer())->execute();
+        // frictionWheelSubsystem.refresh();
+
         aruwlib::can::CanRxHandler::pollCanData();
         aruwlib::control::CommandScheduler::run();
         count++;

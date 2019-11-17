@@ -7,17 +7,17 @@ namespace aruwlib
 
 namespace control
 {
-    Subsystem::Subsystem()
+    Subsystem::Subsystem() : defaultCommand()
     {
         CommandScheduler::registerSubsystem(this);
     }
 
-    void Subsystem::SetDefaultCommand(Command* command)
+    void Subsystem::SetDefaultCommand(modm::SmartPointer& command)
     {
         defaultCommand = command;
     }
 
-    Command* Subsystem::GetDefaultCommand() const
+    modm::SmartPointer Subsystem::GetDefaultCommand() const
     {
         return defaultCommand;
     }

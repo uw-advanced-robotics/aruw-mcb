@@ -22,6 +22,8 @@
 #ifndef __SUBSYSTEM_HPP__
 #define __SUBSYSTEM_HPP__
 
+#include <modm/container/smart_pointer.hpp>
+
 namespace aruwlib
 {
 
@@ -44,7 +46,7 @@ class Subsystem {
      *
      * @param defaultCommand the default command to associate with this subsystem
      */
-    void SetDefaultCommand(aruwlib::control::Command* defaultCommand);
+    void SetDefaultCommand(modm::SmartPointer& defaultCommand);
 
     /**
      * Gets the default command for this subsystem. Returns null if no default
@@ -52,7 +54,7 @@ class Subsystem {
      *
      * @return the default command associated with this subsystem
      */
-    Command* GetDefaultCommand(void) const;
+    modm::SmartPointer GetDefaultCommand(void) const;
 
     /**
      * Called in the scheduler's run method assuming this command
@@ -66,7 +68,7 @@ class Subsystem {
     virtual void refresh(void) = 0;
 
  private:
-    Command* defaultCommand = nullptr;
+    modm::SmartPointer defaultCommand;
 };
 
 }  // namespace control

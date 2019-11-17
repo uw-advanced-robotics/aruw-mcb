@@ -10,11 +10,12 @@ namespace aruwlib
 
 namespace control
 {
-    map<Subsystem*, Command*> CommandScheduler::subsystemToCommandMap;
+    map<Subsystem*, modm::SmartPointer> CommandScheduler::subsystemToCommandMap;
+    // map<Subsystem*, Command*> CommandScheduler::subsystemToCommandMap;
 
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
-    bool CommandScheduler::addCommand(Command* commandToAdd)
+    bool CommandScheduler::addCommand(modm::SmartPointer commandToAdd)
     {
         // only add the command if (a) command is not already being run and (b) all
         // subsystem dependencies can be interrupted.
@@ -26,14 +27,14 @@ namespace control
         // Check to make sure the commandToAdd you are trying to add to the scheduler
         // can be added.
         // If there are command dependencies that can't be interrupted, don't schedule.
-        for (const Subsystem* requirement : commandToAdd->getRequirements())
+        for (const Subsystem* requirement : getCmdPtr(commandToAdd)->getRequirements())
         {
             auto isRequirementRegistered = subsystemToCommandMap.find(
                 const_cast<Subsystem*>(requirement));
 
             if (isRequirementRegistered == subsystemToCommandMap.end()
-                || (isRequirementRegistered->second != NULL
-                && !isRequirementRegistered->second->isInterruptible())
+                || (!(isRequirementRegistered->second == 0)
+                && !getCmdPtr(isRequirementRegistered->second)->isInterruptible())
             ) {
                 return false;
             }
@@ -42,15 +43,15 @@ namespace control
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
-        for (auto& requirement : commandToAdd->getRequirements())
+        for (auto& requirement : getCmdPtr(commandToAdd)->getRequirements())
         {
-            map<Subsystem*, Command*>::iterator isDependentSubsystem =
+            map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
                 subsystemToCommandMap.find(const_cast<Subsystem*>(requirement));
             if (isDependentSubsystem != subsystemToCommandMap.end())
             {
-                if (isDependentSubsystem->second != NULL)
+                if (!(isDependentSubsystem->second == 0))
                 {
-                    isDependentSubsystem->second->end(true);
+                    getCmdPtr(isDependentSubsystem->second)->end(true);
                 }
                 isDependentSubsystem->second = commandToAdd;
             }
@@ -58,7 +59,7 @@ namespace control
 
         // initialize the commandToAdd. Only do this once even though potentially
         // multiple subsystems rely on this command.
-        commandToAdd->initialize();
+        getCmdPtr(commandToAdd)->initialize();
         return true;
     }
 
@@ -70,25 +71,27 @@ namespace control
         // refresh all and run all commands
         for (auto& currSubsystemCommandPair : subsystemToCommandMap) {
             // add default command if no command is currently being run
-            if (currSubsystemCommandPair.second == NULL
-                && currSubsystemCommandPair.first->GetDefaultCommand() != nullptr) {
+            if (currSubsystemCommandPair.second == 0
+                    && getCmdPtr(currSubsystemCommandPair.first->GetDefaultCommand()) != nullptr) {
                 addCommand(currSubsystemCommandPair.first->GetDefaultCommand());
             }
             // only run the command if it hasn't been run this time run has been called
-            if (currSubsystemCommandPair.second != NULL)
+            if (!(currSubsystemCommandPair.second == 0))
             {
-                if (currSubsystemCommandPair.second->prevSchedulerExecuteTimestamp
+                Command* currCommand = getCmdPtr(currSubsystemCommandPair.second);
+
+                if (currCommand->prevSchedulerExecuteTimestamp
                     != commandSchedulerTimestamp
                 ) {
-                    currSubsystemCommandPair.second->execute();
-                    currSubsystemCommandPair.second->prevSchedulerExecuteTimestamp
+                    currCommand->execute();
+                    currCommand->prevSchedulerExecuteTimestamp
                         = commandSchedulerTimestamp;
                 }
                 // remove command if finished running
-                if (currSubsystemCommandPair.second->isFinished())
+                if (currCommand->isFinished())
                 {
-                    currSubsystemCommandPair.second->end(false);
-                    currSubsystemCommandPair.second = NULL;
+                    currCommand->end(false);
+                    currSubsystemCommandPair.second = 0;
                 }
             }
             // refresh subsystem
@@ -96,21 +99,21 @@ namespace control
         }
     }
 
-    void CommandScheduler::removeCommand(Command* command)
+    void CommandScheduler::removeCommand(modm::SmartPointer command)
     {
         for (auto subsystemCommandPair = subsystemToCommandMap.begin();
             subsystemCommandPair != subsystemToCommandMap.end();)
         {
             if (subsystemCommandPair->second == command)
             {
-                subsystemCommandPair->second = NULL;
+                subsystemCommandPair->second = 0;
             }
         }
     }
 
-    bool CommandScheduler::isCommandScheduled(Command* command)
+    bool CommandScheduler::isCommandScheduled(modm::SmartPointer command)
     {
-        for (pair<Subsystem*, Command*> subsystemCommandPair : subsystemToCommandMap)
+        for (pair<Subsystem*, modm::SmartPointer> subsystemCommandPair : subsystemToCommandMap)
         {
             if (subsystemCommandPair.second == command)
             {
@@ -124,7 +127,8 @@ namespace control
     {
         if (!isSubsystemRegistered(subsystem))
         {
-            subsystemToCommandMap.insert(pair<Subsystem*, Command*>(subsystem, NULL));
+            subsystemToCommandMap.insert(std::make_pair(subsystem, 0));
+
             return true;
         }
         return false;
@@ -133,6 +137,11 @@ namespace control
     bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem)
     {
         return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
+    }
+
+    Command* CommandScheduler::getCmdPtr(modm::SmartPointer smrtPtr)
+    {
+        return reinterpret_cast<Command*>(smrtPtr.getPointer());
     }
 }  // namespace control
 

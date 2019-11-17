@@ -5,24 +5,13 @@ namespace aruwsrc
 
 namespace control
 {
-    ExampleSubsystem::ExampleSubsystem(
-        float p,
-        float i,
-        float d,
-        float maxErrorSum,
-        float maxOut,
-        aruwlib::motor::MotorId leftMotorId,
-        aruwlib::motor::MotorId rightMotorId
-    ) : desiredRpm(0) {
-        leftWheel = new aruwlib::motor::DjiMotor(leftMotorId,
-            aruwlib::can::CanBus::CAN_BUS1);
-        rightWheel = new aruwlib::motor::DjiMotor(rightMotorId,
-            aruwlib::can::CanBus::CAN_BUS1);
-        velocityPidLeftWheel = modm::SmartPointer(
-            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
-        velocityPidRightWheel = modm::SmartPointer(
-            new modm::Pid<float>(p, i, d, maxErrorSum, maxOut));
-    }
+    ExampleSubsystem::ExampleSubsystem() :
+        leftWheel(LEFT_MOTOR_ID, CAN_BUS_MOTORS),
+        rightWheel(RIGHT_MOTOR_ID, CAN_BUS_MOTORS),
+        velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+        velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+        desiredRpm(0)
+    {}
 
     void ExampleSubsystem::setDesiredRpm(float desRpm)
     {
@@ -32,27 +21,22 @@ namespace control
     void ExampleSubsystem::refresh()
     {
         updateMotorRpmPid(
-            getPidPointer(velocityPidLeftWheel),
+            velocityPidLeftWheel,
             leftWheel, desiredRpm
         );
         updateMotorRpmPid(
-            getPidPointer(velocityPidRightWheel),
+            velocityPidRightWheel,
             rightWheel, desiredRpm
         );
     }
 
     void ExampleSubsystem::updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        aruwlib::motor::DjiMotor* motor,
+        modm::Pid<float>& pid,
+        aruwlib::motor::DjiMotor& motor,
         float desiredRpm
     ) {
-        pid->update(desiredRpm - motor->getShaftRPM());
-        motor->setDesiredOutput(pid->getValue());
-    }
-
-    modm::Pid<float>* ExampleSubsystem::getPidPointer(modm::SmartPointer smrtPtr)
-    {
-        return reinterpret_cast<modm::Pid<float>*>(smrtPtr.getPointer());
+        pid.update(desiredRpm - motor.getShaftRPM());
+        motor.setDesiredOutput(pid.getValue());
     }
 }  // namespace control
 

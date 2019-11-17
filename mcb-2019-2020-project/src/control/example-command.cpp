@@ -29,7 +29,7 @@ namespace control
         subsystemExample->setDesiredRpm(0);
     }
 
-    bool ExampleCommand::isFinished(void)
+    bool ExampleCommand::isFinished(void) const
     {
         return false;
     }

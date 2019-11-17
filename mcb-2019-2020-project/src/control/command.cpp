@@ -8,15 +8,12 @@ namespace aruwlib
 
 namespace control
 {
-    Command::Command(bool isInterruptible) : isCommandInterruptiable(isInterruptible)
-    {
-        cmdRequirements = new set<const Subsystem*>();
-        commandRequirements = modm::SmartPointer(new set<const Subsystem*>);
-    }
+    Command::Command(bool isInterruptible) : isCommandInterruptiable(isInterruptible), prevSchedulerExecuteTimestamp(0)
+    {}
 
     bool Command::hasRequirement(const Subsystem* requirement) const
     {
-        return getRequirements().find(requirement) != getRequirements().end();
+        return commandRequirements.find(requirement) != commandRequirements.end();
     }
 
     void Command::addSubsystemRequirement(const Subsystem* requirement)
@@ -31,13 +28,12 @@ namespace control
 
     const set<const Subsystem*>& Command::getRequirements() const
     {
-        return *cmdRequirements;
+        return commandRequirements;
     }
 
     set<const Subsystem*>* Command::getRequirementsModifiable()
     {
-        return cmdRequirements;
-        // return reinterpret_cast<set<const Subsystem*>*>(commandRequirements.getPointer());
+        return &commandRequirements;
     }
 
     bool Command::isInterruptible() const

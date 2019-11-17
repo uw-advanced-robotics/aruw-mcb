@@ -1,8 +1,10 @@
 /**
+ * This code is part of aruw's repository.
+ *
  * A generic extendable class for implementing a command. Each 
  * command is attached to a subsystem. To create a new command,
  * extend the Command class and instantiate the virtual functions
- * in this class.
+ * in this class. See example-command.hpp for example of this.
  */
 
 #ifndef __COMMAND_HPP__
@@ -23,11 +25,6 @@ namespace control
 class Command {
  public:
     explicit Command(bool isInterruptible);
-
-    ~Command()
-    {
-        delete[] cmdRequirements;
-    }
 
     /**
      * Specifies the set of subsystems used by this command.  Two commands cannot
@@ -89,7 +86,7 @@ class Command {
      *
      * @return whether the command has finished.
      */
-    virtual bool isFinished(void)
+    virtual bool isFinished(void) const
     {
        return false;
     }
@@ -100,16 +97,12 @@ class Command {
     // initial size of commandRequirements
     const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
 
-    bool isCommandInterruptiable = true;
+    bool isCommandInterruptiable;
 
-    uint32_t prevSchedulerExecuteTimestamp = 0;
+    uint32_t prevSchedulerExecuteTimestamp;
 
-
-// figure out smart pointer
     // contains pointers to const Subsystem pointers that this command requires
-    std::set<const Subsystem*>* cmdRequirements;
-
-    modm::SmartPointer commandRequirements;
+    std::set<const Subsystem*> commandRequirements;
 
     /**
      * An internal helper method that returns the contents of the
