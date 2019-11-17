@@ -18,7 +18,7 @@ int main()
         //Board::Leds::toggle();
         game = RefereeSystem::getGameData();
         robot = RefereeSystem::getRobotData();
-        RefereeSystem::update(false,BASE_CTRL_MODE,false,false);
+        RefereeSystem::periodicTask();
         modm::delayMilliseconds(5);
     }
     return 0;

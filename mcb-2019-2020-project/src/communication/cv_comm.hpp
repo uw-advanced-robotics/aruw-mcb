@@ -58,7 +58,7 @@ public:
         MESSAGE_TYPE_ROBOT_ID = 0x04,
         MESSAGE_TYPE_AUTO_AIM_REQUEST = 0x05,
 
-    } TxCVMessageType;
+    } Tx_CV_Message_Type;
 
     typedef enum
     {
@@ -90,6 +90,8 @@ public:
     static const uint32_t TIME_OFFLINE_CV_AIM_DATA_MS = 5000;
     static const uint8_t MODE_ARRAY_SIZE = 4;
 
+    static const uint8_t AUTO_AIM_DISABLED = 0;
+    static const uint8_t AUTO_AIM_ENABLED = 1;
 
     /** 
      * initialize CV Communication
@@ -103,7 +105,7 @@ public:
      
      * @param turrent_data pointer to input turrent data structure
     */
-    static void update(CV_IMU_Data_t *imu_data, CV_Chassis_Data_t *chassis_data, CV_Turret_Aim_Data_t *turrent_data);
+    static void periodicTask(const CV_IMU_Data_t *imu_data, const CV_Chassis_Data_t *chassis_data, CV_Turret_Aim_Data_t *turrent_data);
 
     /** 
      * Get last received auto aim data for turrent
@@ -120,17 +122,13 @@ public:
      * Stop Requesting Xavier to Track Target
      */
     static void stopTargetTracking();
+
     /**
-     * send IMU and Chassis data to Xavier
-     * @param RobotID Robot ID
+     * Set RobotID
      */
-    static bool sendRobotID(uint8_t RobotID);
-    /**
-     * send IMU and Chassis data to Xavier
-     * @param imu_data pointer to input imu data structure
-     * @param chassis_data pointer to input chassis data structure
-     */
-    static void sendIMUandChassisData(CV_IMU_Data_t *imu_data, CV_Chassis_Data_t *chassis_data);
+    static void setRobotID(uint8_t RobotID);
+    
+    
 
     static void messageHandler(DJISerial::Serial_Message_t* message);
     
@@ -141,8 +139,8 @@ private:
     static uint32_t previousIDTimestamp;
 
     static bool autoAimRequestQueued;
-    static bool autoAimRequestState;
-    static bool hasAimData;
+    static bool autoAimEnabled;
+    static bool isAimDataLatest;
     
     static CV_Turret_Aim_Data_t lastAimData;
     static TurrentDataHandler_t turrentDataHandler;
@@ -152,14 +150,28 @@ private:
     static uint8_t robotID;
     static uint8_t modeArrayIndex;
     static uint8_t modeArray[MODE_ARRAY_SIZE];
-     
+    
+    /**
+     * send RobotID to Xavier
+     * @param RobotID Robot ID
+     */
+    static bool sendRobotID(uint8_t RobotID);
+
+
     static void switchMode();
     
-    static bool decodeToTurrentAimData(DJISerial::Serial_Message_t* message, CV_Turret_Aim_Data_t *aim_data);
-    
-    static void sendTurrentData(float pitch, float yaw);
-    
-    static void handleTurrentAim(CV_Turret_Aim_Data_t *aim_data);
+    static bool decodeToTurrentAimData(const DJISerial::Serial_Message_t* message, CV_Turret_Aim_Data_t *aim_data);
+
+    /**
+     * send IMU and Chassis data to Xavier
+     * @param imu_data pointer to input imu data structure
+     * @param chassis_data pointer to input chassis data structure
+     */
+    static void sendIMUandChassisData(const CV_IMU_Data_t *imu_data, const CV_Chassis_Data_t *chassis_data);
+        
+    static void setTurrentAimData(CV_Turret_Aim_Data_t *aim_data);
+
+    static void sendTurrentData(const float pitch, const float yaw);
 
 };
 

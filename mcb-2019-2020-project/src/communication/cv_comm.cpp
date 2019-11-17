@@ -16,9 +16,8 @@ CVCommunication::CVCommunication(DJISerial::Serial_Port port, TurrentDataHandler
     robotID = 0;
     modeArrayIndex = 0;
 
-    autoAimRequestQueued = false;
-    autoAimRequestState = false;
-    hasAimData = false;
+    autoAimEnabled = false;
+    isAimDataLatest = false;
 
     serial = DJISerial(port, messageHandler, false);
 }
@@ -31,7 +30,7 @@ void CVCommunication::switchMode() {
     modeArrayIndex = (modeArrayIndex + 1) % MODE_ARRAY_SIZE;
 }
 
-bool CVCommunication::decodeToTurrentAimData(DJISerial::Serial_Message_t* message, CV_Turret_Aim_Data_t *aim_data) {
+bool CVCommunication::decodeToTurrentAimData(const DJISerial::Serial_Message_t* message, CV_Turret_Aim_Data_t *aim_data) {
     if (message->length != MESSAGE_LENGTH_TURRET_AIM) {
         return false;
     }
@@ -50,14 +49,14 @@ bool CVCommunication::decodeToTurrentAimData(DJISerial::Serial_Message_t* messag
 }
 
 bool CVCommunication::getLastAimData(CV_Turret_Aim_Data_t *aim_data) {
-    if (hasAimData) {
+    if (isAimDataLatest) {
         *aim_data = lastAimData;
         return true;
     }
     return false;
 }
 
-void CVCommunication::sendTurrentData(float pitch, float yaw) {
+void CVCommunication::sendTurrentData(const float pitch, const float yaw) {
     int16_t data[2] =
         {
             static_cast<int16_t>(pitch * 100),
@@ -70,19 +69,17 @@ void CVCommunication::sendTurrentData(float pitch, float yaw) {
     switchMode();
 }
 
-void CVCommunication::handleTurrentAim(CV_Turret_Aim_Data_t *aim_data) {
+void CVCommunication::setTurrentAimData(CV_Turret_Aim_Data_t *aim_data) {
     lastAimData = *aim_data;
-    hasAimData = true;
+    isAimDataLatest = true;
 }
 
 void CVCommunication::beginTargetTracking() {
-    autoAimRequestQueued = true;
-    autoAimRequestState = true;
+    autoAimEnabled = true;
 }
 
 void CVCommunication::stopTargetTracking() {
-    autoAimRequestQueued = false;
-    autoAimRequestState = false;
+    autoAimEnabled = false;
 }
 
 /**
@@ -99,7 +96,7 @@ void CVCommunication::messageHandler(DJISerial::Serial_Message_t* message) {
             break;
         }
         aim_data.timeStamp = serial.getTimestamp();
-        handleTurrentAim(&aim_data);
+        setTurrentAimData(&aim_data);
         break;
     }
     default:
@@ -116,7 +113,7 @@ void CVCommunication::initialize(TurrentDataHandler_t turrent_data_callback) {
 /**
  * Send Given IMU and Chassis data to to Xavier
  */
-void CVCommunication::sendIMUandChassisData(CV_IMU_Data_t *imu_data, CV_Chassis_Data_t *chassis_data) {
+void CVCommunication::sendIMUandChassisData(const CV_IMU_Data_t *imu_data, const CV_Chassis_Data_t *chassis_data) {
     static int16_t data[13] = {
             // Accelerometer readings in static frame
             static_cast<int16_t>(imu_data->ax * 100),
@@ -157,10 +154,12 @@ bool CVCommunication::sendRobotID(uint8_t RobotID) {
     return serial.send(&message);
 }
 
-void CVCommunication::update(CV_IMU_Data_t *imu_data, CV_Chassis_Data_t *chassis_data, CV_Turret_Aim_Data_t *turrent_data) {
+
+
+void CVCommunication::periodicTask(const CV_IMU_Data_t *imu_data, const CV_Chassis_Data_t *chassis_data, CV_Turret_Aim_Data_t *turrent_data) {
 
     DJISerial::Serial_Message_t message;
-    serial.update(&message);
+    serial.periodicTask(&message);
     
     switch (modeArray[modeArrayIndex]) {
     case MESSAGE_TYPE_TURRET_TELEMETRY: {
@@ -183,8 +182,8 @@ void CVCommunication::update(CV_IMU_Data_t *imu_data, CV_Chassis_Data_t *chassis
     case MESSAGE_TYPE_AUTO_AIM_REQUEST:
     {
         switchMode();
-        if (autoAimRequestQueued) {
-            uint8_t data = autoAimRequestState;
+        if (autoAimEnabled) {
+            uint8_t data = AUTO_AIM_ENABLED;
             DJISerial::Serial_Message_t message;
             message.data = &data;
             message.length = MESSAGE_LENGTH_AUTO_AIM_REQUEST;
