@@ -11,6 +11,7 @@ namespace serial
 ref_game_data_t RefereeSystem::game_data; /* game stats 	(e.g. remaining time, current stage, winner)*/
 ref_robot_data_t RefereeSystem::robot_data; /* robot stats	(e.g. current HP, power draw, turret info)*/
 received_dps_tracker_t RefereeSystem::received_dps_tracker;
+ref_display_data_t RefereeSystem::displayData;
 DJISerial RefereeSystem::serial = DJISerial(DJISerial::PORT_UART6, (RefereeSystem::messageHandler), true);
 bool RefereeSystem::online;
 
@@ -36,12 +37,12 @@ void RefereeSystem::initialize(){
     RefereeSystem::serial.initialize();
 }
 
-float RefereeSystem::decodeTofloat(uint8_t* start_byte) {
+float RefereeSystem::decodeTofloat(const uint8_t* start_byte) {
     uint32_t unsigned_value = (start_byte[3] << 24) | (start_byte[2] << 16) | (start_byte[1] << 8) | start_byte[0];
     return reinterpret_cast<float&>(unsigned_value);
 }
 
-bool RefereeSystem::decodeToGameStatus(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToGameStatus(const DJISerial::Serial_Message_t* message) {
     if (message->length != 3) {
         return false;
     }
@@ -50,7 +51,7 @@ bool RefereeSystem::decodeToGameStatus(DJISerial::Serial_Message_t* message) {
     return true;
 }
 
-bool RefereeSystem::decodeToGameResult(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToGameResult(const DJISerial::Serial_Message_t* message) {
     if (message->length != 1) {
         return false;
     }
@@ -58,7 +59,7 @@ bool RefereeSystem::decodeToGameResult(DJISerial::Serial_Message_t* message) {
     return true;
 }
 
-bool RefereeSystem::decodeToAllRobotHP(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToAllRobotHP(const DJISerial::Serial_Message_t* message) {
     if (message->length != 28) {
         return false;
     }
@@ -79,7 +80,7 @@ bool RefereeSystem::decodeToAllRobotHP(DJISerial::Serial_Message_t* message) {
     return true;
 }
 
-bool RefereeSystem::decodeToRobotStatus(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToRobotStatus(const DJISerial::Serial_Message_t* message) {
     if (message->length != 15) {
         return false;
     }
@@ -104,7 +105,7 @@ bool RefereeSystem::decodeToRobotStatus(DJISerial::Serial_Message_t* message) {
 
 
 
-bool RefereeSystem::decodeToPowerAndHeat(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToPowerAndHeat(const DJISerial::Serial_Message_t* message) {
     if (message->length != 14) {
         return false;
     }
@@ -117,7 +118,7 @@ bool RefereeSystem::decodeToPowerAndHeat(DJISerial::Serial_Message_t* message) {
     return true;
 }
 
-bool RefereeSystem::decodeToRobotPosition(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToRobotPosition(const DJISerial::Serial_Message_t* message) {
     if (message->length != 16) {
         return false;
     }
@@ -128,7 +129,7 @@ bool RefereeSystem::decodeToRobotPosition(DJISerial::Serial_Message_t* message) 
     return true;
 }
 
-bool RefereeSystem::decodeToReceiveDamage(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToReceiveDamage(const DJISerial::Serial_Message_t* message) {
     if (message->length != 1) {
         return false;
     }
@@ -138,7 +139,7 @@ bool RefereeSystem::decodeToReceiveDamage(DJISerial::Serial_Message_t* message) 
     return true;
 }
 
-bool RefereeSystem::decodeToProjectileLaunch(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToProjectileLaunch(const DJISerial::Serial_Message_t* message) {
     if (message->length != 6) {
         return false;
     }
@@ -148,7 +149,7 @@ bool RefereeSystem::decodeToProjectileLaunch(DJISerial::Serial_Message_t* messag
     return true;
 }
 
-bool RefereeSystem::decodeToSentinelDroneBulletsRemain(DJISerial::Serial_Message_t* message) {
+bool RefereeSystem::decodeToSentinelDroneBulletsRemain(const DJISerial::Serial_Message_t* message) {
     if (message->length != 2) {
         return false;
     }
@@ -235,15 +236,15 @@ void RefereeSystem::messageHandler(DJISerial::Serial_Message_t* message){
  * @params bool1, bool2, ..., bool6 the boolean indicator variables to display to the referee client ui.
  * @return the 8 bit variable packeting the 6 boolean indicators
  */
-uint8_t RefereeSystem::packboolIndicators(
-    bool bool1, bool bool2, bool bool3, bool bool4, bool bool5, bool bool6)
+uint8_t RefereeSystem::packBoolMask(
+	bool bool1, bool bool2, bool bool3, bool bool4, bool bool5, bool bool6)
 {
-    return ((uint8_t) bool1) |
-           ((uint8_t) bool2) << 1 |
-           ((uint8_t) bool3) << 2 |
-           ((uint8_t) bool4) << 3 |
-           ((uint8_t) bool5) << 4 |
-           ((uint8_t) bool6) << 5; // bits 6 and 7 are reserved by the ref system
+	return ((uint8_t) bool1) |
+	       ((uint8_t) bool2) << 1 |
+	       ((uint8_t) bool3) << 2 |
+	       ((uint8_t) bool4) << 3 |
+	       ((uint8_t) bool5) << 4 |
+	       ((uint8_t) bool6) << 5; // bits 6 and 7 are reserved by the ref system
 }
 
 void RefereeSystem::updateReceivedDamage() {
@@ -261,7 +262,7 @@ void RefereeSystem::updateReceivedDamage() {
 /** 
  * @brief given robot_id, returns the client_id that the referee system uses to display 
  *        the received messages to the given client_id robot
- * @params robot_id the id of the robot received from the referee system to get the client_id of
+ * @param robot_id the id of the robot received from the referee system to get the client_id of
  * @return the client_id of the robot requested
  */
 uint16_t RefereeSystem::getRobotClientID(ref_robot_id_t robot_id) {
@@ -277,39 +278,22 @@ uint16_t RefereeSystem::getRobotClientID(ref_robot_id_t robot_id) {
 }
 
 
-void RefereeSystem::sendUIDisplay(bool is_cv_online, ref_robot_mode_t robot_mode, bool is_hopper_open, bool is_agitator_jammed) {
+void RefereeSystem::sendDisplayData() {
     if (!RefereeSystem::online) {
         return;
     }
     
-    if (!RefereeSystem::serial.TxMessageRateReady(0, TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS)) {
+    if (serial.getTimestamp() - serial.getLastTxMessageTimestamp() < TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS) {
         // not enough time has passed before next send
         // send at max every 100 ms (max frequency 10Hz)
         return;
     }
     
-    // float vars are temporary for now until there are actual floats that we have decided to display
-    // and will replace the place holders in ref_comms_float_to_display# below
-    float float1 = (69.0f);
-    float float2 = (69.0f);
-    float float3 = RefereeSystem::serial.getTxSequenceNumber();
     // 3 float variables to display on the referee client UI
     // undecided floats are set to 69
-    uint32_t ref_comms_float_to_display1 = reinterpret_cast<uint32_t&>(float1);
-    uint32_t ref_comms_float_to_display2 = reinterpret_cast<uint32_t&>(float2);
-    uint32_t ref_comms_float_to_display3 = reinterpret_cast<uint32_t&>(float3);
-    
-    // 6 boolean indicators to display on the referee client UI
-    // undecided booleans are set as false
-
-
-    bool ref_comms_bool_to_display1 = (robot_mode == WIGGLE_MODE); // wiggle indicator
-    bool ref_comms_bool_to_display2 = is_cv_online; // CV online indicator
-    bool ref_comms_bool_to_display3 = false;
-    bool ref_comms_bool_to_display4 = false;
-    bool ref_comms_bool_to_display5 = is_hopper_open; // hopper indicator
-    // LED is green if the turret is availible to fire, red if it is jammed
-    bool ref_comms_bool_to_display6 = !is_agitator_jammed;
+    uint32_t ref_comms_float_to_display1 = reinterpret_cast<uint32_t&>(displayData.float1);
+    uint32_t ref_comms_float_to_display2 = reinterpret_cast<uint32_t&>(displayData.float2);
+    uint32_t ref_comms_float_to_display3 = reinterpret_cast<uint32_t&>(displayData.float3);
 
     DJISerial::Serial_Message_t message;
 
@@ -339,13 +323,13 @@ void RefereeSystem::sendUIDisplay(bool is_cv_online, ref_robot_mode_t robot_mode
         (uint8_t) (ref_comms_float_to_display3 >> 16),
         (uint8_t) (ref_comms_float_to_display3 >> 24),
         // 6 custom boolean indicators to display in a single 8-bit value
-        (uint8_t) packboolIndicators(
-          ref_comms_bool_to_display1,
-            ref_comms_bool_to_display2,
-            ref_comms_bool_to_display3,
-            ref_comms_bool_to_display4,
-            ref_comms_bool_to_display5,
-            ref_comms_bool_to_display6)
+        (uint8_t) packBoolMask(
+		    displayData.bool1,
+			displayData.bool2,
+			displayData.bool3,
+			displayData.bool4,
+			displayData.bool5,
+			displayData.bool6)
     };
     
     message.data = data;
@@ -355,11 +339,11 @@ void RefereeSystem::sendUIDisplay(bool is_cv_online, ref_robot_mode_t robot_mode
     RefereeSystem::serial.send(&message);
 
 }
-void RefereeSystem::update(bool is_cv_online, ref_robot_mode_t robot_mode, bool is_hopper_open, bool is_agitator_jammed){
+void RefereeSystem::periodicTask(){
     RefereeSystem::updateReceivedDamage();
-    RefereeSystem::sendUIDisplay(is_cv_online, robot_mode, is_hopper_open, is_agitator_jammed);
+    RefereeSystem::sendDisplayData();
     DJISerial::Serial_Message_t message;
-    serial.update(&message);
+    serial.periodicTask(&message);
 
 }
 

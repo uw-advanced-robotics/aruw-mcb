@@ -177,10 +177,22 @@ typedef enum {
     WIGGLE_MODE = 2,       // automatically wiggle the chassis, you can still drive the chassis
     KILL_MODE = 3,         // send nothing to chassis and turret
     LOCK_TURRET_MODE = 4,  // lock the turret in place with manual chassis control
-    #if defined (TARGET_SENTINEL)
-    AUTO_MODE = 5,              // sets the robot features to be autonomous
-    #endif
+    AUTO_MODE = 5,              // (SENTINEL) sets the robot features to be autonomous
 } ref_robot_mode_t;
+
+typedef struct
+{
+    float float1;
+    float float2;
+    float float3;
+
+    bool bool1;
+    bool bool2;
+    bool bool3;
+    bool bool4;
+    bool bool5;
+    bool bool6;
+} ref_display_data_t;
 
 class RefereeSystem
 {
@@ -192,9 +204,13 @@ public:
 
     static ref_robot_data_t getRobotData();
     static ref_game_data_t getGameData();
-    static void update(bool is_cv_online, ref_robot_mode_t robot_mode, bool is_hopper_open, bool is_agitator_jammed);
+
+    static ref_display_data_t displayData;
+
+    static void periodicTask();
     static void messageHandler(DJISerial::Serial_Message_t* message);
     static ref_robot_id_t getRobotID();
+
 
 private:
     static ref_game_data_t game_data; /* game stats     (e.g. remaining time, current stage, winner)*/
@@ -203,22 +219,22 @@ private:
     static DJISerial serial;
     static bool online; /* true if the referee is online and connected, false otherwise */
 
-    static void processReceivedDamage(int32_t damage_taken);
-    static float decodeTofloat(uint8_t* start_byte);
-    static bool decodeToGameStatus(DJISerial::Serial_Message_t* message);
-    static bool decodeToGameResult(DJISerial::Serial_Message_t* message);
-    static bool decodeToAllRobotHP(DJISerial::Serial_Message_t* message);
-    static bool decodeToRobotStatus(DJISerial::Serial_Message_t* message);
-    static bool decodeToPowerAndHeat(DJISerial::Serial_Message_t* message);
-    static bool decodeToRobotPosition(DJISerial::Serial_Message_t* message);
-    static bool decodeToReceiveDamage(DJISerial::Serial_Message_t* message);
-    static bool decodeToProjectileLaunch(DJISerial::Serial_Message_t* message);
-    static bool decodeToSentinelDroneBulletsRemain(DJISerial::Serial_Message_t* message);
+    static void processReceivedDamage(const int32_t damage_taken);
+    static float decodeTofloat(const uint8_t* start_byte);
+    static bool decodeToGameStatus(const DJISerial::Serial_Message_t* message);
+    static bool decodeToGameResult(const DJISerial::Serial_Message_t* message);
+    static bool decodeToAllRobotHP(const DJISerial::Serial_Message_t* message);
+    static bool decodeToRobotStatus(const DJISerial::Serial_Message_t* message);
+    static bool decodeToPowerAndHeat(const DJISerial::Serial_Message_t* message);
+    static bool decodeToRobotPosition(const DJISerial::Serial_Message_t* message);
+    static bool decodeToReceiveDamage(const DJISerial::Serial_Message_t* message);
+    static bool decodeToProjectileLaunch(const DJISerial::Serial_Message_t* message);
+    static bool decodeToSentinelDroneBulletsRemain(const DJISerial::Serial_Message_t* message);
     
-    static uint8_t packboolIndicators(
-    bool bool1, bool bool2, bool bool3, bool bool4, bool bool5, bool bool6);
+    static uint8_t packBoolMask(
+	        bool bool1, bool bool2, bool bool3, bool bool4, bool bool5, bool bool6);
 
-    static void sendUIDisplay(bool is_cv_online, ref_robot_mode_t robot_mode, bool is_hopper_open, bool is_agitator_jammed);
+    static void sendDisplayData();
 
     static uint16_t getRobotClientID(ref_robot_id_t robot_id);
     static void updateReceivedDamage();

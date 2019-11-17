@@ -1,14 +1,20 @@
 #ifndef __serial_h_
 #define __serial_h_
 
-#define SERIAL_RX_BUFF_SIZE 250
+#define SERIAL_RX_BUFF_SIZE 256
 #define SERIAL_TX_BUFF_SIZE 256
 
 #define SERIAL_HEAD_BYTE 0xA5
-#define SERIAL_FOOTER_LENGTH 2
 
 #include <rm-dev-board-a/board.hpp>
-
+#include "modm/processing.hpp"
+/**
+ * Structure of a Serial Message:
+ * Frame Head{[Frame Head Byte(0xA5) 1 Byte][Frame Data Length (HSB Side Byte First, LSB Second) 2 Byte]
+ *         [Frame Sequence Number 1 Byte][CRC8 of Bytes before 1 Byte]}
+ * Frame Body{[Message Type (HSB Side Byte First, LSB Second) 2 Byte][Frame Data][CRC16 of entire frame (HSB Side Byte First, LSB Second) 2 Byte]}
+ * 
+ */
 namespace aruwlib
 {
 namespace serial
@@ -58,14 +64,14 @@ public:
      * @param message pointer to message to send
      * @return true if succeed, false if failed
     */
-    bool send(Serial_Message_t* message);
+    bool send(const Serial_Message_t* message);
 
     /** 
      * Update the port, read a message from rx buffer and decode it
      * @param message pointer to output message
      * @return true if has new message, false if not
     */
-    bool update(Serial_Message_t* message);
+    bool periodicTask(Serial_Message_t* message);
     /** 
      * Enable RX CRC enforcement. Messages that don't pass CRC check will be ignored
     */
@@ -75,16 +81,23 @@ public:
     */
     void disableRxCRCEnforcement();
     /** 
-     * If the Tx message rate is ready
-     * @param previousTxMessageTimestamp
-     * @param minTxMessageInterval
-    */
-    bool TxMessageRateReady(uint32_t previousTxMessageTimestamp, uint32_t minTxMessageInterval);
-    /** 
      * Get current Timestamp
      * @return current Timestamp in ms
     */
     uint32_t getTimestamp();
+
+    /** 
+     * Get timestamp of last message sent
+     * @return timestamp of last message sent in ms
+    */
+    uint32_t getLastTxMessageTimestamp();
+
+    /** 
+     * Get timestamp of last message received
+     * @return timestamp of last message sent in ms
+    */
+    uint32_t getLastRxMessageTimestamp();
+
     /** 
      * Get current Tx message sequence Number
      * @return current Tx message sequence Number
@@ -104,20 +117,20 @@ private:
     Serial_Port port;
 
     // tx/rx buffers
-    uint8_t buff_rx[SERIAL_RX_BUFF_SIZE];
-    uint8_t buff_tx[SERIAL_TX_BUFF_SIZE];
+    uint8_t rxBuffer[SERIAL_RX_BUFF_SIZE];
+    uint8_t txBuffer[SERIAL_TX_BUFF_SIZE];
 
     // state information
-    Serial_Mode current_mode;
+    Serial_Mode currentMode;
 
     // data read from an incoming message header
-    uint16_t expected_message_length;
-    uint16_t message_type;
+    uint16_t currentExpectedMessageLength;
+    uint16_t currentMessageType;
 
     // handle electrical noise
     bool rxCRCEnforcementEnabled;
-    uint8_t tx_sequence_num;
-    uint8_t rx_sequence_num;
+    uint8_t txSequenceNumber;
+    uint8_t rxSequenceNumber;
     uint8_t CRC8;
     uint16_t CRC16;
 
@@ -135,9 +148,13 @@ private:
     bool verifyCRC16(uint8_t *message, uint32_t message_length, uint16_t expectedCRC16);
     bool verifyCRC8(uint8_t *message, uint32_t message_length, uint8_t expectedCRC8);
 
-    Serial_Message_t lastMessage;
+    uint32_t lastTxMessageTimestamp;
+
+    Serial_Message_t lastRxMessage;
+    uint32_t lastRxMessageTimestamp;
 
     modm::Timestamp timestamp;
+
 };
 
 }
