@@ -58,8 +58,8 @@ class ExampleSubsystem : public Subsystem
     float desiredRpm;
 
     void updateMotorRpmPid(
-        modm::Pid<float>& pid,
-        aruwlib::motor::DjiMotor& motor,
+        modm::Pid<float>* pid,
+        aruwlib::motor::DjiMotor* const motor,
         float desiredRpm
     );
 };

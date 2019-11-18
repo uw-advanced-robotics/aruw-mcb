@@ -46,7 +46,7 @@ class Subsystem {
      *
      * @param defaultCommand the default command to associate with this subsystem
      */
-    void SetDefaultCommand(modm::SmartPointer& defaultCommand);
+    void SetDefaultCommand(const modm::SmartPointer& defaultCommand);
 
     /**
      * Gets the default command for this subsystem. Returns null if no default

@@ -21,22 +21,22 @@ namespace control
     void ExampleSubsystem::refresh()
     {
         updateMotorRpmPid(
-            velocityPidLeftWheel,
-            leftWheel, desiredRpm
+            &velocityPidLeftWheel,
+            &leftWheel, desiredRpm
         );
         updateMotorRpmPid(
-            velocityPidRightWheel,
-            rightWheel, desiredRpm
+            &velocityPidRightWheel,
+            &rightWheel, desiredRpm
         );
     }
 
     void ExampleSubsystem::updateMotorRpmPid(
-        modm::Pid<float>& pid,
-        aruwlib::motor::DjiMotor& motor,
+        modm::Pid<float>* pid,
+        aruwlib::motor::DjiMotor* motor,
         float desiredRpm
     ) {
-        pid.update(desiredRpm - motor.getShaftRPM());
-        motor.setDesiredOutput(pid.getValue());
+        pid->update(desiredRpm - motor->getShaftRPM());
+        motor->setDesiredOutput(pid->getValue());
     }
 }  // namespace control
 

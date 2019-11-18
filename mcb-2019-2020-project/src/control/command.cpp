@@ -8,7 +8,9 @@ namespace aruwlib
 
 namespace control
 {
-    Command::Command(bool isInterruptible) : isCommandInterruptible(isInterruptible), prevSchedulerExecuteTimestamp(0)
+    Command::Command(bool isInterruptible)
+        : isCommandInterruptible(isInterruptible),
+        prevSchedulerExecuteTimestamp(0)
     {}
 
     bool Command::hasRequirement(const Subsystem* requirement) const

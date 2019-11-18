@@ -21,9 +21,11 @@ int main()
 {
     Board::initialize();
 
-    modm::SmartPointer frictionWheelDefaultCommand(new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
+    modm::SmartPointer frictionWheelDefaultCommand(
+        new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
     frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
-    commandWatch = reinterpret_cast<aruwsrc::control::ExampleCommand*>(frictionWheelDefaultCommand.getPointer());
+    commandWatch = reinterpret_cast<aruwsrc::control::ExampleCommand*>
+        (frictionWheelDefaultCommand.getPointer());
 
     while (1)
     {

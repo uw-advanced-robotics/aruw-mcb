@@ -47,8 +47,6 @@ class CommandScheduler
     static bool addCommand(modm::SmartPointer commandToAdd);
 
  private:
-   //  static std::map<Subsystem*, Command*> subsystemToCommandMap;
-
     static std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
 
     static uint32_t commandSchedulerTimestamp;
