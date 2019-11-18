@@ -58,6 +58,8 @@ class ExampleCommand : public Command
     static const int16_t DEFAULT_WHEEL_RPM = 2000;
 
     ExampleSubsystem* subsystemExample;
+
+    int j = 0;
 };
 
 }  // namespace control

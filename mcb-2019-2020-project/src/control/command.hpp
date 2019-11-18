@@ -56,7 +56,7 @@ class Command {
     void addSubsystemRequirement(const Subsystem* requirement);
 
     /**
-     * Returns isCommandInterruptiable
+     * Returns isCommandInterruptible
      */
     bool isInterruptible(void) const;
 
@@ -97,7 +97,7 @@ class Command {
     // initial size of commandRequirements
     const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
 
-    bool isCommandInterruptiable;
+    bool isCommandInterruptible;
 
     uint32_t prevSchedulerExecuteTimestamp;
 

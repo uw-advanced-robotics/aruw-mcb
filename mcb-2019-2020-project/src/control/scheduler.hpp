@@ -54,6 +54,8 @@ class CommandScheduler
     static uint32_t commandSchedulerTimestamp;
 
     static Command* getCmdPtr(modm::SmartPointer smrtPtr);
+
+    static modm::SmartPointer defaultNullCommand;
 };
 
 }  // namespace control

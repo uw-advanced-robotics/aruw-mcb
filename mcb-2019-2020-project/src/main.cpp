@@ -15,31 +15,18 @@ using namespace std;
 
 int count = 0;
 
-Subsystem* s2;
-Subsystem* s3;
-
-Command* c;
-Command* c1;
-
-int error()
-{
-    return 0;
-}
+aruwsrc::control::ExampleCommand* commandWatch;
 
 int main()
 {
-    modm::SmartPointer frictionWheelDefaultCommand(new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
-    frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
-
     Board::initialize();
 
-    s2 = &frictionWheelSubsystem;
+    modm::SmartPointer frictionWheelDefaultCommand(new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
+    frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
+    commandWatch = reinterpret_cast<aruwsrc::control::ExampleCommand*>(frictionWheelDefaultCommand.getPointer());
 
     while (1)
     {
-        // reinterpret_cast<aruwlib::control::Command*>(frictionWheelDefaultCommand.getPointer())->execute();
-        // frictionWheelSubsystem.refresh();
-
         aruwlib::can::CanRxHandler::pollCanData();
         aruwlib::control::CommandScheduler::run();
         count++;

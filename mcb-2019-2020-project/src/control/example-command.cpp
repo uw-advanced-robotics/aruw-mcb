@@ -13,7 +13,7 @@ namespace control
     }
 
     void ExampleCommand::initialize()
-    {}
+    {j++;}
 
     void ExampleCommand::execute()
     {

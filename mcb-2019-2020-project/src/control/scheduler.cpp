@@ -15,6 +15,8 @@ namespace control
 
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
+    modm::SmartPointer CommandScheduler::defaultNullCommand(0);
+
     bool CommandScheduler::addCommand(modm::SmartPointer commandToAdd)
     {
         // only add the command if (a) command is not already being run and (b) all
@@ -27,13 +29,16 @@ namespace control
         // Check to make sure the commandToAdd you are trying to add to the scheduler
         // can be added.
         // If there are command dependencies that can't be interrupted, don't schedule.
-        for (const Subsystem* requirement : getCmdPtr(commandToAdd)->getRequirements())
+        auto commandRequirements = getCmdPtr(commandToAdd)->getRequirements();
+        for (auto& requirement : commandRequirements)
         {
             auto isRequirementRegistered = subsystemToCommandMap.find(
                 const_cast<Subsystem*>(requirement));
 
+            // return if a subsystem required is not in the scheduler or the command
+            // scheduled in the subsystem is not interruptible.
             if (isRequirementRegistered == subsystemToCommandMap.end()
-                || (!(isRequirementRegistered->second == 0)
+                || (!(isRequirementRegistered->second == defaultNullCommand)
                 && !getCmdPtr(isRequirementRegistered->second)->isInterruptible())
             ) {
                 return false;
@@ -43,13 +48,13 @@ namespace control
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
-        for (auto& requirement : getCmdPtr(commandToAdd)->getRequirements())
+        for (auto& requirement : commandRequirements)
         {
             map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
                 subsystemToCommandMap.find(const_cast<Subsystem*>(requirement));
             if (isDependentSubsystem != subsystemToCommandMap.end())
             {
-                if (!(isDependentSubsystem->second == 0))
+                if (!(isDependentSubsystem->second == defaultNullCommand))
                 {
                     getCmdPtr(isDependentSubsystem->second)->end(true);
                 }
@@ -71,12 +76,12 @@ namespace control
         // refresh all and run all commands
         for (auto& currSubsystemCommandPair : subsystemToCommandMap) {
             // add default command if no command is currently being run
-            if (currSubsystemCommandPair.second == 0
+            if (currSubsystemCommandPair.second == defaultNullCommand
                     && getCmdPtr(currSubsystemCommandPair.first->GetDefaultCommand()) != nullptr) {
                 addCommand(currSubsystemCommandPair.first->GetDefaultCommand());
             }
             // only run the command if it hasn't been run this time run has been called
-            if (!(currSubsystemCommandPair.second == 0))
+            if (!(currSubsystemCommandPair.second == defaultNullCommand))
             {
                 Command* currCommand = getCmdPtr(currSubsystemCommandPair.second);
 
@@ -127,8 +132,7 @@ namespace control
     {
         if (!isSubsystemRegistered(subsystem))
         {
-            subsystemToCommandMap.insert(std::make_pair(subsystem, 0));
-
+            subsystemToCommandMap[subsystem] = defaultNullCommand;
             return true;
         }
         return false;
