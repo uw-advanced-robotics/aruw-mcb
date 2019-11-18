@@ -184,6 +184,7 @@ using ImuMiso = GpioF8;
 using ImuMosi = GpioF9;
 using ImuNcc = GpioF6;
 using ImuSpiMaster = SpiMaster5;
+using IstEnablePin = GpioE2;
 
 inline void
 killAllGpioOutput()

@@ -88,6 +88,8 @@ class  Mpu6500 {
 
     static void mpuNssHigh(void);
 
+    friend class Ist8310;
+
     static uint8_t mpuWriteReg(uint8_t const reg, uint8_t const data);
 
     static uint8_t mpuReadReg(uint8_t const reg);
