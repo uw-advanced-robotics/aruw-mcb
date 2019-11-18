@@ -1,6 +1,8 @@
 #ifndef __USER_MATH_UTILS_HPP__
 #define __USER_MATH_UTILS_HPP__
 
+const float PI = 3.14159265359f;
+
 template< typename T >
 T limitVal(T val, T min, T max)
 {
