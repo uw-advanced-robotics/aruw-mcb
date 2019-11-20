@@ -8,11 +8,6 @@ namespace aruwlib
 
 namespace control
 {
-    Command::Command(bool isInterruptible)
-        : isCommandInterruptible(isInterruptible),
-        prevSchedulerExecuteTimestamp(0)
-    {}
-
     bool Command::hasRequirement(const Subsystem* requirement) const
     {
         return commandRequirements.find(requirement) != commandRequirements.end();
@@ -36,11 +31,6 @@ namespace control
     set<const Subsystem*>* Command::getRequirementsModifiable()
     {
         return &commandRequirements;
-    }
-
-    bool Command::isInterruptible() const
-    {
-        return isCommandInterruptible;
     }
 }  // namespace control
 

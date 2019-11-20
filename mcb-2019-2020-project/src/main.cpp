@@ -18,8 +18,6 @@ aruwlib::motor::DjiMotor* m3;
 
 using namespace std;
 
-int count = 0;
-
 aruwsrc::control::ExampleCommand* commandWatch;
 
 int main()
@@ -51,8 +49,17 @@ int main()
         if (count > 300)
         {
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-            count = 0;
         }
+
+        // do this as fast as you can
+        aruwlib::can::CanRxHandler::pollCanData();
+
+        // testing
+        if (commandSchedulerRunPeriod.execute())
+        {
+            aruwlib::control::CommandScheduler::run();
+        }
+
         modm::delayMicroseconds(10);
     }
     return 0;

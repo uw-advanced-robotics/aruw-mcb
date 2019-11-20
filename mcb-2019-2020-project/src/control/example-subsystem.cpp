@@ -5,14 +5,6 @@ namespace aruwsrc
 
 namespace control
 {
-    ExampleSubsystem::ExampleSubsystem() :
-        leftWheel(LEFT_MOTOR_ID, CAN_BUS_MOTORS),
-        rightWheel(RIGHT_MOTOR_ID, CAN_BUS_MOTORS),
-        velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        desiredRpm(0)
-    {}
-
     void ExampleSubsystem::setDesiredRpm(float desRpm)
     {
         desiredRpm = desRpm;

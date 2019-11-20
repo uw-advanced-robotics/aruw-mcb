@@ -46,14 +46,14 @@ class CommandScheduler
 
     static bool addCommand(modm::SmartPointer commandToAdd);
 
+    static const modm::SmartPointer defaultNullCommand;
+
  private:
     static std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
 
     static uint32_t commandSchedulerTimestamp;
 
     static Command* getCmdPtr(modm::SmartPointer smrtPtr);
-
-    static modm::SmartPointer defaultNullCommand;
 };
 
 }  // namespace control

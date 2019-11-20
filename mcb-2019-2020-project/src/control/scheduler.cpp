@@ -15,7 +15,7 @@ namespace control
 
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
-    modm::SmartPointer CommandScheduler::defaultNullCommand(0);
+    const modm::SmartPointer CommandScheduler::defaultNullCommand(0);
 
     bool CommandScheduler::addCommand(modm::SmartPointer commandToAdd)
     {
@@ -35,12 +35,8 @@ namespace control
             auto isRequirementRegistered = subsystemToCommandMap.find(
                 const_cast<Subsystem*>(requirement));
 
-            // return if a subsystem required is not in the scheduler or the command
-            // scheduled in the subsystem is not interruptible.
-            if (isRequirementRegistered == subsystemToCommandMap.end()
-                || (!(isRequirementRegistered->second == defaultNullCommand)
-                && !getCmdPtr(isRequirementRegistered->second)->isInterruptible())
-            ) {
+            // return if a subsystem required is not in the scheduler
+            if (isRequirementRegistered == subsystemToCommandMap.end()) {
                 return false;
             }
         }

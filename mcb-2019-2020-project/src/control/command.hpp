@@ -24,14 +24,14 @@ namespace control
 
 class Command {
  public:
-    explicit Command(bool isInterruptible);
+    Command() : prevSchedulerExecuteTimestamp(0)
+    {}
 
     /**
      * Specifies the set of subsystems used by this command.  Two commands cannot
-     * use the same subsystem at the same time.  If the command is scheduled as
-     * interruptible and another command is scheduled that shares a requirement,
-     * the command will be interrupted.  Else, the command will not be scheduled.
-     * If no subsystems are required, return an empty set.
+     * use the same subsystem at the same time.  If another command is scheduled
+     * that shares a requirement, the command will be interrupted. If no subsystems
+     * are required, return an empty set.
      *
      * The generic Command class contains a list of the requrements. The user
      * should add requirements to this list accordingly (typically in the constructor
@@ -54,11 +54,6 @@ class Command {
      * Adds the required subsystem to a list of required subsystems
      */
     void addSubsystemRequirement(const Subsystem* requirement);
-
-    /**
-     * Returns isCommandInterruptible
-     */
-    bool isInterruptible(void) const;
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -96,8 +91,6 @@ class Command {
 
     // initial size of commandRequirements
     const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
-
-    bool isCommandInterruptible;
 
     uint32_t prevSchedulerExecuteTimestamp;
 
