@@ -4,7 +4,6 @@
 #include <rm-dev-board-a/board.hpp>
 #include "serial.hpp"
 
-#define REF_UI_INDICATOR_VALS_PACKET_ID (0xD180)
 #define REF_DAMAGE_EVENT_SIZE (10)
 #define TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS (100) // time between each referee ui display send in milliseconds 
 
@@ -24,8 +23,14 @@ typedef enum
     REF_MESSAGE_TYPE_RECEIVE_DAMAGE = 0x206,
     REF_MESSAGE_TYPE_PROJECTILE_LAUNCH = 0x207,
     REF_MESSAGE_TYPE_SENTINEL_DRONE_BULLETS_REMAIN = 0x208,
-    REF_MESSAGE_TYPE_UI_DISPLAY = 0x301
+    REF_MESSAGE_TYPE_CUSTOM_DATA = 0x301
 } ref_message_type_t;
+
+typedef enum 
+{
+    REF_CUSTOM_DATA_TYPE_UI_INDICATOR = 0xD180,
+
+} ref_custom_data_type_t;
 
 typedef enum 
 {
@@ -200,22 +205,39 @@ public:
     RefereeSystem();
     ~RefereeSystem();
 
+    static const uint16_t CUSTOM_DATA_MAX_LENGTH = 113;
+    static const uint16_t CUSTOM_DATA_TYPE_LENGTH = 2;
+    static const uint16_t CUSTOM_DATA_SENDER_ID_LENGTH = 2;
+    static const uint16_t CUSTOM_DATA_RECIPIENT_ID_LENGTH = 2;
+
+    typedef struct{
+        ref_custom_data_type_t type;
+        uint16_t sender_id;
+        uint16_t recipient_id;
+        uint8_t* data;
+        uint16_t length;
+    } CustomData_t;
+
     static void initialize();
 
     static ref_robot_data_t getRobotData();
     static ref_game_data_t getGameData();
 
-    static ref_display_data_t displayData;
-
     static void periodicTask();
     static void messageHandler(DJISerial::Serial_Message_t* message);
     static ref_robot_id_t getRobotID();
 
+    static ref_display_data_t displayData;
+
+    static bool sendCustomData(CustomData_t* custom_data);
 
 private:
+    static uint8_t customDataBuffer[CUSTOM_DATA_MAX_LENGTH + CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH + CUSTOM_DATA_RECIPIENT_ID_LENGTH];
+
     static ref_game_data_t game_data; /* game stats     (e.g. remaining time, current stage, winner)*/
     static ref_robot_data_t robot_data; /* robot stats    (e.g. current HP, power draw, turret info)*/
     static received_dps_tracker_t received_dps_tracker;
+
     static DJISerial serial;
     static bool online; /* true if the referee is online and connected, false otherwise */
 
@@ -231,10 +253,11 @@ private:
     static bool decodeToProjectileLaunch(const DJISerial::Serial_Message_t* message);
     static bool decodeToSentinelDroneBulletsRemain(const DJISerial::Serial_Message_t* message);
     
+    static bool sendDisplayData();
+
     static uint8_t packBoolMask(
 	        bool bool1, bool bool2, bool bool3, bool bool4, bool bool5, bool bool6);
 
-    static void sendDisplayData();
 
     static uint16_t getRobotClientID(ref_robot_id_t robot_id);
     static void updateReceivedDamage();

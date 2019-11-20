@@ -7,28 +7,50 @@ namespace aruwlib
 {
 namespace serial
 {
-CVCommunication::CVCommunication(DJISerial::Serial_Port port, TurrentDataHandler_t turrent_data_callback)
+uint32_t CVCommunication::previousIDTimestamp;
+
+bool CVCommunication::autoAimEnabled;
+bool CVCommunication::isAimDataLatest;
+CVCommunication::CV_Turret_Aim_Data_t CVCommunication::lastAimData;
+CVCommunication::TurrentDataHandler_t CVCommunication::turrentDataHandler;
+
+DJISerial CVCommunication::serial = DJISerial(DJISerial::PORT_UART2, messageHandler, false);
+
+uint8_t CVCommunication::robotID;
+uint8_t CVCommunication::modeArray[MODE_ARRAY_SIZE] = {
+    MESSAGE_TYPE_TURRET_TELEMETRY,
+    MESSAGE_TYPE_IMU, 
+    MESSAGE_TYPE_ROBOT_ID, 
+    MESSAGE_TYPE_AUTO_AIM_REQUEST};
+
+modm::PeriodicTimer CVCommunication::timeoutArray[MODE_ARRAY_SIZE] = {
+    
+}
+;
+
+CVCommunication::CVCommunication()
 {
     previousIDTimestamp = 0;
 
     lastAimData = {0};
-    turrentDataHandler = {0};
     robotID = 0;
-    modeArrayIndex = 0;
 
     autoAimEnabled = false;
     isAimDataLatest = false;
-
-    serial = DJISerial(port, messageHandler, false);
+    
 }
 
 CVCommunication::~CVCommunication()
 {
 }
 
-void CVCommunication::switchMode() {
-    modeArrayIndex = (modeArrayIndex + 1) % MODE_ARRAY_SIZE;
+void CVCommunication::initialize(DJISerial::Serial_Port port, TurrentDataHandler_t turrent_data_callback) {
+    turrentDataHandler = turrent_data_callback;
+    serial = DJISerial(port, messageHandler, false);
+    serial.initialize();
+    serial.disableRxCRCEnforcement();
 }
+
 
 bool CVCommunication::decodeToTurrentAimData(const DJISerial::Serial_Message_t* message, CV_Turret_Aim_Data_t *aim_data) {
     if (message->length != MESSAGE_LENGTH_TURRET_AIM) {
@@ -66,7 +88,6 @@ void CVCommunication::sendTurrentData(const float pitch, const float yaw) {
     message.length = MESSAGE_LENGTH_TURRET_TELEMETRY;
     message.type = MESSAGE_TYPE_TURRET_TELEMETRY;
     serial.send(&message);
-    switchMode();
 }
 
 void CVCommunication::setTurrentAimData(CV_Turret_Aim_Data_t *aim_data) {
@@ -104,12 +125,6 @@ void CVCommunication::messageHandler(DJISerial::Serial_Message_t* message) {
     }
 }
 
-void CVCommunication::initialize(TurrentDataHandler_t turrent_data_callback) {
-    turrentDataHandler = turrent_data_callback;
-    serial.initialize();
-    serial.disableRxCRCEnforcement();
-}
-
 /**
  * Send Given IMU and Chassis data to to Xavier
  */
@@ -139,7 +154,6 @@ void CVCommunication::sendIMUandChassisData(const CV_IMU_Data_t *imu_data, const
         message.type = MESSAGE_TYPE_IMU;
 
     serial.send(&message);
-    switchMode();
 }
 
 /**
@@ -160,42 +174,44 @@ void CVCommunication::periodicTask(const CV_IMU_Data_t *imu_data, const CV_Chass
 
     DJISerial::Serial_Message_t message;
     serial.periodicTask(&message);
-    
-    switch (modeArray[modeArrayIndex]) {
-    case MESSAGE_TYPE_TURRET_TELEMETRY: {
-        CVCommunication::sendTurrentData(turrent_data->pitch, turrent_data->yaw);
-        break;
-    }
-    case MESSAGE_TYPE_IMU: {
-        sendIMUandChassisData(imu_data, chassis_data);
-        break;
-    }
-    case MESSAGE_TYPE_ROBOT_ID: {
-        switchMode();
-        if (serial.getTimestamp() - previousIDTimestamp > TIME_BETWEEN_ROBOT_ID_SEND_MS) {
-            sendRobotID(robotID);
-            previousIDTimestamp = serial.getTimestamp();
-            break;
+    for (int i = 0; i < MODE_ARRAY_SIZE; i++){
+        
+        switch (modeArray[i]) {
+            case MESSAGE_TYPE_TURRET_TELEMETRY: {
+                if(timeoutArray[i].execute()){
+                    CVCommunication::sendTurrentData(turrent_data->pitch, turrent_data->yaw);
+                }
+                break;
+            }
+            case MESSAGE_TYPE_IMU: {
+                if(timeoutArray[i].execute()){
+                    sendIMUandChassisData(imu_data, chassis_data);
+                }
+                break;
+            }
+            case MESSAGE_TYPE_ROBOT_ID: {
+                if(timeoutArray[i].execute()){
+                    sendRobotID(robotID);
+                }
+                break;
+            }
+
+            case MESSAGE_TYPE_AUTO_AIM_REQUEST:
+            {
+                if(timeoutArray[i].execute()){
+                    if (autoAimEnabled) {
+                        uint8_t data = AUTO_AIM_ENABLED;
+                        DJISerial::Serial_Message_t message;
+                        message.data = &data;
+                        message.length = MESSAGE_LENGTH_AUTO_AIM_REQUEST;
+                        message.type = MESSAGE_TYPE_AUTO_AIM_REQUEST;
+                        serial.send(&message);
+                    }
+                }
+                break;
+            }
         }
     }
-
-    case MESSAGE_TYPE_AUTO_AIM_REQUEST:
-    {
-        switchMode();
-        if (autoAimEnabled) {
-            uint8_t data = AUTO_AIM_ENABLED;
-            DJISerial::Serial_Message_t message;
-            message.data = &data;
-            message.length = MESSAGE_LENGTH_AUTO_AIM_REQUEST;
-            message.type = MESSAGE_TYPE_AUTO_AIM_REQUEST;
-            serial.send(&message);
-            break;
-        }
-    }
-}
-
-
-
 }
 
 }

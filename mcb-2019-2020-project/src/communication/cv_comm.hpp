@@ -2,6 +2,8 @@
 #define _cv_comms_h_
 #include <stdint.h>
 #include "serial.hpp"
+#include <modm/processing.hpp>
+
 
 namespace aruwlib
 {
@@ -22,7 +24,7 @@ public:
     } CV_Turret_Aim_Data_t;
 
     typedef void (*TurrentDataHandler_t)(CV_Turret_Aim_Data_t* aim_data);
-    CVCommunication(DJISerial::Serial_Port port, TurrentDataHandler_t turrent_data_callback);
+    CVCommunication();
     ~CVCommunication();
 
     
@@ -81,6 +83,15 @@ public:
 
     } Rx_CV_Message_Length;
 
+    typedef enum
+    {
+        TIMEOUT_TURRET_TELEMETRY = 5,
+        TIMEOUT_IMU = 5,
+        TIMEOUT_REQUEST_TASK = 1000,
+        TIMEOUT_ROBOT_ID = 1000,
+        TIMEOUT_AUTO_AIM_REQUEST = 5,
+
+    } Tx_CV_Message_Timeout;
 
       /** 
        * time in ms since last CV aim data was
@@ -95,10 +106,9 @@ public:
 
     /** 
      * initialize CV Communication
-     * @param turrent_data_callback callback function to handle turrent data
      * 
     */
-    static void initialize(TurrentDataHandler_t turrent_data_callback);
+    static void initialize(DJISerial::Serial_Port port, TurrentDataHandler_t turrent_data_callback);
 
     /** 
      * Update robot state with given data and decode received message
@@ -138,7 +148,6 @@ private:
      */
     static uint32_t previousIDTimestamp;
 
-    static bool autoAimRequestQueued;
     static bool autoAimEnabled;
     static bool isAimDataLatest;
     
@@ -148,9 +157,10 @@ private:
     static DJISerial serial;
 
     static uint8_t robotID;
-    static uint8_t modeArrayIndex;
     static uint8_t modeArray[MODE_ARRAY_SIZE];
     
+    static modm::PeriodicTimer timeoutArray[MODE_ARRAY_SIZE];
+
     /**
      * send RobotID to Xavier
      * @param RobotID Robot ID
@@ -158,7 +168,6 @@ private:
     static bool sendRobotID(uint8_t RobotID);
 
 
-    static void switchMode();
     
     static bool decodeToTurrentAimData(const DJISerial::Serial_Message_t* message, CV_Turret_Aim_Data_t *aim_data);
 

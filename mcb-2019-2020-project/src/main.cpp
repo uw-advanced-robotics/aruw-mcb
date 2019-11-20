@@ -6,16 +6,22 @@ using namespace aruwlib;
 using namespace serial;
 ref_game_data_t game;
 ref_robot_data_t robot;
+CVCommunication::CV_IMU_Data_t imu;
+CVCommunication::CV_Turret_Aim_Data_t turrent;
+CVCommunication::CV_Chassis_Data_t chassis;
 void boom(CVCommunication::CV_Turret_Aim_Data_t* aaa){
 
 }
+
 int main()
 {
     Board::initialize();
     RefereeSystem::initialize();
+    CVCommunication::initialize(DJISerial::PORT_UART2, boom);
     while (1)
     {
         //Board::Leds::toggle();
+        CVCommunication::periodicTask(&imu, &chassis, &turrent);
         game = RefereeSystem::getGameData();
         robot = RefereeSystem::getRobotData();
         RefereeSystem::periodicTask();
