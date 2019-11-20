@@ -7,13 +7,13 @@
 #include "src/motor/dji_motor_tx_handler.hpp"
 #include "src/communication/can/can_rx_listener.hpp"
 
+#include <modm/processing/timer.hpp>
+
 aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
 
 aruwlib::motor::DjiMotor* m3;
 
 using namespace std;
-
-int count = 0;
 
 aruwsrc::control::ExampleCommand* commandWatch;
 
@@ -21,22 +21,36 @@ int main()
 {
     Board::initialize();
 
+    // lots of random testing code
+
     modm::SmartPointer frictionWheelDefaultCommand(
         new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
+
     frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
     commandWatch = reinterpret_cast<aruwsrc::control::ExampleCommand*>
         (frictionWheelDefaultCommand.getPointer());
 
+    // timers
+    modm::ShortPeriodicTimer motorSendPeriod(3);
+    modm::ShortPeriodicTimer commandSchedulerRunPeriod(1);
+
     while (1)
     {
-        aruwlib::can::CanRxHandler::pollCanData();
-        aruwlib::control::CommandScheduler::run();
-        count++;
-        if (count > 300)
+        // where should this go?
+        if (motorSendPeriod.execute())
         {
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-            count = 0;
         }
+
+        // do this as fast as you can
+        aruwlib::can::CanRxHandler::pollCanData();
+
+        // testing
+        if (commandSchedulerRunPeriod.execute())
+        {
+            aruwlib::control::CommandScheduler::run();
+        }
+
         modm::delayMicroseconds(10);
     }
     return 0;
