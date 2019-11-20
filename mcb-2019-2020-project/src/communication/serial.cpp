@@ -159,7 +159,7 @@ bool DJISerial::send(const Serial_Message_t* message) {
 
     uint8_t *next_tx_buff = &(buff[7]);
 
-    if (next_tx_buff + message->length + FRAME_CRC16_LENGTH >=buff + SERIAL_TX_BUFF_SIZE) {
+    if (next_tx_buff + message->length + FRAME_CRC16_LENGTH >= buff + SERIAL_TX_BUFF_SIZE) {
         return false;
     }
     for (uint16_t i = 0; i < message->length; i++) {
@@ -211,10 +211,6 @@ bool DJISerial::periodicTask(Serial_Message_t* message) {
 
 uint32_t DJISerial::getTimestamp() {
     return timestamp.getTime();
-}
-
-uint32_t getLastTxMessageTimestamp() {
-    
 }
 
 bool DJISerial::read(uint8_t *data, uint16_t length) {

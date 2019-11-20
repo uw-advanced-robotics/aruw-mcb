@@ -14,17 +14,11 @@ received_dps_tracker_t RefereeSystem::received_dps_tracker;
 ref_display_data_t RefereeSystem::displayData;
 DJISerial RefereeSystem::serial = DJISerial(DJISerial::PORT_UART6, (RefereeSystem::messageHandler), true);
 bool RefereeSystem::online;
+uint8_t RefereeSystem::customDataBuffer[CUSTOM_DATA_MAX_LENGTH + CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH + CUSTOM_DATA_RECIPIENT_ID_LENGTH];
 
 RefereeSystem::RefereeSystem()
 {
-	ref_game_data_t game_data; /* game stats     (e.g. remaining time, current stage, winner)*/
-	ref_robot_data_t robot_data; /* robot stats    (e.g. current HP, power draw, turret info)*/
-	received_dps_tracker_t received_dps_tracker = {0};
-	this->game_data = game_data;
-	this->robot_data = robot_data;
-	this->received_dps_tracker = received_dps_tracker;
     this->online = false; // initially sets referee system to be offline
-
     serial = DJISerial(DJISerial::PORT_UART6, (RefereeSystem::messageHandler), true);
     
 }
@@ -278,36 +272,68 @@ uint16_t RefereeSystem::getRobotClientID(ref_robot_id_t robot_id) {
 }
 
 
-void RefereeSystem::sendDisplayData() {
+bool RefereeSystem::sendCustomData(CustomData_t* custom_data) {
+    // Exceed max length
+    if (custom_data->length > CUSTOM_DATA_MAX_LENGTH)
+    {
+        return false;
+    }
+    // Check if sender and recipient is from our alliance
+    if (robot_data.robot_id < 10 && (custom_data->sender_id > 10 || custom_data->recipient_id > 10))
+    {
+        return false;
+    }
+    // Check if sender and recipient is from our alliance
+    if (robot_data.robot_id > 10 && (custom_data->sender_id < 10 || custom_data->recipient_id < 10))
+    {
+        return false;
+    }
+
     if (!RefereeSystem::online) {
-        return;
+        return false;
     }
     
     if (serial.getTimestamp() - serial.getLastTxMessageTimestamp() < TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS) {
         // not enough time has passed before next send
         // send at max every 100 ms (max frequency 10Hz)
-        return;
+        return false;
     }
+
+
+    DJISerial::Serial_Message_t message;
     
+    // data content ID / Packet Header
+    customDataBuffer[0] = (uint8_t) custom_data->type;
+    customDataBuffer[1] = (uint8_t) ((uint16_t) custom_data->type >> 8);
+    // robot ID of the robot that the message is being sent from
+    customDataBuffer[2] = (uint8_t) custom_data->sender_id;
+    customDataBuffer[3] = (uint8_t) ((uint16_t) (custom_data->sender_id) >> 8);
+    // client ID of the robot that the values in the message will be displayed to
+    customDataBuffer[4] = (uint8_t) custom_data->recipient_id;
+    customDataBuffer[5] = (uint8_t) custom_data->recipient_id >> 8;
+    memcpy(customDataBuffer + CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH + CUSTOM_DATA_RECIPIENT_ID_LENGTH, 
+    custom_data->data,
+    custom_data->length);
+    
+    message.data = customDataBuffer;
+    message.type = REF_MESSAGE_TYPE_CUSTOM_DATA;
+    message.length = CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH + CUSTOM_DATA_RECIPIENT_ID_LENGTH + custom_data->length;
+
+    return RefereeSystem::serial.send(&message);
+}
+
+bool RefereeSystem::sendDisplayData() {
+    
+    CustomData_t customData;
+    customData.type = REF_CUSTOM_DATA_TYPE_UI_INDICATOR;
+    customData.sender_id = getRobotClientID(robot_data.robot_id);
+    customData.sender_id = getRobotClientID(robot_data.robot_id);
     // 3 float variables to display on the referee client UI
-    // undecided floats are set to 69
     uint32_t ref_comms_float_to_display1 = reinterpret_cast<uint32_t&>(displayData.float1);
     uint32_t ref_comms_float_to_display2 = reinterpret_cast<uint32_t&>(displayData.float2);
     uint32_t ref_comms_float_to_display3 = reinterpret_cast<uint32_t&>(displayData.float3);
-
-    DJISerial::Serial_Message_t message;
-
-    uint8_t data[19] = {
-        // data content ID / Packet Header
-        (uint8_t) REF_UI_INDICATOR_VALS_PACKET_ID,
-        (uint8_t) ((uint16_t) REF_UI_INDICATOR_VALS_PACKET_ID >> 8),
-        // robot ID of the robot that the message is being sent from
-        (uint8_t) RefereeSystem::robot_data.robot_id,
-        (uint8_t) ((uint16_t) (RefereeSystem::robot_data.robot_id) >> 8),
-        // client ID of the robot that the values in the message will be displayed to
-        (uint8_t) getRobotClientID(RefereeSystem::robot_data.robot_id),
-        (uint8_t) (getRobotClientID(RefereeSystem::robot_data.robot_id) >> 8),
-        // 3 custom floats to display
+    // 3 custom floats to display
+    uint8_t data[13] = {
         (uint8_t) ref_comms_float_to_display1,
         (uint8_t) (ref_comms_float_to_display1 >> 8),
         (uint8_t) (ref_comms_float_to_display1 >> 16),
@@ -317,7 +343,7 @@ void RefereeSystem::sendDisplayData() {
         (uint8_t) (ref_comms_float_to_display2 >> 8),
         (uint8_t) (ref_comms_float_to_display2 >> 16),
         (uint8_t) (ref_comms_float_to_display2 >> 24),
-        
+       
         (uint8_t) ref_comms_float_to_display3,
         (uint8_t) (ref_comms_float_to_display3 >> 8),
         (uint8_t) (ref_comms_float_to_display3 >> 16),
@@ -326,19 +352,17 @@ void RefereeSystem::sendDisplayData() {
         (uint8_t) packBoolMask(
 		    displayData.bool1,
 			displayData.bool2,
-			displayData.bool3,
-			displayData.bool4,
-			displayData.bool5,
-			displayData.bool6)
+		 	displayData.bool3,
+		 	displayData.bool4,
+		 	displayData.bool5,
+		 	displayData.bool6)
     };
-    
-    message.data = data;
-    message.type = REF_MESSAGE_TYPE_UI_DISPLAY;
-    message.length = 19;
-
-    RefereeSystem::serial.send(&message);
-
+    customData.data = data;
+    customData.length = 13;
+    return sendCustomData(&customData);
 }
+
+
 void RefereeSystem::periodicTask(){
     RefereeSystem::updateReceivedDamage();
     RefereeSystem::sendDisplayData();
