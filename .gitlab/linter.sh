@@ -2,8 +2,8 @@
 listTests=(
   "echo cpplint checks:  ================================================================"
   "cpplint --recursive ./mcb-2019-2020-project/src"
-  "cpplint ./mcb-2019-2020-project/rm-dev-board-a/* ./mcb-2019-2020-project/*",
-  "echo",
+  "cpplint ./mcb-2019-2020-project/rm-dev-board-a/* ./mcb-2019-2020-project/*"
+  "echo"
   "echo cppcheck checks:  ================================================================"
   "cppcheck ./mcb-2019-2020-project/src ./mcb-2019-2020-project/robot-type ./mcb-2019-2020-project/rm-dev-board-a --enable=all"
 )
