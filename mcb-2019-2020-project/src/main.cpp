@@ -36,7 +36,7 @@ int main()
     // modm::SmartPointer frictionWheelDefaultCommand(
     //     new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
     modm::SmartPointer rotateAgitator(
-        new AgitatorRotateCommand(&agitator17mm, PI / 2.0f, 10.0f)
+        new AgitatorRotateCommand(&agitator17mm, PI / 2.0f)
     );
 
     // add commands if necessary
@@ -58,6 +58,7 @@ int main()
             agitator17mm.agitatorCalibrateHere();
         }
         prevRead = Board::Button::read();
+
         f = agitator17mm.agitatorEncoderToPosition();
         aruwlib::can::CanRxHandler::pollCanData();
 
@@ -65,10 +66,9 @@ int main()
         count++;
         if (t.execute())
         {
-            //t.restart();
             count = 0;
         //    aruwlib::control::CommandScheduler::run();
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            // aruwlib::motor::DjiMotorTxHandler::processCanSendData();
              agitator17mm.refresh();
 
         }

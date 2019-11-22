@@ -2,6 +2,8 @@
 #define __AGITATOR_SUBSYSTEM_HPP__
 
 #include <modm/math/filter/pid.hpp>
+#include <modm/processing/timer/timeout.hpp>
+
 #include "src/control/subsystem.hpp"
 #include "src/motor/dji_motor.hpp"
 
@@ -13,7 +15,8 @@ namespace control
 
 class AgitatorSubsystem : aruwlib::control::Subsystem {
  public:
-    AgitatorSubsystem(uint16_t gearRatio);
+    AgitatorSubsystem(uint16_t gearRatio,
+       int agitatorJamTimeout = DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD);
 
     void refresh(void);
 
@@ -25,7 +28,14 @@ class AgitatorSubsystem : aruwlib::control::Subsystem {
 
     void agitatorCalibrateHere(void);
 
+    void armAgitatorUnjamTimer(void);
+
+    void disarmAgitatorUnjamTimer(void);
+
+    bool isAgitatorJammed(void);
+
  private:
+    static const int DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD;
     const float PID_P = 70000.0f;
     const float PID_I = 0.0f;
     const float PID_D = 1000000.0f;
@@ -46,6 +56,10 @@ class AgitatorSubsystem : aruwlib::control::Subsystem {
     float agitatorCalibrationAngle;
 
     bool agitatorIsCalibrated;
+
+    modm::ShortTimeout agitatorJammedTimeout;
+
+    int agitatorJammedTimeoutPeriod;
 
     void agitatorRunPositionPid(void);
 };

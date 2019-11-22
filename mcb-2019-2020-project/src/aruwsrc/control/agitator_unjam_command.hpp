@@ -1,9 +1,9 @@
-#ifndef __AGITATOR_ROTATE_COMMAND_HPP__
-#define __AGITATOR_ROTATE_COMMAND_HPP__
+#ifndef __AGITATOR_UNJAM_COMMAND_HPP__
+#define __AGITATOR_UNJAM_COMMAND_HPP__
 
-#include <modm/math/filter/pid.hpp>
-#include <modm/math/filter/ramp.hpp>
+#include <modm/processing/timer/timeout.hpp>
 #include "src/control/command.hpp"
+#include "src/motor/dji_motor.hpp"
 #include "agitator_subsystem.hpp"
 
 namespace aruwsrc
@@ -12,15 +12,10 @@ namespace aruwsrc
 namespace control
 {
 
-class AgitatorRotateCommand : public aruwlib::control::Command
+class AgitatorUnjamCommand : public aruwlib::control::Command
 {
  public:
-    AgitatorRotateCommand(
-        AgitatorSubsystem* agitator,
-        float agitatorAngleChange,
-        float setpointTolerance = agitatorSetpointToleranceDefault,
-        float agitatorAngleIncrement = agitatorRampInc
-    );
+    
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -50,17 +45,16 @@ class AgitatorRotateCommand : public aruwlib::control::Command
      */
     bool isFinished(void) const;
  private:
-    static const float agitatorSetpointToleranceDefault;
-
-    static const float agitatorRampInc;  // in radians
+    // time allowed to rotate back the the currAgitatorUnjamAngle
+    modm::ShortTimeout agitatorRotateBackTimeout;
 
     AgitatorSubsystem* connectedAgitator;
 
     float agitatorSetpointTolerance;
 
-    float agitatorTargetChange;
+    float agitatorUnjamAngleMax;
 
-    modm::filter::Ramp<float> agitatorRotateSetpoint;
+    float currAgitatorUnjamAngle;
 };
 
 }  // namespace control

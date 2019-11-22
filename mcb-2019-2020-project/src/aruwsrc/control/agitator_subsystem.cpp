@@ -11,14 +11,35 @@ namespace aruwsrc
 
 namespace control
 {
-    AgitatorSubsystem::AgitatorSubsystem(uint16_t gearRatio) :
+    const int AgitatorSubsystem::DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD = 100;
+
+    AgitatorSubsystem::AgitatorSubsystem(uint16_t gearRatio, int agitatorJamTimeout) :
         agitatorPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM, PID_MAX_OUT),
         agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS),
         agitatorGearRatio(gearRatio),
         desiredAgitatorAngle(0.0f),
         agitatorCalibrationAngle(0.0f),
-        agitatorIsCalibrated(false)
-    {}
+        agitatorIsCalibrated(false),
+        agitatorJammedTimeout(agitatorJamTimeout),
+        agitatorJammedTimeoutPeriod(agitatorJamTimeout)
+    {
+        agitatorJammedTimeout.stop();
+    }
+
+    void AgitatorSubsystem::armAgitatorUnjamTimer()
+    {
+        agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
+    }
+
+    void AgitatorSubsystem::disarmAgitatorUnjamTimer()
+    {
+        agitatorJammedTimeout.stop();
+    }
+
+    bool AgitatorSubsystem::isAgitatorJammed()
+    {
+        return agitatorJammedTimeout.isArmed() &&  agitatorJammedTimeout.isExpired();
+    }
 
     void AgitatorSubsystem::refresh()
     {
@@ -66,7 +87,6 @@ namespace control
     {
         return desiredAgitatorAngle;
     }
-
 }  // namespace control
 
 }  // namespace aruwsrc
