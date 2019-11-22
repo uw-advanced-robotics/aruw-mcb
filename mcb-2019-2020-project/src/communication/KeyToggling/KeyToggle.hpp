@@ -1,6 +1,7 @@
 #include <rm-dev-board-a/board.hpp>
 #include "src/communication/remote.hpp"
 
+//struct containing the key, if it is enabled, toggled, (state of toggle)
 typedef struct{
 	int16_t key;
 	bool key_enabled;
@@ -32,4 +33,5 @@ void init_desired_keys();
 void key_toggle_handler(toggle_key_t* key);
 
 //calls on key toggle handler which then toggles the key to a given mode.
+//will be called in keyToggleHandler
 void toggle_handler();
