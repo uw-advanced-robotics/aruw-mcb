@@ -29,9 +29,10 @@ namespace control
     {
         if (!agitatorIsCalibrated)
         {
+            agitatorPositionPid.reset();
             return;
         }
-        agitatorPositionPid.update(agitatorEncoderToPosition() - desiredAgitatorAngle);
+        agitatorPositionPid.update(desiredAgitatorAngle - agitatorEncoderToPosition());
         agitatorMotor.setDesiredOutput(agitatorPositionPid.getValue());
     }
 
@@ -41,17 +42,18 @@ namespace control
         {
             return;
         }
-        agitatorCalibrationAngle = agitatorEncoderToPosition();
+        agitatorCalibrationAngle = (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) *
+            agitatorMotor.encStore.getEncoderUnwrapped() / static_cast<float>(agitatorGearRatio);
         agitatorIsCalibrated = true;
     }
 
     float AgitatorSubsystem::agitatorEncoderToPosition() const
     {
-        if (agitatorIsCalibrated)
+        if (!agitatorIsCalibrated)
         {
             return 0.0f;
         }
-        return (2 * PI / ENC_RESOLUTION) * agitatorMotor.encStore.getEncoderUnwrapped() /
+        return (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) * agitatorMotor.encStore.getEncoderUnwrapped() /
             static_cast<float>(agitatorGearRatio) - agitatorCalibrationAngle;
     }
 

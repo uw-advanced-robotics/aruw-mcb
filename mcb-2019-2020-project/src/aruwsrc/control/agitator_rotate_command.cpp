@@ -9,8 +9,7 @@ namespace control
 
     AgitatorRotateCommand::AgitatorRotateCommand(AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float setpointTolerance = agitatorSetpointToleranceDefault) :
-        aruwlib::control::Command(true),
+        float setpointTolerance) :
         agitatorSetpointTolerance(setpointTolerance),
         agitatorTargetChange(agitatorAngleChange)
     {

@@ -23,10 +23,12 @@ class AgitatorSubsystem : aruwlib::control::Subsystem {
 
     float getAgitatorDesiredAngle(void) const;
 
+    void agitatorCalibrateHere(void);
+
  private:
-    const float PID_P = 10.0f;
+    const float PID_P = 70000.0f;
     const float PID_I = 0.0f;
-    const float PID_D = 0.0f;
+    const float PID_D = 1000000.0f;
     const float PID_MAX_ERR_SUM = 0.0f;
     const float PID_MAX_OUT = 16000.0f;
 
@@ -46,8 +48,6 @@ class AgitatorSubsystem : aruwlib::control::Subsystem {
     bool agitatorIsCalibrated;
 
     void agitatorRunPositionPid(void);
-
-    void agitatorCalibrateHere(void);
 };
 
 }  // namespace control

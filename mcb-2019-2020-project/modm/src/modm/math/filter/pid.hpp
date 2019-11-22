@@ -183,6 +183,9 @@ namespace modm
 		T errorSum;
 		T lastError;
 		T output;
+
+		T ffff;
+		T fffff;
 	};
 }
 

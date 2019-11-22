@@ -17,7 +17,7 @@ class AgitatorRotateCommand : public aruwlib::control::Command
     AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float setpointTolerance = agitatorSetpointToleranceDefault
+        float setpointTolerance
     );
 
     /**
