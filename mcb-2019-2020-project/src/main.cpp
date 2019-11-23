@@ -2,8 +2,8 @@
 #include <modm/container/smart_pointer.hpp>
 
 #include "src/control/scheduler.hpp"
-#include "src/control/example-command.hpp"
-#include "src/control/example-subsystem.hpp"
+#include "src/control/example_command.hpp"
+#include "src/control/example_subsystem.hpp"
 #include "src/motor/dji_motor_tx_handler.hpp"
 #include "src/communication/can/can_rx_listener.hpp"
 

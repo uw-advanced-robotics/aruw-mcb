@@ -4,7 +4,7 @@
  * A generic extendable class for implementing a command. Each 
  * command is attached to a subsystem. To create a new command,
  * extend the Command class and instantiate the virtual functions
- * in this class. See example-command.hpp for example of this.
+ * in this class. See example_command.hpp for example of this.
  */
 
 #ifndef __COMMAND_HPP__

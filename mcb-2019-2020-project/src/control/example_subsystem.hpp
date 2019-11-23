@@ -17,7 +17,7 @@
 #include <modm/math/filter/pid.hpp>
 #include "src/control/subsystem.hpp"
 #include "src/motor/dji_motor.hpp"
-#include "src/control/example-command.hpp"
+#include "src/control/example_command.hpp"
 
 using namespace aruwlib::control;
 
