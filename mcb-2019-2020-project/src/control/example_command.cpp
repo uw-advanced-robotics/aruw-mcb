@@ -1,5 +1,5 @@
-#include "src/control/example-command.hpp"
-#include "src/control/example-subsystem.hpp"
+#include "src/control/example_command.hpp"
+#include "src/control/example_subsystem.hpp"
 
 namespace aruwsrc
 {

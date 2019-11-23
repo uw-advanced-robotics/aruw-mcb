@@ -1,4 +1,4 @@
-#include "src/control/example-subsystem.hpp"
+#include "src/control/example_subsystem.hpp"
 
 namespace aruwsrc
 {
