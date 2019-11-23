@@ -96,13 +96,11 @@ namespace control
 
     void CommandScheduler::removeCommand(modm::SmartPointer command)
     {
-        for (auto subsystemCommandPair)
-        for (auto subsystemCommandPair = subsystemToCommandMap.begin();
-            subsystemCommandPair != subsystemToCommandMap.end();)
+        for (auto& subsystemCommandPair : subsystemToCommandMap)
         {
-            if (subsystemCommandPair->second == command)
+            if (subsystemCommandPair.second == command)
             {
-                subsystemCommandPair->second = 0;
+                subsystemCommandPair.second = defaultNullCommand;
             }
         }
     }
