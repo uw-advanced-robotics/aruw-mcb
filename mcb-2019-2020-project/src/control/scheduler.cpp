@@ -26,21 +26,25 @@ namespace control
             return false;
         }
 
-        auto commandRequirements = getCmdPtr(commandToAdd)->getRequirements();
+        bool commandAdded = false;
+
+        set<Subsystem*> commandRequirements =
+            *(smrtPtrCommandCast(commandToAdd)->getRequirements());
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
         for (auto& requirement : commandRequirements)
         {
             map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
-                subsystemToCommandMap.find(const_cast<Subsystem*>(requirement));
+                subsystemToCommandMap.find(requirement);
             if (isDependentSubsystem != subsystemToCommandMap.end())
             {
                 if (!(isDependentSubsystem->second == defaultNullCommand))
                 {
-                    getCmdPtr(isDependentSubsystem->second)->end(true);
+                    smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
                 }
                 isDependentSubsystem->second = commandToAdd;
+                commandAdded = true;
             }
             else
             {
@@ -52,7 +56,10 @@ namespace control
 
         // initialize the commandToAdd. Only do this once even though potentially
         // multiple subsystems rely on this command.
-        getCmdPtr(commandToAdd)->initialize();
+        if (commandAdded)
+        {
+            smrtPtrCommandCast(commandToAdd)->initialize();
+        }
         return true;
     }
 
@@ -66,14 +73,14 @@ namespace control
         {
             // add default command if no command is currently being run
             if (currSubsystemCommandPair.second == defaultNullCommand
-                && !(currSubsystemCommandPair.first->GetDefaultCommand() == defaultNullCommand)
+                && !(currSubsystemCommandPair.first->getDefaultCommand() == defaultNullCommand)
             ){
-                addCommand(currSubsystemCommandPair.first->GetDefaultCommand());
+                addCommand(currSubsystemCommandPair.first->getDefaultCommand());
             }
             // only run the command if it hasn't been run this time run has been called
             if (!(currSubsystemCommandPair.second == defaultNullCommand))
             {
-                Command* currCommand = getCmdPtr(currSubsystemCommandPair.second);
+                Command* currCommand = smrtPtrCommandCast(currSubsystemCommandPair.second);
 
                 if (currCommand->prevSchedulerExecuteTimestamp
                     != commandSchedulerTimestamp
@@ -96,12 +103,11 @@ namespace control
 
     void CommandScheduler::removeCommand(modm::SmartPointer command)
     {
-        for (auto subsystemCommandPair = subsystemToCommandMap.begin();
-            subsystemCommandPair != subsystemToCommandMap.end();)
+        for (auto& subsystemCommandPair : subsystemToCommandMap)
         {
-            if (subsystemCommandPair->second == command)
+            if (subsystemCommandPair.second == command)
             {
-                subsystemCommandPair->second = 0;
+                subsystemCommandPair.second = defaultNullCommand;
             }
         }
     }
@@ -133,7 +139,7 @@ namespace control
         return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
     }
 
-    Command* CommandScheduler::getCmdPtr(modm::SmartPointer smrtPtr)
+    Command* CommandScheduler::smrtPtrCommandCast(modm::SmartPointer smrtPtr)
     {
         return reinterpret_cast<Command*>(smrtPtr.getPointer());
     }

@@ -46,7 +46,7 @@ class Subsystem {
      *
      * @param defaultCommand the default command to associate with this subsystem
      */
-    void SetDefaultCommand(const modm::SmartPointer& defaultCommand);
+    void setDefaultCommand(modm::SmartPointer defaultCommand);
 
     /**
      * Gets the default command for this subsystem. Returns null if no default
@@ -54,7 +54,7 @@ class Subsystem {
      *
      * @return the default command associated with this subsystem
      */
-    modm::SmartPointer GetDefaultCommand(void) const;
+    modm::SmartPointer getDefaultCommand(void) const;
 
     /**
      * Called in the scheduler's run method assuming this command
@@ -65,7 +65,8 @@ class Subsystem {
      * control code. When you create a subclass of Subsystem, you
      * should overwrite this virtual method.
      */
-    virtual void refresh(void) = 0;
+    void refresh(void)
+    {}
 
  private:
     modm::SmartPointer defaultCommand;

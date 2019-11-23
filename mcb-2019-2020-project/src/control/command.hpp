@@ -39,7 +39,7 @@ class Command {
      *
      * @return the set of subsystems that are required
      */
-    const std::set<const Subsystem*>& getRequirements() const;
+    const std::set<Subsystem*>* getRequirements();
 
     /**
      * Whether the command requires a given subsystem.  Named "hasRequirement"
@@ -48,12 +48,12 @@ class Command {
      * @param requirement the subsystem to inquire about
      * @return whether the subsystem is required
      */
-    bool hasRequirement(const Subsystem* requirement) const;
+    bool hasRequirement(Subsystem* requirement) const;
 
     /**
      * Adds the required subsystem to a list of required subsystems
      */
-    void addSubsystemRequirement(const Subsystem* requirement);
+    void addSubsystemRequirement(Subsystem* requirement);
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -89,19 +89,10 @@ class Command {
  private:
     friend class CommandScheduler;
 
-    // initial size of commandRequirements
-    const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
-
     uint32_t prevSchedulerExecuteTimestamp;
 
     // contains pointers to const Subsystem pointers that this command requires
-    std::set<const Subsystem*> commandRequirements;
-
-    /**
-     * An internal helper method that returns the contents of the
-     * commandRequirements smart pointer in a modifiable form
-     */
-    std::set<const Subsystem*>* getRequirementsModifiable(void);
+    std::set<Subsystem*> commandRequirements;
 };
 
 }  // namespace control

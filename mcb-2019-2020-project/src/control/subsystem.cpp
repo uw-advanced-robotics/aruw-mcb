@@ -13,12 +13,12 @@ namespace control
         CommandScheduler::registerSubsystem(this);
     }
 
-    void Subsystem::SetDefaultCommand(const modm::SmartPointer& command)
+    void Subsystem::setDefaultCommand(modm::SmartPointer command)
     {
         defaultCommand = command;
     }
 
-    modm::SmartPointer Subsystem::GetDefaultCommand() const
+    modm::SmartPointer Subsystem::getDefaultCommand() const
     {
         return defaultCommand;
     }

@@ -34,7 +34,7 @@ class CommandScheduler
  public:
     static void run(void);
 
-    void removeCommand(modm::SmartPointer command);
+    static void removeCommand(modm::SmartPointer command);
 
     static bool registerSubsystem(Subsystem* subsystem);
 
@@ -53,7 +53,7 @@ class CommandScheduler
 
     static uint32_t commandSchedulerTimestamp;
 
-    static Command* getCmdPtr(modm::SmartPointer smrtPtr);
+    static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
 };
 
 }  // namespace control
