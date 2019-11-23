@@ -4,8 +4,8 @@
 #include "communication/serial.hpp"
 using namespace aruwlib;
 using namespace serial;
-ref_game_data_t game;
-ref_robot_data_t robot;
+RefereeSystem::Game_Data_t game;
+RefereeSystem::Robot_Data_t robot;
 CVCommunication::CV_IMU_Data_t imu;
 CVCommunication::CV_Turret_Aim_Data_t turrent;
 CVCommunication::CV_Chassis_Data_t chassis;
