@@ -22,7 +22,7 @@ class ExampleSubsystem;
 class ExampleCommand : public Command
 {
  public:
-    explicit ExampleCommand(ExampleSubsystem* subsystem);
+    explicit ExampleCommand(ExampleSubsystem* subsystem = nullptr);
 
     /**
       * The initial subroutine of a command.  Called once when the command is

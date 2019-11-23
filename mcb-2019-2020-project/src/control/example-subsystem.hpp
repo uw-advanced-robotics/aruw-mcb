@@ -30,9 +30,10 @@ namespace control
 class ExampleSubsystem : public Subsystem
 {
  public:
-    ExampleSubsystem()
-        : leftWheel(LEFT_MOTOR_ID, CAN_BUS_MOTORS),
-        rightWheel(RIGHT_MOTOR_ID, CAN_BUS_MOTORS),
+    ExampleSubsystem(const aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
+        aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
+        : leftWheel(leftMotorId, CAN_BUS_MOTORS),
+        rightWheel(rightMotorId, CAN_BUS_MOTORS),
         velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredRpm(0)
@@ -43,8 +44,8 @@ class ExampleSubsystem : public Subsystem
     void refresh(void);
 
  private:
-    const aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR4;
-    const aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
+    static const aruwlib::motor::MotorId LEFT_MOTOR_ID;
+    static const aruwlib::motor::MotorId RIGHT_MOTOR_ID;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
     const float PID_P = 10.0f;

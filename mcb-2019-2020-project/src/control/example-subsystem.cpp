@@ -5,6 +5,9 @@ namespace aruwsrc
 
 namespace control
 {
+    const aruwlib::motor::MotorId ExampleSubsystem::LEFT_MOTOR_ID = aruwlib::motor::MOTOR4;
+    const aruwlib::motor::MotorId ExampleSubsystem::RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
+
     void ExampleSubsystem::setDesiredRpm(float desRpm)
     {
         desiredRpm = desRpm;

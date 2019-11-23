@@ -26,21 +26,7 @@ namespace control
             return false;
         }
 
-        // Check to make sure the commandToAdd you are trying to add to the scheduler
-        // can be added.
-        // If there are command dependencies that can't be interrupted, don't schedule.
         auto commandRequirements = getCmdPtr(commandToAdd)->getRequirements();
-        for (auto& requirement : commandRequirements)
-        {
-            auto isRequirementRegistered = subsystemToCommandMap.find(
-                const_cast<Subsystem*>(requirement));
-
-            // return if a subsystem required is not in the scheduler
-            if (isRequirementRegistered == subsystemToCommandMap.end()) {
-                return false;
-            }
-        }
-
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
@@ -56,6 +42,12 @@ namespace control
                 }
                 isDependentSubsystem->second = commandToAdd;
             }
+            else
+            {
+                // the command you are trying to add has a subsystem that is not in the
+                // scheduler, so you cannot add it (will lead to undefined control behavior)
+                return false;
+            }
         }
 
         // initialize the commandToAdd. Only do this once even though potentially
@@ -70,10 +62,12 @@ namespace control
         // multiple times during the same call to run
         commandSchedulerTimestamp++;
         // refresh all and run all commands
-        for (auto& currSubsystemCommandPair : subsystemToCommandMap) {
+        for (auto& currSubsystemCommandPair : subsystemToCommandMap)
+        {
             // add default command if no command is currently being run
             if (currSubsystemCommandPair.second == defaultNullCommand
-                    && getCmdPtr(currSubsystemCommandPair.first->GetDefaultCommand()) != nullptr) {
+                && !(currSubsystemCommandPair.first->GetDefaultCommand() == defaultNullCommand)
+            ){
                 addCommand(currSubsystemCommandPair.first->GetDefaultCommand());
             }
             // only run the command if it hasn't been run this time run has been called

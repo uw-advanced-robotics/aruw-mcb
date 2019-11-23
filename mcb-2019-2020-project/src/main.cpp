@@ -9,26 +9,62 @@
 
 #include <modm/processing/timer.hpp>
 
-aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
 
-aruwlib::motor::DjiMotor* m3;
+/*
+tests to complete:
+running command framework with following parameters:
+nothing scheudled
+single subsystem, no command
+single subsystem, single command
+multiple subsystems, no commands
+multiple subsystems, any command attached to any subsystem
+*/
+
+// #define NO_SUBSYSTEM_TEST
+// #define SINGLE_SUBSYSTEM_NO_COMMAND
+// #define SINGLE_SUBSYSTEM_SINGLE_COMMAND
+// #define SINGLE_SUBSYSTEM_TWO_COMMANDS
+#define SINGLE_COMMAND
+
+#if defined (NO_SUBSYSTEM_TEST)
+#elif defined (SINGLE_SUBSYSTEM_NO_COMMAND) || defined (SINGLE_SUBSYSTEM_SINGLE_COMMAND)
+aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
+#elif defined (SINGLE_SUBSYSTEM_TWO_COMMANDS)
+aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
+aruwsrc::control::ExampleSubsystem frictionWheelSubsystemOther(aruwlib::motor::MOTOR1, aruwlib::motor::MOTOR2);
+#endif
 
 using namespace std;
 
-aruwsrc::control::ExampleCommand* commandWatch;
+aruwsrc::control::ExampleCommand* commandWatchTest;
+const aruwlib::control::Subsystem* subsystemWatch;
 
 int main()
 {
     Board::initialize();
 
-    // lots of random testing code
-
+    #if defined (NO_SUBSYSTEM_TEST)
+    #elif defined (SINGLE_SUBSYSTEM_NO_COMMAND)
+    #elif defined (SINGLE_SUBSYSTEM_SINGLE_COMMAND) || defined (SINGLE_SUBSYSTEM_TWO_COMMANDS)
     modm::SmartPointer frictionWheelDefaultCommand(
         new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
 
     frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
-    commandWatch = reinterpret_cast<aruwsrc::control::ExampleCommand*>
+
+    commandWatchTest = reinterpret_cast<aruwsrc::control::ExampleCommand*>
         (frictionWheelDefaultCommand.getPointer());
+    #elif defined (SINGLE_COMMAND)
+    modm::SmartPointer frictionWheelCommand(
+        new aruwsrc::control::ExampleCommand());
+
+    CommandScheduler::addCommand(frictionWheelCommand);
+    
+    commandWatchTest = reinterpret_cast<aruwsrc::control::ExampleCommand*>
+        (frictionWheelCommand.getPointer());
+
+    auto requirements = commandWatchTest->getRequirements();
+
+    #endif
 
     // timers
     modm::ShortPeriodicTimer motorSendPeriod(3);
