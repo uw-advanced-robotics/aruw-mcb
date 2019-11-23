@@ -17,7 +17,8 @@ namespace control
     {
         // Ensure the requirement you are trying to add is not already a
         // command requirement.
-        if (requirement != nullptr && getRequirements().find(requirement) == getRequirements().end())
+        if (requirement != nullptr &&
+            getRequirements().find(requirement) == getRequirements().end())
         {
             getRequirementsModifiable()->insert(requirement);
         }

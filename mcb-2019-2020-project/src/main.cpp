@@ -34,7 +34,8 @@ multiple subsystems, any command attached to any subsystem
 aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
 #elif defined (TWO_SUBSYSTEMS) || defined (TWO_SUBSYSTEMS_TWO_COMMANDS)
 aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
-aruwsrc::control::ExampleSubsystem frictionWheelSubsystemOther(aruwlib::motor::MOTOR1, aruwlib::motor::MOTOR2);
+aruwsrc::control::ExampleSubsystem frictionWheelSubsystemOther(
+    aruwlib::motor::MOTOR1, aruwlib::motor::MOTOR2);
 #endif
 
 using namespace std;
@@ -70,7 +71,7 @@ int main()
 
     // try to add a command, you will not be able to do this
     CommandScheduler::addCommand(frictionWheelCommand);
-    
+
     commandWatchTest = reinterpret_cast<aruwsrc::control::ExampleCommand*>
         (frictionWheelCommand.getPointer());
 
@@ -98,16 +99,14 @@ int main()
 
     while (1)
     {
-
         #if defined (SINGLE_SUBSYSTEM_REMOVE_ADD_COMMAND)
         if (Board::Button::read() && !buttonHigh)
         {
-            // CommandScheduler::addCommand(frictionWheelDefaultCommand);
             CommandScheduler::removeCommand(frictionWheelDefaultCommand);
         }
         buttonHigh = Board::Button::read();
         #endif
-        
+
         // where should this go?
         #if defined (SINGLE_SUBSYSTEM_TWO_COMMANDS) || defined (TWO_SUBSYSTEMS_TWO_COMMANDS)
         if (executeOtherCommand.execute())
