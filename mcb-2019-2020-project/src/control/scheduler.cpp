@@ -26,14 +26,14 @@ namespace control
             return false;
         }
 
-        auto commandRequirements = getCmdPtr(commandToAdd)->getRequirements();
+        set<Subsystem*> commandRequirements = *(getCmdPtr(commandToAdd)->getRequirements());
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
         for (auto& requirement : commandRequirements)
         {
             map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
-                subsystemToCommandMap.find(const_cast<Subsystem*>(requirement));
+                subsystemToCommandMap.find(requirement);
             if (isDependentSubsystem != subsystemToCommandMap.end())
             {
                 if (!(isDependentSubsystem->second == defaultNullCommand))
@@ -66,9 +66,9 @@ namespace control
         {
             // add default command if no command is currently being run
             if (currSubsystemCommandPair.second == defaultNullCommand
-                && !(currSubsystemCommandPair.first->GetDefaultCommand() == defaultNullCommand)
+                && !(currSubsystemCommandPair.first->getDefaultCommand() == defaultNullCommand)
             ){
-                addCommand(currSubsystemCommandPair.first->GetDefaultCommand());
+                addCommand(currSubsystemCommandPair.first->getDefaultCommand());
             }
             // only run the command if it hasn't been run this time run has been called
             if (!(currSubsystemCommandPair.second == defaultNullCommand))

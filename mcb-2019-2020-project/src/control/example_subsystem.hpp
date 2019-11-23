@@ -30,7 +30,7 @@ namespace control
 class ExampleSubsystem : public Subsystem
 {
  public:
-    ExampleSubsystem(const aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
+    ExampleSubsystem(aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
         : leftWheel(leftMotorId, CAN_BUS_MOTORS),
         rightWheel(rightMotorId, CAN_BUS_MOTORS),

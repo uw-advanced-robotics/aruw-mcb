@@ -8,28 +8,23 @@ namespace aruwlib
 
 namespace control
 {
-    bool Command::hasRequirement(const Subsystem* requirement) const
+    bool Command::hasRequirement(Subsystem* requirement) const
     {
         return commandRequirements.find(requirement) != commandRequirements.end();
     }
 
-    void Command::addSubsystemRequirement(const Subsystem* requirement)
+    void Command::addSubsystemRequirement(Subsystem* requirement)
     {
         // Ensure the requirement you are trying to add is not already a
         // command requirement.
         if (requirement != nullptr &&
-            getRequirements().find(requirement) == getRequirements().end())
+            commandRequirements.find(requirement) == commandRequirements.end())
         {
-            getRequirementsModifiable()->insert(requirement);
+            commandRequirements.insert(requirement);
         }
     }
 
-    const set<const Subsystem*>& Command::getRequirements() const
-    {
-        return commandRequirements;
-    }
-
-    set<const Subsystem*>* Command::getRequirementsModifiable()
+    const set<Subsystem*>* Command::getRequirements()
     {
         return &commandRequirements;
     }

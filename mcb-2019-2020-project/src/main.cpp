@@ -53,7 +53,7 @@ int main()
     modm::SmartPointer frictionWheelDefaultCommand(
         new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
 
-    frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
+    frictionWheelSubsystem.setDefaultCommand(frictionWheelDefaultCommand);
 
     commandWatchTest = reinterpret_cast<aruwsrc::control::ExampleCommand*>
         (frictionWheelDefaultCommand.getPointer());
@@ -63,7 +63,7 @@ int main()
     modm::SmartPointer frictionWheelOtherCommand(
         new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
 
-    frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
+    frictionWheelSubsystem.setDefaultCommand(frictionWheelDefaultCommand);
 
     #elif defined (SINGLE_COMMAND)
     modm::SmartPointer frictionWheelCommand(
@@ -83,7 +83,7 @@ int main()
     modm::SmartPointer frictionWheelOtherCommand(
         new aruwsrc::control::ExampleCommand(&frictionWheelSubsystemOther));
 
-    frictionWheelSubsystem.SetDefaultCommand(frictionWheelDefaultCommand);
+    frictionWheelSubsystem.setDefaultCommand(frictionWheelDefaultCommand);
     #endif
 
     // timers
