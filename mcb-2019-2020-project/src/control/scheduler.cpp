@@ -26,6 +26,8 @@ namespace control
             return false;
         }
 
+        bool commandAdded = false;
+
         set<Subsystem*> commandRequirements = *(getCmdPtr(commandToAdd)->getRequirements());
         // end all commands running on the subsystem requirements.
         // They were interrupted.
@@ -41,6 +43,7 @@ namespace control
                     getCmdPtr(isDependentSubsystem->second)->end(true);
                 }
                 isDependentSubsystem->second = commandToAdd;
+                commandAdded = true;
             }
             else
             {
@@ -52,7 +55,10 @@ namespace control
 
         // initialize the commandToAdd. Only do this once even though potentially
         // multiple subsystems rely on this command.
-        getCmdPtr(commandToAdd)->initialize();
+        if (commandAdded)
+        {
+            getCmdPtr(commandToAdd)->initialize();
+        }
         return true;
     }
 

@@ -24,10 +24,10 @@ multiple subsystems, any command attached to any subsystem
 // #define SINGLE_SUBSYSTEM_NO_COMMAND
 // #define SINGLE_SUBSYSTEM_SINGLE_COMMAND
 // #define SINGLE_SUBSYSTEM_TWO_COMMANDS
-// #define SINGLE_COMMAND
+#define SINGLE_COMMAND
 // #define TWO_SUBSYSTEMS
 // #define TWO_SUBSYSTEMS_TWO_COMMANDS
-#define SINGLE_SUBSYSTEM_REMOVE_ADD_COMMAND
+// #define SINGLE_SUBSYSTEM_REMOVE_ADD_COMMAND
 
 #if defined (NO_SUBSYSTEM_TEST)
 #elif defined (SINGLE_SUBSYSTEM_NO_COMMAND) || defined (SINGLE_SUBSYSTEM_SINGLE_COMMAND) || defined (SINGLE_SUBSYSTEM_TWO_COMMANDS) || defined (SINGLE_SUBSYSTEM_REMOVE_ADD_COMMAND)
@@ -74,8 +74,6 @@ int main()
 
     commandWatchTest = reinterpret_cast<aruwsrc::control::ExampleCommand*>
         (frictionWheelCommand.getPointer());
-
-    auto requirements = commandWatchTest->getRequirements();
 
     #elif defined (TWO_SUBSYSTEMS_TWO_COMMANDS)
     modm::SmartPointer frictionWheelDefaultCommand(
