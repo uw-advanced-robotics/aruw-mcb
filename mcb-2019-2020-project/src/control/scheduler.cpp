@@ -28,7 +28,8 @@ namespace control
 
         bool commandAdded = false;
 
-        set<Subsystem*> commandRequirements = *(getCmdPtr(commandToAdd)->getRequirements());
+        set<Subsystem*> commandRequirements =
+            *(smrtPtrCommandCast(commandToAdd)->getRequirements());
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
@@ -40,7 +41,7 @@ namespace control
             {
                 if (!(isDependentSubsystem->second == defaultNullCommand))
                 {
-                    getCmdPtr(isDependentSubsystem->second)->end(true);
+                    smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
                 }
                 isDependentSubsystem->second = commandToAdd;
                 commandAdded = true;
@@ -57,7 +58,7 @@ namespace control
         // multiple subsystems rely on this command.
         if (commandAdded)
         {
-            getCmdPtr(commandToAdd)->initialize();
+            smrtPtrCommandCast(commandToAdd)->initialize();
         }
         return true;
     }
@@ -79,7 +80,7 @@ namespace control
             // only run the command if it hasn't been run this time run has been called
             if (!(currSubsystemCommandPair.second == defaultNullCommand))
             {
-                Command* currCommand = getCmdPtr(currSubsystemCommandPair.second);
+                Command* currCommand = smrtPtrCommandCast(currSubsystemCommandPair.second);
 
                 if (currCommand->prevSchedulerExecuteTimestamp
                     != commandSchedulerTimestamp
@@ -138,7 +139,7 @@ namespace control
         return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
     }
 
-    Command* CommandScheduler::getCmdPtr(modm::SmartPointer smrtPtr)
+    Command* CommandScheduler::smrtPtrCommandCast(modm::SmartPointer smrtPtr)
     {
         return reinterpret_cast<Command*>(smrtPtr.getPointer());
     }

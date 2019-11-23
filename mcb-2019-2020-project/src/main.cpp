@@ -30,7 +30,9 @@ multiple subsystems, any command attached to any subsystem
 // #define SINGLE_SUBSYSTEM_REMOVE_ADD_COMMAND
 
 #if defined (NO_SUBSYSTEM_TEST)
-#elif defined (SINGLE_SUBSYSTEM_NO_COMMAND) || defined (SINGLE_SUBSYSTEM_SINGLE_COMMAND) || defined (SINGLE_SUBSYSTEM_TWO_COMMANDS) || defined (SINGLE_SUBSYSTEM_REMOVE_ADD_COMMAND)
+#elif defined (SINGLE_SUBSYSTEM_NO_COMMAND) || defined (SINGLE_SUBSYSTEM_SINGLE_COMMAND)
+aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
+#elif defined (SINGLE_SUBSYSTEM_TWO_COMMANDS) || defined (SINGLE_SUBSYSTEM_REMOVE_ADD_COMMAND)
 aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
 #elif defined (TWO_SUBSYSTEMS) || defined (TWO_SUBSYSTEMS_TWO_COMMANDS)
 aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
