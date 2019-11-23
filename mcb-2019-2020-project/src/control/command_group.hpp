@@ -11,55 +11,24 @@ namespace control
 {
 
 /**
- * A CommandGroup is a list of commands which are executed in sequence.
- * The command group stores the list of commands in the format of a
- * finite state machine.
+ * A CommandGroup is a list of commands that constitute a more complex
+ * command and can be implemented how the user sees fit (i.e. using state
+ * machine, etc)
  *
  * @see Command
  * @see Subsystem
  */
 class CommandGroup : public Command
 {
-    CommandGroup() = default;
+    CommandGroup() : commands(5), subsystemRequirements(5)
+    {}
 
     ~CommandGroup() = default;
 
-    CommandGroup& operator=(CommandGroup&&) = default;
-
-    /**
-     * Adds a new Command to the group. The Command will be started after all the
-     * previously added Commands.
-     *
-     * Note that any requirements the given Command has will be added to the
-     * group. For this reason, a Command's requirements can not be changed after
-     * being added to a group.
-     *
-     * It is recommended that this method be called in the constructor.
-     *
-     * @param command The Command to be added
-     */
-    void AddSequential(Command* command);
-
-    /**
-     * Adds a new child Command to the group. The Command will be started after
-     * all the previously added Commands.
-     *
-     * Instead of waiting for the child to finish, a CommandGroup will have it run
-     * at the same time as the subsequent Commands. The child will run until
-     * either it finishes, a new child with conflicting requirements is started,
-     * or the main sequence runs a Command with conflicting requirements.
-     * 
-     * Note that any requirements the given Command has will be added to the
-     * group. For this reason, a Command's requirements can not be changed after
-     * being added to a group.
-     *
-     * It is recommended that this method be called in the constructor.
-     *
-     * @param command The command to be added
-     */
-    void AddParallel(Command* command);
-
-    int getSize() const;
+    int getCommandSize() const
+    {
+        return commands.getSize();
+    }
 
     virtual void Initialize(void) = 0;
 
@@ -69,8 +38,20 @@ class CommandGroup : public Command
 
     virtual void end(bool interrupted) = 0;
 
+    /*
+     * Typically call in constructor of command group implementation.
+     * For all commands in command group, add them to the list of
+     * required commands so an appropriate list of subsystem
+     * requirements can be formulated.
+     */
+    void addCommandRequirement(modm::SmartPointer command);
+
  private:
     int currentCommandIndex = -1;
+
+    modm::DynamicArray<modm::SmartPointer> commands;
+
+    modm::DynamicArray<modm::SmartPointer> subsystemRequirements;
 };
 
 }  // namespace control
