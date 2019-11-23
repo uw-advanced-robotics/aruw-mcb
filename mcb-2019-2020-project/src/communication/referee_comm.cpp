@@ -8,10 +8,10 @@ namespace aruwlib
 {
 namespace serial
 {
-ref_game_data_t RefereeSystem::game_data; /* game stats 	(e.g. remaining time, current stage, winner)*/
-ref_robot_data_t RefereeSystem::robot_data; /* robot stats	(e.g. current HP, power draw, turret info)*/
-received_dps_tracker_t RefereeSystem::received_dps_tracker;
-ref_display_data_t RefereeSystem::displayData;
+RefereeSystem::Game_Data_t RefereeSystem::game_data; /* game stats 	(e.g. remaining time, current stage, winner)*/
+RefereeSystem::Robot_Data_t RefereeSystem::robot_data; /* robot stats	(e.g. current HP, power draw, turret info)*/
+RefereeSystem::Damage_Tracker_t RefereeSystem::received_dps_tracker;
+RefereeSystem::Display_Data_t RefereeSystem::displayData;
 DJISerial RefereeSystem::serial = DJISerial(DJISerial::PORT_UART6, (RefereeSystem::messageHandler), true);
 bool RefereeSystem::online;
 uint8_t RefereeSystem::customDataBuffer[CUSTOM_DATA_MAX_LENGTH + CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH + CUSTOM_DATA_RECIPIENT_ID_LENGTH];
@@ -40,7 +40,7 @@ bool RefereeSystem::decodeToGameStatus(const DJISerial::Serial_Message_t* messag
     if (message->length != 3) {
         return false;
     }
-    RefereeSystem::game_data.game_stage = (ref_game_stages_t) (message->data[0] >> 4);
+    RefereeSystem::game_data.game_stage = (Game_Stages) (message->data[0] >> 4);
     RefereeSystem::game_data.stage_time_remaining = (message->data[2] << 8) | message->data[1];
     return true;
 }
@@ -49,7 +49,7 @@ bool RefereeSystem::decodeToGameResult(const DJISerial::Serial_Message_t* messag
     if (message->length != 1) {
         return false;
     }
-    RefereeSystem::game_data.game_winner = (ref_game_winner_t) message->data[0];
+    RefereeSystem::game_data.game_winner = (Game_Winner) message->data[0];
     return true;
 }
 
@@ -78,7 +78,7 @@ bool RefereeSystem::decodeToRobotStatus(const DJISerial::Serial_Message_t* messa
     if (message->length != 15) {
         return false;
     }
-    RefereeSystem::robot_data.robot_id = (ref_robot_id_t) message->data[0];
+    RefereeSystem::robot_data.robot_id = (Robot_ID) message->data[0];
     RefereeSystem::robot_data.robot_level = message->data[1];
     RefereeSystem::robot_data.current_HP = (message->data[3] << 8) | message->data[2];
     RefereeSystem::robot_data.max_HP = (message->data[5] << 8) | message->data[4];
@@ -127,8 +127,8 @@ bool RefereeSystem::decodeToReceiveDamage(const DJISerial::Serial_Message_t* mes
     if (message->length != 1) {
         return false;
     }
-    RefereeSystem::robot_data.damaged_armor_id = (ref_armor_id_t) message->data[0];
-    RefereeSystem::robot_data.damage_type = (ref_damage_type_t) (message->data[0] >> 4);
+    RefereeSystem::robot_data.damaged_armor_id = (Armor_ID) message->data[0];
+    RefereeSystem::robot_data.damage_type = (Damage_Type) (message->data[0] >> 4);
     RefereeSystem::robot_data.previous_HP = RefereeSystem::robot_data.current_HP;
     return true;
 }
@@ -137,7 +137,7 @@ bool RefereeSystem::decodeToProjectileLaunch(const DJISerial::Serial_Message_t* 
     if (message->length != 6) {
         return false;
     }
-    RefereeSystem::robot_data.turret.bullet_type = (ref_bullet_type_t) message->data[0];
+    RefereeSystem::robot_data.turret.bullet_type = (Bullet_Type) message->data[0];
     RefereeSystem::robot_data.turret.firing_freq = message->data[1];
     RefereeSystem::robot_data.turret.bullet_speed = RefereeSystem::decodeTofloat(&message->data[2]);
     return true;
@@ -154,7 +154,7 @@ bool RefereeSystem::decodeToSentinelDroneBulletsRemain(const DJISerial::Serial_M
 void RefereeSystem::processReceivedDamage(int32_t damage_taken) {
     if (damage_taken > 0) {
         // create a new received_damage_event with the damage_taken, and current time
-        received_damage_event_t damage_token = { (uint16_t)damage_taken, RefereeSystem::serial.getTimestamp()};
+        Damage_Event_t damage_token = { (uint16_t)damage_taken, RefereeSystem::serial.getTimestamp()};
         // add the recently received damage to the end of the circular array
         RefereeSystem::received_dps_tracker.damage_events[received_dps_tracker.tail] = damage_token;
         RefereeSystem::received_dps_tracker.tail = (received_dps_tracker.tail + 1) % REF_DAMAGE_EVENT_SIZE; // increment tail of circular array
@@ -259,7 +259,7 @@ void RefereeSystem::updateReceivedDamage() {
  * @param robot_id the id of the robot received from the referee system to get the client_id of
  * @return the client_id of the robot requested
  */
-uint16_t RefereeSystem::getRobotClientID(ref_robot_id_t robot_id) {
+uint16_t RefereeSystem::getRobotClientID(Robot_ID robot_id) {
     // there are no client_id for sentinel robots because there are no ui display for them
     if (robot_id == RED_SENTINEL || robot_id == BLUE_SENTINEL) {
         return 0;
@@ -372,11 +372,11 @@ void RefereeSystem::periodicTask(){
 }
 
 
-ref_robot_data_t RefereeSystem::getRobotData(){
+RefereeSystem::Robot_Data_t RefereeSystem::getRobotData(){
     return robot_data;
 }
 
-ref_game_data_t RefereeSystem::getGameData(){
+RefereeSystem::Game_Data_t RefereeSystem::getGameData(){
     return game_data;
 }
 
