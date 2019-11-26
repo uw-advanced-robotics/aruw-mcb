@@ -9,9 +9,7 @@ RefereeSystem::Robot_Data_t robot;
 CVCommunication::CV_IMU_Data_t imu;
 CVCommunication::CV_Turret_Aim_Data_t turrent;
 CVCommunication::CV_Chassis_Data_t chassis;
-void boom(CVCommunication::CV_Turret_Aim_Data_t* aaa){
-
-}
+void boom(CVCommunication::CV_Turret_Aim_Data_t* aaa) {}
 
 int main()
 {
@@ -20,7 +18,7 @@ int main()
     CVCommunication::initialize(DJISerial::PORT_UART2, boom);
     while (1)
     {
-        //Board::Leds::toggle();
+        // Board::Leds::toggle();
         CVCommunication::periodicTask(&imu, &chassis, &turrent);
         game = RefereeSystem::getGameData();
         robot = RefereeSystem::getRobotData();
@@ -29,4 +27,3 @@ int main()
     }
     return 0;
 }
- 
