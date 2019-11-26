@@ -16,17 +16,20 @@ int main()
 
     modm::SmartPointer frictionWheelDefaultCommand(
         new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
-    
+
+    frictionWheelSubsystem.setDefaultCommand(frictionWheelDefaultCommand);
+
     CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
 
     // timers
+    // arbitrary, taken from last year since this send time doesn't overfill
+    // can bus
     modm::ShortPeriodicTimer motorSendPeriod(3);
 
     while (1)
     {
         if (motorSendPeriod.execute())
         {
-            motorSendPeriod.restart(3);
             aruwlib::control::CommandScheduler::run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }

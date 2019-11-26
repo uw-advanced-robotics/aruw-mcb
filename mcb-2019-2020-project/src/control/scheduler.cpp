@@ -105,7 +105,8 @@ namespace control
         }
         // make sure we are not going over tolerable runtime, otherwise something is really
         // wrong with the code
-        if (static_cast<float>(DWT->CYCCNT - checkRunPeriod) / float(modm::clock::fcpu_kHz)
+        if (static_cast<float>(DWT->CYCCNT - checkRunPeriod)
+            / static_cast<float>(modm::clock::fcpu_kHz)
             > MAX_ALLOWABLE_SCHEDULER_RUNTIME)
         {
             // shouldn't take more than 1 ms to complete all this stuff, if it does something
