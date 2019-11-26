@@ -1,5 +1,6 @@
 #include <utility>
 #include <set>
+#include <algorithm>
 #include <modm/processing/timer.hpp>
 #include "command_scheduler.hpp"
 #include "src/motor/dji_motor_tx_handler.hpp"
@@ -116,6 +117,7 @@ namespace control
         }
     }
 
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     void CommandScheduler::removeCommand(modm::SmartPointer command)
     {
         for (auto& subsystemCommandPair : subsystemToCommandMap)
@@ -129,14 +131,21 @@ namespace control
 
     bool CommandScheduler::isCommandScheduled(modm::SmartPointer command)
     {
-        for (pair<Subsystem*, modm::SmartPointer> subsystemCommandPair : subsystemToCommandMap)
-        {
-            if (subsystemCommandPair.second == command)
+        // TODO(MATTHEW) test this
+        return std::any_of(subsystemToCommandMap.begin(), subsystemToCommandMap.end(),
+            [command](pair<Subsystem*, modm::SmartPointer> p)
             {
-                return true;
+                return p.second == command;
             }
-        }
-        return false;
+        );
+        // for (pair<Subsystem*, modm::SmartPointer> subsystemCommandPair : subsystemToCommandMap)
+        // {
+        //     if (subsystemCommandPair.second == command)
+        //     {
+        //         return true;
+        //     }
+        // }
+        // return false;
     }
 
     bool CommandScheduler::registerSubsystem(Subsystem* subsystem)
