@@ -10,7 +10,6 @@ namespace control
     Subsystem::Subsystem() : defaultCommand()
     {
         defaultCommand = CommandScheduler::defaultNullCommand;
-        CommandScheduler::registerSubsystem(this);
     }
 
     void Subsystem::setDefaultCommand(modm::SmartPointer command)
@@ -22,6 +21,9 @@ namespace control
     {
         return defaultCommand;
     }
+
+    void Subsystem::refresh(void) {}
+
 }  // namespace control
 
 }  // namespace aruwlib

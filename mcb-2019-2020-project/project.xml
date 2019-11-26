@@ -31,8 +31,5 @@
     <module>modm:build:scons</module>
     <module>modm:math:utils</module>
     <module>modm:math:saturated</module>
-    <module>modm:container</module>
-    <module>modm:math:filter</module>
-    <module>modm:processing</module>
   </modules>
 </library>

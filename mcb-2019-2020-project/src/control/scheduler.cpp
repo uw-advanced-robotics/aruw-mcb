@@ -1,4 +1,5 @@
 #include <utility>
+#include <modm/processing/timer.hpp>
 #include "src/control/scheduler.hpp"
 #include "src/motor/dji_motor_tx_handler.hpp"
 #include "src/communication/can/can_rx_handler.hpp"
@@ -10,12 +11,14 @@ namespace aruwlib
 
 namespace control
 {
+    const float CommandScheduler::MAX_ALLOWABLE_SCHEDULER_RUNTIME = 0.5f;
+
+    const modm::SmartPointer CommandScheduler::defaultNullCommand(0);
+
     map<Subsystem*, modm::SmartPointer> CommandScheduler::subsystemToCommandMap;
     // map<Subsystem*, Command*> CommandScheduler::subsystemToCommandMap;
 
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
-
-    const modm::SmartPointer CommandScheduler::defaultNullCommand(0);
 
     bool CommandScheduler::addCommand(modm::SmartPointer commandToAdd)
     {
@@ -65,6 +68,7 @@ namespace control
 
     void CommandScheduler::run()
     {
+        uint32_t checkRunPeriod = DWT->CYCCNT;  // clock cycle count
         // timestamp for reference and for disallowing a command from running
         // multiple times during the same call to run
         commandSchedulerTimestamp++;
@@ -98,6 +102,15 @@ namespace control
             }
             // refresh subsystem
             currSubsystemCommandPair.first->refresh();
+        }
+        // make sure we are not going over tolerable runtime, otherwise something is really
+        // wrong with the code
+        if (static_cast<float>(DWT->CYCCNT - checkRunPeriod) / float(modm::clock::fcpu_kHz)
+            > MAX_ALLOWABLE_SCHEDULER_RUNTIME)
+        {
+            // shouldn't take more than 1 ms to complete all this stuff, if it does something
+            // is seriously wrong (i.e. you are adding subsystems unchecked)
+            // THROW-NON-FATAL-ERROR-CHECK
         }
     }
 
