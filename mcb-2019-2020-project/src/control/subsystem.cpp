@@ -1,6 +1,6 @@
 #include "src/control/subsystem.hpp"
 #include "src/control/command.hpp"
-#include "scheduler.hpp"
+#include "command_scheduler.hpp"
 
 namespace aruwlib
 {

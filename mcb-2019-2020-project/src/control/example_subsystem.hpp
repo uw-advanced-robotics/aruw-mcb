@@ -15,7 +15,7 @@
 #define __SUBSYSTEM_EXAMPLE_HPP__
 
 #include <modm/math/filter/pid.hpp>
-#include "scheduler.hpp"
+#include "command_scheduler.hpp"
 #include "src/control/subsystem.hpp"
 #include "src/motor/dji_motor.hpp"
 

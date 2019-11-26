@@ -17,8 +17,6 @@
 #define __SCHEDULER_HPP__
 
 #include <map>
-#include <set>
-#include <modm/container/linked_list.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include "rm-dev-board-a/board.hpp"
 #include "src/control/command.hpp"

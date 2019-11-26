@@ -2,7 +2,7 @@
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 
-#include "src/control/scheduler.hpp"
+#include "src/control/command_scheduler.hpp"
 #include "src/control/example_command.hpp"
 #include "src/control/example_subsystem.hpp"
 #include "src/motor/dji_motor_tx_handler.hpp"

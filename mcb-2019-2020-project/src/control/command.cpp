@@ -1,5 +1,5 @@
 #include "src/control/command.hpp"
-#include "src/control/scheduler.hpp"
+#include "src/control/command_scheduler.hpp"
 
 using namespace std;
 
