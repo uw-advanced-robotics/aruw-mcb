@@ -8,18 +8,18 @@
 #include "src/motor/dji_motor_tx_handler.hpp"
 #include "src/communication/can/can_rx_listener.hpp"
 
-aruwsrc::control::ExampleSubsystem frictionWheelSubsystem;
+aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()
 {
     Board::initialize();
 
-    modm::SmartPointer frictionWheelDefaultCommand(
-        new aruwsrc::control::ExampleCommand(&frictionWheelSubsystem));
+    modm::SmartPointer testDefaultCommand(
+        new aruwsrc::control::ExampleCommand(&testSubsystem));
 
-    frictionWheelSubsystem.setDefaultCommand(frictionWheelDefaultCommand);
+    testSubsystem.setDefaultCommand(testDefaultCommand);
 
-    CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
+    CommandScheduler::registerSubsystem(&testSubsystem);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
