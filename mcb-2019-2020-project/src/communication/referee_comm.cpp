@@ -262,7 +262,6 @@ void RefereeSystem::messageHandler(DJISerial::Serial_Message_t* message) {
         default :
             break;
     }
-
 }
 
 /** 
@@ -281,7 +280,7 @@ uint8_t RefereeSystem::packBoolMask(
            ((uint8_t) bool3) << 2 |
            ((uint8_t) bool4) << 3 |
            ((uint8_t) bool5) << 4 |
-           ((uint8_t) bool6) << 5;  // bits 6 and 7 are reserved by the ref system
+           ((uint8_t) bool6) << 5;  // bits 6 and 7 are reserved by the ref systems
 }
 
 void RefereeSystem::updateReceivedDamage() {
@@ -327,12 +326,16 @@ bool RefereeSystem::sendCustomData(CustomData_t* custom_data) {
         return false;
     }
     // Check if sender and recipient is from our alliance
-    if (robot_data.robot_id < RED_BLUE_ID_WATERSHED && (custom_data->sender_id > RED_BLUE_ID_WATERSHED || custom_data->recipient_id > RED_BLUE_ID_WATERSHED))
+    if (robot_data.robot_id < RED_BLUE_ID_WATERSHED &&
+            (custom_data->sender_id > RED_BLUE_ID_WATERSHED ||
+            custom_data->recipient_id > RED_BLUE_ID_WATERSHED))
     {
         return false;
     }
     // Check if sender and recipient is from our alliance
-    if (robot_data.robot_id > RED_BLUE_ID_WATERSHED && (custom_data->sender_id < RED_BLUE_ID_WATERSHED || custom_data->recipient_id < RED_BLUE_ID_WATERSHED))
+    if (robot_data.robot_id > RED_BLUE_ID_WATERSHED &&
+    (custom_data->sender_id < RED_BLUE_ID_WATERSHED ||
+    custom_data->recipient_id < RED_BLUE_ID_WATERSHED))
     {
         return false;
     }
@@ -360,7 +363,7 @@ bool RefereeSystem::sendCustomData(CustomData_t* custom_data) {
     customDataBuffer[2] = temp[0];
     customDataBuffer[3] = temp[1];
     // client ID of the robot that the values in the message will be displayed to
-    temp = reinterpret_cast<uint8_t*>(&custom_data->recipient_id);    
+    temp = reinterpret_cast<uint8_t*>(&custom_data->recipient_id);
     customDataBuffer[4] = temp[0];
     customDataBuffer[5] = temp[1];
     memcpy(customDataBuffer + CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH

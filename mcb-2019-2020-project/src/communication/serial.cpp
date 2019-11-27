@@ -132,7 +132,7 @@ bool DJISerial::processFrameData() {
         lastRxMessageTimestamp = timestamp.getTime();
         handler(&message);
         return true;
-    } 
+    }
     if (verifyCRC16(rxBuffer, FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH +
                         currentExpectedMessageLength, CRC16)) {
         // CRC checking is enabled and CRC8/CRC16 were valid
