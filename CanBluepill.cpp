@@ -14,7 +14,7 @@ namespace aruwlib
             }
         }
 
-        void transferMessage(int length, int16_t val1, int16_t val2 , int16_t val3 , int16_t val4, modm::can::Message can, bool can1Test) {//tx
+        void transferMessage(modm::can::Message can, int length, int16_t val1, int16_t val2 , int16_t val3 , int16_t val4, bool can1Test) {//tx
             modm::can::Message& message;
             message.identifier = can.identifier;
             message.length = length;
