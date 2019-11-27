@@ -99,10 +99,12 @@ void CVCommunication::setTurrentAimData(CV_Turret_Aim_Data_t *CVTurrentAimData) 
     isAimDataLatest = true;
 }
 
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 void CVCommunication::beginTargetTracking() {
     autoAimEnabled = true;
 }
 
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 void CVCommunication::stopTargetTracking() {
     autoAimEnabled = false;
 }
