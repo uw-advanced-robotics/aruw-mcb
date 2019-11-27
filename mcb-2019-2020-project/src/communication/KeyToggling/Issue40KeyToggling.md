@@ -19,52 +19,29 @@ The steps used to implement this:
 
 ## Code Plan
 
-#### KeyToggle.hpp
+#### KeyStateToggle.hpp
 ```cpp
-/**
- *  PWM modm interface
- *  A simple API that allows users to easily interact with 
- *  modm's PWM functionality. This implementation contains 
- *  a wrapper class on top of a Timer GeneralPurposeTimer
- *  class.
- */
 
-#include <rm-dev-board-a/board.hpp>
 #include "src/communication/remote.hpp"
 
-//struct containing the key, if it is enabled, toggled, (state of toggle)
-typedef struct{
-	int16_t key;
-	bool key_enabled;
-	bool key_toggled;
-	enum{
-		NOT_PRESSED = 0,
-		PRESSED = 1,
-		RELEASED = 3,
-		PRESSED_TO_UNTOGGLE = 4,
-	} key_state;
-} toggle_key_t;
+class KeyStateToggle{
+    private:
+        bool current_state;
+        bool is_pressed; 
+        aruwlib::Remode::Key currKey;
 
-//returns if the key is enabled and toggled on
-bool key_toggled(uint16_t key);
 
-//returns the toggled key
-toggle_key_t get_toggle(int16_t key);
+    public:
+        //iniiializes all fields to their respective amounts
+        //class constructor
+        KeyStateToggle(aruwlib::Remote::Key key);
 
-//puts all keys in a non-toggled mode
-void zero_all_toggle_keys();
+        //actually toggles the key on the computer's side of things
+        void KeyToggleHandler(bool input);
 
-//initializes all states
-void init_toggle_key(int16_t key);
+        //will return true if the object's key is toggled
+        bool keyToggled() const;
 
-//initializes based on robot type
-void init_desired_keys();
-
-//actually toggles the key on the computer's side of things, depending on the data given
-void key_toggle_handler(toggle_key_t* key);
-
-//calls on key toggle handler which then toggles the key to a given mode.
-//will be called in keyToggleHandler
-void toggle_handler();
-
+};
 //KeyToggle.hpp
+
