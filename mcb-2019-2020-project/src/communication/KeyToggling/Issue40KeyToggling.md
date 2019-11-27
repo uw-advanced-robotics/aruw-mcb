@@ -25,10 +25,10 @@ The steps used to implement this:
 #include "src/communication/remote.hpp"
 
 class KeyStateToggle{
-    private:
-        bool current_state;
-        bool is_pressed; 
-        aruwlib::Remode::Key currKey;
+        private:
+        bool current_state;//refers to on or off
+        bool is_pressed; //refers to toggled or not
+        aruwlib::Remote::Key currKey;
 
 
     public:
@@ -42,6 +42,8 @@ class KeyStateToggle{
         //will return true if the object's key is toggled
         bool keyToggled() const;
 
+        //returns if the key's state is on or off
+        bool currState() const;
 };
 //KeyToggle.hpp
 
