@@ -49,6 +49,10 @@ void CVCommunication::initialize(
     serial = DJISerial(port, messageHandler, false);
     serial.initialize();
     serial.disableRxCRCEnforcement();
+    timeoutArray[0] = modm::PeriodicTimer(TIMEOUT_TURRET_TELEMETRY);
+    timeoutArray[1] = modm::PeriodicTimer(TIMEOUT_IMU);
+    timeoutArray[2] = modm::PeriodicTimer(TIMEOUT_ROBOT_ID);
+    timeoutArray[3] = modm::PeriodicTimer(TIMEOUT_AUTO_AIM_REQUEST);
 }
 
 

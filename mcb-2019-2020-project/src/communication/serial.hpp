@@ -147,8 +147,8 @@ class DJISerial
     bool processFrameHeader();
     bool processFrameData();
 
-    bool read(uint8_t *data, uint16_t length);
-    bool write(const uint8_t *data, uint16_t length);
+    uint32_t read(uint8_t *data, uint16_t length);
+    uint32_t write(const uint8_t *data, uint16_t length);
 
     bool verifyCRC16(uint8_t *message, uint32_t messageLength, uint16_t expectedCRC16);
     bool verifyCRC8(uint8_t *message, uint32_t messageLength, uint8_t expectedCRC8);
@@ -158,7 +158,6 @@ class DJISerial
     Serial_Message_t lastRxMessage;
     uint32_t lastRxMessageTimestamp;
 
-    modm::Timestamp timestamp;
 };
 
 }  // namespace serial

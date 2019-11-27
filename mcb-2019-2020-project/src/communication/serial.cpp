@@ -22,7 +22,6 @@ DJISerial::DJISerial(
     this->CRC8 = 0;
     this->CRC16 = 0;
     this->rxCRCEnforcementEnabled = isRxCRCEnforcementEnabled;
-    this->timestamp = modm::Timestamp();
 }
 
 DJISerial::~DJISerial() {
@@ -129,7 +128,7 @@ bool DJISerial::processFrameData() {
         message.data = rxBuffer + FRAME_DATA_OFFSET;
         message.type = currentMessageType;
         this->lastRxMessage = message;
-        lastRxMessageTimestamp = timestamp.getTime();
+        lastRxMessageTimestamp = modm::Clock::now().getTime();
         handler(&message);
         return true;
     }
@@ -141,7 +140,7 @@ bool DJISerial::processFrameData() {
         message.data = rxBuffer + FRAME_DATA_OFFSET;
         message.type = currentMessageType;
         this->lastRxMessage = message;
-        lastRxMessageTimestamp = timestamp.getTime();
+        lastRxMessageTimestamp = modm::Clock::now().getTime();
         handler(&message);
 
         return true;
@@ -182,7 +181,7 @@ bool DJISerial::send(const Serial_Message_t* message) {
         return false;
     }
     txSequenceNumber++;
-    lastTxMessageTimestamp = timestamp.getTime();
+    lastTxMessageTimestamp = modm::Clock::now().getTime();
     return true;
 }
 
@@ -217,27 +216,27 @@ bool DJISerial::periodicTask(Serial_Message_t* message) {
 }
 
 uint32_t DJISerial::getTimestamp() {
-    return timestamp.getTime();
+    return modm::Clock::now().getTime();
 }
 
-bool DJISerial::read(uint8_t *data, uint16_t length) {
+uint32_t DJISerial::read(uint8_t *data, uint16_t length) {
     switch (this->port) {
     case PORT_UART2:
         return Usart2::read(data, length);
     case PORT_UART6:
         return Usart6::read(data, length);
     default:
-        return false;
+        return 0;
     }
 }
-bool DJISerial::write(const uint8_t *data, uint16_t length) {
+uint32_t DJISerial::write(const uint8_t *data, uint16_t length) {
     switch (this->port) {
     case PORT_UART2:
         return Usart2::write(data, length);
     case PORT_UART6:
         return Usart6::write(data, length);
     default:
-        return false;
+        return 0;
     }
 }
 void DJISerial::initialize() {

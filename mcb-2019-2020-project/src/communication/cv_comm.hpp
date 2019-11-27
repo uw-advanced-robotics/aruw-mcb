@@ -78,11 +78,10 @@ class CVCommunication
 
     typedef enum
     {
-        TIMEOUT_TURRET_TELEMETRY = 5,
-        TIMEOUT_IMU = 5,
-        TIMEOUT_REQUEST_TASK = 1000,
+        TIMEOUT_TURRET_TELEMETRY = 10,
+        TIMEOUT_IMU = 10,
         TIMEOUT_ROBOT_ID = 1000,
-        TIMEOUT_AUTO_AIM_REQUEST = 5,
+        TIMEOUT_AUTO_AIM_REQUEST = 15,
     } Tx_CV_Message_Timeout;
 
     /**
