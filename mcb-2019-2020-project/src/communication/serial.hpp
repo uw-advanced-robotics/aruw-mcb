@@ -22,7 +22,7 @@ namespace serial
 
 class DJISerial
 {
-public:
+ public:
     typedef enum
     {
         // PORT_UART1 = 0,
@@ -35,7 +35,7 @@ public:
         WAITING_FOR_HEAD_BYTE = 0,       // head byte (1-byte)
         WAITING_FOR_MESSAGE_LENGTH = 1,  // length of message (2-byte)
         WAITING_FOR_MESSAGE_DATA = 2,    // rest of data in packet [1-byte sequence num,
-                                        // 1-byte CRC8, message_length-byte message, 2-byte CRC16]
+                                         // 1-byte CRC8, messageLength-byte message, 2-byte CRC16]
     } Serial_Mode;
 
     typedef struct{
@@ -51,59 +51,65 @@ public:
      * @param messageHandler callback function for handling received message
      * @param isRxCRCEnforcementEnabled if to enable Rx CRC Enforcement
      */
-    DJISerial(Serial_Port port, SerialMessageHandler_t messageHandler, bool isRxCRCEnforcementEnabled);
+    DJISerial(
+        Serial_Port port, SerialMessageHandler_t messageHandler,
+        bool isRxCRCEnforcementEnabled
+    );
     ~DJISerial();
 
-    /** 
+    /**
      * Initialize serial
     */
     void initialize();
 
-    /** 
+    /**
      * Send a Message
      * @param message pointer to message to send
      * @return true if succeed, false if failed
     */
     bool send(const Serial_Message_t* message);
 
-    /** 
+    /**
      * Update the port, read a message from rx buffer and decode it
      * @param message pointer to output message
      * @return true if has new message, false if not
     */
     bool periodicTask(Serial_Message_t* message);
-    /** 
+
+    /**
      * Enable RX CRC enforcement. Messages that don't pass CRC check will be ignored
     */
     void enableRxCRCEnforcement();
-    /** 
+
+    /**
      * Enable RX CRC enforcement. Messages that don't pass CRC check will not be ignored
     */
     void disableRxCRCEnforcement();
-    /** 
+
+    /**
      * Get current Timestamp
      * @return current Timestamp in ms
     */
     uint32_t getTimestamp();
 
-    /** 
+    /**
      * Get timestamp of last message sent
      * @return timestamp of last message sent in ms
     */
     uint32_t getLastTxMessageTimestamp();
 
-    /** 
+    /**
      * Get timestamp of last message received
      * @return timestamp of last message sent in ms
     */
     uint32_t getLastRxMessageTimestamp();
 
-    /** 
+    /**
      * Get current Tx message sequence Number
      * @return current Tx message sequence Number
     */
     uint8_t getTxSequenceNumber();
-private:
+ private:
     static const uint8_t FRAME_SOF_OFFSET = 0;
     static const uint8_t FRAME_DATA_LENGTH_OFFSET = 1;
     static const uint8_t FRAME_SEQUENCENUM_OFFSET = 3;
@@ -143,10 +149,9 @@ private:
 
     bool read(uint8_t *data, uint16_t length);
     bool write(const uint8_t *data, uint16_t length);
-    
 
-    bool verifyCRC16(uint8_t *message, uint32_t message_length, uint16_t expectedCRC16);
-    bool verifyCRC8(uint8_t *message, uint32_t message_length, uint8_t expectedCRC8);
+    bool verifyCRC16(uint8_t *message, uint32_t messageLength, uint16_t expectedCRC16);
+    bool verifyCRC8(uint8_t *message, uint32_t messageLength, uint8_t expectedCRC8);
 
     uint32_t lastTxMessageTimestamp;
 
@@ -154,9 +159,10 @@ private:
     uint32_t lastRxMessageTimestamp;
 
     modm::Timestamp timestamp;
-
 };
 
-}
-}
+}  // namespace serial
+
+}  // namespace aruwlib
+
 #endif

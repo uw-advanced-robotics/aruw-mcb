@@ -19,14 +19,12 @@ DJISerial CVCommunication::serial = DJISerial(DJISerial::PORT_UART2, messageHand
 uint8_t CVCommunication::robotID;
 uint8_t CVCommunication::modeArray[MODE_ARRAY_SIZE] = {
     MESSAGE_TYPE_TURRET_TELEMETRY,
-    MESSAGE_TYPE_IMU, 
-    MESSAGE_TYPE_ROBOT_ID, 
-    MESSAGE_TYPE_AUTO_AIM_REQUEST};
+    MESSAGE_TYPE_IMU,
+    MESSAGE_TYPE_ROBOT_ID,
+    MESSAGE_TYPE_AUTO_AIM_REQUEST
+};
 
-modm::PeriodicTimer CVCommunication::timeoutArray[MODE_ARRAY_SIZE] = {
-    
-}
-;
+modm::PeriodicTimer CVCommunication::timeoutArray[MODE_ARRAY_SIZE] = {};
 
 CVCommunication::CVCommunication()
 {
@@ -37,14 +35,16 @@ CVCommunication::CVCommunication()
 
     autoAimEnabled = false;
     isAimDataLatest = false;
-    
 }
 
 CVCommunication::~CVCommunication()
 {
 }
 
-void CVCommunication::initialize(DJISerial::Serial_Port port, TurrentDataHandler_t turrent_data_callback) {
+void CVCommunication::initialize(
+    DJISerial::Serial_Port port,
+    TurrentDataHandler_t turrent_data_callback
+) {
     turrentDataHandler = turrent_data_callback;
     serial = DJISerial(port, messageHandler, false);
     serial.initialize();
@@ -52,7 +52,10 @@ void CVCommunication::initialize(DJISerial::Serial_Port port, TurrentDataHandler
 }
 
 
-bool CVCommunication::decodeToTurrentAimData(const DJISerial::Serial_Message_t* message, CV_Turret_Aim_Data_t *aim_data) {
+bool CVCommunication::decodeToTurrentAimData(
+    const DJISerial::Serial_Message_t* message,
+    CV_Turret_Aim_Data_t *aim_data
+) {
     if (message->length != MESSAGE_LENGTH_TURRET_AIM) {
         return false;
     }
@@ -70,6 +73,7 @@ bool CVCommunication::decodeToTurrentAimData(const DJISerial::Serial_Message_t* 
     return true;
 }
 
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 bool CVCommunication::getLastAimData(CV_Turret_Aim_Data_t *aim_data) {
     if (isAimDataLatest) {
         *aim_data = lastAimData;
@@ -95,10 +99,12 @@ void CVCommunication::setTurrentAimData(CV_Turret_Aim_Data_t *aim_data) {
     isAimDataLatest = true;
 }
 
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 void CVCommunication::beginTargetTracking() {
     autoAimEnabled = true;
 }
 
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 void CVCommunication::stopTargetTracking() {
     autoAimEnabled = false;
 }
@@ -112,7 +118,7 @@ void CVCommunication::messageHandler(DJISerial::Serial_Message_t* message) {
         CV_Turret_Aim_Data_t aim_data;
 
         if(decodeToTurrentAimData(message, &aim_data)) {
-            //Call the Callback function when Successfully Decoded
+            // Call the Callback function when Successfully Decoded
             turrentDataHandler(&aim_data);
             break;
         }
@@ -128,7 +134,10 @@ void CVCommunication::messageHandler(DJISerial::Serial_Message_t* message) {
 /**
  * Send Given IMU and Chassis data to to Xavier
  */
-void CVCommunication::sendIMUandChassisData(const CV_IMU_Data_t *imu_data, const CV_Chassis_Data_t *chassis_data) {
+void CVCommunication::sendIMUandChassisData(
+    const CV_IMU_Data_t *imu_data,
+    const CV_Chassis_Data_t *chassis_data
+) {
     static int16_t data[13] = {
             // Accelerometer readings in static frame
             static_cast<int16_t>(imu_data->ax * 100),
@@ -168,29 +177,29 @@ bool CVCommunication::sendRobotID(uint8_t RobotID) {
     return serial.send(&message);
 }
 
-
-
-void CVCommunication::periodicTask(const CV_IMU_Data_t *imu_data, const CV_Chassis_Data_t *chassis_data, CV_Turret_Aim_Data_t *turrent_data) {
-
+void CVCommunication::periodicTask(
+    const CV_IMU_Data_t *imu_data,
+    const CV_Chassis_Data_t *chassis_data,
+    CV_Turret_Aim_Data_t *turrent_data
+) {
     DJISerial::Serial_Message_t message;
     serial.periodicTask(&message);
-    for (int i = 0; i < MODE_ARRAY_SIZE; i++){
-        
+    for (int i = 0; i < MODE_ARRAY_SIZE; i++) {
         switch (modeArray[i]) {
             case MESSAGE_TYPE_TURRET_TELEMETRY: {
-                if(timeoutArray[i].execute()){
+                if(timeoutArray[i].execute()) {
                     CVCommunication::sendTurrentData(turrent_data->pitch, turrent_data->yaw);
                 }
                 break;
             }
             case MESSAGE_TYPE_IMU: {
-                if(timeoutArray[i].execute()){
+                if(timeoutArray[i].execute()) {
                     sendIMUandChassisData(imu_data, chassis_data);
                 }
                 break;
             }
             case MESSAGE_TYPE_ROBOT_ID: {
-                if(timeoutArray[i].execute()){
+                if(timeoutArray[i].execute()) {
                     sendRobotID(robotID);
                 }
                 break;
@@ -198,14 +207,14 @@ void CVCommunication::periodicTask(const CV_IMU_Data_t *imu_data, const CV_Chass
 
             case MESSAGE_TYPE_AUTO_AIM_REQUEST:
             {
-                if(timeoutArray[i].execute()){
+                if(timeoutArray[i].execute()) {
                     if (autoAimEnabled) {
                         uint8_t data = AUTO_AIM_ENABLED;
-                        DJISerial::Serial_Message_t message;
-                        message.data = &data;
-                        message.length = MESSAGE_LENGTH_AUTO_AIM_REQUEST;
-                        message.type = MESSAGE_TYPE_AUTO_AIM_REQUEST;
-                        serial.send(&message);
+                        DJISerial::Serial_Message_t autoAimMessage;
+                        autoAimMessage.data = &data;
+                        autoAimMessage.length = MESSAGE_LENGTH_AUTO_AIM_REQUEST;
+                        autoAimMessage.type = MESSAGE_TYPE_AUTO_AIM_REQUEST;
+                        serial.send(&autoAimMessage);
                     }
                 }
                 break;
@@ -214,5 +223,6 @@ void CVCommunication::periodicTask(const CV_IMU_Data_t *imu_data, const CV_Chass
     }
 }
 
-}
-}
+}  // namespace serial
+
+}  // namespace aruwlib
