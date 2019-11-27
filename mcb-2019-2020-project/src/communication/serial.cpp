@@ -132,7 +132,8 @@ bool DJISerial::processFrameData() {
         lastRxMessageTimestamp = timestamp.getTime();
         handler(&message);
         return true;
-    } else if (verifyCRC16(rxBuffer, FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH +
+    } 
+    if (verifyCRC16(rxBuffer, FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH +
                         currentExpectedMessageLength, CRC16)) {
         // CRC checking is enabled and CRC8/CRC16 were valid
         Serial_Message_t message;
@@ -144,26 +145,24 @@ bool DJISerial::processFrameData() {
         handler(&message);
 
         return true;
-    } else {
-        // CRC checking is enabled but CRC8/CRC16 were invalid
-        currentExpectedMessageLength = 0;
-        return false;
+    // CRC checking is enabled but CRC8/CRC16 were invalid
+    currentExpectedMessageLength = 0;
+    return false;
     }
 }
 
 bool DJISerial::send(const Serial_Message_t* message) {
-    uint8_t buff[SERIAL_TX_BUFF_SIZE];
-    buff[0] = SERIAL_HEAD_BYTE;
-    buff[1] = message->length;
-    buff[2] = message->length >> 8;
-    buff[3] = txSequenceNumber;
-    buff[4] = aruwlib::math::calculateCRC8(buff, 4, CRC8_INIT);
-    buff[5] = message->type;
-    buff[6] = message->type >> 8;
+    txBuffer[0] = SERIAL_HEAD_BYTE;
+    txBuffer[1] = message->length;
+    txBuffer[2] = message->length >> 8;
+    txBuffer[3] = txSequenceNumber;
+    txBuffer[4] = aruwlib::math::calculateCRC8(txBuffer, 4, CRC8_INIT);
+    txBuffer[5] = message->type;
+    txBuffer[6] = message->type >> 8;
 
-    uint8_t *next_tx_buff = &(buff[7]);
+    uint8_t *next_tx_buff = &(txBuffer[7]);
 
-    if (next_tx_buff + message->length + FRAME_CRC16_LENGTH >= buff + SERIAL_TX_BUFF_SIZE) {
+    if (next_tx_buff + message->length + FRAME_CRC16_LENGTH >= txBuffer + SERIAL_TX_BUFF_SIZE) {
         return false;
     }
     for (uint16_t i = 0; i < message->length; i++) {
@@ -171,14 +170,14 @@ bool DJISerial::send(const Serial_Message_t* message) {
         next_tx_buff++;
     }
     uint16_t CRC16_val = aruwlib::math::calculateCRC16(
-        buff,
+        txBuffer,
         FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + message->length, CRC16_INIT
     );
     next_tx_buff[0] = CRC16_val;
     next_tx_buff[1] = CRC16_val >> 8;
     next_tx_buff += FRAME_CRC16_LENGTH;
-    uint16_t total_size = next_tx_buff - buff;
-    uint32_t actual_length = this->write(buff, total_size);
+    uint16_t total_size = next_tx_buff - txBuffer;
+    uint32_t actual_length = this->write(txBuffer, total_size);
     if (actual_length != total_size) {
         return false;
     }

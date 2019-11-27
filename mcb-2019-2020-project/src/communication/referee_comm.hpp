@@ -241,7 +241,7 @@ class RefereeSystem
         + CUSTOM_DATA_SENDER_ID_LENGTH
         + CUSTOM_DATA_RECIPIENT_ID_LENGTH
     ];
-
+    static const uint16_t RED_BLUE_ID_WATERSHED = 10;
     // game stats (e.g. remaining time, current stage, winner)
     static Game_Data_t game_data;
     // robot stats (e.g. current HP, power draw, turret info)

@@ -74,9 +74,9 @@ bool CVCommunication::decodeToTurrentAimData(
 }
 
 // cppcheck-suppress unusedFunction //TODO Remove lint suppression
-bool CVCommunication::getLastAimData(CV_Turret_Aim_Data_t *aim_data) {
+bool CVCommunication::getLastAimData(CV_Turret_Aim_Data_t *CVTurrentAimData) {
     if (isAimDataLatest) {
-        *aim_data = lastAimData;
+        *CVTurrentAimData = lastAimData;
         return true;
     }
     return false;
@@ -94,17 +94,15 @@ void CVCommunication::sendTurrentData(const float pitch, const float yaw) {
     serial.send(&message);
 }
 
-void CVCommunication::setTurrentAimData(CV_Turret_Aim_Data_t *aim_data) {
-    lastAimData = *aim_data;
+void CVCommunication::setTurrentAimData(CV_Turret_Aim_Data_t *CVTurrentAimData) {
+    lastAimData = *CVTurrentAimData;
     isAimDataLatest = true;
 }
 
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 void CVCommunication::beginTargetTracking() {
     autoAimEnabled = true;
 }
 
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 void CVCommunication::stopTargetTracking() {
     autoAimEnabled = false;
 }

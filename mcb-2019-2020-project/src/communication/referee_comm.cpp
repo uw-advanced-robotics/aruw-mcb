@@ -31,7 +31,7 @@ uint8_t RefereeSystem::customDataBuffer[
 RefereeSystem::RefereeSystem()
 {
     this->online = false;  // initially sets referee system to be offline
-    serial = DJISerial(DJISerial::PORT_UART6, (RefereeSystem::messageHandler), true);
+    serial = DJISerial(DJISerial::PORT_UART6, (messageHandler), true);
 }
 
 RefereeSystem::~RefereeSystem()
@@ -39,7 +39,7 @@ RefereeSystem::~RefereeSystem()
 }
 
 void RefereeSystem::initialize() {
-    RefereeSystem::serial.initialize();
+    serial.initialize();
 }
 
 float RefereeSystem::decodeTofloat(const uint8_t* start_byte) {
@@ -55,8 +55,8 @@ bool RefereeSystem::decodeToGameStatus(const DJISerial::Serial_Message_t* messag
     if (message->length != 3) {
         return false;
     }
-    RefereeSystem::game_data.game_stage = (Game_Stages) (message->data[0] >> 4);
-    RefereeSystem::game_data.stage_time_remaining = (message->data[2] << 8) | message->data[1];
+    game_data.game_stage = (Game_Stages) (message->data[0] >> 4);
+    game_data.stage_time_remaining = (message->data[2] << 8) | message->data[1];
     return true;
 }
 
@@ -72,33 +72,33 @@ bool RefereeSystem::decodeToAllRobotHP(const DJISerial::Serial_Message_t* messag
     if (message->length != 28) {
         return false;
     }
-    RefereeSystem::robot_data.all_robot_HP.red_hero_HP
+    robot_data.all_robot_HP.red_hero_HP
         = (message->data[1] << 8) | message->data[0];
-    RefereeSystem::robot_data.all_robot_HP.red_engineer_HP
+    robot_data.all_robot_HP.red_engineer_HP
         = (message->data[3] << 8) | message->data[2];
-    RefereeSystem::robot_data.all_robot_HP.red_soldier_1_HP
+    robot_data.all_robot_HP.red_soldier_1_HP
         = (message->data[5] << 8) | message->data[4];
-    RefereeSystem::robot_data.all_robot_HP.red_soldier_2_HP
+    robot_data.all_robot_HP.red_soldier_2_HP
         = (message->data[7] << 8) | message->data[6];
-    RefereeSystem::robot_data.all_robot_HP.red_soldier_3_HP
+    robot_data.all_robot_HP.red_soldier_3_HP
         = (message->data[9] << 8) | message->data[8];
-    RefereeSystem::robot_data.all_robot_HP.red_sentinel_HP
+    robot_data.all_robot_HP.red_sentinel_HP
         = (message->data[11] << 8) | message->data[10];
-    RefereeSystem::robot_data.all_robot_HP.red_base_HP
+    robot_data.all_robot_HP.red_base_HP
         = (message->data[13] << 8) | message->data[12];
-    RefereeSystem::robot_data.all_robot_HP.blue_hero_HP
+    robot_data.all_robot_HP.blue_hero_HP
         = (message->data[15] << 8) | message->data[14];
-    RefereeSystem::robot_data.all_robot_HP.blue_engineer_HP
+    robot_data.all_robot_HP.blue_engineer_HP
         = (message->data[17] << 8) | message->data[16];
-    RefereeSystem::robot_data.all_robot_HP.blue_soldier_1_HP
+    robot_data.all_robot_HP.blue_soldier_1_HP
         = (message->data[19] << 8) | message->data[18];
-    RefereeSystem::robot_data.all_robot_HP.blue_soldier_2_HP
+    robot_data.all_robot_HP.blue_soldier_2_HP
         = (message->data[21] << 8) | message->data[20];
-    RefereeSystem::robot_data.all_robot_HP.blue_soldier_3_HP
+    robot_data.all_robot_HP.blue_soldier_3_HP
         = (message->data[23] << 8) | message->data[22];
-    RefereeSystem::robot_data.all_robot_HP.blue_sentinel_HP
+    robot_data.all_robot_HP.blue_sentinel_HP
         = (message->data[25] << 8) | message->data[24];
-    RefereeSystem::robot_data.all_robot_HP.blue_base_HP
+    robot_data.all_robot_HP.blue_base_HP
         = (message->data[27] << 8) | message->data[26];
     return true;
 }
@@ -107,26 +107,26 @@ bool RefereeSystem::decodeToRobotStatus(const DJISerial::Serial_Message_t* messa
     if (message->length != 15) {
         return false;
     }
-    RefereeSystem::robot_data.robot_id = (Robot_ID) message->data[0];
-    RefereeSystem::robot_data.robot_level = message->data[1];
-    RefereeSystem::robot_data.current_HP = (message->data[3] << 8) | message->data[2];
-    RefereeSystem::robot_data.max_HP = (message->data[5] << 8) | message->data[4];
-    RefereeSystem::robot_data.turret.heat_cooling_rate_17
+    robot_data.robot_id = (Robot_ID) message->data[0];
+    robot_data.robot_level = message->data[1];
+    robot_data.current_HP = (message->data[3] << 8) | message->data[2];
+    robot_data.max_HP = (message->data[5] << 8) | message->data[4];
+    robot_data.turret.heat_cooling_rate_17
         = (message->data[7] << 8) | message->data[6];
-    RefereeSystem::robot_data.turret.heat_limit_17
+    robot_data.turret.heat_limit_17
         = (message->data[9] << 8) | message->data[8];
-    RefereeSystem::robot_data.turret.heat_cooling_rate_42
+    robot_data.turret.heat_cooling_rate_42
         = (message->data[11] << 8) | message->data[10];
-    RefereeSystem::robot_data.turret.heat_limit_42
+    robot_data.turret.heat_limit_42
         = (message->data[13] << 8) | message->data[12];
-    RefereeSystem::robot_data.gimbal_has_power = message->data[14];
-    RefereeSystem::robot_data.chassis_has_power = (message->data[14] >> 1);
-    RefereeSystem::robot_data.shooter_has_power = (message->data[14] >> 2);
+    robot_data.gimbal_has_power = message->data[14];
+    robot_data.chassis_has_power = (message->data[14] >> 1);
+    robot_data.shooter_has_power = (message->data[14] >> 2);
 
-    if (RefereeSystem::robot_data.previous_HP > RefereeSystem::robot_data.current_HP) {
-        RefereeSystem::processReceivedDamage(RefereeSystem::robot_data.previous_HP
-            - RefereeSystem::robot_data.current_HP);
-        RefereeSystem::robot_data.previous_HP = RefereeSystem::robot_data.current_HP;
+    if (robot_data.previous_HP > robot_data.current_HP) {
+        processReceivedDamage(robot_data.previous_HP
+            - robot_data.current_HP);
+        robot_data.previous_HP = robot_data.current_HP;
     }
     return true;
 }
@@ -137,12 +137,12 @@ bool RefereeSystem::decodeToPowerAndHeat(const DJISerial::Serial_Message_t* mess
     if (message->length != 14) {
         return false;
     }
-    RefereeSystem::robot_data.chassis.volt = (message->data[1] << 8) | message->data[0];
-    RefereeSystem::robot_data.chassis.current = (message->data[3] << 8) | message->data[2];
-    RefereeSystem::robot_data.chassis.power = RefereeSystem::decodeTofloat(&message->data[4]);
-    RefereeSystem::robot_data.chassis.power_buffer = (message->data[9] << 8) | message->data[8];
-    RefereeSystem::robot_data.turret.heat_17 = (message->data[11] << 8) | message->data[10];
-    RefereeSystem::robot_data.turret.heat_42 = (message->data[13] << 8) | message->data[12];
+    robot_data.chassis.volt = (message->data[1] << 8) | message->data[0];
+    robot_data.chassis.current = (message->data[3] << 8) | message->data[2];
+    robot_data.chassis.power = decodeTofloat(&message->data[4]);
+    robot_data.chassis.power_buffer = (message->data[9] << 8) | message->data[8];
+    robot_data.turret.heat_17 = (message->data[11] << 8) | message->data[10];
+    robot_data.turret.heat_42 = (message->data[13] << 8) | message->data[12];
     return true;
 }
 
@@ -150,10 +150,10 @@ bool RefereeSystem::decodeToRobotPosition(const DJISerial::Serial_Message_t* mes
     if (message->length != 16) {
         return false;
     }
-    RefereeSystem::robot_data.chassis.x = RefereeSystem::decodeTofloat(&message->data[0]);
-    RefereeSystem::robot_data.chassis.y = RefereeSystem::decodeTofloat(&message->data[4]);
-    RefereeSystem::robot_data.chassis.z = RefereeSystem::decodeTofloat(&message->data[8]);
-    RefereeSystem::robot_data.turret.yaw = RefereeSystem::decodeTofloat(&message->data[12]);
+    robot_data.chassis.x = decodeTofloat(&message->data[0]);
+    robot_data.chassis.y = decodeTofloat(&message->data[4]);
+    robot_data.chassis.z = decodeTofloat(&message->data[8]);
+    robot_data.turret.yaw = decodeTofloat(&message->data[12]);
     return true;
 }
 
@@ -161,9 +161,9 @@ bool RefereeSystem::decodeToReceiveDamage(const DJISerial::Serial_Message_t* mes
     if (message->length != 1) {
         return false;
     }
-    RefereeSystem::robot_data.damaged_armor_id = (Armor_ID) message->data[0];
-    RefereeSystem::robot_data.damage_type = (Damage_Type) (message->data[0] >> 4);
-    RefereeSystem::robot_data.previous_HP = RefereeSystem::robot_data.current_HP;
+    robot_data.damaged_armor_id = (Armor_ID) message->data[0];
+    robot_data.damage_type = (Damage_Type) (message->data[0] >> 4);
+    robot_data.previous_HP = robot_data.current_HP;
     return true;
 }
 
@@ -171,9 +171,9 @@ bool RefereeSystem::decodeToProjectileLaunch(const DJISerial::Serial_Message_t* 
     if (message->length != 6) {
         return false;
     }
-    RefereeSystem::robot_data.turret.bullet_type = (Bullet_Type) message->data[0];
-    RefereeSystem::robot_data.turret.firing_freq = message->data[1];
-    RefereeSystem::robot_data.turret.bullet_speed = RefereeSystem::decodeTofloat(&message->data[2]);
+    robot_data.turret.bullet_type = (Bullet_Type) message->data[0];
+    robot_data.turret.firing_freq = message->data[1];
+    robot_data.turret.bullet_speed = decodeTofloat(&message->data[2]);
     return true;
 }
 
@@ -183,7 +183,7 @@ bool RefereeSystem::decodeToSentinelDroneBulletsRemain(
     if (message->length != 2) {
         return false;
     }
-    RefereeSystem::robot_data.turret.sentinel_drone_bullets_remain
+    robot_data.turret.sentinel_drone_bullets_remain
         = (message->data[1] << 8) | message->data[0];
     return true;
 }
@@ -192,14 +192,14 @@ void RefereeSystem::processReceivedDamage(int32_t damage_taken) {
     if (damage_taken > 0) {
         // create a new received_damage_event with the damage_taken, and current time
         Damage_Event_t damage_token =
-            { (uint16_t)damage_taken, RefereeSystem::serial.getTimestamp()};
+            { (uint16_t)damage_taken, serial.getTimestamp()};
 
         // add the recently received damage to the end of the circular array
-        RefereeSystem::received_dps_tracker.damage_events[received_dps_tracker.tail]
+        received_dps_tracker.damage_events[received_dps_tracker.tail]
             = damage_token;
 
         // increment tail of circular array
-        RefereeSystem::received_dps_tracker.tail =
+        received_dps_tracker.tail =
             (received_dps_tracker.tail + 1) % REF_DAMAGE_EVENT_SIZE;
 
         // increment the head of the circular array if the tail has overwritten the original head
@@ -207,13 +207,13 @@ void RefereeSystem::processReceivedDamage(int32_t damage_taken) {
             received_dps_tracker.head =
                 (received_dps_tracker.head + 1) % REF_DAMAGE_EVENT_SIZE;
         }
-        RefereeSystem::robot_data.received_dps += damage_taken;
+        robot_data.received_dps += damage_taken;
     }
 }
 
 void RefereeSystem::messageHandler(DJISerial::Serial_Message_t* message) {
     bool ref_received_data = false;
-    RefereeSystem::online = true;
+    online = true;
     switch(message->type) {
         case REF_MESSAGE_TYPE_GAME_STATUS:
         {
@@ -259,13 +259,10 @@ void RefereeSystem::messageHandler(DJISerial::Serial_Message_t* message) {
         {
             ref_received_data = decodeToSentinelDroneBulletsRemain(message);
         }
-        /* handle error messaging */
         default :
             break;
     }
-    if (!ref_received_data) {
-        // TODO(marco)
-    }
+
 }
 
 /** 
@@ -291,15 +288,15 @@ void RefereeSystem::updateReceivedDamage() {
     // if current damage at head of circular array occurred more than a second ago,
     // decrease received_dps by that amount of damage and increment head index
     if (
-        RefereeSystem::serial.getTimestamp() -
-        RefereeSystem::received_dps_tracker.damage_events
+        serial.getTimestamp() -
+        received_dps_tracker.damage_events
             [received_dps_tracker.head].timestamp_ms > 1000
         && received_dps_tracker.head != received_dps_tracker.tail
     ) {
-        RefereeSystem::robot_data.received_dps -=
+        robot_data.received_dps -=
             received_dps_tracker.damage_events[received_dps_tracker.head].damage_amount;
         // increment head of circular array
-        RefereeSystem::received_dps_tracker.head =
+        received_dps_tracker.head =
             (received_dps_tracker.head + 1) % REF_DAMAGE_EVENT_SIZE;
     }
 }
@@ -316,7 +313,7 @@ uint16_t RefereeSystem::getRobotClientID(Robot_ID robot_id) {
         return 0;
     }
     uint16_t retval = 0x100;
-    if (robot_id > 10) {  // if robot_id is a blue robot
+    if (robot_id > RED_BLUE_ID_WATERSHED) {  // if robot_id is a blue robot
         retval += 6;
     }
     return retval + (uint16_t) robot_id;
@@ -330,17 +327,17 @@ bool RefereeSystem::sendCustomData(CustomData_t* custom_data) {
         return false;
     }
     // Check if sender and recipient is from our alliance
-    if (robot_data.robot_id < 10 && (custom_data->sender_id > 10 || custom_data->recipient_id > 10))
+    if (robot_data.robot_id < RED_BLUE_ID_WATERSHED && (custom_data->sender_id > RED_BLUE_ID_WATERSHED || custom_data->recipient_id > RED_BLUE_ID_WATERSHED))
     {
         return false;
     }
     // Check if sender and recipient is from our alliance
-    if (robot_data.robot_id > 10 && (custom_data->sender_id < 10 || custom_data->recipient_id < 10))
+    if (robot_data.robot_id > RED_BLUE_ID_WATERSHED && (custom_data->sender_id < RED_BLUE_ID_WATERSHED || custom_data->recipient_id < RED_BLUE_ID_WATERSHED))
     {
         return false;
     }
 
-    if (!RefereeSystem::online) {
+    if (!online) {
         return false;
     }
 
@@ -354,16 +351,18 @@ bool RefereeSystem::sendCustomData(CustomData_t* custom_data) {
     }
 
     DJISerial::Serial_Message_t message;
-
+    uint8_t* temp = reinterpret_cast<uint8_t*>(&custom_data->type);
     // data content ID / Packet Header
-    customDataBuffer[0] = (uint8_t) custom_data->type;
-    customDataBuffer[1] = (uint8_t) ((uint16_t) custom_data->type >> 8);
+    customDataBuffer[0] = temp[0];
+    customDataBuffer[1] = temp[1];
     // robot ID of the robot that the message is being sent from
-    customDataBuffer[2] = (uint8_t) custom_data->sender_id;
-    customDataBuffer[3] = (uint8_t) ((uint16_t) (custom_data->sender_id) >> 8);
+    temp = reinterpret_cast<uint8_t*>(&custom_data->sender_id);
+    customDataBuffer[2] = temp[0];
+    customDataBuffer[3] = temp[1];
     // client ID of the robot that the values in the message will be displayed to
-    customDataBuffer[4] = (uint8_t) custom_data->recipient_id;
-    customDataBuffer[5] = (uint8_t) custom_data->recipient_id >> 8;
+    temp = reinterpret_cast<uint8_t*>(&custom_data->recipient_id);    
+    customDataBuffer[4] = temp[0];
+    customDataBuffer[5] = temp[1];
     memcpy(customDataBuffer + CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH
         + CUSTOM_DATA_RECIPIENT_ID_LENGTH, custom_data->data, custom_data->length);
 
@@ -372,7 +371,7 @@ bool RefereeSystem::sendCustomData(CustomData_t* custom_data) {
     message.length = CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH +
         CUSTOM_DATA_RECIPIENT_ID_LENGTH + custom_data->length;
 
-    return RefereeSystem::serial.send(&message);
+    return serial.send(&message);
 }
 
 bool RefereeSystem::sendDisplayData() {
@@ -413,8 +412,8 @@ bool RefereeSystem::sendDisplayData() {
 
 
 void RefereeSystem::periodicTask() {
-    RefereeSystem::updateReceivedDamage();
-    RefereeSystem::sendDisplayData();
+    updateReceivedDamage();
+    sendDisplayData();
     DJISerial::Serial_Message_t message;
     serial.periodicTask(&message);
 }
