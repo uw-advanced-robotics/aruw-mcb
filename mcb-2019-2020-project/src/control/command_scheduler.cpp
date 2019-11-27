@@ -131,21 +131,12 @@ namespace control
 
     bool CommandScheduler::isCommandScheduled(modm::SmartPointer command)
     {
-        // TODO(MATTHEW) test this
         return std::any_of(subsystemToCommandMap.begin(), subsystemToCommandMap.end(),
             [command](pair<Subsystem*, modm::SmartPointer> p)
             {
                 return p.second == command;
             }
         );
-        // for (pair<Subsystem*, modm::SmartPointer> subsystemCommandPair : subsystemToCommandMap)
-        // {
-        //     if (subsystemCommandPair.second == command)
-        //     {
-        //         return true;
-        //     }
-        // }
-        // return false;
     }
 
     bool CommandScheduler::registerSubsystem(Subsystem* subsystem)
