@@ -175,7 +175,7 @@ bool DJISerial::send(const Serial_Message_t* message) {
     next_tx_buff[0] = CRC16_val;
     next_tx_buff[1] = CRC16_val >> 8;
     next_tx_buff += FRAME_CRC16_LENGTH;
-    uint16_t total_size = next_tx_buff - txBuffer;
+    uint32_t total_size = next_tx_buff - txBuffer;
     uint32_t actual_length = this->write(txBuffer, total_size);
     if (actual_length != total_size) {
         return false;
@@ -250,6 +250,8 @@ void DJISerial::initialize() {
     default:
         break;
     }
+    lastRxMessageTimestamp = 0;
+    lastTxMessageTimestamp = 0;
 }
 
 // cppcheck-suppress unusedFunction //TODO Remove lint suppression
