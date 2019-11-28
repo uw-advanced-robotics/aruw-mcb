@@ -157,7 +157,6 @@ class DJISerial
 
     Serial_Message_t lastRxMessage;
     uint32_t lastRxMessageTimestamp;
-
 };
 
 }  // namespace serial
