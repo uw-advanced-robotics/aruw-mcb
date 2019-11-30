@@ -23,8 +23,8 @@ namespace control
 
     void AgitatorRotateCommand::initialize()
     {
-        agitatorRotateSetpoint.reset(connectedAgitator->agitatorEncoderToPosition());
-        agitatorRotateSetpoint.setTarget(connectedAgitator->agitatorEncoderToPosition()
+        agitatorRotateSetpoint.reset(connectedAgitator->getAgitatorEncoderToPosition());
+        agitatorRotateSetpoint.setTarget(connectedAgitator->getAgitatorEncoderToPosition()
             + agitatorTargetChange);
         connectedAgitator->armAgitatorUnjamTimer();
     }
@@ -39,14 +39,14 @@ namespace control
     {
         if (interrupted)
         {
-            connectedAgitator->setAgitatorAngle(connectedAgitator->agitatorEncoderToPosition());
+            connectedAgitator->setAgitatorAngle(connectedAgitator->getAgitatorEncoderToPosition());
         }
         connectedAgitator->disarmAgitatorUnjamTimer();
     }
 
     bool AgitatorRotateCommand::isFinished() const
     {
-        return fabs(static_cast<double>(connectedAgitator->agitatorEncoderToPosition()
+        return fabs(static_cast<double>(connectedAgitator->getAgitatorEncoderToPosition()
             - connectedAgitator->getAgitatorDesiredAngle()))
             < static_cast<double>(agitatorSetpointTolerance)
             && agitatorRotateSetpoint.isTargetReached();

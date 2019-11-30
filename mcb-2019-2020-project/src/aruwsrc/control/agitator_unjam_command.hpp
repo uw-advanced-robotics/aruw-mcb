@@ -2,6 +2,7 @@
 #define __AGITATOR_UNJAM_COMMAND_HPP__
 
 #include <modm/processing/timer/timeout.hpp>
+#include "src/algorithms/math_user_utils.hpp"
 #include "src/control/command.hpp"
 #include "src/motor/dji_motor.hpp"
 #include "agitator_subsystem.hpp"
@@ -14,8 +15,13 @@ namespace control
 
 class AgitatorUnjamCommand : public aruwlib::control::Command
 {
- public:
-    
+public:
+    AgitatorUnjamCommand(
+        AgitatorSubsystem* agitator,
+        float agitatorMaxUnjamAngle,
+        uint32_t agitatorMaxWaitTime,
+        float setpointTolerance
+    );
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -44,9 +50,20 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
      * @return whether the command has finished.
      */
     bool isFinished(void) const;
- private:
+
+private:
+    enum AgitatorUnjamState {AGITATOR_UNJAM_BACK, AGITATOR_UNJAM_FORWARD, FINISHED};
+
+    AgitatorUnjamState currUnjamstate;
+
+    const uint32_t MIN_AGITATOR_MAX_WAIT_TIME = 20;
+
+    const float MIN_AGITATOR_UNJAM_ANGLE = PI / 8;
+
     // time allowed to rotate back the the currAgitatorUnjamAngle
-    modm::ShortTimeout agitatorRotateBackTimeout;
+    modm::ShortTimeout agitatorUnjamRotateTimeout;
+
+    uint32_t agitatorMaxWaitTime;
 
     AgitatorSubsystem* connectedAgitator;
 
@@ -55,6 +72,10 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
     float agitatorUnjamAngleMax;
 
     float currAgitatorUnjamAngle;
+
+    float agitatorSetpointBeforeUnjam;
+
+    bool unjamComplete;
 };
 
 }  // namespace control

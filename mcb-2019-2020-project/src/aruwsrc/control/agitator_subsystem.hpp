@@ -22,7 +22,7 @@ class AgitatorSubsystem : aruwlib::control::Subsystem {
 
     void setAgitatorAngle(float newAngle);
 
-    float agitatorEncoderToPosition(void) const;
+    float getAgitatorEncoderToPosition(void) const;
 
     float getAgitatorDesiredAngle(void) const;
 

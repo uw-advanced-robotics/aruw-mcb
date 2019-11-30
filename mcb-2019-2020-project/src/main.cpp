@@ -37,6 +37,20 @@ typedef enum {
 
 AgitatorUnjamStates UJ;
 
+class test
+{
+    test()
+    {
+
+    }
+
+    class UserInput
+    {
+
+    };
+
+    std::map<UserInput, Command*> userInputToComand;
+};
 
 
 int main()
@@ -124,7 +138,7 @@ int main()
         }
         prevRead = Board::Button::read();
 
-        f = agitator17mm.agitatorEncoderToPosition();
+        f = agitator17mm.getAgitatorEncoderToPosition();
         aruwlib::can::CanRxHandler::pollCanData();
 
         // run scheduler
