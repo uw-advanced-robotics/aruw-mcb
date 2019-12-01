@@ -10,9 +10,17 @@
 #include "modm/processing.hpp"
 /**
  * Structure of a Serial Message:
- * Frame Head{[Frame Head Byte(0xA5) 1 Byte][Frame Data Length (HSB Side Byte First, LSB Second) 2 Byte]
- *         [Frame Sequence Number 1 Byte][CRC8 of Bytes before 1 Byte]}
- * Frame Body{[Message Type (HSB Side Byte First, LSB Second) 2 Byte][Frame Data][CRC16 of entire frame (HSB Side Byte First, LSB Second) 2 Byte]}
+ * Frame Head{
+ * [Frame Head Byte(0xA5) 1 Byte]
+ * [Frame Data Length (HSB Side Byte First, LSB Second) 2 Byte]
+ * [Frame Sequence Number 1 Byte]
+ * [CRC8 of Bytes before 1 Byte]
+ * }
+ * Frame Body{
+ * [Message Type (HSB Side Byte First, LSB Second) 2 Byte]
+ * [Frame Data]
+ * [CRC16 of entire frame (HSB Side Byte First, LSB Second) 2 Byte]
+ * }
  * 
  */
 namespace aruwlib
@@ -28,7 +36,7 @@ class DJISerial
         // PORT_UART1 = 0,
         PORT_UART2 = 1,
         PORT_UART6 = 2,
-    } Serial_Port;
+    } SerialPort;
 
     typedef enum
     {
@@ -36,7 +44,7 @@ class DJISerial
         WAITING_FOR_MESSAGE_LENGTH = 1,  // length of message (2-byte)
         WAITING_FOR_MESSAGE_DATA = 2,    // rest of data in packet [1-byte sequence num,
                                          // 1-byte CRC8, messageLength-byte message, 2-byte CRC16]
-    } Serial_Mode;
+    } SerialState;
 
     typedef struct{
         uint16_t type;
@@ -44,7 +52,7 @@ class DJISerial
         uint8_t* data;
     } Serial_Message_t;
 
-    typedef void (*SerialMessageHandler_t)(Serial_Message_t* message);
+    typedef void (*SerialMessageHandler_t)(const Serial_Message_t* message);
     /**
      * Construct a Serial object
      * @param port serial port to work on
@@ -52,7 +60,8 @@ class DJISerial
      * @param isRxCRCEnforcementEnabled if to enable Rx CRC Enforcement
      */
     DJISerial(
-        Serial_Port port, SerialMessageHandler_t messageHandler,
+        SerialPort port,
+        SerialMessageHandler_t messageHandler,
         bool isRxCRCEnforcementEnabled
     );
     ~DJISerial();
@@ -87,12 +96,6 @@ class DJISerial
     void disableRxCRCEnforcement();
 
     /**
-     * Get current Timestamp
-     * @return current Timestamp in ms
-    */
-    uint32_t getTimestamp();
-
-    /**
      * Get timestamp of last message sent
      * @return timestamp of last message sent in ms
     */
@@ -120,14 +123,14 @@ class DJISerial
     static const uint8_t FRAME_DATA_OFFSET = 7;
     static const uint8_t FRAME_CRC16_LENGTH = 2;
 
-    Serial_Port port;
+    SerialPort port;
 
     // tx/rx buffers
     uint8_t rxBuffer[SERIAL_RX_BUFF_SIZE];
     uint8_t txBuffer[SERIAL_TX_BUFF_SIZE];
 
     // state information
-    Serial_Mode currentMode;
+    SerialState currentMode;
 
     // data read from an incoming message header
     uint16_t currentExpectedMessageLength;
@@ -143,7 +146,7 @@ class DJISerial
     // message handler
     SerialMessageHandler_t handler;
 
-    void switchToMode(Serial_Mode new_mode);
+    void switchToMode(SerialState new_mode);
     bool processFrameHeader();
     bool processFrameData();
 

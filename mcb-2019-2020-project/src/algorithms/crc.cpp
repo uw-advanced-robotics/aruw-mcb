@@ -65,28 +65,28 @@ const uint16_t CRC16Table[256] =
 };
 
 
-uint8_t calculateCRC8(uint8_t *message, uint32_t messageLength, uint8_t CRC8) {
+uint8_t calculateCRC8(const uint8_t *message, uint32_t messageLength, uint8_t initCRC8) {
     if (message == NULL) {
-        return static_cast<uint8_t>(CRC8_INIT);
+        return initCRC8;
     }
     while (messageLength-- > 0) {
-        uint8_t curr_byte = CRC8 ^ (*message++);
-        CRC8 = CRC8Table[curr_byte];
+        uint8_t curr_byte = initCRC8 ^ (*message++);
+        initCRC8 = CRC8Table[curr_byte];
     }
-    return CRC8;
+    return initCRC8;
 }
 
-uint16_t calculateCRC16(uint8_t *message, uint32_t messageLength, uint16_t CRC16) {
+uint16_t calculateCRC16(const uint8_t *message, uint32_t messageLength, uint16_t initCRC16) {
     if (message == NULL) {
-        return CRC16_INIT;
+        return initCRC16;
     }
     while(messageLength-- > 0) {
         uint8_t curr_byte = *message++;
-        CRC16 = (static_cast<uint16_t>(CRC16) >> 8)
-            ^ CRC16Table[(static_cast<uint16_t>(CRC16)
+        initCRC16 = (static_cast<uint16_t>(initCRC16) >> 8)
+            ^ CRC16Table[(static_cast<uint16_t>(initCRC16)
             ^ static_cast<uint16_t>(curr_byte)) & 0x00ff];
     }
-    return CRC16;
+    return initCRC16;
 }
 
 }  // namespace math
