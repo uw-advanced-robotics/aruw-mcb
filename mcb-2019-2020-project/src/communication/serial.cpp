@@ -189,10 +189,11 @@ bool DJISerial::send(const Serial_Message_t* message) {
 void DJISerial::enableRxCRCEnforcement() {
     rxCRCEnforcementEnabled = true;
 }
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 void DJISerial::disableRxCRCEnforcement() {
     rxCRCEnforcementEnabled = false;
 }
-
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 bool DJISerial::periodicTask(Serial_Message_t* message) {
     uint8_t data;
     while (read(&data, 1))
@@ -214,7 +215,7 @@ bool DJISerial::periodicTask(Serial_Message_t* message) {
     }
     return false;
 }
-
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 uint32_t DJISerial::getTimestamp() {
     return modm::Clock::now().getTime();
 }
@@ -258,7 +259,7 @@ void DJISerial::initialize() {
 uint8_t DJISerial::getTxSequenceNumber() {
     return this->txSequenceNumber;
 }
-
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 uint32_t DJISerial::getLastTxMessageTimestamp() {
     return this->lastTxMessageTimestamp;
 }
