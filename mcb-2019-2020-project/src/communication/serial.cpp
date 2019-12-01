@@ -23,9 +23,7 @@ rxSequenceNumber(0),
 CRC8(0),
 CRC16(0),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled)
-{
-
-}
+{}
 
 DJISerial::~DJISerial() {
 }
@@ -82,12 +80,12 @@ bool DJISerial::processFrameHeader() {
 
     currentExpectedMessageLength = (rxBuffer[FRAME_DATA_LENGTH_OFFSET + 1] << 8)
         | rxBuffer[FRAME_DATA_LENGTH_OFFSET];
-    
     rxSequenceNumber = rxBuffer[FRAME_SEQUENCENUM_OFFSET];
     CRC8 = rxBuffer[FRAME_CRC8_OFFSET];
     // Check if the messageLength is small than size of buffer
     if (currentExpectedMessageLength == 0 ||
-    currentExpectedMessageLength >= SERIAL_RX_BUFF_SIZE - (FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH)) {
+    currentExpectedMessageLength >=
+    SERIAL_RX_BUFF_SIZE - (FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH)) {
         return false;
     }
 
@@ -100,9 +98,8 @@ bool DJISerial::processFrameHeader() {
     }
 
     currentExpectedMessageLength = 0;
-    return false;    
+    return false;
 }
-
 
 bool DJISerial::processFrameData() {
     // get the rest of the packet (1-byte sequence, 1-byte CRC8, 2-byte
@@ -132,7 +129,7 @@ bool DJISerial::processFrameData() {
             return false;
         }
     }
-    
+
     // CRC checking is enabled and CRC8/CRC16 were valid
     Serial_Message_t message;
     message.length = currentExpectedMessageLength;
@@ -142,7 +139,6 @@ bool DJISerial::processFrameData() {
     lastRxMessageTimestamp = modm::Clock::now().getTime();
     handler(&message);
     return true;
-
 }
 
 bool DJISerial::send(const Serial_Message_t* message) {
