@@ -18,8 +18,8 @@ namespace control
         // Ensure the requirement you are trying to add is not already a
         // command requirement.
         if (requirement != nullptr &&
-            commandRequirements.find(requirement) == commandRequirements.end())
-        {
+            commandRequirements.find(requirement) == commandRequirements.end()
+        ) {
             commandRequirements.insert(requirement);
         }
     }
