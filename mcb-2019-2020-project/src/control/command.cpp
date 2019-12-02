@@ -1,5 +1,5 @@
 #include "src/control/command.hpp"
-#include "src/control/scheduler.hpp"
+#include "src/control/command_scheduler.hpp"
 
 using namespace std;
 
@@ -8,27 +8,23 @@ namespace aruwlib
 
 namespace control
 {
-    bool Command::hasRequirement(const Subsystem* requirement) const
+    bool Command::hasRequirement(Subsystem* requirement) const
     {
         return commandRequirements.find(requirement) != commandRequirements.end();
     }
 
-    void Command::addSubsystemRequirement(const Subsystem* requirement)
+    void Command::addSubsystemRequirement(Subsystem* requirement)
     {
         // Ensure the requirement you are trying to add is not already a
         // command requirement.
-        if (getRequirements().find(requirement) == getRequirements().end())
-        {
-            getRequirementsModifiable()->insert(requirement);
+        if (requirement != nullptr &&
+            commandRequirements.find(requirement) == commandRequirements.end()
+        ) {
+            commandRequirements.insert(requirement);
         }
     }
 
-    const set<const Subsystem*>& Command::getRequirements() const
-    {
-        return commandRequirements;
-    }
-
-    set<const Subsystem*>* Command::getRequirementsModifiable()
+    const set<Subsystem*>* Command::getRequirements()
     {
         return &commandRequirements;
     }

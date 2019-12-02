@@ -22,6 +22,8 @@
 #ifndef __SUBSYSTEM_HPP__
 #define __SUBSYSTEM_HPP__
 
+#include <rm-dev-board-a/board.hpp>
+
 #include <modm/container/smart_pointer.hpp>
 
 namespace aruwlib
@@ -46,7 +48,7 @@ class Subsystem {
      *
      * @param defaultCommand the default command to associate with this subsystem
      */
-    void SetDefaultCommand(const modm::SmartPointer& defaultCommand);
+    void setDefaultCommand(modm::SmartPointer defaultCommand);
 
     /**
      * Gets the default command for this subsystem. Returns null if no default
@@ -54,7 +56,7 @@ class Subsystem {
      *
      * @return the default command associated with this subsystem
      */
-    modm::SmartPointer GetDefaultCommand(void) const;
+    modm::SmartPointer getDefaultCommand(void) const;
 
     /**
      * Called in the scheduler's run method assuming this command
@@ -64,8 +66,11 @@ class Subsystem {
      * subsystem). This method should not contain command specific
      * control code. When you create a subclass of Subsystem, you
      * should overwrite this virtual method.
+     * 
+     * Must be virtual otherwise scheduler will refer to this method
+     * rather than looking in child for this method.
      */
-    virtual void refresh(void) = 0;
+    virtual void refresh(void);
 
  private:
     modm::SmartPointer defaultCommand;

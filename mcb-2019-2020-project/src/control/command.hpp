@@ -4,7 +4,7 @@
  * A generic extendable class for implementing a command. Each 
  * command is attached to a subsystem. To create a new command,
  * extend the Command class and instantiate the virtual functions
- * in this class. See example-command.hpp for example of this.
+ * in this class. See example_command.hpp for example of this.
  */
 
 #ifndef __COMMAND_HPP__
@@ -39,7 +39,7 @@ class Command {
      *
      * @return the set of subsystems that are required
      */
-    const std::set<const Subsystem*>& getRequirements() const;
+    const std::set<Subsystem*>* getRequirements();
 
     /**
      * Whether the command requires a given subsystem.  Named "hasRequirement"
@@ -48,12 +48,12 @@ class Command {
      * @param requirement the subsystem to inquire about
      * @return whether the subsystem is required
      */
-    bool hasRequirement(const Subsystem* requirement) const;
+    bool hasRequirement(Subsystem* requirement) const;
 
     /**
      * Adds the required subsystem to a list of required subsystems
      */
-    void addSubsystemRequirement(const Subsystem* requirement);
+    void addSubsystemRequirement(Subsystem* requirement);
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -89,19 +89,10 @@ class Command {
  private:
     friend class CommandScheduler;
 
-    // initial size of commandRequirements
-    const int SUBSYSTEM_REQUIREMENT_LIST_SIZE = 5;
-
     uint32_t prevSchedulerExecuteTimestamp;
 
     // contains pointers to const Subsystem pointers that this command requires
-    std::set<const Subsystem*> commandRequirements;
-
-    /**
-     * An internal helper method that returns the contents of the
-     * commandRequirements smart pointer in a modifiable form
-     */
-    std::set<const Subsystem*>* getRequirementsModifiable(void);
+    std::set<Subsystem*> commandRequirements;
 };
 
 }  // namespace control

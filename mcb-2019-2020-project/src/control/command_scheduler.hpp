@@ -17,8 +17,6 @@
 #define __SCHEDULER_HPP__
 
 #include <map>
-#include <set>
-#include <modm/container/linked_list.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include "rm-dev-board-a/board.hpp"
 #include "src/control/command.hpp"
@@ -34,7 +32,7 @@ class CommandScheduler
  public:
     static void run(void);
 
-    void removeCommand(modm::SmartPointer command);
+    static void removeCommand(modm::SmartPointer command);
 
     static bool registerSubsystem(Subsystem* subsystem);
 
@@ -48,9 +46,11 @@ class CommandScheduler
 
     static const modm::SmartPointer defaultNullCommand;
 
-    static Command* getCmdPtr(modm::SmartPointer smrtPtr);
+    static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
 
  private:
+    static const float MAX_ALLOWABLE_SCHEDULER_RUNTIME;
+
     static std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
 
     static uint32_t commandSchedulerTimestamp;
