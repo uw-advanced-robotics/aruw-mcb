@@ -20,7 +20,8 @@ namespace control
         agitatorCalibrationAngle(0.0f),
         agitatorIsCalibrated(false),
         agitatorJammedTimeout(agitatorJamTimeout),
-        agitatorJammedTimeoutPeriod(agitatorJamTimeout)
+        agitatorJammedTimeoutPeriod(agitatorJamTimeout),
+        agitatorGearRatio(gearRatio)
     {
         agitatorJammedTimeout.stop();
     }
@@ -63,7 +64,7 @@ namespace control
             return false;
         }
         agitatorCalibrationAngle = (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) *
-            agitatorMotor.encStore.getEncoderUnwrapped();
+            agitatorMotor.encStore.getEncoderUnwrapped() / agitatorGearRatio;
         agitatorIsCalibrated = true;
         return true;
     }
@@ -75,7 +76,7 @@ namespace control
             return 0.0f;
         }
         return (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) * agitatorMotor.encStore.getEncoderUnwrapped()
-            - agitatorCalibrationAngle;
+            / agitatorGearRatio - agitatorCalibrationAngle;
     }
 
     void AgitatorSubsystem::setAgitatorAngle(float newAngle)

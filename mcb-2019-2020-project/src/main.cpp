@@ -68,7 +68,7 @@ int main()
         {
             t.restart(2);
             aruwlib::control::CommandScheduler::run();
-            // aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
         // do this as fast as you can
