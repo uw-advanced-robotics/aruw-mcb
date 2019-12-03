@@ -99,7 +99,7 @@ namespace control
                 if (currCommand->isFinished())
                 {
                     currCommand->end(false);
-                    currSubsystemCommandPair.second = 0;
+                    currSubsystemCommandPair.second = defaultNullCommand;
                 }
             }
             // refresh subsystem

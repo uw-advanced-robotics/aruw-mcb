@@ -37,7 +37,7 @@ int main()
     // add commands when necessary
     // aruwlib::control::CommandScheduler::addCommand(rotateAgitator);
 
-    bool prevRead = false;
+    aruwlib::control::CommandScheduler::registerSubsystem(&agitator17mm);
 
     modm::ShortPeriodicTimer t(2);
 
@@ -47,17 +47,28 @@ int main()
         modm::delayMilliseconds(1);
     }
 
+    bool pressed = false;
+
     while (1)
     {
         f = agitator17mm.getAgitatorEncoderToPosition();
         aruwlib::can::CanRxHandler::pollCanData();
+
+        if (!pressed && Board::Button::read())
+        {
+            modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, PI));
+            aruwlib::control::CommandScheduler::addCommand(rotateCommand);
+            // agitator17mm.agitatorCalibrateHere();
+        }
+
+        pressed = Board::Button::read();
 
         // run scheduler
         if (t.execute())
         {
             t.restart(2);
             aruwlib::control::CommandScheduler::run();
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            // aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
         // do this as fast as you can

@@ -13,7 +13,7 @@ namespace aruwsrc
 namespace control
 {
 
-class AgitatorSubsystem : aruwlib::control::Subsystem {
+class AgitatorSubsystem : public aruwlib::control::Subsystem {
  public:
     AgitatorSubsystem(uint16_t gearRatio,
        int agitatorJamTimeout = DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD);
@@ -36,9 +36,9 @@ class AgitatorSubsystem : aruwlib::control::Subsystem {
 
  private:
     static const int DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD;
-    const float PID_P = 70000.0f;
+    const float PID_P = 7000.0f;
     const float PID_I = 0.0f;
-    const float PID_D = 1000000.0f;
+    const float PID_D = 100000.0f;
     const float PID_MAX_ERR_SUM = 0.0f;
     const float PID_MAX_OUT = 16000.0f;
 

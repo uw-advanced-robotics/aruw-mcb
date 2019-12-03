@@ -51,8 +51,8 @@ void AgitatorUnjamCommand::execute()
             connectedAgitator->setAgitatorAngle(currAgitatorUnjamAngle);
             if (
                 agitatorUnjamRotateTimeout.isExpired() ||
-                fabs(connectedAgitator->getAgitatorEncoderToPosition() -
-                connectedAgitator->getAgitatorDesiredAngle()) < agitatorSetpointTolerance
+                fabs(static_cast<double>(connectedAgitator->getAgitatorEncoderToPosition() -
+                connectedAgitator->getAgitatorDesiredAngle())) < static_cast<double>(agitatorSetpointTolerance)
             ) {
                 // define a random time that the agitator will take to unjam.
                 modm::ShortTimestamp randomUnjamTime = (rand() % agitatorMaxWaitTime + MIN_AGITATOR_MAX_WAIT_TIME)
@@ -72,8 +72,8 @@ void AgitatorUnjamCommand::execute()
                 currUnjamstate = AGITATOR_UNJAM_BACK;
             }
             else if (
-                fabs(connectedAgitator->getAgitatorEncoderToPosition() -
-                connectedAgitator->getAgitatorDesiredAngle()) < agitatorSetpointTolerance
+                fabs(static_cast<double>(connectedAgitator->getAgitatorEncoderToPosition() -
+                connectedAgitator->getAgitatorDesiredAngle())) < static_cast<double>(agitatorSetpointTolerance)
             ) {
                 currUnjamstate = FINISHED;
             }
