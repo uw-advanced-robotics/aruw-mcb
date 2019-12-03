@@ -31,8 +31,8 @@ void AgitatorUnjamCommand::initialize()
     agitatorUnjamRotateTimeout.restart(randomUnjamTime);
 
     // define a random unjam angle
-    currAgitatorUnjamAngle = fmod((fmod(static_cast<float>(rand()), agitatorUnjamAngleMax) +
-        MIN_AGITATOR_UNJAM_ANGLE), agitatorUnjamAngleMax);
+    currAgitatorUnjamAngle = fmod((fmod(static_cast<double>(rand()), static_cast<double>(agitatorUnjamAngleMax +
+        MIN_AGITATOR_UNJAM_ANGLE))), static_cast<double>(agitatorUnjamAngleMax));
 
     // subtract this angle from the current angle
     currAgitatorUnjamAngle -= connectedAgitator->getAgitatorEncoderToPosition();

@@ -16,7 +16,6 @@ namespace control
     AgitatorSubsystem::AgitatorSubsystem(uint16_t gearRatio, int agitatorJamTimeout) :
         agitatorPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM, PID_MAX_OUT),
         agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS),
-        agitatorGearRatio(gearRatio),
         desiredAgitatorAngle(0.0f),
         agitatorCalibrationAngle(0.0f),
         agitatorIsCalibrated(false),
@@ -57,15 +56,16 @@ namespace control
         agitatorMotor.setDesiredOutput(agitatorPositionPid.getValue());
     }
 
-    void AgitatorSubsystem::agitatorCalibrateHere()
+    bool AgitatorSubsystem::agitatorCalibrateHere()
     {
         if (!agitatorMotor.isMotorOnline())
         {
-            return;
+            return false;
         }
         agitatorCalibrationAngle = (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) *
-            agitatorMotor.encStore.getEncoderUnwrapped() / static_cast<float>(agitatorGearRatio);
+            agitatorMotor.encStore.getEncoderUnwrapped();
         agitatorIsCalibrated = true;
+        return true;
     }
 
     float AgitatorSubsystem::getAgitatorEncoderToPosition() const
@@ -74,8 +74,8 @@ namespace control
         {
             return 0.0f;
         }
-        return (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) * agitatorMotor.encStore.getEncoderUnwrapped() /
-            static_cast<float>(agitatorGearRatio) - agitatorCalibrationAngle;
+        return (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) * agitatorMotor.encStore.getEncoderUnwrapped()
+            - agitatorCalibrationAngle;
     }
 
     void AgitatorSubsystem::setAgitatorAngle(float newAngle)

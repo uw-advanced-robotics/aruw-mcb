@@ -26,7 +26,7 @@ class AgitatorSubsystem : aruwlib::control::Subsystem {
 
     float getAgitatorDesiredAngle(void) const;
 
-    void agitatorCalibrateHere(void);
+    bool agitatorCalibrateHere(void);
 
     void armAgitatorUnjamTimer(void);
 
@@ -48,8 +48,6 @@ class AgitatorSubsystem : aruwlib::control::Subsystem {
     modm::Pid<float> agitatorPositionPid;
 
     aruwlib::motor::DjiMotor agitatorMotor;
-
-    uint16_t agitatorGearRatio;
 
     float desiredAgitatorAngle;
 

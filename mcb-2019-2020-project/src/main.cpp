@@ -9,10 +9,8 @@
 #include "src/communication/can/can_rx_listener.hpp"
 #include "src/aruwsrc/control/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator_rotate_command.hpp"
-
+#include "src/algorithms/math_user_utils.hpp"
 #include <modm/processing/timer.hpp>
-
-modm::ShortPeriodicTimer t(2);
 
 using namespace aruwsrc::control;
 
@@ -25,7 +23,6 @@ float f = 0.0f;
 
 using namespace std;
 
-
 aruwsrc::control::ExampleCommand* commandWatch;
 
 int main()
@@ -33,14 +30,22 @@ int main()
     Board::initialize();
 
     // create new commands
-    modm::SmartPointer rotateAgitator(
-        new AgitatorRotateCommand(&agitator17mm, PI / 2.0f)
-    );
+    // modm::SmartPointer rotateAgitator(
+    //     new AgitatorRotateCommand(&agitator17mm, PI / 2.0f)
+    // );
 
     // add commands when necessary
-    aruwlib::control::CommandScheduler::addCommand(rotateAgitator);
+    // aruwlib::control::CommandScheduler::addCommand(rotateAgitator);
 
     bool prevRead = false;
+
+    modm::ShortPeriodicTimer t(2);
+
+    while (!agitator17mm.agitatorCalibrateHere())
+    {
+        aruwlib::can::CanRxHandler::pollCanData();
+        modm::delayMilliseconds(1);
+    }
 
     while (1)
     {
@@ -50,6 +55,7 @@ int main()
         // run scheduler
         if (t.execute())
         {
+            t.restart(2);
             aruwlib::control::CommandScheduler::run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
