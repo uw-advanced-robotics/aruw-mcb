@@ -18,13 +18,16 @@ namespace aruwlib
          * Further it allows for recieving and storing a valid can message, i.e. a message
          * with valid id
          */
-        class CanBluepill: public CanRxListner { ;
+        class CanBluepill: public CanRxListner {
             public:
             
             /** Creates a can object with given id 
              * Calls attachReceiveHandler to add to list of on recieve functions
              */
-            CanBluepill(uint32_t id); 
+            CanBluepill(uint32_t id) : CanRxListner(static_cast<uint32_t>(id), CanBus::CAN_BUS1)
+            {
+                mcbMessage.setExtended(false); 
+            } 
             
             /** This function recives a can message and if the id is valid
             * stores the message in the global can message
@@ -49,12 +52,11 @@ namespace aruwlib
 
             /** Packs the msg.bug[] with the given int byte by byte in little endian
              */ 
-            void packArray(int16_t x, int byteSize, int startingIndex);//packs arrays
-
-        }
+            void packArray(int16_t x, modm::can::Message* message);
+        };
 
     }
 
 }
 
-
+#endif
