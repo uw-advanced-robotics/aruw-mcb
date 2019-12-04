@@ -81,9 +81,6 @@ modm::Pid<T, ScaleFactor>::update(const T& input, bool externalLimitation)
 	tmp += static_cast<WideType>(this->parameter.ki) * (tempErrorSum);
 	tmp += static_cast<WideType>(this->parameter.kd) * (input - this->lastError);
 
-	this->ffff = this->parameter.kp * input;
-	this->fffff =  input - this->lastError;
-
 	tmp = tmp / ScaleFactor;
 
 	if (tmp > this->parameter.maxOutput) {
