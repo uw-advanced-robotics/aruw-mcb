@@ -5,7 +5,7 @@
 namespace aruwlib
 {
 
-namespace math
+namespace algorithms
 {
 
 const uint8_t CRC8Table[256] =
@@ -70,8 +70,8 @@ uint8_t calculateCRC8(const uint8_t *message, uint32_t messageLength, uint8_t in
         return initCRC8;
     }
     while (messageLength-- > 0) {
-        uint8_t curr_byte = initCRC8 ^ (*message++);
-        initCRC8 = CRC8Table[curr_byte];
+        uint8_t currByte = initCRC8 ^ (*message++);
+        initCRC8 = CRC8Table[currByte];
     }
     return initCRC8;
 }
@@ -81,14 +81,14 @@ uint16_t calculateCRC16(const uint8_t *message, uint32_t messageLength, uint16_t
         return initCRC16;
     }
     while(messageLength-- > 0) {
-        uint8_t curr_byte = *message++;
-        initCRC16 = (static_cast<uint16_t>(initCRC16) >> 8)
-            ^ CRC16Table[(static_cast<uint16_t>(initCRC16)
-            ^ static_cast<uint16_t>(curr_byte)) & 0x00ff];
+        uint8_t currByte = *message++;
+        initCRC16 = (initCRC16 >> 8)
+            ^ CRC16Table[(initCRC16
+            ^ static_cast<uint16_t>(currByte)) & 0x00ff];
     }
     return initCRC16;
 }
 
-}  // namespace math
+}  // namespace algorithms
 
 }  // namespace aruwlib

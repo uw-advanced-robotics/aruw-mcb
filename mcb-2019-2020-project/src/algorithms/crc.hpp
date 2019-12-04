@@ -6,7 +6,7 @@
 namespace aruwlib
 {
 
-namespace math
+namespace algorithms
 {
 
 #define CRC8_INIT 0xff
@@ -15,7 +15,7 @@ namespace math
 uint8_t calculateCRC8(const uint8_t *message, uint32_t messageLength, uint8_t initCRC8);
 uint16_t calculateCRC16(const uint8_t *message, uint32_t messageLength, uint16_t initCRC16);
 
-}  // namespace math
+}  // namespace algorithms
 
 }  // namespace aruwlib
 
