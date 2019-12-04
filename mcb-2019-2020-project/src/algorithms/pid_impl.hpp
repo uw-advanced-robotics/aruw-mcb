@@ -15,7 +15,8 @@
 #ifndef __PID_IMPL_HPP__
 #define __PID_IMPL_HPP__
 
-#include <modm/architecture/interface/clock.hpp>
+#include <utility>
+#include <modm/platform/clock/rcc.hpp>
 
 namespace aruwlib
 {
@@ -60,7 +61,7 @@ void Pid<T, ScaleFactor>::reset()
     this->errorSum = 0;
     this->lastError = 0;
     this->output = 0;
-    this->lastTime = modm::Clock::now();
+    this->lastTime = DWT->CYCCNT;
 }
 
 template<typename T, unsigned int ScaleFactor>
@@ -86,8 +87,11 @@ void Pid<T, ScaleFactor>::update(const T& input, bool externalLimitation)
     WideType tmp = 0;
 
     // Main difference between modm::Pid and our Pid, we add a time element
-    modm::Timestamp currTime = modm::Clock::now();
-    uint32_t dt = (currTime.getTime() - this->lastTime.getTime());
+    uint32_t currTime = DWT->CYCCNT;
+    uint32_t dt = (
+        currTime < this->lastTime ?
+        0xffffffff - this->lastTime + currTime :
+        currTime - this->lastTime) / static_cast<float>(modm::clock::fcpu_kHz);
 
     tmp += static_cast<WideType>(this->parameter.kp) * input;
     tmp += static_cast<WideType>(this->parameter.ki * dt) * (tempErrorSum);

@@ -21,9 +21,7 @@
 
 #include <modm/math/utils/arithmetic_traits.hpp>
 
-#include "../modm/src/modm/math/filter.hpp"
-
-#include <modm/processing/timer/timestamp.hpp>
+#include <modm/src/modm/math/filter.hpp>
 
 namespace aruwlib
 {
@@ -53,11 +51,6 @@ namespace algorithms
      * pid.update(v_target - v_input);
      * pwm = pid.getValue();
      * \endcode
-     *
-     * \todo	use the faster avr::mul and avr::mac functions
-     *
-     * \author	Fabian Greif
-     * \ingroup	modm_math_filter
      */
 template<typename T, unsigned int ScaleFactor = 1>
 class Pid
@@ -184,7 +177,7 @@ class Pid
 
  private:
     Parameter parameter;
-    modm::Timestamp lastTime;
+    uint32_t lastTime;
     T errorSum;
     T lastError;
     T output;

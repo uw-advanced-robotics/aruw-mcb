@@ -14,7 +14,7 @@
 #ifndef __SUBSYSTEM_EXAMPLE_HPP__
 #define __SUBSYSTEM_EXAMPLE_HPP__
 
-#include <modm/math/filter/pid.hpp>
+#include "src/algorithms/pid.hpp"
 #include "command_scheduler.hpp"
 #include "src/control/subsystem.hpp"
 #include "src/motor/dji_motor.hpp"
@@ -59,14 +59,14 @@ class ExampleSubsystem : public Subsystem
 
     aruwlib::motor::DjiMotor rightWheel;
 
-    modm::Pid<float> velocityPidLeftWheel;
+    aruwlib::algorithms::Pid<float> velocityPidLeftWheel;
 
-    modm::Pid<float> velocityPidRightWheel;
+    aruwlib::algorithms::Pid<float> velocityPidRightWheel;
 
     float desiredRpm;
 
     void updateMotorRpmPid(
-        modm::Pid<float>* pid,
+        aruwlib::algorithms::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
         float desiredRpm
     );
