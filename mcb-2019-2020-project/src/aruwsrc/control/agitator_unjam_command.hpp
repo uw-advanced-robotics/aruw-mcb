@@ -19,8 +19,8 @@ public:
     AgitatorUnjamCommand(
         AgitatorSubsystem* agitator,
         float agitatorMaxUnjamAngle,
-        uint32_t agitatorMaxWaitTime,
-        float setpointTolerance
+        uint32_t agitatorMaxWaitTime = AGITATOR_MAX_WAIT_TIME,
+        float setpointTolerance = agitatorSetpointToleranceDefault
     );
 
     /**
@@ -52,13 +52,15 @@ public:
     bool isFinished(void) const;
 
 private:
+    static const float agitatorSetpointToleranceDefault;
+
+    static const uint32_t AGITATOR_MAX_WAIT_TIME;  // in ms
+
+    static const float MIN_AGITATOR_UNJAM_ANGLE;
+
     enum AgitatorUnjamState {AGITATOR_UNJAM_BACK, AGITATOR_UNJAM_FORWARD, FINISHED};
 
     AgitatorUnjamState currUnjamstate;
-
-    const uint32_t MIN_AGITATOR_MAX_WAIT_TIME = 20;
-
-    const float MIN_AGITATOR_UNJAM_ANGLE = PI / 8;
 
     // time allowed to rotate back the the currAgitatorUnjamAngle
     modm::ShortTimeout agitatorUnjamRotateTimeout;
@@ -74,8 +76,6 @@ private:
     float currAgitatorUnjamAngle;
 
     float agitatorSetpointBeforeUnjam;
-
-    bool unjamComplete;
 };
 
 }  // namespace control

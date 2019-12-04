@@ -11,7 +11,7 @@ namespace aruwsrc
 
 namespace control
 {
-    const int AgitatorSubsystem::DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD = 100;
+    const int AgitatorSubsystem::DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD = 50;
 
     AgitatorSubsystem::AgitatorSubsystem(uint16_t gearRatio, int agitatorJamTimeout) :
         agitatorPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM, PID_MAX_OUT),
@@ -38,7 +38,7 @@ namespace control
 
     bool AgitatorSubsystem::isAgitatorJammed()
     {
-        return agitatorJammedTimeout.isArmed() &&  agitatorJammedTimeout.isExpired();
+        return agitatorJammedTimeout.isExpired();
     }
 
     void AgitatorSubsystem::refresh()

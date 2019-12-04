@@ -81,10 +81,7 @@ class Command {
      *
      * @return whether the command has finished.
      */
-    virtual bool isFinished(void) const
-    {
-       return false;
-    }
+    virtual bool isFinished(void) const = 0;
 
  private:
     friend class CommandScheduler;

@@ -14,18 +14,20 @@ namespace control
 ShootComprisedCommand::ShootComprisedCommand(
     AgitatorSubsystem* agitator,
     float agitatorChangeAngle,
-    float maxUnjamAngle,
-    uint32_t maxUnjamWaitTime,
-    float unjamSetpointTolerance
+    float maxUnjamAngle
     ) : connectedAgitator(agitator),
     agitatorRotateCommand(new AgitatorRotateCommand(agitator, agitatorChangeAngle)),
-    agitatorUnjamCommand(new AgitatorUnjamCommand(agitator, maxUnjamAngle, maxUnjamWaitTime, unjamSetpointTolerance)),
+    agitatorUnjamCommand(new AgitatorUnjamCommand(agitator, maxUnjamAngle)),
     unjamSequenceCommencing(false)
-{}
-
+{
+    this->addSubsystemRequirement(reinterpret_cast<Subsystem*>(agitator));
+}
+uint32_t timeI = 0;
 void ShootComprisedCommand::initialize()
 {
+    timeI = modm::Clock::now().getTime();
     CommandScheduler::smrtPtrCommandCast(agitatorRotateCommand)->initialize();
+    unjamSequenceCommencing = false;
 }
 
 void ShootComprisedCommand::execute()
@@ -50,8 +52,11 @@ void ShootComprisedCommand::execute()
     }
 }
 
+uint32_t timeF = 0;
+
 void ShootComprisedCommand::end(bool interrupted)
 {
+    timeF = modm::Clock::now().getTime() - timeI;
     if (unjamSequenceCommencing)
     {
         CommandScheduler::smrtPtrCommandCast(agitatorUnjamCommand)->end(interrupted);

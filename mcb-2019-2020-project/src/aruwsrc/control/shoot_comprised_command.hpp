@@ -16,9 +16,7 @@ public:
     ShootComprisedCommand(
         AgitatorSubsystem* agitator,
         float agitatorChangeAngle,
-        float maxUnjamAngle,
-        uint32_t maxUnjamWaitTime,
-        float unjamSetpointTolerance
+        float maxUnjamAngle
     );
 
     /**

@@ -11,33 +11,23 @@
 #include "src/aruwsrc/control/agitator_rotate_command.hpp"
 #include "src/algorithms/math_user_utils.hpp"
 #include <modm/processing/timer.hpp>
+#include "src/aruwsrc/control/shoot_comprised_command.hpp"
+#include "src/aruwsrc/control/agitator_unjam_command.hpp"
 
 using namespace aruwsrc::control;
 
-// ExampleSubsystem frictionWheelSubsystem;
 AgitatorSubsystem agitator17mm(36);
-
-aruwlib::motor::DjiMotor* m3;
-
-float f = 0.0f;
-
-using namespace std;
-
-aruwsrc::control::ExampleCommand* commandWatch;
+ExampleSubsystem frictionWheelSubsystem;
 
 int main()
 {
     Board::initialize();
 
-    // create new commands
-    // modm::SmartPointer rotateAgitator(
-    //     new AgitatorRotateCommand(&agitator17mm, PI / 2.0f)
-    // );
-
-    // add commands when necessary
-    // aruwlib::control::CommandScheduler::addCommand(rotateAgitator);
+    modm::SmartPointer spinFrictionWheelCommand(new ExampleCommand(&frictionWheelSubsystem));
+    frictionWheelSubsystem.setDefaultCommand(spinFrictionWheelCommand);
 
     aruwlib::control::CommandScheduler::registerSubsystem(&agitator17mm);
+    CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
 
     modm::ShortPeriodicTimer t(2);
 
@@ -49,16 +39,17 @@ int main()
 
     bool pressed = false;
 
+    modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, PI));
+    modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, PI / 5));
+    modm::SmartPointer shootCommand(new ShootComprisedCommand(&agitator17mm, PI / 5, PI / 2));
+
     while (1)
     {
-        f = agitator17mm.getAgitatorEncoderToPosition();
         aruwlib::can::CanRxHandler::pollCanData();
 
-        if (!pressed && Board::Button::read())
+        if (Board::Button::read() && !pressed)
         {
-            modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, PI));
-            aruwlib::control::CommandScheduler::addCommand(rotateCommand);
-            // agitator17mm.agitatorCalibrateHere();
+            aruwlib::control::CommandScheduler::addCommand(shootCommand);
         }
 
         pressed = Board::Button::read();

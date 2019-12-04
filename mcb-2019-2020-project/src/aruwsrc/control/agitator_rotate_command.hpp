@@ -19,7 +19,7 @@ class AgitatorRotateCommand : public aruwlib::control::Command
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
         float setpointTolerance = agitatorSetpointToleranceDefault,
-        float agitatorAngleIncrement = agitatorRampInc
+        float agitatorAngleIncrement = AGITATOR_RAMP_INC
     );
 
     /**
@@ -53,7 +53,7 @@ class AgitatorRotateCommand : public aruwlib::control::Command
  private:
     static const float agitatorSetpointToleranceDefault;
 
-    static const float agitatorRampInc;  // in radians
+    static const float AGITATOR_RAMP_INC;  // in radians
 
     AgitatorSubsystem* connectedAgitator;
 
