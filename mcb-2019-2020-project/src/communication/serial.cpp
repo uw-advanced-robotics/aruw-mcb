@@ -11,7 +11,7 @@ namespace serial
 
 DJISerial::DJISerial(
     SerialPort port,
-    SerialMessageHandler_t messageHandler,
+    SerialMessageHandler messageHandler,
     bool isRxCRCEnforcementEnabled
 ):
 port(port),
@@ -24,10 +24,6 @@ CRC8(0),
 CRC16(0),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled)
 {}
-
-DJISerial::~DJISerial() {
-}
-
 
 /**
  * Calculate CRC8 of given array and compare against expectedCRC8
@@ -62,7 +58,6 @@ bool DJISerial::verifyCRC16(uint8_t *data, uint32_t length, uint16_t expectedCRC
     actualCRC16 = aruwlib::algorithms::calculateCRC16(data, length, CRC16_INIT);
     return actualCRC16 == expectedCRC16;
 }
-
 
 bool DJISerial::processFrameHeader() {
     // First Byte is always the head byte (0xA5)
@@ -132,7 +127,7 @@ bool DJISerial::processFrameData() {
     }
 
     // CRC checking is enabled and CRC8/CRC16 were valid
-    Serial_Message_t message;
+    SerialMessage message;
     message.length = currentExpectedMessageLength;
     message.data = rxBuffer + FRAME_DATA_OFFSET;
     message.type = currentMessageType;
@@ -142,7 +137,7 @@ bool DJISerial::processFrameData() {
     return true;
 }
 
-bool DJISerial::send(const Serial_Message_t* message) {
+bool DJISerial::send(const SerialMessage* message) {
     txBuffer[0] = SERIAL_HEAD_BYTE;
     txBuffer[1] = message->length;
     txBuffer[2] = message->length >> 8;
@@ -151,25 +146,25 @@ bool DJISerial::send(const Serial_Message_t* message) {
     txBuffer[5] = message->type;
     txBuffer[6] = message->type >> 8;
 
-    uint8_t *next_tx_buff = &(txBuffer[7]);
+    uint8_t *nextTxBuff = &(txBuffer[7]);
 
-    if (next_tx_buff + message->length + FRAME_CRC16_LENGTH >= txBuffer + SERIAL_TX_BUFF_SIZE) {
+    if (nextTxBuff + message->length + FRAME_CRC16_LENGTH >= txBuffer + SERIAL_TX_BUFF_SIZE) {
         return false;
     }
     for (uint16_t i = 0; i < message->length; i++) {
-        *next_tx_buff = message->data[i];
-        next_tx_buff++;
+        *nextTxBuff = message->data[i];
+        nextTxBuff++;
     }
-    uint16_t CRC16_val = aruwlib::algorithms::calculateCRC16(
+    uint16_t CRC16Val = aruwlib::algorithms::calculateCRC16(
         txBuffer,
         FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + message->length, CRC16_INIT
     );
-    next_tx_buff[0] = CRC16_val;
-    next_tx_buff[1] = CRC16_val >> 8;
-    next_tx_buff += FRAME_CRC16_LENGTH;
-    uint32_t total_size = next_tx_buff - txBuffer;
-    uint32_t actual_length = this->write(txBuffer, total_size);
-    if (actual_length != total_size) {
+    nextTxBuff[0] = CRC16Val;
+    nextTxBuff[1] = CRC16Val >> 8;
+    nextTxBuff += FRAME_CRC16_LENGTH;
+    uint32_t totalSize = nextTxBuff - txBuffer;
+    uint32_t actualLength = this->write(txBuffer, totalSize);
+    if (actualLength != totalSize) {
         return false;
     }
     txSequenceNumber++;
@@ -186,7 +181,7 @@ void DJISerial::disableRxCRCEnforcement() {
     rxCRCEnforcementEnabled = false;
 }
 // cppcheck-suppress unusedFunction //TODO Remove lint suppression
-bool DJISerial::periodicTask(Serial_Message_t* message) {
+bool DJISerial::periodicTask(SerialMessage* message) {
     uint8_t data;
     while (read(&data, 1))
     {

@@ -50,9 +50,9 @@ class DJISerial
         uint16_t type;
         uint16_t length;
         uint8_t* data;
-    } Serial_Message_t;
+    } SerialMessage;
 
-    typedef void (*SerialMessageHandler_t)(const Serial_Message_t* message);
+    typedef void (*SerialMessageHandler)(const SerialMessage* message);
     /**
      * Construct a Serial object
      * @param port serial port to work on
@@ -61,7 +61,7 @@ class DJISerial
      */
     DJISerial(
         SerialPort port,
-        SerialMessageHandler_t messageHandler,
+        SerialMessageHandler messageHandler,
         bool isRxCRCEnforcementEnabled
     );
     ~DJISerial();
@@ -76,14 +76,14 @@ class DJISerial
      * @param message pointer to message to send
      * @return true if succeed, false if failed
     */
-    bool send(const Serial_Message_t* message);
+    bool send(const SerialMessage* message);
 
     /**
      * Update the port, read a message from rx buffer and decode it
      * @param message pointer to output message
      * @return true if has new message, false if not
     */
-    bool periodicTask(Serial_Message_t* message);
+    bool periodicTask(SerialMessage* message);
 
     /**
      * Enable RX CRC enforcement. Messages that don't pass CRC check will be ignored
@@ -144,7 +144,7 @@ class DJISerial
     uint16_t CRC16;
 
     // message handler
-    SerialMessageHandler_t handler;
+    SerialMessageHandler handler;
 
     void switchToMode(SerialState new_mode);
     bool processFrameHeader();
@@ -158,7 +158,7 @@ class DJISerial
 
     uint32_t lastTxMessageTimestamp;
 
-    Serial_Message_t lastRxMessage;
+    SerialMessage lastRxMessage;
     uint32_t lastRxMessageTimestamp;
 };
 
