@@ -3,14 +3,35 @@
 #include "src/communication/can/can_rx_handler.hpp"
 #include "src/communication/can/can_bluepill.hpp"
 #include <modm/platform/can/can_1.hpp>
+#include <modm/container/smart_pointer.hpp>
+#include <modm/processing/timer.hpp>
+
+#include "src/control/command_scheduler.hpp"
+#include "src/control/example_command.hpp"
+#include "src/control/example_subsystem.hpp"
+#include "src/motor/dji_motor_tx_handler.hpp"
+#include "src/communication/can/can_rx_listener.hpp"
 
 uint32_t i = 0;
 
 aruwlib::can::CanBluepill testBluePill(0x201);
+aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()
 {
     Board::initialize();
+
+    modm::SmartPointer testDefaultCommand(
+        new aruwsrc::control::ExampleCommand(&testSubsystem));
+
+    testSubsystem.setDefaultCommand(testDefaultCommand);
+
+    CommandScheduler::registerSubsystem(&testSubsystem);
+
+    // timers
+    // arbitrary, taken from last year since this send time doesn't overfill
+    // can bus
+    modm::ShortPeriodicTimer motorSendPeriod(3);
 
     while (1)
     {
@@ -27,7 +48,17 @@ int main()
         newMessage.identifier = 0x201; 
         newMessage.setExtended(false);
 
-        testBluePill.transferMessage(newMessage, 8, 1, 34, 45, 86, true); 
+        testBluePill.transferMessage(newMessage, 8, 12, 34, -43, -21, true); 
+        if (motorSendPeriod.execute())
+        {
+            aruwlib::control::CommandScheduler::run();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        }
+
+        // do this as fast as you can
+        aruwlib::can::CanRxHandler::pollCanData();
+
+        modm::delayMicroseconds(10);
     }
     return 0;
 }
