@@ -1,6 +1,6 @@
 #include <rm-dev-board-a/board.hpp>
 #include "dji_serial.hpp"
-#include "src/algorithms/crc.hpp"
+#include "src/aruwlib/algorithms/crc.hpp"
 
 namespace aruwlib
 {
