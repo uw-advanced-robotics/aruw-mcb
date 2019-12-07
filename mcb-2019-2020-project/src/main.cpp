@@ -1,29 +1,43 @@
 #include <rm-dev-board-a/board.hpp>
-// #include "communication/referee_comm.hpp"
-// #include "communication/cv_comm.hpp"
-#include "communication/serial/dji_serial.hpp"
-using namespace aruwlib;
-using namespace serial;
-// RefereeSystem::Game_Data_t game;
-// RefereeSystem::Robot_Data_t robot;
-// CVCommunication::CV_IMU_Data_t imu;
-// CVCommunication::CV_Turret_Aim_Data_t turrent;
-// CVCommunication::CV_Chassis_Data_t chassis;
-// void boom(CVCommunication::CV_Turret_Aim_Data_t* aaa) {}
+#include <modm/container/smart_pointer.hpp>
+#include <modm/processing/timer.hpp>
+
+#include "src/aruwlib/control/command_scheduler.hpp"
+#include "src/aruwsrc/control/example_command.hpp"
+#include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
+#include "src/aruwlib/communication/can/can_rx_listener.hpp"
+
+aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()
 {
     Board::initialize();
-    // RefereeSystem::initialize();
-    // CVCommunication::initialize(DJISerial::PORT_UART2, boom);
+
+    modm::SmartPointer testDefaultCommand(
+        new aruwsrc::control::ExampleCommand(&testSubsystem));
+
+    testSubsystem.setDefaultCommand(testDefaultCommand);
+
+    CommandScheduler::registerSubsystem(&testSubsystem);
+
+    // timers
+    // arbitrary, taken from last year since this send time doesn't overfill
+    // can bus
+    modm::ShortPeriodicTimer motorSendPeriod(3);
+
     while (1)
     {
-        // Board::Leds::toggle();
-        // CVCommunication::periodicTask(&imu, &chassis, &turrent);
-        // game = RefereeSystem::getGameData();
-        // robot = RefereeSystem::getRobotData();
-        // RefereeSystem::periodicTask();
-        modm::delayMilliseconds(5);
+        if (motorSendPeriod.execute())
+        {
+            aruwlib::control::CommandScheduler::run();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        }
+
+        // do this as fast as you can
+        aruwlib::can::CanRxHandler::pollCanData();
+
+        modm::delayMicroseconds(10);
     }
     return 0;
 }
