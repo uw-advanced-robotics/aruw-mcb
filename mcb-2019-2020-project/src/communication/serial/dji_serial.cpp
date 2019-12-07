@@ -1,8 +1,6 @@
-#include <stdint.h>
-#include <string.h>
-#include "serial.hpp"
 #include <rm-dev-board-a/board.hpp>
-#include "../algorithms/crc.hpp"
+#include "dji_serial.hpp"
+#include "src/algorithms/crc.hpp"
 
 namespace aruwlib
 {
@@ -16,13 +14,13 @@ DJISerial::DJISerial(
 ):
 port(port),
 currentExpectedMessageLength(0),
-handler(messageHandler),
 currentMessageType(0),
+rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled),
 txSequenceNumber(0),
 rxSequenceNumber(0),
 CRC8(0),
 CRC16(0),
-rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled)
+handler(messageHandler)
 {}
 
 /**
@@ -224,9 +222,11 @@ void DJISerial::initialize() {
     case PORT_UART2:
         Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
         Usart2::initialize<Board::SystemClock, 115200>();
+        break;
     case PORT_UART6:
         Usart6::connect<GpioG14::Tx, GpioG9::Rx>();
         Usart6::initialize<Board::SystemClock, 115200>();
+        break;
     default:
         break;
     }

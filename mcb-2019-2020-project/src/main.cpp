@@ -1,7 +1,7 @@
 #include <rm-dev-board-a/board.hpp>
 // #include "communication/referee_comm.hpp"
 // #include "communication/cv_comm.hpp"
-#include "communication/serial.hpp"
+#include "communication/serial/dji_serial.hpp"
 using namespace aruwlib;
 using namespace serial;
 // RefereeSystem::Game_Data_t game;

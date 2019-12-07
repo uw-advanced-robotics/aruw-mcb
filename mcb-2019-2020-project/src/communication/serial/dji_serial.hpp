@@ -6,8 +6,9 @@
 
 #define SERIAL_HEAD_BYTE 0xA5
 
+#include <modm/processing.hpp>
 #include <rm-dev-board-a/board.hpp>
-#include "modm/processing.hpp"
+
 /**
  * Structure of a Serial Message:
  * Frame Head{
