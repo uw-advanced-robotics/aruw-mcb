@@ -66,7 +66,8 @@ bool DJISerial::send(const SerialMessage* message) {
         txBuffer,
         FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + message->length, CRC16_INIT
     );
-
+    // At this time nextTxBuff points to end of frame data plus one
+    // Append CRC16 to end of frame data
     nextTxBuff[0] = CRC16Val;
     nextTxBuff[1] = CRC16Val >> 8;
     nextTxBuff += FRAME_CRC16_LENGTH;
