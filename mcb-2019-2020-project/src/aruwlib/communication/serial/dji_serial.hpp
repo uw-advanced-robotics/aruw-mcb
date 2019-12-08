@@ -1,11 +1,6 @@
 #ifndef __serial_h_
 #define __serial_h_
 
-#define SERIAL_RX_BUFF_SIZE 256
-#define SERIAL_TX_BUFF_SIZE 256
-
-#define SERIAL_HEAD_BYTE 0xA5
-
 #include <modm/processing.hpp>
 #include <rm-dev-board-a/board.hpp>
 
@@ -54,6 +49,7 @@ class DJISerial
     } SerialMessage;
 
     typedef void (*SerialMessageHandler)(const SerialMessage* message);
+
     /**
      * Construct a Serial object
      * @param port serial port to work on
@@ -65,55 +61,58 @@ class DJISerial
         SerialMessageHandler messageHandler,
         bool isRxCRCEnforcementEnabled
     );
-    ~DJISerial();
 
     /**
      * Initialize serial
-    */
+     */
     void initialize();
 
     /**
      * Send a Message
      * @param message pointer to message to send
      * @return true if succeed, false if failed
-    */
+     */
     bool send(const SerialMessage* message);
 
     /**
      * Update the port, read a message from rx buffer and decode it
      * @param message pointer to output message
      * @return true if has new message, false if not
-    */
+     */
     bool periodicTask(SerialMessage* message);
 
     /**
      * Enable RX CRC enforcement. Messages that don't pass CRC check will be ignored
-    */
+     */
     void enableRxCRCEnforcement();
 
     /**
      * Enable RX CRC enforcement. Messages that don't pass CRC check will not be ignored
-    */
+     */
     void disableRxCRCEnforcement();
 
     /**
      * Get timestamp of last message sent
      * @return timestamp of last message sent in ms
-    */
+     */
     uint32_t getLastTxMessageTimestamp();
 
     /**
      * Get timestamp of last message received
      * @return timestamp of last message sent in ms
-    */
+     */
     uint32_t getLastRxMessageTimestamp();
 
     /**
      * Get current Tx message sequence Number
      * @return current Tx message sequence Number
-    */
+     */
     uint8_t getTxSequenceNumber();
+
  private:
+    static const int16_t SERIAL_RX_BUFF_SIZE = 256;
+    static const int16_t SERIAL_TX_BUFF_SIZE = 256;
+    static const int16_t SERIAL_HEAD_BYTE = 0xA5;
     static const uint8_t FRAME_SOF_OFFSET = 0;
     static const uint8_t FRAME_DATA_LENGTH_OFFSET = 1;
     static const uint8_t FRAME_SEQUENCENUM_OFFSET = 3;
@@ -147,20 +146,22 @@ class DJISerial
     // message handler
     SerialMessageHandler handler;
 
-    void switchToMode(SerialState new_mode);
+    uint32_t lastTxMessageTimestamp;
+    SerialMessage lastRxMessage;
+
+    uint32_t lastRxMessageTimestamp;
+
     bool processFrameHeader();
+
     bool processFrameData();
 
-    uint32_t read(uint8_t *data, uint16_t length);
-    uint32_t write(const uint8_t *data, uint16_t length);
-
     bool verifyCRC16(uint8_t *message, uint32_t messageLength, uint16_t expectedCRC16);
+
     bool verifyCRC8(uint8_t *message, uint32_t messageLength, uint8_t expectedCRC8);
 
-    uint32_t lastTxMessageTimestamp;
+    uint32_t read(uint8_t *data, uint16_t length);
 
-    SerialMessage lastRxMessage;
-    uint32_t lastRxMessageTimestamp;
+    uint32_t write(const uint8_t *data, uint16_t length);
 };
 
 }  // namespace serial
