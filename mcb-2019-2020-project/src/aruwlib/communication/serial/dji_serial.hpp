@@ -81,6 +81,32 @@ class DJISerial
      */
     bool periodicTask(SerialMessage* message);
 
+    typedef enum UpdateSerialState
+    {
+        SERIAL_HEADER_SEARCH,
+        PROCESS_FRAME_HEADER,
+        PROCESS_FRAME_MESSAGE_TYPE,
+        PROCESS_FRAME_DATA,
+    };
+
+    UpdateSerialState djiSerialState;
+
+    typedef struct{
+        uint16_t length;
+        uint8_t headByte;
+        uint16_t type;
+        uint8_t* data;
+    } SerialMessage_t;
+
+    SerialMessage_t newMessage;
+    uint16_t frameHeaderCurrReadByte = 0;
+    uint16_t frameCurrReadByte = 0;
+    uint16_t frameDataCurrReadByte = 0;
+    uint8_t messageType[2];
+    uint8_t frameHeader[5];
+
+    void DJISerial::updateSerial(SerialMessage* message);
+
     /**
      * Enable RX CRC enforcement. Messages that don't pass CRC check will be ignored
      */
