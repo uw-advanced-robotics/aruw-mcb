@@ -74,60 +74,13 @@ class DJISerial
      */
     bool send(const SerialMessage* message);
 
-    /**
-     * Update the port, read a message from rx buffer and decode it
-     * @param message pointer to output message
-     * @return true if has new message, false if not
-     */
-    bool periodicTask(SerialMessage* message);
-
-    typedef enum UpdateSerialState
-    {
-        SERIAL_HEADER_SEARCH,
-        PROCESS_FRAME_HEADER,
-        PROCESS_FRAME_MESSAGE_TYPE,
-        PROCESS_FRAME_DATA,
-    };
-
-    UpdateSerialState djiSerialState;
-
-    typedef struct{
-        uint16_t length;
-        uint8_t headByte;
-        uint16_t type;
-        uint8_t* data;
-    } SerialMessage_t;
-
-    SerialMessage_t newMessage;
-    uint16_t frameHeaderCurrReadByte = 0;
-    uint16_t frameCurrReadByte = 0;
-    uint16_t frameDataCurrReadByte = 0;
-    uint8_t messageType[2];
-    uint8_t frameHeader[5];
-
-    void DJISerial::updateSerial(SerialMessage* message);
-
-    /**
-     * Enable RX CRC enforcement. Messages that don't pass CRC check will be ignored
-     */
-    void enableRxCRCEnforcement();
-
-    /**
-     * Enable RX CRC enforcement. Messages that don't pass CRC check will not be ignored
-     */
-    void disableRxCRCEnforcement();
+    void updateSerial(void);
 
     /**
      * Get timestamp of last message sent
      * @return timestamp of last message sent in ms
      */
     uint32_t getLastTxMessageTimestamp();
-
-    /**
-     * Get timestamp of last message received
-     * @return timestamp of last message sent in ms
-     */
-    uint32_t getLastRxMessageTimestamp();
 
     /**
      * Get current Tx message sequence Number
@@ -149,10 +102,40 @@ class DJISerial
     static const uint8_t FRAME_DATA_OFFSET = 7;
     static const uint8_t FRAME_CRC16_LENGTH = 2;
 
+    enum UpdateSerialState
+    {
+        SERIAL_HEADER_SEARCH,
+        PROCESS_FRAME_HEADER,
+        PROCESS_FRAME_MESSAGE_TYPE,
+        PROCESS_FRAME_DATA
+    };
+
+    UpdateSerialState djiSerialState;
+
+    typedef struct{
+        uint16_t length;
+        uint8_t headByte;
+        uint16_t type;
+        uint8_t data[SERIAL_RX_BUFF_SIZE];
+        modm::Timestamp messageTimestamp;
+        uint8_t sequenceNumber;
+    } SerialMessage_t;
+
+    // stuff for rx, buffers to store parts of the header
+    SerialMessage_t newMessage;
+
+    SerialMessage_t mostRecentMessage;
+
+    uint16_t frameCurrReadByte = 0;
+
+    uint8_t frameType[FRAME_TYPE_LENGTH];
+
+    uint8_t frameHeader[FRAME_HEADER_LENGTH];
+
+    // serial port you are connected to
     SerialPort port;
 
     // tx/rx buffers
-    uint8_t rxBuffer[SERIAL_RX_BUFF_SIZE];
     uint8_t txBuffer[SERIAL_TX_BUFF_SIZE];
 
     // state information
@@ -160,26 +143,15 @@ class DJISerial
 
     // data read from an incoming message header
     uint16_t currentExpectedMessageLength;
+
     uint16_t currentMessageType;
 
     // handle electrical noise
     bool rxCRCEnforcementEnabled;
-    uint8_t txSequenceNumber;
-    uint8_t rxSequenceNumber;
-    uint8_t CRC8;
-    uint16_t CRC16;
 
-    // message handler
-    SerialMessageHandler handler;
+    uint8_t txSequenceNumber;
 
     uint32_t lastTxMessageTimestamp;
-    SerialMessage lastRxMessage;
-
-    uint32_t lastRxMessageTimestamp;
-
-    bool processFrameHeader();
-
-    bool processFrameData();
 
     bool verifyCRC16(uint8_t *message, uint32_t messageLength, uint16_t expectedCRC16);
 

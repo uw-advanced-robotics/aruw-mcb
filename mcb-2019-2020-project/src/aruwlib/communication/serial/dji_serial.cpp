@@ -17,12 +17,7 @@ currentExpectedMessageLength(0),
 currentMessageType(0),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled),
 txSequenceNumber(0),
-rxSequenceNumber(0),
-CRC8(0),
-CRC16(0),
-handler(messageHandler),
-lastTxMessageTimestamp(0),
-lastRxMessageTimestamp(0)
+lastTxMessageTimestamp(0)
 {}
 
 void DJISerial::initialize() {
@@ -80,48 +75,55 @@ bool DJISerial::send(const SerialMessage* message) {
     return true;
 }
 
-void DJISerial::updateSerial(SerialMessage* message) {
+void DJISerial::updateSerial() {
     switch(djiSerialState)
     {
-        case SERIAL_HEAD_BYTE:
+        case SERIAL_HEADER_SEARCH:
         {
+            // keep scanning for the head byte as long as you are here and have not yet found it.
             uint8_t serialHeadCheck = 0;
-            while (read(&serialHeadCheck, 1))
+            while (read(&serialHeadCheck, 1) && djiSerialState == SERIAL_HEADER_SEARCH)
             {
+                // we found it, store the head byte
                 if (serialHeadCheck == SERIAL_HEAD_BYTE)
                 {
                     frameHeader[0] = SERIAL_HEAD_BYTE;
                     djiSerialState = PROCESS_FRAME_HEADER;
                 }
             }
-
-            // purposefully fall through
-            if (djiSerialState != PROCESS_FRAME_HEADER)
+            
+            // recursively call youself if you have received the frame header. Important that we
+            // don't miss any bytes coming in when polling.
+            if (djiSerialState == PROCESS_FRAME_HEADER)
             {
-                break;
+                updateSerial();
             }
+            break;
         }
-        case PROCESS_FRAME_HEADER:
+        case PROCESS_FRAME_HEADER:  // the frame header consists of the length, type, and CRC8
         {
             // Read from the buffer. Keep track of the index in the frameHeader array using the 
-            // frameHeaderCurrReadByte. +1 at beginning and -1 on the end since the serial head
+            // frameCurrReadByte. +1 at beginning and -1 on the end since the serial head
             // byte is part of the frame but has already been processed.
-            frameHeaderCurrReadByte += read(frameHeader + frameHeaderCurrReadByte + 1,
-                FRAME_HEADER_LENGTH - frameHeaderCurrReadByte - 1);
+            frameCurrReadByte += read(frameHeader + frameCurrReadByte + 1,
+                FRAME_HEADER_LENGTH - frameCurrReadByte - 1);
 
             // We have the complete message header in the frameHeader buffer
-            if (frameHeaderCurrReadByte == FRAME_HEADER_LENGTH)
+            if (frameCurrReadByte == FRAME_HEADER_LENGTH)
             {
-                frameHeaderCurrReadByte = 0;
+                frameCurrReadByte = 0;
+
                 // process length
                 newMessage.length = (frameHeader[FRAME_DATA_LENGTH_OFFSET + 1] << 8)
                     | frameHeader[FRAME_DATA_LENGTH_OFFSET];
-                rxSequenceNumber = frameHeader[FRAME_SEQUENCENUM_OFFSET];
+                // process sequence number (counter)
+                newMessage.sequenceNumber = frameHeader[FRAME_SEQUENCENUM_OFFSET];
 
                 if (
                     newMessage.length == 0 || newMessage.length >= SERIAL_RX_BUFF_SIZE
                     - (FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH)
                 ) {
+                    djiSerialState = SERIAL_HEADER_SEARCH;
                     // THROW-NON-FATAL-ERROR-CHECK
                     return;
                 }
@@ -129,59 +131,47 @@ void DJISerial::updateSerial(SerialMessage* message) {
                 // check crc8 on header
                 if (rxCRCEnforcementEnabled)
                 {
-                    CRC8 = rxBuffer[FRAME_CRC8_OFFSET];
-                    if (verifyCRC8(frameHeader, FRAME_HEADER_LENGTH - 1, CRC8));
+                    uint8_t CRC8 = frameHeader[FRAME_CRC8_OFFSET];
+                    if (!verifyCRC8(frameHeader, FRAME_HEADER_LENGTH - 1, CRC8))
+                    {
+                        djiSerialState = SERIAL_HEADER_SEARCH;
+                        // THROW-NON-FATAL-ERROR-CHECK
+                    }
                 }
 
-                // process message body
+                // move on to processing message body
                 djiSerialState = PROCESS_FRAME_DATA;
-
-                if (rxCRCEnforcementEnabled)
-                {
-                    newMessage.data = new uint8_t[newMessage.length + 2];
-                }
-                else
-                {
-                    newMessage.data = new uint8_t[newMessage.length];
-                }
-
-                // purposefully fall through when you have received the whole message
-                // and are ready for the data
+                
+                // recursively call yourself so you don't miss any data that is in the process of
+                // being received.
+                updateSerial();
             }
-            else if (frameHeaderCurrReadByte > FRAME_HEADER_LENGTH)
-            {
-                // THROW-NON-FATAL-ERROR-CHECK
-                break;
-            }
-            else
-            {
-                break;
-            }
+            break;
         }
-        case PROCESS_FRAME_MESSAGE_TYPE:
+        case PROCESS_FRAME_MESSAGE_TYPE:  // here we read the next two bytes of the message
         {
-            frameCurrReadByte = read(messageType + frameCurrReadByte , 2 - frameCurrReadByte);
-            if (frameCurrReadByte == 2)
+            frameCurrReadByte = read(frameType + frameCurrReadByte ,
+                FRAME_TYPE_LENGTH - frameCurrReadByte);
+            if (frameCurrReadByte == FRAME_TYPE_LENGTH)
             {
-                newMessage.type = (messageType[1] << 8) | messageType[0];
+                newMessage.type = (frameType[1] << 8) | frameType[0];
 
                 djiSerialState = PROCESS_FRAME_DATA;
-                // fall through
+
+                updateSerial();
             }
             else if (frameCurrReadByte > 2)
             {
                 frameCurrReadByte = 0;
-                break;
+                djiSerialState = SERIAL_HEADER_SEARCH;
                 // THROW-NON-FATAL-ERROR-CHECK
             }
-            else
-            {
-                break;
-            }
+            break;
         }
         case PROCESS_FRAME_DATA:  // read bulk of message
         {
-            // add on extra 2 bytes for crc enforcement
+            // add on extra 2 bytes for crc enforcement, and read bytes until
+            // the length has been reached
             if (rxCRCEnforcementEnabled)
             {
                 frameCurrReadByte += read(newMessage.data + frameCurrReadByte,
@@ -198,67 +188,30 @@ void DJISerial::updateSerial(SerialMessage* message) {
                 frameCurrReadByte = 0;
                 if (rxCRCEnforcementEnabled)
                 {
-                    CRC16 = (newMessage.data[newMessage.length + 1] << 8)
+                    uint16_t CRC16 = (newMessage.data[newMessage.length + 1] << 8)
                         | newMessage.data[newMessage.length];
                     if (false)  // todo(matthew) fix this
                     {
-                        break;
+                        return;
                         // NON-FATAL-ERROR-CHECK
                     }
                 }
 
-                lastRxMessageTimestamp = modm::Clock::now().getTime();
-                lastRxMessage.data = newMessage.data;
-                lastRxMessage.length = newMessage.length;
-                lastRxMessage.type = newMessage.type;
+                // update the time and copy over the message to the most recent message
+                newMessage.messageTimestamp = modm::Clock::now();
+                memcpy(&newMessage, &mostRecentMessage, sizeof(SerialMessage_t));
+
+                djiSerialState = SERIAL_HEADER_SEARCH;
             }
             else if (frameCurrReadByte > newMessage.length)
             {
                 frameCurrReadByte = 0;
                 // THROW-NON-FATAL-ERROR-CHECK
+                djiSerialState = SERIAL_HEADER_SEARCH;
             }
             break;
         }
     }
-}
-
-
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
-bool DJISerial::periodicTask(SerialMessage* message) {
-    uint8_t data;
-    while (read(&data, 1))
-    {
-        if (data == SERIAL_HEAD_BYTE)
-        {
-            rxBuffer[0] = SERIAL_HEAD_BYTE;
-            if(processFrameHeader()) {
-                message->type = lastRxMessage.type;
-                message->length = lastRxMessage.length;
-                message->data = lastRxMessage.data;
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
-void DJISerial::enableRxCRCEnforcement() {
-    rxCRCEnforcementEnabled = true;
-}
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
-void DJISerial::disableRxCRCEnforcement() {
-    rxCRCEnforcementEnabled = false;
-}
-
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
-uint32_t DJISerial::getLastTxMessageTimestamp() {
-    return this->lastTxMessageTimestamp;
-}
-
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
-uint32_t DJISerial::getLastRxMessageTimestamp() {
-    return this->lastRxMessageTimestamp;
 }
 
 // cppcheck-suppress unusedFunction //TODO Remove lint suppression
@@ -266,83 +219,11 @@ uint8_t DJISerial::getTxSequenceNumber() {
     return this->txSequenceNumber;
 }
 
-bool DJISerial::processFrameHeader() {
-    // First Byte is always the head byte (0xA5)
-    // Skipping First Byte
-    rxBuffer[1] = 0;
-    rxBuffer[2] = 0;
-    rxBuffer[3] = 0;
-    rxBuffer[4] = 0;
-    // Skip the head byte
-    uint32_t actualLength = this->read(rxBuffer + 1, FRAME_HEADER_LENGTH - 1);
-    if (actualLength != FRAME_HEADER_LENGTH - 1)
-    {
-        return false;
-    }
-
-    currentExpectedMessageLength = (rxBuffer[FRAME_DATA_LENGTH_OFFSET + 1] << 8)
-        | rxBuffer[FRAME_DATA_LENGTH_OFFSET];
-    rxSequenceNumber = rxBuffer[FRAME_SEQUENCENUM_OFFSET];
-    CRC8 = rxBuffer[FRAME_CRC8_OFFSET];
-    // Check if the messageLength is small than size of buffer
-    if (currentExpectedMessageLength == 0 ||
-    currentExpectedMessageLength >=
-    SERIAL_RX_BUFF_SIZE - (FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH)) {
-        return false;
-    }
-
-    if(rxCRCEnforcementEnabled) {
-        if(verifyCRC8(rxBuffer, FRAME_HEADER_LENGTH - 1, CRC8)) {
-            return processFrameData();
-        }
-    } else {
-        return processFrameData();
-    }
-
-    currentExpectedMessageLength = 0;
-    return false;
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
+uint32_t DJISerial::getLastTxMessageTimestamp() {
+    return lastTxMessageTimestamp;
 }
 
-bool DJISerial::processFrameData() {
-    // get the rest of the packet (1-byte sequence, 1-byte CRC8, 2-byte
-    // message type, message data, 2-byte CRC16)
-    // skip frame header
-    uint32_t actualLength = this->read((rxBuffer + FRAME_HEADER_LENGTH),
-        currentExpectedMessageLength + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH);
-
-    if (actualLength != (uint32_t)(currentExpectedMessageLength
-        + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH)
-    ) {
-        return false;
-    }
-    currentMessageType = (rxBuffer[FRAME_TYPE_OFFSET + 1] << 8) | rxBuffer[FRAME_TYPE_OFFSET];
-
-    CRC16 = ((rxBuffer[FRAME_DATA_OFFSET + currentExpectedMessageLength + 1] << 8)
-        | rxBuffer[FRAME_DATA_OFFSET + currentExpectedMessageLength]);
-
-    // if CRC checking is not enabled, process the message, otherwise
-    // check if CRC8/CRC16 are valid
-
-    if (rxCRCEnforcementEnabled) {
-        if (!verifyCRC16(rxBuffer, FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH +
-                currentExpectedMessageLength, CRC16)) {
-            // CRC checking is enabled but CRC8/CRC16 were invalid
-            currentExpectedMessageLength = 0;
-            // NON-FATAL-ERROR-CHECK
-            return false;
-        }
-    }
-
-    // CRC checking is enabled and CRC8/CRC16 were valid
-    SerialMessage message;
-    message.length = currentExpectedMessageLength;
-    message.data = rxBuffer + FRAME_DATA_OFFSET;
-    message.type = currentMessageType;
-    this->lastRxMessage = message;
-    lastRxMessageTimestamp = modm::Clock::now().getTime();
-    handler(&message);
-    return true;
-}
 
 /**
  * Calculate CRC8 of given array and compare against expectedCRC8
