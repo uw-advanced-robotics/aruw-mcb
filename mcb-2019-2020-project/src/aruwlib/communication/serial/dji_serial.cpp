@@ -9,12 +9,11 @@ namespace serial
 
 DJISerial::DJISerial(
     SerialPort port,
-    SerialMessageHandler messageHandler,
     bool isRxCRCEnforcementEnabled
 ):
 port(port),
-currentExpectedMessageLength(0),
-currentMessageType(0),
+djiSerialRxState(SERIAL_HEADER_SEARCH),
+frameCurrReadByte(0),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled),
 txSequenceNumber(0),
 lastTxMessageTimestamp(0)
@@ -35,7 +34,7 @@ void DJISerial::initialize() {
     }
 }
 
-bool DJISerial::send(const SerialMessage* message) {
+bool DJISerial::send(const SerialMessage_t* message) {
     txBuffer[0] = SERIAL_HEAD_BYTE;
     txBuffer[1] = message->length;
     txBuffer[2] = message->length >> 8;
@@ -76,25 +75,25 @@ bool DJISerial::send(const SerialMessage* message) {
 }
 
 void DJISerial::updateSerial() {
-    switch(djiSerialState)
+    switch(djiSerialRxState)
     {
         case SERIAL_HEADER_SEARCH:
         {
             // keep scanning for the head byte as long as you are here and have not yet found it.
             uint8_t serialHeadCheck = 0;
-            while (read(&serialHeadCheck, 1) && djiSerialState == SERIAL_HEADER_SEARCH)
+            while (read(&serialHeadCheck, 1) && djiSerialRxState == SERIAL_HEADER_SEARCH)
             {
                 // we found it, store the head byte
                 if (serialHeadCheck == SERIAL_HEAD_BYTE)
                 {
                     frameHeader[0] = SERIAL_HEAD_BYTE;
-                    djiSerialState = PROCESS_FRAME_HEADER;
+                    djiSerialRxState = PROCESS_FRAME_HEADER;
                 }
             }
             
             // recursively call youself if you have received the frame header. Important that we
             // don't miss any bytes coming in when polling.
-            if (djiSerialState == PROCESS_FRAME_HEADER)
+            if (djiSerialRxState == PROCESS_FRAME_HEADER)
             {
                 updateSerial();
             }
@@ -123,7 +122,7 @@ void DJISerial::updateSerial() {
                     newMessage.length == 0 || newMessage.length >= SERIAL_RX_BUFF_SIZE
                     - (FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH)
                 ) {
-                    djiSerialState = SERIAL_HEADER_SEARCH;
+                    djiSerialRxState = SERIAL_HEADER_SEARCH;
                     // THROW-NON-FATAL-ERROR-CHECK
                     return;
                 }
@@ -134,13 +133,13 @@ void DJISerial::updateSerial() {
                     uint8_t CRC8 = frameHeader[FRAME_CRC8_OFFSET];
                     if (!verifyCRC8(frameHeader, FRAME_HEADER_LENGTH - 1, CRC8))
                     {
-                        djiSerialState = SERIAL_HEADER_SEARCH;
+                        djiSerialRxState = SERIAL_HEADER_SEARCH;
                         // THROW-NON-FATAL-ERROR-CHECK
                     }
                 }
 
                 // move on to processing message body
-                djiSerialState = PROCESS_FRAME_DATA;
+                djiSerialRxState = PROCESS_FRAME_DATA;
                 
                 // recursively call yourself so you don't miss any data that is in the process of
                 // being received.
@@ -156,14 +155,14 @@ void DJISerial::updateSerial() {
             {
                 newMessage.type = (frameType[1] << 8) | frameType[0];
 
-                djiSerialState = PROCESS_FRAME_DATA;
+                djiSerialRxState = PROCESS_FRAME_DATA;
 
                 updateSerial();
             }
             else if (frameCurrReadByte > 2)
             {
                 frameCurrReadByte = 0;
-                djiSerialState = SERIAL_HEADER_SEARCH;
+                djiSerialRxState = SERIAL_HEADER_SEARCH;
                 // THROW-NON-FATAL-ERROR-CHECK
             }
             break;
@@ -190,7 +189,7 @@ void DJISerial::updateSerial() {
                 {
                     uint16_t CRC16 = (newMessage.data[newMessage.length + 1] << 8)
                         | newMessage.data[newMessage.length];
-                    if (false)  // todo(matthew) fix this
+                    if (CRC16)  // todo(matthew) fix this
                     {
                         return;
                         // NON-FATAL-ERROR-CHECK
@@ -201,13 +200,13 @@ void DJISerial::updateSerial() {
                 newMessage.messageTimestamp = modm::Clock::now();
                 memcpy(&newMessage, &mostRecentMessage, sizeof(SerialMessage_t));
 
-                djiSerialState = SERIAL_HEADER_SEARCH;
+                djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
             else if (frameCurrReadByte > newMessage.length)
             {
                 frameCurrReadByte = 0;
                 // THROW-NON-FATAL-ERROR-CHECK
-                djiSerialState = SERIAL_HEADER_SEARCH;
+                djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
             break;
         }
@@ -215,15 +214,14 @@ void DJISerial::updateSerial() {
 }
 
 // cppcheck-suppress unusedFunction //TODO Remove lint suppression
-uint8_t DJISerial::getTxSequenceNumber() {
+uint8_t DJISerial::getTxSequenceNumber() const {
     return this->txSequenceNumber;
 }
 
 // cppcheck-suppress unusedFunction //TODO Remove lint suppression
-uint32_t DJISerial::getLastTxMessageTimestamp() {
+uint32_t DJISerial::getLastTxMessageTimestamp() const {
     return lastTxMessageTimestamp;
 }
-
 
 /**
  * Calculate CRC8 of given array and compare against expectedCRC8
@@ -273,9 +271,17 @@ uint32_t DJISerial::read(uint8_t *data, uint16_t length) {
 uint32_t DJISerial::write(const uint8_t *data, uint16_t length) {
     switch (this->port) {
     case PORT_UART2:
-        return Usart2::write(data, length);
+        if (Usart2::isWriteFinished()) {
+            return Usart2::write(data, length);
+        } else {
+            return 0;
+        }
     case PORT_UART6:
-        return Usart6::write(data, length);
+        if (Usart6::isWriteFinished()) {
+            return Usart6::write(data, length);
+        } else {
+            return 0;
+        }
     default:
         return 0;
     }

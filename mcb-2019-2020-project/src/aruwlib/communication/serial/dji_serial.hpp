@@ -21,73 +21,12 @@
  */
 namespace aruwlib
 {
+
 namespace serial
 {
 
 class DJISerial
 {
- public:
-    typedef enum
-    {
-        // PORT_UART1 = 0,
-        PORT_UART2 = 1,
-        PORT_UART6 = 2,
-    } SerialPort;
-
-    typedef enum
-    {
-        WAITING_FOR_HEAD_BYTE = 0,       // head byte (1-byte)
-        WAITING_FOR_MESSAGE_LENGTH = 1,  // length of message (2-byte)
-        WAITING_FOR_MESSAGE_DATA = 2,    // rest of data in packet [1-byte sequence num,
-                                         // 1-byte CRC8, messageLength-byte message, 2-byte CRC16]
-    } SerialState;
-
-    typedef struct{
-        uint16_t type;
-        uint16_t length;
-        uint8_t* data;
-    } SerialMessage;
-
-    typedef void (*SerialMessageHandler)(const SerialMessage* message);
-
-    /**
-     * Construct a Serial object
-     * @param port serial port to work on
-     * @param messageHandler callback function for handling received message
-     * @param isRxCRCEnforcementEnabled if to enable Rx CRC Enforcement
-     */
-    DJISerial(
-        SerialPort port,
-        SerialMessageHandler messageHandler,
-        bool isRxCRCEnforcementEnabled
-    );
-
-    /**
-     * Initialize serial
-     */
-    void initialize();
-
-    /**
-     * Send a Message
-     * @param message pointer to message to send
-     * @return true if succeed, false if failed
-     */
-    bool send(const SerialMessage* message);
-
-    void updateSerial(void);
-
-    /**
-     * Get timestamp of last message sent
-     * @return timestamp of last message sent in ms
-     */
-    uint32_t getLastTxMessageTimestamp();
-
-    /**
-     * Get current Tx message sequence Number
-     * @return current Tx message sequence Number
-     */
-    uint8_t getTxSequenceNumber();
-
  private:
     static const int16_t SERIAL_RX_BUFF_SIZE = 256;
     static const int16_t SERIAL_TX_BUFF_SIZE = 256;
@@ -102,7 +41,15 @@ class DJISerial
     static const uint8_t FRAME_DATA_OFFSET = 7;
     static const uint8_t FRAME_CRC16_LENGTH = 2;
 
-    enum UpdateSerialState
+ public:
+    typedef enum
+    {
+        // PORT_UART1 = 0,
+        PORT_UART2 = 1,
+        PORT_UART6 = 2,
+    } SerialPort;
+
+    enum SerialRxState
     {
         SERIAL_HEADER_SEARCH,
         PROCESS_FRAME_HEADER,
@@ -110,9 +57,8 @@ class DJISerial
         PROCESS_FRAME_DATA
     };
 
-    UpdateSerialState djiSerialState;
-
-    typedef struct{
+    typedef struct
+    {
         uint16_t length;
         uint8_t headByte;
         uint16_t type;
@@ -121,36 +67,70 @@ class DJISerial
         uint8_t sequenceNumber;
     } SerialMessage_t;
 
-    // stuff for rx, buffers to store parts of the header
-    SerialMessage_t newMessage;
+    typedef void (*SerialMessageHandler)(SerialMessage_t * const message);
 
-    SerialMessage_t mostRecentMessage;
+    /**
+     * Construct a Serial object
+     * @param port serial port to work on
+     * @param messageHandler callback function for handling received message
+     * @param isRxCRCEnforcementEnabled if to enable Rx CRC Enforcement
+     */
+    DJISerial(
+        SerialPort port,
+        bool isRxCRCEnforcementEnabled
+    );
 
-    uint16_t frameCurrReadByte = 0;
+    /**
+     * Initialize serial
+     */
+    void initialize();
 
-    uint8_t frameType[FRAME_TYPE_LENGTH];
+    /**
+     * Send a Message
+     * @param message pointer to message to send
+     * @return true if succeed, false if failed
+     */
+    bool send(const SerialMessage_t* message);
 
-    uint8_t frameHeader[FRAME_HEADER_LENGTH];
+    /**
+     * Receive messages. Call periodically in order to not miss any messages
+     */
+    void updateSerial(void);
 
+    const SerialMessage_t& getMostRecentMessage(void) const
+    {
+        return mostRecentMessage;
+    }
+
+    /**
+     * Get timestamp of last message sent
+     * @return timestamp of last message sent in ms
+     */
+    uint32_t getLastTxMessageTimestamp() const;
+
+    /**
+     * Get current Tx message sequence Number
+     * @return current Tx message sequence Number
+     */
+    uint8_t getTxSequenceNumber() const;
+
+ private:
     // serial port you are connected to
     SerialPort port;
 
-    // tx/rx buffers
-    uint8_t txBuffer[SERIAL_TX_BUFF_SIZE];
-
-    // state information
-    SerialState currentMode;
-
-    // data read from an incoming message header
-    uint16_t currentExpectedMessageLength;
-
-    uint16_t currentMessageType;
-
+    // stuff for rx, buffers to store parts of the header, state machine
+    SerialRxState djiSerialRxState;
+    SerialMessage_t newMessage;
+    SerialMessage_t mostRecentMessage;
+    uint16_t frameCurrReadByte;
+    uint8_t frameType[FRAME_TYPE_LENGTH];
+    uint8_t frameHeader[FRAME_HEADER_LENGTH];
     // handle electrical noise
     bool rxCRCEnforcementEnabled;
 
+    // tx buffer
+    uint8_t txBuffer[SERIAL_TX_BUFF_SIZE];
     uint8_t txSequenceNumber;
-
     uint32_t lastTxMessageTimestamp;
 
     bool verifyCRC16(uint8_t *message, uint32_t messageLength, uint16_t expectedCRC16);
