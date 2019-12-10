@@ -31,14 +31,11 @@ class DJISerial
     static const int16_t SERIAL_RX_BUFF_SIZE = 256;
     static const int16_t SERIAL_TX_BUFF_SIZE = 256;
     static const int16_t SERIAL_HEAD_BYTE = 0xA5;
-    static const uint8_t FRAME_SOF_OFFSET = 0;
     static const uint8_t FRAME_DATA_LENGTH_OFFSET = 1;
     static const uint8_t FRAME_SEQUENCENUM_OFFSET = 3;
     static const uint8_t FRAME_CRC8_OFFSET = 4;
-    static const uint8_t FRAME_HEADER_LENGTH = 5;
-    static const uint8_t FRAME_TYPE_LENGTH = 2;
+    static const uint8_t FRAME_HEADER_LENGTH = 7;
     static const uint8_t FRAME_TYPE_OFFSET = 5;
-    static const uint8_t FRAME_DATA_OFFSET = 7;
     static const uint8_t FRAME_CRC16_LENGTH = 2;
 
  public:
@@ -48,14 +45,6 @@ class DJISerial
         PORT_UART2 = 1,
         PORT_UART6 = 2,
     } SerialPort;
-
-    enum SerialRxState
-    {
-        SERIAL_HEADER_SEARCH,
-        PROCESS_FRAME_HEADER,
-        PROCESS_FRAME_MESSAGE_TYPE,
-        PROCESS_FRAME_DATA
-    };
 
     typedef struct
     {
@@ -98,6 +87,13 @@ class DJISerial
     void updateSerial(void);
 
  private:
+    enum SerialRxState
+    {
+        SERIAL_HEADER_SEARCH,
+        PROCESS_FRAME_HEADER,
+        PROCESS_FRAME_DATA
+    };
+
     // serial port you are connected to
     SerialPort port;
 
@@ -105,7 +101,6 @@ class DJISerial
     SerialRxState djiSerialRxState;
     SerialMessage_t newMessage;
     uint16_t frameCurrReadByte;
-    uint8_t frameType[FRAME_TYPE_LENGTH];
     uint8_t frameHeader[FRAME_HEADER_LENGTH];
     // handle electrical noise
     bool rxCRCEnforcementEnabled;

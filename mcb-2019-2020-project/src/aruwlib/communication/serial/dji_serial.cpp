@@ -16,7 +16,8 @@ djiSerialRxState(SERIAL_HEADER_SEARCH),
 frameCurrReadByte(0),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled)
 {
-    
+    txMessage.length = 0;
+    mostRecentMessage.length = 0;
 }
 
 void DJISerial::initialize() {
@@ -36,18 +37,18 @@ void DJISerial::initialize() {
 
 bool DJISerial::send() {
     txBuffer[0] = SERIAL_HEAD_BYTE;
-    txBuffer[1] = txMessage.length;
-    txBuffer[2] = txMessage.length >> 8;
-    txBuffer[3] = txMessage.sequenceNumber;
-    txBuffer[4] = algorithms::calculateCRC8(txBuffer, 4, CRC8_INIT);
-    txBuffer[5] = txMessage.type;
-    txBuffer[6] = txMessage.type >> 8;
+    txBuffer[FRAME_DATA_LENGTH_OFFSET] = txMessage.length;
+    txBuffer[FRAME_DATA_LENGTH_OFFSET + 1] = txMessage.length >> 8;
+    txBuffer[FRAME_SEQUENCENUM_OFFSET] = txMessage.sequenceNumber;
+    txBuffer[FRAME_CRC8_OFFSET] = algorithms::calculateCRC8(txBuffer, 4, CRC8_INIT);
+    txBuffer[FRAME_TYPE_OFFSET] = txMessage.type;
+    txBuffer[FRAME_TYPE_OFFSET + 1] = txMessage.type >> 8;
 
     // pointer to beginning of the message portion of the tx array
-    uint8_t *nextTxBuff = &(txBuffer[7]);
+    uint8_t *nextTxBuff = &(txBuffer[FRAME_HEADER_LENGTH]);
 
     // we can't send, trying to send too much
-    if (FRAME_DATA_OFFSET + txMessage.length + FRAME_CRC16_LENGTH >= SERIAL_TX_BUFF_SIZE) {
+    if (FRAME_HEADER_LENGTH + txMessage.length + FRAME_CRC16_LENGTH >= SERIAL_TX_BUFF_SIZE) {
         // NON-FATAL-ERROR-CHECK
         return false;
     }
@@ -61,7 +62,7 @@ bool DJISerial::send() {
     // add crc16
     uint16_t CRC16Val = algorithms::calculateCRC16(
         txBuffer,
-        FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + txMessage.length, CRC16_INIT
+        FRAME_HEADER_LENGTH + txMessage.length, CRC16_INIT
     );
     nextTxBuff[0] = CRC16Val;
     nextTxBuff[1] = CRC16Val >> 8;
@@ -120,10 +121,12 @@ void DJISerial::updateSerial() {
                     | frameHeader[FRAME_DATA_LENGTH_OFFSET];
                 // process sequence number (counter)
                 newMessage.sequenceNumber = frameHeader[FRAME_SEQUENCENUM_OFFSET];
+                newMessage.type = frameHeader[FRAME_TYPE_OFFSET + 1] << 8
+                    | frameHeader[FRAME_TYPE_OFFSET];
 
                 if (
                     newMessage.length == 0 || newMessage.length >= SERIAL_RX_BUFF_SIZE
-                    - (FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + FRAME_CRC16_LENGTH)
+                    - (FRAME_HEADER_LENGTH + FRAME_CRC16_LENGTH)
                 ) {
                     djiSerialRxState = SERIAL_HEADER_SEARCH;
                     // THROW-NON-FATAL-ERROR-CHECK
@@ -134,7 +137,8 @@ void DJISerial::updateSerial() {
                 if (rxCRCEnforcementEnabled)
                 {
                     uint8_t CRC8 = frameHeader[FRAME_CRC8_OFFSET];
-                    if (!verifyCRC8(frameHeader, FRAME_HEADER_LENGTH - 1, CRC8))
+                    // don't look at crc8 or frame type when calculating crc8
+                    if (!verifyCRC8(frameHeader, FRAME_HEADER_LENGTH - 3, CRC8))
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
                         // THROW-NON-FATAL-ERROR-CHECK
@@ -147,26 +151,6 @@ void DJISerial::updateSerial() {
                 // recursively call yourself so you don't miss any data that is in the process of
                 // being received.
                 updateSerial();
-            }
-            break;
-        }
-        case PROCESS_FRAME_MESSAGE_TYPE:  // here we read the next two bytes of the message
-        {
-            frameCurrReadByte = read(frameType + frameCurrReadByte ,
-                FRAME_TYPE_LENGTH - frameCurrReadByte);
-            if (frameCurrReadByte == FRAME_TYPE_LENGTH)
-            {
-                newMessage.type = (frameType[1] << 8) | frameType[0];
-
-                djiSerialRxState = PROCESS_FRAME_DATA;
-
-                updateSerial();
-            }
-            else if (frameCurrReadByte > 2)
-            {
-                frameCurrReadByte = 0;
-                djiSerialRxState = SERIAL_HEADER_SEARCH;
-                // THROW-NON-FATAL-ERROR-CHECK
             }
             break;
         }
