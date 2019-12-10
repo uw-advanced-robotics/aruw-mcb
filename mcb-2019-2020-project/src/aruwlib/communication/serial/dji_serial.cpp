@@ -14,10 +14,10 @@ DJISerial::DJISerial(
 port(port),
 djiSerialRxState(SERIAL_HEADER_SEARCH),
 frameCurrReadByte(0),
-rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled),
-txSequenceNumber(0),
-lastTxMessageTimestamp(0)
-{}
+rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled)
+{
+    
+}
 
 void DJISerial::initialize() {
     switch (this->port) {
@@ -34,43 +34,46 @@ void DJISerial::initialize() {
     }
 }
 
-bool DJISerial::send(const SerialMessage_t* message) {
+bool DJISerial::send() {
     txBuffer[0] = SERIAL_HEAD_BYTE;
-    txBuffer[1] = message->length;
-    txBuffer[2] = message->length >> 8;
-    txBuffer[3] = txSequenceNumber;
+    txBuffer[1] = txMessage.length;
+    txBuffer[2] = txMessage.length >> 8;
+    txBuffer[3] = txMessage.sequenceNumber;
     txBuffer[4] = algorithms::calculateCRC8(txBuffer, 4, CRC8_INIT);
-    txBuffer[5] = message->type;
-    txBuffer[6] = message->type >> 8;
+    txBuffer[5] = txMessage.type;
+    txBuffer[6] = txMessage.type >> 8;
 
+    // pointer to beginning of the message portion of the tx array
     uint8_t *nextTxBuff = &(txBuffer[7]);
 
     // we can't send, trying to send too much
-    if (nextTxBuff + message->length + FRAME_CRC16_LENGTH >= txBuffer + SERIAL_TX_BUFF_SIZE) {
+    if (FRAME_DATA_OFFSET + txMessage.length + FRAME_CRC16_LENGTH >= SERIAL_TX_BUFF_SIZE) {
         // NON-FATAL-ERROR-CHECK
         return false;
     }
 
-    for (uint16_t i = 0; i < message->length; i++) {
-        *nextTxBuff = message->data[i];
+    // copy over message
+    for (uint16_t i = 0; i < txMessage.length; i++) {
+        *nextTxBuff = txMessage.data[i];
         nextTxBuff++;
     }
 
+    // add crc16
     uint16_t CRC16Val = algorithms::calculateCRC16(
         txBuffer,
-        FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + message->length, CRC16_INIT
+        FRAME_HEADER_LENGTH + FRAME_TYPE_LENGTH + txMessage.length, CRC16_INIT
     );
-
     nextTxBuff[0] = CRC16Val;
     nextTxBuff[1] = CRC16Val >> 8;
+
     nextTxBuff += FRAME_CRC16_LENGTH;
     uint32_t totalSize = nextTxBuff - txBuffer;
-    uint32_t actualLength = this->write(txBuffer, totalSize);
-    if (actualLength != totalSize) {
+    uint32_t messageLengthSent = this->write(txBuffer, totalSize);
+    if (messageLengthSent != totalSize) {
         return false;
+        // the message did not completely send, THROW-NON-FATAL-ERROR-CHECK
     }
-    txSequenceNumber++;
-    lastTxMessageTimestamp = modm::Clock::now().getTime();
+    txMessage.messageTimestamp = modm::Clock::now();
     return true;
 }
 
@@ -211,16 +214,6 @@ void DJISerial::updateSerial() {
             break;
         }
     }
-}
-
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
-uint8_t DJISerial::getTxSequenceNumber() const {
-    return this->txSequenceNumber;
-}
-
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
-uint32_t DJISerial::getLastTxMessageTimestamp() const {
-    return lastTxMessageTimestamp;
 }
 
 /**

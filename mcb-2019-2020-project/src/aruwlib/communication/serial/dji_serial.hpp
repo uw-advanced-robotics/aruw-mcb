@@ -90,29 +90,12 @@ class DJISerial
      * @param message pointer to message to send
      * @return true if succeed, false if failed
      */
-    bool send(const SerialMessage_t* message);
+    bool send(void);
 
     /**
      * Receive messages. Call periodically in order to not miss any messages
      */
     void updateSerial(void);
-
-    const SerialMessage_t& getMostRecentMessage(void) const
-    {
-        return mostRecentMessage;
-    }
-
-    /**
-     * Get timestamp of last message sent
-     * @return timestamp of last message sent in ms
-     */
-    uint32_t getLastTxMessageTimestamp() const;
-
-    /**
-     * Get current Tx message sequence Number
-     * @return current Tx message sequence Number
-     */
-    uint8_t getTxSequenceNumber() const;
 
  private:
     // serial port you are connected to
@@ -121,7 +104,6 @@ class DJISerial
     // stuff for rx, buffers to store parts of the header, state machine
     SerialRxState djiSerialRxState;
     SerialMessage_t newMessage;
-    SerialMessage_t mostRecentMessage;
     uint16_t frameCurrReadByte;
     uint8_t frameType[FRAME_TYPE_LENGTH];
     uint8_t frameHeader[FRAME_HEADER_LENGTH];
@@ -130,8 +112,6 @@ class DJISerial
 
     // tx buffer
     uint8_t txBuffer[SERIAL_TX_BUFF_SIZE];
-    uint8_t txSequenceNumber;
-    uint32_t lastTxMessageTimestamp;
 
     bool verifyCRC16(uint8_t *message, uint32_t messageLength, uint16_t expectedCRC16);
 
@@ -140,6 +120,11 @@ class DJISerial
     uint32_t read(uint8_t *data, uint16_t length);
 
     uint32_t write(const uint8_t *data, uint16_t length);
+
+ protected:  // subclasses can access the most recent message and the message that this
+             // class sends
+    SerialMessage_t txMessage;
+    SerialMessage_t mostRecentMessage;
 };
 
 }  // namespace serial
