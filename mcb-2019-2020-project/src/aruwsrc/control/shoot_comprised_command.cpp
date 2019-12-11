@@ -22,10 +22,9 @@ ShootComprisedCommand::ShootComprisedCommand(
 {
     this->addSubsystemRequirement(reinterpret_cast<Subsystem*>(agitator));
 }
-uint32_t timeI = 0;
+
 void ShootComprisedCommand::initialize()
 {
-    timeI = modm::Clock::now().getTime();
     CommandScheduler::smrtPtrCommandCast(agitatorRotateCommand)->initialize();
     unjamSequenceCommencing = false;
 }
@@ -52,11 +51,8 @@ void ShootComprisedCommand::execute()
     }
 }
 
-uint32_t timeF = 0;
-
 void ShootComprisedCommand::end(bool interrupted)
 {
-    timeF = modm::Clock::now().getTime() - timeI;
     if (unjamSequenceCommencing)
     {
         CommandScheduler::smrtPtrCommandCast(agitatorUnjamCommand)->end(interrupted);

@@ -44,8 +44,10 @@ namespace control
                 subsystemToCommandMap.find(requirement);
             if (isDependentSubsystem != subsystemToCommandMap.end())
             {
-                if (!(isDependentSubsystem->second == defaultNullCommand))
-                {
+                if (
+                    !(isDependentSubsystem->second == defaultNullCommand)
+                    && smrtPtrCommandCast(isDependentSubsystem->second)->isInterruptiable()
+                ) {
                     smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
                 }
                 isDependentSubsystem->second = commandToAdd;

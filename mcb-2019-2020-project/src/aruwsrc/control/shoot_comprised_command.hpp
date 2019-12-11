@@ -47,6 +47,12 @@ public:
      */
     bool isFinished(void) const;
 
+    bool isInterruptiable(void) const
+    {
+        return false;
+    }
+
+
 private:
     AgitatorSubsystem* connectedAgitator; 
 

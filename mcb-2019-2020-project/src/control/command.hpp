@@ -83,6 +83,8 @@ class Command {
      */
     virtual bool isFinished(void) const = 0;
 
+    virtual bool isInterruptiable(void) const;
+
  private:
     friend class CommandScheduler;
 

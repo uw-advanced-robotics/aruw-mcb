@@ -28,6 +28,11 @@ namespace control
     {
         return &commandRequirements;
     }
+
+    bool Command::isInterruptiable(void) const
+    {
+        return true;
+    }
 }  // namespace control
 
 }  // namespace aruwlib

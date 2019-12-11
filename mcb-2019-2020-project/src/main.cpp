@@ -14,14 +14,21 @@
 #include "src/aruwsrc/control/shoot_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator_unjam_command.hpp"
 
+#include "src/communication/remote.hpp"
+
 using namespace aruwsrc::control;
+using namespace aruwlib;
 
 AgitatorSubsystem agitator17mm(36);
 ExampleSubsystem frictionWheelSubsystem;
 
+bool pressed = true;
+
 int main()
 {
     Board::initialize();
+
+    aruwlib::Remote::initialize();
 
     modm::SmartPointer spinFrictionWheelCommand(new ExampleCommand(&frictionWheelSubsystem));
     frictionWheelSubsystem.setDefaultCommand(spinFrictionWheelCommand);
@@ -37,33 +44,36 @@ int main()
         modm::delayMilliseconds(1);
     }
 
-    bool pressed = false;
-
     modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, PI));
     modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, PI / 5));
     modm::SmartPointer shootCommand(new ShootComprisedCommand(&agitator17mm, PI / 5, PI / 2));
 
     while (1)
     {
-        aruwlib::can::CanRxHandler::pollCanData();
+        can::CanRxHandler::pollCanData();
 
-        if (Board::Button::read() && !pressed)
+        if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP)
         {
-            aruwlib::control::CommandScheduler::addCommand(shootCommand);
+            control::CommandScheduler::addCommand(shootCommand);
+        } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
+            && !pressed)
+        {
+            control::CommandScheduler::addCommand(shootCommand);
         }
 
-        pressed = Board::Button::read();
+        pressed = Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP;
 
         // run scheduler
         if (t.execute())
         {
+            Remote::read();
             t.restart(2);
-            aruwlib::control::CommandScheduler::run();
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            control::CommandScheduler::run();
+            motor::DjiMotorTxHandler::processCanSendData();
         }
 
         // do this as fast as you can
-        aruwlib::can::CanRxHandler::pollCanData();
+        can::CanRxHandler::pollCanData();
 
         modm::delayMicroseconds(10);
     }
