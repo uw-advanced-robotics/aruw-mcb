@@ -8,10 +8,22 @@
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 
+#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+
 aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()
 {
+
+    aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
+    contiguousFloatTest.testCore();
+    contiguousFloatTest.extraFeatures();
+    contiguousFloatTest.testBadBounds();
+    contiguousFloatTest.testDifference();
+    contiguousFloatTest.testRotationBounds();
+    contiguousFloatTest.testShiftingValue();
+    contiguousFloatTest.testWrapping();
+
     Board::initialize();
 
     modm::SmartPointer testDefaultCommand(
