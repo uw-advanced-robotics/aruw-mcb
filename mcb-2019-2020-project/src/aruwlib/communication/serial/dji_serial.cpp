@@ -200,7 +200,7 @@ void DJISerial::updateSerial() {
 
                 memcpy(&mostRecentMessage, &newMessage, sizeof(SerialMessage_t));
 
-                RefereeSystem::messageHandler(&mostRecentMessage);
+                messageReceiveCallback();
 
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }

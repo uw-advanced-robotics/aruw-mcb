@@ -5,17 +5,20 @@
 #include <rm-dev-board-a/board.hpp>
 
 /**
+ * Extend this class and implement messageReceiveCallback if you
+ * want to use this serial protocol on a serial line.
+ *
  * Structure of a Serial Message:
  * Frame Head{
  * [Frame Head Byte(0xA5) 1 Byte]
  * [Frame Data Length (HSB Side Byte First, LSB Second) 2 Byte]
  * [Frame Sequence Number 1 Byte]
  * [CRC8 of Bytes before 1 Byte]
+ * [Message Type (HSB Side Byte First, LSB Second) 2 Byte]
  * }
  * Frame Body{
- * [Message Type (HSB Side Byte First, LSB Second) 2 Byte]
  * [Frame Data]
- * [CRC16 of entire frame (HSB Side Byte First, LSB Second) 2 Byte]
+ * [CRC16 of entire frame (head and frame) 2 Byte]
  * }
  * 
  */
@@ -48,8 +51,8 @@ class DJISerial
 
     typedef struct
     {
-        uint16_t length;
         uint8_t headByte;
+        uint16_t length;
         uint16_t type;
         uint8_t data[SERIAL_RX_BUFF_SIZE];
         modm::Timestamp messageTimestamp;
@@ -76,8 +79,7 @@ class DJISerial
     void initialize();
 
     /**
-     * Send a Message
-     * @param message pointer to message to send
+     * Send a Message. This constructs a message from the txMessage
      * @return true if succeed, false if failed
      */
     bool send(void);
@@ -86,6 +88,8 @@ class DJISerial
      * Receive messages. Call periodically in order to not miss any messages
      */
     void updateSerial(void);
+
+    virtual void messageReceiveCallback(void) = 0;
 
  private:
     enum SerialRxState
@@ -100,7 +104,8 @@ class DJISerial
 
     // stuff for rx, buffers to store parts of the header, state machine
     SerialRxState djiSerialRxState;
-    SerialMessage_t newMessage;
+    SerialMessage_t newMessage;  // message in middle of being constructed
+    SerialMessage_t mostRecentMessage;  // most recent complete message
     uint16_t frameCurrReadByte;
     uint8_t frameHeader[FRAME_HEADER_LENGTH];
     // handle electrical noise
@@ -117,10 +122,9 @@ class DJISerial
 
     uint32_t write(const uint8_t *data, uint16_t length);
 
- protected:  // subclasses can access the most recent message and the message that this
-             // class sends
+ protected:  // subclasses can access the message that this class sends as to allow
+             // for modification
     SerialMessage_t txMessage;
-    SerialMessage_t mostRecentMessage;
 };
 
 }  // namespace serial
