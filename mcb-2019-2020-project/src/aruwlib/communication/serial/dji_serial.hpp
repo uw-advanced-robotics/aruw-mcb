@@ -66,6 +66,7 @@ class DJISerial
      */
     DJISerial(
         SerialPort port,
+        SerialMessageHandler messageHandler,
         bool isRxCRCEnforcementEnabled
     );
 

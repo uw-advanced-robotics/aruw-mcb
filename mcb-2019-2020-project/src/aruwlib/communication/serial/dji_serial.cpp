@@ -2,6 +2,8 @@
 #include "dji_serial.hpp"
 #include "src/aruwlib/algorithms/crc.hpp"
 
+#include "ref_comm.hpp"
+
 namespace aruwlib
 {
 namespace serial
@@ -9,6 +11,7 @@ namespace serial
 
 DJISerial::DJISerial(
     SerialPort port,
+    SerialMessageHandler messageHandler,
     bool isRxCRCEnforcementEnabled
 ):
 port(port),
@@ -17,6 +20,7 @@ frameCurrReadByte(0),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled)
 {
     txMessage.length = 0;
+    newMessage.length = 0;
     mostRecentMessage.length = 0;
 }
 
@@ -85,12 +89,13 @@ void DJISerial::updateSerial() {
         {
             // keep scanning for the head byte as long as you are here and have not yet found it.
             uint8_t serialHeadCheck = 0;
-            while (read(&serialHeadCheck, 1) && djiSerialRxState == SERIAL_HEADER_SEARCH)
+            while (djiSerialRxState == SERIAL_HEADER_SEARCH && read(&serialHeadCheck, 1))
             {
                 // we found it, store the head byte
                 if (serialHeadCheck == SERIAL_HEAD_BYTE)
                 {
                     frameHeader[0] = SERIAL_HEAD_BYTE;
+                    newMessage.headByte = SERIAL_HEAD_BYTE;
                     djiSerialRxState = PROCESS_FRAME_HEADER;
                 }
             }
@@ -112,7 +117,7 @@ void DJISerial::updateSerial() {
                 FRAME_HEADER_LENGTH - frameCurrReadByte - 1);
 
             // We have the complete message header in the frameHeader buffer
-            if (frameCurrReadByte == FRAME_HEADER_LENGTH)
+            if (frameCurrReadByte == FRAME_HEADER_LENGTH - 1)
             {
                 frameCurrReadByte = 0;
 
@@ -169,14 +174,21 @@ void DJISerial::updateSerial() {
                     newMessage.length - frameCurrReadByte);
             }
 
-            if (frameCurrReadByte == newMessage.length)
+            if (
+                (frameCurrReadByte == newMessage.length && !rxCRCEnforcementEnabled)
+                || (frameCurrReadByte == newMessage.length + 2 && rxCRCEnforcementEnabled))
             {
                 frameCurrReadByte = 0;
                 if (rxCRCEnforcementEnabled)
                 {
+                    uint8_t crc16CheckData[FRAME_HEADER_LENGTH + newMessage.length];
+                    memcpy(crc16CheckData, frameHeader, FRAME_HEADER_LENGTH);
+                    memcpy(crc16CheckData + FRAME_HEADER_LENGTH, newMessage.data, newMessage.length);
+
                     uint16_t CRC16 = (newMessage.data[newMessage.length + 1] << 8)
                         | newMessage.data[newMessage.length];
-                    if (CRC16)  // todo(matthew) fix this
+                    if (!verifyCRC16(crc16CheckData,
+                        FRAME_HEADER_LENGTH + newMessage.length, CRC16))
                     {
                         return;
                         // NON-FATAL-ERROR-CHECK
@@ -185,11 +197,16 @@ void DJISerial::updateSerial() {
 
                 // update the time and copy over the message to the most recent message
                 newMessage.messageTimestamp = modm::Clock::now();
-                memcpy(&newMessage, &mostRecentMessage, sizeof(SerialMessage_t));
+
+                memcpy(&mostRecentMessage, &newMessage, sizeof(SerialMessage_t));
+
+                RefereeSystem::messageHandler(&mostRecentMessage);
 
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
-            else if (frameCurrReadByte > newMessage.length)
+            else if (
+                (frameCurrReadByte > newMessage.length && !rxCRCEnforcementEnabled)
+                || (frameCurrReadByte > newMessage.length + 2 && rxCRCEnforcementEnabled))
             {
                 frameCurrReadByte = 0;
                 // THROW-NON-FATAL-ERROR-CHECK
@@ -237,7 +254,13 @@ bool DJISerial::verifyCRC16(uint8_t *data, uint32_t length, uint16_t expectedCRC
 uint32_t DJISerial::read(uint8_t *data, uint16_t length) {
     switch (this->port) {
     case PORT_UART2:
-        return Usart2::read(data, length);
+    {
+        uint32_t successRead = 0;
+        for (int i = 0; i < length && Usart2::read(data[i]); i++) {
+            successRead++;
+        }
+        return successRead;
+    }
     case PORT_UART6:
         return Usart6::read(data, length);
     default:
