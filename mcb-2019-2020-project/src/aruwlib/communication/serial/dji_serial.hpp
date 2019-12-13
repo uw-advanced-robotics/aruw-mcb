@@ -59,17 +59,13 @@ class DJISerial
         uint8_t sequenceNumber;
     } SerialMessage_t;
 
-    typedef void (*SerialMessageHandler)(SerialMessage_t * const message);
-
     /**
      * Construct a Serial object
      * @param port serial port to work on
-     * @param messageHandler callback function for handling received message
      * @param isRxCRCEnforcementEnabled if to enable Rx CRC Enforcement
      */
     DJISerial(
         SerialPort port,
-        SerialMessageHandler messageHandler,
         bool isRxCRCEnforcementEnabled
     );
 
@@ -86,10 +82,14 @@ class DJISerial
 
     /**
      * Receive messages. Call periodically in order to not miss any messages
+     * Tested with a delay of 10 microseconds with referee system
      */
     void updateSerial(void);
 
-    virtual void messageReceiveCallback(void) = 0;
+    /**
+     * Called when a complete message is received, implemenent this yourself
+     */
+    virtual void messageReceiveCallback(SerialMessage_t completeMessage) = 0;
 
  private:
     enum SerialRxState
