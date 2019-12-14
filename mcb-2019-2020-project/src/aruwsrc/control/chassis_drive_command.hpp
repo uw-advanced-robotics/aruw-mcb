@@ -1,7 +1,7 @@
 #ifndef __CHASSIS_DRIVE_COMMAND_HPP__
 #define __CHASSIS_DRIVE_COMMAND_HPP__
 
-#include "src/control/command.hpp"
+#include "src/aruwlib/control/command.hpp"
 #include "chassis_subsystem.hpp"
 
 using namespace aruwlib::control;

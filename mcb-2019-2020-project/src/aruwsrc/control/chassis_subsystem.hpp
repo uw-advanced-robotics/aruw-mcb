@@ -2,8 +2,9 @@
 #define __CHASSIS_SUBSYSTEM_HPP__
 
 #include <modm/math/filter/pid.hpp>
-#include "src/control/subsystem.hpp"
-#include "src/motor/dji_motor.hpp"
+#include "src/aruwlib/control/subsystem.hpp"
+#include "src/aruwlib/motor/dji_motor.hpp"
+#include "src/aruwlib/algorithms/kalman.h"
 
 using namespace aruwlib::control;
 
@@ -33,13 +34,23 @@ public:
         leftBotRpm(0),
         rightTopRpm(0),
         rightBotRpm(0)
-    {}
+    {
+        KalmanCreate(&chassisErrorKalman, 1.0f, 0.0f);
+    }
 
-  void setDesiredOutput(float x, float y, float r);
+    void setDesiredOutput(float x, float y, float r);
 
-  void refresh(void);
+    float Chassis_SpeedZ_PID(int16_t ErrorReal, float kp);
+
+    void refresh(void);
 
 private:
+    const int Omni_Speed_Max = 9000;//7600
+    const int STANDARD_MAX_NORMAL = 9000;//7600
+    const int REVOLVE_MAX_NORMAL = 9000;//7600
+    const float REVOLVE_KD = 235.f;
+    const int REVOLVE_ANGLE = 35;
+
     const float PID_P = 10.0f;
     const float PID_I = 0.0f;
     const float PID_D = 0.0f;
@@ -66,6 +77,17 @@ private:
     float leftBotRpm;
     float rightTopRpm;
     float rightBotRpm;
+
+    // rotation variables
+    modm::Pid<float> chassisSpeedZPid;
+
+    extKalman_t chassisErrorKalman; // make sure to initialize this
+
+    float speed_z_pterm = 0;
+    float speed_z_iterm = 0;
+    float speed_z_dterm = 0;
+
+    float Chassis_Revolve_Move_Max;
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,

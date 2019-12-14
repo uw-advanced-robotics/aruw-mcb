@@ -26,7 +26,7 @@ namespace control
     }
 
     void ExampleSubsystem::updateMotorRpmPid(
-        aruwlib::algorithms::Pid<float>* pid,
+        modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* motor,
         float desiredRpm
     ) {
