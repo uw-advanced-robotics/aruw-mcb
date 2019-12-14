@@ -26,10 +26,14 @@ public:
     static const float RADIAN_COEF = 57.3f;
 
     static const int OMNI_SPEED_MAX = 9000;
+    static const int CHAS_CURRENT_LIMIT = OMNI_SPEED_MAX / 4;
     static const int STANDARD_MAX_NORMAL = 9000;
     static const int REVOLVE_MAX_NORMAL = 9000;
     static const float REVOLVE_KD = 235.f;
     static const int REVOLVE_ANGLE = 35;
+
+    static const float WARNING_REMAIN_POWER = 60;
+
 
     // chassis proportional gains (what we multiply the remote and key values by)
     static const float KRC_MECH_CHASSIS_STANDARD = 14.0f;  // no auto rotate, x and y

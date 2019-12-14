@@ -109,13 +109,7 @@ namespace control
     }
 
     void ChassisSubsystem::Chassis_Power_Limit(void)
-    {	
-        // float    chassis_totaloutput = 0;
-        // float    Joule_Residue = 0;
-        // bool  judgDataCorrect = 0;	
-        // static int32_t judgDataError_Time = 0;
-        // float fTotalCurrentLimit;
-
+    {
         bool judgDataCorrect = false; // todo
         float Joule_Residue = 0.0f; // todo	
         
@@ -135,14 +129,13 @@ namespace control
         {
             if(Joule_Residue < WARNING_REMAIN_POWER)
             {
-                float kLimit = (Joule_Residue / WARNING_REMAIN_POWER)
-                    * (Joule_Residue / WARNING_REMAIN_POWER);
+                float kLimit = (Joule_Residue * Joule_Residue) / (WARNING_REMAIN_POWER * WARNING_REMAIN_POWER);
                 
-                fTotalCurrentLimit = kLimit * fChasCurrentLimit;
+                fTotalCurrentLimit = kLimit * CHAS_CURRENT_LIMIT;
             }
             else
             {
-                fTotalCurrentLimit = fChasCurrentLimit;
+                fTotalCurrentLimit = CHAS_CURRENT_LIMIT;
             }
         }
 
