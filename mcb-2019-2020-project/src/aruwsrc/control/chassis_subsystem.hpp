@@ -16,6 +16,30 @@ namespace control
 
 class ChassisSubsystem : public Subsystem {
 public:
+    static const float WHEELBASE_RADIUS = 76.0f;
+    static const float PERIMETER = 500.0f;
+    static const float WHEELTRACK = 360.0f;
+    static const float WHEELBASE = 300.0f;
+    static const float GIMBAL_X_OFFSET = 0.0f;
+    static const float GIMBAL_Y_OFFSET = 0.0f;
+    static const float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
+    static const float RADIAN_COEF = 57.3f;
+
+    static const int OMNI_SPEED_MAX = 9000;
+    static const int STANDARD_MAX_NORMAL = 9000;
+    static const int REVOLVE_MAX_NORMAL = 9000;
+    static const float REVOLVE_KD = 235.f;
+    static const int REVOLVE_ANGLE = 35;
+
+    // chassis proportional gains (what we multiply the remote and key values by)
+    static const float KRC_MECH_CHASSIS_STANDARD = 14.0f;  // no auto rotate, x and y
+    static const float KRC_MECH_CHASSIS_REVOLVE  = 11.4f;  // no auto rotate, z
+    static const float KRC_GYRO_CHASSIS_STANDARD = 14.0f;  // when auto rotating
+    static const float KRC_GYRO_CHASSIS_REVOLVE  = -10.0f;
+
+    static const float KKEY_MECH_CHASSIS_REVOLVE = 40.0f;
+    static const float KKEY_MECH_CHASSIS_REVOLVE = -10.0f;
+
     ChassisSubsystem(
         aruwlib::motor::MotorId leftTopMotorId = LEFT_TOP_MOTOR_ID,
         aruwlib::motor::MotorId leftBotMotorId = LEFT_BOT_MOTOR_ID,
@@ -45,12 +69,6 @@ public:
     void refresh(void);
 
 private:
-    const int Omni_Speed_Max = 9000;//7600
-    const int STANDARD_MAX_NORMAL = 9000;//7600
-    const int REVOLVE_MAX_NORMAL = 9000;//7600
-    const float REVOLVE_KD = 235.f;
-    const int REVOLVE_ANGLE = 35;
-
     const float PID_P = 10.0f;
     const float PID_I = 0.0f;
     const float PID_D = 0.0f;
@@ -88,6 +106,10 @@ private:
     float speed_z_dterm = 0;
 
     float Chassis_Revolve_Move_Max;
+
+    void chassisOmniMoveCalculate(float x, float y, float z);
+
+    void Chassis_Power_Limit(void);
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,

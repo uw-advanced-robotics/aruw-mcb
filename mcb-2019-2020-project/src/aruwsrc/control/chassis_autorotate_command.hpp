@@ -35,6 +35,8 @@ class ChassisAutorotateCommand : public Command
     void interrupted(void) {}
 
  private:
+    static const float chassisAutorotateKp = -10.0f;
+    static const float MIN_ROTATION_THREASHOLD = 800.0f;
     ChassisSubsystem* chassis;    
 };
 
