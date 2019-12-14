@@ -995,35 +995,35 @@ void Chassis_Omni_Move_Calculate(void)
 //	}
 
 	/* NEW */
-	static float rotate_ratio_fl;//ǰ��
-	static float rotate_ratio_fr;//ǰ��
-  	static float rotate_ratio_bl;//����
-  	static float rotate_ratio_br;//����
+	static float rotateRatioFL;//ǰ��
+	static float rotateRatioRF;//ǰ��
+  	static float rotateRatioBL;//����
+  	static float rotateRatioBR;//����
   	static float wheel_rpm_ratio;
 	
 	float speed_max;
 
 	if(1)//��̨���ڵ�������
 	{
-		rotate_ratio_fr = ((WHEELBASE + WHEELTRACK) / 2.0f - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET)/RADIAN_COEF;
-		rotate_ratio_fl = ((WHEELBASE + WHEELTRACK) / 2.0f - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET)/RADIAN_COEF;
-		rotate_ratio_bl = ((WHEELBASE + WHEELTRACK) / 2.0f + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET)/RADIAN_COEF;
-		rotate_ratio_br = ((WHEELBASE + WHEELTRACK) / 2.0f + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET)/RADIAN_COEF;
+		rotateRatioRF = ((WHEELBASE + WHEELTRACK) / 2.0f - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET)/RADIAN_COEF;
+		rotateRatioFL = ((WHEELBASE + WHEELTRACK) / 2.0f - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET)/RADIAN_COEF;
+		rotateRatioBL = ((WHEELBASE + WHEELTRACK) / 2.0f + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET)/RADIAN_COEF;
+		rotateRatioBR = ((WHEELBASE + WHEELTRACK) / 2.0f + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET)/RADIAN_COEF;
 	}
 	else
 	{
-		rotate_ratio_fr = ((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF;
-		rotate_ratio_fl = rotate_ratio_fr;
-		rotate_ratio_bl = rotate_ratio_fr;
-		rotate_ratio_br = rotate_ratio_fr;
+		rotateRatioRF = ((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF;
+		rotateRatioFL = rotateRatioRF;
+		rotateRatioBL = rotateRatioRF;
+		rotateRatioBR = rotateRatioRF;
 	}
 	wheel_rpm_ratio = 60.0f/(PERIMETER * CHASSIS_DECELE_RATIO);             //	60/�ܳ�*������
 	
 	//ȫ���㷨
-	Chassis_Speed_Target[LEFT_FRON_201] = +( +Chassis_Move_Y/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_X/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_Z / ( (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF) * (60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) )*rotate_ratio_fl ) * wheel_rpm_ratio;
-	Chassis_Speed_Target[RIGH_FRON_202] = -( -Chassis_Move_Y/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_X/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) -Chassis_Move_Z / ( (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF) * (60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) )*rotate_ratio_fr ) * wheel_rpm_ratio;
-	Chassis_Speed_Target[LEFT_BACK_203] = +( -Chassis_Move_Y/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_X/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_Z / ( (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF) * (60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) )*rotate_ratio_bl ) * wheel_rpm_ratio;
-	Chassis_Speed_Target[RIGH_BACK_204] = -( +Chassis_Move_Y/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_X/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) -Chassis_Move_Z / ( (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF) * (60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) )*rotate_ratio_br ) * wheel_rpm_ratio;
+	Chassis_Speed_Target[LEFT_FRON_201] = +( +Chassis_Move_Y/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_X/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_Z / ( (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF) * (60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) )*rotateRatioFL ) * wheel_rpm_ratio;
+	Chassis_Speed_Target[RIGH_FRON_202] = -( -Chassis_Move_Y/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_X/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) -Chassis_Move_Z / ( (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF) * (60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) )*rotateRatioRF ) * wheel_rpm_ratio;
+	Chassis_Speed_Target[LEFT_BACK_203] = +( -Chassis_Move_Y/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_X/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_Z / ( (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF) * (60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) )*rotateRatioBL ) * wheel_rpm_ratio;
+	Chassis_Speed_Target[RIGH_BACK_204] = -( +Chassis_Move_Y/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) +Chassis_Move_X/(60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) -Chassis_Move_Z / ( (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF) * (60.0f/(PERIMETER * CHASSIS_DECELE_RATIO)) )*rotateRatioBR ) * wheel_rpm_ratio;
 	
 	//�޷�
 	if(Cap_Out_Can_Open() == TRUE)//���ݷŵ�
@@ -1116,22 +1116,6 @@ void Chassis_MotorOutput(void)
 	Chassis_Motor_Speed_PID(LEFT_BACK_203);
 	Chassis_Motor_Speed_PID(RIGH_BACK_204);
 }
-
-
-float Chassis_Z_Speed_PID(void)
-{
-	static float error[2];
-	
-	error[NOW] = Chassis_Gyro_Error;
-	
-	Chassis_Move_Z = error[NOW]*Chassis_Z_kpid[KP] + Chassis_Z_kpid[KD]*(error[NOW] - error[LAST]);
-	Chassis_Move_Z = limitVal<float>(Chassis_Move_Z, -Chassis_Revolve_Move_Max, Chassis_Revolve_Move_Max);
-
-	error[LAST] = error[NOW];
-	
-	return Chassis_Move_Z;
-}
-
 
 /*****************���̹���*************************/
 

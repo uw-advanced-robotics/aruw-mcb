@@ -26,7 +26,7 @@ public:
     static const float RADIAN_COEF = 57.3f;
 
     static const int OMNI_SPEED_MAX = 9000;
-    static const int CHAS_CURRENT_LIMIT = OMNI_SPEED_MAX / 4;
+    static const int CHAS_CURRENT_LIMIT = OMNI_SPEED_MAX * 4;
     static const int STANDARD_MAX_NORMAL = 9000;
     static const int REVOLVE_MAX_NORMAL = 9000;
     static const float REVOLVE_KD = 235.f;
@@ -45,10 +45,10 @@ public:
     static const float KKEY_MECH_CHASSIS_REVOLVE = -10.0f;
 
     ChassisSubsystem(
-        aruwlib::motor::MotorId leftTopMotorId = LEFT_TOP_MOTOR_ID,
-        aruwlib::motor::MotorId leftBotMotorId = LEFT_BOT_MOTOR_ID,
-        aruwlib::motor::MotorId rightTopMotorId = RIGHT_TOP_MOTOR_ID,
-        aruwlib::motor::MotorId rightBotMotorId = RIGHT_BOT_MOTOR_ID
+        aruwlib::motor::MotorId leftTopMotorId = LEFT_FRONT_MOTOR_ID,
+        aruwlib::motor::MotorId leftBotMotorId = LEFT_BACK_MOTOR_ID,
+        aruwlib::motor::MotorId rightTopMotorId = RIGHT_FRONT_MOTOR_ID,
+        aruwlib::motor::MotorId rightBotMotorId = RIGHT_BACK_MOTOR_ID
     ):
         leftTopMotor(leftTopMotorId, CAN_BUS_MOTORS),
         leftBotMotor(leftBotMotorId, CAN_BUS_MOTORS),
@@ -58,17 +58,25 @@ public:
         leftBotVelocityPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightTopVelocityPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightBotVelocityPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        leftTopRpm(0),
-        leftBotRpm(0),
-        rightTopRpm(0),
-        rightBotRpm(0)
+        leftFrontRpm(0),
+        leftBackRpm(0),
+        rightFrontRpm(0),
+        rightBackRpm(0)
     {
         KalmanCreate(&chassisErrorKalman, 1.0f, 0.0f);
     }
 
     void setDesiredOutput(float x, float y, float r);
 
-    float Chassis_SpeedZ_PID(int16_t ErrorReal, float kp);
+    /**
+     * run chassis rotation pid on some gimbal encoder tick offset
+     * 
+     * @param errorReal the error in encoder ticks. For autorotation,
+     * error between gimbal and center of chassis.
+     * 
+     * @param kp proportional gain for pid caluclation
+     */
+    float chassisSpeedZPID(int16_t errorReal, float kp);
 
     void refresh(void);
 
@@ -79,10 +87,10 @@ private:
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000.0f;
 
-    static const aruwlib::motor::MotorId LEFT_TOP_MOTOR_ID;
-    static const aruwlib::motor::MotorId LEFT_BOT_MOTOR_ID;
-    static const aruwlib::motor::MotorId RIGHT_TOP_MOTOR_ID;
-    static const aruwlib::motor::MotorId RIGHT_BOT_MOTOR_ID;
+    static const aruwlib::motor::MotorId LEFT_FRONT_MOTOR_ID;
+    static const aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID;
+    static const aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID;
+    static const aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
     aruwlib::motor::DjiMotor leftTopMotor;
@@ -95,10 +103,10 @@ private:
     modm::Pid<float> rightTopVelocityPid;
     modm::Pid<float> rightBotVelocityPid;
 
-    float leftTopRpm;
-    float leftBotRpm;
-    float rightTopRpm;
-    float rightBotRpm;
+    float leftFrontRpm;
+    float leftBackRpm;
+    float rightFrontRpm;
+    float rightBackRpm;
 
     // rotation variables
     modm::Pid<float> chassisSpeedZPid;
@@ -113,7 +121,7 @@ private:
 
     void chassisOmniMoveCalculate(float x, float y, float z);
 
-    void Chassis_Power_Limit(void);
+    void chassisPowerLimit(void);
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,

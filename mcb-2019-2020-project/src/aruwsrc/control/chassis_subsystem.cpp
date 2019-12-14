@@ -9,10 +9,10 @@ namespace aruwsrc
 
 namespace control
 {
-    const aruwlib::motor::MotorId ChassisSubsystem::LEFT_TOP_MOTOR_ID = aruwlib::motor::MOTOR4;
-    const aruwlib::motor::MotorId ChassisSubsystem::LEFT_BOT_MOTOR_ID = aruwlib::motor::MOTOR5;
-    const aruwlib::motor::MotorId ChassisSubsystem::RIGHT_TOP_MOTOR_ID = aruwlib::motor::MOTOR6;
-    const aruwlib::motor::MotorId ChassisSubsystem::RIGHT_BOT_MOTOR_ID = aruwlib::motor::MOTOR7;
+    const aruwlib::motor::MotorId ChassisSubsystem::LEFT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR4;
+    const aruwlib::motor::MotorId ChassisSubsystem::LEFT_BACK_MOTOR_ID = aruwlib::motor::MOTOR5;
+    const aruwlib::motor::MotorId ChassisSubsystem::RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR6;
+    const aruwlib::motor::MotorId ChassisSubsystem::RIGHT_BACK_MOTOR_ID = aruwlib::motor::MOTOR7;
 
     void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
     {
@@ -22,36 +22,35 @@ namespace control
 
     void ChassisSubsystem::refresh()
     {
-        updateMotorRpmPid(&leftTopVelocityPid, &leftTopMotor, leftTopRpm);
-        updateMotorRpmPid(&leftBotVelocityPid, &leftBotMotor, leftBotRpm);
-        updateMotorRpmPid(&rightTopVelocityPid, &rightTopMotor, rightTopRpm);
-        updateMotorRpmPid(&rightBotVelocityPid, &rightBotMotor, rightBotRpm);
+        updateMotorRpmPid(&leftTopVelocityPid, &leftTopMotor, leftFrontRpm);
+        updateMotorRpmPid(&leftBotVelocityPid, &leftBotMotor, leftBackRpm);
+        updateMotorRpmPid(&rightTopVelocityPid, &rightTopMotor, rightFrontRpm);
+        updateMotorRpmPid(&rightBotVelocityPid, &rightBotMotor, rightBackRpm);
     }
 
+    // todo fix all of this or insure it is correct
     void ChassisSubsystem::chassisOmniMoveCalculate(float x, float y, float z)
     {
-        float rotate_ratio_fl, rotate_ratio_fr, rotate_ratio_bl, rotate_ratio_br;
-        float wheel_rpm_ratio;
-        float speed_max;
+        float rotateRatioFL, rotateRatioRF, rotateRatioBL, rotateRatioBR;
+        float wheel_rpm_ratio = 60.0f / (PERIMETER * CHASSIS_GEARBOX_RATIO); // what is this
+        float speed_max = OMNI_SPEED_MAX;
+        float chassisRotationRatio = (WHEELBASE + WHEELTRACK) / 2.0f;
+        float zTrans = z * RADIAN_COEF / chassisRotationRatio;
 
-        rotate_ratio_fr = ((WHEELBASE + WHEELTRACK) / 2.0f - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET) / RADIAN_COEF;
-        rotate_ratio_fl = ((WHEELBASE + WHEELTRACK) / 2.0f - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET) / RADIAN_COEF;
-        rotate_ratio_bl = ((WHEELBASE + WHEELTRACK) / 2.0f + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET) / RADIAN_COEF;
-        rotate_ratio_br = ((WHEELBASE + WHEELTRACK) / 2.0f + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET) / RADIAN_COEF;
+        rotateRatioFL = (chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET) / RADIAN_COEF;
+        rotateRatioRF = (chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET) / RADIAN_COEF;
+        rotateRatioBL = (chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET) / RADIAN_COEF;
+        rotateRatioBR = (chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET) / RADIAN_COEF;
+    
+        leftFrontRpm  =  ( y + x + zTrans) / wheel_rpm_ratio * rotateRatioFL;
+        rightFrontRpm = -(-y + x - zTrans) / wheel_rpm_ratio * rotateRatioRF;
+        leftBackRpm   =  (-y + x + zTrans) / wheel_rpm_ratio * rotateRatioBL;
+        rightBackRpm  = -( y + x - zTrans) / wheel_rpm_ratio * rotateRatioBR;
 
-        wheel_rpm_ratio = 60.0f / (PERIMETER * CHASSIS_GEARBOX_RATIO); // what is this
-        
-        float zTrans = z / (((WHEELBASE + WHEELTRACK) / 2.0f) / RADIAN_COEF);
-
-        leftTopRpm  =  ( y + x + zTrans) / wheel_rpm_ratio * rotate_ratio_fl;
-        rightTopRpm = -(-y + x - zTrans) / wheel_rpm_ratio * rotate_ratio_fr;
-        leftBotRpm  =  (-y + x + zTrans) / wheel_rpm_ratio * rotate_ratio_bl;
-        rightBotRpm = -( y + x - zTrans) / wheel_rpm_ratio * rotate_ratio_br;
-
-        leftTopRpm  = aruwlib::algorithms::limitVal<float> (leftTopRpm,  -speed_max, speed_max);
-        rightTopRpm = aruwlib::algorithms::limitVal<float> (rightTopRpm, -speed_max, speed_max);
-        leftBotRpm  = aruwlib::algorithms::limitVal<float> (leftBotRpm,  -speed_max, speed_max);
-        rightBotRpm = aruwlib::algorithms::limitVal<float> (rightBotRpm, -speed_max, speed_max);
+        leftFrontRpm  = aruwlib::algorithms::limitVal<float> (leftFrontRpm,  -speed_max, speed_max);
+        rightFrontRpm = aruwlib::algorithms::limitVal<float> (rightFrontRpm, -speed_max, speed_max);
+        leftBackRpm   = aruwlib::algorithms::limitVal<float> (leftBackRpm,   -speed_max, speed_max);
+        rightBackRpm  = aruwlib::algorithms::limitVal<float> (rightBackRpm,  -speed_max, speed_max);
     }
 
     void ChassisSubsystem::updateMotorRpmPid(
@@ -63,7 +62,8 @@ namespace control
         motor->setDesiredOutput(pid->getValue());
     }
 
-    float ChassisSubsystem::Chassis_SpeedZ_PID(int16_t ErrorReal, float kp)
+// todo fix style
+    float ChassisSubsystem::chassisSpeedZPID(int16_t errorReal, float kp)
     {
         static int16_t ErrorPrev = 0;
         static int32_t ErrorSum = 0;
@@ -72,16 +72,16 @@ namespace control
         
         float speed_z = 0;
 
-        ErrorPR_KF = KalmanFilter(&chassisErrorKalman, ErrorReal);
+        ErrorPR_KF = KalmanFilter(&chassisErrorKalman, errorReal);
         
         //P
-        speed_z_pterm = ErrorReal * kp;
+        speed_z_pterm = errorReal * kp;
         speed_z_pterm = aruwlib::algorithms::limitVal<float>(speed_z_pterm, -REVOLVE_MAX_NORMAL, REVOLVE_MAX_NORMAL);
         
         //I
         ErrorSum -= ErrorPR_KF;
         speed_z_iterm = ErrorSum*3*0.002f; // todo fix this, i in general is messed up
-        if( abs(ErrorReal) <= 10)
+        if( abs(errorReal) <= 10)
         {
             ErrorSum = 0;
         }
@@ -100,58 +100,57 @@ namespace control
             speed_z_dterm = 0;
         }
 
-        speed_z = speed_z_pterm + speed_z_dterm;
-        speed_z = aruwlib::algorithms::limitVal<float>(speed_z, -Chassis_Revolve_Move_Max, +Chassis_Revolve_Move_Max);
+        speed_z = speed_z_pterm + speed_z_dterm; // + speed_i_pterm
+        speed_z = aruwlib::algorithms::limitVal<float>(speed_z, -Chassis_Revolve_Move_Max, Chassis_Revolve_Move_Max);
 
         ErrorPrev = ErrorPR_KF;
         
         return speed_z;
     }
 
-    void ChassisSubsystem::Chassis_Power_Limit(void)
+    void ChassisSubsystem::chassisPowerLimit(void)
     {
-        bool judgDataCorrect = false; // todo
-        float Joule_Residue = 0.0f; // todo	
+        bool judgementSystemInvalid = false; // todo
+        float currChassisPowerBuffer = 0.0f; // todo
+            // run low pass filter on power buffer input
+            // run low pass filter on motor current input
         
-        float chassis_totaloutput =
+        // total current output desired, to be compared with current limit
+        float allMotorCurrentOutput =
             leftTopMotor.getVoltageDesired()
             + leftBotMotor.getVoltageDesired()
             + rightTopMotor.getVoltageDesired()
             + rightBotMotor.getVoltageDesired();
 
-        float fTotalCurrentLimit;
+        float allMotorCurrentLimit;
 
-        if(!judgDataCorrect)
+        if(!judgementSystemInvalid && currChassisPowerBuffer < WARNING_REMAIN_POWER)
         {
-            fTotalCurrentLimit = 9000; // todo fix
+            // the total current for all four wheels is limited by the fraction limit
+            // the fraction is (power buffer / WARNING_REMAIN_POWER)^2
+            // so it will be less than one if WARNING_REMAIN_POWER > power buffer
+            // this is limited between 0 and 1 so it can only make the total current
+            // smaller
+            float chassisPowerFractionLimit = aruwlib::algorithms::limitVal<float>(
+                (currChassisPowerBuffer * currChassisPowerBuffer)
+                / (WARNING_REMAIN_POWER * WARNING_REMAIN_POWER),
+                0.0f, 1.0f
+            );
+            allMotorCurrentLimit = chassisPowerFractionLimit * CHAS_CURRENT_LIMIT;
         }
         else
         {
-            if(Joule_Residue < WARNING_REMAIN_POWER)
-            {
-                float kLimit = (Joule_Residue * Joule_Residue) / (WARNING_REMAIN_POWER * WARNING_REMAIN_POWER);
-                
-                fTotalCurrentLimit = kLimit * CHAS_CURRENT_LIMIT;
-            }
-            else
-            {
-                fTotalCurrentLimit = CHAS_CURRENT_LIMIT;
-            }
+            allMotorCurrentLimit = CHAS_CURRENT_LIMIT;
         }
 
-        if (chassis_totaloutput > fTotalCurrentLimit)
-        {
-            leftTopMotor.setDesiredOutput(leftTopMotor.getVoltageDesired()
-                / chassis_totaloutput * fTotalCurrentLimit);
-            leftBotMotor.setDesiredOutput(leftBotMotor.getVoltageDesired()
-                / chassis_totaloutput * fTotalCurrentLimit);
-            rightTopMotor.setDesiredOutput(rightTopMotor.getVoltageDesired()
-                / chassis_totaloutput * fTotalCurrentLimit);
-            rightBotMotor.setDesiredOutput(rightBotMotor.getVoltageDesired()
-                / chassis_totaloutput * fTotalCurrentLimit);	
-        }
+        // limit the chassis output based on fraction between what our current output is
+        // and what we realistically can output limited.
+        float chassisOutputFraction = allMotorCurrentLimit / allMotorCurrentOutput;
+        leftTopMotor.setDesiredOutput(leftTopMotor.getVoltageDesired() * chassisOutputFraction);
+        leftBotMotor.setDesiredOutput(leftBotMotor.getVoltageDesired() * chassisOutputFraction);
+        rightTopMotor.setDesiredOutput(rightTopMotor.getVoltageDesired() * chassisOutputFraction);
+        rightBotMotor.setDesiredOutput(rightBotMotor.getVoltageDesired() * chassisOutputFraction);
     }
-
 }  // namespace control
 
 }  // namespace aruwsrc
