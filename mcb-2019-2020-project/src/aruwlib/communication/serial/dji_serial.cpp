@@ -14,9 +14,9 @@ DJISerial::DJISerial(
 port(port),
 djiSerialRxState(SERIAL_HEADER_SEARCH),
 frameCurrReadByte(0),
-frameHeader({0}),
+frameHeader(),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled),
-txBuffer{0}
+txBuffer()
 {
     txMessage.length = 0;
     newMessage.length = 0;
@@ -174,7 +174,8 @@ void DJISerial::updateSerial() {
                 frameCurrReadByte = 0;
                 if (rxCRCEnforcementEnabled)
                 {
-                    uint8_t* crc16CheckData = new uint8_t(FRAME_HEADER_LENGTH + newMessage.length);
+                    uint8_t* crc16CheckData =
+                        new uint8_t[FRAME_HEADER_LENGTH + newMessage.length]();
                     memcpy(crc16CheckData, frameHeader, FRAME_HEADER_LENGTH);
                     memcpy(crc16CheckData + FRAME_HEADER_LENGTH,
                         newMessage.data, newMessage.length);
