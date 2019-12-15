@@ -16,7 +16,7 @@ djiSerialRxState(SERIAL_HEADER_SEARCH),
 frameCurrReadByte(0),
 frameHeader({0}),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled),
-txBuffer({0})
+txBuffer{0}
 {
     txMessage.length = 0;
     newMessage.length = 0;
