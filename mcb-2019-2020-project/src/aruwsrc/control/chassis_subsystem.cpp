@@ -1,23 +1,15 @@
 #include "chassis_subsystem.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 
-#define DEG_TO_RAD(val) (val * 3.14f / 180.0f)
-#define PI (3.14f)
-
 namespace aruwsrc
 {
 
 namespace control
 {
-    const aruwlib::motor::MotorId ChassisSubsystem::LEFT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR4;
-    const aruwlib::motor::MotorId ChassisSubsystem::LEFT_BACK_MOTOR_ID = aruwlib::motor::MOTOR5;
-    const aruwlib::motor::MotorId ChassisSubsystem::RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR6;
-    const aruwlib::motor::MotorId ChassisSubsystem::RIGHT_BACK_MOTOR_ID = aruwlib::motor::MOTOR7;
-
-    void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
+    void ChassisSubsystem::setDesiredOutput(float x, float y, float z)
     {
         // TODO calculate motor rpm values based on given x, y, and r
-        chassisOmniMoveCalculate(x, y, r);
+        chassisOmniMoveCalculate(x, y, z, OMNI_SPEED_MAX);
     }
 
     void ChassisSubsystem::refresh()
@@ -28,29 +20,27 @@ namespace control
         updateMotorRpmPid(&rightBotVelocityPid, &rightBotMotor, rightBackRpm);
     }
 
-    // todo fix all of this or insure it is correct
-    void ChassisSubsystem::chassisOmniMoveCalculate(float x, float y, float z)
+    // // todo fix all of this or insure it is correct
+    void ChassisSubsystem::chassisOmniMoveCalculate(float x, float y, float z, float speedMax)
     {
         float rotateRatioFL, rotateRatioRF, rotateRatioBL, rotateRatioBR;
-        float wheel_rpm_ratio = 60.0f / (PERIMETER * CHASSIS_GEARBOX_RATIO); // what is this
-        float speed_max = OMNI_SPEED_MAX;
         float chassisRotationRatio = (WHEELBASE + WHEELTRACK) / 2.0f;
-        float zTrans = z * RADIAN_COEF / chassisRotationRatio;
 
-        rotateRatioFL = (chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET) / RADIAN_COEF;
-        rotateRatioRF = (chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET) / RADIAN_COEF;
-        rotateRatioBL = (chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET) / RADIAN_COEF;
-        rotateRatioBR = (chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET) / RADIAN_COEF;
+        rotateRatioFL = DEGREES_TO_RADIANS(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);//todo fix this
+        rotateRatioRF = DEGREES_TO_RADIANS(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+        rotateRatioBL = DEGREES_TO_RADIANS(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        rotateRatioBR = DEGREES_TO_RADIANS(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
     
-        leftFrontRpm  =  ( y + x + zTrans) / wheel_rpm_ratio * rotateRatioFL;
-        rightFrontRpm = -(-y + x - zTrans) / wheel_rpm_ratio * rotateRatioRF;
-        leftBackRpm   =  (-y + x + zTrans) / wheel_rpm_ratio * rotateRatioBL;
-        rightBackRpm  = -( y + x - zTrans) / wheel_rpm_ratio * rotateRatioBR;
+        float zTrans = RADIANS_TO_DEGREES(z) / chassisRotationRatio;
+        leftFrontRpm  =  ( y + x + zTrans * rotateRatioFL);
+        rightFrontRpm = -(-y + x - zTrans * rotateRatioRF);
+        leftBackRpm   =  (-y + x + zTrans * rotateRatioBL);
+        rightBackRpm  = -( y + x - zTrans * rotateRatioBR);
 
-        leftFrontRpm  = aruwlib::algorithms::limitVal<float> (leftFrontRpm,  -speed_max, speed_max);
-        rightFrontRpm = aruwlib::algorithms::limitVal<float> (rightFrontRpm, -speed_max, speed_max);
-        leftBackRpm   = aruwlib::algorithms::limitVal<float> (leftBackRpm,   -speed_max, speed_max);
-        rightBackRpm  = aruwlib::algorithms::limitVal<float> (rightBackRpm,  -speed_max, speed_max);
+        leftFrontRpm  = aruwlib::algorithms::limitVal<float> (leftFrontRpm,  -speedMax, speedMax);
+        rightFrontRpm = aruwlib::algorithms::limitVal<float> (rightFrontRpm, -speedMax, speedMax);
+        leftBackRpm   = aruwlib::algorithms::limitVal<float> (leftBackRpm,   -speedMax, speedMax);
+        rightBackRpm  = aruwlib::algorithms::limitVal<float> (rightBackRpm,  -speedMax, speedMax);
     }
 
     void ChassisSubsystem::updateMotorRpmPid(
@@ -75,33 +65,33 @@ namespace control
         ErrorPR_KF = KalmanFilter(&chassisErrorKalman, errorReal);
         
         //P
-        speed_z_pterm = errorReal * kp;
-        speed_z_pterm = aruwlib::algorithms::limitVal<float>(speed_z_pterm, -REVOLVE_MAX_NORMAL, REVOLVE_MAX_NORMAL);
+        rotationPidP = errorReal * kp;
+        rotationPidP = aruwlib::algorithms::limitVal<float>(rotationPidP, -CHASSIS_REVOLVE_PID_MAX_P, CHASSIS_REVOLVE_PID_MAX_P);
         
         //I
         ErrorSum -= ErrorPR_KF;
-        speed_z_iterm = ErrorSum*3*0.002f; // todo fix this, i in general is messed up
+        rotationPidI = ErrorSum*3*0.002f; // todo fix this, i in general is messed up
         if( abs(errorReal) <= 10)
         {
             ErrorSum = 0;
         }
 
-        speed_z_iterm = aruwlib::algorithms::limitVal<float>(speed_z_iterm,-5000,5000);
+        rotationPidI = aruwlib::algorithms::limitVal<float>(rotationPidI,-5000,5000);
         
         //D
         ErrorPR = ErrorPR_KF - ErrorPrev;
         
         if(abs(ErrorPR_KF) > REVOLVE_ANGLE)
         {
-            speed_z_dterm = -(ErrorPR) * REVOLVE_KD;
+            rotationPidD = -(ErrorPR) * CHASSIS_REVOLVE_PID_KD;
         }
         else
         {
-            speed_z_dterm = 0;
+            rotationPidD = 0;
         }
 
-        speed_z = speed_z_pterm + speed_z_dterm; // + speed_i_pterm
-        speed_z = aruwlib::algorithms::limitVal<float>(speed_z, -Chassis_Revolve_Move_Max, Chassis_Revolve_Move_Max);
+        speed_z = rotationPidP + rotationPidD; // + speed_i_pterm
+        speed_z = aruwlib::algorithms::limitVal<float>(speed_z, -OMNI_SPEED_MAX, OMNI_SPEED_MAX);
 
         ErrorPrev = ErrorPR_KF;
         

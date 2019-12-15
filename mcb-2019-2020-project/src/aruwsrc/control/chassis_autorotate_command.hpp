@@ -21,6 +21,7 @@ class ChassisAutorotateCommand : public Command
  public:
     explicit ChassisAutorotateCommand(ChassisSubsystem* subsystem = nullptr)
     {
+       addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
        chassis = subsystem;
     }
 
@@ -35,8 +36,7 @@ class ChassisAutorotateCommand : public Command
     void interrupted(void) {}
 
  private:
-    static const float chassisAutorotateKp = -10.0f;
-    static const float MIN_ROTATION_THREASHOLD = 800.0f;
+    static constexpr double MIN_ROTATION_THREASHOLD = 800.0;
     ChassisSubsystem* chassis;    
 };
 

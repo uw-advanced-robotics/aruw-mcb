@@ -15,9 +15,9 @@ namespace control
 
     void ChassisDriveCommand::execute(){}
 
-    void ChassisDriveCommand::end(bool interrupted){}
+    void ChassisDriveCommand::end(bool interrupted){if (interrupted){}}
 
-    bool ChassisDriveCommand::isFinished() const {}
+    bool ChassisDriveCommand::isFinished() const {return false;}
 }  // namespace control
 
 }  // namespace aruwsrc
