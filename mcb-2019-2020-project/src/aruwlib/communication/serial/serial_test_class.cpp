@@ -11,7 +11,7 @@ DJISerial(DJISerial::SerialPort::PORT_UART2, false),
 messageId(0), i(0)
 {}
 
-void SerialTestClass::messageReceiveCallback(SerialMessage_t completeMessage)
+void SerialTestClass::messageReceiveCallback(SerialMessage completeMessage)
 {
     messageId = completeMessage.sequenceNumber;
 }
