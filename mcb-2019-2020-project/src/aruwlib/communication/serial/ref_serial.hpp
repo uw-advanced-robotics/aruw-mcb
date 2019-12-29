@@ -10,7 +10,7 @@ namespace aruwlib
 namespace serial
 {
 
-class RefSerial : DJISerial
+class RefSerial : public DJISerial
 {
  private:
     // RX message constants
@@ -21,17 +21,20 @@ class RefSerial : DJISerial
     static const uint16_t CUSTOM_DATA_SENDER_ID_LENGTH = 2;
     static const uint16_t CUSTOM_DATA_RECIPIENT_ID_LENGTH = 2;
 
+    // tx message constants
+    static const uint32_t TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS = 100;
+
     // rx message type defines
-    static const uint16_t REF_MESSAGE_TYPE_GAME_STATUS = 0x1;
-    static const uint16_t REF_MESSAGE_TYPE_GAME_RESULT = 0x2;
-    static const uint16_t REF_MESSAGE_TYPE_ALL_ROBOT_HP = 0x3;
-    static const uint16_t REF_MESSAGE_TYPE_ROBOT_STATUS = 0x201;
-    static const uint16_t REF_MESSAGE_TYPE_POWER_AND_HEAT = 0x202;
-    static const uint16_t REF_MESSAGE_TYPE_ROBOT_POSITION = 0x203;
-    static const uint16_t REF_MESSAGE_TYPE_RECEIVE_DAMAGE = 0x206;
-    static const uint16_t REF_MESSAGE_TYPE_PROJECTILE_LAUNCH = 0x207;
+    static const uint16_t REF_MESSAGE_TYPE_GAME_STATUS                   = 0x1;
+    static const uint16_t REF_MESSAGE_TYPE_GAME_RESULT                   = 0x2;
+    static const uint16_t REF_MESSAGE_TYPE_ALL_ROBOT_HP                  = 0x3;
+    static const uint16_t REF_MESSAGE_TYPE_ROBOT_STATUS                  = 0x201;
+    static const uint16_t REF_MESSAGE_TYPE_POWER_AND_HEAT                = 0x202;
+    static const uint16_t REF_MESSAGE_TYPE_ROBOT_POSITION                = 0x203;
+    static const uint16_t REF_MESSAGE_TYPE_RECEIVE_DAMAGE                = 0x206;
+    static const uint16_t REF_MESSAGE_TYPE_PROJECTILE_LAUNCH             = 0x207;
     static const uint16_t REF_MESSAGE_TYPE_SENTINEL_DRONE_BULLETS_REMAIN = 0x208;
-    static const uint16_t REF_MESSAGE_TYPE_CUSTOM_DATA = 0x301;
+    static const uint16_t REF_MESSAGE_TYPE_CUSTOM_DATA                   = 0x301;
 
     // rx message type defines
     static const uint16_t REF_CUSTOM_DATA_TYPE_UI_INDICATOR = 0xD180;
@@ -167,22 +170,22 @@ class RefSerial : DJISerial
     typedef struct
     {
         RobotId robotId;              // robot type and team
-        uint8_t robotLevel;            // current level of this robot (1-3)
-        uint16_t previousHp;           // health of this robot before damage was
-                                        // received, used to calculate receivedDps
-                                        // if no damage was received recently,
-                                        // previousHp = currentHp
-        uint16_t currentHp;            // current health of this robot
-        uint16_t maxHp;                // max health of this robot
+        uint8_t robotLevel;           // current level of this robot (1-3)
+        uint16_t previousHp;          // health of this robot before damage was
+                                      // received, used to calculate receivedDps
+                                      // if no damage was received recently,
+                                      // previousHp = currentHp
+        uint16_t currentHp;           // current health of this robot
+        uint16_t maxHp;               // max health of this robot
         uint8_t gimbalHasPower : 1;   // 1 if there is 24V output to gimbal, 0 for 0V
         uint8_t chassisHasPower : 1;  // 1 if there is 24V output to chassis, 0 for 0V
         uint8_t shooterHasPower : 1;  // 1 if there is 24V output to shooter, 0 for 0V
-        ArmorId damagedArmorId : 4;  // armor ID that was damaged
+        ArmorId damagedArmorId : 4;   // armor ID that was damaged
         DamageType damageType : 4;    // cause of damage
-        float receivedDps;             // damage per second received
-        ChassisData chassis;         // chassis power draw and position data
-        TurretData turret;           // turret firing and heat data
-        RobotHpData allRobotHp;   // current HP of all the robots
+        float receivedDps;            // damage per second received
+        ChassisData chassis;          // chassis power draw and position data
+        TurretData turret;            // turret firing and heat data
+        RobotHpData allRobotHp;       // current HP of all the robots
     } RobotData;
 
     typedef struct
@@ -209,7 +212,7 @@ class RefSerial : DJISerial
 
     RefSerial();
 
-    void initalize(void);
+    void initialize(void);
 
     /**
      * Handles the types of messages defined above in the RX message handlers section

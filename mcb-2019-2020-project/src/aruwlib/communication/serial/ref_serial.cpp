@@ -10,9 +10,10 @@ RefSerial::RefSerial() :
 DJISerial(DJISerial::SerialPort::PORT_UART2, true)
 {}
 
-void RefSerial::initalize(void)
+void RefSerial::initialize(void)
 {}
 
+// rx stuff
 void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
 {
     switch(completeMessage.type) {
@@ -66,6 +67,7 @@ void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
     }
 }
 
+// tx stuff
 void RefSerial::sendDisplayData(const DisplayData& displayData)
 {
     CustomData customData;
@@ -116,72 +118,77 @@ void RefSerial::sendCustomData(CustomData& customData)
         return;
     }
     // Check if sender and recipient is from our alliance
-    if (customData.senderId < 10 && (customData.senderId > 10 || customData.recipientId > 10))
+    // trying to send to red and robot is actually blue
+    if (customData.senderId < BLUE_HERO && customData.recipientId > BLUE_HERO)
     {
         return;
     }
     // Check if sender and recipient is from our alliance
-    if (robotData.robotId > 10 && (customData.senderId < 10 || customData.recipientId < 10))
+    // trying to send to a blue robot and robot is actually red
+    if (robotData.robotId >= BLUE_HERO && customData.recipientId < BLUE_HERO)
     {
         return;
     }
 
-    // if (!RefereeSystem::online) {
-    //     return false;
-    // }
+    if (modm::Clock::now().getTime() - this->txMessage.messageTimestamp.getTime()
+        < TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS
+    ) {
+        // not enough time has passed before next send
+        // send at max every 100 ms (max frequency 10Hz)
+        return;
+    }
 
-    // if (  todo
-    //     serial.getTimestamp() - serial.getLastTxMessageTimestamp()
-    //     < TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS
-    // ) {
-    //     // not enough time has passed before next send
-    //     // send at max every 100 ms (max frequency 10Hz)
-    //     return;
-    // }
+    this->txMessage.type = REF_MESSAGE_TYPE_CUSTOM_DATA;
+    this->txMessage.length = customData.length
+        + CUSTOM_DATA_TYPE_LENGTH
+        + CUSTOM_DATA_SENDER_ID_LENGTH
+        + CUSTOM_DATA_RECIPIENT_ID_LENGTH;
 
-
-
-
-
-    // // data content ID / Packet Header
-    // customDataBuffer[0] = (uint8_t) customData.type;
-    // customDataBuffer[1] = (uint8_t) ((uint16_t) custom_data->type >> 8);
-    // // robot ID of the robot that the message is being sent from
-    // customDataBuffer[2] = (uint8_t) custom_data->senderId;
-    // customDataBuffer[3] = (uint8_t) ((uint16_t) (custom_data->senderId) >> 8);
-    // // client ID of the robot that the values in the message will be displayed to
-    // customDataBuffer[4] = (uint8_t) custom_data->recipientId;
-    // customDataBuffer[5] = (uint8_t) custom_data->recipientId >> 8;
-    // memcpy(customDataBuffer + CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH
-    //     + CUSTOM_DATA_RECIPIENT_ID_LENGTH, custom_data->data, custom_data->length);
-
-    // message.data = customDataBuffer;
-    // message.type = REF_MESSAGE_TYPE_CUSTOM_DATA;
-    // message.length = CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH +
-    //     CUSTOM_DATA_RECIPIENT_ID_LENGTH + custom_data->length;
-
+    // this message consists of the following:
+    // - custom data type
+    // - custom data sender id
+    // - custom data receipent id
+    // this is all stored in the message itself, in addition to the message data
+    this->txMessage.data[0] = static_cast<uint8_t>(customData.type);
+    this->txMessage.data[1] = static_cast<uint8_t>(customData.type >> 8);
+    this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH] = static_cast<uint8_t>(customData.senderId);
+    this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH + 1] = static_cast<uint8_t>(customData.senderId >> 8);
+    this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH] =
+        static_cast<uint8_t>(customData.recipientId);
+    this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH + 1] =
+        static_cast<uint8_t>(customData.recipientId >> 8);
+    memcpy(this->txMessage.data + CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH
+        + CUSTOM_DATA_RECIPIENT_ID_LENGTH, customData.data, customData.length);
 
     this->send();
 }
 
 uint8_t RefSerial::packBoolMask(
-    bool bool1, bool bool2, bool bool3, bool bool4, bool bool5, bool bool6)
-{
-    return ((uint8_t) bool1) |
-           ((uint8_t) bool2) << 1 |
-           ((uint8_t) bool3) << 2 |
-           ((uint8_t) bool4) << 3 |
-           ((uint8_t) bool5) << 4 |
-           ((uint8_t) bool6) << 5;  // bits 6 and 7 are reserved by the ref system
+    bool bool1,
+    bool bool2,
+    bool bool3,
+    bool bool4,
+    bool bool5,
+    bool bool6
+) {
+    return static_cast<uint8_t>(bool1) |
+        static_cast<uint8_t>(bool2) << 1 |
+        static_cast<uint8_t>(bool3) << 2 |
+        static_cast<uint8_t>(bool4) << 3 |
+        static_cast<uint8_t>(bool5) << 4 |
+        static_cast<uint8_t>(bool6) << 5;  // bits 6 and 7 are reserved by the ref system
 }
 
-uint16_t RefSerial::getRobotClientID(RobotId RobotId) {
+uint16_t RefSerial::getRobotClientID(RobotId RobotId)
+{
     // there are no client_id for sentinel robots because there are no ui display for them
-    if (RobotId == RED_SENTINEL || RobotId == BLUE_SENTINEL) {
+    if (RobotId == RED_SENTINEL || RobotId == BLUE_SENTINEL)
+    {
         return 0;
     }
     uint16_t retval = 0x100;
-    if (RobotId > 10) {  // if RobotId is a blue robot
+    if (RobotId > 10)
+    {  // if RobotId is a blue robot
         retval += 6;
     }
     return retval + (uint16_t) RobotId;
@@ -212,7 +219,7 @@ bool RefSerial::decodeToGameStatus(const SerialMessage& message)
     if (message.length != 3) {
         return false;
     }
-    gameData.gameStage = (GameStages) (message.data[0] >> 4);
+    gameData.gameStage = static_cast<GameStages>(message.data[0] >> 4);
     gameData.stageTimeRemaining = (message.data[2] << 8) | message.data[1];
     return true;
 }
@@ -265,7 +272,7 @@ bool RefSerial::decodeToAllRobotHP(const SerialMessage& message)
 
 bool RefSerial::decodeToRobotStatus(const SerialMessage& message)
 {
-    if (message.length != 15)  // todo
+    if (message.length != 15)
     {
         return false;
     }
@@ -298,7 +305,7 @@ bool RefSerial::decodeToRobotStatus(const SerialMessage& message)
 
 bool RefSerial::decodeToPowerAndHeat(const SerialMessage& message)
 {
-    if (message.length != 14)  // todo
+    if (message.length != 14)
     {
         return false;
     }
@@ -313,7 +320,7 @@ bool RefSerial::decodeToPowerAndHeat(const SerialMessage& message)
 
 bool RefSerial::decodeToRobotPosition(const SerialMessage& message)
 {
-    if (message.length != 16)  // todo
+    if (message.length != 16)
     {
         return false;
     }
@@ -338,7 +345,7 @@ bool RefSerial::decodeToReceiveDamage(const SerialMessage& message)
 
 bool RefSerial::decodeToProjectileLaunch(const SerialMessage& message)
 {
-    if (message.length != 6)  // todo
+    if (message.length != 6)
     {
         return false;
     }
