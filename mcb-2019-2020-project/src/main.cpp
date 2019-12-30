@@ -8,20 +8,20 @@
 
 #include "aruwsrc/control/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/turret_subsystem.hpp"
  
 using namespace aruwsrc::control;
 
 ChassisSubsystem soldierChassis;
+TurretSubsystem soldierTurret;
 
 int main()
 {
     Board::initialize();
-
-    modm::SmartPointer chassisAutorotate(new ChassisAutorotateCommand(&soldierChassis));
-
-    soldierChassis.setDefaultCommand(chassisAutorotate);
-
+    modm::SmartPointer chassisAutorotate(
+        new ChassisAutorotateCommand(&soldierChassis, &soldierTurret));
     CommandScheduler::registerSubsystem(&soldierChassis);
+    CommandScheduler::addCommand(chassisAutorotate);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill

@@ -3,6 +3,7 @@
 
 #include "src/aruwlib/control/command.hpp"
 #include "chassis_subsystem.hpp"
+#include "turret_subsystem.hpp"
 
 #include "src/aruwlib/motor/dji_motor.hpp"
 
@@ -19,10 +20,12 @@ class ExampleSubsystem;
 class ChassisAutorotateCommand : public Command
 {
  public:
-    explicit ChassisAutorotateCommand(ChassisSubsystem* subsystem = nullptr)
+    explicit ChassisAutorotateCommand(ChassisSubsystem* chassis, TurretSubsystem* turret)
     {
-       addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
-       chassis = subsystem;
+        addSubsystemRequirement(reinterpret_cast<Subsystem*>(chassis));
+        addSubsystemRequirement(reinterpret_cast<Subsystem*>(turret));
+        this->chassis = chassis;
+        this->turret = turret;
     }
 
     void initialize(void);
@@ -37,7 +40,8 @@ class ChassisAutorotateCommand : public Command
 
  private:
     static constexpr double MIN_ROTATION_THREASHOLD = 800.0;
-    ChassisSubsystem* chassis;    
+    ChassisSubsystem* chassis;   
+    TurretSubsystem* turret;
 };
 
 }  // namespace control

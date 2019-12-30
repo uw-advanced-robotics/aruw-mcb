@@ -8,8 +8,8 @@ namespace algorithms
 {
 
 #define PI (3.1415926f)
-#define RADIANS_TO_DEGREES(val) ((val) * 180.0f / PI)
-#define DEGREES_TO_RADIANS(val) ((val) * PI / 180.0f)
+#define RADIANS_TO_DEGREES(val) (static_cast<float>(val) * 180.0f / PI)
+#define DEGREES_TO_RADIANS(val) (static_cast<float>(val) * PI / 180.0f)
 
 template< typename T >
 T limitVal(T val, T min, T max)

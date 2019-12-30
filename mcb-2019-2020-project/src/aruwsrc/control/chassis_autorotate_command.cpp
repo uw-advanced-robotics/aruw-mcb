@@ -8,10 +8,6 @@ namespace aruwsrc
 namespace control
 {
 
-int16_t gimbalGetOffset(void) {
-    return 0;
-}
-
 void ChassisAutorotateCommand::initialize()
 {
 
@@ -19,10 +15,13 @@ void ChassisAutorotateCommand::initialize()
 
 void ChassisAutorotateCommand::execute()
 {
+    float remoteMoveX = aruwlib::Remote::getChannel(aruwlib::Remote::Channel::LEFT_HORIZONTAL);
+    float remoteMoveY = aruwlib::Remote::getChannel(aruwlib::Remote::Channel::LEFT_VERTICAL);  // todo replace
+    float turretRelativeX, turretRelativeY;
     float chassisMoveX, chassisMoveY, chassisMoveZ;
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
-    chassisMoveZ = chassis->chassisSpeedZPID(gimbalGetOffset(), ChassisSubsystem::CHASSIS_AUTOROTATE_PID_KP);
+    chassisMoveZ = chassis->chassisSpeedZPID(turret->gimbalGetOffset(), ChassisSubsystem::CHASSIS_AUTOROTATE_PID_KP);
 
     float zTranslationGain;  // what we will multiply x and y speed by to take into account rotation
 
@@ -32,7 +31,7 @@ void ChassisAutorotateCommand::execute()
     {
         // power(max revolve speed - specified revolve speed, 2)
         // / power(max revolve speed, 2) (don't use double operation)
-        zTranslationGain =
+        zTranslationGain = 
             pow((ChassisSubsystem::OMNI_SPEED_MAX - fabs(chassisMoveZ) + MIN_ROTATION_THREASHOLD)
             / ( ChassisSubsystem::OMNI_SPEED_MAX * ChassisSubsystem::OMNI_SPEED_MAX), 2.0);
         
@@ -40,13 +39,19 @@ void ChassisAutorotateCommand::execute()
     }
     else
     {
-		zTranslationGain = 1;
+		zTranslationGain = 1.0f;
     }
 
-	chassisMoveX = aruwlib::algorithms::limitVal<float>(0/**/,
+    // translate x and y relative to turret for turret relative control
+    turretRelativeX = remoteMoveX
+        * static_cast<float>(cos(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
+    turretRelativeY = remoteMoveY
+        * static_cast<float>(sin(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
+
+	chassisMoveX = aruwlib::algorithms::limitVal<float>(turretRelativeX,
         -ChassisSubsystem::OMNI_SPEED_MAX * zTranslationGain,
          ChassisSubsystem::OMNI_SPEED_MAX * zTranslationGain);
-	chassisMoveY = aruwlib::algorithms::limitVal<float>(0,
+	chassisMoveY = aruwlib::algorithms::limitVal<float>(turretRelativeY,
         -ChassisSubsystem::OMNI_SPEED_MAX * zTranslationGain,
          ChassisSubsystem::OMNI_SPEED_MAX * zTranslationGain);
 
