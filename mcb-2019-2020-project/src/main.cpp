@@ -14,10 +14,8 @@ aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()
 {
-
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
     contiguousFloatTest.testCore();
-    contiguousFloatTest.extraFeatures();
     contiguousFloatTest.testBadBounds();
     contiguousFloatTest.testDifference();
     contiguousFloatTest.testRotationBounds();
