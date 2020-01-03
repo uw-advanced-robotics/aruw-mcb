@@ -60,6 +60,15 @@ class Remote {
     // Returns the value of the wheel
     static int16_t getWheel(void);
 
+    // Returns the value used for chassis movement forward and backward, between 0 and 1
+    static float getChassisX();
+
+    // Returns the value used for chassis movement side to side, between 0 and 1
+    static float getChassisY();
+
+    // Returns the value used for chassis rotation, between 0 and 1
+    static float getChassisZ();
+
  private:
     #define REMOTE_BUF_LEN 18  // Length of the remote recieve buffer
     #define REMOTE_READ_TIMEOUT 6  // Timeout delay between valid packets

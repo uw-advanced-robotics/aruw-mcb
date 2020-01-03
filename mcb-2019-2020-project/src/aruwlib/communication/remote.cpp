@@ -127,6 +127,24 @@ namespace aruwlib {
         return remote.wheel;
     }
 
+    float Remote::getChassisX()
+    {
+        return static_cast<float>(remote.leftHorizontal) / 660.0f
+            + static_cast<float>(keyPressed(Key::A) - keyPressed(Key::D));
+    }
+
+    float Remote::getChassisY()
+    {
+        return static_cast<float>(remote.leftVertical) / 660.0f
+            + static_cast<float>(keyPressed(Key::W) - keyPressed(Key::S));
+    }
+
+    float Remote::getChassisZ()
+    {
+        return static_cast<float>(remote.rightHorizontal) / 660.0f
+            + static_cast<float>(keyPressed(Key::E) - keyPressed(Key::Q));
+    }
+
     // Parses the current rxBuffer
     void Remote::parseBuffer() {
         // values implemented by shifting bits across based on the dr16

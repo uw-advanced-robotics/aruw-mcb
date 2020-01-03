@@ -53,13 +53,8 @@ namespace control
     }
 
 // todo fix style
-    float ChassisSubsystem::chassisSpeedZPID(int16_t errorReal, float kp)
-    {
-        static int16_t ErrorPrev = 0;
-        static int32_t ErrorSum = 0;
-        static int32_t ErrorPR = 0;
-        static int32_t ErrorPR_KF = 0;
-        
+    float ChassisSubsystem::chassisSpeedZPID(float errorReal, float kp)
+    {        
         float speed_z = 0;
 
         ErrorPR_KF = KalmanFilter(&chassisErrorKalman, errorReal);
@@ -69,8 +64,8 @@ namespace control
         rotationPidP = aruwlib::algorithms::limitVal<float>(rotationPidP, -CHASSIS_REVOLVE_PID_MAX_P, CHASSIS_REVOLVE_PID_MAX_P);
         
         //I
-        ErrorSum -= ErrorPR_KF;
-        rotationPidI = ErrorSum*3*0.002f; // todo fix this, i in general is messed up
+        ErrorSum -= ErrorPR_KF;         // .002 is time, 3 is the I term
+        rotationPidI = ErrorSum * 3 * 0.002f; // todo fix this, i in general is messed up
         if( abs(errorReal) <= 10)
         {
             ErrorSum = 0;

@@ -15,8 +15,8 @@ void ChassisAutorotateCommand::initialize()
 
 void ChassisAutorotateCommand::execute()
 {
-    float remoteMoveX = aruwlib::Remote::getChannel(aruwlib::Remote::Channel::LEFT_HORIZONTAL);
-    float remoteMoveY = aruwlib::Remote::getChannel(aruwlib::Remote::Channel::LEFT_VERTICAL);  // todo replace
+    float remoteMoveX = aruwlib::Remote::getChassisX();
+    float remoteMoveY = aruwlib::Remote::getChassisY();
     float turretRelativeX, turretRelativeY;
     float chassisMoveX, chassisMoveY, chassisMoveZ;
     // calculate pid for chassis rotation
@@ -43,19 +43,19 @@ void ChassisAutorotateCommand::execute()
     }
 
     // translate x and y relative to turret for turret relative control
+    // x output = remoteX * cos(angle between turret and center or chassis)
     turretRelativeX = remoteMoveX
         * static_cast<float>(cos(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
     turretRelativeY = remoteMoveY
         * static_cast<float>(sin(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
 
 	chassisMoveX = aruwlib::algorithms::limitVal<float>(turretRelativeX,
-        -ChassisSubsystem::OMNI_SPEED_MAX * zTranslationGain,
-         ChassisSubsystem::OMNI_SPEED_MAX * zTranslationGain);
+        -zTranslationGain, zTranslationGain);
 	chassisMoveY = aruwlib::algorithms::limitVal<float>(turretRelativeY,
-        -ChassisSubsystem::OMNI_SPEED_MAX * zTranslationGain,
-         ChassisSubsystem::OMNI_SPEED_MAX * zTranslationGain);
+        -zTranslationGain, zTranslationGain);
 
-    chassis->setDesiredOutput(chassisMoveX, chassisMoveY, chassisMoveZ);
+    chassis->setDesiredOutput(chassisMoveX * ChassisSubsystem::OMNI_SPEED_MAX,
+        chassisMoveY * ChassisSubsystem::OMNI_SPEED_MAX, chassisMoveZ);
 }
 
 void ChassisAutorotateCommand::end(bool interrupted)

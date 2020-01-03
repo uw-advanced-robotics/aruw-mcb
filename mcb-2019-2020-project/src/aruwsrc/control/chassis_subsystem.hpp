@@ -117,11 +117,17 @@ public:
      * 
      * @retval a desired rotation speed (wheel speed)
      */
-    float chassisSpeedZPID(int16_t errorReal, float kp);
+    float chassisSpeedZPID(float errorReal, float kp);
 
     void refresh(void);
 
 private:
+    // rotation pid parameters
+    float ErrorPrev = 0;
+    float ErrorSum = 0;
+    float ErrorPR = 0;
+    float ErrorPR_KF = 0;
+    
     /**
      * When you input desired x, y, an z values, this function translates
      * and sets the rpm of individual chassis motors
