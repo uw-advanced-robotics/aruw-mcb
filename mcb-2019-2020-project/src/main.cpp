@@ -26,6 +26,14 @@ bool pressed = true;
 
 int main()
 {
+    aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
+    contiguousFloatTest.testCore();
+    contiguousFloatTest.testBadBounds();
+    contiguousFloatTest.testDifference();
+    contiguousFloatTest.testRotationBounds();
+    contiguousFloatTest.testShiftingValue();
+    contiguousFloatTest.testWrapping();
+
     Board::initialize();
 
     aruwlib::Remote::initialize();
