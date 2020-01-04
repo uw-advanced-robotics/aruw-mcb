@@ -6,11 +6,11 @@ namespace aruwsrc
 namespace control
 {
 
-const float AgitatorUnjamCommand::agitatorSetpointToleranceDefault = PI / 16;
+const float AgitatorUnjamCommand::agitatorSetpointToleranceDefault = aruwlib::algorithms::PI / 16;
 
 const uint32_t AgitatorUnjamCommand::AGITATOR_MAX_WAIT_TIME = 130;
 
-const float AgitatorUnjamCommand::MIN_AGITATOR_UNJAM_ANGLE = PI / 4;
+const float AgitatorUnjamCommand::MIN_AGITATOR_UNJAM_ANGLE = aruwlib::algorithms::PI / 4;
 
 AgitatorUnjamCommand::AgitatorUnjamCommand(
     AgitatorSubsystem* agitator,

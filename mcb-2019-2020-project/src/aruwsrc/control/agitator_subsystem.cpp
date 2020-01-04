@@ -1,8 +1,8 @@
 #include "agitator_subsystem.hpp"
-#include "src/algorithms/math_user_utils.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include <modm/math/filter/pid.hpp>
-#include "src/control/subsystem.hpp"
-#include "src/motor/dji_motor.hpp"
+#include "src/aruwlib/control/subsystem.hpp"
+#include "src/aruwlib/motor/dji_motor.hpp"
 
 using namespace aruwlib::motor;
 
@@ -63,7 +63,7 @@ namespace control
         {
             return false;
         }
-        agitatorCalibrationAngle = (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) *
+        agitatorCalibrationAngle = (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
             agitatorMotor.encStore.getEncoderUnwrapped() / agitatorGearRatio;
         agitatorIsCalibrated = true;
         return true;
@@ -75,7 +75,7 @@ namespace control
         {
             return 0.0f;
         }
-        return (2.0f * PI / static_cast<float>(ENC_RESOLUTION)) * agitatorMotor.encStore.getEncoderUnwrapped()
+        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) * agitatorMotor.encStore.getEncoderUnwrapped()
             / agitatorGearRatio - agitatorCalibrationAngle;
     }
 

@@ -2,9 +2,9 @@
 #define __AGITATOR_UNJAM_COMMAND_HPP__
 
 #include <modm/processing/timer/timeout.hpp>
-#include "src/algorithms/math_user_utils.hpp"
-#include "src/control/command.hpp"
-#include "src/motor/dji_motor.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include "src/aruwlib/control/command.hpp"
+#include "src/aruwlib/motor/dji_motor.hpp"
 #include "agitator_subsystem.hpp"
 
 namespace aruwsrc

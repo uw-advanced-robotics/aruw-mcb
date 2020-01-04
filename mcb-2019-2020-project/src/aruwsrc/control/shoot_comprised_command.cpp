@@ -1,7 +1,7 @@
 #include "shoot_comprised_command.hpp"
 #include "agitator_rotate_command.hpp"
 #include "agitator_unjam_command.hpp"
-#include "src/control/command_scheduler.hpp"
+#include "src/aruwlib/control/command_scheduler.hpp"
 
 using namespace aruwlib::control;
 

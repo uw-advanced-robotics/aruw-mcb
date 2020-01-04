@@ -2,21 +2,23 @@
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 
-#include "src/control/command_scheduler.hpp"
-#include "src/control/example_command.hpp"
-#include "src/control/example_subsystem.hpp"
-#include "src/motor/dji_motor_tx_handler.hpp"
-#include "src/communication/can/can_rx_listener.hpp"
+#include "src/aruwlib/control/command_scheduler.hpp"
+#include "src/aruwsrc/control/example_command.hpp"
+#include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
+#include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwsrc/control/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator_rotate_command.hpp"
-#include "src/algorithms/math_user_utils.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include <modm/processing/timer.hpp>
 #include "src/aruwsrc/control/shoot_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator_unjam_command.hpp"
+#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 
-#include "src/communication/remote.hpp"
+#include "src/aruwlib/communication/remote.hpp"
 
 using namespace aruwsrc::control;
+using namespace aruwlib::algorithms;
 using namespace aruwlib;
 
 AgitatorSubsystem agitator17mm(36);
@@ -52,9 +54,9 @@ int main()
         modm::delayMilliseconds(1);
     }
 
-    modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, PI));
-    modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, PI / 5));
-    modm::SmartPointer shootCommand(new ShootComprisedCommand(&agitator17mm, PI / 5, PI / 2));
+    modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
+    modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5));
+    modm::SmartPointer shootCommand(new ShootComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2));
 
     while (1)
     {

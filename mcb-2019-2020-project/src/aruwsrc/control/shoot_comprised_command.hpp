@@ -1,7 +1,7 @@
 #ifndef __SHOOT_COMPRISED_COMMAND_HPP__
 #define __SHOOT_COMPRISED_COMMAND_HPP__
 
-#include "src/control/command.hpp"
+#include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
 
 namespace aruwsrc

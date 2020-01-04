@@ -4,8 +4,8 @@
 #include <modm/math/filter/pid.hpp>
 #include <modm/processing/timer/timeout.hpp>
 
-#include "src/control/subsystem.hpp"
-#include "src/motor/dji_motor.hpp"
+#include "src/aruwlib/control/subsystem.hpp"
+#include "src/aruwlib/motor/dji_motor.hpp"
 
 namespace aruwsrc
 {

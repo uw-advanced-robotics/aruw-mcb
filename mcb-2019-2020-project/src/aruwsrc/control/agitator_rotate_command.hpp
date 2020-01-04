@@ -3,7 +3,7 @@
 
 #include <modm/math/filter/pid.hpp>
 #include <modm/math/filter/ramp.hpp>
-#include "src/control/command.hpp"
+#include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
 
 namespace aruwsrc

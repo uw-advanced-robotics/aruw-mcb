@@ -1,12 +1,12 @@
 #include "agitator_rotate_command.hpp"
-#include "src/algorithms/math_user_utils.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
 
 namespace control
 {
-    const float AgitatorRotateCommand::agitatorSetpointToleranceDefault = PI / 16.0f;
+    const float AgitatorRotateCommand::agitatorSetpointToleranceDefault = aruwlib::algorithms::PI / 16.0f;
 
     const float AgitatorRotateCommand::AGITATOR_RAMP_INC = 0.07f;
 
