@@ -3,14 +3,20 @@
 
 #include <modm/platform/uart/uart_2.hpp>
 
-#include "src/aruwlib/communication/serial/ref_serial.hpp"
+#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 
-using namespace aruwlib::serial;
-
-RefSerial refSerial;
+aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()
 {
+    aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
+    contiguousFloatTest.testCore();
+    contiguousFloatTest.testBadBounds();
+    contiguousFloatTest.testDifference();
+    contiguousFloatTest.testRotationBounds();
+    contiguousFloatTest.testShiftingValue();
+    contiguousFloatTest.testWrapping();
+
     Board::initialize();
 
     refSerial.initialize();
