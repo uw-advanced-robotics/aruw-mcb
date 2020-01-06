@@ -40,7 +40,6 @@ class RefSerial : public DJISerial
     static const uint16_t REF_CUSTOM_DATA_TYPE_UI_INDICATOR = 0xD180;
 
  public:
-
     typedef enum
     {
         PREMATCH = 0,        // pre-competition stage
@@ -217,9 +216,9 @@ class RefSerial : public DJISerial
      */
     void messageReceiveCallback(SerialMessage completeMessage) override;
 
-    RobotData getRobotData(void) const;
+    const RobotData& getRobotData() const;
 
-    GameData getGameData(void) const;
+    const GameData& getGameData() const;
 
     void sendDisplayData(const DisplayData& displayData);
 
@@ -228,7 +227,7 @@ class RefSerial : public DJISerial
     GameData gameData;
     DamageTracker receivedDpsTracker;
 
-    void sendCustomData(CustomData& customData);
+    void sendCustomData(const CustomData& customData);
 
     /** 
      * @brief given 6 boolean variables to display to the referee ui, 
@@ -248,7 +247,7 @@ class RefSerial : public DJISerial
      * @return the client_id of the robot requested
      */
     uint16_t getRobotClientID(RobotId RobotId);
-        
+
     static float decodeTofloat(const uint8_t* start_byte);
     bool decodeToGameStatus(const SerialMessage& message);
     bool decodeToGameResult(const SerialMessage& message);
@@ -262,7 +261,6 @@ class RefSerial : public DJISerial
 
     void updateReceivedDamage();
     void processReceivedDamage(uint32_t timestamp, int32_t damageTaken);
-
 };
 
 }  // namespace serial

@@ -7,7 +7,10 @@ namespace serial
 {
 
 RefSerial::RefSerial() :
-DJISerial(DJISerial::SerialPort::PORT_UART6, true)
+DJISerial(DJISerial::SerialPort::PORT_UART6, true),
+robotData(),
+gameData(),
+receivedDpsTracker()
 {}
 
 // rx stuff
@@ -74,10 +77,13 @@ void RefSerial::sendDisplayData(const DisplayData& displayData)
     customData.senderId = getRobotClientID(robotData.robotId);
 
     // 3 float variables to display on the referee client UI
-    const uint32_t ref_comms_float_to_display1 = reinterpret_cast<const uint32_t&>(displayData.float1);
-    const uint32_t ref_comms_float_to_display2 = reinterpret_cast<const uint32_t&>(displayData.float2);
-    const uint32_t ref_comms_float_to_display3 = reinterpret_cast<const uint32_t&>(displayData.float3);
-   
+    const uint32_t ref_comms_float_to_display1
+        = reinterpret_cast<const uint32_t&>(displayData.float1);
+    const uint32_t ref_comms_float_to_display2
+        = reinterpret_cast<const uint32_t&>(displayData.float2);
+    const uint32_t ref_comms_float_to_display3
+        = reinterpret_cast<const uint32_t&>(displayData.float3);
+
     // 3 custom floats to display
     uint8_t data[13] = {
         static_cast<uint8_t>(ref_comms_float_to_display1),
@@ -109,7 +115,7 @@ void RefSerial::sendDisplayData(const DisplayData& displayData)
     return sendCustomData(customData);
 }
 
-void RefSerial::sendCustomData(CustomData& customData)
+void RefSerial::sendCustomData(const CustomData& customData)
 {
     // Exceed max length
     if (customData.length > CUSTOM_DATA_MAX_LENGTH)
@@ -151,7 +157,8 @@ void RefSerial::sendCustomData(CustomData& customData)
     this->txMessage.data[0] = static_cast<uint8_t>(customData.type);
     this->txMessage.data[1] = static_cast<uint8_t>(customData.type >> 8);
     this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH] = static_cast<uint8_t>(customData.senderId);
-    this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH + 1] = static_cast<uint8_t>(customData.senderId >> 8);
+    this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH + 1] =
+        static_cast<uint8_t>(customData.senderId >> 8);
     this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH] =
         static_cast<uint8_t>(customData.recipientId);
     this->txMessage.data[CUSTOM_DATA_TYPE_LENGTH + CUSTOM_DATA_SENDER_ID_LENGTH + 1] =
@@ -193,12 +200,14 @@ uint16_t RefSerial::getRobotClientID(RobotId RobotId)
     return retval + (uint16_t) RobotId;
 }
 
-RefSerial::RobotData RefSerial::getRobotData() const
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
+const RefSerial::RobotData& RefSerial::getRobotData() const
 {
     return robotData;
 }
 
-RefSerial::GameData RefSerial::getGameData() const
+// cppcheck-suppress unusedFunction //TODO Remove lint suppression
+const RefSerial::GameData& RefSerial::getGameData() const
 {
     return gameData;
 }
