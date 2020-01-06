@@ -14,7 +14,7 @@ class RefSerial : public DJISerial
 {
  private:
     // RX message constants
-    static const uint16_t REF_DAMAGE_EVENT_SIZE = 10;
+    static const uint16_t REF_DAMAGE_EVENT_SIZE = 20;
 
     static const uint16_t CUSTOM_DATA_MAX_LENGTH = 113;
     static const uint16_t CUSTOM_DATA_TYPE_LENGTH = 2;
@@ -212,8 +212,6 @@ class RefSerial : public DJISerial
 
     RefSerial();
 
-    void initialize(void);
-
     /**
      * Handles the types of messages defined above in the RX message handlers section
      */
@@ -262,6 +260,7 @@ class RefSerial : public DJISerial
     bool decodeToProjectileLaunch(const SerialMessage& message);
     bool decodeToSentinelDroneBulletsRemain(const SerialMessage& message);
 
+    void updateReceivedDamage();
     void processReceivedDamage(uint32_t timestamp, int32_t damageTaken);
 
 };

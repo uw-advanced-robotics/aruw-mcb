@@ -7,16 +7,15 @@ namespace serial
 {
 
 RefSerial::RefSerial() :
-DJISerial(DJISerial::SerialPort::PORT_UART2, true)
-{}
-
-void RefSerial::initialize(void)
+DJISerial(DJISerial::SerialPort::PORT_UART6, true)
 {}
 
 // rx stuff
 void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
 {
-    switch(completeMessage.type) {
+    updateReceivedDamage();
+    switch(completeMessage.type)
+    {
         case REF_MESSAGE_TYPE_GAME_STATUS:
         {
             decodeToGameStatus(completeMessage);
@@ -216,7 +215,8 @@ float RefSerial::decodeTofloat(const uint8_t* start_byte)
 
 bool RefSerial::decodeToGameStatus(const SerialMessage& message)
 {
-    if (message.length != 3) {
+    if (message.length != 3)
+    {
         return false;
     }
     gameData.gameStage = static_cast<GameStages>(message.data[0] >> 4);
@@ -226,7 +226,8 @@ bool RefSerial::decodeToGameStatus(const SerialMessage& message)
 
 bool RefSerial::decodeToGameResult(const SerialMessage& message)
 {
-    if (message.length != 1) {
+    if (message.length != 1)
+    {
         return false;
     }
     gameData.gameWinner = static_cast<GameWinner>(message.data[0]);
@@ -292,12 +293,10 @@ bool RefSerial::decodeToRobotStatus(const SerialMessage& message)
     robotData.chassisHasPower = (message.data[14] >> 1);
     robotData.shooterHasPower = (message.data[14] >> 2);
 
-    if (robotData.previousHp > robotData.currentHp)
-    {
-        processReceivedDamage(robotData.previousHp
-            - robotData.currentHp, message.messageTimestamp.getTime());
-        robotData.previousHp = robotData.currentHp;
-    }
+    processReceivedDamage(message.messageTimestamp.getTime(), robotData.previousHp
+        - robotData.currentHp);
+    robotData.previousHp = robotData.currentHp;
+
     return true;
 }
 
@@ -358,7 +357,8 @@ bool RefSerial::decodeToProjectileLaunch(const SerialMessage& message)
 bool RefSerial::decodeToSentinelDroneBulletsRemain(
     const SerialMessage& message
 ) {
-    if (message.length != 2) {
+    if (message.length != 2)
+    {
         return false;
     }
     robotData.turret.sentinelDroneBulletsRemain
@@ -371,21 +371,42 @@ void RefSerial::processReceivedDamage(uint32_t timestamp, int32_t damageTaken)
     if (damageTaken > 0)
     {
         // create a new received_damage_event with the damage_taken, and current time
-        DamageEvent damage_token = {static_cast<uint16_t>(damageTaken), timestamp};
+        DamageEvent damageToken = {
+            static_cast<uint16_t>(damageTaken),
+            timestamp
+        };
 
         // add the recently received damage to the end of the circular array
-        receivedDpsTracker.damageEvents[receivedDpsTracker.tail] = damage_token;
+        receivedDpsTracker.damageEvents[receivedDpsTracker.tail] = damageToken;
 
         // increment tail of circular array
         receivedDpsTracker.tail =
             (receivedDpsTracker.tail + 1) % REF_DAMAGE_EVENT_SIZE;
 
         // increment the head of the circular array if the tail has overwritten the original head
-        if (receivedDpsTracker.tail == receivedDpsTracker.head) {
+        if (receivedDpsTracker.tail == receivedDpsTracker.head)
+        {
             receivedDpsTracker.head =
                 (receivedDpsTracker.head + 1) % REF_DAMAGE_EVENT_SIZE;
         }
         robotData.receivedDps += damageTaken;
+    }
+}
+
+void RefSerial::updateReceivedDamage()
+{
+    // if current damage at head of circular array occurred more than a second ago,
+    // decrease receivedDps by that amount of damage and increment head index
+    while (modm::Clock::now().getTime() -
+        receivedDpsTracker.damageEvents
+            [receivedDpsTracker.head].timestampMs > 1000
+        && receivedDpsTracker.head != receivedDpsTracker.tail
+    ) {
+        robotData.receivedDps -=
+            receivedDpsTracker.damageEvents[receivedDpsTracker.head].damageAmount;
+        // increment head of circular array
+        receivedDpsTracker.head =
+            (receivedDpsTracker.head + 1) % REF_DAMAGE_EVENT_SIZE;
     }
 }
 
