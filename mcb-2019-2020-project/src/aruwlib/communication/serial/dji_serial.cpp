@@ -185,6 +185,8 @@ void DJISerial::updateSerial() {
                     if (!verifyCRC16(crc16CheckData,
                         FRAME_HEADER_LENGTH + newMessage.length, CRC16))
                     {
+                        delete[] crc16CheckData;
+                        djiSerialRxState = SERIAL_HEADER_SEARCH;
                         return;
                         // NON-FATAL-ERROR-CHECK
                     }

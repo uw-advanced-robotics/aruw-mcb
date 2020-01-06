@@ -11,10 +11,10 @@
  * Structure of a Serial Message:
  * Frame Head{
  * [Frame Head Byte(0xA5) 1 Byte]
- * [Frame Data Length (HSB Side Byte First, LSB Second) 2 Byte]
+ * [Frame Data Length (MSB Side Byte second, LSB first) 2 Byte]
  * [Frame Sequence Number 1 Byte]
  * [CRC8 of Bytes before 1 Byte]
- * [Message Type (HSB Side Byte First, LSB Second) 2 Byte]
+ * [Message Type (MSB second, LSB first) 2 Byte]
  * }
  * Frame Body{
  * [Frame Data]

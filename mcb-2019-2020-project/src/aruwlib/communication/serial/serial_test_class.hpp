@@ -9,7 +9,7 @@ namespace aruwlib
 namespace serial
 {
 
-class SerialTestClass : DJISerial
+class SerialTestClass : public DJISerial
 {
  private:
     uint8_t messageId;
