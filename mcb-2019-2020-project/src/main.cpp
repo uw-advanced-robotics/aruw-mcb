@@ -21,10 +21,10 @@ int main()
     Board::initialize();
     aruwlib::Remote::initialize();
     ChassisAutorotateCommand car(&soldierChassis, &soldierTurret);
-    // modm::SmartPointer chassisAutorotate(&car);
-    //     // new ChassisAutorotateCommand(&soldierChassis, &soldierTurret));
-    // CommandScheduler::registerSubsystem(&soldierChassis);
-    // CommandScheduler::addCommand(chassisAutorotate);
+    modm::SmartPointer chassisAutorotate(&car);
+        // new ChassisAutorotateCommand(&soldierChassis, &soldierTurret));
+    CommandScheduler::registerSubsystem(&soldierChassis);
+    CommandScheduler::addCommand(chassisAutorotate);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
@@ -36,10 +36,9 @@ int main()
         aruwlib::Remote::read();
         if (motorSendPeriod.execute())
         {
-            car.execute();
-            // soldierChassis.setDesiredOutput(1000, 0, 0);
-            soldierChassis.refresh();
-            // aruwlib::control::CommandScheduler::run();
+            // car.execute();
+            // soldierChassis.refresh();
+            aruwlib::control::CommandScheduler::run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
