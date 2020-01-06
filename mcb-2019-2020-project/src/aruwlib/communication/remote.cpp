@@ -129,13 +129,13 @@ namespace aruwlib {
 
     float Remote::getChassisX()
     {
-        return static_cast<float>(remote.leftHorizontal) / 660.0f
+        return static_cast<float>(remote.leftVertical) / 660.0f
             + static_cast<float>(keyPressed(Key::A) - keyPressed(Key::D));
     }
 
     float Remote::getChassisY()
     {
-        return static_cast<float>(remote.leftVertical) / 660.0f
+        return static_cast<float>(remote.leftHorizontal) / 660.0f
             + static_cast<float>(keyPressed(Key::W) - keyPressed(Key::S));
     }
 

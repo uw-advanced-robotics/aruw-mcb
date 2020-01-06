@@ -35,9 +35,9 @@ private:
     static const int REVOLVE_ANGLE                    = 35;
 
     // hardware constants
-    static constexpr aruwlib::motor::MotorId LEFT_FRONT_MOTOR_ID  = aruwlib::motor::MOTOR1;
-    static constexpr aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID   = aruwlib::motor::MOTOR2;
-    static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR3;
+    static constexpr aruwlib::motor::MotorId LEFT_FRONT_MOTOR_ID  = aruwlib::motor::MOTOR2;
+    static constexpr aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID   = aruwlib::motor::MOTOR3;
+    static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR1;
     static constexpr aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID  = aruwlib::motor::MOTOR4;
     static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
@@ -89,14 +89,30 @@ public:
         leftBotMotor(leftBotMotorId, CAN_BUS_MOTORS),
         rightTopMotor(rightTopMotorId, CAN_BUS_MOTORS),
         rightBotMotor(rightBotMotorId, CAN_BUS_MOTORS),
-        leftTopVelocityPid(VELOCITY_PID_KP, VELOCITY_PID_KI, VELOCITY_PID_KD,
-            VELOCITY_PID_MAX_ERROR_SUM, VELOCITY_PID_MAX_OUTPUT),
-        leftBotVelocityPid(VELOCITY_PID_KP, VELOCITY_PID_KI, VELOCITY_PID_KD,
-            VELOCITY_PID_MAX_ERROR_SUM, VELOCITY_PID_MAX_OUTPUT),
-        rightTopVelocityPid(VELOCITY_PID_KP, VELOCITY_PID_KI, VELOCITY_PID_KD,
-            VELOCITY_PID_MAX_ERROR_SUM, VELOCITY_PID_MAX_OUTPUT),
-        rightBotVelocityPid(VELOCITY_PID_KP, VELOCITY_PID_KI, VELOCITY_PID_KD,
-            VELOCITY_PID_MAX_ERROR_SUM, VELOCITY_PID_MAX_OUTPUT),
+        leftTopVelocityPid(
+            VELOCITY_PID_KP,
+            VELOCITY_PID_KI,
+            VELOCITY_PID_KD,
+            VELOCITY_PID_MAX_ERROR_SUM,
+            VELOCITY_PID_MAX_OUTPUT),
+        leftBotVelocityPid(
+            VELOCITY_PID_KP,
+            VELOCITY_PID_KI,
+            VELOCITY_PID_KD,
+            VELOCITY_PID_MAX_ERROR_SUM,
+            VELOCITY_PID_MAX_OUTPUT),
+        rightTopVelocityPid(
+            VELOCITY_PID_KP,
+            VELOCITY_PID_KI,
+            VELOCITY_PID_KD,
+            VELOCITY_PID_MAX_ERROR_SUM,
+            VELOCITY_PID_MAX_OUTPUT),
+        rightBotVelocityPid(
+            VELOCITY_PID_KP,
+            VELOCITY_PID_KI,
+            VELOCITY_PID_KD,
+            VELOCITY_PID_MAX_ERROR_SUM,
+            VELOCITY_PID_MAX_OUTPUT),
         leftFrontRpm(0),
         leftBackRpm(0),
         rightFrontRpm(0),
