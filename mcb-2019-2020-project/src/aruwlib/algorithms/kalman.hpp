@@ -1,28 +1,26 @@
 /**
-  * @author  Liu heng
-  * �������˲�������RoboMaster��̳  
+  * Robomaster source code code  
   */
-  
-#ifndef _KALMAN_H
-#define _KALMAN_H
 
+#ifndef __KALMAN_HPP__
+#define __KALMAN_HPP__
 
 typedef struct {
-    float X_last; //��һʱ�̵����Ž��  X(k-|k-1)
-    float X_mid;  //��ǰʱ�̵�Ԥ����  X(k|k-1)
-    float X_now;  //��ǰʱ�̵����Ž��  X(k|k)
-    float P_mid;  //��ǰʱ��Ԥ������Э����  P(k|k-1)
-    float P_now;  //��ǰʱ�����Ž����Э����  P(k|k)
-    float P_last; //��һʱ�����Ž����Э����  P(k-1|k-1)
-    float kg;     //kalman����
-    float A;      //ϵͳ����
-	float B;
+    float X_last;
+    float X_mid;
+    float X_now;
+    float P_mid;
+    float P_now;
+    float P_last;
+    float kg;
+    float A;
+    float B;
     float Q;
     float R;
     float H;
-}extKalman_t;
+} ExtKalman;
 
-void KalmanCreate(extKalman_t *p,float T_Q,float T_R);
-float KalmanFilter(extKalman_t* p,float dat);
+void KalmanCreate(ExtKalman *p, float T_Q, float T_R);
+float KalmanFilter(ExtKalman* p, float dat);
 
 #endif

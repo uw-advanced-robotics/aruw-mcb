@@ -40,7 +40,7 @@ class ChassisAutorotateCommand : public Command
 
  private:
     static constexpr double MIN_ROTATION_THREASHOLD = 800.0;
-    ChassisSubsystem* chassis;   
+    ChassisSubsystem* chassis;
     TurretSubsystem* turret;
 };
 

@@ -13,7 +13,7 @@
 #include "aruwsrc/control/example_command.hpp"
 #include "aruwsrc/control/turret_subsystem.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
- 
+
 using namespace aruwsrc::control;
 
 ChassisSubsystem soldierChassis;
@@ -33,7 +33,8 @@ int main()
     Board::initialize();
     aruwlib::Remote::initialize();
 
-    modm::SmartPointer chassisAutorotate(new ChassisAutorotateCommand(&soldierChassis, &soldierTurret));
+    modm::SmartPointer chassisAutorotate(
+        new ChassisAutorotateCommand(&soldierChassis, &soldierTurret));
     modm::SmartPointer frictionWheelSpinCommand(new ExampleCommand(&frictionWheelSubsystem));
 
     CommandScheduler::registerSubsystem(&soldierChassis);

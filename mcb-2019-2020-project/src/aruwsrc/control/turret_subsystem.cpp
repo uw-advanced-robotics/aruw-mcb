@@ -14,9 +14,11 @@ float angle2 = 0.0f;
 
 void TurretSubsystem::refresh()
 {
-    desiredAngle = 90.0f + 30.0f * static_cast<float>( aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL) ) / 660.0f;
+    // todo(matthew) just for testing, fix when we actually do turret stuff
+    desiredAngle = 90.0f + 30.0f * static_cast<float>(
+        aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL) ) / 660.0f;
     yawPid.update(desiredAngle - this->getGimbalAngle());
-    angle = getGimbalAngle();   
+    angle = getGimbalAngle();
     yawGimbal.setDesiredOutput(yawPid.getValue());
     angle2 = gimbalGetOffset();
 }
@@ -31,6 +33,6 @@ float TurretSubsystem::getGimbalAngle()  // 90 is center, between 0 and 360
     return 90.0f + 360.0f * (yawGimbal.encStore.getEncoderWrapped() - 4750.0f) / 8192.0f;
 }
 
-}
+}  // namespace control
 
-}
+}  // namespace aruwsrc

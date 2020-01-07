@@ -8,7 +8,6 @@ namespace control
 {
     void ChassisSubsystem::setDesiredOutput(float x, float y, float z)
     {
-        // TODO calculate motor rpm values based on given x, y, and r
         chassisOmniMoveCalculate(x, y, z, OMNI_SPEED_MAX);
     }
 
@@ -20,17 +19,20 @@ namespace control
         updateMotorRpmPid(&rightBotVelocityPid, &rightBotMotor, rightBackRpm);
     }
 
-    // // todo fix all of this or insure it is correct
     void ChassisSubsystem::chassisOmniMoveCalculate(float x, float y, float z, float speedMax)
     {
         float rotateRatioFL, rotateRatioRF, rotateRatioBL, rotateRatioBR;
         float chassisRotationRatio = (WHEELBASE + WHEELTRACK) / 2.0f;
 
-        rotateRatioFL = DEGREES_TO_RADIANS(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);//todo fix this
-        rotateRatioRF = DEGREES_TO_RADIANS(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
-        rotateRatioBL = DEGREES_TO_RADIANS(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-        rotateRatioBR = DEGREES_TO_RADIANS(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
-    
+        rotateRatioFL = DEGREES_TO_RADIANS(
+            chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        rotateRatioRF = DEGREES_TO_RADIANS(
+            chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+        rotateRatioBL = DEGREES_TO_RADIANS(
+            chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        rotateRatioBR = DEGREES_TO_RADIANS(
+            chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+
         float zTrans = RADIANS_TO_DEGREES(z) / chassisRotationRatio;
         leftFrontRpm  =  ( y + x + zTrans * rotateRatioFL);
         rightFrontRpm = -(-y + x - zTrans * rotateRatioRF);
@@ -52,30 +54,20 @@ namespace control
         motor->setDesiredOutput(pid->getValue());
     }
 
-// todo fix style
     float ChassisSubsystem::chassisSpeedZPID(float errorReal, float kp)
     {
         float speed_z = 0;
 
         ErrorPR_KF = KalmanFilter(&chassisErrorKalman, errorReal);
-        
-        //P
-        rotationPidP = errorReal * kp;
-        rotationPidP = aruwlib::algorithms::limitVal<float>(rotationPidP, -CHASSIS_REVOLVE_PID_MAX_P, CHASSIS_REVOLVE_PID_MAX_P);
-        
-        //I
-        ErrorSum -= ErrorPR_KF;         // .002 is time, 3 is the I term
-        rotationPidI = ErrorSum * 3 * 0.002f; // todo fix this, i in general is messed up
-        if( abs(errorReal) <= 10)
-        {
-            ErrorSum = 0;
-        }
 
-        rotationPidI = aruwlib::algorithms::limitVal<float>(rotationPidI,-5000,5000);
-        
-        //D
+        // P
+        rotationPidP = errorReal * kp;
+        rotationPidP = aruwlib::algorithms::limitVal<float>(rotationPidP,
+            -CHASSIS_REVOLVE_PID_MAX_P, CHASSIS_REVOLVE_PID_MAX_P);
+
+        // D
         ErrorPR = ErrorPR_KF - ErrorPrev;
-        
+
         if(abs(ErrorPR_KF) > REVOLVE_ANGLE)
         {
             rotationPidD = -(ErrorPR) * CHASSIS_REVOLVE_PID_KD;
@@ -85,21 +77,21 @@ namespace control
             rotationPidD = 0;
         }
 
-        speed_z = rotationPidP + rotationPidD; // + rotationPidI
+        speed_z = rotationPidP + rotationPidD;
         speed_z = aruwlib::algorithms::limitVal<float>(speed_z, -OMNI_SPEED_MAX, OMNI_SPEED_MAX);
 
         ErrorPrev = ErrorPR_KF;
-        
+
         return speed_z;
     }
 
     void ChassisSubsystem::chassisPowerLimit(void)
     {
-        bool judgementSystemInvalid = false; // todo
-        float currChassisPowerBuffer = 0.0f; // todo
+        bool judgementSystemInvalid = false;  // todo
+        float currChassisPowerBuffer = 0.0f;  // todo
             // run low pass filter on power buffer input
             // run low pass filter on motor current input
-        
+
         // total current output desired, to be compared with current limit
         float allMotorCurrentOutput =
             leftTopMotor.getVoltageDesired()

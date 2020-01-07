@@ -13,7 +13,7 @@ namespace control
 {
 
 class ChassisDriveCommand : public Command {
-public:
+ public:
     explicit ChassisDriveCommand(ChassisSubsystem* chassis = nullptr);
 
     /**
@@ -43,8 +43,8 @@ public:
       * @return whether the command has finished.
       */
     bool isFinished(void) const;
-    
-private:
+
+ private:
     ChassisSubsystem* chassis;
 };
 

@@ -15,12 +15,12 @@ namespace control
 {
 
 class ChassisSubsystem : public Subsystem {
-public:
+ public:
     // public constants
     static const int OMNI_SPEED_MAX                  = 9000;
     static constexpr float CHASSIS_AUTOROTATE_PID_KP = -100.0f;
 
-private:
+ private:
     // velocity pid gains and constants
     const float VELOCITY_PID_KP            = 10.0f;
     const float VELOCITY_PID_KI            = 0.0f;
@@ -73,12 +73,11 @@ private:
     float rightBackRpm;
 
     // rotation pid variables
-    extKalman_t chassisErrorKalman;
+    ExtKalman chassisErrorKalman;
     float rotationPidP = 0;
-    float rotationPidI = 0;
     float rotationPidD = 0;
 
-public:
+ public:
     ChassisSubsystem(
         aruwlib::motor::MotorId leftTopMotorId = LEFT_FRONT_MOTOR_ID,
         aruwlib::motor::MotorId leftBotMotorId = LEFT_BACK_MOTOR_ID,
@@ -137,13 +136,13 @@ public:
 
     void refresh(void);
 
-private:
+ private:
     // rotation pid parameters
     float ErrorPrev = 0;
     float ErrorSum = 0;
     float ErrorPR = 0;
     float ErrorPR_KF = 0;
-    
+
     /**
      * When you input desired x, y, an z values, this function translates
      * and sets the rpm of individual chassis motors
