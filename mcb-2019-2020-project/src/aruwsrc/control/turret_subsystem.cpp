@@ -10,6 +10,7 @@ namespace control
 
 float desiredAngle = 0.0f;
 float angle = 0.0f;
+float angle2 = 0.0f;
 
 void TurretSubsystem::refresh()
 {
@@ -17,6 +18,7 @@ void TurretSubsystem::refresh()
     yawPid.update(desiredAngle - this->getGimbalAngle());
     angle = getGimbalAngle();   
     yawGimbal.setDesiredOutput(yawPid.getValue());
+    angle2 = gimbalGetOffset();
 }
 
 float TurretSubsystem::gimbalGetOffset()

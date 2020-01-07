@@ -16,8 +16,8 @@ void ChassisAutorotateCommand::execute()
     float remoteMoveX = aruwlib::Remote::getChassisX();
     float remoteMoveY = aruwlib::Remote::getChassisY();
 
-    float turretRelativeX, turretRelativeY;
     float chassisMoveX, chassisMoveY, chassisMoveZ;
+    float turretRelativeX, turretRelativeY;
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
     chassisMoveZ = chassis->chassisSpeedZPID(turret->gimbalGetOffset(), ChassisSubsystem::CHASSIS_AUTOROTATE_PID_KP);
@@ -42,13 +42,13 @@ void ChassisAutorotateCommand::execute()
     }
 
     // translate x and y relative to turret for turret relative control
-    // x output = remoteX * cos(angle between turret and center or chassis)
-    // turretRelativeX = remoteMoveX
-    //     * static_cast<float>(cos(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
-    // turretRelativeY = remoteMoveY
-    //     * static_cast<float>(sin(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
-    turretRelativeX = remoteMoveX;
-    turretRelativeY = remoteMoveY;
+    // translation matrix:
+    // translate the controls by angle theta defined by the gimbal center offset
+    double gimbalOffsetRad = -static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()));
+    turretRelativeX = remoteMoveX * static_cast<float>(cos(gimbalOffsetRad))
+        - remoteMoveY * static_cast<float>(sin(gimbalOffsetRad));
+    turretRelativeY = remoteMoveX * static_cast<float>(sin(gimbalOffsetRad))
+        + remoteMoveY * static_cast<float>(cos(gimbalOffsetRad));
 
 	chassisMoveX = aruwlib::algorithms::limitVal<float>(turretRelativeX,
         -zTranslationGain, zTranslationGain);
