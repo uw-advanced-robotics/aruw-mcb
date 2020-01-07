@@ -18,7 +18,7 @@ class ChassisSubsystem : public Subsystem {
 public:
     // public constants
     static const int OMNI_SPEED_MAX                  = 9000;
-    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -10.0f;
+    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -100.0f;
 
 private:
     // velocity pid gains and constants

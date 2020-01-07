@@ -29,10 +29,10 @@ void ChassisAutorotateCommand::execute()
     if (fabs(chassisMoveZ) > MIN_ROTATION_THREASHOLD)
     {
         // power(max revolve speed - specified revolve speed, 2)
-        // / power(max revolve speed, 2) (don't use double operation)
+        // / power(max revolve speed, 2)
         zTranslationGain = 
-            pow((ChassisSubsystem::OMNI_SPEED_MAX - fabs(chassisMoveZ) + MIN_ROTATION_THREASHOLD)
-            / ( ChassisSubsystem::OMNI_SPEED_MAX * ChassisSubsystem::OMNI_SPEED_MAX), 2.0);
+            pow( (static_cast<double>(ChassisSubsystem::OMNI_SPEED_MAX + MIN_ROTATION_THREASHOLD) - fabs(chassisMoveZ) )
+            / static_cast<double>(ChassisSubsystem::OMNI_SPEED_MAX), 2.0);
         
         zTranslationGain = aruwlib::algorithms::limitVal<float>(zTranslationGain, 0.0f, 1.0f);
     }
@@ -43,18 +43,20 @@ void ChassisAutorotateCommand::execute()
 
     // translate x and y relative to turret for turret relative control
     // x output = remoteX * cos(angle between turret and center or chassis)
-    turretRelativeX = remoteMoveX
-        * static_cast<float>(cos(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
-    turretRelativeY = remoteMoveY
-        * static_cast<float>(sin(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
+    // turretRelativeX = remoteMoveX
+    //     * static_cast<float>(cos(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
+    // turretRelativeY = remoteMoveY
+    //     * static_cast<float>(sin(static_cast<double>(DEGREES_TO_RADIANS(turret->gimbalGetOffset()))));
+    turretRelativeX = remoteMoveX;
+    turretRelativeY = remoteMoveY;
 
 	chassisMoveX = aruwlib::algorithms::limitVal<float>(turretRelativeX,
         -zTranslationGain, zTranslationGain);
 	chassisMoveY = aruwlib::algorithms::limitVal<float>(turretRelativeY,
         -zTranslationGain, zTranslationGain);
 
-    chassis->setDesiredOutput(remoteMoveX * ChassisSubsystem::OMNI_SPEED_MAX,
-        remoteMoveY * ChassisSubsystem::OMNI_SPEED_MAX, 0);
+    chassis->setDesiredOutput(chassisMoveX * ChassisSubsystem::OMNI_SPEED_MAX,
+        chassisMoveY * ChassisSubsystem::OMNI_SPEED_MAX, chassisMoveZ);
 }
 
 void ChassisAutorotateCommand::end(bool interrupted)

@@ -54,7 +54,7 @@ namespace control
 
 // todo fix style
     float ChassisSubsystem::chassisSpeedZPID(float errorReal, float kp)
-    {        
+    {
         float speed_z = 0;
 
         ErrorPR_KF = KalmanFilter(&chassisErrorKalman, errorReal);
@@ -85,7 +85,7 @@ namespace control
             rotationPidD = 0;
         }
 
-        speed_z = rotationPidP + rotationPidD; // + speed_i_pterm
+        speed_z = rotationPidP + rotationPidD; // + rotationPidI
         speed_z = aruwlib::algorithms::limitVal<float>(speed_z, -OMNI_SPEED_MAX, OMNI_SPEED_MAX);
 
         ErrorPrev = ErrorPR_KF;

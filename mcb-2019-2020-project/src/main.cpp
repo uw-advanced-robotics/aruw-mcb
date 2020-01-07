@@ -16,6 +16,8 @@ using namespace aruwsrc::control;
 ChassisSubsystem soldierChassis;
 TurretSubsystem soldierTurret;
 
+float turretOffset = 0.0f;
+
 int main()
 {
     Board::initialize();
@@ -24,6 +26,7 @@ int main()
     modm::SmartPointer chassisAutorotate(&car);
         // new ChassisAutorotateCommand(&soldierChassis, &soldierTurret));
     CommandScheduler::registerSubsystem(&soldierChassis);
+    CommandScheduler::registerSubsystem(&soldierTurret);
     CommandScheduler::addCommand(chassisAutorotate);
 
     // timers
@@ -36,6 +39,7 @@ int main()
         aruwlib::Remote::read();
         if (motorSendPeriod.execute())
         {
+            turretOffset = soldierTurret.gimbalGetOffset();
             // car.execute();
             // soldierChassis.refresh();
             aruwlib::control::CommandScheduler::run();

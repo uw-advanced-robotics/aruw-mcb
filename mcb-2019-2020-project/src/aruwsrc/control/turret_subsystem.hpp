@@ -1,6 +1,8 @@
 #ifndef __TURRET_SUBSYSTEM_HPP__
 #define __TURRET_SUBSYSTEM_HPP__
 
+#include <modm/math/filter/pid.hpp>
+
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
@@ -16,22 +18,20 @@ namespace control
 class TurretSubsystem : public Subsystem
 {
  public:
-    TurretSubsystem(void)
-    : yawGimbal(aruwlib::motor::MOTOR5, aruwlib::can::CanBus::CAN_BUS1) {}
+    TurretSubsystem()
+    : yawGimbal(aruwlib::motor::MOTOR5, aruwlib::can::CanBus::CAN_BUS1),
+    yawPid(3000.0f, 0.0f, 10000.0f, 0.0f, 15000.0f)
+    {}
 
-    void refresh(void) {}
+    void refresh();
 
-    float gimbalGetOffset(void)
-    {  // todo replace, use angle in degrees
-        return getGimbalAngle() - 90.0f;
-    }
+    float gimbalGetOffset();
 
-    float getGimbalAngle(void)  // 90 is center, between 0 and 360
-    {  // todo fix, just for testing chassis
-        return 360.0f * (yawGimbal.encStore.getEncoderWrapped() - 4750.0f) / 8192.0f;
-    }
+    float getGimbalAngle();
  private:
     aruwlib::motor::DjiMotor yawGimbal;
+
+    modm::Pid<float> yawPid;
 };
 
 }  // namespace control
