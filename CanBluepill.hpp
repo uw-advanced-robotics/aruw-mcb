@@ -1,8 +1,8 @@
 #ifndef __CAN_BLUEPILL__
 #define __CAN_BLUEPILL__
 
-#include <dji_motor_tx_handler.hpp>
-#include <can_rx_listener.hpp> 
+#include "src/motor/dji_motor_tx_handler.hpp"
+#include "can_rx_listener.hpp" 
 #include "src/communication/can/can_rx_handler.hpp"
 #include <stdio.h>
 
@@ -37,9 +37,7 @@ namespace aruwlib
             /** Given an id, length and four integers, 
              * packet that into can message and send it 
              */ 
-            void transferMessage(modm::can::Message can, int len, int16_t val1, int16_t val2 , int16_t val3 , int16_t val4, bool can1Test); //tx
-            
-            void printCanMsg();
+            void transferMessage(modm::can::Message can, int len, int16_t val1, int16_t val2 , int16_t val3 , int16_t val4, int can_channel); 
             
             modm::can::Message can;
 
@@ -52,7 +50,7 @@ namespace aruwlib
 
             /** Packs the msg.bug[] with the given int byte by byte in little endian
              */ 
-            void packArray(int16_t x, modm::can::Message* message);
+            void serializeCanBluePillSendData(int16_t ints_to_send[4], modm::can::Message* message);
         };
 
     }
