@@ -1,4 +1,4 @@
-#include "can_bluepill.hpp" 
+#include "can_bluepill.hpp"
 #include "src/communication/can/can_rx_handler.hpp"
 
 namespace aruwlib
@@ -13,49 +13,23 @@ namespace aruwlib
             }
         }
 
-        void CanBluepill::transferMessage(modm::can::Message can, int length, int16_t val1, int16_t val2 , int16_t val3 , int16_t val4, bool can1Test) {
+        void CanBluepill::transferMessage(modm::can::Message can, int length, int16_t val1, int16_t val2 , int16_t val3 , int16_t val4, int can_channel) {
             modm::can::Message message;
             message.identifier = can.identifier;
             message.length = length;
-        
-            packArray(val1, &message);
-            packArray(val2, &message);
-            packArray(val3, &message);
-            packArray(val4, &message);
+            int16_t ints_to_send[4] = {val1, val2, val3, val4};
+            serializeCanBluePillSendData(ints_to_send, &message);
 
             message.setExtended(false); 
 
-            if (can1Test) {
+            if (can_channel = 1) {
                 Can1::sendMessage(message);
             }
-            else 
+            else // can_channel = 2
             {
                 Can2::sendMessage(message); 
             }
         
-        }
-                
-        void CanBluepill::printCanMsg() {
-            // printf("MB: ");
-            // printf(mcbMessage); 
-
-            // printf("ID: 0x ");
-            // printf(mcbMessage.identifier, HEX); // how do we do this in cpp
-
-            // printf("EXT: ");
-            // printf(mcbMessage.flags); 
-
-            // printf("LEN: ");
-            // printf(mcbMessage.length);
-                
-            // printf("DATA: ");
-            //     for (int16_t i = 0; i < mcbMessage.length; i+=2) {
-            //         int16_t x = mcbMessage.data[i];
-            //         x += mcbMessage.data[i + 1] << 8;
-            //         printf(x);
-            //         printf(" ");
-            //     }
-            // printf("");
         }
 
         void CanBluepill::storeMessage(const modm::can::Message& message) {
@@ -67,11 +41,10 @@ namespace aruwlib
             memcpy(mcbMessage.data, message.data, sizeof(message.data));
         }
 
-        void CanBluepill::packArray(int16_t x, modm::can::Message* message) { // fix!!!!!! arhghghghgh
-            char byte;
-            for (int16_t i = message->length; i >= 0; i--) {
-                byte = x >> (i * 8);
-                message->data[i] = byte & 0xFF;
+        void CanBluepill::serializeCanBluePillSendData(int16_t ints_to_send[4], modm::can::Message* message) {
+            for (int16_t i = 0; i < 4; i++) {
+                message->data[2 * i + 1] = ints_to_send[i] >> 8;
+                message->data[2 * i] = ints_to_send[i] & 0xFF;
             }
         }
 
