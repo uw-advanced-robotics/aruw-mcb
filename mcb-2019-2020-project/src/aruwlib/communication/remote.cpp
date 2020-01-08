@@ -40,7 +40,7 @@ namespace aruwlib {
         }
         uint8_t data;  // Next byte to be read
         // Read next byte if available and more needed for the current packet
-        while (Usart1::read(data) && currentBufferIndex < REMOTE_BUF_LEN){
+        while (Usart1::read(data) && currentBufferIndex < REMOTE_BUF_LEN) {
             rxBuffer[currentBufferIndex] = data;
             currentBufferIndex++;
             lastRead = modm::Clock::now();
@@ -50,7 +50,7 @@ namespace aruwlib {
             clearRxBuffer();
         }
         // Parse buffer if all 18 bytes are read
-        if (currentBufferIndex >= REMOTE_BUF_LEN){
+        if (currentBufferIndex >= REMOTE_BUF_LEN) {
             connected = true;
             parseBuffer();
             clearRxBuffer();
@@ -58,15 +58,13 @@ namespace aruwlib {
     }
 
     // Returns if the remote is connected
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     bool Remote::isConnected() {
         return connected;
     }
 
     // Returns the value of the given channel
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getChannel(Channel ch) {
-        switch (ch){
+        switch (ch) {
             case Channel::RIGHT_HORIZONTAL: return remote.rightHorizontal;
             case Channel::RIGHT_VERTICAL: return remote.rightVertical;
             case Channel::LEFT_HORIZONTAL: return remote.leftHorizontal;
@@ -76,7 +74,6 @@ namespace aruwlib {
     }
 
     // Returns the value of the given switch
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     Remote::SwitchState Remote::getSwitch(Switch sw) {
         switch (sw) {
             case Switch::LEFT_SWITCH: return remote.leftSwitch;
@@ -86,43 +83,35 @@ namespace aruwlib {
     }
 
     // Returns the current mouse x value
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getMouseX() {
         return remote.mouse.x;
     }
 
     // Returns the current mouse y value
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getMouseY() {
         return remote.mouse.y;
     }
 
     // Returns the current mouse z value
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getMouseZ() {
         return remote.mouse.z;
     }
 
     // Returns the current mouse l value
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     bool Remote::getMouseL() {
         return remote.mouse.l;
     }
 
     // Returns the current mouse r value
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     bool Remote::getMouseR() {
         return remote.mouse.r;
     }
 
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
-    // Returns whether or not the given key is pressed
     bool Remote::keyPressed(Key key) {
         return (remote.key & (1 << (uint8_t) key)) != 0;
     }
 
     // Returns the value of the wheel
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getWheel() {
         return remote.wheel;
     }
@@ -203,7 +192,7 @@ namespace aruwlib {
         // Reset bytes read counter
         currentBufferIndex = 0;
         // Clear remote rxBuffer
-        for (int i = 0; i < REMOTE_BUF_LEN; i++){
+        for (int i = 0; i < REMOTE_BUF_LEN; i++) {
             rxBuffer[i] = 0;
         }
         // Clear Usart1 rxBuffer
