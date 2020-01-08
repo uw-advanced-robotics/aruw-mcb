@@ -2,21 +2,19 @@
 
 KeyStateToggle::KeyStateToggle(aruwlib::Remote::Key key){
     currKey = key;
-    current_state = false;
-    is_pressed = false;
+    currentToggleState = false;
+    PrevState = false;
 }
 
-void KeyStateToggle::KeyToggleHandler(bool input){
-    if(input != keyToggled()){
-        is_pressed = !is_pressed;
-        current_state != current_state;
+void KeyStateToggle::KeyToggleHandler(){
+    bool input = aruwlib::Remote::keyPressed(currKey);
+    // only when input is true
+    if (input && PrevState != input) {
+        currentToggleState = !currentToggleState;
     }
+    PrevState = input;
 }
 
 bool KeyStateToggle::keyToggled() const{
-    return is_pressed;
-}
-
-bool KeyStateToggle::currState() const{
-    return current_state;
+    return PrevState;
 }
