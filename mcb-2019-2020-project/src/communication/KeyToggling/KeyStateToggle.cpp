@@ -7,10 +7,17 @@ KeyStateToggle::KeyStateToggle(aruwlib::Remote::Key key){
 }
 
 void KeyStateToggle::KeyToggleHandler(bool input){
-    if(input != keyToggled()){
-        is_pressed = !is_pressed;
-        current_state != current_state;
+    input = aruwlib::Remote::keyPressed(currKey);
+    // only when input is true
+    if (input && is_pressed != input) {
+        current_state = !current_state;
     }
+    is_pressed = input;
+
+    // if(input != is_pressed && ){
+    //     is_pressed = !is_pressed;
+    //     // current_state = !current_state;
+    // }
 }
 
 bool KeyStateToggle::keyToggled() const{
