@@ -54,8 +54,10 @@ int main()
         modm::delayMilliseconds(1);
     }
 
-    modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
-    modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5));
+    ShootComprisedCommand shoot(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2);
+
+    // modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
+    // modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5));
     modm::SmartPointer shootCommand(new ShootComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2));
 
     while (1)
@@ -76,7 +78,6 @@ int main()
         // run scheduler
         if (t.execute())
         {
-            Remote::read();
             t.restart(2);
             control::CommandScheduler::run();
             motor::DjiMotorTxHandler::processCanSendData();
@@ -84,6 +85,7 @@ int main()
 
         // do this as fast as you can
         can::CanRxHandler::pollCanData();
+        Remote::read();
 
         modm::delayMicroseconds(10);
     }
