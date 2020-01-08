@@ -6,8 +6,6 @@
 #define CAN_DJI_MESSAGE_SEND_LENGTH 8
 #define CAN_DJI_LOW_IDENTIFIER 0X200
 #define CAN_DJI_HIGH_IDENTIFIER 0X1FF
-#define MCB_CAN_ID 0x100
-
 
 namespace aruwlib
 {
@@ -72,28 +70,11 @@ namespace motor
         );
         can2MessageHigh.setExtended(false);
 
-        // Test Code 
-        modm::can::Message canMCBMessage(
-            MCB_CAN_ID,
-            CAN_DJI_MESSAGE_SEND_LENGTH
-        );
-        canMCBMessage.setExtended(false);//new
-        //new
-        canMCBMessage.data[1] = 16 >> 8;
-        canMCBMessage.data[0] = 16 & 0xFF;
-        canMCBMessage.data[3] = 17 >> 8;
-        canMCBMessage.data[2] = 17 & 0xFF;
-        canMCBMessage.data[5] = 18 >> 8;
-        canMCBMessage.data[4] = 18 & 0xFF;
-        canMCBMessage.data[7] = 19 >> 8;
-        canMCBMessage.data[6] = 19 & 0xFF;
-
         serializeMotorStoreSendData(can1MotorStore, &can1MessageLow, &can1MessageHigh);
         serializeMotorStoreSendData(can2MotorStore, &can2MessageLow, &can2MessageHigh);
 
         if (Can1::isReadyToSend())
         {
-            Can1::sendMessage(canMCBMessage);//new
             Can1::sendMessage(can1MessageLow);
             Can1::sendMessage(can1MessageHigh);
         }
