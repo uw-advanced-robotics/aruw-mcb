@@ -24,7 +24,9 @@ namespace aruwlib
             /** Creates a can object with given id 
              * Calls attachReceiveHandler to add to list of on recieve functions
              */
-            CanBluepill(uint32_t id) : CanRxListner(static_cast<uint32_t>(id), CanBus::CAN_BUS1)
+            uint32_t id = 0x201; 
+
+            CanBluepill(id) : CanRxListner(static_cast<uint32_t>(id), CanBus::CAN_BUS1)
             {
                 mcbMessage.setExtended(false); 
             } 
