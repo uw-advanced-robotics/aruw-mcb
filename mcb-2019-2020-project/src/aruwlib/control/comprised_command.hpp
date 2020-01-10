@@ -13,14 +13,7 @@ namespace control
 
 
 class ComprisedCommand : public Command
-{
- public:
-    virtual void initialize() = 0;
-
-    virtual void execute() = 0;
-
-    virtual void end(bool interrupted) = 0;
-};
+{};
 
 }  // namespace control
 

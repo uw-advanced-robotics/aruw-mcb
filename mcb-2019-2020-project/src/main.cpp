@@ -12,6 +12,8 @@
 
 #include "src/aruwsrc/control/example_comprised_command.hpp"
 
+#include "SEGGER_RTT.h"
+
 aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()

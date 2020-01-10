@@ -3,6 +3,7 @@
 
 #include "src/aruwlib/control/comprised_command.hpp"
 #include "example_command.hpp"
+#include "example_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -13,21 +14,13 @@ namespace control
 class ExampleComprisedCommand : public ComprisedCommand
 {
  public:
-    ExampleComprisedCommand(ExampleSubsystem* subsystem) : exampleCommand(new ExampleCommand(subsystem))
-    {
-        this->addSubsystemRequirement(subsystem);
-    }
+    ExampleComprisedCommand(ExampleSubsystem* subsystem);
 
-    void initialize()
-    {
-        CommandScheduler::addCommand(exampleCommand);
-    }
+    void initialize();
 
-    void execute()
-    {}
+    void execute();
 
-    void end(bool interrupted)
-    {}
+    void end(bool interrupted);
 
  private:
     modm::SmartPointer exampleCommand;
