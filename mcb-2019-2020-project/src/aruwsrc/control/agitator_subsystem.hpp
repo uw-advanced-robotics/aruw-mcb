@@ -28,7 +28,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
 
     bool agitatorCalibrateHere(void);
 
-    void armAgitatorUnjamTimer(void);
+    void armAgitatorUnjamTimer(uint32_t additionalUnjamTimeout);
 
     void disarmAgitatorUnjamTimer(void);
 

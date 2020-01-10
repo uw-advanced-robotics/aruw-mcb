@@ -17,7 +17,7 @@
 #define __SCHEDULER_HPP__
 
 #include <map>
-#include <modm/container/dynamic_array.hpp>
+#include <modm/container/linked_list.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include <rm-dev-board-a/board.hpp>
 #include "command.hpp"
@@ -58,7 +58,7 @@ class CommandScheduler
 
     static std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
 
-    static modm::DynamicArray<modm::SmartPointer> comprisedCommandList;
+    static modm::LinkedList<modm::SmartPointer> comprisedCommandList;
 
     static uint32_t commandSchedulerTimestamp;
 };

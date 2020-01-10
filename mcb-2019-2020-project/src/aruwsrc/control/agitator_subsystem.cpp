@@ -3,6 +3,7 @@
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
+#include "agitator_rotate_command.hpp"
 
 using namespace aruwlib::motor;
 
@@ -26,9 +27,9 @@ namespace control
         agitatorJammedTimeout.stop();
     }
 
-    void AgitatorSubsystem::armAgitatorUnjamTimer()
+    void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t additionalUnjamTimeout)
     {
-        agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
+        agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod + additionalUnjamTimeout);
     }
 
     void AgitatorSubsystem::disarmAgitatorUnjamTimer()

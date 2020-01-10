@@ -21,7 +21,7 @@ namespace control
     map<Subsystem*, modm::SmartPointer> CommandScheduler::subsystemToCommandMap;
     // map<Subsystem*, Command*> CommandScheduler::subsystemToCommandMap;
 
-    modm::DynamicArray<modm::SmartPointer> CommandScheduler::comprisedCommandList;
+    modm::LinkedList<modm::SmartPointer> CommandScheduler::comprisedCommandList;
 
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
@@ -49,7 +49,6 @@ namespace control
             {
                 if (
                     !(isDependentSubsystem->second == defaultNullCommand)
-                    && smrtPtrCommandCast(isDependentSubsystem->second)->isInterruptiable()
                 ) {
                     smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
                 }
@@ -106,19 +105,20 @@ namespace control
         // multiple times during the same call to run
         commandSchedulerTimestamp++;
         // refresh all comprised commands
-        for (auto& comprisedCommand : comprisedCommandList)
+        for (int i = 0; i < static_cast<int>(comprisedCommandList.getSize()); i++)
         {
-            if (!(comprisedCommand == defaultNullCommand))
+            modm::SmartPointer comprisedCommand = comprisedCommandList.getFront();
+            comprisedCommandList.removeFront();
+            Command* currComprisedCommand = smrtPtrCommandCast(comprisedCommand);
+            currComprisedCommand->execute();
+            
+            if (currComprisedCommand->isFinished())
             {
-                Command* currComprisedCommand = smrtPtrCommandCast(comprisedCommand);
-                
-                currComprisedCommand->execute();
-                
-                if (currComprisedCommand->isFinished())
-                {
-                    currComprisedCommand->end(false);
-                    comprisedCommand = defaultNullCommand;
-                }
+                currComprisedCommand->end(false);
+            }
+            else
+            {
+                comprisedCommandList.append(comprisedCommand);
             }
         }
         // refresh all and run all commands
@@ -185,16 +185,17 @@ namespace control
         const modm::SmartPointer& comprisedCommand,
         bool interrupted
     ) {
-        for (uint8_t i = 0; i < comprisedCommandList.getSize(); i++)
+        for (int i = 0; i < static_cast<int>(comprisedCommandList.getSize()); i++)
         {
-            if (comprisedCommandList[i] == defaultNullCommand)
+            auto command = comprisedCommandList.getFront();
+            comprisedCommandList.removeFront();
+            if (!(command == comprisedCommand))
             {
-                if (comprisedCommand.getPointer() == comprisedCommandList[i].getPointer())
-                {
-                    smrtPtrCommandCast(comprisedCommandList[i])->end(interrupted);
-                    comprisedCommandList[i] = defaultNullCommand;
-                    return;
-                }
+                comprisedCommandList.append(comprisedCommand);
+            }
+            else
+            {
+                smrtPtrCommandCast(comprisedCommand)->end(interrupted);
             }
         }
     }

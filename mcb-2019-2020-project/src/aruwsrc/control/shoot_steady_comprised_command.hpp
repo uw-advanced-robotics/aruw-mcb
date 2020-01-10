@@ -3,6 +3,7 @@
 
 #include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
+#include "src/aruwlib/control/comprised_command.hpp"
 
 namespace aruwsrc
 {
@@ -10,10 +11,10 @@ namespace aruwsrc
 namespace control
 {
 
-class ShootComprisedCommand : public aruwlib::control::Command
+class ShootSteadyComprisedCommand : public aruwlib::control::ComprisedCommand
 {
 public:
-    ShootComprisedCommand(
+    ShootSteadyComprisedCommand(
         AgitatorSubsystem* agitator,
         float agitatorChangeAngle,
         float maxUnjamAngle
@@ -46,13 +47,7 @@ public:
      * @return whether the command has finished.
      */
     bool isFinished(void) const;
-
-    bool isInterruptiable(void) const
-    {
-        return false;
-    }
-
-
+    
 private:
     AgitatorSubsystem* connectedAgitator; 
 

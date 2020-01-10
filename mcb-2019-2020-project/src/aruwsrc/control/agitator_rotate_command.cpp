@@ -16,7 +16,8 @@ namespace control
         float agitatorAngleIncrement) :
         agitatorSetpointTolerance(setpointTolerance),
         agitatorTargetChange(agitatorAngleChange),
-        agitatorRotateSetpoint(agitatorAngleIncrement, agitatorAngleIncrement, 0)
+        agitatorRotateSetpoint(agitatorAngleIncrement, agitatorAngleIncrement, 0),
+        agitatorMinRotateTime(AGITATOR_MIN_ROTATE_TIME)
     {
         this->addSubsystemRequirement(reinterpret_cast<aruwlib::control::Subsystem*>(agitator));
         connectedAgitator = agitator;
@@ -27,7 +28,8 @@ namespace control
         agitatorRotateSetpoint.reset(connectedAgitator->getAgitatorEncoderToPosition());
         agitatorRotateSetpoint.setTarget(connectedAgitator->getAgitatorEncoderToPosition()
             + agitatorTargetChange);
-        connectedAgitator->armAgitatorUnjamTimer();
+        connectedAgitator->armAgitatorUnjamTimer(AGITATOR_MIN_ROTATE_TIME);
+        agitatorMinRotateTime.restart(AGITATOR_MIN_ROTATE_TIME);
     }
 
     void AgitatorRotateCommand::execute()
@@ -50,7 +52,8 @@ namespace control
         return fabs(static_cast<double>(connectedAgitator->getAgitatorEncoderToPosition()
             - connectedAgitator->getAgitatorDesiredAngle()))
             < static_cast<double>(agitatorSetpointTolerance)
-            && agitatorRotateSetpoint.isTargetReached();
+            && agitatorRotateSetpoint.isTargetReached()
+            && agitatorMinRotateTime.isExpired();  // agitator min timeout finished
     }
 }  // namespace control
 

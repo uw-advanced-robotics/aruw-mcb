@@ -15,6 +15,8 @@ namespace control
 class AgitatorRotateCommand : public aruwlib::control::Command
 {
  public:
+    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 100;
+
     AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
@@ -62,6 +64,8 @@ class AgitatorRotateCommand : public aruwlib::control::Command
     float agitatorTargetChange;
 
     modm::filter::Ramp<float> agitatorRotateSetpoint;
+
+    modm::ShortTimeout agitatorMinRotateTime;
 };
 
 }  // namespace control

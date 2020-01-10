@@ -11,7 +11,7 @@
 #include "src/aruwsrc/control/agitator_rotate_command.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include <modm/processing/timer.hpp>
-#include "src/aruwsrc/control/shoot_comprised_command.hpp"
+#include "src/aruwsrc/control/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator_unjam_command.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 
@@ -54,23 +54,22 @@ int main()
         modm::delayMilliseconds(1);
     }
 
-    ShootComprisedCommand shoot(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2);
-
     // modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
     // modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5));
-    modm::SmartPointer shootCommand(new ShootComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2));
+    modm::SmartPointer shootCommand(new ShootSteadyComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2));
 
     while (1)
     {
         can::CanRxHandler::pollCanData();
 
-        if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP)
+        if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
+            && CommandScheduler::smrtPtrCommandCast(shootCommand)->isFinished())
         {
-            control::CommandScheduler::addCommand(shootCommand);
+            control::CommandScheduler::addComprisedCommand(shootCommand);
         } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
             && !pressed)
         {
-            control::CommandScheduler::addCommand(shootCommand);
+            control::CommandScheduler::addComprisedCommand(shootCommand);
         }
 
         pressed = Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP;

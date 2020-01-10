@@ -1,4 +1,4 @@
-#include "shoot_comprised_command.hpp"
+#include "shoot_steady_comprised_command.hpp"
 #include "agitator_rotate_command.hpp"
 #include "agitator_unjam_command.hpp"
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -11,7 +11,7 @@ namespace aruwsrc
 namespace control
 {
 
-ShootComprisedCommand::ShootComprisedCommand(
+ShootSteadyComprisedCommand::ShootSteadyComprisedCommand(
     AgitatorSubsystem* agitator,
     float agitatorChangeAngle,
     float maxUnjamAngle
@@ -23,13 +23,13 @@ ShootComprisedCommand::ShootComprisedCommand(
     this->addSubsystemRequirement(reinterpret_cast<Subsystem*>(agitator));
 }
 
-void ShootComprisedCommand::initialize()
+void ShootSteadyComprisedCommand::initialize()
 {
-    CommandScheduler::smrtPtrCommandCast(agitatorRotateCommand)->initialize();
+    CommandScheduler::addCommand(agitatorRotateCommand);
     unjamSequenceCommencing = false;
 }
 
-void ShootComprisedCommand::execute()
+void ShootSteadyComprisedCommand::execute()
 {
     if (connectedAgitator->isAgitatorJammed() && !unjamSequenceCommencing)
     {
@@ -37,33 +37,18 @@ void ShootComprisedCommand::execute()
         // the to scheduler. The rotate forward command will be automatically
         // unscheduled.
         unjamSequenceCommencing = true;
-        CommandScheduler::smrtPtrCommandCast(agitatorRotateCommand)->end(true);
-        CommandScheduler::smrtPtrCommandCast(agitatorUnjamCommand)->initialize();
-    }
-
-    if (unjamSequenceCommencing)
-    {
-        CommandScheduler::smrtPtrCommandCast(agitatorUnjamCommand)->execute();
-    }
-    else
-    {
-        CommandScheduler::smrtPtrCommandCast(agitatorRotateCommand)->execute();
+        CommandScheduler::removeCommand(agitatorRotateCommand, true);
+        CommandScheduler::addCommand(agitatorUnjamCommand);
     }
 }
 
-void ShootComprisedCommand::end(bool interrupted)
+void ShootSteadyComprisedCommand::end(bool interrupted)
 {
-    if (unjamSequenceCommencing)
-    {
-        CommandScheduler::smrtPtrCommandCast(agitatorUnjamCommand)->end(interrupted);
-    }
-    else
-    {
-        CommandScheduler::smrtPtrCommandCast(agitatorRotateCommand)->end(interrupted);
-    }
+    CommandScheduler::removeCommand(agitatorUnjamCommand, interrupted);
+    CommandScheduler::removeCommand(agitatorRotateCommand, interrupted);
 }
 
-bool ShootComprisedCommand::isFinished() const
+bool ShootSteadyComprisedCommand::isFinished() const
 {
     return (CommandScheduler::smrtPtrCommandCast(agitatorRotateCommand)->isFinished()
         && !unjamSequenceCommencing)
