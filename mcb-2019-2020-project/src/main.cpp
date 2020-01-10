@@ -7,24 +7,10 @@
 #include "src/aruwsrc/control/example_subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
-#include "src/aruwsrc/control/agitator_subsystem.hpp"
-#include "src/aruwsrc/control/agitator_rotate_command.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
-#include <modm/processing/timer.hpp>
-#include "src/aruwsrc/control/shoot_steady_comprised_command.hpp"
-#include "src/aruwsrc/control/agitator_unjam_command.hpp"
+
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 
-#include "src/aruwlib/communication/remote.hpp"
-
-using namespace aruwsrc::control;
-using namespace aruwlib::algorithms;
-using namespace aruwlib;
-
-AgitatorSubsystem agitator17mm(36);
-ExampleSubsystem frictionWheelSubsystem;
-
-bool pressed = true;
+aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()
 {
@@ -38,53 +24,28 @@ int main()
 
     Board::initialize();
 
-    aruwlib::Remote::initialize();
+    modm::SmartPointer testDefaultCommand(
+        new aruwsrc::control::ExampleCommand(&testSubsystem));
 
-    modm::SmartPointer spinFrictionWheelCommand(new ExampleCommand(&frictionWheelSubsystem));
-    frictionWheelSubsystem.setDefaultCommand(spinFrictionWheelCommand);
+    testSubsystem.setDefaultCommand(testDefaultCommand);
 
-    aruwlib::control::CommandScheduler::registerSubsystem(&agitator17mm);
-    CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
+    CommandScheduler::registerSubsystem(&testSubsystem);
 
-    modm::ShortPeriodicTimer t(2);
-
-    while (!agitator17mm.agitatorCalibrateHere())
-    {
-        aruwlib::can::CanRxHandler::pollCanData();
-        modm::delayMilliseconds(1);
-    }
-
-    // modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
-    // modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5));
-    modm::SmartPointer shootCommand(new ShootSteadyComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2));
+    // timers
+    // arbitrary, taken from last year since this send time doesn't overfill
+    // can bus
+    modm::ShortPeriodicTimer motorSendPeriod(3);
 
     while (1)
     {
-        can::CanRxHandler::pollCanData();
-
-        if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
-            && CommandScheduler::smrtPtrCommandCast(shootCommand)->isFinished())
+        if (motorSendPeriod.execute())
         {
-            control::CommandScheduler::addComprisedCommand(shootCommand);
-        } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
-            && !pressed)
-        {
-            control::CommandScheduler::addComprisedCommand(shootCommand);
-        }
-
-        pressed = Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP;
-
-        // run scheduler
-        if (t.execute())
-        {
-            t.restart(2);
-            control::CommandScheduler::run();
-            motor::DjiMotorTxHandler::processCanSendData();
+            aruwlib::control::CommandScheduler::run();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
         // do this as fast as you can
-        can::CanRxHandler::pollCanData();
-        Remote::read();
+        aruwlib::can::CanRxHandler::pollCanData();
 
         modm::delayMicroseconds(10);
     }
