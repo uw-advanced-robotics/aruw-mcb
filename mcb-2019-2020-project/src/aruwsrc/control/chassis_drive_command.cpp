@@ -18,7 +18,7 @@ void ChassisDriveCommand::execute()
     float remoteMoveZ = aruwlib::Remote::getChassisZ();
 
     float chassisMoveX, chassisMoveY, chassisMoveZ;
-    
+
     chassisMoveZ = remoteMoveZ * ChassisSubsystem::OMNI_SPEED_MAX;
 
     float zTranslationGain;  // what we will multiply x and y speed by to take into account rotation
