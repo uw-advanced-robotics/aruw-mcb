@@ -8,6 +8,7 @@
 #include "aruwlib/communication/remote.hpp"
 
 #include "aruwsrc/control/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/example_subsystem.hpp"
 #include "aruwsrc/control/example_command.hpp"
@@ -17,11 +18,12 @@
 using namespace aruwsrc::control;
 
 ChassisSubsystem soldierChassis;
-TurretSubsystem soldierTurret;
-ExampleSubsystem frictionWheelSubsystem;
+//TurretSubsystem soldierTurret;
+//ExampleSubsystem frictionWheelSubsystem;
 
 int main()
 {
+    /*
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
     contiguousFloatTest.testCore();
     contiguousFloatTest.testBadBounds();
@@ -29,20 +31,26 @@ int main()
     contiguousFloatTest.testRotationBounds();
     contiguousFloatTest.testShiftingValue();
     contiguousFloatTest.testWrapping();
+    */
 
     Board::initialize();
     aruwlib::Remote::initialize();
 
+    /*
     modm::SmartPointer chassisAutorotate(
         new ChassisAutorotateCommand(&soldierChassis, &soldierTurret));
     modm::SmartPointer frictionWheelSpinCommand(new ExampleCommand(&frictionWheelSubsystem));
+    */
+
+    modm::SmartPointer chassisDrive(new ChassisDriveCommand(&soldierChassis));
 
     CommandScheduler::registerSubsystem(&soldierChassis);
-    CommandScheduler::registerSubsystem(&soldierTurret);
-    CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
+    //CommandScheduler::registerSubsystem(&soldierTurret);
+    //CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
 
-    CommandScheduler::addCommand(chassisAutorotate);
-    CommandScheduler::addCommand(frictionWheelSpinCommand);
+    CommandScheduler::addCommand(chassisDrive);
+    //CommandScheduler::addCommand(chassisAutorotate);
+    //CommandScheduler::addCommand(frictionWheelSpinCommand);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
