@@ -10,9 +10,13 @@ namespace control
     const aruwlib::motor::MotorId ChassisSubsystem::RIGHT_TOP_MOTOR_ID = aruwlib::motor::MOTOR6;
     const aruwlib::motor::MotorId ChassisSubsystem::RIGHT_BOT_MOTOR_ID = aruwlib::motor::MOTOR7;
 
-    void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
+    void ChassisSubsystem::setDesiredOutput(modm::Vector2f translation, float rotation)
     {
-        // TODO calculate motor rpm values based on given x, y, and r
+        // Store x, y, and r for debugging
+        desiredOutput.x = translation.x;
+        desiredOutput.y = translation.y;
+        desiredOutput.z = rotation;
+        // Calculate motor rpm values based on given x, y, and r
         leftTopRpm = 0;
         leftBotRpm = 0;
         rightTopRpm = 0;

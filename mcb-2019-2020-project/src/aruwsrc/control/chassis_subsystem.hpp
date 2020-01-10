@@ -2,6 +2,7 @@
 #define __CHASSIS_SUBSYSTEM_HPP__
 
 #include <modm/math/filter/pid.hpp>
+#include <modm/math/geometry.hpp>
 #include "src/control/subsystem.hpp"
 #include "src/motor/dji_motor.hpp"
 
@@ -35,7 +36,7 @@ public:
         rightBotRpm(0)
     {}
 
-  void setDesiredOutput(float x, float y, float r);
+  void setDesiredOutput(modm::Vector2f translation, float rotation);
 
   void refresh(void);
 
@@ -61,6 +62,8 @@ private:
     modm::Pid<float> leftBotVelocityPid;
     modm::Pid<float> rightTopVelocityPid;
     modm::Pid<float> rightBotVelocityPid;
+
+    modm::Vector3f desiredOutput;
 
     float leftTopRpm;
     float leftBotRpm;

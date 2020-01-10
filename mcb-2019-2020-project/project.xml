@@ -34,5 +34,6 @@
     <module>modm:container</module>
     <module>modm:math:filter</module>
     <module>modm:processing</module>
+    <module>modm:math:geometry</module>
   </modules>
 </library>
