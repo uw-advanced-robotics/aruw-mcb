@@ -6,7 +6,8 @@ namespace aruwsrc
 namespace control
 {
 
-ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem) : exampleCommand(new ExampleCommand(subsystem))
+ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem)
+: exampleCommand(new ExampleCommand(subsystem))
 {
     this->addSubsystemRequirement(subsystem);
 }
@@ -20,9 +21,9 @@ void ExampleComprisedCommand::execute() {}
 
 void ExampleComprisedCommand::end(bool interrupted)
 {
-    CommandScheduler::removeCommand(exampleCommand, interrupted);    
+    CommandScheduler::removeCommand(exampleCommand, interrupted);
 }
 
-}
+}  // namespace control
 
-}
+}  // namespace aruwsrc

@@ -35,7 +35,10 @@ class CommandScheduler
 
     static void removeCommand(modm::SmartPointer command, bool interrupted);
 
-    static void removeComprisedCommand(const modm::SmartPointer& comprisedCommand, bool interrupted);
+    static void removeComprisedCommand(
+       const modm::SmartPointer& comprisedCommand,
+       bool interrupted
+    );
 
     static bool registerSubsystem(Subsystem* subsystem);
 

@@ -14,7 +14,7 @@ namespace control
 class ExampleComprisedCommand : public ComprisedCommand
 {
  public:
-    ExampleComprisedCommand(ExampleSubsystem* subsystem);
+    explicit ExampleComprisedCommand(ExampleSubsystem* subsystem);
 
     void initialize();
 
@@ -26,8 +26,8 @@ class ExampleComprisedCommand : public ComprisedCommand
     modm::SmartPointer exampleCommand;
 };
 
-}
+}  // namespace control
 
-}
+}  // namespace aruwsrc
 
 #endif

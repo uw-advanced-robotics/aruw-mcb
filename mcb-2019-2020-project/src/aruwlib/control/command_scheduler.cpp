@@ -79,7 +79,8 @@ namespace control
             return false;
         }
 
-        set<Subsystem*> commandRequirements = *smrtPtrCommandCast(comprisedCommand)->getRequirements();
+        set<Subsystem*> commandRequirements =
+            *smrtPtrCommandCast(comprisedCommand)->getRequirements();
         for (auto& requirement : commandRequirements)
         {
             // return false if the command you are trying to add has a subsystem that is not in the
@@ -111,7 +112,7 @@ namespace control
             comprisedCommandList.removeFront();
             Command* currComprisedCommand = smrtPtrCommandCast(comprisedCommand);
             currComprisedCommand->execute();
-            
+
             if (currComprisedCommand->isFinished())
             {
                 currComprisedCommand->end(false);
