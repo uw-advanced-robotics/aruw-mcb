@@ -47,9 +47,7 @@ namespace control
                 subsystemToCommandMap.find(requirement);
             if (isDependentSubsystem != subsystemToCommandMap.end())
             {
-                if (
-                    !(isDependentSubsystem->second == defaultNullCommand)
-                ) {
+                if (!(isDependentSubsystem->second == defaultNullCommand)) {
                     smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
                 }
                 isDependentSubsystem->second = commandToAdd;
@@ -74,9 +72,18 @@ namespace control
 
     bool CommandScheduler::addComprisedCommand(modm::SmartPointer comprisedCommand)
     {
-        if (0)  // command already added
+        // remove the command if it is already added
+        for (int i = 0; i < static_cast<int>(comprisedCommandList.getSize()); i++)
         {
-            return false;
+            modm::SmartPointer addedComprisedCommand = comprisedCommandList.getFront();
+            if (addedComprisedCommand == comprisedCommand)
+            {
+                smrtPtrCommandCast(addedComprisedCommand)->end(true);
+            }
+            else
+            {
+                comprisedCommandList.append(addedComprisedCommand);
+            }
         }
 
         set<Subsystem*> commandRequirements =
