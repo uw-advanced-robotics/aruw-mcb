@@ -115,6 +115,8 @@ namespace aruwlib {
         return remote.mouse.r;
     }
 
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
+    // Returns whether or not the given key is pressed
     bool Remote::keyPressed(Key key) {
         return (remote.key & (1 << (uint8_t) key)) != 0;
     }
