@@ -14,7 +14,11 @@ namespace control
 
 class ChassisDriveCommand : public Command {
  public:
-    explicit ChassisDriveCommand(ChassisSubsystem* chassis = nullptr);
+    explicit ChassisDriveCommand(ChassisSubsystem* chassis)
+    {
+      addSubsystemRequirement(reinterpret_cast<Subsystem*>(chassis));
+      this->chassis = chassis;
+    }
 
     /**
       * The initial subroutine of a command.  Called once when the command is

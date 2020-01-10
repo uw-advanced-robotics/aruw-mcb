@@ -1,23 +1,33 @@
 #include "chassis_drive_command.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include "src/aruwlib/communication/remote.hpp"
 
 namespace aruwsrc
 {
 
 namespace control
 {
-    ChassisDriveCommand::ChassisDriveCommand(ChassisSubsystem* chassis):
-        Command(), chassis(chassis)
-    {
-        addSubsystemRequirement(reinterpret_cast<Subsystem*>(chassis));
-    }
 
-    void ChassisDriveCommand::initialize(){}
+void ChassisDriveCommand::initialize()
+{}
 
-    void ChassisDriveCommand::execute(){}
+void ChassisDriveCommand::execute()
+{
+    float remoteMoveX = aruwlib::Remote::getChassisX();
+    float remoteMoveY = aruwlib::Remote::getChassisY();
 
-    void ChassisDriveCommand::end(bool interrupted){if (interrupted){}}
+    float chassisMoveX, chassisMoveY, chassisMoveZ;
+    
+}
 
-    bool ChassisDriveCommand::isFinished() const {return false;}
+void ChassisDriveCommand::end(bool interrupted)
+{}
+
+bool ChassisDriveCommand::isFinished() const
+{
+    return false;
+}
+
 }  // namespace control
 
 }  // namespace aruwsrc
