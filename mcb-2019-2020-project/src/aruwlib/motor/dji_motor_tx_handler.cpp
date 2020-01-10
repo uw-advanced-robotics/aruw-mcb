@@ -42,6 +42,7 @@ namespace motor
         }
     }
 
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     void DjiMotorTxHandler::processCanSendData()
     {
         // set up new can messages to be sent via CAN bus 1 and 2

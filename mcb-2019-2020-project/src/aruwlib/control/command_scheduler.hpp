@@ -17,6 +17,7 @@
 #define __SCHEDULER_HPP__
 
 #include <map>
+#include <modm/container/dynamic_array.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include <rm-dev-board-a/board.hpp>
 #include "command.hpp"
@@ -34,6 +35,8 @@ class CommandScheduler
 
     static void removeCommand(modm::SmartPointer command, bool interrupted);
 
+    static void removeComprisedCommand(const modm::SmartPointer& comprisedCommand, bool interrupted);
+
     static bool registerSubsystem(Subsystem* subsystem);
 
     static bool isSubsystemRegistered(Subsystem* subsystem);
@@ -44,6 +47,8 @@ class CommandScheduler
 
     static bool addCommand(modm::SmartPointer commandToAdd);
 
+    static bool addComprisedCommand(modm::SmartPointer comprisedCommand);
+
     static const modm::SmartPointer defaultNullCommand;
 
     static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
@@ -52,6 +57,8 @@ class CommandScheduler
     static const float MAX_ALLOWABLE_SCHEDULER_RUNTIME;
 
     static std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
+
+    static modm::DynamicArray<modm::SmartPointer> comprisedCommandList;
 
     static uint32_t commandSchedulerTimestamp;
 };

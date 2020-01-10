@@ -58,11 +58,13 @@ namespace aruwlib {
     }
 
     // Returns if the remote is connected
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     bool Remote::isConnected() {
         return connected;
     }
 
     // Returns the value of the given channel
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getChannel(Channel ch) {
         switch (ch) {
             case Channel::RIGHT_HORIZONTAL: return remote.rightHorizontal;
@@ -74,6 +76,7 @@ namespace aruwlib {
     }
 
     // Returns the value of the given switch
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     Remote::SwitchState Remote::getSwitch(Switch sw) {
         switch (sw) {
             case Switch::LEFT_SWITCH: return remote.leftSwitch;
@@ -83,26 +86,31 @@ namespace aruwlib {
     }
 
     // Returns the current mouse x value
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getMouseX() {
         return remote.mouse.x;
     }
 
     // Returns the current mouse y value
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getMouseY() {
         return remote.mouse.y;
     }
 
     // Returns the current mouse z value
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getMouseZ() {
         return remote.mouse.z;
     }
 
     // Returns the current mouse l value
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     bool Remote::getMouseL() {
         return remote.mouse.l;
     }
 
     // Returns the current mouse r value
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     bool Remote::getMouseR() {
         return remote.mouse.r;
     }
@@ -112,6 +120,7 @@ namespace aruwlib {
     }
 
     // Returns the value of the wheel
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t Remote::getWheel() {
         return remote.wheel;
     }

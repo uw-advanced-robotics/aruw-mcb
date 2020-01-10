@@ -5,6 +5,7 @@
 #include "command_scheduler.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_handler.hpp"
+#include "comprised_command.hpp"
 
 using namespace std;
 
@@ -19,6 +20,8 @@ namespace control
 
     map<Subsystem*, modm::SmartPointer> CommandScheduler::subsystemToCommandMap;
     // map<Subsystem*, Command*> CommandScheduler::subsystemToCommandMap;
+
+    modm::DynamicArray<modm::SmartPointer> CommandScheduler::comprisedCommandList;
 
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
@@ -70,12 +73,54 @@ namespace control
         return true;
     }
 
+    bool CommandScheduler::addComprisedCommand(modm::SmartPointer comprisedCommand)
+    {
+        if (0)  // command already added
+        {
+            return false;
+        }
+
+        set<Subsystem*> commandRequirements = *smrtPtrCommandCast(comprisedCommand)->getRequirements();
+        for (auto& requirement : commandRequirements)
+        {
+            // return false if the command you are trying to add has a subsystem that is not in the
+            // command scheduler
+            map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
+                subsystemToCommandMap.find(requirement);
+            if (isDependentSubsystem == subsystemToCommandMap.end())
+            {
+                return false;
+            }
+        }
+
+        comprisedCommandList.append(comprisedCommand);
+        // don't add commands here, for a comprised command, you add them yourselves
+        smrtPtrCommandCast(comprisedCommand)->initialize();
+        return true;
+    }
+
     void CommandScheduler::run()
     {
         uint32_t checkRunPeriod = DWT->CYCCNT;  // clock cycle count
         // timestamp for reference and for disallowing a command from running
         // multiple times during the same call to run
         commandSchedulerTimestamp++;
+        // refresh all comprised commands
+        for (auto& comprisedCommand : comprisedCommandList)
+        {
+            if (!(comprisedCommand == defaultNullCommand))
+            {
+                Command* currComprisedCommand = smrtPtrCommandCast(comprisedCommand);
+                
+                currComprisedCommand->execute();
+                
+                if (currComprisedCommand->isFinished())
+                {
+                    currComprisedCommand->end(false);
+                    comprisedCommand = defaultNullCommand;
+                }
+            }
+        }
         // refresh all and run all commands
         for (auto& currSubsystemCommandPair : subsystemToCommandMap)
         {
@@ -132,6 +177,24 @@ namespace control
                     commandFound = true;
                 }
                 subsystemCommandPair.second = defaultNullCommand;
+            }
+        }
+    }
+
+    void CommandScheduler::removeComprisedCommand(
+        const modm::SmartPointer& comprisedCommand,
+        bool interrupted
+    ) {
+        for (uint8_t i = 0; i < comprisedCommandList.getSize(); i++)
+        {
+            if (comprisedCommandList[i] == defaultNullCommand)
+            {
+                if (comprisedCommand.getPointer() == comprisedCommandList[i].getPointer())
+                {
+                    smrtPtrCommandCast(comprisedCommandList[i])->end(interrupted);
+                    comprisedCommandList[i] = defaultNullCommand;
+                    return;
+                }
             }
         }
     }
