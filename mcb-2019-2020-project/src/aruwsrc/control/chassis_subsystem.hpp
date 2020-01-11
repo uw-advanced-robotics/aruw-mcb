@@ -17,8 +17,7 @@ namespace control
 class ChassisSubsystem : public Subsystem {
  public:
     // public constants
-    static const int OMNI_SPEED_MAX                  = 9000;
-    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -100.0f;
+    static const int OMNI_SPEED_MAX = 9000;
 
  private:
     // velocity pid gains and constants
@@ -32,7 +31,7 @@ class ChassisSubsystem : public Subsystem {
     // no i, max error sum is OMNI_SPEED_MAX, proportional gain specified by user
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 9000.0;
     static constexpr float CHASSIS_REVOLVE_PID_KD     = 235.f;
-    static const int REVOLVE_ANGLE                    = 35;
+    static const int MAX_REVOLVE_ANGLE                = 35;
 
     // hardware constants
     static constexpr aruwlib::motor::MotorId LEFT_FRONT_MOTOR_ID  = aruwlib::motor::MOTOR2;

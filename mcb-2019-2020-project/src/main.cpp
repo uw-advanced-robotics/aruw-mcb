@@ -2,15 +2,16 @@
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
-#include "src/aruwlib/communication/can/can_rx_listener.hpp"
+#include "robot-type/robot.hpp"
+
+#include "aruwlib/control/command_scheduler.hpp"
+#include "aruwlib/motor/dji_motor_tx_handler.hpp"
+#include "aruwlib/communication/can/can_rx_listener.hpp"
 #include "aruwlib/communication/remote.hpp"
 
 #include "aruwsrc/control/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis_drive_command.hpp"
-#include "aruwsrc/control/turret_subsystem.hpp"
-#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+#include "aruwlib/algorithms/contiguous_float_test.hpp"
 
 using namespace aruwsrc::control;
 
@@ -18,6 +19,14 @@ ChassisSubsystem soldierChassis;
 
 int main()
 {
+    aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
+    contiguousFloatTest.testCore();
+    contiguousFloatTest.testBadBounds();
+    contiguousFloatTest.testDifference();
+    contiguousFloatTest.testRotationBounds();
+    contiguousFloatTest.testShiftingValue();
+    contiguousFloatTest.testWrapping();
+
     Board::initialize();
     aruwlib::Remote::initialize();
 
@@ -25,7 +34,7 @@ int main()
 
     CommandScheduler::registerSubsystem(&soldierChassis);
 
-    CommandScheduler::addCommand(chassisDrive);
+    soldierChassis.setDefaultCommand(chassisDrive);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill

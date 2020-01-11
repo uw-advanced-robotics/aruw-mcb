@@ -68,7 +68,7 @@ namespace control
         // D
         ErrorPR = ErrorPR_KF - ErrorPrev;
 
-        if(abs(ErrorPR_KF) > REVOLVE_ANGLE)
+        if(abs(ErrorPR_KF) > MAX_REVOLVE_ANGLE)
         {
             rotationPidD = -(ErrorPR) * CHASSIS_REVOLVE_PID_KD;
         }

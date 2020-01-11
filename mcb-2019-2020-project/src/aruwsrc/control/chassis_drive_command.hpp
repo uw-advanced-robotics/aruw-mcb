@@ -16,8 +16,8 @@ class ChassisDriveCommand : public Command {
  public:
     explicit ChassisDriveCommand(ChassisSubsystem* chassis)
     {
-      addSubsystemRequirement(reinterpret_cast<Subsystem*>(chassis));
-      this->chassis = chassis;
+        addSubsystemRequirement(reinterpret_cast<Subsystem*>(chassis));
+        this->chassis = chassis;
     }
 
     /**
