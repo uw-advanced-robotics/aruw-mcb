@@ -54,16 +54,16 @@ class ChassisSubsystem : public Subsystem {
     static constexpr float WARNING_REMAIN_POWER = 60;
 
     // motors
-    aruwlib::motor::DjiMotor leftTopMotor;
-    aruwlib::motor::DjiMotor leftBotMotor;
-    aruwlib::motor::DjiMotor rightTopMotor;
-    aruwlib::motor::DjiMotor rightBotMotor;
+    aruwlib::motor::DjiMotor leftFrontMotor;
+    aruwlib::motor::DjiMotor leftBackMotor;
+    aruwlib::motor::DjiMotor rightFrontMotor;
+    aruwlib::motor::DjiMotor rightBackMotor;
 
     // wheel velocity pid variables
-    modm::Pid<float> leftTopVelocityPid;
-    modm::Pid<float> leftBotVelocityPid;
-    modm::Pid<float> rightTopVelocityPid;
-    modm::Pid<float> rightBotVelocityPid;
+    modm::Pid<float> leftFrontVelocityPid;
+    modm::Pid<float> leftBackVelocityPid;
+    modm::Pid<float> rightFrontVelocityPid;
+    modm::Pid<float> rightBackVelocityPid;
 
     // translate all input into a desired wheel rpm when given
     float leftFrontRpm;
@@ -76,36 +76,42 @@ class ChassisSubsystem : public Subsystem {
     float rotationPidP = 0;
     float rotationPidD = 0;
 
+    // rotation pid parameters
+    float errorPrevKalman = 0;
+    float ErrorSum = 0;
+    float errorPRotate = 0;
+    float errorPRotateKalman = 0;
+
  public:
     ChassisSubsystem(
-        aruwlib::motor::MotorId leftTopMotorId = LEFT_FRONT_MOTOR_ID,
-        aruwlib::motor::MotorId leftBotMotorId = LEFT_BACK_MOTOR_ID,
-        aruwlib::motor::MotorId rightTopMotorId = RIGHT_FRONT_MOTOR_ID,
-        aruwlib::motor::MotorId rightBotMotorId = RIGHT_BACK_MOTOR_ID
+        aruwlib::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
+        aruwlib::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
+        aruwlib::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
+        aruwlib::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID
     ):
-        leftTopMotor(leftTopMotorId, CAN_BUS_MOTORS),
-        leftBotMotor(leftBotMotorId, CAN_BUS_MOTORS),
-        rightTopMotor(rightTopMotorId, CAN_BUS_MOTORS),
-        rightBotMotor(rightBotMotorId, CAN_BUS_MOTORS),
-        leftTopVelocityPid(
+        leftFrontMotor(leftFrontMotorId, CAN_BUS_MOTORS),
+        leftBackMotor(leftBackMotorId, CAN_BUS_MOTORS),
+        rightFrontMotor(rightFrontMotorId, CAN_BUS_MOTORS),
+        rightBackMotor(rightBackMotorId, CAN_BUS_MOTORS),
+        leftFrontVelocityPid(
             VELOCITY_PID_KP,
             VELOCITY_PID_KI,
             VELOCITY_PID_KD,
             VELOCITY_PID_MAX_ERROR_SUM,
             VELOCITY_PID_MAX_OUTPUT),
-        leftBotVelocityPid(
+        leftBackVelocityPid(
             VELOCITY_PID_KP,
             VELOCITY_PID_KI,
             VELOCITY_PID_KD,
             VELOCITY_PID_MAX_ERROR_SUM,
             VELOCITY_PID_MAX_OUTPUT),
-        rightTopVelocityPid(
+        rightFrontVelocityPid(
             VELOCITY_PID_KP,
             VELOCITY_PID_KI,
             VELOCITY_PID_KD,
             VELOCITY_PID_MAX_ERROR_SUM,
             VELOCITY_PID_MAX_OUTPUT),
-        rightBotVelocityPid(
+        rightBackVelocityPid(
             VELOCITY_PID_KP,
             VELOCITY_PID_KI,
             VELOCITY_PID_KD,
@@ -122,9 +128,9 @@ class ChassisSubsystem : public Subsystem {
     void setDesiredOutput(float x, float y, float z);
 
     /**
-     * run chassis rotation pid on some gimbal encoder tick offset
+     * run chassis rotation pid on some actual turret angle offset
      * 
-     * @param errorReal the error in encoder ticks. For autorotation,
+     * @param errorReal the error as an angle. For autorotation,
      * error between gimbal and center of chassis.
      * 
      * @param kp proportional gain for pid caluclation
@@ -136,19 +142,11 @@ class ChassisSubsystem : public Subsystem {
     void refresh(void);
 
  private:
-    // rotation pid parameters
-    float ErrorPrev = 0;
-    float ErrorSum = 0;
-    float ErrorPR = 0;
-    float ErrorPR_KF = 0;
-
     /**
      * When you input desired x, y, an z values, this function translates
      * and sets the rpm of individual chassis motors
      */
     void chassisOmniMoveCalculate(float x, float y, float z, float speedMax);
-
-    void chassisPowerLimit(void);
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,

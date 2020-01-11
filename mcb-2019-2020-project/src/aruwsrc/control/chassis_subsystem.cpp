@@ -13,10 +13,10 @@ namespace control
 
     void ChassisSubsystem::refresh()
     {
-        updateMotorRpmPid(&leftTopVelocityPid, &leftTopMotor, leftFrontRpm);
-        updateMotorRpmPid(&leftBotVelocityPid, &leftBotMotor, leftBackRpm);
-        updateMotorRpmPid(&rightTopVelocityPid, &rightTopMotor, rightFrontRpm);
-        updateMotorRpmPid(&rightBotVelocityPid, &rightBotMotor, rightBackRpm);
+        updateMotorRpmPid(&leftFrontVelocityPid, &leftFrontMotor, leftFrontRpm);
+        updateMotorRpmPid(&leftBackVelocityPid, &leftBackMotor, leftBackRpm);
+        updateMotorRpmPid(&rightFrontVelocityPid, &rightFrontMotor, rightFrontRpm);
+        updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, rightBackRpm);
     }
 
     void ChassisSubsystem::chassisOmniMoveCalculate(float x, float y, float z, float speedMax)
@@ -58,7 +58,7 @@ namespace control
     {
         float speed_z = 0;
 
-        ErrorPR_KF = KalmanFilter(&chassisErrorKalman, errorReal);
+        errorPRotateKalman = KalmanFilter(&chassisErrorKalman, errorReal);
 
         // P
         rotationPidP = errorReal * kp;
@@ -66,11 +66,11 @@ namespace control
             -CHASSIS_REVOLVE_PID_MAX_P, CHASSIS_REVOLVE_PID_MAX_P);
 
         // D
-        ErrorPR = ErrorPR_KF - ErrorPrev;
+        errorPRotate = errorPRotateKalman - errorPrevKalman;
 
-        if(abs(ErrorPR_KF) > MAX_REVOLVE_ANGLE)
+        if(abs(errorPRotateKalman) > MAX_REVOLVE_ANGLE)
         {
-            rotationPidD = -(ErrorPR) * CHASSIS_REVOLVE_PID_KD;
+            rotationPidD = -(errorPRotate) * CHASSIS_REVOLVE_PID_KD;
         }
         else
         {
@@ -80,53 +80,9 @@ namespace control
         speed_z = rotationPidP + rotationPidD;
         speed_z = aruwlib::algorithms::limitVal<float>(speed_z, -OMNI_SPEED_MAX, OMNI_SPEED_MAX);
 
-        ErrorPrev = ErrorPR_KF;
+        errorPrevKalman = errorPRotateKalman;
 
         return speed_z;
-    }
-
-    void ChassisSubsystem::chassisPowerLimit(void)
-    {
-        bool judgementSystemInvalid = false;  // todo
-        float currChassisPowerBuffer = 0.0f;  // todo
-            // run low pass filter on power buffer input
-            // run low pass filter on motor current input
-
-        // total current output desired, to be compared with current limit
-        float allMotorCurrentOutput =
-            leftTopMotor.getVoltageDesired()
-            + leftBotMotor.getVoltageDesired()
-            + rightTopMotor.getVoltageDesired()
-            + rightBotMotor.getVoltageDesired();
-
-        float allMotorCurrentLimit;
-
-        if(!judgementSystemInvalid && currChassisPowerBuffer < WARNING_REMAIN_POWER)
-        {
-            // the total current for all four wheels is limited by the fraction limit
-            // the fraction is (power buffer / WARNING_REMAIN_POWER)^2
-            // so it will be less than one if WARNING_REMAIN_POWER > power buffer
-            // this is limited between 0 and 1 so it can only make the total current
-            // smaller
-            float chassisPowerFractionLimit = aruwlib::algorithms::limitVal<float>(
-                (currChassisPowerBuffer * currChassisPowerBuffer)
-                / (WARNING_REMAIN_POWER * WARNING_REMAIN_POWER),
-                0.0f, 1.0f
-            );
-            allMotorCurrentLimit = chassisPowerFractionLimit * CHAS_CURRENT_LIMIT;
-        }
-        else
-        {
-            allMotorCurrentLimit = CHAS_CURRENT_LIMIT;
-        }
-
-        // limit the chassis output based on fraction between what our current output is
-        // and what we realistically can output limited.
-        float chassisOutputFraction = allMotorCurrentLimit / allMotorCurrentOutput;
-        leftTopMotor.setDesiredOutput(leftTopMotor.getVoltageDesired() * chassisOutputFraction);
-        leftBotMotor.setDesiredOutput(leftBotMotor.getVoltageDesired() * chassisOutputFraction);
-        rightTopMotor.setDesiredOutput(rightTopMotor.getVoltageDesired() * chassisOutputFraction);
-        rightBotMotor.setDesiredOutput(rightBotMotor.getVoltageDesired() * chassisOutputFraction);
     }
 }  // namespace control
 
