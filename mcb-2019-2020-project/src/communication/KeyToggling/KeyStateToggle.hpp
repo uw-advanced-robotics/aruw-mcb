@@ -1,9 +1,12 @@
-#include "src/communication/remote.hpp"
+#ifndef __KEY_STATE_TOGGLE_HPP__
+#define __KEY_STATE_TOGGLE_HPP__
+
+#include "src/aruwlib/communication/remote.hpp"
 
 class KeyStateToggle{
     private:
         bool currentToggleState;//refers to on or off
-        bool PrevState; //refers to toggled or not
+        bool prevState; //refers to toggled or not
         aruwlib::Remote::Key currKey;
 
 
@@ -19,4 +22,4 @@ class KeyStateToggle{
         bool keyToggled() const;
 
 };
-//KeyToggle.hpp
+#endif //KeyStateToggle.hpp

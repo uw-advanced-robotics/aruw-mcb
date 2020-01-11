@@ -1,20 +1,22 @@
 #include "KeyStateToggle.hpp"
 
-KeyStateToggle::KeyStateToggle(aruwlib::Remote::Key key){
-    currKey = key;
-    currentToggleState = false;
-    PrevState = false;
-}
+KeyStateToggle::KeyStateToggle(aruwlib::Remote::Key key)
+            : currKey(key)
+            , prevState(false)
+            , currentToggleState(false)
+            {} //empty compound statement
 
 void KeyStateToggle::KeyToggleHandler(){
     bool input = aruwlib::Remote::keyPressed(currKey);
-    // only when input is true
-    if (input && PrevState != input) {
+    // ensures a change in the toggle state only when the input is true i.e the key is pressed
+    // and the previous input or toggled state does not equal input i.e. only swaps the state when
+    // the input given is different
+    if (input && prevState != input) {
         currentToggleState = !currentToggleState;
     }
-    PrevState = input;
+    prevState = input;
 }
 
 bool KeyStateToggle::keyToggled() const{
-    return PrevState;
+    return currentToggleState;
 }
