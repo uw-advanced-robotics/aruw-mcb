@@ -9,6 +9,8 @@
 
 #include "remote.hpp"
 
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
+
 namespace aruwlib {
     // The current remote information
     Remote::RemoteInfo Remote::remote;
@@ -118,20 +120,20 @@ namespace aruwlib {
 
     float Remote::getChassisX()
     {
-        return static_cast<float>(remote.leftVertical) / 660.0f
-            + static_cast<float>(keyPressed(Key::A) - keyPressed(Key::D));
+        return algorithms::limitVal<float>(static_cast<float>(remote.leftVertical) / 660.0f
+            + static_cast<float>(keyPressed(Key::D) - keyPressed(Key::A)), -1, 1);
     }
 
     float Remote::getChassisY()
     {
-        return static_cast<float>(remote.leftHorizontal) / 660.0f
-            + static_cast<float>(keyPressed(Key::W) - keyPressed(Key::S));
+        return algorithms::limitVal<float>(static_cast<float>(remote.leftHorizontal) / 660.0f
+            + static_cast<float>(keyPressed(Key::W) - keyPressed(Key::S)), -1, 1);
     }
 
     float Remote::getChassisZ()
     {
-        return static_cast<float>(remote.rightHorizontal) / 660.0f
-            + static_cast<float>(keyPressed(Key::E) - keyPressed(Key::Q));
+        return algorithms::limitVal<float>(static_cast<float>(remote.rightHorizontal) / 660.0f
+            + static_cast<float>(keyPressed(Key::E) - keyPressed(Key::Q)), -1, 1);
     }
 
     // Parses the current rxBuffer

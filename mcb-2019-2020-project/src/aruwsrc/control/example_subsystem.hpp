@@ -1,3 +1,16 @@
+/**
+ * This is part of aruw's library.
+ * 
+ * This is example code for running friction wheels. As you can
+ * see, there is a generic update pid loop that is independent of
+ * what command is given to the subsystem. Additionally, the
+ * subsystem contains variables specific to the subsystem
+ * (pid controllers, motors, etc). If a control loop is specific
+ * to a command, it should NOT be in a subsystem. For example,
+ * control code to pulse the friction wheels should be located
+ * outside of this class because pulsing is a specific command.
+ */
+
 #ifndef __SUBSYSTEM_EXAMPLE_HPP__
 #define __SUBSYSTEM_EXAMPLE_HPP__
 
