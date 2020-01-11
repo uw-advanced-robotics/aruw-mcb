@@ -10,6 +10,18 @@
 
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 
+#include <modm/debug/logger.hpp>
+
+using namespace modm::literals;
+
+modm::IODeviceWrapper< Usart2, modm::IOBuffer::BlockIfFull > loggerDevice;
+
+modm::log::Logger modm::log::debug(loggerDevice);
+modm::log::Logger modm::log::info(loggerDevice);
+modm::log::Logger modm::log::warning(loggerDevice);
+modm::log::Logger modm::log::error(loggerDevice);
+
+
 aruwsrc::control::ExampleSubsystem testSubsystem;
 
 int main()
@@ -21,6 +33,8 @@ int main()
     contiguousFloatTest.testRotationBounds();
     contiguousFloatTest.testShiftingValue();
     contiguousFloatTest.testWrapping();
+
+
 
     Board::initialize();
 
@@ -35,14 +49,22 @@ int main()
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
     modm::ShortPeriodicTimer motorSendPeriod(3);
+    Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
+    Usart2::initialize<Board::SystemClock, 115200>();
 
     while (1)
     {
+
         if (motorSendPeriod.execute())
         {
+            MODM_LOG_DEBUG << "debug\r" << modm::endl;
+            // MODM_LOG_ERROR << "error" << modm::endl;
+
             aruwlib::control::CommandScheduler::run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
+
+
 
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
