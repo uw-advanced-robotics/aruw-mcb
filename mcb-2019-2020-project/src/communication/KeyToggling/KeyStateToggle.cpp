@@ -1,10 +1,16 @@
 #include "KeyStateToggle.hpp"
 
+namespace aruwlib
+{
+
+namespace communication
+{
+
 KeyStateToggle::KeyStateToggle(aruwlib::Remote::Key key)
-            : currKey(key)
-            , prevState(false)
-            , currentToggleState(false)
-            {} //empty compound statement
+    : currKey(key)
+    , prevState(false)
+    , currentToggleState(false)
+    {}  // empty compound statement
 
 void KeyStateToggle::KeyToggleHandler(){
     bool input = aruwlib::Remote::keyPressed(currKey);
@@ -20,3 +26,7 @@ void KeyStateToggle::KeyToggleHandler(){
 bool KeyStateToggle::keyToggled() const{
     return currentToggleState;
 }
+
+}  // namespace communication
+
+}  // namespace aruwlib

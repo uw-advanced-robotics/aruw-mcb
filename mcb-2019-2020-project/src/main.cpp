@@ -12,12 +12,6 @@
 
 aruwsrc::control::ExampleSubsystem testSubsystem;
 
-#include "src/communication/remote.hpp"
-#include "src/communication/KeyToggling/KeyStateToggle.hpp"
-
-bool keyA = false;
-    KeyStateToggle toggle(aruwlib::Remote::Key::A);
-
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -29,8 +23,6 @@ int main()
     contiguousFloatTest.testWrapping();
 
     Board::initialize();
-    aruwlib::Remote::initialize();
-
 
     modm::SmartPointer testDefaultCommand(
         new aruwsrc::control::ExampleCommand(&testSubsystem));
