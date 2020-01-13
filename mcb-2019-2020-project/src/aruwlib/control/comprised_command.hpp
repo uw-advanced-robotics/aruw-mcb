@@ -11,9 +11,16 @@ namespace aruwlib
 namespace control
 {
 
-
 class ComprisedCommand : public Command
-{};
+{
+ public:
+    bool usesCommand(modm::SmartPointer& command);
+
+    void addUseCommand(modm::SmartPointer& commandToAdd);
+
+ private:
+    modm::DynamicArray<modm::SmartPointer> commandsToUse;
+};
 
 }  // namespace control
 

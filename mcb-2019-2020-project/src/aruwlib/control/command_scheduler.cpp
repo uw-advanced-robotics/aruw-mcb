@@ -36,12 +36,47 @@ namespace control
 
         bool commandAdded = false;
 
-        const set<Subsystem*>* commandRequirements =
-            smrtPtrCommandCast(commandToAdd)->getRequirements();
+        /**
+         * check comprised command requirements to see if any comprised commands need to
+         * be removed. Only remove the requirement if the comprised command does not contain
+         * the command that is trying to be added.
+         */
+        int comprisedCommandListSize = static_cast<int>(comprisedCommandList.getSize());
+        for (int i = 0; i < comprisedCommandListSize; i++)
+        {
+            bool removeCommand = false;
+            auto command = comprisedCommandList.getFront();
+            comprisedCommandList.removeFront();
+            set<Subsystem*> requirements = *smrtPtrCommandCast(commandToAdd)->getRequirements();
+            for (auto& requirement : requirements)
+            {
+                if (smrtPtrCommandCast(command)->getRequirements()->find(requirement) !=
+                    smrtPtrCommandCast(command)->getRequirements()->end()
+                    && !reinterpret_cast<ComprisedCommand*>(command.getPointer())->usesCommand(commandToAdd)
+                ) {
+                    removeCommand = true;
+                    break;
+                }
+            }
+
+            if (!removeCommand)
+            {
+                comprisedCommandList.append(command);
+            }
+            else
+            {
+                smrtPtrCommandCast(command)->end(true);
+            }
+            
+        }
+        
+
+        const set<Subsystem*> commandRequirements =
+            *smrtPtrCommandCast(commandToAdd)->getRequirements();
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
-        for (auto& requirement : *commandRequirements)
+        for (auto& requirement : commandRequirements)
         {
             map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
                 subsystemToCommandMap.find(requirement);
@@ -91,24 +126,27 @@ namespace control
             // the currComprisedCommand
             modm::SmartPointer currComprisedCommand = comprisedCommandList.getFront();
             comprisedCommandList.removeFront();
-            const set<Subsystem*>* currCmdSubsystemRequirements =
-                smrtPtrCommandCast(currComprisedCommand)->getRequirements();
-            const set<Subsystem*>* cmdToAddSubsystemRequirements =
-                smrtPtrCommandCast(comprisedCommandToAdd)->getRequirements();
-            for (auto subsystem : *cmdToAddSubsystemRequirements)
+            const set<Subsystem*> currCmdSubsystemRequirements =
+                *smrtPtrCommandCast(currComprisedCommand)->getRequirements();
+            const set<Subsystem*> cmdToAddSubsystemRequirements =
+                *smrtPtrCommandCast(comprisedCommandToAdd)->getRequirements();
+            for (auto subsystem : cmdToAddSubsystemRequirements)
             {
-                if (currCmdSubsystemRequirements->find(subsystem)
-                    != currCmdSubsystemRequirements->end()
+                if (currCmdSubsystemRequirements.find(subsystem)
+                    != currCmdSubsystemRequirements.end()
                 ) {
                     // shares a subsystem requirement, end the comprised command
-                    smrtPtrCommandCast(currComprisedCommand)->end(true);
                     removeCurrCommand = true;
                     break;
                 }
             }
-            if (!removeCurrCommand)
+            if (!removeCurrCommand)  // add back to the list if we didn't remove 
             {
                 comprisedCommandList.append(currComprisedCommand);
+            }
+            else
+            {
+                smrtPtrCommandCast(currComprisedCommand)->end(true);
             }
         }
 
@@ -117,9 +155,9 @@ namespace control
          * if there is a subsystem that does not exist, you fail
          * if a subsystem has a command running, kill the command, but you don't fail
          */
-        const set<Subsystem*>* commandRequirements =
-            smrtPtrCommandCast(comprisedCommandToAdd)->getRequirements();
-        for (auto& requirement : *commandRequirements)
+        const set<Subsystem*> commandRequirements =
+            *smrtPtrCommandCast(comprisedCommandToAdd)->getRequirements();
+        for (auto& requirement : commandRequirements)
         {
             // return false if the command you are trying to add has a subsystem that is not in the
             // command scheduler
@@ -129,6 +167,12 @@ namespace control
             {
                 return false;
             }
+            else if (!(isDependentSubsystem->second == defaultNullCommand))
+            {
+                smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
+                isDependentSubsystem->second = defaultNullCommand;
+            }
+            
         }
 
         // you made it, add the comprised command. slack me a :jankturret
@@ -226,7 +270,8 @@ namespace control
         const modm::SmartPointer& comprisedCommand,
         bool interrupted
     ) {
-        for (int i = 0; i < static_cast<int>(comprisedCommandList.getSize()); i++)
+        int size = static_cast<int>(comprisedCommandList.getSize());
+        for (int i = 0; i < size; i++)
         {
             auto command = comprisedCommandList.getFront();
             comprisedCommandList.removeFront();
