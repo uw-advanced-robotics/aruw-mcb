@@ -52,7 +52,8 @@ namespace control
             {
                 if (smrtPtrCommandCast(command)->getRequirements()->find(requirement) !=
                     smrtPtrCommandCast(command)->getRequirements()->end()
-                    && !reinterpret_cast<ComprisedCommand*>(command.getPointer())->usesCommand(commandToAdd)
+                    && !reinterpret_cast<ComprisedCommand*>(command.getPointer())->
+                        usesCommand(commandToAdd)
                 ) {
                     removeCommand = true;
                     break;
@@ -67,9 +68,7 @@ namespace control
             {
                 smrtPtrCommandCast(command)->end(true);
             }
-            
         }
-        
 
         const set<Subsystem*> commandRequirements =
             *smrtPtrCommandCast(commandToAdd)->getRequirements();
@@ -140,7 +139,7 @@ namespace control
                     break;
                 }
             }
-            if (!removeCurrCommand)  // add back to the list if we didn't remove 
+            if (!removeCurrCommand)  // add back to the list if we didn't remove
             {
                 comprisedCommandList.append(currComprisedCommand);
             }
@@ -172,7 +171,6 @@ namespace control
                 smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
                 isDependentSubsystem->second = defaultNullCommand;
             }
-            
         }
 
         // you made it, add the comprised command. slack me a :jankturret

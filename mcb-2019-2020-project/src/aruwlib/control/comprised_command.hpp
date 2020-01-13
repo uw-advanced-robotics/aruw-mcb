@@ -14,9 +14,9 @@ namespace control
 class ComprisedCommand : public Command
 {
  public:
-    bool usesCommand(modm::SmartPointer& command);
+    bool usesCommand(const modm::SmartPointer& command) const;
 
-    void addUseCommand(modm::SmartPointer& commandToAdd);
+    void addUseCommand(const modm::SmartPointer& commandToAdd);
 
  private:
     modm::DynamicArray<modm::SmartPointer> commandsToUse;
