@@ -20,6 +20,8 @@ ShootSteadyComprisedCommand::ShootSteadyComprisedCommand(
     agitatorUnjamCommand(new AgitatorUnjamCommand(agitator, maxUnjamAngle)),
     unjamSequenceCommencing(false)
 {
+    addUseCommand(agitatorRotateCommand);
+    addUseCommand(agitatorUnjamCommand);
     this->addSubsystemRequirement(reinterpret_cast<Subsystem*>(agitator));
 }
 

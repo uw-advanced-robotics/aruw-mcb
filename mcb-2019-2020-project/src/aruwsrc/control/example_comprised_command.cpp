@@ -8,6 +8,7 @@ namespace control
 
 ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem) : exampleCommand(new ExampleCommand(subsystem))
 {
+    addUseCommand(exampleCommand);
     this->addSubsystemRequirement(subsystem);
 }
 

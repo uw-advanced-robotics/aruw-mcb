@@ -4,6 +4,7 @@
 #include "src/aruwlib/control/comprised_command.hpp"
 #include "example_command.hpp"
 #include "example_subsystem.hpp"
+#include "agitator_subsystem.hpp"
 
 namespace aruwsrc
 {

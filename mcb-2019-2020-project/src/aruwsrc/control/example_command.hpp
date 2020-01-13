@@ -8,6 +8,7 @@
 #define __COMMAND_EXAMPLE_HPP__
 
 #include "src/aruwlib/control/command.hpp"
+#include "agitator_subsystem.hpp"
 
 using namespace aruwlib::control;
 
@@ -22,7 +23,7 @@ class ExampleSubsystem;
 class ExampleCommand : public Command
 {
  public:
-    explicit ExampleCommand(ExampleSubsystem* subsystem = nullptr);
+    explicit ExampleCommand(ExampleSubsystem* subsystem);
 
     /**
       * The initial subroutine of a command.  Called once when the command is
