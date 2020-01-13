@@ -36,12 +36,12 @@ namespace control
 
         bool commandAdded = false;
 
-        set<Subsystem*> commandRequirements =
-            *(smrtPtrCommandCast(commandToAdd)->getRequirements());
+        const set<Subsystem*>* commandRequirements =
+            smrtPtrCommandCast(commandToAdd)->getRequirements();
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
-        for (auto& requirement : commandRequirements)
+        for (auto& requirement : *commandRequirements)
         {
             map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
                 subsystemToCommandMap.find(requirement);
@@ -71,25 +71,55 @@ namespace control
         return true;
     }
 
-    bool CommandScheduler::addComprisedCommand(modm::SmartPointer comprisedCommand)
+    bool CommandScheduler::addComprisedCommand(modm::SmartPointer comprisedCommandToAdd)
     {
-        // remove the command if it is already added
-        for (int i = 0; i < static_cast<int>(comprisedCommandList.getSize()); i++)
+        /**
+         * review comprised command requirements
+         * if a comprised command is being run that has any subsystem requirements that
+         * are the same as the one trying to be added, end the comprised command
+         * there is no need to end any command that are being run by the scheduler,
+         * as this will happen in the below step
+         * We do have to look at all subsystem dependencies, not just commands that are 
+         * scheduled, since comprised commands could have subsystem dependencies but
+         * the command being run currently does not yet tell the subsystem what to do
+         */
+        int initialComprisedCommandListSize = static_cast<int>(comprisedCommandList.getSize());
+        for (int i = 0; i < initialComprisedCommandListSize; i++)
         {
-            modm::SmartPointer addedComprisedCommand = comprisedCommandList.getFront();
-            if (addedComprisedCommand == comprisedCommand)
+            bool removeCurrCommand = false;
+            // look at subsystem requirements. if overlapping subsystem requirements, remove
+            // the currComprisedCommand
+            modm::SmartPointer currComprisedCommand = comprisedCommandList.getFront();
+            comprisedCommandList.removeFront();
+            const set<Subsystem*>* currCmdSubsystemRequirements =
+                smrtPtrCommandCast(currComprisedCommand)->getRequirements();
+            const set<Subsystem*>* cmdToAddSubsystemRequirements =
+                smrtPtrCommandCast(comprisedCommandToAdd)->getRequirements();
+            for (auto subsystem : *cmdToAddSubsystemRequirements)
             {
-                smrtPtrCommandCast(addedComprisedCommand)->end(true);
+                if (currCmdSubsystemRequirements->find(subsystem)
+                    != currCmdSubsystemRequirements->end()
+                ) {
+                    // shares a subsystem requirement, end the comprised command
+                    smrtPtrCommandCast(currComprisedCommand)->end(true);
+                    removeCurrCommand = true;
+                    break;
+                }
             }
-            else
+            if (!removeCurrCommand)
             {
-                comprisedCommandList.append(addedComprisedCommand);
+                comprisedCommandList.append(currComprisedCommand);
             }
         }
 
-        set<Subsystem*> commandRequirements =
-            *smrtPtrCommandCast(comprisedCommand)->getRequirements();
-        for (auto& requirement : commandRequirements)
+        /**
+         * review subsystem requirements
+         * if there is a subsystem that does not exist, you fail
+         * if a subsystem has a command running, kill the command, but you don't fail
+         */
+        const set<Subsystem*>* commandRequirements =
+            smrtPtrCommandCast(comprisedCommandToAdd)->getRequirements();
+        for (auto& requirement : *commandRequirements)
         {
             // return false if the command you are trying to add has a subsystem that is not in the
             // command scheduler
@@ -101,9 +131,11 @@ namespace control
             }
         }
 
-        comprisedCommandList.append(comprisedCommand);
+        // you made it, add the comprised command. slack me a :jankturret
+        // if you read this
+        comprisedCommandList.append(comprisedCommandToAdd);
         // don't add commands here, for a comprised command, you add them yourselves
-        smrtPtrCommandCast(comprisedCommand)->initialize();
+        smrtPtrCommandCast(comprisedCommandToAdd)->initialize();
         return true;
     }
 
