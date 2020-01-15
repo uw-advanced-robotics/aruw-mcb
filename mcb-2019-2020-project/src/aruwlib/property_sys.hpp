@@ -24,7 +24,7 @@
  */
 namespace aruwlib {
 
-class PropertySystem : aruwlib::serial::DJISerial
+class PropertySystem : public aruwlib::serial::DJISerial
 {
 
  public:
@@ -38,7 +38,7 @@ class PropertySystem : aruwlib::serial::DJISerial
     } PropertyType;
     
     PropertySystem();
-    ~PropertySystem();
+
 
     void initializePropertySystem();
     
@@ -84,7 +84,7 @@ class PropertySystem : aruwlib::serial::DJISerial
      * Send all properties through serial
      * @return if the operation succeed
      */
-    void sendAllProperty();
+    bool sendAllProperty();
 
     /**
      * Check if number of properties in PropertySystem reaches maximum
@@ -116,8 +116,10 @@ class PropertySystem : aruwlib::serial::DJISerial
     //static const uint8_t SHORT_PACKAGE_TYPE_DELETE_PROPERTY = 0x15;
     static const uint8_t SHORT_PACKAGE_TYPE_ADJUST_DEQUEUE_RATE = 0x16;
 
-    static const uint8_t DEFAULT_DEQUEUE_RATE_TX_DATA = 20;
-    static const uint8_t DEFAULT_DEQUEUE_RATE_TX_TABLE_DATA = 20;
+    static const uint8_t DEFAULT_DEQUEUE_RATE_TX_DATA = 200;
+    static const uint8_t DEFAULT_DEQUEUE_RATE_TX_TABLE_DATA = 200;
+    static const uint8_t DEFAULT_DEQUEUE_RATE_TX_LONG_PACKAGE = 2;
+    static const uint8_t DEFAULT_DEQUEUE_RATE_TX_SHORT_PACKAGE = 2;
 
     static const uint16_t PROPERTY_TABLE_MAX_SIZE = 1024;
 

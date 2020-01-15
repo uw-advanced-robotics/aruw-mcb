@@ -8,17 +8,17 @@ PropertySystem::PropertySystem() :
 DJISerial(SerialPort::PORT_UART2, true),
 propertyTableSize(0),
 txDataQueue(),
+txDataDequeueRate(DEFAULT_DEQUEUE_RATE_TX_DATA),
 txTableDataQueue(),
-txDataDequeueRate(),
-txTableDataDequeueRate(),
-txLongPackageDequeueRate(),
-txShortPackageDequeueRate()
+txTableDataDequeueRate(DEFAULT_DEQUEUE_RATE_TX_TABLE_DATA),
+txLongPackageDequeueRate(DEFAULT_DEQUEUE_RATE_TX_LONG_PACKAGE),
+txShortPackageDequeueRate(DEFAULT_DEQUEUE_RATE_TX_SHORT_PACKAGE)
 {
 }
 
 void PropertySystem::initializePropertySystem()
 {
-    this->initialize()
+    this->initialize();
 }
 
 template <class Type>
@@ -52,6 +52,16 @@ uint16_t PropertySystem::addProperty(Type *data, uint16_t length, uint8_t *prope
 bool PropertySystem::sendProperty(uint16_t property_id)
 {
     return txDataQueue.push(&propertyTable[property_id]);
+}
+
+bool PropertySystem::sendAllProperty()
+{
+    bool flag = true;
+    for (uint16_t i = 0; i < PROPERTY_TABLE_MAX_SIZE; i++)
+    {
+        flag = txDataQueue.push(&propertyTable[i]) ? flag : false;
+    }
+    return flag;
 }
 
 bool PropertySystem::sendPropertyTable()

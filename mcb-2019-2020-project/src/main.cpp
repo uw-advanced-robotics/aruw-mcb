@@ -47,8 +47,8 @@ int main()
 
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
+        propertySystem.updateSerial();
         propertySystem.updatePropertySystem();
-
         modm::delayMicroseconds(10);
     }
     return 0;
