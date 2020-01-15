@@ -9,9 +9,10 @@
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+#include "src/aruwlib/property_sys.hpp"
 
 aruwsrc::control::ExampleSubsystem testSubsystem;
-
+aruwlib::PropertySystem propertySystem;
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -23,7 +24,7 @@ int main()
     contiguousFloatTest.testWrapping();
 
     Board::initialize();
-
+    propertySystem.initializePropertySystem();
     modm::SmartPointer testDefaultCommand(
         new aruwsrc::control::ExampleCommand(&testSubsystem));
 
@@ -46,6 +47,7 @@ int main()
 
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
+        propertySystem.updatePropertySystem();
 
         modm::delayMicroseconds(10);
     }

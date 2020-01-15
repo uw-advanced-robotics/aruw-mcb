@@ -16,7 +16,8 @@ djiSerialRxState(SERIAL_HEADER_SEARCH),
 frameCurrReadByte(0),
 frameHeader(),
 rxCRCEnforcementEnabled(isRxCRCEnforcementEnabled),
-txBuffer()
+txBuffer(),
+txSequenceNumber(0)
 {
     txMessage.length = 0;
     newMessage.length = 0;
@@ -70,6 +71,7 @@ bool DJISerial::send() {
         // the message did not completely send, THROW-NON-FATAL-ERROR-CHECK
     }
     txMessage.messageTimestamp = modm::Clock::now();
+    txSequenceNumber += 1;
     return true;
 }
 
