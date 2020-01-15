@@ -21,10 +21,19 @@ class EngineerWristSubsystem : public Subsystem
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID
     );
+        
     
     void refresh(void);
 
     void setWristAngle(float newAngle);
+
+    // needed?
+
+    float getWristEncoderToPosition(void) const;
+
+    float getWristDesiredAngle(void) const;
+    
+    bool wristCalibrateHere(void);
 
  private:
     static const aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR1;
@@ -51,6 +60,8 @@ class EngineerWristSubsystem : public Subsystem
     float wristCalibrationAngle;
 
     bool wristIsCalibrated;
+
+    float wristGearRatio;
 
     void wristRunPositionPid(void);
 };

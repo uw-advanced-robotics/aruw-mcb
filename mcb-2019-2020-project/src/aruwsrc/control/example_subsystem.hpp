@@ -31,14 +31,10 @@ class ExampleSubsystem : public Subsystem
 {
  public:
     ExampleSubsystem(
+        uint16_t gear_ratio,
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
-        : leftWheel(leftMotorId, CAN_BUS_MOTORS),
-        rightWheel(rightMotorId, CAN_BUS_MOTORS),
-        velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        desiredRpm(0)
-    {}
+        aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID
+    );
 
     void setDesiredRpm(float desRpm);
 
