@@ -15,39 +15,39 @@ void ChassisDriveCommand::execute()
 {
     float remoteMoveX = ChassisSubsystem::getChassisX();
     float remoteMoveY = ChassisSubsystem::getChassisY();
-    float remoteMoveZ = ChassisSubsystem::getChassisZ();
+    float remoteMoveZ = ChassisSubsystem::getChassisR();
 
     float chassisMoveX, chassisMoveY, chassisMoveZ;
 
     chassisMoveZ = remoteMoveZ * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR;
 
-    float zTranslationGain;  // what we will multiply x and y speed by to take into account rotation
+    float rTranslationalGain;  // what we will multiply x and y speed by to take into account rotation
 
     // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
-    // power consumption when the rotation speed is greater than the MIN_ROTATION_THREASHOLD
-    if (fabs(chassisMoveZ) > MIN_ROTATION_THREASHOLD)
+    // power consumption when the rotation speed is greater than the MIN_ROTATION_THRESHOLD
+    if (fabs(chassisMoveZ) > MIN_ROTATION_THRESHOLD)
     {
         // power(max revolve speed - specified revolve speed, 2)
         // / power(max revolve speed, 2)
-        zTranslationGain =
+        rTranslationalGain =
             pow(
                 (static_cast<double>(
-                ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR + MIN_ROTATION_THREASHOLD)
+                ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD)
                 - fabs(chassisMoveZ) )
                 / static_cast<double>(ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR),
                 2.0
             );
-        zTranslationGain = aruwlib::algorithms::limitVal<float>(zTranslationGain, 0.0f, 1.0f);
+        rTranslationalGain = aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
     }
     else
     {
-        zTranslationGain = 1.0f;
+        rTranslationalGain = 1.0f;
     }
 
     chassisMoveX = aruwlib::algorithms::limitVal<float>(remoteMoveX,
-        -zTranslationGain, zTranslationGain);
+        -rTranslationalGain, rTranslationalGain);
     chassisMoveY = aruwlib::algorithms::limitVal<float>(remoteMoveY,
-        -zTranslationGain, zTranslationGain);
+        -rTranslationalGain, rTranslationalGain);
 
     chassis->setDesiredOutput(chassisMoveX * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR,
         chassisMoveY * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR, chassisMoveZ);

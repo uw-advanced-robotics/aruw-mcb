@@ -29,7 +29,7 @@ class ChassisDriveCommand : public Command {
     bool isFinished() const override;
 
  private:
-    static constexpr double MIN_ROTATION_THREASHOLD = 800.0;
+    static constexpr double MIN_ROTATION_THRESHOLD = 800.0;
     ChassisSubsystem* chassis;
 };
 

@@ -43,11 +43,11 @@ class ChassisSubsystem : public Subsystem {
     // derivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD     = 235.f;
     // the maximum revolve error before we start using the derivative term
-    static const int MAX_REVOLVE_ANGLE                = 35;
+    static const int MIN_ERROR_ROTATION_D                = 35;
 
     // mechanical chassis constants, all in mm
     // radius of the wheels
-    static constexpr float WHEEL_RADIUS      = 76.0f;
+    static constexpr float WHEEL_RADIUS          = 76.0f;
     // distance from center of the two front wheels
     static constexpr float WHEELTRACK            = 366.0f;
     // distance from center of the front and rear wheels
@@ -69,7 +69,7 @@ class ChassisSubsystem : public Subsystem {
     // no i, max error sum is MAX_CURRENT_OUT_SINGLE_MOTOR, proportional gain specified by user
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 0.0;
     static constexpr float CHASSIS_REVOLVE_PID_KD     = 0.0;
-    static const int MAX_REVOLVE_ANGLE                = 0;
+    static const int MIN_ERROR_ROTATION_D                = 0;
 
     // mechanical chassis constants
     static constexpr float WHEEL_RADIUS          = 76.0f;
@@ -91,7 +91,7 @@ class ChassisSubsystem : public Subsystem {
     // no i, max error sum is MAX_CURRENT_OUT_SINGLE_MOTOR, proportional gain specified by user
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 0.0;
     static constexpr float CHASSIS_REVOLVE_PID_KD     = 0.0;
-    static const int MAX_REVOLVE_ANGLE                = 0;
+    static const int MIN_ERROR_ROTATION_D                = 0;
 
     // mechanical chassis constants
     static constexpr float WHEEL_RADIUS          = 76.0f;
@@ -181,7 +181,7 @@ class ChassisSubsystem : public Subsystem {
         KalmanCreate(&chassisErrorKalman, 1.0f, 0.0f);
     }
 
-    void setDesiredOutput(float x, float y, float z);
+    void setDesiredOutput(float x, float y, float r);
 
     /**
      * run chassis rotation pid on some actual turret angle offset
@@ -204,14 +204,14 @@ class ChassisSubsystem : public Subsystem {
     static float getChassisY();
 
     // Returns the value used for chassis rotation, between -1 and 1
-    static float getChassisZ();
+    static float getChassisR();
 
  private:
     /**
-     * When you input desired x, y, an z values, this function translates
+     * When you input desired x, y, an r values, this function translates
      * and sets the rpm of individual chassis motors
      */
-    void chassisOmniMoveCalculate(float x, float y, float z, float speedMax);
+    void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,

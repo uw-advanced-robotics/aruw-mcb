@@ -9,9 +9,9 @@ namespace aruwsrc
 
 namespace chassis
 {
-    void ChassisSubsystem::setDesiredOutput(float x, float y, float z)
+    void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
     {
-        chassisOmniMoveCalculate(x, y, z, MAX_CURRENT_OUT_SINGLE_MOTOR);
+        mecanumDriveCalculate(x, y, r, MAX_CURRENT_OUT_SINGLE_MOTOR);
     }
 
     void ChassisSubsystem::refresh()
@@ -22,30 +22,29 @@ namespace chassis
         updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, rightBackRpm);
     }
 
-    void ChassisSubsystem::chassisOmniMoveCalculate(float x, float y, float z, float speedMax)
+    void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
     {
-        float rotateRatioFL, rotateRatioRF, rotateRatioBL, rotateRatioBR;
         float chassisRotationRatio = (WHEELBASE + WHEELTRACK) / 2.0f;
 
-        rotateRatioFL = DEGREES_TO_RADIANS(
+        float rotateRatioFL = DEGREES_TO_RADIANS(
             chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-        rotateRatioRF = DEGREES_TO_RADIANS(
+        float rotateRatioRF = DEGREES_TO_RADIANS(
             chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
-        rotateRatioBL = DEGREES_TO_RADIANS(
+        float rotateRatioBL = DEGREES_TO_RADIANS(
             chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-        rotateRatioBR = DEGREES_TO_RADIANS(
+        float rotateRatioBR = DEGREES_TO_RADIANS(
             chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
 
-        float zTrans = RADIANS_TO_DEGREES(z) / chassisRotationRatio;
-        leftFrontRpm  =  ( y + x + zTrans * rotateRatioFL);
-        rightFrontRpm = -(-y + x - zTrans * rotateRatioRF);
-        leftBackRpm   =  (-y + x + zTrans * rotateRatioBL);
-        rightBackRpm  = -( y + x - zTrans * rotateRatioBR);
+        float chassisRotateTranslated = RADIANS_TO_DEGREES(r) / chassisRotationRatio;
+        leftFrontRpm  =  ( y + x + chassisRotateTranslated * rotateRatioFL);
+        rightFrontRpm = -(-y + x - chassisRotateTranslated * rotateRatioRF);
+        leftBackRpm   =  (-y + x + chassisRotateTranslated * rotateRatioBL);
+        rightBackRpm  = -( y + x - chassisRotateTranslated * rotateRatioBR);
 
-        leftFrontRpm  = aruwlib::algorithms::limitVal<float> (leftFrontRpm,  -speedMax, speedMax);
-        rightFrontRpm = aruwlib::algorithms::limitVal<float> (rightFrontRpm, -speedMax, speedMax);
-        leftBackRpm   = aruwlib::algorithms::limitVal<float> (leftBackRpm,   -speedMax, speedMax);
-        rightBackRpm  = aruwlib::algorithms::limitVal<float> (rightBackRpm,  -speedMax, speedMax);
+        leftFrontRpm  = aruwlib::algorithms::limitVal<float> (leftFrontRpm,  -maxWheelSpeed, maxWheelSpeed);
+        rightFrontRpm = aruwlib::algorithms::limitVal<float> (rightFrontRpm, -maxWheelSpeed, maxWheelSpeed);
+        leftBackRpm   = aruwlib::algorithms::limitVal<float> (leftBackRpm,   -maxWheelSpeed, maxWheelSpeed);
+        rightBackRpm  = aruwlib::algorithms::limitVal<float> (rightBackRpm,  -maxWheelSpeed, maxWheelSpeed);
     }
 
     void ChassisSubsystem::updateMotorRpmPid(
@@ -59,7 +58,7 @@ namespace chassis
 
     float ChassisSubsystem::chassisSpeedZPID(float currentAngleError, float kp)
     {
-        float speed_z = 0;
+        float wheelRotationSpeed = 0;
 
         errorPRotateKalman = KalmanFilter(&chassisErrorKalman, currentAngleError);
 
@@ -71,7 +70,7 @@ namespace chassis
         // D
         errorPRotate = errorPRotateKalman - errorPrevKalman;
 
-        if(abs(errorPRotateKalman) > MAX_REVOLVE_ANGLE)
+        if(abs(errorPRotateKalman) > MIN_ERROR_ROTATION_D)
         {
             rotationPidD = -(errorPRotate) * CHASSIS_REVOLVE_PID_KD;
         }
@@ -80,13 +79,13 @@ namespace chassis
             rotationPidD = 0.0f;
         }
 
-        speed_z = rotationPidP + rotationPidD;
-        speed_z = aruwlib::algorithms::limitVal<float>(speed_z,
+        wheelRotationSpeed = rotationPidP + rotationPidD;
+        wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(wheelRotationSpeed,
             -MAX_CURRENT_OUT_SINGLE_MOTOR, MAX_CURRENT_OUT_SINGLE_MOTOR);
 
         errorPrevKalman = errorPRotateKalman;
 
-        return speed_z;
+        return wheelRotationSpeed;
     }
 
     float ChassisSubsystem::getChassisX()
@@ -107,7 +106,7 @@ namespace chassis
         );
     }
 
-    float ChassisSubsystem::getChassisZ()
+    float ChassisSubsystem::getChassisR()
     {
         return aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL)
