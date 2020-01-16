@@ -34,7 +34,7 @@ class Remote {
     static bool isConnected(void);
 
     // Returns the value of the given channel
-    static int16_t getChannel(Channel ch);
+    static float getChannel(Channel ch);
 
     // Returns the state of the given switch
     static SwitchState getSwitch(Switch sw);
@@ -60,20 +60,13 @@ class Remote {
     // Returns the value of the wheel
     static int16_t getWheel(void);
 
-    // Returns the value used for chassis movement forward and backward, between -1 and 1
-    static float getChassisX();
-
-    // Returns the value used for chassis movement side to side, between -1 and 1
-    static float getChassisY();
-
-    // Returns the value used for chassis rotation, between -1 and 1
-    static float getChassisZ();
-
  private:
     #define REMOTE_BUF_LEN 18  // Length of the remote recieve buffer
     #define REMOTE_READ_TIMEOUT 6  // Timeout delay between valid packets
     #define REMOTE_DISCONNECT_TIMEOUT 100  // Timeout delay for remote disconnect
     #define REMOTE_INT_PRI 12  // Interrupt priority
+
+    static constexpr float STICK_MAX_VALUE = 660.0f;
 
     // The current remote information
     static struct RemoteInfo {

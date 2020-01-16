@@ -2,20 +2,20 @@
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 
-#include "robot-type/robot.hpp"
-
 #include "aruwlib/control/command_scheduler.hpp"
 #include "aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "aruwlib/communication/can/can_rx_listener.hpp"
 #include "aruwlib/communication/remote.hpp"
 
-#include "aruwsrc/control/chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwlib/algorithms/contiguous_float_test.hpp"
 
-using namespace aruwsrc::control;
+using namespace aruwsrc::chassis;
 
+#if defined(TARGET_SOLDIER)
 ChassisSubsystem soldierChassis;
+#endif
 
 int main()
 {
@@ -30,11 +30,13 @@ int main()
     Board::initialize();
     aruwlib::Remote::initialize();
 
+    // define subsystems/commands below
+
+    #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
     modm::SmartPointer chassisDrive(new ChassisDriveCommand(&soldierChassis));
-
     CommandScheduler::registerSubsystem(&soldierChassis);
-
     soldierChassis.setDefaultCommand(chassisDrive);
+    #endif
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill

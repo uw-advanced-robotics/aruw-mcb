@@ -5,7 +5,7 @@
 namespace aruwsrc
 {
 
-namespace control
+namespace chassis
 {
 
 void ChassisDriveCommand::initialize()
@@ -13,13 +13,13 @@ void ChassisDriveCommand::initialize()
 
 void ChassisDriveCommand::execute()
 {
-    float remoteMoveX = aruwlib::Remote::getChassisX();
-    float remoteMoveY = aruwlib::Remote::getChassisY();
-    float remoteMoveZ = aruwlib::Remote::getChassisZ();
+    float remoteMoveX = ChassisSubsystem::getChassisX();
+    float remoteMoveY = ChassisSubsystem::getChassisY();
+    float remoteMoveZ = ChassisSubsystem::getChassisZ();
 
     float chassisMoveX, chassisMoveY, chassisMoveZ;
 
-    chassisMoveZ = remoteMoveZ * ChassisSubsystem::OMNI_SPEED_MAX;
+    chassisMoveZ = remoteMoveZ * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR;
 
     float zTranslationGain;  // what we will multiply x and y speed by to take into account rotation
 
@@ -31,9 +31,10 @@ void ChassisDriveCommand::execute()
         // / power(max revolve speed, 2)
         zTranslationGain =
             pow(
-                (static_cast<double>(ChassisSubsystem::OMNI_SPEED_MAX + MIN_ROTATION_THREASHOLD)
+                (static_cast<double>(
+                ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR + MIN_ROTATION_THREASHOLD)
                 - fabs(chassisMoveZ) )
-                / static_cast<double>(ChassisSubsystem::OMNI_SPEED_MAX),
+                / static_cast<double>(ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR),
                 2.0
             );
         zTranslationGain = aruwlib::algorithms::limitVal<float>(zTranslationGain, 0.0f, 1.0f);
@@ -48,18 +49,26 @@ void ChassisDriveCommand::execute()
     chassisMoveY = aruwlib::algorithms::limitVal<float>(remoteMoveY,
         -zTranslationGain, zTranslationGain);
 
-    chassis->setDesiredOutput(chassisMoveX * ChassisSubsystem::OMNI_SPEED_MAX,
-        chassisMoveY * ChassisSubsystem::OMNI_SPEED_MAX, chassisMoveZ);
+    chassis->setDesiredOutput(chassisMoveX * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR,
+        chassisMoveY * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR, chassisMoveZ);
 }
 
 void ChassisDriveCommand::end(bool interrupted)
-{}
+{
+    // if the command was just ended outright, we should set chassis movement to all zeros
+    // if the command was interrupted, however, we know that another command is running so
+    // we don't need to change the output
+    if (!interrupted)
+    {
+        chassis->setDesiredOutput(0.0f, 0.0f, 0.0f);
+    }
+}
 
 bool ChassisDriveCommand::isFinished() const
 {
     return false;
 }
 
-}  // namespace control
+}  // namespace chassis
 
 }  // namespace aruwsrc
