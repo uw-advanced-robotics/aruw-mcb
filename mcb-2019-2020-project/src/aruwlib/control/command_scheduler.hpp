@@ -59,9 +59,9 @@ class CommandScheduler
  private:
     static const float MAX_ALLOWABLE_SCHEDULER_RUNTIME;
 
-    static std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
-
-    static modm::LinkedList<modm::SmartPointer> comprisedCommandList;
+    // a map containing keys of subsystems, pairs of Commands and ComprisedCommands
+    // the command comes first, the ComprisedCommand second 
+    static std::map<Subsystem*, std::pair<modm::SmartPointer, modm::SmartPointer>> subsystemToCommandMap;
 
     static uint32_t commandSchedulerTimestamp;
 };

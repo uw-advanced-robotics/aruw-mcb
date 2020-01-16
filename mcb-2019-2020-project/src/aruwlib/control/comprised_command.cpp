@@ -6,7 +6,7 @@ namespace aruwlib
 namespace control
 {
 
-bool ComprisedCommand::usesCommand(const modm::SmartPointer& commandToFind) const
+bool ComprisedCommand::usesCommand(modm::SmartPointer commandToFind)
 {
     return commandsToUse.find(commandToFind) != commandsToUse.end();
 }
