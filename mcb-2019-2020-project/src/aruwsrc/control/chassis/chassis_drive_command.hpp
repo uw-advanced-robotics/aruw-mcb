@@ -14,10 +14,9 @@ namespace chassis
 
 class ChassisDriveCommand : public Command {
  public:
-    explicit ChassisDriveCommand(ChassisSubsystem* chassis)
+    explicit ChassisDriveCommand(ChassisSubsystem* chassis) : chassis(chassis)
     {
         addSubsystemRequirement(dynamic_cast<Subsystem*>(chassis));
-        this->chassis = chassis;
     }
 
     void initialize() override;
@@ -30,6 +29,7 @@ class ChassisDriveCommand : public Command {
 
  private:
     static constexpr double MIN_ROTATION_THRESHOLD = 800.0;
+
     ChassisSubsystem* chassis;
 };
 

@@ -13,44 +13,41 @@ void ChassisDriveCommand::initialize()
 
 void ChassisDriveCommand::execute()
 {
-    float remoteMoveX = ChassisSubsystem::getChassisX();
-    float remoteMoveY = ChassisSubsystem::getChassisY();
-    float remoteMoveZ = ChassisSubsystem::getChassisR();
+    float chassisRotationDesiredWheelspeed = ChassisSubsystem::getChassisR()
+        * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
-    float chassisMoveX, chassisMoveY, chassisMoveZ;
-
-    chassisMoveZ = remoteMoveZ * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR;
-
-    float rTranslationalGain;  // what we will multiply x and y speed by to take into account rotation
+    // what we will multiply x and y speed by to take into account rotation
+    float rTranslationalGain = 1.0f;
 
     // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
-    // power consumption when the rotation speed is greater than the MIN_ROTATION_THRESHOLD
-    if (fabs(chassisMoveZ) > MIN_ROTATION_THRESHOLD)
+    // power consumption when the wheel rotation speed for chassis rotationis greater than the
+    // MIN_ROTATION_THRESHOLD
+    if (fabs(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
     {
         // power(max revolve speed - specified revolve speed, 2)
         // / power(max revolve speed, 2)
         rTranslationalGain =
             pow(
                 (static_cast<double>(
-                ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD)
-                - fabs(chassisMoveZ) )
-                / static_cast<double>(ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR),
+                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD)
+                - fabs(chassisRotationDesiredWheelspeed) )
+                / static_cast<double>(ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR),
                 2.0
             );
         rTranslationalGain = aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
     }
-    else
-    {
-        rTranslationalGain = 1.0f;
-    }
 
-    chassisMoveX = aruwlib::algorithms::limitVal<float>(remoteMoveX,
-        -rTranslationalGain, rTranslationalGain);
-    chassisMoveY = aruwlib::algorithms::limitVal<float>(remoteMoveY,
-        -rTranslationalGain, rTranslationalGain);
+    float chassisXDesiredWheelspeed =
+        aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisX(),
+        -rTranslationalGain, rTranslationalGain)
+        * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    float chassisYDesiredWheelspeed =
+        aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisY(),
+        -rTranslationalGain, rTranslationalGain)
+        * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
-    chassis->setDesiredOutput(chassisMoveX * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR,
-        chassisMoveY * ChassisSubsystem::MAX_CURRENT_OUT_SINGLE_MOTOR, chassisMoveZ);
+    chassis->setDesiredOutput(chassisXDesiredWheelspeed,
+        chassisYDesiredWheelspeed, chassisRotationDesiredWheelspeed);
 }
 
 void ChassisDriveCommand::end(bool interrupted)

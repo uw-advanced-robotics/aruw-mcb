@@ -25,7 +25,7 @@ namespace chassis
 class ChassisSubsystem : public Subsystem {
  public:
     // public constants
-    static const int MAX_CURRENT_OUT_SINGLE_MOTOR = 9000;
+    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 9000;
 
  private:
     #if defined(TARGET_SOLDIER)
@@ -37,9 +37,9 @@ class ChassisSubsystem : public Subsystem {
     const float VELOCITY_PID_MAX_OUTPUT    = 16000.0f;
 
     // rotation pid gains and constants
-    // no i, max error sum the same as MAX_CURRENT_OUT_SINGLE_MOTOR, proportional
+    // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
     // gain specified by user
-    static constexpr double CHASSIS_REVOLVE_PID_MAX_P = MAX_CURRENT_OUT_SINGLE_MOTOR;
+    static constexpr double CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
     // derivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD     = 235.f;
     // the maximum revolve error before we start using the derivative term
@@ -66,7 +66,7 @@ class ChassisSubsystem : public Subsystem {
     const float VELOCITY_PID_MAX_OUTPUT    = 16000.0f;
 
     // rotation pid gains and constants
-    // no i, max error sum is MAX_CURRENT_OUT_SINGLE_MOTOR, proportional gain specified by user
+    // no i, max error sum is MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional gain specified by user
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 0.0;
     static constexpr float CHASSIS_REVOLVE_PID_KD     = 0.0;
     static const int MIN_ERROR_ROTATION_D                = 0;
@@ -88,7 +88,7 @@ class ChassisSubsystem : public Subsystem {
     const float VELOCITY_PID_MAX_OUTPUT    = 16000.0f;
 
     // rotation pid gains and constants
-    // no i, max error sum is MAX_CURRENT_OUT_SINGLE_MOTOR, proportional gain specified by user
+    // no i, max error sum is MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional gain specified by user
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 0.0;
     static constexpr float CHASSIS_REVOLVE_PID_KD     = 0.0;
     static const int MIN_ERROR_ROTATION_D                = 0;

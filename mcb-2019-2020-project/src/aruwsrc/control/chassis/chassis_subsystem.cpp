@@ -11,7 +11,7 @@ namespace chassis
 {
     void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
     {
-        mecanumDriveCalculate(x, y, r, MAX_CURRENT_OUT_SINGLE_MOTOR);
+        mecanumDriveCalculate(x, y, r, MAX_WHEEL_SPEED_SINGLE_MOTOR);
     }
 
     void ChassisSubsystem::refresh()
@@ -81,7 +81,7 @@ namespace chassis
 
         wheelRotationSpeed = rotationPidP + rotationPidD;
         wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(wheelRotationSpeed,
-            -MAX_CURRENT_OUT_SINGLE_MOTOR, MAX_CURRENT_OUT_SINGLE_MOTOR);
+            -MAX_WHEEL_SPEED_SINGLE_MOTOR, MAX_WHEEL_SPEED_SINGLE_MOTOR);
 
         errorPrevKalman = errorPRotateKalman;
 
