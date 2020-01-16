@@ -66,26 +66,27 @@ namespace chassis
 
     float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float kp)
     {
-        float kalmanAngleError = KalmanFilter(&chassisRotationErrorKalman, currentAngleError);
+        float currentFilteredAngleError = KalmanFilter(&chassisRotationErrorKalman, currentAngleError);
 
         // P
-        float rotationPidP = currentAngleError * kp;
-        rotationPidP = aruwlib::algorithms::limitVal<float>(rotationPidP,
+        float currRotationPidP = currentAngleError * kp;
+        currRotationPidP = aruwlib::algorithms::limitVal<float>(currRotationPidP,
             -CHASSIS_REVOLVE_PID_MAX_P, CHASSIS_REVOLVE_PID_MAX_P);
 
         // D
-        float errorPRotate = kalmanAngleError - kalmanAngleErrorPrevious;
+        float currentErrorRotation = currentFilteredAngleError - currentFilteredAngleErrorPrevious;
 
-        float rotationPidD = 0.0f;
-        if(abs(kalmanAngleError) > MIN_ERROR_ROTATION_D)
+        float currentRotationPidD = 0.0f;
+        if(abs(currentFilteredAngleError) > MIN_ERROR_ROTATION_D)
         {
-            rotationPidD = -(errorPRotate) * CHASSIS_REVOLVE_PID_KD;
+            currentRotationPidD = -(currentErrorRotation) * CHASSIS_REVOLVE_PID_KD;
         }
 
-        float wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(rotationPidP + rotationPidD,
+        float wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(
+            currRotationPidP + currentRotationPidD,
             -MAX_WHEEL_SPEED_SINGLE_MOTOR, MAX_WHEEL_SPEED_SINGLE_MOTOR);
 
-        kalmanAngleErrorPrevious = kalmanAngleError;
+        currentFilteredAngleErrorPrevious = currentFilteredAngleError;
 
         return wheelRotationSpeed;
     }

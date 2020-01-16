@@ -146,7 +146,7 @@ class ChassisSubsystem : public Subsystem {
     ExtKalman chassisRotationErrorKalman;
 
     // rotation pid parameters
-    float kalmanAngleErrorPrevious = 0;
+    float currentFilteredAngleErrorPrevious = 0;
 
  public:
     ChassisSubsystem(
