@@ -143,7 +143,7 @@ class ChassisSubsystem : public Subsystem {
     float rightBackRpm;
 
     // rotation pid variables
-    ExtKalman chassisErrorKalman;
+    ExtKalman chassisRotationErrorKalman;
 
     // rotation pid parameters
     float kalmanAngleErrorPrevious = 0;
@@ -188,7 +188,7 @@ class ChassisSubsystem : public Subsystem {
         rightFrontRpm(0),
         rightBackRpm(0)
     {
-        KalmanCreate(&chassisErrorKalman, 1.0f, 0.0f);
+        KalmanCreate(&chassisRotationErrorKalman, 1.0f, 0.0f);
     }
 
     void setDesiredOutput(float x, float y, float r);

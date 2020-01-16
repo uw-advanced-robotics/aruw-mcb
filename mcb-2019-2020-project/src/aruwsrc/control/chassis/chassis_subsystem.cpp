@@ -45,10 +45,14 @@ namespace chassis
         leftBackRpm   = -y + x + chassisRotateTranslated * leftBackRotationRatio;
         rightBackRpm  = -y - x + chassisRotateTranslated * rightBackRotationRatio;
 
-        leftFrontRpm  = aruwlib::algorithms::limitVal<float> (leftFrontRpm,  -maxWheelSpeed, maxWheelSpeed);
-        rightFrontRpm = aruwlib::algorithms::limitVal<float> (rightFrontRpm, -maxWheelSpeed, maxWheelSpeed);
-        leftBackRpm   = aruwlib::algorithms::limitVal<float> (leftBackRpm,   -maxWheelSpeed, maxWheelSpeed);
-        rightBackRpm  = aruwlib::algorithms::limitVal<float> (rightBackRpm,  -maxWheelSpeed, maxWheelSpeed);
+        leftFrontRpm
+            = aruwlib::algorithms::limitVal<float>(leftFrontRpm,  -maxWheelSpeed, maxWheelSpeed);
+        rightFrontRpm
+            = aruwlib::algorithms::limitVal<float>(rightFrontRpm, -maxWheelSpeed, maxWheelSpeed);
+        leftBackRpm
+            = aruwlib::algorithms::limitVal<float>(leftBackRpm,   -maxWheelSpeed, maxWheelSpeed);
+        rightBackRpm
+            = aruwlib::algorithms::limitVal<float>(rightBackRpm,  -maxWheelSpeed, maxWheelSpeed);
     }
 
     void ChassisSubsystem::updateMotorRpmPid(
@@ -62,7 +66,7 @@ namespace chassis
 
     float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float kp)
     {
-        float kalmanAngleError = KalmanFilter(&chassisErrorKalman, currentAngleError);
+        float kalmanAngleError = KalmanFilter(&chassisRotationErrorKalman, currentAngleError);
 
         // P
         float rotationPidP = currentAngleError * kp;
