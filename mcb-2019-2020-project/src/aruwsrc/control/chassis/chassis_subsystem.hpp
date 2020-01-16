@@ -41,17 +41,17 @@ class ChassisSubsystem : public Subsystem {
     // gain specified by user
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
     // derivative term used in chassis pid
-    static constexpr float CHASSIS_REVOLVE_PID_KD     = 235.f;
+    static constexpr float CHASSIS_REVOLVE_PID_KD = 235.0f;
     // the maximum revolve error before we start using the derivative term
-    static const int MIN_ERROR_ROTATION_D                = 35;
+    static const int MIN_ERROR_ROTATION_D = 35;
 
     // mechanical chassis constants, all in mm
     // radius of the wheels
-    static constexpr float WHEEL_RADIUS          = 76.0f;
+    static constexpr float WHEEL_RADIUS = 76.0f;
     // distance from center of the two front wheels
-    static constexpr float WHEELTRACK            = 366.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 366.0f;
     // distance from center of the front and rear wheels
-    static constexpr float WHEELBASE             = 366.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 366.0f;
     // gimbal offset from the center of the chassis, see note above for explanation of x and y
     static constexpr float GIMBAL_X_OFFSET       = 0.0f;
     static constexpr float GIMBAL_Y_OFFSET       = 0.0f;
@@ -63,18 +63,25 @@ class ChassisSubsystem : public Subsystem {
     const float VELOCITY_PID_KI            = 0.0f;
     const float VELOCITY_PID_KD            = 0.0f;
     const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-    const float VELOCITY_PID_MAX_OUTPUT    = 16000.0f;
+    const float VELOCITY_PID_MAX_OUTPUT    = 0.0f;
 
     // rotation pid gains and constants
-    // no i, max error sum is MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional gain specified by user
+    // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
+    // gain specified by user
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 0.0;
-    static constexpr float CHASSIS_REVOLVE_PID_KD     = 0.0;
-    static const int MIN_ERROR_ROTATION_D                = 0;
+    // derivative term used in chassis pid
+    static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
+    // the maximum revolve error before we start using the derivative term
+    static const int MIN_ERROR_ROTATION_D = 0;
 
     // mechanical chassis constants
-    static constexpr float WHEEL_RADIUS          = 76.0f;
-    static constexpr float WHEELTRACK            = 517.0f;
-    static constexpr float WHEELBASE             = 600.0f;
+    // radius of the wheels
+    static constexpr float WHEEL_RADIUS = 76.0f;
+    // distance from center of the two front wheels
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 517.0f;
+    // distance from center of the front and rear wheels
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 600.0f;
+    // gimbal offset from the center of the chassis, see note above for explanation of x and y
     static constexpr float GIMBAL_X_OFFSET       = 175.0f;
     static constexpr float GIMBAL_Y_OFFSET       = 0.0f;
     static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
@@ -85,21 +92,29 @@ class ChassisSubsystem : public Subsystem {
     const float VELOCITY_PID_KI            = 0.0f;
     const float VELOCITY_PID_KD            = 0.0f;
     const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-    const float VELOCITY_PID_MAX_OUTPUT    = 16000.0f;
+    const float VELOCITY_PID_MAX_OUTPUT    = 0.0f;
 
     // rotation pid gains and constants
-    // no i, max error sum is MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional gain specified by user
+    // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
+    // gain specified by user
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 0.0;
-    static constexpr float CHASSIS_REVOLVE_PID_KD     = 0.0;
-    static const int MIN_ERROR_ROTATION_D                = 0;
+    // derivative term used in chassis pid
+    static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
+    // the maximum revolve error before we start using the derivative term
+    static const int MIN_ERROR_ROTATION_D = 0;
 
     // mechanical chassis constants
-    static constexpr float WHEEL_RADIUS          = 76.0f;
-    static constexpr float WHEELTRACK            = 517.0f;
-    static constexpr float WHEELBASE             = 600.0f;
+    // radius of the wheels
+    static constexpr float WHEEL_RADIUS = 0.0f;
+    // distance from center of the two front wheels
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 517.0f;
+    // distance from center of the front and rear wheels
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 600.0f;
+    // gimbal offset from the center of the chassis, see note above for explanation of x and y
     static constexpr float GIMBAL_X_OFFSET       = 175.0f;
     static constexpr float GIMBAL_Y_OFFSET       = 0.0f;
     static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
+
     #endif
 
     // hardware constants, not specific to any particular chassis
@@ -129,14 +144,9 @@ class ChassisSubsystem : public Subsystem {
 
     // rotation pid variables
     ExtKalman chassisErrorKalman;
-    float rotationPidP = 0;
-    float rotationPidD = 0;
 
     // rotation pid parameters
-    float errorPrevKalman = 0;
-    float ErrorSum = 0;
-    float errorPRotate = 0;
-    float errorPRotateKalman = 0;
+    float kalmanAngleErrorPrevious = 0;
 
  public:
     ChassisSubsystem(
@@ -193,7 +203,7 @@ class ChassisSubsystem : public Subsystem {
      * 
      * @retval a desired rotation speed (wheel speed)
      */
-    float chassisSpeedZPID(float currentAngleError, float kp);
+    float chassisSpeedRotationPID(float currentAngleError, float kp);
 
     void refresh() override;
 

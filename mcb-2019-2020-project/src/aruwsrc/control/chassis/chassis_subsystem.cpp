@@ -24,22 +24,26 @@ namespace chassis
 
     void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
     {
-        float chassisRotationRatio = (WHEELBASE + WHEELTRACK) / 2.0f;
+        // this is the distance between the center of the chassis to the wheel
+        float chassisRotationRatio = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y) / 2.0f;
 
-        float rotateRatioFL = DEGREES_TO_RADIANS(
-            chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-        float rotateRatioRF = DEGREES_TO_RADIANS(
-            chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
-        float rotateRatioBL = DEGREES_TO_RADIANS(
-            chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-        float rotateRatioBR = DEGREES_TO_RADIANS(
-            chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+        // to take into account the location of the turret so we rotate around the turret rather
+        // than the center of the chassis, we calculate the offset and than multiply however
+        // much we want to rotate by
+        float leftFrontRotationRatio
+            = RADIANS_TO_DEGREES(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        float rightFroneRotationRatio
+            = RADIANS_TO_DEGREES(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+        float leftBackRotationRatio
+            = RADIANS_TO_DEGREES(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        float rightBackRotationRatio
+            = RADIANS_TO_DEGREES(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
 
         float chassisRotateTranslated = RADIANS_TO_DEGREES(r) / chassisRotationRatio;
-        leftFrontRpm  =  ( y + x + chassisRotateTranslated * rotateRatioFL);
-        rightFrontRpm = -(-y + x - chassisRotateTranslated * rotateRatioRF);
-        leftBackRpm   =  (-y + x + chassisRotateTranslated * rotateRatioBL);
-        rightBackRpm  = -( y + x - chassisRotateTranslated * rotateRatioBR);
+        leftFrontRpm  =  y + x + chassisRotateTranslated * leftFrontRotationRatio;
+        rightFrontRpm =  y - x + chassisRotateTranslated * rightFroneRotationRatio;
+        leftBackRpm   = -y + x + chassisRotateTranslated * leftBackRotationRatio;
+        rightBackRpm  = -y - x + chassisRotateTranslated * rightBackRotationRatio;
 
         leftFrontRpm  = aruwlib::algorithms::limitVal<float> (leftFrontRpm,  -maxWheelSpeed, maxWheelSpeed);
         rightFrontRpm = aruwlib::algorithms::limitVal<float> (rightFrontRpm, -maxWheelSpeed, maxWheelSpeed);
@@ -56,34 +60,28 @@ namespace chassis
         motor->setDesiredOutput(pid->getValue());
     }
 
-    float ChassisSubsystem::chassisSpeedZPID(float currentAngleError, float kp)
+    float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float kp)
     {
-        float wheelRotationSpeed = 0;
-
-        errorPRotateKalman = KalmanFilter(&chassisErrorKalman, currentAngleError);
+        float kalmanAngleError = KalmanFilter(&chassisErrorKalman, currentAngleError);
 
         // P
-        rotationPidP = currentAngleError * kp;
+        float rotationPidP = currentAngleError * kp;
         rotationPidP = aruwlib::algorithms::limitVal<float>(rotationPidP,
             -CHASSIS_REVOLVE_PID_MAX_P, CHASSIS_REVOLVE_PID_MAX_P);
 
         // D
-        errorPRotate = errorPRotateKalman - errorPrevKalman;
+        float errorPRotate = kalmanAngleError - kalmanAngleErrorPrevious;
 
-        if(abs(errorPRotateKalman) > MIN_ERROR_ROTATION_D)
+        float rotationPidD = 0.0f;
+        if(abs(kalmanAngleError) > MIN_ERROR_ROTATION_D)
         {
             rotationPidD = -(errorPRotate) * CHASSIS_REVOLVE_PID_KD;
         }
-        else
-        {
-            rotationPidD = 0.0f;
-        }
 
-        wheelRotationSpeed = rotationPidP + rotationPidD;
-        wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(wheelRotationSpeed,
+        float wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(rotationPidP + rotationPidD,
             -MAX_WHEEL_SPEED_SINGLE_MOTOR, MAX_WHEEL_SPEED_SINGLE_MOTOR);
 
-        errorPrevKalman = errorPRotateKalman;
+        kalmanAngleErrorPrevious = kalmanAngleError;
 
         return wheelRotationSpeed;
     }
