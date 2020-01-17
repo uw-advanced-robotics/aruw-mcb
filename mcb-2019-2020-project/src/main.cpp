@@ -2,6 +2,8 @@
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 
+#include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
+
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "src/aruwsrc/control/example_command.hpp"
 #include "src/aruwsrc/control/example_subsystem.hpp"
@@ -26,6 +28,8 @@ ExampleSubsystem frictionWheelSubsystem;
 
 bool pressed = true;
 
+using namespace aruwlib::sensors;
+
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -39,6 +43,8 @@ int main()
     Board::initialize();
 
     aruwlib::Remote::initialize();
+    
+    Mpu6500::init();
 
     // adding agitator for testing
     modm::SmartPointer spinFrictionWheelCommand(new ExampleCommand(&frictionWheelSubsystem));
@@ -69,6 +75,8 @@ int main()
     {
         can::CanRxHandler::pollCanData();
 
+        Remote::read();
+
         if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
             && CommandScheduler::smrtPtrCommandCast(shootCommand)->isFinished())
         {
@@ -91,10 +99,6 @@ int main()
             control::CommandScheduler::run();
             motor::DjiMotorTxHandler::processCanSendData();
         }
-
-        // do this as fast as you can
-        can::CanRxHandler::pollCanData();
-        Remote::read();
 
         modm::delayMicroseconds(10);
     }
