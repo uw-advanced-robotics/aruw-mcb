@@ -17,11 +17,7 @@ namespace control
 class EngineerWristSubsystem : public Subsystem
 {
  public:
-    EngineerWristSubsystem(
-        aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID
-    );
-        
+    EngineerWristSubsystem(uint16_t gearRatio);
     
     void refresh(void);
 

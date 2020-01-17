@@ -6,8 +6,8 @@ namespace aruwsrc
 namespace control
 {
     EngineerWristSubsystem::EngineerWristSubsystem(uint16_t gearRatio) :
-        leftMotor(leftMotorId, CAN_BUS_MOTORS),
-        rightMotor(rightMotorId, CAN_BUS_MOTORS),
+        leftMotor(LEFT_MOTOR_ID, CAN_BUS_MOTORS),
+        rightMotor(RIGHT_MOTOR_ID, CAN_BUS_MOTORS),
         leftPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredWristAngle(0.0f),
