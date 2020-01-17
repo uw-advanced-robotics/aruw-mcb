@@ -16,7 +16,7 @@ namespace control
 
     AgitatorSubsystem::AgitatorSubsystem(uint16_t gearRatio, int agitatorJamTimeout) :
         agitatorPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM, PID_MAX_OUT),
-        agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS),
+        agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS, false),
         desiredAgitatorAngle(0.0f),
         agitatorCalibrationAngle(0.0f),
         agitatorIsCalibrated(false),

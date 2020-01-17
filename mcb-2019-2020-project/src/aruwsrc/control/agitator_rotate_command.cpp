@@ -8,12 +8,12 @@ namespace control
 {
     const float AgitatorRotateCommand::agitatorSetpointToleranceDefault = aruwlib::algorithms::PI / 16.0f;
 
-    const float AgitatorRotateCommand::AGITATOR_RAMP_INC = 0.07f;
+    const float AgitatorRotateCommand::AGITATOR_RAMP_INC = 0.007f;
 
     AgitatorRotateCommand::AgitatorRotateCommand(AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float setpointTolerance,
-        float agitatorAngleIncrement) :
+        float agitatorAngleIncrement,
+        float setpointTolerance) :
         agitatorSetpointTolerance(setpointTolerance),
         agitatorTargetChange(agitatorAngleChange),
         agitatorRotateSetpoint(agitatorAngleIncrement, agitatorAngleIncrement, 0),

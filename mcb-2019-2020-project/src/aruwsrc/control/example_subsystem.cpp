@@ -17,7 +17,7 @@ namespace control
     {
         updateMotorRpmPid(
             &velocityPidLeftWheel,
-            &leftWheel, -desiredRpm
+            &leftWheel, desiredRpm
         );
         updateMotorRpmPid(
             &velocityPidRightWheel,

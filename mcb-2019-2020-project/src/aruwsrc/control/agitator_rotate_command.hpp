@@ -15,13 +15,13 @@ namespace control
 class AgitatorRotateCommand : public aruwlib::control::Command
 {
  public:
-    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 100;
+    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 200;
 
     AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float setpointTolerance = agitatorSetpointToleranceDefault,
-        float agitatorAngleIncrement = AGITATOR_RAMP_INC
+        float agitatorAngleIncrement = AGITATOR_RAMP_INC,
+        float setpointTolerance = agitatorSetpointToleranceDefault
     );
 
     /**

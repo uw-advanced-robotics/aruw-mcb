@@ -7,7 +7,7 @@ namespace aruwlib
 namespace algorithms
 {
 
-const float PI = 3.14159265359f;
+constexpr float PI = 3.14159265359f;
 
 template< typename T >
 T limitVal(T val, T min, T max)

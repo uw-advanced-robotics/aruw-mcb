@@ -72,10 +72,13 @@ int main()
         if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
             && CommandScheduler::smrtPtrCommandCast(shootCommand)->isFinished())
         {
+            // control::CommandScheduler::addCommand(rotateCommand);
             control::CommandScheduler::addComprisedCommand(shootCommand);
         } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
             && !pressed)
         {
+                        // control::CommandScheduler::addCommand(rotateCommand);
+
             control::CommandScheduler::addComprisedCommand(shootCommand);
         }
 

@@ -4,6 +4,7 @@
 #include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
 #include "src/aruwlib/control/comprised_command.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
@@ -49,6 +50,8 @@ public:
     bool isFinished(void) const;
     
 private:
+    // static constexpr float AGITATOR_ANGLE_INCREMENT = aruwlib::algorithms::PI / 50.0f;
+
     AgitatorSubsystem* connectedAgitator; 
 
     modm::SmartPointer agitatorRotateCommand;
