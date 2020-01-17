@@ -1,17 +1,17 @@
 /**
-  * Robomaster source code code  
+  * Simple implementation of a single variable kalman filter 
   */
 
 #ifndef __KALMAN_HPP__
 #define __KALMAN_HPP__
 
 typedef struct {
-    float X_last;  // last optimal prediction
-    float X_mid;   // forcast optimal prediction
-    float X_now;   // current optimal prediction
-    float P_mid;   // predicted covariance
-    float P_now;   // current covariance
-    float P_last;  // previous covariance
+    float xLast;  // last optimal prediction
+    float xMid;   // forcast optimal prediction
+    float xNow;   // current optimal prediction
+    float pMid;   // predicted covariance
+    float pNow;   // current covariance
+    float pLast;  // previous covariance
     float kg;  // kalman gain
     float A;   // system parameters
     float B;
@@ -20,7 +20,7 @@ typedef struct {
     float H;
 } ExtKalman;
 
-void KalmanCreate(ExtKalman *p, float T_Q, float T_R);
+void KalmanCreate(ExtKalman *p, float tQ, float tR);
 float KalmanFilter(ExtKalman* p, float dat);
 
 #endif
