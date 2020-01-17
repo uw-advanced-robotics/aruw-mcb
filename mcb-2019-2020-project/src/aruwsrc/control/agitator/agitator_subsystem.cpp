@@ -10,26 +10,30 @@ using namespace aruwlib::motor;
 namespace aruwsrc
 {
 
-namespace control
+namespace agitator
 {
-    const int AgitatorSubsystem::DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD = 50;
-
-    AgitatorSubsystem::AgitatorSubsystem(uint16_t gearRatio, int agitatorJamTimeout) :
+    AgitatorSubsystem::AgitatorSubsystem() :
         agitatorPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM, PID_MAX_OUT),
         agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS, false),
         desiredAgitatorAngle(0.0f),
-        agitatorCalibrationAngle(0.0f),
-        agitatorIsCalibrated(false),
-        agitatorJammedTimeout(agitatorJamTimeout),
-        agitatorJammedTimeoutPeriod(agitatorJamTimeout),
-        agitatorGearRatio(gearRatio)
+        agitatorCalibratedZeroAngle(0.0f),
+        agitatorIsCalibrated(false)
     {
         agitatorJammedTimeout.stop();
     }
 
-    void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t additionalUnjamTimeout)
+    void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t predictedRotateTime)
     {
-        agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod + additionalUnjamTimeout);
+        if (predictedRotateTime == 0)
+        {
+            agitatorJammedTimeoutPeriod = DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD;
+        }
+        else
+        {
+            agitatorJammedTimeoutPeriod = predictedRotateTime;
+        }
+        agitatorJammedTimeoutPeriod += JAMMED_TOLERANCE_PERIOD;
+        agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
     }
 
     void AgitatorSubsystem::disarmAgitatorUnjamTimer()
@@ -54,7 +58,7 @@ namespace control
             agitatorPositionPid.reset();
             return;
         }
-        agitatorPositionPid.update(desiredAgitatorAngle - getAgitatorEncoderToPosition());
+        agitatorPositionPid.update(desiredAgitatorAngle - getAgitatorAngle());
         agitatorMotor.setDesiredOutput(agitatorPositionPid.getValue());
     }
 
@@ -64,20 +68,26 @@ namespace control
         {
             return false;
         }
-        agitatorCalibrationAngle = (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
-            agitatorMotor.encStore.getEncoderUnwrapped() / agitatorGearRatio;
+        agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
         agitatorIsCalibrated = true;
         return true;
     }
 
-    float AgitatorSubsystem::getAgitatorEncoderToPosition() const
+    float AgitatorSubsystem::getAgitatorAngle() const
     {
         if (!agitatorIsCalibrated)
         {
             return 0.0f;
         }
-        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) * agitatorMotor.encStore.getEncoderUnwrapped()
-            / agitatorGearRatio - agitatorCalibrationAngle;
+        return getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
+    }
+
+    float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
+    {
+        // position is equal to the following equation:
+        // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
+        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
+            agitatorMotor.encStore.getEncoderUnwrapped() / AGITATOR_GEAR_RATIO;
     }
 
     void AgitatorSubsystem::setAgitatorAngle(float newAngle)
@@ -85,7 +95,7 @@ namespace control
         desiredAgitatorAngle = newAngle;
     }
 
-    float AgitatorSubsystem::getAgitatorDesiredAngle(void) const
+    float AgitatorSubsystem::getAgitatorDesiredAngle() const
     {
         return desiredAgitatorAngle;
     }

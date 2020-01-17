@@ -8,7 +8,6 @@
 #define __COMMAND_EXAMPLE_HPP__
 
 #include "src/aruwlib/control/command.hpp"
-#include "agitator_subsystem.hpp"
 
 using namespace aruwlib::control;
 

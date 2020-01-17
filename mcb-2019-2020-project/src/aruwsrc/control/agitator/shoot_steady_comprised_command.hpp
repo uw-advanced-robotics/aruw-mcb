@@ -1,27 +1,25 @@
-#ifndef __AGITATOR_ROTATE_COMMAND_HPP__
-#define __AGITATOR_ROTATE_COMMAND_HPP__
+#ifndef __SHOOT_COMPRISED_COMMAND_HPP__
+#define __SHOOT_COMPRISED_COMMAND_HPP__
 
-#include <modm/math/filter/pid.hpp>
-#include <modm/math/filter/ramp.hpp>
 #include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
+#include "src/aruwlib/control/comprised_command.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
 
-namespace control
+namespace agitator
 {
 
-class AgitatorRotateCommand : public aruwlib::control::Command
+class ShootSteadyComprisedCommand : public aruwlib::control::ComprisedCommand
 {
- public:
-    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 200;
-
-    AgitatorRotateCommand(
+public:
+    ShootSteadyComprisedCommand(
         AgitatorSubsystem* agitator,
-        float agitatorAngleChange,
-        float agitatorAngleIncrement = AGITATOR_RAMP_INC,
-        float setpointTolerance = agitatorSetpointToleranceDefault
+        float agitatorChangeAngle,
+        float agitatorRotateTime,
+        float maxUnjamAngle
     );
 
     /**
@@ -51,21 +49,17 @@ class AgitatorRotateCommand : public aruwlib::control::Command
      * @return whether the command has finished.
      */
     bool isFinished(void) const;
+    
+private:
+    // static constexpr float AGITATOR_ANGLE_INCREMENT = aruwlib::algorithms::PI / 50.0f;
 
- private:
-    static const float agitatorSetpointToleranceDefault;
+    AgitatorSubsystem* connectedAgitator; 
 
-    static const float AGITATOR_RAMP_INC;  // in radians
+    modm::SmartPointer agitatorRotateCommand;
 
-    AgitatorSubsystem* connectedAgitator;
+    modm::SmartPointer agitatorUnjamCommand;
 
-    float agitatorSetpointTolerance;
-
-    float agitatorTargetChange;
-
-    modm::filter::Ramp<float> agitatorRotateSetpoint;
-
-    modm::ShortTimeout agitatorMinRotateTime;
+    bool unjamSequenceCommencing;
 };
 
 }  // namespace control

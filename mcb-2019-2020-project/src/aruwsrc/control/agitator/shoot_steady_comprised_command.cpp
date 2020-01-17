@@ -8,15 +8,16 @@ using namespace aruwlib::control;
 namespace aruwsrc
 {
 
-namespace control
+namespace agitator
 {
 
 ShootSteadyComprisedCommand::ShootSteadyComprisedCommand(
     AgitatorSubsystem* agitator,
     float agitatorChangeAngle,
-    float maxUnjamAngle
-    ) : connectedAgitator(agitator),
-    agitatorRotateCommand(new AgitatorRotateCommand(agitator, agitatorChangeAngle)),
+    float agitatorRotateTime,
+    float maxUnjamAngle) :
+    connectedAgitator(agitator),
+    agitatorRotateCommand(new AgitatorRotateCommand(agitator, agitatorChangeAngle, agitatorRotateTime)),
     agitatorUnjamCommand(new AgitatorUnjamCommand(agitator, maxUnjamAngle)),
     unjamSequenceCommencing(false)
 {
