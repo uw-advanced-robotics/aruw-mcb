@@ -25,6 +25,8 @@ namespace chassis
 class ChassisSubsystem : public Subsystem {
  public:
     // public constants
+    // max wheel speed, measured in rpm of the encoder (rather than shaft)
+    // we use this for wheel speed since this is how dji's motors measures motor speed
     static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 9000;
 
  private:
@@ -34,11 +36,31 @@ class ChassisSubsystem : public Subsystem {
     const float VELOCITY_PID_KI            = 0.0f;
     const float VELOCITY_PID_KD            = 0.0f;
     const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-    const float VELOCITY_PID_MAX_OUTPUT    = 16000.0f;
+    /**
+     * This max output is measured in the c620 robomaster translated current.
+     * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
+     * The corresponding speed controller output torque current range is 
+     * -20 ~ 0 ~ 20 A.
+     */
+    static constexpr float VELOCITY_PID_MAX_OUTPUT = 16000.0f;
 
-    // rotation pid gains and constants
-    // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
-    // gain specified by user
+    /**
+     * Rotation pid:
+     * A PD controller for chassis autorotation pid that runs on error between
+     * chassis rotation error.
+     * 
+     * Description of controller:
+     * First runs kalman filter on the input angle error. All the error calculations in
+     * the controller uses this kalman filtered gain.
+     * Next, calculates the proportional term using the kalman filtered angle.
+     * Also uses kalman filtered angle and previous kalman filtered angle for the
+     * derivative term; however, the derivative term will be calculated only if the
+     * filtered angle is greater than MIN_ERROR_ROTATION_D.
+     * The wheel speed is calculated by then adding p and d terms and clamping the output
+     * to MAX_WHEEL_SPEED_SINGLE_MOTOR
+     * 
+     * the P gain is specified by the user and thus is not specified below
+     */
     static constexpr double CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
     // derivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD = 235.0f;
@@ -46,13 +68,13 @@ class ChassisSubsystem : public Subsystem {
     static const int MIN_ERROR_ROTATION_D = 35;
 
     // mechanical chassis constants, all in mm
-    // radius of the wheels
+    // radius of the wheels (mm)
     static constexpr float WHEEL_RADIUS = 76.0f;
-    // distance from center of the two front wheels
+    // distance from center of the two front wheels (mm)
     static constexpr float WIDTH_BETWEEN_WHEELS_Y = 366.0f;
-    // distance from center of the front and rear wheels
+    // distance from center of the front and rear wheels (mm)
     static constexpr float WIDTH_BETWEEN_WHEELS_X = 366.0f;
-    // gimbal offset from the center of the chassis, see note above for explanation of x and y
+    // gimbal offset from the center of the chassis, see note above for explanation of x and y (mm)
     static constexpr float GIMBAL_X_OFFSET       = 0.0f;
     static constexpr float GIMBAL_Y_OFFSET       = 0.0f;
     static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
@@ -145,9 +167,6 @@ class ChassisSubsystem : public Subsystem {
     // rotation pid variables
     ExtKalman chassisRotationErrorKalman;
 
-    // rotation pid parameters
-    float currentFilteredAngleErrorPrevious = 0;
-
  public:
     ChassisSubsystem(
         aruwlib::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
@@ -197,7 +216,8 @@ class ChassisSubsystem : public Subsystem {
      * run chassis rotation pid on some actual turret angle offset
      * 
      * @param currentAngleError the error as an angle. For autorotation,
-     * error between gimbal and center of chassis.
+     * error between gimbal and center of chassis. See description of the
+     * controller above.
      * 
      * @param kp proportional gain for pid caluclation
      * 

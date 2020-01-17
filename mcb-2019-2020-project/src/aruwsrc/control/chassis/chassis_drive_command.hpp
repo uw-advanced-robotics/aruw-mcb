@@ -28,7 +28,8 @@ class ChassisDriveCommand : public Command {
     bool isFinished() const override;
 
  private:
-    static constexpr double MIN_ROTATION_THRESHOLD = 800.0;
+    // the minimum desired wheel speed for chassis rotation, measured in rpm
+    static constexpr double MIN_ROTATION_THRESHOLD = 800.0f;
 
     ChassisSubsystem* chassis;
 };

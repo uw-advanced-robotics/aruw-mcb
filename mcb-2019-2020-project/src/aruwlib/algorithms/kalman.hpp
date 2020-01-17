@@ -6,14 +6,14 @@
 #define __KALMAN_HPP__
 
 typedef struct {
-    float X_last;
-    float X_mid;
-    float X_now;
-    float P_mid;
-    float P_now;
-    float P_last;
-    float kg;
-    float A;
+    float X_last;  // last optimal prediction
+    float X_mid;   // forcast optimal prediction
+    float X_now;   // current optimal prediction
+    float P_mid;   // predicted covariance
+    float P_now;   // current covariance
+    float P_last;  // previous covariance
+    float kg;  // kalman gain
+    float A;   // system parameters
     float B;
     float Q;
     float R;

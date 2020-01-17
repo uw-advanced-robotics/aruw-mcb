@@ -66,7 +66,9 @@ namespace chassis
 
     float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float kp)
     {
-        float currentFilteredAngleError = KalmanFilter(&chassisRotationErrorKalman, currentAngleError);
+        float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.X_last;
+        float currentFilteredAngleError =
+            KalmanFilter(&chassisRotationErrorKalman, currentAngleError);
 
         // P
         float currRotationPidP = currentAngleError * kp;
@@ -74,19 +76,18 @@ namespace chassis
             -CHASSIS_REVOLVE_PID_MAX_P, CHASSIS_REVOLVE_PID_MAX_P);
 
         // D
-        float currentErrorRotation = currentFilteredAngleError - currentFilteredAngleErrorPrevious;
-
         float currentRotationPidD = 0.0f;
         if(abs(currentFilteredAngleError) > MIN_ERROR_ROTATION_D)
         {
+            float currentErrorRotation =
+                currentFilteredAngleError - currentFilteredAngleErrorPrevious;
+
             currentRotationPidD = -(currentErrorRotation) * CHASSIS_REVOLVE_PID_KD;
         }
 
         float wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(
             currRotationPidP + currentRotationPidD,
             -MAX_WHEEL_SPEED_SINGLE_MOTOR, MAX_WHEEL_SPEED_SINGLE_MOTOR);
-
-        currentFilteredAngleErrorPrevious = currentFilteredAngleError;
 
         return wheelRotationSpeed;
     }
