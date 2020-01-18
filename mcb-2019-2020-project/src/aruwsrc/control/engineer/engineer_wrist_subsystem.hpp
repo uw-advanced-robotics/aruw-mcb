@@ -5,6 +5,7 @@
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 using namespace aruwlib::control;
 
@@ -23,14 +24,16 @@ class EngineerWristSubsystem : public Subsystem
 
     void setWristAngle(float newAngle);
 
-    float getWristAngle() const;
+    float getWristAngleLeft() const;
+
+    float getWristAngleRight() const;
 
     float getWristDesiredAngle(void) const;
 
     bool wristCalibrateHere(void);
 
  private:
-   static const float WRIST_GEAR_RATIO = 36.0f;
+   static constexpr float WRIST_GEAR_RATIO = 36.0f;
    
    static const aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR1;
    static const aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR2;
@@ -53,15 +56,16 @@ class EngineerWristSubsystem : public Subsystem
    float desiredWristAngle;
 
    // Angle the wrist is initially calibrated to as a zero reference point
-   float wristCalibrationAngle;
+   float wristCalibrationAngleLeft;
+   float wristCalibrationAngleRight;
 
    // If the wrist has been calibrated or not
    bool wristIsCalibrated;
 
    void wristRunPositionPid(void);
 
-   float getUncalibratedWristLeftAngle(void) const;
-   float getUncalibratedWristRightAngle(void) const;
+   float getUncalibratedWristAngleLeft(void) const;
+   float getUncalibratedWristAngleRight(void) const;
 };
 
 }  // namespace control

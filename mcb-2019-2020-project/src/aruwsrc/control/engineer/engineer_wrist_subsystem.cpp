@@ -1,5 +1,4 @@
 #include "engineer_wrist_subsystem.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
@@ -7,13 +6,13 @@ namespace aruwsrc
 namespace control
 {
     EngineerWristSubsystem::EngineerWristSubsystem() :
-        // may need to flip which motor is inverted
         leftMotor(LEFT_MOTOR_ID, CAN_BUS_MOTORS, true),
         rightMotor(RIGHT_MOTOR_ID, CAN_BUS_MOTORS, false),
         leftPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredWristAngle(0.0f),
-        wristCalibrationAngle(0.0f),
+        wristCalibrationAngleLeft(0.0f),
+        wristCalibrationAngleRight(0.0f),
         wristIsCalibrated(false)
     {}
 
@@ -27,14 +26,22 @@ namespace control
         desiredWristAngle = newAngle;
     }
 
-    float EngineerWristSubsystem::getWristAngle(void) const
+    float EngineerWristSubsystem::getWristAngleLeft(void) const
     {
         if (!wristIsCalibrated)
         {
             return 0.0f;
         }
-        // TODO: Base the angle off of one motor or keep track of each individually???
-        return getUncalibratedWristLeftAngle() - wristCalibrationAngle;
+        return getUncalibratedWristAngleLeft() - wristCalibrationAngleLeft;
+    }
+
+    float EngineerWristSubsystem::getWristAngleRight(void) const
+    {
+        if (!wristIsCalibrated)
+        {
+            return 0.0f;
+        }
+        return getUncalibratedWristAngleRight() - wristCalibrationAngleRight;
     }
 
     float EngineerWristSubsystem::getWristDesiredAngle(void) const
@@ -49,7 +56,8 @@ namespace control
             return false;
         }
         // TODO: Base the angle off of one motor or keep track of each individually???
-        wristCalibrationAngle = getUncalibratedWristLeftAngle();
+        wristCalibrationAngleLeft = getUncalibratedWristAngleLeft();
+        wristCalibrationAngleRight = getUncalibratedWristAngleRight();
         wristIsCalibrated = true;
         return true;
     }
@@ -62,20 +70,20 @@ namespace control
             rightPositionPid.reset();
             return;
         }
-        leftPositionPid.update(desiredWristAngle - getWristAngle());
-        rightPositionPid.update(desiredWristAngle - getWristAngle());
+        leftPositionPid.update(desiredWristAngle - getWristAngleLeft());
+        rightPositionPid.update(desiredWristAngle - getWristAngleRight());
         leftMotor.setDesiredOutput(leftPositionPid.getValue());
         rightMotor.setDesiredOutput(rightPositionPid.getValue());
     }
 
     // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
-    float EngineerWristSubsystem::getUncalibratedWristLeftAngle(void) const
+    float EngineerWristSubsystem::getUncalibratedWristAngleLeft(void) const
     {
         return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
             leftMotor.encStore.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
     }
 
-    float EngineerWristSubsystem::getUncalibratedWristRightAngle(void) const
+    float EngineerWristSubsystem::getUncalibratedWristAngleRight(void) const
     {
         return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
             rightMotor.encStore.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
