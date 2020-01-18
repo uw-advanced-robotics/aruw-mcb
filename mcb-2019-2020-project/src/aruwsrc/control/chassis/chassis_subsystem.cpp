@@ -66,9 +66,9 @@ namespace chassis
 
     float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float kp)
     {
-        float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.xLast;
+        float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.getLastPrediction();
         float currentFilteredAngleError =
-            KalmanFilter(&chassisRotationErrorKalman, currentAngleError);
+            chassisRotationErrorKalman.filterData(currentAngleError);
 
         // P
         float currRotationPidP = currentAngleError * kp;

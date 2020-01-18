@@ -4,7 +4,7 @@
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
-#include "src/aruwlib/algorithms/kalman.hpp"
+#include "src/aruwlib/algorithms/extended_kalman.hpp"
 
 using namespace aruwlib::control;
 
@@ -165,7 +165,7 @@ class ChassisSubsystem : public Subsystem {
     float rightBackRpm;
 
     // rotation pid variables
-    ExtKalman chassisRotationErrorKalman;
+    aruwlib::algorithms::ExtendedKalman chassisRotationErrorKalman;
 
  public:
     ChassisSubsystem(
@@ -205,10 +205,9 @@ class ChassisSubsystem : public Subsystem {
         leftFrontRpm(0),
         leftBackRpm(0),
         rightFrontRpm(0),
-        rightBackRpm(0)
-    {
-        KalmanCreate(&chassisRotationErrorKalman, 1.0f, 0.0f);
-    }
+        rightBackRpm(0),
+        chassisRotationErrorKalman(1.0f, 0.0f)
+    {}
 
     void setDesiredOutput(float x, float y, float r);
 
