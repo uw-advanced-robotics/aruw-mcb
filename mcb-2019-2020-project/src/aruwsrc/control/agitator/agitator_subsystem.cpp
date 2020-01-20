@@ -41,8 +41,11 @@ namespace agitator
         agitatorJammedTimeout.stop();
     }
 
+    uint32_t t1;
+
     bool AgitatorSubsystem::isAgitatorJammed()
     {
+        t1 = agitatorJammedTimeout.remaining();
         return agitatorJammedTimeout.isExpired();
     }
 

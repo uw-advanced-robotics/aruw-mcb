@@ -10,7 +10,7 @@ namespace agitator
      * @param agitator the agitator associated with the rotate command
      * @param agitatorAngleChange the desired rotation angle
      * @param agitatorRotateTime the time it takes to rotate the agitator to the desired angle
-     *                           in seconds
+     *                           in milliseconds
      * 
      * @attention the ramp value is calculated by finding the rotation speed
      *            (agitatorAngleChange / agitatorRotateTime), and then multiplying this by
@@ -20,11 +20,11 @@ namespace agitator
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
         float agitatorRotateTime) :
+        agitatorTargetChange(agitatorAngleChange),
         agitatorRotateSetpoint(
             AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime,
             AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime, 0),
         agitatorDesiredRotateTime(agitatorRotateTime),
-        agitatorTargetChange(agitatorAngleChange),
         agitatorMinRotateTime(AGITATOR_MIN_ROTATE_TIME)
     {
         this->addSubsystemRequirement(reinterpret_cast<aruwlib::control::Subsystem*>(agitator));

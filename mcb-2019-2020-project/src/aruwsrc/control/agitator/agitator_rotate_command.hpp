@@ -16,7 +16,7 @@ namespace agitator
 class AgitatorRotateCommand : public aruwlib::control::Command
 {
  public:
-    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 200;
+    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 300;
 
     AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
@@ -28,13 +28,13 @@ class AgitatorRotateCommand : public aruwlib::control::Command
      * The initial subroutine of a command.  Called once when the command is
      * initially scheduled.
      */
-    void initialize(void);
+    void initialize();
 
     /**
      * The main body of a command.  Called repeatedly while the command is
      * scheduled.
      */
-    void execute(void);
+    void execute();
 
     /**
      * The action to take when the command ends.  Called when either the command
@@ -55,8 +55,8 @@ class AgitatorRotateCommand : public aruwlib::control::Command
  private:
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
-    // how often this command is called, in seconds
-    static constexpr float AGITATOR_ROTATE_COMMAND_PERIOD = 0.002f;
+    // how often this command is called, in milliseconds
+    static constexpr float AGITATOR_ROTATE_COMMAND_PERIOD = 2;
 
     AgitatorSubsystem* connectedAgitator;
 
@@ -64,7 +64,7 @@ class AgitatorRotateCommand : public aruwlib::control::Command
 
     modm::filter::Ramp<float> agitatorRotateSetpoint;
 
-    // time you want the agitator to take to rotate to the desired angle, in seconds
+    // time you want the agitator to take to rotate to the desired angle, in milliseconds
     float agitatorDesiredRotateTime;
 
     modm::ShortTimeout agitatorMinRotateTime;

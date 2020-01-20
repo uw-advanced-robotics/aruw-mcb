@@ -44,7 +44,7 @@ int main()
 
     aruwlib::Remote::initialize();
     
-    Mpu6500::init();
+    //Mpu6500::init();
 
     // adding agitator for testing
     modm::SmartPointer spinFrictionWheelCommand(new ExampleCommand(&frictionWheelSubsystem));
@@ -63,7 +63,7 @@ int main()
 
     // modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
     // modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5));
-    modm::SmartPointer shootCommand(new ShootSteadyComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, 100, aruwlib::algorithms::PI / 2));
+    modm::SmartPointer shootCommand(new ShootSteadyComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, 300, aruwlib::algorithms::PI / 2));
 
     // CommandScheduler::addComprisedCommand(shootCommand);
     // CommandScheduler::removeComprisedCommand(shootCommand, false);
