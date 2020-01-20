@@ -1,15 +1,25 @@
 #ifndef __USER_MATH_UTILS_HPP__
 #define __USER_MATH_UTILS_HPP__
 
+#include <math.h>
+
 namespace aruwlib
 {
 
 namespace algorithms
 {
 
-#define PI (3.1415926f)
-#define RADIANS_TO_DEGREES(val) (static_cast<float>(val) * 180.0f / PI)
-#define DEGREES_TO_RADIANS(val) (static_cast<float>(val) * PI / 180.0f)
+constexpr float PI = 3.1415926535897932384626f;
+
+inline float degreesToRadians(float radians)
+{
+    return radians * PI / 180.0f;
+}
+
+inline float radiansToDegrees(float degrees)
+{
+    return degrees * 180.f / PI;
+}
 
 template< typename T >
 T limitVal(T val, T min, T max)
