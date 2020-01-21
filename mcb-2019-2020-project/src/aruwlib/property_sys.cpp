@@ -243,12 +243,7 @@ void PropertySystem::dequeueTxLongPackageQueue() {
         }
     }
 }
-int aaa = 0;
-int aab = 0;
-int aac = 0;
-int aad = 0;
-int aae = 0;
-int aaf = 0;
+
 void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
 {
     switch (completeMessage.type)
@@ -284,7 +279,6 @@ void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
                     while (currentAddress - completeMessage.data < completeMessage.length)
                     {
                         uint16_t id = *reinterpret_cast<uint16_t*>(currentAddress);
-                        aaa = id;
                         currentAddress += sizeof(id);
                         if (id < propertyTableSize)
                         {
@@ -298,7 +292,6 @@ void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
                     while (currentAddress - completeMessage.data < completeMessage.length)
                     {
                         uint16_t id = *reinterpret_cast<uint16_t*>(currentAddress);
-                        aab = id;
                         currentAddress += sizeof(id);
                         if (id < propertyTableSize)
                         {
