@@ -3,7 +3,9 @@
 #include <rm-dev-board-a/board.hpp>
 #include "src/aruwlib/communication/serial/dji_serial.hpp"
 #include <modm/container.hpp>
-#include <unordered_map>
+#include <modm/architecture/driver/atomic/queue.hpp>
+#include <memory>
+#include <utility>
 /**
  * Property Serial Protocol
  * Long Package
@@ -29,12 +31,15 @@ class PropertySystem : public aruwlib::serial::DJISerial
 
  public:
 
-   typedef enum {
-        BYTE_PROPERTY = 1,
-        SHORT_PROPERTY = 2,
-        INTEGER_PROPERTY = 3,
-        FLOAT_PROPERTY = 4,
-        BYTE_ARRAY_PROPERTY = 5
+   typedef enum : uint8_t {
+        UBYTE_PROPERTY = 1,
+        USHORT_PROPERTY = 2,
+        UINTEGER_PROPERTY = 3,
+        BYTE_PROPERTY = 4,
+        SHORT_PROPERTY = 5,
+        INTEGER_PROPERTY = 6,
+        FLOAT_PROPERTY = 7,
+        BOOL_PROPERTY = 8
     } PropertyType;
     
     PropertySystem();
@@ -55,7 +60,7 @@ class PropertySystem : public aruwlib::serial::DJISerial
      * @param name_length length of property name
      * @return alias id of the property corresponding to given data
      */
-    template <class Type>
+    template<class Type>
     uint16_t addProperty(Type* data, uint8_t* property_name, uint8_t name_length);
     
     /**
@@ -66,7 +71,7 @@ class PropertySystem : public aruwlib::serial::DJISerial
      * @param name_length length of property name
      * @return alias id of the property corresponding to given data
      */
-    template <class Type>
+    template<class Type>
     uint16_t addProperty(Type* array, uint16_t length, uint8_t* property_name, uint8_t name_length);
     /**
      * Send a property through serial
@@ -91,6 +96,9 @@ class PropertySystem : public aruwlib::serial::DJISerial
      * @return if PropertySystem is full
      */
     bool isFull();
+
+    template<class T>
+    PropertyType typeToEnum(T* type);
 
     /**
      * Handle serial message received
@@ -127,17 +135,18 @@ class PropertySystem : public aruwlib::serial::DJISerial
 
     struct Property_t {
         uint16_t id;
+        PropertyType type;
         uint8_t* name;
         uint8_t nameLength;
-        modm::SmartPointer data;
-        uint8_t length;
-        
+        void* dataPointer;
+        uint8_t typeSize;
+        uint8_t byteCount;
     };
 
     typedef struct {
         uint8_t packageType;
         uint8_t initialSequenceNumber;
-        uint8_t expectedPackageCount;
+        uint8_t expectedMessageCount;
         uint8_t data[MAX_PACKAGE_DATA_LENGTH];
         uint8_t dataLength;
     } LongPackage_t;
@@ -147,17 +156,22 @@ class PropertySystem : public aruwlib::serial::DJISerial
         uint8_t* data;
         uint8_t dataLength;
     } ShortPackage_t;
+    
+    
+
+    
+
 
     Property_t propertyTable[PROPERTY_TABLE_MAX_SIZE];
     uint16_t propertyTableSize;
     //Store Properties Waiting to be Sent
-    modm::Queue<Property_t*, modm::LinkedList<Property_t*>> txDataQueue;
+    modm::Queue<uint16_t, modm::LinkedList<uint16_t>> txDataQueue;
     
     //Maximum Number of property data to send in each call to updatePropertySystem()
     uint16_t txDataDequeueRate;
 
     //Store Property Table Entries Waiting to be Sent
-    modm::Queue<Property_t*, modm::LinkedList<Property_t*>> txTableDataQueue;
+    modm::Queue<uint16_t, modm::LinkedList<uint16_t>> txTableDataQueue;
 
     //Maximum Number of table entry to send in each call to updatePropertySystem()
     uint16_t txTableDataDequeueRate;
@@ -185,6 +199,10 @@ class PropertySystem : public aruwlib::serial::DJISerial
      * @return if the operation succeed
      */
     bool sendPropertyTableEntry(Property_t* property);
+    
+    void dequeueTxDataQueue();
+    void dequeueTxTableDataQueue();
+    void dequeueTxLongPackageQueue();
     
     /**
      * Add data of given property to given package
