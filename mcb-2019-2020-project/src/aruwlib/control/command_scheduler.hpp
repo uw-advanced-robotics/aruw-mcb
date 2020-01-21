@@ -20,7 +20,8 @@
 #include <modm/container/linked_list.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include <rm-dev-board-a/board.hpp>
-#include "command.hpp"
+
+#include "subsystem.hpp"
 
 namespace aruwlib
 {
@@ -31,39 +32,37 @@ namespace control
 class CommandScheduler
 {
  public:
-    static void run(void);
+    CommandScheduler() : subsystemToCommandMap(), commandSchedulerTimestamp(0) {}
 
-    static void removeCommand(modm::SmartPointer command, bool interrupted);
+    void runCommands();
 
-    static void removeComprisedCommand(
-        const modm::SmartPointer& comprisedCommand,
-        bool interrupted
-    );
+    void run();
 
-    static bool registerSubsystem(Subsystem* subsystem);
+    void removeCommand(modm::SmartPointer command, bool interrupted);
 
-    static bool isSubsystemRegistered(Subsystem* subsystem);
+    bool registerSubsystem(Subsystem* subsystem);
 
-    static bool isSubsystemRegistered(const Subsystem* subsystem);
+    bool isSubsystemRegistered(Subsystem* subsystem);
 
-    static bool isCommandScheduled(modm::SmartPointer command);
+    bool isSubsystemRegistered(const Subsystem* subsystem);
 
-    static bool addCommand(modm::SmartPointer commandToAdd);
+    bool isCommandScheduled(modm::SmartPointer command);
 
-    static bool addComprisedCommand(modm::SmartPointer comprisedCommand);
+    bool addCommand(modm::SmartPointer commandToAdd);
 
     static const modm::SmartPointer defaultNullCommand;
 
     static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
 
  private:
-    static const float MAX_ALLOWABLE_SCHEDULER_RUNTIME;
+    // maximum time before we start erroring, in seconds
+    static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 0.5f;
 
     // a map containing keys of subsystems, pairs of Commands and ComprisedCommands
     // the command comes first, the ComprisedCommand second 
-    static std::map<Subsystem*, std::pair<modm::SmartPointer, modm::SmartPointer>> subsystemToCommandMap;
+    std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
 
-    static uint32_t commandSchedulerTimestamp;
+    uint32_t commandSchedulerTimestamp;
 };
 
 }  // namespace control

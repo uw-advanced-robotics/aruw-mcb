@@ -11,10 +11,12 @@
 #define __COMMAND_HPP__
 
 #include <set>
+#include <list>
 #include <modm/container/dynamic_array.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include <rm-dev-board-a/board.hpp>
 #include "subsystem.hpp"
+#include "command_scheduler.hpp"
 
 namespace aruwlib
 {
@@ -24,7 +26,10 @@ namespace control
 
 class Command {
  public:
-    Command() : prevSchedulerExecuteTimestamp(0)
+    Command(bool isComprisedCommand = false) :
+    prevSchedulerExecuteTimestamp(0),
+    isComprisedCommand(isComprisedCommand),
+    comprisedCommandScheduler()
     {}
 
     /**
@@ -90,6 +95,11 @@ class Command {
 
     // contains pointers to const Subsystem pointers that this command requires
     std::set<Subsystem*> commandRequirements;
+
+    bool isComprisedCommand;
+
+ public:
+    CommandScheduler comprisedCommandScheduler;
 };
 
 }  // namespace control

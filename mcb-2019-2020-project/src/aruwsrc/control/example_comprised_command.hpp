@@ -1,7 +1,6 @@
 #ifndef __HPP__
 #define __HPP__
 
-#include "src/aruwlib/control/comprised_command.hpp"
 #include "example_command.hpp"
 #include "example_subsystem.hpp"
 
@@ -11,7 +10,7 @@ namespace aruwsrc
 namespace control
 {
 
-class ExampleComprisedCommand : public ComprisedCommand
+class ExampleComprisedCommand : public Command
 {
  public:
     explicit ExampleComprisedCommand(ExampleSubsystem* subsystem);
@@ -21,6 +20,11 @@ class ExampleComprisedCommand : public ComprisedCommand
     void execute();
 
     void end(bool interrupted);
+
+    bool isFinished() const override
+    {
+       return false;
+    }
 
  private:
     modm::SmartPointer exampleCommand;

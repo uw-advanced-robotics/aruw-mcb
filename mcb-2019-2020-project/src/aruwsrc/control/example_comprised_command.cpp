@@ -6,22 +6,26 @@ namespace aruwsrc
 namespace control
 {
 
-ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem)
-: ComprisedCommand(exampleCommand), exampleCommand(new ExampleCommand(subsystem))
+ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem) :
+Command(true),
+exampleCommand(new ExampleCommand(subsystem))
 {
+    this->comprisedCommandScheduler.registerSubsystem(subsystem);
     this->addSubsystemRequirement(subsystem);
 }
 
 void ExampleComprisedCommand::initialize()
 {
-    CommandScheduler::addCommand(exampleCommand);
+    this->comprisedCommandScheduler.addCommand(exampleCommand);
 }
 
-void ExampleComprisedCommand::execute() {}
+void ExampleComprisedCommand::execute() {
+    this->comprisedCommandScheduler.runCommands();
+}
 
 void ExampleComprisedCommand::end(bool interrupted)
 {
-    CommandScheduler::removeCommand(exampleCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(exampleCommand, interrupted);
 }
 
 }  // namespace control
