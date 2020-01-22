@@ -9,7 +9,7 @@ namespace control
         reservoirMotor(RESERVOIR_MOTOR_ID, CAN_BUS_MOTORS, false),
         reservoirPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredReservoirAngle(0.0f),
-        reservoirCalibrationAngle(0.0f),
+        reservoirCalibratedAngle(0.0f),
         reservoirIsCalibrated(false)
     {}
 
@@ -29,7 +29,7 @@ namespace control
         {
             return 0.0f;
         }
-        // TODO, angle calculation
+        return getUncalibratedReservoirAngle() - reservoirCalibratedAngle;
     }
 
     float Engineer17mmReservoirSubsystem::getReservoirDesiredAngle() const
@@ -43,8 +43,7 @@ namespace control
         {
             return false;
         }
-        // TODO: determine calibration calculation
-        reservoirCalibrationAngle = ?;
+        reservoirCalibratedAngle = getUncalibratedReservoirAngle();
         reservoirIsCalibrated = true;
         return true;
     }
@@ -56,16 +55,15 @@ namespace control
             reservoirPositionPid.reset();
             return;
         }
-        // TODO: determine calculation
-        reservoirPositionPid.update(desiredReservoirAngle - ?);
+        reservoirPositionPid.update(desiredReservoirAngle - getReservoirAngle());
         reservoirMotor.setDesiredOutput(reservoirPositionPid.getValue());
     }
 
     float Engineer17mmReservoirSubsystem::getUncalibratedReservoirAngle() const
     {
-        // TODO:
+        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
+            reservoirMotor.encStore.getEncoderUnwrapped() / RESERVOIR_GEAR_RATIO;
     }
-
 }  // namespace control
 
 }  // namespace aruwsrc

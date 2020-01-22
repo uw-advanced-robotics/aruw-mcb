@@ -4,6 +4,7 @@
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 using namespace aruwlib::control;
 
@@ -48,7 +49,7 @@ class Engineer17mmReservoirSubsystem : public Subsystem
 
     float desiredReservoirAngle;
 
-    float reservoirCalibrationAngle;
+    float reservoirCalibratedAngle;
 
     bool reservoirIsCalibrated;
 
