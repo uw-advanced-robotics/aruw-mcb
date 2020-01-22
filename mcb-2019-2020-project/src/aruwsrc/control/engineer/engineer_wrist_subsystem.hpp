@@ -56,8 +56,8 @@ class EngineerWristSubsystem : public Subsystem
    float desiredWristAngle;
 
    // Angle the wrist is initially calibrated to as a zero reference point
-   float wristCalibrationAngleLeft;
-   float wristCalibrationAngleRight;
+   float wristCalibratedAngleLeft;
+   float wristCalibratedAngleRight;
 
    // If the wrist has been calibrated or not
    bool wristIsCalibrated;

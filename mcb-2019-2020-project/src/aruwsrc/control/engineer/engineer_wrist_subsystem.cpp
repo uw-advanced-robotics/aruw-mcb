@@ -11,8 +11,8 @@ namespace control
         leftPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredWristAngle(0.0f),
-        wristCalibrationAngleLeft(0.0f),
-        wristCalibrationAngleRight(0.0f),
+        wristCalibratedAngleLeft(0.0f),
+        wristCalibratedAngleRight(0.0f),
         wristIsCalibrated(false)
     {}
 
@@ -32,7 +32,7 @@ namespace control
         {
             return 0.0f;
         }
-        return getUncalibratedWristAngleLeft() - wristCalibrationAngleLeft;
+        return getUncalibratedWristAngleLeft() - wristCalibratedAngleLeft;
     }
 
     float EngineerWristSubsystem::getWristAngleRight(void) const
@@ -41,7 +41,7 @@ namespace control
         {
             return 0.0f;
         }
-        return getUncalibratedWristAngleRight() - wristCalibrationAngleRight;
+        return getUncalibratedWristAngleRight() - wristCalibratedAngleRight;
     }
 
     float EngineerWristSubsystem::getWristDesiredAngle(void) const
@@ -55,9 +55,8 @@ namespace control
         {
             return false;
         }
-        // TODO: Base the angle off of one motor or keep track of each individually???
-        wristCalibrationAngleLeft = getUncalibratedWristAngleLeft();
-        wristCalibrationAngleRight = getUncalibratedWristAngleRight();
+        wristCalibratedAngleLeft = getUncalibratedWristAngleLeft();
+        wristCalibratedAngleRight = getUncalibratedWristAngleRight();
         wristIsCalibrated = true;
         return true;
     }
