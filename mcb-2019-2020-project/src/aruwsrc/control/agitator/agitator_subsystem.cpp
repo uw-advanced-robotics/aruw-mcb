@@ -12,13 +12,31 @@ namespace aruwsrc
 
 namespace agitator
 {
-    AgitatorSubsystem::AgitatorSubsystem() :
-        agitatorPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM, PID_MAX_OUT),
+    AgitatorSubsystem::AgitatorSubsystem(AgitatorType type) :
+        agitatorType(type),
         agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS, false),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
-        agitatorIsCalibrated(false)
+        agitatorIsCalibrated(false),
+        agitatorPositionPid(0.0f, 0.0f, 0.0f, 0.0f, PID_MAX_OUT)
     {
+        modm::Pid<float>::Parameter* param;
+        switch (type) {
+            case AgitatorType::Soldier:
+                param = new modm::Pid<float>::Parameter(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM,
+                                                            PID_MAX_OUT);
+                break;
+            case AgitatorType::Hero1:
+                param = new modm::Pid<float>::Parameter(PID_HERO1_P, PID_HERO1_I, PID_HERO1_D,
+                                                            PID_HERO1_MAX_ERR_SUM, PID_MAX_OUT);
+                break;
+            case AgitatorType::Hero2:
+                param = new modm::Pid<float>::Parameter(PID_HERO2_P, PID_HERO2_I, PID_HERO2_D,
+                                                            PID_HERO2_MAX_ERR_SUM, PID_MAX_OUT);
+                break;
+        }
+        agitatorPositionPid.setParameter(*param);
+        delete param;   /// \todo make sure this works
         agitatorJammedTimeout.stop();
     }
 

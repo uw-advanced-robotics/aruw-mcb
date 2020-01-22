@@ -15,7 +15,13 @@ namespace agitator
 
 class AgitatorSubsystem : public aruwlib::control::Subsystem {
  public:
-    AgitatorSubsystem();
+    enum class AgitatorType {
+        Soldier,
+        Hero1,
+        Hero2
+    };
+
+    AgitatorSubsystem(AgitatorType type);
 
     void refresh();
 
@@ -46,11 +52,26 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static const int JAMMED_TOLERANCE_PERIOD = 10;
 
     // position pid terms
+
+    // pid terms for soldier
     const float PID_P = 190000.0f;
     const float PID_I = 0.0f;
     const float PID_D = 1500000.0f;
     const float PID_MAX_ERR_SUM = 0.0f;
     const float PID_MAX_OUT = 16000.0f;
+
+    /// \todo tune all the things
+    // pid terms for hero agitator 1
+    const float PID_HERO1_P = 300000.0f;
+    const float PID_HERO1_I = 0.0f;
+    const float PID_HERO1_D = 0.0f;
+    const float PID_HERO1_MAX_ERR_SUM = 0.0f;
+
+    // pid terms for hero agitator 2
+    const float PID_HERO2_P = 300000.0f;
+    const float PID_HERO2_I = 0.0f;
+    const float PID_HERO2_D = 0.0f;
+    const float PID_HERO2_MAX_ERR_SUM = 0.0f;
 
     const aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     const aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
@@ -78,6 +99,8 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
 
     // the current agitator timeout time
     int agitatorJammedTimeoutPeriod;
+
+    AgitatorType agitatorType;
 
     void agitatorRunPositionPid();
 
