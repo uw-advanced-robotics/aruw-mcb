@@ -33,20 +33,20 @@ class SentinelDriveSubsystem : public Subsystem
 
     void refresh(void);
 
-    const static float RAIL_LENGTH = 4650;
+    static constexpr float RAIL_LENGTH = 4650;
 
  private:
     static const aruwlib::motor::MotorId LEFT_MOTOR_ID;
     static const aruwlib::motor::MotorId RIGHT_MOTOR_ID;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
-    const float PID_P = 10.0f;
+    const float PID_P = 5.0f;
     const float PID_I = 0.0f;
-    const float PID_D = 0.0f;
+    const float PID_D = 0.1f;
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000;
 
-    const static float WHEEL_RADIUS = 35;
+    static constexpr float WHEEL_RADIUS = 35;
 
     aruwlib::motor::DjiMotor leftWheel;
 
