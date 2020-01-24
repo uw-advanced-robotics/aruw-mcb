@@ -1,4 +1,5 @@
 #include "sentinel_drive_subsystem.hpp"
+#include "src/aruwlib/motor/dji_motor.hpp"
 
 namespace aruwsrc
 {
@@ -59,8 +60,8 @@ namespace control
     // Here we get the radius from the getEncoderUnwrapped function
     float SentinelDriveSubsystem::distanceFromEncoder(aruwlib::motor::DjiMotor* motor){
         float unwrappedAngle = motor->encStore.getEncoderUnwrapped();
-        float numberOfRotations = unwrappedAngle / 8192.0f;
-        return numberOfRotations * 2.0f * (atan(1)*4) * WHEEL_RADIUS;
+        float numberOfRotations = unwrappedAngle / (ENC_RESOLUTION + 1);
+        return numberOfRotations * 2.0f * (atan(1)*4) * WHEEL_RADIUS / GEAR_RATIO;
     }
 
 }  // namespace control
