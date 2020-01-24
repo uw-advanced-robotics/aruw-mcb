@@ -16,6 +16,13 @@ using namespace aruwsrc::chassis;
 #if defined(TARGET_SOLDIER)
 ChassisSubsystem soldierChassis;
 #endif
+#include "src/aruwlib/communication/serial/ref_serial.hpp"
+#include "src/aruwlib/communication/serial/serial_test_class.hpp"
+
+using namespace aruwlib::serial;
+
+RefSerial refSerial;
+SerialTestClass testSerial;
 
 int main()
 {
@@ -30,7 +37,8 @@ int main()
     Board::initialize();
     aruwlib::Remote::initialize();
 
-    // define subsystems/commands below
+    refSerial.initialize();
+
 
     #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
     modm::SmartPointer chassisDrive(new ChassisDriveCommand(&soldierChassis));
@@ -46,6 +54,7 @@ int main()
     while (1)
     {
         aruwlib::Remote::read();
+        refSerial.updateSerial();
         if (motorSendPeriod.execute())
         {
             aruwlib::control::CommandScheduler::run();
