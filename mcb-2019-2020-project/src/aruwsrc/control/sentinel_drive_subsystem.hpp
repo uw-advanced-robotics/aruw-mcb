@@ -47,6 +47,7 @@ class SentinelDriveSubsystem : public Subsystem
     const float PID_MAX_OUTPUT = 16000;
 
     static constexpr float WHEEL_RADIUS = 35;
+    static constexpr float GEAR_RATIO = 19.0f;
 
     aruwlib::motor::DjiMotor leftWheel;
 
