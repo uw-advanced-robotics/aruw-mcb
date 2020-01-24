@@ -12,8 +12,8 @@ namespace control
 
 ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem) :
 Command(true),
-exampleCommand(subsystem, 2000),
-otherExampleCommand(subsystem, 500),
+exampleCommand(subsystem),
+otherExampleCommand(subsystem),
 switchTimer(2000)
 {
     this->comprisedCommandScheduler.registerSubsystem(subsystem);

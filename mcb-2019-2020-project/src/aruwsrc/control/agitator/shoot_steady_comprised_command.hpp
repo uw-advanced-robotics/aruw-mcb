@@ -3,8 +3,9 @@
 
 #include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
-#include "src/aruwlib/control/comprised_command.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include "agitator_rotate_command.hpp"
+#include "agitator_unjam_command.hpp"
 
 namespace aruwsrc
 {
@@ -12,7 +13,7 @@ namespace aruwsrc
 namespace agitator
 {
 
-class ShootSteadyComprisedCommand : public aruwlib::control::ComprisedCommand
+class ShootSteadyComprisedCommand : public aruwlib::control::Command
 {
 public:
     ShootSteadyComprisedCommand(
@@ -55,9 +56,9 @@ private:
 
     AgitatorSubsystem* connectedAgitator; 
 
-    modm::SmartPointer agitatorRotateCommand;
+    AgitatorRotateCommand agitatorRotateCommand;
 
-    modm::SmartPointer agitatorUnjamCommand;
+    AgitatorUnjamCommand agitatorUnjamCommand;
 
     bool unjamSequenceCommencing;
 };

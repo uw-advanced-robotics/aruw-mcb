@@ -17,18 +17,16 @@ ShootSteadyComprisedCommand::ShootSteadyComprisedCommand(
     float agitatorRotateTime,
     float maxUnjamAngle) :
     connectedAgitator(agitator),
-    agitatorRotateCommand(new AgitatorRotateCommand(agitator, agitatorChangeAngle, agitatorRotateTime)),
-    agitatorUnjamCommand(new AgitatorUnjamCommand(agitator, maxUnjamAngle)),
+    agitatorRotateCommand(agitator, agitatorChangeAngle, agitatorRotateTime),
+    agitatorUnjamCommand(agitator, maxUnjamAngle),
     unjamSequenceCommencing(false)
 {
-    addUseCommand(agitatorRotateCommand);
-    addUseCommand(agitatorUnjamCommand);
     this->addSubsystemRequirement(reinterpret_cast<Subsystem*>(agitator));
 }
 
 void ShootSteadyComprisedCommand::initialize()
 {
-    CommandScheduler::addCommand(agitatorRotateCommand);
+    this->comprisedCommandScheduler.addCommand(reinterpret_cast<Command*>(&agitatorRotateCommand));
     unjamSequenceCommencing = false;
 }
 
@@ -40,22 +38,26 @@ void ShootSteadyComprisedCommand::execute()
         // the to scheduler. The rotate forward command will be automatically
         // unscheduled.
         unjamSequenceCommencing = true;
-        CommandScheduler::removeCommand(agitatorRotateCommand, true);
-        CommandScheduler::addCommand(agitatorUnjamCommand);
+        this->comprisedCommandScheduler.removeCommand(
+            reinterpret_cast<Command*>(&agitatorRotateCommand), true);
+        this->comprisedCommandScheduler.addCommand(
+            reinterpret_cast<Command*>(&agitatorUnjamCommand));
     }
 }
 
 void ShootSteadyComprisedCommand::end(bool interrupted)
 {
-    CommandScheduler::removeCommand(agitatorUnjamCommand, interrupted);
-    CommandScheduler::removeCommand(agitatorRotateCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(
+        reinterpret_cast<Command*>(&agitatorUnjamCommand), interrupted);
+    this->comprisedCommandScheduler.removeCommand(
+        reinterpret_cast<Command*>(&agitatorRotateCommand), interrupted);
 }
 
 bool ShootSteadyComprisedCommand::isFinished() const
 {
-    return (CommandScheduler::smrtPtrCommandCast(agitatorRotateCommand)->isFinished()
+    return (agitatorRotateCommand.isFinished()
         && !unjamSequenceCommencing)
-        || (CommandScheduler::smrtPtrCommandCast(agitatorUnjamCommand)->isFinished()
+        || (agitatorUnjamCommand.isFinished()
         && unjamSequenceCommencing);
 }
 
