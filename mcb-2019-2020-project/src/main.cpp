@@ -9,11 +9,14 @@
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "src/aruwsrc/control/example_command.hpp"
 #include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwsrc/control/sentinel_drive_subsystem.hpp"
+#include "src/aruwsrc/control/sentinel_drive_random_command.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 
 aruwsrc::control::ExampleSubsystem testSubsystem;
+aruwsrc::control::SentinelDriveSubsystem sentinelDriveSubsystem;
 
 using namespace aruwlib::sensors;
 
@@ -36,9 +39,15 @@ int main()
         new aruwsrc::control::ExampleCommand(&testSubsystem));
 
     CommandScheduler::registerSubsystem(&testSubsystem);
+    CommandScheduler::registerSubsystem(&sentinelDriveSubsystem);
 
     modm::SmartPointer blinkCommand(
         new aruwsrc::control::BlinkLEDCommand(&testSubsystem));
+
+    modm::SmartPointer sentinelRandomDriveCommand(
+        new aruwsrc::control::SentinelDriveRandomCommand(&sentinelDriveSubsystem));
+    
+    sentinelDriveSubsystem.setDefaultCommand(sentinelRandomDriveCommand);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
