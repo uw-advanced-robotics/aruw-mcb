@@ -29,7 +29,7 @@ class Engineer17mmReservoirSubsystem : public Subsystem
 
     bool reservoirCalibrateHere(void);
  private:
-    static constexpr float RESERVOIR_GEAR_RATIO = 36.0f;
+    static constexpr float RESERVOIR_GEAR_RATIO = 27.0f;
 
     // TODO: update all engineer motor assignments
     // might need another motor to dump the ammo
@@ -39,9 +39,9 @@ class Engineer17mmReservoirSubsystem : public Subsystem
     aruwlib::motor::DjiMotor reservoirMotor;
 
     // PID values
-    const float PID_P = 10.0f;
-    const float PID_I = 0.0f;
-    const float PID_D = 0.0f;
+    const float PID_P = 80.0f;
+    const float PID_I = 1.0f;
+    const float PID_D = 1.0f;
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000;
 

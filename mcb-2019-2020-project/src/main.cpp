@@ -10,10 +10,13 @@
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+#include "src/aruwsrc/control/engineer/engineer_17mm_reservoir_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/engineer_17mm_reservoir_rotate_command.hpp"
 
-aruwsrc::control::ExampleSubsystem testSubsystem;
+aruwsrc::control::Engineer17mmReservoirSubsystem engineer17mmReservoir;
 
 using namespace aruwlib::sensors;
+using namespace aruwsrc::control;
 
 int main()
 {
@@ -27,14 +30,30 @@ int main()
 
     Board::initialize();
 
-    Mpu6500::init();
+    //Mpu6500::init();
 
-    modm::SmartPointer testDefaultCommand(
-        new aruwsrc::control::ExampleCommand(&testSubsystem));
+    // reservoir rotate testing
+    aruwlib::control::CommandScheduler::registerSubsystem(&engineer17mmReservoir);
 
-    testSubsystem.setDefaultCommand(testDefaultCommand);
+    while (!engineer17mmReservoir.reservoirCalibrateHere())
+    {
+        aruwlib::can::CanRxHandler::pollCanData();
+        modm::delayMilliseconds(1);
+    }
 
-    CommandScheduler::registerSubsystem(&testSubsystem);
+    // rotate in 3rds taking two seconds for a rotation segment
+    modm::SmartPointer rotateCommand(new Engineer17mmReservoirRotateCommand(&engineer17mmReservoir, 2.0f * aruwlib::algorithms::PI / 3, 2000));
+
+    //engineer17mmReservoir.setDefaultCommand(rotateCommand);
+
+    CommandScheduler::addCommand(rotateCommand);
+
+    //modm::SmartPointer testDefaultCommand(
+    //    new aruwsrc::control::ExampleCommand(&testSubsystem));
+
+    //testSubsystem.setDefaultCommand(testDefaultCommand);
+
+    //CommandScheduler::registerSubsystem(&testSubsystem);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
@@ -48,17 +67,20 @@ int main()
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
 
+        /*
         if (updateImuPeriod.execute())
         {
             Mpu6500::read();
         }
+        */
 
         if (motorSendPeriod.execute())
         {
-            aruwlib::control::CommandScheduler::run();
+            //motorSendPeriod.restart(3);
+            //aruwlib::control::CommandScheduler::run();
+            engineer17mmReservoir.refresh();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
-
 
         modm::delayMicroseconds(10);
     }
