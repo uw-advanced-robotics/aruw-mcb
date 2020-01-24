@@ -6,6 +6,7 @@
 
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "src/aruwsrc/control/example_command.hpp"
+#include "src/aruwsrc/control/example_comprised_command.hpp"
 #include "src/aruwsrc/control/example_subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
@@ -26,7 +27,16 @@ using namespace aruwlib;
 AgitatorSubsystem agitator17mm;
 ExampleSubsystem frictionWheelSubsystem;
 
-bool pressed = true;
+#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+
+aruwsrc::control::ExampleSubsystem testSubsystem;
+
+aruwlib::control::CommandScheduler mainScheduler(true);
+
+// aruwsrc::control::ExampleCommand testDefaultCommand(&testSubsystem);
+aruwsrc::control::ExampleComprisedCommand testComprisedCommand(&testSubsystem);
+
+// aruwsrc::control::ExampleComprisedCommand test2(&testSubsystem);
 
 using namespace aruwlib::sensors;
 
@@ -88,16 +98,6 @@ int main()
                         // control::CommandScheduler::addCommand(rotateCommand);
 
             control::CommandScheduler::addComprisedCommand(shootCommand);
-        }
-
-        pressed = Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP;
-
-        // run scheduler
-        if (t.execute())
-        {
-            t.restart(2);
-            control::CommandScheduler::run();
-            motor::DjiMotorTxHandler::processCanSendData();
         }
 
         modm::delayMicroseconds(10);
