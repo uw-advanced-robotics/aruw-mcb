@@ -55,11 +55,11 @@ int main()
 
     modm::ShortPeriodicTimer t(2);
 
-    while (!agitator17mm.agitatorCalibrateHere())
-    {
-        aruwlib::can::CanRxHandler::pollCanData();
-        modm::delayMilliseconds(1);
-    }
+    // while (!agitator17mm.agitatorCalibrateHere())
+    // {
+    //     aruwlib::can::CanRxHandler::pollCanData();
+    //     modm::delayMilliseconds(1);
+    // }
 
     // modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
     // modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5));
