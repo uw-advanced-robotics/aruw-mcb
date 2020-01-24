@@ -27,7 +27,7 @@ class ExampleComprisedCommand : public Command
     }
 
  private:
-    modm::SmartPointer exampleCommand;
+    ExampleSubsystem* exampleCommand;
 };
 
 }  // namespace control

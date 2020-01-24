@@ -98,7 +98,7 @@ class Command {
 
     bool isComprisedCommand;
 
- public:
+ protected:
     CommandScheduler comprisedCommandScheduler;
 };
 

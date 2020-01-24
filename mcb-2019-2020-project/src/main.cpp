@@ -13,9 +13,12 @@
 
 aruwsrc::control::ExampleSubsystem testSubsystem;
 
-aruwlib::control::CommandScheduler mainScheduler;
+aruwlib::control::CommandScheduler mainScheduler(true);
 
-aruwsrc::control::ExampleComprisedCommand test2(&testSubsystem);
+// aruwsrc::control::ExampleCommand testDefaultCommand(&testSubsystem);
+aruwsrc::control::ExampleComprisedCommand testComprisedCommand(&testSubsystem);
+
+// aruwsrc::control::ExampleComprisedCommand test2(&testSubsystem);
 
 int main()
 {
@@ -29,42 +32,21 @@ int main()
 
     Board::initialize();
 
-
-    modm::SmartPointer testDefaultCommand(
-        new aruwsrc::control::ExampleComprisedCommand(&testSubsystem)
-    );
-
-    // modm::SmartPointer testDefaultCommand(
-    //     new aruwsrc::control::ExampleCommand(&testSubsystem));
-
-    // testSubsystem.setDefaultCommand(testDefaultCommand);
-
-    // mainScheduler.registerSubsystem(&testSubsystem);
+    mainScheduler.registerSubsystem(&testSubsystem);
+    mainScheduler.addCommand(&testComprisedCommand);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
     modm::ShortPeriodicTimer motorSendPeriod(3);
 
-    aruwlib::control::CommandScheduler::smrtPtrCommandCast(testDefaultCommand)->initialize();
-
-    if (aruwlib::control::CommandScheduler::smrtPtrCommandCast(testDefaultCommand)->comprisedCommandScheduler.isSubsystemRegistered(&testSubsystem)) {
-        Board::LedA::toggle();
-    }
-
-    test2.initialize();
+    // test2.initialize();
 
     while (1)
     {
         if (motorSendPeriod.execute())
         {
-
-            aruwlib::control::CommandScheduler::smrtPtrCommandCast(testDefaultCommand)->execute();
-            // test2.execute();
-
-            testSubsystem.refresh();
-
-            // mainScheduler.run();
+            mainScheduler.run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

@@ -14,26 +14,25 @@ namespace aruwlib
 
 namespace control
 {
-    const modm::SmartPointer CommandScheduler::defaultNullCommand(0);
+    uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
-    bool CommandScheduler::addCommand(modm::SmartPointer commandToAdd)
+    bool CommandScheduler::addCommand(Command* commandToAdd)
     {
         bool commandAdded = false;
 
-        set<Subsystem*> commandRequirements =
-            *(smrtPtrCommandCast(commandToAdd)->getRequirements());
+        set<Subsystem*> commandRequirements = *commandToAdd->getRequirements();
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
         for (auto& requirement : commandRequirements)
         {
-            map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
+            map<Subsystem*, Command*>::iterator isDependentSubsystem =
                 subsystemToCommandMap.find(requirement);
             if (isDependentSubsystem != subsystemToCommandMap.end())
             {
-                if (!(isDependentSubsystem->second == defaultNullCommand))
+                if (isDependentSubsystem->second != nullptr)
                 {
-                    smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
+                    isDependentSubsystem->second->end(true);
                 }
                 isDependentSubsystem->second = commandToAdd;
                 commandAdded = true;
@@ -50,73 +49,33 @@ namespace control
         // multiple subsystems rely on this command.
         if (commandAdded)
         {
-            smrtPtrCommandCast(commandToAdd)->initialize();
+            commandToAdd->initialize();
         }
         return true;
-    }
-
-    Subsystem* subsystemW;
-
-    void CommandScheduler::runCommands()
-    {
-        uint32_t checkRunPeriod = DWT->CYCCNT;  // clock cycle count
-        // timestamp for reference and for disallowing a command from running
-        // multiple times during the same call to run
-        commandSchedulerTimestamp++;
-        // refresh all and run all commands
-        for (auto& currSubsystemCommandPair : subsystemToCommandMap)
-        {
-            // only run the command if it hasn't been run this time `run` has been called
-            if (!(currSubsystemCommandPair.second == defaultNullCommand))
-            {
-                subsystemW = currSubsystemCommandPair.first;
-                Command* currCommand = smrtPtrCommandCast(currSubsystemCommandPair.second);
-
-                if (currCommand->prevSchedulerExecuteTimestamp != commandSchedulerTimestamp)
-                {
-                    currCommand->execute();
-                    currCommand->prevSchedulerExecuteTimestamp = commandSchedulerTimestamp;
-                }
-                // remove command if finished running
-                if (currCommand->isFinished())
-                {
-                    currCommand->end(false);
-                    currSubsystemCommandPair.second = defaultNullCommand;
-                }
-            }
-        }
-        // make sure we are not going over tolerable runtime, otherwise something is really
-        // wrong with the code
-        if (static_cast<float>(DWT->CYCCNT - checkRunPeriod)
-            / static_cast<float>(modm::clock::fcpu_kHz)
-            > MAX_ALLOWABLE_SCHEDULER_RUNTIME)
-        {
-            // shouldn't take more than 1 ms to complete all this stuff, if it does something
-            // is seriously wrong (i.e. you are adding subsystems unchecked)
-            // THROW-NON-FATAL-ERROR-CHECK
-        }
     }
 
     void CommandScheduler::run()
     {
         uint32_t checkRunPeriod = DWT->CYCCNT;  // clock cycle count
-        // timestamp for reference and for disallowing a command from running
-        // multiple times during the same call to run
-        commandSchedulerTimestamp++;
+        // Timestamp for reference and for disallowing a command from running
+        // multiple times during the same call to run.
+        if (isMainScheduler)
+        {
+            commandSchedulerTimestamp++;
+        }
         // refresh all and run all commands
         for (auto& currSubsystemCommandPair : subsystemToCommandMap)
         {
             // add default command if no command is currently being run
-            if (currSubsystemCommandPair.second == defaultNullCommand
-                && !(currSubsystemCommandPair.first->getDefaultCommand() == defaultNullCommand)
+            if (currSubsystemCommandPair.second == nullptr
+                && currSubsystemCommandPair.first->getDefaultCommand() != nullptr
             ){
                 addCommand(currSubsystemCommandPair.first->getDefaultCommand());
             }
             // only run the command if it hasn't been run this time run has been called
-            if (!(currSubsystemCommandPair.second == defaultNullCommand))
+            if (currSubsystemCommandPair.second != nullptr)
             {
-                Subsystem* currSubsystem = currSubsystemCommandPair.first;
-                Command* currCommand = smrtPtrCommandCast(currSubsystemCommandPair.second);
+                Command* currCommand = currSubsystemCommandPair.second;
 
                 if (currCommand->prevSchedulerExecuteTimestamp
                     != commandSchedulerTimestamp
@@ -129,11 +88,15 @@ namespace control
                 if (currCommand->isFinished())
                 {
                     currCommand->end(false);
-                    currSubsystemCommandPair.second = defaultNullCommand;
+                    currSubsystemCommandPair.second = nullptr;
                 }
             }
             // refresh subsystem
-            currSubsystemCommandPair.first->refresh();
+            if (currSubsystemCommandPair.first->prevSchedulerExecuteTimestamp
+                != commandSchedulerTimestamp) {
+                currSubsystemCommandPair.first->refresh();
+                currSubsystemCommandPair.first->prevSchedulerExecuteTimestamp = commandSchedulerTimestamp;
+            }
         }
         // make sure we are not going over tolerable runtime, otherwise something is really
         // wrong with the code
@@ -147,7 +110,7 @@ namespace control
         }
     }
 
-    void CommandScheduler::removeCommand(modm::SmartPointer command, bool interrupted)
+    void CommandScheduler::removeCommand(Command* command, bool interrupted)
     {
         bool commandFound = false;
         for (auto& subsystemCommandPair : subsystemToCommandMap)
@@ -156,18 +119,18 @@ namespace control
             {
                 if (!commandFound)
                 {
-                    smrtPtrCommandCast(subsystemCommandPair.second)->end(interrupted);
+                    subsystemCommandPair.second->end(interrupted);
                     commandFound = true;
                 }
-                subsystemCommandPair.second = defaultNullCommand;
+                subsystemCommandPair.second = nullptr;
             }
         }
     }
 
-    bool CommandScheduler::isCommandScheduled(modm::SmartPointer command)
+    bool CommandScheduler::isCommandScheduled(Command* command)
     {
         return std::any_of(subsystemToCommandMap.begin(), subsystemToCommandMap.end(),
-            [command](pair<Subsystem*, modm::SmartPointer> p)
+            [command](pair<Subsystem*, Command*> p)
             {
                 return p.second == command;
             }
@@ -178,7 +141,7 @@ namespace control
     {
         if (!isSubsystemRegistered(subsystem))
         {
-            subsystemToCommandMap[subsystem] = defaultNullCommand;
+            subsystemToCommandMap[subsystem] = nullptr;
             return true;
         }
         return false;
@@ -187,11 +150,6 @@ namespace control
     bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem)
     {
         return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
-    }
-
-    Command* CommandScheduler::smrtPtrCommandCast(modm::SmartPointer smrtPtr)
-    {
-        return reinterpret_cast<Command*>(smrtPtr.getPointer());
     }
 }  // namespace control
 

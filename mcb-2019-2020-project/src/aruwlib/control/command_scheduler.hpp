@@ -32,13 +32,15 @@ namespace control
 class CommandScheduler
 {
  public:
-    CommandScheduler() : subsystemToCommandMap(), commandSchedulerTimestamp(0) {}
+    CommandScheduler(bool isMainScheduler = false) :
+    subsystemToCommandMap(),
+    isMainScheduler(isMainScheduler) {}
 
     void runCommands();
 
     void run();
 
-    void removeCommand(modm::SmartPointer command, bool interrupted);
+    void removeCommand(Command* command, bool interrupted);
 
     bool registerSubsystem(Subsystem* subsystem);
 
@@ -46,13 +48,9 @@ class CommandScheduler
 
     bool isSubsystemRegistered(const Subsystem* subsystem);
 
-    bool isCommandScheduled(modm::SmartPointer command);
+    bool isCommandScheduled(Command* command);
 
-    bool addCommand(modm::SmartPointer commandToAdd);
-
-    static const modm::SmartPointer defaultNullCommand;
-
-    static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
+    bool addCommand(Command* commandToAdd);
 
  private:
     // maximum time before we start erroring, in seconds
@@ -60,9 +58,12 @@ class CommandScheduler
 
     // a map containing keys of subsystems, pairs of Commands and ComprisedCommands
     // the command comes first, the ComprisedCommand second 
-    std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
+ public:
+    std::map<Subsystem*, Command*> subsystemToCommandMap;
 
-    uint32_t commandSchedulerTimestamp;
+    static uint32_t commandSchedulerTimestamp;
+
+    bool isMainScheduler;
 };
 
 }  // namespace control

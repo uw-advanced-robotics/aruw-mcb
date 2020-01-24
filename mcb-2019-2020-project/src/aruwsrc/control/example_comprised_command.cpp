@@ -8,7 +8,7 @@ namespace control
 
 ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem) :
 Command(true),
-exampleCommand(new ExampleCommand(subsystem))
+exampleCommand(subsystem)
 {
     this->comprisedCommandScheduler.registerSubsystem(subsystem);
     this->addSubsystemRequirement(subsystem);
@@ -16,16 +16,16 @@ exampleCommand(new ExampleCommand(subsystem))
 
 void ExampleComprisedCommand::initialize()
 {
-    this->comprisedCommandScheduler.addCommand(exampleCommand);
+    this->comprisedCommandScheduler.addCommand(reinterpret_cast<Command*>(exampleCommand));
 }
 
 void ExampleComprisedCommand::execute() {
-    this->comprisedCommandScheduler.runCommands();
+    this->comprisedCommandScheduler.run();
 }
 
 void ExampleComprisedCommand::end(bool interrupted)
 {
-    this->comprisedCommandScheduler.removeCommand(exampleCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(reinterpret_cast<Command*>(exampleCommand), interrupted);
 }
 
 }  // namespace control
