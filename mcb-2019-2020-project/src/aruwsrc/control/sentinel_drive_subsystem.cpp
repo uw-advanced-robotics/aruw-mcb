@@ -5,8 +5,8 @@ namespace aruwsrc
 
 namespace control
 {
-    const aruwlib::motor::MotorId SentinelDriveSubsystem::LEFT_MOTOR_ID = aruwlib::motor::MOTOR4;
-    const aruwlib::motor::MotorId SentinelDriveSubsystem::RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
+    const aruwlib::motor::MotorId SentinelDriveSubsystem::LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
+    const aruwlib::motor::MotorId SentinelDriveSubsystem::RIGHT_MOTOR_ID = aruwlib::motor::MOTOR3;
 
     void SentinelDriveSubsystem::setDesiredRpm(float desRpm)
     {
