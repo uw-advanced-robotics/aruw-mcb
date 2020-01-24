@@ -2,6 +2,7 @@
 #define __COMMAND_SENTINEL_DRIVE_RANDOM_HPP__
 
 #include "src/aruwlib/control/command.hpp"
+#include "src/aruwsrc/control/sentinel_drive_subsystem.hpp"
 #include "modm/processing/timer.hpp"
 
 using namespace aruwlib::control;
@@ -50,8 +51,9 @@ class SentinelDriveRandomCommand : public Command
     void interrupted(void);
 
  private:
-    static const int16_t MAX_RPM = 1000;
-    static const float RAIL_BUFFER = 0.1 * SentinelDriveSubsystem::RAIL_LENGTH;
+    static constexpr int16_t MAX_RPM = 4000;
+    static constexpr float RAIL_BUFFER = 0.1 * SentinelDriveSubsystem::RAIL_LENGTH;
+    static const int16_t CHANGE_TIME_INTERVAL = 5000;
 
     float currentRPM = 0;
 
