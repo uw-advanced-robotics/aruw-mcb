@@ -25,9 +25,9 @@ namespace control
         }
     }
 
-    const set<Subsystem*>* Command::getRequirements()
+    const set<Subsystem*>& Command::getRequirements()
     {
-        return &commandRequirements;
+        return commandRequirements;
     }
 
 }  // namespace control

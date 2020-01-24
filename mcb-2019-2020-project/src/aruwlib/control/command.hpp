@@ -44,7 +44,7 @@ class Command {
      *
      * @return the set of subsystems that are required
      */
-    const std::set<Subsystem*>* getRequirements();
+    const std::set<Subsystem*>& getRequirements();
 
     /**
      * Whether the command requires a given subsystem.  Named "hasRequirement"

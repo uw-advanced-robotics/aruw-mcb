@@ -33,14 +33,13 @@ int main()
     Board::initialize();
 
     mainScheduler.registerSubsystem(&testSubsystem);
+    // mainScheduler.addCommand(&testDefaultCommand);
     mainScheduler.addCommand(&testComprisedCommand);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
     modm::ShortPeriodicTimer motorSendPeriod(3);
-
-    // test2.initialize();
 
     while (1)
     {
@@ -49,6 +48,8 @@ int main()
             mainScheduler.run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
+
+        
 
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();

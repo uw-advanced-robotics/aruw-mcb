@@ -27,7 +27,11 @@ class ExampleComprisedCommand : public Command
     }
 
  private:
-    ExampleSubsystem* exampleCommand;
+    ExampleCommand exampleCommand;
+
+    ExampleCommand otherExampleCommand;
+
+    modm::ShortTimeout switchTimer;
 };
 
 }  // namespace control
