@@ -28,13 +28,21 @@ namespace chassis
 
     float ChassisSubsystem::currentControl()
     {
-        // max allowed power is 80 W, Battery is 24V. Max current is 80/24
-        // -log base (80/24)^2(80/24) x + 2. When current is at max, scale acceleration by 1. 
+        // max allowed power is 80 W, Battery is 24V. Max current allowed is 80/24
+        // -(log base (80/24)^2 (80/24) x + 2). When current is at max, scale acceleration by 1. 
         // buffer of a^2/b^2 = (80/24)^2 logarithmic base
-        // + 2 so nonnegative values
+        // + 2 so nonnegative values when current is capped
         // scales down high current values
         // if current < 80/24, scale by larger constant based on gap in current
         // add cap: 1.5?
+        // add lower limit: 0.5?
+
+        // visualization of graph on desmos: https://www.desmos.com/calculator/hjec1vpo1z
+
+        // Problem: current is improperly constrained. Soldier life bar continues to deplete. 
+        // Could be related to refSerial not returning anything (wiring issue), problem with 
+        // constants, or something else
+        
         float chassisCurrent = refSerial.getRobotData().chassis.current;
         float currentMultiplier = -(log10f(80/24 * chassisCurrent) / log10f(powf((80/24),2)) + 2);
 
