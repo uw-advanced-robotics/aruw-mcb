@@ -4,6 +4,7 @@
 #include "src/main.hpp"
 
 using namespace aruwlib;
+using namespace aruwlib::algorithms;
 
 
 namespace aruwsrc
@@ -61,15 +62,15 @@ namespace chassis
         // than the center of the chassis, we calculate the offset and than multiply however
         // much we want to rotate by
         float leftFrontRotationRatio
-            = RADIANS_TO_DEGREES(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+            = degreesToRadians(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
         float rightFroneRotationRatio
-            = RADIANS_TO_DEGREES(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+            = degreesToRadians(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
         float leftBackRotationRatio
-            = RADIANS_TO_DEGREES(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+            = degreesToRadians(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
         float rightBackRotationRatio
-            = RADIANS_TO_DEGREES(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+            = degreesToRadians(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
 
-        float chassisRotateTranslated = RADIANS_TO_DEGREES(r) / chassisRotationRatio;
+        float chassisRotateTranslated = radiansToDegrees(r) / chassisRotationRatio;
         leftFrontRpm  =  y + x + chassisRotateTranslated * leftFrontRotationRatio;
         rightFrontRpm =  y - x + chassisRotateTranslated * rightFroneRotationRatio;
         leftBackRpm   = -y + x + chassisRotateTranslated * leftBackRotationRatio;

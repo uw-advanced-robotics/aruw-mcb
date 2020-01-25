@@ -2,14 +2,15 @@
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 
-#include "aruwlib/control/command_scheduler.hpp"
-#include "aruwlib/motor/dji_motor_tx_handler.hpp"
-#include "aruwlib/communication/can/can_rx_listener.hpp"
-#include "aruwlib/communication/remote.hpp"
-
+#include "src/aruwlib/control/controller_mapper.hpp"
+#include "src/aruwlib/communication/remote.hpp"
+#include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
+#include "src/aruwlib/control/command_scheduler.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-#include "aruwlib/algorithms/contiguous_float_test.hpp"
+#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
+#include "src/aruwlib/communication/can/can_rx_listener.hpp"
+#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 
 using namespace aruwsrc::chassis;
 
@@ -23,6 +24,8 @@ using namespace aruwlib::serial;
 
 RefSerial refSerial;
 SerialTestClass testSerial;
+
+using namespace aruwlib::sensors;
 
 int main()
 {
@@ -50,20 +53,27 @@ int main()
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
     modm::ShortPeriodicTimer motorSendPeriod(3);
+    // update imu
+    modm::ShortPeriodicTimer updateImuPeriod(2);
 
     while (1)
     {
-        
+        // do this as fast as you can
+        aruwlib::can::CanRxHandler::pollCanData();
+
         aruwlib::Remote::read();
         refSerial.updateSerial();
+        
+        if (updateImuPeriod.execute())
+        {
+            Mpu6500::read();
+        }
+
         if (motorSendPeriod.execute())
         {
             aruwlib::control::CommandScheduler::run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
-
-        // do this as fast as you can
-        aruwlib::can::CanRxHandler::pollCanData();
 
         modm::delayMicroseconds(10);
     }

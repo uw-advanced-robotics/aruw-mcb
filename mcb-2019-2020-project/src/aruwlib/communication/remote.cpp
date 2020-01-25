@@ -8,6 +8,7 @@
  */
 
 #include "remote.hpp"
+#include "src/aruwlib/control/controller_mapper.hpp"
 
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 
@@ -187,6 +188,8 @@ namespace aruwlib {
         remote.key = rxBuffer[14] | rxBuffer[15] << 8;
         // Remote wheel
         remote.wheel = (rxBuffer[16] | rxBuffer[17] << 8) - 1024;
+
+        IoMapper::handleKeyStateChange(remote.key, remote.leftSwitch, remote.rightSwitch);
     }
 
     // Clears the current rxBuffer

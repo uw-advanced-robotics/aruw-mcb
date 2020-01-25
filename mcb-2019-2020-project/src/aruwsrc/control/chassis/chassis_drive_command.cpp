@@ -28,10 +28,10 @@ void ChassisDriveCommand::execute()
         // / power(max revolve speed, 2)
         rTranslationalGain =
             pow(
-                (static_cast<double>(
-                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD)
-                - fabs(chassisRotationDesiredWheelspeed) )
-                / static_cast<double>(ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR),
+                static_cast<double>(
+                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD
+                - fabs(chassisRotationDesiredWheelspeed)
+                / ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR),
                 2.0
             );
         rTranslationalGain = aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);

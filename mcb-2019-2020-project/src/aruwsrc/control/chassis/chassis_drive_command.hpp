@@ -29,7 +29,7 @@ class ChassisDriveCommand : public Command {
 
  private:
     // the minimum desired wheel speed for chassis rotation, measured in rpm
-    static constexpr double MIN_ROTATION_THRESHOLD = 800.0f;
+    static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
     ChassisSubsystem* chassis;
 };
