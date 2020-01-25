@@ -23,7 +23,7 @@ using namespace aruwsrc::control;
 using namespace aruwlib::algorithms;
 using namespace aruwlib;
 
-AgitatorSubsystem agitator17mm;
+AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
 ExampleSubsystem frictionWheelSubsystem;
 
 bool pressed = true;

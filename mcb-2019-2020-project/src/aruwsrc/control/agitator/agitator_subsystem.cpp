@@ -20,8 +20,9 @@ namespace agitator
         agitatorIsCalibrated(false),
         agitatorPositionPid(0.0f, 0.0f, 0.0f, 0.0f, PID_MAX_OUT)
     {
-        modm::Pid<float>::Parameter* param;
-        switch (type) {
+        modm::Pid<float>::Parameter* param = nullptr;   // assign nullptr to fix build
+        switch (type)
+        {
             case AgitatorType::Soldier:
                 param = new modm::Pid<float>::Parameter(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM,
                                                             PID_MAX_OUT);
