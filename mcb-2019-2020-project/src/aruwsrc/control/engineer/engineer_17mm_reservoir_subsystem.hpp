@@ -39,9 +39,9 @@ class Engineer17mmReservoirSubsystem : public Subsystem
     aruwlib::motor::DjiMotor reservoirMotor;
 
     // PID values
-    const float PID_P = 80.0f;
-    const float PID_I = 1.0f;
-    const float PID_D = 1.0f;
+    const float PID_P = 10000.0f;
+    const float PID_I = 0.0f;
+    const float PID_D = 100000.0f;
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000;
 

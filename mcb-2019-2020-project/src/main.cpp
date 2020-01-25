@@ -41,8 +41,8 @@ int main()
         modm::delayMilliseconds(1);
     }
 
-    // rotate in 3rds taking two seconds for a rotation segment
-    modm::SmartPointer rotateCommand(new Engineer17mmReservoirRotateCommand(&engineer17mmReservoir, 2.0f * aruwlib::algorithms::PI / 3, 2000));
+    // rotate in 3rds taking one second for a rotation segment
+    modm::SmartPointer rotateCommand(new Engineer17mmReservoirRotateCommand(&engineer17mmReservoir, 2.0f * aruwlib::algorithms::PI / 3, 1000.0f));
 
     //engineer17mmReservoir.setDefaultCommand(rotateCommand);
 
@@ -76,9 +76,8 @@ int main()
 
         if (motorSendPeriod.execute())
         {
-            //motorSendPeriod.restart(3);
-            //aruwlib::control::CommandScheduler::run();
-            engineer17mmReservoir.refresh();
+            motorSendPeriod.restart(3);
+            aruwlib::control::CommandScheduler::run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

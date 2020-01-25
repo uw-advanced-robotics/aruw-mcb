@@ -36,7 +36,7 @@ namespace control
 
     void Engineer17mmReservoirRotateCommand::end(bool interrupted)
     {
-        // nothing yet??
+        connectedReservoir->setReservoirAngle(connectedReservoir->getReservoirAngle());
     }
 
     bool Engineer17mmReservoirRotateCommand::isFinished() const

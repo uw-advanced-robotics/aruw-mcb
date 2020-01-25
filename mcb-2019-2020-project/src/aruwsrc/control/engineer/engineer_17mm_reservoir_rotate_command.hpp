@@ -53,9 +53,9 @@ class Engineer17mmReservoirRotateCommand : Command
     bool isFinished() const;
 
  private:
-    static constexpr float RESERVOIR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
+    static constexpr float RESERVOIR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 30.0f;
 
-    static constexpr float RESERVOIR_ROTATE_COMMAND_PERIOD = 2;
+    static constexpr float RESERVOIR_ROTATE_COMMAND_PERIOD = 3;
 
     Engineer17mmReservoirSubsystem* connectedReservoir;
 
