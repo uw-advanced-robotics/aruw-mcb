@@ -28,7 +28,7 @@ class GrabberSubsystem : public Subsystem
 
    void refresh(void);
 
-   void setMovement(bool gripMode); 
+   void setSqueezed(bool gripMode); 
 
  private: 
    bool gripMode; 

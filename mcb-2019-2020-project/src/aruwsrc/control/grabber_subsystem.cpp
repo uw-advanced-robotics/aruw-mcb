@@ -13,7 +13,7 @@ namespace control
         grabberDigitalOutPin::set(gripMode); 
     }
 
-    void GrabberSubsystem::setMovement(bool gripMode) {
+    void GrabberSubsystem::setSqueezed(bool gripMode) {
         this->gripMode = gripMode; 
         grabberDigitalOutPin::set(gripMode);
     }
