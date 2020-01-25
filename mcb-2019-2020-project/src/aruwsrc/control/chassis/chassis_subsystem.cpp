@@ -25,6 +25,10 @@ namespace chassis
         updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, rightBackRpm);
     }
 
+float currentMultiplier = 0.0f;
+float chassisCurrent = 0.0f;
+float eq1 = 0.0f;
+float eq2 = 0.0f;
 
     float ChassisSubsystem::currentControl()
     {
@@ -42,19 +46,28 @@ namespace chassis
         // Problem: current is improperly constrained. Soldier life bar continues to deplete. 
         // Could be related to refSerial not returning anything (wiring issue), problem with 
         // constants, or something else
-        
-        float chassisCurrent = refSerial.getRobotData().chassis.current;
-        float currentMultiplier = -(log10f(80/24 * chassisCurrent) / log10f(powf((80/24),2)) + 2);
 
-        if(currentMultiplier > 1.5)
+        
+        chassisCurrent = refSerial.getRobotData().chassis.current / 1000.0f;
+
+        if (chassisCurrent < 0.00001f) {
+            chassisCurrent = 5.0f;
+        }
+
+        eq1 = log10f(80.0f / 24.0f * chassisCurrent);
+        eq2 = log10f(powf((80.0f /24.0f ), 2.0f));
+
+        currentMultiplier = -(log10f(80.0f / 24.0f * chassisCurrent) / log10f(powf((80.0f /24.0f ), 2.0f))) + 1.5f;
+
+        if(currentMultiplier > 1.0f)
         {
-            currentMultiplier = 1.5;
+            currentMultiplier = 1.0f;
         }
 
         //add lower limit:
-        if(currentMultiplier < 0.5)
+        if(currentMultiplier < 0.0f)
         {
-            currentMultiplier = 0.5;
+            currentMultiplier = 0.0f;
         }
 
         return currentMultiplier;
