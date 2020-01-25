@@ -1,8 +1,10 @@
 #include "chassis_subsystem.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/communication/remote.hpp"
+#include "src/main.hpp"
 
 using namespace aruwlib;
+
 
 namespace aruwsrc
 {
@@ -20,6 +22,34 @@ namespace chassis
         updateMotorRpmPid(&leftBackVelocityPid, &leftBackMotor, leftBackRpm);
         updateMotorRpmPid(&rightFrontVelocityPid, &rightFrontMotor, rightFrontRpm);
         updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, rightBackRpm);
+    }
+
+
+    float ChassisSubsystem::currentControl()
+    {
+        // max allowed power is 80 W, Battery is 24V. Max current is 80/24
+        // -log base (80/24)^2(80/24) x + 2. When current is at max, scale acceleration by 1. 
+        // buffer of a^2/b^2 = (80/24)^2 logarithmic base
+        // + 2 so nonnegative values
+        // scales down high current values
+        // if current < 80/24, scale by larger constant based on gap in current
+        // add cap: 1.5?
+        float chassisCurrent = refSerial.getRobotData().chassis.current;
+        float currentMultiplier = -(log10f(80/24 * chassisCurrent) / log10f(powf((80/24),2)) + 2);
+
+        if(currentMultiplier > 1.5)
+        {
+            currentMultiplier = 1.5;
+        }
+
+        //add lower limit:
+        if(currentMultiplier < 0.5)
+        {
+            currentMultiplier = 0.5;
+        }
+
+        return currentMultiplier;
+
     }
 
     void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
@@ -61,7 +91,8 @@ namespace chassis
         float desiredRpm
     ) {
         pid->update(desiredRpm - motor->getShaftRPM());
-        motor->setDesiredOutput(pid->getValue());
+        //update here; multiply desiredOutput by currentControl()
+        motor->setDesiredOutput(currentControl() * pid->getValue());
     }
 
     float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float kp)

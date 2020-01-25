@@ -208,6 +208,7 @@ class ChassisSubsystem : public Subsystem {
         rightBackRpm(0),
         chassisRotationErrorKalman(1.0f, 0.0f)
     {}
+    float currentControl();
 
     void setDesiredOutput(float x, float y, float r);
 

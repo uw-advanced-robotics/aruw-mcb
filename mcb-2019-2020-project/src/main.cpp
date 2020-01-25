@@ -53,6 +53,7 @@ int main()
 
     while (1)
     {
+        
         aruwlib::Remote::read();
         refSerial.updateSerial();
         if (motorSendPeriod.execute())
