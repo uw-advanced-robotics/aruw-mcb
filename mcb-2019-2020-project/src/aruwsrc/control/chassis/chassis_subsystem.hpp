@@ -29,6 +29,10 @@ class ChassisSubsystem : public Subsystem {
     // we use this for wheel speed since this is how dji's motors measures motor speed
     static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 9000;
 
+    // the minimum desired wheel speed for chassis rotation, measured in rpm before
+    // we start slowing down translational speed
+    static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
+
  private:
     #if defined(TARGET_SOLDIER)
     // velocity pid gains and constants
@@ -129,11 +133,11 @@ class ChassisSubsystem : public Subsystem {
     // radius of the wheels
     static constexpr float WHEEL_RADIUS = 0.0f;
     // distance from center of the two front wheels
-    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 517.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.0f;
     // distance from center of the front and rear wheels
-    static constexpr float WIDTH_BETWEEN_WHEELS_X = 600.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.0f;
     // gimbal offset from the center of the chassis, see note above for explanation of x and y
-    static constexpr float GIMBAL_X_OFFSET       = 175.0f;
+    static constexpr float GIMBAL_X_OFFSET       = 0.0f;
     static constexpr float GIMBAL_Y_OFFSET       = 0.0f;
     static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
@@ -225,6 +229,10 @@ class ChassisSubsystem : public Subsystem {
     float chassisSpeedRotationPID(float currentAngleError, float kp);
 
     void refresh() override;
+
+    // Returns a number between 0 and 1 that is the ratio between the rotationRpm and
+    // the max rotation speed
+    float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
     // Returns the value used for chassis movement forward and backward, between -1 and 1
     static float getChassisX();
