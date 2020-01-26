@@ -51,7 +51,14 @@ namespace agitator
 
     void AgitatorSubsystem::refresh()
     {
-        agitatorRunPositionPid();
+        if (agitatorIsCalibrated)
+        {
+            agitatorRunPositionPid();
+        }
+        else
+        {
+            agitatorCalibrateHere();
+        }
     }
 
     void AgitatorSubsystem::agitatorRunPositionPid()

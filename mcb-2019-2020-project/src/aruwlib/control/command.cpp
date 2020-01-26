@@ -22,6 +22,7 @@ namespace control
             commandRequirements.find(requirement) == commandRequirements.end()
         ) {
             commandRequirements.insert(requirement);
+            // this->comprisedCommandScheduler.registerSubsystem(requirement);  todo test this
         }
     }
 
