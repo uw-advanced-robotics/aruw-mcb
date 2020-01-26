@@ -11,7 +11,7 @@ namespace aruwsrc
 namespace agitator
 {
 
-ShootSteadyComprisedCommand::ShootSteadyComprisedCommand(
+ShootComprisedCommand::ShootComprisedCommand(
     AgitatorSubsystem* agitator,
     float agitatorChangeAngle,
     float maxUnjamAngle,
@@ -30,13 +30,13 @@ ShootSteadyComprisedCommand::ShootSteadyComprisedCommand(
     this->addSubsystemRequirement(dynamic_cast<Subsystem*>(agitator));
 }
 
-void ShootSteadyComprisedCommand::initialize()
+void ShootComprisedCommand::initialize()
 {
     this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&agitatorRotateCommand));
     unjamSequenceCommencing = false;
 }
 
-void ShootSteadyComprisedCommand::execute()
+void ShootComprisedCommand::execute()
 {
     if (connectedAgitator->isAgitatorJammed() && !unjamSequenceCommencing)
     {
@@ -51,7 +51,7 @@ void ShootSteadyComprisedCommand::execute()
     }
 }
 
-void ShootSteadyComprisedCommand::end(bool interrupted)
+void ShootComprisedCommand::end(bool interrupted)
 {
     this->comprisedCommandScheduler.removeCommand(
         dynamic_cast<Command*>(&agitatorUnjamCommand), interrupted);
@@ -59,7 +59,7 @@ void ShootSteadyComprisedCommand::end(bool interrupted)
         dynamic_cast<Command*>(&agitatorRotateCommand), interrupted);
 }
 
-bool ShootSteadyComprisedCommand::isFinished() const
+bool ShootComprisedCommand::isFinished() const
 {
     return (agitatorRotateCommand.isFinished()
         && !unjamSequenceCommencing)

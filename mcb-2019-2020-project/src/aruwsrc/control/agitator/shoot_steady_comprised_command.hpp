@@ -13,10 +13,10 @@ namespace aruwsrc
 namespace agitator
 {
 
-class ShootSteadyComprisedCommand : public aruwlib::control::Command
+class ShootComprisedCommand : public aruwlib::control::Command
 {
 public:
-    ShootSteadyComprisedCommand(
+    ShootComprisedCommand(
         AgitatorSubsystem* agitator,
         float agitatorChangeAngle,
         float maxUnjamAngle,

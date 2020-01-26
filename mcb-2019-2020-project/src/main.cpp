@@ -15,6 +15,7 @@
 
 /* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
+#include "src/aruwlib/control/controller_mapper.hpp"
 
 /* aruwsrc control includes -------------------------------------------------*/
 #include "src/aruwsrc/control/example_command.hpp"
@@ -23,7 +24,7 @@
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
-#include "src/aruwlib/control/controller_mapper.hpp"
+#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
@@ -35,18 +36,17 @@ using namespace aruwlib;
 aruwlib::control::CommandScheduler mainScheduler(true);
 
 /* define subsystems --------------------------------------------------------*/
+#if defined(TARGET_SOLDIER)
 AgitatorSubsystem agitator17mm;
 ExampleSubsystem frictionWheelSubsystem;
+#endif
 
 /* define commands ----------------------------------------------------------*/
+#if defined(TARGET_SOLDIER)
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
-ShootSteadyComprisedCommand agitatorShootCommand(
-    &agitator17mm,
-    aruwlib::algorithms::PI / 5.0f,
-    aruwlib::algorithms::PI / 2.0f,
-    300.0f, 300.0f
-);
+ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
+#endif
 
 using namespace aruwlib::sensors;
 
@@ -67,24 +67,32 @@ int main()
     Mpu6500::init();
 
     /* register subsystems here ---------------------------------------------*/
+    #if defined(TARGET_SOLDIER)
     mainScheduler.registerSubsystem(&agitator17mm);
     mainScheduler.registerSubsystem(&frictionWheelSubsystem);
+    #endif
 
     /* set any default commands to subsystems here --------------------------*/
+    #if defined(TARGET_SOLDIER)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
+    #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
+    #if defined(TARGET_SOLDIER)
     mainScheduler.addCommand(&agitatorCalibrateCommand);
+    #endif
 
     /* define timers here ---------------------------------------------------*/
     modm::ShortPeriodicTimer updateImuPeriod(2);
     modm::ShortPeriodicTimer sendMotorTimeout(2);
 
     /* register io mappings here --------------------------------------------*/
+    #if defined(TARGET_SOLDIER)
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        &agitatorShootCommand
+        &agitatorShootSlowCommand
     );
+    #endif
 
     while (1)
     {
