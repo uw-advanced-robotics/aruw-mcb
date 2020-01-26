@@ -66,7 +66,7 @@ int main()
 
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
 
-    modm::ShortPeriodicTimer t(2);
+    modm::ShortPeriodicTimer sendMotorTimeout(2);
 
     while (!agitator17mm.agitatorCalibrateHere())  // have a calibrate command
     {
@@ -85,14 +85,21 @@ int main()
         if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
             && agitatorShootCommand.isFinished()
         ) {
-            mainScheduler.addCommand(reinterpret_cast<Command*>(&agitatorShootCommand));
+            mainScheduler.addCommand(dynamic_cast<Command*>(&agitatorShootCommand));
         } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
             && !pressed)
         {
-            mainScheduler.addCommand(reinterpret_cast<Command*>(&agitatorShootCommand));
+            mainScheduler.addCommand(dynamic_cast<Command*>(&agitatorShootCommand));
         }
 
         pressed = Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP;
+
+        // 
+        if (sendMotorTimeout.execute())
+        {
+            mainScheduler.run();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        }
 
         modm::delayMicroseconds(10);
     }

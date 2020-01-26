@@ -21,12 +21,12 @@ ShootSteadyComprisedCommand::ShootSteadyComprisedCommand(
     agitatorUnjamCommand(agitator, maxUnjamAngle),
     unjamSequenceCommencing(false)
 {
-    this->addSubsystemRequirement(reinterpret_cast<Subsystem*>(agitator));
+    this->addSubsystemRequirement(dynamic_cast<Subsystem*>(agitator));
 }
 
 void ShootSteadyComprisedCommand::initialize()
 {
-    this->comprisedCommandScheduler.addCommand(reinterpret_cast<Command*>(&agitatorRotateCommand));
+    this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&agitatorRotateCommand));
     unjamSequenceCommencing = false;
 }
 
@@ -39,18 +39,18 @@ void ShootSteadyComprisedCommand::execute()
         // unscheduled.
         unjamSequenceCommencing = true;
         this->comprisedCommandScheduler.removeCommand(
-            reinterpret_cast<Command*>(&agitatorRotateCommand), true);
+            dynamic_cast<Command*>(&agitatorRotateCommand), true);
         this->comprisedCommandScheduler.addCommand(
-            reinterpret_cast<Command*>(&agitatorUnjamCommand));
+            dynamic_cast<Command*>(&agitatorUnjamCommand));
     }
 }
 
 void ShootSteadyComprisedCommand::end(bool interrupted)
 {
     this->comprisedCommandScheduler.removeCommand(
-        reinterpret_cast<Command*>(&agitatorUnjamCommand), interrupted);
+        dynamic_cast<Command*>(&agitatorUnjamCommand), interrupted);
     this->comprisedCommandScheduler.removeCommand(
-        reinterpret_cast<Command*>(&agitatorRotateCommand), interrupted);
+        dynamic_cast<Command*>(&agitatorRotateCommand), interrupted);
 }
 
 bool ShootSteadyComprisedCommand::isFinished() const

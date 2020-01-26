@@ -19,7 +19,7 @@ AgitatorUnjamCommand::AgitatorUnjamCommand(
     currAgitatorUnjamAngle(0),
     agitatorSetpointBeforeUnjam(0)
 {
-    this->addSubsystemRequirement(reinterpret_cast<aruwlib::control::Subsystem*>(agitator));
+    this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
     agitatorUnjamRotateTimeout.stop();
 }
 
@@ -97,6 +97,9 @@ void AgitatorUnjamCommand::execute()
 
 void AgitatorUnjamCommand::end(bool interrupted)
 {
+    if (interrupted) {
+        connectedAgitator->setAgitatorAngle(agitatorSetpointBeforeUnjam);
+    }
     connectedAgitator->setAgitatorAngle(agitatorSetpointBeforeUnjam);
 }
 

@@ -27,7 +27,7 @@ namespace agitator
         agitatorDesiredRotateTime(agitatorRotateTime),
         agitatorMinRotateTime(AGITATOR_MIN_ROTATE_TIME)
     {
-        this->addSubsystemRequirement(reinterpret_cast<aruwlib::control::Subsystem*>(agitator));
+        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
         connectedAgitator = agitator;
     }
 
