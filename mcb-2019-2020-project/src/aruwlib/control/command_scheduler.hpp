@@ -52,6 +52,8 @@ class CommandScheduler
 
     bool addCommand(Command* commandToAdd);
 
+    static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
+
  private:
     // maximum time before we start erroring, in seconds
     static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 0.5f;

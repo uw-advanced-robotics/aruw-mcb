@@ -24,6 +24,7 @@
 #include "src/aruwsrc/control/agitator/agitator_rotate_command.hpp"
 #include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_unjam_command.hpp"
+#include "src/aruwlib/control/controller_mapper.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
@@ -31,6 +32,7 @@ using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
 
+// main scheduler responsible for interfacing with user and cv input
 aruwlib::control::CommandScheduler mainScheduler(true);
 
 // define subsystems
@@ -45,6 +47,8 @@ ShootSteadyComprisedCommand agitatorShootCommand(
     aruwlib::algorithms::PI / 2.0f
 );
 
+using namespace aruwlib::sensors;
+
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -58,23 +62,27 @@ int main()
     Board::initialize();
 
     aruwlib::Remote::initialize();
-    
+
     Mpu6500::init();
 
+    // register subsystems here
     mainScheduler.registerSubsystem(&agitator17mm);
     mainScheduler.registerSubsystem(&frictionWheelSubsystem);
 
+    // set any default commands here
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
 
+    // define timers here
+    modm::ShortPeriodicTimer updateImuPeriod(2);
     modm::ShortPeriodicTimer sendMotorTimeout(2);
 
-    while (!agitator17mm.agitatorCalibrateHere())  // have a calibrate command
+    while (!agitator17mm.agitatorCalibrateHere())  // todo have a calibrate command
     {
         aruwlib::can::CanRxHandler::pollCanData();
         modm::delayMilliseconds(1);
     }
 
-    bool pressed = false;
+    // bool pressed = false;
 
     while (1)
     {
@@ -82,19 +90,22 @@ int main()
 
         Remote::read();
 
-        if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
-            && agitatorShootCommand.isFinished()
-        ) {
-            mainScheduler.addCommand(dynamic_cast<Command*>(&agitatorShootCommand));
-        } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
-            && !pressed)
+        // if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
+        //     && agitatorShootCommand.isFinished()
+        // ) {
+        //     mainScheduler.addCommand(dynamic_cast<Command*>(&agitatorShootCommand));
+        // } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
+        //     && !pressed)
+        // {
+        //     mainScheduler.addCommand(dynamic_cast<Command*>(&agitatorShootCommand));
+        // }
+        // pressed = Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP;
+
+        if (updateImuPeriod.execute())
         {
-            mainScheduler.addCommand(dynamic_cast<Command*>(&agitatorShootCommand));
+            Mpu6500::read();
         }
-
-        pressed = Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP;
-
-        // 
+        
         if (sendMotorTimeout.execute())
         {
             mainScheduler.run();
