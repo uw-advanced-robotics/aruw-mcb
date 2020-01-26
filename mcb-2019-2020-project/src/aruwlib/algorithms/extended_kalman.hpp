@@ -5,13 +5,12 @@
   * 
   * Example source:
   * 
-  * extKalman p;
-  * float SensorData;
-  * KalmanCreate(&p,20,200);
+  * float sensorData;
+  * float filtered;
+  * ExtendedKalman kalman(0.0f, 1.0f);
   * while(1)
   * {
-  *     SensorData = sensor();
-  *     SensorData = filterData(&p,SensorData);
+  *     filtered = kalman.filterData(sensorData);
   * }
   */
 

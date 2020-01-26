@@ -97,8 +97,8 @@ namespace chassis
     {
         return aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_VERTICAL)
-            + static_cast<float>(Remote::keyPressed(Remote::Key::W)
-            - Remote::keyPressed(Remote::Key::S)), -1.0f, 1.0f
+            + static_cast<float>(Remote::keyPressed(Remote::Key::W))
+            - static_cast<float>(Remote::keyPressed(Remote::Key::S)), -1.0f, 1.0f
         );
     }
 
@@ -106,8 +106,8 @@ namespace chassis
     {
         return aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_HORIZONTAL)
-            + static_cast<float>(Remote::keyPressed(Remote::Key::A)
-            - Remote::keyPressed(Remote::Key::D)), -1.0f, 1.0f
+            + static_cast<float>(Remote::keyPressed(Remote::Key::A))
+            - static_cast<float>(Remote::keyPressed(Remote::Key::D)), -1.0f, 1.0f
         );
     }
 
@@ -115,8 +115,8 @@ namespace chassis
     {
         return aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL)
-            + static_cast<float>(Remote::keyPressed(Remote::Key::Q)
-            - Remote::keyPressed(Remote::Key::E)), -1.0f, 1.0f
+            + static_cast<float>(Remote::keyPressed(Remote::Key::Q))
+            - static_cast<float>(Remote::keyPressed(Remote::Key::E)), -1.0f, 1.0f
         );
     }
 }  // namespace chassis
