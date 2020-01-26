@@ -6,26 +6,18 @@ namespace aruwsrc
 
 namespace agitator
 {
-    /**
-     * @param agitator the agitator associated with the rotate command
-     * @param agitatorAngleChange the desired rotation angle
-     * @param agitatorRotateTime the time it takes to rotate the agitator to the desired angle
-     *                           in milliseconds
-     * 
-     * @attention the ramp value is calculated by finding the rotation speed
-     *            (agitatorAngleChange / agitatorRotateTime), and then multiplying this by
-     *            the period (how often the ramp is called)
-     */
     AgitatorRotateCommand::AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float agitatorRotateTime) :
+        float agitatorRotateTime,
+        float agitatorPauseAfterRotateTime) :
         agitatorTargetChange(agitatorAngleChange),
         agitatorRotateSetpoint(
             AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime,
             AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime, 0),
         agitatorDesiredRotateTime(agitatorRotateTime),
-        agitatorMinRotateTime(AGITATOR_MIN_ROTATE_TIME)
+        agitatorMinRotatePeriod(agitatorRotateTime + agitatorPauseAfterRotateTime),
+        agitatorMinRotateTimeout(agitatorRotateTime + agitatorPauseAfterRotateTime)
     {
         this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
         connectedAgitator = agitator;
@@ -41,9 +33,9 @@ namespace agitator
         // we set the unjam timer to the larger of two values:
         // either the desired rotate time minimum rotate time
         connectedAgitator->armAgitatorUnjamTimer(
-            agitatorDesiredRotateTime > AGITATOR_MIN_ROTATE_TIME ?
-            agitatorDesiredRotateTime : AGITATOR_MIN_ROTATE_TIME);
-        agitatorMinRotateTime.restart(AGITATOR_MIN_ROTATE_TIME);
+            agitatorDesiredRotateTime > agitatorMinRotatePeriod ?
+            agitatorDesiredRotateTime : agitatorMinRotatePeriod);
+        agitatorMinRotateTimeout.restart(agitatorMinRotatePeriod);
     }
 
     void AgitatorRotateCommand::execute()
@@ -74,7 +66,7 @@ namespace agitator
             - connectedAgitator->getAgitatorDesiredAngle()))
             < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE)
             && agitatorRotateSetpoint.isTargetReached()
-            && agitatorMinRotateTime.isExpired();  // agitator min timeout finished
+            && agitatorMinRotateTimeout.isExpired();  // agitator min timeout finished
     }
 }  // namespace control
 

@@ -42,8 +42,9 @@ ExampleSubsystem frictionWheelSubsystem;
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
 ShootSteadyComprisedCommand agitatorShootCommand(
     &agitator17mm,
-    aruwlib::algorithms::PI / 5.0f, 300.0f,
-    aruwlib::algorithms::PI / 2.0f
+    aruwlib::algorithms::PI / 5.0f,
+    aruwlib::algorithms::PI / 2.0f,
+    300.0f, 300.0f
 );
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 

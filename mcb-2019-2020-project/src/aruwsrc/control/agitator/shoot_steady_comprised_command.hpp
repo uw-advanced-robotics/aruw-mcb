@@ -19,8 +19,9 @@ public:
     ShootSteadyComprisedCommand(
         AgitatorSubsystem* agitator,
         float agitatorChangeAngle,
-        float agitatorRotateTime,
-        float maxUnjamAngle
+        float maxUnjamAngle,
+        float agitatorDesiredRotateTime,
+        float minAgitatorRotateTime
     );
 
     void initialize(void);

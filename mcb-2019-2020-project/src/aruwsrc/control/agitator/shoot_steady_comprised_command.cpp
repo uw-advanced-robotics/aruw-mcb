@@ -14,10 +14,16 @@ namespace agitator
 ShootSteadyComprisedCommand::ShootSteadyComprisedCommand(
     AgitatorSubsystem* agitator,
     float agitatorChangeAngle,
-    float agitatorRotateTime,
-    float maxUnjamAngle) :
+    float maxUnjamAngle,
+    float agitatorDesiredRotateTime,
+    float minAgitatorRotateTime) :
     connectedAgitator(agitator),
-    agitatorRotateCommand(agitator, agitatorChangeAngle, agitatorRotateTime),
+    agitatorRotateCommand(
+        agitator,
+        agitatorChangeAngle,
+        agitatorDesiredRotateTime,
+        minAgitatorRotateTime
+    ),
     agitatorUnjamCommand(agitator, maxUnjamAngle),
     unjamSequenceCommencing(false)
 {

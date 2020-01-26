@@ -16,12 +16,21 @@ namespace agitator
 class AgitatorRotateCommand : public aruwlib::control::Command
 {
  public:
-    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 300;
-
+    /**
+     * @param agitator the agitator associated with the rotate command
+     * @param agitatorAngleChange the desired rotation angle
+     * @param agitatorRotateTime the time it takes to rotate the agitator to the desired angle
+     *                           in milliseconds
+     * 
+     * @attention the ramp value is calculated by finding the rotation speed
+     *            (agitatorAngleChange / agitatorRotateTime), and then multiplying this by
+     *            the period (how often the ramp is called)
+     */
     AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float agitatorRotateTime
+        float agitatorRotateTime,
+        float agitatorPauseAfterRotateTime
     );
 
     void initialize();
@@ -47,7 +56,9 @@ class AgitatorRotateCommand : public aruwlib::control::Command
     // time you want the agitator to take to rotate to the desired angle, in milliseconds
     float agitatorDesiredRotateTime;
 
-    modm::ShortTimeout agitatorMinRotateTime;
+    float agitatorMinRotatePeriod;
+
+    modm::ShortTimeout agitatorMinRotateTimeout;
 };
 
 }  // namespace control
