@@ -22,6 +22,8 @@ aruwlib::control::CommandScheduler mainScheduler(true);
 aruwsrc::control::ExampleComprisedCommand testComprisedCommand(&testSubsystem);
 // aruwsrc::control::ExampleComprisedCommand test2(&testSubsystem);
 
+aruwsrc::control::BlinkLEDCommand blinkCommand(&testSubsystem);
+
 using namespace aruwlib::sensors;
 
 int main()
@@ -43,9 +45,6 @@ int main()
     // mainScheduler.addCommand(&testDefaultCommand);
     mainScheduler.addCommand(&testComprisedCommand);
 
-    modm::SmartPointer blinkCommand(
-        new aruwsrc::control::BlinkLEDCommand(&testSubsystem));
-
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
@@ -55,7 +54,7 @@ int main()
 
     IoMapper::addToggleMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
-        blinkCommand
+        &blinkCommand
     );
 
     while (1)
