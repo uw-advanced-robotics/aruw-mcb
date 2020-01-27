@@ -14,7 +14,6 @@ namespace aruwlib
 
 namespace control
 {
-    int size = 0;
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
     bool CommandScheduler::addCommand(Command* commandToAdd)
@@ -22,7 +21,6 @@ namespace control
         bool commandAdded = false;
 
         const set<Subsystem*>& commandRequirements = commandToAdd->getRequirements();
-        size = commandRequirements.size();
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd

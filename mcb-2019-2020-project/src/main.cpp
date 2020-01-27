@@ -44,12 +44,7 @@ ExampleSubsystem frictionWheelSubsystem;
 /* define commands ----------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
-// ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
-
-#include "src/aruwsrc/control/agitator/agitator_rotate_command.hpp"
-AgitatorRotateCommand agitatorShootSlowCommand(&agitator17mm, PI / 5, 100, 100);
-
-
+ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 #endif
 
@@ -99,24 +94,8 @@ int main()
     );
     #endif
 
-    bool pressed = false;
-
     while (1)
     {
-        // if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
-        //     && agitatorShootSlowCommand.isFinished()
-        // ) {
-        //     mainScheduler.addCommand(dynamic_cast<Command*>(&agitatorShootSlowCommand));
-        // } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
-        //     && !pressed)
-        // {
-        //     mainScheduler.addCommand(dynamic_cast<Command*>(&agitatorShootSlowCommand));
-        // }
-
-        // pressed = Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP;
-
-
-
         can::CanRxHandler::pollCanData();
 
         Remote::read();
