@@ -41,7 +41,6 @@ void IoMapper::handleKeyStateChange(uint16_t key,
                     }
                     break;
                 case HOLD_REPEAT:  // spam add the command
-                    mainScheduler.addCommand(mi->command);
                     if (!mainScheduler.isCommandScheduled(mi->command)) {
                         mainScheduler.addCommand(mi->command);
                     }
