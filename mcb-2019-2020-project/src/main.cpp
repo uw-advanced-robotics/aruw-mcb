@@ -2,6 +2,7 @@
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 #include <modm/processing/timer.hpp>
+#include "main.hpp"
 
 /* communication includes ---------------------------------------------------*/
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
@@ -47,7 +48,7 @@ ExampleSubsystem frictionWheelSubsystem;
 
 /* define commands ----------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
+ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
