@@ -25,8 +25,11 @@
 #include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
+#include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
 
 using namespace aruwsrc::agitator;
+using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
@@ -38,6 +41,7 @@ aruwlib::control::CommandScheduler mainScheduler(true);
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 AgitatorSubsystem agitator17mm;
+ChassisSubsystem soldierChassis;
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
@@ -46,6 +50,7 @@ ExampleSubsystem frictionWheelSubsystem;
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
+ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #endif
 
 using namespace aruwlib::sensors;
@@ -64,17 +69,19 @@ int main()
 
     aruwlib::Remote::initialize();
 
-    Mpu6500::init();
+    refSerial.initialize();
 
     /* register subsystems here ---------------------------------------------*/
     #if defined(TARGET_SOLDIER)
     mainScheduler.registerSubsystem(&agitator17mm);
     mainScheduler.registerSubsystem(&frictionWheelSubsystem);
+    mainScheduler.registerSubsystem(&soldierChassis);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
+    soldierChassis.setDefaultCommand(&chassisDriveCommand);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
