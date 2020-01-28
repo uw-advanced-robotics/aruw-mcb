@@ -53,10 +53,10 @@ namespace sensors {
         uint8_t Mpu6500InitData[7][2] = {
             {MPU6500_PWR_MGMT_1, 0x03},      // Auto selects Clock Source
             {MPU6500_PWR_MGMT_2, 0x00},      // all enable
-            {MPU6500_CONFIG, 0x02},          // gyro bandwidth 0x00:250Hz 0x04:20Hz
+            {MPU6500_CONFIG, 0x00},          // gyro bandwidth 0x00:250Hz 0x04:20Hz
             {MPU6500_GYRO_CONFIG, 0x18},     // gyro range 0x10:+-1000dps 0x18:+-2000dps
             {MPU6500_ACCEL_CONFIG, 0x10},    // acc range 0x10:+-8G
-            {MPU6500_ACCEL_CONFIG_2, 0x00},  // acc bandwidth 0x00:250Hz 0x04:20Hz
+            {MPU6500_ACCEL_CONFIG_2, 0x07},  // 1.13 Khz bandwidth    acc bandwidth 0x00:250Hz 0x04:20Hz
             {MPU6500_USER_CTRL, 0x20},       // Enable the I2C Master I/F module
                                              // pins ES_DA and ES_SCL are isolated from
                                              // pins SDA/SDI and SCL/SCLK.
@@ -67,14 +67,12 @@ namespace sensors {
             mpuWriteReg(Mpu6500InitData[i][0], Mpu6500InitData[i][1]);
             modm::delayMilliseconds(1);
         }
-
-        caliFlagHandler();
     }
 
     // parse imu data from data buffer
     void Mpu6500::read() {
-        if (imuInitialized) {
-        mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
+        if (imuInitialized && !imuCaliFlags.accCalcFlag && !imuCaliFlags.gyroCalcFlag) {
+            mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
             mpu6500Data.ax = (mpu6500RxBuff[0] << 8 | mpu6500RxBuff[1]) - mpu6500Data.ax_offset;
             mpu6500Data.ay = (mpu6500RxBuff[2] << 8 | mpu6500RxBuff[3]) - mpu6500Data.ay_offset;
             mpu6500Data.az = (mpu6500RxBuff[4] << 8 | mpu6500RxBuff[5]) - mpu6500Data.az_offset;
@@ -85,7 +83,7 @@ namespace sensors {
 
             Mpu6500::calcImuAttitude(&mpu6500Data.imuAtti);
         } else {
-            // NON-FATAL-ERROR-CHECK
+            caliFlagHandler();
         }
     }
 
@@ -205,37 +203,62 @@ namespace sensors {
 
     // calibrate gyro offset values
     void Mpu6500::getMpuGyroOffset() {
-        for (int i = 0; i < MPU6500_OFFSET_SAMPLES; i++) {
+        if (gyroOffsetSampleNumber == 0) {
+            mpu6500Data.gx_offset = 0;
+            mpu6500Data.gy_offset = 0;
+            mpu6500Data.gz_offset = 0;
+        }
+        if (gyroOffsetSampleNumber < MPU6500_OFFSET_SAMPLES) {
             mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
             mpu6500Data.gx_offset += (mpu6500RxBuff[8] << 8) | mpu6500RxBuff[9];
             mpu6500Data.gy_offset += (mpu6500RxBuff[10] << 8) | mpu6500RxBuff[11];
             mpu6500Data.gz_offset += (mpu6500RxBuff[12] << 8) | mpu6500RxBuff[13];
-            modm::delayMilliseconds(2);
+            gyroOffsetSampleNumber++;
+        } else {
+            gyroOffsetSampleNumber = 0;
+            mpu6500Data.gx_offset /= MPU6500_OFFSET_SAMPLES;
+            mpu6500Data.gy_offset /= MPU6500_OFFSET_SAMPLES;
+            mpu6500Data.gz_offset /= MPU6500_OFFSET_SAMPLES;
+
+            // todo test this
+            mpuWriteReg(MPU6500_XG_OFFSET_H, mpu6500Data.gx_offset << 8);
+            mpuWriteReg(MPU6500_XG_OFFSET_L, mpu6500Data.gx_offset & 0xF);
+            mpuWriteReg(MPU6500_YG_OFFSET_H, mpu6500Data.gy_offset << 8);
+            mpuWriteReg(MPU6500_YG_OFFSET_L, mpu6500Data.gy_offset & 0xF);
+            mpuWriteReg(MPU6500_ZG_OFFSET_H, mpu6500Data.gz_offset << 8);
+            mpuWriteReg(MPU6500_ZG_OFFSET_L, mpu6500Data.gz_offset & 0xF);
+
+            mpu6500Data.gx_offset = 0;
+            mpu6500Data.gy_offset = 0;
+            mpu6500Data.gz_offset = 0;
+
+            imuCaliFlags.gyroCalcFlag = 0;
+            imuCaliFlags.gyroCalcFlag = false;
         }
-
-        mpu6500Data.gx_offset /= MPU6500_OFFSET_SAMPLES;
-        mpu6500Data.gy_offset /= MPU6500_OFFSET_SAMPLES;
-        mpu6500Data.gz_offset /= MPU6500_OFFSET_SAMPLES;
-
-        imuCaliFlags.gyroCalcFlag = false;
     }
 
     // calibrate accelerometer offset values
     // possbie magic number for az: -4096
     void Mpu6500::getMpuAccOffset() {
-        for (int i = 0; i < MPU6500_OFFSET_SAMPLES; i++) {
+        if (accOffsetSampleNumber == 0) {
+            mpu6500Data.ax_offset = 0;
+            mpu6500Data.ay_offset = 0;
+            mpu6500Data.az_offset = 0;            
+        }
+        if (accOffsetSampleNumber < MPU6500_OFFSET_SAMPLES) {
             mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
             mpu6500Data.ax_offset += (mpu6500RxBuff[0] << 8) | mpu6500RxBuff[1];
             mpu6500Data.ay_offset += (mpu6500RxBuff[2] << 8) | mpu6500RxBuff[3];
             mpu6500Data.az_offset += (mpu6500RxBuff[4] << 8) | mpu6500RxBuff[5];
-            modm::delayMilliseconds(2);
+
+            accOffsetSampleNumber++;
+        } else {
+            accOffsetSampleNumber = 0;
+            mpu6500Data.ax_offset /= MPU6500_OFFSET_SAMPLES;
+            mpu6500Data.ay_offset /= MPU6500_OFFSET_SAMPLES;
+            mpu6500Data.az_offset /= MPU6500_OFFSET_SAMPLES;
+            imuCaliFlags.accCalcFlag = false;
         }
-
-        mpu6500Data.ax_offset /= MPU6500_OFFSET_SAMPLES;
-        mpu6500Data.ay_offset /= MPU6500_OFFSET_SAMPLES;
-        mpu6500Data.az_offset /= MPU6500_OFFSET_SAMPLES;
-
-        imuCaliFlags.accCalcFlag = false;
     }
 
     // calibrates the imu only when we have flags

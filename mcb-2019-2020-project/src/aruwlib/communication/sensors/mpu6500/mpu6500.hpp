@@ -85,8 +85,12 @@ class  Mpu6500 {
 
     typedef struct {
         bool gyroCalcFlag = true;
-        bool accCalcFlag = true;
+        bool accCalcFlag = false;  // true;
     } mpu_cali_t;
+
+    static uint16_t accOffsetSampleNumber;
+
+    static uint16_t gyroOffsetSampleNumber;
 
     static MahonyAhrs arhsAlgorithm;
 
