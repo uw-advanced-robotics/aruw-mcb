@@ -25,11 +25,6 @@ namespace chassis
         updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, rightBackRpm);
     }
 
-float currentMultiplier = 0.0f;
-float chassisCurrent = 0.0f;
-float eq1 = 0.0f;
-float eq2 = 0.0f;
-
     float ChassisSubsystem::currentControl()
     {
         // max allowed power is 80 W, Battery is 24V. Max current allowed is 80/24
@@ -48,30 +43,26 @@ float eq2 = 0.0f;
         // constants, or something else
 
         
-        chassisCurrent = refSerial.getRobotData().chassis.current / 1000.0f;
+        float chassisCurrent = refSerial.getRobotData().chassis.current / 1000.0f;
 
         if (chassisCurrent < 0.00001f) {
             chassisCurrent = 5.0f;
         }
 
-        eq1 = log10f(80.0f / 24.0f * chassisCurrent);
-        eq2 = log10f(powf((80.0f /24.0f ), 2.0f));
-
-        currentMultiplier = -(log10f(80.0f / 24.0f * chassisCurrent) / log10f(powf((80.0f /24.0f ), 2.0f))) + 1.5f;
+        float currentMultiplier = -(log10f(80.0f / 24.0f * chassisCurrent) / log10f(powf((80.0f /24.0f ), 2.0f))) + 1.5f;
 
         if(currentMultiplier > 1.0f)
         {
             currentMultiplier = 1.0f;
         }
 
-        //add lower limit:
+        // add lower limit:
         if(currentMultiplier < 0.0f)
         {
             currentMultiplier = 0.0f;
         }
 
         return currentMultiplier;
-
     }
 
     void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)

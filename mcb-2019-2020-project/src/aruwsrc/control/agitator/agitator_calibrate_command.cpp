@@ -23,7 +23,12 @@ namespace agitator
     }
 
     void AgitatorCalibrateCommand::end(bool interrupted)
-    {}
+    {
+        if (interrupted)
+        {
+            agitator->agitatorCalibrateHere();
+        }
+    }
 
     bool AgitatorCalibrateCommand::isFinished() const
     {

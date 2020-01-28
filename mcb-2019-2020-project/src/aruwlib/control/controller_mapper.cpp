@@ -1,6 +1,7 @@
 #include "controller_mapper.hpp"
+#include "src/main.hpp"
 
-extern aruwlib::control::CommandScheduler mainScheduler;  // todo test this
+extern aruwlib::control::CommandScheduler mainScheduler;
 
 namespace aruwlib {
 

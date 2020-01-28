@@ -36,6 +36,8 @@ using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
 
+aruwlib::serial::RefSerial refSerial;
+
 /* main scheduler responsible for interfacing with user and cv input --------*/
 aruwlib::control::CommandScheduler mainScheduler(true);
 
@@ -53,8 +55,6 @@ ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #endif
-
-using namespace aruwlib::sensors;
 
 int main()
 {
