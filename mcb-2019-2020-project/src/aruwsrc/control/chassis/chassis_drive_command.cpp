@@ -17,25 +17,8 @@ void ChassisDriveCommand::execute()
         * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
     // what we will multiply x and y speed by to take into account rotation
-    float rTranslationalGain = 1.0f;
-
-    // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
-    // power consumption when the wheel rotation speed for chassis rotationis greater than the
-    // MIN_ROTATION_THRESHOLD
-    if (fabs(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
-    {
-        // power(max revolve speed - specified revolve speed, 2)
-        // / power(max revolve speed, 2)
-        rTranslationalGain =
-            pow(
-                static_cast<double>(
-                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD
-                - fabs(chassisRotationDesiredWheelspeed)
-                / ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR),
-                2.0
-            );
-        rTranslationalGain = aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
-    }
+    float rTranslationalGain
+        = chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
 
     float chassisXDesiredWheelspeed =
         aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisX(),

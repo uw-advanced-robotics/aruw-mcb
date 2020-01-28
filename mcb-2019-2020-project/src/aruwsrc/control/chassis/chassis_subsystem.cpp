@@ -145,12 +145,39 @@ float eq2 = 0.0f;
         return wheelRotationSpeed;
     }
 
+    float ChassisSubsystem::calculateRotationTranslationalGain(
+        float chassisRotationDesiredWheelspeed
+    ) {
+        // what we will multiply x and y speed by to take into account rotation
+        float rTranslationalGain = 1.0f;
+
+        // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
+        // power consumption when the wheel rotation speed for chassis rotationis greater than the
+        // MIN_ROTATION_THRESHOLD
+        if (fabs(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
+        {
+            // power(max revolve speed - specified revolve speed, 2)
+            // / power(max revolve speed, 2)
+            rTranslationalGain =
+                pow(
+                    static_cast<double>(
+                    ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD
+                    - fabs(chassisRotationDesiredWheelspeed)
+                    / ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR),
+                    2.0
+                );
+            rTranslationalGain
+                = aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
+        }
+        return rTranslationalGain;
+    }
+
     float ChassisSubsystem::getChassisX()
     {
         return aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_VERTICAL)
-            + static_cast<float>(Remote::keyPressed(Remote::Key::W)
-            - Remote::keyPressed(Remote::Key::S)), -1.0f, 1.0f
+            + static_cast<float>(Remote::keyPressed(Remote::Key::W))
+            - static_cast<float>(Remote::keyPressed(Remote::Key::S)), -1.0f, 1.0f
         );
     }
 
@@ -158,8 +185,8 @@ float eq2 = 0.0f;
     {
         return aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_HORIZONTAL)
-            + static_cast<float>(Remote::keyPressed(Remote::Key::A)
-            - Remote::keyPressed(Remote::Key::D)), -1.0f, 1.0f
+            + static_cast<float>(Remote::keyPressed(Remote::Key::A))
+            - static_cast<float>(Remote::keyPressed(Remote::Key::D)), -1.0f, 1.0f
         );
     }
 
@@ -167,8 +194,8 @@ float eq2 = 0.0f;
     {
         return aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL)
-            + static_cast<float>(Remote::keyPressed(Remote::Key::Q)
-            - Remote::keyPressed(Remote::Key::E)), -1.0f, 1.0f
+            + static_cast<float>(Remote::keyPressed(Remote::Key::Q))
+            - static_cast<float>(Remote::keyPressed(Remote::Key::E)), -1.0f, 1.0f
         );
     }
 }  // namespace chassis
