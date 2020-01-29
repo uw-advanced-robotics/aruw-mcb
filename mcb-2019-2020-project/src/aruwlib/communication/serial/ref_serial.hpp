@@ -1,6 +1,7 @@
 #ifndef __REF_SERIAL_HPP__
 #define __REF_SERIAL_HPP__
 
+#include <modm/container/deque.hpp>
 #include <rm-dev-board-a/board.hpp>
 #include "dji_serial.hpp"
 
@@ -101,14 +102,6 @@ class RefSerial : public DJISerial
         uint32_t timestampMs;   // time when damage was received (in milliseconds)
     } DamageEvent;
 
-    typedef struct
-    {
-        // circular array containing all occurrences of when damage was received in the last second
-        DamageEvent damageEvents[REF_DAMAGE_EVENT_SIZE];
-        uint8_t head;  // head index of circular array
-        uint8_t tail;  // tail index of circular array
-    } DamageTracker;
-
     typedef enum
     {
         AMMO_17 = 1,  // 17 mm projectile ammo
@@ -201,7 +194,8 @@ class RefSerial : public DJISerial
         bool bool6;
     } DisplayData;
 
-    typedef struct{
+    typedef struct
+    {
         uint16_t type;
         uint16_t senderId;
         uint16_t recipientId;
@@ -225,7 +219,7 @@ class RefSerial : public DJISerial
  private:
     RobotData robotData;
     GameData gameData;
-    DamageTracker receivedDpsTracker;
+    modm::BoundedDeque<DamageEvent, REF_DAMAGE_EVENT_SIZE> receivedDpsTracker;
 
     void sendCustomData(const CustomData& customData);
 
@@ -246,9 +240,9 @@ class RefSerial : public DJISerial
      * @param RobotId the id of the robot received from the referee system to get the client_id of
      * @return the client_id of the robot requested
      */
-    uint16_t getRobotClientID(RobotId RobotId);
+    uint16_t getRobotClientID(RobotId robotId);
 
-    static float decodeTofloat(const uint8_t* start_byte);
+    static float decodeTofloat(const uint8_t* startByte);
     bool decodeToGameStatus(const SerialMessage& message);
     bool decodeToGameResult(const SerialMessage& message);
     bool decodeToAllRobotHP(const SerialMessage& message);

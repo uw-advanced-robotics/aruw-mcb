@@ -62,6 +62,7 @@ void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
         case REF_MESSAGE_TYPE_SENTINEL_DRONE_BULLETS_REMAIN:
         {
             decodeToSentinelDroneBulletsRemain(completeMessage);
+            break;
         }
         default :
             // THROW-NON-FATAL-ERROR-CHECK
@@ -185,40 +186,38 @@ uint8_t RefSerial::packBoolMask(
         static_cast<uint8_t>(bool6) << 5;  // bits 6 and 7 are reserved by the ref system
 }
 
-uint16_t RefSerial::getRobotClientID(RobotId RobotId)
+uint16_t RefSerial::getRobotClientID(RobotId robotId)
 {
     // there are no client_id for sentinel robots because there are no ui display for them
-    if (RobotId == RED_SENTINEL || RobotId == BLUE_SENTINEL)
+    if (robotId == RED_SENTINEL || robotId == BLUE_SENTINEL)
     {
         return 0;
     }
-    uint16_t retval = 0x100;
-    if (RobotId > 10)
-    {  // if RobotId is a blue robot
-        retval += 6;
+    uint16_t convertedRobotId = 0x100;
+    if (robotId > 10)
+    {  // if robotId is a blue robot
+        convertedRobotId += 6;
     }
-    return retval + (uint16_t) RobotId;
+    return convertedRobotId + (uint16_t) robotId;
 }
 
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 const RefSerial::RobotData& RefSerial::getRobotData() const
 {
     return robotData;
 }
 
-// cppcheck-suppress unusedFunction //TODO Remove lint suppression
 const RefSerial::GameData& RefSerial::getGameData() const
 {
     return gameData;
 }
 
-float RefSerial::decodeTofloat(const uint8_t* start_byte)
+float RefSerial::decodeTofloat(const uint8_t* startByte)
 {
     uint32_t unsigned_value = (
-        start_byte[3] << 24)
-        | (start_byte[2] << 16)
-        | (start_byte[1] << 8)
-        | start_byte[0];
+        startByte[3] << 24)
+        | (startByte[2] << 16)
+        | (startByte[1] << 8)
+        | startByte[0];
     return reinterpret_cast<float&>(unsigned_value);
 }
 
@@ -379,26 +378,18 @@ void RefSerial::processReceivedDamage(uint32_t timestamp, int32_t damageTaken)
 {
     if (damageTaken > 0)
     {
-        // create a new received_damage_event with the damage_taken, and current time
-        DamageEvent damageToken = {
+        // create a new DamageEvent with the damage_taken, and current time
+        DamageEvent damageEvent = {
             static_cast<uint16_t>(damageTaken),
             timestamp
         };
 
-        // add the recently received damage to the end of the circular array
-        receivedDpsTracker.damageEvents[receivedDpsTracker.tail] = damageToken;
-
-        // increment tail of circular array
-        receivedDpsTracker.tail =
-            (receivedDpsTracker.tail + 1) % REF_DAMAGE_EVENT_SIZE;
-
-        // increment the head of the circular array if the tail has overwritten the original head
-        if (receivedDpsTracker.tail == receivedDpsTracker.head)
-        {
-            receivedDpsTracker.head =
-                (receivedDpsTracker.head + 1) % REF_DAMAGE_EVENT_SIZE;
+        if (receivedDpsTracker.getSize() == REF_DAMAGE_EVENT_SIZE) {
+            receivedDpsTracker.removeBack();
         }
         robotData.receivedDps += damageTaken;
+
+        receivedDpsTracker.append(damageEvent);
     }
 }
 
@@ -406,16 +397,13 @@ void RefSerial::updateReceivedDamage()
 {
     // if current damage at head of circular array occurred more than a second ago,
     // decrease receivedDps by that amount of damage and increment head index
-    while (modm::Clock::now().getTime() -
-        receivedDpsTracker.damageEvents
-            [receivedDpsTracker.head].timestampMs > 1000
-        && receivedDpsTracker.head != receivedDpsTracker.tail
+    while (
+        receivedDpsTracker.getSize() > 0
+        && modm::Clock::now().getTime() -
+        receivedDpsTracker.getFront().timestampMs > 1000
     ) {
-        robotData.receivedDps -=
-            receivedDpsTracker.damageEvents[receivedDpsTracker.head].damageAmount;
-        // increment head of circular array
-        receivedDpsTracker.head =
-            (receivedDpsTracker.head + 1) % REF_DAMAGE_EVENT_SIZE;
+        robotData.receivedDps -= receivedDpsTracker.getFront().damageAmount;
+        receivedDpsTracker.removeFront();
     }
 }
 

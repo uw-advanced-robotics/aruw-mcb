@@ -13,6 +13,7 @@
 /* math includes ------------------------------------------------------------*/
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+#include "src/aruwlib/communication/serial/ref_serial.hpp"
 
 /* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
