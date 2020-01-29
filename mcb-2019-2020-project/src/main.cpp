@@ -23,8 +23,8 @@ using namespace aruwsrc::control;
 using namespace aruwlib::algorithms;
 using namespace aruwlib;
 
-AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
-ExampleSubsystem frictionWheelSubsystem;
+AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Hero1);
+// ExampleSubsystem frictionWheelSubsystem;
 
 bool pressed = true;
 
@@ -47,11 +47,11 @@ int main()
     //Mpu6500::init();
 
     // adding agitator for testing
-    modm::SmartPointer spinFrictionWheelCommand(new ExampleCommand(&frictionWheelSubsystem));
-    frictionWheelSubsystem.setDefaultCommand(spinFrictionWheelCommand);
+    // modm::SmartPointer spinFrictionWheelCommand(new ExampleCommand(&frictionWheelSubsystem));
+    // frictionWheelSubsystem.setDefaultCommand(spinFrictionWheelCommand);
 
     aruwlib::control::CommandScheduler::registerSubsystem(&agitator17mm);
-    CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
+    // CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
 
     modm::ShortPeriodicTimer t(2);
 
@@ -62,10 +62,10 @@ int main()
     }
 
     // modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
-    // modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5));
+    // modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2));
     modm::SmartPointer shootCommand(new ShootSteadyComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, 300, aruwlib::algorithms::PI / 2));
 
-    // CommandScheduler::addComprisedCommand(shootCommand);
+    CommandScheduler::addComprisedCommand(shootCommand);
     // CommandScheduler::removeComprisedCommand(shootCommand, false);
     // CommandScheduler::addComprisedCommand(shootCommand);
     // CommandScheduler::addComprisedCommand(shootCommand);

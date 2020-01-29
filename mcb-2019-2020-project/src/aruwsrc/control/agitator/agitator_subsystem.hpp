@@ -62,9 +62,9 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
 
     /// \todo tune all the things
     // pid terms for hero agitator 1
-    const float PID_HERO1_P = 300000.0f;
-    const float PID_HERO1_I = 0.0f;
-    const float PID_HERO1_D = 0.0f;
+    const float PID_HERO1_P = 1500.0f;
+    const float PID_HERO1_I = 500.0f;
+    const float PID_HERO1_D = 7000.0f;
     const float PID_HERO1_MAX_ERR_SUM = 0.0f;
 
     // pid terms for hero agitator 2

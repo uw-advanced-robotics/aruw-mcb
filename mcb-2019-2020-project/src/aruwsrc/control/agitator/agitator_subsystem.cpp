@@ -37,7 +37,7 @@ namespace agitator
                 break;
         }
         agitatorPositionPid.setParameter(*param);
-        delete param;   /// \todo make sure this works
+        delete param;
         agitatorJammedTimeout.stop();
     }
 

@@ -16,7 +16,7 @@ namespace agitator
 class AgitatorRotateCommand : public aruwlib::control::Command
 {
  public:
-    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 300;
+    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 1000;
 
     AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
