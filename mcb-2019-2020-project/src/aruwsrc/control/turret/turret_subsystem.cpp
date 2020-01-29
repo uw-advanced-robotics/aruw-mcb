@@ -11,25 +11,31 @@ namespace aruwsrc
 
 namespace control
 {
-    const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR1;
-    const aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR2;
-    aruwsrc::control::TurretManualCommand turretManualCommand;
     //aruwsrc::control::TurretCVCommand turretCVCommand;
 
+    TurretSubsystem::TurretSubsystem() {
+        turretStatus = IDLE;
+        modm::SmartPointer turretManualCommand(
+        new aruwsrc::control::TurretManualCommand(this));
+        *pitchMotor = aruwlib::motor::DjiMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true);
+        *yawMotor = aruwlib::motor::DjiMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, false);
+        setDefaultCommand(modm::SmartPointer(turretManualCommand));
+    }
+
     void TurretSubsystem::pitchMotorToDegree(uint32_t degrees) {
-        goToDegree(&pitchMotor, degrees);
+        goToDegree(pitchMotor, degrees);
     }
 
     void TurretSubsystem::yawMotorToDegree(uint32_t degrees) {
-        goToDegree(&yawMotor, degrees);
+        goToDegree(yawMotor, degrees);
     }
 
     void TurretSubsystem::incPitchMotorByDegree(int32_t degrees) {
-        incByDegree(&pitchMotor, degrees);
+        incByDegree(pitchMotor, degrees);
     }
 
     void TurretSubsystem::incYawMotorByDegree(int32_t degrees) {
-        incByDegree(&yawMotor, degrees);
+        incByDegree(yawMotor, degrees);
     }
 
     void TurretSubsystem::refresh() {
@@ -47,12 +53,11 @@ namespace control
     }
 
     void TurretSubsystem::updateTurretVals() {
-        pitchMotor.setDesiredOutput(clamp<uint16_t>(pitchMotor.getOutputDesired(), -TURRET_ROTATION_BOUNDS, TURRET_ROTATION_BOUNDS));
-        yawMotor.setDesiredOutput(clamp<uint16_t>(yawMotor.getOutputDesired(), -TURRET_ROTATION_BOUNDS, TURRET_ROTATION_BOUNDS));
-        pitchMotor.setDesiredOutput(pitchMotor.getOutputDesired() - pitchMotor.encStore.getEncoderUnwrapped());
-        yawMotor.setDesiredOutput(yawMotor.getOutputDesired() - yawMotor.encStore.getEncoderUnwrapped());
+        pitchMotor->setDesiredOutput(clamp<uint16_t>(pitchMotor->getOutputDesired(), -TURRET_ROTATION_BOUNDS, TURRET_ROTATION_BOUNDS));
+        yawMotor->setDesiredOutput(clamp<uint16_t>(yawMotor->getOutputDesired(), -TURRET_ROTATION_BOUNDS, TURRET_ROTATION_BOUNDS));
+        pitchMotor->setDesiredOutput(pitchMotor->getOutputDesired() - pitchMotor->encStore.getEncoderUnwrapped());
+        yawMotor->setDesiredOutput(yawMotor->getOutputDesired() - yawMotor->encStore.getEncoderUnwrapped());
     }
-
 }  // control
 
 }  // aruwsrc

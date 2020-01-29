@@ -3,7 +3,7 @@
 
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/command.hpp"
-#include "src/aruwsrc/control/turret_subsystem.hpp"
+#include "turret_subsystem.hpp"
 
 namespace aruwsrc
 {

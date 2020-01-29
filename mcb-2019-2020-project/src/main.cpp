@@ -3,17 +3,19 @@
 #include <modm/processing/timer.hpp>
 
 #include "src/aruwlib/control/controller_mapper.hpp"
-#include "src/aruwsrc/control/blink_led_command.hpp"
+#include "src/aruwsrc/control/example/blink_led_command.hpp"
 #include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
 #include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwsrc/control/example_command.hpp"
-#include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwsrc/control/example/example_command.hpp"
+#include "src/aruwsrc/control/example/example_subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
 
 aruwsrc::control::ExampleSubsystem testSubsystem;
+aruwsrc::control::TurretSubsystem turretSubsystem;
 
 using namespace aruwlib::sensors;
 
@@ -36,6 +38,8 @@ int main()
         new aruwsrc::control::ExampleCommand(&testSubsystem));
 
     CommandScheduler::registerSubsystem(&testSubsystem);
+
+    CommandScheduler::registerSubsystem(&turretSubsystem);
 
     modm::SmartPointer blinkCommand(
         new aruwsrc::control::BlinkLEDCommand(&testSubsystem));
