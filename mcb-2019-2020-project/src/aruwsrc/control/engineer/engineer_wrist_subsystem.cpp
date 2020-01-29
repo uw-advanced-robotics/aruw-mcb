@@ -10,7 +10,8 @@ namespace control
         rightMotor(RIGHT_MOTOR_ID, CAN_BUS_MOTORS, false),
         leftPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        desiredWristAngle(0.0f),
+        desiredWristAngleLeft(0.0f),
+        desiredWristAngleRight(0.0f),
         wristCalibratedAngleLeft(0.0f),
         wristCalibratedAngleRight(0.0f),
         wristIsCalibrated(false)
@@ -21,9 +22,14 @@ namespace control
         wristRunPositionPid();
     }
 
-    void EngineerWristSubsystem::setWristAngle(float newAngle)
+    void EngineerWristSubsystem::setWristAngleLeft(float newAngle)
     {
-        desiredWristAngle = newAngle;
+        desiredWristAngleLeft = newAngle;
+    }
+
+    void EngineerWristSubsystem::setWristAngleRight(float newAngle)
+    {
+        desiredWristAngleRight = newAngle;
     }
 
     float EngineerWristSubsystem::getWristAngleLeft(void) const
@@ -44,9 +50,14 @@ namespace control
         return getUncalibratedWristAngleRight() - wristCalibratedAngleRight;
     }
 
-    float EngineerWristSubsystem::getWristDesiredAngle(void) const
+    float EngineerWristSubsystem::getWristDesiredAngleLeft(void) const
     {
-        return desiredWristAngle;
+        return desiredWristAngleLeft;
+    }
+
+    float EngineerWristSubsystem::getWristDesiredAngleRight(void) const
+    {
+        return desiredWristAngleRight;
     }
 
     bool EngineerWristSubsystem::wristCalibrateHere(void)
@@ -69,8 +80,8 @@ namespace control
             rightPositionPid.reset();
             return;
         }
-        leftPositionPid.update(desiredWristAngle - getWristAngleLeft());
-        rightPositionPid.update(desiredWristAngle - getWristAngleRight());
+        leftPositionPid.update(desiredWristAngleLeft - getWristAngleLeft());
+        rightPositionPid.update(desiredWristAngleRight - getWristAngleRight());
         leftMotor.setDesiredOutput(leftPositionPid.getValue());
         rightMotor.setDesiredOutput(rightPositionPid.getValue());
     }

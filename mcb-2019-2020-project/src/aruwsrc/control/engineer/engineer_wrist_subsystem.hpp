@@ -22,13 +22,17 @@ class EngineerWristSubsystem : public Subsystem
     
     void refresh(void);
 
-    void setWristAngle(float newAngle);
+    void setWristAngleLeft(float newAngle);
+
+    void setWristAngleRight(float newAngle);
 
     float getWristAngleLeft() const;
 
     float getWristAngleRight() const;
 
-    float getWristDesiredAngle(void) const;
+    float getWristDesiredAngleLeft(void) const;
+
+    float getWristDesiredAngleRight(void) const;
 
     bool wristCalibrateHere(void);
 
@@ -53,7 +57,8 @@ class EngineerWristSubsystem : public Subsystem
    modm::Pid<float> rightPositionPid;
 
    // Desired angle in radian, unwrapped
-   float desiredWristAngle;
+   float desiredWristAngleLeft;
+   float desiredWristAngleRight;
 
    // Angle the wrist is initially calibrated to as a zero reference point
    float wristCalibratedAngleLeft;
