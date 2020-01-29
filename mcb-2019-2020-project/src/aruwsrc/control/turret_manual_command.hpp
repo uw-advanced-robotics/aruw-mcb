@@ -3,7 +3,9 @@
 
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/command.hpp"
-#include "src/aruwsrc/control/turret_subsystem.hpp"
+//#include "src/aruwsrc/control/turret_subsystem.hpp"
+
+using namespace aruwlib::control;
 
 namespace aruwsrc
 {
@@ -11,38 +13,37 @@ namespace aruwsrc
 namespace control
 {
 
+class TurretSubsystem;
+
 class TurretManualCommand : public Command {
  public:
-    explicit TurretManualCommand(void) {
-        addSubsystemRequirement(&TurretSubsystem);
-    }
+    explicit TurretManualCommand(TurretSubsystem *turret = nullptr);
 
-    void initialize() {
-        TurretSubsystem.turretStatus = TurretSubsystem.CV;
-    }
+    void initialize(void);
 
-    void execute() {
-        updateTurretPosition();
-    }
+    void execute(void);
 
-    void end(bool interrupted) {
-        if (interrupted) {
-            // print error message
-        }
-        TurretSubsystem.turretStatus = TurretSubsystem.IDLE;
-    }
+    void end(bool interrupted);
 
-    bool isFinished() {
-        return TurretSubsystem.turretStatus != TurretSubsystem.CV;
-    }
+    bool isFinished(void) const;
 
  private:
-    modm::Pid<float> manualYawPid;
-    modm::Pid<float> manualPitchPid;
+    uint16_t YAW_P = 0.0f;
+    uint16_t YAW_I = 0.0f;
+    uint16_t YAW_D = 0.0f;
 
-    TurretSubsystem TurretSubsystem;
+    uint16_t PITCH_P = 0.0f;
+    uint16_t PITCH_I = 0.0f;
+    uint16_t PITCH_D = 0.0f;
 
-    void updateTurretPosition();
+    uint16_t remoteControlScaler = 0.5;
+
+    modm::Pid<float>::Parameter *manualYawPid;
+    modm::Pid<float>::Parameter *manualPitchPid;
+
+    TurretSubsystem *turretSubsystem;
+
+    void updateTurretPosition(void);
 };
 
 }  // control

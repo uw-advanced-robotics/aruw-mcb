@@ -51,13 +51,13 @@ class TurretCVCommand : public Command {
     modm::Pid<float> cvYawPid;
     modm::Pid<float> cvPitchPid;
 
-    TurretSubsystem TurretSubsystem;
+    static TurretSubsystem TurretSubsystem;
 
     void updateTurretPosition();
 
     ScaleCurve getScaleCurve();
 
-    void followScaleCurve(aruwlib::motor::DjiMotor motor, ScaleCurve* curve, uint32_t timestamp);
+    void followScaleCurve(aruwlib::motor::DjiMotor *motor, ScaleCurve *curve, uint32_t timestamp);
 };
 
 }  // control
