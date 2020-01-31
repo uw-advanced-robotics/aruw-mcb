@@ -1,6 +1,5 @@
 #include "turret_manual_command.hpp"
 #include "src/aruwlib/communication/remote.hpp"
-#include "turret_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -12,8 +11,8 @@ TurretManualCommand::TurretManualCommand(TurretSubsystem* subsystem) : Command()
         turretSubsystem(subsystem)
 {
     addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
-    manualPitchPid = new modm::Pid<float>::Parameter(PITCH_P, PITCH_I, PITCH_D);
-    manualYawPid = new modm::Pid<float>::Parameter(YAW_P, YAW_I, YAW_D);
+    manualPitchPid = new modm::Pid<float>::Parameter(PITCH_P, PITCH_I, PITCH_D, PITCH_MAX_ERROR_SUM, PITCH_MAX_OUTPUT);
+    manualYawPid = new modm::Pid<float>::Parameter(YAW_P, YAW_I, YAW_D, YAW_MAX_ERROR_SUM, YAW_MAX_OUTPUT);
 }
 
 void TurretManualCommand::execute() {
@@ -38,8 +37,8 @@ bool TurretManualCommand::isFinished() const {
 }
 
 void TurretManualCommand::updateTurretPosition() {
-    turretSubsystem->incPitchMotorByDegree(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL) * remoteControlScaler);
-    turretSubsystem->incYawMotorByDegree(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL) * remoteControlScaler);
+    turretSubsystem->incPitchMotorByDegree(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL));
+    turretSubsystem->incYawMotorByDegree(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL));
 }
 
 }  // control
