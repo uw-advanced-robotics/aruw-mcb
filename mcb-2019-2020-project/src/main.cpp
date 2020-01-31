@@ -25,6 +25,7 @@
 #include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
+#include "src/aruwsrc/control/agitator/hero_shoot_sensor_comprised_command.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
@@ -37,8 +38,11 @@ aruwlib::control::CommandScheduler mainScheduler(true);
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-AgitatorSubsystem agitator17mm;
+AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
 ExampleSubsystem frictionWheelSubsystem;
+#elif defined(TARGET_HERO)
+AgitatorSubsystem waterWheel(AgitatorSubsystem::AgitatorType::Hero1);
+AgitatorSubsystem pusher(AgitatorSubsystem::AgitatorType::Hero2);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -46,6 +50,14 @@ ExampleSubsystem frictionWheelSubsystem;
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
+#elif defined(TARGET_HERO)
+HeroShootSensorComprisedCommand heroShootSensorCommand(&waterWheel,
+    &pusher,
+    aruwlib::algorithms::PI / 5.0f,
+    2 * aruwlib::algorithms::PI,
+    aruwlib::algorithms::PI / 2.0f,
+    100.0f, 100.f, 150.f);
+AgitatorCalibrateCommand calibrateWWCommand(&waterWheel);
 #endif
 
 using namespace aruwlib::sensors;
@@ -70,6 +82,9 @@ int main()
     #if defined(TARGET_SOLDIER)
     mainScheduler.registerSubsystem(&agitator17mm);
     mainScheduler.registerSubsystem(&frictionWheelSubsystem);
+    #elif defined(TARGET_HERO)
+    mainScheduler.registerSubsystem(&waterWheel);
+    mainScheduler.registerSubsystem(&pusher);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
@@ -80,6 +95,8 @@ int main()
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     mainScheduler.addCommand(&agitatorCalibrateCommand);
+    #elif defined(TARGET_HERO)
+    mainScheduler.addCommand(&calibrateWWCommand);
     #endif
 
     /* define timers here ---------------------------------------------------*/
