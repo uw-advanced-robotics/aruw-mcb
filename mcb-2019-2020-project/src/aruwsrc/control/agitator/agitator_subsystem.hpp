@@ -68,9 +68,9 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     const float PID_HERO1_MAX_ERR_SUM = 0.0f;
 
     // pid terms for hero agitator 2
-    const float PID_HERO2_P = 300000.0f;
-    const float PID_HERO2_I = 0.0f;
-    const float PID_HERO2_D = 0.0f;
+    const float PID_HERO2_P = 1500.0f;
+    const float PID_HERO2_I = 500.0f;
+    const float PID_HERO2_D = 7000.0f;
     const float PID_HERO2_MAX_ERR_SUM = 0.0f;
 
     const aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
