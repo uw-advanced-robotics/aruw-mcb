@@ -9,7 +9,7 @@ namespace control
     ExampleCommand::ExampleCommand(ExampleSubsystem* subsystem)
         : Command(), subsystemExample(subsystem)
     {
-        addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
+        addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
     }
 
     void ExampleCommand::initialize()

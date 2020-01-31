@@ -56,7 +56,6 @@ namespace motor
         this->encw = encStore.getEncoderWrapped();
     }
 
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     void DjiMotor::setDesiredOutput(int32_t desiredOutput)
     {
         int16_t desOutputNotInverted = static_cast<int16_t>(aruwlib::algorithms::limitVal<int32_t>
@@ -91,25 +90,21 @@ namespace motor
         return motorIdentifier;
     }
 
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int8_t DjiMotor::getTemperature() const
     {
         return temperature;
     }
 
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t DjiMotor::getTorque() const
     {
         return torque;
     }
 
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t DjiMotor::getShaftRPM() const
     {
         return shaftRPM;
     }
 
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t DjiMotor::getCurrentActual() const
     {
         return motorInverted;
@@ -120,7 +115,6 @@ namespace motor
         return motorCanBus;
     }
 
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int32_t DjiMotor::EncoderStore::getEncoderUnwrapped() const
     {
         int32_t unwrappedNotInverted = encoderWrapped + ENC_RESOLUTION * encoderRevolutions;
@@ -133,7 +127,6 @@ namespace motor
             (2 * initialEncValue - unwrappedNotInverted) : unwrappedNotInverted;
     }
 
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     int16_t DjiMotor::EncoderStore::getEncoderWrapped() const
     {
         if (!encStoreInverted) {

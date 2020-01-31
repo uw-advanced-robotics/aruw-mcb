@@ -22,12 +22,13 @@ namespace control
             commandRequirements.find(requirement) == commandRequirements.end()
         ) {
             commandRequirements.insert(requirement);
+            this->comprisedCommandScheduler.registerSubsystem(requirement);
         }
     }
 
-    const set<Subsystem*>* Command::getRequirements()
+    const set<Subsystem*>& Command::getRequirements()
     {
-        return &commandRequirements;
+        return commandRequirements;
     }
 
 }  // namespace control

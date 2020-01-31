@@ -1,32 +1,52 @@
 #include <rm-dev-board-a/board.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
+#include <modm/processing/timer.hpp>
 
+/* communication includes ---------------------------------------------------*/
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwsrc/control/example_command.hpp"
-#include "src/aruwsrc/control/example_subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
-#include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "src/aruwsrc/control/agitator/agitator_rotate_command.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
-#include <modm/processing/timer.hpp>
-#include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
-#include "src/aruwsrc/control/agitator/agitator_unjam_command.hpp"
-#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/remote.hpp"
+
+/* math includes ------------------------------------------------------------*/
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+
+/* aruwlib control includes -------------------------------------------------*/
+#include "src/aruwlib/control/command_scheduler.hpp"
+#include "src/aruwlib/control/controller_mapper.hpp"
+
+/* aruwsrc control includes -------------------------------------------------*/
+#include "src/aruwsrc/control/example_command.hpp"
+#include "src/aruwsrc/control/example_comprised_command.hpp"
+#include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
+#include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
+#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
 using namespace aruwlib::algorithms;
+using namespace aruwlib::sensors;
 using namespace aruwlib;
 
-AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Hero1);
-// ExampleSubsystem frictionWheelSubsystem;
+/* main scheduler responsible for interfacing with user and cv input --------*/
+aruwlib::control::CommandScheduler mainScheduler(true);
 
-bool pressed = true;
+/* define subsystems --------------------------------------------------------*/
+#if defined(TARGET_SOLDIER)
+AgitatorSubsystem agitator17mm;
+ExampleSubsystem frictionWheelSubsystem;
+#endif
+
+/* define commands ----------------------------------------------------------*/
+#if defined(TARGET_SOLDIER)
+aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
+ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
+AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
+#endif
 
 using namespace aruwlib::sensors;
 
@@ -43,33 +63,36 @@ int main()
     Board::initialize();
 
     aruwlib::Remote::initialize();
-    
-    //Mpu6500::init();
 
-    // adding agitator for testing
-    // modm::SmartPointer spinFrictionWheelCommand(new ExampleCommand(&frictionWheelSubsystem));
-    // frictionWheelSubsystem.setDefaultCommand(spinFrictionWheelCommand);
+    Mpu6500::init();
 
-    aruwlib::control::CommandScheduler::registerSubsystem(&agitator17mm);
-    // CommandScheduler::registerSubsystem(&frictionWheelSubsystem);
+    /* register subsystems here ---------------------------------------------*/
+    #if defined(TARGET_SOLDIER)
+    mainScheduler.registerSubsystem(&agitator17mm);
+    mainScheduler.registerSubsystem(&frictionWheelSubsystem);
+    #endif
 
-    modm::ShortPeriodicTimer t(2);
+    /* set any default commands to subsystems here --------------------------*/
+    #if defined(TARGET_SOLDIER)
+    frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
+    #endif
 
-    while (!agitator17mm.agitatorCalibrateHere())
-    {
-        aruwlib::can::CanRxHandler::pollCanData();
-        modm::delayMilliseconds(1);
-    }
+    /* add any starting commands to the scheduler here ----------------------*/
+    #if defined(TARGET_SOLDIER)
+    mainScheduler.addCommand(&agitatorCalibrateCommand);
+    #endif
 
-    // modm::SmartPointer unjamCommand(new AgitatorUnjamCommand(&agitator17mm, aruwlib::algorithms::PI));
-    // modm::SmartPointer rotateCommand(new AgitatorRotateCommand(&agitator17mm, aruwlib::algorithms::PI / 5, aruwlib::algorithms::PI / 2));
-    modm::SmartPointer shootCommand(new ShootSteadyComprisedCommand(&agitator17mm, aruwlib::algorithms::PI / 5, 300, aruwlib::algorithms::PI / 2));
+    /* define timers here ---------------------------------------------------*/
+    modm::ShortPeriodicTimer updateImuPeriod(2);
+    modm::ShortPeriodicTimer sendMotorTimeout(2);
 
-    CommandScheduler::addComprisedCommand(shootCommand);
-    // CommandScheduler::removeComprisedCommand(shootCommand, false);
-    // CommandScheduler::addComprisedCommand(shootCommand);
-    // CommandScheduler::addComprisedCommand(shootCommand);
-    // CommandScheduler::addCommand(spinFrictionWheelCommand);
+    /* register io mappings here --------------------------------------------*/
+    #if defined(TARGET_SOLDIER)
+    IoMapper::addHoldRepeatMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        &agitatorShootSlowCommand
+    );
+    #endif
 
     while (1)
     {
@@ -77,27 +100,15 @@ int main()
 
         Remote::read();
 
-        if (Remote::getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP
-            && CommandScheduler::smrtPtrCommandCast(shootCommand)->isFinished())
+        if (updateImuPeriod.execute())
         {
-            // control::CommandScheduler::addCommand(rotateCommand);
-            control::CommandScheduler::addComprisedCommand(shootCommand);
-        } else if (Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP
-            && !pressed)
-        {
-                        // control::CommandScheduler::addCommand(rotateCommand);
-
-            control::CommandScheduler::addComprisedCommand(shootCommand);
+            Mpu6500::read();
         }
-
-        pressed = Remote::getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::UP;
-
-        // run scheduler
-        if (t.execute())
+        
+        if (sendMotorTimeout.execute())
         {
-            t.restart(2);
-            control::CommandScheduler::run();
-            motor::DjiMotorTxHandler::processCanSendData();
+            mainScheduler.run();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
         modm::delayMicroseconds(10);

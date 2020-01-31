@@ -16,40 +16,29 @@ namespace agitator
 class AgitatorRotateCommand : public aruwlib::control::Command
 {
  public:
-    static const uint32_t AGITATOR_MIN_ROTATE_TIME = 1000;
-
+    /**
+     * @param agitator the agitator associated with the rotate command
+     * @param agitatorAngleChange the desired rotation angle
+     * @param agitatorRotateTime the time it takes to rotate the agitator to the desired angle
+     *                           in milliseconds
+     * 
+     * @attention the ramp value is calculated by finding the rotation speed
+     *            (agitatorAngleChange / agitatorRotateTime), and then multiplying this by
+     *            the period (how often the ramp is called)
+     */
     AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float agitatorRotateTime
+        float agitatorRotateTime,
+        float agitatorPauseAfterRotateTime
     );
 
-    /**
-     * The initial subroutine of a command.  Called once when the command is
-     * initially scheduled.
-     */
     void initialize();
 
-    /**
-     * The main body of a command.  Called repeatedly while the command is
-     * scheduled.
-     */
     void execute();
 
-    /**
-     * The action to take when the command ends.  Called when either the command
-     * finishes normally, or when it interrupted/canceled.
-     *
-     * @param interrupted whether the command was interrupted/canceled
-     */
     void end(bool interrupted);
 
-    /**
-     * Whether the command has finished.  Once a command finishes, the scheduler
-     * will call its end() method and un-schedule it.
-     *
-     * @return whether the command has finished.
-     */
     bool isFinished() const;
 
  private:
@@ -67,7 +56,9 @@ class AgitatorRotateCommand : public aruwlib::control::Command
     // time you want the agitator to take to rotate to the desired angle, in milliseconds
     float agitatorDesiredRotateTime;
 
-    modm::ShortTimeout agitatorMinRotateTime;
+    float agitatorMinRotatePeriod;
+
+    modm::ShortTimeout agitatorMinRotateTimeout;
 };
 
 }  // namespace control

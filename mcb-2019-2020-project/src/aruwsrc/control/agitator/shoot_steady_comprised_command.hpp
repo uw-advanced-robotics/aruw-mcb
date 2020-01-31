@@ -3,8 +3,9 @@
 
 #include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
-#include "src/aruwlib/control/comprised_command.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include "agitator_rotate_command.hpp"
+#include "agitator_unjam_command.hpp"
 
 namespace aruwsrc
 {
@@ -12,42 +13,23 @@ namespace aruwsrc
 namespace agitator
 {
 
-class ShootSteadyComprisedCommand : public aruwlib::control::ComprisedCommand
+class ShootComprisedCommand : public aruwlib::control::Command
 {
 public:
-    ShootSteadyComprisedCommand(
+    ShootComprisedCommand(
         AgitatorSubsystem* agitator,
         float agitatorChangeAngle,
-        float agitatorRotateTime,
-        float maxUnjamAngle
+        float maxUnjamAngle,
+        float agitatorDesiredRotateTime,
+        float minAgitatorRotateTime
     );
 
-    /**
-     * The initial subroutine of a command.  Called once when the command is
-     * initially scheduled.
-     */
     void initialize(void);
 
-    /**
-     * The main body of a command.  Called repeatedly while the command is
-     * scheduled.
-     */
     void execute(void);
 
-    /**
-     * The action to take when the command ends.  Called when either the command
-     * finishes normally, or when it interrupted/canceled.
-     *
-     * @param interrupted whether the command was interrupted/canceled
-     */
     void end(bool interrupted);
 
-    /**
-     * Whether the command has finished.  Once a command finishes, the scheduler
-     * will call its end() method and un-schedule it.
-     *
-     * @return whether the command has finished.
-     */
     bool isFinished(void) const;
     
 private:
@@ -55,9 +37,9 @@ private:
 
     AgitatorSubsystem* connectedAgitator; 
 
-    modm::SmartPointer agitatorRotateCommand;
+    AgitatorRotateCommand agitatorRotateCommand;
 
-    modm::SmartPointer agitatorUnjamCommand;
+    AgitatorUnjamCommand agitatorUnjamCommand;
 
     bool unjamSequenceCommencing;
 };
