@@ -71,8 +71,8 @@ bool HeroShootSensorComprisedCommand::isFinished() const
     return ((wwRotateCommand.isFinished()
         && !unjamSequenceCommencing)
         || (unjamWWCommand.isFinished()
-        && unjamSequenceCommencing)
-        && pusherRotateCommand.isFinished());
+        && unjamSequenceCommencing))
+        && pusherRotateCommand.isFinished();
 }
 
 }  // namespace control
