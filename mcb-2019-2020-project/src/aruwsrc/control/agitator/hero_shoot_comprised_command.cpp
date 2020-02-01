@@ -26,6 +26,7 @@ HeroShootComprisedCommand::HeroShootComprisedCommand(
     wwRotateCommand(
         waterWheel,
         agitatorChangeAngle,
+        maxUnjamAngle,
         agitatorDesiredRotateTime,
         minAgitatorRotateTime
     ),
@@ -35,7 +36,6 @@ HeroShootComprisedCommand::HeroShootComprisedCommand(
         pusherDesiredRotateTime,
         minAgitatorRotateTime
     ),
-    unjamWWCommand(waterWheel, maxUnjamAngle),
     useSensorInput(useSensorInput)
 {
     this->addSubsystemRequirement(dynamic_cast<Subsystem*>(waterWheel));
@@ -50,14 +50,6 @@ void HeroShootComprisedCommand::initialize()
     // if (ball is loaded || !useSensorInput) {
         this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&pusherRotateCommand));
     // }
-    if (connectedAgitator1->isAgitatorJammed() && !unjamSequenceCommencing)
-    {
-        unjamSequenceCommencing = true;
-        this->comprisedCommandScheduler.removeCommand(
-            dynamic_cast<Command*>(&wwRotateCommand), true);
-        this->comprisedCommandScheduler.addCommand(
-            dynamic_cast<Command*>(&unjamWWCommand));
-    }
 }
 
 void HeroShootComprisedCommand::execute()
@@ -68,8 +60,6 @@ void HeroShootComprisedCommand::execute()
 void HeroShootComprisedCommand::end(bool interrupted)
 {
     this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&unjamWWCommand), interrupted);
-    this->comprisedCommandScheduler.removeCommand(
         dynamic_cast<Command*>(&wwRotateCommand), interrupted);
     this->comprisedCommandScheduler.removeCommand(
         dynamic_cast<Command*>(&pusherRotateCommand), interrupted);
@@ -77,12 +67,7 @@ void HeroShootComprisedCommand::end(bool interrupted)
 
 bool HeroShootComprisedCommand::isFinished() const
 {
-    /// \todo make an actual condition for finishing
-    return ((wwRotateCommand.isFinished()
-        && !unjamSequenceCommencing)
-        || (unjamWWCommand.isFinished()
-        && unjamSequenceCommencing))
-        && pusherRotateCommand.isFinished();
+    return wwRotateCommand.isFinished() && pusherRotateCommand.isFinished();
 }
 
 }  // namespace control

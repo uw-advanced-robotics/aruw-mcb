@@ -6,6 +6,7 @@
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "agitator_rotate_command.hpp"
 #include "agitator_unjam_command.hpp"
+#include "shoot_steady_comprised_command.hpp"
 
 namespace aruwsrc
 {
@@ -42,12 +43,9 @@ private:
     AgitatorSubsystem* connectedAgitator1;
     AgitatorSubsystem* connectedAgitator2;
 
-    AgitatorRotateCommand wwRotateCommand;
+    ShootComprisedCommand wwRotateCommand;
     AgitatorRotateCommand pusherRotateCommand;
 
-    AgitatorUnjamCommand unjamWWCommand;
-
-    bool unjamSequenceCommencing;
     bool useSensorInput;
 };
 
