@@ -35,6 +35,10 @@ namespace agitator
                 param = new modm::Pid<float>::Parameter(PID_HERO2_P, PID_HERO2_I, PID_HERO2_D,
                                                             PID_HERO2_MAX_ERR_SUM, PID_MAX_OUT);
                 break;
+            case AgitatorType::Engi1:
+                param = new modm::Pid<float>::Parameter(PID_ENGI1_P, PID_ENGI1_I, PID_ENGI1_D, 
+                                                            PID_ENGI1_MAX_ERR_SUM, PID_MAX_OUT);
+                break;
         }
         agitatorPositionPid.setParameter(*param);
         delete param;

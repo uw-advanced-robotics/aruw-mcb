@@ -41,11 +41,19 @@ AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
+#if defined(TARGET_ENGINEER)
+AgitatorSubsystem reservoir17mm(AgitatorSubsystem::AgitatorType::Engi1);
+#endif
+
 /* define commands ----------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
+#endif
+
+#if defined(TARGET_ENGINEER)
+AgitatorCalibrateCommand agitatorCalibrateCommand(&reservoir17mm);
 #endif
 
 using namespace aruwlib::sensors;
