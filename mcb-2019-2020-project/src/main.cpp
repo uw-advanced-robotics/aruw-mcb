@@ -37,7 +37,7 @@ aruwlib::control::CommandScheduler mainScheduler(true);
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-AgitatorSubsystem agitator17mm;
+AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
