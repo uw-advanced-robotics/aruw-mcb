@@ -17,9 +17,11 @@
 #define __SCHEDULER_HPP__
 
 #include <map>
+#include <modm/container/linked_list.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include <rm-dev-board-a/board.hpp>
-#include "command.hpp"
+
+#include "subsystem.hpp"
 
 namespace aruwlib
 {
@@ -30,30 +32,40 @@ namespace control
 class CommandScheduler
 {
  public:
-    static void run(void);
+    CommandScheduler(bool isMainScheduler = false) :
+    subsystemToCommandMap(),
+    isMainScheduler(isMainScheduler) {}
 
-    static void removeCommand(modm::SmartPointer command, bool interrupted);
+    void runCommands();
 
-    static bool registerSubsystem(Subsystem* subsystem);
+    void run();
 
-    static bool isSubsystemRegistered(Subsystem* subsystem);
+    void removeCommand(Command* command, bool interrupted);
 
-    static bool isSubsystemRegistered(const Subsystem* subsystem);
+    bool registerSubsystem(Subsystem* subsystem);
 
-    static bool isCommandScheduled(modm::SmartPointer command);
+    bool isSubsystemRegistered(Subsystem* subsystem);
 
-    static bool addCommand(modm::SmartPointer commandToAdd);
+    bool isSubsystemRegistered(const Subsystem* subsystem);
 
-    static const modm::SmartPointer defaultNullCommand;
+    bool isCommandScheduled(Command* command);
+
+    bool addCommand(Command* commandToAdd);
+
+    static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
 
  private:
-    static const float MAX_ALLOWABLE_SCHEDULER_RUNTIME;
+    // maximum time before we start erroring, in seconds
+    static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 0.5f;
 
-    static std::map<Subsystem*, modm::SmartPointer> subsystemToCommandMap;
+    // a map containing keys of subsystems, pairs of Commands and ComprisedCommands
+    // the command comes first, the ComprisedCommand second 
+ public:
+    std::map<Subsystem*, Command*> subsystemToCommandMap;
 
     static uint32_t commandSchedulerTimestamp;
 
-    static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
+    bool isMainScheduler;
 };
 
 }  // namespace control

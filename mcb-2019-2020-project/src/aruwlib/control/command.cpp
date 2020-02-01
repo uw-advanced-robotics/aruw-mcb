@@ -8,6 +8,7 @@ namespace aruwlib
 
 namespace control
 {
+    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     bool Command::hasRequirement(Subsystem* requirement) const
     {
         return commandRequirements.find(requirement) != commandRequirements.end();
@@ -21,13 +22,15 @@ namespace control
             commandRequirements.find(requirement) == commandRequirements.end()
         ) {
             commandRequirements.insert(requirement);
+            this->comprisedCommandScheduler.registerSubsystem(requirement);
         }
     }
 
-    const set<Subsystem*>* Command::getRequirements()
+    const set<Subsystem*>& Command::getRequirements()
     {
-        return &commandRequirements;
+        return commandRequirements;
     }
+
 }  // namespace control
 
 }  // namespace aruwlib

@@ -1,19 +1,43 @@
 #include <rm-dev-board-a/board.hpp>
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
+#include <modm/processing/timer.hpp>
 
+/* communication includes ---------------------------------------------------*/
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwsrc/control/example_command.hpp"
-#include "src/aruwsrc/control/example_subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
-#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
-#include "src/aruwsrc/control/engineer/engineer_17mm_reservoir_subsystem.hpp"
-#include "src/aruwsrc/control/engineer/engineer_17mm_reservoir_rotate_command.hpp"
+#include "src/aruwlib/communication/remote.hpp"
 
-aruwsrc::control::Engineer17mmReservoirSubsystem engineer17mmReservoir;
+/* math includes ------------------------------------------------------------*/
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+
+/* aruwlib control includes -------------------------------------------------*/
+#include "src/aruwlib/control/command_scheduler.hpp"
+#include "src/aruwlib/control/controller_mapper.hpp"
+
+/* aruwsrc control includes -------------------------------------------------*/
+#include "src/aruwsrc/control/example_command.hpp"
+#include "src/aruwsrc/control/example_comprised_command.hpp"
+#include "src/aruwsrc/control/example_subsystem.hpp"
+using namespace aruwlib;
+
+/* main scheduler responsible for interfacing with user and cv input --------*/
+aruwlib::control::CommandScheduler mainScheduler(true);
+
+/* define subsystems --------------------------------------------------------*/
+#if defined(TARGET_SOLDIER)
+AgitatorSubsystem agitator17mm;
+ExampleSubsystem frictionWheelSubsystem;
+#endif
+
+/* define commands ----------------------------------------------------------*/
+#if defined(TARGET_SOLDIER)
+aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
+ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
+AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
+#endif
 
 using namespace aruwlib::sensors;
 using namespace aruwsrc::control;
@@ -23,61 +47,58 @@ int main()
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
     contiguousFloatTest.testCore();
     contiguousFloatTest.testBadBounds();
-    contiguousFloatTest.testDifference();
     contiguousFloatTest.testRotationBounds();
     contiguousFloatTest.testShiftingValue();
     contiguousFloatTest.testWrapping();
 
     Board::initialize();
 
-    //Mpu6500::init();
+    aruwlib::Remote::initialize();
 
-    // reservoir rotate testing
-    aruwlib::control::CommandScheduler::registerSubsystem(&engineer17mmReservoir);
+    Mpu6500::init();
 
-    while (!engineer17mmReservoir.reservoirCalibrateHere())
-    {
-        aruwlib::can::CanRxHandler::pollCanData();
-        modm::delayMilliseconds(1);
-    }
+    /* register subsystems here ---------------------------------------------*/
+    #if defined(TARGET_SOLDIER)
+    mainScheduler.registerSubsystem(&agitator17mm);
+    mainScheduler.registerSubsystem(&frictionWheelSubsystem);
+    #endif
 
-    // rotate in 3rds taking one second for a rotation segment
-    modm::SmartPointer rotateCommand(new Engineer17mmReservoirRotateCommand(&engineer17mmReservoir, 2.0f * aruwlib::algorithms::PI / 3, 1000.0f));
+    /* set any default commands to subsystems here --------------------------*/
+    #if defined(TARGET_SOLDIER)
+    frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
+    #endif
 
-    //engineer17mmReservoir.setDefaultCommand(rotateCommand);
+    /* add any starting commands to the scheduler here ----------------------*/
+    #if defined(TARGET_SOLDIER)
+    mainScheduler.addCommand(&agitatorCalibrateCommand);
+    #endif
 
-    CommandScheduler::addCommand(rotateCommand);
-
-    //modm::SmartPointer testDefaultCommand(
-    //    new aruwsrc::control::ExampleCommand(&testSubsystem));
-
-    //testSubsystem.setDefaultCommand(testDefaultCommand);
-
-    //CommandScheduler::registerSubsystem(&testSubsystem);
-
-    // timers
-    // arbitrary, taken from last year since this send time doesn't overfill
-    // can bus
-    modm::ShortPeriodicTimer motorSendPeriod(3);
-    // update imu
+    /* define timers here ---------------------------------------------------*/
     modm::ShortPeriodicTimer updateImuPeriod(2);
+    modm::ShortPeriodicTimer sendMotorTimeout(2);
+
+    /* register io mappings here --------------------------------------------*/
+    #if defined(TARGET_SOLDIER)
+    IoMapper::addHoldRepeatMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        &agitatorShootSlowCommand
+    );
+    #endif
 
     while (1)
     {
-        // do this as fast as you can
-        aruwlib::can::CanRxHandler::pollCanData();
+        can::CanRxHandler::pollCanData();
 
-        /*
+        Remote::read();
+
         if (updateImuPeriod.execute())
         {
             Mpu6500::read();
         }
-        */
-
-        if (motorSendPeriod.execute())
+        
+        if (sendMotorTimeout.execute())
         {
-            motorSendPeriod.restart(3);
-            aruwlib::control::CommandScheduler::run();
+            mainScheduler.run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

@@ -1,13 +1,9 @@
-/**
- * This code is part of aruw's repository
- * 
- * Example code for a default command for the subsystem-example subsystem.
- */
+#ifndef __BLINK_LED_COMMAND_HPP__
+#define __BLINK_LED_COMMAND_HPP__
 
-#ifndef __COMMAND_EXAMPLE_HPP__
-#define __COMMAND_EXAMPLE_HPP__
-
+#include <modm/processing/timer/timeout.hpp>
 #include "src/aruwlib/control/command.hpp"
+#include "example_subsystem.hpp"
 
 using namespace aruwlib::control;
 
@@ -17,12 +13,10 @@ namespace aruwsrc
 namespace control
 {
 
-class ExampleSubsystem;
-
-class ExampleCommand : public Command
+class BlinkLEDCommand : public Command
 {
  public:
-    explicit ExampleCommand(ExampleSubsystem* subsystem);
+    explicit BlinkLEDCommand(aruwsrc::control::ExampleSubsystem* subsystem);
 
     /**
       * The initial subroutine of a command.  Called once when the command is
@@ -54,13 +48,23 @@ class ExampleCommand : public Command
 
     void interrupted(void);
 
- private:
-    static const int16_t DEFAULT_WHEEL_RPM = 6000;
+    /**
+      * Whether the given command should run when the robot is disabled.  Override
+      * to return true if the command should run when disabled.
+      *
+      * @return whether the command should run when the robot is disabled
+      */
+    bool runsWhenDisabled(void);
 
-    ExampleSubsystem* subsystemExample;
+    modm::ShortTimeout completedTimer;
+
+    int refershCounter = 0;
+    int endCounter = 0;
+    int startCounter = 0;
 };
 
 }  // namespace control
 
 }  // namespace aruwsrc
+
 #endif
