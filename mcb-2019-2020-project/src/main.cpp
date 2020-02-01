@@ -25,7 +25,7 @@
 #include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
-#include "src/aruwsrc/control/agitator/hero_shoot_sensor_comprised_command.hpp"
+#include "src/aruwsrc/control/agitator/hero_shoot_comprised_command.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
@@ -51,12 +51,19 @@ aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsyste
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 #elif defined(TARGET_HERO)
-HeroShootSensorComprisedCommand heroShootSensorCommand(&waterWheel,
+/// \todo tune these values later
+HeroShootComprisedCommand heroShootSensorCommand(&waterWheel,
     &pusher,
     aruwlib::algorithms::PI / 5.0f,
     2 * aruwlib::algorithms::PI,
     aruwlib::algorithms::PI / 2.0f,
-    100.0f, 100.f, 150.f);
+    100.0f, 100.f, 150.f, true);
+HeroShootComprisedCommand heroShootSimpleCommand(&waterWheel,
+    &pusher,
+    aruwlib::algorithms::PI / 5.0f,
+    2 * aruwlib::algorithms::PI,
+    aruwlib::algorithms::PI / 2.0f,
+    100.0f, 500.f, 150.f, false);
 AgitatorCalibrateCommand calibrateWWCommand(&waterWheel);
 #endif
 

@@ -1,5 +1,5 @@
-#ifndef __HERO_SENSOR_SHOOT_COMPRISED_COMMAND_HPP__
-#define __HERO_SENSOR_SHOOT_COMPRISED_COMMAND_HPP__
+#ifndef __HERO_SHOOT_COMPRISED_COMMAND_HPP__
+#define __HERO_SHOOT_COMPRISED_COMMAND_HPP__
 
 #include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
@@ -13,18 +13,19 @@ namespace aruwsrc
 namespace agitator
 {
 
-class HeroShootSensorComprisedCommand : public aruwlib::control::Command
+class HeroShootComprisedCommand : public aruwlib::control::Command
 {
 public:
-    HeroShootSensorComprisedCommand(
+    HeroShootComprisedCommand(
         AgitatorSubsystem* waterWheel,
         AgitatorSubsystem* pusher,
         float agitatorChangeAngle,
         float pusherChangeAngle,
         float maxUnjamAngle,
         float agitatorDesiredRotateTime,
-        float pusherRotateTime,
-        float minAgitatorRotateTime
+        float pusherDesiredRotateTime,
+        float minAgitatorRotateTime,
+        bool useSensorInput
     );
 
     void initialize(void);
@@ -47,6 +48,7 @@ private:
     AgitatorUnjamCommand unjamWWCommand;
 
     bool unjamSequenceCommencing;
+    bool useSensorInput;
 };
 
 }  // namespace control
