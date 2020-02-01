@@ -1,5 +1,6 @@
 #include "turret_manual_command.hpp"
 #include "src/aruwlib/communication/remote.hpp"
+#include "turret_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -36,9 +37,28 @@ bool TurretManualCommand::isFinished() const {
     return turretSubsystem->turretStatus != turretSubsystem->CV;
 }
 
+void TurretManualCommand::pitchToVelocity(float velocity) {
+    pitchVelocityTarget = velocity;
+}
+
+void TurretManualCommand::yawToVelocity(float velocity) {
+    yawVelocityTarget = velocity;
+}
+
+void TurretManualCommand::pitchIncrementVelocity(float velocity) {
+    pitchVelocityTarget += velocity;
+}
+
+void TurretManualCommand::yawIncrementVelocity(float velocity) {
+    yawVelocityTarget += velocity;
+}
+
 void TurretManualCommand::updateTurretPosition() {
-    turretSubsystem->incPitchMotorByDegree(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL));
-    turretSubsystem->incYawMotorByDegree(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL));
+    int i = aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL);
+    pitchToVelocity(i * remoteControlScaler);
+    yawToVelocity(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL) * remoteControlScaler);
+    turretSubsystem->pitchMotorPid.update(pitchVelocityTarget - turretSubsystem->pitchMotor.getShaftRPM());
+    turretSubsystem->yawMotorPid.update(yawVelocityTarget - turretSubsystem->yawMotor.getShaftRPM());
 }
 
 }  // control

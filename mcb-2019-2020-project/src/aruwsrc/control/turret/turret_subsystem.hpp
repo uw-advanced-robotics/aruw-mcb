@@ -5,7 +5,8 @@
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
-//#include "src/aruwsrc/control/turret_cv_command.hpp"
+#include "turret_manual_command.hpp"
+#include "turret_cv_command.hpp"
 
 using namespace aruwlib::control;
 
@@ -15,8 +16,6 @@ namespace aruwsrc
 namespace control
 {
 
-class TurretCVCommand;
-class TurretManualCommand;
 class TurretSubsystem : public Subsystem {
 
 friend class TurretCVCommand;
@@ -24,15 +23,27 @@ friend class TurretManualCommand;
 
  public:
     TurretSubsystem(void);
+
+    void setPitchVelocity(float velocity);
+
+    void setYawVelocity(float velocity);
     
-    void pitchMotorToDegree(uint32_t degrees);  
+    void pitchMotorToDegree(float degrees);  
 
-    void yawMotorToDegree(uint32_t degrees);
+    void yawMotorToDegree(float degrees);
 
-    void incPitchMotorByDegree(int32_t degrees);  
+    void incPitchMotorByDegree(float degrees);  
 
-    void incYawMotorByDegree(int32_t degrees);
+    void incYawMotorByDegree(float degrees);
     
+    float getYawAngle(void);
+
+    float getPitchAngle(void);
+
+    float getYawVelocity(void);
+
+    float getPitchVelocity(void);
+
     void refresh(void);
 
     aruwlib::motor::DjiMotor pitchMotor;
@@ -47,6 +58,9 @@ friend class TurretManualCommand;
     static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR7;
     static const aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR8;
 
+    TurretManualCommand *turretManual;
+    TurretCVCommand *turretCV;
+
     enum turretMode
     {
         IDLE = 0,
@@ -59,18 +73,15 @@ friend class TurretManualCommand;
     modm::Pid<float> pitchMotorPid;
     modm::Pid<float> yawMotorPid;
 
-    int32_t yawEncoderTarget;
-    int32_t pitchEncoderTarget;
+    float yawTarget;
+    float pitchTarget;
 
-    int32_t getDegree(aruwlib::motor::DjiMotor *motor, int32_t degrees);
+    float convertToUnwrappedEncoder(aruwlib::motor::DjiMotor *motor, float degrees);
+
+    float getVelocity(aruwlib::motor::DjiMotor *motor);
+    float getAngle(aruwlib::motor::DjiMotor *motor);
 
     void updateTurretVals(void);
-
-    template<class T>
-    constexpr const T& clamp( const T& v, const T& lo, const T& hi )
-    {
-        return (v < lo) ? lo : (hi < v) ? hi : v;
-    }
 };
 
 }  // control

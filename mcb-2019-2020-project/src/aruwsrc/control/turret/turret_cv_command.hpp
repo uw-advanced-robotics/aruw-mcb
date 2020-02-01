@@ -3,7 +3,8 @@
 
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/command.hpp"
-#include "turret_subsystem.hpp"
+
+using namespace aruwlib::control;
 
 namespace aruwsrc
 {
@@ -11,53 +12,49 @@ namespace aruwsrc
 namespace control
 {
 
+class TurretSubsystem;
 class TurretCVCommand : public Command {
  public:
-    explicit TurretCVCommand(void) {
-        addSubsystemRequirement(&TurretSubsystem);
-    }
+    explicit TurretCVCommand(TurretSubsystem *turret = nullptr);
 
-    void initialize() {
-        TurretSubsystem.turretStatus = TurretSubsystem.CV;
-    }
+    void initialize(void);
 
-    void execute() {
-        getScaleCurve();
-        updateTurretPosition();
-    }
+    void execute(void);
 
-    void end(bool interrupted) {
-        if (interrupted) {
-            // print error message
-        }
-        TurretSubsystem.turretStatus = TurretSubsystem.IDLE;
-    }
+    void end(bool interrupted);
 
-    bool isFinished() {
-        return TurretSubsystem.turretStatus != TurretSubsystem.CV;
-    }
+    bool isFinished(void) const;
+
+    void pitchToEncoder(float degree);
+    void yawToEncoder(float degree);
+
+    void pitchIncrementEncoder(float degree);
+    void yawIncrementEncoder(float degree);
 
  private:
-    struct ScaleCurve {
-    uint32_t timestamp;
-    uint32_t timeOffset;
-    // cubic coefficients
-    uint32_t a_1;
-    uint32_t a_2;
-    uint32_t a_3;
-    uint32_t a_4;
-    };
+    uint16_t YAW_P = 1.0f;
+    uint16_t YAW_I = 0.0f;
+    uint16_t YAW_D = 0.0f;
+    uint16_t YAW_MAX_ERROR_SUM = 0.0f;
+    uint16_t YAW_MAX_OUTPUT = 16000;
 
-    modm::Pid<float> cvYawPid;
-    modm::Pid<float> cvPitchPid;
+    uint16_t PITCH_P = 1.0f;
+    uint16_t PITCH_I = 0.0f;
+    uint16_t PITCH_D = 0.0f;
+    uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
+    uint16_t PITCH_MAX_OUTPUT = 16000;
 
-    static TurretSubsystem TurretSubsystem;
+    const float remoteControlScaler = 0.5;
 
-    void updateTurretPosition();
+    modm::Pid<float>::Parameter *CVYawPid;
+    modm::Pid<float>::Parameter *CVPitchPid;
 
-    ScaleCurve getScaleCurve();
+    TurretSubsystem *turretSubsystem;
 
-    void followScaleCurve(aruwlib::motor::DjiMotor *motor, ScaleCurve *curve, uint32_t timestamp);
+    float pitchEncoderTarget;
+    float yawEncoderTarget;
+
+    void updateTurretPosition(void);
 };
 
 }  // control

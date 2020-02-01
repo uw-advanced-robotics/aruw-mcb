@@ -3,7 +3,6 @@
 
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/command.hpp"
-#include "turret_subsystem.hpp"
 
 using namespace aruwlib::control;
 
@@ -13,6 +12,7 @@ namespace aruwsrc
 namespace control
 {
 
+class TurretSubsystem;
 class TurretManualCommand : public Command {
  public:
     explicit TurretManualCommand(TurretSubsystem *turret = nullptr);
@@ -25,8 +25,14 @@ class TurretManualCommand : public Command {
 
     bool isFinished(void) const;
 
+    void pitchToVelocity(float degree);
+    void yawToVelocity(float degree);
+
+    void pitchIncrementVelocity(float degree);
+    void yawIncrementVelocity(float degree);
+
  private:
-    uint16_t YAW_P = 0.0f;
+    uint16_t YAW_P = 1.0f;
     uint16_t YAW_I = 0.0f;
     uint16_t YAW_D = 0.0f;
     uint16_t YAW_MAX_ERROR_SUM = 0.0f;
@@ -38,12 +44,15 @@ class TurretManualCommand : public Command {
     uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
     uint16_t PITCH_MAX_OUTPUT = 16000;
 
-    uint16_t remoteControlScaler = 0.5;
+    const float remoteControlScaler = 3;
 
     modm::Pid<float>::Parameter *manualYawPid;
     modm::Pid<float>::Parameter *manualPitchPid;
 
     TurretSubsystem *turretSubsystem;
+
+    float pitchVelocityTarget;
+    float yawVelocityTarget;
 
     void updateTurretPosition(void);
 };

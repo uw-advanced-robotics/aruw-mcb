@@ -1,9 +1,7 @@
 #include <algorithm>
 #include <random>
 #include "turret_subsystem.hpp"
-#include "turret_manual_command.hpp"
 
-#define PI 3.141592
 #define DEGREE_TO_ENCODER(degree) ((8192 * degree) / 360)
 #define ENCODER_TO_DEGREE(encoder) ((encoder * 360) / 8192)
 
@@ -14,47 +12,75 @@ namespace control
 {
     TurretSubsystem::TurretSubsystem() : 
         pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true),
-        yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false) {
-        turretStatus = IDLE;
-        modm::SmartPointer turretManualCommand(
-        new aruwsrc::control::TurretManualCommand(this));
-        setDefaultCommand(turretManualCommand);
-        pitchMotor.encStore.getEncoderUnwrapped();
-        pitchEncoderTarget = PITCH_START_POSITION;
-        yawEncoderTarget = YAW_START_POSITION;
+        yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false),
+        turretStatus(IDLE) {
+        turretManual = new aruwsrc::control::TurretManualCommand(this);
+        turretCV = new aruwsrc::control::TurretCVCommand(this);
+        setDefaultCommand(modm::SmartPointer(turretManual));
     }
 
-    void TurretSubsystem::pitchMotorToDegree(uint32_t degrees) {
-        pitchEncoderTarget = getDegree(&pitchMotor, degrees);
+    void TurretSubsystem::pitchMotorToDegree(float degrees) {
+        turretCV->pitchToEncoder(convertToUnwrappedEncoder(&pitchMotor, degrees));
     }
 
-    void TurretSubsystem::yawMotorToDegree(uint32_t degrees) {
-        yawEncoderTarget = getDegree(&yawMotor, degrees);
+    void TurretSubsystem::yawMotorToDegree(float degrees) {
+        turretCV->yawToEncoder(convertToUnwrappedEncoder(&yawMotor, degrees));
     }
 
-    void TurretSubsystem::incPitchMotorByDegree(int32_t degrees) {
-        pitchEncoderTarget += DEGREE_TO_ENCODER(degrees);
+    void TurretSubsystem::incPitchMotorByDegree(float degrees) {
+        turretCV->pitchIncrementEncoder(DEGREE_TO_ENCODER(degrees));
     }
 
-    void TurretSubsystem::incYawMotorByDegree(int32_t degrees) {
-        yawEncoderTarget += DEGREE_TO_ENCODER(degrees);
+    void TurretSubsystem::incYawMotorByDegree(float degrees) {
+        turretCV->yawIncrementEncoder(DEGREE_TO_ENCODER(degrees));
+    }
+
+    // TODO : units?
+    void TurretSubsystem::setPitchVelocity(float velocity) {
+        turretManual->pitchToVelocity(velocity);
+    }
+
+    // TODO : units?
+    void TurretSubsystem::setYawVelocity(float velocity) {
+        turretManual->yawToVelocity(velocity);
+    }
+
+    float TurretSubsystem::getYawAngle(void) {
+        return getAngle(&yawMotor);
+    }
+
+    float TurretSubsystem::getPitchAngle(void) {
+        return getAngle(&pitchMotor);
+    }
+
+    float TurretSubsystem::getYawVelocity(void) {
+        return getVelocity(&yawMotor);
+    }
+
+    float TurretSubsystem::getPitchVelocity(void) {
+        return getVelocity(&pitchMotor);
     }
 
     void TurretSubsystem::refresh() {
         updateTurretVals();
     }
 
-    int32_t TurretSubsystem::getDegree(aruwlib::motor::DjiMotor *motor, int32_t degrees) {
-        int32_t targetDegree = degrees < 0 ? 360 - (degrees % 360) : degrees % 360;
+    float TurretSubsystem::convertToUnwrappedEncoder(aruwlib::motor::DjiMotor *motor, float degrees) {
+        float targetDegree = degrees < 0 ? 360 - fmod(degrees, 360) : fmod(degrees, 360);
         float relativePosition = fmod(DEGREE_TO_ENCODER(targetDegree) - motor->encStore.getEncoderWrapped(), 8192);
         return motor->encStore.getEncoderUnwrapped() + DEGREE_TO_ENCODER(relativePosition);
     }
 
+    float TurretSubsystem::getAngle(aruwlib::motor::DjiMotor *motor) {
+        return DEGREE_TO_ENCODER(motor->encStore.getEncoderWrapped());
+    }
+
+    // units: degrees per second
+    float TurretSubsystem::getVelocity(aruwlib::motor::DjiMotor *motor) {
+        return 360 * motor->getShaftRPM() / 60;
+    }
+
     void TurretSubsystem::updateTurretVals() {
-        int i = pitchMotor.encStore.getEncoderUnwrapped();
-        printf("%d",i);
-        pitchMotorPid.update(pitchEncoderTarget - pitchMotor.encStore.getEncoderUnwrapped());
-        yawMotorPid.update(yawEncoderTarget - yawMotor.encStore.getEncoderUnwrapped());
         pitchMotor.setDesiredOutput(pitchMotorPid.getValue());
         yawMotor.setDesiredOutput(yawMotorPid.getValue());
     }
