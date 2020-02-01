@@ -21,6 +21,8 @@
 #include "src/aruwsrc/control/example_command.hpp"
 #include "src/aruwsrc/control/example_comprised_command.hpp"
 #include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/engineer_17mm_reservoir_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/engineer_17mm_reservoir_rotate_command.hpp"
 using namespace aruwlib;
 
 /* main scheduler responsible for interfacing with user and cv input --------*/
@@ -32,11 +34,19 @@ AgitatorSubsystem agitator17mm;
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
+#if defined(TARGET_ENGINEER)
+Engineer17mmReservoirSubsystem reservoir17mm;
+#endif
+
 /* define commands ----------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
+#endif
+
+#if defined(TARGET_ENGINEER)
+Engineer17mmReservoirRotateCommand reservoir17mmRotateCommand(&reservoir17mm);
 #endif
 
 using namespace aruwlib::sensors;
@@ -62,6 +72,10 @@ int main()
     mainScheduler.registerSubsystem(&agitator17mm);
     mainScheduler.registerSubsystem(&frictionWheelSubsystem);
     #endif
+
+    #if defined(TARGET_ENGINEER)
+    mainScheduler.registerSubsystem(&reservoir17mm);
+    #endif    
 
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)

@@ -14,7 +14,7 @@ namespace aruwsrc
 namespace control
 {
 
-class Engineer17mmReservoirSubsystem : public Subsystem
+class Engineer17mmReservoirSubsystem : public aruwlib::control::Subsystem
 {
  public:
     Engineer17mmReservoirSubsystem();

@@ -13,7 +13,7 @@ namespace aruwsrc
 namespace control
 {
 
-class Engineer17mmReservoirRotateCommand : Command
+class Engineer17mmReservoirRotateCommand : aruwlib::control::Command
 {
  public:
     static const uint32_t RESERVOIR_MIN_ROTATE_TIME = 300;
