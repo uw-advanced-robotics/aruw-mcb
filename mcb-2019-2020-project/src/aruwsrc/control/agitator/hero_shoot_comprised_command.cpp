@@ -50,6 +50,14 @@ void HeroShootComprisedCommand::initialize()
     // if (ball is loaded || !useSensorInput) {
         this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&pusherRotateCommand));
     // }
+    if (connectedAgitator1->isAgitatorJammed() && !unjamSequenceCommencing)
+    {
+        unjamSequenceCommencing = true;
+        this->comprisedCommandScheduler.removeCommand(
+            dynamic_cast<Command*>(&wwRotateCommand), true);
+        this->comprisedCommandScheduler.addCommand(
+            dynamic_cast<Command*>(&unjamWWCommand));
+    }
 }
 
 void HeroShootComprisedCommand::execute()
