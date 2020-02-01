@@ -26,6 +26,7 @@
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
 #include "src/aruwsrc/control/agitator/hero_shoot_comprised_command.hpp"
+#include "src/aruwsrc/control/agitator/hero_waterwheel_passive_spin_command.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
@@ -65,6 +66,10 @@ HeroShootComprisedCommand heroShootSimpleCommand(&waterWheel,
     aruwlib::algorithms::PI / 2.0f,
     100.0f, 500.f, 150.f, false);
 AgitatorCalibrateCommand calibrateWWCommand(&waterWheel);
+HeroWaterWheelPassiveSpinCommand spinWWCommand(&waterWheel,
+    aruwlib::algorithms::PI / 5.0f,
+    aruwlib::algorithms::PI / 2.0f,
+    100.0f, 150.f);
 #endif
 
 using namespace aruwlib::sensors;
@@ -97,6 +102,8 @@ int main()
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
+    #elif defined(TARGET_HERO)
+    waterWheel.setDefaultCommand(&spinWWCommand);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
