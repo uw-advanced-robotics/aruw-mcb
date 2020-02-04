@@ -20,9 +20,8 @@
 #include "src/aruwlib/control/controller_mapper.hpp"
 
 /* aruwsrc control includes -------------------------------------------------*/
-#include "src/aruwsrc/control/example_command.hpp"
-#include "src/aruwsrc/control/example_comprised_command.hpp"
-#include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwsrc/control/example/example_command.hpp"
+#include "src/aruwsrc/control/example/example_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
@@ -132,7 +131,7 @@ int main()
                     / 660.0f) * 0.5f;
             desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
             desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
-            turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
+            // turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
             // aruwlib::control::CommandScheduler::run();
             turretSubsystem.updateCurrentTurretAngles();
             turretSubsystem.runTurretPositionPid();

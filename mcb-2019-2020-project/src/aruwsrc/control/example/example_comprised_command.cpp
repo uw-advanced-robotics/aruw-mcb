@@ -3,7 +3,6 @@
 #include "example_command.hpp"
 #include "example_subsystem.hpp"
 
-
 namespace aruwsrc
 {
 

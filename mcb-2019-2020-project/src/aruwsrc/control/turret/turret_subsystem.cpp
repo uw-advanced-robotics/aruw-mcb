@@ -31,7 +31,6 @@ namespace control
         currPitchAngle(0.0f, 0.0f, 360.0f),
         desiredYawAngle(TURRET_START_ANGLE, 0.0f, 360.0f),
         desiredPitchAngle(TURRET_START_ANGLE, 0.0f, 360.0f) {
-        setDefaultCommand(modm::SmartPointer(turretManual));
     }
 
     void TurretSubsystem::pitchMotorToDegree(float degrees) {
