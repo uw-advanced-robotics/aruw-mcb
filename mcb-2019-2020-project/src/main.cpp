@@ -29,6 +29,7 @@
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
@@ -47,6 +48,7 @@ aruwlib::control::CommandScheduler mainScheduler(true);
 AgitatorSubsystem agitator17mm;
 ChassisSubsystem soldierChassis;
 ExampleSubsystem frictionWheelSubsystem;
+TurretSubsystem turretSubsystem;
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -56,6 +58,9 @@ ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #endif
+
+float desiredYaw = 0.0f;
+float desiredPitch = 0.0f;
 
 int main()
 {
@@ -103,6 +108,9 @@ int main()
     );
     #endif
 
+    desiredYaw = 90.0f;
+    desiredPitch = 90.0f;
+
     while (1)
     {
         can::CanRxHandler::pollCanData();
@@ -117,6 +125,17 @@ int main()
         if (sendMotorTimeout.execute())
         {
             mainScheduler.run();
+
+            desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))
+                    / 660.0f) * 0.5f;
+            desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
+                    / 660.0f) * 0.5f;
+            desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
+            desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
+            turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
+            // aruwlib::control::CommandScheduler::run();
+            turretSubsystem.updateCurrentTurretAngles();
+            turretSubsystem.runTurretPositionPid();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
