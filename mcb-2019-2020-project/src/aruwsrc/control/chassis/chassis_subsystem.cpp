@@ -124,13 +124,24 @@ namespace chassis
         return rTranslationalGain;
     }
 
+    float xLowPass = 0.0f;
+
+    float low_pass_filter(float prev_value, float new_value, float alpha) {
+        if (alpha < 0.0f || alpha > 1.0f) {
+            return 0.0f;
+        }
+	    return alpha * new_value + (1.0f - alpha) * prev_value;
+    }
+
+
     float ChassisSubsystem::getChassisX()
     {
-        return aruwlib::algorithms::limitVal<float>(
+        xLowPass = low_pass_filter(xLowPass, aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_VERTICAL)
             + static_cast<float>(Remote::keyPressed(Remote::Key::W))
             - static_cast<float>(Remote::keyPressed(Remote::Key::S)), -1.0f, 1.0f
-        );
+        ), 0.154f);
+        return xLowPass;
     }
 
     float ChassisSubsystem::getChassisY()

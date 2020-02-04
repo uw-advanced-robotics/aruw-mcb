@@ -11,6 +11,7 @@ namespace chassis
 void ChassisDriveCommand::initialize()
 {}
 
+float xW = 0.0f;
 void ChassisDriveCommand::execute()
 {
     float chassisRotationDesiredWheelspeed = ChassisSubsystem::getChassisR()
@@ -24,6 +25,8 @@ void ChassisDriveCommand::execute()
         aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisX(),
         -rTranslationalGain, rTranslationalGain)
         * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    
+    xW = chassisXDesiredWheelspeed;
     float chassisYDesiredWheelspeed =
         aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisY(),
         -rTranslationalGain, rTranslationalGain)
