@@ -35,13 +35,11 @@ void ChassisDriveCommand::execute()
 
 void ChassisDriveCommand::end(bool interrupted)
 {
-    // if the command was just ended outright, we should set chassis movement to all zeros
-    // if the command was interrupted, however, we know that another command is running so
-    // we don't need to change the output
-    if (!interrupted)
+    if (interrupted)
     {
         chassis->setDesiredOutput(0.0f, 0.0f, 0.0f);
     }
+    chassis->setDesiredOutput(0.0f, 0.0f, 0.0f);
 }
 
 bool ChassisDriveCommand::isFinished() const

@@ -51,7 +51,7 @@ ExampleSubsystem frictionWheelSubsystem;
 
 /* define commands ----------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
+ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem, 6000);
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);

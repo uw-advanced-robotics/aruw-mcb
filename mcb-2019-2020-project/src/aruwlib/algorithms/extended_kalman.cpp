@@ -33,7 +33,7 @@ float ExtendedKalman::filterData(float dat)
     return xNow;
 }
 
-float ExtendedKalman::getLastPrediction() const
+float ExtendedKalman::getLastFiltered() const
 {
     return xLast;
 }

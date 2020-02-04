@@ -57,7 +57,7 @@ class ExtendedKalman
      */
     float filterData(float dat);
 
-    float getLastPrediction() const;
+    float getLastFiltered() const;
 
  private:
     float xLast;  // last optimal prediction

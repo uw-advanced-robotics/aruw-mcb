@@ -65,9 +65,11 @@ class ChassisSubsystem : public Subsystem {
      * 
      * the P gain is specified by the user and thus is not specified below
      */
-    static constexpr double CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
     // derivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD = 235.0f;
+    // derivative max term
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // the maximum revolve error before we start using the derivative term
     static const int MIN_ERROR_ROTATION_D = 35;
 
@@ -94,12 +96,13 @@ class ChassisSubsystem : public Subsystem {
     // rotation pid gains and constants
     // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
     // gain specified by user
-    static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 0.0;
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
     // derivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
     // the maximum revolve error before we start using the derivative term
     static const int MIN_ERROR_ROTATION_D = 0;
-
+    // derivative max term
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // mechanical chassis constants
     // radius of the wheels
     static constexpr float WHEEL_RADIUS = 76.0f;
@@ -123,9 +126,11 @@ class ChassisSubsystem : public Subsystem {
     // rotation pid gains and constants
     // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
     // gain specified by user
-    static constexpr double CHASSIS_REVOLVE_PID_MAX_P = 0.0;
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
     // derivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
+    // derivative max term
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // the maximum revolve error before we start using the derivative term
     static const int MIN_ERROR_ROTATION_D = 0;
 
@@ -212,7 +217,6 @@ class ChassisSubsystem : public Subsystem {
         rightBackRpm(0),
         chassisRotationErrorKalman(1.0f, 0.0f)
     {}
-    float currentControl();
 
     void setDesiredOutput(float x, float y, float r);
 
