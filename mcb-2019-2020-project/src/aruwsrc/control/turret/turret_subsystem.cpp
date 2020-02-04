@@ -13,9 +13,11 @@ namespace control
     TurretSubsystem::TurretSubsystem() : 
         pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true),
         yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false),
-        turretStatus(IDLE) {
-        turretManual = new aruwsrc::control::TurretManualCommand(this);
-        turretCV = new aruwsrc::control::TurretCVCommand(this);
+        turretStatus(IDLE),
+        currYawAngle(0.0f, 0.0f, 360.0f),
+        currPitchAngle(0.0f, 0.0f, 360.0f),
+        desiredYawAngle(0.0f, 0.0f, 360.0f),
+        desiredPitchAngle(0.0f, 0.0f, 360.0f) {
         setDefaultCommand(modm::SmartPointer(turretManual));
     }
 
@@ -83,6 +85,47 @@ namespace control
     void TurretSubsystem::updateTurretVals() {
         pitchMotor.setDesiredOutput(pitchMotorPid.getValue());
         yawMotor.setDesiredOutput(yawMotorPid.getValue());
+    }
+
+    void TurretSubsystem::updateCurrentTurretAngles()
+    {
+        if (yawMotor.isMotorOnline())
+        {
+            currYawAngle.setValue(ENCODER_TO_DEGREE(
+                    yawMotor.encStore.getEncoderUnwrapped() - YAW_START_ENCODER_POSITION));  // todo fix
+        }
+        else
+        {
+            currYawAngle.setValue(TURRET_START_ANGLE);
+        }
+        if (pitchMotor.isMotorOnline())
+        {
+            currPitchAngle.setValue(ENCODER_TO_DEGREE(
+                pitchMotor.encStore.getEncoderUnwrapped() - PITCH_START_ENCODER_POSITION));
+        }
+        else
+        {
+            currPitchAngle.setValue(TURRET_START_ANGLE);
+        }
+    }
+
+    void TurretSubsystem::updateDesiredTurretAngles(float newYawAngle, float newPitchAngle)
+    {
+        desiredYawAngle.setValue(newYawAngle);
+        desiredPitchAngle.setValue(newPitchAngle);
+    }
+
+    void TurretSubsystem::runTurretPositionPid()
+    {
+        yawMotorPid.update(desiredYawAngle.difference(currYawAngle));
+        pitchMotorPid.update(desiredPitchAngle.difference(currPitchAngle));
+    }
+
+    float TurretSubsystem::getYawAngleFromCenter()
+    {
+        aruwlib::algorithms::ContiguousFloat yawAngleFromCenter(
+            currYawAngle.getValue(), -180.0f, 180.0f);
+        return yawAngleFromCenter.getValue();
     }
 }  // control
 
