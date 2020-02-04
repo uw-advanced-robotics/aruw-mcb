@@ -51,19 +51,33 @@ friend class TurretManualCommand;
     aruwlib::motor::DjiMotor pitchMotor;
     aruwlib::motor::DjiMotor yawMotor;
 
+    void updateCurrentTurretAngles();
+
+    void updateDesiredTurretAngles(float newYawAngle, float newPitchAngle);
+
+    void runTurretPositionPid();
+
+    void updateTurretVals();
+
+    float getYawWrapped();
+
+    float getPitchWrapped();
+
+    float getYawAngleFromCenter();
+
  private:
     const int TURRET_YAW_MIN_ANGLE = 0;
-    const int TURRET_YAW_MAX_ANGLE = 360;
-    const int TURRET_PITCH_MIN_ANGLE = 70;
-    const int TURRET_PITCH_MAX_ANGLE = 120;
+    const int TURRET_YAW_MAX_ANGLE = 180;
+    const int TURRET_PITCH_MIN_ANGLE = 75;
+    const int TURRET_PITCH_MAX_ANGLE = 110;
     const int TURRET_START_ANGLE = 90;
 
-    const int YAW_START_ENCODER_POSITION = 4090;
-    const int PITCH_START_ENCODER_POSITION = -4090;
+    const int YAW_START_ENCODER_POSITION = 8160;
+    const int PITCH_START_ENCODER_POSITION = 4780;
 
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-    static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR5;
-    static const aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR6;
+    static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
+    static const aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
     
     TurretManualCommand *turretManual;
     TurretCVCommand *turretCV;
@@ -76,7 +90,17 @@ friend class TurretManualCommand;
     };
 
     turretMode turretStatus;
-    
+
+    const float TURRET_YAW_PID_P = 3000.0f;
+    const float TURRET_YAW_PID_I = 0.0f;
+    const float TURRET_YAW_PID_D = 18000.0f;
+
+    const float TURRET_PITCH_PID_P = 2000.0f;
+    const float TURRET_PITCH_PID_I = 0.0f;
+    const float TURRET_PITCH_PID_D = 8000.0f;
+
+    const float TURRET_MAX_VOLTAGE_OUT = 32000.0f;
+
     modm::Pid<float> pitchMotorPid;
     modm::Pid<float> yawMotorPid;
 
@@ -93,16 +117,6 @@ friend class TurretManualCommand;
 
     float getVelocity(aruwlib::motor::DjiMotor *motor);
     float getAngle(aruwlib::motor::DjiMotor *motor);
-
-    void updateCurrentTurretAngles();
-
-    void updateDesiredTurretAngles(float newYawAngle, float newPitchAngle);
-
-    void runTurretPositionPid();
-
-    void updateTurretVals(void);
-
-    float getYawAngleFromCenter();
 };
 
 }  // control
