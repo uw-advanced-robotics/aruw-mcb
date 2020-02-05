@@ -3,21 +3,6 @@
 #include <modm/processing/timer.hpp>
 
 #include "src/aruwlib/control/controller_mapper.hpp"
-<<<<<<< HEAD
-#include "src/aruwsrc/control/example/blink_led_command.hpp"
-#include "src/aruwlib/communication/remote.hpp"
-#include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwsrc/control/example/example_command.hpp"
-#include "src/aruwsrc/control/example/example_subsystem.hpp"
-#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
-#include "src/aruwlib/communication/can/can_rx_listener.hpp"
-#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
-#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
-
-aruwsrc::control::ExampleSubsystem testSubsystem;
-aruwsrc::control::TurretSubsystem turretSubsystem;
-=======
 #include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -37,9 +22,14 @@ ChassisSubsystem soldierChassis;
 #endif
 
 aruwlib::serial::RefSerial refereeSerial;
->>>>>>> 68a9b83ab2d0d95a8256d9b72369c06158130c30
 
 using namespace aruwlib::sensors;
+
+float watchYaw = 0.0f;
+float watchPitch = 0.0f;
+
+float desiredYaw = 0.0f;
+float desiredPitch = 0.0f;
 
 int main()
 {
@@ -54,22 +44,34 @@ int main()
     Board::initialize();
     aruwlib::Remote::initialize();
 
-    refereeSerial.initialize();
-
     Mpu6500::init();
 
-    #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
-    modm::SmartPointer chassisDrive(new ChassisDriveCommand(&soldierChassis));
-    CommandScheduler::registerSubsystem(&soldierChassis);
-    soldierChassis.setDefaultCommand(chassisDrive);
-    #endif
+    // modm::SmartPointer testDefaultCommand(
+    //     new aruwsrc::control::ExampleCommand(&testSubsystem));
+
+    // CommandScheduler::registerSubsystem(&testSubsystem);
+
+    CommandScheduler::registerSubsystem(&turretSubsystem);
+
+    // modm::SmartPointer blinkCommand(
+    //     new aruwsrc::control::BlinkLEDCommand(&testSubsystem));
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
-    modm::ShortPeriodicTimer motorSendPeriod(3);
+    modm::ShortPeriodicTimer motorSendPeriod(2);
     // update imu
     modm::ShortPeriodicTimer updateImuPeriod(2);
+
+    // IoMapper::addToggleMapping(
+    //     IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
+    //     blinkCommand
+    // );
+
+    turretSubsystem.updateDesiredTurretAngles(90.0f, 90.0f);
+
+    desiredYaw = 90.0f;
+    desiredPitch = 90.0f;
 
     while (1)
     {
@@ -86,7 +88,17 @@ int main()
 
         if (motorSendPeriod.execute())
         {
-            aruwlib::control::CommandScheduler::run();
+            desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))
+                    / 660.0f) * 0.5f;
+            desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
+                    / 660.0f) * 0.5f;
+            desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
+            desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
+            turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
+            // aruwlib::control::CommandScheduler::run();
+            turretSubsystem.updateCurrentTurretAngles();
+            turretSubsystem.runTurretPositionPid();
+            watchYaw = turretSubsystem.getYawAngleFromCenter();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
