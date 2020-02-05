@@ -24,14 +24,14 @@ namespace control
 class GrabberSubsystem : public Subsystem
 {
  public:
-   GrabberSubsystem(): gripMode(false) {}
+   GrabberSubsystem(): isGrabberSqueezed(false) {}
 
    void refresh(void);
 
-   void setSqueezed(bool gripMode); 
+   void setSqueezed(bool isGrabberSqueezed); 
 
  private: 
-   bool gripMode; 
+   bool isGrabberSqueezed; 
     
 };
 
