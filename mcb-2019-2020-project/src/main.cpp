@@ -42,7 +42,7 @@ ExampleSubsystem frictionWheelSubsystem;
 #endif
 
 #if defined(TARGET_ENGINEER)
-AgitatorSubsystem reservoir17mm(AgitatorSubsystem::AgitatorType::Engi1);
+AgitatorSubsystem reservoir17mm(AgitatorSubsystem::AgitatorType::Engi1, 1.0f);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -53,7 +53,8 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 #endif
 
 #if defined(TARGET_ENGINEER)
-AgitatorCalibrateCommand agitatorCalibrateCommand(&reservoir17mm);
+AgitatorCalibrateCommand reservoir17mmCalibrateCommand(&reservoir17mm);
+AgitatorRotateCommand reservoir17mmRotateCommand(&reservoir17mm, 2.0f * aruwlib::algorithms::PI / 3, 500.0f, 500.0f);
 #endif
 
 using namespace aruwlib::sensors;
@@ -80,14 +81,26 @@ int main()
     mainScheduler.registerSubsystem(&frictionWheelSubsystem);
     #endif
 
+    #if defined(TARGET_ENGINEER)
+    mainScheduler.registerSubsystem(&reservoir17mm);
+    #endif
+
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #endif
 
+    #if defined(TARGET_ENGINEER)
+
+    #endif
+
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     mainScheduler.addCommand(&agitatorCalibrateCommand);
+    #endif
+
+    #if defined(TARGET_ENGINEER)
+    mainScheduler.addCommand(&reservoir17mmCalibrateCommand);
     #endif
 
     /* define timers here ---------------------------------------------------*/
@@ -100,6 +113,15 @@ int main()
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootSlowCommand
     );
+    #endif
+
+    #if defined(TARGET_ENGINEER)
+    /*
+    IoMapper::addHoldRepeatMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        &reservoir17mmRotateCommand
+    );
+    */
     #endif
 
     while (1)

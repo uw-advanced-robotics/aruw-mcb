@@ -12,8 +12,9 @@ namespace aruwsrc
 
 namespace agitator
 {
-    AgitatorSubsystem::AgitatorSubsystem(AgitatorType type) :
+    AgitatorSubsystem::AgitatorSubsystem(AgitatorType type, float gearRatio) :
         agitatorType(type),
+        agitatorGearRatio(gearRatio),
         agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS, false),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
@@ -120,7 +121,8 @@ namespace agitator
         // position is equal to the following equation:
         // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
         return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
-            agitatorMotor.encStore.getEncoderUnwrapped() / AGITATOR_GEAR_RATIO;
+            //agitatorMotor.encStore.getEncoderUnwrapped() / AGITATOR_GEAR_RATIO;
+            agitatorMotor.encStore.getEncoderUnwrapped() / agitatorGearRatio;
     }
 
     void AgitatorSubsystem::setAgitatorAngle(float newAngle)
