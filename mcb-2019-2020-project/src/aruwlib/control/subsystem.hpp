@@ -24,8 +24,6 @@
 
 #include <rm-dev-board-a/board.hpp>
 
-#include <modm/container/smart_pointer.hpp>
-
 namespace aruwlib
 {
 

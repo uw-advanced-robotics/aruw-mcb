@@ -3,6 +3,7 @@
 
 #include "example_command.hpp"
 #include "example_subsystem.hpp"
+#include "src/aruwlib/control/comprised_command.hpp"
 
 namespace aruwsrc
 {
@@ -10,7 +11,7 @@ namespace aruwsrc
 namespace control
 {
 
-class ExampleComprisedCommand : public Command
+class ExampleComprisedCommand : public ComprisedCommand
 {
  public:
     explicit ExampleComprisedCommand(ExampleSubsystem* subsystem);
@@ -32,6 +33,8 @@ class ExampleComprisedCommand : public Command
     ExampleCommand otherExampleCommand;
 
     modm::ShortTimeout switchTimer;
+
+    bool switchCommand;
 };
 
 }  // namespace control

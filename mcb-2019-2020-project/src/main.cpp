@@ -1,5 +1,4 @@
 #include <rm-dev-board-a/board.hpp>
-#include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 #include <modm/processing/timer.hpp>
 
@@ -12,6 +11,8 @@
 /* math includes ------------------------------------------------------------*/
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+#include "src/aruwlib/communication/serial/ref_serial.hpp"
+#include "src/aruwsrc/control/example_comprised_command.hpp"
 
 /* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -32,9 +33,6 @@ using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
 
-/* main scheduler responsible for interfacing with user and cv input --------*/
-aruwlib::control::CommandScheduler mainScheduler(true);
-
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
@@ -50,6 +48,15 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 
 using namespace aruwlib::sensors;
 
+#if defined(TARGET_SOLDIER)
+ChassisSubsystem soldierChassis;
+ChassisDriveCommand chassisDriveCommand(&soldierChassis);
+#else  // error
+#error "select soldier robot type only"
+#endif
+
+aruwlib::serial::RefSerial refereeSerial;
+
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -64,12 +71,12 @@ int main()
 
     aruwlib::Remote::initialize();
 
-    Mpu6500::init();
+    refereeSerial.initialize();
 
     /* register subsystems here ---------------------------------------------*/
     #if defined(TARGET_SOLDIER)
-    mainScheduler.registerSubsystem(&agitator17mm);
-    mainScheduler.registerSubsystem(&frictionWheelSubsystem);
+    CommandScheduler::getMainScheduler().registerSubsystem(&agitator17mm);
+    CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
@@ -107,7 +114,7 @@ int main()
         
         if (sendMotorTimeout.execute())
         {
-            mainScheduler.run();
+            CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

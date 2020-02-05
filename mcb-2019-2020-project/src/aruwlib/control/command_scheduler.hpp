@@ -18,7 +18,6 @@
 
 #include <map>
 #include <modm/container/linked_list.hpp>
-#include <modm/container/smart_pointer.hpp>
 #include <rm-dev-board-a/board.hpp>
 
 #include "subsystem.hpp"
@@ -32,9 +31,8 @@ namespace control
 class CommandScheduler
 {
  public:
-    CommandScheduler(bool isMainScheduler = false) :
-    subsystemToCommandMap(),
-    isMainScheduler(isMainScheduler) {}
+    CommandScheduler() : subsystemToCommandMap()
+    {}
 
     void runCommands();
 
@@ -42,30 +40,26 @@ class CommandScheduler
 
     void removeCommand(Command* command, bool interrupted);
 
-    bool registerSubsystem(Subsystem* subsystem);
+    void registerSubsystem(Subsystem* subsystem);
 
-    bool isSubsystemRegistered(Subsystem* subsystem);
+    bool isSubsystemRegistered(Subsystem* subsystem) const;
 
-    bool isSubsystemRegistered(const Subsystem* subsystem);
+    bool isCommandScheduled(Command* command) const;
 
-    bool isCommandScheduled(Command* command);
+    void addCommand(Command* commandToAdd);
 
-    bool addCommand(Command* commandToAdd);
-
-    static Command* smrtPtrCommandCast(modm::SmartPointer smrtPtr);
+    static CommandScheduler& getMainScheduler();
 
  private:
-    // maximum time before we start erroring, in seconds
-    static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 0.5f;
+    // maximum time before we start erroring, in microseconds
+    static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 100;
 
-    // a map containing keys of subsystems, pairs of Commands and ComprisedCommands
-    // the command comes first, the ComprisedCommand second 
- public:
+    // a map containing keys of subsystems, pairs of Commands
     std::map<Subsystem*, Command*> subsystemToCommandMap;
 
     static uint32_t commandSchedulerTimestamp;
 
-    bool isMainScheduler;
+    static CommandScheduler mainScheduler;
 };
 
 }  // namespace control
