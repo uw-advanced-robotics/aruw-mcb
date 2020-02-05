@@ -1,11 +1,12 @@
 #ifndef __PROPERTY_HPP__
 #define __PROPERTY_HPP__
+#include <memory>
+#include <utility>
 #include <rm-dev-board-a/board.hpp>
 #include "src/aruwlib/communication/serial/dji_serial.hpp"
 #include <modm/container.hpp>
 #include <modm/architecture/driver/atomic/queue.hpp>
-#include <memory>
-#include <utility>
+
 /**
  * Property Serial Protocol
  * Long Package
@@ -28,9 +29,7 @@ namespace aruwlib {
 
 class PropertySystem : public aruwlib::serial::DJISerial
 {
-
- public:
-
+public:
    typedef enum : uint8_t {
         UBYTE_PROPERTY = 1,
         USHORT_PROPERTY = 2,
@@ -41,12 +40,11 @@ class PropertySystem : public aruwlib::serial::DJISerial
         FLOAT_PROPERTY = 7,
         BOOL_PROPERTY = 8
     } PropertyType;
-    
+
     PropertySystem();
 
-
     void initializePropertySystem();
-    
+
     /**
      * Process property query from serial and interactive with ROM.
      * Call periodically in order to make Property System be reactive.
@@ -62,7 +60,7 @@ class PropertySystem : public aruwlib::serial::DJISerial
      */
     template<class Type>
     uint16_t addProperty(Type* data, uint8_t* property_name, uint8_t name_length);
-    
+
     /**
      * Add a array to PropertySystem
      * @param array pointer to array to be managed
@@ -114,14 +112,14 @@ class PropertySystem : public aruwlib::serial::DJISerial
     static const uint8_t LONG_PACKAGE_TYPE_TABLE_DATA = 0x02;
     static const uint8_t LONG_PACKAGE_TYPE_QUERY = 0x03;
     static const uint8_t LONG_PACKAGE_TYPE_TABLE_QUERY = 0x04;
-    //static const uint8_t LONG_PACKAGE_TYPE_SAVE_PROPERTY = 0x05;
-    //static const uint8_t LONG_PACKAGE_TYPE_ADD_PROPERTY = 0x06;
-    
+    // static const uint8_t LONG_PACKAGE_TYPE_SAVE_PROPERTY = 0x05;
+    // static const uint8_t LONG_PACKAGE_TYPE_ADD_PROPERTY = 0x06;
+
     static const uint8_t SHORT_PACKAGE_TYPE_SEND_ALL_PROPERTY = 0x11;
-    //static const uint8_t SHORT_PACKAGE_TYPE_SAVE_ALL_PROPERTY = 0x12;
+    // static const uint8_t SHORT_PACKAGE_TYPE_SAVE_ALL_PROPERTY = 0x12;
     static const uint8_t SHORT_PACKAGE_TYPE_SEND_TABLE = 0x13;
-    //static const uint8_t SHORT_PACKAGE_TYPE_SAVE_TABLE = 0x14;
-    //static const uint8_t SHORT_PACKAGE_TYPE_DELETE_PROPERTY = 0x15;
+    // static const uint8_t SHORT_PACKAGE_TYPE_SAVE_TABLE = 0x14;
+    // static const uint8_t SHORT_PACKAGE_TYPE_DELETE_PROPERTY = 0x15;
     static const uint8_t SHORT_PACKAGE_TYPE_ADJUST_DEQUEUE_RATE = 0x16;
 
     static const uint8_t DEFAULT_DEQUEUE_RATE_TX_DATA = 200;
@@ -133,7 +131,7 @@ class PropertySystem : public aruwlib::serial::DJISerial
 
     static const uint16_t MAX_PACKAGE_DATA_LENGTH = 200;
 
-    struct Property_t {
+    typedef struct {
         uint16_t id;
         PropertyType type;
         uint8_t* name;
@@ -141,7 +139,7 @@ class PropertySystem : public aruwlib::serial::DJISerial
         void* dataPointer;
         uint8_t typeSize;
         uint8_t byteCount;
-    };
+    } Property_t;
 
     typedef struct {
         uint8_t packageType;
@@ -156,24 +154,19 @@ class PropertySystem : public aruwlib::serial::DJISerial
         uint8_t* data;
         uint8_t dataLength;
     } ShortPackage_t;
-    
-    
-
-    
-
 
     Property_t propertyTable[PROPERTY_TABLE_MAX_SIZE];
     uint16_t propertyTableSize;
-    //Store Properties Waiting to be Sent
+    // Store Properties Waiting to be Sent
     modm::Queue<uint16_t, modm::LinkedList<uint16_t>> txDataQueue;
-    
-    //Maximum Number of property data to send in each call to updatePropertySystem()
+
+    // Maximum Number of property data to send in each call to updatePropertySystem()
     uint16_t txDataDequeueRate;
 
-    //Store Property Table Entries Waiting to be Sent
+    // Store Property Table Entries Waiting to be Sent
     modm::Queue<uint16_t, modm::LinkedList<uint16_t>> txTableDataQueue;
 
-    //Maximum Number of table entry to send in each call to updatePropertySystem()
+    // Maximum Number of table entry to send in each call to updatePropertySystem()
     uint16_t txTableDataDequeueRate;
 
     modm::Queue<LongPackage_t*, modm::LinkedList<LongPackage_t*>> txLongPackageQueue;
@@ -181,10 +174,8 @@ class PropertySystem : public aruwlib::serial::DJISerial
     uint16_t txLongPackageDequeueRate;
 
     modm::Queue<ShortPackage_t*, modm::LinkedList<ShortPackage_t*>> txShortPackageQueue;
-    
+
     uint16_t txShortPackageDequeueRate;
-
-
 
     /**
      * Send a property data through serial
@@ -199,11 +190,11 @@ class PropertySystem : public aruwlib::serial::DJISerial
      * @return if the operation succeed
      */
     bool sendPropertyTableEntry(Property_t* property);
-    
+
     void dequeueTxDataQueue();
     void dequeueTxTableDataQueue();
     void dequeueTxLongPackageQueue();
-    
+
     /**
      * Add data of given property to given package
      * @param property
@@ -220,7 +211,6 @@ class PropertySystem : public aruwlib::serial::DJISerial
     bool packPropertyTableEntry(Property_t* property, LongPackage_t* package);
 
 };
-
 }
 
 #endif
