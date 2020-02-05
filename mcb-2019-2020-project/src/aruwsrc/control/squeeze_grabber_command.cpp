@@ -16,7 +16,7 @@ namespace control
 
     void GrabberCommand::initialize(void) 
     {
-        subsystemGrabber->setSqueezed(true); // default movement is "not extended"  
+        subsystemGrabber->setSqueezed(true); // default movement is "squeezed"  
     }
 
     void GrabberCommand::execute(void) 
