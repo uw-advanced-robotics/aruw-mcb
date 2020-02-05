@@ -71,14 +71,14 @@ class PropertySystem : public aruwlib::serial::DJISerial
      */
     template<class Type>
     uint16_t addProperty(Type* array, uint16_t length, uint8_t* property_name, uint8_t name_length);
-    
+
     /**
      * Send a property through serial
      * @param property_id
      * @return if the operation succeed
      */
     bool sendProperty(uint16_t property_id);
-    
+
     /**
      * Send property table through serial
      * @return if the operation succeed
@@ -119,7 +119,7 @@ class PropertySystem : public aruwlib::serial::DJISerial
 
     // Behavior: PC request MCB to send data with specific id
     static const uint8_t LONG_PACKAGE_TYPE_QUERY = 0x03;
-    
+
     // Behavior: PC request MCB to send table entries with specific id
     static const uint8_t LONG_PACKAGE_TYPE_TABLE_QUERY = 0x04;
     // static const uint8_t LONG_PACKAGE_TYPE_SAVE_PROPERTY = 0x05;
