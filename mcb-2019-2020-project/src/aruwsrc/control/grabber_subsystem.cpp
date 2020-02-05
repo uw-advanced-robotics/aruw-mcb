@@ -10,12 +10,12 @@ namespace aruwsrc
 namespace control
 {
     void GrabberSubsystem::refresh(void) {
-        grabberDigitalOutPin::set(gripMode); 
+        grabberDigitalOutPin::set(isGrabberSqueezed); 
     }
 
-    void GrabberSubsystem::setSqueezed(bool gripMode) {
-        this->gripMode = gripMode; 
-        grabberDigitalOutPin::set(gripMode);
+    void GrabberSubsystem::setSqueezed(bool isGrabberSqueezed) {
+        this->isGrabberSqueezed = isGrabberSqueezed; 
+        grabberDigitalOutPin::set(isGrabberSqueezed);
     }
 }  // namespace control
 
