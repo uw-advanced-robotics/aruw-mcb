@@ -71,12 +71,14 @@ class PropertySystem : public aruwlib::serial::DJISerial
      */
     template<class Type>
     uint16_t addProperty(Type* array, uint16_t length, uint8_t* property_name, uint8_t name_length);
+    
     /**
      * Send a property through serial
      * @param property_id
      * @return if the operation succeed
      */
     bool sendProperty(uint16_t property_id);
+    
     /**
      * Send property table through serial
      * @return if the operation succeed
@@ -105,12 +107,20 @@ class PropertySystem : public aruwlib::serial::DJISerial
     void messageReceiveCallback(SerialMessage_t completeMessage) override;
 
  private:
+    // serial header type
     static const uint16_t PROPERTY_MESSAGE_TYPE_LONG_PACKAGE = 0x1001;
     static const uint16_t PROPERTY_MESSAGE_TYPE_SHORT_PACKAGE = 0x1002;
 
+    // Behavior: MCB send data to PC or PC ask MCB to change data
     static const uint8_t LONG_PACKAGE_TYPE_DATA = 0x01;
+
+    // Behavior: MCB send property table entries to PC
     static const uint8_t LONG_PACKAGE_TYPE_TABLE_DATA = 0x02;
+
+    // Behavior: PC request MCB to send data with specific id
     static const uint8_t LONG_PACKAGE_TYPE_QUERY = 0x03;
+    
+    // Behavior: PC request MCB to send table entries with specific id
     static const uint8_t LONG_PACKAGE_TYPE_TABLE_QUERY = 0x04;
     // static const uint8_t LONG_PACKAGE_TYPE_SAVE_PROPERTY = 0x05;
     // static const uint8_t LONG_PACKAGE_TYPE_ADD_PROPERTY = 0x06;
@@ -122,6 +132,7 @@ class PropertySystem : public aruwlib::serial::DJISerial
     // static const uint8_t SHORT_PACKAGE_TYPE_DELETE_PROPERTY = 0x15;
     static const uint8_t SHORT_PACKAGE_TYPE_ADJUST_DEQUEUE_RATE = 0x16;
 
+    // Maximum number of properties in queues to process in each call to update
     static const uint8_t DEFAULT_DEQUEUE_RATE_TX_DATA = 200;
     static const uint8_t DEFAULT_DEQUEUE_RATE_TX_TABLE_DATA = 200;
     static const uint8_t DEFAULT_DEQUEUE_RATE_TX_LONG_PACKAGE = 2;
