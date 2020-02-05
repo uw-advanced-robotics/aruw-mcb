@@ -37,7 +37,7 @@ aruwlib::control::CommandScheduler mainScheduler(true);
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
+AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier, 36.0f);
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
@@ -54,7 +54,7 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 
 #if defined(TARGET_ENGINEER)
 AgitatorCalibrateCommand reservoir17mmCalibrateCommand(&reservoir17mm);
-AgitatorRotateCommand reservoir17mmRotateCommand(&reservoir17mm, 2.0f * aruwlib::algorithms::PI / 3, 500.0f, 500.0f);
+AgitatorRotateCommand reservoir17mmRotateCommand(&reservoir17mm, 2.0f * aruwlib::algorithms::PI / 3, 500.0f, 0.0f);
 #endif
 
 using namespace aruwlib::sensors;
@@ -116,12 +116,10 @@ int main()
     #endif
 
     #if defined(TARGET_ENGINEER)
-    /*
-    IoMapper::addHoldRepeatMapping(
+    IoMapper::addHoldMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &reservoir17mmRotateCommand
     );
-    */
     #endif
 
     while (1)
@@ -137,7 +135,7 @@ int main()
         
         if (sendMotorTimeout.execute())
         {
-            mainScheduler.run();
+            //mainScheduler.run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
