@@ -13,12 +13,14 @@ namespace aruwsrc
 namespace agitator
 {
     AgitatorSubsystem::AgitatorSubsystem(AgitatorType type) :
-        agitatorType(type),
+        agitatorPositionPid(0.0f, 0.0f, 0.0f, 0.0f, PID_MAX_OUT),
         agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS, false),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
         agitatorIsCalibrated(false),
-        agitatorPositionPid(0.0f, 0.0f, 0.0f, 0.0f, PID_MAX_OUT)
+        agitatorJammedTimeout(0),
+        agitatorJammedTimeoutPeriod(0),
+        agitatorType(type)
     {
         modm::Pid<float>::Parameter* param = nullptr;   // assign nullptr to fix build
         switch (type)

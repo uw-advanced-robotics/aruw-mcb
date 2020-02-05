@@ -26,12 +26,15 @@
 #include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
+#include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
 using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
+using namespace aruwsrc::chassis;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
@@ -41,7 +44,8 @@ ExampleSubsystem frictionWheelSubsystem;
 
 /* define commands ----------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
+aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
+    ExampleCommand::DEFAULT_WHEEL_RPM);
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 #endif
@@ -86,7 +90,7 @@ int main()
 
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
-    mainScheduler.addCommand(&agitatorCalibrateCommand);
+    CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
     #endif
 
     /* define timers here ---------------------------------------------------*/
