@@ -53,7 +53,7 @@ int main()
 
         // do this as fast as you can
         // aruwlib::can::CanRxHandler::pollCanData();
-        
+
         propertySystem.updatePropertySystem();
         propertySystem.updateSerial();
         a += 1;
@@ -61,7 +61,6 @@ int main()
         array[2] += 1;
         array[3] += 1;
         modm::delayMicroseconds(10);
-        
     }
     return 0;
 }

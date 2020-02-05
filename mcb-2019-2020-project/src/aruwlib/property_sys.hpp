@@ -29,8 +29,8 @@ namespace aruwlib {
 
 class PropertySystem : public aruwlib::serial::DJISerial
 {
-public:
-   typedef enum : uint8_t {
+ public:
+    typedef enum : uint8_t {
         UBYTE_PROPERTY = 1,
         USHORT_PROPERTY = 2,
         UINTEGER_PROPERTY = 3,
@@ -209,8 +209,7 @@ public:
      * @return if the operation succeed
      */
     bool packPropertyTableEntry(Property_t* property, LongPackage_t* package);
-
 };
-}
+}  // namespace aruwlib
 
 #endif
