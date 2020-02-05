@@ -61,6 +61,20 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 float desiredYaw = 0.0f;
 float desiredPitch = 0.0f;
 
+modm::Pid<float> yawImuPid(2500.0f, 0.0f, 12000.0f, 0.0f, 30000.0f);
+
+ContiguousFloat imuYawWrapped(0.0f, 0.0f, 360.0f);
+ContiguousFloat imuTurretYawCombined(0.0f, 0.0f, 360.0f);
+void runTurretAlgorithm()
+{
+    turretSubsystem.updateCurrentTurretAngles();
+    float currYaw = turretSubsystem.getYawWrapped();
+    imuYawWrapped.setValue(Mpu6500::getImuAttitude().yaw);
+    imuTurretYawCombined.setValue(imuYawWrapped.getValue() + currYaw);
+    yawImuPid.update(imuTurretYawCombined.difference(desiredYaw));
+    turretSubsystem.yawMotor.setDesiredOutput(yawImuPid.getValue());
+}
+
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -74,6 +88,8 @@ int main()
     Board::initialize();
 
     aruwlib::Remote::initialize();
+
+    Mpu6500::init();
 
     refSerial.initialize();
 
@@ -110,6 +126,8 @@ int main()
     desiredYaw = 90.0f;
     desiredPitch = 90.0f;
 
+    chassisDriveCommand.initialize();
+
     while (1)
     {
         can::CanRxHandler::pollCanData();
@@ -123,18 +141,21 @@ int main()
         
         if (sendMotorTimeout.execute())
         {
-            mainScheduler.run();
+            chassisDriveCommand.execute();
+            soldierChassis.refresh();
+            // desiredPitch+= 0.1f;
+            // mainScheduler.run();
 
-            desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))
-                    / 660.0f) * 0.5f;
-            desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
-                    / 660.0f) * 0.5f;
+            // desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))) * 0.5f;
+            // desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
+            //         / 660.0f) * 0.5f;
             desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
-            desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
-            // turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
-            // aruwlib::control::CommandScheduler::run();
-            turretSubsystem.updateCurrentTurretAngles();
-            turretSubsystem.runTurretPositionPid();
+            runTurretAlgorithm();
+            // desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
+            // // turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
+            // // aruwlib::control::CommandScheduler::run();
+            // turretSubsystem.updateCurrentTurretAngles();
+            // turretSubsystem.runTurretPositionPid();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
