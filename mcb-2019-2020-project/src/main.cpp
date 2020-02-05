@@ -1,10 +1,14 @@
-#include <rm-dev-board-a/board.hpp>
 #include <modm/container/smart_pointer.hpp>
+#include <rm-dev-board-a/board.hpp>
 #include <modm/processing/timer.hpp>
 #include <modm/processing/timer.hpp>
 
-/* communication includes ---------------------------------------------------*/
+#include "src/aruwlib/control/controller_mapper.hpp"
+#include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
+#include "src/aruwlib/control/command_scheduler.hpp"
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/communication/remote.hpp"
@@ -12,6 +16,7 @@
 /* math includes ------------------------------------------------------------*/
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
+#include "src/aruwlib/communication/serial/ref_serial.hpp"
 
 /* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -57,6 +62,16 @@ AgitatorCalibrateCommand reservoir17mmCalibrateCommand(&reservoir17mm);
 AgitatorRotateCommand reservoir17mmRotateCommand(&reservoir17mm, 2.0f * aruwlib::algorithms::PI / 3, 500.0f, 0.0f);
 #endif
 
+using namespace aruwsrc::chassis;
+
+#if defined(TARGET_SOLDIER)
+ChassisSubsystem soldierChassis;
+#else  // error
+//#error "select soldier robot type only"
+#endif
+
+aruwlib::serial::RefSerial refereeSerial;
+
 using namespace aruwlib::sensors;
 
 int main()
@@ -91,7 +106,13 @@ int main()
     #endif
 
     #if defined(TARGET_ENGINEER)
+    refereeSerial.initialize();
+    #endif
 
+    #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
+    modm::SmartPointer chassisDrive(new ChassisDriveCommand(&soldierChassis));
+    CommandScheduler::registerSubsystem(&soldierChassis);
+    soldierChassis.setDefaultCommand(chassisDrive);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
@@ -125,6 +146,7 @@ int main()
     while (1)
     {
         can::CanRxHandler::pollCanData();
+        refereeSerial.updateSerial();
 
         Remote::read();
 
@@ -135,7 +157,7 @@ int main()
         
         if (sendMotorTimeout.execute())
         {
-            //mainScheduler.run();
+            mainScheduler.run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
