@@ -37,6 +37,8 @@ class ChassisAutorotateCommand : public Command
     void interrupted(void) {}
 
  private:
+    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -100.0f;
+
     ChassisSubsystem* chassis;
     aruwsrc::control::TurretSubsystem* turret;
 };

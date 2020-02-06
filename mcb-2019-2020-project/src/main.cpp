@@ -60,31 +60,43 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 ChassisAutorotateCommand chassisAutoRotateCommand(&soldierChassis, &turretSubsystem);
 #endif
 
+float desiredYaw2 = 0.0f;
+float desiredYaw3 = 0.0f;
 ContiguousFloat desiredYaw(90.0f, 0.0f, 360.0f);
+ContiguousFloat currValueImuYawGimbal(0.0f, 0.0f, 360.0f);
 float desiredPitch = 0.0f;
 
 float imuInitialValue = 0.0f;
 modm::Pid<float> yawImuPid(2500.0f, 0.0f, 12000.0f, 0.0f, 30000.0f);
 
+float diff=0.0f;
+
 // ContiguousFloat imuYawWrapped(0.0f, 0.0f, 360.0f);
 // ContiguousFloat imuTurretYawCombined(0.0f, 0.0f, 360.0f);
 void runTurretAlgorithm()
 {
+    desiredYaw2 -= static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f;
+    // desiredYaw2 = aruwlib::algorithms::limitVal<float>(
+    //     desiredYaw2,
+    //     0.0f + Mpu6500::getImuAttitude().yaw,
+    //     180.0f + Mpu6500::getImuAttitude().yaw
+    // );
 
-    desiredYaw.setValue(desiredYaw.getValue() - static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f);
-    desiredYaw.setValue(
-        aruwlib::algorithms::limitVal<float>(
-            desiredYaw.getValue(),
-            0.0f + Mpu6500::getImuAttitude().yaw,
-            180.0f + Mpu6500::getImuAttitude().yaw
-        )
+    desiredYaw3 = desiredYaw2 + Mpu6500::getImuAttitude().yaw - imuInitialValue;
+    desiredYaw3 = aruwlib::algorithms::limitVal<float>(
+        desiredYaw3,
+        0.0f + Mpu6500::getImuAttitude().yaw,
+        180.0f + Mpu6500::getImuAttitude().yaw
     );
+
+    desiredYaw.setValue(desiredYaw2);
     // position control on imu and encoder angle
     turretSubsystem.updateCurrentTurretAngles();
-    ContiguousFloat currValueImuYawGimbal(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue, 0.0f, 360.0f);
+    currValueImuYawGimbal.setValue(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue);
     // float currYaw = turretSubsystem.getYawWrapped();
     // imuYawWrapped.setValue(Mpu6500::getImuAttitude().yaw);
     // imuTurretYawCombined.setValue(imuYawWrapped.getValue() + currYaw);
+    diff = currValueImuYawGimbal.difference(desiredYaw);
     yawImuPid.update(currValueImuYawGimbal.difference(desiredYaw));
     turretSubsystem.yawMotor.setDesiredOutput(yawImuPid.getValue());
 }
@@ -139,6 +151,7 @@ int main()
 
     desiredPitch = 90.0f;
 
+    desiredYaw2 = 90.0f;
     // chassisDriveCommand.initialize();
     chassisAutoRotateCommand.initialize();
 
@@ -155,6 +168,11 @@ int main()
         
         if (sendMotorTimeout.execute())
         {
+            if (Remote::getSwitch(aruwlib::Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN) {
+                turretSubsystem.yawMotor.setDesiredOutput(0);
+            } else {
+                runTurretAlgorithm();
+            }
             chassisAutoRotateCommand.execute();
             // chassisDriveCommand.execute();
             soldierChassis.refresh();
@@ -165,7 +183,6 @@ int main()
             // desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
             //         / 660.0f) * 0.5f;
             // desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
-            runTurretAlgorithm();
             // desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
             // // turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
             // // aruwlib::control::CommandScheduler::run();
