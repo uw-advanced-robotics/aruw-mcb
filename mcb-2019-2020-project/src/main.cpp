@@ -58,20 +58,32 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #endif
 
-float desiredYaw = 0.0f;
+ContiguousFloat desiredYaw(90.0f, 0.0f, 360.0f);
 float desiredPitch = 0.0f;
 
+float imuInitialValue = 0.0f;
 modm::Pid<float> yawImuPid(2500.0f, 0.0f, 12000.0f, 0.0f, 30000.0f);
 
-ContiguousFloat imuYawWrapped(0.0f, 0.0f, 360.0f);
-ContiguousFloat imuTurretYawCombined(0.0f, 0.0f, 360.0f);
+// ContiguousFloat imuYawWrapped(0.0f, 0.0f, 360.0f);
+// ContiguousFloat imuTurretYawCombined(0.0f, 0.0f, 360.0f);
 void runTurretAlgorithm()
 {
+
+    desiredYaw.setValue(desiredYaw.getValue() - static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f);
+    desiredYaw.setValue(
+        aruwlib::algorithms::limitVal<float>(
+            desiredYaw.getValue(),
+            0.0f + Mpu6500::getImuAttitude().yaw,
+            180.0f + Mpu6500::getImuAttitude().yaw
+        )
+    );
+    // position control on imu and encoder angle
     turretSubsystem.updateCurrentTurretAngles();
-    float currYaw = turretSubsystem.getYawWrapped();
-    imuYawWrapped.setValue(Mpu6500::getImuAttitude().yaw);
-    imuTurretYawCombined.setValue(imuYawWrapped.getValue() + currYaw);
-    yawImuPid.update(imuTurretYawCombined.difference(desiredYaw));
+    ContiguousFloat currValueImuYawGimbal(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue, 0.0f, 360.0f);
+    // float currYaw = turretSubsystem.getYawWrapped();
+    // imuYawWrapped.setValue(Mpu6500::getImuAttitude().yaw);
+    // imuTurretYawCombined.setValue(imuYawWrapped.getValue() + currYaw);
+    yawImuPid.update(currValueImuYawGimbal.difference(desiredYaw));
     turretSubsystem.yawMotor.setDesiredOutput(yawImuPid.getValue());
 }
 
@@ -123,7 +135,6 @@ int main()
     );
     #endif
 
-    desiredYaw = 90.0f;
     desiredPitch = 90.0f;
 
     chassisDriveCommand.initialize();
@@ -149,7 +160,7 @@ int main()
             // desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))) * 0.5f;
             // desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
             //         / 660.0f) * 0.5f;
-            desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
+            // desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
             runTurretAlgorithm();
             // desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
             // // turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
