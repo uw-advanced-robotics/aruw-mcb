@@ -75,28 +75,41 @@ float diff=0.0f;
 // ContiguousFloat imuTurretYawCombined(0.0f, 0.0f, 360.0f);
 void runTurretAlgorithm()
 {
-    desiredYaw2 -= static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f;
-    // desiredYaw2 = aruwlib::algorithms::limitVal<float>(
-    //     desiredYaw2,
+    // calculate the desired user angle in world reference frame
+    // if user does not want to move the turret, recalibrate the imu initial value
+    float userChange = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f;
+    if (fabs(userChange) < 0.000001) {
+        /// \todo test this
+        imuInitialValue = Mpu6500::getImuAttitude().yaw;
+    }
+    desiredYaw2 -= userChange;
+    // we must limit the input between 0 and 180 degrees relative to the chassis
+    // limit the angle of the user angle in chassis frame (i.e. subtract away imu yaw angle from setpoint)
+    desiredYaw2 = aruwlib::algorithms::limitVal<float>(
+        desiredYaw2 - Mpu6500::getImuAttitude().yaw + imuInitialValue,
+        0.0f,
+        180.0f
+    );
+
+    // desiredYaw3 = desiredYaw2 + Mpu6500::getImuAttitude().yaw - imuInitialValue;
+    // desiredYaw3 = aruwlib::algorithms::limitVal<float>(
+    //     desiredYaw3,
     //     0.0f + Mpu6500::getImuAttitude().yaw,
     //     180.0f + Mpu6500::getImuAttitude().yaw
     // );
 
-    desiredYaw3 = desiredYaw2 + Mpu6500::getImuAttitude().yaw - imuInitialValue;
-    desiredYaw3 = aruwlib::algorithms::limitVal<float>(
-        desiredYaw3,
-        0.0f + Mpu6500::getImuAttitude().yaw,
-        180.0f + Mpu6500::getImuAttitude().yaw
-    );
-
-    desiredYaw.setValue(desiredYaw2);
+    // desiredYaw.setValue(desiredYaw2);
     // position control on imu and encoder angle
-    turretSubsystem.updateCurrentTurretAngles();
-    currValueImuYawGimbal.setValue(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue);
     // float currYaw = turretSubsystem.getYawWrapped();
     // imuYawWrapped.setValue(Mpu6500::getImuAttitude().yaw);
     // imuTurretYawCombined.setValue(imuYawWrapped.getValue() + currYaw);
-    diff = currValueImuYawGimbal.difference(desiredYaw);
+
+
+    turretSubsystem.updateCurrentTurretAngles();
+    // the position controller is in world reference frame (i.e. add imu yaw to current encoder value)
+    currValueImuYawGimbal.setValue(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue);
+    // debug value - position error
+    diff = currValueImuYawGimbal.difference(desiredYaw2);
     yawImuPid.update(currValueImuYawGimbal.difference(desiredYaw));
     turretSubsystem.yawMotor.setDesiredOutput(yawImuPid.getValue());
 }
