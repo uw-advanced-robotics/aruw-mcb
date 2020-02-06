@@ -29,6 +29,7 @@
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"
+#include "src/aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
@@ -56,6 +57,7 @@ ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
+ChassisAutorotateCommand chassisAutoRotateCommand(&soldierChassis, &turretSubsystem);
 #endif
 
 ContiguousFloat desiredYaw(90.0f, 0.0f, 360.0f);
@@ -137,7 +139,8 @@ int main()
 
     desiredPitch = 90.0f;
 
-    chassisDriveCommand.initialize();
+    // chassisDriveCommand.initialize();
+    chassisAutoRotateCommand.initialize();
 
     while (1)
     {
@@ -152,7 +155,8 @@ int main()
         
         if (sendMotorTimeout.execute())
         {
-            chassisDriveCommand.execute();
+            chassisAutoRotateCommand.execute();
+            // chassisDriveCommand.execute();
             soldierChassis.refresh();
             // desiredPitch+= 0.1f;
             // mainScheduler.run();

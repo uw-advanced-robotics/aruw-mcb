@@ -1,6 +1,7 @@
-#include "chassis_drive_command.hpp"
+#include "chassis_autorotate_command.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/communication/remote.hpp"
+#include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -8,13 +9,15 @@ namespace aruwsrc
 namespace chassis
 {
 
-void ChassisDriveCommand::initialize()
+void ChassisAutorotateCommand::initialize()
 {}
 
-void ChassisDriveCommand::execute()
+void ChassisAutorotateCommand::execute()
 {
-    float chassisRotationDesiredWheelspeed = ChassisSubsystem::getChassisR()
-        * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    // calculate pid for chassis rotation
+    // returns a chassis rotation speed
+    float chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(turret->getYawAngleFromCenter(),
+        ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR);
 
     // what we will multiply x and y speed by to take into account rotation
     float rTranslationalGain
@@ -34,20 +37,14 @@ void ChassisDriveCommand::execute()
         chassisYDesiredWheelspeed, chassisRotationDesiredWheelspeed);
 }
 
-void ChassisDriveCommand::end(bool interrupted)
-{
-    if (interrupted)
-    {
-        chassis->setDesiredOutput(0.0f, 0.0f, 0.0f);
-    }
-    chassis->setDesiredOutput(0.0f, 0.0f, 0.0f);
-}
+void ChassisAutorotateCommand::end(bool interrupted)
+{}
 
-bool ChassisDriveCommand::isFinished() const
+bool ChassisAutorotateCommand::isFinished() const
 {
     return false;
 }
 
-}  // namespace chassis
+}  // namespace control
 
 }  // namespace aruwsrc
