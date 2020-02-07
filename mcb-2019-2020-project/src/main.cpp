@@ -9,6 +9,8 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/sentinel_drive_subsystem.hpp"
 #include "src/aruwsrc/control/sentinel_drive_random_command.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_drive_subsystem.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_drive_random_command.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
@@ -55,7 +57,6 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&sentinelDriveSubsystem);
     sentinelDriveSubsystem.setDefaultCommand(&sentinelRandomDriveCommand);
     #endif
-
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill

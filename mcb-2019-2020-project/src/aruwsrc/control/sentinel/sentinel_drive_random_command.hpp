@@ -2,7 +2,7 @@
 #define __COMMAND_SENTINEL_DRIVE_RANDOM_HPP__
 
 #include "src/aruwlib/control/command.hpp"
-#include "src/aruwsrc/control/sentinel_drive_subsystem.hpp"
+#include "sentinel_drive_subsystem.hpp"
 #include "modm/processing/timer.hpp"
 
 using namespace aruwlib::control;
