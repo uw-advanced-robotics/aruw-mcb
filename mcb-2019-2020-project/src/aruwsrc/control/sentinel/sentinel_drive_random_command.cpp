@@ -21,7 +21,7 @@ namespace control
     {
         if (this->sleepTimeout.isExpired()) {
             this->sleepTimeout.restart(CHANGE_TIME_INTERVAL);
-            currentRPM = rand() % MAX_RPM + 1;
+            currentRPM = rand() % MAX_RPM + 1;  // NOLINT
             if (currentRPM < MAX_RPM / 2) {
                 currentRPM -= MAX_RPM;
             }
