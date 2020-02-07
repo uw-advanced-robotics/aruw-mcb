@@ -7,8 +7,8 @@
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-#include "src/aruwsrc/control/sentinel_drive_subsystem.hpp"
-#include "src/aruwsrc/control/sentinel_drive_random_command.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_drive_subsystem.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_drive_random_command.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
@@ -24,6 +24,7 @@ ChassisSubsystem soldierChassis;
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #elif defined(TARGET_SENTRY)
 aruwsrc::control::SentinelDriveSubsystem sentinelDriveSubsystem;
+aruwsrc::control::SentinelDriveRandomCommand sentinelRandomDriveCommand(&sentinelDriveSubsystem)
 #else  // error
 #error "select soldier robot type only"
 #endif
@@ -51,13 +52,9 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
     soldierChassis.setDefaultCommand(&chassisDriveCommand);
     #elif defined(TARGET_SENTRY)
-    CommandScheduler::registerSubsystem(&sentinelDriveSubsystem);
+    CommandScheduler::registerSubsystem(&sentinelDriveSubsystem);    
+    sentinelDriveSubsystem.setDefaultCommand(&sentinelRandomDriveCommand);
     #endif
-
-    modm::SmartPointer sentinelRandomDriveCommand(
-        new aruwsrc::control::SentinelDriveRandomCommand(&sentinelDriveSubsystem));
-    
-    sentinelDriveSubsystem.setDefaultCommand(sentinelRandomDriveCommand);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
