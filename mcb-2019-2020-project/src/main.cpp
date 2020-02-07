@@ -24,7 +24,7 @@ ChassisSubsystem soldierChassis;
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #elif defined(TARGET_SENTRY)
 aruwsrc::control::SentinelDriveSubsystem sentinelDriveSubsystem;
-aruwsrc::control::SentinelDriveRandomCommand sentinelRandomDriveCommand(&sentinelDriveSubsystem)
+aruwsrc::control::SentinelDriveRandomCommand sentinelRandomDriveCommand(&sentinelDriveSubsystem);
 #else  // error
 #error "select soldier robot type only"
 #endif
@@ -52,7 +52,7 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
     soldierChassis.setDefaultCommand(&chassisDriveCommand);
     #elif defined(TARGET_SENTRY)
-    CommandScheduler::registerSubsystem(&sentinelDriveSubsystem);
+    CommandScheduler::getMainScheduler().registerSubsystem(&sentinelDriveSubsystem);
     sentinelDriveSubsystem.setDefaultCommand(&sentinelRandomDriveCommand);
     #endif
 
