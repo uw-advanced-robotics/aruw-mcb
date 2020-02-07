@@ -46,7 +46,7 @@ int main()
 
     modm::SmartPointer sentinelRandomDriveCommand(
         new aruwsrc::control::SentinelDriveRandomCommand(&sentinelDriveSubsystem));
-    
+
     sentinelDriveSubsystem.setDefaultCommand(sentinelRandomDriveCommand);
 
     // timers
