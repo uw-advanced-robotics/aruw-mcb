@@ -52,7 +52,7 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
     soldierChassis.setDefaultCommand(&chassisDriveCommand);
     #elif defined(TARGET_SENTRY)
-    CommandScheduler::registerSubsystem(&sentinelDriveSubsystem);    
+    CommandScheduler::registerSubsystem(&sentinelDriveSubsystem);
     sentinelDriveSubsystem.setDefaultCommand(&sentinelRandomDriveCommand);
     #endif
 
