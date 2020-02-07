@@ -35,26 +35,27 @@ namespace control
         motor->setDesiredOutput(pid->getValue());
     }
 
-    // Returns the absolute position of the sentinel on the rail with respect to the first rail end that was hit
-    float SentinelDriveSubsystem::absolutePosition () 
+    // Returns the absolute position of the sentinel on the rail with respect to the first rail
+    // end that was hit
+    float SentinelDriveSubsystem::absolutePosition ()
     {
         return ((distanceFromEncoder(&this->leftWheel) - leftZeroRailOffset) +
             (distanceFromEncoder(&this->rightWheel) - rightZeroRailOffset)) / 2;
-    }  
+    }
 
-    // Call when rail is hit to set the offset or the 
+    // Call when rail is hit to set the offset or the
     // Sets the offset field value every time a rails is hit
     // Only sets the offset when the rail end that was first hit is hit again, or a rail end
     // is hit for the first time
     void SentinelDriveSubsystem::resetOffsetFromLimitterSwitch ()
     {
-        if(Board::AnalogInPinS::read()){// DigitalPin where LimitterSwitch is placed 
+        if(Board::AnalogInPinS::read()){  // DigitalPin where LimitterSwitch is placed
          leftZeroRailOffset = distanceFromEncoder(&this->leftWheel);
          rightZeroRailOffset = distanceFromEncoder(&this->rightWheel);
         }
     }
 
-    // Returns the distance covered by the sentinel wheel on the rail 
+    // Returns the distance covered by the sentinel wheel on the rail
     // with respect to the encoders
     // Equation used: Arc Length = Angle * numberOfRotations * radius
     // Here we get the radius from the getEncoderUnwrapped function
