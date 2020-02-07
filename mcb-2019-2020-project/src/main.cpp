@@ -78,18 +78,18 @@ void runTurretAlgorithm()
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value
     float userChange = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f;
-    if (fabs(userChange) < 0.000001) {
-        /// \todo test this
-        imuInitialValue = Mpu6500::getImuAttitude().yaw;
-    }
+    // if (fabs(userChange) < 0.000001) {
+    //     /// \todo test this
+    //     imuInitialValue = Mpu6500::getImuAttitude().yaw;
+    // }
     desiredYaw2 -= userChange;
     // we must limit the input between 0 and 180 degrees relative to the chassis
     // limit the angle of the user angle in chassis frame (i.e. subtract away imu yaw angle from setpoint)
-    desiredYaw2 = aruwlib::algorithms::limitVal<float>(
-        desiredYaw2 - Mpu6500::getImuAttitude().yaw + imuInitialValue,
-        0.0f,
-        180.0f
-    );
+    // desiredYaw2 = aruwlib::algorithms::limitVal<float>(
+    //     desiredYaw2,
+    //     0.0f + Mpu6500::getImuAttitude().yaw + imuInitialValue,
+    //     180.0f + Mpu6500::getImuAttitude().yaw + imuInitialValue
+    // );
 
     // desiredYaw3 = desiredYaw2 + Mpu6500::getImuAttitude().yaw - imuInitialValue;
     // desiredYaw3 = aruwlib::algorithms::limitVal<float>(
@@ -110,7 +110,8 @@ void runTurretAlgorithm()
     currValueImuYawGimbal.setValue(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue);
     // debug value - position error
     diff = currValueImuYawGimbal.difference(desiredYaw2);
-    yawImuPid.update(currValueImuYawGimbal.difference(desiredYaw));
+    diff = limitVal<float>(diff, -90.0f, 90.0f);
+    yawImuPid.update(diff); // currValueImuYawGimbal.difference(desiredYaw2));
     turretSubsystem.yawMotor.setDesiredOutput(yawImuPid.getValue());
 }
 
