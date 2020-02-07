@@ -56,11 +56,6 @@ int main()
     sentinelDriveSubsystem.setDefaultCommand(&sentinelRandomDriveCommand);
     #endif
 
-    modm::SmartPointer sentinelRandomDriveCommand(
-        new aruwsrc::control::SentinelDriveRandomCommand(&sentinelDriveSubsystem));
-
-    sentinelDriveSubsystem.setDefaultCommand(sentinelRandomDriveCommand);
-
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
