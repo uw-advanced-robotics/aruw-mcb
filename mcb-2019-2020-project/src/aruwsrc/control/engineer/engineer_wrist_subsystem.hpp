@@ -37,7 +37,7 @@ class EngineerWristSubsystem : public Subsystem
     bool wristCalibrateHere(void);
 
  private:
-   static constexpr float WRIST_GEAR_RATIO = 36.0f;
+   static constexpr float WRIST_GEAR_RATIO = 19.0f;
    
    static const aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR1;
    static const aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR2;
@@ -47,9 +47,9 @@ class EngineerWristSubsystem : public Subsystem
    aruwlib::motor::DjiMotor rightMotor;
 
    // PID values
-   const float PID_P = 10.0f;
+   const float PID_P = 80000.0f; // TODO
    const float PID_I = 0.0f;
-   const float PID_D = 0.0f;
+   const float PID_D = 800000.0f;
    const float PID_MAX_ERROR_SUM = 0.0f;
    const float PID_MAX_OUTPUT = 16000;
 

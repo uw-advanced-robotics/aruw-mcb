@@ -19,7 +19,14 @@ namespace control
 
     void EngineerWristSubsystem::refresh()
     {
-        wristRunPositionPid();
+        if (wristIsCalibrated)
+        {
+            wristRunPositionPid();
+        }
+        else
+        {
+            wristCalibrateHere();
+        }
     }
 
     void EngineerWristSubsystem::setWristAngleLeft(float newAngle)
