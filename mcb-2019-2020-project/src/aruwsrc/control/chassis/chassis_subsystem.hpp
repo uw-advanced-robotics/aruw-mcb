@@ -27,7 +27,7 @@ class ChassisSubsystem : public Subsystem {
     // public constants
     // max wheel speed, measured in rpm of the encoder (rather than shaft)
     // we use this for wheel speed since this is how dji's motors measures motor speed
-    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;
+    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 9000;  // todo test
 
     // the minimum desired wheel speed for chassis rotation, measured in rpm before
     // we start slowing down translational speed
@@ -36,7 +36,7 @@ class ChassisSubsystem : public Subsystem {
  private:
     #if defined(TARGET_SOLDIER)
     // velocity pid gains and constants
-    const float VELOCITY_PID_KP            = 15.0f;
+    const float VELOCITY_PID_KP            = 10.0f;  // todo test
     const float VELOCITY_PID_KI            = 0.0f;
     const float VELOCITY_PID_KD            = 0.0f;
     const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
@@ -46,7 +46,11 @@ class ChassisSubsystem : public Subsystem {
      * The corresponding speed controller output torque current range is 
      * -20 ~ 0 ~ 20 A.
      */
-    static constexpr float VELOCITY_PID_MAX_OUTPUT = 16000.0f;
+    static constexpr float VELOCITY_PID_MAX_OUTPUT = 7000.0f;
+
+    static const int MIN_POWER_BUFFER_BEFORE_LIMITING = 50;
+    // the maximum current we will output, in the same units as what we send to the motors
+    static const int MAX_TOTAL_CHASSIS_CURRENT = VELOCITY_PID_MAX_OUTPUT * 4;
 
     /**
      * Rotation pid:
@@ -92,6 +96,9 @@ class ChassisSubsystem : public Subsystem {
     const float VELOCITY_PID_KD            = 0.0f;
     const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
     const float VELOCITY_PID_MAX_OUTPUT    = 0.0f;
+    static const int MIN_POWER_BUFFER_BEFORE_LIMITING = 0;
+    // the maximum current we will output, in the same units as what we send to the motors
+    static const int MAX_TOTAL_CHASSIS_CURRENT = VELOCITY_PID_MAX_OUTPUT * 4;
 
     // rotation pid gains and constants
     // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
@@ -122,6 +129,9 @@ class ChassisSubsystem : public Subsystem {
     const float VELOCITY_PID_KD            = 0.0f;
     const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
     const float VELOCITY_PID_MAX_OUTPUT    = 0.0f;
+    static const int MIN_POWER_BUFFER_BEFORE_LIMITING = 0;
+    // the maximum current we will output, in the same units as what we send to the motors
+    static const int MAX_TOTAL_CHASSIS_CURRENT = VELOCITY_PID_MAX_OUTPUT * 4;
 
     // rotation pid gains and constants
     // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
@@ -175,6 +185,13 @@ class ChassisSubsystem : public Subsystem {
 
     // rotation pid variables
     aruwlib::algorithms::ExtendedKalman chassisRotationErrorKalman;
+
+    // low pass filtered remote analog input, base low pass before any
+    // filtering on digital control is added on
+    static constexpr float REMOTE_LOW_PASS_ALPHA = 0.154f;
+    float xLowPass = 0.0f;
+    float yLowPass = 0.0f;
+    float rLowPass = 0.0f;
 
  public:
     ChassisSubsystem(
@@ -240,13 +257,14 @@ class ChassisSubsystem : public Subsystem {
     float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
     // Returns the value used for chassis movement forward and backward, between -1 and 1
-    static float getChassisX();
+    // this is filtered to mitigate the 13 ms delay between between the dr16 and remote
+    float getChassisX();
 
     // Returns the value used for chassis movement side to side, between -1 and 1
-    static float getChassisY();
+    float getChassisY();
 
     // Returns the value used for chassis rotation, between -1 and 1
-    static float getChassisR();
+    float getChassisR();
 
  private:
     /**
@@ -254,6 +272,12 @@ class ChassisSubsystem : public Subsystem {
      * and sets the rpm of individual chassis motors
      */
     void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
+
+    /**
+     * Power limiting calculations, modifying current output to comply with referee
+     * system standards
+     */
+    void chassisPowerLimit();
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,
