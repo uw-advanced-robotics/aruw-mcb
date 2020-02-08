@@ -1,6 +1,7 @@
 #include "chassis_subsystem.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/communication/remote.hpp"
+#include "src/aruwlib/communication/serial/ref_serial.hpp"
 
 using namespace aruwlib;
 using namespace aruwlib::algorithms;
@@ -21,6 +22,7 @@ namespace chassis
         updateMotorRpmPid(&leftBackVelocityPid, &leftBackMotor, leftBackRpm);
         updateMotorRpmPid(&rightFrontVelocityPid, &rightFrontMotor, rightFrontRpm);
         updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, rightBackRpm);
+        chassisPowerLimit();
     }
 
     void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
@@ -124,31 +126,88 @@ namespace chassis
         return rTranslationalGain;
     }
 
+    float low_pass_filter(float prev_value, float new_value, float alpha) {
+        if (alpha < 0.0f || alpha > 1.0f) {
+            return 0.0f;
+        }
+	    return alpha * new_value + (1.0f - alpha) * prev_value;
+    }
+
     float ChassisSubsystem::getChassisX()
     {
-        return aruwlib::algorithms::limitVal<float>(
+        xLowPass = low_pass_filter(xLowPass, aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_VERTICAL)
             + static_cast<float>(Remote::keyPressed(Remote::Key::W))
             - static_cast<float>(Remote::keyPressed(Remote::Key::S)), -1.0f, 1.0f
-        );
+        ), REMOTE_LOW_PASS_ALPHA);
+        return xLowPass;
     }
 
     float ChassisSubsystem::getChassisY()
     {
-        return aruwlib::algorithms::limitVal<float>(
+        yLowPass = low_pass_filter(yLowPass, aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_HORIZONTAL)
             + static_cast<float>(Remote::keyPressed(Remote::Key::A))
             - static_cast<float>(Remote::keyPressed(Remote::Key::D)), -1.0f, 1.0f
-        );
+        ), REMOTE_LOW_PASS_ALPHA);
+        return yLowPass;
     }
 
     float ChassisSubsystem::getChassisR()
     {
-        return aruwlib::algorithms::limitVal<float>(
+        rLowPass = low_pass_filter(rLowPass, aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL)
             + static_cast<float>(Remote::keyPressed(Remote::Key::Q))
             - static_cast<float>(Remote::keyPressed(Remote::Key::E)), -1.0f, 1.0f
-        );
+        ), REMOTE_LOW_PASS_ALPHA);
+        return rLowPass;
+    }
+
+    void ChassisSubsystem::chassisPowerLimit()
+    {
+        /// \todo fix this
+        bool refereeSystemConnected = true;
+            // run low pass filter on power buffer input
+            // run low pass filter on motor current input
+
+        float allMotorCurrentLimit;
+        float chassisPowerBuffer = aruwlib::serial::RefSerial::getRefSerial().getRobotData().chassis.powerBuffer;
+        if(refereeSystemConnected && chassisPowerBuffer < MIN_POWER_BUFFER_BEFORE_LIMITING)
+        {
+            // the total current for all four wheels is limited by the fraction limit
+            // the fraction is (power buffer / MIN_POWER_BUFFER_BEFORE_LIMITING)^2
+            // so it will be less than one if MIN_POWER_BUFFER_BEFORE_LIMITING > power buffer
+            // this is limited between 0 and 1 so it can only make the total current
+            // smaller
+            float chassisPowerFractionLimit = aruwlib::algorithms::limitVal<float>(
+                (chassisPowerBuffer * chassisPowerBuffer)
+                / (static_cast<float>(MIN_POWER_BUFFER_BEFORE_LIMITING * MIN_POWER_BUFFER_BEFORE_LIMITING)),
+                0.0f, 1.0f
+            );
+            allMotorCurrentLimit = chassisPowerFractionLimit * MAX_TOTAL_CHASSIS_CURRENT;
+        }
+        else
+        {
+            allMotorCurrentLimit = MAX_TOTAL_CHASSIS_CURRENT;
+        }
+
+        // total current output desired, to be compared with current limit
+        float allMotorCurrentOutput =
+            abs(leftFrontMotor.getOutputDesired())
+            + abs(leftBackMotor.getOutputDesired())
+            + abs(rightFrontMotor.getOutputDesired())
+            + abs(rightBackMotor.getOutputDesired());
+        // limit the chassis output based on fraction between what our current output is
+        // and what we realistically can output limited.
+        // only limit if the current output is greater than the current limit (what was calculated above)
+        if (allMotorCurrentOutput > allMotorCurrentLimit && allMotorCurrentOutput != 0)
+        {
+            float chassisOutputFraction = allMotorCurrentLimit / allMotorCurrentOutput;
+            leftFrontMotor.setDesiredOutput(leftFrontMotor.getOutputDesired() * chassisOutputFraction);
+            leftBackMotor.setDesiredOutput(leftBackMotor.getOutputDesired() * chassisOutputFraction);
+            rightFrontMotor.setDesiredOutput(rightFrontMotor.getOutputDesired() * chassisOutputFraction);
+            rightBackMotor.setDesiredOutput(rightBackMotor.getOutputDesired() * chassisOutputFraction);
+        }
     }
 }  // namespace chassis
 
