@@ -47,7 +47,7 @@ ExampleSubsystem frictionWheelSubsystem;
 #endif
 
 #if defined(TARGET_ENGINEER)
-AgitatorSubsystem reservoir17mm(AgitatorSubsystem::AgitatorType::Engi1, 1.0f);
+AgitatorSubsystem reservoir17mm(AgitatorSubsystem::AgitatorType::Engi1, 19.0f);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -59,7 +59,7 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 
 #if defined(TARGET_ENGINEER)
 AgitatorCalibrateCommand reservoir17mmCalibrateCommand(&reservoir17mm);
-AgitatorRotateCommand reservoir17mmRotateCommand(&reservoir17mm, 2.0f * aruwlib::algorithms::PI / 3, 500.0f, 0.0f);
+AgitatorRotateCommand reservoir17mmRotateCommand(&reservoir17mm, 2.0f * aruwlib::algorithms::PI / 3.0f, 500.0f, 0.0f);
 #endif
 
 using namespace aruwsrc::chassis;

@@ -76,9 +76,9 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     const float PID_HERO2_MAX_ERR_SUM = 0.0f;
 
     // pid terms for engineer reservoir 17mm agitator
-    const float PID_ENGI1_P = 1000.0f;
+    const float PID_ENGI1_P = 80000.0f;
     const float PID_ENGI1_I = 0.0f;
-    const float PID_ENGI1_D = 1000.0f;
+    const float PID_ENGI1_D = 800000.0f;
     const float PID_ENGI1_MAX_ERR_SUM = 0.0f;
 
     const aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR5;
