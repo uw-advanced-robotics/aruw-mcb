@@ -17,67 +17,19 @@ class EngineerWristRotateCommand : Command
 {
  public:
     static const uint32_t WRIST_MIN_ROTATE_TIME = 300;
-
+    
     EngineerWristRotateCommand(
         EngineerWristSubsystem* wrist,
         float wristAngleChange,
         float wristRotateTime
     );
 
-    /**
-     * The initial subroutine of a command.  Called once when the command is
-     * initially scheduled.
-     */
     void initialize();
 
-    /**
-     * The main body of a command.  Called repeatedly while the command is
-     * scheduled.
-     */
     void execute();
 
-    /**
-     * The action to take when the command ends.  Called when either the command
-     * finishes normally, or when it interrupted/canceled.
-     *
-     * @param interrupted whether the command was interrupted/canceled
-     */
     void end(bool interrupted);
 
-    /**
-     * Whether the command has finished.  Once a command finishes, the scheduler
-     * will call its end() method and un-schedule it.
-     *
-     * @return whether the command has finished.
-     */
-    bool isFinished() const;
-    
-    /**
-     * The initial subroutine of a command.  Called once when the command is
-     * initially scheduled.
-     */
-    void initialize();
-
-    /**
-     * The main body of a command.  Called repeatedly while the command is
-     * scheduled.
-     */
-    void execute();
-
-    /**
-     * The action to take when the command ends.  Called when either the command
-     * finishes normally, or when it interrupted/canceled.
-     *
-     * @param interrupted whether the command was interrupted/canceled
-     */
-    void end(bool interrupted);
-
-    /**
-     * Whether the command has finished.  Once a command finishes, the scheduler
-     * will call its end() method and un-schedule it.
-     *
-     * @return whether the command has finished.
-     */
     bool isFinished() const;
 
  private:
