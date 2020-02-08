@@ -45,11 +45,12 @@ class  Mpu6500 {
 
     static MahonyAhrs::attitude getImuAttitude();
 
+     // for converting from gyro values we receive to more conventional deg/sec
+     static constexpr float LSB_D_PER_S_TO_D_PER_S = 16.384f;
+
  private:
      static constexpr float ACCELERATION_GRAVITY = 9.80665f;
 
-     // for converting from gyro values we receive to more conventional deg/sec
-     static constexpr float LSB_D_PER_S_TO_D_PER_S = 16.384f;
 
      static constexpr float ACCELERATION_SENSITIVITY = 4096.0f;
 
