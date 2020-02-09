@@ -46,9 +46,9 @@ class ChassisSubsystem : public Subsystem {
      * The corresponding speed controller output torque current range is 
      * -20 ~ 0 ~ 20 A.
      */
-    static constexpr float VELOCITY_PID_MAX_OUTPUT = 9000.0f;
+    static constexpr float VELOCITY_PID_MAX_OUTPUT = 10000.0f;
 
-    static const int MIN_POWER_BUFFER_BEFORE_LIMITING = 50;
+    static const int MIN_POWER_BUFFER_BEFORE_LIMITING = 60;
     // the maximum current we will output, in the same units as what we send to the motors
     static const int MAX_TOTAL_CHASSIS_CURRENT = VELOCITY_PID_MAX_OUTPUT * 4;
 
@@ -163,7 +163,7 @@ class ChassisSubsystem : public Subsystem {
     static constexpr aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID   = aruwlib::motor::MOTOR3;
     static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR1;
     static constexpr aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID  = aruwlib::motor::MOTOR4;
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS2;
+    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
     // motors
     aruwlib::motor::DjiMotor leftFrontMotor;
