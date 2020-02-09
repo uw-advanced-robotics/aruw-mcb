@@ -46,7 +46,7 @@ class ChassisSubsystem : public Subsystem {
      * The corresponding speed controller output torque current range is 
      * -20 ~ 0 ~ 20 A.
      */
-    static constexpr float VELOCITY_PID_MAX_OUTPUT = 7000.0f;
+    static constexpr float VELOCITY_PID_MAX_OUTPUT = 9000.0f;
 
     static const int MIN_POWER_BUFFER_BEFORE_LIMITING = 50;
     // the maximum current we will output, in the same units as what we send to the motors
