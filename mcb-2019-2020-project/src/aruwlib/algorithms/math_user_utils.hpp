@@ -11,6 +11,14 @@ namespace algorithms
 
 constexpr float PI = 3.1415926535897932384626f;
 
+inline float lowPassFilter(float prevValue, float newValue, float alpha)
+{
+    if (alpha < 0.0f || alpha > 1.0f) {
+        return 0.0f;
+    }
+    return alpha * newValue + (1.0f - alpha) * prevValue;
+}
+
 inline float degreesToRadians(float degrees)
 {
     return degrees * PI / 180.0f;

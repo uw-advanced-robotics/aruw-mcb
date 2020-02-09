@@ -126,16 +126,9 @@ namespace chassis
         return rTranslationalGain;
     }
 
-    float low_pass_filter(float prev_value, float new_value, float alpha) {
-        if (alpha < 0.0f || alpha > 1.0f) {
-            return 0.0f;
-        }
-	    return alpha * new_value + (1.0f - alpha) * prev_value;
-    }
-
     float ChassisSubsystem::getChassisX()
     {
-        xLowPass = low_pass_filter(xLowPass, aruwlib::algorithms::limitVal<float>(
+        xLowPass = lowPassFilter(xLowPass, limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_VERTICAL)
             + static_cast<float>(Remote::keyPressed(Remote::Key::W))
             - static_cast<float>(Remote::keyPressed(Remote::Key::S)), -1.0f, 1.0f
@@ -145,7 +138,7 @@ namespace chassis
 
     float ChassisSubsystem::getChassisY()
     {
-        yLowPass = low_pass_filter(yLowPass, aruwlib::algorithms::limitVal<float>(
+        yLowPass = lowPassFilter(yLowPass, limitVal<float>(
             Remote::getChannel(Remote::Channel::LEFT_HORIZONTAL)
             + static_cast<float>(Remote::keyPressed(Remote::Key::A))
             - static_cast<float>(Remote::keyPressed(Remote::Key::D)), -1.0f, 1.0f
@@ -155,7 +148,7 @@ namespace chassis
 
     float ChassisSubsystem::getChassisR()
     {
-        rLowPass = low_pass_filter(rLowPass, aruwlib::algorithms::limitVal<float>(
+        rLowPass = lowPassFilter(rLowPass, limitVal<float>(
             Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL)
             + static_cast<float>(Remote::keyPressed(Remote::Key::Q))
             - static_cast<float>(Remote::keyPressed(Remote::Key::E)), -1.0f, 1.0f
