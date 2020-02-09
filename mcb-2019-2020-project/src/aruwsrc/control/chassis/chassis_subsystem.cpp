@@ -126,6 +126,16 @@ namespace chassis
         return rTranslationalGain;
     }
 
+    float xLowPass = 0.0f;
+
+    float low_pass_filter(float prev_value, float new_value, float alpha) {
+        if (alpha < 0.0f || alpha > 1.0f) {
+            return 0.0f;
+        }
+	    return alpha * new_value + (1.0f - alpha) * prev_value;
+    }
+
+
     float ChassisSubsystem::getChassisX()
     {
         xLowPass = lowPassFilter(xLowPass, limitVal<float>(

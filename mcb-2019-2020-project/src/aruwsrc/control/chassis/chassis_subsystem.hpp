@@ -27,7 +27,7 @@ class ChassisSubsystem : public Subsystem {
     // public constants
     // max wheel speed, measured in rpm of the encoder (rather than shaft)
     // we use this for wheel speed since this is how dji's motors measures motor speed
-    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 9000;  // todo test
+    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;  // todo test
 
     // the minimum desired wheel speed for chassis rotation, measured in rpm before
     // we start slowing down translational speed
@@ -163,7 +163,7 @@ class ChassisSubsystem : public Subsystem {
     static constexpr aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID   = aruwlib::motor::MOTOR3;
     static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR1;
     static constexpr aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID  = aruwlib::motor::MOTOR4;
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS2;
 
     // motors
     aruwlib::motor::DjiMotor leftFrontMotor;

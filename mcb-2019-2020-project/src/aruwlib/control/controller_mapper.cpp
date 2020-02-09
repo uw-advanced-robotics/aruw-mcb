@@ -1,4 +1,7 @@
 #include "controller_mapper.hpp"
+#include "src/main.hpp"
+
+extern aruwlib::control::CommandScheduler mainScheduler;
 
 namespace aruwlib {
 
