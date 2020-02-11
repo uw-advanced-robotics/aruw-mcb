@@ -60,59 +60,57 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 ChassisAutorotateCommand chassisAutoRotateCommand(&soldierChassis, &turretSubsystem);
 #endif
 
+// variables for world relative control
 float desiredYaw2 = 0.0f;
-float desiredYaw3 = 0.0f;
-ContiguousFloat desiredYaw(90.0f, 0.0f, 360.0f);
 ContiguousFloat currValueImuYawGimbal(0.0f, 0.0f, 360.0f);
-float desiredPitch = 0.0f;
-
 float imuInitialValue = 0.0f;
 modm::Pid<float> yawImuPid(2500.0f, 0.0f, 12000.0f, 0.0f, 30000.0f);
-
 float diff=0.0f;
+// end variables for world relative control
 
-// ContiguousFloat imuYawWrapped(0.0f, 0.0f, 360.0f);
-// ContiguousFloat imuTurretYawCombined(0.0f, 0.0f, 360.0f);
+// custom turret PD controller
+float kp = 10.0f; // 2500.0f;
+float kd = 100.0f; // 12000.0f;
+float maxAngleError = 35.0f;
+float maxD = 100000.0f;
+float maxOutput = 10000.0f;  // 32000.0f;
+
+float currErrorP;
+float currErrorD;
+float output;
+
+ExtendedKalman proportionalKalman(1.0f, 0.0f);
+ExtendedKalman derivativeKalman(1.0f, 0.0f);
+
+float turretPID(float angleError, float degreesPerSecond)
+{
+    // p
+    currErrorP = kp * limitVal<float>(proportionalKalman.filterData(angleError),
+        -maxAngleError, maxAngleError);
+    // d
+    currErrorD = limitVal<float>(derivativeKalman.filterData(degreesPerSecond), -maxD, maxD);
+    // total
+    output = limitVal<float>(currErrorP + currErrorD, -maxOutput, maxOutput);
+    return output;
+}
+// end custom PD controller
+
 void runTurretAlgorithm()
 {
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value
     float userChange = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f;
-    // if (fabs(userChange) < 0.000001) {
-    //     /// \todo test this
-    //     imuInitialValue = Mpu6500::getImuAttitude().yaw;
-    // }
     desiredYaw2 -= userChange;
-    // we must limit the input between 0 and 180 degrees relative to the chassis
-    // limit the angle of the user angle in chassis frame (i.e. subtract away imu yaw angle from setpoint)
-    // desiredYaw2 = aruwlib::algorithms::limitVal<float>(
-    //     desiredYaw2,
-    //     0.0f + Mpu6500::getImuAttitude().yaw + imuInitialValue,
-    //     180.0f + Mpu6500::getImuAttitude().yaw + imuInitialValue
-    // );
-
-    // desiredYaw3 = desiredYaw2 + Mpu6500::getImuAttitude().yaw - imuInitialValue;
-    // desiredYaw3 = aruwlib::algorithms::limitVal<float>(
-    //     desiredYaw3,
-    //     0.0f + Mpu6500::getImuAttitude().yaw,
-    //     180.0f + Mpu6500::getImuAttitude().yaw
-    // );
-
-    // desiredYaw.setValue(desiredYaw2);
-    // position control on imu and encoder angle
-    // float currYaw = turretSubsystem.getYawWrapped();
-    // imuYawWrapped.setValue(Mpu6500::getImuAttitude().yaw);
-    // imuTurretYawCombined.setValue(imuYawWrapped.getValue() + currYaw);
-
-
     turretSubsystem.updateCurrentTurretAngles();
     // the position controller is in world reference frame (i.e. add imu yaw to current encoder value)
     currValueImuYawGimbal.setValue(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue);
-    // debug value - position error
     diff = currValueImuYawGimbal.difference(desiredYaw2);
     diff = limitVal<float>(diff, -90.0f, 90.0f);
-    yawImuPid.update(diff); // currValueImuYawGimbal.difference(desiredYaw2));
-    turretSubsystem.yawMotor.setDesiredOutput(yawImuPid.getValue());
+    float pidOutput = turretPID(currValueImuYawGimbal.getValue(),
+        turretSubsystem.yawMotor.getShaftRPM() * 6.0f + Mpu6500::getGz());
+    yawImuPid.update(diff);
+    turretSubsystem.yawMotor.setDesiredOutput(pidOutput);
+    // turretSubsystem.yawMotor.setDesiredOutput(yawImuPid.getValue());
 }
 
 int main()
@@ -162,8 +160,6 @@ int main()
         &agitatorShootSlowCommand
     );
     #endif
-
-    desiredPitch = 90.0f;
 
     desiredYaw2 = 90.0f;
     // chassisDriveCommand.initialize();

@@ -149,10 +149,10 @@ namespace sensors {
         }
     }
 
-    // get gyro reading on z-axis
-    int16_t Mpu6500::getGz() {
+    // get gyro reading on z-axis (degrees per second)
+    float Mpu6500::getGz() {
         if (imuInitialized) {
-            return mpu6500Data.gz;
+            return mpu6500Data.gz / LSB_D_PER_S_TO_D_PER_S;
         } else {
             // NON-FATAL-ERROR-CHECK
             return -1;
