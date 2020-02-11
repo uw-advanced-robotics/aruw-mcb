@@ -85,8 +85,8 @@ ExtendedKalman derivativeKalman(1.0f, 0.0f);
 float turretPID(float angleError, float degreesPerSecond)
 {
     // p
-    currErrorP = kp * limitVal<float>(proportionalKalman.filterData(angleError),
-        -maxAngleError, maxAngleError);
+    currErrorP = kp * proportionalKalman.filterData(angleError);// limitVal<float>(proportionalKalman.filterData(angleError),
+        // -maxAngleError, maxAngleError);
     // d
     currErrorD = limitVal<float>(derivativeKalman.filterData(degreesPerSecond), -maxD, maxD);
     // total
@@ -106,7 +106,7 @@ void runTurretAlgorithm()
     currValueImuYawGimbal.setValue(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue);
     diff = currValueImuYawGimbal.difference(desiredYaw2);
     diff = limitVal<float>(diff, -90.0f, 90.0f);
-    float pidOutput = turretPID(currValueImuYawGimbal.getValue(),
+    float pidOutput = turretPID(diff,
         turretSubsystem.yawMotor.getShaftRPM() * 6.0f + Mpu6500::getGz());
     yawImuPid.update(diff);
     turretSubsystem.yawMotor.setDesiredOutput(pidOutput);
@@ -198,7 +198,7 @@ int main()
             // // aruwlib::control::CommandScheduler::run();
             // turretSubsystem.updateCurrentTurretAngles();
             // turretSubsystem.runTurretPositionPid();
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            // aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
         modm::delayMicroseconds(10);
