@@ -69,11 +69,11 @@ float diff=0.0f;
 // end variables for world relative control
 
 // custom turret PD controller
-float kp = 10.0f; // 2500.0f;
-float kd = 100.0f; // 12000.0f;
+float kpYaw = 4000.0f; // 2500.0f;
+float kdYaw = 100.0f; // 12000.0f;
 float maxAngleError = 35.0f;
 float maxD = 100000.0f;
-float maxOutput = 10000.0f;  // 32000.0f;
+float maxOutput = 32000.0f;  // 32000.0f;
 
 float currErrorP;
 float currErrorD;
@@ -82,16 +82,26 @@ float output;
 ExtendedKalman proportionalKalman(1.0f, 0.0f);
 ExtendedKalman derivativeKalman(1.0f, 0.0f);
 
+int averageDIndex = 0;
+float dprev[10] = {0};
+float outputLowPass = 0.0f;
+
 float turretPID(float angleError, float degreesPerSecond)
 {
     // p
-    currErrorP = kp * proportionalKalman.filterData(angleError);// limitVal<float>(proportionalKalman.filterData(angleError),
+    currErrorP = kpYaw * proportionalKalman.filterData(angleError);// limitVal<float>(proportionalKalman.filterData(angleError),
         // -maxAngleError, maxAngleError);
     // d
-    currErrorD = limitVal<float>(derivativeKalman.filterData(degreesPerSecond), -maxD, maxD);
+    dprev[averageDIndex] = -kdYaw * limitVal<float>(derivativeKalman.filterData(degreesPerSecond), -maxD, maxD);
+    for (int i = 0; i < 10; i++) {
+        currErrorD += dprev[i];
+    }
+    currErrorD /= 10.0f;
+    averageDIndex = (averageDIndex + 1) % 10;
     // total
     output = limitVal<float>(currErrorP + currErrorD, -maxOutput, maxOutput);
-    return output;
+    outputLowPass = 0.7f * output + 0.3f * outputLowPass;
+    return outputLowPass;
 }
 // end custom PD controller
 
@@ -198,7 +208,7 @@ int main()
             // // aruwlib::control::CommandScheduler::run();
             // turretSubsystem.updateCurrentTurretAngles();
             // turretSubsystem.runTurretPositionPid();
-            // aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
         modm::delayMicroseconds(10);
