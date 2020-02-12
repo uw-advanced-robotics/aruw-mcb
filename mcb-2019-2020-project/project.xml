@@ -17,6 +17,8 @@
     <option name="modm:platform:uart:2:buffer.tx">256</option>
     <option name="modm:platform:uart:6:buffer.rx">256</option>
     <option name="modm:platform:uart:6:buffer.tx">256</option>
+    <option name="modm:platform:uart:8:buffer.rx">512</option>
+    <option name="modm:platform:uart:8:buffer.tx">512</option>
 
   </options>
   <modules>
@@ -33,6 +35,7 @@
     <module>modm:platform:uart:1</module>
     <module>modm:platform:uart:2</module>
     <module>modm:platform:uart:6</module>
+    <module>modm:platform:uart:8</module>
     <module>modm:build:scons</module>
     <module>modm:cmsis:device</module>
     <module>modm:platform:can:1</module>

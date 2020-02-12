@@ -24,6 +24,8 @@ env["CONFIG_PROJECT_NAME"] = project_name
 env.SConscript(dirs=generated_paths, exports="env")
 
 env.Append(CPPPATH=".")
+env.Append(CPPPATH=['./src/osdklib'])
+env.Append(CPPFLAG=['-Wno-sign-compare'])
 ignored = [".lbuild_cache", build_path, "robot-type"] + generated_paths
 sources = []
 # Finding application sources

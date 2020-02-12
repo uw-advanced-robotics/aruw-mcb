@@ -189,9 +189,11 @@
 #include "platform\uart\uart_1.hpp"
 #include "platform\uart\uart_2.hpp"
 #include "platform\uart\uart_6.hpp"
+#include "platform\uart\uart_8.hpp"
 #include "platform\uart\uart_base.hpp"
 #include "platform\uart\uart_baudrate.hpp"
 #include "platform\uart\uart_hal_1.hpp"
 #include "platform\uart\uart_hal_2.hpp"
 #include "platform\uart\uart_hal_6.hpp"
+#include "platform\uart\uart_hal_8.hpp"
 #endif // MODM_PLATFORM_HPP
