@@ -15,13 +15,15 @@ namespace control
     TurretSubsystem::TurretSubsystem() :
         turretStatus(IDLE),
         pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true),
-        yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false) 
+        yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false)
     {
-        turretManual = new aruwsrc::control::TurretManualCommand(*this);
-        turretCV = new aruwsrc::control::TurretCVCommand(*this);
+        turretManual = new aruwsrc::control::TurretManualCommand(this);
+        turretCV = new aruwsrc::control::TurretCVCommand(this);
         setDefaultCommand(modm::SmartPointer(turretManual));
         turretStatus = MANUAL;
-        IoMapper::addHoldMapping(IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}), modm::SmartPointer(turretCV));
+        IoMapper::addHoldMapping(IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH,
+                                                     Remote::SwitchState::UP, {}),
+                                                     modm::SmartPointer(turretCV));
     }
 
     float TurretSubsystem::getYawAngle(void) {
@@ -40,18 +42,16 @@ namespace control
         return getVelocity(pitchMotor);
     }
 
-    float TurretSubsystem::getAngle(aruwlib::motor::DjiMotor &motor) {
+    float TurretSubsystem::getAngle(const aruwlib::motor::DjiMotor &motor) {
         return motor.encStore.getEncoderWrapped();
     }
 
     // units: degrees per second
-    float TurretSubsystem::getVelocity(aruwlib::motor::DjiMotor &motor) {
+    float TurretSubsystem::getVelocity(const aruwlib::motor::DjiMotor &motor) {
         return 360 * motor.getShaftRPM() / 60;
     }
 
-    void TurretSubsystem::refresh() {
-        
-    }
+    void TurretSubsystem::refresh() {}
 
     void TurretSubsystem::setPitchMotorOutput(float out) {
         pitchMotor.setDesiredOutput(out);
@@ -61,6 +61,6 @@ namespace control
         yawMotor.setDesiredOutput(out);
     }
 
-}  // control
+}  // namespace control
 
-}  // aruwsrc
+}  // namespace aruwsrc

@@ -16,7 +16,7 @@ namespace control
 class TurretSubsystem;
 class TurretCVCommand : public Command {
  public:
-    explicit TurretCVCommand(TurretSubsystem &subsystem);
+    explicit TurretCVCommand(TurretSubsystem *subsystem);
 
     void initialize(void) {}
 
@@ -44,7 +44,7 @@ class TurretCVCommand : public Command {
 
     uint16_t remoteControlScaler = 0.5;
 
-    TurretSubsystem &turretSubsystem;
+    TurretSubsystem *turretSubsystem;
 
     aruwlib::algorithms::ContiguousFloat yawTargetAngle;
     aruwlib::algorithms::ContiguousFloat pitchTargetAngle;
@@ -55,8 +55,8 @@ class TurretCVCommand : public Command {
     void updateTurretPosition(void);
 };
 
-}  // control
+}  // namespace control
 
-}  // aruwsrc
+}  // namespace aruwsrc
 
 #endif

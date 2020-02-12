@@ -7,12 +7,12 @@ namespace aruwsrc
 
 namespace control
 {
-TurretManualCommand::TurretManualCommand(TurretSubsystem &subsystem) :
+TurretManualCommand::TurretManualCommand(TurretSubsystem *subsystem) :
     turretSubsystem(subsystem),
     manualYawPid(YAW_P, YAW_I, YAW_D, YAW_MAX_ERROR_SUM, YAW_MAX_OUTPUT),
     manualPitchPid(PITCH_P, PITCH_I, PITCH_D, PITCH_MAX_ERROR_SUM, PITCH_MAX_OUTPUT)
 {
-    addSubsystemRequirement(&subsystem);
+    addSubsystemRequirement(subsystem);
 }
 
 float TurretManualCommand::getPitchOutput() {
@@ -44,15 +44,17 @@ void TurretManualCommand::yawIncrementVelocity(float velocity) {
 }
 
 void TurretManualCommand::updateTurretPosition() {
-    pitchToVelocity(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL) * remoteControlScaler);
-    yawToVelocity(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL) * remoteControlScaler);
-    manualPitchPid.update(pitchVelocityTarget - turretSubsystem.getPitchVelocity());
-    manualYawPid.update(yawVelocityTarget - turretSubsystem.getYawVelocity());
+    pitchToVelocity(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL)
+                    * remoteControlScaler);
+    yawToVelocity(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)
+                  * remoteControlScaler);
+    manualPitchPid.update(pitchVelocityTarget - turretSubsystem->getPitchVelocity());
+    manualYawPid.update(yawVelocityTarget - turretSubsystem->getYawVelocity());
 
-    turretSubsystem.setPitchMotorOutput(manualPitchPid.getValue());
-    turretSubsystem.setYawMotorOutput(manualYawPid.getValue());
+    turretSubsystem->setPitchMotorOutput(manualPitchPid.getValue());
+    turretSubsystem->setYawMotorOutput(manualYawPid.getValue());
 }
 
-}  // control
+}  // namespace control
 
-}  // aruwsrc
+}  // namespace aruwsrc

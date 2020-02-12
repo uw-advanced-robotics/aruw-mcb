@@ -17,18 +17,17 @@ namespace control
 {
 
 class TurretSubsystem : public Subsystem {
-
  public:
     TurretSubsystem();
-    
-    void pitchMotorToDegree(float degrees);  
+
+    void pitchMotorToDegree(float degrees);
 
     void yawMotorToDegree(float degrees);
 
-    void incPitchMotorByDegree(float degrees);  
+    void incPitchMotorByDegree(float degrees);
 
     void incYawMotorByDegree(float degrees);
-    
+
     float getYawAngle();
 
     float getPitchAngle();
@@ -56,7 +55,7 @@ class TurretSubsystem : public Subsystem {
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
     static const aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
-    
+
     TurretManualCommand *turretManual;
     TurretCVCommand *turretCV;
 
@@ -72,12 +71,12 @@ class TurretSubsystem : public Subsystem {
     aruwlib::motor::DjiMotor pitchMotor;
     aruwlib::motor::DjiMotor yawMotor;
 
-    float getVelocity(aruwlib::motor::DjiMotor &motor);
-    float getAngle(aruwlib::motor::DjiMotor &motor);
+    float getVelocity(const aruwlib::motor::DjiMotor &motor);
+    float getAngle(const aruwlib::motor::DjiMotor &motor);
 };
 
-}  // control
+}  // namespace control
 
-}  // aruwsrc
+}  // namespace aruwsrc
 
 #endif

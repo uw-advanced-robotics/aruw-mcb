@@ -24,9 +24,13 @@ namespace control
 
     void BlinkLEDCommand::end(bool interrupted)
     {
-        if (interrupted) {}
-        endCounter++;
-        Board::LedA::reset();
+        if (interrupted) {
+            endCounter++;
+            Board::LedA::reset();
+        } else {
+            endCounter++;
+            Board::LedA::reset();
+        }
     }
 
     bool BlinkLEDCommand::isFinished() const

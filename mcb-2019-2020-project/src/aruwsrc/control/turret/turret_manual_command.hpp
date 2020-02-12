@@ -15,7 +15,7 @@ namespace control
 class TurretSubsystem;
 class TurretManualCommand : public Command {
  public:
-    explicit TurretManualCommand(TurretSubsystem &subsystem);
+    explicit TurretManualCommand(TurretSubsystem *subsystem);
 
     void initialize(void) {}
 
@@ -47,7 +47,7 @@ class TurretManualCommand : public Command {
 
     const float remoteControlScaler = 30000;
 
-    TurretSubsystem &turretSubsystem;
+    TurretSubsystem *turretSubsystem;
     modm::Pid<float> manualYawPid;
     modm::Pid<float> manualPitchPid;
 
@@ -57,8 +57,8 @@ class TurretManualCommand : public Command {
     void updateTurretPosition(void);
 };
 
-}  // control
+}  // namespace control
 
-}  // aruwsrc
+}  // namespace aruwsrc
 
 #endif
