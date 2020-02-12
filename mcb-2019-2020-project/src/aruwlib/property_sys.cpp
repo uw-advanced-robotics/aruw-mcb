@@ -248,7 +248,7 @@ void PropertySystem::dequeueTxLongPackageQueue() {
     }
 }
 
-void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
+void PropertySystem::messageReceiveCallback(aruwlib::serial::DJISerial::SerialMessage_t completeMessage)
 {
     switch (completeMessage.type)
     {
