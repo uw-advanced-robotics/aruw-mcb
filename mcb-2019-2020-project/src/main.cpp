@@ -1,6 +1,5 @@
 #include <rm-dev-board-a/board.hpp>
 #include <modm/processing/timer.hpp>
-#include <modm/processing/timer.hpp>
 #include "main.hpp"
 
 /* communication includes ---------------------------------------------------*/
@@ -13,7 +12,6 @@
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
-#include "src/aruwsrc/control/example_comprised_command.hpp"
 
 
 #include "aruwsrc/turret_pid.hpp"
@@ -24,36 +22,35 @@ aruwsrc::algorithms::TurretPid yawTurretPid(
 aruwsrc::algorithms::TurretPid pitchTurretPid(
     4000.0f, 0.0f, 100.0f, 100000.0f, 0.0f, 32000.0f, 0.7f, 10);
 
-/* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwlib/control/controller_mapper.hpp"
 
-/* aruwsrc control includes -------------------------------------------------*/
-#include "src/aruwsrc/control/example/example_command.hpp"
-#include "src/aruwsrc/control/example/example_subsystem.hpp"
-#include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
-#include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
-#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
-#include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"
 #include "src/aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 
-using namespace aruwsrc::agitator;
+#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
+
 using namespace aruwsrc::chassis;
 using namespace aruwlib::sensors;
+using namespace aruwsrc::control;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 ChassisSubsystem soldierChassis;
-ChassisDriveCommand chassisDriveCommand(&soldierChassis);
+TurretSubsystem soldierTurret;
+ChassisAutorotateCommand chassisAutorotateCommand(&soldierChassis, &soldierTurret);
 #else  // error
 #error "select soldier robot type only"
 #endif
 
 float desiredYaw = 90.0f;
 float desiredPitch = 90.0f;
+
+void runTurretAlgorithm()
+{
+    yawTurretPid.runController(0.0f, 0.0f);
+    pitchTurretPid.runController(0.0f, 0.0f);
+}
 
 int main()
 {
@@ -71,20 +68,14 @@ int main()
 
     Mpu6500::init();
 
-    #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
-    CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
-    soldierChassis.setDefaultCommand(&chassisDriveCommand);
-    #endif
-
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
-    modm::ShortPeriodicTimer motorSendPeriod(2);
     // update imu
     modm::ShortPeriodicTimer updateImuPeriod(2);
     modm::ShortPeriodicTimer sendMotorTimeout(2);
 
-    chassisAutoRotateCommand.initialize();
+    chassisAutorotateCommand.initialize();
 
     while (1)
     {
@@ -92,7 +83,7 @@ int main()
         aruwlib::can::CanRxHandler::pollCanData();
         aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
-        Remote::read();
+        aruwlib::Remote::read();
 
         if (updateImuPeriod.execute())
         {
@@ -102,13 +93,13 @@ int main()
         if (sendMotorTimeout.execute())
         {
             runTurretAlgorithm();
-            chassisAutoRotateCommand.execute();
+            chassisAutorotateCommand.execute();
             soldierChassis.refresh();
 
             desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))) * 0.5f;
             desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
                     / 660.0f) * 0.5f;
-            turretSubsystem.runTurretPositionPid();
+            soldierTurret.runTurretPositionPid();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

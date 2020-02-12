@@ -10,9 +10,9 @@ namespace control
 {
 
 ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem) :
-Command(true),
-exampleCommand(subsystem),
-otherExampleCommand(subsystem),
+Command(),
+exampleCommand(subsystem, 500),
+otherExampleCommand(subsystem, 1000),
 switchTimer(2000)
 {
     this->comprisedCommandScheduler.registerSubsystem(subsystem);
