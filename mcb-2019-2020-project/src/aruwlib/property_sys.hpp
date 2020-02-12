@@ -106,7 +106,7 @@ class PropertySystem : public aruwlib::serial::DJISerial
      * Handle serial message received
      * @param completeMessage serial message received
      */
-    void messageReceiveCallback(SerialMessage_t completeMessage) override;
+    void messageReceiveCallback(SerialMessage completeMessage) override;
 
  private:
     // serial header type

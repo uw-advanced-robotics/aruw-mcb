@@ -125,6 +125,7 @@ class DJISerial
  protected:  // subclasses can access the message that this class sends as to allow
              // for modification
     SerialMessage txMessage;
+    uint8_t txSequenceNumber;
 };
 
 }  // namespace serial

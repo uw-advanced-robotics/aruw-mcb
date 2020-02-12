@@ -248,7 +248,7 @@ void PropertySystem::dequeueTxLongPackageQueue() {
     }
 }
 
-void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
+void PropertySystem::messageReceiveCallback(SerialMessage completeMessage)
 {
     switch (completeMessage.type)
     {
