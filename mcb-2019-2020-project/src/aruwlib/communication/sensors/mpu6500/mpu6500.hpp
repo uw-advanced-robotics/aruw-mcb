@@ -34,7 +34,7 @@ class  Mpu6500 {
 
     static int16_t getGy(void);
 
-    static int16_t getGz(void);
+    static float getGz(void);
 
     // get temperature value in C
     static float mpuGetTemp(void);
