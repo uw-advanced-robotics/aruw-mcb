@@ -263,7 +263,7 @@ void PropertySystem::messageReceiveCallback(SerialMessage completeMessage)
                 {
                     while (currentAddress - completeMessage.data < completeMessage.length)
                     {
-                        PropertySystem::property_id_t id = 
+                        PropertySystem::property_id_t id =
                                 *reinterpret_cast<property_id_t*>(currentAddress);
                         currentAddress += sizeof(id);
                         uint8_t dataLength = currentAddress[0];
