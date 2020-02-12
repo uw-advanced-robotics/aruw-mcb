@@ -3,6 +3,7 @@
 
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/command.hpp"
+#include "src/aruwlib/algorithms/contiguous_float.hpp"
 
 using namespace aruwlib::control;
 
@@ -15,15 +16,12 @@ namespace control
 class TurretSubsystem;
 class TurretCVCommand : public Command {
  public:
-    explicit TurretCVCommand(TurretSubsystem *turret = nullptr);
+    explicit TurretCVCommand(TurretSubsystem &subsystem);
 
-    void initialize(void);
+    void initialize(void) {}
 
     void execute(void);
-
-    void end(bool interrupted);
-
-    bool isFinished(void) const;
+    void end(bool interrupted) { if (interrupted) { return; } }
 
     void pitchToEncoder(float degree);
     void yawToEncoder(float degree);
@@ -44,15 +42,15 @@ class TurretCVCommand : public Command {
     uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
     uint16_t PITCH_MAX_OUTPUT = 16000;
 
-    const float remoteControlScaler = 0.5;
+    uint16_t remoteControlScaler = 0.5;
 
-    modm::Pid<float>::Parameter *CVYawPid;
-    modm::Pid<float>::Parameter *CVPitchPid;
+    TurretSubsystem &turretSubsystem;
 
-    TurretSubsystem *turretSubsystem;
+    aruwlib::algorithms::ContiguousFloat yawTargetAngle;
+    aruwlib::algorithms::ContiguousFloat pitchTargetAngle;
 
-    float pitchEncoderTarget;
-    float yawEncoderTarget;
+    modm::Pid<float> CVYawPid;
+    modm::Pid<float> CVPitchPid;
 
     void updateTurretPosition(void);
 };

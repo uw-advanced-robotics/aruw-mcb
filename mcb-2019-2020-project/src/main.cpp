@@ -12,6 +12,9 @@
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
+#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
+
+aruwsrc::control::TurretSubsystem turretSubsystem;
 
 using namespace aruwsrc::chassis;
 
@@ -51,7 +54,7 @@ int main()
 
     // CommandScheduler::registerSubsystem(&testSubsystem);
 
-    CommandScheduler::registerSubsystem(&turretSubsystem);
+     CommandScheduler::registerSubsystem(&turretSubsystem);
 
     // modm::SmartPointer blinkCommand(
     //     new aruwsrc::control::BlinkLEDCommand(&testSubsystem));
@@ -68,7 +71,7 @@ int main()
     //     blinkCommand
     // );
 
-    turretSubsystem.updateDesiredTurretAngles(90.0f, 90.0f);
+    //turretSubsystem.updateDesiredTurretAngles(90.0f, 90.0f);
 
     desiredYaw = 90.0f;
     desiredPitch = 90.0f;
@@ -88,17 +91,15 @@ int main()
 
         if (motorSendPeriod.execute())
         {
-            desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))
-                    / 660.0f) * 0.5f;
-            desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
-                    / 660.0f) * 0.5f;
-            desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
-            desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
-            turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
-            // aruwlib::control::CommandScheduler::run();
-            turretSubsystem.updateCurrentTurretAngles();
-            turretSubsystem.runTurretPositionPid();
-            watchYaw = turretSubsystem.getYawAngleFromCenter();
+            //desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))
+            //        / 660.0f) * 0.5f;
+            //desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
+            //        / 660.0f) * 0.5f;
+            //desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
+            //desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
+            //turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
+            aruwlib::control::CommandScheduler::run();
+            //watchYaw = turretSubsystem.getYawAngleFromCenter();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

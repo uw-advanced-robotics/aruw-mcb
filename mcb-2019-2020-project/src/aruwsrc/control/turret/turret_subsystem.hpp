@@ -8,8 +8,6 @@
 #include "turret_manual_command.hpp"
 #include "turret_cv_command.hpp"
 
-#include "src/aruwlib/algorithms/contiguous_float.hpp"
-
 using namespace aruwlib::control;
 
 namespace aruwsrc
@@ -20,15 +18,8 @@ namespace control
 
 class TurretSubsystem : public Subsystem {
 
-friend class TurretCVCommand;
-friend class TurretManualCommand;
-
  public:
     TurretSubsystem();
-
-    void setPitchVelocity(float velocity);
-
-    void setYawVelocity(float velocity);
     
     void pitchMotorToDegree(float degrees);  
 
@@ -48,22 +39,9 @@ friend class TurretManualCommand;
 
     void refresh();
 
-    aruwlib::motor::DjiMotor pitchMotor;
-    aruwlib::motor::DjiMotor yawMotor;
+    void setPitchMotorOutput(float out);
 
-    void updateCurrentTurretAngles();
-
-    void updateDesiredTurretAngles(float newYawAngle, float newPitchAngle);
-
-    void runTurretPositionPid();
-
-    void updateTurretVals();
-
-    float getYawWrapped();
-
-    float getPitchWrapped();
-
-    float getYawAngleFromCenter();
+    void setYawMotorOutput(float out);
 
  private:
     const int TURRET_YAW_MIN_ANGLE = 0;
@@ -91,32 +69,11 @@ friend class TurretManualCommand;
 
     turretMode turretStatus;
 
-    const float TURRET_YAW_PID_P = 3000.0f;
-    const float TURRET_YAW_PID_I = 0.0f;
-    const float TURRET_YAW_PID_D = 18000.0f;
+    aruwlib::motor::DjiMotor pitchMotor;
+    aruwlib::motor::DjiMotor yawMotor;
 
-    const float TURRET_PITCH_PID_P = 2000.0f;
-    const float TURRET_PITCH_PID_I = 0.0f;
-    const float TURRET_PITCH_PID_D = 8000.0f;
-
-    const float TURRET_MAX_VOLTAGE_OUT = 32000.0f;
-
-    modm::Pid<float> pitchMotorPid;
-    modm::Pid<float> yawMotorPid;
-
-    float yawTarget;
-    float pitchTarget;
-
-    aruwlib::algorithms::ContiguousFloat currYawAngle;
-    aruwlib::algorithms::ContiguousFloat currPitchAngle;
-
-    aruwlib::algorithms::ContiguousFloat desiredYawAngle;
-    aruwlib::algorithms::ContiguousFloat desiredPitchAngle;
-
-    float convertToUnwrappedEncoder(aruwlib::motor::DjiMotor *motor, float degrees);
-
-    float getVelocity(aruwlib::motor::DjiMotor *motor);
-    float getAngle(aruwlib::motor::DjiMotor *motor);
+    float getVelocity(aruwlib::motor::DjiMotor &motor);
+    float getAngle(aruwlib::motor::DjiMotor &motor);
 };
 
 }  // control
