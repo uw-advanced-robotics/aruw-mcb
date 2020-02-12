@@ -21,8 +21,10 @@ void PropertySystem::initializePropertySystem()
     this->initialize();
 }
 
+// cppcheck-suppress unusedParameters //
 template<class T>
-PropertySystem::PropertyType PropertySystem::typeToEnum(T* type) {
+PropertySystem::PropertyType PropertySystem::typeToEnum(T* type __attribute__((unused))) {
+    
     if (std::is_same<T, uint8_t>::value)
     {
         return UBYTE_PROPERTY;
@@ -58,11 +60,10 @@ PropertySystem::PropertyType PropertySystem::typeToEnum(T* type) {
 }
 
 template <class Type>
-uint16_t PropertySystem::addProperty(Type *data, uint8_t *property_name, uint8_t name_length)
+PropertySystem::property_id_t PropertySystem::addProperty(Type *data, std::string propertyName)
 {
     Property_t property;
-    property.name = property_name;
-    property.nameLength = name_length;
+    property.name = propertyName;
     property.id = propertyTableSize;
     property.dataPointer = data;
     property.type = typeToEnum(data);
@@ -75,14 +76,12 @@ uint16_t PropertySystem::addProperty(Type *data, uint8_t *property_name, uint8_t
 
 
 template <class Type>
-uint16_t PropertySystem::addProperty(Type *data,
+PropertySystem::property_id_t PropertySystem::addArrayProperty(Type *data,
                                     uint16_t length,
-                                    uint8_t *property_name,
-                                    uint8_t name_length)
+                                    std::string propertyName)
 {
     Property_t property;
-    property.name = property_name;
-    property.nameLength = name_length;
+    property.name = propertyName;
     property.id = propertyTableSize;
     property.dataPointer = data;
     property.type = typeToEnum(data);
@@ -93,29 +92,31 @@ uint16_t PropertySystem::addProperty(Type *data,
     return property.id;
 }
 
-bool PropertySystem::sendProperty(uint16_t property_id)
+bool PropertySystem::sendProperty(uint16_t propertyID)
 {
-    return property_id < propertyTableSize ? txDataQueue.push(property_id) : false;
+    return propertyID < propertyTableSize ? txDataQueue.push(propertyID) : false;
 }
 
-bool PropertySystem::sendAllProperty()
+bool PropertySystem::sendAllPropertyData()
 {
-    bool flag = true;
     for (uint16_t i = 0; i < PROPERTY_TABLE_MAX_SIZE; i++)
     {
-        flag = txDataQueue.push(i) ? flag : false;
+        if(!txDataQueue.push(i)) {
+            return false;
+        }
     }
-    return flag;
+    return true;
 }
 
-bool PropertySystem::sendPropertyTable()
+bool PropertySystem::sendAllPropertyTableEntry()
 {
-    bool flag = true;
     for (uint16_t i = 0; i < PROPERTY_TABLE_MAX_SIZE; i++)
     {
-        flag = txTableDataQueue.push(i) ? flag : false;
+        if(!txTableDataQueue.push(i)) {
+            return false;
+        }
     }
-    return flag;
+    return true;
 }
 
 void PropertySystem::updatePropertySystem()
@@ -196,7 +197,7 @@ bool PropertySystem::packPropertyTableEntry(Property_t *property, LongPackage_t 
     if (sizeof(property->id) +
         sizeof(property->byteCount) +
         sizeof(property->type) +
-        property->nameLength >
+        property->name.length() >
         (unsigned)(MAX_PACKAGE_DATA_LENGTH - package->dataLength))
     {
         return false;
@@ -206,18 +207,18 @@ bool PropertySystem::packPropertyTableEntry(Property_t *property, LongPackage_t 
     currentPackData += sizeof(property->id);
     currentPackData[0] = property->byteCount;
     currentPackData[1] = property->type;
-    currentPackData[2] = property->nameLength;
+    currentPackData[2] = property->name.length();
     currentPackData += sizeof(property->byteCount) +
                         sizeof(property->type) +
-                        sizeof(property->nameLength);
+                        sizeof(property->name.length());
     memcpy(currentPackData,
-           property->name,
-           property->nameLength);
+           property->name.c_str(),
+           property->name.length());
     package->dataLength += sizeof(property->id) +
                             sizeof(property->byteCount) +
                             sizeof(property->type) +
-                            sizeof(property->nameLength) +
-                            property->nameLength;
+                            sizeof(property->name.length()) +
+                            property->name.length();
     return true;
 }
 
@@ -254,8 +255,8 @@ void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
         case PROPERTY_MESSAGE_TYPE_LONG_PACKAGE:
         {
             uint8_t packageType = completeMessage.data[0];
-            uint8_t initialSequenceNumber = completeMessage.data[1];
-            uint8_t expectedMessageCount = completeMessage.data[2];
+            uint8_t initialSequenceNumber __attribute__((unused)) = completeMessage.data[1];
+            uint8_t expectedMessageCount __attribute__((unused)) = completeMessage.data[2];
             uint8_t *currentAddress = completeMessage.data + 3;
             switch (packageType)
             {
@@ -263,7 +264,7 @@ void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
                 {
                     while (currentAddress - completeMessage.data < completeMessage.length)
                     {
-                        uint16_t id = *reinterpret_cast<uint16_t*>(currentAddress);
+                        PropertySystem::property_id_t id = *reinterpret_cast<property_id_t*>(currentAddress);
                         currentAddress += sizeof(id);
                         uint8_t dataLength = currentAddress[0];
                         currentAddress += sizeof(dataLength);
@@ -281,7 +282,7 @@ void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
                 {
                     while (currentAddress - completeMessage.data < completeMessage.length)
                     {
-                        uint16_t id = *reinterpret_cast<uint16_t*>(currentAddress);
+                        property_id_t id = *reinterpret_cast<property_id_t*>(currentAddress);
                         currentAddress += sizeof(id);
                         if (id < propertyTableSize)
                         {
@@ -294,7 +295,7 @@ void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
                 {
                     while (currentAddress - completeMessage.data < completeMessage.length)
                     {
-                        uint16_t id = *reinterpret_cast<uint16_t*>(currentAddress);
+                        property_id_t id = *reinterpret_cast<property_id_t*>(currentAddress);
                         currentAddress += sizeof(id);
                         if (id < propertyTableSize)
                         {
@@ -316,12 +317,12 @@ void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
             {
                 case SHORT_PACKAGE_TYPE_SEND_TABLE:
                 {
-                    sendPropertyTable();
+                    sendAllPropertyTableEntry();
                     break;
                 }
                 case SHORT_PACKAGE_TYPE_SEND_ALL_PROPERTY:
                 {
-                    sendAllProperty();
+                    sendAllPropertyData();
                     break;
                 }
                 default:
@@ -334,62 +335,46 @@ void PropertySystem::messageReceiveCallback(SerialMessage_t completeMessage)
     }
 }
 
-template uint16_t PropertySystem::addProperty<uint8_t>(uint8_t* data,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<uint16_t>(uint16_t* data,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<uint32_t>(uint32_t* data,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<int8_t>(int8_t* data,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<int16_t>(int16_t* data,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<int32_t>(int32_t* data,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<float>(float* data,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<bool>(bool* data,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
+template PropertySystem::property_id_t PropertySystem::addProperty<uint8_t>(uint8_t* data,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addProperty<uint16_t>(uint16_t* data,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addProperty<uint32_t>(uint32_t* data,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addProperty<int8_t>(int8_t* data,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addProperty<int16_t>(int16_t* data,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addProperty<int32_t>(int32_t* data,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addProperty<float>(float* data,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addProperty<bool>(bool* data,
+                                                        std::string propertyName);
 
-template uint16_t PropertySystem::addProperty<uint8_t>(uint8_t* array,
+template PropertySystem::property_id_t PropertySystem::addArrayProperty<uint8_t>(uint8_t* array,
                                                         uint16_t length,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<uint16_t>(uint16_t* array,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addArrayProperty<uint16_t>(uint16_t* array,
                                                         uint16_t length,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<uint32_t>(uint32_t* array,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addArrayProperty<uint32_t>(uint32_t* array,
                                                         uint16_t length,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<int8_t>(int8_t* array,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addArrayProperty<int8_t>(int8_t* array,
                                                         uint16_t length,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<int16_t>(int16_t* array,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addArrayProperty<int16_t>(int16_t* array,
                                                         uint16_t length,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<int32_t>(int32_t* array,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addArrayProperty<int32_t>(int32_t* array,
                                                         uint16_t length,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<float>(float* array,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addArrayProperty<float>(float* array,
                                                         uint16_t length,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
-template uint16_t PropertySystem::addProperty<bool>(bool* array,
+                                                        std::string propertyName);
+template PropertySystem::property_id_t PropertySystem::addArrayProperty<bool>(bool* array,
                                                         uint16_t length,
-                                                        uint8_t* property_name,
-                                                        uint8_t name_length);
+                                                        std::string propertyName);
 
 }  // namespace aruwlib

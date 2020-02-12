@@ -2,6 +2,7 @@
 #define __PROPERTY_HPP__
 #include <memory>
 #include <utility>
+#include <string>
 #include <rm-dev-board-a/board.hpp>
 #include "src/aruwlib/communication/serial/dji_serial.hpp"
 #include <modm/container.hpp>
@@ -27,9 +28,12 @@
  */
 namespace aruwlib {
 
+#define PROPERTY_TABLE_MAX_SIZE 512
+
 class PropertySystem : public aruwlib::serial::DJISerial
 {
  public:
+    typedef uint16_t property_id_t;
     typedef enum : uint8_t {
         UBYTE_PROPERTY = 1,
         USHORT_PROPERTY = 2,
@@ -55,41 +59,39 @@ class PropertySystem : public aruwlib::serial::DJISerial
      * Add a data to PropertySystem
      * @param data pointer to data to be managed
      * @param property_name name of property
-     * @param name_length length of property name
      * @return alias id of the property corresponding to given data
      */
     template<class Type>
-    uint16_t addProperty(Type* data, uint8_t* property_name, uint8_t name_length);
+    property_id_t addProperty(Type *data, std::string propertyName);
 
     /**
      * Add a array to PropertySystem
      * @param array pointer to array to be managed
      * @param length length of array
      * @param property_name name of property
-     * @param name_length length of property name
      * @return alias id of the property corresponding to given data
      */
     template<class Type>
-    uint16_t addProperty(Type* array, uint16_t length, uint8_t* property_name, uint8_t name_length);
+    property_id_t addArrayProperty(Type *data, uint16_t length, std::string propertyName);
 
     /**
      * Send a property through serial
      * @param property_id
      * @return if the operation succeed
      */
-    bool sendProperty(uint16_t property_id);
+    bool sendProperty(property_id_t propertyID);
 
     /**
      * Send property table through serial
      * @return if the operation succeed
      */
-    bool sendPropertyTable();
+    bool sendAllPropertyTableEntry();
 
     /**
      * Send all properties through serial
      * @return if the operation succeed
      */
-    bool sendAllProperty();
+    bool sendAllPropertyData();
 
     /**
      * Check if number of properties in PropertySystem reaches maximum
@@ -138,24 +140,24 @@ class PropertySystem : public aruwlib::serial::DJISerial
     static const uint8_t DEFAULT_DEQUEUE_RATE_TX_LONG_PACKAGE = 2;
     static const uint8_t DEFAULT_DEQUEUE_RATE_TX_SHORT_PACKAGE = 2;
 
-    static const uint16_t PROPERTY_TABLE_MAX_SIZE = 1024;
-
     static const uint16_t MAX_PACKAGE_DATA_LENGTH = 200;
 
     typedef struct {
-        uint16_t id;
+        property_id_t id;
         PropertyType type;
-        uint8_t* name;
-        uint8_t nameLength;
+        std::string name;
         void* dataPointer;
         uint8_t typeSize;
         uint8_t byteCount;
     } Property_t;
 
+    /*
+     * Long Package has initialSequenceNumber and expectedMessageCount
+     */
     typedef struct {
         uint8_t packageType;
-        uint8_t initialSequenceNumber;
-        uint8_t expectedMessageCount;
+        uint8_t initialSequenceNumber; // used to tell if package loss occured
+        uint8_t expectedMessageCount; // used to tell if package loss occured
         uint8_t data[MAX_PACKAGE_DATA_LENGTH];
         uint8_t dataLength;
     } LongPackage_t;
@@ -169,13 +171,13 @@ class PropertySystem : public aruwlib::serial::DJISerial
     Property_t propertyTable[PROPERTY_TABLE_MAX_SIZE];
     uint16_t propertyTableSize;
     // Store Properties Waiting to be Sent
-    modm::Queue<uint16_t, modm::LinkedList<uint16_t>> txDataQueue;
+    modm::Queue<property_id_t, modm::LinkedList<property_id_t>> txDataQueue;
 
     // Maximum Number of property data to send in each call to updatePropertySystem()
     uint16_t txDataDequeueRate;
 
     // Store Property Table Entries Waiting to be Sent
-    modm::Queue<uint16_t, modm::LinkedList<uint16_t>> txTableDataQueue;
+    modm::Queue<property_id_t, modm::LinkedList<property_id_t>> txTableDataQueue;
 
     // Maximum Number of table entry to send in each call to updatePropertySystem()
     uint16_t txTableDataDequeueRate;
@@ -189,14 +191,14 @@ class PropertySystem : public aruwlib::serial::DJISerial
     uint16_t txShortPackageDequeueRate;
 
     /**
-     * Send a property data through serial
+     * Send data of a property through serial
      * @param property
      * @return if the operation succeed
      */
     bool sendPropertyData(Property_t* property);
 
     /**
-     * Send property table through serial
+     * Send a entry of property table through serial
      * @param property
      * @return if the operation succeed
      */

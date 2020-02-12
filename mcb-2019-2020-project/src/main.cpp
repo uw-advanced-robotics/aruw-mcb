@@ -15,8 +15,8 @@ aruwsrc::control::ExampleSubsystem testSubsystem;
 aruwlib::PropertySystem propertySystem;
 uint32_t a = 0;
 uint16_t array[6] = {1, 2, 3, 4, 5, 6};
-uint8_t n[5] = "test";
-uint8_t n1[6] = "test1";
+std::string n = "test";
+std::string n1 = "test1";
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -29,8 +29,8 @@ int main()
 
     Board::initialize();
     propertySystem.initializePropertySystem();
-    propertySystem.addProperty(&a, n, 5);
-    propertySystem.addProperty(array, 6, n1, 6);
+    propertySystem.addProperty(&a, n);
+    propertySystem.addArrayProperty(array, 6, n1);
     modm::SmartPointer testDefaultCommand(
         new aruwsrc::control::ExampleCommand(&testSubsystem));
 
