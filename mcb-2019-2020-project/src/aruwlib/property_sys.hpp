@@ -152,16 +152,31 @@ class PropertySystem : public aruwlib::serial::DJISerial
     } Property_t;
 
     /*
-     * Long Package has initialSequenceNumber and expectedMessageCount
+     * Differ from short package, long package
+     * has initialSequenceNumber and expectedMessageCount
+     * and is usually used to carry larger data.
+     * 
+     * By checking sequence numbers of packages received
+     * with initialSequenceNumber and expectedMessageCount,
+     * the receiver could tell if package loss happen
+     * during some critical package sequence transmition
+     * like property table entries, and takes actions such as
+     * requesting sender to send property table again.
+     * 
+     * (Currently sequence number check is not implemented)
      */
     typedef struct {
         uint8_t packageType;
-        uint8_t initialSequenceNumber; // used to tell if package loss occured
-        uint8_t expectedMessageCount; // used to tell if package loss occured
+        uint8_t initialSequenceNumber;
+        uint8_t expectedMessageCount;
         uint8_t data[MAX_PACKAGE_DATA_LENGTH];
         uint8_t dataLength;
     } LongPackage_t;
 
+    /*
+     * Short package don't have sequence number check mechanism,
+     * so it is usually used to hold short instructions.
+     */
     typedef struct {
         uint8_t packageType;
         uint8_t* data;

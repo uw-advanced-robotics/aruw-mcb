@@ -24,7 +24,6 @@ void PropertySystem::initializePropertySystem()
 // cppcheck-suppress unusedParameters //
 template<class T>
 PropertySystem::PropertyType PropertySystem::typeToEnum(T* type __attribute__((unused))) {
-    
     if (std::is_same<T, uint8_t>::value)
     {
         return UBYTE_PROPERTY;
@@ -264,7 +263,8 @@ void PropertySystem::messageReceiveCallback(SerialMessage completeMessage)
                 {
                     while (currentAddress - completeMessage.data < completeMessage.length)
                     {
-                        PropertySystem::property_id_t id = *reinterpret_cast<property_id_t*>(currentAddress);
+                        PropertySystem::property_id_t id = 
+                                *reinterpret_cast<property_id_t*>(currentAddress);
                         currentAddress += sizeof(id);
                         uint8_t dataLength = currentAddress[0];
                         currentAddress += sizeof(dataLength);
