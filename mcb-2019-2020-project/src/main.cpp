@@ -2,21 +2,24 @@
 #include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 
+#include "src/aruwlib/control/controller_mapper.hpp"
+#include "src/aruwsrc/control/blink_led_command.hpp"
+#include "src/aruwlib/communication/remote.hpp"
+#include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "src/aruwsrc/control/example_command.hpp"
 #include "src/aruwsrc/control/example_subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
-
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
-#include "src/aruwlib/property_sys.hpp"
+#include "src/aruwlib/communication/serial/ref_serial.hpp"
 
 aruwsrc::control::ExampleSubsystem testSubsystem;
-aruwlib::PropertySystem propertySystem;
-uint32_t a = 0;
-uint16_t array[6] = {1, 2, 3, 4, 5, 6};
-std::string n = "test";
-std::string n1 = "test1";
+
+aruwlib::serial::RefSerial refereeSerial;
+
+using namespace aruwlib::sensors;
+
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -28,38 +31,51 @@ int main()
     contiguousFloatTest.testWrapping();
 
     Board::initialize();
-    propertySystem.initializePropertySystem();
-    propertySystem.addProperty(&a, n);
-    propertySystem.addArrayProperty(array, 6, n1);
+    aruwlib::Remote::initialize();
+
+    refereeSerial.initialize();
+
+    Mpu6500::init();
+
     modm::SmartPointer testDefaultCommand(
         new aruwsrc::control::ExampleCommand(&testSubsystem));
 
-    testSubsystem.setDefaultCommand(testDefaultCommand);
-
     CommandScheduler::registerSubsystem(&testSubsystem);
+
+    modm::SmartPointer blinkCommand(
+        new aruwsrc::control::BlinkLEDCommand(&testSubsystem));
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
     modm::ShortPeriodicTimer motorSendPeriod(3);
+    // update imu
+    modm::ShortPeriodicTimer updateImuPeriod(2);
+
+    IoMapper::addToggleMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
+        blinkCommand
+    );
 
     while (1)
     {
-        // if (motorSendPeriod.execute())
-        // {
-        //     aruwlib::control::CommandScheduler::run();
-        //     aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-        // }
-
         // do this as fast as you can
-        // aruwlib::can::CanRxHandler::pollCanData();
+        aruwlib::can::CanRxHandler::pollCanData();
+        refereeSerial.updateSerial();
 
-        propertySystem.updatePropertySystem();
-        propertySystem.updateSerial();
-        a += 1;
-        array[0] += 1;
-        array[2] += 1;
-        array[3] += 1;
+        aruwlib::Remote::read();
+
+        if (updateImuPeriod.execute())
+        {
+            Mpu6500::read();
+        }
+
+        if (motorSendPeriod.execute())
+        {
+            aruwlib::control::CommandScheduler::run();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        }
+
         modm::delayMicroseconds(10);
     }
     return 0;
