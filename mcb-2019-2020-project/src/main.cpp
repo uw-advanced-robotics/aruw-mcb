@@ -13,6 +13,15 @@
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
 #include "src/aruwsrc/control/example_comprised_command.hpp"
 
+
+#include "aruwsrc/turret_pid.hpp"
+
+aruwsrc::algorithms::TurretPid yawTurretPid(
+    4000.0f, 0.0f, 100.0f, 100000.0f, 0.0f, 32000.0f, 0.7f, 10);
+
+aruwsrc::algorithms::TurretPid pitchTurretPid(
+    4000.0f, 0.0f, 100.0f, 100000.0f, 0.0f, 32000.0f, 0.7f, 10);
+
 using namespace aruwsrc::chassis;
 using namespace aruwlib::sensors;
 
