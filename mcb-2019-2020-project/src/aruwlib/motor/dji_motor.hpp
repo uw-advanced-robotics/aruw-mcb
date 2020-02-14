@@ -115,9 +115,11 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     aruwlib::can::CanBus getCanBus() const;
 
-    EncoderStore encStore;
+    static uint32_t degreesToEncoder(float angle);
 
-    int32_t encw;
+    static float encoderToDegrees(uint32_t encoder);
+
+    EncoderStore encStore;
 
  private:
     // wait time before the motor is considered disconnected, in milliseconds

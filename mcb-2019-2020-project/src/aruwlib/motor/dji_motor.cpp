@@ -52,8 +52,6 @@ namespace motor
         motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
 
         encStore.updateValue(encoderActual);
-
-        this->encw = encStore.getEncoderWrapped();
     }
 
     void DjiMotor::setDesiredOutput(int32_t desiredOutput)
@@ -135,6 +133,16 @@ namespace motor
             int16_t val = 2 * initialEncValue - encoderWrapped;
             return val < 0 ? val + ENC_RESOLUTION + 1 : val;
         }
+    }
+
+    uint32_t DjiMotor::degreesToEncoder(float angle)
+    {
+        return (ENC_RESOLUTION * angle) / 360;
+    }
+
+    float DjiMotor::encoderToDegrees(uint32_t encoder)
+    {
+        return (360.0f * static_cast<float>(encoder)) / ENC_RESOLUTION;
     }
 
     void DjiMotor::EncoderStore::updateValue(uint16_t newEncWrapped)

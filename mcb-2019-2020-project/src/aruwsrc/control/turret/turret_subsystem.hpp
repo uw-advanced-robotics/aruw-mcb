@@ -53,37 +53,9 @@ class TurretSubsystem : public Subsystem {
     const int YAW_START_ENCODER_POSITION = 8160;
     const int PITCH_START_ENCODER_POSITION = 4780;
 
-    uint16_t YAW_P = 1.0f;
-    uint16_t YAW_I = 0.0f;
-    uint16_t YAW_D = 0.0f;
-    uint16_t YAW_MAX_ERROR_SUM = 0.0f;
-    uint16_t YAW_MAX_OUTPUT = 16000;
-
-    uint16_t PITCH_P = 1.0f;
-    uint16_t PITCH_I = 0.0f;
-    uint16_t PITCH_D = 0.0f;
-    uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
-    uint16_t PITCH_MAX_OUTPUT = 16000;
-
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
     static const aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
-
-    TurretManualCommand *turretManual;
-    TurretCVCommand *turretCV;
-    TurretInitCommand *turretInit;
-
-    enum turretMode
-    {
-        INIT = 0,
-        MANUAL,
-        CV
-    };
-
-    turretMode turretStatus;
-
-    modm::Pid<float> YawPid;
-    modm::Pid<float> PitchPid;
 
     aruwlib::motor::DjiMotor pitchMotor;
     aruwlib::motor::DjiMotor yawMotor;

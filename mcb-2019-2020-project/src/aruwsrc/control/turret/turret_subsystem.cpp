@@ -4,8 +4,7 @@
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/control/controller_mapper.hpp"
 
-#define DEGREE_TO_ENCODER(degree) ((8192 * degree) / 360)
-#define ENCODER_TO_DEGREE(encoder) ((static_cast<float>(encoder) * 360.0f) / 8192.0f)
+using namespace aruwlib::motor;
 
 namespace aruwsrc
 {
@@ -13,20 +12,11 @@ namespace aruwsrc
 namespace control
 {
     TurretSubsystem::TurretSubsystem() :
-        turretStatus(INIT),
         pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true),
         yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false),
         currYawAngle(0.0f, 0.0f, 360.0f),
         currPitchAngle(0.0f, 0.0f, 360.0f)
-    {
-        turretInit = new aruwsrc::control::TurretInitCommand(this);
-        turretManual = new aruwsrc::control::TurretManualCommand(this);
-        turretCV = new aruwsrc::control::TurretCVCommand(this);
-        setDefaultCommand(modm::SmartPointer(turretInit));
-        IoMapper::addHoldMapping(IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH,
-                                                     Remote::SwitchState::UP, {}),
-                                                     modm::SmartPointer(turretCV));
-    }
+    {}
 
     float TurretSubsystem::getYawAngleFromCenter()
     {
@@ -50,33 +40,24 @@ namespace control
         return getVelocity(pitchMotor);
     }
 
-    float TurretSubsystem::getAngle(const aruwlib::motor::DjiMotor &motor) {
-        return ENCODER_TO_DEGREE(motor.encStore.getEncoderWrapped());
+    float TurretSubsystem::getAngle(const DjiMotor &motor) {
+        return DjiMotor::encoderToDegrees(motor.encStore.getEncoderWrapped());
     }
 
     // units: degrees per second
-    float TurretSubsystem::getVelocity(const aruwlib::motor::DjiMotor &motor) {
+    float TurretSubsystem::getVelocity(const DjiMotor &motor) {
         return 360 * motor.getShaftRPM() / 60;
     }
 
     void TurretSubsystem::refresh() {
-        switch (turretStatus) {
-            case INIT:
-                if (turretInit->isFinished()) {
-                    setDefaultCommand(modm::SmartPointer(turretManual));
-                    turretStatus = MANUAL;
-                }
-                break;
-            default:
-                updateCurrentTurretAngles();
-        }
+        updateCurrentTurretAngles();
     }
 
     void TurretSubsystem::updateCurrentTurretAngles()
     {
         if (yawMotor.isMotorOnline())
         {
-            currYawAngle.setValue(ENCODER_TO_DEGREE(
+            currYawAngle.setValue(DjiMotor::encoderToDegrees(
                     yawMotor.encStore.getEncoderWrapped() - YAW_START_ENCODER_POSITION)
                     + TURRET_START_ANGLE);
         }
@@ -86,7 +67,7 @@ namespace control
         }
         if (pitchMotor.isMotorOnline())
         {
-            currPitchAngle.setValue(ENCODER_TO_DEGREE(
+            currPitchAngle.setValue(DjiMotor::encoderToDegrees(
                     pitchMotor.encStore.getEncoderWrapped() - PITCH_START_ENCODER_POSITION)
                     + TURRET_START_ANGLE);
         }
