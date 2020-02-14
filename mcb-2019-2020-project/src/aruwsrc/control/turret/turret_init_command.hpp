@@ -1,5 +1,5 @@
-#ifndef __TURRET_MANUAL_COMMAND_H__
-#define __TURRET_MANUAL_COMMAND_H__
+#ifndef __TURRET_INIT_COMMAND_H__
+#define __TURRET_INIT_COMMAND_H__
 
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/command.hpp"
@@ -13,23 +13,15 @@ namespace control
 {
 
 class TurretSubsystem;
-class TurretManualCommand : public Command {
+class TurretInitCommand : public Command {
  public:
-    explicit TurretManualCommand(TurretSubsystem *subsystem);
+    explicit TurretInitCommand(TurretSubsystem *subsystem);
 
     void initialize(void) {}
+    bool isFinished(void) const;
 
     void execute(void);
     void end(bool interrupted) { if (interrupted) { return; } }
-
-    void pitchToVelocity(float degree);
-    void yawToVelocity(float degree);
-
-    void pitchIncrementVelocity(float degree);
-    void yawIncrementVelocity(float degree);
-
-    float getPitchOutput(void);
-    float getYawOutput(void);
 
  private:
     uint16_t YAW_P = 1.0f;
@@ -44,14 +36,12 @@ class TurretManualCommand : public Command {
     uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
     uint16_t PITCH_MAX_OUTPUT = 16000;
 
-    const float remoteControlScaler = 30000;
+    const int TURRET_START_ANGLE = 90;
 
     TurretSubsystem *turretSubsystem;
-    modm::Pid<float> manualYawPid;
-    modm::Pid<float> manualPitchPid;
 
-    float yawVelocityTarget = 0;
-    float pitchVelocityTarget = 0;
+    modm::Pid<float> initYawPid;
+    modm::Pid<float> initPitchPid;
 
     void updateTurretPosition(void);
 };

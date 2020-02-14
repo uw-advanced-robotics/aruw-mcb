@@ -41,8 +41,8 @@ void TurretCVCommand::yawIncrementEncoder(float encoder) {
 }
 
 void TurretCVCommand::updateTurretPosition() {
-    CVPitchPid.update(pitchTargetAngle.difference(turretSubsystem->getPitchAngle()));
-    CVYawPid.update(yawTargetAngle.difference(turretSubsystem->getYawAngle()));
+    CVPitchPid.update(pitchTargetAngle.difference(turretSubsystem->getPitchAngleFromCenter()));
+    CVYawPid.update(yawTargetAngle.difference(turretSubsystem->getYawAngleFromCenter()));
 
     turretSubsystem->setPitchMotorOutput(CVPitchPid.getValue());
     turretSubsystem->setYawMotorOutput(CVYawPid.getValue());
