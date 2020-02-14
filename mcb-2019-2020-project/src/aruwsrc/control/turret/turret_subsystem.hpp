@@ -29,13 +29,17 @@ class TurretSubsystem : public Subsystem {
 
     void incYawMotorByDegree(float degrees);
 
-    float getYawVelocity();
+    float getYawVelocity() const;
 
-    float getPitchVelocity();
+    float getPitchVelocity() const;
 
-    float getYawAngleFromCenter();
+    float getYawAngleFromCenter() const;
 
-    float getPitchAngleFromCenter();
+    float getPitchAngleFromCenter() const;
+
+    float getYawAngle() const;
+
+    float getPitchAngle() const;
 
     void refresh();
 
@@ -65,8 +69,7 @@ class TurretSubsystem : public Subsystem {
 
     void updateCurrentTurretAngles();
 
-    float getVelocity(const aruwlib::motor::DjiMotor &motor);
-    float getAngle(const aruwlib::motor::DjiMotor &motor);
+    float getVelocity(const aruwlib::motor::DjiMotor &motor) const;
 };
 
 }  // namespace control

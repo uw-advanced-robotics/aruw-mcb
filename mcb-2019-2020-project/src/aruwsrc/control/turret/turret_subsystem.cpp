@@ -18,34 +18,40 @@ namespace control
         currPitchAngle(0.0f, 0.0f, 360.0f)
     {}
 
-    float TurretSubsystem::getYawAngleFromCenter()
+    float TurretSubsystem::getYawAngleFromCenter() const
     {
         aruwlib::algorithms::ContiguousFloat yawAngleFromCenter(
             currYawAngle.getValue() - TURRET_START_ANGLE, -180.0f, 180.0f);
         return yawAngleFromCenter.getValue();
     }
 
-    float TurretSubsystem::getPitchAngleFromCenter()
+    float TurretSubsystem::getPitchAngleFromCenter() const
     {
         aruwlib::algorithms::ContiguousFloat yawAngleFromCenter(
             currPitchAngle.getValue() - TURRET_START_ANGLE, -180.0f, 180.0f);
         return yawAngleFromCenter.getValue();
     }
 
-    float TurretSubsystem::getYawVelocity(void) {
+    float TurretSubsystem::getYawVelocity() const {
         return getVelocity(yawMotor);
     }
 
-    float TurretSubsystem::getPitchVelocity(void) {
+    float TurretSubsystem::getPitchVelocity() const {
         return getVelocity(pitchMotor);
     }
 
-    float TurretSubsystem::getAngle(const DjiMotor &motor) {
-        return DjiMotor::encoderToDegrees(motor.encStore.getEncoderWrapped());
+    float TurretSubsystem::getYawAngle() const
+    {
+        return currYawAngle.getValue();
+    }
+
+    float TurretSubsystem::getPitchAngle() const
+    {
+        return currPitchAngle.getValue();
     }
 
     // units: degrees per second
-    float TurretSubsystem::getVelocity(const DjiMotor &motor) {
+    float TurretSubsystem::getVelocity(const DjiMotor &motor) const {
         return 360 * motor.getShaftRPM() / 60;
     }
 

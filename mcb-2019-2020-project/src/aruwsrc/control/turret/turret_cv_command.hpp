@@ -18,13 +18,11 @@ class TurretCVCommand : public Command {
  public:
     explicit TurretCVCommand(TurretSubsystem *subsystem);
 
-    void initialize(void) {}
+    void initialize();
 
-    void execute(void);
+    void execute();
+
     void end(bool interrupted) { if (interrupted) { return; } }
-
-    void pitchToEncoder(float degree);
-    void yawToEncoder(float degree);
 
     void pitchIncrementEncoder(float degree);
     void yawIncrementEncoder(float degree);
@@ -52,7 +50,7 @@ class TurretCVCommand : public Command {
     modm::Pid<float> CVYawPid;
     modm::Pid<float> CVPitchPid;
 
-    void updateTurretPosition(void);
+    void updateTurretPosition();
 };
 
 }  // namespace control

@@ -18,18 +18,13 @@ TurretCVCommand::TurretCVCommand(TurretSubsystem *subsystem) :
     addSubsystemRequirement(subsystem);
 }
 
+void TurretCVCommand::initialize()
+{
+    // add xavier stuff here
+}
+
 void TurretCVCommand::execute() {
     updateTurretPosition();
-}
-
-void TurretCVCommand::pitchToEncoder(float encoder) {
-    pitchTargetAngle.setValue(encoder);
-    pitchTargetAngle.reboundValue();
-}
-
-void TurretCVCommand::yawToEncoder(float encoder) {
-    yawTargetAngle.setValue(encoder);
-    yawTargetAngle.reboundValue();
 }
 
 void TurretCVCommand::pitchIncrementEncoder(float encoder) {
