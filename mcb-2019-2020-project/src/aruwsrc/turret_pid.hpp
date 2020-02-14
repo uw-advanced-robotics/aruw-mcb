@@ -33,12 +33,12 @@ class TurretPid
     proportionalKalman(1.0f, 0.0f),
     derivativeKalman(1.0f, 0.0f)
     {
-        derivativePreviousStore = new float[derivativeStepsToAverage];
+        // derivativePreviousStore = new float[derivativeStepsToAverage];
     }
 
     ~TurretPid()
     {
-        delete[] derivativePreviousStore;
+        // delete[] derivativePreviousStore;
     }
 
     float runController(float angleError, float rotationalSpeed);
@@ -63,8 +63,10 @@ class TurretPid
     // derivative averaging
     int derivativeStepsToAverage = 0;
     int averageDIndex = 0;
-    float* derivativePreviousStore;
+    float derivativePreviousStore[10];
     float currAverageBeforeDividing = 0.0f;
+
+    uint32_t prevTimeMicroseconds = 0;
 
     aruwlib::algorithms::ExtendedKalman proportionalKalman;
     aruwlib::algorithms::ExtendedKalman derivativeKalman;

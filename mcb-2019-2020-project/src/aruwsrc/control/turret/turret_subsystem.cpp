@@ -138,7 +138,7 @@ namespace control
     {
         yawMotorPid.update(currYawAngle.difference(desiredYawAngle));
         pitchMotorPid.update(currPitchAngle.difference(desiredPitchAngle));
-        yawMotor.setDesiredOutput(yawMotorPid.getValue());
+        // yawMotor.setDesiredOutput(yawMotorPid.getValue());
         pitchMotor.setDesiredOutput(pitchMotorPid.getValue());
     }
 

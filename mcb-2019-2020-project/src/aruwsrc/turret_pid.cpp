@@ -1,3 +1,4 @@
+#include <rm-dev-board-a/board.hpp>
 #include "turret_pid.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 
@@ -17,10 +18,27 @@ float TurretPid::runController(float angleError, float rotationalSpeed)
     currErrorI = limitVal<float>(currErrorI + ki * proportionalKalman.getLastFiltered(),
         -maxICumulative, maxICumulative);
     // d
-    currAverageBeforeDividing -= derivativePreviousStore[averageDIndex];
+    // currErrorD = -kd * limitVal<float>(
+    //     derivativeKalman.filterData(rotationalSpeed), -maxD, maxD
+    // );
+    // currAverageBeforeDividing -= derivativePreviousStore[averageDIndex];  // todo fix
+    derivativePreviousStore[averageDIndex] = -kd *  // todo try out this version
+        limitVal<float>(derivativeKalman.filterData(
+            angleError /
+            (static_cast<float>(Board::getTimeMicroseconds() - prevTimeMicroseconds)) / 1000.0f),
+            -maxD, maxD
+        );
+
     derivativePreviousStore[averageDIndex] = -kd * limitVal<float>(
         derivativeKalman.filterData(rotationalSpeed), -maxD, maxD);
-    currAverageBeforeDividing += derivativePreviousStore[averageDIndex];
+
+    currAverageBeforeDividing = 0.0f;
+
+    for (int i = 0; i < 10; i++) {  // todo fix
+        currAverageBeforeDividing += derivativePreviousStore[i];
+    }
+    
+    // currAverageBeforeDividing += derivativePreviousStore[averageDIndex];
     currErrorD = currAverageBeforeDividing / 10.0f;
     averageDIndex = (averageDIndex + 1) % derivativeStepsToAverage;
     // total
