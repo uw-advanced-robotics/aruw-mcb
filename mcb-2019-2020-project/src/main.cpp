@@ -49,7 +49,7 @@ int main()
 
     Mpu6500::init();
 
-     CommandScheduler::registerSubsystem(&turretSubsystem);
+    CommandScheduler::registerSubsystem(&turretSubsystem);
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill

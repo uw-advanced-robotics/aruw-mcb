@@ -1,7 +1,6 @@
 #ifndef __TURRET_SUBSYSTEM_HPP__
 #define __TURRET_SUBSYSTEM_HPP__
 
-#include <stdint.h>
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"

@@ -17,9 +17,9 @@ class TurretManualCommand : public Command {
  public:
     explicit TurretManualCommand(TurretSubsystem *subsystem);
 
-    void initialize(void) {}
+    void initialize() {}
 
-    void execute(void);
+    void execute();
     void end(bool interrupted) { if (interrupted) { return; } }
 
     void pitchToVelocity(float degree);
@@ -28,8 +28,8 @@ class TurretManualCommand : public Command {
     void pitchIncrementVelocity(float degree);
     void yawIncrementVelocity(float degree);
 
-    float getPitchOutput(void);
-    float getYawOutput(void);
+    float getPitchOutput();
+    float getYawOutput();
 
  private:
     uint16_t YAW_P = 1.0f;

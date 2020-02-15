@@ -17,10 +17,10 @@ class TurretInitCommand : public Command {
  public:
     explicit TurretInitCommand(TurretSubsystem *subsystem);
 
-    void initialize(void) {}
-    bool isFinished(void) const;
+    void initialize() {}
+    bool isFinished() const;
 
-    void execute(void);
+    void execute();
     void end(bool interrupted) { if (interrupted) { return; } }
 
  private:
