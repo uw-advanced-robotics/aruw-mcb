@@ -41,6 +41,7 @@ class SerialDataLogger
     modm::Queue<char, modm::LinkedList<char>> queue;
     modm::IODeviceWrapper< Usart2, modm::IOBuffer::BlockIfFull > loggerDevice;
 
+    uint8_t a1 = 0;
     char a;
     // string commands[2] = {"COMMAND1", "COMMAND2"};
 

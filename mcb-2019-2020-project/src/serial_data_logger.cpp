@@ -6,13 +6,15 @@ namespace logger
 {
 
 void logger::SerialDataLogger::runLogger() {
-    if (inputReceieved() == false) {
-        parseInput();
+    if (inputReceieved()) {
+        // loggerDevice.write(terminalInput.c_str());
+        // parseInput();
         // terminalInput.append(" : This is terminalInput");
         // const char *c = terminalInput.c_str();
         // loggerDevice.write(c);
         // terminalInput.clear();
         writeToTerminal();
+        terminalInput.clear();
     }
 }
 
@@ -32,53 +34,59 @@ void logger::SerialDataLogger::parseInput() {
 } 
 
 int logger::SerialDataLogger::matchToCommand() {
-    // Search through array of commands   
-    const char *c = terminalInput.c_str();
-    loggerDevice.write(c);
-    const char *v = "COMMAND1";
-    int num = -1;
-
-    if (c == v) {
-        num = 0;
+    // Search through array of commands
+    if (!terminalInput.compare(std::string("a")) || terminalInput.length() == 1)
+    {
+        terminalInput.clear();
+        return 1;
     }
-
-    if (terminalInput == std::string("COMMAND2")) {
-        num = 1;
+    else if (!terminalInput.compare(std::string("bb")))
+    {
+        terminalInput.clear();
+        return 0;
+    } else if (!terminalInput.compare(std::string("COMMAND1")))
+    {
+        return 2;
     }
-    
-    // int index = 0;
-    // for (const char *command : commands) {
-    //    if (command == c) {
-    //        return index;
-    //    } else {
-    //        index++;
-    //    }   
-    // }
-    return num;
+    terminalInput.clear();
+    return -1;
 }
 
 // Makes sure we type something first and press enter key
 bool logger::SerialDataLogger::inputReceieved() {
-    while (loggerDevice.read(a) && a != '\n') {
-        return false;
+    // every time you read from serial
+    if (loggerDevice.read(a)) {
+        if (a == '\r') {
+            return true;
+        } else {
+            terminalInput.push_back(a);
+        }
     }
-    // while (!loggerDevice.read(a)) {
-    //    a = 'b';
+    return false;
+
+    // if you read enter serial, return true
+    // while (loggerDevice.read(a) && a != '\n') {  // remove while loop 
+    //     return false;
     // }
-    return true;
+    // // while (!loggerDevice.read(a)) {
+    // //    a = 'b';
+    // // }
+    // return true;
 }
 
 // If after comparison with input to existing commands is true
 // Switch through which one it matched with and write in response
 void logger::SerialDataLogger::writeToTerminal() {
     switch(matchToCommand()) {
-        case 0: loggerDevice.write("Case 0 Corresponding to COMMAND1");
+        case 0: loggerDevice.write("Case 0 Corresponding to COMMAND1\r");
             break;
-        case 1: loggerDevice.write("Case 1 Corresponding to COMMAND2");
+        case 1: loggerDevice.write("Case 1 Corresponding to COMMAND2\r");
             break;
+        case 2: loggerDevice.write("case 2");
+        default:
+            loggerDevice.write("incorrect");
     }
     // Reset the terminalInput buffer
-    terminalInput.clear();
     // terminalInput = "";
 }
 
