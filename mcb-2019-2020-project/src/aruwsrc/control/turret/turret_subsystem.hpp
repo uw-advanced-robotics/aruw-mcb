@@ -95,11 +95,11 @@ friend class TurretManualCommand;
     const float TURRET_YAW_PID_I = 0.0f;
     const float TURRET_YAW_PID_D = 18000.0f;
 
-    const float TURRET_PITCH_PID_P = 2000.0f;
+    const float TURRET_PITCH_PID_P = 1500.0f;
     const float TURRET_PITCH_PID_I = 0.0f;
-    const float TURRET_PITCH_PID_D = 8000.0f;
+    const float TURRET_PITCH_PID_D = 6000.0f;
 
-    const float TURRET_MAX_VOLTAGE_OUT = 32000.0f;
+    const float TURRET_MAX_VOLTAGE_OUT = 15000.0f;
 
     modm::Pid<float> pitchMotorPid;
     modm::Pid<float> yawMotorPid;

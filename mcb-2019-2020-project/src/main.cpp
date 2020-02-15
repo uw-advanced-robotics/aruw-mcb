@@ -12,17 +12,13 @@
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
-
-
 #include "aruwsrc/turret_pid.hpp"
-
 #include "src/aruwlib/control/command_scheduler.hpp"
-
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"
 #include "src/aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"
+#include "src/aruwsrc/control/example/example_subsystem.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwlib::sensors;
@@ -34,6 +30,7 @@ using namespace aruwlib::algorithms;
 ChassisSubsystem soldierChassis;
 TurretSubsystem soldierTurret;
 ChassisAutorotateCommand chassisAutorotateCommand(&soldierChassis, &soldierTurret);
+
 #else  // error
 #error "select soldier robot type only"
 #endif
@@ -42,69 +39,38 @@ float desiredYaw = 90.0f;
 float desiredPitch = 90.0f;
 
 aruwsrc::algorithms::TurretPid yawTurretPid(
-    4400.0f, 0.0f, 140.0f, 100000.0f, 0.0f, 32000.0f, 0.7f, 10);
+    4500.0f, 0.0f, 190.0f, 0.0f, 32000.0f, 1.5f, 40.0f, 1.5f, 11.0f
+);
 
 aruwsrc::algorithms::TurretPid pitchTurretPid(
-    4000.0f, 0.0f, 100.0f, 100000.0f, 0.0f, 32000.0f, 0.7f, 10);
+    4000.0f, 0.0f, 100.0f, 0.0f, 32000.0f, 1.0f, 0.0f, 1.0f, 0.0f);
 
 // variables for world relative control
 ContiguousFloat currValueImuYawGimbal(0.0f, 0.0f, 360.0f);
 float imuInitialValue = 0.0f;
-modm::Pid<float> yawImuPid(2500.0f, 0.0f, 12000.0f, 0.0f, 30000.0f);
-float diff=0.0f;
+float positionControllerError = 0.0f;
 // end variables for world relative control
 
-// // custom turret PD controller
-// float kpYaw = 4000.0f; // 2500.0f;
-// float kdYaw = 100.0f; // 12000.0f;
-// float maxAngleError = 35.0f;
-// float maxD = 100000.0f;
-// float maxOutput = 32000.0f;  // 32000.0f;
+float prevVelocity = 0.0f;
 
-// float currErrorP;
-// float currErrorD;
-// float output;
-
-// ExtendedKalman proportionalKalman(1.0f, 0.0f);
-// ExtendedKalman derivativeKalman(1.0f, 0.0f);
-
-// int averageDIndex = 0;
-// float dprev[10] = {0};
-// float outputLowPass = 0.0f;
-
-// float turretPID(float angleError, float degreesPerSecond)
-// {
-//     // p
-//     currErrorP = kpYaw * proportionalKalman.filterData(angleError);// limitVal<float>(proportionalKalman.filterData(angleError),
-//         // -maxAngleError, maxAngleError);
-//     // d
-//     dprev[averageDIndex] = -kdYaw * limitVal<float>(derivativeKalman.filterData(degreesPerSecond), -maxD, maxD);
-//     for (int i = 0; i < 10; i++) {
-//         currErrorD += dprev[i];
-//     }
-//     currErrorD /= 10.0f;
-//     averageDIndex = (averageDIndex + 1) % 10;
-//     // total
-//     output = limitVal<float>(currErrorP + currErrorD, -maxOutput, maxOutput);
-//     outputLowPass = 0.7f * output + 0.3f * outputLowPass;
-//     return outputLowPass;
-// }
-// end custom PD controller
+float lowPassUserVelocity = 0.0f;
 
 void runTurretAlgorithm()
 {
+    soldierTurret.updateCurrentTurretAngles();
+
+    float userVelocity = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f
+        - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
+    lowPassUserVelocity = 0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocity;
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value
-    float userChange = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f;
-    desiredYaw -= userChange;
-    soldierTurret.updateCurrentTurretAngles();
+    desiredYaw -= lowPassUserVelocity;
     // the position controller is in world reference frame (i.e. add imu yaw to current encoder value)
     currValueImuYawGimbal.setValue(soldierTurret.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue);
-    diff = currValueImuYawGimbal.difference(desiredYaw);
-    diff = limitVal<float>(diff, -90.0f, 90.0f);
-    float pidOutput = yawTurretPid.runController(diff,
+
+    positionControllerError = limitVal<float>(currValueImuYawGimbal.difference(desiredYaw), -90.0f, 90.0f);
+    float pidOutput = yawTurretPid.runController(positionControllerError,
         soldierTurret.yawMotor.getShaftRPM() * 6.0f + Mpu6500::getGz());
-    yawImuPid.update(diff);
     soldierTurret.yawMotor.setDesiredOutput(pidOutput);
 }
 
@@ -153,19 +119,6 @@ int main()
             runTurretAlgorithm();
             chassisAutorotateCommand.execute();
             soldierChassis.refresh();
-
-
-            desiredYaw -= (
-                (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))) * 0.5f
-                + static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f
-            );
-            desiredPitch += (
-                (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))) * 0.5f
-                - static_cast<float>(aruwlib::Remote::getMouseY()) / 1000.0f
-            );
-            soldierTurret.updateDesiredTurretAngles(90.0f, desiredPitch);
-            soldierTurret.runTurretPositionPid();
-
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

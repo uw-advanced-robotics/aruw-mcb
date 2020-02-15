@@ -76,7 +76,7 @@ namespace control
     }
 
     void TurretSubsystem::refresh() {
-        updateTurretVals();
+        // updateTurretVals();
     }
 
     float TurretSubsystem::convertToUnwrappedEncoder(aruwlib::motor::DjiMotor *motor, float degrees) {
