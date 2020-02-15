@@ -8,6 +8,9 @@
  */
 
 #include "remote.hpp"
+#include "src/aruwlib/control/controller_mapper.hpp"
+
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwlib {
     // The current remote information
@@ -63,12 +66,12 @@ namespace aruwlib {
     }
 
     // Returns the value of the given channel
-    int16_t Remote::getChannel(Channel ch) {
+    float Remote::getChannel(Channel ch) {
         switch (ch) {
-            case Channel::RIGHT_HORIZONTAL: return remote.rightHorizontal;
-            case Channel::RIGHT_VERTICAL: return remote.rightVertical;
-            case Channel::LEFT_HORIZONTAL: return remote.leftHorizontal;
-            case Channel::LEFT_VERTICAL: return remote.leftVertical;
+            case Channel::RIGHT_HORIZONTAL: return remote.rightHorizontal / STICK_MAX_VALUE;
+            case Channel::RIGHT_VERTICAL: return remote.rightVertical / STICK_MAX_VALUE;
+            case Channel::LEFT_HORIZONTAL: return remote.leftHorizontal / STICK_MAX_VALUE;
+            case Channel::LEFT_VERTICAL: return remote.leftVertical / STICK_MAX_VALUE;
         }
         return 0;
     }
@@ -185,6 +188,9 @@ namespace aruwlib {
         remote.key = rxBuffer[14] | rxBuffer[15] << 8;
         // Remote wheel
         remote.wheel = (rxBuffer[16] | rxBuffer[17] << 8) - 1024;
+
+        aruwlib::control::IoMapper::handleKeyStateChange(
+            remote.key, remote.leftSwitch, remote.rightSwitch);
     }
 
     // Clears the current rxBuffer

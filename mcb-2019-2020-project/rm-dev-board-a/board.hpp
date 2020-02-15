@@ -20,8 +20,6 @@
 #include <src/aruwlib/communication/gpio/pwm.hpp>
 #include <robot-type/robot_type.hpp>
 
-// #include "robot-type/robot.hpp"
-
 using namespace modm::platform;
 
 /// @ingroup TODO
@@ -236,6 +234,11 @@ initialize()
     CanFilter::setFilter(14, CanFilter::FIFO0,
         CanFilter::StandardIdentifier(0),
         CanFilter::StandardFilterMask(0));
+}
+
+inline uint32_t getTimeMicroseconds()
+{
+    return DWT->CYCCNT / static_cast<uint32_t>(modm::clock::fcpu_MHz);
 }
 
 }  // namespace Board
