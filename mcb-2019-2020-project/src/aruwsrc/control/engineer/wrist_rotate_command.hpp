@@ -33,6 +33,7 @@ class WristRotateCommand : public aruwlib::control::Command
     bool isFinished() const;
 
  private:
+    // TODO: should possible make the tolerance much smaller as there was some drift.
     static constexpr float WRIST_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 30.0f;
 
     static constexpr float WRIST_ROTATE_COMMAND_PERIOD = 3;
