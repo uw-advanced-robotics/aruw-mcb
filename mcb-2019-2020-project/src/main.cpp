@@ -13,6 +13,7 @@
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
 #include "src/aruwsrc/control/example_comprised_command.hpp"
+#include "src/aruwlib/communication/serial/xavier_serial.hpp"
 
 /* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -59,8 +60,6 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #error "select soldier robot type only"
 #endif
 
-aruwlib::serial::RefSerial refereeSerial;
-
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -75,7 +74,8 @@ int main()
 
     aruwlib::Remote::initialize();
 
-    refereeSerial.initialize();
+    aruwlib::serial::RefSerial::getRefSerial().initialize();
+    aruwlib::serial::XavierSerial::getXavierSerial().initialize();
 
     /* register subsystems here ---------------------------------------------*/
     #if defined(TARGET_SOLDIER)
@@ -107,7 +107,10 @@ int main()
 
     while (1)
     {
-        can::CanRxHandler::pollCanData();
+        // do this as fast as you can
+        aruwlib::can::CanRxHandler::pollCanData();
+        aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
+        aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
         Remote::read();
 
