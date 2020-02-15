@@ -41,6 +41,10 @@ AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
+#if defined(TARGET_ENGINEER)
+
+#endif
+
 /* define commands ----------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem);
