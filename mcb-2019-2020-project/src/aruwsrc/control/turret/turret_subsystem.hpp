@@ -68,8 +68,8 @@ friend class TurretManualCommand;
  private:
     const int TURRET_YAW_MIN_ANGLE = 0;
     const int TURRET_YAW_MAX_ANGLE = 180;
-    const int TURRET_PITCH_MIN_ANGLE = 75;
-    const int TURRET_PITCH_MAX_ANGLE = 110;
+    const int TURRET_PITCH_MIN_ANGLE = 80;
+    const int TURRET_PITCH_MAX_ANGLE = 100;
     const int TURRET_START_ANGLE = 90;
 
     const int YAW_START_ENCODER_POSITION = 8160;

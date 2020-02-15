@@ -154,10 +154,18 @@ int main()
             chassisAutorotateCommand.execute();
             soldierChassis.refresh();
 
+
+            desiredYaw -= (
+                (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))) * 0.5f
+                + static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f
+            );
+            desiredPitch += (
+                (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))) * 0.5f
+                - static_cast<float>(aruwlib::Remote::getMouseY()) / 1000.0f
+            );
+            soldierTurret.updateDesiredTurretAngles(90.0f, desiredPitch);
             soldierTurret.runTurretPositionPid();
 
-            desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))) * 0.5f;
-            desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))) * 0.5f;
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
