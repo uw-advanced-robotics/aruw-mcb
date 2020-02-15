@@ -11,6 +11,10 @@
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 
 #include <modm/debug/logger.hpp>
+#include <modm/container/queue.hpp>
+#include <modm/container/linked_list.hpp>
+
+#include "serial_data_logger.hpp"
 
 using namespace modm::literals;
 
@@ -23,6 +27,7 @@ modm::log::Logger modm::log::error(loggerDevice);
 
 
 aruwsrc::control::ExampleSubsystem testSubsystem;
+
 
 int main()
 {
@@ -51,20 +56,40 @@ int main()
     modm::ShortPeriodicTimer motorSendPeriod(3);
     Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
     Usart2::initialize<Board::SystemClock, 115200>();
+    // modm::IOStream stream(loggerDevice);
+
+    // char a;
+    
+    // modm::Queue<char, modm::LinkedList<char>> queue;
+
+    src::logger::SerialDataLogger dataLogger;
 
     while (1)
     {
+        dataLogger.runLogger();
 
         if (motorSendPeriod.execute())
-        {
-            MODM_LOG_DEBUG << "debug\r" << modm::endl;
+            {
+            // MODM_LOG_DEBUG << "debug\r" << modm::endl;
             // MODM_LOG_ERROR << "error" << modm::endl;
 
             aruwlib::control::CommandScheduler::run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-        }
+            }
 
+        // map char values, clear the queue as we go
+        // while(queue.isNotEmpty()) {
+        //    char temp = queue.get();
+        //    loggerDevice.write(temp);
+        //    queue.pop();
+        // }
+        
 
+        // clear the queue
+        /*
+        for (int i=0; i<numChars; i++) queue.pop;
+        numChars = 0; // reset numChars
+        */
 
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
