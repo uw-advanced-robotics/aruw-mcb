@@ -19,7 +19,7 @@ namespace control
         wristDesiredRotateTime(wristRotateTime),
         wristMinRotateTime(WRIST_MIN_ROTATE_TIME)
     {
-        this->addSubsystemRequirement*(reinterpret_cast<aruwlib::control::Subsystem*>(wrist));
+        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(wrist));
         connectedWrist = wrist;
     }
 

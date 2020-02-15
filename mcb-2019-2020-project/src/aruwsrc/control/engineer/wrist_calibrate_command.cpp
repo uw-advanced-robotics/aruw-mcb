@@ -6,7 +6,6 @@ namespace aruwsrc
 
 namespace control
 {
-
     WristCalibrateCommand::WristCalibrateCommand(WristSubsystem* wrist) :
         wrist(wrist)
     {

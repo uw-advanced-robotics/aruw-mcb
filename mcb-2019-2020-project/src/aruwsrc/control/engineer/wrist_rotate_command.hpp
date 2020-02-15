@@ -13,7 +13,7 @@ namespace aruwsrc
 namespace control
 {
 
-class WristRotateCommand : Command
+class WristRotateCommand : public aruwlib::control::Command
 {
  public:
     static const uint32_t WRIST_MIN_ROTATE_TIME = 300;
@@ -53,4 +53,4 @@ class WristRotateCommand : Command
 
 }  // namespace aruwsrc
 
-#endif  // __WRIST_IN_COMMAND_HPP__
+#endif  // __WRIST_ROTATE_COMMAND_HPP__

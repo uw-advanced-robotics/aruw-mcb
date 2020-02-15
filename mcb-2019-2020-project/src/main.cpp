@@ -25,6 +25,9 @@
 #include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
+#include "src/aruwsrc/control/engineer/wrist_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/wrist_calibrate_command.hpp"
+#include "src/aruwsrc/control/engineer/wrist_rotate_command.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
@@ -42,7 +45,7 @@ ExampleSubsystem frictionWheelSubsystem;
 #endif
 
 #if defined(TARGET_ENGINEER)
-
+WristSubsystem wrist;
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -52,7 +55,10 @@ ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 #endif
 
-using namespace aruwlib::sensors;
+#if defined(TARGET_ENGINEER)
+WristCalibrateCommand wristCalibrateCommand(&wrist);
+WristRotateCommand wristRotateCommand(&wrist, 2.0f * aruwlib::algorithms::PI / 2.0f, 500.0f);
+#endif
 
 int main()
 {
@@ -76,14 +82,26 @@ int main()
     mainScheduler.registerSubsystem(&frictionWheelSubsystem);
     #endif
 
+    #if defined(TARGET_ENGINEER)
+    mainScheduler.registerSubsystem(&wrist);
+    #endif
+
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #endif
 
+    #if defined(TARGET_ENGINEER)
+    
+    #endif
+
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     mainScheduler.addCommand(&agitatorCalibrateCommand);
+    #endif
+
+    #if defined(TARGET_ENGINEER)
+    mainScheduler.addCommand(&wristCalibrateCommand);
     #endif
 
     /* define timers here ---------------------------------------------------*/
@@ -95,6 +113,13 @@ int main()
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootSlowCommand
+    );
+    #endif
+
+    #if defined(TARGET_ENGINEER)
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        &wristRotateCommand
     );
     #endif
 

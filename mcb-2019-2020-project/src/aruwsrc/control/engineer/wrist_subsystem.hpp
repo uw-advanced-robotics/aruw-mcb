@@ -15,7 +15,7 @@ namespace aruwsrc
 namespace control
 {
 
-class WristSubsystem : public Subsystem
+class WristSubsystem : public aruwlib::control::Subsystem
 {
  public:
     WristSubsystem();
