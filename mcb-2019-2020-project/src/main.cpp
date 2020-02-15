@@ -1,5 +1,4 @@
 #include <rm-dev-board-a/board.hpp>
-#include <modm/container/smart_pointer.hpp>
 #include <modm/processing/timer.hpp>
 
 #include "src/aruwlib/control/controller_mapper.hpp"
@@ -13,26 +12,20 @@
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"
-
-aruwsrc::control::TurretSubsystem turretSubsystem;
+#include "src/aruwsrc/control/example/example_comprised_command.hpp"
+#include "src/aruwlib/communication/serial/xavier_serial.hpp"
 
 using namespace aruwsrc::chassis;
+using namespace aruwlib::sensors;
 
 #if defined(TARGET_SOLDIER)
 ChassisSubsystem soldierChassis;
+ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #else  // error
 #error "select soldier robot type only"
 #endif
 
-aruwlib::serial::RefSerial refereeSerial;
-
-using namespace aruwlib::sensors;
-
-float watchYaw = 0.0f;
-float watchPitch = 0.0f;
-
-float desiredYaw = 0.0f;
-float desiredPitch = 0.0f;
+aruwsrc::control::TurretSubsystem turretSubsystem;
 
 int main()
 {
@@ -47,9 +40,17 @@ int main()
     Board::initialize();
     aruwlib::Remote::initialize();
 
+    CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
+    
+    aruwlib::serial::RefSerial::getRefSerial().initialize();
+    aruwlib::serial::XavierSerial::getXavierSerial().initialize();
+
     Mpu6500::init();
 
-    CommandScheduler::registerSubsystem(&turretSubsystem);
+    #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
+    CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
+    soldierChassis.setDefaultCommand(&chassisDriveCommand);
+    #endif
 
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
@@ -58,14 +59,12 @@ int main()
     // update imu
     modm::ShortPeriodicTimer updateImuPeriod(2);
 
-    desiredYaw = 90.0f;
-    desiredPitch = 90.0f;
-
     while (1)
     {
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
-        refereeSerial.updateSerial();
+        aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
+        aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
         aruwlib::Remote::read();
 
@@ -76,7 +75,7 @@ int main()
 
         if (motorSendPeriod.execute())
         {
-            aruwlib::control::CommandScheduler::run();
+            CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
