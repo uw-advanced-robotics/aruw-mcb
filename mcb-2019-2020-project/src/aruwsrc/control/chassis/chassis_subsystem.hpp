@@ -36,7 +36,7 @@ class ChassisSubsystem : public Subsystem {
  private:
     #if defined(TARGET_SOLDIER)
     // velocity pid gains and constants
-    const float VELOCITY_PID_KP            = 15.0f;
+    const float VELOCITY_PID_KP            = 20.0f;
     const float VELOCITY_PID_KI            = 0.0f;
     const float VELOCITY_PID_KD            = 0.0f;
     const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
@@ -67,7 +67,7 @@ class ChassisSubsystem : public Subsystem {
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
     // derivative term used in chassis pid
-    static constexpr float CHASSIS_REVOLVE_PID_KD = 235.0f;
+    static constexpr float CHASSIS_REVOLVE_PID_KD = 500.0f;
     // derivative max term
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // the maximum revolve error before we start using the derivative term
