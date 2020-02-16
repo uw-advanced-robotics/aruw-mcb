@@ -18,7 +18,7 @@ build-code:
     - cd mcb-2019-2020-project # Go to robot code diretory
     - rm -r modm # Because lbuild clean is broken
     - lbuild build # Make sure that modm is setup for linux.
-    - /usr/bin/env python3 $(which scons) build # Build the robot code!
+    - 'for robot in SOLDIER HERO ENGINEER SENTINEL DRONE; do echo -e "#ifndef __ROBOT_TYPE_HPP__\n#define __ROBOT_TYPE_HPP__\n#define TARGET_$robot\n#endif" > robot-type/robot_type.hpp && /usr/bin/env python3 $(which scons) build; done # Build the robot code!'
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   only:
