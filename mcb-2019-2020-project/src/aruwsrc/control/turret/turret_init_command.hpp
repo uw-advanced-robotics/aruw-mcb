@@ -3,6 +3,7 @@
 
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/command.hpp"
+#include "src/aruwlib/algorithms/contiguous_float.hpp"
 
 using namespace aruwlib::control;
 
@@ -36,7 +37,8 @@ class TurretInitCommand : public Command {
     uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
     uint16_t PITCH_MAX_OUTPUT = 16000;
 
-    const int TURRET_START_ANGLE = 90;
+    const aruwlib::algorithms::ContiguousFloat yawTargetEncoder;
+    const aruwlib::algorithms::ContiguousFloat pitchTargetEncoder;
 
     TurretSubsystem *turretSubsystem;
 

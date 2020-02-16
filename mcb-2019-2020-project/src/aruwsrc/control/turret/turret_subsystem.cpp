@@ -40,19 +40,23 @@ namespace control
         return getVelocity(pitchMotor);
     }
 
-    float TurretSubsystem::getYawAngle() const
+    float TurretSubsystem::getYawEncoder() const
     {
-        return currYawAngle.getValue();
+        return yawMotor.encStore.getEncoderWrapped();
     }
 
-    float TurretSubsystem::getPitchAngle() const
+    float TurretSubsystem::getPitchEncoder() const
     {
-        return currPitchAngle.getValue();
+        return pitchMotor.encStore.getEncoderWrapped();
     }
 
     // units: degrees per second
     float TurretSubsystem::getVelocity(const DjiMotor &motor) const {
         return 360 * motor.getShaftRPM() / 60;
+    }
+
+    bool TurretSubsystem::isTurretOnline() const {
+        return pitchMotor.isMotorOnline() && yawMotor.isMotorOnline();
     }
 
     void TurretSubsystem::refresh() {
@@ -84,22 +88,28 @@ namespace control
     }
 
     void TurretSubsystem::setPitchMotorOutput(float out) {
-        float angle = getPitchAngleFromCenter();
-        if ((angle > TURRET_PITCH_MAX_ANGLE && out > 0) ||
-            (angle < TURRET_PITCH_MIN_ANGLE && out < 0)) {
-            pitchMotor.setDesiredOutput(0);
-        } else {
-            pitchMotor.setDesiredOutput(out);
+        if (isTurretOnline()) {
+            aruwlib::algorithms::ContiguousFloat angle(TURRET_START_ANGLE + getPitchAngleFromCenter(), 0 , 360);
+            angle.reboundValue();
+            if ((angle.getValue() > TURRET_PITCH_MAX_ANGLE && out > 0) ||
+                (angle.getValue() < TURRET_PITCH_MIN_ANGLE && out < 0)) {
+                pitchMotor.setDesiredOutput(0);
+            } else {
+                pitchMotor.setDesiredOutput(out);
+            }
         }
     }
 
     void TurretSubsystem::setYawMotorOutput(float out) {
-        float angle = getYawAngleFromCenter();
-        if ((angle > TURRET_YAW_MAX_ANGLE && out < 0) ||
-            (angle < TURRET_YAW_MIN_ANGLE && out > 0)) {
-            yawMotor.setDesiredOutput(0);
-        } else {
-            yawMotor.setDesiredOutput(out);
+        if (isTurretOnline()) {
+            aruwlib::algorithms::ContiguousFloat angle(TURRET_START_ANGLE + getYawAngleFromCenter(), 0, 360);
+            angle.reboundValue();
+            if ((angle.getValue() > TURRET_YAW_MAX_ANGLE && out < 0) ||
+                (angle.getValue() < TURRET_YAW_MIN_ANGLE && out > 0)) {
+                yawMotor.setDesiredOutput(0);
+            } else {
+                yawMotor.setDesiredOutput(out);
+            }
         }
     }
 }  // namespace control

@@ -19,6 +19,7 @@ class TurretCVCommand : public Command {
     explicit TurretCVCommand(TurretSubsystem *subsystem);
 
     void initialize();
+    bool isFinished() const {return false;}
 
     void execute();
 

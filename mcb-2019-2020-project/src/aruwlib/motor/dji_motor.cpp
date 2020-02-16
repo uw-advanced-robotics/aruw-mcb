@@ -61,7 +61,7 @@ namespace motor
         this->desiredOutput = motorInverted ? -desOutputNotInverted : desOutputNotInverted;
     }
 
-    bool DjiMotor::isMotorOnline()
+    bool DjiMotor::isMotorOnline() const
     {
         return !motorDisconnectTimeout.isExpired() || motorDisconnectTimeout.isStopped();
     }

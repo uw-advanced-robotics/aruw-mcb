@@ -93,7 +93,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
     // is simply a sanity check.
     void setDesiredOutput(int32_t desiredOutput);
 
-    bool isMotorOnline();
+    bool isMotorOnline() const;
 
     // Serializes send data and deposits it in a message to be sent.
     void serializeCanSendData(modm::can::Message* txMessage) const;

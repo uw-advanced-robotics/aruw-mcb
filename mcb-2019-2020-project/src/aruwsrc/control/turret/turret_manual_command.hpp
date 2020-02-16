@@ -18,6 +18,7 @@ class TurretManualCommand : public Command {
     explicit TurretManualCommand(TurretSubsystem *subsystem);
 
     void initialize() {}
+    bool isFinished() const {return false;}
 
     void execute();
     void end(bool interrupted) { if (interrupted) { return; } }

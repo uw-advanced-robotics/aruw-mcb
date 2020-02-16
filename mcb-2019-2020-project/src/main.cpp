@@ -16,6 +16,7 @@
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 
 using namespace aruwsrc::chassis;
+using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 
 #if defined(TARGET_SOLDIER)
@@ -25,7 +26,10 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #error "select soldier robot type only"
 #endif
 
-aruwsrc::control::TurretSubsystem turretSubsystem;
+TurretSubsystem turretSubsystem;
+TurretCVCommand turretCVCommand(&turretSubsystem);
+TurretInitCommand turretInitCommand(&turretSubsystem);
+TurretManualCommand turretManualCommand(&turretSubsystem);
 
 int main()
 {
@@ -40,12 +44,15 @@ int main()
     Board::initialize();
     aruwlib::Remote::initialize();
 
-    CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
-    
     aruwlib::serial::RefSerial::getRefSerial().initialize();
     aruwlib::serial::XavierSerial::getXavierSerial().initialize();
 
     Mpu6500::init();
+
+    CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
+    turretSubsystem.setDefaultCommand(&turretManualCommand);
+    IoMapper::addHoldMapping(IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}), &turretCVCommand);
+    CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
 
     #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
     CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
