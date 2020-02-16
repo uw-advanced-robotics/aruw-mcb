@@ -25,6 +25,8 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #error "select soldier robot type only"
 #endif
 
+aruwlib::motor::DjiMotor gimbal(aruwlib::motor::MOTOR5, aruwlib::can::CanBus::CAN_BUS1, false);
+bool online = false;
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -71,6 +73,7 @@ int main()
 
         if (motorSendPeriod.execute())
         {
+            online = gimbal.isMotorOnline();
             aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
