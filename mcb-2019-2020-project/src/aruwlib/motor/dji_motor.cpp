@@ -65,6 +65,11 @@ namespace motor
 
     bool DjiMotor::isMotorOnline()
     {
+        /*
+         * motor online if the disconnect timout has not expired (if it received message but
+         * somehow got disconnected) and the timeout hasn't been stopped (initially, the timeout)
+         * is stopped
+         */
         return !motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped();
     }
 

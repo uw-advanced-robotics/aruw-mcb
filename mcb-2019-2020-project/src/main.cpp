@@ -12,6 +12,7 @@
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
+#include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwsrc/control/example_comprised_command.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 
@@ -121,6 +122,7 @@ int main()
         
         if (sendMotorTimeout.execute())
         {
+            aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
