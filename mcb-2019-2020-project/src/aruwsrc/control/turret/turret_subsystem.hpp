@@ -4,9 +4,7 @@
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
-#include "turret_manual_command.hpp"
-#include "turret_cv_command.hpp"
-#include "turret_init_command.hpp"
+#include "src/aruwlib/algorithms/contiguous_float.hpp"
 
 using namespace aruwlib::control;
 
@@ -19,14 +17,6 @@ namespace control
 class TurretSubsystem : public Subsystem {
  public:
     TurretSubsystem();
-
-    void pitchMotorToDegree(float degrees);
-
-    void yawMotorToDegree(float degrees);
-
-    void incPitchMotorByDegree(float degrees);
-
-    void incYawMotorByDegree(float degrees);
 
     float getYawVelocity() const;
 
@@ -44,6 +34,10 @@ class TurretSubsystem : public Subsystem {
 
     bool isTurretOnline() const;
 
+    float getRemoteXMovement();
+
+    float getRemoteYMovement();
+
     const aruwlib::algorithms::ContiguousFloat& getYawAngle() const;
 
     const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
@@ -57,6 +51,8 @@ class TurretSubsystem : public Subsystem {
 
     const int YAW_START_ENCODER_POSITION = 8160;
     const int PITCH_START_ENCODER_POSITION = 4780;
+
+    const int REMOTE_INPUT_SCALER = 30000;
 
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;

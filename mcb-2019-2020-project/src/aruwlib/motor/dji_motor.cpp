@@ -135,7 +135,7 @@ namespace motor
         }
     }
 
-    uint32_t DjiMotor::degreesToEncoder(float angle)
+    int32_t DjiMotor::degreesToEncoder(float angle)
     {
         return (ENC_RESOLUTION * angle) / 360;
     }

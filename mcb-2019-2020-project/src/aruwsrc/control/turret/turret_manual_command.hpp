@@ -23,15 +23,6 @@ class TurretManualCommand : public Command {
     void execute();
     void end(bool interrupted) { if (interrupted) { return; } }
 
-    void pitchToVelocity(float degree);
-    void yawToVelocity(float degree);
-
-    void pitchIncrementVelocity(float degree);
-    void yawIncrementVelocity(float degree);
-
-    float getPitchOutput();
-    float getYawOutput();
-
  private:
     uint16_t YAW_P = 1.0f;
     uint16_t YAW_I = 0.0f;
@@ -45,8 +36,6 @@ class TurretManualCommand : public Command {
     uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
     uint16_t PITCH_MAX_OUTPUT = 16000;
 
-    const float remoteControlScaler = 30000;
-
     TurretSubsystem *turretSubsystem;
     modm::Pid<float> manualYawPid;
     modm::Pid<float> manualPitchPid;
@@ -54,7 +43,7 @@ class TurretManualCommand : public Command {
     float yawVelocityTarget = 0;
     float pitchVelocityTarget = 0;
 
-    void updateTurretPosition(void);
+    void updateTurretVelocity();
 };
 
 }  // namespace control

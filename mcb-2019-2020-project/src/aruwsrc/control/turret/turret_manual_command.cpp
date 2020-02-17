@@ -1,5 +1,4 @@
 #include "turret_manual_command.hpp"
-#include "src/aruwlib/communication/remote.hpp"
 #include "turret_subsystem.hpp"
 
 namespace aruwsrc
@@ -15,39 +14,14 @@ TurretManualCommand::TurretManualCommand(TurretSubsystem *subsystem) :
     addSubsystemRequirement(subsystem);
 }
 
-float TurretManualCommand::getPitchOutput() {
-    return manualPitchPid.getValue();
-}
-
-float TurretManualCommand::getYawOutput() {
-    return manualYawPid.getValue();
-}
-
 void TurretManualCommand::execute() {
-    updateTurretPosition();
+    updateTurretVelocity();
 }
 
-void TurretManualCommand::pitchToVelocity(float velocity) {
-    pitchVelocityTarget = velocity;
-}
+void TurretManualCommand::updateTurretVelocity() {
+    pitchVelocityTarget = turretSubsystem->getRemoteYMovement();
+    yawVelocityTarget = turretSubsystem->getRemoteXMovement();
 
-void TurretManualCommand::yawToVelocity(float velocity) {
-    yawVelocityTarget = velocity;
-}
-
-void TurretManualCommand::pitchIncrementVelocity(float velocity) {
-    pitchVelocityTarget += velocity;
-}
-
-void TurretManualCommand::yawIncrementVelocity(float velocity) {
-    yawVelocityTarget += velocity;
-}
-
-void TurretManualCommand::updateTurretPosition() {
-    pitchToVelocity(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL)
-                    * remoteControlScaler);
-    yawToVelocity(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)
-                  * remoteControlScaler);
     manualPitchPid.update(pitchVelocityTarget - turretSubsystem->getPitchVelocity());
     manualYawPid.update(yawVelocityTarget - turretSubsystem->getYawVelocity());
 

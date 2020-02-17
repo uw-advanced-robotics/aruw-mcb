@@ -115,7 +115,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     aruwlib::can::CanBus getCanBus() const;
 
-    static uint32_t degreesToEncoder(float angle);
+    static int32_t degreesToEncoder(float angle);
 
     static float encoderToDegrees(int32_t encoder);
 

@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <random>
+#include <cfloat>
 #include "turret_subsystem.hpp"
+#include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/control/controller_mapper.hpp"
 
@@ -42,7 +44,7 @@ namespace control
 
     // units: degrees per second
     float TurretSubsystem::getVelocity(const DjiMotor &motor) const {
-        return 360 * motor.getShaftRPM() / 60;
+        return aruwlib::algorithms::limitVal(360.0 * motor.getShaftRPM() / 60.0, FLT_MIN, FLT_MAX);
     }
 
     bool TurretSubsystem::isTurretOnline() const {
@@ -79,9 +81,13 @@ namespace control
 
     /// \todo fix this
     void TurretSubsystem::setPitchMotorOutput(float out) {
+        if (out > INT32_MAX) {
+            // return error
+            return;
+        }
         if (isTurretOnline()) {
-            if ((currPitchAngle.getValue() > TURRET_PITCH_MAX_ANGLE && out > 0) ||
-                (currPitchAngle.getValue() < TURRET_PITCH_MIN_ANGLE && out < 0)) {
+            if ((getPitchAngleFromCenter() + TURRET_START_ANGLE > TURRET_PITCH_MAX_ANGLE && out > 0) ||
+                (getPitchAngleFromCenter() + TURRET_START_ANGLE < TURRET_PITCH_MIN_ANGLE && out < 0)) {
                 pitchMotor.setDesiredOutput(0);
             } else {
                 pitchMotor.setDesiredOutput(out);
@@ -90,14 +96,26 @@ namespace control
     }
 
     void TurretSubsystem::setYawMotorOutput(float out) {
+        if (out > INT32_MAX) {
+            // return error
+            return;
+        }
         if (isTurretOnline()) {
-            if ((currYawAngle.getValue() > TURRET_YAW_MAX_ANGLE && out < 0) ||
-                (currYawAngle.getValue() < TURRET_YAW_MIN_ANGLE && out > 0)) {
+            if ((getYawAngleFromCenter() + TURRET_START_ANGLE > TURRET_YAW_MAX_ANGLE && out > 0) ||
+                (getYawAngleFromCenter() + TURRET_START_ANGLE < TURRET_YAW_MIN_ANGLE && out < 0)) {
                 yawMotor.setDesiredOutput(0);
             } else {
                 yawMotor.setDesiredOutput(out);
             }
         }
+    }
+
+    float TurretSubsystem::getRemoteXMovement() {
+        return aruwlib::Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL) * REMOTE_INPUT_SCALER;
+    }
+
+    float TurretSubsystem::getRemoteYMovement() {
+        return aruwlib::Remote::getChannel(Remote::Channel::RIGHT_VERTICAL) * REMOTE_INPUT_SCALER;
     }
 
     const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle() const

@@ -12,6 +12,9 @@
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"
+#include "src/aruwsrc/control/turret/turret_cv_command.hpp"
+#include "src/aruwsrc/control/turret/turret_init_command.hpp"
+#include "src/aruwsrc/control/turret/turret_manual_command.hpp"
 #include "src/aruwsrc/control/example/example_comprised_command.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 
