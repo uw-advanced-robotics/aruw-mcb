@@ -49,11 +49,11 @@ class TurretSubsystem : public Subsystem {
     float getPitchAngle() const;
 
  private:
-    const int TURRET_YAW_MIN_ANGLE = 0;
-    const int TURRET_YAW_MAX_ANGLE = 180;
-    const int TURRET_PITCH_MIN_ANGLE = 75;
-    const int TURRET_PITCH_MAX_ANGLE = 110;
-    const int TURRET_START_ANGLE = 90;
+    const int TURRET_YAW_MIN_ANGLE = 0.0f;
+    const int TURRET_YAW_MAX_ANGLE = 180.0f;
+    const int TURRET_PITCH_MIN_ANGLE = 75.0f;
+    const int TURRET_PITCH_MAX_ANGLE = 110.0f;
+    const int TURRET_START_ANGLE = 90.0f;
 
     const int YAW_START_ENCODER_POSITION = 8160;
     const int PITCH_START_ENCODER_POSITION = 4780;

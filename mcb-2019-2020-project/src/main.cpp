@@ -83,8 +83,9 @@ int main()
 
         if (motorSendPeriod.execute())
         {
-            CommandScheduler::getMainScheduler().run();
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            turretSubsystem.refresh();
+            // CommandScheduler::getMainScheduler().run();
+            // aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
         modm::delayMicroseconds(10);
