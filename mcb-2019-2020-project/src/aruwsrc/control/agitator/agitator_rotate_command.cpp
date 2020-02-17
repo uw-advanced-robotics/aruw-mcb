@@ -10,7 +10,8 @@ namespace agitator
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
         float agitatorRotateTime,
-        float agitatorPauseAfterRotateTime) :
+        float agitatorPauseAfterRotateTime
+    ) :
         agitatorTargetChange(agitatorAngleChange),
         agitatorRotateSetpoint(
             AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime,
