@@ -52,7 +52,6 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
 
     AgitatorSubsystem* connectedAgitator;
 
-    // 
     float agitatorUnjamAngleMax;
 
     float currAgitatorUnjamAngle;

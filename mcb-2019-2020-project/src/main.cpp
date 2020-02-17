@@ -71,6 +71,7 @@ int main()
     Board::initialize();
 
     aruwlib::Remote::initialize();
+    aruwlib::sensors::Mpu6500::init();
 
     aruwlib::serial::RefSerial::getRefSerial().initialize();
     aruwlib::serial::XavierSerial::getXavierSerial().initialize();
