@@ -8,7 +8,6 @@ namespace aruwlib
 
 namespace control
 {
-    // cppcheck-suppress unusedFunction //TODO Remove lint suppression
     bool Command::hasRequirement(Subsystem* requirement) const
     {
         if (requirement == nullptr)
@@ -30,7 +29,6 @@ namespace control
             commandRequirements.find(requirement) == commandRequirements.end()
         ) {
             commandRequirements.insert(requirement);
-            this->comprisedCommandScheduler.registerSubsystem(requirement);
         }
     }
 
