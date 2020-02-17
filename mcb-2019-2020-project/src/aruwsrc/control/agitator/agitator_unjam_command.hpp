@@ -33,8 +33,11 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
  private:
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
-    static const uint32_t AGITATOR_MAX_WAIT_TIME;
+    // the maximum time that the command will wait from commanding the agitator to rotate
+    // backwards to rotating forwards again.
+    static constexpr uint32_t AGITATOR_MAX_WAIT_TIME = 130;
 
+    // minimum angle the agitator will rotate backwards when unjamming
     static constexpr float MIN_AGITATOR_UNJAM_ANGLE = aruwlib::algorithms::PI / 4;;
 
     enum AgitatorUnjamState {AGITATOR_UNJAM_BACK, AGITATOR_UNJAM_FORWARD, FINISHED};
@@ -44,10 +47,12 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
     // time allowed to rotate back the the currAgitatorUnjamAngle
     modm::ShortTimeout agitatorUnjamRotateTimeout;
 
+    // usually set to AGITATOR_MAX_WAIT_TIME, but can be user enabled
     uint32_t agitatorMaxWaitTime;
 
     AgitatorSubsystem* connectedAgitator;
 
+    // 
     float agitatorUnjamAngleMax;
 
     float currAgitatorUnjamAngle;

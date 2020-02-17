@@ -13,6 +13,9 @@
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "src/aruwlib/control/controller_mapper.hpp"
 
+/* math includes ------------------------------------------------------------*/
+#include "aruwlib/algorithms/contiguous_float_test.hpp"
+
 /* aruwsrc control includes -------------------------------------------------*/
 #include "src/aruwsrc/control/example_command.hpp"
 #include "src/aruwsrc/control/example_comprised_command.hpp"
@@ -28,7 +31,6 @@
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
-using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
 using namespace aruwsrc::chassis;

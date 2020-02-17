@@ -6,8 +6,6 @@ namespace aruwsrc
 namespace agitator
 {
 
-const uint32_t AgitatorUnjamCommand::AGITATOR_MAX_WAIT_TIME = 130;
-
 AgitatorUnjamCommand::AgitatorUnjamCommand(
     AgitatorSubsystem* agitator,
     float agitatorMaxUnjamAngle,
