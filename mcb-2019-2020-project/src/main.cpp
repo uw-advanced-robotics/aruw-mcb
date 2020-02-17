@@ -20,16 +20,17 @@ using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 
 #if defined(TARGET_SOLDIER)
+TurretSubsystem turretSubsystem;
+TurretCVCommand turretCVCommand(&turretSubsystem);
+TurretInitCommand turretInitCommand(&turretSubsystem);
+TurretManualCommand turretManualCommand(&turretSubsystem);
+
 ChassisSubsystem soldierChassis;
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #else  // error
 #error "select soldier robot type only"
 #endif
 
-TurretSubsystem turretSubsystem;
-TurretCVCommand turretCVCommand(&turretSubsystem);
-TurretInitCommand turretInitCommand(&turretSubsystem);
-TurretManualCommand turretManualCommand(&turretSubsystem);
 
 int main()
 {
@@ -49,14 +50,14 @@ int main()
 
     Mpu6500::init();
 
+    #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
+    CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
+    soldierChassis.setDefaultCommand(&chassisDriveCommand);
+
     CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
     turretSubsystem.setDefaultCommand(&turretManualCommand);
     IoMapper::addHoldMapping(IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}), &turretCVCommand);
     CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
-
-    #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
-    CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
-    soldierChassis.setDefaultCommand(&chassisDriveCommand);
     #endif
 
     // timers
