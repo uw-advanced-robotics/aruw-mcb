@@ -10,21 +10,28 @@ namespace aruwsrc
 namespace algorithms
 {
 
-float TurretPid::runController(float angleError, float rotationalSpeed)
+float TurretPid::runController(float error, float errorDerivative)
 {
     // p
-    currErrorP = kp * proportionalKalman.filterData(angleError);
+    currErrorP = kp * proportionalKalman.filterData(error);
     // i
     currErrorI = limitVal<float>(currErrorI + ki * proportionalKalman.getLastFiltered(),
         -maxICumulative, maxICumulative);
     // d
-    currErrorD = kd * derivativeKalman.filterData(rotationalSpeed);
+    currErrorD = -kd * derivativeKalman.filterData(errorDerivative);
     // total
-    output = limitVal<float>(currErrorP + currErrorI - currErrorD, -maxOutput, maxOutput);
+    output = limitVal<float>(currErrorP + currErrorI + currErrorD, -maxOutput, maxOutput);
     return output;
 }
 
-float TurretPid::getValue()
+float TurretPid::runController(float error)
+{
+    float errorDerivative = error / (modm::Clock::now().getTime() - previousTimestamp);
+    previousTimestamp = modm::Clock::now().getTime();
+    return runController(error, errorDerivative);
+}
+
+float TurretPid::getOutput()
 {
     return output;
 }
