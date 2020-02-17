@@ -77,9 +77,9 @@ namespace control
         }
     }
 
+    /// \todo fix this
     void TurretSubsystem::setPitchMotorOutput(float out) {
         if (isTurretOnline()) {
-            currPitchAngle.reboundValue();
             if ((currPitchAngle.getValue() > TURRET_PITCH_MAX_ANGLE && out > 0) ||
                 (currPitchAngle.getValue() < TURRET_PITCH_MIN_ANGLE && out < 0)) {
                 pitchMotor.setDesiredOutput(0);
@@ -100,14 +100,14 @@ namespace control
         }
     }
 
-    float TurretSubsystem::getYawAngle() const
+    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle() const
     {
-        return currYawAngle.getValue();
+        return currYawAngle;
     }
 
-    float TurretSubsystem::getPitchAngle() const
+    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPitchAngle() const
     {
-        return currPitchAngle.getValue();
+        return currPitchAngle;
     }
 
 }  // namespace control

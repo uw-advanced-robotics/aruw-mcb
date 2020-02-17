@@ -25,20 +25,20 @@ class TurretInitCommand : public Command {
     void end(bool interrupted) { if (interrupted) { return; } }
 
  private:
-    uint16_t YAW_P = 1.0f;
+    uint16_t YAW_P = 300.0f;
     uint16_t YAW_I = 0.0f;
-    uint16_t YAW_D = 0.0f;
+    uint16_t YAW_D = 100.0f;
     uint16_t YAW_MAX_ERROR_SUM = 0.0f;
     uint16_t YAW_MAX_OUTPUT = 16000;
 
-    uint16_t PITCH_P = 1.0f;
+    uint16_t PITCH_P = 300.0f;
     uint16_t PITCH_I = 0.0f;
-    uint16_t PITCH_D = 0.0f;
+    uint16_t PITCH_D = 100.0f;
     uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
     uint16_t PITCH_MAX_OUTPUT = 16000;
 
-    const aruwlib::algorithms::ContiguousFloat yawTargetEncoder;
-    const aruwlib::algorithms::ContiguousFloat pitchTargetEncoder;
+    const float pitchTargetAngle = 90.0f;
+    const float yawTargetAngle = 90.0f;
 
     TurretSubsystem *turretSubsystem;
 

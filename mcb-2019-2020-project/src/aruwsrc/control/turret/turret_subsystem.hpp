@@ -44,9 +44,9 @@ class TurretSubsystem : public Subsystem {
 
     bool isTurretOnline() const;
 
-    float getYawAngle() const;
+    const aruwlib::algorithms::ContiguousFloat& getYawAngle() const;
 
-    float getPitchAngle() const;
+    const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
 
  private:
     const int TURRET_YAW_MIN_ANGLE = 0.0f;
