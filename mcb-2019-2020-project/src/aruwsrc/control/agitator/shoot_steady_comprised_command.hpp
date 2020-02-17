@@ -1,7 +1,7 @@
 #ifndef __SHOOT_COMPRISED_COMMAND_HPP__
 #define __SHOOT_COMPRISED_COMMAND_HPP__
 
-#include "src/aruwlib/control/command.hpp"
+#include "src/aruwlib/control/comprised_command.hpp"
 #include "agitator_subsystem.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "agitator_rotate_command.hpp"
@@ -13,7 +13,7 @@ namespace aruwsrc
 namespace agitator
 {
 
-class ShootComprisedCommand : public aruwlib::control::Command
+class ShootComprisedCommand : public aruwlib::control::ComprisedCommand
 {
 public:
     ShootComprisedCommand(
@@ -24,17 +24,15 @@ public:
         float minAgitatorRotateTime
     );
 
-    void initialize(void);
+    void initialize();
 
-    void execute(void);
+    void execute();
 
     void end(bool interrupted);
 
-    bool isFinished(void) const;
+    bool isFinished() const;
     
 private:
-    // static constexpr float AGITATOR_ANGLE_INCREMENT = aruwlib::algorithms::PI / 50.0f;
-
     AgitatorSubsystem* connectedAgitator; 
 
     AgitatorRotateCommand agitatorRotateCommand;

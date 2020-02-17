@@ -27,35 +27,24 @@ ShootComprisedCommand::ShootComprisedCommand(
     agitatorUnjamCommand(agitator, maxUnjamAngle),
     unjamSequenceCommencing(false)
 {
+    this->comprisedCommandScheduler.registerSubsystem(agitator);
     this->addSubsystemRequirement(dynamic_cast<Subsystem*>(agitator));
 }
 
-
-int i = 0;
-int j = 0;
-
 void ShootComprisedCommand::initialize()
 {
-    i = 0;
-    j = 0;
     this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&agitatorRotateCommand));
     unjamSequenceCommencing = false;
 }
 
 void ShootComprisedCommand::execute()
 {
-    i++;
-    if (isFinished()) {
-        j = i;
-    }
     if (connectedAgitator->isAgitatorJammed() && !unjamSequenceCommencing)
     {
         // when the agitator is jammed, add the agitatorUnjamCommand
         // the to scheduler. The rotate forward command will be automatically
         // unscheduled.
         unjamSequenceCommencing = true;
-        this->comprisedCommandScheduler.removeCommand(
-            dynamic_cast<Command*>(&agitatorRotateCommand), true);
         this->comprisedCommandScheduler.addCommand(
             dynamic_cast<Command*>(&agitatorUnjamCommand));
     }
