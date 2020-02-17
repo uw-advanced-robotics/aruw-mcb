@@ -21,7 +21,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
         Hero2
     };
 
-    AgitatorSubsystem(AgitatorType type);
+    explicit AgitatorSubsystem(AgitatorType type);
 
     void refresh();
 
@@ -107,7 +107,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     float getUncalibratedAgitatorAngle() const;
 };
 
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc
 

@@ -51,7 +51,8 @@ void AgitatorUnjamCommand::execute()
             if (
                 agitatorUnjamRotateTimeout.isExpired() ||
                 fabs(static_cast<double>(connectedAgitator->getAgitatorAngle() -
-                connectedAgitator->getAgitatorDesiredAngle())) < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE)
+                    connectedAgitator->getAgitatorDesiredAngle()))
+                < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE)
             ) {
                 // define a random time that the agitator will take to rotate forwards.
                 agitatorUnjamRotateTimeout.restart(agitatorMaxWaitTime);
@@ -61,7 +62,7 @@ void AgitatorUnjamCommand::execute()
             }
             break;
         }
-        case AGITATOR_UNJAM_FORWARD:  // this is inherently different than just agitator_rotate_command
+        case AGITATOR_UNJAM_FORWARD:  // this is different than just agitator_rotate_command
         {
             // reset the angle to what it was before unjamming
             connectedAgitator->setAgitatorAngle(agitatorSetpointBeforeUnjam);
@@ -82,8 +83,9 @@ void AgitatorUnjamCommand::execute()
             }
             else if (
                 fabs(static_cast<double>(connectedAgitator->getAgitatorAngle() -
-                connectedAgitator->getAgitatorDesiredAngle())) < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE)
-            ) {
+                    connectedAgitator->getAgitatorDesiredAngle()))
+                < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE))
+            {
                 currUnjamstate = FINISHED;
             }
             break;
@@ -108,6 +110,6 @@ bool AgitatorUnjamCommand::isFinished(void) const
     return currUnjamstate == FINISHED;
 }
 
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc

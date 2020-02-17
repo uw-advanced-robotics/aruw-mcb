@@ -1,4 +1,4 @@
-#include "shoot_steady_comprised_command.hpp"
+#include "agitator_shoot_comprised_command.hpp"
 #include "agitator_rotate_command.hpp"
 #include "agitator_unjam_command.hpp"
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -67,6 +67,6 @@ bool ShootComprisedCommand::isFinished() const
         && unjamSequenceCommencing);
 }
 
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc

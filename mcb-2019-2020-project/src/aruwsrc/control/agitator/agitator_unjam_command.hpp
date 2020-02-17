@@ -15,7 +15,7 @@ namespace agitator
 
 class AgitatorUnjamCommand : public aruwlib::control::Command
 {
-public:
+ public:
     AgitatorUnjamCommand(
         AgitatorSubsystem* agitator,
         float agitatorMaxUnjamAngle,
@@ -30,7 +30,7 @@ public:
 
     bool isFinished() const;
 
-private:
+ private:
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
     static const uint32_t AGITATOR_MAX_WAIT_TIME;
@@ -55,7 +55,7 @@ private:
     float agitatorSetpointBeforeUnjam;
 };
 
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc
 

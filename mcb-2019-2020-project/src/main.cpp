@@ -1,20 +1,13 @@
 #include <rm-dev-board-a/board.hpp>
 #include <modm/processing/timer.hpp>
-#include <modm/processing/timer.hpp>
 
 /* communication includes ---------------------------------------------------*/
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/communication/remote.hpp"
-
-/* math includes ------------------------------------------------------------*/
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
-#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
-#include "src/aruwlib/communication/serial/ref_serial.hpp"
-#include "src/aruwlib/errors/error_controller.hpp"
-#include "src/aruwsrc/control/example_comprised_command.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
+#include "src/aruwlib/communication/serial/ref_serial.hpp"
 
 /* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -25,11 +18,13 @@
 #include "src/aruwsrc/control/example_comprised_command.hpp"
 #include "src/aruwsrc/control/example_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
-#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
+#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
+
+/* error handling includes --------------------------------------------------*/
+#include "src/aruwlib/errors/error_controller.hpp"
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
@@ -119,7 +114,7 @@ int main()
         {
             Mpu6500::read();
         }
-        
+
         if (sendMotorTimeout.execute())
         {
             aruwlib::errors::ErrorController::update();

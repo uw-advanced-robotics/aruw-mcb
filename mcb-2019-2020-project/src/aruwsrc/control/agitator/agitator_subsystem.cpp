@@ -127,6 +127,6 @@ namespace agitator
     {
         return desiredAgitatorAngle;
     }
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc

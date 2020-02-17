@@ -15,7 +15,7 @@ namespace agitator
 
 class ShootComprisedCommand : public aruwlib::control::ComprisedCommand
 {
-public:
+ public:
     ShootComprisedCommand(
         AgitatorSubsystem* agitator,
         float agitatorChangeAngle,
@@ -31,9 +31,9 @@ public:
     void end(bool interrupted);
 
     bool isFinished() const;
-    
-private:
-    AgitatorSubsystem* connectedAgitator; 
+
+ private:
+    AgitatorSubsystem* connectedAgitator;
 
     AgitatorRotateCommand agitatorRotateCommand;
 
@@ -42,7 +42,7 @@ private:
     bool unjamSequenceCommencing;
 };
 
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc
 

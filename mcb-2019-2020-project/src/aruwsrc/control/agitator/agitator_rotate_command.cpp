@@ -10,7 +10,8 @@ namespace agitator
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
         float agitatorRotateTime,
-        float agitatorPauseAfterRotateTime
+        float agitatorPauseAfterRotateTime,
+        float setpointTolerance
     ) :
         agitatorTargetChange(agitatorAngleChange),
         agitatorRotateSetpoint(
@@ -18,7 +19,8 @@ namespace agitator
             AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime, 0),
         agitatorDesiredRotateTime(agitatorRotateTime),
         agitatorMinRotatePeriod(agitatorRotateTime + agitatorPauseAfterRotateTime),
-        agitatorMinRotateTimeout(agitatorRotateTime + agitatorPauseAfterRotateTime)
+        agitatorMinRotateTimeout(agitatorRotateTime + agitatorPauseAfterRotateTime),
+        agitatorSetpointTolerance(setpointTolerance)
     {
         this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
         connectedAgitator = agitator;
@@ -30,7 +32,7 @@ namespace agitator
         agitatorRotateSetpoint.reset(connectedAgitator->getAgitatorAngle());
         agitatorRotateSetpoint.setTarget(connectedAgitator->getAgitatorAngle()
             + agitatorTargetChange);
-        
+
         // we set the unjam timer to the larger of two values:
         // either the desired rotate time minimum rotate time
         connectedAgitator->armAgitatorUnjamTimer(
@@ -65,10 +67,10 @@ namespace agitator
         // finished, and the minimum rotate time is expired.
         return fabs(static_cast<double>(connectedAgitator->getAgitatorAngle()
             - connectedAgitator->getAgitatorDesiredAngle()))
-            < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE)
+            < static_cast<double>(agitatorSetpointTolerance)
             && agitatorRotateSetpoint.isTargetReached()
             && agitatorMinRotateTimeout.isExpired();  // agitator min timeout finished
     }
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc

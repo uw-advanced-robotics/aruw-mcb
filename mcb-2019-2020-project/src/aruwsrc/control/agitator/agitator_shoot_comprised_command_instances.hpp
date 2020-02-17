@@ -1,7 +1,7 @@
 #ifndef __AGITATOR_SHOOT_COMPRISED_COMMANDS_HPP__
 #define __AGITATOR_SHOOT_COMPRISED_COMMANDS_HPP__
 
-#include "shoot_steady_comprised_command.hpp"
+#include "agitator_shoot_comprised_command.hpp"
 
 namespace aruwsrc
 {
@@ -12,7 +12,7 @@ namespace agitator
 class ShootFastComprisedCommand : public ShootComprisedCommand
 {
  public:
-    ShootFastComprisedCommand(AgitatorSubsystem* agitator17mm) :
+    explicit ShootFastComprisedCommand(AgitatorSubsystem* agitator17mm) :
     ShootComprisedCommand(
         agitator17mm,
         aruwlib::algorithms::PI / 5.0f,
@@ -24,7 +24,7 @@ class ShootFastComprisedCommand : public ShootComprisedCommand
 class ShootSlowComprisedCommand : public ShootComprisedCommand
 {
  public:
-    ShootSlowComprisedCommand(AgitatorSubsystem* agitator17mm) :
+    explicit ShootSlowComprisedCommand(AgitatorSubsystem* agitator17mm) :
     ShootComprisedCommand(
         agitator17mm,
         aruwlib::algorithms::PI / 5.0f,
