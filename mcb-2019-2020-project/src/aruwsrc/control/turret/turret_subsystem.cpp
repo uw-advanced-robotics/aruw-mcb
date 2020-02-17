@@ -40,16 +40,6 @@ namespace control
         return getVelocity(pitchMotor);
     }
 
-    float TurretSubsystem::getYawEncoder() const
-    {
-        return yawMotor.encStore.getEncoderWrapped();
-    }
-
-    float TurretSubsystem::getPitchEncoder() const
-    {
-        return pitchMotor.encStore.getEncoderWrapped();
-    }
-
     // units: degrees per second
     float TurretSubsystem::getVelocity(const DjiMotor &motor) const {
         return 360 * motor.getShaftRPM() / 60;
@@ -89,10 +79,9 @@ namespace control
 
     void TurretSubsystem::setPitchMotorOutput(float out) {
         if (isTurretOnline()) {
-            aruwlib::algorithms::ContiguousFloat angle(TURRET_START_ANGLE + getPitchAngleFromCenter(), 0 , 360);
-            angle.reboundValue();
-            if ((angle.getValue() > TURRET_PITCH_MAX_ANGLE && out > 0) ||
-                (angle.getValue() < TURRET_PITCH_MIN_ANGLE && out < 0)) {
+            currPitchAngle.reboundValue();
+            if ((currPitchAngle.getValue() > TURRET_PITCH_MAX_ANGLE && out > 0) ||
+                (currPitchAngle.getValue() < TURRET_PITCH_MIN_ANGLE && out < 0)) {
                 pitchMotor.setDesiredOutput(0);
             } else {
                 pitchMotor.setDesiredOutput(out);
@@ -102,16 +91,25 @@ namespace control
 
     void TurretSubsystem::setYawMotorOutput(float out) {
         if (isTurretOnline()) {
-            aruwlib::algorithms::ContiguousFloat angle(TURRET_START_ANGLE + getYawAngleFromCenter(), 0, 360);
-            angle.reboundValue();
-            if ((angle.getValue() > TURRET_YAW_MAX_ANGLE && out < 0) ||
-                (angle.getValue() < TURRET_YAW_MIN_ANGLE && out > 0)) {
+            if ((currYawAngle.getValue() > TURRET_YAW_MAX_ANGLE && out < 0) ||
+                (currYawAngle.getValue() < TURRET_YAW_MIN_ANGLE && out > 0)) {
                 yawMotor.setDesiredOutput(0);
             } else {
                 yawMotor.setDesiredOutput(out);
             }
         }
     }
+
+    float TurretSubsystem::getYawAngle() const
+    {
+        return currYawAngle.getValue();
+    }
+
+    float TurretSubsystem::getPitchAngle() const
+    {
+        return currPitchAngle.getValue();
+    }
+
 }  // namespace control
 
 }  // namespace aruwsrc

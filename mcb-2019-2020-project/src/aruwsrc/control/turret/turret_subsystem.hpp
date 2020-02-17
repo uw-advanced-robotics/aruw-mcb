@@ -36,10 +36,6 @@ class TurretSubsystem : public Subsystem {
 
     float getPitchAngleFromCenter() const;
 
-    float getYawEncoder() const;
-
-    float getPitchEncoder() const;
-
     void refresh();
 
     void setPitchMotorOutput(float out);
@@ -47,6 +43,10 @@ class TurretSubsystem : public Subsystem {
     void setYawMotorOutput(float out);
 
     bool isTurretOnline() const;
+
+    float getYawAngle() const;
+
+    float getPitchAngle() const;
 
  private:
     const int TURRET_YAW_MIN_ANGLE = 0;
