@@ -48,7 +48,9 @@ sources += env.FindSourceFiles(".", ignorePaths=ignored)
 #   7. Anyone using your project now also benefits from your environment changes.
 
 profile = ARGUMENTS.get("profile", "release")
-
+print(profile)
+import sys
+sys.exit(1)
 if profile == "debug":
     env.Append(CCFLAGS = [
        "-fno-inline",
