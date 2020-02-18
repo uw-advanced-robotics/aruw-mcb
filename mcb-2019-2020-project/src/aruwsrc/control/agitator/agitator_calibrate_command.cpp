@@ -26,9 +26,7 @@ namespace agitator
     {}
 
     bool AgitatorCalibrateCommand::isFinished() const
-    {
-        return agitator->agitatorCalibrateHere();
-    }
+    {}
 }  // namespace agitator
 
 }  // namespace aruwsrc

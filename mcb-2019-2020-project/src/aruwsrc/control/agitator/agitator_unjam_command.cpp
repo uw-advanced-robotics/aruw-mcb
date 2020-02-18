@@ -45,7 +45,7 @@ void AgitatorUnjamCommand::execute()
     {
         case AGITATOR_UNJAM_BACK:
         {
-            connectedAgitator->setAgitatorAngle(currAgitatorUnjamAngle);
+            connectedAgitator->setAgitatorDesiredAngle(currAgitatorUnjamAngle);
             if (
                 agitatorUnjamRotateTimeout.isExpired() ||
                 fabs(static_cast<double>(connectedAgitator->getAgitatorAngle() -
@@ -63,7 +63,7 @@ void AgitatorUnjamCommand::execute()
         case AGITATOR_UNJAM_FORWARD:  // this is different than just agitator_rotate_command
         {
             // reset the angle to what it was before unjamming
-            connectedAgitator->setAgitatorAngle(agitatorSetpointBeforeUnjam);
+            connectedAgitator->setAgitatorDesiredAngle(agitatorSetpointBeforeUnjam);
             // the agitator is still unjammed
             if (agitatorUnjamRotateTimeout.isExpired())
             {
@@ -98,9 +98,9 @@ void AgitatorUnjamCommand::execute()
 void AgitatorUnjamCommand::end(bool interrupted)
 {
     if (interrupted) {
-        connectedAgitator->setAgitatorAngle(agitatorSetpointBeforeUnjam);
+        connectedAgitator->setAgitatorDesiredAngle(agitatorSetpointBeforeUnjam);
     }
-    connectedAgitator->setAgitatorAngle(agitatorSetpointBeforeUnjam);
+    connectedAgitator->setAgitatorDesiredAngle(agitatorSetpointBeforeUnjam);
 }
 
 bool AgitatorUnjamCommand::isFinished(void) const

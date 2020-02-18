@@ -12,34 +12,25 @@ namespace aruwsrc
 
 namespace agitator
 {
-    AgitatorSubsystem::AgitatorSubsystem(AgitatorType type) :
-        agitatorPositionPid(0.0f, 0.0f, 0.0f, 0.0f, PID_MAX_OUT),
-        agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS, false),
+    AgitatorSubsystem::AgitatorSubsystem(
+        float kp,
+        float ki,
+        float kd,
+        float maxIAccum,
+        float maxOutput,
+        float agitatorGearRatio,
+        aruwlib::motor::MotorId agitatorMotorId,
+        aruwlib::can::CanBus agitatorCanBusId
+    ) :
+        agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput),
+        agitatorMotor(agitatorMotorId, agitatorCanBusId, false),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
         agitatorIsCalibrated(false),
         agitatorJammedTimeout(0),
         agitatorJammedTimeoutPeriod(0),
-        agitatorType(type)
+        gearRatio(agitatorGearRatio)
     {
-        modm::Pid<float>::Parameter* param = nullptr;   // assign nullptr to fix build
-        switch (type)
-        {
-            case AgitatorType::Soldier:
-                param = new modm::Pid<float>::Parameter(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM,
-                                                            PID_MAX_OUT);
-                break;
-            case AgitatorType::Hero1:
-                param = new modm::Pid<float>::Parameter(PID_HERO1_P, PID_HERO1_I, PID_HERO1_D,
-                                                            PID_HERO1_MAX_ERR_SUM, PID_MAX_OUT);
-                break;
-            case AgitatorType::Hero2:
-                param = new modm::Pid<float>::Parameter(PID_HERO2_P, PID_HERO2_I, PID_HERO2_D,
-                                                            PID_HERO2_MAX_ERR_SUM, PID_MAX_OUT);
-                break;
-        }
-        agitatorPositionPid.setParameter(*param);
-        delete param;
         agitatorJammedTimeout.stop();
     }
 
@@ -115,10 +106,10 @@ namespace agitator
         // position is equal to the following equation:
         // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
         return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
-            agitatorMotor.encStore.getEncoderUnwrapped() / AGITATOR_GEAR_RATIO;
+            agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
     }
 
-    void AgitatorSubsystem::setAgitatorAngle(float newAngle)
+    void AgitatorSubsystem::setAgitatorDesiredAngle(float newAngle)
     {
         desiredAgitatorAngle = newAngle;
     }
@@ -126,6 +117,11 @@ namespace agitator
     float AgitatorSubsystem::getAgitatorDesiredAngle() const
     {
         return desiredAgitatorAngle;
+    }
+
+    float AgitatorSubsystem::getAgitatorVelocity()
+    {
+        return agitatorMotor.getShaftRPM() / gearRatio;
     }
 }  // namespace agitator
 

@@ -37,7 +37,16 @@ using namespace aruwsrc::chassis;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-AgitatorSubsystem agitator17mm(AgitatorSubsystem::AgitatorType::Soldier);
+AgitatorSubsystem agitator17mm(
+    AgitatorSubsystem::PID_17MM_P,
+    AgitatorSubsystem::PID_17MM_I,
+    AgitatorSubsystem::PID_17MM_D,
+    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem::AGITATOR_MOTOR_ID,
+    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS
+);
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 

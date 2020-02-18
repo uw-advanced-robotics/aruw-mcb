@@ -45,7 +45,7 @@ namespace agitator
     {
         // update the agitator setpoint ramp
         agitatorRotateSetpoint.update();
-        connectedAgitator->setAgitatorAngle(agitatorRotateSetpoint.getValue());
+        connectedAgitator->setAgitatorDesiredAngle(agitatorRotateSetpoint.getValue());
     }
 
     void AgitatorRotateCommand::end(bool interrupted)
@@ -56,7 +56,7 @@ namespace agitator
         // so the motor does not attempt to keep rotating forward (and possible stalling)
         if (connectedAgitator->isAgitatorJammed())
         {
-            connectedAgitator->setAgitatorAngle(connectedAgitator->getAgitatorAngle());
+            connectedAgitator->setAgitatorDesiredAngle(connectedAgitator->getAgitatorAngle());
         }
         connectedAgitator->disarmAgitatorUnjamTimer();
     }
@@ -68,8 +68,7 @@ namespace agitator
         return fabs(static_cast<double>(connectedAgitator->getAgitatorAngle()
             - connectedAgitator->getAgitatorDesiredAngle()))
             < static_cast<double>(agitatorSetpointTolerance)
-            && agitatorRotateSetpoint.isTargetReached()
-            && agitatorMinRotateTimeout.isExpired();  // agitator min timeout finished
+            && agitatorMinRotateTimeout.isExpired();
     }
 }  // namespace agitator
 
