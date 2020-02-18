@@ -26,9 +26,6 @@ class SerialDataLogger
     void runLogger();
 
     private:
-    // Read the input
-    void parseInput();
-    
     void writeToTerminal();
 
     bool inputReceieved();

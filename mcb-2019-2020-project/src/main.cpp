@@ -56,11 +56,6 @@ int main()
     modm::ShortPeriodicTimer motorSendPeriod(3);
     Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
     Usart2::initialize<Board::SystemClock, 115200>();
-    // modm::IOStream stream(loggerDevice);
-
-    // char a;
-    
-    // modm::Queue<char, modm::LinkedList<char>> queue;
 
     src::logger::SerialDataLogger dataLogger;
 
@@ -77,21 +72,6 @@ int main()
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
             }
 
-        // map char values, clear the queue as we go
-        // while(queue.isNotEmpty()) {
-        //    char temp = queue.get();
-        //    loggerDevice.write(temp);
-        //    queue.pop();
-        // }
-        
-
-        // clear the queue
-        /*
-        for (int i=0; i<numChars; i++) queue.pop;
-        numChars = 0; // reset numChars
-        */
-
-        // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
 
         modm::delayMicroseconds(10);
