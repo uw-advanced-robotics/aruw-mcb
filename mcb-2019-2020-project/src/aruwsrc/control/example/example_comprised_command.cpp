@@ -3,7 +3,6 @@
 #include "example_command.hpp"
 #include "example_subsystem.hpp"
 
-
 namespace aruwsrc
 {
 
@@ -11,14 +10,13 @@ namespace control
 {
 
 ExampleComprisedCommand::ExampleComprisedCommand(ExampleSubsystem* subsystem) :
-ComprisedCommand(),
-exampleCommand(subsystem, 2000),
-otherExampleCommand(subsystem, 500),
-switchTimer(2000),
-switchCommand(false)
+Command(),
+exampleCommand(subsystem, 500),
+otherExampleCommand(subsystem, 1000),
+switchTimer(2000)
 {
-    this->addSubsystemRequirement(subsystem);
     this->comprisedCommandScheduler.registerSubsystem(subsystem);
+    this->addSubsystemRequirement(subsystem);
 }
 
 void ExampleComprisedCommand::initialize()
@@ -29,15 +27,16 @@ void ExampleComprisedCommand::initialize()
 void ExampleComprisedCommand::execute() {
     if (switchTimer.execute()) {
         switchTimer.restart(2000);
-        if (switchCommand)
+        if (this->comprisedCommandScheduler.isCommandScheduled(dynamic_cast<Command*>(&exampleCommand)))
         {
-            comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&otherExampleCommand));
+            this->comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&exampleCommand), false);
+            this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&otherExampleCommand));
         }
         else
         {
-            comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&exampleCommand));
+            this->comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&otherExampleCommand), false);
+            this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&exampleCommand));
         }
-        switchCommand = !switchCommand;
     }
 
     this->comprisedCommandScheduler.run();
@@ -45,7 +44,7 @@ void ExampleComprisedCommand::execute() {
 
 void ExampleComprisedCommand::end(bool interrupted)
 {
-    comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&exampleCommand), interrupted);
+    this->comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&exampleCommand), interrupted);
 }
 
 }  // namespace control

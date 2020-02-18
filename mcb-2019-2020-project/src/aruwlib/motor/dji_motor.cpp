@@ -63,7 +63,7 @@ namespace motor
 
     bool DjiMotor::isMotorOnline() const
     {
-        return !motorDisconnectTimeout.isExpired() || motorDisconnectTimeout.isStopped();
+        return !motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped();
     }
 
     void DjiMotor::serializeCanSendData(modm::can::Message* txMessage) const
