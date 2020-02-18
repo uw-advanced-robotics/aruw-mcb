@@ -40,7 +40,7 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
     // minimum angle the agitator will rotate backwards when unjamming
     static constexpr float MIN_AGITATOR_UNJAM_ANGLE = aruwlib::algorithms::PI / 4;;
 
-    enum AgitatorUnjamState {AGITATOR_UNJAM_BACK, AGITATOR_UNJAM_FORWARD, FINISHED};
+    enum AgitatorUnjamState {AGITATOR_UNJAM_BACK, AGITATOR_UNJAM_RESET, FINISHED};
 
     AgitatorUnjamState currUnjamstate;
 

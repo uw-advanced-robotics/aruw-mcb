@@ -56,15 +56,15 @@ void AgitatorUnjamCommand::execute()
                 agitatorUnjamRotateTimeout.restart(agitatorMaxWaitTime);
 
                 // move on to unjam forward state
-                currUnjamstate = AGITATOR_UNJAM_FORWARD;
+                currUnjamstate = AGITATOR_UNJAM_RESET;
             }
             break;
         }
-        case AGITATOR_UNJAM_FORWARD:  // this is different than just agitator_rotate_command
+        case AGITATOR_UNJAM_RESET:  // this is different than just agitator_rotate_command
         {
             // reset the angle to what it was before unjamming
             connectedAgitator->setAgitatorDesiredAngle(agitatorSetpointBeforeUnjam);
-            // the agitator is still unjammed
+            // the agitator is still jammed
             if (agitatorUnjamRotateTimeout.isExpired())
             {
                 // restart the timeout

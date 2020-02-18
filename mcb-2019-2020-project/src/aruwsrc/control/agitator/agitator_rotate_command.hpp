@@ -2,10 +2,10 @@
 #define __AGITATOR_ROTATE_COMMAND_HPP__
 
 #include <modm/math/filter/pid.hpp>
-#include <modm/math/filter/ramp.hpp>
 #include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include "src/aruwlib/algorithms/ramp.hpp"
 
 namespace aruwsrc
 {
@@ -22,15 +22,11 @@ class AgitatorRotateCommand : public aruwlib::control::Command
  private:
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
-    // how often this command is called, in milliseconds
-    /// \todo fix this
-    static constexpr float AGITATOR_ROTATE_COMMAND_PERIOD = 2;
-
     AgitatorSubsystem* connectedAgitator;
 
     float agitatorTargetAngleChange;
 
-    modm::filter::Ramp<float> rampToTargetAngle;
+    aruwlib::algorithms::Ramp rampToTargetAngle;
 
     // time you want the agitator to take to rotate to the desired angle, in milliseconds
     float agitatorDesiredRotateTime;
@@ -40,6 +36,8 @@ class AgitatorRotateCommand : public aruwlib::control::Command
     modm::ShortTimeout agitatorMinRotateTimeout;
 
     float agitatorSetpointTolerance;
+
+    uint32_t agitatorPrevRotateTime;
 
  public:
     /**

@@ -54,6 +54,8 @@ if profile == "debug":
        "-fno-inline",
     ])
 
+env.Append(CCPDBFLAGS = ["-j"])
+
 # Get the robot type
 robot = ARGUMENTS.get("robot","soldier").upper()
 

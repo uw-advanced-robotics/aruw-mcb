@@ -14,13 +14,12 @@ namespace agitator
         float setpointTolerance
     ) :
         agitatorTargetAngleChange(agitatorAngleChange),
-        rampToTargetAngle(
-            AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime,
-            AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime, 0),
+        rampToTargetAngle(0.0f),
         agitatorDesiredRotateTime(agitatorRotateTime),
         agitatorMinRotatePeriod(agitatorRotateTime + agitatorPauseAfterRotateTime),
         agitatorMinRotateTimeout(agitatorRotateTime + agitatorPauseAfterRotateTime),
-        agitatorSetpointTolerance(setpointTolerance)
+        agitatorSetpointTolerance(setpointTolerance), 
+        agitatorPrevRotateTime(0)
     {
         this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
         connectedAgitator = agitator;
@@ -35,16 +34,18 @@ namespace agitator
 
         // we set the unjam timer to the larger of two values:
         // either the desired rotate time minimum rotate time
-        connectedAgitator->armAgitatorUnjamTimer(
-            agitatorDesiredRotateTime > agitatorMinRotatePeriod ?
-            agitatorDesiredRotateTime : agitatorMinRotatePeriod);
+        connectedAgitator->armAgitatorUnjamTimer(agitatorMinRotatePeriod);
         agitatorMinRotateTimeout.restart(agitatorMinRotatePeriod);
     }
 
     void AgitatorRotateCommand::execute()
     {
         // update the agitator setpoint ramp
-        rampToTargetAngle.update();
+        uint32_t currTime = modm::Clock::now().getTime();
+        rampToTargetAngle.update(
+            (currTime - agitatorPrevRotateTime) * agitatorTargetAngleChange
+            / agitatorDesiredRotateTime);
+        agitatorPrevRotateTime = modm::Clock::now().getTime();
         connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getValue());
     }
 
