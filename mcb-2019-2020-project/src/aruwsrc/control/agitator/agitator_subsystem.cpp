@@ -5,6 +5,9 @@
 #include "src/aruwlib/motor/dji_motor.hpp"
 #include "agitator_rotate_command.hpp"
 
+
+#include <stdlib.h>
+
 using namespace aruwlib::motor;
 
 namespace aruwsrc

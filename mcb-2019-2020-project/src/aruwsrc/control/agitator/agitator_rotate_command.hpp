@@ -23,13 +23,14 @@ class AgitatorRotateCommand : public aruwlib::control::Command
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
     // how often this command is called, in milliseconds
+    /// \todo fix this
     static constexpr float AGITATOR_ROTATE_COMMAND_PERIOD = 2;
 
     AgitatorSubsystem* connectedAgitator;
 
-    float agitatorTargetChange;
+    float agitatorTargetAngleChange;
 
-    modm::filter::Ramp<float> agitatorRotateSetpoint;
+    modm::filter::Ramp<float> rampToTargetAngle;
 
     // time you want the agitator to take to rotate to the desired angle, in milliseconds
     float agitatorDesiredRotateTime;

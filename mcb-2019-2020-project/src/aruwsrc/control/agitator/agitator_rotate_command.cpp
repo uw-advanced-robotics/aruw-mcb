@@ -13,8 +13,8 @@ namespace agitator
         float agitatorPauseAfterRotateTime,
         float setpointTolerance
     ) :
-        agitatorTargetChange(agitatorAngleChange),
-        agitatorRotateSetpoint(
+        agitatorTargetAngleChange(agitatorAngleChange),
+        rampToTargetAngle(
             AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime,
             AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime, 0),
         agitatorDesiredRotateTime(agitatorRotateTime),
@@ -29,9 +29,9 @@ namespace agitator
     void AgitatorRotateCommand::initialize()
     {
         // set the ramp start and target angles
-        agitatorRotateSetpoint.reset(connectedAgitator->getAgitatorAngle());
-        agitatorRotateSetpoint.setTarget(connectedAgitator->getAgitatorAngle()
-            + agitatorTargetChange);
+        rampToTargetAngle.reset(connectedAgitator->getAgitatorAngle());
+        rampToTargetAngle.setTarget(connectedAgitator->getAgitatorAngle()
+            + agitatorTargetAngleChange);
 
         // we set the unjam timer to the larger of two values:
         // either the desired rotate time minimum rotate time
@@ -44,8 +44,8 @@ namespace agitator
     void AgitatorRotateCommand::execute()
     {
         // update the agitator setpoint ramp
-        agitatorRotateSetpoint.update();
-        connectedAgitator->setAgitatorDesiredAngle(agitatorRotateSetpoint.getValue());
+        rampToTargetAngle.update();
+        connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getValue());
     }
 
     void AgitatorRotateCommand::end(bool interrupted)
