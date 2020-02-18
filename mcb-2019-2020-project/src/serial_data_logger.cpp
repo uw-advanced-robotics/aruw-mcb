@@ -12,19 +12,18 @@ void logger::SerialDataLogger::runLogger() {
     }
 }
 
-
 int logger::SerialDataLogger::matchToCommand() {
     // Search through array of commands
-    if (!terminalInput.compare(std::string("COMMAND2")) || terminalInput.length() == 1)
+    if (!terminalInput.compare(std::string("COMMAND0")) || terminalInput.length() == 1)
     {
         terminalInput.clear();
-        return 1;
+        return 0;
     }
     else if (!terminalInput.compare(std::string("COMMAND1")))
     {
         terminalInput.clear();
-        return 0;
-    } else if (!terminalInput.compare(std::string("COMMAND3")))
+        return 1;
+    } else if (!terminalInput.compare(std::string("COMMAND2")))
     {
         return 2;
     }
@@ -49,17 +48,15 @@ bool logger::SerialDataLogger::inputReceieved() {
 // Switch through which one it matched with and write in response
 void logger::SerialDataLogger::writeToTerminal() {
     switch(matchToCommand()) {
-        case 0: loggerDevice.write("\r Case 0 Corresponding to COMMAND1\n\r");
+        case 0: loggerDevice.write("\r Case 0 Corresponding to COMMAND0\n\r");
             break;
-        case 1: loggerDevice.write("\r Case 1 Corresponding to COMMAND2\n\r");
+        case 1: loggerDevice.write("\r Case 1 Corresponding to COMMAND1\n\r");
             break;
-        case 2: loggerDevice.write("\r Case 2 Corresponding to COMMAND3\n\r");
+        case 2: loggerDevice.write("\r Case 2 Corresponding to COMMAND2\n\r");
             break;
         default:
-            loggerDevice.write("incorrect\n\r");
+            loggerDevice.write("\r invalid\n\r");
     }
-    // Reset the terminalInput buffer
-    // terminalInput = "";
 }
 
 } // namespace src

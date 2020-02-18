@@ -26,25 +26,21 @@ class SerialDataLogger
     void runLogger();
 
     private:
+    // Writes output to PuTTY window
     void writeToTerminal();
-
+    // Buffers input until enter key is read
+    // PuTTY reads enter keys as '\r'
     bool inputReceieved();
-
-    // turn data into writeable information
-    // const char toString(int data);
-    
+    // Switch block that matches input with a specific output
     int matchToCommand();
     
     modm::Queue<char, modm::LinkedList<char>> queue;
     modm::IODeviceWrapper< Usart2, modm::IOBuffer::BlockIfFull > loggerDevice;
-
-    uint8_t a1 = 0;
+    
     char a;
-    // string commands[2] = {"COMMAND1", "COMMAND2"};
 
     string terminalInput;
 
-    const char *commands[2] = {"COMMAND1", "COMMAND2"};
 };
 
 } // namespace logger
