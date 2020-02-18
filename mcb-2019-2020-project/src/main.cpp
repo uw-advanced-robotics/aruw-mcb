@@ -17,6 +17,7 @@
 #include "src/aruwsrc/control/turret/turret_manual_command.hpp"
 #include "src/aruwsrc/control/example/example_comprised_command.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
+#include "aruwsrc/control/turret/turret_world_relative_position_command.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
@@ -27,6 +28,7 @@ TurretSubsystem turretSubsystem;
 TurretCVCommand turretCVCommand(&turretSubsystem);
 TurretInitCommand turretInitCommand(&turretSubsystem);
 TurretManualCommand turretManualCommand(&turretSubsystem);
+TurretWorldRelativePositionCommand turretManualPositionCommand(&turretSubsystem);
 
 ChassisSubsystem soldierChassis;
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
@@ -58,7 +60,7 @@ int main()
     soldierChassis.setDefaultCommand(&chassisDriveCommand);
 
     CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
-    turretSubsystem.setDefaultCommand(&turretManualCommand);
+    turretSubsystem.setDefaultCommand(&turretManualPositionCommand);
     IoMapper::addHoldMapping(IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}), &turretCVCommand);
     CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
     #endif
