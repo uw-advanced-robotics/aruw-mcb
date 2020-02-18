@@ -1,6 +1,3 @@
-variables:
-  GIT_DEPTH: 1
-
 before_script:
   - python -V # Print out python version for debugging
 
@@ -24,6 +21,7 @@ build-code:
     - /usr/bin/env python3 $(which scons) build -j2 # Build the robot code!
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
+    GIT_DEPTH: 10
   only:
     - merge_requests
     - master
