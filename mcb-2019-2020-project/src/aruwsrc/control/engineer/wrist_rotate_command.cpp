@@ -28,8 +28,8 @@ namespace control
         wristRotateSetpointLeft.reset(connectedWrist->getWristAngleLeft());
         wristRotateSetpointRight.reset(connectedWrist->getWristAngleRight());
 
-        wristRotateSetpointLeft.setTarget(connectedWrist->getWristAngleLeft() + wristTargetChange);
-        wristRotateSetpointRight.setTarget(connectedWrist->getWristAngleRight() + wristTargetChange);
+        wristRotateSetpointLeft.setTarget(connectedWrist->getWristDesiredAngleLeft() + wristTargetChange);
+        wristRotateSetpointRight.setTarget(connectedWrist->getWristDesiredAngleRight() + wristTargetChange);
 
         wristMinRotateTime.restart(WRIST_MIN_ROTATE_TIME);
     }
