@@ -7,8 +7,6 @@
 #include "src/aruwlib/control/command_scheduler.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-#include "src/aruwsrc/control/sentinel_drive_subsystem.hpp"
-#include "src/aruwsrc/control/sentinel_drive_random_command.hpp"
 #include "src/aruwsrc/control/sentinel/sentinel_drive_subsystem.hpp"
 #include "src/aruwsrc/control/sentinel/sentinel_drive_random_command.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
