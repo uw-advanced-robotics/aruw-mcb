@@ -57,7 +57,7 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 
 #if defined(TARGET_ENGINEER)
 WristCalibrateCommand wristCalibrateCommand(&wrist);
-WristRotateCommand wristRotateCommand(&wrist, 2.0f * aruwlib::algorithms::PI / 2.0f, 500.0f);
+WristRotateCommand wristRotateCommand(&wrist, 2.0f * aruwlib::algorithms::PI / 2.0f, 1500.0f);
 #endif
 
 int main()

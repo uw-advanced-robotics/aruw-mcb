@@ -5,8 +5,9 @@ namespace aruwsrc
 
 namespace control
 {
+        float test;
     WristSubsystem::WristSubsystem() :
-        leftMotor(LEFT_MOTOR_ID, CAN_BUS_MOTORS, true),
+        leftMotor(LEFT_MOTOR_ID, CAN_BUS_MOTORS, false),
         rightMotor(RIGHT_MOTOR_ID, CAN_BUS_MOTORS, false),
         leftPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
@@ -22,6 +23,7 @@ namespace control
         if (wristIsCalibrated)
         {
             wristRunPositionPid();
+            test = leftMotor.encStore.getEncoderUnwrapped();
         }
         else
         {
