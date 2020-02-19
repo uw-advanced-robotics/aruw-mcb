@@ -1,4 +1,5 @@
 #include "sentinel_drive_subsystem.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
 
 namespace aruwsrc
@@ -39,19 +40,22 @@ namespace control
     // end that was hit
     float SentinelDriveSubsystem::absolutePosition ()
     {
-        return ((distanceFromEncoder(&this->leftWheel) - leftZeroRailOffset) +
-            (distanceFromEncoder(&this->rightWheel) - rightZeroRailOffset)) / 2;
+        return ((distanceFromEncoder(&leftWheel) - leftZeroRailOffset) +
+            (distanceFromEncoder(&rightWheel) - rightZeroRailOffset)) / 2;
     }
 
     // Call when rail is hit to set the offset or the
     // Sets the offset field value every time a rails is hit
     // Only sets the offset when the rail end that was first hit is hit again, or a rail end
     // is hit for the first time
-    void SentinelDriveSubsystem::resetOffsetFromLimitterSwitch ()
+    void SentinelDriveSubsystem::resetOffsetFromLimitSwitch ()
     {
-        if(Board::AnalogInPinS::read()){  // DigitalPin where LimitterSwitch is placed
-         leftZeroRailOffset = distanceFromEncoder(&this->leftWheel);
-         rightZeroRailOffset = distanceFromEncoder(&this->rightWheel);
+        if (leftLimitSwitch::read()) {  // DigitalPin where LimitterSwitch is placed
+            leftZeroRailOffset = distanceFromEncoder(&leftWheel);
+            rightZeroRailOffset = distanceFromEncoder(&rightWheel);
+        } else if (rightLimitSwitch::read()) {
+            leftZeroRailOffset = RAIL_LENGTH - distanceFromEncoder(&leftWheel);
+            rightZeroRailOffset = RAIL_LENGTH - distanceFromEncoder(&rightWheel);
         }
     }
 
@@ -62,7 +66,7 @@ namespace control
     float SentinelDriveSubsystem::distanceFromEncoder(aruwlib::motor::DjiMotor* motor){
         float unwrappedAngle = motor->encStore.getEncoderUnwrapped();
         float numberOfRotations = unwrappedAngle / (ENC_RESOLUTION + 1);
-        return numberOfRotations * 2.0f * (atan(1)*4) * WHEEL_RADIUS / GEAR_RATIO;
+        return numberOfRotations * 2.0f * aruwlib::algorithms::PI * WHEEL_RADIUS / GEAR_RATIO;
     }
 
 }  // namespace control

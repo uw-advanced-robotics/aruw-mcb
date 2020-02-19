@@ -39,6 +39,8 @@ class SentinelDriveSubsystem : public Subsystem
     static const aruwlib::motor::MotorId LEFT_MOTOR_ID;
     static const aruwlib::motor::MotorId RIGHT_MOTOR_ID;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
+    using leftLimitSwitch = Board::DigitalInPinA;
+    using rightLimitSwitch = Board::DigitalInPinB;
 
     const float PID_P = 5.0f;
     const float PID_I = 0.0f;
@@ -61,7 +63,7 @@ class SentinelDriveSubsystem : public Subsystem
     float leftZeroRailOffset = 0;
     float rightZeroRailOffset = 0;
 
-    void resetOffsetFromLimitterSwitch(void);
+    void resetOffsetFromLimitSwitch(void);
 
     float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
 
