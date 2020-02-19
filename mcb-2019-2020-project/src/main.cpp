@@ -13,7 +13,9 @@
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
+#include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwsrc/control/example_comprised_command.hpp"
+#include "src/aruwlib/communication/serial/xavier_serial.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
@@ -29,8 +31,6 @@ SentinelDriveRandomCommand sentinelRandomDriveCommand(&sentinelDriveSubsystem);
 #error "select soldier robot type only"
 #endif
 
-aruwlib::serial::RefSerial refereeSerial;
-
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -44,7 +44,8 @@ int main()
     Board::initialize();
     aruwlib::Remote::initialize();
 
-    refereeSerial.initialize();
+    aruwlib::serial::RefSerial::getRefSerial().initialize();
+    aruwlib::serial::XavierSerial::getXavierSerial().initialize();
 
     Mpu6500::init();
 
@@ -67,7 +68,8 @@ int main()
     {
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
-        refereeSerial.updateSerial();
+        aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
+        aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
         aruwlib::Remote::read();
 
@@ -78,6 +80,7 @@ int main()
 
         if (motorSendPeriod.execute())
         {
+            aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }

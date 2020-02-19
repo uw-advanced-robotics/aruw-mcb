@@ -6,12 +6,19 @@ namespace aruwlib
 namespace serial
 {
 
+RefSerial RefSerial::refSerial;
+
 RefSerial::RefSerial() :
 DJISerial(DJISerial::SerialPort::PORT_UART6, true),
 robotData(),
 gameData(),
 receivedDpsTracker()
 {}
+
+RefSerial& RefSerial::getRefSerial()
+{
+    return refSerial;
+}
 
 // rx stuff
 void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
@@ -65,7 +72,6 @@ void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
             break;
         }
         default :
-            // THROW-NON-FATAL-ERROR-CHECK
             break;
     }
 }
