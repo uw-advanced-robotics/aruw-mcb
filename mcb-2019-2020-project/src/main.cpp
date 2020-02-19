@@ -79,7 +79,6 @@ int main()
             aruwlib::control::CommandScheduler::run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
-
         modm::delayMicroseconds(10);
     }
     return 0;

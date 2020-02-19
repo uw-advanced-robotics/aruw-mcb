@@ -40,12 +40,39 @@ void TurretCVCommand::yawIncrementEncoder(float encoder) {
     yawTargetAngle.shiftValue(encoder);
 }
 
-void TurretCVCommand::updateTurretPosition() {
-    CVPitchPid.update(pitchTargetAngle.difference(turretSubsystem->getPitchAngle()));
-    CVYawPid.update(yawTargetAngle.difference(turretSubsystem->getYawAngle()));
+void TurretCVCommand::setCurve(float* pitch, float* yaw, modm::Timestamp timestamp) {
+    pitchA = pitch[0];
+    pitchB = pitch[1];
+    pitchC = pitch[2];
+    pitchD = pitch[3];
+    yawA = yaw[0];
+    yawB = yaw[1];
+    yawC = yaw[2];
+    yawD = yaw[3];
+    curveBeginningTime = timestamp;
+}
 
-    turretSubsystem->setPitchMotorOutput(CVPitchPid.getValue());
-    turretSubsystem->setYawMotorOutput(CVYawPid.getValue());
+void TurretCVCommand::updateTurretPosition() {
+    float t = modm::Clock::now().getTime() - curveBeginningTime;
+    float t2 = t * t;
+    float t3 = t2 * t;
+
+    aruwlib::algorithms::ContiguousFloat goalPitch = aruwlib::algorithms::ContiguousFloat(pitchA * t3 + 
+        pitchB * t2 + pitchC * t + pitchD, 0, 360);
+    aruwlib::algorithms::ContiguousFloat goalYaw = aruwlib::algorithms::ContiguousFloat(yawA * t3 + 
+        yawB * t2 + yawC * t + yawD, 0, 360);
+
+    float goalPitchVel = 3 * pitchA * t2 + 2 * pitchB * t + pitchC;
+    float goalYawVel = 3 * yawA * t2 + 2 * yawB * t + yawC;
+
+    float goalPitchAcc = 6 * pitchA * t + 2 * pitchB;
+    float goalYawAcc = 6 * yawA * t + 2 * pitchB;
+
+    CVPitchPid.update(goalPitch.difference(turretSubsystem->getPitchAngle()));
+    CVYawPid.update(goalYaw.difference(turretSubsystem->getYawAngle()));
+
+    turretSubsystem->setPitchMotorOutput(CVPitchPid.getValue() + PITCH_F1 * goalPitchVel + PITCH_F2 * goalPitchAcc);
+    turretSubsystem->setYawMotorOutput(CVYawPid.getValue() + YAW_F1 * goalYawVel + YAW_F2 * goalYawAcc);
 }
 
 }  // namespace control
