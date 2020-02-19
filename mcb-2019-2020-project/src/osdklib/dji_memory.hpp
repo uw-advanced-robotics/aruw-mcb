@@ -49,7 +49,7 @@ public:
 
 public:
   static const int MMU_TABLE_NUM = 32;
-  static const int MEMORY_SIZE   = 1024;
+  static const int MEMORY_SIZE   = 4096;
 
 private:
   MMU_Tab memoryTable[MMU_TABLE_NUM];

@@ -201,7 +201,7 @@ DataSubscription::verify()
 {
   uint32_t data = DBVersion;
 
-  int cbIndex                           = vehicle->callbackIdIndex();
+  uint32_t cbIndex                           = vehicle->callbackIdIndex();
   vehicle->nbCallbackFunctions[cbIndex] = (void*)verifyCallback;
   vehicle->nbUserData[cbIndex]          = NULL;
 
@@ -276,7 +276,7 @@ DataSubscription::startPackage(int packageID)
   package[packageID].allocateDataBuffer();
 
   // Register Callback
-  int cbIndex = vehicle->callbackIdIndex();
+  uint32_t cbIndex = vehicle->callbackIdIndex();
   vehicle->nbCallbackFunctions[cbIndex] =
     (void*)DataSubscription::addPackageCallback;
   vehicle->nbUserData[cbIndex] = &package[packageID];
@@ -415,7 +415,7 @@ DataSubscription::removePackage(int packageID)
 {
   uint8_t data = packageID;
 
-  int cbIndex = vehicle->callbackIdIndex();
+  uint32_t cbIndex = vehicle->callbackIdIndex();
   vehicle->nbCallbackFunctions[cbIndex] =
     (void*)DataSubscription::removePackageCallback;
   vehicle->nbUserData[cbIndex] = &package[packageID];
@@ -525,7 +525,7 @@ void DataSubscription::removeAllExistingPackages()
 void DataSubscription::reset()
 {
   uint8_t data = 0;
-  int cbIndex = vehicle->callbackIdIndex();
+  uint32_t cbIndex = vehicle->callbackIdIndex();
   vehicle->nbCallbackFunctions[cbIndex] =
           (void*)DataSubscription::resetCallback;
   vehicle->nbUserData[cbIndex] = NULL;

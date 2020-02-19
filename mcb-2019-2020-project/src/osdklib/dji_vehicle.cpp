@@ -1325,7 +1325,7 @@ Vehicle::processAdvancedSensingImgs(RecvContainer* receivedFrame)
 }
 #endif
 
-int
+uint32_t
 Vehicle::callbackIdIndex()
 {
   if (callbackId == 199)

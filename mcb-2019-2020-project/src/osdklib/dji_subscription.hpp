@@ -303,18 +303,18 @@ public: // public methods
 
     void* p = Telemetry::TopicDataBase[topic].latest;
 
-    protocol->getThreadHandle()->lockMSG();
+    //protocol->getThreadHandle()->lockMSG();
     if (p)
     {
       ans = *reinterpret_cast<typename Telemetry::TypeMap<topic>::type*>(p);
-      protocol->getThreadHandle()->freeMSG();
+      //protocol->getThreadHandle()->freeMSG();
       return ans;
     }
     else
     {
       DERROR("Topic 0x%X value memory not initialized, return default", topic);
     }
-    protocol->getThreadHandle()->freeMSG();
+    //protocol->getThreadHandle()->freeMSG();
 
     memset(&ans, 0xFF, sizeof(ans));
     return ans;

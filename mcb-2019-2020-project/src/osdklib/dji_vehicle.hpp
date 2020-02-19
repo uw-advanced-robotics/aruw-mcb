@@ -278,7 +278,7 @@ public:
   //! User sets this to true in order to enable Callback thread with Non
   //! blocking calls.
   void     callbackPoll();
-  int      callbackIdIndex();
+  uint32_t      callbackIdIndex();
   void*    nbCallbackFunctions[200]; //! @todo magic number
   UserData nbUserData[200];          //! @todo magic number
 
@@ -307,7 +307,7 @@ private:
   bool        advancedSensingEnabled;
   const char* device = "";
   uint32_t    baudRate = 0;
-  int callbackId;
+  uint32_t callbackId;
 
   //! ACK management
   // Internal space

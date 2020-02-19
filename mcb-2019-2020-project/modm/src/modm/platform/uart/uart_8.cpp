@@ -24,8 +24,8 @@
 
 namespace
 {
-	static modm::atomic::Queue<uint8_t, 512> rxBuffer;
-	static modm::atomic::Queue<uint8_t, 512> txBuffer;
+	static modm::atomic::Queue<uint8_t, 1024> rxBuffer;
+	static modm::atomic::Queue<uint8_t, 1024> txBuffer;
 }
 void
 modm::platform::Uart8::initializeBuffered(uint32_t interruptPriority)
