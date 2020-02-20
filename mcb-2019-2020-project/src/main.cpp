@@ -88,6 +88,7 @@ int main()
 
         if (motorSendPeriod.execute())
         {
+            aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }

@@ -16,7 +16,7 @@ namespace motor
         aruwlib::can::CanBus motorCanBus,
         bool isInverted
         ) : CanRxListner(static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
-        encStore(isInverted),
+        encStore(),
         motorIdentifier(desMotorIdentifier),
         motorCanBus(motorCanBus),
         desiredOutput(0),
@@ -42,15 +42,12 @@ namespace motor
         torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // torque
         torque = motorInverted ? -torque : torque;
         temperature = static_cast<int8_t>(message.data[6]);  // temperature
-        if (motorDisconnectTimeout.isStopped())  // the first time you receive a message, the
-                                                 // motor disconnect timeout will be stopped
-        {
-            encStore.setInitialEncoderValue(encoderActual);
-        }
 
         // restart disconnect timer, since you just received a message from the motor
         motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
 
+        // invert motor if necessary
+        encoderActual = motorInverted ? ENC_RESOLUTION - encoderActual : encoderActual;
         encStore.updateValue(encoderActual);
     }
 
@@ -63,6 +60,11 @@ namespace motor
 
     bool DjiMotor::isMotorOnline() const
     {
+        /*
+         * motor online if the disconnect timout has not expired (if it received message but
+         * somehow got disconnected) and the timeout hasn't been stopped (initially, the timeout)
+         * is stopped
+         */
         return !motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped();
     }
 
@@ -113,26 +115,15 @@ namespace motor
         return motorCanBus;
     }
 
-    int32_t DjiMotor::EncoderStore::getEncoderUnwrapped() const
+    int64_t DjiMotor::EncoderStore::getEncoderUnwrapped() const
     {
-        int32_t unwrappedNotInverted = encoderWrapped + ENC_RESOLUTION * encoderRevolutions;
-        // to make the motor encoder value inverted, subtract the difference between the
-        // encoder value you have that is not inverted by the first value you received from
-        // the motor, and add this to the initial value again. doing this calculation this
-        // way insures that when the motor is first connected, its starting encoder value
-        // will be the same as a motor that is not inverted
-        return encStoreInverted ?
-            (2 * initialEncValue - unwrappedNotInverted) : unwrappedNotInverted;
+        return static_cast<int64_t>(encoderWrapped)
+            + static_cast<int64_t>(ENC_RESOLUTION) * encoderRevolutions;
     }
 
-    int16_t DjiMotor::EncoderStore::getEncoderWrapped() const
+    uint16_t DjiMotor::EncoderStore::getEncoderWrapped() const
     {
-        if (!encStoreInverted) {
-            return encoderWrapped;
-        } else {
-            int16_t val = 2 * initialEncValue - encoderWrapped;
-            return val < 0 ? val + ENC_RESOLUTION + 1 : val;
-        }
+        return encoderWrapped;
     }
 
     int32_t DjiMotor::degreesToEncoder(float angle)
@@ -157,11 +148,6 @@ namespace motor
             encoderRevolutions--;
         }
         encoderWrapped = newEncWrapped;
-    }
-
-    void DjiMotor::EncoderStore::setInitialEncoderValue(uint16_t initEncValue)
-    {
-        initialEncValue = initEncValue;
     }
 }  // namespace motor
 
