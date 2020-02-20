@@ -18,7 +18,7 @@ namespace chassis
 class ChassisAutorotateCommand : public Command
 {
  public:
-    explicit ChassisAutorotateCommand(ChassisSubsystem* chassis, aruwsrc::control::TurretSubsystem* turret)
+    explicit ChassisAutorotateCommand(ChassisSubsystem* chassis, aruwsrc::control::TurretSubsystem const* turret)
     {
         addSubsystemRequirement(reinterpret_cast<Subsystem*>(chassis));
         this->chassis = chassis;
@@ -39,7 +39,7 @@ class ChassisAutorotateCommand : public Command
     static constexpr float CHASSIS_AUTOROTATE_PID_KP = -85.0f;
 
     ChassisSubsystem* chassis;
-    aruwsrc::control::TurretSubsystem* turret;
+    aruwsrc::control::TurretSubsystem const* turret;
 };
 
 }  // namespace control
