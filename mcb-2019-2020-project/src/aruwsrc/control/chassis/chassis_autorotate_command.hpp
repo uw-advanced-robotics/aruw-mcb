@@ -21,7 +21,6 @@ class ChassisAutorotateCommand : public Command
     explicit ChassisAutorotateCommand(ChassisSubsystem* chassis, aruwsrc::control::TurretSubsystem* turret)
     {
         addSubsystemRequirement(reinterpret_cast<Subsystem*>(chassis));
-        addSubsystemRequirement(reinterpret_cast<Subsystem*>(turret));
         this->chassis = chassis;
         this->turret = turret;
     }

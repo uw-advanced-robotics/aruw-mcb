@@ -19,6 +19,7 @@
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "aruwsrc/control/turret/turret_world_relative_position_command.hpp"
 #include "src/aruwlib/errors/error_controller.hpp"
+#include "src/aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
@@ -31,7 +32,7 @@ TurretInitCommand turretInitCommand(&turretSubsystem);
 TurretWorldRelativePositionCommand turretManualPositionCommand(&turretSubsystem);
 
 ChassisSubsystem soldierChassis;
-ChassisDriveCommand chassisDriveCommand(&soldierChassis);
+ChassisAutorotateCommand chassisDriveCommand(&soldierChassis, &turretSubsystem);
 #else  // error
 #error "select soldier robot type only"
 #endif
