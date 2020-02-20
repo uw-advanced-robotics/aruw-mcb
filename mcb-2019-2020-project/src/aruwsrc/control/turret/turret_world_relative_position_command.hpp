@@ -28,11 +28,11 @@ class TurretWorldRelativePositionCommand : public Command
     void refresh();
 
  private:
-    static constexpr float YAW_P = 500.0f;  // 2000.0f;
+    static constexpr float YAW_P = 2000.0f;  // 500.0f;
     static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 50.0f;  // 190.0f;
+    static constexpr float YAW_D = 190.0f;  // 50.0f
     static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 16000.0;  // 32000.0f;
+    static constexpr float YAW_MAX_OUTPUT = 32000.0f;  // 16000.0f
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.5f;
     static constexpr float YAW_R_DERIVATIVE_KALMAN = 40.0f;
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.5f;
@@ -46,7 +46,7 @@ class TurretWorldRelativePositionCommand : public Command
     static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
     static constexpr float PITCH_R_DERIVATIVE_KALMAN = 40.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.5f;
-    static constexpr float PITCH_R_pROPORTIONAL_KALMAN = 11.0f;
+    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 11.0f;
 
     TurretSubsystem *turretSubsystem;
 
