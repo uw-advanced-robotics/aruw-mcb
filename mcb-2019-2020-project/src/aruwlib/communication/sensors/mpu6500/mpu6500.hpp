@@ -45,6 +45,8 @@ class  Mpu6500 {
 
     static MahonyAhrs::attitude getImuAttitude();
 
+    static float getTiltAngle();
+
  private:
      static constexpr float ACCELERATION_GRAVITY = 9.80665f;
 
@@ -79,6 +81,8 @@ class  Mpu6500 {
         int16_t gx_offset = 0;
         int16_t gy_offset = 0;
         int16_t gz_offset = 0;
+
+        float tiltAngle = 0.0f;
 
         MahonyAhrs::attitude imuAtti;
     } mpu_info_t;

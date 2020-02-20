@@ -82,6 +82,10 @@ void ContiguousFloat::shiftValue(const float& shiftMagnitude) {
 
 void ContiguousFloat::limitValue(const ContiguousFloat& min, const ContiguousFloat& max)
 {
+    if (min.getValue() == max.getValue())
+    {
+        return;
+    }
     if ((min.getValue() < max.getValue()
             && (getValue() > max.getValue() || getValue() < min.getValue()))
             || (min.getValue() > max.getValue()

@@ -175,6 +175,8 @@ files = [
     env.File(r"src\modm\debug\error_report.cpp"),
     env.File(r"src\modm\io\iostream.cpp"),
     env.File(r"src\modm\io\iostream_printf.cpp"),
+    env.File(r"src\modm\math\geometry\angle.cpp"),
+    env.File(r"src\modm\math\geometry\vector2.cpp"),
     env.File(r"src\modm\math\utils\bit_operation.cpp"),
     env.File(r"src\modm\math\utils\pc\operator.cpp"),
     env.File(r"src\modm\platform\adc\adc_interrupt_1.cpp"),

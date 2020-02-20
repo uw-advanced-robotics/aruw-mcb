@@ -1,3 +1,4 @@
+#include <modm/math/geometry/vector2.hpp>
 #include "turret_world_relative_position_command.hpp"
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
 #include "src/aruwlib/communication/remote.hpp"  /// \todo fix and remove remote from command
@@ -100,13 +101,51 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
     // if user does not want to move the turret, recalibrate the imu initial value
     pitchTargetAngle.shiftValue(lowPassUserVelocityPitch);
     // the position controller is in world reference frame (i.e. add imu yaw to current encoder value)
-    currImuPitchAngle.setValue(turretSubsystem->getPitchAngle().getValue());
+    currImuPitchAngle.setValue(turretSubsystem->getPitchAngle().getValue() + calcPitchImuOffset());
+
+    // limit the yaw min and max angles
+    aruwlib::algorithms::ContiguousFloat min(
+        turretSubsystem->TURRET_PITCH_MIN_ANGLE + calcPitchImuOffset(), 0.0f, 360.0f);
+    aruwlib::algorithms::ContiguousFloat max(
+        turretSubsystem->TURRET_PITCH_MAX_ANGLE + calcPitchImuOffset(), 0.0f, 360.0f);
+    pitchTargetAngle.limitValue(min, max);
 
     float positionControllerError = currImuPitchAngle.difference(pitchTargetAngle);
     float pidOutput = pitchPid.runController(positionControllerError,
-        turretSubsystem->getPitchAngle().getValue());  /// \todo fix imu stuff for pitch
+        turretSubsystem->getPitchVelocity());  /// \todo fix imu stuff for pitch
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
+}
+
+float fme2 = 0.0f;
+
+float TurretWorldRelativePositionCommand::calcPitchImuOffset()
+{
+    if (Mpu6500::getImuAttitude().pitch < 45.0f && Mpu6500::getImuAttitude().roll < 45.0f)
+    {
+        // for following vector calculations
+        // i direction perpendicular to foward direction of chassis
+        // j direction facing foward on chassis
+        modm::Vector2f imuVector = {Mpu6500::getImuAttitude().pitch, -Mpu6500::getImuAttitude().roll};
+        modm::Vector2f turretVector = {
+                cos(aruwlib::algorithms::degreesToRadians(turretSubsystem->getYawAngle().getValue())),
+                sin(aruwlib::algorithms::degreesToRadians(turretSubsystem->getYawAngle().getValue()))
+        };
+
+        // unit vector
+        imuVector.normalize();
+
+        float yawImuDot = imuVector.dot(turretVector);
+
+        fme2 = Mpu6500::getTiltAngle();
+
+        return yawImuDot * Mpu6500::getTiltAngle();
+    }
+    else
+    {
+        return 0.0f;
+    }
+    
 }
 
 }  // namespace control

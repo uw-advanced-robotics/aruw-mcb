@@ -89,7 +89,6 @@ int main()
         {
             aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
-            // runTurretAlgorithm();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

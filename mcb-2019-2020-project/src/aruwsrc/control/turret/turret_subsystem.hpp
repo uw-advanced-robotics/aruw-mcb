@@ -21,7 +21,7 @@ class TurretSubsystem : public Subsystem {
     const float TURRET_YAW_MAX_ANGLE = 180.0f;
     const float TURRET_PITCH_MIN_ANGLE = 75.0f;
     const float TURRET_PITCH_MAX_ANGLE = 110.0f;
-    
+
     TurretSubsystem();
 
     float getYawVelocity() const;
@@ -54,7 +54,7 @@ class TurretSubsystem : public Subsystem {
  private:
     const float YAW_START_ENCODER_POSITION = 8160;
     /// \todo fix this encoder starting position
-    const float PITCH_START_ENCODER_POSITION = 4300;
+    const float PITCH_START_ENCODER_POSITION = 4130;
 
     const float REMOTE_INPUT_SCALER = 30000;
 

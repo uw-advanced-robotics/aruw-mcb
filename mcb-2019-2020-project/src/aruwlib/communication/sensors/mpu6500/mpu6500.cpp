@@ -290,6 +290,15 @@ namespace sensors {
         imuSensor.wy = algorithms::degreesToRadians(mpu6500Data.gy / LSB_D_PER_S_TO_D_PER_S);
         imuSensor.wz = algorithms::degreesToRadians(mpu6500Data.gz / LSB_D_PER_S_TO_D_PER_S);
         arhsAlgorithm.mahony_ahrs_updateIMU(&imuSensor, imuAtti);
+        mpu6500Data.tiltAngle = aruwlib::algorithms::radiansToDegrees(acos(
+                cos(aruwlib::algorithms::degreesToRadians(Mpu6500::getImuAttitude().pitch))
+                * cos(aruwlib::algorithms::degreesToRadians(Mpu6500::getImuAttitude().roll))));
+
+    }
+
+    float Mpu6500::getTiltAngle()
+    {
+        return mpu6500Data.tiltAngle;
     }
 
 }  // namespace sensors
