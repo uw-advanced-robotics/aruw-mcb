@@ -96,18 +96,19 @@ namespace control
     }
 
     void TurretSubsystem::setYawMotorOutput(float out) {
-        if (out > INT32_MAX) {
-            // return error
-            return;
-        }
-        if (isTurretOnline()) {
-            if ((getYawAngleFromCenter() + TURRET_START_ANGLE > TURRET_YAW_MAX_ANGLE && out > 0) ||
-                (getYawAngleFromCenter() + TURRET_START_ANGLE < TURRET_YAW_MIN_ANGLE && out < 0)) {
-                yawMotor.setDesiredOutput(0);
-            } else {
-                yawMotor.setDesiredOutput(out);
-            }
-        }
+        yawMotor.setDesiredOutput(out);
+        // if (out > INT32_MAX) {
+        //     // return error
+        //     return;
+        // }
+        // if (isTurretOnline()) {
+        //     if ((getYawAngleFromCenter() + TURRET_START_ANGLE > TURRET_YAW_MAX_ANGLE && out > 0) ||
+        //         (getYawAngleFromCenter() + TURRET_START_ANGLE < TURRET_YAW_MIN_ANGLE && out < 0)) {
+        //         yawMotor.setDesiredOutput(0);
+        //     } else {
+        //         yawMotor.setDesiredOutput(out);
+        //     }
+        // }
     }
 
     float TurretSubsystem::getRemoteXMovement() {

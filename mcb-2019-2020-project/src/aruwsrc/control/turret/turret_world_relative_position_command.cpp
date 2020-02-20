@@ -44,7 +44,9 @@ TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
         PITCH_Q_PROPORTIONAL_KALMAN,
         PITCH_R_pROPORTIONAL_KALMAN
     )
-{}
+{
+    addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
+}
 
 void TurretWorldRelativePositionCommand::initialize()
 {
@@ -59,9 +61,13 @@ void TurretWorldRelativePositionCommand::execute()
 
 // todo add min/max limiting to the turret here
 
+aruwlib::algorithms::ContiguousFloat min(0.0f, 0.0f, 360.0f);
+aruwlib::algorithms::ContiguousFloat max(0.0f, 0.0f, 360.0f);
+
+float minMaxCenter1 = 0.0f;
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
-    /// \todo fix user input
+    /// \todo fix user input, not my problem
     float userVelocity = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f
         - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
     lowPassUserVelocityYaw = 0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocityYaw;
@@ -75,22 +81,41 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
 
 
     // limit currValueImuYawGimbal
-    aruwlib::algorithms::ContiguousFloat min(turretSubsystem->getYawAngle().getValue()
-            - 90.0f + Mpu6500::getImuAttitude().yaw, 0.0f, 360.0f);
-    aruwlib::algorithms::ContiguousFloat max(turretSubsystem->getYawAngle().getValue()
-            + 90.0f + Mpu6500::getImuAttitude().yaw, 0.0f, 360.0f);
+    /// \todo test this
+     min.setValue(0.0f + Mpu6500::getImuAttitude().yaw); // , 0.0f, 360.0f);
+     max.setValue(
+            + 180.0f + Mpu6500::getImuAttitude().yaw); // , 0.0f, 360.0f);
 
     if (min.getValue() < max.getValue())
     {
-        currValueImuYawGimbal.setValue(
-                aruwlib::algorithms::limitVal<float>(currValueImuYawGimbal.getValue(),
-                min.getValue(), max.getValue()));
+        if (yawTargetAngle.getValue() > max.getValue()) {
+            minMaxCenter1 = fmod((max.getValue() + min.getValue()) / 2 + max.getValue(), 360.0f);
+            if (yawTargetAngle.getValue() < minMaxCenter1) {
+                yawTargetAngle.setValue(max.getValue());
+            } else {
+                yawTargetAngle.setValue(min.getValue());
+            }
+        } else if (yawTargetAngle.getValue() < min.getValue()) {
+            yawTargetAngle.setValue(min.getValue());
+        }
+        // yawTargetAngle.setValue(
+        //         aruwlib::algorithms::limitVal<float>(yawTargetAngle.getValue(),
+        //         min.getValue(), max.getValue()));
     }
-    else if (min.getValue() != max.getValue())
+    else if (min.getValue() > max.getValue())
     {
-        currValueImuYawGimbal.setValue(aruwlib::algorithms::limitVal<float>(
-                currValueImuYawGimbal.getValue(),
-                max.getValue(), min.getValue()));
+        if (yawTargetAngle.getValue() > max.getValue() && yawTargetAngle.getValue() < min.getValue()) {
+            float minMaxCenter = (min.getValue() - max.getValue()) / 2 + max.getValue();
+            if (yawTargetAngle.getValue() < minMaxCenter) {
+                yawTargetAngle.setValue(max.getValue());
+            } else {
+                yawTargetAngle.setValue(min.getValue());
+            }
+        }
+
+        // currValueImuYawGimbal.setValue(aruwlib::algorithms::limitVal<float>(
+        //         currValueImuYawGimbal.getValue(),
+        //         max.getValue(), min.getValue()));
     }
 
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
@@ -113,7 +138,7 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
     // the position controller is in world reference frame (i.e. add imu yaw to current encoder value)
     currImuPitchAngle.setValue(turretSubsystem->getPitchAngle().getValue());
 
-    float positionControllerError = currImuPitchAngle.difference(yawTargetAngle);
+    float positionControllerError = currImuPitchAngle.difference(pitchTargetAngle);
     float pidOutput = pitchPid.runController(positionControllerError,
         turretSubsystem->getPitchAngle().getValue());  /// \todo fix imu stuff for pitch
 

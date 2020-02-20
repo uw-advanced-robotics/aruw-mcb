@@ -51,7 +51,7 @@ class TurretSubsystem : public Subsystem {
     const float TURRET_PITCH_MAX_ANGLE = 110.0f;
 
     const float YAW_START_ENCODER_POSITION = 8160;
-    const float PITCH_START_ENCODER_POSITION = 4780;
+    const float PITCH_START_ENCODER_POSITION = 4300;
 
     const float REMOTE_INPUT_SCALER = 30000;
 
