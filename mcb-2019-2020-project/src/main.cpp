@@ -36,7 +36,6 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #error "select soldier robot type only"
 #endif
 
-
 int main()
 {
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
@@ -90,6 +89,7 @@ int main()
         {
             aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
+            // runTurretAlgorithm();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

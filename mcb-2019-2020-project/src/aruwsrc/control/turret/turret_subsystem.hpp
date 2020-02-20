@@ -16,6 +16,12 @@ namespace control
 
 class TurretSubsystem : public Subsystem {
  public:
+    static constexpr float TURRET_START_ANGLE = 90.0f;
+    const float TURRET_YAW_MIN_ANGLE = 0.0f;
+    const float TURRET_YAW_MAX_ANGLE = 180.0f;
+    const float TURRET_PITCH_MIN_ANGLE = 75.0f;
+    const float TURRET_PITCH_MAX_ANGLE = 110.0f;
+    
     TurretSubsystem();
 
     float getYawVelocity() const;
@@ -42,14 +48,10 @@ class TurretSubsystem : public Subsystem {
 
     const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
 
-   static constexpr float TURRET_START_ANGLE = 90.0f;
+
+    void updateCurrentTurretAngles();
 
  private:
-    const float TURRET_YAW_MIN_ANGLE = 0.0f;
-    const float TURRET_YAW_MAX_ANGLE = 180.0f;
-    const float TURRET_PITCH_MIN_ANGLE = 75.0f;
-    const float TURRET_PITCH_MAX_ANGLE = 110.0f;
-
     const float YAW_START_ENCODER_POSITION = 8160;
     /// \todo fix this encoder starting position
     const float PITCH_START_ENCODER_POSITION = 4300;
@@ -65,8 +67,6 @@ class TurretSubsystem : public Subsystem {
 
     aruwlib::algorithms::ContiguousFloat currYawAngle;
     aruwlib::algorithms::ContiguousFloat currPitchAngle;
-
-    void updateCurrentTurretAngles();
 
     float getVelocity(const aruwlib::motor::DjiMotor &motor) const;
 };

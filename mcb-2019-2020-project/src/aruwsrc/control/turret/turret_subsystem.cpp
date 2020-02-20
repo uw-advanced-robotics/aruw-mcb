@@ -44,7 +44,7 @@ namespace control
 
     // units: degrees per second
     float TurretSubsystem::getVelocity(const DjiMotor &motor) const {
-        return aruwlib::algorithms::limitVal(360.0 * motor.getShaftRPM() / 60.0, FLT_MIN, FLT_MAX);
+        return 6.0f * motor.getShaftRPM();
     }
 
     bool TurretSubsystem::isTurretOnline() const {

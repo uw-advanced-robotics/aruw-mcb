@@ -28,7 +28,7 @@ class TurretWorldRelativePositionCommand : public Command
     void refresh();
 
  private:
-    static constexpr float YAW_P = 2000.0f;  // 500.0f;
+    static constexpr float YAW_P = 4500.0f;  // 500.0f;
     static constexpr float YAW_I = 0.0f;
     static constexpr float YAW_D = 190.0f;  // 50.0f
     static constexpr float YAW_MAX_ERROR_SUM = 0.0f;

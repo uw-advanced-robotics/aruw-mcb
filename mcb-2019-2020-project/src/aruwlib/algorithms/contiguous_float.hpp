@@ -69,6 +69,11 @@ class ContiguousFloat {
      */
     void shiftValue(const float& shiftMagnitude);
 
+    /**
+     * Limits the current contiguous float between the min max value
+     */
+    void limitValue(const ContiguousFloat& min, const ContiguousFloat& max);
+
     // Getters/Setters ----------------
     // Value
     float getValue() const;

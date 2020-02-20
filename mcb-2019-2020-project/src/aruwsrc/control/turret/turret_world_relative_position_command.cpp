@@ -59,14 +59,10 @@ void TurretWorldRelativePositionCommand::execute()
     runPitchPositionController();
 }
 
-/// \todo add min/max limiting to the turret here
-
-aruwlib::algorithms::ContiguousFloat min(0.0f, 0.0f, 360.0f);
-aruwlib::algorithms::ContiguousFloat max(0.0f, 0.0f, 360.0f);
-bool outOfBounds = false;
-
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
+    turretSubsystem->updateCurrentTurretAngles();
+
     /// \todo fix user input, not my problem
     float userVelocity = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f
         - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
@@ -79,34 +75,12 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     currValueImuYawGimbal.setValue(turretSubsystem->getYawAngle().getValue()
             + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
 
-
-    // limit currValueImuYawGimbal
-    /// \todo test this
-    /// \todo replace with constants
-    min.setValue(0.0f + Mpu6500::getImuAttitude().yaw);
-    max.setValue(180.0f + Mpu6500::getImuAttitude().yaw);
-
-    outOfBounds = false;
-    if (min.getValue() < max.getValue())
-    {
-        if (yawTargetAngle.getValue() > max.getValue() || yawTargetAngle.getValue() < min.getValue())
-        {
-            outOfBounds = true;
-        }
-    }
-    else
-    {
-        if (yawTargetAngle.getValue() > max.getValue() && yawTargetAngle.getValue() < min.getValue())
-        {
-            outOfBounds = true;
-        }
-    }
-    if (outOfBounds)
-    {
-        float targetMinDifference = fabs(yawTargetAngle.difference(min));
-        float targetMaxDifference = fabs(yawTargetAngle.difference(max));
-        yawTargetAngle.setValue(targetMinDifference < targetMaxDifference ? min.getValue() : max.getValue());
-    }
+    // limit the yaw min and max angles
+    aruwlib::algorithms::ContiguousFloat min(
+        turretSubsystem->TURRET_YAW_MIN_ANGLE + Mpu6500::getImuAttitude().yaw, 0.0f, 360.0f);
+    aruwlib::algorithms::ContiguousFloat max(
+        turretSubsystem->TURRET_YAW_MAX_ANGLE + Mpu6500::getImuAttitude().yaw, 0.0f, 360.0f);
+    yawTargetAngle.limitValue(min, max);
 
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
     float pidOutput = yawPid.runController(positionControllerError,
