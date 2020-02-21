@@ -4,7 +4,8 @@
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
 #include "agitator_rotate_command.hpp"
-
+#include "src/aruwlib/errors/system_error.hpp"
+#include "src/aruwlib/errors/error_controller.hpp"
 
 #include <stdlib.h>
 
@@ -23,10 +24,11 @@ namespace agitator
         float maxOutput,
         float agitatorGearRatio,
         aruwlib::motor::MotorId agitatorMotorId,
-        aruwlib::can::CanBus agitatorCanBusId
+        aruwlib::can::CanBus agitatorCanBusId,
+        bool isAgitatorInverted
     ) :
         agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput),
-        agitatorMotor(agitatorMotorId, agitatorCanBusId, false),
+        agitatorMotor(agitatorMotorId, agitatorCanBusId, isAgitatorInverted),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
         agitatorIsCalibrated(false),
@@ -37,11 +39,12 @@ namespace agitator
         agitatorJammedTimeout.stop();
     }
 
-    void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t predictedRotateTime)
+    void AgitatorSubsystem::armAgitatorUnjamTimer(const uint32_t& predictedRotateTime)
     {
         if (predictedRotateTime == 0)
         {
-            agitatorJammedTimeoutPeriod = DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD;
+            aruwlib::errors::SystemError error(aruwlib::errors::SUBSYSTEM, aruwlib::errors::ZERO_ROTATE_TIME);
+            aruwlib::errors::ErrorController::addToErrorList(error);
         }
         else
         {
@@ -56,7 +59,7 @@ namespace agitator
         agitatorJammedTimeout.stop();
     }
 
-    bool AgitatorSubsystem::isAgitatorJammed()
+    bool AgitatorSubsystem::isAgitatorJammed() const
     {
         return agitatorJammedTimeout.isExpired();
     }
@@ -112,7 +115,7 @@ namespace agitator
             agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
     }
 
-    void AgitatorSubsystem::setAgitatorDesiredAngle(float newAngle)
+    void AgitatorSubsystem::setAgitatorDesiredAngle(const float& newAngle)
     {
         desiredAgitatorAngle = newAngle;
     }
@@ -122,7 +125,7 @@ namespace agitator
         return desiredAgitatorAngle;
     }
 
-    float AgitatorSubsystem::getAgitatorVelocity()
+    float AgitatorSubsystem::getAgitatorVelocity() const
     {
         return agitatorMotor.getShaftRPM() / gearRatio;
     }

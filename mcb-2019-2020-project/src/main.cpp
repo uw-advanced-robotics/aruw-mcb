@@ -45,7 +45,8 @@ AgitatorSubsystem agitator17mm(
     AgitatorSubsystem::PID_17MM_MAX_OUT,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS
+    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
+    AgitatorSubsystem::isAgitatorInverted
 );
 ExampleSubsystem frictionWheelSubsystem;
 #endif

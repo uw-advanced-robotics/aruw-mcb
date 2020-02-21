@@ -15,6 +15,7 @@ namespace agitator
 
 class AgitatorSubsystem : public aruwlib::control::Subsystem {
  public:
+    #if defined(TARGET_SOLDIER)
     // position pid terms
     // pid terms for soldier
     static constexpr float PID_17MM_P = 190000.0f;
@@ -23,6 +24,12 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
     static constexpr float PID_17MM_MAX_OUT = 16000.0f;
 
+    static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
+    static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+
+    static constexpr bool isAgitatorInverted = false;
+
+    #elif defined(TARGET_HERO)
     /// \todo tune all the things
     // pid terms for hero agitator 1
     static constexpr float PID_HERO1_P = 1500.0f;
@@ -36,8 +43,13 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr float PID_HERO2_D = 7000.0f;
     static constexpr float PID_HERO2_MAX_ERR_SUM = 0.0f;
 
-    static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
-    static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+
+    static constexpr aruwlib::motor::MotorId HERO1_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
+    static constexpr aruwlib::can::CanBus HERO1_AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+
+    static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR6;
+    static constexpr aruwlib::can::CanBus HERO2_AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+    #endif
 
     // agitator gear ratio, for determining shaft rotation angle
     static constexpr float AGITATOR_GEAR_RATIO_M2006 = 36.0f;
@@ -51,12 +63,13 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
         float maxOutput,
         float agitatorGearRatio,
         aruwlib::motor::MotorId agitatorMotorId,
-        aruwlib::can::CanBus agitatorCanBusId
+        aruwlib::can::CanBus agitatorCanBusId,
+        bool isAgitatorInverted
     );
 
     void refresh();
 
-    void setAgitatorDesiredAngle(float newAngle);
+    void setAgitatorDesiredAngle(const float& newAngle);
 
     float getAgitatorAngle() const;
 
@@ -64,23 +77,21 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
 
     bool agitatorCalibrateHere();
 
-    void armAgitatorUnjamTimer(uint32_t predictedRotateTime);
+    void armAgitatorUnjamTimer(const uint32_t& predictedRotateTime);
 
     void disarmAgitatorUnjamTimer();
 
-    bool isAgitatorJammed();
+    bool isAgitatorJammed() const;
 
-    float getAgitatorVelocity();
+    float getAgitatorVelocity() const;
 
  private:
-    // if no default agitator timeout period is specified for whatever reason, 50 ms is used
-    static const int DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD = 50;
-
     // we add on this amount of "tolerance" to the predicted rotate time since some times it
     // takes longer than predicted and we only want to unjam when we are actually jammed
     // measured in ms
     static const int JAMMED_TOLERANCE_PERIOD = 10;
 
+    // pid controller for running postiion pid on unwrapped agitator angle (in radians)
     modm::Pid<float> agitatorPositionPid;
 
     aruwlib::motor::DjiMotor agitatorMotor;
@@ -100,11 +111,13 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     // A timeout that is used to determine whether or not the agitator is jammed.
     // If the agitator has not reached the desired position in a certain time, the
     // agitator is considered jammed.
+    // units: milliseconds
     modm::ShortTimeout agitatorJammedTimeout;
 
-    // the current agitator timeout time
-    int agitatorJammedTimeoutPeriod;
+    // the current agitator timeout time, in milliseconds
+    uint32_t agitatorJammedTimeoutPeriod;
 
+    // motor gera ratio, so we use shaft angle rather than encoder angle
     float gearRatio;
 
     void agitatorRunPositionPid();

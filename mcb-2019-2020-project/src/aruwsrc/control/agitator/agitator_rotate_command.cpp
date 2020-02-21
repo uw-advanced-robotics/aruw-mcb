@@ -49,7 +49,7 @@ namespace agitator
         connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getValue());
     }
 
-    void AgitatorRotateCommand::end(bool interrupted)
+    void AgitatorRotateCommand::end(bool)
     {
         // if the agitator is not interrupted, then it exited normally
         // (i.e. reached the desired angle) and is not jammed. If it is
