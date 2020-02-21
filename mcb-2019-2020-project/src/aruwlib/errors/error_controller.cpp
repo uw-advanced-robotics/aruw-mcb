@@ -33,6 +33,10 @@ namespace errors
         errorList.append(error);
     }
 
+    const modm::BoundedDeque<SystemError, ErrorController::ERROR_LIST_MAX_SIZE> ErrorController::getErrorList() {
+        return errorList;
+    }
+
     // Blink the list of errors in a loop on the board
     void ErrorController::update() {
         // there are no errors to display, default display

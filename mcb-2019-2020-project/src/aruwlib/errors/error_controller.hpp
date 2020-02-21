@@ -44,6 +44,9 @@ class ErrorController
     static void setLedError(uint8_t binaryRep);
 
     static void ledSwitch(uint8_t ledLocation, bool display);
+
+public:
+    static const modm::BoundedDeque<SystemError, ERROR_LIST_MAX_SIZE> getErrorList();
 };
 
 }  // namespace errors
