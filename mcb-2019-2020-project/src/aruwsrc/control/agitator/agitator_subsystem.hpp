@@ -43,7 +43,6 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr float PID_HERO2_D = 7000.0f;
     static constexpr float PID_HERO2_MAX_ERR_SUM = 0.0f;
 
-
     static constexpr aruwlib::motor::MotorId HERO1_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::can::CanBus HERO1_AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 
@@ -84,6 +83,8 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     bool isAgitatorJammed() const;
 
     float getAgitatorVelocity() const;
+
+    bool isAgitatorCalibrated() const;
 
  private:
     // we add on this amount of "tolerance" to the predicted rotate time since some times it
