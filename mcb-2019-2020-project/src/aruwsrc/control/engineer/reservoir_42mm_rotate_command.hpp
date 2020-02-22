@@ -16,6 +16,8 @@ namespace engineer
 class Reservoir42mmRotateCommand : public aruwlib::control::Command
 {
  public:
+    static const uint32_t RESERVOIR_MIN_ROTATE_TIME = 300;
+
     Reservoir42mmRotateCommand(
         Reservoir42mmSubsystem* reservoir,
         float reservoirAngleChange,

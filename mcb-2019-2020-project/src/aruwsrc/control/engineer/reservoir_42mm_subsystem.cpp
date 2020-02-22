@@ -70,7 +70,6 @@ namespace engineer
     {
         return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
             reservoirMotor.encStore.getEncoderUnwrapped() / RESERVOIR_42MM_GEAR_RATIO;
-
     }
 }  // namespace engineer
 
