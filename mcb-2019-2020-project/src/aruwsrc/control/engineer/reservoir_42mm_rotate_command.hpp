@@ -44,7 +44,6 @@ class Reservoir42mmRotateCommand : public aruwlib::control::Command
     float reservoirDesiredRotateTime;
 
     modm::ShortTimeout reservoirMinRotateTime;
-
 };
 
 }  // namespace engineer
