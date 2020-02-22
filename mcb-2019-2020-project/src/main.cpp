@@ -14,6 +14,7 @@
 #include "src/aruwlib/control/controller_mapper.hpp"
 
 /* math includes ------------------------------------------------------------*/
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/algorithms/contiguous_float_test.hpp"
 
 /* aruwsrc control includes -------------------------------------------------*/
@@ -25,11 +26,16 @@
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/reservoir_42mm_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/reservoir_42mm_calibrate_command.hpp"
+#include "src/aruwsrc/control/engineer/reservoir_42mm_rotate_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
 
 using namespace aruwsrc::agitator;
+using namespace aruwsrc::engineer;
+using namespace aruwlib::algorithms;
 using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
@@ -50,6 +56,10 @@ AgitatorSubsystem agitator17mm(
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
+#if defined(TARGET_ENGINEER)
+Reservoir42mmSubsystem reservoir42mm;
+#endif
+
 /* define commands ----------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
@@ -58,13 +68,19 @@ ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 #endif
 
+#if defined(TARGET_ENGINEER)
+Reservoir42mmCalibrateCommand reservoir42mmCalibrateCommand(&reservoir42mm);
+Reservoir42mmRotateCommand reservoir42mmOpenCommand(&reservoir42mm, aruwlib::algorithms::PI / 2.0f, 500.0f);
+Reservoir42mmRotateCommand reservoir42mmCloseCommand(&reservoir42mm, -1.0f * aruwlib::algorithms::PI / 2.0f, 500.0f);
+#endif
+
 using namespace aruwlib::sensors;
 
 #if defined(TARGET_SOLDIER)
 ChassisSubsystem soldierChassis;
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #else  // error
-#error "select soldier robot type only"
+//#error "select soldier robot type only"
 #endif
 
 int main()
@@ -91,6 +107,10 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
     #endif
 
+    #if defined(TARGET_ENGINEER)
+    CommandScheduler::getMainScheduler().registerSubsystem(&reservoir42mm);
+    #endif
+
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
@@ -99,6 +119,10 @@ int main()
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
+    #endif
+
+    #if defined(TARGET_ENGINEER)
+    CommandScheduler::getMainScheduler().addCommand(&reservoir42mmCalibrateCommand);
     #endif
 
     /* define timers here ---------------------------------------------------*/
@@ -110,6 +134,17 @@ int main()
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootSlowCommand
+    );
+    #endif
+
+    #if defined(TARGET_ENGINEER)
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        &reservoir42mmOpenCommand
+    );
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+        &reservoir42mmCloseCommand
     );
     #endif
 

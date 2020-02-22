@@ -30,6 +30,10 @@ class Reservoir42mmSubsystem : public aruwlib::control::Subsystem
 
     bool reservoirCalibrateHere();
 
+    void reservoirToggleState();
+
+    bool isClosed();
+
  private:
     static constexpr float RESERVOIR_42MM_GEAR_RATIO = 36.0f;
 
@@ -52,6 +56,8 @@ class Reservoir42mmSubsystem : public aruwlib::control::Subsystem
     float reservoirCalibratedAngle;
 
     bool reservoirIsCalibrated;
+
+    bool reservoirIsClosed;
 
     void reservoirRunPositionPid(void);
 

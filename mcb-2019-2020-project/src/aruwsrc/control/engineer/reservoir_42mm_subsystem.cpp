@@ -10,7 +10,8 @@ namespace engineer
         positionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredReservoirAngle(0.0f),
         reservoirCalibratedAngle(0.0f),
-        reservoirIsCalibrated(false)
+        reservoirIsCalibrated(false),
+        reservoirIsClosed(true)
     {}
 
     void Reservoir42mmSubsystem::refresh()
@@ -53,6 +54,16 @@ namespace engineer
         reservoirCalibratedAngle = getUncalibratedReservoirAngle();
         reservoirIsCalibrated = true;
         return true;
+    }
+
+    void Reservoir42mmSubsystem::reservoirToggleState()
+    {
+        reservoirIsClosed = !reservoirIsClosed;
+    }
+
+    bool Reservoir42mmSubsystem::isClosed()
+    {
+        return reservoirIsClosed;
     }
 
     void Reservoir42mmSubsystem::reservoirRunPositionPid()

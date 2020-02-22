@@ -1,4 +1,5 @@
 #include "reservoir_42mm_calibrate_command.hpp"
+#include "src/aruwlib/control/subsystem.hpp"
 
 namespace aruwsrc
 {
