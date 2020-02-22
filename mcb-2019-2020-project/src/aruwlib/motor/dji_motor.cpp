@@ -138,7 +138,7 @@ namespace motor
             return encoderWrapped;
         } else {
             int16_t val = 2 * initialEncValue - encoderWrapped;
-            return val < 0 ? val + ENC_RESOLUTION + 1 : val;
+            return val < 0 ? val + ENC_RESOLUTION : val;
         }
     }
 

@@ -64,10 +64,17 @@ namespace agitator
         return agitatorJammedTimeout.isExpired();
     }
 
+    int64_t enc = 0;
+    float agitatorangle = 0.0f;
+    float ang = 0.0f;
+
     void AgitatorSubsystem::refresh()
     {
+        agitatorangle = 180.0f * this->desiredAgitatorAngle / aruwlib::algorithms::PI;
         if (agitatorIsCalibrated)
         {
+            ang = this->getAgitatorAngle();
+            enc = this->agitatorMotor.encStore.getEncoderUnwrapped();
             agitatorRunPositionPid();
         }
         else
@@ -129,6 +136,12 @@ namespace agitator
     {
         return agitatorMotor.getShaftRPM() / gearRatio;
     }
+
+    bool AgitatorSubsystem::isAgitatorCalibrated() const
+    {
+        return agitatorIsCalibrated;
+    }
+
 }  // namespace agitator
 
 }  // namespace aruwsrc

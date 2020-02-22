@@ -31,7 +31,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
 {
  public:
     // 0 - 8191 for dji motors
-    #define ENC_RESOLUTION 8191
+    #define ENC_RESOLUTION 8200
 
     // construct new motor
     DjiMotor(MotorId desMotorIdentifier, aruwlib::can::CanBus motorCanBus, bool isInverted);
@@ -52,7 +52,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
         explicit EncoderStore(
             bool inverted,
-            uint16_t encWrapped = (ENC_RESOLUTION + 1) / 2,
+            uint16_t encWrapped = (ENC_RESOLUTION) / 2,
             int16_t encRevolutions = 0
         ) : encoderWrapped(encWrapped),
         encoderRevolutions(encRevolutions),

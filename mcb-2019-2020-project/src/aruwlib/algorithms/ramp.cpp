@@ -63,6 +63,11 @@ bool Ramp::isTargetReached() const
     return targetReached;
 }
 
+const float& Ramp::getTarget() const
+{
+    return this->target;
+}
+
 }  // namespace algorithms
 
 }  // namespace aruwlib

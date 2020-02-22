@@ -29,13 +29,15 @@ namespace agitator
     {
         // set the ramp start and target angles
         rampToTargetAngle.reset(connectedAgitator->getAgitatorAngle());
-        rampToTargetAngle.setTarget(connectedAgitator->getAgitatorAngle()
+        rampToTargetAngle.setTarget(connectedAgitator->getAgitatorDesiredAngle()
             + agitatorTargetAngleChange);
 
         // we set the unjam timer to the larger of two values:
         // either the desired rotate time minimum rotate time
         connectedAgitator->armAgitatorUnjamTimer(agitatorMinRotatePeriod);
         agitatorMinRotateTimeout.restart(agitatorMinRotatePeriod);
+
+        agitatorPrevRotateTime = modm::Clock::now().getTime();
     }
 
     void AgitatorRotateCommand::execute()
@@ -59,6 +61,11 @@ namespace agitator
         {
             connectedAgitator->setAgitatorDesiredAngle(connectedAgitator->getAgitatorAngle());
         }
+        else
+        {
+            connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getTarget());
+        }
+        
         connectedAgitator->disarmAgitatorUnjamTimer();
     }
 

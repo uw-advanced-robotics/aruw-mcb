@@ -37,6 +37,8 @@ class Ramp
 
     bool isTargetReached() const;
 
+    const float& getTarget() const;
+
  private:
     float target;
     float value;
