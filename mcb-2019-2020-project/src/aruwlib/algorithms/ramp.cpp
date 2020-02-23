@@ -1,5 +1,6 @@
 #include <math.h>
 #include "ramp.hpp"
+#include "math_user_utils.hpp"
 
 namespace aruwlib
 {
@@ -15,42 +16,19 @@ Ramp::Ramp(const float& initialValue) :
 
 void Ramp::setTarget(const float& target)
 {
-    this->target = target;
-    this->targetReached = false;
+    if (!compareFloatClose(target, this->target, RAMP_EPSILON))
+    {
+        this->target = target;
+        this->targetReached = false;
+    }
 }
 
 void Ramp::update(float increment)
 {
-    increment = fabs(increment);
-    if (target > value)
-    {
-        float targetValueDifference = target - value;
-        if (targetValueDifference > increment) {
-            value += increment;
-        }
-        else
-        {
-            value = target;
-            targetReached = true;
-        }
-    }
-    else
-    {
-        float targetValueDifference = value - target;
-        if (targetValueDifference > increment) {
-            value -= increment;
-        }
-        else
-        {
-            value = target;
-            targetReached = true;
-        }
-    }
-}
-
-void Ramp::reset(const float& value)
-{
-    this->value = value;
+    increment = copysign(increment, target - value);
+    float targetValueDifference = copysign(target - value, increment);
+    value = fabs(targetValueDifference) > fabs(increment) ? value + increment : target;
+    targetReached = compareFloatClose(value, target, RAMP_EPSILON);
 }
 
 const float& Ramp::getValue() const
@@ -65,7 +43,7 @@ bool Ramp::isTargetReached() const
 
 const float& Ramp::getTarget() const
 {
-    return this->target;
+    return target;
 }
 
 }  // namespace algorithms

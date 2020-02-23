@@ -31,8 +31,6 @@ class Ramp
     // pass in timestamp in case period is not constant
     void update(float increment);
 
-    void reset(const float& value = 0.0f);
-
     const float& getValue() const;
 
     bool isTargetReached() const;
@@ -40,6 +38,7 @@ class Ramp
     const float& getTarget() const;
 
  private:
+    static constexpr float RAMP_EPSILON = 0.00000000001f;
     float target;
     float value;
     bool targetReached;
