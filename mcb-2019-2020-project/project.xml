@@ -30,6 +30,7 @@
     <module>modm:platform:gpio</module>
     <module>modm:architecture:spi.device</module>
     <module>modm:platform:spi:5</module>
+    <module>modm:platform:spi:1</module>
     <module>modm:platform:uart:1</module>
     <module>modm:platform:uart:2</module>
     <module>modm:platform:uart:6</module>
@@ -44,5 +45,6 @@
     <module>modm:math:filter</module>
     <module>modm:processing</module>
     <module>modm:math:geometry</module>
+    <module>modm:ui:display</module>
   </modules>
 </library>
