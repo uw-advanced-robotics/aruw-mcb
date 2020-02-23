@@ -65,7 +65,6 @@ namespace agitator
         {
             connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getTarget());
         }
-        
         connectedAgitator->disarmAgitatorUnjamTimer();
     }
 
