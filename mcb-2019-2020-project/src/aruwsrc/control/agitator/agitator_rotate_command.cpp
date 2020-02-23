@@ -18,7 +18,7 @@ namespace agitator
         agitatorDesiredRotateTime(agitatorRotateTime),
         agitatorMinRotatePeriod(agitatorRotateTime + agitatorPauseAfterRotateTime),
         agitatorMinRotateTimeout(agitatorRotateTime + agitatorPauseAfterRotateTime),
-        agitatorSetpointTolerance(setpointTolerance), 
+        agitatorSetpointTolerance(setpointTolerance),
         agitatorPrevRotateTime(0)
     {
         this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
@@ -28,7 +28,7 @@ namespace agitator
     void AgitatorRotateCommand::initialize()
     {
         // set the ramp start and target angles
-        rampToTargetAngle.reset(connectedAgitator->getAgitatorAngle());
+        rampToTargetAngle.setTarget(connectedAgitator->getAgitatorAngle());
         rampToTargetAngle.setTarget(connectedAgitator->getAgitatorDesiredAngle()
             + agitatorTargetAngleChange);
 
@@ -51,6 +51,7 @@ namespace agitator
         connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getValue());
     }
 
+    // NOLINTNEXTLINE
     void AgitatorRotateCommand::end(bool)
     {
         // if the agitator is not interrupted, then it exited normally

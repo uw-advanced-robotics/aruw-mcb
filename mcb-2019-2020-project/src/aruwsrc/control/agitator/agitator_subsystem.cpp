@@ -7,8 +7,6 @@
 #include "src/aruwlib/errors/system_error.hpp"
 #include "src/aruwlib/errors/error_controller.hpp"
 
-#include <stdlib.h>
-
 using namespace aruwlib::motor;
 
 namespace aruwsrc
@@ -43,7 +41,8 @@ namespace agitator
     {
         if (predictedRotateTime == 0)
         {
-            aruwlib::errors::SystemError error(aruwlib::errors::SUBSYSTEM, aruwlib::errors::ZERO_ROTATE_TIME);
+            aruwlib::errors::SystemError error(aruwlib::errors::SUBSYSTEM,
+                aruwlib::errors::ZERO_ROTATE_TIME);
             aruwlib::errors::ErrorController::addToErrorList(error);
         }
         else

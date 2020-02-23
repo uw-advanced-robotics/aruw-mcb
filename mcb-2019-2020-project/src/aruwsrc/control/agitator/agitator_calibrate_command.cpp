@@ -22,6 +22,7 @@ namespace agitator
         agitator->agitatorCalibrateHere();
     }
 
+    // NOLINTNEXTLINE
     void AgitatorCalibrateCommand::end(bool)
     {}
 

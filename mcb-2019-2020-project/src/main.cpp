@@ -8,7 +8,6 @@
 #include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
-#include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
 
 /* aruwlib control includes -------------------------------------------------*/
@@ -36,36 +35,37 @@ using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
 using namespace aruwsrc::chassis;
+using namespace aruwlib::sensors;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
+ChassisSubsystem soldierChassis;
+
 AgitatorSubsystem agitator17mm(
     AgitatorSubsystem::PID_17MM_P,
     AgitatorSubsystem::PID_17MM_I,
     AgitatorSubsystem::PID_17MM_D,
     AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
     AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
     AgitatorSubsystem::isAgitatorInverted
 );
+
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
 /* define commands ----------------------------------------------------------*/
+
 #if defined(TARGET_SOLDIER)
+ChassisDriveCommand chassisDriveCommand(&soldierChassis);
+
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
-    ExampleCommand::DEFAULT_WHEEL_RPM);
+        ExampleCommand::DEFAULT_WHEEL_RPM);
+
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
-#endif
-
-using namespace aruwlib::sensors;
-
-#if defined(TARGET_SOLDIER)
-ChassisSubsystem soldierChassis;
-ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #else  // error
 #error "select soldier robot type only"
 #endif
