@@ -8,6 +8,8 @@
 #include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
+#include "src/aruwlib/communication/serial/xavier_serial.hpp"
+#include "src/aruwlib/display/sh1106.hpp"
 
 /* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -70,6 +72,31 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 
 int main()
 {
+    Board::initialize();
+
+    Board::DisplaySpiMaster::connect<
+        Board::DisplayMiso::Miso,
+        Board::DisplayMosi::Mosi,
+        Board::DisplaySck::Sck
+    >();
+
+    // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
+    // 90MHz/64=~14MHz
+    Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
+
+    aruwlib::display::Sh1106<
+        Board::DisplaySpiMaster,
+        Board::DisplayCommand,
+        Board::DisplayReset,
+        128, 64,
+        false
+    > display;
+    display.initializeBlocking();
+    display.setCursor(2, 1);
+    display.setFont(modm::font::ScriptoNarrow);
+    display << "ur code is shit" << modm::endl;
+    display.update();
+
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
     contiguousFloatTest.testCore();
     contiguousFloatTest.testBadBounds();
@@ -77,8 +104,6 @@ int main()
     contiguousFloatTest.testRotationBounds();
     contiguousFloatTest.testShiftingValue();
     contiguousFloatTest.testWrapping();
-
-    Board::initialize();
 
     aruwlib::Remote::initialize();
     aruwlib::sensors::Mpu6500::init();
