@@ -31,6 +31,8 @@ void AgitatorUnjamCommand::initialize()
     agitatorUnjamRotateTimeout.restart(agitatorMaxWaitTime);
 
     // define a random unjam angle between [MIN_AGITATOR_UNJAM_ANGLE, agitatorUnjamAngleMax]
+
+    // NOLINTNEXTLINE
     float randomUnjamAngle = fmodf(rand(), agitatorUnjamAngleMax - MIN_AGITATOR_UNJAM_ANGLE)
             + MIN_AGITATOR_UNJAM_ANGLE;
 
@@ -73,6 +75,7 @@ void AgitatorUnjamCommand::execute()
                 agitatorUnjamRotateTimeout.restart(agitatorMaxWaitTime);
 
                 // define a new random angle, which will be used in the unjam back state
+                // NOLINTNEXTLINE
                 currAgitatorUnjamAngle = fmodf(rand(), agitatorUnjamAngleMax
                         - MIN_AGITATOR_UNJAM_ANGLE)
                         + MIN_AGITATOR_UNJAM_ANGLE;
