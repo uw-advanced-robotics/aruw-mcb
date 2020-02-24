@@ -20,8 +20,8 @@ class ShootComprisedCommand : public aruwlib::control::ComprisedCommand
         AgitatorSubsystem* agitator,
         float agitatorChangeAngle,
         float maxUnjamAngle,
-        float agitatorDesiredRotateTime,
-        float minAgitatorRotateTime
+        uint32_t agitatorDesiredRotateTime,
+        uint32_t minAgitatorRotateTime
     );
 
     void initialize();

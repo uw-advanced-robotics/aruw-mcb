@@ -9,10 +9,11 @@ namespace agitator
     AgitatorRotateCommand::AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float agitatorRotateTime,
-        float agitatorPauseAfterRotateTime,
+        uint32_t agitatorRotateTime,
+        uint32_t agitatorPauseAfterRotateTime,
         float setpointTolerance
     ) :
+        connectedAgitator(agitator),
         agitatorTargetAngleChange(agitatorAngleChange),
         rampToTargetAngle(0.0f),
         agitatorDesiredRotateTime(agitatorRotateTime),
@@ -22,13 +23,11 @@ namespace agitator
         agitatorPrevRotateTime(0)
     {
         this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
-        connectedAgitator = agitator;
     }
 
     void AgitatorRotateCommand::initialize()
     {
         // set the ramp start and target angles
-        rampToTargetAngle.setTarget(connectedAgitator->getAgitatorAngle());
         rampToTargetAngle.setTarget(connectedAgitator->getAgitatorDesiredAngle()
             + agitatorTargetAngleChange);
 
@@ -45,8 +44,8 @@ namespace agitator
         // update the agitator setpoint ramp
         uint32_t currTime = modm::Clock::now().getTime();
         rampToTargetAngle.update(
-            (currTime - agitatorPrevRotateTime) * agitatorTargetAngleChange
-            / agitatorDesiredRotateTime);
+                (currTime - agitatorPrevRotateTime) * agitatorTargetAngleChange
+                / static_cast<float>(agitatorDesiredRotateTime));
         agitatorPrevRotateTime = modm::Clock::now().getTime();
         connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getValue());
     }
@@ -73,10 +72,10 @@ namespace agitator
     {
         // The agitator is within the setpoint tolerance, the agitator ramp is
         // finished, and the minimum rotate time is expired.
-        return fabs(static_cast<double>(connectedAgitator->getAgitatorAngle()
-            - connectedAgitator->getAgitatorDesiredAngle()))
-            < static_cast<double>(agitatorSetpointTolerance)
-            && agitatorMinRotateTimeout.isExpired();
+        return fabsf(connectedAgitator->getAgitatorAngle()
+                - connectedAgitator->getAgitatorDesiredAngle())
+                < agitatorSetpointTolerance
+                && agitatorMinRotateTimeout.isExpired();
     }
 }  // namespace agitator
 

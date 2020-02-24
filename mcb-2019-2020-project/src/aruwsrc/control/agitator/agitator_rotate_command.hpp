@@ -29,9 +29,9 @@ class AgitatorRotateCommand : public aruwlib::control::Command
     aruwlib::algorithms::Ramp rampToTargetAngle;
 
     // time you want the agitator to take to rotate to the desired angle, in milliseconds
-    float agitatorDesiredRotateTime;
+    uint32_t agitatorDesiredRotateTime;
 
-    float agitatorMinRotatePeriod;
+    uint32_t agitatorMinRotatePeriod;
 
     modm::ShortTimeout agitatorMinRotateTimeout;
 
@@ -56,8 +56,8 @@ class AgitatorRotateCommand : public aruwlib::control::Command
     AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float agitatorRotateTime,
-        float agitatorPauseAfterRotateTime,
+        uint32_t agitatorRotateTime,
+        uint32_t agitatorPauseAfterRotateTime,
         float setpointTolerance = AGITATOR_SETPOINT_TOLERANCE
     );
 

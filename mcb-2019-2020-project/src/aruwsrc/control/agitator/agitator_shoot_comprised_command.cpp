@@ -15,8 +15,8 @@ ShootComprisedCommand::ShootComprisedCommand(
     AgitatorSubsystem* agitator,
     float agitatorChangeAngle,
     float maxUnjamAngle,
-    float agitatorDesiredRotateTime,
-    float minAgitatorRotateTime) :
+    uint32_t agitatorDesiredRotateTime,
+    uint32_t minAgitatorRotateTime) :
     connectedAgitator(agitator),
     agitatorRotateCommand(
         agitator,
@@ -54,17 +54,17 @@ void ShootComprisedCommand::execute()
 void ShootComprisedCommand::end(bool interrupted)
 {
     this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&agitatorUnjamCommand), interrupted);
+            dynamic_cast<Command*>(&agitatorUnjamCommand), interrupted);
     this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&agitatorRotateCommand), interrupted);
+            dynamic_cast<Command*>(&agitatorRotateCommand), interrupted);
 }
 
 bool ShootComprisedCommand::isFinished() const
 {
     return (agitatorRotateCommand.isFinished()
-        && !unjamSequenceCommencing)
-        || (agitatorUnjamCommand.isFinished()
-        && unjamSequenceCommencing);
+            && !unjamSequenceCommencing)
+            || (agitatorUnjamCommand.isFinished()
+            && unjamSequenceCommencing);
 }
 
 }  // namespace agitator

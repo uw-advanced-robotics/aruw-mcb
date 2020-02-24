@@ -42,14 +42,10 @@ namespace agitator
         if (predictedRotateTime == 0)
         {
             aruwlib::errors::SystemError error(aruwlib::errors::SUBSYSTEM,
-                aruwlib::errors::ZERO_ROTATE_TIME);
+                    aruwlib::errors::ZERO_ROTATE_TIME);
             aruwlib::errors::ErrorController::addToErrorList(error);
         }
-        else
-        {
-            agitatorJammedTimeoutPeriod = predictedRotateTime;
-        }
-        agitatorJammedTimeoutPeriod += JAMMED_TOLERANCE_PERIOD;
+        agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
         agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
     }
 
@@ -63,17 +59,10 @@ namespace agitator
         return agitatorJammedTimeout.isExpired();
     }
 
-    int64_t enc = 0;
-    float agitatorangle = 0.0f;
-    float ang = 0.0f;
-
     void AgitatorSubsystem::refresh()
     {
-        agitatorangle = 180.0f * this->desiredAgitatorAngle / aruwlib::algorithms::PI;
         if (agitatorIsCalibrated)
         {
-            ang = this->getAgitatorAngle();
-            enc = this->agitatorMotor.encStore.getEncoderUnwrapped();
             agitatorRunPositionPid();
         }
         else
@@ -87,10 +76,12 @@ namespace agitator
         if (!agitatorIsCalibrated)
         {
             agitatorPositionPid.reset();
-            return;
         }
-        agitatorPositionPid.update(desiredAgitatorAngle - getAgitatorAngle());
-        agitatorMotor.setDesiredOutput(agitatorPositionPid.getValue());
+        else
+        {
+            agitatorPositionPid.update(desiredAgitatorAngle - getAgitatorAngle());
+            agitatorMotor.setDesiredOutput(agitatorPositionPid.getValue());
+        }
     }
 
     bool AgitatorSubsystem::agitatorCalibrateHere()

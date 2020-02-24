@@ -14,9 +14,13 @@ AgitatorUnjamCommand::AgitatorUnjamCommand(
     agitatorMaxWaitTime(agitatorMaxWaitTime),
     connectedAgitator(agitator),
     agitatorUnjamAngleMax(agitatorMaxUnjamAngle),
-    currAgitatorUnjamAngle(0),
-    agitatorSetpointBeforeUnjam(0)
+    currAgitatorUnjamAngle(0.0f),
+    agitatorSetpointBeforeUnjam(0.0f)
 {
+    if (agitatorMaxUnjamAngle < MIN_AGITATOR_UNJAM_ANGLE)
+    {
+        agitatorUnjamAngleMax = MIN_AGITATOR_UNJAM_ANGLE;
+    }
     this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
     agitatorUnjamRotateTimeout.stop();
 }
@@ -27,12 +31,11 @@ void AgitatorUnjamCommand::initialize()
     agitatorUnjamRotateTimeout.restart(agitatorMaxWaitTime);
 
     // define a random unjam angle between [MIN_AGITATOR_UNJAM_ANGLE, agitatorUnjamAngleMax]
-    currAgitatorUnjamAngle = fmod(static_cast<double>(rand()),
-        static_cast<double>(agitatorUnjamAngleMax - MIN_AGITATOR_UNJAM_ANGLE))
-        + static_cast<double>(MIN_AGITATOR_UNJAM_ANGLE);
+    float randomUnjamAngle = fmodf(rand(), agitatorUnjamAngleMax - MIN_AGITATOR_UNJAM_ANGLE)
+            + MIN_AGITATOR_UNJAM_ANGLE;
 
     // subtract this angle from the current angle to rotate agitator backwards
-    currAgitatorUnjamAngle = connectedAgitator->getAgitatorAngle() - currAgitatorUnjamAngle;
+    currAgitatorUnjamAngle = connectedAgitator->getAgitatorAngle() - randomUnjamAngle;
 
     // store the current setpoint angle to be referenced later
     agitatorSetpointBeforeUnjam = connectedAgitator->getAgitatorDesiredAngle();
@@ -46,16 +49,15 @@ void AgitatorUnjamCommand::execute()
         case AGITATOR_UNJAM_BACK:
         {
             connectedAgitator->setAgitatorDesiredAngle(currAgitatorUnjamAngle);
-            if (
-                agitatorUnjamRotateTimeout.isExpired() ||
-                fabs(static_cast<double>(connectedAgitator->getAgitatorAngle() -
-                    connectedAgitator->getAgitatorDesiredAngle()))
-                < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE)
-            ) {
+            if (agitatorUnjamRotateTimeout.isExpired() ||
+                    fabsf(connectedAgitator->getAgitatorAngle() -
+                    connectedAgitator->getAgitatorDesiredAngle())
+                    < AGITATOR_SETPOINT_TOLERANCE
+            ) {  // either the timeout has been triggered or the agitator has reached the setpoint
                 // define a random time that the agitator will take to rotate forwards.
                 agitatorUnjamRotateTimeout.restart(agitatorMaxWaitTime);
 
-                // move on to unjam forward state
+                // reset the agitator
                 currUnjamstate = AGITATOR_UNJAM_RESET;
             }
             break;
@@ -71,18 +73,17 @@ void AgitatorUnjamCommand::execute()
                 agitatorUnjamRotateTimeout.restart(agitatorMaxWaitTime);
 
                 // define a new random angle, which will be used in the unjam back state
-                currAgitatorUnjamAngle = fmod(static_cast<double>(rand()),
-                    static_cast<double>(agitatorUnjamAngleMax - MIN_AGITATOR_UNJAM_ANGLE))
-                    + static_cast<double>(MIN_AGITATOR_UNJAM_ANGLE);
+                currAgitatorUnjamAngle = fmodf(rand(), agitatorUnjamAngleMax
+                        - MIN_AGITATOR_UNJAM_ANGLE)
+                        + MIN_AGITATOR_UNJAM_ANGLE;
 
                 currAgitatorUnjamAngle = agitatorSetpointBeforeUnjam - currAgitatorUnjamAngle;
 
                 currUnjamstate = AGITATOR_UNJAM_BACK;
             }
-            else if (
-                fabs(static_cast<double>(connectedAgitator->getAgitatorAngle() -
-                    connectedAgitator->getAgitatorDesiredAngle()))
-                < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE))
+            else if (fabsf(connectedAgitator->getAgitatorAngle() -
+                    connectedAgitator->getAgitatorDesiredAngle())
+                    < AGITATOR_SETPOINT_TOLERANCE)
             {
                 currUnjamstate = FINISHED;
             }
@@ -95,11 +96,9 @@ void AgitatorUnjamCommand::execute()
     }
 }
 
-void AgitatorUnjamCommand::end(bool interrupted)
+// NOLINTNEXTLINE
+void AgitatorUnjamCommand::end(bool)
 {
-    if (interrupted) {
-        connectedAgitator->setAgitatorDesiredAngle(agitatorSetpointBeforeUnjam);
-    }
     connectedAgitator->setAgitatorDesiredAngle(agitatorSetpointBeforeUnjam);
 }
 

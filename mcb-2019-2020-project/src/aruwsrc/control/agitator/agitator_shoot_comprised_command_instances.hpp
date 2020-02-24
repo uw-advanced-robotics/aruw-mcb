@@ -17,7 +17,7 @@ class ShootFastComprisedCommand : public ShootComprisedCommand
         agitator17mm,
         aruwlib::algorithms::PI / 5.0f,
         aruwlib::algorithms::PI / 2.0f,
-        100.0f, 150.0f
+        100, 150
     ) {}
 };
 
@@ -29,7 +29,7 @@ class ShootSlowComprisedCommand : public ShootComprisedCommand
         agitator17mm,
         aruwlib::algorithms::PI / 5.0f,
         aruwlib::algorithms::PI / 2.0f,
-        300.0f, 100.0f
+        300, 100
     ) {}
 };
 

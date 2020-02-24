@@ -92,7 +92,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     // we add on this amount of "tolerance" to the predicted rotate time since some times it
     // takes longer than predicted and we only want to unjam when we are actually jammed
     // measured in ms
-    static const int JAMMED_TOLERANCE_PERIOD = 10;
+    static const uint32_t JAMMED_TOLERANCE_PERIOD = 10;
 
     // pid controller for running postiion pid on unwrapped agitator angle (in radians)
     modm::Pid<float> agitatorPositionPid;
