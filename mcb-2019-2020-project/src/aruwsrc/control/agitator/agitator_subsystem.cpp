@@ -42,7 +42,7 @@ namespace agitator
         if (predictedRotateTime == 0)
         {
             aruwlib::errors::SystemError error(aruwlib::errors::SUBSYSTEM,
-                    aruwlib::errors::ZERO_ROTATE_TIME);
+                    aruwlib::errors::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
             aruwlib::errors::ErrorController::addToErrorList(error);
         }
         agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
