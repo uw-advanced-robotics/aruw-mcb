@@ -26,6 +26,19 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
 
     static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+    
+    #elif defined(TARGET_SENTRY)
+    // position pid terms
+    // pid terms for sentry
+    static constexpr float PID_17MM_P = 190000.0f;
+    static constexpr float PID_17MM_I = 0.0f;
+    static constexpr float PID_17MM_D = 1500000.0f;
+    static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
+    static constexpr float PID_17MM_MAX_OUT = 16000.0f;
+
+    static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
+    static constexpr aruwlib::motor::MotorId SENTRY_KICKER_MOTOR_ID = aruwlib::motor::MOTOR8;
+    static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 
     static constexpr bool isAgitatorInverted = false;
 

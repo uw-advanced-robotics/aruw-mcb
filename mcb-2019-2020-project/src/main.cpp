@@ -54,6 +54,33 @@ AgitatorSubsystem agitator17mm(
 );
 
 ExampleSubsystem frictionWheelSubsystem;
+
+#elif defined(TARGET_SENTRY)
+AgitatorSubsystem sentryAgitator(
+    AgitatorSubsystem::PID_17MM_P,
+    AgitatorSubsystem::PID_17MM_I,
+    AgitatorSubsystem::PID_17MM_D,
+    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem::AGITATOR_MOTOR_ID,
+    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
+    AgitatorSubsystem::isAgitatorInverted
+);
+
+AgitatorSubsystem sentryKicker(
+    AgitatorSubsystem::PID_17MM_P,
+    AgitatorSubsystem::PID_17MM_I,
+    AgitatorSubsystem::PID_17MM_D,
+    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem::SENTRY_KICKER_MOTOR_ID,
+    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
+    AgitatorSubsystem::isAgitatorInverted
+);
+
+ExampleSubsystem frictionWheelSubsystem;
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -66,8 +93,14 @@ aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsyste
 
 ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
-#else  // error
-#error "select soldier robot type only"
+#elif defined(TARGET_SENTRY)
+aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
+        ExampleCommand::DEFAULT_WHEEL_RPM);
+
+ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
+AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
+AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 2 * aruwlib::algorithms::PI, 100, 0);
+AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 #endif
 
 int main()
@@ -115,15 +148,23 @@ int main()
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().registerSubsystem(&agitator17mm);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
+    #elif defined(TARGET_SENTRY)
+    CommandScheduler::getMainScheduler().registerSubsystem(&sentryAgitator);
+    CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
+    CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
+    #elif defined(TARGET_SENTRY)
+    frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
+    CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
+    #elif defined(TARGET_SENTRY)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
     #endif
 
@@ -136,6 +177,15 @@ int main()
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootSlowCommand
+    );
+    #elif defined(TARGET_SENTRY)
+    IoMapper::addHoldRepeatMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        &agitatorShootSlowCommand
+    );
+    IoMapper::addHoldRepeatMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        &agitatorKickerCommand
     );
     #endif
 
