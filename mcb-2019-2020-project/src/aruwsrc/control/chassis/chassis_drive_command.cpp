@@ -24,7 +24,7 @@ void ChassisDriveCommand::execute()
         aruwlib::algorithms::limitVal<float>(chassis->getChassisX(),
         -rTranslationalGain, rTranslationalGain)
         * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-    
+
     float chassisYDesiredWheelspeed =
         aruwlib::algorithms::limitVal<float>(chassis->getChassisY(),
         -rTranslationalGain, rTranslationalGain)

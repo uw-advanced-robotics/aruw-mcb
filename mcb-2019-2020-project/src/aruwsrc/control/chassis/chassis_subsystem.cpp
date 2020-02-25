@@ -194,14 +194,19 @@ namespace chassis
             + abs(rightBackMotor.getOutputDesired());
         // limit the chassis output based on fraction between what our current output is
         // and what we realistically can output limited.
-        // only limit if the current output is greater than the current limit (what was calculated above)
+        // only limit if the current output is greater than the current limit (what was
+        // calculated above)
         if (allMotorCurrentOutput > allMotorCurrentLimit && allMotorCurrentOutput != 0)
         {
             float chassisOutputFraction = allMotorCurrentLimit / allMotorCurrentOutput;
-            leftFrontMotor.setDesiredOutput(leftFrontMotor.getOutputDesired() * chassisOutputFraction);
-            leftBackMotor.setDesiredOutput(leftBackMotor.getOutputDesired() * chassisOutputFraction);
-            rightFrontMotor.setDesiredOutput(rightFrontMotor.getOutputDesired() * chassisOutputFraction);
-            rightBackMotor.setDesiredOutput(rightBackMotor.getOutputDesired() * chassisOutputFraction);
+            leftFrontMotor.setDesiredOutput(leftFrontMotor.getOutputDesired()
+                    * chassisOutputFraction);
+            leftBackMotor.setDesiredOutput(leftBackMotor.getOutputDesired()
+                    * chassisOutputFraction);
+            rightFrontMotor.setDesiredOutput(rightFrontMotor.getOutputDesired()
+                    * chassisOutputFraction);
+            rightBackMotor.setDesiredOutput(rightBackMotor.getOutputDesired()
+                    * chassisOutputFraction);
         }
     }
 }  // namespace chassis
