@@ -1,95 +1,29 @@
 #include <rm-dev-board-a/board.hpp>
 #include <modm/processing/timer.hpp>
-#include <modm/processing/timer.hpp>
-#include "main.hpp"
 
-/* communication includes ---------------------------------------------------*/
+#include "src/aruwlib/control/controller_mapper.hpp"
+#include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
+#include "src/aruwlib/control/command_scheduler.hpp"
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_listener.hpp"
-#include "src/aruwlib/communication/remote.hpp"
-
-/* math includes ------------------------------------------------------------*/
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/algorithms/contiguous_float_test.hpp"
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
 #include "src/aruwlib/errors/error_controller.hpp"
-#include "src/aruwsrc/control/example_comprised_command.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
 
-/* aruwlib control includes -------------------------------------------------*/
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwlib/control/controller_mapper.hpp"
-
-/* aruwsrc control includes -------------------------------------------------*/
-#include "src/aruwsrc/control/example/example_command.hpp"
-#include "src/aruwsrc/control/example/example_subsystem.hpp"
-#include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "src/aruwsrc/control/agitator/shoot_steady_comprised_command.hpp"
-#include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
-#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_commands.hpp"
-#include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
-#include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
-#include "src/aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-#include "src/aruwlib/algorithms/contiguous_float.hpp"
-
-using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwlib::sensors;
-using namespace aruwsrc::control;
 
-/* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-AgitatorSubsystem agitator17mm;
 ChassisSubsystem soldierChassis;
-TurretSubsystem turretSubsystem;
-ChassisAutorotateCommand chassisAutoRotateCommand(&soldierChassis, &turretSubsystem);
+ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #else  // error
 #error "select soldier robot type only"
 #endif
-
-float desiredYaw2 = 0.0f;
-float desiredYaw3 = 0.0f;
-ContiguousFloat desiredYaw(90.0f, 0.0f, 360.0f);
-ContiguousFloat currValueImuYawGimbal(0.0f, 0.0f, 360.0f);
-float desiredPitch = 0.0f;
-
-float imuInitialValue = 0.0f;
-modm::Pid<float> yawImuPid(2500.0f, 0.0f, 12000.0f, 0.0f, 30000.0f);
-
-float diff=0.0f;
-
-// ContiguousFloat imuYawWrapped(0.0f, 0.0f, 360.0f);
-// ContiguousFloat imuTurretYawCombined(0.0f, 0.0f, 360.0f);
-void runTurretAlgorithm()
-{
-    desiredYaw2 -= static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f;
-    // desiredYaw2 = aruwlib::algorithms::limitVal<float>(
-    //     desiredYaw2,
-    //     0.0f + Mpu6500::getImuAttitude().yaw,
-    //     180.0f + Mpu6500::getImuAttitude().yaw
-    // );
-
-    desiredYaw3 = desiredYaw2 + Mpu6500::getImuAttitude().yaw - imuInitialValue;
-    desiredYaw3 = aruwlib::algorithms::limitVal<float>(
-        desiredYaw3,
-        0.0f + Mpu6500::getImuAttitude().yaw,
-        180.0f + Mpu6500::getImuAttitude().yaw
-    );
-
-    desiredYaw.setValue(desiredYaw2);
-    // position control on imu and encoder angle
-    turretSubsystem.updateCurrentTurretAngles();
-    currValueImuYawGimbal.setValue(turretSubsystem.getYawWrapped() + Mpu6500::getImuAttitude().yaw - imuInitialValue);
-    // float currYaw = turretSubsystem.getYawWrapped();
-    // imuYawWrapped.setValue(Mpu6500::getImuAttitude().yaw);
-    // imuTurretYawCombined.setValue(imuYawWrapped.getValue() + currYaw);
-    diff = currValueImuYawGimbal.difference(desiredYaw);
-    yawImuPid.update(currValueImuYawGimbal.difference(desiredYaw));
-    turretSubsystem.yawMotor.setDesiredOutput(yawImuPid.getValue());
-}
 
 int main()
 {
@@ -126,7 +60,6 @@ int main()
     contiguousFloatTest.testShiftingValue();
     contiguousFloatTest.testWrapping();
 
-    Board::initialize();
     aruwlib::Remote::initialize();
 
     aruwlib::serial::RefSerial::getRefSerial().initialize();
@@ -136,7 +69,7 @@ int main()
 
     #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
     CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
-    soldierChassis.setDefaultCommand(&chassisAutoRotateCommand);
+    soldierChassis.setDefaultCommand(&chassisDriveCommand);
     #endif
 
     // timers
@@ -145,21 +78,6 @@ int main()
     modm::ShortPeriodicTimer motorSendPeriod(2);
     // update imu
     modm::ShortPeriodicTimer updateImuPeriod(2);
-    modm::ShortPeriodicTimer sendMotorTimeout(2);
-
-    /* register io mappings here --------------------------------------------*/
-    #if defined(TARGET_SOLDIER)
-    IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        &agitatorShootSlowCommand
-    );
-    #endif
-
-    desiredPitch = 90.0f;
-
-    desiredYaw2 = 90.0f;
-    // chassisDriveCommand.initialize();
-    chassisAutoRotateCommand.initialize();
 
     while (1)
     {
@@ -168,37 +86,17 @@ int main()
         aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
         aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
-        Remote::read();
+        aruwlib::Remote::read();
 
         if (updateImuPeriod.execute())
         {
             Mpu6500::read();
         }
-        
-        if (sendMotorTimeout.execute())
+
+        if (motorSendPeriod.execute())
         {
             aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
-            if (Remote::getSwitch(aruwlib::Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN) {
-                turretSubsystem.yawMotor.setDesiredOutput(0);
-            } else {
-                runTurretAlgorithm();
-            }
-            chassisAutoRotateCommand.execute();
-            // chassisDriveCommand.execute();
-            soldierChassis.refresh();
-            // desiredPitch+= 0.1f;
-            // mainScheduler.run();
-
-            // desiredYaw -= (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL))) * 0.5f;
-            // desiredPitch += (static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL))
-            //         / 660.0f) * 0.5f;
-            // desiredYaw = aruwlib::algorithms::limitVal<float>(desiredYaw, 0.0f, 180.0f);
-            // desiredPitch = aruwlib::algorithms::limitVal<float>(desiredPitch, 75.0f, 110.0f);
-            // // turretSubsystem.updateDesiredTurretAngles(desiredYaw, desiredPitch);
-            // // aruwlib::control::CommandScheduler::run();
-            // turretSubsystem.updateCurrentTurretAngles();
-            // turretSubsystem.runTurretPositionPid();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 

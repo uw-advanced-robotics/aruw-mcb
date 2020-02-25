@@ -14,8 +14,11 @@ RefSerial::RefSerial() :
 DJISerial(DJISerial::SerialPort::PORT_UART6, true),
 robotData(),
 gameData(),
-receivedDpsTracker()
-{}
+receivedDpsTracker(),
+refSerialOnlineTimer(REF_SERIAL_TIMEOUT_PERIOD)
+{
+    refSerialOnlineTimer.stop();
+}
 
 RefSerial& RefSerial::getRefSerial()
 {
@@ -25,6 +28,7 @@ RefSerial& RefSerial::getRefSerial()
 // rx stuff
 void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
 {
+    refSerialOnlineTimer.restart(REF_SERIAL_TIMEOUT_PERIOD);
     updateReceivedDamage();
     switch(completeMessage.type)
     {
@@ -219,6 +223,11 @@ const RefSerial::GameData& RefSerial::getGameData() const
     return gameData;
 }
 
+bool RefSerial::isRefSerialOnline() const
+{
+    return !refSerialOnlineTimer.isExpired() && !refSerialOnlineTimer.isStopped();
+}
+
 float RefSerial::decodeTofloat(const uint8_t* startByte)
 {
     uint32_t unsigned_value = (
@@ -315,8 +324,6 @@ bool RefSerial::decodeToRobotStatus(const SerialMessage& message)
 
     return true;
 }
-
-
 
 bool RefSerial::decodeToPowerAndHeat(const SerialMessage& message)
 {

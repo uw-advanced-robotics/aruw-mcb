@@ -40,6 +40,8 @@ class RefSerial : public DJISerial
     // rx message type defines
     static const uint16_t REF_CUSTOM_DATA_TYPE_UI_INDICATOR = 0xD180;
 
+    static const uint32_t REF_SERIAL_TIMEOUT_PERIOD = 1000;
+
  public:
     typedef enum
     {
@@ -216,6 +218,8 @@ class RefSerial : public DJISerial
 
     void sendDisplayData(const DisplayData& displayData);
 
+    bool isRefSerialOnline() const;
+
     static RefSerial& getRefSerial();
 
  private:
@@ -224,6 +228,7 @@ class RefSerial : public DJISerial
     RobotData robotData;
     GameData gameData;
     modm::BoundedDeque<DamageEvent, REF_DAMAGE_EVENT_SIZE> receivedDpsTracker;
+    modm::ShortTimeout refSerialOnlineTimer;
 
     void sendCustomData(const CustomData& customData);
 
