@@ -1,13 +1,17 @@
 #include "oled_menu.hpp"
+#include "src/aruwlib/display/sh1106.hpp"
 
 namespace aruwlib 
 {
 
 namespace errors
 {
-    void OledMenu::init() {
-        ChoiceMenu(new modm::ViewStack(new modm::GraphicDisplay()), 1);
-        OledMenu::initialise();
+    OledMenu::OledMenu(modm::ViewStack *vs) : ChoiceMenu(vs, 1, "Title"), viewStack(vs) {
+        initialise();
+    }
+
+    void OledMenu::openNextScreen() {
+       
     }
 }
 

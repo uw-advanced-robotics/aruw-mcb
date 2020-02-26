@@ -16,6 +16,8 @@
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
 
+#include "src/aruwlib/errors/oled_menu.hpp"
+
 using namespace aruwsrc::chassis;
 using namespace aruwlib::sensors;
 
@@ -47,11 +49,18 @@ int main()
         128, 64,
         false
     > display;
+
     display.initializeBlocking();
-    display.setCursor(2, 1);
-    display.setFont(modm::font::ScriptoNarrow);
-    display << "ur code is shit" << modm::endl;
-    display.update();
+    // display.setCursor(2, 1);
+    // display.setFont(modm::font::ScriptoNarrow);
+    // display << "ur code is shit" << modm::endl;
+    // display.update();
+    modm::ViewStack vs(&display);
+
+    aruwlib::errors::OledMenu menu(&vs);
+    bool isWorking;
+    menu.addEntry("Row 1", &isWorking, true);
+    menu.draw();
 
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
     contiguousFloatTest.testCore();
