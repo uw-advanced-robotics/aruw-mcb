@@ -11,11 +11,11 @@ namespace engineer
         float wristRotateTime) :
         wristTargetChange(wristAngleChange),
         wristRotateSetpointLeft(
-            WRIST_ROTATE_COMMAND_PERIOD * wristAngleChange / wristRotateTime,
-            WRIST_ROTATE_COMMAND_PERIOD * wristAngleChange / wristRotateTime, 0),
+            WRIST_ROTATE_COMMAND_PERIOD * fabs(wristAngleChange) / wristRotateTime,
+            WRIST_ROTATE_COMMAND_PERIOD * fabs(wristAngleChange) / wristRotateTime, 0),
         wristRotateSetpointRight(
-            WRIST_ROTATE_COMMAND_PERIOD * wristAngleChange / wristRotateTime,
-            WRIST_ROTATE_COMMAND_PERIOD * wristAngleChange / wristRotateTime, 0),
+            WRIST_ROTATE_COMMAND_PERIOD * fabs(wristAngleChange) / wristRotateTime,
+            WRIST_ROTATE_COMMAND_PERIOD * fabs(wristAngleChange) / wristRotateTime, 0),
         wristDesiredRotateTime(wristRotateTime),
         wristMinRotateTime(WRIST_MIN_ROTATE_TIME)
     {
@@ -28,8 +28,15 @@ namespace engineer
         wristRotateSetpointLeft.reset(connectedWrist->getWristAngleLeft());
         wristRotateSetpointRight.reset(connectedWrist->getWristAngleRight());
 
-        wristRotateSetpointLeft.setTarget(connectedWrist->getWristDesiredAngleLeft() + wristTargetChange);
-        wristRotateSetpointRight.setTarget(connectedWrist->getWristDesiredAngleRight() + wristTargetChange);
+        if ((wristTargetChange > 0 && connectedWrist->isIn()) || (wristTargetChange < 0 && !connectedWrist->isIn()))
+        {
+            connectedWrist->wristToggleState();
+            wristRotateSetpointLeft.setTarget(connectedWrist->getWristDesiredAngleLeft() + wristTargetChange);
+            wristRotateSetpointRight.setTarget(connectedWrist->getWristDesiredAngleRight() + wristTargetChange);
+        } else {
+            wristRotateSetpointLeft.setTarget(connectedWrist->getWristDesiredAngleLeft());
+            wristRotateSetpointRight.setTarget(connectedWrist->getWristDesiredAngleRight());
+        }
 
         wristMinRotateTime.restart(WRIST_MIN_ROTATE_TIME);
     }

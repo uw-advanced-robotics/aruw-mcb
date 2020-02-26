@@ -58,7 +58,8 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 
 #if defined(TARGET_ENGINEER)
 WristCalibrateCommand wristCalibrateCommand(&wrist);
-WristRotateCommand wristRotateCommand(&wrist, 2.0f * aruwlib::algorithms::PI / 2.0f, 1500.0f);
+WristRotateCommand wristOutCommand(&wrist, 2.0f * aruwlib::algorithms::PI / 2.0f, 1000.0f);
+WristRotateCommand wristInCommand(&wrist, -2.0f * aruwlib::algorithms::PI / 2.0f, 1000.0f);
 #endif
 
 int main()
@@ -120,7 +121,11 @@ int main()
     #if defined(TARGET_ENGINEER)
     IoMapper::addHoldMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        &wristRotateCommand
+        &wristOutCommand
+    );
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+        &wristInCommand
     );
     #endif
 

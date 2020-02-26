@@ -7,7 +7,7 @@ namespace engineer
 {
         float test;
     WristSubsystem::WristSubsystem() :
-        leftMotor(LEFT_MOTOR_ID, CAN_BUS_MOTORS, false),
+        leftMotor(LEFT_MOTOR_ID, CAN_BUS_MOTORS, true),
         rightMotor(RIGHT_MOTOR_ID, CAN_BUS_MOTORS, false),
         leftPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
@@ -15,7 +15,8 @@ namespace engineer
         desiredWristAngleRight(0.0f),
         wristCalibratedAngleLeft(0.0f),
         wristCalibratedAngleRight(0.0f),
-        wristIsCalibrated(false)
+        wristIsCalibrated(false),
+        wristIsIn(true)
     {}
 
     void WristSubsystem::refresh()
@@ -79,6 +80,16 @@ namespace engineer
         wristCalibratedAngleRight = getUncalibratedWristAngleRight();
         wristIsCalibrated = true;
         return true;
+    }
+
+    void WristSubsystem::wristToggleState()
+    {
+        wristIsIn = !wristIsIn;
+    }
+
+    bool WristSubsystem::isIn()
+    {
+        return wristIsIn;
     }
 
     void WristSubsystem::wristRunPositionPid(void)
