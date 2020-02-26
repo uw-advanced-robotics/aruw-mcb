@@ -22,6 +22,7 @@ ShootComprisedCommand::ShootComprisedCommand(
         agitator,
         agitatorChangeAngle,
         agitatorDesiredRotateTime,
+        false,
         minAgitatorRotateTime
     ),
     agitatorUnjamCommand(agitator, maxUnjamAngle),

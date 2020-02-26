@@ -39,6 +39,8 @@ class AgitatorRotateCommand : public aruwlib::control::Command
 
     uint32_t agitatorPrevRotateTime;
 
+    bool agitatorSetToFinalAngle;
+
  public:
     /**
      * @param agitator the agitator associated with the rotate command
@@ -58,6 +60,7 @@ class AgitatorRotateCommand : public aruwlib::control::Command
         float agitatorAngleChange,
         uint32_t agitatorRotateTime,
         uint32_t agitatorPauseAfterRotateTime,
+        bool agitatorSetToFinalAngle,
         float setpointTolerance = AGITATOR_SETPOINT_TOLERANCE
     );
 

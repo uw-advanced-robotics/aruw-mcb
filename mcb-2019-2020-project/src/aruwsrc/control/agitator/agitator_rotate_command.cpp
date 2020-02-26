@@ -11,6 +11,7 @@ namespace agitator
         float agitatorAngleChange,
         uint32_t agitatorRotateTime,
         uint32_t agitatorPauseAfterRotateTime,
+        bool agitatorSetToFinalAngle,
         float setpointTolerance
     ) :
         connectedAgitator(agitator),
@@ -20,7 +21,8 @@ namespace agitator
         agitatorMinRotatePeriod(agitatorRotateTime + agitatorPauseAfterRotateTime),
         agitatorMinRotateTimeout(agitatorRotateTime + agitatorPauseAfterRotateTime),
         agitatorSetpointTolerance(setpointTolerance),
-        agitatorPrevRotateTime(0)
+        agitatorPrevRotateTime(0),
+        agitatorSetToFinalAngle(agitatorSetToFinalAngle)
     {
         this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
     }
@@ -61,11 +63,14 @@ namespace agitator
         {
             connectedAgitator->setAgitatorDesiredAngle(connectedAgitator->getAgitatorAngle());
         }
+        else if (agitatorSetToFinalAngle)
+        {
+            connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getTarget());
+        }
         else
         {
-            // connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getTarget());
+            connectedAgitator->setAgitatorDesiredAngle(connectedAgitator->getAgitatorAngle());
         }
-        connectedAgitator->setAgitatorDesiredAngle(connectedAgitator->getAgitatorAngle());
         connectedAgitator->disarmAgitatorUnjamTimer();
     }
 
