@@ -7,7 +7,7 @@
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
 
 class WristCalibrateCommand : public aruwlib::control::Command
@@ -27,7 +27,7 @@ private:
     WristSubsystem* wrist;
 };
 
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc
 

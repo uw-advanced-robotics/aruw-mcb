@@ -3,7 +3,7 @@
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
         float test;
     WristSubsystem::WristSubsystem() :
@@ -107,6 +107,6 @@ namespace control
         return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
             rightMotor.encStore.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
     }
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc

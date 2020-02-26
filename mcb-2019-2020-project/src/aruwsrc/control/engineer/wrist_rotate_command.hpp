@@ -10,7 +10,7 @@
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
 
 class WristRotateCommand : public aruwlib::control::Command
@@ -50,7 +50,7 @@ class WristRotateCommand : public aruwlib::control::Command
     modm::ShortTimeout wristMinRotateTime;
 };
 
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc
 

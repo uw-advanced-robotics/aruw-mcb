@@ -4,7 +4,7 @@
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
     WristCalibrateCommand::WristCalibrateCommand(WristSubsystem* wrist) :
         wrist(wrist)
@@ -32,6 +32,6 @@ namespace control
 
     WristSubsystem* wrist;
 
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc

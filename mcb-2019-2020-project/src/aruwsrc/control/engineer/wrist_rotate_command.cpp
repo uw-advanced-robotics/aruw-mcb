@@ -3,7 +3,7 @@
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
     WristRotateCommand::WristRotateCommand(
         WristSubsystem* wrist,
@@ -62,6 +62,6 @@ namespace control
          && wristRotateSetpointRight.isTargetReached()
          && wristMinRotateTime.isExpired();
     }
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc

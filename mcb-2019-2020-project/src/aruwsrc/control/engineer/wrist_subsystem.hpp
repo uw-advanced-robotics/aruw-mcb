@@ -12,7 +12,7 @@ using namespace aruwlib::control;
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
 
 class WristSubsystem : public aruwlib::control::Subsystem
@@ -73,7 +73,7 @@ class WristSubsystem : public aruwlib::control::Subsystem
    float getUncalibratedWristAngleRight(void) const;
 };
 
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc
 

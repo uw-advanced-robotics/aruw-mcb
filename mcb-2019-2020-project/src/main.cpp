@@ -30,6 +30,7 @@
 #include "src/aruwsrc/control/engineer/wrist_rotate_command.hpp"
 
 using namespace aruwsrc::agitator;
+using namespace aruwsrc::engineer;
 using namespace aruwsrc::control;
 using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
