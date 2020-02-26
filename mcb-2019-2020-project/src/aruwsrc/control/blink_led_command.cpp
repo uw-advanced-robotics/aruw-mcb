@@ -22,7 +22,7 @@ namespace control
         Board::LedA::set();
     }
 
-    void BlinkLEDCommand::end(bool interrupted)
+    void BlinkLEDCommand::end(bool)
     {
         endCounter++;
         Board::LedA::reset();

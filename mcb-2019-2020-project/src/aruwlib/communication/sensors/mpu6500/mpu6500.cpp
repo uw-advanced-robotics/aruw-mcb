@@ -14,6 +14,10 @@ namespace sensors {
 
     uint8_t Mpu6500::mpu6500RxBuff[ACC_GYRO_BUFF_RX_SIZE] = {0};
 
+    uint16_t Mpu6500::accOffsetSampleNumber = 0;
+
+    uint16_t Mpu6500::gyroOffsetSampleNumber = 0;
+
     Mpu6500::mpu_cali_t Mpu6500::imuCaliFlags;
 
     bool Mpu6500::imuInitialized = false;
@@ -203,12 +207,12 @@ namespace sensors {
 
     // calibrate gyro offset values
     void Mpu6500::getMpuGyroOffset() {
-        if (gyroOffsetSampleNumber == 0) {
+        if (gyroOffsetSampleNumber == 0 && imuCaliFlags.gyroCalcFlag) {
             mpu6500Data.gx_offset = 0;
             mpu6500Data.gy_offset = 0;
             mpu6500Data.gz_offset = 0;
         }
-        if (gyroOffsetSampleNumber < MPU6500_OFFSET_SAMPLES) {
+        if (gyroOffsetSampleNumber < MPU6500_OFFSET_SAMPLES && imuCaliFlags.gyroCalcFlag) {
             mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
             mpu6500Data.gx_offset += (mpu6500RxBuff[8] << 8) | mpu6500RxBuff[9];
             mpu6500Data.gy_offset += (mpu6500RxBuff[10] << 8) | mpu6500RxBuff[11];
@@ -221,12 +225,12 @@ namespace sensors {
             mpu6500Data.gz_offset /= MPU6500_OFFSET_SAMPLES;
 
             // todo test this
-            mpuWriteReg(MPU6500_XG_OFFSET_H, mpu6500Data.gx_offset << 8);
-            mpuWriteReg(MPU6500_XG_OFFSET_L, mpu6500Data.gx_offset & 0xF);
-            mpuWriteReg(MPU6500_YG_OFFSET_H, mpu6500Data.gy_offset << 8);
-            mpuWriteReg(MPU6500_YG_OFFSET_L, mpu6500Data.gy_offset & 0xF);
-            mpuWriteReg(MPU6500_ZG_OFFSET_H, mpu6500Data.gz_offset << 8);
-            mpuWriteReg(MPU6500_ZG_OFFSET_L, mpu6500Data.gz_offset & 0xF);
+            // mpuWriteReg(MPU6500_XG_OFFSET_H, mpu6500Data.gx_offset << 8);
+            // mpuWriteReg(MPU6500_XG_OFFSET_L, mpu6500Data.gx_offset & 0xF);
+            // mpuWriteReg(MPU6500_YG_OFFSET_H, mpu6500Data.gy_offset << 8);
+            // mpuWriteReg(MPU6500_YG_OFFSET_L, mpu6500Data.gy_offset & 0xF);
+            // mpuWriteReg(MPU6500_ZG_OFFSET_H, mpu6500Data.gz_offset << 8);
+            // mpuWriteReg(MPU6500_ZG_OFFSET_L, mpu6500Data.gz_offset & 0xF);
 
             mpu6500Data.gx_offset = 0;
             mpu6500Data.gy_offset = 0;
@@ -240,12 +244,12 @@ namespace sensors {
     // calibrate accelerometer offset values
     // possbie magic number for az: -4096
     void Mpu6500::getMpuAccOffset() {
-        if (accOffsetSampleNumber == 0) {
+        if (accOffsetSampleNumber == 0 && imuCaliFlags.accCalcFlag) {
             mpu6500Data.ax_offset = 0;
             mpu6500Data.ay_offset = 0;
             mpu6500Data.az_offset = 0;            
         }
-        if (accOffsetSampleNumber < MPU6500_OFFSET_SAMPLES) {
+        if (accOffsetSampleNumber < MPU6500_OFFSET_SAMPLES && imuCaliFlags.accCalcFlag) {
             mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
             mpu6500Data.ax_offset += (mpu6500RxBuff[0] << 8) | mpu6500RxBuff[1];
             mpu6500Data.ay_offset += (mpu6500RxBuff[2] << 8) | mpu6500RxBuff[3];

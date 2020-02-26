@@ -72,20 +72,20 @@ class  Mpu6500 {
         uint16_t temp = 0;
 
         // offsets
-        int16_t ax_offset = 0;
-        int16_t ay_offset = 0;
-        int16_t az_offset = 0;
+        int32_t ax_offset = 0;
+        int32_t ay_offset = 0;
+        int32_t az_offset = 0;
 
-        int16_t gx_offset = 0;
-        int16_t gy_offset = 0;
-        int16_t gz_offset = 0;
+        int32_t gx_offset = 0;
+        int32_t gy_offset = 0;
+        int32_t gz_offset = 0;
 
         MahonyAhrs::attitude imuAtti;
     } mpu_info_t;
 
     typedef struct {
         bool gyroCalcFlag = true;
-        bool accCalcFlag = false;  // true;
+        bool accCalcFlag = true;  // true;
     } mpu_cali_t;
 
     static uint16_t accOffsetSampleNumber;
