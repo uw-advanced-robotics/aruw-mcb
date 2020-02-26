@@ -1,7 +1,7 @@
 #ifndef __TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP__
 #define __TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP__
 
-#include "src/aruwsrc/turret_pid.hpp"
+#include "src/aruwsrc/algorithms/turret_pid.hpp"
 #include "src/aruwlib/control/command.hpp"
 #include "src/aruwlib/algorithms/contiguous_float.hpp"
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"

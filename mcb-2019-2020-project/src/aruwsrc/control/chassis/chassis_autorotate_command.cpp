@@ -37,7 +37,7 @@ void ChassisAutorotateCommand::execute()
         chassisYDesiredWheelspeed, chassisRotationDesiredWheelspeed);
 }
 
-void ChassisAutorotateCommand::end(bool interrupted)
+void ChassisAutorotateCommand::end(bool)
 {}
 
 bool ChassisAutorotateCommand::isFinished() const

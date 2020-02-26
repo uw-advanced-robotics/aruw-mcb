@@ -25,13 +25,8 @@ namespace control
     // NOLINTNEXTLINE (see https://github.com/cpplint/cpplint/issues/131)
     void BlinkLEDCommand::end(bool)
     {
-        if (interrupted) {
-            endCounter++;
-            Board::LedA::reset();
-        } else {
-            endCounter++;
-            Board::LedA::reset();
-        }
+        endCounter++;
+        Board::LedA::reset();
     }
 
     bool BlinkLEDCommand::isFinished() const

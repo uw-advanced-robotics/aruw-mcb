@@ -126,16 +126,6 @@ namespace motor
         return encoderWrapped;
     }
 
-    int32_t DjiMotor::degreesToEncoder(float angle)
-    {
-        return (ENC_RESOLUTION * angle) / 360;
-    }
-
-    float DjiMotor::encoderToDegrees(int32_t encoder)
-    {
-        return (360.0f * static_cast<float>(encoder)) / ENC_RESOLUTION;
-    }
-
     void DjiMotor::EncoderStore::updateValue(uint16_t newEncWrapped)
     {
         int16_t enc_dif = newEncWrapped - encoderWrapped;
