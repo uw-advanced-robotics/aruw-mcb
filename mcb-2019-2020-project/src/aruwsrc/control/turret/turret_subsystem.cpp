@@ -74,6 +74,12 @@ namespace control
 
     void TurretSubsystem::updateCurrentTurretAngles()
     {
+        updateCurrentYawAngle();
+        updateCurrentPitchAngle();
+    }
+
+    void TurretSubsystem::updateCurrentYawAngle()
+    {
         if (yawMotor.isMotorOnline())
         {
             currYawAngle.setValue(DjiMotor::encoderToDegrees(static_cast<uint16_t>(
@@ -84,6 +90,10 @@ namespace control
         {
             currYawAngle.setValue(TURRET_START_ANGLE);
         }
+    }
+
+    void TurretSubsystem::updateCurrentPitchAngle()
+    {
         if (pitchMotor.isMotorOnline())
         {
             currPitchAngle.setValue(DjiMotor::encoderToDegrees(static_cast<uint16_t>(
@@ -161,13 +171,15 @@ namespace control
         return aruwlib::Remote::getMouseY() * KEYBOARD_INPUT_SCALAR;
     }
 
-    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle() const
+    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle()
     {
+        updateCurrentYawAngle();
         return currYawAngle;
     }
 
-    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPitchAngle() const
+    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPitchAngle()
     {
+        updateCurrentPitchAngle();
         return currPitchAngle;
     }
 

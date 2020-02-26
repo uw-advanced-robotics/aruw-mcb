@@ -34,8 +34,8 @@ class TurretSubsystem : public Subsystem {
     float getYawAngleFromCenter() const;
     float getPitchAngleFromCenter() const;
 
-    const aruwlib::algorithms::ContiguousFloat& getYawAngle() const;
-    const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
+    const aruwlib::algorithms::ContiguousFloat& getYawAngle();
+    const aruwlib::algorithms::ContiguousFloat& getPitchAngle();
 
     void setYawMotorOutput(float out);
     void setPitchMotorOutput(float out);
@@ -45,8 +45,6 @@ class TurretSubsystem : public Subsystem {
 
     int16_t getMouseXMovement() const;
     int16_t getMouseYMovement() const;
-
-    void updateCurrentTurretAngles();
 
  private:
     const uint16_t YAW_START_ENCODER_POSITION = 8160;
@@ -64,6 +62,12 @@ class TurretSubsystem : public Subsystem {
 
     aruwlib::algorithms::ContiguousFloat currPitchAngle;
     aruwlib::algorithms::ContiguousFloat currYawAngle;
+
+    void updateCurrentTurretAngles();
+
+    void updateCurrentYawAngle();
+
+    void updateCurrentPitchAngle();
 
     int32_t getVelocity(const aruwlib::motor::DjiMotor &motor) const;
 };
