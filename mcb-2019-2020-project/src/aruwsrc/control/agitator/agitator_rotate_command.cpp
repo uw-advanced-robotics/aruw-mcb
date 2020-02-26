@@ -63,8 +63,9 @@ namespace agitator
         }
         else
         {
-            connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getTarget());
+            // connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getTarget());
         }
+        connectedAgitator->setAgitatorDesiredAngle(connectedAgitator->getAgitatorAngle());
         connectedAgitator->disarmAgitatorUnjamTimer();
     }
 

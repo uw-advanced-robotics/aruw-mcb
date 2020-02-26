@@ -18,7 +18,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     #if defined(TARGET_SOLDIER)
     // position pid terms
     // pid terms for soldier
-    static constexpr float PID_17MM_P = 190000.0f;
+    static constexpr float PID_17MM_P = 140000.0f;
     static constexpr float PID_17MM_I = 0.0f;
     static constexpr float PID_17MM_D = 1500000.0f;
     static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
@@ -26,7 +26,9 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
 
     static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
-    
+
+    static constexpr bool isAgitatorInverted = false;
+
     #elif defined(TARGET_SENTRY)
     // position pid terms
     // pid terms for sentry
@@ -39,8 +41,6 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::motor::MotorId SENTRY_KICKER_MOTOR_ID = aruwlib::motor::MOTOR8;
     static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
-
-    static constexpr bool isAgitatorInverted = false;
 
     #elif defined(TARGET_HERO)
     /// \todo tune all the things
@@ -105,7 +105,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     // we add on this amount of "tolerance" to the predicted rotate time since some times it
     // takes longer than predicted and we only want to unjam when we are actually jammed
     // measured in ms
-    static const uint32_t JAMMED_TOLERANCE_PERIOD = 10;
+    static const uint32_t JAMMED_TOLERANCE_PERIOD = 150;
 
     // pid controller for running postiion pid on unwrapped agitator angle (in radians)
     modm::Pid<float> agitatorPositionPid;

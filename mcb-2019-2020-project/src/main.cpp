@@ -91,7 +91,7 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
         ExampleCommand::DEFAULT_WHEEL_RPM);
 
-ShootSlowComprisedCommand agitatorShootSlowCommand(&agitator17mm);
+ShootFastComprisedCommand agitatorShootSlowCommand(&agitator17mm);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 #elif defined(TARGET_SENTRY)
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
