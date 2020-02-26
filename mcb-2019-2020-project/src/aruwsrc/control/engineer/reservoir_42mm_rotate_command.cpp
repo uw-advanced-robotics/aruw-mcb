@@ -23,7 +23,7 @@ namespace engineer
     void Reservoir42mmRotateCommand::initialize()
     {
         reservoirRotateSetpoint.reset(connectedReservoir->getAngle());
-        if ((reservoirTargetChange > 0 && connectedReservoir->isClosed()) || (reservoirTargetChange < 0 && !connectedReservoir->isClosed()))
+        if ((reservoirTargetChange < 0 && connectedReservoir->isClosed()) || (reservoirTargetChange > 0 && !connectedReservoir->isClosed()))
         {
             connectedReservoir->reservoirToggleState();
             reservoirRotateSetpoint.setTarget(connectedReservoir->getDesiredAngle() + reservoirTargetChange);

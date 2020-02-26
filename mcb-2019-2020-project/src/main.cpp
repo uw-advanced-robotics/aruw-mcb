@@ -70,8 +70,8 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 
 #if defined(TARGET_ENGINEER)
 Reservoir42mmCalibrateCommand reservoir42mmCalibrateCommand(&reservoir42mm);
-Reservoir42mmRotateCommand reservoir42mmOpenCommand(&reservoir42mm, aruwlib::algorithms::PI / 2.0f, 500.0f);
-Reservoir42mmRotateCommand reservoir42mmCloseCommand(&reservoir42mm, -1.0f * aruwlib::algorithms::PI / 2.0f, 500.0f);
+Reservoir42mmRotateCommand reservoir42mmOpenCommand(&reservoir42mm, -1.0f * aruwlib::algorithms::PI / 2.0f, 500.0f);
+Reservoir42mmRotateCommand reservoir42mmCloseCommand(&reservoir42mm, aruwlib::algorithms::PI / 2.0f, 500.0f);
 #endif
 
 using namespace aruwlib::sensors;
@@ -139,11 +139,11 @@ int main()
 
     #if defined(TARGET_ENGINEER)
     IoMapper::addHoldMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
         &reservoir42mmOpenCommand
     );
     IoMapper::addHoldMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &reservoir42mmCloseCommand
     );
     #endif
