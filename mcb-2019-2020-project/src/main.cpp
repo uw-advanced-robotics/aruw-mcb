@@ -38,6 +38,7 @@ ChassisAutorotateCommand chassisDriveCommand(&soldierChassis, &turretSubsystem);
 #error "select soldier robot type only"
 #endif
 
+
 int main()
 {
     Board::initialize();
@@ -86,8 +87,10 @@ int main()
 
     CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
     turretSubsystem.setDefaultCommand(&turretManualPositionCommand);
-    // IoMapper::addHoldMapping(IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}), &turretCVCommand);
-    // CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
+        &turretCVCommand);
+    CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
     #endif
 
     // timers

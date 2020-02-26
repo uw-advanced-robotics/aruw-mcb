@@ -17,46 +17,41 @@ namespace control
 class TurretSubsystem : public Subsystem {
  public:
     static constexpr float TURRET_START_ANGLE = 90.0f;
-    const float TURRET_YAW_MIN_ANGLE = 0.0f;
-    const float TURRET_YAW_MAX_ANGLE = 180.0f;
-    const float TURRET_PITCH_MIN_ANGLE = 75.0f;
-    const float TURRET_PITCH_MAX_ANGLE = 110.0f;
+    const float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
+    const float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
+    const float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 15.0f;
+    const float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
 
     TurretSubsystem();
 
-    float getYawVelocity() const;
-
-    float getPitchVelocity() const;
-
-    float getYawAngleFromCenter() const;
-
-    float getPitchAngleFromCenter() const;
-
     void refresh();
-
-    void setPitchMotorOutput(float out);
-
-    void setYawMotorOutput(float out);
 
     bool isTurretOnline() const;
 
-    float getRemoteXMovement();
+    int32_t getYawVelocity() const;
+    int32_t getPitchVelocity() const;
 
-    float getRemoteYMovement();
+    float getYawAngleFromCenter() const;
+    float getPitchAngleFromCenter() const;
 
     const aruwlib::algorithms::ContiguousFloat& getYawAngle() const;
-
     const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
 
+    void setYawMotorOutput(float out);
+    void setPitchMotorOutput(float out);
 
-    void updateCurrentTurretAngles();
+    float getRemoteXMovement() const;
+    float getRemoteYMovement() const;
+
+    int16_t getMouseXMovement() const;
+    int16_t getMouseYMovement() const;
 
  private:
-    const float YAW_START_ENCODER_POSITION = 8160;
-    /// \todo fix this encoder starting position
-    const float PITCH_START_ENCODER_POSITION = 4130;
+    const uint16_t YAW_START_ENCODER_POSITION = 8160;
+    const uint16_t PITCH_START_ENCODER_POSITION = 4780;
 
-    const float REMOTE_INPUT_SCALER = 30000;
+    const float REMOTE_INPUT_SCALER = 10000;
+    const float KEYBOARD_INPUT_SCALAR = 50;
 
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
@@ -65,10 +60,12 @@ class TurretSubsystem : public Subsystem {
     aruwlib::motor::DjiMotor pitchMotor;
     aruwlib::motor::DjiMotor yawMotor;
 
-    aruwlib::algorithms::ContiguousFloat currYawAngle;
     aruwlib::algorithms::ContiguousFloat currPitchAngle;
+    aruwlib::algorithms::ContiguousFloat currYawAngle;
 
-    float getVelocity(const aruwlib::motor::DjiMotor &motor) const;
+    void updateCurrentTurretAngles();
+
+    int32_t getVelocity(const aruwlib::motor::DjiMotor &motor) const;
 };
 
 }  // namespace control

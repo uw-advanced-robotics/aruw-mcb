@@ -106,9 +106,28 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     aruwlib::can::CanBus getCanBus() const;
 
-    static int32_t degreesToEncoder(float angle);
+    template<typename T>
+    static void assertEncoderType()
+    {
+        constexpr bool good_type =
+            std::is_same<typename std::decay<T>::type, std::int64_t>::value ||
+            std::is_same<typename std::decay<T>::type, std::uint16_t>::value;
+        static_assert(good_type, "x is not of the correct type");
+    }
 
-    static float encoderToDegrees(int32_t encoder);
+    template<typename T>
+    static T degreesToEncoder(float angle)
+    {
+        assertEncoderType<T>();
+        return static_cast<T>((ENC_RESOLUTION * angle) / 360);
+    }
+
+    template<typename T>
+    static float encoderToDegrees(T encoder)
+    {
+        assertEncoderType<T>();
+        return (360.0f * static_cast<float>(encoder)) / ENC_RESOLUTION;
+    }
 
     EncoderStore encStore;
 

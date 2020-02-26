@@ -17,17 +17,22 @@ TurretInitCommand::TurretInitCommand(TurretSubsystem *subsystem) :
     addSubsystemRequirement(subsystem);
 }
 
-void TurretInitCommand::execute() {
+bool TurretInitCommand::isFinished() const
+{
+    return fabsf(turretSubsystem->getPitchAngleFromCenter()) < 5.0f
+        && fabsf(turretSubsystem->getYawAngleFromCenter()) < 5.0f
+        && turretSubsystem->isTurretOnline();
+}
+
+void TurretInitCommand::end(bool) {}
+
+void TurretInitCommand::execute()
+{
     updateTurretPosition();
 }
 
-bool TurretInitCommand::isFinished() const {
-    return fabs(turretSubsystem->getPitchAngleFromCenter()) < 5.0f
-        && fabs(turretSubsystem->getYawAngleFromCenter()) < 5.0f
-        && turretSubsystem->isTurretOnline(); 
-}
-
-void TurretInitCommand::updateTurretPosition() {
+void TurretInitCommand::updateTurretPosition()
+{
     initPitchPid.update(turretSubsystem->getPitchAngle().difference(pitchTargetAngle));
     initYawPid.update(turretSubsystem->getYawAngle().difference(yawTargetAngle));
     turretSubsystem->setPitchMotorOutput(initPitchPid.getValue());

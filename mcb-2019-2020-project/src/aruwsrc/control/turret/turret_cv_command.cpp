@@ -23,19 +23,30 @@ void TurretCVCommand::initialize()
     // add xavier stuff here
 }
 
-void TurretCVCommand::execute() {
+bool TurretCVCommand::isFinished() const
+{
+    return false;
+}
+
+void TurretCVCommand::end(bool) {}
+
+void TurretCVCommand::execute()
+{
     updateTurretPosition();
 }
 
-void TurretCVCommand::pitchIncrementAngle(float angle) {
+void TurretCVCommand::pitchIncrementAngle(float angle)
+{
     pitchTargetAngle.shiftValue(angle);
 }
 
-void TurretCVCommand::yawIncrementAngle(float angle) {
+void TurretCVCommand::yawIncrementAngle(float angle)
+{
     yawTargetAngle.shiftValue(angle);
 }
 
-void TurretCVCommand::updateTurretPosition() {
+void TurretCVCommand::updateTurretPosition()
+{
     CVPitchPid.update(pitchTargetAngle.difference(turretSubsystem->getPitchAngle()));
     CVYawPid.update(yawTargetAngle.difference(turretSubsystem->getYawAngle()));
 

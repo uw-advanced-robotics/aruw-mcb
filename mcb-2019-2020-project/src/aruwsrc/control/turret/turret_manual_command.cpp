@@ -14,13 +14,24 @@ TurretManualCommand::TurretManualCommand(TurretSubsystem *subsystem) :
     addSubsystemRequirement(subsystem);
 }
 
-void TurretManualCommand::execute() {
+bool TurretManualCommand::isFinished() const
+{
+    return false;
+}
+
+void TurretManualCommand::end(bool) {}
+
+void TurretManualCommand::execute()
+{
     updateTurretVelocity();
 }
 
-void TurretManualCommand::updateTurretVelocity() {
-    pitchVelocityTarget = turretSubsystem->getRemoteYMovement();
-    yawVelocityTarget = turretSubsystem->getRemoteXMovement();
+void TurretManualCommand::updateTurretVelocity()
+{
+    pitchVelocityTarget = turretSubsystem->getRemoteYMovement() +
+                          turretSubsystem->getMouseXMovement();
+    yawVelocityTarget = turretSubsystem->getRemoteXMovement() +
+                        turretSubsystem->getMouseYMovement();
 
     manualPitchPid.update(pitchVelocityTarget - turretSubsystem->getPitchVelocity());
     manualYawPid.update(yawVelocityTarget - turretSubsystem->getYawVelocity());

@@ -18,23 +18,23 @@ class TurretManualCommand : public Command {
     explicit TurretManualCommand(TurretSubsystem *subsystem);
 
     void initialize() {}
-    bool isFinished() const {return false;}
+    bool isFinished() const;
 
     void execute();
-    void end(bool interrupted) { if (interrupted) { return; } }
+    void end(bool);
 
  private:
-    uint16_t YAW_P = 1.0f;
-    uint16_t YAW_I = 0.0f;
-    uint16_t YAW_D = 0.0f;
-    uint16_t YAW_MAX_ERROR_SUM = 0.0f;
-    uint16_t YAW_MAX_OUTPUT = 16000;
+    const float YAW_P = 1.0f;
+    const float YAW_I = 0.0f;
+    const float YAW_D = 0.0f;
+    const float YAW_MAX_ERROR_SUM = 0.0f;
+    const float YAW_MAX_OUTPUT = 16000;
 
-    uint16_t PITCH_P = 1.0f;
-    uint16_t PITCH_I = 0.0f;
-    uint16_t PITCH_D = 0.0f;
-    uint16_t PITCH_MAX_ERROR_SUM = 0.0f;
-    uint16_t PITCH_MAX_OUTPUT = 16000;
+    const float PITCH_P = 1.0f;
+    const float PITCH_I = 0.0f;
+    const float PITCH_D = 0.0f;
+    const float PITCH_MAX_ERROR_SUM = 0.0f;
+    const float PITCH_MAX_OUTPUT = 16000;
 
     TurretSubsystem *turretSubsystem;
     modm::Pid<float> manualYawPid;
