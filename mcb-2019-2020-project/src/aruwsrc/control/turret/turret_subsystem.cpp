@@ -2,7 +2,6 @@
 #include <random>
 #include <cfloat>
 #include "turret_subsystem.hpp"
-#include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/control/controller_mapper.hpp"
 
