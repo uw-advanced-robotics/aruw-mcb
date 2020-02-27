@@ -58,7 +58,7 @@ class ChassisSubsystem : public Subsystem {
      * the controller uses this kalman filtered gain.
      * Next, calculates the proportional term using the kalman filtered angle.
      * Also uses kalman filtered angle and previous kalman filtered angle for the
-     * derivative term; however, the derivative term will be calculated only if the
+     * chassisRotationDerivative term; however, the chassisRotationDerivative term will be calculated only if the
      * filtered angle is greater than MIN_ERROR_ROTATION_D.
      * The wheel speed is calculated by then adding p and d terms and clamping the output
      * to MAX_WHEEL_SPEED_SINGLE_MOTOR
@@ -66,11 +66,11 @@ class ChassisSubsystem : public Subsystem {
      * the P gain is specified by the user and thus is not specified below
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
-    // derivative term used in chassis pid
+    // chassisRotationDerivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD = 500.0f;
-    // derivative max term
+    // chassisRotationDerivative max term
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
-    // the maximum revolve error before we start using the derivative term
+    // the maximum revolve error before we start using the chassisRotationDerivative term
     static const int MIN_ERROR_ROTATION_D = 35;
 
     // mechanical chassis constants, all in mm
@@ -97,11 +97,11 @@ class ChassisSubsystem : public Subsystem {
     // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
     // gain specified by user
     static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
-    // derivative term used in chassis pid
+    // chassisRotationDerivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
-    // the maximum revolve error before we start using the derivative term
+    // the maximum revolve error before we start using the chassisRotationDerivative term
     static const int MIN_ERROR_ROTATION_D = 0;
-    // derivative max term
+    // chassisRotationDerivative max term
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // mechanical chassis constants
     // radius of the wheels
@@ -127,11 +127,11 @@ class ChassisSubsystem : public Subsystem {
     // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
     // gain specified by user
     static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
-    // derivative term used in chassis pid
+    // chassisRotationDerivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
-    // derivative max term
+    // chassisRotationDerivative max term
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
-    // the maximum revolve error before we start using the derivative term
+    // the maximum revolve error before we start using the chassisRotationDerivative term
     static const int MIN_ERROR_ROTATION_D = 0;
 
     // mechanical chassis constants

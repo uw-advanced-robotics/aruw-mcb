@@ -56,6 +56,11 @@ class TurretWorldRelativePositionCommand : public Command
     static constexpr float USER_REMOTE_PITCH_SCALAR = 0.5f;
     static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / 1000.0f);
 
+   static constexpr float FEED_FORWARD_KP = 2.75f;
+   static constexpr float FEED_FORWARD_SIN_GAIN = 1.0f;
+   static constexpr float FEED_FORWARD_KD = 30.0f;
+   static constexpr float FEED_FORWARD_DERIVATIVE_LOW_PASS = 0.154f;
+
     TurretSubsystem *turretSubsystem;
     chassis::ChassisSubsystem *chassisSubsystem;
 
@@ -69,6 +74,9 @@ class TurretWorldRelativePositionCommand : public Command
 
     float lowPassUserVelocityYaw;
     float lowPassUserVelocityPitch;
+
+    float chassisRotationDerivative = 0.0f;
+    float prevChassisRotationDesired = 0.0f;
 
     aruwsrc::algorithms::TurretPid yawPid;
     aruwsrc::algorithms::TurretPid pitchPid;

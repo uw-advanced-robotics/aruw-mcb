@@ -60,6 +60,10 @@ void TurretWorldRelativePositionCommand::initialize()
     /// \todo decide if this is the best thing to do
     yawTargetAngle.setValue(turretSubsystem->getYawAngle().getValue());
     pitchTargetAngle.setValue(turretSubsystem->getPitchAngle().getValue());
+    // or should I do this. I think for startup, this should be used, but for toggling
+    // between CV and user control, the other one should be used
+    yawTargetAngle.setValue(TurretSubsystem::TURRET_START_ANGLE);
+    pitchTargetAngle.setValue(TurretSubsystem::TURRET_START_ANGLE);
 }
 
 void TurretWorldRelativePositionCommand::execute()
@@ -67,13 +71,6 @@ void TurretWorldRelativePositionCommand::execute()
     runYawPositionController();
     runPitchPositionController();
 }
-
-float gains = 2.75f;
-float gains2 = 30.0f;
-float gains3 = 1.0f;
-float derivative = 0.0f;
-float prevRotationDesired = 0.0f;
-float wchassis = 0.0f;
 
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
@@ -96,17 +93,15 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     float pidOutput = yawPid.runController(positionControllerError,
         turretSubsystem->getYawVelocity() + Mpu6500::getGz());  /// \todo fix gz in mpu6500 class
 
+    pidOutput += FEED_FORWARD_KP * chassisSubsystem->getChassisDesiredRotation()
+            * (fabsf(FEED_FORWARD_SIN_GAIN * sin(turretSubsystem->getYawAngleFromCenter()
+            * aruwlib::algorithms::PI / 180.0f)) + 1.0f);
+    /// \todo fix low pass filter
+    chassisRotationDerivative = FEED_FORWARD_DERIVATIVE_LOW_PASS * (chassisSubsystem->getChassisDesiredRotation()
+            - prevChassisRotationDesired) + (1.0f - FEED_FORWARD_DERIVATIVE_LOW_PASS) * chassisRotationDerivative;
+    pidOutput += FEED_FORWARD_KD * chassisRotationDerivative;
+    prevChassisRotationDesired = chassisSubsystem->getChassisDesiredRotation();
 
-    wchassis = chassisSubsystem->getChassisDesiredRotation();
-    pidOutput += gains * chassisSubsystem->getChassisDesiredRotation()
-            * (fabsf(sin(turretSubsystem->getYawAngleFromCenter()
-            * aruwlib::algorithms::PI / 180.0f)) + gains3);
-    derivative = gains2 * 0.154f * (chassisSubsystem->getChassisDesiredRotation()
-            - prevRotationDesired) + (1.0f - 0.154f) * derivative;
-    pidOutput += derivative;
-
-
-    prevRotationDesired = chassisSubsystem->getChassisDesiredRotation();
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 

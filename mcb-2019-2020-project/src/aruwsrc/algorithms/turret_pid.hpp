@@ -53,7 +53,7 @@ class TurretPid
     float output = 0.0f;
 
     // if you run the controller without inputting a rotationalSpeed, we find the
-    // derivative ourselves
+    // chassisRotationDerivative ourselves
     uint32_t previousTimestamp = 0;
 
     aruwlib::algorithms::ExtendedKalman proportionalKalman;
