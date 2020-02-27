@@ -71,6 +71,9 @@ namespace agitator
         }
     }
 
+    float eOld = 0;
+    float d = 0.0f;
+
     void AgitatorSubsystem::agitatorRunPositionPid()
     {
         if (!agitatorIsCalibrated)
@@ -79,7 +82,11 @@ namespace agitator
         }
         else
         {
-            agitatorPositionPid.runControllerDerivateError(desiredAgitatorAngle - getAgitatorAngle(), getAgitatorVelocity());
+            d = (desiredAgitatorAngle - getAgitatorAngle() - eOld);
+            eOld = desiredAgitatorAngle - getAgitatorAngle();
+
+            agitatorPositionPid.runController(desiredAgitatorAngle - getAgitatorAngle(),
+                    getAgitatorVelocity());
             agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());
         }
     }
@@ -124,7 +131,7 @@ namespace agitator
 
     float AgitatorSubsystem::getAgitatorVelocity() const
     {
-        return 6.0f * agitatorMotor.getShaftRPM() / gearRatio;
+        return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / gearRatio;
     }
 
     bool AgitatorSubsystem::isAgitatorCalibrated() const
