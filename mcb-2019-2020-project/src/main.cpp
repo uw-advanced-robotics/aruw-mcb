@@ -21,6 +21,7 @@
 #include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
+#include "src/aruwsrc/control/chassis/wiggle_drive_command.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
@@ -33,6 +34,7 @@ TurretInitCommand turretInitCommand(&turretSubsystem);
 
 ChassisSubsystem soldierChassis;
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
+WiggleDriveCommand wiggle(&soldierChassis, &turretSubsystem);
 
 TurretWorldRelativePositionCommand turretManualPositionCommand(&turretSubsystem, &soldierChassis);
 
@@ -90,8 +92,8 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
     turretSubsystem.setDefaultCommand(&turretManualPositionCommand);
     IoMapper::addHoldMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
-        &turretCVCommand);
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN, {}),
+        &wiggle);
     #endif
 
     // timers
