@@ -25,7 +25,7 @@ namespace agitator
         aruwlib::can::CanBus agitatorCanBusId,
         bool isAgitatorInverted
     ) :
-        agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput),
+        agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
         agitatorMotor(agitatorMotorId, agitatorCanBusId, isAgitatorInverted),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
@@ -79,8 +79,8 @@ namespace agitator
         }
         else
         {
-            agitatorPositionPid.update(desiredAgitatorAngle - getAgitatorAngle());
-            agitatorMotor.setDesiredOutput(agitatorPositionPid.getValue());
+            agitatorPositionPid.runControllerDerivateError(desiredAgitatorAngle - getAgitatorAngle(), getAgitatorVelocity());
+            agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());
         }
     }
 
@@ -124,7 +124,7 @@ namespace agitator
 
     float AgitatorSubsystem::getAgitatorVelocity() const
     {
-        return agitatorMotor.getShaftRPM() / gearRatio;
+        return 6.0f * agitatorMotor.getShaftRPM() / gearRatio;
     }
 
     bool AgitatorSubsystem::isAgitatorCalibrated() const

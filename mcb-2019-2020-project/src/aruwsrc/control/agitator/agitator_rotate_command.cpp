@@ -1,5 +1,4 @@
 #include "agitator_rotate_command.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
@@ -33,8 +32,7 @@ namespace agitator
         rampToTargetAngle.setTarget(connectedAgitator->getAgitatorDesiredAngle()
             + agitatorTargetAngleChange);
 
-        // we set the unjam timer to the larger of two values:
-        // either the desired rotate time minimum rotate time
+        // reset unjam and min rotate timeouts
         connectedAgitator->armAgitatorUnjamTimer(agitatorMinRotatePeriod);
         agitatorMinRotateTimeout.restart(agitatorMinRotatePeriod);
 
@@ -48,7 +46,7 @@ namespace agitator
         rampToTargetAngle.update(
                 (currTime - agitatorPrevRotateTime) * agitatorTargetAngleChange
                 / static_cast<float>(agitatorDesiredRotateTime));
-        agitatorPrevRotateTime = modm::Clock::now().getTime();
+        agitatorPrevRotateTime = currTime;
         connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getValue());
     }
 

@@ -4,8 +4,8 @@
 #include <modm/math/filter/pid.hpp>
 #include "src/aruwlib/control/command.hpp"
 #include "agitator_subsystem.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/algorithms/ramp.hpp"
+#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {

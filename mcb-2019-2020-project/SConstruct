@@ -64,8 +64,6 @@ if GetOption('num_jobs') == 1:
 
 print("running with -j", GetOption('num_jobs'))
 
-env.Append(CCPDBFLAGS = ["-j"])
-
 # Get the robot type
 robot = ARGUMENTS.get("robot","soldier").upper()
 

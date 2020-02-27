@@ -6,6 +6,7 @@
 
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
+#include "src/aruwsrc/algorithms/turret_pid.hpp"
 
 namespace aruwsrc
 {
@@ -108,7 +109,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static const uint32_t JAMMED_TOLERANCE_PERIOD = 150;
 
     // pid controller for running postiion pid on unwrapped agitator angle (in radians)
-    modm::Pid<float> agitatorPositionPid;
+    aruwsrc::algorithms::TurretPid agitatorPositionPid;
 
     aruwlib::motor::DjiMotor agitatorMotor;
 
