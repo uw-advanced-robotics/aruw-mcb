@@ -62,9 +62,7 @@ void TurretWorldRelativePositionCommand::execute()
 
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
-    turretSubsystem->updateCurrentTurretAngles();
-
-    /// \todo fix user input, not my problem
+    /// \todo fix user input
     float userVelocity = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f
         - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
     lowPassUserVelocityYaw = 0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocityYaw;
@@ -117,8 +115,6 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
 
-float fme2 = 0.0f;
-
 float TurretWorldRelativePositionCommand::calcPitchImuOffset()
 {
     if (Mpu6500::getImuAttitude().pitch < 45.0f && Mpu6500::getImuAttitude().roll < 45.0f)
@@ -136,8 +132,6 @@ float TurretWorldRelativePositionCommand::calcPitchImuOffset()
         imuVector.normalize();
 
         float yawImuDot = imuVector.dot(turretVector);
-
-        fme2 = Mpu6500::getTiltAngle();
 
         return yawImuDot * Mpu6500::getTiltAngle();
     }

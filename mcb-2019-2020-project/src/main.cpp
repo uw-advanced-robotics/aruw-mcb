@@ -90,7 +90,6 @@ int main()
     IoMapper::addHoldMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
         &turretCVCommand);
-    CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
     #endif
 
     // timers

@@ -48,7 +48,7 @@ class TurretSubsystem : public Subsystem {
 
  private:
     const uint16_t YAW_START_ENCODER_POSITION = 8160;
-    const uint16_t PITCH_START_ENCODER_POSITION = 4780;
+    const uint16_t PITCH_START_ENCODER_POSITION = 4100;
 
     const float REMOTE_INPUT_SCALER = 10000;
     const float KEYBOARD_INPUT_SCALAR = 50;
