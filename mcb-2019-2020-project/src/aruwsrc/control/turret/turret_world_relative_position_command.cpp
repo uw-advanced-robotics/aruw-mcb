@@ -5,6 +5,7 @@
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 using namespace aruwlib::sensors;
+using namespace aruwlib;
 
 namespace aruwsrc
 {
@@ -53,6 +54,12 @@ TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
 void TurretWorldRelativePositionCommand::initialize()
 {
     imuInitialYaw = Mpu6500::getImuAttitude().yaw;
+    /// \todo uncomment when the agitator code has been merged in, has reset method there
+    // yawPid.reset();
+    // pitchPid.reset();
+    /// \todo decide if this is the best thing to do
+    yawTargetAngle.setValue(turretSubsystem->getYawAngle().getValue());
+    pitchTargetAngle.setValue(turretSubsystem->getPitchAngle().getValue());
 }
 
 void TurretWorldRelativePositionCommand::execute()
@@ -67,17 +74,14 @@ float gains3 = 1.0f;
 float derivative = 0.0f;
 float prevRotationDesired = 0.0f;
 float wchassis = 0.0f;
+
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
-    /// \todo fix user input
-    // float userVelocity = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f
-    //     - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
-    lowPassUserVelocityYaw = 0.0f; //0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocityYaw;
-
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value
-    yawTargetAngle.shiftValue(-lowPassUserVelocityYaw);
-    // the position controller is in world reference frame (i.e. add imu yaw to current encoder value)
+    yawTargetAngle.shiftValue(getUserTurretYawInput());
+    // the position controller is in world reference frame
+    // (i.e. add imu yaw to current encoder value)
     currValueImuYawGimbal.setValue(turretSubsystem->getYawAngle().getValue()
             + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
 
@@ -92,24 +96,27 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     float pidOutput = yawPid.runController(positionControllerError,
         turretSubsystem->getYawVelocity() + Mpu6500::getGz());  /// \todo fix gz in mpu6500 class
 
+
     wchassis = chassisSubsystem->getChassisDesiredRotation();
-    pidOutput += gains * chassisSubsystem->getChassisDesiredRotation() * (fabsf(sin(turretSubsystem->getYawAngleFromCenter() * aruwlib::algorithms::PI / 180.0f)) + gains3);
-    derivative = gains2 * 0.154f * (chassisSubsystem->getChassisDesiredRotation() - prevRotationDesired) + (1.0f - 0.154f) * derivative;
+    pidOutput += gains * chassisSubsystem->getChassisDesiredRotation()
+            * (fabsf(sin(turretSubsystem->getYawAngleFromCenter()
+            * aruwlib::algorithms::PI / 180.0f)) + gains3);
+    derivative = gains2 * 0.154f * (chassisSubsystem->getChassisDesiredRotation()
+            - prevRotationDesired) + (1.0f - 0.154f) * derivative;
     pidOutput += derivative;
+
+
     prevRotationDesired = chassisSubsystem->getChassisDesiredRotation();
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 
 void TurretWorldRelativePositionCommand::runPitchPositionController()
 {
-    /// \todo fix user input
-    //    - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
-    lowPassUserVelocityPitch = 0.0f; // 0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocityPitch;
-
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value
-    pitchTargetAngle.shiftValue(lowPassUserVelocityPitch);
-    // the position controller is in world reference frame (i.e. add imu yaw to current encoder value)
+    pitchTargetAngle.shiftValue(getUserTurretPitchInput());
+    // the position controller is in world reference frame
+    // (i.e. add imu yaw to current encoder value)
     currImuPitchAngle.setValue(turretSubsystem->getPitchAngle().getValue() + calcPitchImuOffset());
 
     // limit the yaw min and max angles
@@ -133,10 +140,11 @@ float TurretWorldRelativePositionCommand::calcPitchImuOffset()
         // for following vector calculations
         // i direction perpendicular to foward direction of chassis
         // j direction facing foward on chassis
-        modm::Vector2f imuVector = {Mpu6500::getImuAttitude().pitch, -Mpu6500::getImuAttitude().roll};
+        modm::Vector2f imuVector = {Mpu6500::getImuAttitude().pitch,
+                                    -Mpu6500::getImuAttitude().roll};
         modm::Vector2f turretVector = {
-                cos(aruwlib::algorithms::degreesToRadians(turretSubsystem->getYawAngle().getValue())),
-                sin(aruwlib::algorithms::degreesToRadians(turretSubsystem->getYawAngle().getValue()))
+            cos(aruwlib::algorithms::degreesToRadians(turretSubsystem->getYawAngle().getValue())),
+            sin(aruwlib::algorithms::degreesToRadians(turretSubsystem->getYawAngle().getValue()))
         };
 
         // unit vector
@@ -150,7 +158,28 @@ float TurretWorldRelativePositionCommand::calcPitchImuOffset()
     {
         return 0.0f;
     }
-    
+}
+
+float TurretWorldRelativePositionCommand::getUserTurretYawInput()
+{
+    float userVelocity = -static_cast<float>(Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL))
+            * USER_REMOTE_YAW_SCALAR
+            + static_cast<float>(Remote::getMouseX()) * USER_MOUSE_YAW_SCALAR;
+    /// \todo fix low pass
+    lowPassUserVelocityYaw = USER_INPUT_LOW_PASS_ALPHA * userVelocity
+            + (1 - USER_INPUT_LOW_PASS_ALPHA) * lowPassUserVelocityYaw;
+    return lowPassUserVelocityYaw;
+}
+
+float TurretWorldRelativePositionCommand::getUserTurretPitchInput()
+{
+    float userVelocity = static_cast<float>(Remote::getChannel(Remote::Channel::RIGHT_VERTICAL))
+            * USER_REMOTE_PITCH_SCALAR
+            - static_cast<float>(aruwlib::Remote::getMouseX()) * USER_MOUSE_PITCH_SCALAR;
+    /// \todo fix low pass
+    lowPassUserVelocityPitch = USER_INPUT_LOW_PASS_ALPHA * userVelocity
+            + (1 - USER_INPUT_LOW_PASS_ALPHA) * lowPassUserVelocityPitch;
+    return lowPassUserVelocityPitch;
 }
 
 }  // namespace control

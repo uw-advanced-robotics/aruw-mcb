@@ -27,7 +27,7 @@ void ChassisAutorotateCommand::execute()
         aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisX(),
         -rTranslationalGain, rTranslationalGain)
         * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-    
+
     float chassisYDesiredWheelspeed =
         aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisY(),
         -rTranslationalGain, rTranslationalGain)
@@ -37,6 +37,7 @@ void ChassisAutorotateCommand::execute()
         chassisYDesiredWheelspeed, chassisRotationDesiredWheelspeed);
 }
 
+// NOLINTNEXTLINE
 void ChassisAutorotateCommand::end(bool)
 {}
 
@@ -45,6 +46,6 @@ bool ChassisAutorotateCommand::isFinished() const
     return false;
 }
 
-}  // namespace control
+}  // namespace chassis
 
 }  // namespace aruwsrc

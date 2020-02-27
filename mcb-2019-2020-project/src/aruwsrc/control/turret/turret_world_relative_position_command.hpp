@@ -16,7 +16,8 @@ namespace control
 class TurretWorldRelativePositionCommand : public Command
 {
  public:
-    TurretWorldRelativePositionCommand(TurretSubsystem *subsystem, chassis::ChassisSubsystem *chassis);
+    TurretWorldRelativePositionCommand(TurretSubsystem *subsystem,
+                                       chassis::ChassisSubsystem *chassis);
 
     void initialize();
 
@@ -49,6 +50,12 @@ class TurretWorldRelativePositionCommand : public Command
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.5f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 0.0f;
 
+    static constexpr float USER_INPUT_LOW_PASS_ALPHA = 0.153f;
+    static constexpr float USER_REMOTE_YAW_SCALAR = 0.5f;
+    static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / 1000.0f);
+    static constexpr float USER_REMOTE_PITCH_SCALAR = 0.5f;
+    static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / 1000.0f);
+
     TurretSubsystem *turretSubsystem;
     chassis::ChassisSubsystem *chassisSubsystem;
 
@@ -71,6 +78,9 @@ class TurretWorldRelativePositionCommand : public Command
     void runPitchPositionController();
 
     float calcPitchImuOffset();
+
+    float getUserTurretYawInput();
+    float getUserTurretPitchInput();
 };
 
 }  // namespace control

@@ -293,7 +293,6 @@ namespace sensors {
         mpu6500Data.tiltAngle = aruwlib::algorithms::radiansToDegrees(acos(
                 cos(aruwlib::algorithms::degreesToRadians(Mpu6500::getImuAttitude().pitch))
                 * cos(aruwlib::algorithms::degreesToRadians(Mpu6500::getImuAttitude().roll))));
-
     }
 
     float Mpu6500::getTiltAngle()

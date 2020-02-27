@@ -29,7 +29,6 @@
 #include <set>
 #include <rm-dev-board-a/board.hpp>
 #include "subsystem.hpp"
-#include "command_scheduler.hpp"
 
 namespace aruwlib
 {
@@ -106,11 +105,6 @@ class Command {
 
     // contains pointers to const Subsystem pointers that this command requires
     std::set<Subsystem*> commandRequirements;
-
-    bool isComprisedCommand;
-
- protected:
-    CommandScheduler comprisedCommandScheduler;
 };
 
 }  // namespace control

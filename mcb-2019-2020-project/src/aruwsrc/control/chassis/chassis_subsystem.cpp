@@ -132,7 +132,7 @@ namespace chassis
         if (alpha < 0.0f || alpha > 1.0f) {
             return 0.0f;
         }
-	    return alpha * new_value + (1.0f - alpha) * prev_value;
+        return alpha * new_value + (1.0f - alpha) * prev_value;
     }
 
 

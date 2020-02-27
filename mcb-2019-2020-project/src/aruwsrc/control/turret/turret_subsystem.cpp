@@ -151,26 +151,6 @@ namespace control
         }
     }
 
-    float TurretSubsystem::getRemoteXMovement() const
-    {
-        return aruwlib::Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL) * REMOTE_INPUT_SCALER;
-    }
-
-    float TurretSubsystem::getRemoteYMovement() const
-    {
-        return aruwlib::Remote::getChannel(Remote::Channel::RIGHT_VERTICAL) * REMOTE_INPUT_SCALER;
-    }
-
-    int16_t TurretSubsystem::getMouseXMovement() const
-    {
-        return aruwlib::Remote::getMouseX() * KEYBOARD_INPUT_SCALAR;
-    }
-
-    int16_t TurretSubsystem::getMouseYMovement() const
-    {
-        return aruwlib::Remote::getMouseY() * KEYBOARD_INPUT_SCALAR;
-    }
-
     const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle()
     {
         updateCurrentYawAngle();

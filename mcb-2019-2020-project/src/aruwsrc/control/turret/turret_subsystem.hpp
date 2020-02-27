@@ -40,18 +40,9 @@ class TurretSubsystem : public Subsystem {
     void setYawMotorOutput(float out);
     void setPitchMotorOutput(float out);
 
-    float getRemoteXMovement() const;
-    float getRemoteYMovement() const;
-
-    int16_t getMouseXMovement() const;
-    int16_t getMouseYMovement() const;
-
  private:
     const uint16_t YAW_START_ENCODER_POSITION = 8160;
     const uint16_t PITCH_START_ENCODER_POSITION = 4100;
-
-    const float REMOTE_INPUT_SCALER = 10000;
-    const float KEYBOARD_INPUT_SCALAR = 50;
 
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;

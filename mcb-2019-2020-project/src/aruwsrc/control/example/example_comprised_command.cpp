@@ -27,15 +27,20 @@ void ExampleComprisedCommand::initialize()
 void ExampleComprisedCommand::execute() {
     if (switchTimer.execute()) {
         switchTimer.restart(2000);
-        if (this->comprisedCommandScheduler.isCommandScheduled(dynamic_cast<Command*>(&exampleCommand)))
+        if (this->comprisedCommandScheduler.isCommandScheduled(
+                dynamic_cast<Command*>(&exampleCommand)))
         {
-            this->comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&exampleCommand), false);
-            this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&otherExampleCommand));
+            this->comprisedCommandScheduler.removeCommand(
+                    dynamic_cast<Command*>(&exampleCommand), false);
+            this->comprisedCommandScheduler.addCommand(
+                    dynamic_cast<Command*>(&otherExampleCommand));
         }
         else
         {
-            this->comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&otherExampleCommand), false);
-            this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&exampleCommand));
+            this->comprisedCommandScheduler.removeCommand(
+                dynamic_cast<Command*>(&otherExampleCommand), false);
+            this->comprisedCommandScheduler.addCommand(
+                dynamic_cast<Command*>(&exampleCommand));
         }
     }
 
@@ -44,7 +49,8 @@ void ExampleComprisedCommand::execute() {
 
 void ExampleComprisedCommand::end(bool interrupted)
 {
-    this->comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&exampleCommand), interrupted);
+    this->comprisedCommandScheduler.removeCommand(
+            dynamic_cast<Command*>(&exampleCommand), interrupted);
 }
 
 }  // namespace control
