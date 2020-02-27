@@ -146,7 +146,7 @@ namespace chassis
                 Remote::getChannel(Remote::Channel::LEFT_HORIZONTAL)
                 + static_cast<float>(Remote::keyPressed(Remote::Key::A))
                 - static_cast<float>(Remote::keyPressed(Remote::Key::D)), -1.0f, 1.0f),
-                LOW_PASS_USER_INPUT 
+                LOW_PASS_USER_INPUT
         );
         return userYLowPass;
     }
