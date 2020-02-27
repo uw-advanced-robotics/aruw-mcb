@@ -173,6 +173,8 @@ class ChassisSubsystem : public Subsystem {
     float rightFrontRpm;
     float rightBackRpm;
 
+    float chassisDesiredR = 0.0f;
+
     // rotation pid variables
     aruwlib::algorithms::ExtendedKalman chassisRotationErrorKalman;
 
@@ -247,6 +249,8 @@ class ChassisSubsystem : public Subsystem {
 
     // Returns the value used for chassis rotation, between -1 and 1
     static float getChassisR();
+
+    float getChassisDesiredRotation() const;
 
  private:
     /**

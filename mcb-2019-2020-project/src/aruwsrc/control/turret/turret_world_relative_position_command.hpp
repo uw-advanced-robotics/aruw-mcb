@@ -5,6 +5,7 @@
 #include "src/aruwlib/control/command.hpp"
 #include "src/aruwlib/algorithms/contiguous_float.hpp"
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"
+#include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -15,7 +16,7 @@ namespace control
 class TurretWorldRelativePositionCommand : public Command
 {
  public:
-    explicit TurretWorldRelativePositionCommand(TurretSubsystem *subsystem);
+    TurretWorldRelativePositionCommand(TurretSubsystem *subsystem, chassis::ChassisSubsystem *chassis);
 
     void initialize();
 
@@ -30,25 +31,26 @@ class TurretWorldRelativePositionCommand : public Command
  private:
     static constexpr float YAW_P = 4500.0f;  // 500.0f;
     static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 190.0f;  // 50.0f
+    static constexpr float YAW_D = 140.0f;  // 50.0f
     static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 32000.0f;  // 16000.0f
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 40.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.5f;
-    static constexpr float YAW_R_pROPORTIONAL_KALMAN = 11.0f;
+    static constexpr float YAW_MAX_OUTPUT = 1.0f;  // 16000.0f
+    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float YAW_R_pROPORTIONAL_KALMAN = 0.0f;
 
     static constexpr float PITCH_P = 5000.0f;
     static constexpr float PITCH_I = 0.0f;
     static constexpr float PITCH_D = 100.0f;
     static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
+    static constexpr float PITCH_MAX_OUTPUT = 1.0f;
     static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
     static constexpr float PITCH_R_DERIVATIVE_KALMAN = 40.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.5f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 11.0f;
+    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 8.0f;
 
     TurretSubsystem *turretSubsystem;
+    chassis::ChassisSubsystem *chassisSubsystem;
 
     aruwlib::algorithms::ContiguousFloat yawTargetAngle;
     aruwlib::algorithms::ContiguousFloat pitchTargetAngle;

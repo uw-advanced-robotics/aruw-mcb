@@ -30,10 +30,12 @@ using namespace aruwlib::sensors;
 TurretSubsystem turretSubsystem;
 TurretCVCommand turretCVCommand(&turretSubsystem);
 TurretInitCommand turretInitCommand(&turretSubsystem);
-TurretWorldRelativePositionCommand turretManualPositionCommand(&turretSubsystem);
 
 ChassisSubsystem soldierChassis;
-ChassisAutorotateCommand chassisDriveCommand(&soldierChassis, &turretSubsystem);
+ChassisDriveCommand chassisDriveCommand(&soldierChassis);
+
+TurretWorldRelativePositionCommand turretManualPositionCommand(&turretSubsystem, &soldierChassis);
+
 #else  // error
 #error "select soldier robot type only"
 #endif

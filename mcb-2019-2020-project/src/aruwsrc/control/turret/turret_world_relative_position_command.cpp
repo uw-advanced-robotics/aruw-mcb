@@ -13,9 +13,10 @@ namespace control
 {
 
 TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
-    TurretSubsystem *subsystem
+    TurretSubsystem *subsystem, chassis::ChassisSubsystem *chassis
 ) :
     turretSubsystem(subsystem),
+    chassisSubsystem(chassis),
     yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
     pitchTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
     currValueImuYawGimbal(0.0f, 0.0f, 360.0f),
@@ -60,12 +61,18 @@ void TurretWorldRelativePositionCommand::execute()
     runPitchPositionController();
 }
 
+float gains = 2.75f;
+float gains2 = 30.0f;
+float gains3 = 1.0f;
+float derivative = 0.0f;
+float prevRotationDesired = 0.0f;
+float wchassis = 0.0f;
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
     /// \todo fix user input
-    float userVelocity = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f
-        - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
-    lowPassUserVelocityYaw = 0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocityYaw;
+    // float userVelocity = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_HORIZONTAL)) * 0.5f
+    //     - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
+    lowPassUserVelocityYaw = 0.0f; //0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocityYaw;
 
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value
@@ -85,15 +92,19 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     float pidOutput = yawPid.runController(positionControllerError,
         turretSubsystem->getYawVelocity() + Mpu6500::getGz());  /// \todo fix gz in mpu6500 class
 
+    wchassis = chassisSubsystem->getChassisDesiredRotation();
+    pidOutput += gains * chassisSubsystem->getChassisDesiredRotation() * (fabsf(sin(turretSubsystem->getYawAngleFromCenter() * aruwlib::algorithms::PI / 180.0f)) + gains3);
+    derivative = gains2 * 0.154f * (chassisSubsystem->getChassisDesiredRotation() - prevRotationDesired) + (1.0f - 0.154f) * derivative;
+    pidOutput += derivative;
+    prevRotationDesired = chassisSubsystem->getChassisDesiredRotation();
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 
 void TurretWorldRelativePositionCommand::runPitchPositionController()
 {
     /// \todo fix user input
-    float userVelocity = static_cast<float>(aruwlib::Remote::getChannel(aruwlib::Remote::Channel::RIGHT_VERTICAL)) * 0.5f
-        - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
-    lowPassUserVelocityPitch = 0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocityPitch;
+    //    - static_cast<float>(aruwlib::Remote::getMouseX()) / 1000.0f;
+    lowPassUserVelocityPitch = 0.0f; // 0.13f * userVelocity + (1 - 0.13f) * lowPassUserVelocityPitch;
 
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value

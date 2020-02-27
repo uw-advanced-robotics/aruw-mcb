@@ -55,6 +55,8 @@ namespace chassis
             = aruwlib::algorithms::limitVal<float>(leftBackRpm,   -maxWheelSpeed, maxWheelSpeed);
         rightBackRpm
             = aruwlib::algorithms::limitVal<float>(rightBackRpm,  -maxWheelSpeed, maxWheelSpeed);
+
+        chassisDesiredR = r;
     }
 
     void ChassisSubsystem::updateMotorRpmPid(
@@ -153,13 +155,22 @@ namespace chassis
         );
     }
 
+    float rLowPass = 0.0f;
+
     float ChassisSubsystem::getChassisR()
     {
-        return aruwlib::algorithms::limitVal<float>(
+        rLowPass = low_pass_filter(rLowPass, aruwlib::algorithms::limitVal<float>(
             Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL)
             + static_cast<float>(Remote::keyPressed(Remote::Key::Q))
             - static_cast<float>(Remote::keyPressed(Remote::Key::E)), -1.0f, 1.0f
-        );
+        ), 0.154f);
+
+        return rLowPass;
+    }
+
+    float ChassisSubsystem::getChassisDesiredRotation() const
+    {
+        return chassisDesiredR;
     }
 }  // namespace chassis
 

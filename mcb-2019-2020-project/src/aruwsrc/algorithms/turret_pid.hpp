@@ -52,6 +52,10 @@ class TurretPid
     float currErrorD = 0.0f;
     float output = 0.0f;
 
+    float watchYawDUnfiltered=0.0f;
+float watchYawPUnfiltered=0.0f;
+
+
     // if you run the controller without inputting a rotationalSpeed, we find the
     // derivative ourselves
     uint32_t previousTimestamp = 0;

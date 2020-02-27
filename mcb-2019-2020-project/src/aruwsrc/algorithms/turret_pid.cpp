@@ -12,6 +12,9 @@ namespace algorithms
 
 float TurretPid::runController(float error, float errorDerivative)
 {
+    watchYawDUnfiltered= error * kp;
+    watchYawPUnfiltered = -kd * errorDerivative;
+
     // p
     currErrorP = kp * proportionalKalman.filterData(error);
     // i
