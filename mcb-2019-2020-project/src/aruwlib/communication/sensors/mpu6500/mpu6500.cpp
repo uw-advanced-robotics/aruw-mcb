@@ -107,9 +107,10 @@ namespace sensors {
     }
 
     // get accleration reading on x-axis
-    int16_t Mpu6500::getAx() {
+    float Mpu6500::getAx() {
         if (imuInitialized) {
-            return mpu6500Data.ax;
+            return static_cast<float>(mpu6500Data.ax)
+                    / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
             aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
@@ -119,9 +120,10 @@ namespace sensors {
     }
 
     // get accleration reading on y-axis
-    int16_t Mpu6500::getAy() {
+    float Mpu6500::getAy() {
         if (imuInitialized) {
-            return mpu6500Data.ay;
+            return static_cast<float>(mpu6500Data.ay)
+                    / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
             aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
@@ -131,9 +133,10 @@ namespace sensors {
     }
 
     // get acceleration reading on z-axis
-    int16_t Mpu6500::getAz() {
+    float Mpu6500::getAz() {
         if (imuInitialized) {
-            return mpu6500Data.az;
+            return static_cast<float>(mpu6500Data.az)
+                    / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
             aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
@@ -143,9 +146,9 @@ namespace sensors {
     }
 
     // get gyro reading on x-axis
-    int16_t Mpu6500::getGx() {
+    float Mpu6500::getGx() {
         if (imuInitialized) {
-            return mpu6500Data.gx;
+            return static_cast<float>(mpu6500Data.gx) / LSB_D_PER_S_TO_D_PER_S;
         } else {
             aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
@@ -155,9 +158,9 @@ namespace sensors {
     }
 
     // get gyro reading on y-axis
-    int16_t Mpu6500::getGy() {
+    float Mpu6500::getGy() {
         if (imuInitialized) {
-            return mpu6500Data.gy;
+            return static_cast<float>(mpu6500Data.gy) / LSB_D_PER_S_TO_D_PER_S;
         } else {
             aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
@@ -169,7 +172,7 @@ namespace sensors {
     // get gyro reading on z-axis (degrees per second)
     float Mpu6500::getGz() {
         if (imuInitialized) {
-            return mpu6500Data.gz / LSB_D_PER_S_TO_D_PER_S;
+            return static_cast<float>(mpu6500Data.gz) / LSB_D_PER_S_TO_D_PER_S;
         } else {
             aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);

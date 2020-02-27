@@ -17,10 +17,10 @@ namespace control
 class TurretSubsystem : public Subsystem {
  public:
     static constexpr float TURRET_START_ANGLE = 90.0f;
-    const float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
-    const float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
-    const float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 15.0f;
-    const float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
+    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
+    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
+    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 15.0f;
+    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
 
     TurretSubsystem();
 

@@ -1,7 +1,7 @@
 #include <modm/math/geometry/vector2.hpp>
 #include "turret_world_relative_position_command.hpp"
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-#include "src/aruwlib/communication/remote.hpp"  /// \todo fix and remove remote from command
+#include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 using namespace aruwlib::sensors;
@@ -89,17 +89,35 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
         turretSubsystem->TURRET_YAW_MAX_ANGLE + Mpu6500::getImuAttitude().yaw, 0.0f, 360.0f);
     yawTargetAngle.limitValue(min, max);
 
+    // position controller based on imu and yaw gimbal angle
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
     float pidOutput = yawPid.runController(positionControllerError,
         turretSubsystem->getYawVelocity() + Mpu6500::getGz());  /// \todo fix gz in mpu6500 class
 
-    pidOutput += FEED_FORWARD_KP * chassisSubsystem->getChassisDesiredRotation()
+    // feed forward controller based on desired chassis wheel rotation
+    float chassisRotationProportional = FEED_FORWARD_KP
+            * chassisSubsystem->getChassisDesiredRotation()
             * (fabsf(FEED_FORWARD_SIN_GAIN * sin(turretSubsystem->getYawAngleFromCenter()
             * aruwlib::algorithms::PI / 180.0f)) + 1.0f);
-    /// \todo fix low pass filter
-    chassisRotationDerivative = FEED_FORWARD_DERIVATIVE_LOW_PASS * (chassisSubsystem->getChassisDesiredRotation()
-            - prevChassisRotationDesired) + (1.0f - FEED_FORWARD_DERIVATIVE_LOW_PASS) * chassisRotationDerivative;
-    pidOutput += FEED_FORWARD_KD * chassisRotationDerivative;
+
+    chassisRotationDerivative = aruwlib::algorithms::lowPassFilter(chassisRotationDerivative,
+            chassisSubsystem->getChassisDesiredRotation() - prevChassisRotationDesired,
+            FEED_FORWARD_DERIVATIVE_LOW_PASS);
+
+    float chassisRotationFeedForward = aruwlib::algorithms::limitVal<float>(
+            chassisRotationProportional + FEED_FORWARD_KD * chassisRotationDerivative,
+            -FEED_FORWARD_MAX_OUTPUT, FEED_FORWARD_MAX_OUTPUT);
+
+    // don't do feed forward if it is trying to go past turret bounds
+    if ((chassisRotationFeedForward > 0.0f
+        && turretSubsystem->getYawAngle().getValue() > TurretSubsystem::TURRET_YAW_MAX_ANGLE)
+        || (chassisRotationFeedForward < 0.0f
+        && turretSubsystem->getYawAngle().getValue() < TurretSubsystem::TURRET_YAW_MIN_ANGLE))
+    {
+        chassisRotationFeedForward = 0.0f;
+    }
+
+    pidOutput += chassisRotationFeedForward;
     prevChassisRotationDesired = chassisSubsystem->getChassisDesiredRotation();
 
     turretSubsystem->setYawMotorOutput(pidOutput);
@@ -121,6 +139,7 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
         turretSubsystem->TURRET_PITCH_MAX_ANGLE + calcPitchImuOffset(), 0.0f, 360.0f);
     pitchTargetAngle.limitValue(min, max);
 
+    // position controller based on turret pitch gimbal and imu data
     float positionControllerError = currImuPitchAngle.difference(pitchTargetAngle);
     float pidOutput = pitchPid.runController(positionControllerError,
         turretSubsystem->getPitchVelocity());  /// \todo fix imu stuff for pitch
@@ -160,9 +179,8 @@ float TurretWorldRelativePositionCommand::getUserTurretYawInput()
     float userVelocity = -static_cast<float>(Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL))
             * USER_REMOTE_YAW_SCALAR
             + static_cast<float>(Remote::getMouseX()) * USER_MOUSE_YAW_SCALAR;
-    /// \todo fix low pass
-    lowPassUserVelocityYaw = USER_INPUT_LOW_PASS_ALPHA * userVelocity
-            + (1 - USER_INPUT_LOW_PASS_ALPHA) * lowPassUserVelocityYaw;
+    lowPassUserVelocityYaw = aruwlib::algorithms::lowPassFilter(lowPassUserVelocityYaw,
+            userVelocity, USER_INPUT_LOW_PASS_ALPHA);
     return lowPassUserVelocityYaw;
 }
 
@@ -171,9 +189,8 @@ float TurretWorldRelativePositionCommand::getUserTurretPitchInput()
     float userVelocity = static_cast<float>(Remote::getChannel(Remote::Channel::RIGHT_VERTICAL))
             * USER_REMOTE_PITCH_SCALAR
             - static_cast<float>(aruwlib::Remote::getMouseX()) * USER_MOUSE_PITCH_SCALAR;
-    /// \todo fix low pass
-    lowPassUserVelocityPitch = USER_INPUT_LOW_PASS_ALPHA * userVelocity
-            + (1 - USER_INPUT_LOW_PASS_ALPHA) * lowPassUserVelocityPitch;
+    lowPassUserVelocityPitch = aruwlib::algorithms::lowPassFilter(lowPassUserVelocityPitch,
+            userVelocity, USER_INPUT_LOW_PASS_ALPHA);
     return lowPassUserVelocityPitch;
 }
 
