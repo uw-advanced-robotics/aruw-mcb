@@ -51,16 +51,12 @@ int main()
     > display;
 
     display.initializeBlocking();
-    // display.setCursor(2, 1);
-    // display.setFont(modm::font::ScriptoNarrow);
-    // display << "ur code is shit" << modm::endl;
-    // display.update();
+    display.setFont(modm::font::ScriptoNarrow);
+    
     modm::ViewStack vs(&display);
-
     aruwlib::errors::OledMenu menu(&vs);
-    bool isWorking;
+    bool isWorking = true;
     menu.addEntry("Row 1", &isWorking, true);
-    menu.draw();
 
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
     contiguousFloatTest.testCore();
@@ -97,6 +93,8 @@ int main()
         aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
         aruwlib::Remote::read();
+        menu.draw();
+        display.update();
 
         if (updateImuPeriod.execute())
         {

@@ -3,6 +3,7 @@
 
 #include "modm/ui/menu/choice_menu.hpp"
 #include "rm-dev-board-a/board.hpp"
+#include "modm/ui/menu/menu_buttons.hpp"
 
 namespace aruwlib
 {
@@ -16,6 +17,8 @@ class OledMenu : public modm::ChoiceMenu
 
     OledMenu(modm::ViewStack *vs);
 
+    void draw() override;
+
     /**
      * @brief openNextScreen puts the next screen to be displayed on the stack
      */
@@ -26,6 +29,17 @@ class OledMenu : public modm::ChoiceMenu
     //typedef modm::DoublyLinkedList<ChoiceMenuEntry> EntryList;
     //EntryList entries;
  private:
+    enum ButtonState {
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN,
+        OK,
+        IDLE
+    };
+
+    void getButtonStatus();
+
     modm::ViewStack *viewStack;
 };
 
