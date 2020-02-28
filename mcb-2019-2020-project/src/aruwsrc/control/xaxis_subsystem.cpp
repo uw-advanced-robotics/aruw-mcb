@@ -6,12 +6,19 @@ namespace aruwsrc
 
 namespace control
 {
-    const aruwlib::motor::MotorId XAxisSubsystem::XAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
 
-    void XAxisSubsystem::setPosition(float desiredPosition) {
-        if (desiredPosition >= MIN_DISTANCE && desiredPosition <= MAX_DISTANCE) {
-            this->desiredPosition = desiredPosition;
-            xAxisRamp.setTarget(this->desiredPosition);
+    void XAxisSubsystem::setPosition(Position p) {
+        xAxisPosition = p; 
+        switch(xAxisPosition) {
+            case Position::MIN_DISTANCE:
+                xAxisRamp.setTarget(MIN_DISTANCE); 
+                break;
+            case Position::CENTER_DISTANCE:
+                xAxisRamp.setTarget(CENTER_DISTANCE); 
+                break;
+            case Position::MAX_DISTANCE:
+                xAxisRamp.setTarget(MAX_DISTANCE);
+                break; 
         }
     }
 
@@ -21,7 +28,7 @@ namespace control
                 &xAxisPositionPid,
                 &xAxisMotor,
                 &xAxisRamp);
-        }
+        } 
     }
 
     void XAxisSubsystem::updateMotorDisplacement(
@@ -34,11 +41,12 @@ namespace control
         float error = ramp->getValue() - getPosition();
         xAxisPositionPid.update(error);
         motor->setDesiredOutput(xAxisPositionPid.getValue());
+        currentPosition = ramp->getValue(); 
     }
 
-    float XAxisSubsystem::getPosition()
+    float XAxisSubsystem::getPosition() const
     {
-        return xAxisMotor.encStore.getEncoderUnwrapped() * (2 * aruwlib::algorithms::PI * X_AXIS_PULLEY_RADIUS / (float) GM_3510_GEAR_RATIO);
+        return xAxisMotor.encStore.getEncoderUnwrapped() * (2 * aruwlib::algorithms::PI * X_AXIS_PULLEY_RADIUS / static_cast<float>(GM_3510_GEAR_RATIO));
     }
 
 }

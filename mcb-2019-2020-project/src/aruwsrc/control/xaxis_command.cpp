@@ -7,34 +7,35 @@ namespace aruwsrc
 namespace control
 {
     XAxisCommand::XAxisCommand(XAxisSubsystem* subsystem)
-        : Command(), subsystemXAxis(subsystem)
+        : Command(), subsystemXAxis(subsystem), positionXAxis(positionXAxis)
     {
-        addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
+        addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
     }
 
     void XAxisCommand::initialize()
     {}
 
-    void XAxisCommand::execute()
+    void XAxisCommand::execute(XAxisSubsystem::Position)
     {
-        subsystemXAxis->setPosition(desiredPosition);
+        subsystemXAxis->setPosition(positionXAxis); 
     }
 
     void XAxisCommand::end(bool interrupted)
     {
-        if (interrupted)
-        {
-            subsystemXAxis->setPosition(currentPosition);
-        }
-        subsystemXAxis->setPosition(currentPosition);
+        end(interrupted);
+        // if (interrupted)
+        // {
+        //     subsystemXAxis->setPosition(currentPosition);
+        // }
+        // subsystemXAxis->setPosition(currentPosition);
     }
 
-    bool XAxisCommand::isFinished(void) const
+    bool XAxisCommand::isFinished() const
     {
         return false;
     }
 
-    void XAxisCommand::interrupted(void)
+    void XAxisCommand::interrupted()
     {}
 }
 

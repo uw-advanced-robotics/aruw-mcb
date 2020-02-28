@@ -16,11 +16,12 @@ class XAxisSubsystem;
 class XAxisCommand : public Command
 {
  public:
+
     explicit XAxisCommand(XAxisSubsystem* subsystem = nullptr);
 
     void initialize(void);
 
-    void execute(void);
+    void execute(enum XAxisSubsystem::Position);
 
     void end(bool interrupted);
 
@@ -29,9 +30,9 @@ class XAxisCommand : public Command
     void interrupted(void);
 
  private:
-    float desiredPosition;
-    float currentPosition;
     XAxisSubsystem* subsystemXAxis;
+    float displacement; 
+    XAxisSubsystem::Position positionXAxis; 
 };
 
 }

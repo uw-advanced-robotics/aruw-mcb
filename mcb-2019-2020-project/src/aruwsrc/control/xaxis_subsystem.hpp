@@ -24,13 +24,21 @@ class XAxisSubsystem : public Subsystem {
         xAxisRamp(0.1f, 0.1f, currentPosition)
     {}
 
-    void setPosition(float desiredPosition);
+    enum Position {
+       MIN_DISTANCE,
+       CENTER_DISTANCE,
+       MAX_DISTANCE,
+    };  
+
+    void setPosition(Position p);
 
     void refresh(void);
 
  private:
-    static const aruwlib::motor::MotorId XAXIS_MOTOR_ID;
+    static constexpr aruwlib::motor::MotorId XAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
+
+    Position xAxisPosition = MIN_DISTANCE; 
 
     const float PID_P = 100.0f;
     const float PID_I = 0.0f;
@@ -38,7 +46,9 @@ class XAxisSubsystem : public Subsystem {
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000;
 
+    // units below are in centimeter (cm)
     const float MIN_DISTANCE = 0.0f;
+    const float CENTER_DISTANCE = 15.0f; 
     const float MAX_DISTANCE = 30.0f;
     const float X_AXIS_PULLEY_RADIUS = 2.5f;
     const int GM_3510_GEAR_RATIO = 19;
@@ -47,7 +57,7 @@ class XAxisSubsystem : public Subsystem {
     modm::Pid<float> xAxisPositionPid;
     modm::filter::Ramp<float> xAxisRamp;
 
-    float currentPosition = 0.0f;
+    float currentPosition = 15.0f;
     float desiredPosition;
 
     void updateMotorDisplacement(
@@ -56,7 +66,7 @@ class XAxisSubsystem : public Subsystem {
         modm::filter::Ramp<float>* ramp
     );
 
-    float XAxisSubsystem::getPosition();
+    float XAxisSubsystem::getPosition() const;
 };
 
 }
