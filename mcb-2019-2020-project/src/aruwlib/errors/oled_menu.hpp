@@ -29,17 +29,8 @@ class OledMenu : public modm::ChoiceMenu
     //typedef modm::DoublyLinkedList<ChoiceMenuEntry> EntryList;
     //EntryList entries;
  private:
-    enum ButtonState {
-        LEFT,
-        RIGHT,
-        UP,
-        DOWN,
-        OK,
-        IDLE
-    };
-
-    void getButtonStatus();
-
+    void handleButtonStatus();
+    bool buttonIsIdle;
     modm::ViewStack *viewStack;
 };
 

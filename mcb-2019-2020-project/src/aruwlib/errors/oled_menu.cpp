@@ -20,16 +20,31 @@ namespace errors
 
     void OledMenu::draw() {
         ChoiceMenu::draw();
-        getButtonStatus();
-        //modm::MenuButtons::Button currButton(getButtonStatus());
-        // if (currButton != IDLE) {
-        //     ChoiceMenu::shortButtonPress(currButton);
-        // }
+        handleButtonStatus();
     }
 
-    uint16_t bruh;
-    void OledMenu::getButtonStatus() {
-        bruh = Adc1::readChannel(Adc1::getPinChannel<GpioOutputA6>());
+    void OledMenu::handleButtonStatus() {
+        uint16_t buttonADC= Adc1::readChannel(Adc1::getPinChannel<GpioOutputA6>());
+        if (buttonADC > 4000) {
+            buttonIsIdle = true;
+            return;
+        }
+        if (buttonIsIdle) {
+            buttonIsIdle = false;
+            if (buttonADC > 3000) {
+                ChoiceMenu::shortButtonPress(modm::MenuButtons::DOWN);
+            }
+            else if (buttonADC > 2000) {
+                ChoiceMenu::shortButtonPress(modm::MenuButtons::UP);
+            }
+            else if (buttonADC > 1000) {
+                ChoiceMenu::shortButtonPress(modm::MenuButtons::RIGHT);
+            }   
+            else if (buttonADC > 500) {
+                ChoiceMenu::shortButtonPress(modm::MenuButtons::LEFT);
+            }
+            ChoiceMenu::shortButtonPress(modm::MenuButtons::OK);
+        }
     }
 }
 
