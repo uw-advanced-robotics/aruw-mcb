@@ -8,7 +8,10 @@ namespace errors
 {
     modm::MenuButtons::Button getButtonStatus();
 
-    OledMenu::OledMenu(modm::ViewStack *vs) : ChoiceMenu(vs, 1, "Title"), viewStack(vs) {
+    OledMenu::OledMenu(modm::ViewStack *vs) :
+    ChoiceMenu(vs, 1, "Title"),
+    viewStack(vs),
+    buttonIsIdle(true) {
         initialise();
         GpioOutputA6::setAnalogInput();
         Adc1::setPinChannel<GpioOutputA6>();

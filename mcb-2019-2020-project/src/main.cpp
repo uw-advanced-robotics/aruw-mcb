@@ -19,7 +19,6 @@
 #include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
-
 #include "src/aruwlib/errors/oled_menu.hpp"
 
 using namespace aruwsrc::chassis;
