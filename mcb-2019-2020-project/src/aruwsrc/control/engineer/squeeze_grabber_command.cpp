@@ -1,12 +1,12 @@
-#include "src/aruwsrc/control/grabber_subsystem.hpp"
-#include "src/aruwsrc/control/squeeze_grabber_command.hpp"
+#include "grabber_subsystem.hpp"
+#include "squeeze_grabber_command.hpp"
 
 // this is y axis command 
 
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
     GrabberCommand::GrabberCommand(GrabberSubsystem* subsystem)
         : Command(), subsystemGrabber(subsystem)
@@ -40,6 +40,6 @@ namespace control
 
     void GrabberCommand::interrupted(void) 
     {}
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc

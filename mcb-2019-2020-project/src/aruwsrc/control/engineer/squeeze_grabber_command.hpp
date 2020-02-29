@@ -14,7 +14,7 @@ using namespace aruwlib::control;
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
 
 class GrabberSubsystem;
@@ -39,7 +39,7 @@ class GrabberCommand : public Command
     
 };
 
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc
 #endif

@@ -1,13 +1,13 @@
 // Subsystem for grabber mechanism
 
-#include "src/aruwsrc/control/grabber_subsystem.hpp"
+#include "grabber_subsystem.hpp"
 
 #include <rm-dev-board-a/board.hpp>
 
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
     void GrabberSubsystem::refresh(void) {
         grabberDigitalOutPin::set(isGrabberSqueezed); 
@@ -17,6 +17,6 @@ namespace control
         this->isGrabberSqueezed = isGrabberSqueezed; 
         grabberDigitalOutPin::set(isGrabberSqueezed);
     }
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc

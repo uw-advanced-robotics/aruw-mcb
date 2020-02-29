@@ -18,7 +18,7 @@ using grabberDigitalOutPin = Board::DigitalOutPinG;
 namespace aruwsrc
 {
 
-namespace control
+namespace engineer
 {
 
 class GrabberSubsystem : public Subsystem
@@ -35,7 +35,7 @@ class GrabberSubsystem : public Subsystem
     
 };
 
-}  // namespace control
+}  // namespace engineer
 
 }  // namespace aruwsrc
 
