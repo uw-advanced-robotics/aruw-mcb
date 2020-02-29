@@ -23,6 +23,10 @@
 #include "src/aruwsrc/control/example_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
+#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command.hpp"
+#include "src/aruwsrc/control/engineer/wrist_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/wrist_calibrate_command.hpp"
+#include "src/aruwsrc/control/engineer/wrist_rotate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
@@ -31,6 +35,7 @@
 #include "src/aruwlib/errors/error_controller.hpp"
 
 using namespace aruwsrc::agitator;
+using namespace aruwsrc::engineer;
 using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
@@ -83,6 +88,10 @@ AgitatorSubsystem sentryKicker(
 ExampleSubsystem frictionWheelSubsystem;
 #endif
 
+#if defined(TARGET_ENGINEER)
+WristSubsystem wrist;
+#endif
+
 /* define commands ----------------------------------------------------------*/
 
 #if defined(TARGET_SOLDIER)
@@ -101,6 +110,12 @@ ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
 AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 2 * aruwlib::algorithms::PI, 100, 0);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
+#endif
+
+#if defined(TARGET_ENGINEER)
+WristCalibrateCommand wristCalibrateCommand(&wrist);
+WristRotateCommand wristOutCommand(&wrist, 2.0f * aruwlib::algorithms::PI / 2.0f, 1000.0f);
+WristRotateCommand wristInCommand(&wrist, -2.0f * aruwlib::algorithms::PI / 2.0f, 1000.0f);
 #endif
 
 int main()
@@ -154,6 +169,10 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
     #endif
 
+    #if defined(TARGET_ENGINEER)
+    CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
+    #endif
+
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
@@ -161,11 +180,19 @@ int main()
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #endif
 
+    #if defined(TARGET_ENGINEER)
+    
+    #endif
+
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
     #elif defined(TARGET_SENTRY)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
+    #endif
+
+    #if defined(TARGET_ENGINEER)
+    CommandScheduler::getMainScheduler().addCommand(&wristCalibrateCommand);
     #endif
 
     /* define timers here ---------------------------------------------------*/
@@ -186,6 +213,17 @@ int main()
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &agitatorKickerCommand
+    );
+    #endif
+
+    #if defined(TARGET_ENGINEER)
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        &wristOutCommand
+    );
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+        &wristInCommand
     );
     #endif
 
