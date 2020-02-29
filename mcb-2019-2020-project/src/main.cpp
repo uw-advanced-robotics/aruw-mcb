@@ -69,11 +69,11 @@ AgitatorSubsystem sentryAgitator(
 );
 
 AgitatorSubsystem sentryKicker(
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    AgitatorSubsystem::PID_17MM_KICKER_P,
+    AgitatorSubsystem::PID_17MM_KICKER_I,
+    AgitatorSubsystem::PID_17MM_KICKER_D,
+    AgitatorSubsystem::PID_17MM_KICKER_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_17MM_KICKER_MAX_OUT,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::SENTRY_KICKER_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
@@ -99,7 +99,7 @@ aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsyste
 
 ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
-AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 2.0f * aruwlib::algorithms::PI, 100, 0, true);
+AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 #endif
 
@@ -184,7 +184,7 @@ int main()
         &agitatorShootSlowCommand
     );
     IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
         &agitatorKickerCommand
     );
     #endif
