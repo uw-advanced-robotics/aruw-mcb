@@ -43,12 +43,9 @@ class GrabBoxComprisedCommand : public ComprisedCommand
    // Wrist
    WristSubsystem* connectedWrist;
 
-   WristRotateCommand wristInCommand;
-
    WristRotateCommand wristOutCommand;
 
-   enum states {out, in, done};
-   states ps;
+   bool grabSequenceCommencing;
 };
 
 }  // namespace engineer

@@ -14,8 +14,8 @@ GrabBoxComprisedCommand::GrabBoxComprisedCommand(
     connectedGrabber(grabber),
     grabberCommand(grabber),
     connectedWrist(wrist),
-    wristInCommand(wrist, wristAngleChange, wristRotateTime),
-    wristOutCommand(wrist, -1.0f * wristAngleChange, wristRotateTime)
+    wristOutCommand(wrist, wristAngleChange, wristRotateTime),
+    grabSequenceCommencing(false)
     {
         this->comprisedCommandScheduler.registerSubsystem(grabber);
         this->addSubsystemRequirement(dynamic_cast<Subsystem*>(grabber));
@@ -26,9 +26,6 @@ GrabBoxComprisedCommand::GrabBoxComprisedCommand(
 
 void GrabBoxComprisedCommand::initialize()
 {
-    // start sequence
-    ps = out;
-
     // open grabber
     this->comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&grabberCommand), true);
 
@@ -38,26 +35,9 @@ void GrabBoxComprisedCommand::initialize()
 
 void GrabBoxComprisedCommand::execute()
 {
-    switch (ps)
-    {
-        case out :
-            // check if the out sequence is finished
-            if (wristOutCommand.isFinished()) {
-                ps = in;
-
-                // close grabber
-                this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&grabberCommand));
-
-                // rotate wrist in
-                this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&wristInCommand));
-            }
-            break;
-        case in :
-            // check if the in sequence is finished
-            if (wristInCommand.isFinished()) {
-                ps = done;
-            }
-            break;
+    if (wristOutCommand.isFinished()) {
+        // close grabber
+        this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&grabberCommand));
     }
     this->comprisedCommandScheduler.run();
 }
@@ -67,13 +47,12 @@ void GrabBoxComprisedCommand::end(bool interrupted)
     this->comprisedCommandScheduler.removeCommand(
             dynamic_cast<Command*>(&grabberCommand), interrupted);
     this->comprisedCommandScheduler.removeCommand(
-            dynamic_cast<Command*>(&wristInCommand), interrupted);
-    this->comprisedCommandScheduler.removeCommand(
             dynamic_cast<Command*>(&wristOutCommand), interrupted);
 }
 
 bool GrabBoxComprisedCommand::isFinished() const
 {
+    // TODO, finished when the wrist is rotated and closed on box
     return ps == done;
 }
 
