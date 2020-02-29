@@ -52,7 +52,7 @@ int main()
 
     display.initializeBlocking();
     display.setFont(modm::font::ScriptoNarrow);
-    
+
     modm::ViewStack vs(&display);
     aruwlib::errors::OledMenu menu(&vs);
     bool isWorking = true;

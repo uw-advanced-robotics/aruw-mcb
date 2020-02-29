@@ -33,7 +33,8 @@ namespace errors
         errorList.append(error);
     }
 
-    const modm::BoundedDeque<SystemError, ErrorController::ERROR_LIST_MAX_SIZE> ErrorController::getErrorList() {
+    const modm::BoundedDeque<SystemError,
+        ErrorController::ERROR_LIST_MAX_SIZE> ErrorController::getErrorList() {
         return errorList;
     }
 

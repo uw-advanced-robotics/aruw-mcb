@@ -45,7 +45,7 @@ class ErrorController
 
     static void ledSwitch(uint8_t ledLocation, bool display);
 
-public:
+ public:
     static const modm::BoundedDeque<SystemError, ERROR_LIST_MAX_SIZE> getErrorList();
 };
 

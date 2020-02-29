@@ -14,8 +14,7 @@ namespace errors
 class OledMenu : public modm::ChoiceMenu
 {
  public:
-
-    OledMenu(modm::ViewStack *vs);
+    explicit OledMenu(modm::ViewStack *vs);
 
     void draw() override;
 
@@ -24,10 +23,6 @@ class OledMenu : public modm::ChoiceMenu
      */
     void openNextScreen() override;
 
- protected:
-
-    //typedef modm::DoublyLinkedList<ChoiceMenuEntry> EntryList;
-    //EntryList entries;
  private:
     void handleButtonStatus();
     bool buttonIsIdle;
