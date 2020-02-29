@@ -24,12 +24,10 @@
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command.hpp"
-#include "src/aruwsrc/control/engineer/wrist_subsystem.hpp"
-#include "src/aruwsrc/control/engineer/wrist_calibrate_command.hpp"
-#include "src/aruwsrc/control/engineer/wrist_rotate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/grab_box_comprised_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
