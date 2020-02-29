@@ -12,7 +12,10 @@ namespace control
 
     void Subsystem::setDefaultCommand(Command* command)
     {
-        defaultCommand = command;
+        if (command != nullptr)
+        {
+            defaultCommand = command;
+        }
     }
 
     Command* Subsystem::getDefaultCommand() const

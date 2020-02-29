@@ -1,4 +1,4 @@
-#include "shoot_steady_comprised_command.hpp"
+#include "agitator_shoot_comprised_command.hpp"
 #include "agitator_rotate_command.hpp"
 #include "agitator_unjam_command.hpp"
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -15,47 +15,37 @@ ShootComprisedCommand::ShootComprisedCommand(
     AgitatorSubsystem* agitator,
     float agitatorChangeAngle,
     float maxUnjamAngle,
-    float agitatorDesiredRotateTime,
-    float minAgitatorRotateTime) :
+    uint32_t agitatorDesiredRotateTime,
+    uint32_t minAgitatorRotateTime) :
     connectedAgitator(agitator),
     agitatorRotateCommand(
         agitator,
         agitatorChangeAngle,
         agitatorDesiredRotateTime,
+        false,
         minAgitatorRotateTime
     ),
     agitatorUnjamCommand(agitator, maxUnjamAngle),
     unjamSequenceCommencing(false)
 {
+    this->comprisedCommandScheduler.registerSubsystem(agitator);
     this->addSubsystemRequirement(dynamic_cast<Subsystem*>(agitator));
 }
 
-
-int i = 0;
-int j = 0;
-
 void ShootComprisedCommand::initialize()
 {
-    i = 0;
-    j = 0;
     this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&agitatorRotateCommand));
     unjamSequenceCommencing = false;
 }
 
 void ShootComprisedCommand::execute()
 {
-    i++;
-    if (isFinished()) {
-        j = i;
-    }
     if (connectedAgitator->isAgitatorJammed() && !unjamSequenceCommencing)
     {
         // when the agitator is jammed, add the agitatorUnjamCommand
         // the to scheduler. The rotate forward command will be automatically
         // unscheduled.
         unjamSequenceCommencing = true;
-        this->comprisedCommandScheduler.removeCommand(
-            dynamic_cast<Command*>(&agitatorRotateCommand), true);
         this->comprisedCommandScheduler.addCommand(
             dynamic_cast<Command*>(&agitatorUnjamCommand));
     }
@@ -65,19 +55,19 @@ void ShootComprisedCommand::execute()
 void ShootComprisedCommand::end(bool interrupted)
 {
     this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&agitatorUnjamCommand), interrupted);
+            dynamic_cast<Command*>(&agitatorUnjamCommand), interrupted);
     this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&agitatorRotateCommand), interrupted);
+            dynamic_cast<Command*>(&agitatorRotateCommand), interrupted);
 }
 
 bool ShootComprisedCommand::isFinished() const
 {
     return (agitatorRotateCommand.isFinished()
-        && !unjamSequenceCommencing)
-        || (agitatorUnjamCommand.isFinished()
-        && unjamSequenceCommencing);
+            && !unjamSequenceCommencing)
+            || (agitatorUnjamCommand.isFinished()
+            && unjamSequenceCommencing);
 }
 
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc

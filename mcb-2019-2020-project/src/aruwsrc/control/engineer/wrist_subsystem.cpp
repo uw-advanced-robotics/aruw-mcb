@@ -1,5 +1,7 @@
 #include "wrist_subsystem.hpp"
 
+using namespace aruwlib::motor;
+
 namespace aruwsrc
 {
 
@@ -109,13 +111,13 @@ namespace engineer
     // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
     float WristSubsystem::getUncalibratedWristAngleLeft(void) const
     {
-        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
+        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
             leftMotor.encStore.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
     }
 
     float WristSubsystem::getUncalibratedWristAngleRight(void) const
     {
-        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
+        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
             rightMotor.encStore.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
     }
 }  // namespace engineer

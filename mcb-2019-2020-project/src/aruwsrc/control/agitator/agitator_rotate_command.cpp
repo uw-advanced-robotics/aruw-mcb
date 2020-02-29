@@ -1,5 +1,4 @@
 #include "agitator_rotate_command.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
@@ -9,43 +8,50 @@ namespace agitator
     AgitatorRotateCommand::AgitatorRotateCommand(
         AgitatorSubsystem* agitator,
         float agitatorAngleChange,
-        float agitatorRotateTime,
-        float agitatorPauseAfterRotateTime) :
-        agitatorTargetChange(agitatorAngleChange),
-        agitatorRotateSetpoint(
-            AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime,
-            AGITATOR_ROTATE_COMMAND_PERIOD * agitatorAngleChange / agitatorRotateTime, 0),
+        uint32_t agitatorRotateTime,
+        uint32_t agitatorPauseAfterRotateTime,
+        bool agitatorSetToFinalAngle,
+        float setpointTolerance
+    ) :
+        connectedAgitator(agitator),
+        agitatorTargetAngleChange(agitatorAngleChange),
+        rampToTargetAngle(0.0f),
         agitatorDesiredRotateTime(agitatorRotateTime),
         agitatorMinRotatePeriod(agitatorRotateTime + agitatorPauseAfterRotateTime),
-        agitatorMinRotateTimeout(agitatorRotateTime + agitatorPauseAfterRotateTime)
+        agitatorMinRotateTimeout(agitatorRotateTime + agitatorPauseAfterRotateTime),
+        agitatorSetpointTolerance(setpointTolerance),
+        agitatorPrevRotateTime(0),
+        agitatorSetToFinalAngle(agitatorSetToFinalAngle)
     {
         this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
-        connectedAgitator = agitator;
     }
 
     void AgitatorRotateCommand::initialize()
     {
         // set the ramp start and target angles
-        agitatorRotateSetpoint.reset(connectedAgitator->getAgitatorAngle());
-        agitatorRotateSetpoint.setTarget(connectedAgitator->getAgitatorAngle()
-            + agitatorTargetChange);
-        
-        // we set the unjam timer to the larger of two values:
-        // either the desired rotate time minimum rotate time
-        connectedAgitator->armAgitatorUnjamTimer(
-            agitatorDesiredRotateTime > agitatorMinRotatePeriod ?
-            agitatorDesiredRotateTime : agitatorMinRotatePeriod);
+        rampToTargetAngle.setTarget(connectedAgitator->getAgitatorDesiredAngle()
+            + agitatorTargetAngleChange);
+
+        // reset unjam and min rotate timeouts
+        connectedAgitator->armAgitatorUnjamTimer(agitatorMinRotatePeriod);
         agitatorMinRotateTimeout.restart(agitatorMinRotatePeriod);
+
+        agitatorPrevRotateTime = modm::Clock::now().getTime();
     }
 
     void AgitatorRotateCommand::execute()
     {
         // update the agitator setpoint ramp
-        agitatorRotateSetpoint.update();
-        connectedAgitator->setAgitatorAngle(agitatorRotateSetpoint.getValue());
+        uint32_t currTime = modm::Clock::now().getTime();
+        rampToTargetAngle.update(
+                (currTime - agitatorPrevRotateTime) * agitatorTargetAngleChange
+                / static_cast<float>(agitatorDesiredRotateTime));
+        agitatorPrevRotateTime = currTime;
+        connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getValue());
     }
 
-    void AgitatorRotateCommand::end(bool interrupted)
+    // NOLINTNEXTLINE
+    void AgitatorRotateCommand::end(bool)
     {
         // if the agitator is not interrupted, then it exited normally
         // (i.e. reached the desired angle) and is not jammed. If it is
@@ -53,7 +59,15 @@ namespace agitator
         // so the motor does not attempt to keep rotating forward (and possible stalling)
         if (connectedAgitator->isAgitatorJammed())
         {
-            connectedAgitator->setAgitatorAngle(connectedAgitator->getAgitatorAngle());
+            connectedAgitator->setAgitatorDesiredAngle(connectedAgitator->getAgitatorAngle());
+        }
+        else if (agitatorSetToFinalAngle)
+        {
+            connectedAgitator->setAgitatorDesiredAngle(rampToTargetAngle.getTarget());
+        }
+        else
+        {
+            connectedAgitator->setAgitatorDesiredAngle(connectedAgitator->getAgitatorAngle());
         }
         connectedAgitator->disarmAgitatorUnjamTimer();
     }
@@ -62,12 +76,11 @@ namespace agitator
     {
         // The agitator is within the setpoint tolerance, the agitator ramp is
         // finished, and the minimum rotate time is expired.
-        return fabs(static_cast<double>(connectedAgitator->getAgitatorAngle()
-            - connectedAgitator->getAgitatorDesiredAngle()))
-            < static_cast<double>(AGITATOR_SETPOINT_TOLERANCE)
-            && agitatorRotateSetpoint.isTargetReached()
-            && agitatorMinRotateTimeout.isExpired();  // agitator min timeout finished
+        return fabsf(connectedAgitator->getAgitatorAngle()
+                - connectedAgitator->getAgitatorDesiredAngle())
+                < agitatorSetpointTolerance
+                && agitatorMinRotateTimeout.isExpired();
     }
-}  // namespace control
+}  // namespace agitator
 
 }  // namespace aruwsrc

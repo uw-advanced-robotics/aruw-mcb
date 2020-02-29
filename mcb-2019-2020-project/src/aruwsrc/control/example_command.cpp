@@ -6,8 +6,8 @@ namespace aruwsrc
 
 namespace control
 {
-    ExampleCommand::ExampleCommand(ExampleSubsystem* subsystem)
-        : Command(), subsystemExample(subsystem)
+    ExampleCommand::ExampleCommand(ExampleSubsystem* subsystem, int speed)
+        : Command(), subsystemExample(subsystem), speed(speed)
     {
         addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
     }
@@ -17,7 +17,7 @@ namespace control
 
     void ExampleCommand::execute()
     {
-        subsystemExample->setDesiredRpm(DEFAULT_WHEEL_RPM);
+        subsystemExample->setDesiredRpm(speed);
     }
 
     void ExampleCommand::end(bool interrupted)
@@ -33,9 +33,6 @@ namespace control
     {
         return false;
     }
-
-    void ExampleCommand::interrupted(void)
-    {}
 }  // namespace control
 
 }  // namespace aruwsrc

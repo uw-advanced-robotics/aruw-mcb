@@ -9,9 +9,9 @@ namespace agitator
     AgitatorCalibrateCommand::AgitatorCalibrateCommand(AgitatorSubsystem* agitator) :
     agitator(agitator)
     {
-        this->addSubsystemRequirement(reinterpret_cast<aruwlib::control::Subsystem*>(agitator));
+        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
     }
-    
+
     void AgitatorCalibrateCommand::initialize()
     {
         agitator->agitatorCalibrateHere();
@@ -22,16 +22,14 @@ namespace agitator
         agitator->agitatorCalibrateHere();
     }
 
-    void AgitatorCalibrateCommand::end(bool interrupted)
+    // NOLINTNEXTLINE
+    void AgitatorCalibrateCommand::end(bool)
     {}
 
     bool AgitatorCalibrateCommand::isFinished() const
     {
-        return agitator->agitatorCalibrateHere();
+        return agitator->isAgitatorCalibrated();
     }
-
-    AgitatorSubsystem* agitator;
-
 }  // namespace agitator
 
 }  // namespace aruwsrc

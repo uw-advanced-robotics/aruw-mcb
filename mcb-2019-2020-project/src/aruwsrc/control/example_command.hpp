@@ -22,7 +22,7 @@ class ExampleSubsystem;
 class ExampleCommand : public Command
 {
  public:
-    explicit ExampleCommand(ExampleSubsystem* subsystem);
+    explicit ExampleCommand(ExampleSubsystem* subsystem, int speed);
 
     /**
       * The initial subroutine of a command.  Called once when the command is
@@ -54,10 +54,12 @@ class ExampleCommand : public Command
 
     void interrupted(void);
 
- private:
     static const int16_t DEFAULT_WHEEL_RPM = 6000;
 
+ private:
     ExampleSubsystem* subsystemExample;
+
+    int speed;
 };
 
 }  // namespace control

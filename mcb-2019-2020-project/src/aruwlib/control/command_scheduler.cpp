@@ -6,6 +6,8 @@
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
 #include "src/aruwlib/communication/can/can_rx_handler.hpp"
 #include "command.hpp"
+#include "src/aruwlib/errors/error_controller.hpp"
+#include "src/aruwlib/errors/system_error.hpp"
 
 using namespace std;
 
@@ -16,8 +18,23 @@ namespace control
 {
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
-    bool CommandScheduler::addCommand(Command* commandToAdd)
+    CommandScheduler CommandScheduler::mainScheduler;
+
+    CommandScheduler& CommandScheduler::getMainScheduler()
     {
+        return mainScheduler;
+    }
+
+    void CommandScheduler::addCommand(Command* commandToAdd)
+    {
+        if (commandToAdd == nullptr)
+        {
+            aruwlib::errors::SystemError error(aruwlib::errors::Location::COMMAND_SCHEDULER,
+                aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
+            aruwlib::errors::ErrorController::addToErrorList(error);
+            return;
+        }
+
         bool commandAdded = false;
 
         const set<Subsystem*>& commandRequirements = commandToAdd->getRequirements();
@@ -26,22 +43,25 @@ namespace control
         // Additionally, replace the current command with the commandToAdd
         for (auto& requirement : commandRequirements)
         {
-            map<Subsystem*, Command*>::iterator isDependentSubsystem =
+            map<Subsystem*, Command*>::iterator subsystemRequirementCommandPair =
                 subsystemToCommandMap.find(requirement);
-            if (isDependentSubsystem != subsystemToCommandMap.end())
+            if (subsystemRequirementCommandPair != subsystemToCommandMap.end())
             {
-                if (isDependentSubsystem->second != nullptr)
+                if (subsystemRequirementCommandPair->second != nullptr)
                 {
-                    isDependentSubsystem->second->end(true);
+                    subsystemRequirementCommandPair->second->end(true);
                 }
-                isDependentSubsystem->second = commandToAdd;
+                subsystemRequirementCommandPair->second = commandToAdd;
                 commandAdded = true;
             }
             else
             {
                 // the command you are trying to add has a subsystem that is not in the
                 // scheduler, so you cannot add it (will lead to undefined control behavior)
-                return false;
+                aruwlib::errors::SystemError error(aruwlib::errors::Location::COMMAND_SCHEDULER,
+                    aruwlib::errors::ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
+                aruwlib::errors::ErrorController::addToErrorList(error);
+                return;
             }
         }
 
@@ -51,15 +71,14 @@ namespace control
         {
             commandToAdd->initialize();
         }
-        return true;
     }
 
     void CommandScheduler::run()
     {
-        uint32_t checkRunPeriod = DWT->CYCCNT;  // clock cycle count
+        uint32_t checkRunPeriod = Board::getTimeMicroseconds();
         // Timestamp for reference and for disallowing a command from running
         // multiple times during the same call to run.
-        if (isMainScheduler)
+        if (this == &mainScheduler)
         {
             commandSchedulerTimestamp++;
         }
@@ -95,23 +114,28 @@ namespace control
             if (currSubsystemCommandPair.first->prevSchedulerExecuteTimestamp
                 != commandSchedulerTimestamp) {
                 currSubsystemCommandPair.first->refresh();
-                currSubsystemCommandPair.first->prevSchedulerExecuteTimestamp = commandSchedulerTimestamp;
+                currSubsystemCommandPair.first->prevSchedulerExecuteTimestamp
+                    = commandSchedulerTimestamp;
             }
         }
         // make sure we are not going over tolerable runtime, otherwise something is really
         // wrong with the code
-        if (static_cast<float>(DWT->CYCCNT - checkRunPeriod)
-            / static_cast<float>(modm::clock::fcpu_kHz)
-            > MAX_ALLOWABLE_SCHEDULER_RUNTIME)
+        if (Board::getTimeMicroseconds() - checkRunPeriod > MAX_ALLOWABLE_SCHEDULER_RUNTIME)
         {
             // shouldn't take more than 1 ms to complete all this stuff, if it does something
             // is seriously wrong (i.e. you are adding subsystems unchecked)
-            // THROW-NON-FATAL-ERROR-CHECK
+            aruwlib::errors::SystemError error(aruwlib::errors::Location::COMMAND_SCHEDULER,
+                aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
+            aruwlib::errors::ErrorController::addToErrorList(error);
         }
     }
 
     void CommandScheduler::removeCommand(Command* command, bool interrupted)
     {
+        if (command == nullptr)
+        {
+            return;
+        }
         bool commandFound = false;
         for (auto& subsystemCommandPair : subsystemToCommandMap)
         {
@@ -127,8 +151,12 @@ namespace control
         }
     }
 
-    bool CommandScheduler::isCommandScheduled(Command* command)
+    bool CommandScheduler::isCommandScheduled(Command* command) const
     {
+        if (command == nullptr)
+        {
+            return false;
+        }
         return std::any_of(subsystemToCommandMap.begin(), subsystemToCommandMap.end(),
             [command](pair<Subsystem*, Command*> p)
             {
@@ -137,18 +165,24 @@ namespace control
         );
     }
 
-    bool CommandScheduler::registerSubsystem(Subsystem* subsystem)
+    void CommandScheduler::registerSubsystem(Subsystem* subsystem)
     {
-        if (!isSubsystemRegistered(subsystem))
+        if (subsystem != nullptr && !isSubsystemRegistered(subsystem))
         {
             subsystemToCommandMap[subsystem] = nullptr;
-            return true;
+        } else {
+            aruwlib::errors::SystemError error(aruwlib::errors::Location::COMMAND_SCHEDULER,
+                aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
+            aruwlib::errors::ErrorController::addToErrorList(error);
         }
-        return false;
     }
 
-    bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem)
+    bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem) const
     {
+        if (subsystem == nullptr)
+        {
+            return false;
+        }
         return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
     }
 }  // namespace control

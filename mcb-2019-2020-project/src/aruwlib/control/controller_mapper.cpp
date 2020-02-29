@@ -1,7 +1,5 @@
 #include "controller_mapper.hpp"
 
-extern aruwlib::control::CommandScheduler mainScheduler;  // todo test this
-
 namespace aruwlib {
 
 namespace control {
@@ -31,27 +29,27 @@ void IoMapper::handleKeyStateChange(uint16_t key,
                 case PRESS:
                     if (!mi->pressed) {
                         mi->pressed = true;
-                        mainScheduler.addCommand(mi->command);
+                        CommandScheduler::getMainScheduler().addCommand(mi->command);
                     }
                     break;
                 case HOLD:
                     if (!mi->pressed) {
-                        mainScheduler.addCommand(mi->command);
+                        CommandScheduler::getMainScheduler().addCommand(mi->command);
                         mi->pressed = true;
                     }
                     break;
                 case HOLD_REPEAT:  // spam add the command
-                    if (!mainScheduler.isCommandScheduled(mi->command)) {
-                        mainScheduler.addCommand(mi->command);
+                    if (!CommandScheduler::getMainScheduler().isCommandScheduled(mi->command)) {
+                        CommandScheduler::getMainScheduler().addCommand(mi->command);
                     }
                     break;
                 case TOGGLE:
                     if (!mi->pressed) {
                         if (mi->toggled) {
-                            mainScheduler.removeCommand(mi->command, true);
+                            CommandScheduler::getMainScheduler().removeCommand(mi->command, true);
                             mi->toggled = false;
                         } else {
-                            mainScheduler.addCommand(mi->command);
+                            CommandScheduler::getMainScheduler().addCommand(mi->command);
                             mi->toggled = true;
                         }
                         mi->pressed = true;
@@ -61,8 +59,8 @@ void IoMapper::handleKeyStateChange(uint16_t key,
                     break;
                 }
         } else {
-            if ((mi->type == HOLD && mi->pressed) || mi->type == HOLD_REPEAT) {
-                mainScheduler.removeCommand(mi->command, true);
+            if (mi->type == HOLD && mi->pressed || mi->type == HOLD_REPEAT) {
+                CommandScheduler::getMainScheduler().removeCommand(mi->command, true);
             }
             mi->pressed = false;
         }

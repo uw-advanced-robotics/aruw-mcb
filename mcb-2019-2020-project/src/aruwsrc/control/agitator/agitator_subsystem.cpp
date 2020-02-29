@@ -4,6 +4,8 @@
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
 #include "agitator_rotate_command.hpp"
+#include "src/aruwlib/errors/system_error.hpp"
+#include "src/aruwlib/errors/error_controller.hpp"
 
 using namespace aruwlib::motor;
 
@@ -12,46 +14,38 @@ namespace aruwsrc
 
 namespace agitator
 {
-    AgitatorSubsystem::AgitatorSubsystem(AgitatorType type) :
-        agitatorType(type),
-        agitatorMotor(AGITATOR_MOTOR_ID, AGITATOR_MOTOR_CAN_BUS, false),
+    AgitatorSubsystem::AgitatorSubsystem(
+        float kp,
+        float ki,
+        float kd,
+        float maxIAccum,
+        float maxOutput,
+        float agitatorGearRatio,
+        aruwlib::motor::MotorId agitatorMotorId,
+        aruwlib::can::CanBus agitatorCanBusId,
+        bool isAgitatorInverted
+    ) :
+        agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
+        agitatorMotor(agitatorMotorId, agitatorCanBusId, isAgitatorInverted),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
         agitatorIsCalibrated(false),
-        agitatorPositionPid(0.0f, 0.0f, 0.0f, 0.0f, PID_MAX_OUT)
+        agitatorJammedTimeout(0),
+        agitatorJammedTimeoutPeriod(0),
+        gearRatio(agitatorGearRatio)
     {
-        modm::Pid<float>::Parameter* param = nullptr;   // assign nullptr to fix build
-        switch (type)
-        {
-            case AgitatorType::Soldier:
-                param = new modm::Pid<float>::Parameter(PID_P, PID_I, PID_D, PID_MAX_ERR_SUM,
-                                                            PID_MAX_OUT);
-                break;
-            case AgitatorType::Hero1:
-                param = new modm::Pid<float>::Parameter(PID_HERO1_P, PID_HERO1_I, PID_HERO1_D,
-                                                            PID_HERO1_MAX_ERR_SUM, PID_MAX_OUT);
-                break;
-            case AgitatorType::Hero2:
-                param = new modm::Pid<float>::Parameter(PID_HERO2_P, PID_HERO2_I, PID_HERO2_D,
-                                                            PID_HERO2_MAX_ERR_SUM, PID_MAX_OUT);
-                break;
-        }
-        agitatorPositionPid.setParameter(*param);
-        delete param;
         agitatorJammedTimeout.stop();
     }
 
-    void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t predictedRotateTime)
+    void AgitatorSubsystem::armAgitatorUnjamTimer(const uint32_t& predictedRotateTime)
     {
         if (predictedRotateTime == 0)
         {
-            agitatorJammedTimeoutPeriod = DEFAULT_AGITATOR_JAMMED_TIMEOUT_PERIOD;
+            aruwlib::errors::SystemError error(aruwlib::errors::SUBSYSTEM,
+                    aruwlib::errors::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
+            aruwlib::errors::ErrorController::addToErrorList(error);
         }
-        else
-        {
-            agitatorJammedTimeoutPeriod = predictedRotateTime;
-        }
-        agitatorJammedTimeoutPeriod += JAMMED_TOLERANCE_PERIOD;
+        agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
         agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
     }
 
@@ -60,11 +54,8 @@ namespace agitator
         agitatorJammedTimeout.stop();
     }
 
-    uint32_t t1;
-
-    bool AgitatorSubsystem::isAgitatorJammed()
+    bool AgitatorSubsystem::isAgitatorJammed() const
     {
-        t1 = agitatorJammedTimeout.remaining();
         return agitatorJammedTimeout.isExpired();
     }
 
@@ -80,15 +71,24 @@ namespace agitator
         }
     }
 
+    float eOld = 0;
+    float d = 0.0f;
+
     void AgitatorSubsystem::agitatorRunPositionPid()
     {
         if (!agitatorIsCalibrated)
         {
             agitatorPositionPid.reset();
-            return;
         }
-        agitatorPositionPid.update(desiredAgitatorAngle - getAgitatorAngle());
-        agitatorMotor.setDesiredOutput(agitatorPositionPid.getValue());
+        else
+        {
+            d = (desiredAgitatorAngle - getAgitatorAngle() - eOld);
+            eOld = desiredAgitatorAngle - getAgitatorAngle();
+
+            agitatorPositionPid.runController(desiredAgitatorAngle - getAgitatorAngle(),
+                    getAgitatorVelocity());
+            agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());
+        }
     }
 
     bool AgitatorSubsystem::agitatorCalibrateHere()
@@ -115,11 +115,11 @@ namespace agitator
     {
         // position is equal to the following equation:
         // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
-        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(ENC_RESOLUTION)) *
-            agitatorMotor.encStore.getEncoderUnwrapped() / AGITATOR_GEAR_RATIO;
+        return (2.0f * aruwlib::algorithms::PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
+            agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
     }
 
-    void AgitatorSubsystem::setAgitatorAngle(float newAngle)
+    void AgitatorSubsystem::setAgitatorDesiredAngle(const float& newAngle)
     {
         desiredAgitatorAngle = newAngle;
     }
@@ -128,6 +128,17 @@ namespace agitator
     {
         return desiredAgitatorAngle;
     }
-}  // namespace control
+
+    float AgitatorSubsystem::getAgitatorVelocity() const
+    {
+        return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / gearRatio;
+    }
+
+    bool AgitatorSubsystem::isAgitatorCalibrated() const
+    {
+        return agitatorIsCalibrated;
+    }
+
+}  // namespace agitator
 
 }  // namespace aruwsrc

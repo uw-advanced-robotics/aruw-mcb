@@ -1,6 +1,8 @@
 #include <rm-dev-board-a/board.hpp>
 #include "dji_serial.hpp"
 #include "src/aruwlib/algorithms/crc.hpp"
+#include "src/aruwlib/errors/error_controller.hpp"
+#include "src/aruwlib/errors/system_error.hpp"
 
 namespace aruwlib
 {
@@ -40,16 +42,18 @@ void DJISerial::initialize() {
 
 bool DJISerial::send() {
     txBuffer[0] = SERIAL_HEAD_BYTE;
-    txBuffer[FRAME_DATA_LENGTH_OFFSET] = txMessage.length;
-    txBuffer[FRAME_DATA_LENGTH_OFFSET + 1] = txMessage.length >> 8;
+    txBuffer[FRAME_DATA_LENGTH_OFFSET] = txMessage.length & 0xFF;
+    txBuffer[FRAME_DATA_LENGTH_OFFSET + 1] = (txMessage.length >> 8) & 0xFF;
     txBuffer[FRAME_SEQUENCENUM_OFFSET] = txMessage.sequenceNumber;
     txBuffer[FRAME_CRC8_OFFSET] = algorithms::calculateCRC8(txBuffer, 4, CRC8_INIT);
-    txBuffer[FRAME_TYPE_OFFSET] = txMessage.type;
-    txBuffer[FRAME_TYPE_OFFSET + 1] = txMessage.type >> 8;
+    txBuffer[FRAME_TYPE_OFFSET] = (txMessage.type) & 0xFF;
+    txBuffer[FRAME_TYPE_OFFSET + 1] = (txMessage.type >> 8) & 0xFF;
 
     // we can't send, trying to send too much
     if (FRAME_HEADER_LENGTH + txMessage.length + FRAME_CRC16_LENGTH >= SERIAL_TX_BUFF_SIZE) {
-        // NON-FATAL-ERROR-CHECK
+        aruwlib::errors::SystemError error(aruwlib::errors::Location::DJI_SERIAL,
+            aruwlib::errors::ErrorType::MESSAGE_LENGTH_OVERFLOW);
+        aruwlib::errors::ErrorController::addToErrorList(error);
         return false;
     }
 
@@ -67,7 +71,10 @@ bool DJISerial::send() {
     uint32_t messageLengthSent = this->write(txBuffer, totalSize);
     if (messageLengthSent != totalSize) {
         return false;
-        // the message did not completely send, THROW-NON-FATAL-ERROR-CHECK
+        // the message did not completely send
+        aruwlib::errors::SystemError error(aruwlib::errors::Location::DJI_SERIAL,
+            aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+        aruwlib::errors::ErrorController::addToErrorList(error);
     }
     txMessage.messageTimestamp = modm::Clock::now();
     return true;
@@ -125,7 +132,9 @@ void DJISerial::updateSerial() {
                     - (FRAME_HEADER_LENGTH + FRAME_CRC16_LENGTH)
                 ) {
                     djiSerialRxState = SERIAL_HEADER_SEARCH;
-                    // THROW-NON-FATAL-ERROR-CHECK
+                    aruwlib::errors::SystemError error(aruwlib::errors::Location::DJI_SERIAL,
+                        aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+                    aruwlib::errors::ErrorController::addToErrorList(error);
                     return;
                 }
 
@@ -137,8 +146,10 @@ void DJISerial::updateSerial() {
                     if (!verifyCRC8(frameHeader, FRAME_HEADER_LENGTH - 3, CRC8))
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
+                        aruwlib::errors::SystemError error(aruwlib::errors::Location::DJI_SERIAL,
+                            aruwlib::errors::ErrorType::CRC8_FAILURE);
+                        aruwlib::errors::ErrorController::addToErrorList(error);
                         return;
-                        // THROW-NON-FATAL-ERROR-CHECK
                     }
                 }
 
@@ -186,8 +197,10 @@ void DJISerial::updateSerial() {
                     {
                         delete[] crc16CheckData;
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
+                        aruwlib::errors::SystemError error(aruwlib::errors::Location::DJI_SERIAL,
+                            aruwlib::errors::ErrorType::CRC16_FAILURE);
+                        aruwlib::errors::ErrorController::addToErrorList(error);
                         return;
-                        // NON-FATAL-ERROR-CHECK
                     }
                     delete[] crc16CheckData;
                 }
@@ -195,7 +208,7 @@ void DJISerial::updateSerial() {
                 // update the time and copy over the message to the most recent message
                 newMessage.messageTimestamp = modm::Clock::now();
 
-                memcpy(&mostRecentMessage, &newMessage, sizeof(SerialMessage_t));
+                memcpy(&mostRecentMessage, &newMessage, sizeof(SerialMessage));
 
                 messageReceiveCallback(mostRecentMessage);
 
@@ -206,7 +219,9 @@ void DJISerial::updateSerial() {
                 || (frameCurrReadByte > newMessage.length + 2 && rxCRCEnforcementEnabled))
             {
                 frameCurrReadByte = 0;
-                // THROW-NON-FATAL-ERROR-CHECK
+                aruwlib::errors::SystemError error(aruwlib::errors::Location::DJI_SERIAL,
+                    aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+                aruwlib::errors::ErrorController::addToErrorList(error);
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
             break;
