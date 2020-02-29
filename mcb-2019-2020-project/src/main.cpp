@@ -65,7 +65,7 @@ AgitatorSubsystem sentryAgitator(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted
+    false
 );
 
 AgitatorSubsystem sentryKicker(
@@ -77,7 +77,7 @@ AgitatorSubsystem sentryKicker(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::SENTRY_KICKER_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted
+    false
 );
 
 ExampleSubsystem frictionWheelSubsystem;
@@ -99,7 +99,7 @@ aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsyste
 
 ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
-AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 2 * aruwlib::algorithms::PI, 100, 0);
+AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 2.0f * aruwlib::algorithms::PI, 100, 0, true);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 #endif
 
