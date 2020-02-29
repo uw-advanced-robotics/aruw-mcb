@@ -15,6 +15,7 @@
 #include "src/aruwsrc/control/example_comprised_command.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
+#include "src/aruwsrc/control/drone/init_friction_wheel_command.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwlib::sensors;
@@ -25,6 +26,9 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #else  // error
 #error "select soldier robot type only"
 #endif
+
+aruwsrc::drone::DroneTurretSubsystem droneTurretSubsystem;
+aruwsrc::drone::InitFrictionWheelCommand initializeFrictionWheelCommand(&droneTurretSubsystem);
 
 int main()
 {
@@ -72,7 +76,8 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
     soldierChassis.setDefaultCommand(&chassisDriveCommand);
     #endif
-
+    CommandScheduler::getMainScheduler().registerSubsystem(&droneTurretSubsystem);
+    droneTurretSubsystem.setDefaultCommand(&initializeFrictionWheelCommand);
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus

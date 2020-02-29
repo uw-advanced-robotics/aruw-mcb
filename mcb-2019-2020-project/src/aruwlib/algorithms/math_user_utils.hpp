@@ -48,6 +48,18 @@ T limitVal(T val, T min, T max)
     }
 }
 
+template< typename T >
+T mapVal(T val, T in_min, T in_max, T out_min, T out_max)
+{
+    return (in_max == in_min) ? 0 :
+            (val - in_min) / (in_max - in_min) * (out_max - out_min) + out_min;
+}
+
+template< typename T >
+T mapValLimited(T val, T in_min, T in_max, T out_min, T out_max)
+{
+    return mapVal<T>(limitVal<T>(val, in_min, in_max), in_min, in_max, out_min, out_max);
+}
 
 template <typename From, typename To>
 To reinterpretCopy(From from) {
