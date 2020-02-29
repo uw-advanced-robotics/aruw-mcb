@@ -1,5 +1,5 @@
-#ifndef __SUBSYSTEM_XAXIS_HPP__
-#define __SUBSYSTEM_XAXIS_HPP__
+#ifndef __SUBSYSTEM_YAXIS_HPP__
+#define __SUBSYSTEM_YAXIS_HPP__
 
 #include <modm/math/filter/pid.hpp>
 #include <modm/math/filter/ramp.hpp>
@@ -15,13 +15,13 @@ namespace aruwsrc
 namespace control
 {
 
-class XAxisSubsystem : public Subsystem {
+class YAxisSubsystem : public Subsystem {
 
  public:
-     XAxisSubsystem(aruwlib::motor::MotorId xAxisId = XAXIS_MOTOR_ID)
-        : xAxisMotor(xAxisId, CAN_BUS_MOTORS, true),
-        xAxisPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        xAxisRamp(0.1f, 0.1f, currentPosition)
+     YAxisSubsystem(aruwlib::motor::MotorId yAxisId = YAXIS_MOTOR_ID)
+        : yAxisMotor(yAxisId, CAN_BUS_MOTORS, true),
+        yAxisPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+        yAxisRamp(0.1f, 0.1f, currentPosition)
     {}
 
     enum Position {
@@ -35,10 +35,10 @@ class XAxisSubsystem : public Subsystem {
     void refresh(void);
 
  private:
-    static constexpr aruwlib::motor::MotorId XAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
+    static constexpr aruwlib::motor::MotorId YAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
-    Position xAxisPosition = MIN_DISTANCE; 
+    Position yAxisPosition = MIN_DISTANCE; 
 
     const float PID_P = 100.0f;
     const float PID_I = 0.0f;
@@ -50,12 +50,12 @@ class XAxisSubsystem : public Subsystem {
     const float MIN_DISTANCE = 0.0f;
     const float CENTER_DISTANCE = 15.0f; 
     const float MAX_DISTANCE = 30.0f;
-    const float X_AXIS_PULLEY_RADIUS = 2.5f;
+    const float Y_AXIS_PULLEY_RADIUS = 2.5f;
     const int GM_3510_GEAR_RATIO = 19;
 
-    aruwlib::motor::DjiMotor xAxisMotor;
-    modm::Pid<float> xAxisPositionPid;
-    modm::filter::Ramp<float> xAxisRamp;
+    aruwlib::motor::DjiMotor yAxisMotor;
+    modm::Pid<float> yAxisPositionPid;
+    modm::filter::Ramp<float> yAxisRamp;
 
     float currentPosition = 15.0f;
     float desiredPosition;
@@ -66,7 +66,7 @@ class XAxisSubsystem : public Subsystem {
         modm::filter::Ramp<float>* ramp
     );
 
-    float XAxisSubsystem::getPosition() const;
+    float YAxisSubsystem::getPosition() const;
 };
 
 }

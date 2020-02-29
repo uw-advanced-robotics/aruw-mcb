@@ -11,17 +11,17 @@ namespace aruwsrc
 namespace control
 {
 
-class XAxisSubsystem;
+class YAxisSubsystem;
 
-class XAxisCommand : public Command
+class YAxisCommand : public Command
 {
  public:
 
-    explicit XAxisCommand(XAxisSubsystem* subsystem = nullptr);
+    explicit YAxisCommand(YAxisSubsystem* subsystem = nullptr);
 
     void initialize(void);
 
-    void execute(enum XAxisSubsystem::Position);
+    void execute(enum YAxisSubsystem::Position);
 
     void end(bool interrupted);
 
@@ -30,9 +30,9 @@ class XAxisCommand : public Command
     void interrupted(void);
 
  private:
-    XAxisSubsystem* subsystemXAxis;
+    YAxisSubsystem* subsystemYAxis;
     float displacement; 
-    XAxisSubsystem::Position positionXAxis; 
+    YAxisSubsystem::Position positionYAxis; 
 };
 
 }
