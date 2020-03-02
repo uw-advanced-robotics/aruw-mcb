@@ -30,6 +30,7 @@
 #include "src/aruwsrc/control/turret/turret_cv_command.hpp"
 #include "src/aruwsrc/control/turret/turret_init_command.hpp"
 #include "src/aruwsrc/control/turret/turret_manual_command.hpp"
+#include "src/aruwsrc/control/sentry/sentry_agitator_system_comprised_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -107,10 +108,11 @@ AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
 aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
         ExampleCommand::DEFAULT_WHEEL_RPM);
 
-ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
-AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
+
+aruwsrc::sentry::SentryAgitatorSystemComprisedCommand rotateSentryAgitator(&sentryAgitator,
+        &sentryKicker);
 #endif
 
 
@@ -198,11 +200,7 @@ int main()
     #elif defined(TARGET_SENTRY)
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        &agitatorShootSlowCommand
-    );
-    IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-        &agitatorKickerCommand
+        dynamic_cast<Command*>(&rotateSentryAgitator)
     );
     #endif
 
