@@ -104,6 +104,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
 
     bool isAgitatorJammed() const;
 
+    // Returns the velocity of the agitator in units of degrees per second
     float getAgitatorVelocity() const;
 
     bool isAgitatorCalibrated() const;

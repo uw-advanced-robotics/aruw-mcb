@@ -71,9 +71,6 @@ namespace agitator
         }
     }
 
-    float eOld = 0;
-    float d = 0.0f;
-
     void AgitatorSubsystem::agitatorRunPositionPid()
     {
         if (!agitatorIsCalibrated)
@@ -82,9 +79,6 @@ namespace agitator
         }
         else
         {
-            d = (desiredAgitatorAngle - getAgitatorAngle() - eOld);
-            eOld = desiredAgitatorAngle - getAgitatorAngle();
-
             agitatorPositionPid.runController(desiredAgitatorAngle - getAgitatorAngle(),
                     getAgitatorVelocity());
             agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());

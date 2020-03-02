@@ -168,10 +168,6 @@ int main()
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
     #endif
 
-    /* define timers here ---------------------------------------------------*/
-    modm::ShortPeriodicTimer updateImuPeriod(2);
-    modm::ShortPeriodicTimer sendMotorTimeout(2);
-
     /* register io mappings here --------------------------------------------*/
     #if defined(TARGET_SOLDIER)
     IoMapper::addHoldRepeatMapping(
@@ -188,6 +184,10 @@ int main()
         &agitatorKickerCommand
     );
     #endif
+
+    /* define timers here ---------------------------------------------------*/
+    modm::ShortPeriodicTimer updateImuPeriod(2);
+    modm::ShortPeriodicTimer sendMotorTimeout(2);
 
     while (1)
     {
