@@ -18,9 +18,9 @@
 #include "aruwlib/algorithms/contiguous_float_test.hpp"
 
 /* aruwsrc control includes -------------------------------------------------*/
-#include "src/aruwsrc/control/example_command.hpp"
-#include "src/aruwsrc/control/example_comprised_command.hpp"
-#include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwsrc/control/example/example_command.hpp"
+#include "src/aruwsrc/control/example/example_comprised_command.hpp"
+#include "src/aruwsrc/control/example/example_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
