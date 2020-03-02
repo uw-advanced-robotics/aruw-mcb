@@ -1,6 +1,7 @@
 #ifndef __TURRET_PID_HPP__
 #define __TURRET_PID_HPP__
 
+#include <rm-dev-board-a/board.hpp>
 #include "src/aruwlib/algorithms/extended_kalman.hpp"
 
 namespace aruwsrc
@@ -37,6 +38,8 @@ class TurretPid
     float runControllerDerivateError(float error, float dt);
 
     float getOutput();
+
+    void reset();
 
  private:
     // gains and constants, to be set by the user

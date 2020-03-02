@@ -36,6 +36,16 @@ float TurretPid::getOutput()
     return output;
 }
 
+void TurretPid::reset()
+{
+    this->currErrorP = 0.0f;
+    this->currErrorI = 0.0f;
+    this->currErrorD = 0.0f;
+    this->output = 0.0f;
+    this->proportionalKalman.reset();
+    this->derivativeKalman.reset();
+}
+
 }  // namespace algorithms
 
 }  // namespace aruwsrc

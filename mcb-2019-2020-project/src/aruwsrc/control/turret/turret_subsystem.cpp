@@ -16,7 +16,9 @@ namespace control
         pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true),
         yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false),
         currPitchAngle(0.0f, 0.0f, 360.0f),
-        currYawAngle(0.0f, 0.0f, 360.0f)
+        currYawAngle(0.0f, 0.0f, 360.0f),
+        prevYawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
+        pretPitchTarget(TURRET_START_ANGLE, 0.0f, 360.0f)
     {}
 
     float TurretSubsystem::getYawAngleFromCenter() const
@@ -162,6 +164,25 @@ namespace control
         return currPitchAngle;
     }
 
+    void TurretSubsystem::updatePrevYawTarget(const float& yaw)
+    {
+        prevYawTarget.setValue(yaw);
+    }
+
+    void TurretSubsystem::updatePrevPitchTarget(const float& pitch)
+    {
+        pretPitchTarget.setValue(pitch);
+    }
+
+    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPrevYawTarget() const
+    {
+        return prevYawTarget;
+    }
+
+    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPrevPitchTarget() const
+    {
+        return pretPitchTarget;
+    }
 }  // namespace control
 
 }  // namespace aruwsrc

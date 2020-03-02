@@ -54,16 +54,10 @@ TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
 void TurretWorldRelativePositionCommand::initialize()
 {
     imuInitialYaw = Mpu6500::getImuAttitude().yaw;
-    /// \todo uncomment when the agitator code has been merged in, has reset method there
-    // yawPid.reset();
-    // pitchPid.reset();
-    /// \todo decide if this is the best thing to do
-    yawTargetAngle.setValue(turretSubsystem->getYawAngle().getValue());
-    pitchTargetAngle.setValue(turretSubsystem->getPitchAngle().getValue());
-    // or should I do this. I think for startup, this should be used, but for toggling
-    // between CV and user control, the other one should be used
-    yawTargetAngle.setValue(TurretSubsystem::TURRET_START_ANGLE);
-    pitchTargetAngle.setValue(TurretSubsystem::TURRET_START_ANGLE);
+    yawPid.reset();
+    pitchPid.reset();
+    yawTargetAngle.setValue(turretSubsystem->getPrevYawTarget().getValue());
+    pitchTargetAngle.setValue(turretSubsystem->getPrevPitchTarget().getValue());
 }
 
 void TurretWorldRelativePositionCommand::execute()
@@ -192,6 +186,13 @@ float TurretWorldRelativePositionCommand::getUserTurretPitchInput()
     lowPassUserVelocityPitch = aruwlib::algorithms::lowPassFilter(lowPassUserVelocityPitch,
             userVelocity, USER_INPUT_LOW_PASS_ALPHA);
     return lowPassUserVelocityPitch;
+}
+
+// NOLINTNEXTLINE
+void TurretWorldRelativePositionCommand::end(bool)
+{
+    turretSubsystem->updatePrevYawTarget(yawTargetAngle.getValue());
+    turretSubsystem->updatePrevPitchTarget(pitchTargetAngle.getValue());
 }
 
 }  // namespace control

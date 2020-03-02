@@ -19,7 +19,7 @@ class TurretSubsystem : public Subsystem {
     static constexpr float TURRET_START_ANGLE = 90.0f;
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
-    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 15.0f;
+    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
 
     TurretSubsystem();
@@ -40,6 +40,12 @@ class TurretSubsystem : public Subsystem {
     void setYawMotorOutput(float out);
     void setPitchMotorOutput(float out);
 
+    void updatePrevYawTarget(const float& yaw);
+    void updatePrevPitchTarget(const float& pitch);
+
+    const aruwlib::algorithms::ContiguousFloat& getPrevYawTarget() const;
+    const aruwlib::algorithms::ContiguousFloat& getPrevPitchTarget() const;
+
  private:
     const uint16_t YAW_START_ENCODER_POSITION = 8160;
     const uint16_t PITCH_START_ENCODER_POSITION = 4100;
@@ -53,6 +59,9 @@ class TurretSubsystem : public Subsystem {
 
     aruwlib::algorithms::ContiguousFloat currPitchAngle;
     aruwlib::algorithms::ContiguousFloat currYawAngle;
+
+    aruwlib::algorithms::ContiguousFloat prevYawTarget;
+    aruwlib::algorithms::ContiguousFloat pretPitchTarget;
 
     void updateCurrentTurretAngles();
 

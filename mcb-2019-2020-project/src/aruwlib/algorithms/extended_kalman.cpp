@@ -38,6 +38,17 @@ float ExtendedKalman::getLastFiltered() const
     return xLast;
 }
 
+void ExtendedKalman::reset()
+{
+    xLast = 0.0f;
+    xMid = 0.0f;
+    xNow = 0.0f;
+    pMid = 0.0f;
+    pNow = 0.0f;
+    pLast = 0.0f;
+    kg = 0.0f;
+}
+
 }  // namespace algorithms
 
 }  // namespace aruwlib
