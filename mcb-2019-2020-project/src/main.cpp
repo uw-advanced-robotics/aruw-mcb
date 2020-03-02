@@ -26,6 +26,10 @@
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
+#include "src/aruwsrc/control/turret/turret_cv_command.hpp"
+#include "src/aruwsrc/control/turret/turret_init_command.hpp"
+#include "src/aruwsrc/control/turret/turret_manual_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -35,10 +39,16 @@ using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
 using namespace aruwsrc::chassis;
+using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
+TurretSubsystem turretSubsystem;
+TurretCVCommand turretCVCommand(&turretSubsystem);
+TurretInitCommand turretInitCommand(&turretSubsystem);
+TurretManualCommand turretManualCommand(&turretSubsystem);
+
 ChassisSubsystem soldierChassis;
 
 AgitatorSubsystem agitator17mm(
@@ -103,6 +113,7 @@ AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 #endif
 
+
 int main()
 {
     Board::initialize();
@@ -148,6 +159,8 @@ int main()
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().registerSubsystem(&agitator17mm);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
+    CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
+    CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
     #elif defined(TARGET_SENTRY)
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryAgitator);
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
@@ -156,6 +169,8 @@ int main()
 
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
+    soldierChassis.setDefaultCommand(&chassisDriveCommand);
+    turretSubsystem.setDefaultCommand(&turretManualCommand);
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #elif defined(TARGET_SENTRY)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
@@ -164,8 +179,10 @@ int main()
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
+    CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
     #elif defined(TARGET_SENTRY)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
+    CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateKickerCommand);
     #endif
 
     /* register io mappings here --------------------------------------------*/
@@ -173,6 +190,10 @@ int main()
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootSlowCommand
+    );
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
+        &turretCVCommand
     );
     #elif defined(TARGET_SENTRY)
     IoMapper::addHoldRepeatMapping(
