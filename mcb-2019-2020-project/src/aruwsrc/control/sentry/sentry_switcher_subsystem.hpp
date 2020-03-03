@@ -17,7 +17,9 @@ class SentrySwticherSubsystem : public aruwlib::control::Subsystem
 
     void refresh();
 
-    void useLowerBarrel(bool userLower);
+    void useLowerBarrel(bool useLower);
+
+    bool isLowerUsed() const;
 
  private:
     static constexpr aruwlib::gpio::Pwm::Pin SWITCHER_SERVO_PIN = aruwlib::gpio::Pwm::Pin::W;
@@ -27,6 +29,8 @@ class SentrySwticherSubsystem : public aruwlib::control::Subsystem
     static constexpr float SWITCHER_SERVO_MAX_PWM = 0.22f;
 
     aruwlib::motor::Servo switcherMotor;
+
+    bool useLower = true;
 };
 
 }  // namespace sentry
