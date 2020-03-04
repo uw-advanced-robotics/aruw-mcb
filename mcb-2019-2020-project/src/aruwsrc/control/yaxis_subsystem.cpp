@@ -23,14 +23,16 @@ namespace control
     }
 
     void YAxisSubsystem::refresh(void) {
-        watchDistance = getPosition(); //
-        // if (! online), false 
-        if (!yAxisRamp.isTargetReached()) {
-            updateMotorDisplacement(
-                &yAxisMotor,
-                &yAxisRamp);
-        } 
+        if (!isInitialized) {
+            initializeYAxis();
+        }
+        updateMotorDisplacement(
+            &yAxisMotor,
+            &yAxisRamp);
+
     }
+
+    float error; 
 
     void YAxisSubsystem::updateMotorDisplacement(
         aruwlib::motor::DjiMotor* motor,
@@ -38,7 +40,7 @@ namespace control
     ) {
 
         ramp->update();
-        float error = ramp->getValue() - getPosition();
+        error = ramp->getValue() - getPosition();
         yAxisPositionPid.update(error);
         motor->setDesiredOutput(yAxisPositionPid.getValue());
         currentPosition = ramp->getValue(); 
@@ -46,11 +48,11 @@ namespace control
 
     void YAxisSubsystem::initializeYAxis() {
         startEncoder = yAxisMotor.encStore.getEncoderUnwrapped();
+        isInitialized = true; 
         
     }
     float YAxisSubsystem::getPosition() const
     {
-        // yAxisMotor->setDesiredOutput(yAxisMotor.getOutputDesired - (yAxisMotor.encStore.getEncoderUnwrapped() / 8192.0f) * (2 * aruwlib::algorithms::PI * Y_AXIS_PULLEY_RADIUS / static_cast<float>(GM_3510_GEAR_RATIO)));
         return ((yAxisMotor.encStore.getEncoderUnwrapped() - startEncoder) / 8192.0f) * (2 * aruwlib::algorithms::PI * Y_AXIS_PULLEY_RADIUS / static_cast<float>(GM_3510_GEAR_RATIO));
     }
 

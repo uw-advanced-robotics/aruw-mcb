@@ -32,8 +32,6 @@ class YAxisSubsystem : public Subsystem {
 
     void setPosition(Position p);
 
-    float watchDistance; 
-
     void initializeYAxis();
 
     void refresh();
@@ -45,9 +43,9 @@ class YAxisSubsystem : public Subsystem {
 
     Position yAxisPosition = MIN_DISTANCE; 
 
-    const float PID_P = 100.0f;
+    const float PID_P = 100000.0f;
     const float PID_I = 0.0f;
-    const float PID_D = 0.0f;
+    const float PID_D = 1000000.0f;
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000;
 

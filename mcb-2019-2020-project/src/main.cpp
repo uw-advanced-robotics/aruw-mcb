@@ -82,7 +82,7 @@ int main()
         {
             aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
-            // aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
 
         modm::delayMicroseconds(10);
