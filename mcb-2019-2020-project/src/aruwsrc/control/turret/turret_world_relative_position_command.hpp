@@ -38,7 +38,7 @@ class TurretWorldRelativePositionCommand : public Command
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
     static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_pROPORTIONAL_KALMAN = 0.0f;
+    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
 
     static constexpr float PITCH_P = 3500.0f;
     static constexpr float PITCH_I = 0.0f;

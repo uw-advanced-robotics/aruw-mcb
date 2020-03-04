@@ -34,7 +34,7 @@ TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
         YAW_Q_DERIVATIVE_KALMAN,
         YAW_R_DERIVATIVE_KALMAN,
         YAW_Q_PROPORTIONAL_KALMAN,
-        YAW_R_pROPORTIONAL_KALMAN
+        YAW_R_PROPORTIONAL_KALMAN
     ),
     pitchPid(
         PITCH_P,
