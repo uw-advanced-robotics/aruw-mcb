@@ -16,19 +16,17 @@ namespace drone
 
 class DroneTurretSubsystem : public Subsystem
 {
-
-public:
+ public:
     static constexpr float MIN_PWM_DUTY = 0.1f;
     static constexpr float MAX_PWM_DUTY = 0.2f;
 
-private:
-
+ private:
     static const aruwlib::gpio::Pwm::Pin leftFrictionWheelPin = aruwlib::gpio::Pwm::Pin::X;
     static const aruwlib::gpio::Pwm::Pin rightFrictionWheelPin = aruwlib::gpio::Pwm::Pin::Y;
 
-    aruwlib::gpio::Pwm leftFrictionWheel; // View from top
-    aruwlib::gpio::Pwm rightFrictionWheel; // View from top
-    
+    aruwlib::gpio::Pwm leftFrictionWheel;  // View from top
+    aruwlib::gpio::Pwm rightFrictionWheel;  // View from top
+
     bool initialized;
     float currentFrictionWheelPWMDuty;
 
@@ -40,8 +38,8 @@ private:
     void setRawFrictionWheelOutput(float duty);
 
     friend class InitFrictionWheelCommand;
-    
-public:
+
+ public:
     DroneTurretSubsystem() :
             leftFrictionWheel(),
             rightFrictionWheel(),
@@ -50,16 +48,15 @@ public:
             lastRampTime(0),
             throttleRamp(0.1f)
             {};
-    
+
     void refresh() override;
     void setFrictionWheelOutput(float percentage);
     void stopFrictionWheel();
     bool isInitialized();
-
 };
 
-}
+} // namespace drone
 
-}
+} // namespace aruwsrc
 
 #endif

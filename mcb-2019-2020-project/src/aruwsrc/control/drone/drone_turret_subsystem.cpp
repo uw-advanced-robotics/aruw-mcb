@@ -13,12 +13,12 @@ namespace drone
 {
 
 void DroneTurretSubsystem::setFrictionWheelOutput(float percentage) {
-    if (!initialized)
-    {
+    if (!initialized){
         stopFrictionWheel();
     }
     else {
-        throttleRamp.setTarget(mapValLimited<float>(percentage, 0.0f, 1.0f, MIN_PWM_DUTY, MAX_PWM_DUTY));
+        throttleRamp.setTarget(mapValLimited<float>(percentage,
+                        0.0f, 1.0f, MIN_PWM_DUTY, MAX_PWM_DUTY));
         lastRampTime = Board::getTimeMicroseconds();
     }
 }
@@ -43,6 +43,5 @@ bool DroneTurretSubsystem::isInitialized() {
     return initialized;
 }
 
-}
-
-}
+} // namespace drone
+} // namespace aruwsrc

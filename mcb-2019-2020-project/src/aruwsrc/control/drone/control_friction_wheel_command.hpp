@@ -16,9 +16,9 @@ namespace drone
 
 class ControlFrictionWheelCommand : public Command
 {
-private:
+ private:
     DroneTurretSubsystem* turret;
-public:
+ public:
     explicit ControlFrictionWheelCommand(DroneTurretSubsystem* turret) :
             turret(turret)
     {
@@ -29,11 +29,9 @@ public:
     void execute(void) override;
     void end(bool interrupted) override;
     bool isFinished(void) const override;
-
 };
 
-
-}
-}
+} // namespace drone
+} // namespace aruwsrc
 
 #endif

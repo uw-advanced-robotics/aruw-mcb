@@ -33,13 +33,13 @@ TurretManualCommand turretManualCommand(&turretSubsystem);
 
 ChassisSubsystem soldierChassis;
 ChassisDriveCommand chassisDriveCommand(&soldierChassis);
-#else  // error
-//#error "select soldier robot type only"
 #endif
 
+#if defined(TARGET_DRONE)
 aruwsrc::drone::DroneTurretSubsystem droneTurretSubsystem;
 aruwsrc::drone::InitFrictionWheelCommand initializeFrictionWheelCommand(&droneTurretSubsystem);
 aruwsrc::drone::ControlFrictionWheelCommand controlFrictionWheelCommand(&droneTurretSubsystem);
+#endif
 
 int main()
 {
@@ -94,8 +94,10 @@ int main()
         &turretCVCommand);
     CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
     #endif
+    #if defined(TARGET_DRONE)
     CommandScheduler::getMainScheduler().registerSubsystem(&droneTurretSubsystem);
     droneTurretSubsystem.setDefaultCommand(&initializeFrictionWheelCommand);
+    #endif
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
@@ -123,12 +125,12 @@ int main()
             CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
+        #if defined(TARGET_DRONE)
         if (droneTurretSubsystem.isInitialized())
         {
             droneTurretSubsystem.setDefaultCommand(&controlFrictionWheelCommand);
         }
-        
-
+        #endif
         modm::delayMicroseconds(10);
     }
     return 0;

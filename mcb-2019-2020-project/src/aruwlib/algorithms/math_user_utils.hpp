@@ -49,16 +49,16 @@ T limitVal(T val, T min, T max)
 }
 
 template< typename T >
-T mapVal(T val, T in_min, T in_max, T out_min, T out_max)
+T mapVal(T val, T inMin, T inMax, T outMin, T outMax)
 {
-    return (in_max == in_min) ? 0 :
-            (val - in_min) / (in_max - in_min) * (out_max - out_min) + out_min;
+    return (inMax == inMin) ? 0 :
+            (val - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
 }
 
 template< typename T >
-T mapValLimited(T val, T in_min, T in_max, T out_min, T out_max)
+T mapValLimited(T val, T inMin, T inMax, T outMin, T outMax)
 {
-    return mapVal<T>(limitVal<T>(val, in_min, in_max), in_min, in_max, out_min, out_max);
+    return mapVal<T>(limitVal<T>(val, inMin, inMax), inMin, inMax, outMin, outMax);
 }
 
 template <typename From, typename To>

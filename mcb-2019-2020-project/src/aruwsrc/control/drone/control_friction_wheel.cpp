@@ -18,7 +18,10 @@ bool ControlFrictionWheelCommand::isFinished() const {
 }
 
 void ControlFrictionWheelCommand::end(bool interrupted) {
-    turret->stopFrictionWheel();
+    if (interrupted) {
+        turret->stopFrictionWheel();
+    }
 }
-}
-}
+
+} // namespace drone
+} // namespace aruwsrc

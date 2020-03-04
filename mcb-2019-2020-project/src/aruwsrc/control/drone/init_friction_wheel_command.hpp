@@ -14,8 +14,7 @@ namespace drone
 
 class InitFrictionWheelCommand : public Command
 {
-private:
-
+ private:
     DroneTurretSubsystem* turret;
     aruwlib::algorithms::Ramp ramp;
     static constexpr uint32_t ZERO_THROTTLE_TIME_MS = 2000;
@@ -23,7 +22,7 @@ private:
 
     uint32_t zeroThrottleStartTime;
     uint32_t lastUpdateTime;
-public:
+ public:
     explicit InitFrictionWheelCommand(DroneTurretSubsystem* turret) :
             turret(turret),
             ramp(turret->MIN_PWM_DUTY),
@@ -37,11 +36,9 @@ public:
     void execute(void) override;
     void end(bool interrupted) override;
     bool isFinished(void) const override;
-
 };
 
-
-}
-}
+} // namespace drone
+} // namespace aruwsrc
 
 #endif

@@ -20,9 +20,9 @@ void InitFrictionWheelCommand::execute() {
         uint32_t currentTime = modm::Clock::now().getTime();
         if (!(currentTime - zeroThrottleStartTime < ZERO_THROTTLE_TIME_MS))
         {
-            ramp.update(((float)(currentTime - lastUpdateTime) / RAMP_TIME_MS) *
+            ramp.update((static_cast<float>(currentTime - lastUpdateTime) / RAMP_TIME_MS) *
                     (turret->MAX_PWM_DUTY - turret->MIN_PWM_DUTY));
-            //turret->setRawFrictionWheelOutput(ramp.getValue());
+            turret->setRawFrictionWheelOutput(ramp.getValue());
         }
         lastUpdateTime = currentTime;
     }
@@ -33,12 +33,10 @@ bool InitFrictionWheelCommand::isFinished() const {
 }
 
 void InitFrictionWheelCommand::end(bool interrupted) {
-    if (!turret->initialized)
-    {
+    if (!turret->initialized) {
        turret->stopFrictionWheel();
     }
     turret->initialized = !interrupted;
-    
 }
-}
-}
+} // namespace drone
+} // namespace aruwsrc
