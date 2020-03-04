@@ -65,8 +65,6 @@ int main()
 
     modm::ViewStack vs(&display);
     aruwlib::errors::OledMenu menu(&vs);
-    bool isWorking = true;
-    menu.addEntry("Row 1", &isWorking, true);
 
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
     contiguousFloatTest.testCore();
@@ -110,7 +108,7 @@ int main()
         aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
         aruwlib::Remote::read();
-        menu.draw();
+        //menu.draw();
         display.update();
 
         if (updateImuPeriod.execute())
