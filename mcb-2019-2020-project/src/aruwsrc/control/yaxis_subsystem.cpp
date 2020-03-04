@@ -11,13 +11,13 @@ namespace control
         yAxisPosition = p; 
         switch(yAxisPosition) {
             case Position::MIN_DISTANCE:
-                yAxisRamp.setTarget(MIN_DISTANCE); 
+                yAxisRamp.setTarget(MIN_DIST); 
                 break;
             case Position::CENTER_DISTANCE:
-                yAxisRamp.setTarget(CENTER_DISTANCE); 
+                yAxisRamp.setTarget(CENTER_DIST); 
                 break;
             case Position::MAX_DISTANCE:
-                yAxisRamp.setTarget(MAX_DISTANCE);
+                yAxisRamp.setTarget(MAX_DIST);
                 break; 
         }
     }
@@ -25,14 +25,12 @@ namespace control
     void YAxisSubsystem::refresh(void) {
         if (!yAxisRamp.isTargetReached()) {
             updateMotorDisplacement(
-                &yAxisPositionPid,
                 &yAxisMotor,
                 &yAxisRamp);
         } 
     }
 
     void YAxisSubsystem::updateMotorDisplacement(
-        modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* motor,
         modm::filter::Ramp<float>* ramp
     ) {

@@ -24,11 +24,11 @@ class YAxisSubsystem : public Subsystem {
         yAxisRamp(0.1f, 0.1f, currentPosition)
     {}
 
-    enum Position {
+    typedef enum {
        MIN_DISTANCE,
        CENTER_DISTANCE,
        MAX_DISTANCE,
-    };  
+    } Position ;  
 
     void setPosition(Position p);
 
@@ -47,9 +47,9 @@ class YAxisSubsystem : public Subsystem {
     const float PID_MAX_OUTPUT = 16000;
 
     // units below are in centimeter (cm)
-    const float MIN_DISTANCE = 0.0f;
-    const float CENTER_DISTANCE = 15.0f; 
-    const float MAX_DISTANCE = 30.0f;
+    const float MIN_DIST = 0.0f;
+    const float CENTER_DIST = 15.0f; 
+    const float MAX_DIST = 30.0f;
     const float Y_AXIS_PULLEY_RADIUS = 2.5f;
     const int GM_3510_GEAR_RATIO = 19;
 
@@ -61,12 +61,11 @@ class YAxisSubsystem : public Subsystem {
     float desiredPosition;
 
     void updateMotorDisplacement(
-        modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
         modm::filter::Ramp<float>* ramp
     );
 
-    float YAxisSubsystem::getPosition() const;
+    float getPosition() const;
 };
 
 }

@@ -14,6 +14,7 @@
 #include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwsrc/control/example_comprised_command.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
+#include "src/aruwsrc/control/yaxis_subsystem.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwlib::sensors;
@@ -24,6 +25,12 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #else  // error
 #error "select soldier robot type only"
 #endif
+
+using namespace aruwsrc::control; 
+
+ #if defined(TARGET_SOLDIER)
+ YAxisSubsystem soldierYAxis;
+ #endif
 
 int main()
 {
@@ -48,6 +55,8 @@ int main()
     soldierChassis.setDefaultCommand(&chassisDriveCommand);
     #endif
 
+    CommandScheduler::getMainScheduler().registerSubsystem(&soldierYAxis);
+    
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus
