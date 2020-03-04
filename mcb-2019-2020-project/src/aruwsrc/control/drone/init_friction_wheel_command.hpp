@@ -22,6 +22,8 @@ class InitFrictionWheelCommand : public Command
 
     uint32_t zeroThrottleStartTime;
     uint32_t lastUpdateTime;
+
+    static constexpr float RAMP_TARGET = 0.18;
  public:
     explicit InitFrictionWheelCommand(DroneTurretSubsystem* turret) :
             turret(turret),

@@ -8,7 +8,7 @@ namespace drone
 
 void InitFrictionWheelCommand::initialize() {
     if (!turret->initialized) {
-        ramp.setTarget(turret->MAX_PWM_DUTY);
+        ramp.setTarget(RAMP_TARGET);
         turret->setRawFrictionWheelOutput(turret->MIN_PWM_DUTY);
         zeroThrottleStartTime = modm::Clock::now().getTime();
         lastUpdateTime = zeroThrottleStartTime;
