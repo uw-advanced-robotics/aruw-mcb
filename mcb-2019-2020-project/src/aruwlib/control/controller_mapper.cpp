@@ -1,4 +1,5 @@
 #include "controller_mapper.hpp"
+#include "src/aruwlib/errors/create_errors.hpp"
 
 namespace aruwlib {
 
@@ -59,7 +60,7 @@ void IoMapper::handleKeyStateChange(uint16_t key,
                     break;
                 }
         } else {
-            if ((mi->type == HOLD && mi->pressed) || mi->type == HOLD_REPEAT) {
+            if ((mi->type == HOLD && mi->pressed) || (mi->type == HOLD_REPEAT)) {
                 CommandScheduler::getMainScheduler().removeCommand(mi->command, true);
             }
             mi->pressed = false;
@@ -87,6 +88,8 @@ void IoMapper::addMap(RemoteMap* mapping, MapInfo* mapInfo) {
     if (remoteMappings.insert(
         std::pair<RemoteMap*, MapInfo*>
         (mapping, mapInfo)).second == false) {
+        RAISE_ERROR("failed to insert io mapping", aruwlib::errors::CONTROLLER_MAPPER,
+                aruwlib::errors::INVALID_ADD)
         // throw exception here?
     }
 }
@@ -104,7 +107,9 @@ IoMapper::RemoteMap* IoMapper::newKeyMap(Remote::Switch sw,
         return newKeyMap(Remote::SwitchState::UNKNOWN, switchState, keySet);
     }
 
-    // throw error here eventually
+    RAISE_ERROR("adding a key map with unknown switch state",
+            aruwlib::errors::CONTROLLER_MAPPER, aruwlib::errors::INVALID_KEY_MAP_TYPE)
+
     return NULL;
 }
 

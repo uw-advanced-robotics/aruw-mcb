@@ -1,8 +1,7 @@
 #include "mpu6500.hpp"
 #include "mpu6500_reg.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
-#include "src/aruwlib/errors/error_controller.hpp"
-#include "src/aruwlib/errors/system_error.hpp"
+#include "src/aruwlib/errors/create_errors.hpp"
 
 namespace aruwlib {
 
@@ -44,9 +43,9 @@ namespace sensors {
 
         // verify mpu register ID
         if (MPU6500_ID !=  mpuReadReg(MPU6500_WHO_AM_I)) {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
-                aruwlib::errors::ErrorType::IMU_NOT_RECEIVING_PROPERLY);
-            aruwlib::errors::ErrorController::addToErrorList(error);
+            RAISE_ERROR("failed to initialize the imu properly",
+                    aruwlib::errors::Location::MPU6500,
+                    aruwlib::errors::ErrorType::IMU_NOT_RECEIVING_PROPERLY);
             return;
         }
 
@@ -88,9 +87,8 @@ namespace sensors {
 
             Mpu6500::calcImuAttitude(&mpu6500Data.imuAtti);
         } else {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
         }
     }
 
@@ -99,9 +97,8 @@ namespace sensors {
         if (imuInitialized) {
             return 21.0f + static_cast<float>(mpu6500Data.temp) / 333.87f;
         } else {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
             return NAN;
         }
     }
@@ -112,9 +109,8 @@ namespace sensors {
             return static_cast<float>(mpu6500Data.ax)
                     / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
             return -1;
         }
     }
@@ -125,9 +121,8 @@ namespace sensors {
             return static_cast<float>(mpu6500Data.ay)
                     / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
             return -1;
         }
     }
@@ -138,9 +133,8 @@ namespace sensors {
             return static_cast<float>(mpu6500Data.az)
                     / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
             return -1;
         }
     }
@@ -150,9 +144,8 @@ namespace sensors {
         if (imuInitialized) {
             return static_cast<float>(mpu6500Data.gx) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
             return -1;
         }
     }
@@ -162,9 +155,8 @@ namespace sensors {
         if (imuInitialized) {
             return static_cast<float>(mpu6500Data.gy) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
             return -1;
         }
     }
@@ -174,18 +166,16 @@ namespace sensors {
         if (imuInitialized) {
             return static_cast<float>(mpu6500Data.gz) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
             return -1;
         }
     }
 
     MahonyAhrs::attitude Mpu6500::getImuAttitude() {
         if (!imuInitialized) {
-            aruwlib::errors::SystemError error(aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
-            aruwlib::errors::ErrorController::addToErrorList(error);
         }
         return mpu6500Data.imuAtti;
     }
