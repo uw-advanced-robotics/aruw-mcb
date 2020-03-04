@@ -1,5 +1,5 @@
-#ifndef __GRAB_BOX_COMPRISED_COMMAND_HPP__
-#define __GRAB_BOX_COMPRISED_COMMAND_HPP__
+#ifndef __THROW_BOX_COMPRISED_COMMAND_HPP__
+#define __THROW_BOX_COMPRISED_COMMAND_HPP__
 
 #include "src/aruwlib/control/comprised_command.hpp"
 #include "grabber_subsystem.hpp"
@@ -16,10 +16,10 @@ namespace aruwsrc
 namespace engineer
 {
 
-class GrabBoxComprisedCommand : public ComprisedCommand
+class ThrowBoxComprisedCommand : public ComprisedCommand
 {
  public:
-   GrabBoxComprisedCommand(
+   ThrowBoxComprisedCommand(
       GrabberSubsystem* grabber,
       WristSubsystem* wrist,
       float wristAngleChange,
@@ -45,13 +45,11 @@ class GrabBoxComprisedCommand : public ComprisedCommand
 
    WristRotateCommand wristOutCommand;
 
-   bool grabSequenceCommencing;
-
-   // TODO: Lift
+   bool throwSequenceCommencing;
 };
 
 }  // namespace engineer
 
 }  // namespace aruwsrc
 
-#endif  // __GRAB_BOX_COMPRISED_COMMAND_HPP__
+#endif  // __THROW_BOX_COMPRISED_COMMAND_HPP__

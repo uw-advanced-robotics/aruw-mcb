@@ -46,6 +46,8 @@ class DumpBoxComprisedCommand : public ComprisedCommand
    WristRotateCommand wristOutCommand;
 
    bool dumpSequenceCommencing;
+
+   // TODO: Lift
 };
 
 }  // namespace engineer
