@@ -19,7 +19,7 @@ private:
     DroneTurretSubsystem* turret;
     aruwlib::algorithms::Ramp ramp;
     static constexpr uint32_t ZERO_THROTTLE_TIME_MS = 2000;
-    static constexpr uint32_t RAMP_TIME_MS = 500;
+    static constexpr uint32_t RAMP_TIME_MS = 1000;
 
     uint32_t zeroThrottleStartTime;
     uint32_t lastUpdateTime;

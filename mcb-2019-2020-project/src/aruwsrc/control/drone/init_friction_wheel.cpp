@@ -7,21 +7,25 @@ namespace drone
 {
 
 void InitFrictionWheelCommand::initialize() {
-    ramp.setTarget(turret->MAX_PWM_DUTY);
-    turret->setRawFrictionWheelOutput(turret->MIN_PWM_DUTY);
-    zeroThrottleStartTime = modm::Clock::now().getTime();
-    lastUpdateTime = zeroThrottleStartTime;
+    if (!turret->initialized) {
+        ramp.setTarget(turret->MAX_PWM_DUTY);
+        turret->setRawFrictionWheelOutput(turret->MIN_PWM_DUTY);
+        zeroThrottleStartTime = modm::Clock::now().getTime();
+        lastUpdateTime = zeroThrottleStartTime;
+    }
 }
 
 void InitFrictionWheelCommand::execute() {
-    uint32_t currentTime = modm::Clock::now().getTime();
-    if (!(currentTime - zeroThrottleStartTime < ZERO_THROTTLE_TIME_MS))
-    {
-        ramp.update(((float)(currentTime - lastUpdateTime) / RAMP_TIME_MS) *
-                (turret->MAX_PWM_DUTY - turret->MIN_PWM_DUTY));
-        turret->setRawFrictionWheelOutput(ramp.getValue());
+    if (!turret->initialized) {
+        uint32_t currentTime = modm::Clock::now().getTime();
+        if (!(currentTime - zeroThrottleStartTime < ZERO_THROTTLE_TIME_MS))
+        {
+            ramp.update(((float)(currentTime - lastUpdateTime) / RAMP_TIME_MS) *
+                    (turret->MAX_PWM_DUTY - turret->MIN_PWM_DUTY));
+            //turret->setRawFrictionWheelOutput(ramp.getValue());
+        }
+        lastUpdateTime = currentTime;
     }
-    lastUpdateTime = currentTime;
 }
 
 bool InitFrictionWheelCommand::isFinished() const {
@@ -29,8 +33,12 @@ bool InitFrictionWheelCommand::isFinished() const {
 }
 
 void InitFrictionWheelCommand::end(bool interrupted) {
-    turret->stopFrictionWheel();
+    if (!turret->initialized)
+    {
+       turret->stopFrictionWheel();
+    }
     turret->initialized = !interrupted;
+    
 }
 }
 }

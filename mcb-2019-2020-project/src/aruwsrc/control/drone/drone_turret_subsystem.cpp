@@ -18,9 +18,8 @@ void DroneTurretSubsystem::setFrictionWheelOutput(float percentage) {
         stopFrictionWheel();
     }
     else {
-        currentFrictionWheelPWMDuty = 
-                mapValLimited<float>(percentage, 0.0f, 1.0f, MIN_PWM_DUTY, MAX_PWM_DUTY);
-        setRawFrictionWheelOutput(currentFrictionWheelPWMDuty);
+        throttleRamp.setTarget(mapValLimited<float>(percentage, 0.0f, 1.0f, MIN_PWM_DUTY, MAX_PWM_DUTY));
+        lastRampTime = Board::getTimeMicroseconds();
     }
 }
 
@@ -35,7 +34,13 @@ void DroneTurretSubsystem::stopFrictionWheel() {
 }
 
 void DroneTurretSubsystem::refresh() {
-    
+    throttleRamp.update(RAMP_RATE * (Board::getTimeMicroseconds() - lastRampTime));
+    setRawFrictionWheelOutput(throttleRamp.getValue());
+    lastRampTime = Board::getTimeMicroseconds();
+}
+
+bool DroneTurretSubsystem::isInitialized() {
+    return initialized;
 }
 
 }
