@@ -23,5 +23,5 @@ void ControlFrictionWheelCommand::end(bool interrupted) {
     }
 }
 
-} // namespace drone
-} // namespace aruwsrc
+}  // namespace drone
+}  // namespace aruwsrc

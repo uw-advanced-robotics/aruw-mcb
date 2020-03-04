@@ -55,8 +55,8 @@ class DroneTurretSubsystem : public Subsystem
     bool isInitialized();
 };
 
-} // namespace drone
+}  // namespace drone
 
-} // namespace aruwsrc
+}  // namespace aruwsrc
 
 #endif

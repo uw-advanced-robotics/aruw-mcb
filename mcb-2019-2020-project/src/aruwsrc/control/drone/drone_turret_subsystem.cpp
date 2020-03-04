@@ -13,7 +13,7 @@ namespace drone
 {
 
 void DroneTurretSubsystem::setFrictionWheelOutput(float percentage) {
-    if (!initialized){
+    if (!initialized) {
         stopFrictionWheel();
     }
     else {
@@ -43,5 +43,5 @@ bool DroneTurretSubsystem::isInitialized() {
     return initialized;
 }
 
-} // namespace drone
-} // namespace aruwsrc
+}  // namespace drone
+}  // namespace aruwsrc

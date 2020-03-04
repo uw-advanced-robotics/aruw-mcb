@@ -38,7 +38,7 @@ class InitFrictionWheelCommand : public Command
     bool isFinished(void) const override;
 };
 
-} // namespace drone
-} // namespace aruwsrc
+}  // namespace drone
+}  // namespace aruwsrc
 
 #endif

@@ -38,5 +38,5 @@ void InitFrictionWheelCommand::end(bool interrupted) {
     }
     turret->initialized = !interrupted;
 }
-} // namespace drone
-} // namespace aruwsrc
+}  // namespace drone
+}  // namespace aruwsrc
