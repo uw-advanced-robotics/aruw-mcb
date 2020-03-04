@@ -32,7 +32,12 @@ class YAxisSubsystem : public Subsystem {
 
     void setPosition(Position p);
 
-    void refresh(void);
+    float watchDistance; 
+
+    void initializeYAxis();
+
+    void refresh();
+
 
  private:
     static constexpr aruwlib::motor::MotorId YAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
@@ -52,6 +57,8 @@ class YAxisSubsystem : public Subsystem {
     const float MAX_DIST = 30.0f;
     const float Y_AXIS_PULLEY_RADIUS = 2.5f;
     const int GM_3510_GEAR_RATIO = 19;
+    float startEncoder = 0;
+    bool isInitialized = false; 
 
     aruwlib::motor::DjiMotor yAxisMotor;
     modm::Pid<float> yAxisPositionPid;

@@ -23,6 +23,8 @@ namespace control
     }
 
     void YAxisSubsystem::refresh(void) {
+        watchDistance = getPosition(); //
+        // if (! online), false 
         if (!yAxisRamp.isTargetReached()) {
             updateMotorDisplacement(
                 &yAxisMotor,
@@ -42,9 +44,14 @@ namespace control
         currentPosition = ramp->getValue(); 
     }
 
+    void YAxisSubsystem::initializeYAxis() {
+        startEncoder = yAxisMotor.encStore.getEncoderUnwrapped();
+        
+    }
     float YAxisSubsystem::getPosition() const
     {
-        return yAxisMotor.encStore.getEncoderUnwrapped() * (2 * aruwlib::algorithms::PI * Y_AXIS_PULLEY_RADIUS / static_cast<float>(GM_3510_GEAR_RATIO));
+        // yAxisMotor->setDesiredOutput(yAxisMotor.getOutputDesired - (yAxisMotor.encStore.getEncoderUnwrapped() / 8192.0f) * (2 * aruwlib::algorithms::PI * Y_AXIS_PULLEY_RADIUS / static_cast<float>(GM_3510_GEAR_RATIO)));
+        return ((yAxisMotor.encStore.getEncoderUnwrapped() - startEncoder) / 8192.0f) * (2 * aruwlib::algorithms::PI * Y_AXIS_PULLEY_RADIUS / static_cast<float>(GM_3510_GEAR_RATIO));
     }
 
 }
