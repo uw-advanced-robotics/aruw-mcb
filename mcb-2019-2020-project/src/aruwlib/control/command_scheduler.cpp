@@ -72,6 +72,8 @@ namespace control
         }
     }
 
+    uint32_t fme = 0;
+
     void CommandScheduler::run()
     {
         uint32_t checkRunPeriod = Board::getTimeMicroseconds();
@@ -119,6 +121,7 @@ namespace control
         }
         // make sure we are not going over tolerable runtime, otherwise something is really
         // wrong with the code
+        fme = Board::getTimeMicroseconds() - checkRunPeriod;
         if (Board::getTimeMicroseconds() - checkRunPeriod > MAX_ALLOWABLE_SCHEDULER_RUNTIME)
         {
             // shouldn't take more than 1 ms to complete all this stuff, if it does something

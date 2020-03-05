@@ -48,7 +48,6 @@ using namespace aruwlib::sensors;
 #if defined(TARGET_SOLDIER)
 TurretSubsystem turretSubsystem;
 TurretCVCommand turretCVCommand(&turretSubsystem);
-TurretInitCommand turretInitCommand(&turretSubsystem);
 
 ChassisSubsystem soldierChassis;
 
@@ -189,12 +188,8 @@ int main()
     /* register io mappings here --------------------------------------------*/
     #if defined(TARGET_SOLDIER)
     IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootSlowCommand
-    );
-    IoMapper::addHoldMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
-        &turretCVCommand
     );
     #elif defined(TARGET_SENTRY)
     IoMapper::addHoldRepeatMapping(

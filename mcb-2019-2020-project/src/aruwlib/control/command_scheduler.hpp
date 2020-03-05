@@ -52,7 +52,7 @@ class CommandScheduler
 
  private:
     // maximum time before we start erroring, in microseconds
-    static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 100;
+    static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 200;
 
     // a map containing keys of subsystems, pairs of Commands
     std::map<Subsystem*, Command*> subsystemToCommandMap;
