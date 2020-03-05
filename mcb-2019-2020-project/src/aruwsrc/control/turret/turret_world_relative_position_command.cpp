@@ -69,35 +69,17 @@ void TurretWorldRelativePositionCommand::execute()
 
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
-    // calculate the desired user angle in world reference frame
-    // if user does not want to move the turret, recalibrate the imu initial value
-    /// \todo test this
-    if (getUserTurretYawInput() < 0.00000000001f)
-    {
-        imuInitialYaw = Mpu6500::getImuAttitude().yaw;
-    }
-
     yawTargetAngle.shiftValue(getUserTurretYawInput());
-
-    /// \todo how do I do this
-    // turretSubsystem->setYawTarget(
-    //         turretSubsystem->getYawTarget().getValue()
-    //         - Mpu6500::getImuAttitude().yaw
-    //         + getUserTurretYawInput());
-
-    // limit the yaw min and max angles
-    aruwlib::algorithms::ContiguousFloat min(
-        turretSubsystem->TURRET_YAW_MIN_ANGLE + Mpu6500::getImuAttitude().yaw, 0.0f, 360.0f);
-    aruwlib::algorithms::ContiguousFloat max(
-        turretSubsystem->TURRET_YAW_MAX_ANGLE + Mpu6500::getImuAttitude().yaw, 0.0f, 360.0f);
-    yawTargetAngle.limitValue(min, max);
+    yawTargetAngle.limitValue(
+            turretSubsystem->TURRET_YAW_MIN_ANGLE + Mpu6500::getImuAttitude().yaw - imuInitialYaw,
+            turretSubsystem->TURRET_YAW_MAX_ANGLE + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
 
     // the position controller is in world reference frame
     // (i.e. add imu yaw to current encoder value)
     currValueImuYawGimbal.setValue(turretSubsystem->getYawAngle().getValue()
             + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
 
-    // position controller based on imu and yaw gimbal angle
+    // position controller based on imu and yaw gimbal anglet
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
     float pidOutput = yawPid.runController(positionControllerError,
         turretSubsystem->getYawVelocity() + Mpu6500::getGz());
@@ -183,8 +165,13 @@ float TurretWorldRelativePositionCommand::calcPitchImuOffset()
     }
 }
 
+float prevTurretYawInput;
+float turretYawInterpolationSlope;
+
 float TurretWorldRelativePositionCommand::getUserTurretYawInput()
 {
+    /// \todo implement linear interpolation
+
     float userVelocity = -static_cast<float>(Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL))
             * USER_REMOTE_YAW_SCALAR
             + static_cast<float>(Remote::getMouseX()) * USER_MOUSE_YAW_SCALAR;

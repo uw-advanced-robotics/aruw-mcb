@@ -181,7 +181,6 @@ int main()
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
-    CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
     #elif defined(TARGET_SENTRY)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateKickerCommand);
