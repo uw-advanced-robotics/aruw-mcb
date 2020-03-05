@@ -45,20 +45,20 @@ void TurretManualCommand::updateTurretVelocity()
 
 float TurretManualCommand::getRemoteXMovement() const
 {
-    return Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL) * REMOTE_INPUT_SCALER;
+    return Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL) * REMOTE_INPUT_SCALAR;
 }
 
 float TurretManualCommand::getRemoteYMovement() const
 {
-    return Remote::getChannel(Remote::Channel::RIGHT_VERTICAL) * REMOTE_INPUT_SCALER;
+    return Remote::getChannel(Remote::Channel::RIGHT_VERTICAL) * REMOTE_INPUT_SCALAR;
 }
 
-int16_t TurretManualCommand::getMouseXMovement() const
+float TurretManualCommand::getMouseXMovement() const
 {
     return Remote::getMouseX() * KEYBOARD_INPUT_SCALAR;
 }
 
-int16_t TurretManualCommand::getMouseYMovement() const
+float TurretManualCommand::getMouseYMovement() const
 {
     return Remote::getMouseY() * KEYBOARD_INPUT_SCALAR;
 }

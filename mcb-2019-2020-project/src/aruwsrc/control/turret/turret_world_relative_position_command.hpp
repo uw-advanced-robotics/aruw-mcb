@@ -86,6 +86,20 @@ class TurretWorldRelativePositionCommand : public Command
 
     void runPitchPositionController();
 
+    /**
+     * Calculates the necessary pitch offset required to keep the turret pitch angle
+     * the same in world frame. If the chassis is tilted up for example, and the
+     * turret is pointed straight ahead, the pitch offset will return an angle such
+     * that the angle added to the desired pitch angle keeps the turret level. On the 
+     * other hand, if the chassis is tilted sideways, the turret pitch angle doesn't
+     * have to change since the chassis tilt was perpendicular the position of the
+     * pitch motor
+     * 
+     * Calculation as follows:
+     *  - First convert the yaw angle and imu angle to normalized vectors.
+     *  - Take the dot product. This gives the relationship between chassis
+     *    tilt and how much the turret should adjust in response to the tilt
+     */
     float calcPitchImuOffset();
 
     float getUserTurretYawInput();

@@ -74,6 +74,8 @@ class ContiguousFloat {
      */
     void limitValue(const ContiguousFloat& min, const ContiguousFloat& max);
 
+    void limitValue(const float& min, const float& max);
+
     // Getters/Setters ----------------
     // Value
     float getValue() const;

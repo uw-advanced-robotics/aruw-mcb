@@ -24,7 +24,7 @@ class TurretManualCommand : public Command {
     void end(bool);
 
  private:
-    const float REMOTE_INPUT_SCALER = 10000;
+    const float REMOTE_INPUT_SCALAR = 10000;
     const float KEYBOARD_INPUT_SCALAR = 50;
 
     const float YAW_P = 1.0f;
@@ -48,12 +48,11 @@ class TurretManualCommand : public Command {
 
     void updateTurretVelocity();
 
-
     float getRemoteXMovement() const;
     float getRemoteYMovement() const;
 
-    int16_t getMouseXMovement() const;
-    int16_t getMouseYMovement() const;
+    float getMouseXMovement() const;
+    float getMouseYMovement() const;
 };
 
 }  // namespace control

@@ -56,6 +56,7 @@ void TurretWorldRelativePositionCommand::initialize()
     imuInitialYaw = Mpu6500::getImuAttitude().yaw;
     yawPid.reset();
     pitchPid.reset();
+    /// \todo test this
     yawTargetAngle.setValue(turretSubsystem->getPrevYawTarget().getValue());
     pitchTargetAngle.setValue(turretSubsystem->getPrevPitchTarget().getValue());
 }
@@ -70,11 +71,19 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
 {
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value
+    /// \todo test this
+    if (getUserTurretYawInput() < 0.00000000001f)
+    {
+        imuInitialYaw = Mpu6500::getImuAttitude().yaw;
+    }
+
     yawTargetAngle.shiftValue(getUserTurretYawInput());
-    // the position controller is in world reference frame
-    // (i.e. add imu yaw to current encoder value)
-    currValueImuYawGimbal.setValue(turretSubsystem->getYawAngle().getValue()
-            + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
+
+    /// \todo how do I do this
+    // turretSubsystem->setYawTarget(
+    //         turretSubsystem->getYawTarget().getValue()
+    //         - Mpu6500::getImuAttitude().yaw
+    //         + getUserTurretYawInput());
 
     // limit the yaw min and max angles
     aruwlib::algorithms::ContiguousFloat min(
@@ -83,10 +92,15 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
         turretSubsystem->TURRET_YAW_MAX_ANGLE + Mpu6500::getImuAttitude().yaw, 0.0f, 360.0f);
     yawTargetAngle.limitValue(min, max);
 
+    // the position controller is in world reference frame
+    // (i.e. add imu yaw to current encoder value)
+    currValueImuYawGimbal.setValue(turretSubsystem->getYawAngle().getValue()
+            + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
+
     // position controller based on imu and yaw gimbal angle
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
     float pidOutput = yawPid.runController(positionControllerError,
-        turretSubsystem->getYawVelocity() + Mpu6500::getGz());  /// \todo fix gz in mpu6500 class
+        turretSubsystem->getYawVelocity() + Mpu6500::getGz());
 
     // feed forward controller based on desired chassis wheel rotation
     float chassisRotationProportional = FEED_FORWARD_KP
@@ -136,14 +150,15 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
     // position controller based on turret pitch gimbal and imu data
     float positionControllerError = currImuPitchAngle.difference(pitchTargetAngle);
     float pidOutput = pitchPid.runController(positionControllerError,
-        turretSubsystem->getPitchVelocity());  /// \todo fix imu stuff for pitch
+        turretSubsystem->getPitchVelocity());
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
 
 float TurretWorldRelativePositionCommand::calcPitchImuOffset()
 {
-    if (Mpu6500::getImuAttitude().pitch < 45.0f && Mpu6500::getImuAttitude().roll < 45.0f)
+    if (fabsf(Mpu6500::getImuAttitude().pitch) < 45.0f
+            && fabsf(Mpu6500::getImuAttitude().roll) < 45.0f)
     {
         // for following vector calculations
         // i direction perpendicular to foward direction of chassis

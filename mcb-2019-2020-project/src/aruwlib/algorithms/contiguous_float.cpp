@@ -80,6 +80,13 @@ void ContiguousFloat::shiftValue(const float& shiftMagnitude) {
     reboundValue();
 }
 
+void ContiguousFloat::limitValue(const float& min, const float& max)
+{
+    ContiguousFloat minContig(min, this->lowerBound, this->upperBound);
+    ContiguousFloat maxContig(max, this->lowerBound, this->upperBound);
+    limitValue(minContig, maxContig);
+}
+
 void ContiguousFloat::limitValue(const ContiguousFloat& min, const ContiguousFloat& max)
 {
     if (min.getValue() == max.getValue())

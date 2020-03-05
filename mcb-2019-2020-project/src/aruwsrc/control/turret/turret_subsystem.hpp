@@ -46,6 +46,12 @@ class TurretSubsystem : public Subsystem {
     const aruwlib::algorithms::ContiguousFloat& getPrevYawTarget() const;
     const aruwlib::algorithms::ContiguousFloat& getPrevPitchTarget() const;
 
+    const aruwlib::algorithms::ContiguousFloat& getYawTarget() const;
+    const aruwlib::algorithms::ContiguousFloat& getPitchTarget() const;
+
+    void setYawTarget(float target);
+    void setPitchTarget(float target);
+
  private:
     const uint16_t YAW_START_ENCODER_POSITION = 8160;
     const uint16_t PITCH_START_ENCODER_POSITION = 4100;
@@ -59,6 +65,9 @@ class TurretSubsystem : public Subsystem {
 
     aruwlib::algorithms::ContiguousFloat currPitchAngle;
     aruwlib::algorithms::ContiguousFloat currYawAngle;
+
+    aruwlib::algorithms::ContiguousFloat yawTarget;
+    aruwlib::algorithms::ContiguousFloat pitchTarget;
 
     aruwlib::algorithms::ContiguousFloat prevYawTarget;
     aruwlib::algorithms::ContiguousFloat pretPitchTarget;
