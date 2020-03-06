@@ -214,6 +214,24 @@ namespace control
         pitchTarget.limitValue(TURRET_PITCH_MIN_ANGLE, TURRET_PITCH_MAX_ANGLE);
     }
 
+    void TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
+    {
+        float chassisRotationProportional = FEED_FORWARD_KP
+                * desiredChassisRotation
+                * (fabsf(FEED_FORWARD_SIN_GAIN * sin(turretSubsystem->getYawAngleFromCenter()
+                * aruwlib::algorithms::PI / 180.0f)) + 1.0f);
+
+        chassisRotationDerivative = aruwlib::algorithms::lowPassFilter(chassisRotationDerivative,
+                chassisSubsystem->getChassisDesiredRotation() - prevChassisRotationDesired,
+                FEED_FORWARD_DERIVATIVE_LOW_PASS);
+
+        float chassisRotationFeedForward = aruwlib::algorithms::limitVal<float>(
+                chassisRotationProportional + FEED_FORWARD_KD * chassisRotationDerivative,
+                -FEED_FORWARD_MAX_OUTPUT, FEED_FORWARD_MAX_OUTPUT);
+
+
+    }
+
 }  // namespace control
 
 }  // namespace aruwsrc

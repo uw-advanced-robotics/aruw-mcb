@@ -56,7 +56,6 @@ void TurretWorldRelativePositionCommand::initialize()
     imuInitialYaw = Mpu6500::getImuAttitude().yaw;
     yawPid.reset();
     pitchPid.reset();
-    /// \todo test this
     yawTargetAngle.setValue(turretSubsystem->getPrevYawTarget().getValue());
     pitchTargetAngle.setValue(turretSubsystem->getPrevPitchTarget().getValue());
 }
@@ -79,10 +78,12 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     currValueImuYawGimbal.setValue(turretSubsystem->getYawAngle().getValue()
             + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
 
-    // position controller based on imu and yaw gimbal anglet
+    // position controller based on imu and yaw gimbal angle
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
     float pidOutput = yawPid.runController(positionControllerError,
-        turretSubsystem->getYawVelocity() + Mpu6500::getGz());
+            turretSubsystem->getYawVelocity() + Mpu6500::getGz());
+
+    turretSubsystem->yawFeedForwardCalculation(chassisSubsystem->getChassisDesiredRotation());
 
     // feed forward controller based on desired chassis wheel rotation
     float chassisRotationProportional = FEED_FORWARD_KP
@@ -99,13 +100,14 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
             -FEED_FORWARD_MAX_OUTPUT, FEED_FORWARD_MAX_OUTPUT);
 
     // don't do feed forward if it is trying to go past turret bounds
-    if ((chassisRotationFeedForward > 0.0f
-        && turretSubsystem->getYawAngle().getValue() > TurretSubsystem::TURRET_YAW_MAX_ANGLE)
-        || (chassisRotationFeedForward < 0.0f
-        && turretSubsystem->getYawAngle().getValue() < TurretSubsystem::TURRET_YAW_MIN_ANGLE))
-    {
-        chassisRotationFeedForward = 0.0f;
-    }
+    /// \todo test this
+    // if ((chassisRotationFeedForward > 0.0f
+    //     && turretSubsystem->getYawAngle().getValue() > TurretSubsystem::TURRET_YAW_MAX_ANGLE)
+    //     || (chassisRotationFeedForward < 0.0f
+    //     && turretSubsystem->getYawAngle().getValue() < TurretSubsystem::TURRET_YAW_MIN_ANGLE))
+    // {
+    //     chassisRotationFeedForward = 0.0f;
+    // }
 
     pidOutput += chassisRotationFeedForward;
     prevChassisRotationDesired = chassisSubsystem->getChassisDesiredRotation();
