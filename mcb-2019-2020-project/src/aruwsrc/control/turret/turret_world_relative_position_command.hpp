@@ -70,9 +70,6 @@ class TurretWorldRelativePositionCommand : public Command
     float lowPassUserVelocityYaw;
     float lowPassUserVelocityPitch;
 
-    float chassisRotationDerivative = 0.0f;
-    float prevChassisRotationDesired = 0.0f;
-
     aruwsrc::algorithms::TurretPid yawPid;
     aruwsrc::algorithms::TurretPid pitchPid;
 

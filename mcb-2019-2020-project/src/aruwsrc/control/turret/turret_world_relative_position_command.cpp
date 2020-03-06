@@ -83,34 +83,8 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     float pidOutput = yawPid.runController(positionControllerError,
             turretSubsystem->getYawVelocity() + Mpu6500::getGz());
 
-    turretSubsystem->yawFeedForwardCalculation(chassisSubsystem->getChassisDesiredRotation());
-
-    // feed forward controller based on desired chassis wheel rotation
-    float chassisRotationProportional = FEED_FORWARD_KP
-            * chassisSubsystem->getChassisDesiredRotation()
-            * (fabsf(FEED_FORWARD_SIN_GAIN * sin(turretSubsystem->getYawAngleFromCenter()
-            * aruwlib::algorithms::PI / 180.0f)) + 1.0f);
-
-    chassisRotationDerivative = aruwlib::algorithms::lowPassFilter(chassisRotationDerivative,
-            chassisSubsystem->getChassisDesiredRotation() - prevChassisRotationDesired,
-            FEED_FORWARD_DERIVATIVE_LOW_PASS);
-
-    float chassisRotationFeedForward = aruwlib::algorithms::limitVal<float>(
-            chassisRotationProportional + FEED_FORWARD_KD * chassisRotationDerivative,
-            -FEED_FORWARD_MAX_OUTPUT, FEED_FORWARD_MAX_OUTPUT);
-
-    // don't do feed forward if it is trying to go past turret bounds
-    /// \todo test this
-    // if ((chassisRotationFeedForward > 0.0f
-    //     && turretSubsystem->getYawAngle().getValue() > TurretSubsystem::TURRET_YAW_MAX_ANGLE)
-    //     || (chassisRotationFeedForward < 0.0f
-    //     && turretSubsystem->getYawAngle().getValue() < TurretSubsystem::TURRET_YAW_MIN_ANGLE))
-    // {
-    //     chassisRotationFeedForward = 0.0f;
-    // }
-
-    pidOutput += chassisRotationFeedForward;
-    prevChassisRotationDesired = chassisSubsystem->getChassisDesiredRotation();
+    pidOutput += turretSubsystem->yawFeedForwardCalculation(
+            chassisSubsystem->getChassisDesiredRotation());
 
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
@@ -120,16 +94,14 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
     // calculate the desired user angle in world reference frame
     // if user does not want to move the turret, recalibrate the imu initial value
     pitchTargetAngle.shiftValue(getUserTurretPitchInput());
+
+    // limit the yaw min and max angles
+    pitchTargetAngle.limitValue(turretSubsystem->TURRET_PITCH_MIN_ANGLE + calcPitchImuOffset(),
+            turretSubsystem->TURRET_PITCH_MAX_ANGLE + calcPitchImuOffset());
+
     // the position controller is in world reference frame
     // (i.e. add imu yaw to current encoder value)
     currImuPitchAngle.setValue(turretSubsystem->getPitchAngle().getValue() + calcPitchImuOffset());
-
-    // limit the yaw min and max angles
-    aruwlib::algorithms::ContiguousFloat min(
-        turretSubsystem->TURRET_PITCH_MIN_ANGLE + calcPitchImuOffset(), 0.0f, 360.0f);
-    aruwlib::algorithms::ContiguousFloat max(
-        turretSubsystem->TURRET_PITCH_MAX_ANGLE + calcPitchImuOffset(), 0.0f, 360.0f);
-    pitchTargetAngle.limitValue(min, max);
 
     // position controller based on turret pitch gimbal and imu data
     float positionControllerError = currImuPitchAngle.difference(pitchTargetAngle);

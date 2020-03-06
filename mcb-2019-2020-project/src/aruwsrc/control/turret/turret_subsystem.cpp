@@ -214,22 +214,32 @@ namespace control
         pitchTarget.limitValue(TURRET_PITCH_MIN_ANGLE, TURRET_PITCH_MAX_ANGLE);
     }
 
-    void TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
+    float TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
     {
+        // calculate feed forward
         float chassisRotationProportional = FEED_FORWARD_KP
                 * desiredChassisRotation
-                * (fabsf(FEED_FORWARD_SIN_GAIN * sin(turretSubsystem->getYawAngleFromCenter()
+                * (fabsf(FEED_FORWARD_SIN_GAIN * sinf(getYawAngleFromCenter()
                 * aruwlib::algorithms::PI / 180.0f)) + 1.0f);
 
-        chassisRotationDerivative = aruwlib::algorithms::lowPassFilter(chassisRotationDerivative,
-                chassisSubsystem->getChassisDesiredRotation() - prevChassisRotationDesired,
+        feedforwardChassisRotateDerivative = aruwlib::algorithms::lowPassFilter(feedforwardChassisRotateDerivative,
+                desiredChassisRotation - feedforwardPrevChassisRotationDesired,
                 FEED_FORWARD_DERIVATIVE_LOW_PASS);
 
         float chassisRotationFeedForward = aruwlib::algorithms::limitVal<float>(
-                chassisRotationProportional + FEED_FORWARD_KD * chassisRotationDerivative,
+                chassisRotationProportional + FEED_FORWARD_KD * feedforwardChassisRotateDerivative,
                 -FEED_FORWARD_MAX_OUTPUT, FEED_FORWARD_MAX_OUTPUT);
 
+        feedforwardPrevChassisRotationDesired = desiredChassisRotation;
 
+        if ((chassisRotationFeedForward > 0.0f
+            && getYawAngle().getValue() > TurretSubsystem::TURRET_YAW_MAX_ANGLE)
+            || (chassisRotationFeedForward < 0.0f
+            && getYawAngle().getValue() < TurretSubsystem::TURRET_YAW_MIN_ANGLE))
+        {
+            chassisRotationFeedForward = 0.0f;
+        }
+        return chassisRotationFeedForward;
     }
 
 }  // namespace control

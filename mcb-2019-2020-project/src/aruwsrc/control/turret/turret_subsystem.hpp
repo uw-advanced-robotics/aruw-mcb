@@ -45,11 +45,10 @@ class TurretSubsystem : public Subsystem {
 
     /**
      * Calculates a yaw output that uses the desired chassis rotation as a feed forward gain.
-     * Adds the feed forward output to the desired yaw output.
      * 
      * The chassis rotation is given in desired wheel rpm.
      */
-    void yawFeedForwardCalculation(float desiredChassisRotation);
+    float yawFeedForwardCalculation(float desiredChassisRotation);
 
     const aruwlib::algorithms::ContiguousFloat& getPrevYawTarget() const;
     const aruwlib::algorithms::ContiguousFloat& getPrevPitchTarget() const;
@@ -73,6 +72,9 @@ class TurretSubsystem : public Subsystem {
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
     static const aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
+
+    float feedforwardChassisRotateDerivative = 0.0f;
+    float feedforwardPrevChassisRotationDesired = 0.0f;
 
     aruwlib::motor::DjiMotor pitchMotor;
     aruwlib::motor::DjiMotor yawMotor;
