@@ -5,6 +5,7 @@
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/control/controller_mapper.hpp"
 #include "src/aruwlib/errors/create_errors.hpp"
+#include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
 
 using namespace aruwlib::motor;
 
@@ -240,6 +241,18 @@ namespace control
             chassisRotationFeedForward = 0.0f;
         }
         return chassisRotationFeedForward;
+    }
+
+    float TurretSubsystem::projectChassisRelativeYawToWorldRelative(float yawAngle,
+                                                                    float imuInitialAngle)
+    {
+        return yawAngle + aruwlib::sensors::Mpu6500::getImuAttitude().yaw - imuInitialAngle;
+    }
+
+    float TurretSubsystem::projectWorldRelativeYawToChassisFrame(float yawAngle,
+                                                                 float imuInitialAngle)
+    {
+        return yawAngle - aruwlib::sensors::Mpu6500::getImuAttitude().yaw + imuInitialAngle;
     }
 
 }  // namespace control

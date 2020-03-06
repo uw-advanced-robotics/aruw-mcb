@@ -59,6 +59,10 @@ class TurretSubsystem : public Subsystem {
     void setYawTarget(float target);
     void setPitchTarget(float target);
 
+    static float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
+
+    static float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
+
  private:
     const uint16_t YAW_START_ENCODER_POSITION = 8160;
     const uint16_t PITCH_START_ENCODER_POSITION = 4100;

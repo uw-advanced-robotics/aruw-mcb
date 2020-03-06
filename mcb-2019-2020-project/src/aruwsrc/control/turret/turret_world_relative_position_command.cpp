@@ -70,13 +70,16 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
 {
     yawTargetAngle.shiftValue(getUserTurretYawInput());
     yawTargetAngle.limitValue(
-            turretSubsystem->TURRET_YAW_MIN_ANGLE + Mpu6500::getImuAttitude().yaw - imuInitialYaw,
-            turretSubsystem->TURRET_YAW_MAX_ANGLE + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
+            TurretSubsystem::projectChassisRelativeYawToWorldRelative(
+                    turretSubsystem->TURRET_YAW_MIN_ANGLE, imuInitialYaw),
+            TurretSubsystem::projectChassisRelativeYawToWorldRelative(
+                    turretSubsystem->TURRET_YAW_MAX_ANGLE, imuInitialYaw));
 
     // the position controller is in world reference frame
     // (i.e. add imu yaw to current encoder value)
-    currValueImuYawGimbal.setValue(turretSubsystem->getYawAngle().getValue()
-            + Mpu6500::getImuAttitude().yaw - imuInitialYaw);
+    currValueImuYawGimbal.setValue(
+            TurretSubsystem::projectChassisRelativeYawToWorldRelative(
+                    turretSubsystem->getYawAngle().getValue(), imuInitialYaw));
 
     // position controller based on imu and yaw gimbal angle
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
@@ -167,7 +170,8 @@ float TurretWorldRelativePositionCommand::getUserTurretPitchInput()
 // NOLINTNEXTLINE
 void TurretWorldRelativePositionCommand::end(bool)
 {
-    turretSubsystem->updatePrevYawTarget(yawTargetAngle.getValue());
+    turretSubsystem->updatePrevYawTarget(yawTargetAngle.getValue()
+            - Mpu6500::getImuAttitude().yaw + imuInitialYaw);
     turretSubsystem->updatePrevPitchTarget(pitchTargetAngle.getValue());
 }
 
