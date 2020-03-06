@@ -17,6 +17,25 @@
 extern void modm_undefined_handler(int32_t);
 void Undefined_Handler(void)
 {
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
+	asm volatile("nop");
 	int32_t irqn;
 	asm volatile("mrs %[irqn], ipsr" :[irqn] "=r" (irqn));
 	modm_undefined_handler(irqn - 16);

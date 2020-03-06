@@ -73,10 +73,12 @@ namespace control
     }
 
     uint32_t fme = 0;
+    int iiii;
 
     void CommandScheduler::run()
     {
         uint32_t checkRunPeriod = Board::getTimeMicroseconds();
+
         // Timestamp for reference and for disallowing a command from running
         // multiple times during the same call to run.
         if (this == &mainScheduler)
@@ -126,7 +128,8 @@ namespace control
         {
             // shouldn't take more than 1 ms to complete all this stuff, if it does something
             // is seriously wrong (i.e. you are adding subsystems unchecked)
-            RAISE_ERROR("scheduler took longer than MAX_ALLOWABLE_SCHEDULER_RUNTIME",
+            std::string s = std::to_string(Board::getTimeMicroseconds() - checkRunPeriod);
+            RAISE_ERROR("scheduler took longer than",
                     aruwlib::errors::Location::COMMAND_SCHEDULER,
                     aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
         }

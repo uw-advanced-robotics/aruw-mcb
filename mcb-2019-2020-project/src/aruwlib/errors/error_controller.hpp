@@ -29,7 +29,7 @@ class ErrorController
     static void update();
 
  private:
-    static const int ERROR_ROTATE_TIME = 5000;
+    static const int ERROR_ROTATE_TIME = 1000;
 
     static const unsigned ERROR_LIST_MAX_SIZE = 16;
 

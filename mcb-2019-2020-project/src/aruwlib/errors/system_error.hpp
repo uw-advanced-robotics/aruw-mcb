@@ -64,7 +64,7 @@ class SystemError
     SystemError();
 
     SystemError(const std::string& desc,
-                int line,
+                const int& line,
                 const std::string& file,
                 Location l,
                 ErrorType et);

@@ -14,16 +14,18 @@ namespace errors
 
     int ErrorController::currentDisplayIndex = 0;
 
+SystemError er;
     // add an error to list of errors
     void ErrorController::addToErrorList(SystemError error) {
         // only add error if it is not already added
+        er = error;
         for (SystemError sysErr : errorList)
-        {
+        { 
             if (
                 sysErr.getErrorType() == error.getErrorType()
                 && sysErr.getLocation() == error.getLocation()
-                && (sysErr.getDescription().compare(error.getDescription()) == 0)
-                && (sysErr.getFilename().compare(error.getFilename()) == 0)
+                // && (sysErr.getDescription().compare(error.getDescription()) == 0)
+                // && (sysErr.getFilename().compare(error.getFilename()) == 0)
                 && sysErr.getLineNumber() == error.getLineNumber()
             ) {
                 return;  // the error is already added
