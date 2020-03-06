@@ -8,8 +8,6 @@
 #include <iostream>
 #include <rm-dev-board-a/board.hpp>
 
-using namespace std;
-
 namespace src
 {
 
@@ -39,7 +37,7 @@ class SerialDataLogger
     
     char a;
 
-    string terminalInput;
+    std::string terminalInput;
 
 };
 
