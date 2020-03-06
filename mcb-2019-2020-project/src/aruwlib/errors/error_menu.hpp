@@ -1,10 +1,11 @@
-#ifndef __OLED_MENU_HPP__
-#define __OLED_MENU_HPP__
+#ifndef __ERROR_MENU_HPP__
+#define __ERROR_MENU_HPP__
 
 #include "modm/ui/menu/abstract_menu.hpp"
 #include "rm-dev-board-a/board.hpp"
 #include "modm/ui/menu/menu_buttons.hpp"
 #include "modm/processing/timer/periodic_timer.hpp"
+#include "src/aruwlib/display/sh1106.hpp"
 #include <list>
 
 namespace aruwlib
@@ -13,10 +14,10 @@ namespace aruwlib
 namespace errors
 {
 
-class OledMenu : public modm::AbstractMenu
+class ErrorMenu : public modm::AbstractMenu
 {
  public:
-    explicit OledMenu(modm::ViewStack *vs);
+    explicit ErrorMenu(modm::ViewStack *vs);
 
     void draw() override;
 
@@ -43,13 +44,10 @@ class OledMenu : public modm::AbstractMenu
     int maxEntries = 17;
 
  private:
-    void handleButtonStatus();
-    bool buttonIsIdle;
+    modm::ViewStack *viewStack;
 
     uint16_t display_update_time;
     modm::ShortPeriodicTimer timer;
-
-    modm::ViewStack *viewStack;
 };
 
 }  // namespace errors

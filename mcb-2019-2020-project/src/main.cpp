@@ -19,7 +19,7 @@
 #include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
-#include "src/aruwlib/errors/oled_menu.hpp"
+#include "src/aruwlib/errors/oled_display.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
@@ -52,20 +52,6 @@ int main()
     // 90MHz/64=~14MHz
     Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
 
-    aruwlib::display::Sh1106<
-        Board::DisplaySpiMaster,
-        Board::DisplayCommand,
-        Board::DisplayReset,
-        128, 64,
-        false
-    > display;
-
-    display.initializeBlocking();
-    display.setFont(modm::font::ScriptoNarrow);
-
-    modm::ViewStack vs(&display);
-    aruwlib::errors::OledMenu menu(&vs);
-
     aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
     contiguousFloatTest.testCore();
     contiguousFloatTest.testBadBounds();
@@ -80,6 +66,9 @@ int main()
     aruwlib::serial::XavierSerial::getXavierSerial().initialize();
 
     Mpu6500::init();
+
+    aruwlib::errors::OledDisplay display;
+    display.initialize();
 
     #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
     CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
@@ -108,8 +97,6 @@ int main()
         aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
         aruwlib::Remote::read();
-        //menu.draw();
-        display.update();
 
         if (updateImuPeriod.execute())
         {
