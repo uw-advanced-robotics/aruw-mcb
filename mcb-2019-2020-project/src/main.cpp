@@ -125,8 +125,7 @@ AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 #elif defined(TARGET_ENGINEER)
 WristCalibrateCommand wristCalibrateCommand(&wrist);
-//GrabBoxComprisedCommand grabBoxComprisedCommand(&wrist, &grabber, aruwlib::algorithms::PI, 1000.0f);
-GrabberCommand grabTestCommand(&grabber);
+GrabBoxComprisedCommand grabBoxComprisedCommand(&wrist, &grabber, aruwlib::algorithms::PI, 1000.0f);
 #endif
 
 int main()
@@ -181,7 +180,7 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
     #elif defined(TARGET_ENGINEER)
-    //CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
+    CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
     CommandScheduler::getMainScheduler().registerSubsystem(&grabber);
     #endif
 
@@ -227,7 +226,7 @@ int main()
     #elif defined(TARGET_ENGINEER)
     IoMapper::addHoldMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        &grabTestCommand
+        &grabBoxComprisedCommand
     );
     #endif
 
@@ -242,9 +241,10 @@ int main()
         aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
         aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
-        Board::LedA::setOutput(grabber.getIsSqueezed());
-
         Remote::read();
+
+        Board::LedA::setOutput(!grabber.getIsSqueezed());
+        Board::LedB::setOutput(!grabBoxComprisedCommand.isFinished());
 
         if (updateImuPeriod.execute())
         {

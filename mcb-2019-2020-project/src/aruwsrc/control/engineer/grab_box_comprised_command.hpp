@@ -45,7 +45,7 @@ class GrabBoxComprisedCommand : public ComprisedCommand
 
    WristRotateCommand wristOutCommand;
 
-   bool grabSequenceCommencing;
+   bool done;
 
    // TODO: Lift
 };

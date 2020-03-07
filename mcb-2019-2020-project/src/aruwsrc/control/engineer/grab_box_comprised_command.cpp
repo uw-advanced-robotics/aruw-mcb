@@ -15,7 +15,7 @@ GrabBoxComprisedCommand::GrabBoxComprisedCommand(
     grabberCommand(grabber),
     connectedWrist(wrist),
     wristOutCommand(wrist, wristAngleChange, wristRotateTime),
-    grabSequenceCommencing(false)
+    done(false)
     {
         this->comprisedCommandScheduler.registerSubsystem(grabber);
         this->addSubsystemRequirement(dynamic_cast<Subsystem*>(grabber));
@@ -31,13 +31,13 @@ void GrabBoxComprisedCommand::initialize()
     // rotate wrist out
     this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&wristOutCommand));
     
-    grabSequenceCommencing = false;
+    done = false;
 }
 
 void GrabBoxComprisedCommand::execute()
 {
-    if (!wristOutCommand.isFinished() && !grabSequenceCommencing) {
-        grabSequenceCommencing = true;
+    if (wristOutCommand.isFinished() && !done) {
+        done = true;
 
         // close grabber
         this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&grabberCommand));
@@ -46,7 +46,6 @@ void GrabBoxComprisedCommand::execute()
         // Start timer to account for the grabber to close on a cube
         // Once the time is up activate the lift to the upwards position
     }
-    //Board::LedA::setOutput(!wristOutCommand.isFinished());
     this->comprisedCommandScheduler.run();
 }
 
@@ -61,7 +60,7 @@ void GrabBoxComprisedCommand::end(bool interrupted)
 bool GrabBoxComprisedCommand::isFinished() const
 {
     // TODO: finished when the wrist is rotated and the lift is up
-    return wristOutCommand.isFinished();
+    return done && connectedGrabber->getIsSqueezed();
 }
 
 }  // namspace engineer
