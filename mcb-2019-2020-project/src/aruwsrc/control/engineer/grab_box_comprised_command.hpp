@@ -20,8 +20,8 @@ class GrabBoxComprisedCommand : public ComprisedCommand
 {
  public:
    GrabBoxComprisedCommand(
-      GrabberSubsystem* grabber,
       WristSubsystem* wrist,
+      GrabberSubsystem* grabber,
       float wristAngleChange,
       float wristRotateTime
    );

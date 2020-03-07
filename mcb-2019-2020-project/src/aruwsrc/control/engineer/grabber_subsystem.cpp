@@ -10,7 +10,7 @@ namespace aruwsrc
 namespace engineer
 {
     void GrabberSubsystem::refresh(void) {
-        grabberDigitalOutPin::set(isGrabberSqueezed); 
+        grabberDigitalOutPin::set(isGrabberSqueezed);
     }
 
     void GrabberSubsystem::setSqueezed(bool isGrabberSqueezed) {

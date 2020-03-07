@@ -7,8 +7,8 @@ namespace engineer
 {
 
 GrabBoxComprisedCommand::GrabBoxComprisedCommand(
-    GrabberSubsystem* grabber,
     WristSubsystem* wrist,
+    GrabberSubsystem* grabber,
     float wristAngleChange,
     float wristRotateTime) :
     connectedGrabber(grabber),
@@ -46,6 +46,7 @@ void GrabBoxComprisedCommand::execute()
         // Start timer to account for the grabber to close on a cube
         // Once the time is up activate the lift to the upwards position
     }
+    Board::LedG::setOutput(wristOutCommand.isFinished());
     this->comprisedCommandScheduler.run();
 }
 
