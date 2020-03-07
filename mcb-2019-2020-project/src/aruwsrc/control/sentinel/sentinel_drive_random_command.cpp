@@ -2,7 +2,6 @@
 
 #include "sentinel_drive_random_command.hpp"
 #include "sentinel_drive_subsystem.hpp"
-#include "src/aruwlib/communication/remote.hpp"
 
 namespace aruwsrc
 {

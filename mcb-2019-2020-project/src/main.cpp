@@ -30,8 +30,9 @@
 #include "src/aruwsrc/control/turret/turret_cv_command.hpp"
 #include "src/aruwsrc/control/turret/turret_init_command.hpp"
 #include "src/aruwsrc/control/turret/turret_manual_command.hpp"
-#include "src/aruwsrc/control/sentinel_drive_subsystem.hpp"
-#include "src/aruwsrc/control/sentinel_drive_random_command.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_drive_manual_command.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_drive_random_command.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_drive_subsystem.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -95,7 +96,6 @@ AgitatorSubsystem sentryKicker(
 ExampleSubsystem frictionWheelSubsystem;
 
 aruwsrc::control::SentinelDriveSubsystem sentinelDrive;
-aruwsrc::control::SentinelDriveRandomCommand sentinelDriveRandom(&sentinelDrive);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -116,6 +116,9 @@ ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
 AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
+
+aruwsrc::control::SentinelDriveRandomCommand sentinelDriveRandom(&sentinelDrive);
+aruwsrc::control::SentinelDriveManualCommand sentinelDriveManual(&sentinelDrive);
 #endif
 
 
@@ -180,7 +183,7 @@ int main()
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #elif defined(TARGET_SENTRY)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
-    sentinelDrive.setDefaultCommand(reinterpret_cast<Command*>(&sentinelDriveRandom));
+    sentinelDrive.setDefaultCommand(&sentinelDriveManual);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
@@ -210,6 +213,10 @@ int main()
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
         &agitatorKickerCommand
+    );
+    IoMapper::addHoldRepeatMapping(
+        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
+        &sentinelDriveRandom
     );
     #endif
 

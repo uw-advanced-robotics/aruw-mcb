@@ -68,7 +68,6 @@ namespace control
         float numberOfRotations = unwrappedAngle / (aruwlib::motor::DjiMotor::ENC_RESOLUTION);
         return numberOfRotations * 2.0f * aruwlib::algorithms::PI * WHEEL_RADIUS / GEAR_RATIO;
     }
-
 }  // namespace control
 
 }  // namespace aruwsrc

@@ -45,4 +45,5 @@ class SentinelDriveRandomCommand : public Command
 }  // namespace control
 
 }  // namespace aruwsrc
+
 #endif
