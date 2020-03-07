@@ -92,9 +92,9 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
                 chassisSubsystem->getChassisDesiredRotation());
     }
     #elif defined(TARGET_DRONE)
-    yawTargetAngle.limitValue(
-            turretSubsystem->TURRET_YAW_MIN_ANGLE,
-            turretSubsystem->TURRET_YAW_MAX_ANGLE);
+    // yawTargetAngle.limitValue(
+    //         turretSubsystem->TURRET_YAW_MIN_ANGLE,
+    //         turretSubsystem->TURRET_YAW_MAX_ANGLE);
 
     currValueImuYawGimbal.setValue(Mpu6500::getImuAttitude().yaw
             + TurretSubsystem::TURRET_START_ANGLE - imuInitialYaw);

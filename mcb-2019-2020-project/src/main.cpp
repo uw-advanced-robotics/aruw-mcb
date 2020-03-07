@@ -110,7 +110,7 @@ AgitatorSubsystem droneAgitator(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsyste::IS_AGITATOR_INVERTED
+    AgitatorSubsystem::IS_AGITATOR_INVERTED
 );
 
 DroneTurretSubsystem droneSubsystem;
@@ -139,6 +139,7 @@ AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 TurretWorldRelativePositionCommand turretUserCommand(&droneTurret);
 ShootFastComprisedCommand rotateDroneAgitator(&droneAgitator);
 InitFrictionWheelCommand initializeFrictionWheelCommand(&droneSubsystem);
+ControlFrictionWheelCommand controlFrictionWheelCommand(&droneSubsystem);
 #endif
 
 int main()
@@ -207,7 +208,7 @@ int main()
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #elif defined(TARGET_DRONE)
     droneTurret.setDefaultCommand(&turretUserCommand);
-    droneTurretSubsystem.setDefaultCommand(&initializeFrictionWheelCommand);
+    droneSubsystem.setDefaultCommand(&initializeFrictionWheelCommand);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
@@ -263,6 +264,7 @@ int main()
             aruwlib::errors::ErrorController::update();
             CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            droneSubsystem.setDefaultCommand(&controlFrictionWheelCommand);
         }
         modm::delayMicroseconds(10);
     }
