@@ -9,8 +9,8 @@ namespace engineer
 {
         float test;
     WristSubsystem::WristSubsystem() :
-        leftMotor(LEFT_MOTOR_ID, CAN_BUS_MOTORS, true),
-        rightMotor(RIGHT_MOTOR_ID, CAN_BUS_MOTORS, false),
+        leftMotor(LEFT_MOTOR_ID, CAN_BUS_MOTORS, true, "left wrist motor"),
+        rightMotor(RIGHT_MOTOR_ID, CAN_BUS_MOTORS, false, "right wrist motor"),
         leftPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         rightPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredWristAngleLeft(0.0f),

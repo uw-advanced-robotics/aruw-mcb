@@ -23,15 +23,17 @@
 #include "src/aruwsrc/control/example/example_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
-#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "src/aruwsrc/control/engineer/grab_box_comprised_command.hpp"
 #include "src/aruwsrc/control/turret/turret_subsystem.hpp"
 #include "src/aruwsrc/control/turret/turret_cv_command.hpp"
 #include "src/aruwsrc/control/turret/turret_init_command.hpp"
 #include "src/aruwsrc/control/turret/turret_manual_command.hpp"
+#include "src/aruwsrc/control/engineer/wrist_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/wrist_calibrate_command.hpp"
+#include "src/aruwsrc/control/engineer/wrist_rotate_command.hpp"
+#include "src/aruwsrc/control/engineer/grab_box_comprised_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -179,10 +181,6 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
     #endif
 
-    #if defined(TARGET_ENGINEER)
-    CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
-    #endif
-
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
     soldierChassis.setDefaultCommand(&chassisDriveCommand);
@@ -193,7 +191,7 @@ int main()
     #endif
 
     #if defined(TARGET_ENGINEER)
-    
+    CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
@@ -208,10 +206,6 @@ int main()
     #if defined(TARGET_ENGINEER)
     CommandScheduler::getMainScheduler().addCommand(&wristCalibrateCommand);
     #endif
-
-    /* define timers here ---------------------------------------------------*/
-    modm::ShortPeriodicTimer updateImuPeriod(2);
-    modm::ShortPeriodicTimer sendMotorTimeout(2);
 
     /* register io mappings here --------------------------------------------*/
     #if defined(TARGET_SOLDIER)
@@ -244,6 +238,10 @@ int main()
         &wristInCommand
     );
     #endif
+
+    /* define timers here ---------------------------------------------------*/
+    modm::ShortPeriodicTimer updateImuPeriod(2);
+    modm::ShortPeriodicTimer sendMotorTimeout(2);
 
     while (1)
     {
