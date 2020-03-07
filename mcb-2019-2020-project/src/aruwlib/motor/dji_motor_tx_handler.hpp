@@ -57,6 +57,10 @@ class DjiMotorTxHandler
 
     static void removeFromMotorManager(const DjiMotor& motor);
 
+    static DjiMotor const* getCan1MotorData(MotorId motorId);
+
+    static DjiMotor const* getCan2MotorData(MotorId motorId);
+
  private:
     static void addMotorToManager(DjiMotor** canMotorStore, DjiMotor*const motor);
 
@@ -67,6 +71,8 @@ class DjiMotorTxHandler
     );
 
     static void removeFromMotorManager(const DjiMotor& motor, DjiMotor** motorStore);
+
+    static void zeroTxMessage(modm::can::Message* message);
 };
 
 }  // namespace motor

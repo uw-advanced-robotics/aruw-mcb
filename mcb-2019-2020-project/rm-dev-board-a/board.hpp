@@ -76,6 +76,15 @@ struct SystemClock
     static constexpr uint32_t Timer13 = Apb1Timer;
     static constexpr uint32_t Timer14 = Apb1Timer;
 
+    static constexpr uint32_t PWM_FREQUENCY = 50;
+    static constexpr uint32_t PWM_RESOLUTION = 31000;
+    static constexpr uint32_t APB1_TIMER_CLOCKS = 48150000;
+    static constexpr uint32_t APB2_TIMER_CLOCKS = 92500000;
+    static constexpr uint32_t APB1_PRESCALER
+        = ((APB1_TIMER_CLOCKS/PWM_FREQUENCY) / PWM_RESOLUTION - 1);
+    static constexpr uint32_t APB2_PRESCALER
+        = ((APB2_TIMER_CLOCKS / PWM_FREQUENCY) / PWM_RESOLUTION - 1);
+
     static bool inline
     enable()
     {
@@ -187,6 +196,13 @@ using ImuMosi = GpioF9;
 using ImuNcc = GpioF6;
 using ImuSpiMaster = SpiMaster5;
 
+using DisplaySck = GpioB3;
+using DisplayMiso = GpioB4;
+using DisplayMosi = GpioA7;
+using DisplayReset = GpioB10;
+using DisplayCommand = GpioB9;
+using DisplaySpiMaster = SpiMaster1;
+
 inline void
 killAllGpioOutput()
 {
@@ -234,6 +250,11 @@ initialize()
     CanFilter::setFilter(14, CanFilter::FIFO0,
         CanFilter::StandardIdentifier(0),
         CanFilter::StandardFilterMask(0));
+}
+
+inline uint32_t getTimeMicroseconds()
+{
+    return DWT->CYCCNT / static_cast<uint32_t>(modm::clock::fcpu_MHz);
 }
 
 }  // namespace Board

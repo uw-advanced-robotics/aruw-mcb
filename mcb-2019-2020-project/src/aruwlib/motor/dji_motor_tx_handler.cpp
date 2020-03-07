@@ -2,6 +2,7 @@
 #include <rm-dev-board-a/board.hpp>
 #include "dji_motor_tx_handler.hpp"
 #include "dji_motor.hpp"
+#include "src/aruwlib/errors/create_errors.hpp"
 
 #define CAN_DJI_MESSAGE_SEND_LENGTH 8
 #define CAN_DJI_LOW_IDENTIFIER 0X200
@@ -69,6 +70,11 @@ namespace motor
         );
         can2MessageHigh.setExtended(false);
 
+        zeroTxMessage(&can1MessageLow);
+        zeroTxMessage(&can1MessageHigh);
+        zeroTxMessage(&can2MessageLow);
+        zeroTxMessage(&can2MessageHigh);
+
         serializeMotorStoreSendData(can1MotorStore, &can1MessageLow, &can1MessageHigh);
         serializeMotorStoreSendData(can2MotorStore, &can2MessageLow, &can2MessageHigh);
 
@@ -124,12 +130,31 @@ namespace motor
         if (motorStore[id] == nullptr)
         {
             // error, trying to remove something that doesn't exist!
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("trying to remove something that doesn't exist",
+                    aruwlib::errors::Location::MOTOR_CONTROL,
+                    aruwlib::errors::ErrorType::NULL_MOTOR_ID);
             return;
         }
         motorStore[id] = nullptr;
     }
 
+    void DjiMotorTxHandler::zeroTxMessage(modm::can::Message* message)
+    {
+        for (int i = 0; i < message->length; i++)
+        {
+            message->data[i] = 0;
+        }
+    }
+
+    DjiMotor const* DjiMotorTxHandler::getCan1MotorData(MotorId motorId)
+    {
+        return can1MotorStore[DJI_MOTOR_NORMALIZED_ID(motorId)];
+    }
+
+    DjiMotor const* DjiMotorTxHandler::getCan2MotorData(MotorId motorId)
+    {
+        return can2MotorStore[DJI_MOTOR_NORMALIZED_ID(motorId)];
+    }
 }  // namespace motor
 
 }  // namespace aruwlib

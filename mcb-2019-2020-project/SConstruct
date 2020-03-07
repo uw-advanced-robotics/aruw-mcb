@@ -53,12 +53,15 @@ if profile == "debug":
     env.Append(CCFLAGS = [
        "-fno-inline",
     ])
+    
+if 'additional-ccflags' in ARGUMENTS:
+    env.Append(CCFLAGS = [
+       ARGUMENTS['additional-ccflags'],
+    ])
 
-# Get the robot type
-robot = ARGUMENTS.get("robot","soldier").upper()
+if GetOption('num_jobs') == 1:
+    SetOption('num_jobs', 8)
 
-robot_types = ['HERO', 'ENGINEER', 'SOLDIER', 'DRONE', 'SENTRY']
-if robot not in robot_types:
-    Exit("Robot is not set to a valid robot!");
+print("running with -j", GetOption('num_jobs'))
 
 env.BuildTarget(sources)

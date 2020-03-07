@@ -33,8 +33,8 @@ class ExampleSubsystem : public Subsystem
     ExampleSubsystem(
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
-        : leftWheel(leftMotorId, CAN_BUS_MOTORS, true),
-        rightWheel(rightMotorId, CAN_BUS_MOTORS, false),
+        : leftWheel(leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
+        rightWheel(rightMotorId, CAN_BUS_MOTORS, false, "right example motor"),
         velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredRpm(0)
@@ -49,9 +49,9 @@ class ExampleSubsystem : public Subsystem
     static const aruwlib::motor::MotorId RIGHT_MOTOR_ID;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
-    const float PID_P = 10.0f;
+    const float PID_P = 5.0f;
     const float PID_I = 0.0f;
-    const float PID_D = 0.0f;
+    const float PID_D = 1.0f;
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000;
 

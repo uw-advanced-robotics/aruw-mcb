@@ -2,7 +2,7 @@
 #include <modm/container/linked_list.hpp>
 #include "can_rx_handler.hpp"
 #include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
-
+#include "src/aruwlib/errors/create_errors.hpp"
 namespace aruwlib
 {
 
@@ -68,11 +68,16 @@ namespace can
             return;
         }
         int32_t handlerStoreId = DJI_MOTOR_NORMALIZED_ID(rxMessage.getIdentifier());
-        // if (not in bounds) throw NON-FATAL-ERROR-CHECK
         if ((handlerStoreId >= 0 && handlerStoreId < MAX_RECEIVE_UNIQUE_HEADER_CAN1)
             && messageHandlerStore[handlerStoreId] != nullptr)
         {
             messageHandlerStore[handlerStoreId]->processMessage(rxMessage);
+        }
+        else
+        {
+            RAISE_ERROR("Invalid can id received - not between 0x200 and 0x208",
+                    aruwlib::errors::Location::CAN_RX,
+                    aruwlib::errors::ErrorType::MOTOR_ID_OUT_OF_BOUNDS);
         }
     }
 
@@ -95,6 +100,8 @@ namespace can
         uint32_t id = DJI_MOTOR_NORMALIZED_ID(rxListner.canIdentifier);
         if (messageHandlerStore[id] == nullptr)
         {
+            RAISE_ERROR("trying to remove something from rx listner that doesn't exist",
+                    aruwlib::errors::CAN_RX, aruwlib::errors::INVALID_REMOVE)
             // error, trying to remove something that doesn't exist!
             return;
         }
