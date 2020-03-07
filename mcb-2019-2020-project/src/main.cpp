@@ -119,9 +119,8 @@ ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
 AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
-#endif
 
-#if defined(TARGET_ENGINEER)
+#elif defined(TARGET_ENGINEER)
 WristCalibrateCommand wristCalibrateCommand(&wrist);
 WristRotateCommand wristOutCommand(&wrist, 2.0f * aruwlib::algorithms::PI / 2.0f, 1000.0f);
 WristRotateCommand wristInCommand(&wrist, -2.0f * aruwlib::algorithms::PI / 2.0f, 1000.0f);
@@ -179,6 +178,8 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryAgitator);
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
+    #elif defined(TARGET_ENGINEER)
+    CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
@@ -190,10 +191,6 @@ int main()
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #endif
 
-    #if defined(TARGET_ENGINEER)
-    CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
-    #endif
-
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
@@ -201,9 +198,7 @@ int main()
     #elif defined(TARGET_SENTRY)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateKickerCommand);
-    #endif
-
-    #if defined(TARGET_ENGINEER)
+    #elif defined(TARGET_ENGINEER)
     CommandScheduler::getMainScheduler().addCommand(&wristCalibrateCommand);
     #endif
 
@@ -226,9 +221,7 @@ int main()
         IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
         &agitatorKickerCommand
     );
-    #endif
-
-    #if defined(TARGET_ENGINEER)
+    #elif defined(TARGET_ENGINEER)
     IoMapper::addHoldMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &wristOutCommand
@@ -249,6 +242,9 @@ int main()
         aruwlib::can::CanRxHandler::pollCanData();
         aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
         aruwlib::serial::RefSerial::getRefSerial().updateSerial();
+
+        Board::LedA::setOutput(wristInCommand.isFinished());
+        Board::LedB::setOutput(wristOutCommand.isFinished());
 
         Remote::read();
 

@@ -17,8 +17,7 @@ namespace engineer
         desiredWristAngleRight(0.0f),
         wristCalibratedAngleLeft(0.0f),
         wristCalibratedAngleRight(0.0f),
-        wristIsCalibrated(false),
-        wristIsIn(true)
+        wristIsCalibrated(false)
     {}
 
     void WristSubsystem::refresh()
@@ -82,16 +81,6 @@ namespace engineer
         wristCalibratedAngleRight = getUncalibratedWristAngleRight();
         wristIsCalibrated = true;
         return true;
-    }
-
-    void WristSubsystem::wristToggleState()
-    {
-        wristIsIn = !wristIsIn;
-    }
-
-    bool WristSubsystem::isIn()
-    {
-        return wristIsIn;
     }
 
     void WristSubsystem::wristRunPositionPid(void)
