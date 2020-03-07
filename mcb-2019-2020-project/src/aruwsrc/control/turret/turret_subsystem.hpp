@@ -22,19 +22,25 @@ class TurretSubsystem : public Subsystem {
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
+    static constexpr bool IS_YAW_MOTOR_INVERTED = true;
+    static constexpr bool IS_PITCH_MOTOR_INVERTED = true;
     #elif defined(TARGET_DRONE)
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 60.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 60.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
+    static constexpr bool IS_YAW_MOTOR_INVERTED = true;
+    static constexpr bool IS_PITCH_MOTOR_INVERTED = true;
     #else
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 10.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 10.0f;
+    static constexpr bool IS_YAW_MOTOR_INVERTED = true;
+    static constexpr bool IS_PITCH_MOTOR_INVERTED = true;
     #endif
 
-    TurretSubsystem();
+    TurretSubsystem(bool isYawMotorInverted, bool isPitchMotorInverted);
 
     void refresh();
 

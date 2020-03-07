@@ -47,7 +47,8 @@ using namespace aruwlib::sensors;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
-TurretSubsystem turretSubsystem;
+TurretSubsystem turretSubsystem(TurretSubsystem::IS_YAW_MOTOR_INVERTED,
+        TurretSubsystem::IS_PITCH_MOTOR_INVERTED);
 TurretCVCommand turretCVCommand(&turretSubsystem);
 
 ChassisSubsystem soldierChassis;
@@ -61,7 +62,7 @@ AgitatorSubsystem agitator17mm(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted
+    AgitatorSubsystem::IS_AGITATOR_INVERTED
 );
 
 ExampleSubsystem frictionWheelSubsystem;
@@ -94,7 +95,19 @@ AgitatorSubsystem sentryKicker(
 ExampleSubsystem frictionWheelSubsystem;
 
 #elif defined (TARGET_DRONE)
-TurretSubsystem droneTurret;
+TurretSubsystem droneTurret(TurretSubsystem::IS_YAW_MOTOR_INVERTED,
+        TurretSubsystem::IS_PITCH_MOTOR_INVERTED);
+AgitatorSubsystem droneAgitator(
+    AgitatorSubsystem::PID_17MM_P,
+    AgitatorSubsystem::PID_17MM_I,
+    AgitatorSubsystem::PID_17MM_D,
+    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem::AGITATOR_MOTOR_ID,
+    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
+    AgitatorSubsystem::IS_AGITATOR_INVERTED
+);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -118,6 +131,7 @@ AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 #elif defined(TARGET_DRONE)
 TurretWorldRelativePositionCommand turretUserCommand(&droneTurret);
+ShootFastComprisedCommand rotateDroneAgitator(&droneAgitator);
 #endif
 
 int main()
@@ -173,6 +187,7 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
     #elif defined(TARGET_DRONE)
     CommandScheduler::getMainScheduler().registerSubsystem(&droneTurret);
+    CommandScheduler::getMainScheduler().registerSubsystem(&droneAgitator);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
@@ -208,6 +223,11 @@ int main()
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
         &agitatorKickerCommand
+    );
+    #elif defined(TARGET_DRONE)
+    IoMapper::addHoldRepeatMapping(
+        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+        &rotateDroneAgitator
     );
     #endif
 

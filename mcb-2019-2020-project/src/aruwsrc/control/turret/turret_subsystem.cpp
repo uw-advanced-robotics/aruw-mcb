@@ -14,9 +14,9 @@ namespace aruwsrc
 
 namespace control
 {
-    TurretSubsystem::TurretSubsystem() :
-        pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true, "pitch motor"),
-        yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false, "yaw motor"),
+    TurretSubsystem::TurretSubsystem(bool isYawMotorInverted, bool isPitchMotorInverted) :
+        pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, isPitchMotorInverted, "pitch motor"),
+        yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, isYawMotorInverted, "yaw motor"),
         currPitchAngle(0.0f, 0.0f, 360.0f),
         currYawAngle(0.0f, 0.0f, 360.0f),
         yawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),

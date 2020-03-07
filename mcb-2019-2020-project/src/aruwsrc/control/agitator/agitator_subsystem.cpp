@@ -22,10 +22,10 @@ namespace agitator
         float agitatorGearRatio,
         aruwlib::motor::MotorId agitatorMotorId,
         aruwlib::can::CanBus agitatorCanBusId,
-        bool isAgitatorInverted
+        bool IS_AGITATOR_INVERTED
     ) :
         agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
-        agitatorMotor(agitatorMotorId, agitatorCanBusId, isAgitatorInverted, "agitator motor"),
+        agitatorMotor(agitatorMotorId, agitatorCanBusId, IS_AGITATOR_INVERTED, "agitator motor"),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
         agitatorIsCalibrated(false),

@@ -28,7 +28,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 
-    static constexpr bool isAgitatorInverted = false;
+    static constexpr bool IS_AGITATOR_INVERTED = false;
 
     #elif defined(TARGET_SENTRY)
     // position pid terms
@@ -70,6 +70,20 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR6;
     static constexpr aruwlib::can::CanBus HERO2_AGITATOR_MOTOR_CAN_BUS
             = aruwlib::can::CanBus::CAN_BUS1;
+
+    #elif defined(TARGET_DRONE)
+    // position pid terms
+    // pid terms for sentry
+    static constexpr float PID_17MM_P = 170000.0f;
+    static constexpr float PID_17MM_I = 0.0f;
+    static constexpr float PID_17MM_D = 80.0f;
+    static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
+    static constexpr float PID_17MM_MAX_OUT = 16000.0f;
+
+    static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
+    static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+
+    static constexpr bool IS_AGITATOR_INVERTED = false;
     #endif
 
     // agitator gear ratio, for determining shaft rotation angle
@@ -85,7 +99,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
         float agitatorGearRatio,
         aruwlib::motor::MotorId agitatorMotorId,
         aruwlib::can::CanBus agitatorCanBusId,
-        bool isAgitatorInverted
+        bool IS_AGITATOR_INVERTED
     );
 
     void refresh();
