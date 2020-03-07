@@ -26,8 +26,8 @@ float TurretPid::runController(float error, float errorDerivative)
 
 float TurretPid::runControllerDerivateError(float error, float dt)
 {
-    float errorDerivative = error / dt;
-    previousTimestamp = modm::Clock::now().getTime();
+    float errorDerivative =  (error - prevError) / dt;
+    prevError = error;
     return runController(error, errorDerivative);
 }
 

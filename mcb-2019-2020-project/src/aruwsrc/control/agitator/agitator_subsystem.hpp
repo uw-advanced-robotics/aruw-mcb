@@ -83,7 +83,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 
-    static constexpr bool IS_AGITATOR_INVERTED = false;
+    static constexpr bool IS_AGITATOR_INVERTED = true;
     #endif
 
     // agitator gear ratio, for determining shaft rotation angle

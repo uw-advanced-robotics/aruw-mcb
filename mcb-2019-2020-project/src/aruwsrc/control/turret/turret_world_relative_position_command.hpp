@@ -57,11 +57,11 @@ class TurretWorldRelativePositionCommand : public Command
     static constexpr float USER_REMOTE_PITCH_SCALAR = 0.5f;
     static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / 1000.0f);
     #elif defined(TARGET_DRONE)
-    static constexpr float YAW_P = 4500.0f;  // 500.0f;
+    static constexpr float YAW_P = 5000.0f;
     static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 140.0f;  // 50.0f
+    static constexpr float YAW_D = 100.0f;
     static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 32000.0f;  // 16000.0f
+    static constexpr float YAW_MAX_OUTPUT = 32000.0f;
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
     static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
@@ -69,7 +69,7 @@ class TurretWorldRelativePositionCommand : public Command
 
     static constexpr float PITCH_P = 3500.0f;
     static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 80.0f;
+    static constexpr float PITCH_D = 90.0f;
     static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
     static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
     static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;

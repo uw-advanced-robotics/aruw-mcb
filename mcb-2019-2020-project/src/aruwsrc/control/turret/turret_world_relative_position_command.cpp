@@ -83,6 +83,14 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
             TurretSubsystem::projectChassisRelativeYawToWorldRelative(
                     turretSubsystem->getYawAngle().getValue(), imuInitialYaw));
 
+    // position controller based on imu and yaw gimbal angle
+    float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
+    float pidOutput = yawPid.runControllerDerivateError(positionControllerError, 2.0f);
+
+    if (chassisSubsystem != nullptr) {
+        pidOutput += turretSubsystem->yawFeedForwardCalculation(
+                chassisSubsystem->getChassisDesiredRotation());
+    }
     #elif defined(TARGET_DRONE)
     yawTargetAngle.limitValue(
             turretSubsystem->TURRET_YAW_MIN_ANGLE,
@@ -90,19 +98,11 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
 
     currValueImuYawGimbal.setValue(Mpu6500::getImuAttitude().yaw
             + TurretSubsystem::TURRET_START_ANGLE - imuInitialYaw);
-    #else
-    #endif
 
     // position controller based on imu and yaw gimbal angle
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
-    float pidOutput = yawPid.runController(positionControllerError,
-            turretSubsystem->getYawVelocity() + Mpu6500::getGz());
-
-    #if defined(TARGET_SOLDIER)
-    if (chassisSubsystem != nullptr) {
-        pidOutput += turretSubsystem->yawFeedForwardCalculation(
-                chassisSubsystem->getChassisDesiredRotation());
-    }
+    float pidOutput = yawPid.runController(positionControllerError, Mpu6500::getGz());
+    #else
     #endif
 
     turretSubsystem->setYawMotorOutput(pidOutput);
@@ -125,19 +125,24 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
     // (i.e. add imu yaw to current encoder value)
     currImuPitchAngle.setValue(turretSubsystem->getPitchAngle().getValue() + pitchImuOffset);
 
+    // position controller based on turret pitch gimbal and imu data
+    float positionControllerError = currImuPitchAngle.difference(pitchTargetAngle);
+    /// \todo fix this, currently drone stuff
+    float pidOutput = pitchPid.runController(positionControllerError, Mpu6500::getGx());
+
     #elif defined(TARGET_DRONE)
     pitchTargetAngle.limitValue(turretSubsystem->TURRET_PITCH_MIN_ANGLE,
             turretSubsystem->TURRET_PITCH_MAX_ANGLE);
 
-    currImuPitchAngle.setValue(Mpu6500::getImuAttitude().pitch);
-    #else
-    // do nothing
-    #endif
+    currImuPitchAngle.setValue(Mpu6500::getImuAttitude().roll
+            + TurretSubsystem::TURRET_START_ANGLE);
 
     // position controller based on turret pitch gimbal and imu data
     float positionControllerError = currImuPitchAngle.difference(pitchTargetAngle);
-    float pidOutput = pitchPid.runController(positionControllerError,
-        turretSubsystem->getPitchVelocity());
+    float pidOutput = pitchPid.runController(positionControllerError, Mpu6500::getGx());
+    #else
+    // do nothing
+    #endif
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
