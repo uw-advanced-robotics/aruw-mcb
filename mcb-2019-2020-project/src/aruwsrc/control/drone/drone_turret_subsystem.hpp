@@ -30,8 +30,8 @@ class DroneTurretSubsystem : public Subsystem
     bool initialized;
     float currentFrictionWheelPWMDuty;
 
-    static constexpr uint32_t RAMP_TIME_MS = 300;
-    static constexpr float RAMP_RATE = (MAX_PWM_DUTY - MIN_PWM_DUTY) / (RAMP_TIME_MS * 1000.0f);
+    static constexpr uint32_t RAMP_TIME_MS = 250;
+    static constexpr float RAMP_RATE = (MAX_PWM_DUTY - MIN_PWM_DUTY) / RAMP_TIME_MS;
     uint32_t lastRampTime;
     aruwlib::algorithms::Ramp throttleRamp;
 
