@@ -2,6 +2,7 @@
 
 #include "sentinel_drive_random_command.hpp"
 #include "sentinel_drive_subsystem.hpp"
+#include "src/aruwlib/communication/remote.hpp"
 
 namespace aruwsrc
 {
@@ -37,12 +38,8 @@ namespace control
         subsystemSentinelDrive->setDesiredRpm(currentRPM);
     }
 
-    void SentinelDriveRandomCommand::end(bool interrupted)
+    void SentinelDriveRandomCommand::end(bool)
     {
-        if (interrupted)
-        {
-            subsystemSentinelDrive->setDesiredRpm(0);
-        }
         subsystemSentinelDrive->setDesiredRpm(0);
     }
 

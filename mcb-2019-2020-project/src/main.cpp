@@ -30,6 +30,8 @@
 #include "src/aruwsrc/control/turret/turret_cv_command.hpp"
 #include "src/aruwsrc/control/turret/turret_init_command.hpp"
 #include "src/aruwsrc/control/turret/turret_manual_command.hpp"
+#include "src/aruwsrc/control/sentinel_drive_subsystem.hpp"
+#include "src/aruwsrc/control/sentinel_drive_random_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -91,6 +93,9 @@ AgitatorSubsystem sentryKicker(
 );
 
 ExampleSubsystem frictionWheelSubsystem;
+
+aruwsrc::control::SentinelDriveSubsystem sentinelDrive;
+aruwsrc::control::SentinelDriveRandomCommand sentinelDriveRandom(&sentinelDrive);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -165,6 +170,7 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryAgitator);
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
+    CommandScheduler::getMainScheduler().registerSubsystem(&sentinelDrive);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
@@ -174,6 +180,7 @@ int main()
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #elif defined(TARGET_SENTRY)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
+    sentinelDrive.setDefaultCommand(reinterpret_cast<Command*>(&sentinelDriveRandom));
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/

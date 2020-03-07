@@ -6,8 +6,8 @@ namespace aruwsrc
 
 namespace control
 {
-    const aruwlib::motor::MotorId SentinelDriveSubsystem::LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
-    const aruwlib::motor::MotorId SentinelDriveSubsystem::RIGHT_MOTOR_ID = aruwlib::motor::MOTOR3;
+    const aruwlib::motor::MotorId SentinelDriveSubsystem::LEFT_MOTOR_ID = aruwlib::motor::MOTOR5;
+    const aruwlib::motor::MotorId SentinelDriveSubsystem::RIGHT_MOTOR_ID = aruwlib::motor::MOTOR6;
 
     void SentinelDriveSubsystem::setDesiredRpm(float desRpm)
     {
@@ -60,8 +60,8 @@ namespace control
     // Here we get the radius from the getEncoderUnwrapped function
     float SentinelDriveSubsystem::distanceFromEncoder(aruwlib::motor::DjiMotor* motor){
         float unwrappedAngle = motor->encStore.getEncoderUnwrapped();
-        float numberOfRotations = unwrappedAngle / (ENC_RESOLUTION + 1);
-        return numberOfRotations * 2.0f * (atan(1)*4) * WHEEL_RADIUS / GEAR_RATIO;
+        float numberOfRotations = unwrappedAngle / (aruwlib::motor::DjiMotor::ENC_RESOLUTION + 1);
+        return numberOfRotations * 2.0f * (atanf(1.0f) * 4.0f) * WHEEL_RADIUS / GEAR_RATIO;
     }
 
 }  // namespace control
