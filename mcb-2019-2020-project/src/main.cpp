@@ -32,6 +32,9 @@
 #include "src/aruwsrc/control/turret/turret_manual_command.hpp"
 #include "src/aruwsrc/control/turret/turret_world_relative_position_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "src/aruwsrc/control/drone/drone_turret_subsystem.hpp"
+#include "src/aruwsrc/control/drone/init_friction_wheel_command.hpp"
+#include "src/aruwsrc/control/drone/control_friction_wheel_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -44,6 +47,7 @@ using namespace aruwlib;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
+using namespace aruwsrc::drone;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
@@ -106,8 +110,10 @@ AgitatorSubsystem droneAgitator(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::IS_AGITATOR_INVERTED
+    AgitatorSubsyste::IS_AGITATOR_INVERTED
 );
+
+DroneTurretSubsystem droneSubsystem;
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -132,6 +138,7 @@ AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 #elif defined(TARGET_DRONE)
 TurretWorldRelativePositionCommand turretUserCommand(&droneTurret);
 ShootFastComprisedCommand rotateDroneAgitator(&droneAgitator);
+InitFrictionWheelCommand initializeFrictionWheelCommand(&droneSubsystem);
 #endif
 
 int main()
@@ -188,6 +195,7 @@ int main()
     #elif defined(TARGET_DRONE)
     CommandScheduler::getMainScheduler().registerSubsystem(&droneTurret);
     CommandScheduler::getMainScheduler().registerSubsystem(&droneAgitator);
+    CommandScheduler::getMainScheduler().registerSubsystem(&droneSubsystem);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
@@ -199,6 +207,7 @@ int main()
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #elif defined(TARGET_DRONE)
     droneTurret.setDefaultCommand(&turretUserCommand);
+    droneTurretSubsystem.setDefaultCommand(&initializeFrictionWheelCommand);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/

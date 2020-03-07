@@ -56,6 +56,19 @@ inline float lowPassFilter(float prevValue, float newValue, float alpha)
     return alpha * newValue + (1.0f - alpha) * prevValue;
 }
 
+template< typename T >
+T mapVal(T val, T inMin, T inMax, T outMin, T outMax)
+{
+    return (inMax == inMin) ? 0 :
+            (val - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
+}
+
+template< typename T >
+T mapValLimited(T val, T inMin, T inMax, T outMin, T outMax)
+{
+    return mapVal<T>(limitVal<T>(val, inMin, inMax), inMin, inMax, outMin, outMax);
+}
+
 template <typename From, typename To>
 To reinterpretCopy(From from) {
     static_assert(sizeof(From) == sizeof(To), "can only reinterpret-copy types of the same size");
