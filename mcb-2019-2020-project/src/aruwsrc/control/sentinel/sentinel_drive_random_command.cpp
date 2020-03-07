@@ -10,7 +10,7 @@ namespace aruwsrc
 namespace control
 {
     SentinelDriveRandomCommand::SentinelDriveRandomCommand(SentinelDriveSubsystem* subsystem)
-        : Command(), subsystemSentinelDrive(subsystem), sleepTimeout(CHANGE_TIME_INTERVAL)
+        : Command(), subsystemSentinelDrive(subsystem), changeVelocityTimer(CHANGE_TIME_INTERVAL)
     {
         addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
     }
@@ -20,10 +20,10 @@ namespace control
 
     void SentinelDriveRandomCommand::execute()
     {
-        if (this->sleepTimeout.isExpired()) {
-            this->sleepTimeout.restart(CHANGE_TIME_INTERVAL);
-            currentRPM = rand() % MAX_RPM + 1;
-            if (currentRPM < MAX_RPM / 2) {
+        if (this->changeVelocityTimer.isExpired()) {
+            this->changeVelocityTimer.restart(CHANGE_TIME_INTERVAL);
+            currentRPM = rand() % (MAX_RPM - MIN_RPM + 1) + MIN_RPM;
+            if (rand() % 2 == 0) {
                 currentRPM -= MAX_RPM;
             }
         }
