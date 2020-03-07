@@ -17,7 +17,7 @@ class TurretWorldRelativePositionCommand : public Command
 {
  public:
     TurretWorldRelativePositionCommand(TurretSubsystem *subsystem,
-                                       chassis::ChassisSubsystem *chassis);
+                                       chassis::ChassisSubsystem *chassis = nullptr);
 
     void initialize();
 
@@ -30,6 +30,7 @@ class TurretWorldRelativePositionCommand : public Command
     void refresh();
 
  private:
+    #if defined(TARGET_SOLDIER)
     static constexpr float YAW_P = 4500.0f;  // 500.0f;
     static constexpr float YAW_I = 0.0f;
     static constexpr float YAW_D = 140.0f;  // 50.0f
@@ -55,6 +56,59 @@ class TurretWorldRelativePositionCommand : public Command
     static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / 1000.0f);
     static constexpr float USER_REMOTE_PITCH_SCALAR = 0.5f;
     static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / 1000.0f);
+    #elif defined(TARGET_DRONE)
+    static constexpr float YAW_P = 4500.0f;  // 500.0f;
+    static constexpr float YAW_I = 0.0f;
+    static constexpr float YAW_D = 140.0f;  // 50.0f
+    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
+    static constexpr float YAW_MAX_OUTPUT = 32000.0f;  // 16000.0f
+    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
+
+    static constexpr float PITCH_P = 3500.0f;
+    static constexpr float PITCH_I = 0.0f;
+    static constexpr float PITCH_D = 80.0f;
+    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
+    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
+
+    static constexpr float USER_INPUT_LOW_PASS_ALPHA = 0.153f;
+    static constexpr float USER_REMOTE_YAW_SCALAR = 0.5f;
+    static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / 1000.0f);
+    static constexpr float USER_REMOTE_PITCH_SCALAR = 0.5f;
+    static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / 1000.0f);
+    #else
+    static constexpr float YAW_P = 0;
+    static constexpr float YAW_I = 0;
+    static constexpr float YAW_D = 0;
+    static constexpr float YAW_MAX_ERROR_SUM = 0;
+    static constexpr float YAW_MAX_OUTPUT = 0;
+    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 0;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 0;
+    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 0;
+    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0;
+
+    static constexpr float PITCH_P = 3500.0f;
+    static constexpr float PITCH_I = 0;
+    static constexpr float PITCH_D = 0
+    static constexpr float PITCH_MAX_ERROR_SUM = 0;
+    static constexpr float PITCH_MAX_OUTPUT = 0;
+    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 0;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 0;
+    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 0;
+    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 0;
+
+    static constexpr float USER_INPUT_LOW_PASS_ALPHA = 0;
+    static constexpr float USER_REMOTE_YAW_SCALAR = 0;
+    static constexpr float USER_MOUSE_YAW_SCALAR = 0;
+    static constexpr float USER_REMOTE_PITCH_SCALAR = 0;
+    static constexpr float USER_MOUSE_PITCH_SCALAR = 0;
+    #endif
 
     TurretSubsystem *turretSubsystem;
     chassis::ChassisSubsystem *chassisSubsystem;

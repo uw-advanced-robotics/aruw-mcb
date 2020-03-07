@@ -45,8 +45,6 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 
-int i = 0;
-
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
 TurretSubsystem turretSubsystem;
@@ -94,6 +92,9 @@ AgitatorSubsystem sentryKicker(
 );
 
 ExampleSubsystem frictionWheelSubsystem;
+
+#elif defined (TARGET_DRONE)
+TurretSubsystem droneTurret;
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -115,6 +116,8 @@ ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
 AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
+#elif defined(TARGET_DRONE)
+TurretWorldRelativePositionCommand turretUserCommand(&droneTurret);
 #endif
 
 int main()
@@ -168,6 +171,8 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryAgitator);
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
+    #elif defined(TARGET_DRONE)
+    CommandScheduler::getMainScheduler().registerSubsystem(&droneTurret);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
@@ -177,6 +182,8 @@ int main()
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #elif defined(TARGET_SENTRY)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
+    #elif defined(TARGET_DRONE)
+    droneTurret.setDefaultCommand(&turretUserCommand);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/

@@ -69,6 +69,8 @@ void TurretWorldRelativePositionCommand::execute()
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
     yawTargetAngle.shiftValue(getUserTurretYawInput());
+
+    #if defined(TARGET_SOLDIER)
     yawTargetAngle.limitValue(
             TurretSubsystem::projectChassisRelativeYawToWorldRelative(
                     turretSubsystem->TURRET_YAW_MIN_ANGLE, imuInitialYaw),
@@ -81,13 +83,27 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
             TurretSubsystem::projectChassisRelativeYawToWorldRelative(
                     turretSubsystem->getYawAngle().getValue(), imuInitialYaw));
 
+    #elif defined(TARGET_DRONE)
+    yawTargetAngle.limitValue(
+            turretSubsystem->TURRET_YAW_MIN_ANGLE,
+            turretSubsystem->TURRET_YAW_MAX_ANGLE);
+
+    currValueImuYawGimbal.setValue(Mpu6500::getImuAttitude().yaw
+            + TurretSubsystem::TURRET_START_ANGLE - imuInitialYaw);
+    #else
+    #endif
+
     // position controller based on imu and yaw gimbal angle
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
     float pidOutput = yawPid.runController(positionControllerError,
             turretSubsystem->getYawVelocity() + Mpu6500::getGz());
 
-    pidOutput += turretSubsystem->yawFeedForwardCalculation(
-            chassisSubsystem->getChassisDesiredRotation());
+    #if defined(TARGET_SOLDIER)
+    if (chassisSubsystem != nullptr) {
+        pidOutput += turretSubsystem->yawFeedForwardCalculation(
+                chassisSubsystem->getChassisDesiredRotation());
+    }
+    #endif
 
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
@@ -98,13 +114,25 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
     // if user does not want to move the turret, recalibrate the imu initial value
     pitchTargetAngle.shiftValue(getUserTurretPitchInput());
 
+    #if defined(TARGET_SOLDIER)
+    float pitchImuOffset = calcPitchImuOffset();
+
     // limit the yaw min and max angles
-    pitchTargetAngle.limitValue(turretSubsystem->TURRET_PITCH_MIN_ANGLE + calcPitchImuOffset(),
-            turretSubsystem->TURRET_PITCH_MAX_ANGLE + calcPitchImuOffset());
+    pitchTargetAngle.limitValue(turretSubsystem->TURRET_PITCH_MIN_ANGLE + pitchImuOffset,
+            turretSubsystem->TURRET_PITCH_MAX_ANGLE + pitchImuOffset);
 
     // the position controller is in world reference frame
     // (i.e. add imu yaw to current encoder value)
-    currImuPitchAngle.setValue(turretSubsystem->getPitchAngle().getValue() + calcPitchImuOffset());
+    currImuPitchAngle.setValue(turretSubsystem->getPitchAngle().getValue() + pitchImuOffset);
+
+    #elif defined(TARGET_DRONE)
+    pitchTargetAngle.limitValue(turretSubsystem->TURRET_PITCH_MIN_ANGLE,
+            turretSubsystem->TURRET_PITCH_MAX_ANGLE);
+
+    currImuPitchAngle.setValue(Mpu6500::getImuAttitude().pitch);
+    #else
+    // do nothing
+    #endif
 
     // position controller based on turret pitch gimbal and imu data
     float positionControllerError = currImuPitchAngle.difference(pitchTargetAngle);
@@ -116,6 +144,7 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
 
 float TurretWorldRelativePositionCommand::calcPitchImuOffset()
 {
+    #if defined(TARGET_SOLDIER)
     if (fabsf(Mpu6500::getImuAttitude().pitch) < 45.0f
             && fabsf(Mpu6500::getImuAttitude().roll) < 45.0f)
     {
@@ -123,7 +152,7 @@ float TurretWorldRelativePositionCommand::calcPitchImuOffset()
         // i direction perpendicular to foward direction of chassis
         // j direction facing foward on chassis
         modm::Vector2f imuVector = {Mpu6500::getImuAttitude().pitch,
-                                    -Mpu6500::getImuAttitude().roll};
+                                   -Mpu6500::getImuAttitude().roll};
         modm::Vector2f turretVector = {
             cos(aruwlib::algorithms::degreesToRadians(turretSubsystem->getYawAngle().getValue())),
             sin(aruwlib::algorithms::degreesToRadians(turretSubsystem->getYawAngle().getValue()))
@@ -139,11 +168,11 @@ float TurretWorldRelativePositionCommand::calcPitchImuOffset()
     else
     {
         return 0.0f;
-    }
+    }    
+    #else
+    return 0.0f;
+    #endif
 }
-
-float prevTurretYawInput;
-float turretYawInterpolationSlope;
 
 float TurretWorldRelativePositionCommand::getUserTurretYawInput()
 {
