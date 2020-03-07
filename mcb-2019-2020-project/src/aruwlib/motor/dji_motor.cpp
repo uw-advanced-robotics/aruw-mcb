@@ -14,7 +14,8 @@ namespace motor
     DjiMotor::DjiMotor(
         MotorId desMotorIdentifier,
         aruwlib::can::CanBus motorCanBus,
-        bool isInverted
+        bool isInverted,
+        const std::string& name
         ) : CanRxListner(static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
         encStore(),
         motorIdentifier(desMotorIdentifier),
@@ -23,7 +24,8 @@ namespace motor
         shaftRPM(0),
         temperature(0),
         torque(0),
-        motorInverted(isInverted)
+        motorInverted(isInverted),
+        motorName(name)
     {
         motorDisconnectTimeout.stop();
         DjiMotorTxHandler::addMotorToManager(this);
@@ -49,8 +51,6 @@ namespace motor
         // invert motor if necessary
         encoderActual = motorInverted ? ENC_RESOLUTION - 1 - encoderActual : encoderActual;
         encStore.updateValue(encoderActual);
-
-        this->encw = encStore.getEncoderWrapped();
     }
 
     void DjiMotor::setDesiredOutput(int32_t desiredOutput)
@@ -60,7 +60,7 @@ namespace motor
         this->desiredOutput = motorInverted ? -desOutputNotInverted : desOutputNotInverted;
     }
 
-    bool DjiMotor::isMotorOnline()
+    bool DjiMotor::isMotorOnline() const
     {
         /*
          * motor online if the disconnect timout has not expired (if it received message but
@@ -115,6 +115,11 @@ namespace motor
     aruwlib::can::CanBus DjiMotor::getCanBus() const
     {
         return motorCanBus;
+    }
+
+    const std::string& DjiMotor::getName() const
+    {
+        return motorName;
     }
 
     int64_t DjiMotor::EncoderStore::getEncoderUnwrapped() const

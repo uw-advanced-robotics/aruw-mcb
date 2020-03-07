@@ -56,7 +56,7 @@ void AgitatorUnjamCommand::execute()
     {
         currAgitatorUnjamAngle = agitatorSetpointBeforeUnjam - 2 * aruwlib::algorithms::PI;
         salvationTimeout.stop();
-        agitatorUnjamRotateTimeout.restart(SALVATION_TIMEOUT_MS);
+        agitatorUnjamRotateTimeout.restart(SALVATION_UNJAM_BACK_WAIT_TIME);
         currUnjamstate = AGITATOR_SALVATION_UNJAM_BACK;
     }
 

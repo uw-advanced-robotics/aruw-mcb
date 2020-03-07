@@ -18,18 +18,21 @@
 #include "aruwlib/algorithms/contiguous_float_test.hpp"
 
 /* aruwsrc control includes -------------------------------------------------*/
-#include "src/aruwsrc/control/example_command.hpp"
-#include "src/aruwsrc/control/example_comprised_command.hpp"
-#include "src/aruwsrc/control/example_subsystem.hpp"
+#include "src/aruwsrc/control/example/example_command.hpp"
+#include "src/aruwsrc/control/example/example_comprised_command.hpp"
+#include "src/aruwsrc/control/example/example_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_calibrate_command.hpp"
-#include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command.hpp"
-#include "src/aruwsrc/control/engineer/wrist_subsystem.hpp"
-#include "src/aruwsrc/control/engineer/wrist_calibrate_command.hpp"
-#include "src/aruwsrc/control/engineer/wrist_rotate_command.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "src/aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
+#include "src/aruwsrc/control/turret/turret_cv_command.hpp"
+#include "src/aruwsrc/control/turret/turret_init_command.hpp"
+#include "src/aruwsrc/control/turret/turret_manual_command.hpp"
+#include "src/aruwsrc/control/engineer/wrist_subsystem.hpp"
+#include "src/aruwsrc/control/engineer/wrist_calibrate_command.hpp"
+#include "src/aruwsrc/control/engineer/wrist_rotate_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -40,10 +43,16 @@ using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 using namespace aruwlib;
 using namespace aruwsrc::chassis;
+using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
+TurretSubsystem turretSubsystem;
+TurretCVCommand turretCVCommand(&turretSubsystem);
+TurretInitCommand turretInitCommand(&turretSubsystem);
+TurretManualCommand turretManualCommand(&turretSubsystem);
+
 ChassisSubsystem soldierChassis;
 
 AgitatorSubsystem agitator17mm(
@@ -70,19 +79,19 @@ AgitatorSubsystem sentryAgitator(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted
+    false
 );
 
 AgitatorSubsystem sentryKicker(
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    AgitatorSubsystem::PID_17MM_KICKER_P,
+    AgitatorSubsystem::PID_17MM_KICKER_I,
+    AgitatorSubsystem::PID_17MM_KICKER_D,
+    AgitatorSubsystem::PID_17MM_KICKER_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_17MM_KICKER_MAX_OUT,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::SENTRY_KICKER_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted
+    false
 );
 
 ExampleSubsystem frictionWheelSubsystem;
@@ -108,7 +117,7 @@ aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsyste
 
 ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
-AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 2 * aruwlib::algorithms::PI, 100, 0);
+AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 #endif
 
@@ -117,6 +126,7 @@ WristCalibrateCommand wristCalibrateCommand(&wrist);
 WristRotateCommand wristOutCommand(&wrist, 2.0f * aruwlib::algorithms::PI / 2.0f, 1000.0f);
 WristRotateCommand wristInCommand(&wrist, -2.0f * aruwlib::algorithms::PI / 2.0f, 1000.0f);
 #endif
+
 
 int main()
 {
@@ -163,41 +173,39 @@ int main()
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().registerSubsystem(&agitator17mm);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
+    CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
+    CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
     #elif defined(TARGET_SENTRY)
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryAgitator);
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
     #endif
 
-    #if defined(TARGET_ENGINEER)
-    CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
-    #endif
-
     /* set any default commands to subsystems here --------------------------*/
     #if defined(TARGET_SOLDIER)
+    soldierChassis.setDefaultCommand(&chassisDriveCommand);
+    turretSubsystem.setDefaultCommand(&turretManualCommand);
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #elif defined(TARGET_SENTRY)
     frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
     #endif
 
     #if defined(TARGET_ENGINEER)
-    
+    CommandScheduler::getMainScheduler().registerSubsystem(&wrist);
     #endif
 
     /* add any starting commands to the scheduler here ----------------------*/
     #if defined(TARGET_SOLDIER)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
+    CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
     #elif defined(TARGET_SENTRY)
     CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
+    CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateKickerCommand);
     #endif
 
     #if defined(TARGET_ENGINEER)
     CommandScheduler::getMainScheduler().addCommand(&wristCalibrateCommand);
     #endif
-
-    /* define timers here ---------------------------------------------------*/
-    modm::ShortPeriodicTimer updateImuPeriod(2);
-    modm::ShortPeriodicTimer sendMotorTimeout(2);
 
     /* register io mappings here --------------------------------------------*/
     #if defined(TARGET_SOLDIER)
@@ -205,13 +213,17 @@ int main()
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootSlowCommand
     );
+    IoMapper::addHoldMapping(
+        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
+        &turretCVCommand
+    );
     #elif defined(TARGET_SENTRY)
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootSlowCommand
     );
     IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
         &agitatorKickerCommand
     );
     #endif
@@ -226,6 +238,10 @@ int main()
         &wristInCommand
     );
     #endif
+
+    /* define timers here ---------------------------------------------------*/
+    modm::ShortPeriodicTimer updateImuPeriod(2);
+    modm::ShortPeriodicTimer sendMotorTimeout(2);
 
     while (1)
     {

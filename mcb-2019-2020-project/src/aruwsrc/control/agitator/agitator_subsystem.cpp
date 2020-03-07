@@ -4,8 +4,7 @@
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
 #include "agitator_rotate_command.hpp"
-#include "src/aruwlib/errors/system_error.hpp"
-#include "src/aruwlib/errors/error_controller.hpp"
+#include "src/aruwlib/errors/create_errors.hpp"
 
 using namespace aruwlib::motor;
 
@@ -26,7 +25,7 @@ namespace agitator
         bool isAgitatorInverted
     ) :
         agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
-        agitatorMotor(agitatorMotorId, agitatorCanBusId, isAgitatorInverted),
+        agitatorMotor(agitatorMotorId, agitatorCanBusId, isAgitatorInverted, "agitator motor"),
         desiredAgitatorAngle(0.0f),
         agitatorCalibratedZeroAngle(0.0f),
         agitatorIsCalibrated(false),
@@ -41,9 +40,9 @@ namespace agitator
     {
         if (predictedRotateTime == 0)
         {
-            aruwlib::errors::SystemError error(aruwlib::errors::SUBSYSTEM,
+            RAISE_ERROR("The predicted rotate time is 0, this is physically impossible",
+                    aruwlib::errors::SUBSYSTEM,
                     aruwlib::errors::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
-            aruwlib::errors::ErrorController::addToErrorList(error);
         }
         agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
         agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
@@ -71,9 +70,6 @@ namespace agitator
         }
     }
 
-    float eOld = 0;
-    float d = 0.0f;
-
     void AgitatorSubsystem::agitatorRunPositionPid()
     {
         if (!agitatorIsCalibrated)
@@ -82,9 +78,6 @@ namespace agitator
         }
         else
         {
-            d = (desiredAgitatorAngle - getAgitatorAngle() - eOld);
-            eOld = desiredAgitatorAngle - getAgitatorAngle();
-
             agitatorPositionPid.runController(desiredAgitatorAngle - getAgitatorAngle(),
                     getAgitatorVelocity());
             agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());

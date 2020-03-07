@@ -1,6 +1,7 @@
 #ifndef __DJI_MOTOR_HPP__
 #define __DJI_MOTOR_HPP__
 
+#include <string>
 #include <modm/processing/timer/timeout.hpp>
 #include <rm-dev-board-a/board.hpp>
 #include "src/aruwlib/communication/can/can_rx_handler.hpp"
@@ -34,7 +35,8 @@ class DjiMotor : public aruwlib::can::CanRxListner
     static constexpr uint16_t ENC_RESOLUTION = 8192;
 
     // construct new motor
-    DjiMotor(MotorId desMotorIdentifier, aruwlib::can::CanBus motorCanBus, bool isInverted);
+    DjiMotor(MotorId desMotorIdentifier, aruwlib::can::CanBus motorCanBus, bool isInverted,
+            const std::string& name);
 
     ~DjiMotor();
 
@@ -84,7 +86,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
     // is simply a sanity check.
     void setDesiredOutput(int32_t desiredOutput);
 
-    bool isMotorOnline();
+    bool isMotorOnline() const;
 
     // Serializes send data and deposits it in a message to be sent.
     void serializeCanSendData(modm::can::Message* txMessage) const;
@@ -106,9 +108,32 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     aruwlib::can::CanBus getCanBus() const;
 
-    EncoderStore encStore;
+    const std::string& getName() const;
 
-    int32_t encw;
+    template<typename T>
+    static void assertEncoderType()
+    {
+        constexpr bool good_type =
+            std::is_same<typename std::decay<T>::type, std::int64_t>::value ||
+            std::is_same<typename std::decay<T>::type, std::uint16_t>::value;
+        static_assert(good_type, "x is not of the correct type");
+    }
+
+    template<typename T>
+    static T degreesToEncoder(float angle)
+    {
+        assertEncoderType<T>();
+        return static_cast<T>((ENC_RESOLUTION * angle) / 360);
+    }
+
+    template<typename T>
+    static float encoderToDegrees(T encoder)
+    {
+        assertEncoderType<T>();
+        return (360.0f * static_cast<float>(encoder)) / ENC_RESOLUTION;
+    }
+
+    EncoderStore encStore;
 
  private:
     // wait time before the motor is considered disconnected, in milliseconds
@@ -132,6 +157,8 @@ class DjiMotor : public aruwlib::can::CanRxListner
     int16_t torque;
 
     bool motorInverted;
+
+    std::string motorName;
 
     modm::ShortTimeout motorDisconnectTimeout;
 };
