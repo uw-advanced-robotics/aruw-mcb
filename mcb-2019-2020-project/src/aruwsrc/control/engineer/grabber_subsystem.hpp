@@ -26,10 +26,11 @@ class GrabberSubsystem : public Subsystem
  public:
    GrabberSubsystem(): isGrabberSqueezed(false) {}
 
-   void refresh(void);
+   void refresh();
 
    void setSqueezed(bool isGrabberSqueezed); 
 
+   bool getIsSqueezed();
  private: 
    bool isGrabberSqueezed; 
     

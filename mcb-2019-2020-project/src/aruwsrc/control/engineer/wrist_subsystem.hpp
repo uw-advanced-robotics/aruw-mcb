@@ -36,10 +36,6 @@ class WristSubsystem : public aruwlib::control::Subsystem
 
     bool wristCalibrateHere(void);
 
-    void wristToggleState();
-
-    bool isIn();
-
  private:
    static constexpr float WRIST_GEAR_RATIO = 19.0f;
    
@@ -70,8 +66,6 @@ class WristSubsystem : public aruwlib::control::Subsystem
 
    // If the wrist has been calibrated or not
    bool wristIsCalibrated;
-
-   bool wristIsIn;
 
    void wristRunPositionPid(void);
 

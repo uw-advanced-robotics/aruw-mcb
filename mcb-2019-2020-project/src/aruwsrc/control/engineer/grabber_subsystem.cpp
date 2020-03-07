@@ -17,6 +17,10 @@ namespace engineer
         this->isGrabberSqueezed = isGrabberSqueezed; 
         grabberDigitalOutPin::set(isGrabberSqueezed);
     }
+
+    bool GrabberSubsystem::getIsSqueezed() {
+        return isGrabberSqueezed;
+    }
 }  // namespace engineer
 
 }  // namespace aruwsrc

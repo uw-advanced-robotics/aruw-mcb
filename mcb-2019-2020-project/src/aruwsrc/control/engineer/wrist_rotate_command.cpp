@@ -28,15 +28,8 @@ namespace engineer
         wristRotateSetpointLeft.reset(connectedWrist->getWristAngleLeft());
         wristRotateSetpointRight.reset(connectedWrist->getWristAngleRight());
 
-        if ((wristTargetChange > 0 && connectedWrist->isIn()) || (wristTargetChange < 0 && !connectedWrist->isIn()))
-        {
-            connectedWrist->wristToggleState();
-            wristRotateSetpointLeft.setTarget(connectedWrist->getWristDesiredAngleLeft() + wristTargetChange);
-            wristRotateSetpointRight.setTarget(connectedWrist->getWristDesiredAngleRight() + wristTargetChange);
-        } else {
-            wristRotateSetpointLeft.setTarget(connectedWrist->getWristDesiredAngleLeft());
-            wristRotateSetpointRight.setTarget(connectedWrist->getWristDesiredAngleRight());
-        }
+        wristRotateSetpointLeft.setTarget(connectedWrist->getWristDesiredAngleLeft() + wristTargetChange);
+        wristRotateSetpointRight.setTarget(connectedWrist->getWristDesiredAngleRight() + wristTargetChange);
 
         wristMinRotateTime.restart(WRIST_MIN_ROTATE_TIME);
     }
@@ -59,12 +52,12 @@ namespace engineer
     // Finished if the left and right side of the wrist has reached target within the tolerance
     bool WristRotateCommand::isFinished() const
     {
-        return fabs(static_cast<double>(connectedWrist->getWristAngleLeft()
-         - connectedWrist->getWristDesiredAngleLeft()))
-         < static_cast<double>(WRIST_SETPOINT_TOLERANCE)
-         && fabs(static_cast<double>(connectedWrist->getWristAngleRight()
-         - connectedWrist->getWristDesiredAngleRight()))
-         < static_cast<double>(WRIST_SETPOINT_TOLERANCE)
+        return fabsf(connectedWrist->getWristAngleLeft()
+         - connectedWrist->getWristDesiredAngleLeft())
+         < WRIST_SETPOINT_TOLERANCE
+         && fabsf(connectedWrist->getWristAngleRight()
+         - connectedWrist->getWristDesiredAngleRight())
+         < WRIST_SETPOINT_TOLERANCE
          && wristRotateSetpointLeft.isTargetReached()
          && wristRotateSetpointRight.isTargetReached()
          && wristMinRotateTime.isExpired();

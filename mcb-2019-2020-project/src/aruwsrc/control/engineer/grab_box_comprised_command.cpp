@@ -36,7 +36,7 @@ void GrabBoxComprisedCommand::initialize()
 
 void GrabBoxComprisedCommand::execute()
 {
-    if (wristOutCommand.isFinished() && !grabSequenceCommencing) {
+    if (!wristOutCommand.isFinished() && !grabSequenceCommencing) {
         grabSequenceCommencing = true;
 
         // close grabber
@@ -46,7 +46,7 @@ void GrabBoxComprisedCommand::execute()
         // Start timer to account for the grabber to close on a cube
         // Once the time is up activate the lift to the upwards position
     }
-    Board::LedG::setOutput(wristOutCommand.isFinished());
+    //Board::LedA::setOutput(!wristOutCommand.isFinished());
     this->comprisedCommandScheduler.run();
 }
 
