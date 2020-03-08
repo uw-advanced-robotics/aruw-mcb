@@ -20,20 +20,20 @@ class SentinelDriveRandomCommand : public Command
  public:
     explicit SentinelDriveRandomCommand(SentinelDriveSubsystem* subsystem = nullptr);
 
-    void initialize(void);
+    void initialize();
 
-    void execute(void);
+    void execute();
 
     void end(bool interrupted);
 
-    bool isFinished(void) const;
+    bool isFinished() const;
 
-    void interrupted(void);
+    void interrupted();
 
  private:
-    static const int16_t MIN_RPM = 3000;
-    static const int16_t MAX_RPM = 4000;
-    static const int16_t CHANGE_TIME_INTERVAL = 5000;
+    static const int16_t MIN_RPM = 5000;
+    static const int16_t MAX_RPM = 7000;
+    static const int16_t CHANGE_TIME_INTERVAL = 1000;
     static constexpr float RAIL_BUFFER = 0.1f * SentinelDriveSubsystem::RAIL_LENGTH;
 
     float currentRPM = 0;

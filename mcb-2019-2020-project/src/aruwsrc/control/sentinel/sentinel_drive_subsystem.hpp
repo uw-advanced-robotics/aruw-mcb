@@ -17,6 +17,13 @@ namespace control
 class SentinelDriveSubsystem : public Subsystem
 {
  public:
+    static constexpr float MAX_POWER_CONSUMPTION = 30.0f;
+    static constexpr float MAX_ENERGY_BUFFER = 200.0f;
+
+    // length of the rail we own, in mm
+    // the competition rail length is actually 4650mm
+    static constexpr float RAIL_LENGTH = 1900;
+
     SentinelDriveSubsystem(
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
@@ -27,17 +34,15 @@ class SentinelDriveSubsystem : public Subsystem
         desiredRpm(0)
     {}
 
-    float absolutePosition(void);
+    float absolutePosition();
 
     void setDesiredRpm(float desRpm);
 
-    void refresh(void);
-
-    static constexpr float RAIL_LENGTH = 4650;
+    void refresh();
 
  private:
-    static const aruwlib::motor::MotorId LEFT_MOTOR_ID;
-    static const aruwlib::motor::MotorId RIGHT_MOTOR_ID;
+    static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR6;
+    static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     using leftLimitSwitch = Board::DigitalInPinA;
     using rightLimitSwitch = Board::DigitalInPinB;
@@ -48,7 +53,8 @@ class SentinelDriveSubsystem : public Subsystem
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000;
 
-    static constexpr float WHEEL_RADIUS = 35;
+    // radius of the wheel in mm
+    static constexpr float WHEEL_RADIUS = 35.0f;
     static constexpr float GEAR_RATIO = 19.0f;
 
     aruwlib::motor::DjiMotor leftWheel;
@@ -63,7 +69,7 @@ class SentinelDriveSubsystem : public Subsystem
     float leftZeroRailOffset = 0;
     float rightZeroRailOffset = 0;
 
-    void resetOffsetFromLimitSwitch(void);
+    void resetOffsetFromLimitSwitch();
 
     float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
 

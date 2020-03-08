@@ -7,9 +7,6 @@ namespace aruwsrc
 
 namespace control
 {
-    const aruwlib::motor::MotorId SentinelDriveSubsystem::LEFT_MOTOR_ID = aruwlib::motor::MOTOR5;
-    const aruwlib::motor::MotorId SentinelDriveSubsystem::RIGHT_MOTOR_ID = aruwlib::motor::MOTOR6;
-
     void SentinelDriveSubsystem::setDesiredRpm(float desRpm)
     {
         desiredRpm = desRpm;
@@ -40,8 +37,15 @@ namespace control
     // end that was hit
     float SentinelDriveSubsystem::absolutePosition ()
     {
-        return ((distanceFromEncoder(&leftWheel) - leftZeroRailOffset) +
-            (distanceFromEncoder(&rightWheel) - rightZeroRailOffset)) / 2;
+        float leftPosition = distanceFromEncoder(&leftWheel) - leftZeroRailOffset;
+        float rightPosition = distanceFromEncoder(&rightWheel) - rightZeroRailOffset;
+        float average = leftWheel.isMotorOnline() && rightWheel.isMotorOnline()
+                ? (leftPosition + rightPosition) / 2.0f
+                : leftWheel.isMotorOnline()
+                ? leftPosition
+                : rightPosition;
+        return aruwlib::algorithms::limitVal<float>(average, 0.0f,
+                SentinelDriveSubsystem::RAIL_LENGTH);
     }
 
     // Call when rail is hit to set the offset or the
@@ -50,7 +54,7 @@ namespace control
     // is hit for the first time
     void SentinelDriveSubsystem::resetOffsetFromLimitSwitch ()
     {
-        if (leftLimitSwitch::read()) {  // DigitalPin where LimitterSwitch is placed
+        if (leftLimitSwitch::read()) {  // DigitalPin where limit switch is placed
             leftZeroRailOffset = distanceFromEncoder(&leftWheel);
             rightZeroRailOffset = distanceFromEncoder(&rightWheel);
         } else if (rightLimitSwitch::read()) {

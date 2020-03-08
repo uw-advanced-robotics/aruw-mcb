@@ -14,7 +14,7 @@ namespace control
     SentinelDriveManualCommand::SentinelDriveManualCommand(SentinelDriveSubsystem* subsystem)
         : Command(), subsystemSentinelDrive(subsystem)
     {
-        addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
+        addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
     }
 
     void SentinelDriveManualCommand::initialize()
@@ -25,6 +25,7 @@ namespace control
         subsystemSentinelDrive->setDesiredRpm(getUserDesiredSentinelSpeed());
     }
 
+    // NOLINTNEXTLINE
     void SentinelDriveManualCommand::end(bool)
     {
         subsystemSentinelDrive->setDesiredRpm(0);

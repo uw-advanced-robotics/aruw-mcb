@@ -11,7 +11,7 @@ namespace control
     SentinelDriveRandomCommand::SentinelDriveRandomCommand(SentinelDriveSubsystem* subsystem)
         : Command(), subsystemSentinelDrive(subsystem), changeVelocityTimer(CHANGE_TIME_INTERVAL)
     {
-        addSubsystemRequirement(reinterpret_cast<Subsystem*>(subsystem));
+        addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
     }
 
     void SentinelDriveRandomCommand::initialize()
@@ -21,9 +21,11 @@ namespace control
     {
         if (this->changeVelocityTimer.isExpired()) {
             this->changeVelocityTimer.restart(CHANGE_TIME_INTERVAL);
+            // NOLINTNEXTLINE
             currentRPM = rand() % (MAX_RPM - MIN_RPM + 1) + MIN_RPM;
+            // NOLINTNEXTLINE
             if (rand() % 2 == 0) {
-                currentRPM -= MAX_RPM;
+                currentRPM *= -1.0f;
             }
         }
 
@@ -37,17 +39,18 @@ namespace control
         subsystemSentinelDrive->setDesiredRpm(currentRPM);
     }
 
+    // NOLINTNEXTLINE
     void SentinelDriveRandomCommand::end(bool)
     {
         subsystemSentinelDrive->setDesiredRpm(0);
     }
 
-    bool SentinelDriveRandomCommand::isFinished(void) const
+    bool SentinelDriveRandomCommand::isFinished() const
     {
         return false;
     }
 
-    void SentinelDriveRandomCommand::interrupted(void)
+    void SentinelDriveRandomCommand::interrupted()
     {}
 }  // namespace control
 
