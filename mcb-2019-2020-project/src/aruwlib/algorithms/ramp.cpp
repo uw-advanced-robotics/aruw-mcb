@@ -46,6 +46,13 @@ const float& Ramp::getTarget() const
     return target;
 }
 
+void Ramp::reset(const float& resetValue)
+{
+    targetReached &= resetValue != target;
+    target = resetValue;
+    value = resetValue;
+}
+
 }  // namespace algorithms
 
 }  // namespace aruwlib

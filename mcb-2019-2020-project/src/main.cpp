@@ -33,6 +33,7 @@
 #include "src/aruwsrc/control/sentinel/sentinel_drive_manual_command.hpp"
 #include "src/aruwsrc/control/sentinel/sentinel_drive_random_command.hpp"
 #include "src/aruwsrc/control/sentinel/sentinel_drive_subsystem.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_full_traverse_command.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -119,8 +120,8 @@ AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 
 aruwsrc::control::SentinelDriveRandomCommand sentinelDriveRandom(&sentinelDrive);
 aruwsrc::control::SentinelDriveManualCommand sentinelDriveManual(&sentinelDrive);
+aruwsrc::control::SentinelFullTraverseCommand sentinelFullTraverse(&sentinelDrive);
 #endif
-
 
 int main()
 {
@@ -211,12 +212,16 @@ int main()
         &agitatorShootSlowCommand
     );
     IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
         &agitatorKickerCommand
     );
     IoMapper::addHoldRepeatMapping(
         IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
         &sentinelDriveRandom
+    );
+    IoMapper::addHoldRepeatMapping(
+        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+        &sentinelFullTraverse
     );
     #endif
 
@@ -232,6 +237,10 @@ int main()
         aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
         Remote::read();
+
+        if (Board::Button::read()) {
+            sentinelDrive.resetOffsetFromLimitSwitch();
+        }
 
         if (updateImuPeriod.execute())
         {

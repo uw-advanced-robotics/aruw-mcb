@@ -37,6 +37,8 @@ class Ramp
 
     const float& getTarget() const;
 
+    void reset(const float& resetValue = 0);
+
  private:
     static constexpr float RAMP_EPSILON = 0.00000000001f;
     float target;

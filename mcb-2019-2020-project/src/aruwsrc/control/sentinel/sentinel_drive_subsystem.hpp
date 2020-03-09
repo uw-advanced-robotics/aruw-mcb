@@ -20,6 +20,7 @@ class SentinelDriveSubsystem : public Subsystem
     static constexpr float MAX_POWER_CONSUMPTION = 30.0f;
     static constexpr float MAX_ENERGY_BUFFER = 200.0f;
 
+    static constexpr float SENTINEL_WIDTH = 300;
     // length of the rail we own, in mm
     // the competition rail length is actually 4650mm
     static constexpr float RAIL_LENGTH = 1900;
@@ -68,9 +69,9 @@ class SentinelDriveSubsystem : public Subsystem
     float desiredRpm;
     float leftZeroRailOffset = 0;
     float rightZeroRailOffset = 0;
-
+public:
     void resetOffsetFromLimitSwitch();
-
+private:
     float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
 
     void updateMotorRpmPid(

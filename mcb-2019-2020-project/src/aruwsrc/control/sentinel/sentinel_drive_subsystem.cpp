@@ -55,11 +55,13 @@ namespace control
     void SentinelDriveSubsystem::resetOffsetFromLimitSwitch ()
     {
         if (leftLimitSwitch::read()) {  // DigitalPin where limit switch is placed
-            leftZeroRailOffset = distanceFromEncoder(&leftWheel);
-            rightZeroRailOffset = distanceFromEncoder(&rightWheel);
+            leftZeroRailOffset = SENTINEL_WIDTH / 2.0f + distanceFromEncoder(&leftWheel);
+            rightZeroRailOffset = SENTINEL_WIDTH / 2.0f + distanceFromEncoder(&rightWheel);
         } else if (rightLimitSwitch::read()) {
-            leftZeroRailOffset = RAIL_LENGTH - distanceFromEncoder(&leftWheel);
-            rightZeroRailOffset = RAIL_LENGTH - distanceFromEncoder(&rightWheel);
+            leftZeroRailOffset = RAIL_LENGTH - SENTINEL_WIDTH / 2.0f
+                    - distanceFromEncoder(&leftWheel);
+            rightZeroRailOffset = RAIL_LENGTH - SENTINEL_WIDTH / 2.0f
+                    - distanceFromEncoder(&rightWheel);
         }
     }
 
