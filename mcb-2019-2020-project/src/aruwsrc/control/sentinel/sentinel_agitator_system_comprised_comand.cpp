@@ -55,7 +55,7 @@ bool SentinelAgitatorSystemComprisedCommand::isFinished() const
 {
     return rotateAgitator.isFinished();
 }
-    
+
 }  // namespace sentinel
 
 }  // namespace aruwsrc

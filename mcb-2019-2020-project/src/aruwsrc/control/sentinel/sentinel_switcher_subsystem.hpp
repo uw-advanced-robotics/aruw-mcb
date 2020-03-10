@@ -35,6 +35,6 @@ class SentinelSwticherSubsystem : public aruwlib::control::Subsystem
 
 }  // namespace sentinel
 
-}  // aruwsrc
+}  // namespace aruwsrc
 
 #endif

@@ -30,4 +30,4 @@ bool SentinelSwticherSubsystem::isLowerUsed() const
 
 }  // namespace sentinel
 
-}  // aruwsrc
+}  // namespace aruwsrc
