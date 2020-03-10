@@ -87,11 +87,6 @@ void TurretChassisRelativePositionCommand::runPitchPositionController()
     #if defined(TARGET_SOLDIER)
     pidOutput += PITCH_GRAVITY_COMPENSATION_KP * cosf(aruwlib::algorithms::degreesToRadians(
             turretSubsystem->getPitchAngleFromCenter()));
-    #elif defined(TARGET_SENTRY)
-    // best fit curve when plotting motor output to hold the pitch motor up vs pitch angle
-    pidOutput += 1.7736f * powf(turretSubsystem->getPitchAngle().getValue(), 2.0f)
-            + 11.802 * turretSubsystem->getPitchAngle().getValue()
-            - 23417.0f;
     #endif
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
