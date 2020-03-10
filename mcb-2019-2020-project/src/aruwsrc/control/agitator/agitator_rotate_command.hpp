@@ -14,8 +14,9 @@ namespace agitator
 {
 
 /**
- * Rotates the connected agitator some angle in some desired time. Currently uses
- * AGITATOR_ROTATE_COMMAND_PERIOD to determine the proper ramp increment.
+ * Rotates the connected agitator some angle in some desired time. Currently
+ * pass in a rotate velocity and it uses modm::Clock::now() to determine the
+ * proper ramp increment.
  */
 class AgitatorRotateCommand : public aruwlib::control::Command
 {

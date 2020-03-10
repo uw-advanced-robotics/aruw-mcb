@@ -33,6 +33,8 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
  private:
     static constexpr uint32_t SALVATION_TIMEOUT_MS = 2000;
 
+    static constexpr uint32_t SALVATION_UNJAM_BACK_WAIT_TIME = 1000;
+
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
     // the maximum time that the command will wait from commanding the agitator to rotate
