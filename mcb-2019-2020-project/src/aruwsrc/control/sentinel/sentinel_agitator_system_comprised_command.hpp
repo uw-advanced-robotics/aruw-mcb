@@ -5,20 +5,20 @@
 #include "src/aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "src/aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "src/aruwsrc/control/agitator/agitator_rotate_command.hpp"
-#include "sentry_switcher_subsystem.hpp"
+#include "sentinel_switcher_subsystem.hpp"
 
 namespace aruwsrc
 {
 
-namespace sentry
+namespace sentinel
 {
 
-class SentryAgitatorSystemComprisedCommand : public aruwlib::control::ComprisedCommand
+class SentinelAgitatorSystemComprisedCommand : public aruwlib::control::ComprisedCommand
 {
  public:
-    SentryAgitatorSystemComprisedCommand(agitator::AgitatorSubsystem* agitator,
-                                         agitator::AgitatorSubsystem* kicker,
-                                         SentrySwticherSubsystem* switcher);
+    SentinelAgitatorSystemComprisedCommand(agitator::AgitatorSubsystem* agitator,
+                                           agitator::AgitatorSubsystem* kicker,
+                                           SentinelSwticherSubsystem* switcher);
 
     void initialize();
 
@@ -35,7 +35,7 @@ class SentryAgitatorSystemComprisedCommand : public aruwlib::control::ComprisedC
 
     agitator::AgitatorSubsystem* kicker;
 
-    SentrySwticherSubsystem* switcher;
+    SentinelSwticherSubsystem* switcher;
 
     agitator::ShootFastComprisedCommand rotateAgitator;
 
@@ -44,7 +44,7 @@ class SentryAgitatorSystemComprisedCommand : public aruwlib::control::ComprisedC
     bool userLowerBarrel = true;
 };
 
-}  // namespace sentry
+}  // namespace sentinel
 
 }  // namespace aruwsrc
 

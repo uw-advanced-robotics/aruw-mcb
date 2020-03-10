@@ -7,13 +7,13 @@
 namespace aruwsrc
 {
 
-namespace sentry
+namespace sentinel
 {
 
-class SentrySwticherSubsystem : public aruwlib::control::Subsystem
+class SentinelSwticherSubsystem : public aruwlib::control::Subsystem
 {
  public:
-    SentrySwticherSubsystem();
+    SentinelSwticherSubsystem();
 
     void refresh();
 
@@ -33,7 +33,7 @@ class SentrySwticherSubsystem : public aruwlib::control::Subsystem
     bool useLower = true;
 };
 
-}  // namespace sentry
+}  // namespace sentinel
 
 }  // aruwsrc
 

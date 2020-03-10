@@ -1,33 +1,33 @@
-#include "sentry_switcher_subsystem.hpp"
+#include "sentinel_switcher_subsystem.hpp"
 
 namespace aruwsrc
 {
 
-namespace sentry
+namespace sentinel
 {
 
-SentrySwticherSubsystem::SentrySwticherSubsystem() :
+SentinelSwticherSubsystem::SentinelSwticherSubsystem() :
         switcherMotor(SWITCHER_SERVO_PIN, SWITCHER_SERVO_MIN_PWM, SWITCHER_SERVO_MAX_PWM, 0.1f)
 {
     useLowerBarrel(this->useLower);
 }
 
-void SentrySwticherSubsystem::refresh()
+void SentinelSwticherSubsystem::refresh()
 {
     switcherMotor.updateSendPwmRamp();
 }
 
-void SentrySwticherSubsystem::useLowerBarrel(bool useLower)
+void SentinelSwticherSubsystem::useLowerBarrel(bool useLower)
 {
     switcherMotor.setTargetPwm(useLower ? SWITCHER_SERVO_MIN_PWM : SWITCHER_SERVO_MAX_PWM);
     this->useLower = useLower;
 }
 
-bool SentrySwticherSubsystem::isLowerUsed() const
+bool SentinelSwticherSubsystem::isLowerUsed() const
 {
     return useLower;
 }
 
-}  // namespace sentry
+}  // namespace sentinel
 
 }  // aruwsrc

@@ -30,8 +30,8 @@
 #include "src/aruwsrc/control/turret/turret_cv_command.hpp"
 #include "src/aruwsrc/control/turret/turret_init_command.hpp"
 #include "src/aruwsrc/control/turret/turret_manual_command.hpp"
-#include "src/aruwsrc/control/sentry/sentry_agitator_system_comprised_command.hpp"
-#include "src/aruwsrc/control/sentry/sentry_switcher_subsystem.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_agitator_system_comprised_command.hpp"
+#include "src/aruwsrc/control/sentinel/sentinel_switcher_subsystem.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
@@ -92,7 +92,7 @@ AgitatorSubsystem sentryKicker(
     false
 );
 
-aruwsrc::sentry::SentrySwticherSubsystem sentrySwitcherMotor;
+aruwsrc::sentinel::SentinelSwticherSubsystem sentinelSwitcherMotor;
 
 ExampleSubsystem frictionWheelSubsystem;
 #endif
@@ -114,8 +114,8 @@ aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsyste
 AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
 AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
 
-aruwsrc::sentry::SentryAgitatorSystemComprisedCommand rotateSentryAgitator(&sentryAgitator,
-        &sentryKicker, &sentrySwitcherMotor);
+aruwsrc::sentinel::SentinelAgitatorSystemComprisedCommand rotateSentryAgitator(&sentryAgitator,
+        &sentryKicker, &sentinelSwitcherMotor);
 #endif
 
 int main()
@@ -169,7 +169,7 @@ int main()
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryAgitator);
     CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
     CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
-    CommandScheduler::getMainScheduler().registerSubsystem(&sentrySwitcherMotor);
+    CommandScheduler::getMainScheduler().registerSubsystem(&sentinelSwitcherMotor);
     #endif
 
     /* set any default commands to subsystems here --------------------------*/
