@@ -15,7 +15,7 @@ namespace control
 class TurretChassisRelativePositionCommand : public Command
 {
  public:
-    TurretChassisRelativePositionCommand(TurretSubsystem *subsystem);
+    explicit TurretChassisRelativePositionCommand(TurretSubsystem *subsystem);
 
     void initialize();
 
