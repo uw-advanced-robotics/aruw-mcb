@@ -12,7 +12,10 @@ float frictionwheelspeed = 0.0f;
 void ControlFrictionWheelCommand::execute() {
     // frictionwheelspeed = aruwlib::algorithms::limitVal<float>(frictionwheelspeed + aruwlib::Remote::getWheel() / 660.0f / 2000.0f, 0.0f, 1.0f);
     // turret->setFrictionWheelOutput(frictionwheelspeed);
-    turret->setFrictionWheelOutput(aruwlib::Remote::getWheel() / 660.0f);
+    float newFrictionWheelSpeed = aruwlib::Remote::getWheel() / 660.0f;
+    frictionwheelspeed = newFrictionWheelSpeed > frictionwheelspeed ? newFrictionWheelSpeed : frictionwheelspeed;
+    frictionwheelspeed = newFrictionWheelSpeed < 0.0f ? 0.0f : frictionwheelspeed;
+    turret->setFrictionWheelOutput(frictionwheelspeed);
 }
 
 bool ControlFrictionWheelCommand::isFinished() const {

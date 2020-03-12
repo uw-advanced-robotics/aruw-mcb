@@ -25,9 +25,9 @@ class TurretSubsystem : public Subsystem {
     static constexpr bool IS_YAW_MOTOR_INVERTED = true;
     static constexpr bool IS_PITCH_MOTOR_INVERTED = true;
     #elif defined(TARGET_DRONE)
-    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 60.0f;
-    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 10.0f;
-    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
+    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 60.0F; // TURRET_START_ANGLE - 60.0f;
+    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 15.0F; // 10.0f;
+    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 30.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
     static constexpr bool IS_YAW_MOTOR_INVERTED = true;
     static constexpr bool IS_PITCH_MOTOR_INVERTED = false;
@@ -82,8 +82,8 @@ class TurretSubsystem : public Subsystem {
     static float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
 
  private:
-    const uint16_t YAW_START_ENCODER_POSITION = 8160;
-    const uint16_t PITCH_START_ENCODER_POSITION = 4100;
+    const uint16_t YAW_START_ENCODER_POSITION = 1960;
+    const uint16_t PITCH_START_ENCODER_POSITION = 6800;
 
     static constexpr float FEED_FORWARD_KP = 2.75f;
     static constexpr float FEED_FORWARD_SIN_GAIN = 1.0f;
