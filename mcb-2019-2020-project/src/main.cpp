@@ -271,3 +271,32 @@ int main()
     }
     return 0;
 }
+
+#include "modm/math/matrix.hpp"
+
+aruwlib::motor::DjiMotor stateSpaceTestMotor(aruwlib::motor::MOTOR1, aruwlib::can::CanBus::CAN_BUS1, false, "testing motor");
+
+// motor constants:
+float c_1 = 0.0f;
+float c_2 = 0.0f;
+// reference (motor speed)
+float K = 0.0f;
+float x;
+float x_dot;
+uint32_t dt = 0.0f;
+float w_f = 0.0f;
+float y = 0.0f;
+
+uint32_t prevTime = 0;
+
+void controlFlywheels() {
+    uint32_t currTime = modm::Clock::now().getTime();
+    dt = currTime - prevTime;
+    K = stateSpaceTestMotor.getShaftRPM();
+    x_dot = (c_1 - c_2 * K) * w_f + c_2 * K;
+    x = x + x_dot * static_cast<float>(dt);
+    y = x;
+    stateSpaceTestMotor.setDesiredOutput(y);
+    prevTime = modm::Clock::now().getTime();
+}
+
