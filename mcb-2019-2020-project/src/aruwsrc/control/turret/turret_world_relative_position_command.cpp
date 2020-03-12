@@ -120,7 +120,7 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     currValueImuYawGimbal.setValue(Mpu6500::getImuAttitude().yaw
             + TurretSubsystem::TURRET_START_ANGLE - imuInitialYaw);
 
-    float inityaw = yawTargetAngle.getValue();
+    // float inityaw = yawTargetAngle.getValue();
     // yawTargetAngle.limitValue(imuInitialYaw + TurretSubsystem::TURRET_YAW_MIN_ANGLE, imuInitialYaw + TurretSubsystem::TURRET_YAW_MAX_ANGLE);
     // position controller based on imu and yaw gimbal angle
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
