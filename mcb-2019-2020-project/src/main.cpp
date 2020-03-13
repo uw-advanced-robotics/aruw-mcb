@@ -126,7 +126,6 @@ void initFlywheelControl() {
     A[0][0] = A_1;
     B[0][0] = B_1;
     C[0][0] = 1.0f;
-    D[0][0] = 1.0f;
     // D = 0
     K[0][0] = K_1;
 }
