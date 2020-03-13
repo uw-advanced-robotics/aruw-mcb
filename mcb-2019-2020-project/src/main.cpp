@@ -42,229 +42,27 @@
 #include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwlib/errors/create_errors.hpp"
 
-using namespace aruwsrc::agitator;
-using namespace aruwsrc::control;
-using namespace aruwlib::sensors;
-using namespace aruwlib;
-using namespace aruwsrc::chassis;
-using namespace aruwsrc::control;
-using namespace aruwlib::sensors;
-using namespace aruwsrc::control;
-
-/* define subsystems --------------------------------------------------------*/
-#if defined(TARGET_SOLDIER)
-TurretSubsystem turret17mm;
-TurretCVCommand turret17mmCVCommand(&turret17mm);
-
-ChassisSubsystem soldierChassis;
-
-AgitatorSubsystem agitator17mm(
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted
-);
-
-ExampleSubsystem frictionWheelSubsystem;
-
-HopperSubsystem soldierHopper(aruwlib::gpio::Pwm::W,
-        HopperSubsystem::SOLDIER_HOPPER_OPEN_PWM,
-        HopperSubsystem::SOLDIER_HOPPER_CLOSE_PWM,
-        HopperSubsystem::SOLDIER_PWM_RAMP_SPEED);
-
-#elif defined(TARGET_SENTRY)
-AgitatorSubsystem sentryAgitator(
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    false
-);
-
-AgitatorSubsystem sentryKicker(
-    AgitatorSubsystem::PID_17MM_KICKER_P,
-    AgitatorSubsystem::PID_17MM_KICKER_I,
-    AgitatorSubsystem::PID_17MM_KICKER_D,
-    AgitatorSubsystem::PID_17MM_KICKER_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_KICKER_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::SENTRY_KICKER_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    false
-
-);
-
-aruwsrc::control::SentinelDriveSubsystem sentinelDrive;
-
-ExampleSubsystem frictionWheelSubsystem;
-
-#endif
-
-/* define commands ----------------------------------------------------------*/
-
-#if defined(TARGET_SOLDIER)
-ChassisDriveCommand chassisDriveCommand(&soldierChassis);
-ChassisAutorotateCommand chassisAutorotateCommand(&soldierChassis, &turret17mm);
-aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
-        ExampleCommand::DEFAULT_WHEEL_RPM);
-
-TurretWorldRelativePositionCommand turretUserCommand(&turret17mm, &soldierChassis);
-
-ShootFastComprisedCommand agitatorShootSlowCommand(&agitator17mm);
-AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator17mm);
-OpenHopperCommand openHopperCommand(&soldierHopper);
-
-#elif defined(TARGET_SENTRY)
-aruwsrc::control::ExampleCommand spinFrictionWheelCommand(&frictionWheelSubsystem,
-        ExampleCommand::DEFAULT_WHEEL_RPM);
-
-ShootFastComprisedCommand agitatorShootSlowCommand(&sentryAgitator);
-AgitatorCalibrateCommand agitatorCalibrateCommand(&sentryAgitator);
-AgitatorRotateCommand agitatorKickerCommand(&sentryKicker, 3.0f, 1, 0, false);
-AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&sentryKicker);
-
-SentinelAutoDriveCommand sentinelAutoDrive(&sentinelDrive);
-SentinelDriveManualCommand sentinelDriveManual(&sentinelDrive);
-#endif
+void controlFlywheels();
+void initFlywheelControl();
 
 int main()
 {
     Board::initialize();
 
-    Board::DisplaySpiMaster::connect<
-        Board::DisplayMiso::Miso,
-        Board::DisplayMosi::Mosi,
-        Board::DisplaySck::Sck
-    >();
+    modm::ShortTimeout sendMotorTimeout(2);
 
-    // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
-    // 90MHz/64=~14MHz
-    Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
-
-    aruwlib::display::Sh1106<
-        Board::DisplaySpiMaster,
-        Board::DisplayCommand,
-        Board::DisplayReset,
-        128, 64,
-        false
-    > display;
-    display.initializeBlocking();
-    display.setCursor(2, 1);
-    display.setFont(modm::font::ScriptoNarrow);
-    display << "ur code is shit" << modm::endl;
-    display.update();
-
-    aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
-    contiguousFloatTest.testCore();
-    contiguousFloatTest.testBadBounds();
-    contiguousFloatTest.testDifference();
-    contiguousFloatTest.testRotationBounds();
-    contiguousFloatTest.testShiftingValue();
-    contiguousFloatTest.testWrapping();
-
-    aruwlib::Remote::initialize();
-    aruwlib::sensors::Mpu6500::init();
-
-    aruwlib::serial::RefSerial::getRefSerial().initialize();
-    aruwlib::serial::XavierSerial::getXavierSerial().initialize();
-
-    /* register subsystems here ---------------------------------------------*/
-    #if defined(TARGET_SOLDIER)
-    CommandScheduler::getMainScheduler().registerSubsystem(&agitator17mm);
-    CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
-    CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
-    CommandScheduler::getMainScheduler().registerSubsystem(&turret17mm);
-    CommandScheduler::getMainScheduler().registerSubsystem(&soldierHopper);
-    #elif defined(TARGET_SENTRY)
-    CommandScheduler::getMainScheduler().registerSubsystem(&sentryAgitator);
-    CommandScheduler::getMainScheduler().registerSubsystem(&sentryKicker);
-    CommandScheduler::getMainScheduler().registerSubsystem(&frictionWheelSubsystem);
-    CommandScheduler::getMainScheduler().registerSubsystem(&sentinelDrive);
-    sentinelDrive.initLimitSwitches();
-    #endif
-
-    /* set any default commands to subsystems here --------------------------*/
-    #if defined(TARGET_SOLDIER)
-    soldierChassis.setDefaultCommand(&chassisDriveCommand);
-    turret17mm.setDefaultCommand(&turretUserCommand);
-    frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
-    #elif defined(TARGET_SENTRY)
-    frictionWheelSubsystem.setDefaultCommand(&spinFrictionWheelCommand);
-    sentinelDrive.setDefaultCommand(&sentinelDriveManual);
-    #endif
-
-    /* add any starting commands to the scheduler here ----------------------*/
-    #if defined(TARGET_SOLDIER)
-    CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
-    #elif defined(TARGET_SENTRY)
-    CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateCommand);
-    CommandScheduler::getMainScheduler().addCommand(&agitatorCalibrateKickerCommand);
-    #endif
-
-    /* register io mappings here --------------------------------------------*/
-    #if defined(TARGET_SOLDIER)
-    IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-        &agitatorShootSlowCommand
-    );
-    IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID),
-        &chassisAutorotateCommand
-    );
-    IoMapper::addHoldMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
-        &turret17mmCVCommand
-    );
-    IoMapper::addHoldMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-        &openHopperCommand
-    );
-    #elif defined(TARGET_SENTRY)
-    IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        &agitatorShootSlowCommand
-    );
-    IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-        &agitatorKickerCommand
-    );
-    IoMapper::addHoldRepeatMapping(
-        IoMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
-        &sentinelAutoDrive
-    );
-    #endif
-
-    /* define timers here ---------------------------------------------------*/
-    modm::ShortPeriodicTimer updateImuPeriod(2);
-    modm::ShortPeriodicTimer sendMotorTimeout(2);
+    initFlywheelControl();
 
     while (1)
     {
         // do this as fast as you can
         aruwlib::can::CanRxHandler::pollCanData();
-        aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
-        aruwlib::serial::RefSerial::getRefSerial().updateSerial();
-
-        aruwlib::Remote::read();
-
-        if (updateImuPeriod.execute())
-        {
-            Mpu6500::read();
-        }
-
+        
         if (sendMotorTimeout.execute())
         {
-            aruwlib::errors::ErrorController::update();
-            CommandScheduler::getMainScheduler().run();
+            sendMotorTimeout.restart(2);
+            controlFlywheels();
+
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
         modm::delayMicroseconds(10);
@@ -272,31 +70,77 @@ int main()
     return 0;
 }
 
-#include "modm/math/matrix.hpp"
-
 aruwlib::motor::DjiMotor stateSpaceTestMotor(aruwlib::motor::MOTOR1, aruwlib::can::CanBus::CAN_BUS1, false, "testing motor");
 
-// motor constants:
-float c_1 = 0.0f;
-float c_2 = 0.0f;
-// reference (motor speed)
-float K = 0.0f;
-float x;
-float x_dot;
-uint32_t dt = 0.0f;
-float w_f = 0.0f;
-float y = 0.0f;
+int GEAR_RATIO = 1;
+float TORQUE_CONSTANT = 0.3f;
+float RESISTANCE = 0.194f;
+/// \todo
+float MOMENT_OF_INERTIA = 0.3f;
+float ANGULAR_VELOCITY_CONSTANT = 24.48f;
 
-uint32_t prevTime = 0;
+// state space constants (1 x 1 matrices)
+
+// system matrix (1x1)
+float A_1 = -(GEAR_RATIO * GEAR_RATIO * TORQUE_CONSTANT)
+        / (ANGULAR_VELOCITY_CONSTANT * RESISTANCE * MOMENT_OF_INERTIA);
+
+// input matrix (1x1)
+float B_1 = (GEAR_RATIO * TORQUE_CONSTANT)
+        / (RESISTANCE * MOMENT_OF_INERTIA);
+
+// controller gain matrix (1x1)
+/// \todo tune this value
+float K_1 = 0.7f;
+
+#include <modm/math/matrix.hpp>
+
+using namespace modm;
+
+Matrix1f A;
+Matrix<float, 1, 1> B;
+Matrix<float, 1, 1> C;
+Matrix<float, 1, 1> D;
+Matrix<float, 1, 1> K;
+Matrix<float, 1, 1> r;
+Matrix<float, 1, 1> x;
+Matrix<float, 1, 1> x_hat;
+Matrix<float, 1, 1> y;
+
+float desiredRpm = 0.0f;
+
+float x_hatf = 0.0f;
+float xf = 0.0f;
+float yf = 0.0f;
+float uf = 0.0f;
+
+void controlFlywheels2() {
+    uf = desiredRpm;
+    x_hatf = A_1 * xf + B_1 * uf;
+    yf = 1 * xf;
+    xf += x_hatf * 0.002f;
+    // stateSpaceTestMotor.setDesiredOutput(yf);
+}
+
+void initFlywheelControl() {
+    A[0][0] = A_1;
+    B[0][0] = B_1;
+    C[0][0] = 1.0f;
+    D[0][0] = 1.0f;
+    // D = 0
+    K[0][0] = K_1;
+}
 
 void controlFlywheels() {
-    uint32_t currTime = modm::Clock::now().getTime();
-    dt = currTime - prevTime;
-    K = stateSpaceTestMotor.getShaftRPM();
-    x_dot = (c_1 - c_2 * K) * w_f + c_2 * K;
-    x = x + x_dot * static_cast<float>(dt);
-    y = x;
-    stateSpaceTestMotor.setDesiredOutput(y);
-    prevTime = modm::Clock::now().getTime();
+    initFlywheelControl();
+    // K[0][0] = K_1;
+    r[0][0] = desiredRpm; // - stateSpaceTestMotor.getShaftRPM();
+    x_hat = A * x + B * (K * (r - x));
+    // x_hat = (A - B * K) * x + B * K * r;
+    x += x_hat * 0.02f;
+    y = x; // (C - D * K) * x + D * K * r;
+    stateSpaceTestMotor.setDesiredOutput(y[0][0]);
+
+    // controlFlywheels2();
 }
 
