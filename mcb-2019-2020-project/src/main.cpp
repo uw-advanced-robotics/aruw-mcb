@@ -132,14 +132,46 @@ void initFlywheelControl() {
 
 void controlFlywheels() {
     initFlywheelControl();
-    // K[0][0] = K_1;
-    r[0][0] = desiredRpm; // - stateSpaceTestMotor.getShaftRPM();
-    x_hat = A * x + B * (K * (r - x));
-    // x_hat = (A - B * K) * x + B * K * r;
-    x += x_hat * 0.02f;
-    y = x; // (C - D * K) * x + D * K * r;
+    r[0][0] = desiredRpm - stateSpaceTestMotor.getShaftRPM();
+    x = (A - B * K) * x + B * K * r;
+    y = x;
     stateSpaceTestMotor.setDesiredOutput(y[0][0]);
 
     // controlFlywheels2();
 }
 
+Matrix2f A_aug;
+Matrix<float, 2, 1> B_aug;
+Matrix<float, 1, 2> C_aug;
+Matrix<float, 1, 1> D_aug;
+Matrix<float, 1, 2> K_aug;
+Matrix<float, 2, 1> r_aug;
+Matrix<float, 2, 1> x_aug;
+Matrix<float, 1, 1> y_aug;
+Matrix<float, 1, 1> u_aug;
+
+void initFlywheelControl_aug() {
+    A_aug[0][0] = A_1;
+    A_aug[0][1] = B_1;
+    B_aug[0][0] = B_1;
+    C_aug[0][0] = 1;
+    K_aug[0][0] = K_1;
+    K_aug[0][1] = 1;
+}
+
+void controlFlywheels_aug() {
+    initFlywheelControl_aug();
+    r_aug[0][0] = desiredRpm - stateSpaceTestMotor.getShaftRPM();
+    r_aug[0][1] = (stateSpaceTestMotor.getOutputDesired()
+            - stateSpaceTestMotor.getCurrentActual())
+            * RESISTANCE; // u_error ? v = ir
+    // or should it be as follows:
+    r_aug[0][0] = desiredRpm - x_aug[0][0];
+    r_aug[0][1] = stateSpaceTestMotor.getOutputDesired() - x_aug[0][1];
+
+    u_aug = K_aug * r_aug;
+
+    x_aug = A_aug * x_aug + B_aug * u_aug;
+    y = x;
+    stateSpaceTestMotor.setDesiredOutput(y[0][0]);
+}
