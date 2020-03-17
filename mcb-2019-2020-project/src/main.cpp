@@ -42,12 +42,27 @@
 #include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwlib/errors/create_errors.hpp"
 
+#include "state_space_controller.hpp"
+
+
+#include <modm/math/matrix.hpp>
+
+
+StateSpaceController<1, 1> flywheelController;
+
+aruwlib::motor::DjiMotor stateSpaceTestMotor(aruwlib::motor::MOTOR1, aruwlib::can::CanBus::CAN_BUS1, false, "testing motor");
+
 void controlFlywheels();
 void initFlywheelControl();
 
 int main()
 {
     Board::initialize();
+
+    flywheelController.initialise();
+
+    /// \todo determine this value
+    flywheelController.K;
 
     modm::ShortTimeout sendMotorTimeout(2);
 
@@ -60,6 +75,10 @@ int main()
         
         if (sendMotorTimeout.execute())
         {
+            float y_arr[1] = {stateSpaceTestMotor.getShaftRPM()};
+            modm::Matrix<float, 1, 1> y(&y_arr);
+            flywheelController.update(y, 0.002f);
+
             sendMotorTimeout.restart(2);
             controlFlywheels();
 
@@ -69,8 +88,6 @@ int main()
     }
     return 0;
 }
-
-aruwlib::motor::DjiMotor stateSpaceTestMotor(aruwlib::motor::MOTOR1, aruwlib::can::CanBus::CAN_BUS1, false, "testing motor");
 
 int GEAR_RATIO = 1;
 float TORQUE_CONSTANT = 0.3f;
@@ -92,8 +109,6 @@ float B_1 = (GEAR_RATIO * TORQUE_CONSTANT)
 // controller gain matrix (1x1)
 /// \todo tune this value
 float K_1 = 0.7f;
-
-#include <modm/math/matrix.hpp>
 
 using namespace modm;
 
