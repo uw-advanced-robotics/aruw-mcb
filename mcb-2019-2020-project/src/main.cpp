@@ -76,7 +76,7 @@ int main()
         if (sendMotorTimeout.execute())
         {
             float y_arr[1] = {stateSpaceTestMotor.getShaftRPM()};
-            modm::Matrix<float, 1, 1> y(&y_arr);
+            modm::Matrix<float, 1, 1> y(y_arr);
             flywheelController.update(y, 0.002f);
 
             sendMotorTimeout.restart(2);
