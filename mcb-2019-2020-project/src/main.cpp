@@ -42,13 +42,13 @@
 #include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwlib/errors/create_errors.hpp"
 
-#include "state_space_controller.hpp"
+#include "aruwsrc/algorithms/state_space_controller.hpp"
 
 
 #include <modm/math/matrix.hpp>
 
 
-StateSpaceController<1, 1> flywheelController;
+aruwsrc::algorithms::StateSpaceController<1, 1> flywheelController;
 
 aruwlib::motor::DjiMotor stateSpaceTestMotor(aruwlib::motor::MOTOR1, aruwlib::can::CanBus::CAN_BUS1, false, "testing motor");
 
@@ -59,10 +59,10 @@ int main()
 {
     Board::initialize();
 
-    flywheelController.initialise();
+    flywheelController.initialize();
 
     /// \todo determine this value
-    flywheelController.K;
+    // flywheelController.K;
 
     modm::ShortTimeout sendMotorTimeout(2);
 
