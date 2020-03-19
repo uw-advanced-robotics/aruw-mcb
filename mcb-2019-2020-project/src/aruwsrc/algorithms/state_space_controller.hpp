@@ -11,15 +11,48 @@
 
 using namespace modm;
 
+template<typename T, uint8_t ROWS, uint8_t COLUMNS1, uint8_t COLUMNS2>
+static Matrix<T, ROWS, COLUMNS1 + COLUMNS2>
+horizontalMatrixConcat(Matrix<T, ROWS, COLUMNS1> m1, Matrix<T, ROWS, COLUMNS2> m2)
+{
+    Matrix<T, ROWS, COLUMNS1 + COLUMNS2> newM;
+    for (uint8_t i = 0; i < COLUMNS1; i++)
+    {
+        newM.replaceColumn(i, m1.getColumn(i));
+    }
+    for(uint8_t i = COLUMNS1; i < COLUMNS1 + COLUMNS2; i++)
+    {
+        newM.replaceColumn(i, m2.getColumn(i - COLUMNS1));
+    }
+    return newM;
+}
+
+
+template<typename T, uint8_t ROWS1, uint8_t ROWS2, uint8_t COLUMNS>
+static Matrix<T, ROWS1 + ROWS2, COLUMNS>
+verticalMatrixConcat(Matrix<T, ROWS1, COLUMNS> m1, Matrix<T, ROWS1, COLUMNS> m2)
+{
+    Matrix<T, ROWS1 + ROWS2, COLUMNS> newM;
+    for (uint8_t i = 0; i < ROWS1; i++)
+    {
+        newM.replaceRow(i, m1.getRow(i));
+    }
+    for(uint8_t i = ROWS1; i < ROWS1 + ROWS2; i++)
+    {
+        newM.replaceRow(i, m2.getRow(i - ROWS1));
+    }
+    return newM;
+}
+
 namespace aruwsrc
 {
 
 namespace algorithms
 {
-    template<int X, int Y = 1> struct Zeros
-    {
-        typedef Matrix<float, X, Y> T;
-    };
+    // template<int X, int Y = 1> struct Zeros
+    // {
+    //     typedef Matrix<float, X, Y> I;
+    // };
 
     /**
      * Model has three template parameters:
@@ -51,7 +84,7 @@ namespace algorithms
 
     template<int X, int Y> struct EnableMatrixIf<false, X, Y>
     {
-        typedef Zeros<X, Y> T;
+        typedef Matrix<float, X, Y> T;
     };
 
     /**
@@ -109,35 +142,113 @@ namespace algorithms
     class StateSpaceController
     {
      public:
-        StateSpaceController(const Model<X, U, Y>& model, const Matrix<U, X> K) :
-                model(model),
-                x_hat(Zeros<X>()),
-                u(Zeros<U>()),
-                r(Zeros<Y>()),
-                w_hat(Zeros<U>()),
-                K(K) {}
+        StateSpaceController(const Model<X, U, Y>& model) : model(model) {}
 
-        void initialize();
+        void initialize()
+        {
+            // If reference tracking is enabled we'll need to precalculate Nbar which maps the reference input to a control input offset
+            if (EnableReferenceTracking) {  // calculate N_bar
+                Matrix<float, X + Y, X + U> sys = verticalMatrixConcat<float, X, Y, X + U>(
+                        horizontalMatrixConcat<float, X, X, U>(model.A, model.B),
+                        horizontalMatrixConcat<float, Y, X, U>(model.C, model.D));
+
+                // Find an inverse for the aggregated matrix
+                Matrix<float, X + U, X + Y> sysInv;
+
+                // case 1: more outputs than inputs - find the left inverse
+                if (model.inputs < model.outputs)
+                {
+                    // sysInv = (sys.transpose() * sys).inverse() * sys.transpose();
+                }
+                else
+                {
+                    // sysInv = sys.transpose() * (sys * sys.transpose()).inverse();
+                }
+
+                // Split it up and multiply it with K to find NBar
+                /// \todo fix this
+                for (int i = 0; i < U; i++)
+                {
+                    for (int j = Y; j < Y + X; j++)
+                    {
+                        N_bar[i][j - Y] = sysInv[i][j];
+                    }
+                }
+                N_bar *= K;
+                Matrix<float, U, Y> m;
+                for (int i = X; i < X + U; i++)
+                {
+                    for (int j = X; j < X + Y; j++)
+                    {
+                        m[i - U][j - Y] = sysInv[i][j];
+                    }
+                }
+                N_bar += m;
+            }
+
+            // If estimation is enabled we can also save a bit of processing by precalculating the expression: A - L * C
+            if (EnableEstimation) {
+                ALC = model.A - L * model.C;
+            }
+        }
 
         // updates the state derivative, calculates the control input
-        void update(const Matrix<float, Y, 1> &y, const float dt = 0.0f);
+        const Matrix<float, U, 1> update(const Matrix<float, Y, 1> &y, const float dt = 0.0f)
+        {
+            // If estimation is enabled, update the state estimate
+            if (EnableEstimation) {
+                x_hat += (ALC * x_hat + model.B * u + L * y) * dt;
+            }
+            // If not, then we assume that the entire state is fed back to the controller as y (i.e X == Y)
+            else {
+                static_assert(X == Y || EnableEstimation, "Estimation must be enabled if the state is only partially observed (i.e len(y) != len(x) )");
+                /// \todo
+                x_hat.replaceColumn(0, y);
+            }
 
-        void updateReference(const Matrix<Y, 1>& newR);
+            // Calculate the control input required to drive the state to 0.
+            if (!EnableReferenceTracking)
+            {
+                u = -K * x_hat;
+            }
+            else
+            {
+                u = K * (r - x_hat);
+            }
+            
+            // u = -K * x_hat;
 
-     private:
-        // System model
-        const Model<X, U, Y> &model;
+            // // If reference tracking is enabled then offset the control input to drive the state to the reference input r
+            // if (EnableReferenceTracking) {
+            //     u += N_bar * r;
+            // }
+
+            // If integral control is enabled then windup the control input to offset a (presumably) constant disturbance w
+
+            if (EnableIntegralControl) {
+                w_hat += I * (y - r) * dt;
+                u += w_hat;
+            }
+            return u;
+        }
+
+        void updateReference(const Matrix<float, Y, 1>& newR);
 
         // Control Gains
 
         // regulator Gain
         Matrix<float, U, X> K;
 
+
         /// \todo add comment
         typename EnableMatrixIf<EnableEstimation, X, X>::T ALC;
 
         /// \todo add comment
         typename EnableMatrixIf<EnableReferenceTracking, U, Y>::T N_bar;
+        
+     private:
+        // System model
+        const Model<X, U, Y> &model;
 
         // Control variables
 
@@ -164,10 +275,14 @@ namespace algorithms
     class Simulation
     {
      public:
-        Simulation(const Model<X, U, Y>& model) : model(model), x(Zeros<X>()) {}
+        Simulation(const Model<X, U, Y>& model) : model(model) {}
 
         // updates the state vector x and returns the necessary output y
-        Matrix<float, Y, 1> step(const Matrix<float, U, 1>& u, const float dt);
+        Matrix<float, Y, 1> step(const Matrix<float, U, 1>& u, const float dt)
+        {
+            x += (model.A * x + model.B * u) * dt;
+            return model.C * x;
+        }
 
      private:
         Matrix<float, X, 1> x;

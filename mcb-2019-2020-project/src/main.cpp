@@ -41,56 +41,11 @@
 /* error handling includes --------------------------------------------------*/
 #include "src/aruwlib/errors/error_controller.hpp"
 #include "src/aruwlib/errors/create_errors.hpp"
-
 #include "aruwsrc/algorithms/state_space_controller.hpp"
-
-
 #include <modm/math/matrix.hpp>
 
-
-aruwsrc::algorithms::StateSpaceController<1, 1> flywheelController;
-
-aruwlib::motor::DjiMotor stateSpaceTestMotor(aruwlib::motor::MOTOR1, aruwlib::can::CanBus::CAN_BUS1, false, "testing motor");
-
-void controlFlywheels();
-void initFlywheelControl();
-
-int main()
-{
-    Board::initialize();
-
-    flywheelController.initialize();
-
-    /// \todo determine this value
-    // flywheelController.K;
-
-    modm::ShortTimeout sendMotorTimeout(2);
-
-    initFlywheelControl();
-
-    while (1)
-    {
-        // do this as fast as you can
-        aruwlib::can::CanRxHandler::pollCanData();
-        
-        if (sendMotorTimeout.execute())
-        {
-            float y_arr[1] = {stateSpaceTestMotor.getShaftRPM()};
-            modm::Matrix<float, 1, 1> y(y_arr);
-            flywheelController.update(y, 0.002f);
-
-            sendMotorTimeout.restart(2);
-            controlFlywheels();
-
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-        }
-        modm::delayMicroseconds(10);
-    }
-    return 0;
-}
-
 int GEAR_RATIO = 1;
-float TORQUE_CONSTANT = 0.3f;
+float TORQUE_CONSTANT = 0.1f;
 float RESISTANCE = 0.194f;
 /// \todo
 float MOMENT_OF_INERTIA = 0.3f;
@@ -105,6 +60,60 @@ float A_1 = -(GEAR_RATIO * GEAR_RATIO * TORQUE_CONSTANT)
 // input matrix (1x1)
 float B_1 = (GEAR_RATIO * TORQUE_CONSTANT)
         / (RESISTANCE * MOMENT_OF_INERTIA);
+
+aruwsrc::algorithms::Model<1, 1> m;
+aruwsrc::algorithms::StateSpaceController<1, 1, 1, false, false, true> flywheelController(m);
+aruwsrc::algorithms::Simulation<1, 1> s(m);
+
+aruwlib::motor::DjiMotor stateSpaceTestMotor(aruwlib::motor::MOTOR1, aruwlib::can::CanBus::CAN_BUS1, false, "testing motor");
+
+void controlFlywheels();
+void initFlywheelControl();
+
+int main()
+{
+    Board::initialize();
+
+    flywheelController.initialize();
+
+    m.A[0][0] = A_1;
+    m.B[0][0] = B_1;
+    m.C[0][0] = 1;
+    m.D[0][0] = 0;
+
+    /// \todo determine this value
+    // flywheelController.K;
+
+    modm::ShortTimeout sendMotorTimeout(2);
+
+    initFlywheelControl();
+
+    flywheelController.K[0][0] = 20.0f;
+
+    flywheelController.K.subMatrix<1, 1>(0, 0);
+
+    while (1)
+    {
+        // do this as fast as you can
+        aruwlib::can::CanRxHandler::pollCanData();
+        
+        if (sendMotorTimeout.execute())
+        {
+            float y_arr[1];
+            y_arr[0] = stateSpaceTestMotor.getShaftRPM();
+            modm::Matrix<float, 1, 1> y(y_arr);
+            // stateSpaceTestMotor.setDesiredOutput(flywheelController.update(y, 0.002f)[0][0]);
+
+            sendMotorTimeout.restart(2);
+            stateSpaceTestMotor.setDesiredOutput(s.step(flywheelController.update(y, 0.002f), 0.002f)[0][0]);
+            // controlFlywheels();
+
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        }
+        modm::delayMicroseconds(10);
+    }
+    return 0;
+}
 
 // controller gain matrix (1x1)
 /// \todo tune this value
