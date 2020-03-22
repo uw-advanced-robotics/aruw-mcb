@@ -1,3 +1,13 @@
+/**
+ * the error is no acknowledge from the i2c device (NAK register is set)
+ * 
+ * checked clock speed using logic analyzer, the speed is correct (i.e. setting clock
+ * speed to x khz gives x khz square waves)
+ * 
+ * tried with bit banging just to see if that would work, it also doesn't
+ * 
+ */
+
 #include <rm-dev-board-a/board.hpp>
 
 #include <modm/processing.hpp>
