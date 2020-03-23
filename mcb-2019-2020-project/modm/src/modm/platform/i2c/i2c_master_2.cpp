@@ -147,7 +147,7 @@
  *
  * You can enable serial debugging with this define by changing 0 to 1.
  */
-#define SERIAL_DEBUGGING 1
+#define SERIAL_DEBUGGING 0
 
 #if SERIAL_DEBUGGING
 #	include <modm/platform/uart/uart_2.hpp>

@@ -21,14 +21,16 @@ modm::IOStream stream(device);
 
 using namespace Board;
 
-typedef GpioF1 Scl;
-typedef GpioF0 Sda;
-typedef BitBangI2cMaster<Scl, Sda> MyI2cMaster;
+// typedef GpioA4 Scl;  // P2
+// typedef GpioA5 Sda;  // P1
+// typedef BitBangI2cMaster<Scl, Sda> MyI2cMaster;
 
-// using MyI2cMaster = I2cMaster2;
+using MyI2cMaster = I2cMaster2;
 
 modm::bno055::Data data;
-modm::Bno055<MyI2cMaster> imu(data);
+modm::Bno055<MyI2cMaster> imu(data, 0x28);
+
+uint8_t i = 0;
 
 class ThreadOne : public modm::pt::Protothread
 {
@@ -37,6 +39,23 @@ public:
     update()
     {
         PT_BEGIN();
+
+        // stream << "\n read chip id" << modm::endl;
+
+        // while (true)
+        // {
+        //     PT_CALL( imu.readRegister(modm::bno055::Register::CHIP_ID, &i) );
+        //     // stream << i << "\n" << modm::endl;
+        //     // if (PT_CALL( imu.readRegister(modm::bno055::Register::CHIP_ID, &i) ))
+        //     // {
+        //     //     stream << "chip id acknowledged \n" << modm::endl;
+        //     //     if (i == 0x28 || i == 0x29)
+        //     //     {
+        //     //         break;
+        //     //     }
+        //     // }
+        //     PT_WAIT_UNTIL(timer.execute());
+        // }
 
         stream << "Ping the device from ThreadOne" << modm::endl;
 
@@ -88,11 +107,11 @@ main()
     Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
     Usart2::initialize<Board::SystemClock, 9600>();
 
-    // MyI2cMaster::connect<GpioF1::Scl, GpioF0::Sda>();
-    MyI2cMaster::connect<Scl::BitBang, Sda::BitBang>(MyI2cMaster::PullUps::Internal);
-    MyI2cMaster::initialize<Board::SystemClock, 400_kHz>();
+    MyI2cMaster::connect<GpioF1::Scl, GpioF0::Sda>(modm::I2cMaster::PullUps::Internal);
+    // MyI2cMaster::connect<Scl::BitBang, Sda::BitBang>(MyI2cMaster::PullUps::Internal);
+    MyI2cMaster::initialize<Board::SystemClock, 100_kHz>();
 
-    stream << "\n\nWelcome to BNO055 demo!\n\n" << modm::endl;
+    // stream << "\n\nWelcome to BNO055 demo!\n\n" << modm::endl;
 
     modm::ShortPeriodicTimer tmr(500);
 

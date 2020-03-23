@@ -19,6 +19,8 @@
 #endif
 
 // debugging for serious dummies
+#include <modm/platform/uart/uart_2.hpp>
+// #define DEBUG_SW_I2C(x) modm::platform::Usart2::write(x)
 /*
 #include "../../uart/stm32/usart_2.hpp"
 #define DEBUG_SW_I2C(x) modm::platform::Usart2::write(x)
@@ -109,6 +111,7 @@ modm::platform::BitBangI2cMaster<Scl, Sda>::start(modm::I2cTransaction *transact
 				// ask the transaction object about address and next operation.
 				starting = transactionObject->starting();
 				uint8_t address = (starting.address & 0xfe);
+				DEBUG_SW_I2C(address);
 
 				// set the correct addressing bit
 				DEBUG_SW_I2C((starting.next == modm::I2c::OperationAfterStart::Read) ? 'r': 'w');
