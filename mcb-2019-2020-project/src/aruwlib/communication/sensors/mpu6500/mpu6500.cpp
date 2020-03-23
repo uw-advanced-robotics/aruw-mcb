@@ -44,7 +44,7 @@ namespace sensors {
         // verify mpu register ID
         if (MPU6500_ID !=  mpuReadReg(MPU6500_WHO_AM_I)) {
             RAISE_ERROR("failed to initialize the imu properly",
-                    aruwlib::errors::Location::MPU6500,
+                    aruwlib::errors::Location::IMU,
                     aruwlib::errors::ErrorType::IMU_NOT_RECEIVING_PROPERLY);
             return;
         }
@@ -87,7 +87,7 @@ namespace sensors {
 
             Mpu6500::calcImuAttitude(&mpu6500Data.imuAtti);
         } else {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
         }
     }
@@ -97,7 +97,7 @@ namespace sensors {
         if (imuInitialized) {
             return 21.0f + static_cast<float>(mpu6500Data.temp) / 333.87f;
         } else {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return NAN;
         }
@@ -109,7 +109,7 @@ namespace sensors {
             return static_cast<float>(mpu6500Data.ax)
                     / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
@@ -121,7 +121,7 @@ namespace sensors {
             return static_cast<float>(mpu6500Data.ay)
                     / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
@@ -133,7 +133,7 @@ namespace sensors {
             return static_cast<float>(mpu6500Data.az)
                     / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
@@ -144,7 +144,7 @@ namespace sensors {
         if (imuInitialized) {
             return static_cast<float>(mpu6500Data.gx) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
@@ -155,7 +155,7 @@ namespace sensors {
         if (imuInitialized) {
             return static_cast<float>(mpu6500Data.gy) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
@@ -166,7 +166,7 @@ namespace sensors {
         if (imuInitialized) {
             return static_cast<float>(mpu6500Data.gz) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
@@ -174,7 +174,7 @@ namespace sensors {
 
     MahonyAhrs::attitude Mpu6500::getImuAttitude() {
         if (!imuInitialized) {
-            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::IMU,
                 aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
         }
         return mpu6500Data.imuAtti;

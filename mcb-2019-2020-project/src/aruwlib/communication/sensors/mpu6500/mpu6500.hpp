@@ -1,6 +1,6 @@
 /*
  * To use this class, call Remote::init() to properly initialize and calibrate
- * the MPU6500. Next, call Remote::read() to read acceleration, gyro, and temp
+ * the IMU. Next, call Remote::read() to read acceleration, gyro, and temp
  * values from the imu. Use the getter methods to access imu information.
  */
 

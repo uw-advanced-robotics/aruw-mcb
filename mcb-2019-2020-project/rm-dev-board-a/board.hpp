@@ -189,7 +189,7 @@ using DigitalOutPins = SoftwareGpioPort
     DigitalOutPinG, DigitalOutPinH
 >;
 
-// gpio pins used for SPI communication to the onboard MPU6500 IMU
+// gpio pins used for SPI communication to the onboard IMU IMU
 using ImuSck = GpioF7;
 using ImuMiso = GpioF8;
 using ImuMosi = GpioF9;

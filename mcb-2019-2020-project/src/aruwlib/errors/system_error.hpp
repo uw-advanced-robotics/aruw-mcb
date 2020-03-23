@@ -28,7 +28,7 @@ static const uint8_t ERROR_TYPE_SIZE = 8 - ERROR_LOCATION_SIZE;
 enum Location {
     CAN_RX = 0,
     MOTOR_CONTROL,
-    MPU6500,
+    IMU,
     DJI_SERIAL,
     COMMAND_SCHEDULER,
     SUBSYSTEM,
