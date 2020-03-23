@@ -25,21 +25,6 @@ class Bno055Interface : public modm::pt::Protothread, public modm::Bno055<I2cMas
                     communicateTimeout(bno055CommunicationTimeoutPeriod)
     {}
 
-    /// \todo how do I do this
-    // template< template<Peripheral _> class SCL, template<Peripheral _> class SDA >
-    // void initialize()
-    // {
-    //     if (UseBitBang)
-    //     {
-    //         MyI2cMaster::connect<Scl::BitBang, Sda::BitBang>(MyI2cMaster::PullUps::Internal);
-    //     }
-    //     else
-    //     {
-    //         I2cMaster::connect<SCL::Scl, SDA::Sda>(modm::I2cMaster::PullUps::Internal);
-    //     }
-    //     I2cMaster::initialize<Board::SystemClock, 100_kHz>();
-    // }
-
     bool update()
     {
         PT_BEGIN();
