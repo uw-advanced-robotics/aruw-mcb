@@ -150,8 +150,8 @@
 #define SERIAL_DEBUGGING 0
 
 #if SERIAL_DEBUGGING
-#	include <modm/platform/uart/uart_2.hpp>
-	typedef modm::platform::Usart2 DebugUart;
+#	include "../../uart/stm32/uart_5.hpp"
+	typedef modm::platform::Uart5 DebugUart;
 #	include <modm/io/iostream.hpp>
 	extern modm::IOStream stream;
 #	define DEBUG_STREAM(x) stream << x << "\n"
