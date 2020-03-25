@@ -16,20 +16,14 @@ class InitFrictionWheelCommand : public Command
 {
  private:
     DroneTurretSubsystem* turret;
-    aruwlib::algorithms::Ramp ramp;
     static constexpr uint32_t ZERO_THROTTLE_TIME_MS = 2000;
-    static constexpr uint32_t RAMP_TIME_MS = 1000;
 
     uint32_t zeroThrottleStartTime;
-    uint32_t lastUpdateTime;
 
-    static constexpr float RAMP_TARGET = 0.18;
  public:
     explicit InitFrictionWheelCommand(DroneTurretSubsystem* turret) :
             turret(turret),
-            ramp(turret->MIN_PWM_DUTY),
-            zeroThrottleStartTime(0),
-            lastUpdateTime(0)
+            zeroThrottleStartTime(0)
     {
         addSubsystemRequirement(dynamic_cast<Subsystem*>(turret));
     }

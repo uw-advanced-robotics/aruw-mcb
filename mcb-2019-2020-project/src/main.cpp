@@ -20,7 +20,6 @@
 #include "src/aruwlib/communication/serial/xavier_serial.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
 #include "src/aruwsrc/control/drone/init_friction_wheel_command.hpp"
-#include "src/aruwsrc/control/drone/control_friction_wheel_command.hpp"
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwlib::sensors;
@@ -38,7 +37,6 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #if defined(TARGET_DRONE)
 aruwsrc::drone::DroneTurretSubsystem droneTurretSubsystem;
 aruwsrc::drone::InitFrictionWheelCommand initializeFrictionWheelCommand(&droneTurretSubsystem);
-aruwsrc::drone::ControlFrictionWheelCommand controlFrictionWheelCommand(&droneTurretSubsystem);
 #endif
 
 int main()
@@ -125,12 +123,6 @@ int main()
             CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
-        #if defined(TARGET_DRONE)
-        if (droneTurretSubsystem.isInitialized())
-        {
-            droneTurretSubsystem.setDefaultCommand(&controlFrictionWheelCommand);
-        }
-        #endif
         modm::delayMicroseconds(10);
     }
     return 0;
