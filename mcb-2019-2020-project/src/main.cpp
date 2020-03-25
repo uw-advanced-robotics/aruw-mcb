@@ -10,6 +10,7 @@
 #include "src/aruwlib/communication/serial/ref_serial.hpp"
 #include "src/aruwlib/display/sh1106.hpp"
 #include "src/aruwlib/communication/sensors/bno055_interface.hpp"
+#include "src/aruwlib/communication/sensors/distance/adafruit_vl6180x_distance_sensor.hpp"
 
 /* aruwlib control includes -------------------------------------------------*/
 #include "src/aruwlib/control/command_scheduler.hpp"
@@ -54,6 +55,8 @@ using namespace aruwsrc::control;
 
 Bno055Interface<I2cMaster2> externalImu;
 float yaw = 0.0f;
+
+Vl6810xDistanceSensor<I2cMaster2> distanceSensor;
 
 /* define subsystems --------------------------------------------------------*/
 #if defined(TARGET_SOLDIER)
@@ -256,28 +259,31 @@ int main()
 
     while (1)
     {
-        externalImu.update();
-        yaw = externalImu.getData().heading();
+        uint8_t output;
+        distanceSensor.readRegister(Vl6810xConstants::Register::VL6180X_REG_IDENTIFICATION_MODEL_ID, &output);
 
-        // do this as fast as you can
-        aruwlib::can::CanRxHandler::pollCanData();
-        aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
-        aruwlib::serial::RefSerial::getRefSerial().updateSerial();
+        // externalImu.update();
+        // yaw = externalImu.getData().heading();
 
-        aruwlib::Remote::read();
+        // // do this as fast as you can
+        // aruwlib::can::CanRxHandler::pollCanData();
+        // aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
+        // aruwlib::serial::RefSerial::getRefSerial().updateSerial();
 
-        if (updateImuPeriod.execute())
-        {
-            Mpu6500::read();
-        }
+        // aruwlib::Remote::read();
 
-        if (sendMotorTimeout.execute())
-        {
-            aruwlib::errors::ErrorController::update();
-            CommandScheduler::getMainScheduler().run();
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-        }
-        modm::delayMicroseconds(10);
+        // if (updateImuPeriod.execute())
+        // {
+        //     Mpu6500::read();
+        // }
+
+        // if (sendMotorTimeout.execute())
+        // {
+        //     aruwlib::errors::ErrorController::update();
+        //     CommandScheduler::getMainScheduler().run();
+        //     aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        // }
+        // modm::delayMicroseconds(10);
     }
     return 0;
 }
