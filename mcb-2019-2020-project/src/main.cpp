@@ -259,8 +259,7 @@ int main()
 
     while (1)
     {
-        uint8_t output;
-        distanceSensor.readRegister(Vl6810xConstants::Register::VL6180X_REG_IDENTIFICATION_MODEL_ID, &output);
+        distanceSensor.update();
 
         // externalImu.update();
         // yaw = externalImu.getData().heading();
