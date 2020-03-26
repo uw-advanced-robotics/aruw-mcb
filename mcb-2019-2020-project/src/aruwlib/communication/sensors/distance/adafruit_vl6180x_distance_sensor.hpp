@@ -23,6 +23,8 @@ struct Vl6810xConstants
     Register : uint16_t
     {
         IDENTIFICATION_MODEL_ID              = 0x000,
+        SYSTEM__MODE_GPIO0                   = 0X010,
+        SYSTEM__MODE_GPIO1                   = 0X011,
         SYSTEM_INTERRUPT_CONFIG_GPIO         = 0x014,
         SYSTEM_INTERRUPT_CLEAR               = 0x015,
         SYSTEM_FRESH_OUT_OF_RESET            = 0x016,
@@ -81,8 +83,6 @@ struct Vl6810xConstants
         VL6180X_ALS_GAIN_20   = 0x00,  ///< 20x gain
         VL6180X_ALS_GAIN_40   = 0x07   ///< 40x gain
     };
-
-    using Registers_t = modm::FlagsGroup<modm::Flags8<ALSGain>>;
 };
 
 /**
@@ -100,13 +100,11 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
     {}
 
     void init() override
-    {
-
-    }
+    {}
 
     float read() override
     {
-        return 0.0f;
+        return range;
     }
 
     bool validReading() override
@@ -134,12 +132,38 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
             }
             else if (currState == VL6180XInitializationState::CONFIGURING_DEVICE)
             {
-                loadSettings();
-                writeRegister(Register::VL6180X_REG_SYSTEM_FRESH_OUT_OF_RESET, 0x00);
+                if (PT_CALL(loadSettings()))
+                {
+                    currState = VL6180XInitializationState::RECEIVING_DATA;
+                }
+                else
+                {
+                    PT_WAIT_UNTIL(communicateTimeout.execute());
+                }
             }
             else if (currState == VL6180XInitializationState::RECEIVING_DATA)
             {
+                do
+                {
+                    PT_CALL( readRegister(Register::RESULT__RANGE_STATUS, data) );
+                } while (!(data[0] & 0x1));
 
+                PT_CALL( writeRegister(Register::SYSRANGE_START, 0x1) );
+
+                do
+                {
+                    PT_CALL( readRegister(Register::RESULT__INTERRUPT_STATUS_GPIO, data) );
+                } while (!(data[0] & 0x04));
+
+                // range in mm
+                PT_CALL( readRegister(Register::RESULT__RANGE_VAL, data) );
+                range = data[0];
+
+                // clear interrupt
+                PT_CALL( writeRegister(Register::SYSTEM_INTERRUPT_CLEAR, 0x07) );
+                
+                // readRange();
+                PT_WAIT_UNTIL(communicateTimeout.execute());
             }
         }
 
@@ -163,6 +187,8 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
     uint8_t data[10];
 
     uint8_t prev_reg;
+
+    uint8_t range;
 
     modm::ShortPeriodicTimer communicateTimeout;
 
@@ -196,63 +222,48 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
         RF_END_RETURN_CALL( this->runTransaction() );
     }
 
-    void loadSettings()
+    modm::ResumableResult<bool> loadSettings()
     {
-        writeRegister(0x0207, 0x01);
-        writeRegister(0x0208, 0x01);
-        writeRegister(0x0096, 0x00);
-        writeRegister(0x0097, 0xfd);
-        writeRegister(0x00e3, 0x00);
-        writeRegister(0x00e4, 0x04);
-        writeRegister(0x00e5, 0x02);
-        writeRegister(0x00e6, 0x01);
-        writeRegister(0x00e7, 0x03);
-        writeRegister(0x00f5, 0x02);
-        writeRegister(0x00d9, 0x05);
-        writeRegister(0x00db, 0xce);
-        writeRegister(0x00dc, 0x03);
-        writeRegister(0x00dd, 0xf8);
-        writeRegister(0x009f, 0x00);
-        writeRegister(0x00a3, 0x3c);
-        writeRegister(0x00b7, 0x00);
-        writeRegister(0x00bb, 0x3c);
-        writeRegister(0x00b2, 0x09);
-        writeRegister(0x00ca, 0x09);
-        writeRegister(0x0198, 0x01);
-        writeRegister(0x01b0, 0x17);
-        writeRegister(0x01ad, 0x00);
-        writeRegister(0x00ff, 0x05);
-        writeRegister(0x0100, 0x05);
-        writeRegister(0x0199, 0x05);
-        writeRegister(0x01a6, 0x1b);
-        writeRegister(0x01ac, 0x3e);
-        writeRegister(0x01a7, 0x1f);
-        writeRegister(0x0030, 0x00);
+        // Set to insure the device does not use any of the parameters midway through
+        // setting update
+        writeRegister(Register::SYSTEM_GROUPED_PARAMETER_HOLD, 0x01);
+
+        // enables GPIO Interrupt output, enables polling for 'new sample ready when
+        // measurement completes
+        writeRegister(Register::SYSTEM__MODE_GPIO0, 0b00010000);
+
+        // enable system interrupt trigger when a new sample is ready for both als and range
+        writeRegister(Register::SYSTEM_INTERRUPT_CONFIG_GPIO, 0b00100100);
+
+        return writeRegister(Register::SYSTEM_GROUPED_PARAMETER_HOLD, 0x00);
+
 
         // Recommended : Public registers - See data sheet for more detail
-        writeRegister(0x0011, 0x10);       // Enables polling for 'New Sample ready'
-                                    // when measurement completes
-        writeRegister(0x010a, 0x30);       // Set the averaging sample period
-                                    // (compromise between lower noise and
-                                    // increased execution time)
-        writeRegister(0x003f, 0x46);       // Sets the light and dark gain (upper
-                                    // nibble). Dark gain should not be
-                                    // changed.
-        writeRegister(0x0031, 0xFF);       // sets the # of range measurements after
-                                    // which auto calibration of system is
-                                    // performed
-        writeRegister(0x0040, 0x63);       // Set ALS integration time to 100ms
-        writeRegister(0x002e, 0x01);       // perform a single temperature calibration
-                                    // of the ranging sensor
+        // writeRegister(0x0011, 0x10);       // Enables polling for 'New Sample ready'
+        //                             // when measurement completes
+        // writeRegister(0x010a, 0x30);       // Set the averaging sample period
+        //                             // (compromise between lower noise and
+        //                             // increased execution time)
+        // writeRegister(0x003f, 0x46);       // Sets the light and dark gain (upper
+        //                             // nibble). Dark gain should not be
+        //                             // changed.
+        // writeRegister(0x0031, 0xFF);       // sets the # of range measurements after
+        //                             // which auto calibration of system is
+        //                             // performed
+        // writeRegister(0x0040, 0x63);       // Set ALS integration time to 100ms
+        // writeRegister(0x002e, 0x01);       // perform a single temperature calibration
+        //                             // of the ranging sensor
 
-        // Optional: Public registers - See data sheet for more detail
-        writeRegister(0x001b, 0x09);       // Set default ranging inter-measurement
-                                    // period to 100ms
-        writeRegister(0x003e, 0x31);       // Set default ALS inter-measurement period
-                                    // to 500ms
-        writeRegister(0x0014, 0x24);       // Configures interrupt on 'New Sample
-                                    // Ready threshold event'
+        // // Optional: Public registers - See data sheet for more detail
+        // writeRegister(0x001b, 0x09);       // Set default ranging inter-measurement
+        //                             // period to 100ms
+        // writeRegister(0x003e, 0x31);       // Set default ALS inter-measurement period
+        //                             // to 500ms
+        // writeRegister(0x0014, 0x24);       // Configures interrupt on 'New Sample
+        //                             // Ready threshold event'
 
+        // use this to check for a reset condition, default is 1
+        writeRegister(Register::SYSTEM_FRESH_OUT_OF_RESET, 0x0);
     }
 };
 
