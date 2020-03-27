@@ -259,7 +259,7 @@ int main()
 
     while (1)
     {
-        distanceSensor.update();
+        distanceSensor.run();
 
         // externalImu.update();
         // yaw = externalImu.getData().heading();

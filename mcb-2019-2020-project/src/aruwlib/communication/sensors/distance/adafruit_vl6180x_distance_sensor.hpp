@@ -25,16 +25,16 @@ struct Vl6810xConstants
         IDENTIFICATION_MODEL_ID              = 0x000,
         SYSTEM__MODE_GPIO0                   = 0X010,
         SYSTEM__MODE_GPIO1                   = 0X011,
-        SYSTEM_INTERRUPT_CONFIG_GPIO         = 0x014,
-        SYSTEM_INTERRUPT_CLEAR               = 0x015,
-        SYSTEM_FRESH_OUT_OF_RESET            = 0x016,
-        SYSTEM_GROUPED_PARAMETER_HOLD        = 0X017,
-        SYSRANGE_START                       = 0x018,
-        SYSRANGE_THRESH_HIGH                 = 0X019,
-        SYSRANGE_THRESH_LOW                  = 0X01A,
-        SYSRANGE_INTERMEASUREMENT_PERIOD     = 0X01B,
-        SYSRANGE_MAX_CONVERGENCE_TIME        = 0X01C,
-        SYSRANGE_CROSSTALK_COMPENSATION_RATE = 0X01E,
+        SYSTEM__INTERRUPT_CONFIG_GPIO         = 0x014,
+        SYSTEM__INTERRUPT_CLEAR               = 0x015,
+        SYSTEM__FRESH_OUT_OF_RESET            = 0x016,
+        SYSTEM__GROUPED_PARAMETER_HOLD        = 0X017,
+        SYSRANGE__START                       = 0x018,
+        SYSRANGE__THRESH_HIGH                 = 0X019,
+        SYSRANGE__THRESH_LOW                  = 0X01A,
+        SYSRANGE__INTERMEASUREMENT_PERIOD     = 0X01B,
+        SYSRANGE__MAX_CONVERGENCE_TIME        = 0X01C,
+        SYSRANGE__CROSSTALK_COMPENSATION_RATE = 0X01E,
         SYSRANGE__CROSSTALK_VALID_HEIGHT     = 0X021,
         SYSRANGE__EARLY_CONVERGENCE_ESTIMATE = 0x022,
         SYSRANGE__PART_TO_PART_RANGE_OFFSET  = 0x024,
@@ -88,6 +88,11 @@ struct Vl6810xConstants
 /**
  * @attention The vl6180 expects 16 bit register requests, so when reading and writing to registers,
  *            the configuration is set to send the register as 16 bit (2 eight bit values).
+ * @note The logic behind configuring and reading from the distance sensor comes from the chip data
+ *       sheet and setup guide, these links respectively:
+ *       https://www.st.com/resource/en/datasheet/vl6180x.pdf
+ *       https://www.st.com/resource/en/design_tip/dm00123019-vl6180x-range-and-ambient-light
+ *       -sensor-quick-setup-guide-stmicroelectronics.pdf 
  */
 template < class I2cMaster >
 class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cMaster, 4>, public Vl6810xConstants, public modm::pt::Protothread
@@ -112,61 +117,22 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
         return false;
     }
 
-    bool update()
+    bool initialized = false;
+    bool run()
     {
         PT_BEGIN();
-
-        while (true)
+        while(true)
         {
-            if (currState == VL6180XInitializationState::DEVICE_NOT_STARTED)
+            if (I2cMaster2::getErrorState() != I2cMaster2::Error::NoError)
             {
-                PT_CALL( readRegister(Register::IDENTIFICATION_MODEL_ID, data) );
-                if (data[0] == VL6180X_REG_IDENTIFICATION_RESPONSE)
-                {
-                    currState = VL6180XInitializationState::CONFIGURING_DEVICE;
-                }
-                else
-                {
-                    PT_WAIT_UNTIL(communicateTimeout.execute());
-                }
+                initialized = false;
             }
-            else if (currState == VL6180XInitializationState::CONFIGURING_DEVICE)
+            if (!initialized)
             {
-                if (PT_CALL(loadSettings()))
-                {
-                    currState = VL6180XInitializationState::RECEIVING_DATA;
-                }
-                else
-                {
-                    PT_WAIT_UNTIL(communicateTimeout.execute());
-                }
+                PT_CALL(bootDevice());
             }
-            else if (currState == VL6180XInitializationState::RECEIVING_DATA)
-            {
-                do
-                {
-                    PT_CALL( readRegister(Register::RESULT__RANGE_STATUS, data) );
-                } while (!(data[0] & 0x1));
-
-                PT_CALL( writeRegister(Register::SYSRANGE_START, 0x1) );
-
-                do
-                {
-                    PT_CALL( readRegister(Register::RESULT__INTERRUPT_STATUS_GPIO, data) );
-                } while (!(data[0] & 0x04));
-
-                // range in mm
-                PT_CALL( readRegister(Register::RESULT__RANGE_VAL, data) );
-                range = data[0];
-
-                // clear interrupt
-                PT_CALL( writeRegister(Register::SYSTEM_INTERRUPT_CLEAR, 0x07) );
-                
-                // readRange();
-                PT_WAIT_UNTIL(communicateTimeout.execute());
-            }
+            PT_CALL(readRange());
         }
-
         PT_END();
     }
 
@@ -222,48 +188,98 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
         RF_END_RETURN_CALL( this->runTransaction() );
     }
 
-    modm::ResumableResult<bool> loadSettings()
+    modm::ResumableResult<bool> bootDevice()
     {
-        // Set to insure the device does not use any of the parameters midway through
-        // setting update
-        writeRegister(Register::SYSTEM_GROUPED_PARAMETER_HOLD, 0x01);
+        RF_BEGIN();
 
-        // enables GPIO Interrupt output, enables polling for 'new sample ready when
-        // measurement completes
-        writeRegister(Register::SYSTEM__MODE_GPIO0, 0b00010000);
+        do
+        {
+            RF_CALL(writeRegister(Register::SYSTEM__MODE_GPIO0, 0x0));
 
-        // enable system interrupt trigger when a new sample is ready for both als and range
-        writeRegister(Register::SYSTEM_INTERRUPT_CONFIG_GPIO, 0b00100100);
+            communicateTimeout.restart(1);
 
-        return writeRegister(Register::SYSTEM_GROUPED_PARAMETER_HOLD, 0x00);
+            RF_WAIT_UNTIL(communicateTimeout.execute());
 
+            // enables GPIO Interrupt output, enables polling for 'new sample ready when
+            // measurement completes
+            RF_CALL(writeRegister(Register::SYSTEM__MODE_GPIO0, 0b00010000));
 
-        // Recommended : Public registers - See data sheet for more detail
-        // writeRegister(0x0011, 0x10);       // Enables polling for 'New Sample ready'
-        //                             // when measurement completes
-        // writeRegister(0x010a, 0x30);       // Set the averaging sample period
-        //                             // (compromise between lower noise and
-        //                             // increased execution time)
-        // writeRegister(0x003f, 0x46);       // Sets the light and dark gain (upper
-        //                             // nibble). Dark gain should not be
-        //                             // changed.
-        // writeRegister(0x0031, 0xFF);       // sets the # of range measurements after
-        //                             // which auto calibration of system is
-        //                             // performed
-        // writeRegister(0x0040, 0x63);       // Set ALS integration time to 100ms
-        // writeRegister(0x002e, 0x01);       // perform a single temperature calibration
-        //                             // of the ranging sensor
+            communicateTimeout.restart(1);
 
-        // // Optional: Public registers - See data sheet for more detail
-        // writeRegister(0x001b, 0x09);       // Set default ranging inter-measurement
-        //                             // period to 100ms
-        // writeRegister(0x003e, 0x31);       // Set default ALS inter-measurement period
-        //                             // to 500ms
-        // writeRegister(0x0014, 0x24);       // Configures interrupt on 'New Sample
-        //                             // Ready threshold event'
+            RF_WAIT_UNTIL(communicateTimeout.execute());
 
-        // use this to check for a reset condition, default is 1
-        writeRegister(Register::SYSTEM_FRESH_OUT_OF_RESET, 0x0);
+            RF_CALL(readRegister(Register::SYSTEM__FRESH_OUT_OF_RESET, data));
+        } while (data[0] != 0x1);
+
+        RF_CALL(writeRegister(Register::SYSTEM__FRESH_OUT_OF_RESET, 0x0));
+
+        // these register configurations are described in the quick setup guide linked above
+        RF_CALL(writeRegister(Register(0x0207), 0x01));
+        RF_CALL(writeRegister(Register(0x0208), 0x01));
+        RF_CALL(writeRegister(Register(0x0133), 0x01));
+        RF_CALL(writeRegister(Register(0x0096), 0x00));
+        RF_CALL(writeRegister(Register(0x0097), 0xFD));
+        RF_CALL(writeRegister(Register(0x00e3), 0x00));
+        RF_CALL(writeRegister(Register(0x00e4), 0x04));
+        RF_CALL(writeRegister(Register(0x00e5), 0x02));
+        RF_CALL(writeRegister(Register(0x00e6), 0x01));
+        RF_CALL(writeRegister(Register(0x00e7), 0x03));
+        RF_CALL(writeRegister(Register(0x00f5), 0x02));
+        RF_CALL(writeRegister(Register(0x00D9), 0x05));
+        RF_CALL(writeRegister(Register(0x00DB), 0xCE));
+        RF_CALL(writeRegister(Register(0x00DC), 0x03));
+        RF_CALL(writeRegister(Register(0x00DD), 0xF8));
+        RF_CALL(writeRegister(Register(0x009f), 0x00));
+        RF_CALL(writeRegister(Register(0x00a3), 0x3c));
+        RF_CALL(writeRegister(Register(0x00b7), 0x00));
+        RF_CALL(writeRegister(Register(0x00bb), 0x3c));
+        RF_CALL(writeRegister(Register(0x00b2), 0x09));
+        RF_CALL(writeRegister(Register(0x00ca), 0x09));
+        RF_CALL(writeRegister(Register(0x0198), 0x01));
+        RF_CALL(writeRegister(Register(0x01b0), 0x17));
+        RF_CALL(writeRegister(Register(0x01ad), 0x00));
+        RF_CALL(writeRegister(Register(0x00FF), 0x05));
+        RF_CALL(writeRegister(Register(0x0100), 0x05));
+        RF_CALL(writeRegister(Register(0x0199), 0x05));
+        RF_CALL(writeRegister(Register(0x0109), 0x07));
+        RF_CALL(writeRegister(Register(0x010a), 0x30));
+        RF_CALL(writeRegister(Register(0x003f), 0x46));
+        RF_CALL(writeRegister(Register(0x01a6), 0x1b));
+        RF_CALL(writeRegister(Register(0x01ac), 0x3e));
+        RF_CALL(writeRegister(Register(0x01a7), 0x1f));
+        RF_CALL(writeRegister(Register(0x0103), 0x01));
+        RF_CALL(writeRegister(Register(0x0030), 0x00));
+        RF_CALL(writeRegister(Register(0x001b), 0x0A));
+        RF_CALL(writeRegister(Register(0x003e), 0x0A));
+        RF_CALL(writeRegister(Register(0x0131), 0x04));
+        RF_CALL(writeRegister(Register(0x0011), 0x10));
+        RF_CALL(writeRegister(Register(0x0014), 0x24));
+        RF_CALL(writeRegister(Register(0x0031), 0xFF));
+        RF_CALL(writeRegister(Register(0x00d2), 0x01));
+        RF_CALL(writeRegister(Register(0x00f2), 0x01)); 
+
+        initialized = true;
+
+        RF_END_RETURN(true);
+    }
+
+    modm::ResumableResult<bool> readRange()
+    {
+        RF_BEGIN();
+
+        RF_CALL(readRegister(Register::SYSRANGE__START, data));
+
+        RF_CALL(writeRegister(Register::SYSRANGE__START, uint8_t(data[0] & 0b11111100)));
+
+        do
+        {
+            RF_CALL(readRegister(Register::RESULT__INTERRUPT_STATUS_GPIO, data));
+        } while (data[0] != 0b100);
+
+        RF_CALL(readRegister(Register::RESULT__RANGE_VAL, data));
+        range = data[0];
+
+        RF_END();
     }
 };
 
