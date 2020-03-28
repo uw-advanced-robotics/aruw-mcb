@@ -72,6 +72,22 @@ struct Vl6810xConstants
     };
 
     enum class
+    ReadRangeStatus : uint8_t 
+    {
+        VL6180X_ERROR_NONE        = 0,   ///< Success!
+        VL6180X_ERROR_SYSERR_1    = 1,   ///< System error
+        VL6180X_ERROR_SYSERR_5    = 5,   ///< Sysem error
+        VL6180X_ERROR_ECEFAIL     = 6,   ///< Early convergence estimate fail
+        VL6180X_ERROR_NOCONVERGE  = 7,   ///< No target detected
+        VL6180X_ERROR_RANGEIGNORE = 8,   ///< Ignore threshold check failed
+        VL6180X_ERROR_SNR         = 11,  ///< Ambient conditions too high
+        VL6180X_ERROR_RAWUFLOW    = 12,  ///< Raw range algo underflow
+        VL6180X_ERROR_RAWOFLOW    = 13,  ///< Raw range algo overflow
+        VL6180X_ERROR_RANGEUFLOW  = 14,  ///< Raw range algo underflow
+        VL6180X_ERROR_RANGEOFLOW  = 15   ///< Raw range algo overflow
+    };
+
+    enum class
     ALSGain : uint8_t
     {
         VL6180X_ALS_GAIN_1    = 0x06,  ///< 1x gain
@@ -107,6 +123,10 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
     void init() override
     {}
 
+    /**
+     * doesn't actually read, as this must be called consistently in the protothread. Instead,
+     * simply returns the range.
+     */
     float read() override
     {
         return range;
@@ -114,26 +134,47 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
 
     bool validReading() override
     {
-        return false;
+        readRegister(Register::RESULT__RANGE_STATUS, data);
+        return ReadRangeStatus(data[0]) == ReadRangeStatus::VL6180X_ERROR_NONE;
     }
 
+    modm::I2cMaster::Error err;
+        modm::I2cMaster::Error err2;
     bool initialized = false;
     bool run()
     {
-        PT_BEGIN();
-        while(true)
-        {
-            if (I2cMaster2::getErrorState() != I2cMaster2::Error::NoError)
-            {
-                initialized = false;
-            }
-            if (!initialized)
-            {
-                PT_CALL(bootDevice());
-            }
-            PT_CALL(readRange());
-        }
-        PT_END();
+        // PT_BEGIN();
+        // while(true)
+        // {
+            // readRegister(Register::IDENTIFICATION_MODEL_ID, data);
+            // connected = data[0] == VL6180X_REG_IDENTIFICATION_RESPONSE;
+            err = I2cMaster::getErrorState();
+            err2 = I2cMaster2::getErrorState();
+            modm::delayMilliseconds(100);
+            return false;
+            // PT_WAIT_UNTIL(communicateTimeout.execute());
+        //     if (!connected)
+        //     {
+        //         PT_CALL(readRegister(Register::IDENTIFICATION_MODEL_ID, data));
+        //         
+        //     }
+        //     else
+        //     {
+        //         if (I2cMaster::getErrorState() != I2cMaster::Error::NoError)
+        //         {
+        //             connected = false;
+        //             initialized = false;
+        //         }
+        //         if (!initialized)
+        //         {
+        //             PT_CALL(bootDevice());
+        //         }
+        //         PT_CALL(readRange());
+        //     }
+        //     PT_WAIT_UNTIL(communicateTimeout.execute());
+        // }
+
+        // PT_END();
     }
 
  private:
@@ -152,68 +193,20 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
 
     uint8_t data[10];
 
-    uint8_t prev_reg;
+    uint8_t prev_reg = 0;
 
-    uint8_t range;
+    uint8_t range = 0;
+
+    bool connected = false;
 
     modm::ShortPeriodicTimer communicateTimeout;
-
-    modm::ResumableResult<bool>
-    begin()
-    {
-        RF_BEGIN();
-        RF_END_RETURN(true);
-    }
-
-    inline modm::ResumableResult<bool>
-    readRegister(Register reg, uint8_t *output, size_t length = 1)
-    {
-        RF_BEGIN();
-
-        buffer[0] = uint16_t(reg) >> 8;
-        buffer[1] = uint8_t(reg);
-
-        this->transaction.configureWriteRead(buffer, 2, output, length);
-        RF_END_RETURN_CALL( this->runTransaction() );
-    }
-
-    inline modm::ResumableResult<bool>
-    writeRegister(Register reg, uint8_t output)
-    {
-        RF_BEGIN();
-        buffer[0] = uint16_t(reg) >> 8;
-        buffer[1] = uint8_t(reg);
-        buffer[2] = output;
-        this->transaction.configureWrite(buffer, 3);
-        RF_END_RETURN_CALL( this->runTransaction() );
-    }
 
     modm::ResumableResult<bool> bootDevice()
     {
         RF_BEGIN();
 
-        do
-        {
-            RF_CALL(writeRegister(Register::SYSTEM__MODE_GPIO0, 0x0));
-
-            communicateTimeout.restart(1);
-
-            RF_WAIT_UNTIL(communicateTimeout.execute());
-
-            // enables GPIO Interrupt output, enables polling for 'new sample ready when
-            // measurement completes
-            RF_CALL(writeRegister(Register::SYSTEM__MODE_GPIO0, 0b00010000));
-
-            communicateTimeout.restart(1);
-
-            RF_WAIT_UNTIL(communicateTimeout.execute());
-
-            RF_CALL(readRegister(Register::SYSTEM__FRESH_OUT_OF_RESET, data));
-        } while (data[0] != 0x1);
-
-        RF_CALL(writeRegister(Register::SYSTEM__FRESH_OUT_OF_RESET, 0x0));
-
         // these register configurations are described in the quick setup guide linked above
+        // register names are not given as these are provided as-is by the manufacturer
         RF_CALL(writeRegister(Register(0x0207), 0x01));
         RF_CALL(writeRegister(Register(0x0208), 0x01));
         RF_CALL(writeRegister(Register(0x0133), 0x01));
@@ -258,6 +251,34 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
         RF_CALL(writeRegister(Register(0x00d2), 0x01));
         RF_CALL(writeRegister(Register(0x00f2), 0x01)); 
 
+        // Recommended by Ardiuno designer: Public registers - See data sheet for more detail
+
+        // Enables polling for 'New Sample ready' when measurement completes
+        RF_CALL(writeRegister(Register::SYSTEM__MODE_GPIO1, 0x10));
+        // Set the averaging sample period (compromise between lower noise and
+        // increased execution time)
+        RF_CALL(writeRegister(Register::READOUT__AVERAGING_SAMPLE_PERIOD, 0x30));
+        // Sets the light and dark gain (upper nibble). Dark gain should not be changed.
+        RF_CALL(writeRegister(Register::SYSALS__ANALOGUE_GAIN, 0x46));
+        // sets the # of range measurements after which auto calibration of system is performed
+        RF_CALL(writeRegister(Register::SYSRANGE__VHV_REPEAT_RATE, 0xFF));
+        // Set ALS integration time to 100ms
+        RF_CALL(writeRegister(Register::SYSALS__INTEGRATION_PERIOD, 0x63));
+        // perform a single temperature calibration of the ranging sensor
+        RF_CALL(writeRegister(Register::SYSRANGE__VHV_RECALIBRATE, 0x01));
+        
+        // Optional: Public registers - See data sheet for more detail
+        
+        // Set default ranging inter-measurement period to 100ms
+        RF_CALL(writeRegister(Register::SYSRANGE__INTERMEASUREMENT_PERIOD, 0x09));
+        // Set default ALS inter-measurement period to 500ms
+        RF_CALL(writeRegister(Register::SYSALS__INTERMEASUREMENT_PERIOD, 0x31));
+        // Configures interrupt on 'New Sample Ready threshold event'
+        RF_CALL(writeRegister(Register::SYSTEM__INTERRUPT_CONFIG_GPIO, 0x24));
+
+        // Reset debug register
+        RF_CALL(writeRegister(Register::SYSTEM__FRESH_OUT_OF_RESET, 0x0));
+
         initialized = true;
 
         RF_END_RETURN(true);
@@ -267,19 +288,66 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
     {
         RF_BEGIN();
 
-        RF_CALL(readRegister(Register::SYSRANGE__START, data));
+        while (true)
+        {
+            RF_CALL(readRegister(Register::RESULT__RANGE_STATUS, data));
+            if (data[0] & 0x01)
+            {
+                break;
+            }
+            if (I2cMaster::getErrorState() != I2cMaster::Error::NoError)
+            {
+                break;
+            }
+        }
 
-        RF_CALL(writeRegister(Register::SYSRANGE__START, uint8_t(data[0] & 0b11111100)));
+        RF_CALL(writeRegister(Register::SYSRANGE__START, 0x01));
 
-        do
+        while (true)
         {
             RF_CALL(readRegister(Register::RESULT__INTERRUPT_STATUS_GPIO, data));
-        } while (data[0] != 0b100);
+            if (data[0] & 0x04)
+            {
+                break;
+            }
+            if (I2cMaster::getErrorState() != I2cMaster::Error::NoError)
+            {
+                break;
+            }
+        }
 
         RF_CALL(readRegister(Register::RESULT__RANGE_VAL, data));
+
         range = data[0];
 
+        RF_CALL(writeRegister(Register::SYSTEM__INTERRUPT_CLEAR, 0x07));
+
         RF_END();
+    }
+
+    inline modm::ResumableResult<bool>
+    readRegister(Register reg, uint8_t *output, size_t length = 1)
+    {
+        RF_BEGIN();
+
+        buffer[0] = uint16_t(reg) >> 8;
+        buffer[1] = uint8_t(reg);
+
+        this->transaction.configureWriteRead(buffer, 2, output, length);
+        RF_END_RETURN_CALL(this->runTransaction());
+    }
+
+    inline modm::ResumableResult<bool>
+    writeRegister(Register reg, uint8_t output)
+    {
+        RF_BEGIN();
+
+        buffer[0] = uint16_t(reg) >> 8;
+        buffer[1] = uint8_t(reg);
+        buffer[2] = output;
+
+        this->transaction.configureWrite(buffer, 3);
+        RF_END_RETURN_CALL(this->runTransaction());
     }
 };
 
