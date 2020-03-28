@@ -183,7 +183,6 @@ int main()
     aruwlib::sensors::Mpu6500::init();
 
 
-    I2cMaster2::resetDevices<GpioF1, 100_kHz>();
     I2cMaster2::connect<GpioF1::Scl, GpioF0::Sda>(modm::I2cMaster::PullUps::Internal);
     I2cMaster2::initialize<Board::SystemClock, 100_kHz>();
 
