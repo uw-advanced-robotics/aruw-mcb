@@ -143,6 +143,7 @@ SentinelAutoDriveCommand sentinelAutoDrive(&sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual(&sentinelDrive);
 #endif
 
+modm::I2cMaster::Error err;
 int main()
 {
     Board::initialize();
@@ -181,6 +182,8 @@ int main()
     aruwlib::Remote::initialize();
     aruwlib::sensors::Mpu6500::init();
 
+
+    I2cMaster2::resetDevices<GpioF1, 100_kHz>();
     I2cMaster2::connect<GpioF1::Scl, GpioF0::Sda>(modm::I2cMaster::PullUps::Internal);
     I2cMaster2::initialize<Board::SystemClock, 100_kHz>();
 
@@ -259,7 +262,8 @@ int main()
 
     while (1)
     {
-        distanceSensor.run();
+        // distanceSensor.run();
+        err = I2cMaster2::getErrorState();
 
         // externalImu.update();
         // yaw = externalImu.getData().heading();
@@ -282,7 +286,7 @@ int main()
         //     CommandScheduler::getMainScheduler().run();
         //     aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         // }
-        // modm::delayMicroseconds(10);
+        modm::delayMicroseconds(10);
     }
     return 0;
 }
