@@ -262,7 +262,7 @@ int main()
 
     while (1)
     {
-        // distanceSensor.run();
+        distanceSensor.run();
         err = I2cMaster2::getErrorState();
 
         // externalImu.update();

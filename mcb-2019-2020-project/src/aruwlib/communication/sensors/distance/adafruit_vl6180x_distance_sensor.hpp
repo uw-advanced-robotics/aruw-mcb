@@ -134,8 +134,10 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
 
     bool validReading() override
     {
-        readRegister(Register::RESULT__RANGE_STATUS, data);
-        return ReadRangeStatus(data[0]) == ReadRangeStatus::VL6180X_ERROR_NONE;
+        uint8_t validCheck = 0;
+        readRegister(Register::RESULT__RANGE_STATUS, &validCheck);
+        return ReadRangeStatus(validCheck) == ReadRangeStatus::VL6180X_ERROR_NONE
+                && I2cMaster::getErrorState() == I2cMaster::Error::NoError;
     }
 
     modm::I2cMaster::Error err;
@@ -143,57 +145,52 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
     bool initialized = false;
     bool run()
     {
-        // PT_BEGIN();
-        // while(true)
-        // {
-            // readRegister(Register::IDENTIFICATION_MODEL_ID, data);
-            // connected = data[0] == VL6180X_REG_IDENTIFICATION_RESPONSE;
-            err = I2cMaster::getErrorState();
-            err2 = I2cMaster2::getErrorState();
-            modm::delayMilliseconds(100);
-            return false;
+        PT_BEGIN();
+        while(true)
+        {
+            // data[0] = 0;
+            // PT_CALL(readRegister(Register::IDENTIFICATION_MODEL_ID, data));
+            // // connected = data[0] == VL6180X_REG_IDENTIFICATION_RESPONSE;
+            // err = I2cMaster::getErrorState();
+            // err2 = I2cMaster2::getErrorState();
             // PT_WAIT_UNTIL(communicateTimeout.execute());
-        //     if (!connected)
-        //     {
-        //         PT_CALL(readRegister(Register::IDENTIFICATION_MODEL_ID, data));
-        //         
-        //     }
-        //     else
-        //     {
-        //         if (I2cMaster::getErrorState() != I2cMaster::Error::NoError)
-        //         {
-        //             connected = false;
-        //             initialized = false;
-        //         }
-        //         if (!initialized)
-        //         {
-        //             PT_CALL(bootDevice());
-        //         }
-        //         PT_CALL(readRange());
-        //     }
-        //     PT_WAIT_UNTIL(communicateTimeout.execute());
-        // }
+            if (!connected)
+            {
+                I2cMaster2::resetDevices<GpioF1, 100_kHz>();
+                I2cMaster2::initialize<Board::SystemClock, 100_kHz>();
 
-        // PT_END();
+                PT_WAIT_UNTIL(communicateTimeout.execute());
+
+                data[0] = 0;
+                PT_CALL(readRegister(Register::IDENTIFICATION_MODEL_ID, data));
+                connected = data[0] == VL6180X_REG_IDENTIFICATION_RESPONSE;
+            }
+            else
+            {
+                if (I2cMaster::getErrorState() != I2cMaster::Error::NoError)
+                {
+                    connected = false;
+                    initialized = false;
+                }
+                if (!initialized)
+                {
+                    PT_CALL(bootDevice());
+                }
+                // PT_CALL(readRegister(Register::IDENTIFICATION_MODEL_ID, data));
+                PT_CALL(readRange());
+            }
+            PT_WAIT_UNTIL(communicateTimeout.execute());
+        }
+
+        PT_END();
     }
 
  private:
     static constexpr uint32_t DEFAULT_COMMUNICATION_TIMEOUT = 5;
 
-    enum class VL6180XInitializationState
-    {
-        DEVICE_NOT_STARTED,
-        CONFIGURING_DEVICE,
-        RECEIVING_DATA
-    };
-
-    VL6180XInitializationState currState = VL6180XInitializationState::DEVICE_NOT_STARTED;
-
     uint8_t buffer[4];
 
     uint8_t data[10];
-
-    uint8_t prev_reg = 0;
 
     uint8_t range = 0;
 
@@ -290,6 +287,7 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
 
         while (true)
         {
+            data[0] = 0;
             RF_CALL(readRegister(Register::RESULT__RANGE_STATUS, data));
             if (data[0] & 0x01)
             {
@@ -297,7 +295,7 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
             }
             if (I2cMaster::getErrorState() != I2cMaster::Error::NoError)
             {
-                break;
+                RF_RETURN();
             }
         }
 
@@ -305,6 +303,7 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
 
         while (true)
         {
+            data[0] = 0;
             RF_CALL(readRegister(Register::RESULT__INTERRUPT_STATUS_GPIO, data));
             if (data[0] & 0x04)
             {
@@ -312,13 +311,11 @@ class Vl6810xDistanceSensor : public DistanceSensor, public modm::I2cDevice<I2cM
             }
             if (I2cMaster::getErrorState() != I2cMaster::Error::NoError)
             {
-                break;
+                RF_RETURN();
             }
         }
 
-        RF_CALL(readRegister(Register::RESULT__RANGE_VAL, data));
-
-        range = data[0];
+        RF_CALL(readRegister(Register::RESULT__RANGE_VAL, &range));
 
         RF_CALL(writeRegister(Register::SYSTEM__INTERRUPT_CLEAR, 0x07));
 
