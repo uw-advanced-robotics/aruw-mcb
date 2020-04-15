@@ -1,5 +1,5 @@
 
-#include "drone_turret_subsystem.hpp"
+#include "pwm_friction_wheel_subsystem.hpp"
 
 using namespace aruwlib;
 
@@ -12,7 +12,7 @@ namespace aruwsrc
 namespace drone
 {
 
-void DroneTurretSubsystem::setFrictionWheelOutput(float percentage) {
+void PWMFrictionWheelSubsystem::setFrictionWheelOutput(float percentage) {
     if (!initialized) {
         stopFrictionWheel();
     } else {
@@ -22,23 +22,23 @@ void DroneTurretSubsystem::setFrictionWheelOutput(float percentage) {
     }
 }
 
-void DroneTurretSubsystem::setRawFrictionWheelOutput(float duty) {
+void PWMFrictionWheelSubsystem::setRawFrictionWheelOutput(float duty) {
     leftFrictionWheel.Write(duty, leftFrictionWheelPin);
     rightFrictionWheel.Write(duty, rightFrictionWheelPin);
     currentFrictionWheelPWMDuty = duty;
 }
 
-void DroneTurretSubsystem::stopFrictionWheel() {
+void PWMFrictionWheelSubsystem::stopFrictionWheel() {
     setRawFrictionWheelOutput(MIN_PWM_DUTY);
 }
 
-void DroneTurretSubsystem::refresh() {
+void PWMFrictionWheelSubsystem::refresh() {
     throttleRamp.update(RAMP_RATE * (Board::getTimeMicroseconds() - lastRampTime));
     setRawFrictionWheelOutput(throttleRamp.getValue());
     lastRampTime = Board::getTimeMicroseconds();
 }
 
-bool DroneTurretSubsystem::isInitialized() {
+bool PWMFrictionWheelSubsystem::isInitialized() {
     return initialized;
 }
 

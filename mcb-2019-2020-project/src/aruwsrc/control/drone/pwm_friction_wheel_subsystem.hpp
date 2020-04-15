@@ -14,7 +14,7 @@ namespace aruwsrc
 namespace drone
 {
 
-class DroneTurretSubsystem : public Subsystem
+class PWMFrictionWheelSubsystem : public Subsystem
 {
  public:
     static constexpr float MIN_PWM_DUTY = 0.1f;
@@ -37,10 +37,10 @@ class DroneTurretSubsystem : public Subsystem
 
     void setRawFrictionWheelOutput(float duty);
 
-    friend class InitFrictionWheelCommand;
+    friend class InitPWMFrictionWheelCommand;
 
  public:
-    DroneTurretSubsystem() :
+    PWMFrictionWheelSubsystem() :
             leftFrictionWheel(),
             rightFrictionWheel(),
             initialized(false),

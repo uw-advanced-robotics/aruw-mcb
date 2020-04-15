@@ -12,10 +12,10 @@ namespace aruwsrc
 namespace drone
 {
 
-class InitFrictionWheelCommand : public Command
+class InitPWMFrictionWheelCommand : public Command
 {
  private:
-    DroneTurretSubsystem* turret;
+    PWMFrictionWheelSubsystem* turret;
     aruwlib::algorithms::Ramp ramp;
     static constexpr uint32_t ZERO_THROTTLE_TIME_MS = 2000;
     static constexpr uint32_t RAMP_TIME_MS = 1000;
@@ -25,7 +25,7 @@ class InitFrictionWheelCommand : public Command
 
     static constexpr float RAMP_TARGET = 0.18;
  public:
-    explicit InitFrictionWheelCommand(DroneTurretSubsystem* turret) :
+    explicit InitPWMFrictionWheelCommand(PWMFrictionWheelSubsystem* turret) :
             turret(turret),
             ramp(turret->MIN_PWM_DUTY),
             zeroThrottleStartTime(0),

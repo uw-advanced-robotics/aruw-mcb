@@ -1,4 +1,4 @@
-#include "init_friction_wheel_command.hpp"
+#include "init_pwm_friction_wheel_command.hpp"
 
 namespace aruwsrc
 {
@@ -6,7 +6,7 @@ namespace aruwsrc
 namespace drone
 {
 
-void InitFrictionWheelCommand::initialize() {
+void InitPWMFrictionWheelCommand::initialize() {
     if (!turret->initialized) {
         ramp.setTarget(RAMP_TARGET);
         turret->setRawFrictionWheelOutput(turret->MIN_PWM_DUTY);
@@ -15,7 +15,7 @@ void InitFrictionWheelCommand::initialize() {
     }
 }
 
-void InitFrictionWheelCommand::execute() {
+void InitPWMFrictionWheelCommand::execute() {
     if (!turret->initialized) {
         uint32_t currentTime = modm::Clock::now().getTime();
         if (!(currentTime - zeroThrottleStartTime < ZERO_THROTTLE_TIME_MS))
@@ -28,11 +28,11 @@ void InitFrictionWheelCommand::execute() {
     }
 }
 
-bool InitFrictionWheelCommand::isFinished() const {
+bool InitPWMFrictionWheelCommand::isFinished() const {
     return ramp.isTargetReached() || turret->initialized;
 }
 
-void InitFrictionWheelCommand::end(bool interrupted) {
+void InitPWMFrictionWheelCommand::end(bool interrupted) {
     if (!turret->initialized) {
        turret->stopFrictionWheel();
     }
