@@ -8,11 +8,12 @@
 #include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
 
 using namespace aruwlib::motor;
+using namespace aruwlib;
 
 namespace aruwsrc
 {
 
-namespace control
+namespace turret
 {
     TurretSubsystem::TurretSubsystem(bool isYawMotorInverted, bool isPitchMotorInverted) :
         pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, isPitchMotorInverted, "pitch motor"),
@@ -20,9 +21,7 @@ namespace control
         currPitchAngle(0.0f, 0.0f, 360.0f),
         currYawAngle(0.0f, 0.0f, 360.0f),
         yawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
-        pitchTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
-        prevYawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
-        pretPitchTarget(TURRET_START_ANGLE, 0.0f, 360.0f)
+        pitchTarget(TURRET_START_ANGLE, 0.0f, 360.0f)
     {}
 
     float TurretSubsystem::getYawAngleFromCenter() const
@@ -161,58 +160,38 @@ namespace control
         // }
     }
 
-    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle()
+    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle() const
     {
-        updateCurrentYawAngle();
         return currYawAngle;
     }
 
-    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPitchAngle()
+    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPitchAngle() const
     {
-        updateCurrentPitchAngle();
         return currPitchAngle;
     }
 
-    void TurretSubsystem::updatePrevYawTarget(const float& yaw)
+    float TurretSubsystem::getYawTarget() const
     {
-        prevYawTarget.setValue(yaw);
+        return yawTarget.getValue();
     }
 
-    void TurretSubsystem::updatePrevPitchTarget(const float& pitch)
+    float TurretSubsystem::getPitchTarget() const
     {
-        pretPitchTarget.setValue(pitch);
-    }
-
-    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPrevYawTarget() const
-    {
-        return prevYawTarget;
-    }
-
-    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPrevPitchTarget() const
-    {
-        return pretPitchTarget;
-    }
-
-    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawTarget() const
-    {
-        return yawTarget;
-    }
-
-    const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPitchTarget() const
-    {
-        return pitchTarget;
+        return pitchTarget.getValue();
     }
 
     void TurretSubsystem::setYawTarget(float target)
     {
         yawTarget.setValue(target);
-        yawTarget.limitValue(TURRET_YAW_MIN_ANGLE, TURRET_YAW_MAX_ANGLE);
+        yawTarget.setValue(aruwlib::algorithms::ContiguousFloat::limitValue(yawTarget,
+                TURRET_YAW_MIN_ANGLE, TURRET_YAW_MAX_ANGLE));
     }
 
     void TurretSubsystem::setPitchTarget(float target)
     {
         pitchTarget.setValue(target);
-        pitchTarget.limitValue(TURRET_PITCH_MIN_ANGLE, TURRET_PITCH_MAX_ANGLE);
+        pitchTarget.setValue(aruwlib::algorithms::ContiguousFloat::limitValue(pitchTarget,
+                TURRET_PITCH_MIN_ANGLE, TURRET_PITCH_MAX_ANGLE));
     }
 
     float TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
@@ -223,8 +202,17 @@ namespace control
                 * (fabsf(FEED_FORWARD_SIN_GAIN * sinf(getYawAngleFromCenter()
                 * aruwlib::algorithms::PI / 180.0f)) + 1.0f);
 
-        feedforwardChassisRotateDerivative = aruwlib::algorithms::lowPassFilter(feedforwardChassisRotateDerivative,
-                desiredChassisRotation - feedforwardPrevChassisRotationDesired,
+        if (Remote::getUpdateCounter() != prevUpdateCounterChassisRotateDerivative) {
+            chassisRotateDerivativeInterpolation.update(
+                    desiredChassisRotation - feedforwardPrevChassisRotationDesired);
+        }
+        prevUpdateCounterChassisRotateDerivative = Remote::getUpdateCounter();
+        float derivativeInterpolated = chassisRotateDerivativeInterpolation
+                .getInterpolatedValue(modm::Clock::now().getTime());
+
+        feedforwardChassisRotateDerivative = aruwlib::algorithms::lowPassFilter(
+                feedforwardChassisRotateDerivative,
+                derivativeInterpolated,
                 FEED_FORWARD_DERIVATIVE_LOW_PASS);
 
         float chassisRotationFeedForward = aruwlib::algorithms::limitVal<float>(
@@ -242,19 +230,6 @@ namespace control
         }
         return chassisRotationFeedForward;
     }
-
-    float TurretSubsystem::projectChassisRelativeYawToWorldRelative(float yawAngle,
-                                                                    float imuInitialAngle)
-    {
-        return yawAngle + aruwlib::sensors::Mpu6500::getImuAttitude().yaw - imuInitialAngle;
-    }
-
-    float TurretSubsystem::projectWorldRelativeYawToChassisFrame(float yawAngle,
-                                                                 float imuInitialAngle)
-    {
-        return yawAngle - aruwlib::sensors::Mpu6500::getImuAttitude().yaw + imuInitialAngle;
-    }
-
-}  // namespace control
+}  // namespace turret
 
 }  // namespace aruwsrc

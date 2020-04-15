@@ -9,7 +9,7 @@ using namespace aruwlib::control;
 namespace aruwsrc
 {
 
-namespace control
+namespace turret
 {
 
 class TurretSubsystem;
@@ -24,8 +24,7 @@ class TurretManualCommand : public Command {
     void end(bool);
 
  private:
-    const float REMOTE_INPUT_SCALAR = 10000;
-    const float KEYBOARD_INPUT_SCALAR = 50;
+    const float USER_INPUT_SCALAR = 50.0f;
 
     const float YAW_P = 1.0f;
     const float YAW_I = 0.0f;
@@ -55,7 +54,7 @@ class TurretManualCommand : public Command {
     float getMouseYMovement() const;
 };
 
-}  // namespace control
+}  // namespace turret
 
 }  // namespace aruwsrc
 

@@ -76,7 +76,7 @@ namespace sensors {
     // parse imu data from data buffer
     void Mpu6500::read() {
         if (imuInitialized) {
-        mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
+            mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
             mpu6500Data.ax = (mpu6500RxBuff[0] << 8 | mpu6500RxBuff[1]) - mpu6500Data.ax_offset;
             mpu6500Data.ay = (mpu6500RxBuff[2] << 8 | mpu6500RxBuff[3]) - mpu6500Data.ay_offset;
             mpu6500Data.az = (mpu6500RxBuff[4] << 8 | mpu6500RxBuff[5]) - mpu6500Data.az_offset;
@@ -293,6 +293,10 @@ namespace sensors {
         return mpu6500Data.tiltAngle;
     }
 
+    float Mpu6500::getTiltAngle()
+    {
+        return mpu6500Data.tiltAngle;
+    }
 }  // namespace sensors
 
 }  // namespace aruwlib

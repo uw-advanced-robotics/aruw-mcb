@@ -175,12 +175,6 @@ class ChassisSubsystem : public Subsystem {
 
     float chassisDesiredR = 0.0f;
 
-    // low pass user input since we receive data every 14 ms from the remote
-    static constexpr float LOW_PASS_USER_INPUT = 0.154f;
-    static float userXLowPass;
-    static float userYLowPass;
-    static float userRLowPass;
-
     // rotation pid variables
     aruwlib::algorithms::ExtendedKalman chassisRotationErrorKalman;
 
@@ -247,14 +241,8 @@ class ChassisSubsystem : public Subsystem {
     // the max rotation speed
     float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
-    // Returns the value used for chassis movement forward and backward, between -1 and 1
-    static float getChassisX();
-
-    // Returns the value used for chassis movement side to side, between -1 and 1
-    static float getChassisY();
-
-    // Returns the value used for chassis rotation, between -1 and 1
-    static float getChassisR();
+    // returns the desired rotation based on what was input into the subsystem via setDesiredOutput
+    float getChassisDesiredRotation() const;
 
     float getChassisDesiredRotation() const;
 

@@ -2,6 +2,9 @@
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 #include "src/aruwlib/communication/remote.hpp"
 #include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "src/aruwlib/control/control_operator_interface.hpp"
+
+using namespace aruwlib::control;
 
 namespace aruwsrc
 {
@@ -17,21 +20,23 @@ void ChassisAutorotateCommand::execute()
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
     float chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
-        turret->getYawAngleFromCenter(), CHASSIS_AUTOROTATE_PID_KP);
+            turret->getYawAngleFromCenter(), CHASSIS_AUTOROTATE_PID_KP);
 
     // what we will multiply x and y speed by to take into account rotation
     float rTranslationalGain
-        = chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
+            = chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
 
     float chassisXDesiredWheelspeed =
-        aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisX(),
-        -rTranslationalGain, rTranslationalGain)
-        * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+            aruwlib::algorithms::limitVal<float>(
+                    ControlOperatorInterface::getChassisXInput(),
+                    -rTranslationalGain, rTranslationalGain)
+            * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
     float chassisYDesiredWheelspeed =
-        aruwlib::algorithms::limitVal<float>(ChassisSubsystem::getChassisY(),
-        -rTranslationalGain, rTranslationalGain)
-        * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+            aruwlib::algorithms::limitVal<float>(
+                    ControlOperatorInterface::getChassisYInput(),
+                    -rTranslationalGain, rTranslationalGain)
+            * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
     chassis->setDesiredOutput(chassisXDesiredWheelspeed,
         chassisYDesiredWheelspeed, chassisRotationDesiredWheelspeed);

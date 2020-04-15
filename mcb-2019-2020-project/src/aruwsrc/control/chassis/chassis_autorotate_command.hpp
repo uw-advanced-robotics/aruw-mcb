@@ -19,28 +19,26 @@ class ChassisAutorotateCommand : public Command
 {
  public:
     explicit ChassisAutorotateCommand(ChassisSubsystem* chassis,
-                                     aruwsrc::control::TurretSubsystem const* turret)
+                                     aruwsrc::turret::TurretSubsystem const* turret) :
+                                     chassis(chassis),
+                                     turret(turret)
     {
-        addSubsystemRequirement(reinterpret_cast<Subsystem*>(chassis));
-        this->chassis = chassis;
-        this->turret = turret;
+        addSubsystemRequirement(dynamic_cast<Subsystem*>(chassis));
     }
 
-    void initialize(void);
+    void initialize();
 
-    void execute(void);
+    void execute();
 
-    void end(bool interrupted);
+    void end(bool);
 
-    bool isFinished(void) const;
-
-    void interrupted(void) {}
+    bool isFinished() const;
 
  private:
     static constexpr float CHASSIS_AUTOROTATE_PID_KP = -85.0f;
 
     ChassisSubsystem* chassis;
-    aruwsrc::control::TurretSubsystem const* turret;
+    aruwsrc::turret::TurretSubsystem const* turret;
 };
 
 }  // namespace chassis

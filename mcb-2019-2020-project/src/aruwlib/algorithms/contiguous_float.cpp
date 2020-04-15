@@ -80,27 +80,35 @@ void ContiguousFloat::shiftValue(const float& shiftMagnitude) {
     reboundValue();
 }
 
-void ContiguousFloat::limitValue(const float& min, const float& max)
+float ContiguousFloat::limitValue(const ContiguousFloat& valueToLimit,
+                                 const float& min,
+                                 const float& max)
 {
-    ContiguousFloat minContig(min, this->lowerBound, this->upperBound);
-    ContiguousFloat maxContig(max, this->lowerBound, this->upperBound);
-    limitValue(minContig, maxContig);
+    ContiguousFloat minContig(min, valueToLimit.lowerBound, valueToLimit.upperBound);
+    ContiguousFloat maxContig(max, valueToLimit.lowerBound, valueToLimit.upperBound);
+    return limitValue(valueToLimit, minContig, maxContig);
 }
 
-void ContiguousFloat::limitValue(const ContiguousFloat& min, const ContiguousFloat& max)
+float ContiguousFloat::limitValue(const ContiguousFloat& valueToLimit,
+                                 const ContiguousFloat& min,
+                                 const ContiguousFloat& max)
 {
     if (min.getValue() == max.getValue())
     {
-        return;
+        return valueToLimit.getValue();
     }
     if ((min.getValue() < max.getValue()
-            && (getValue() > max.getValue() || getValue() < min.getValue()))
-            || (min.getValue() > max.getValue()
-            && getValue() > max.getValue() && getValue() < min.getValue()))
+                && (valueToLimit.getValue() > max.getValue()
+                || valueToLimit.getValue() < min.getValue()))
+        || (min.getValue() > max.getValue()
+                && valueToLimit.getValue() > max.getValue()
+                && valueToLimit.getValue() < min.getValue()))
     {
-        float targetMinDifference = fabs(difference(min));
-        float targetMaxDifference = fabs(difference(max));
-        setValue(targetMinDifference < targetMaxDifference ? min.getValue() : max.getValue());
+        float targetMinDifference = fabs(valueToLimit.difference(min));
+        float targetMaxDifference = fabs(valueToLimit.difference(max));
+        return targetMinDifference < targetMaxDifference ? min.getValue() : max.getValue();
+    } else {
+        return valueToLimit.getValue();
     }
 }
 

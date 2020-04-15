@@ -1,13 +1,14 @@
 #include "turret_manual_command.hpp"
 #include "turret_subsystem.hpp"
 #include "src/aruwlib/communication/remote.hpp"
+#include "src/aruwlib/control/control_operator_interface.hpp"
 
 using namespace aruwlib;
 
 namespace aruwsrc
 {
 
-namespace control
+namespace turret
 {
 TurretManualCommand::TurretManualCommand(TurretSubsystem *subsystem) :
     turretSubsystem(subsystem),
@@ -31,10 +32,10 @@ void TurretManualCommand::execute()
 
 void TurretManualCommand::updateTurretVelocity()
 {
-    pitchVelocityTarget = getRemoteYMovement() +
-                          getMouseXMovement();
-    yawVelocityTarget = getRemoteXMovement() +
-                        getMouseYMovement();
+    pitchVelocityTarget = USER_INPUT_SCALAR
+            * aruwlib::control::ControlOperatorInterface::getTurretPitchInput();
+    yawVelocityTarget = USER_INPUT_SCALAR
+            * aruwlib::control::ControlOperatorInterface::getTurretYawInput();
 
     manualPitchPid.update(pitchVelocityTarget - turretSubsystem->getPitchVelocity());
     manualYawPid.update(yawVelocityTarget - turretSubsystem->getYawVelocity());
@@ -43,26 +44,6 @@ void TurretManualCommand::updateTurretVelocity()
     turretSubsystem->setYawMotorOutput(manualYawPid.getValue());
 }
 
-float TurretManualCommand::getRemoteXMovement() const
-{
-    return Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL) * REMOTE_INPUT_SCALAR;
-}
-
-float TurretManualCommand::getRemoteYMovement() const
-{
-    return Remote::getChannel(Remote::Channel::RIGHT_VERTICAL) * REMOTE_INPUT_SCALAR;
-}
-
-float TurretManualCommand::getMouseXMovement() const
-{
-    return Remote::getMouseX() * KEYBOARD_INPUT_SCALAR;
-}
-
-float TurretManualCommand::getMouseYMovement() const
-{
-    return Remote::getMouseY() * KEYBOARD_INPUT_SCALAR;
-}
-
-}  // namespace control
+}  // namespace turret
 
 }  // namespace aruwsrc

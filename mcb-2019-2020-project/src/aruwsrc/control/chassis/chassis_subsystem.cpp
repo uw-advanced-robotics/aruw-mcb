@@ -130,37 +130,6 @@ namespace chassis
         return rTranslationalGain;
     }
 
-    float ChassisSubsystem::getChassisX()
-    {
-        userXLowPass = lowPassFilter(userXLowPass, aruwlib::algorithms::limitVal<float>(
-                Remote::getChannel(Remote::Channel::LEFT_VERTICAL)
-                + static_cast<float>(Remote::keyPressed(Remote::Key::W))
-                - static_cast<float>(Remote::keyPressed(Remote::Key::S)), -1.0f, 1.0f),
-                LOW_PASS_USER_INPUT);
-        return userXLowPass;
-    }
-
-    float ChassisSubsystem::getChassisY()
-    {
-        userYLowPass = lowPassFilter(userYLowPass, aruwlib::algorithms::limitVal<float>(
-                Remote::getChannel(Remote::Channel::LEFT_HORIZONTAL)
-                + static_cast<float>(Remote::keyPressed(Remote::Key::A))
-                - static_cast<float>(Remote::keyPressed(Remote::Key::D)), -1.0f, 1.0f),
-                LOW_PASS_USER_INPUT
-        );
-        return userYLowPass;
-    }
-
-    float ChassisSubsystem::getChassisR()
-    {
-        userRLowPass = lowPassFilter(userRLowPass, aruwlib::algorithms::limitVal<float>(
-                Remote::getChannel(Remote::Channel::RIGHT_HORIZONTAL)
-                + static_cast<float>(Remote::keyPressed(Remote::Key::Q))
-                - static_cast<float>(Remote::keyPressed(Remote::Key::E)), -1.0f, 1.0f),
-                LOW_PASS_USER_INPUT);
-        return userRLowPass;
-    }
-
     float ChassisSubsystem::getChassisDesiredRotation() const
     {
         return chassisDesiredR;

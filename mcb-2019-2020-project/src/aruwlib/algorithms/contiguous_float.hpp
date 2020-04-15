@@ -72,9 +72,13 @@ class ContiguousFloat {
     /**
      * Limits the current contiguous float between the min max value
      */
-    void limitValue(const ContiguousFloat& min, const ContiguousFloat& max);
+    static float limitValue(const ContiguousFloat& valueToLimit,
+                            const ContiguousFloat& min,
+                            const ContiguousFloat& max);
 
-    void limitValue(const float& min, const float& max);
+    static float limitValue(const ContiguousFloat& valueToLimit,
+                            const float& min,
+                            const float& max);
 
     // Getters/Setters ----------------
     // Value
