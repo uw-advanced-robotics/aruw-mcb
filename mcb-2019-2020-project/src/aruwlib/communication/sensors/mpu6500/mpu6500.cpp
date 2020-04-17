@@ -293,10 +293,6 @@ namespace sensors {
         return mpu6500Data.tiltAngle;
     }
 
-    float Mpu6500::getTiltAngle()
-    {
-        return mpu6500Data.tiltAngle;
-    }
 }  // namespace sensors
 
 }  // namespace aruwlib

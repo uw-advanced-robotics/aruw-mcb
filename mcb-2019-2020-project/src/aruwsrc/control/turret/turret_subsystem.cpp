@@ -15,9 +15,9 @@ namespace aruwsrc
 
 namespace turret
 {
-    TurretSubsystem::TurretSubsystem(bool isYawMotorInverted, bool isPitchMotorInverted) :
-        pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, isPitchMotorInverted, "pitch motor"),
-        yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, isYawMotorInverted, "yaw motor"),
+    TurretSubsystem::TurretSubsystem() :
+        pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true, "pitch motor"),
+        yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false, "yaw motor"),
         currPitchAngle(0.0f, 0.0f, 360.0f),
         currYawAngle(0.0f, 0.0f, 360.0f),
         yawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
@@ -115,49 +115,49 @@ namespace turret
 
     void TurretSubsystem::setPitchMotorOutput(float out)
     {
-        // if (out > INT32_MAX || out < INT32_MIN)
-        // {
-        //     RAISE_ERROR("pitch motor output invalid",
-        //             aruwlib::errors::TURRET, aruwlib::errors::INVALID_MOTOR_OUTPUT);
-        //     return;
-        // }
-        // if (pitchMotor.isMotorOnline())
-        // {
-        //     if ((getPitchAngleFromCenter() + TURRET_START_ANGLE >
-        //             TURRET_PITCH_MAX_ANGLE && out > 0) ||
-        //         (getPitchAngleFromCenter() + TURRET_START_ANGLE <
-        //             TURRET_PITCH_MIN_ANGLE && out < 0))
-        //     {
-        //         pitchMotor.setDesiredOutput(0);
-        //     }
-        //     else
-        //     {
+        if (out > INT32_MAX || out < INT32_MIN)
+        {
+            RAISE_ERROR("pitch motor output invalid",
+                    aruwlib::errors::TURRET, aruwlib::errors::INVALID_MOTOR_OUTPUT);
+            return;
+        }
+        if (pitchMotor.isMotorOnline())
+        {
+            if ((getPitchAngleFromCenter() + TURRET_START_ANGLE >
+                    TURRET_PITCH_MAX_ANGLE && out > 0) ||
+                (getPitchAngleFromCenter() + TURRET_START_ANGLE <
+                    TURRET_PITCH_MIN_ANGLE && out < 0))
+            {
+                pitchMotor.setDesiredOutput(0);
+            }
+            else
+            {
                 pitchMotor.setDesiredOutput(out);
-        //     }
-        // }
+            }
+        }
     }
 
     void TurretSubsystem::setYawMotorOutput(float out)
     {
-        // if (out > INT32_MAX || out < INT32_MIN) {
-        //     RAISE_ERROR("yaw motor output invalid",
-        //             aruwlib::errors::TURRET, aruwlib::errors::INVALID_MOTOR_OUTPUT);
-        //     return;
-        // }
-        // if (yawMotor.isMotorOnline())
-        // {
-        //     if ((getYawAngleFromCenter() + TURRET_START_ANGLE >
-        //             TURRET_YAW_MAX_ANGLE && out > 0) ||
-        //         (getYawAngleFromCenter() + TURRET_START_ANGLE <
-        //             TURRET_YAW_MIN_ANGLE && out < 0))
-        //     {
-        //         yawMotor.setDesiredOutput(0);
-        //     }
-        //     else
-        //     {
+        if (out > INT32_MAX || out < INT32_MIN) {
+            RAISE_ERROR("yaw motor output invalid",
+                    aruwlib::errors::TURRET, aruwlib::errors::INVALID_MOTOR_OUTPUT);
+            return;
+        }
+        if (yawMotor.isMotorOnline())
+        {
+            if ((getYawAngleFromCenter() + TURRET_START_ANGLE >
+                    TURRET_YAW_MAX_ANGLE && out > 0) ||
+                (getYawAngleFromCenter() + TURRET_START_ANGLE <
+                    TURRET_YAW_MIN_ANGLE && out < 0))
+            {
+                yawMotor.setDesiredOutput(0);
+            }
+            else
+            {
                 yawMotor.setDesiredOutput(out);
-            // }
-        // }
+            }
+        }
     }
 
     const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle() const

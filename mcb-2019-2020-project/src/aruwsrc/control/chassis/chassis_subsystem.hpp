@@ -244,8 +244,6 @@ class ChassisSubsystem : public Subsystem {
     // returns the desired rotation based on what was input into the subsystem via setDesiredOutput
     float getChassisDesiredRotation() const;
 
-    float getChassisDesiredRotation() const;
-
  private:
     /**
      * When you input desired x, y, an r values, this function translates

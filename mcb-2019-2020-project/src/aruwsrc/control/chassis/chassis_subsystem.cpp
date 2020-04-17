@@ -10,10 +10,6 @@ namespace aruwsrc
 
 namespace chassis
 {
-    float ChassisSubsystem::userXLowPass = 0.0f;
-    float ChassisSubsystem::userYLowPass = 0.0f;
-    float ChassisSubsystem::userRLowPass = 0.0f;
-
     void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
     {
         mecanumDriveCalculate(x, y, r, MAX_WHEEL_SPEED_SINGLE_MOTOR);
