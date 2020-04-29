@@ -13,7 +13,6 @@ namespace sensors {
 
 struct Bno055Enum
 {
-
     enum class
     Identifier : uint8_t
     {
