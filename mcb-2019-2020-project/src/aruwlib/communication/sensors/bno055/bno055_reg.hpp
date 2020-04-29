@@ -214,10 +214,10 @@ struct Bno055Enum
     enum class
     SelfTestResult : uint8_t
     {
-        ST_MCU = modm::Bit3,		///< Microcontroller self test result.
-        ST_GYR = modm::Bit2,		///< Gyroscope self test result.
-        ST_MAG = modm::Bit1,		///< Magnetometer self test result.
-        ST_ACC = modm::Bit0,		///< Accelerometer self test result.
+        ST_MCU = modm::Bit3,  ///< Microcontroller self test result.
+        ST_GYR = modm::Bit2,  ///< Gyroscope self test result.
+        ST_MAG = modm::Bit1,  ///< Magnetometer self test result.
+        ST_ACC = modm::Bit0,  ///< Accelerometer self test result.
     };
     MODM_FLAGS8(SelfTestResult);
 
@@ -226,12 +226,12 @@ struct Bno055Enum
     enum class
     InterruptStatus : uint8_t
     {
-        ACC_NM = modm::Bit7,			///< Status of Accelerometer no motion or slow motion interrupt
-        ACC_AM = modm::Bit6,			///< Status of Accelerometer any motion interrupt
-        ACC_HIGH_G = modm::Bit5,		///< Status of Accelerometer high-g interrupt
+        ACC_NM = modm::Bit7,   ///< Status of Accelerometer no motion or slow motion interrupt
+        ACC_AM = modm::Bit6,   ///< Status of Accelerometer any motion interrupt
+        ACC_HIGH_G = modm::Bit5,  ///< Status of Accelerometer high-g interrupt
 
-        GYR_HIGH_RATE = modm::Bit3,	///< Status of gyroscope high rate interrupt
-        GYRO_AM = modm::Bit2,			///< Status of gyroscope any motion interrupt
+        GYR_HIGH_RATE = modm::Bit3, ///< Status of gyroscope high rate interrupt
+        GYRO_AM = modm::Bit2,   ///< Status of gyroscope any motion interrupt
     };
     MODM_FLAGS8(InterruptStatus);
 
@@ -239,7 +239,7 @@ struct Bno055Enum
     enum class
     SystemClockStatus : uint8_t
     {
-        ST_MAIN_CLK = modm::Bit0,	///< 1: in Configuration state, 0: Free to configure the CLK SRC
+        ST_MAIN_CLK = modm::Bit0, ///< 1: in Configuration state, 0: Free to configure the CLK SRC
     };
     MODM_FLAGS8(SystemClockStatus);
 
@@ -247,13 +247,13 @@ struct Bno055Enum
     enum class
     UnitSelection : uint8_t
     {
-        ORI_Android_Windows = modm::Bit7,	///< 0: Windows orientation, 1: Android orientation
+        ORI_Android_Windows = modm::Bit7, ///< 0: Windows orientation, 1: Android orientation
 
-        TEMP_Unit = modm::Bit5,			///< 0: Celsius, 1: Fahrenheit
+        TEMP_Unit = modm::Bit5,   ///< 0: Celsius, 1: Fahrenheit
 
-        EUL_Unit = modm::Bit2,			///< 0: Degrees, 1: Radians
-        GYR_Unit = modm::Bit1,			///< 0: dps, 1: rps
-        ACC_Unit = modm::Bit0,			///< 0: m/s^2, 1: mg
+        EUL_Unit = modm::Bit2,   ///< 0: Degrees, 1: Radians
+        GYR_Unit = modm::Bit1,   ///< 0: dps, 1: rps
+        ACC_Unit = modm::Bit0,   ///< 0: m/s^2, 1: mg
     };
     MODM_FLAGS8(UnitSelection);
 
@@ -261,11 +261,11 @@ struct Bno055Enum
     enum class
     SystemTrigger : uint8_t
     {
-        CLK_SEL = modm::Bit7,		///< 0: Use internal oscillator, 1: Use external oscillator.
-        RST_INT = modm::Bit6,		///< Set to reset all interrupt status bits, and INT output
-        RST_SYS = modm::Bit5,		///< Set to reset system
+        CLK_SEL = modm::Bit7,  ///< 0: Use internal oscillator, 1: Use external oscillator.
+        RST_INT = modm::Bit6,  ///< Set to reset all interrupt status bits, and INT output
+        RST_SYS = modm::Bit5,  ///< Set to reset system
 
-        Self_Test = modm::Bit0,	///< Set to trigger self test
+        Self_Test = modm::Bit0, ///< Set to trigger self test
     };
     MODM_FLAGS8(SystemTrigger);
 
@@ -284,12 +284,12 @@ struct Bno055Enum
     enum class
     AccPowerMode : uint8_t
     {
-        Normal		= (0 << 5),
-        Suspend		= (1 << 5),
-        LowPower1	= (2 << 5),
-        Standby		= (3 << 5),
-        LowPower2	= (4 << 5),
-        DeepSuspend	= (5 << 5),
+        Normal  = (0 << 5),
+        Suspend  = (1 << 5),
+        LowPower1 = (2 << 5),
+        Standby  = (3 << 5),
+        LowPower2 = (4 << 5),
+        DeepSuspend = (5 << 5),
     };
     MODM_FLAGS_CONFIG(AccConfig, AccPowerMode);
 
@@ -297,14 +297,14 @@ struct Bno055Enum
     enum class
     AccBandwidth : uint8_t
     {
-        Hz7_81	= (0 << 2),
-        Hz15_63	= (1 << 2),
-        Hz31_25	= (2 << 2),
-        Hz62_5	= (3 << 2),
-        Hz125	= (4 << 2),
-        Hz250	= (5 << 2),
-        Hz500	= (6 << 2),
-        Hz1000	= (7 << 2),
+        Hz7_81 = (0 << 2),
+        Hz15_63 = (1 << 2),
+        Hz31_25 = (2 << 2),
+        Hz62_5 = (3 << 2),
+        Hz125 = (4 << 2),
+        Hz250 = (5 << 2),
+        Hz500 = (6 << 2),
+        Hz1000 = (7 << 2),
     };
     MODM_FLAGS_CONFIG(AccConfig, AccBandwidth);
 
@@ -334,10 +334,10 @@ struct Bno055Enum
     enum class
     MagPowerMode : uint8_t
     {
-        Normal		= (0 << 5),
-        Sleep		= (1 << 5),
-        Suspend		= (2 << 5),
-        ForceMode	= (3 << 5),
+        Normal  = (0 << 5),
+        Sleep  = (1 << 5),
+        Suspend  = (2 << 5),
+        ForceMode = (3 << 5),
     };
     MODM_FLAGS_CONFIG(MagConfig, MagPowerMode);
 
@@ -345,10 +345,10 @@ struct Bno055Enum
     enum class
     MagOperationMode : uint8_t
     {
-        LowPower		= (0 << 3),
-        Regular			= (1 << 3),
-        EnhancedRegular	= (2 << 3),
-        HighAccuracy	= (3 << 3),
+        LowPower  = (0 << 3),
+        Regular   = (1 << 3),
+        EnhancedRegular = (2 << 3),
+        HighAccuracy = (3 << 3),
     };
     MODM_FLAGS_CONFIG(MagConfig, MagOperationMode);
 
@@ -381,14 +381,14 @@ struct Bno055Enum
     enum class
     GyrBandwidth : uint8_t
     {
-        Hz523	= (0 << 3),
-        Hz230	= (1 << 3),
-        Hz116	= (2 << 3),
-        Hz47	= (3 << 3),
-        Hz23	= (4 << 3),
-        Hz12	= (5 << 3),
-        Hz64	= (6 << 3),
-        Hz32	= (7 << 3),
+        Hz523 = (0 << 3),
+        Hz230 = (1 << 3),
+        Hz116 = (2 << 3),
+        Hz47 = (3 << 3),
+        Hz23 = (4 << 3),
+        Hz12 = (5 << 3),
+        Hz64 = (6 << 3),
+        Hz32 = (7 << 3),
     };
     MODM_FLAGS_CONFIG(GyrConfig0, GyrBandwidth);
 
@@ -396,11 +396,11 @@ struct Bno055Enum
     enum class
     GyrRange : uint8_t
     {
-        Dps2000	= 0,
-        Dps1000	= 1,
-        Dps500	= 2,
-        Dps250	= 3,
-        Dps125	= 4,
+        Dps2000 = 0,
+        Dps1000 = 1,
+        Dps500 = 2,
+        Dps250 = 3,
+        Dps125 = 4,
     };
     MODM_FLAGS_CONFIG(GyrConfig0, GyrRange);
 
@@ -416,11 +416,11 @@ struct Bno055Enum
     enum class
     GyrPowerMode : uint8_t
     {
-        Normal				= 0,
-        FastPowerUp			= 1,
-        DeepSuspend			= 2,
-        Suspend				= 3,
-        AdvancePowerSave	= 4,
+        Normal    = 0,
+        FastPowerUp   = 1,
+        DeepSuspend   = 2,
+        Suspend    = 3,
+        AdvancePowerSave = 4,
     };
     MODM_FLAGS_CONFIG(GyrConfig1, GyrPowerMode);
 
@@ -435,12 +435,12 @@ struct Bno055Enum
     enum class
     Interrupt : uint8_t
     {
-        ACC_NM = modm::Bit7,			///< Masking of accelerometer no motion or slow motion interrupt
-        ACC_AM = modm::Bit6,			///< Masking of accelerometer any motion interrupt
-        ACC_HIGH_G = modm::Bit5,		///< Masking of accelerometer high-g interrupt
+        ACC_NM = modm::Bit7,   ///< Masking of accelerometer no motion or slow motion interrupt
+        ACC_AM = modm::Bit6,   ///< Masking of accelerometer any motion interrupt
+        ACC_HIGH_G = modm::Bit5,  ///< Masking of accelerometer high-g interrupt
 
-        GYR_HIGH_RATE = modm::Bit3,	///< Masking of gyroscope high rate interrupt
-        GYRO_AM = modm::Bit2,			///< Masking of gyroscope any motion interrupt
+        GYR_HIGH_RATE = modm::Bit3, ///< Masking of gyroscope high rate interrupt
+        GYRO_AM = modm::Bit2,   ///< Masking of gyroscope any motion interrupt
     };
     MODM_FLAGS8(Interrupt);
 
