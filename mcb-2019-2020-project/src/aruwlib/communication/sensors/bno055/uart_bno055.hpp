@@ -7,8 +7,7 @@ namespace aruwlib {
 
 namespace sensors {
 
-struct modm_packed
-Bno055Data
+struct Bno055Data
 {
     inline modm::Vector3f acceleration() const {
         return modm::Vector3f(raw.acceleration).scaled(1.f/16);
