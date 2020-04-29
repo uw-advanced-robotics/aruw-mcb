@@ -60,7 +60,7 @@ void UartBno055<Uart>::read() {
         disconnectTimeout.restart();
         lastReceivedDataTimestamp = modm::Clock::now();
     }
-    
+
     if (communicationTimeout.execute()) {
         rxState = SerialRxState::WAIT_FOR_HEADER;
         currentBufferIndex = 0;
@@ -125,13 +125,15 @@ bool UartBno055<Uart>::updateRegister(Bno055Enum::Register reg, uint8_t mask) {
 
 template < class Uart >
 bool UartBno055<Uart>::sendCommand(WriteCommand* command) {
-    uint8_t buff[command->size()];
+    uint8_t* buff = static_cast<uint8_t*>(malloc(command->size()));
     buff[0] = command->startByte;
     buff[1] = command->readWriteMode;
     buff[2] = static_cast<uint8_t>(command->registerAddress);
     buff[3] = command->length;
     memcpy(buff + 4, command->data, command->length);
-    return Uart::write(buff, command->size());
+    bool result = Uart::write(buff, command->size());
+    free(buff);
+    return result;
 }
 
 template < class Uart >

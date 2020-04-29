@@ -230,7 +230,7 @@ struct Bno055Enum
         ACC_AM = modm::Bit6,   ///< Status of Accelerometer any motion interrupt
         ACC_HIGH_G = modm::Bit5,  ///< Status of Accelerometer high-g interrupt
 
-        GYR_HIGH_RATE = modm::Bit3, ///< Status of gyroscope high rate interrupt
+        GYR_HIGH_RATE = modm::Bit3,  ///< Status of gyroscope high rate interrupt
         GYRO_AM = modm::Bit2,   ///< Status of gyroscope any motion interrupt
     };
     MODM_FLAGS8(InterruptStatus);
@@ -239,7 +239,7 @@ struct Bno055Enum
     enum class
     SystemClockStatus : uint8_t
     {
-        ST_MAIN_CLK = modm::Bit0, ///< 1: in Configuration state, 0: Free to configure the CLK SRC
+        ST_MAIN_CLK = modm::Bit0,  ///< 1: in Configuration state, 0: Free to configure the CLK SRC
     };
     MODM_FLAGS8(SystemClockStatus);
 
@@ -247,7 +247,7 @@ struct Bno055Enum
     enum class
     UnitSelection : uint8_t
     {
-        ORI_Android_Windows = modm::Bit7, ///< 0: Windows orientation, 1: Android orientation
+        ORI_Android_Windows = modm::Bit7,  ///< 0: Windows orientation, 1: Android orientation
 
         TEMP_Unit = modm::Bit5,   ///< 0: Celsius, 1: Fahrenheit
 
@@ -265,7 +265,7 @@ struct Bno055Enum
         RST_INT = modm::Bit6,  ///< Set to reset all interrupt status bits, and INT output
         RST_SYS = modm::Bit5,  ///< Set to reset system
 
-        Self_Test = modm::Bit0, ///< Set to trigger self test
+        Self_Test = modm::Bit0,  ///< Set to trigger self test
     };
     MODM_FLAGS8(SystemTrigger);
 
@@ -439,7 +439,7 @@ struct Bno055Enum
         ACC_AM = modm::Bit6,   ///< Masking of accelerometer any motion interrupt
         ACC_HIGH_G = modm::Bit5,  ///< Masking of accelerometer high-g interrupt
 
-        GYR_HIGH_RATE = modm::Bit3, ///< Masking of gyroscope high rate interrupt
+        GYR_HIGH_RATE = modm::Bit3,  ///< Masking of gyroscope high rate interrupt
         GYRO_AM = modm::Bit2,   ///< Masking of gyroscope any motion interrupt
     };
     MODM_FLAGS8(Interrupt);
@@ -524,7 +524,7 @@ struct Bno055Enum
         modm::Flags8<StatusCode>,
         modm::Flags8<StatusError>
     >;
-}; // struct Bno055Enum
+};  // struct Bno055Enum
 
 }  // namespace sensors
 

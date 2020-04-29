@@ -10,17 +10,31 @@ namespace sensors {
 struct modm_packed
 Bno055Data
 {
+    inline modm::Vector3f acceleration() const {
+        return modm::Vector3f(raw.acceleration).scaled(1.f/16);
+    }
+    inline modm::Vector3f magnetometer() const {
+        return modm::Vector3f(raw.magnetometer).scaled(1.f/16);
+    }
+    inline modm::Vector3f gyroscope() const {
+        return modm::Vector3f(raw.gyroscope).scaled(1.f/16);
+    }
 
-    inline modm::Vector3f acceleration()        const { return modm::Vector3f(raw.acceleration).scaled(1.f/16); }
-    inline modm::Vector3f magnetometer()        const { return modm::Vector3f(raw.magnetometer).scaled(1.f/16); }
-    inline modm::Vector3f gyroscope()           const { return modm::Vector3f(raw.gyroscope).scaled(1.f/16); }
-    inline float heading()                const { return raw.heading / 16.f; }
-    inline float roll()                   const { return raw.roll / 16.f; }
-    inline float pitch()                  const { return raw.pitch / 16.f; }
-    inline modm::Quaternion<float> quaternion() const { return modm::Quaternion<float>(raw.quaternion).scale(1l << 14); }
-    inline modm::Vector3f linear_acceleration() const { return modm::Vector3f(raw.linear_acceleration).scaled(1.f/100); }
-    inline modm::Vector3f gravity()             const { return modm::Vector3f(raw.gravity).scaled(1.f/100); }
-    inline int8_t temperature()           const { return raw.temperature; }
+    inline float heading() const { return raw.heading / 16.f; }
+    inline float roll() const { return raw.roll / 16.f; }
+    inline float pitch() const { return raw.pitch / 16.f; }
+
+    inline modm::Quaternion<float> quaternion() const {
+        return modm::Quaternion<float>(raw.quaternion).scale(1l << 14);
+    }
+    inline modm::Vector3f linear_acceleration() const {
+        return modm::Vector3f(raw.linear_acceleration).scaled(1.f/100);
+    }
+    inline modm::Vector3f gravity() const {
+        return modm::Vector3f(raw.gravity).scaled(1.f/100);
+    }
+    inline int8_t temperature() const {
+        return raw.temperature; }
 
     struct Raw {
         int16_t acceleration[3];
@@ -46,8 +60,7 @@ template < class Uart >
 class UartBno055
 {
  private:
-
- enum class SerialRxState
+    enum class SerialRxState
     {
         WAIT_FOR_HEADER,
         WAIT_FOR_DATA_LENGTH,
@@ -129,7 +142,6 @@ class UartBno055
     ResponseStatus lastResponseStatus;
 
  public:
-
     UartBno055() :
             port(),
             imuData(),
