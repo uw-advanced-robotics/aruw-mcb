@@ -59,6 +59,17 @@ void logger::SerialDataLogger::writeToTerminal() {
     }
 }
 
+void logger::SerialDataLogger::write(char message) {
+    loggerDevice.write(message);
+}
+
+bool logger::SerialDataLogger::compare(std::string command) {
+    if (!terminalInput.compare(command) || terminalInput.length() == 1) {
+        terminalInput.clear();
+        return true;
+    }
+}
+
 } // namespace src
 
 } // namespace logger

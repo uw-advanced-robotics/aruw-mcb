@@ -32,6 +32,12 @@ class SerialDataLogger
     // Switch block that matches input with a specific output
     int matchToCommand();
     
+    // Writes a given string
+    void write(char message);
+
+    // Compares an input with an existing command
+    bool compare(std::string command);
+    
     modm::Queue<char, modm::LinkedList<char>> queue;
     modm::IODeviceWrapper< Usart2, modm::IOBuffer::BlockIfFull > loggerDevice;
     

@@ -1,6 +1,9 @@
 #ifndef SERIAL_MOTOR_HPP
 #define SERIAL_MOTOR_HPP
 
+#include "serial_data_logger.hpp"
+#include "dji_motor.hpp"
+
 namespace src
 {
 namespace logger
@@ -8,24 +11,22 @@ namespace logger
 
 class SerialMotor
 {
+    
     public:
+    // Prints individual motor and corresponding info
+    void printMotor();
 
     // Prints the motors and corresponding info
-    static void printMotors();
-
-    // Prints individual motor and corresponding info
-    static void printMotor();
+    void printMotors();
 
     // Keep printing individual motor and relevant info
-    static void pollData();
+    void pollData();
 
     private: 
     // Retrieves the motors from the dji_motor
     // Stores them in a field?
     // Can call the field later to print
-    static void getMotors();
-
-    
+    void getMotors();
 };
 
 } // namespace logger
