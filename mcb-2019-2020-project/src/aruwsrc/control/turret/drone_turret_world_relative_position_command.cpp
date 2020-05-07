@@ -106,8 +106,7 @@ void DroneTurretWorldRelativePositionCommand::runPitchPositionController()
             turretSubsystem->getPitchTarget(), imuInitialPitch));
     
     // position controller based on turret pitch gimbal and imu data
-    float positionControllerError = turretSubsystem->getPitchAngle().difference(
-            turretSubsystem->getPitchTarget());
+    float positionControllerError = absolutePitchAngle.difference(pitchTargetAbsoluteAngle);
 
     float pidOutput = pitchPid.runController(positionControllerError,
         turretSubsystem->getPitchVelocity() - Mpu6500::getGx());
