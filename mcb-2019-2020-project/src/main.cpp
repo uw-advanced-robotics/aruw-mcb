@@ -11,6 +11,7 @@
 #include <aruwlib/communication/serial/xavier_serial.hpp>
 #include <aruwlib/communication/serial/ref_serial.hpp>
 #include <aruwlib/display/sh1106.hpp>
+#include <aruwlib/communication/sensors/bno055/uart_bno055.hpp>
 
 /* error handling includes --------------------------------------------------*/
 #include <aruwlib/errors/error_controller.hpp>
