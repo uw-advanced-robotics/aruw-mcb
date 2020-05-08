@@ -1,9 +1,9 @@
 #ifndef __INIT_FRICTION_WHEEL_COMMAND_HPP__
 #define __INIT_FRICTION_WHEEL_COMMAND_HPP__
 
-#include "src/aruwlib/control/command.hpp"
+#include <aruwlib/control/command.hpp>
 #include "pwm_friction_wheel_subsystem.hpp"
-#include "src/aruwlib/algorithms/ramp.hpp"
+#include <aruwlib/algorithms/ramp.hpp>
 using namespace aruwlib::control;
 
 namespace aruwsrc

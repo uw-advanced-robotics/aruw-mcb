@@ -1,9 +1,9 @@
-#ifndef __DroneTurret_INIT_COMMAND_H__
-#define __DroneTurret_INIT_COMMAND_H__
+#ifndef __DRONE_TURRET_INIT_COMMAND_H__
+#define __DRONE_TURRET_INIT_COMMAND_H__
 
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/command.hpp"
-#include "src/aruwlib/algorithms/contiguous_float.hpp"
+#include <aruwlib/control/command.hpp>
+#include <aruwlib/algorithms/contiguous_float.hpp>
 
 using namespace aruwlib::control;
 

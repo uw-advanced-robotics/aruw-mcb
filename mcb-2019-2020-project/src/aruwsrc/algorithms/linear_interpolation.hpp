@@ -1,7 +1,7 @@
 #ifndef __LINEAR_INTERPOLATION_HPP__
 #define __LINEAR_INTERPOLATION_HPP__
 
-#include <rm-dev-board-a/board.hpp>
+#include <aruwlib/rm-dev-board-a/board.hpp>
 
 /**
  * Solving the linear equation Au = x, for u then plugging u into

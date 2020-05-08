@@ -1,7 +1,7 @@
 #include "drone_turret_init_command.hpp"
 #include "drone_turret_subsystem.hpp"
-#include "src/aruwlib/control/command.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include <aruwlib/control/command.hpp>
+#include <aruwlib/algorithms/math_user_utils.hpp>
 
 namespace aruwsrc
 {

@@ -4,7 +4,7 @@
 using namespace aruwlib;
 
 using namespace aruwlib::algorithms;
-
+using namespace aruwlib::arch::clock;
 
 namespace aruwsrc
 {
@@ -18,7 +18,7 @@ void PWMFrictionWheelSubsystem::setFrictionWheelOutput(float percentage) {
     } else {
         throttleRamp.setTarget(mapValLimited<float>(percentage,
                         0.0f, 1.0f, MIN_PWM_DUTY, MAX_PWM_DUTY));
-        lastRampTime = Board::getTimeMicroseconds();
+        lastRampTime = getTimeMicroseconds();
     }
 }
 
@@ -33,9 +33,9 @@ void PWMFrictionWheelSubsystem::stopFrictionWheel() {
 }
 
 void PWMFrictionWheelSubsystem::refresh() {
-    throttleRamp.update(RAMP_RATE * (Board::getTimeMicroseconds() - lastRampTime));
+    throttleRamp.update(RAMP_RATE * (getTimeMicroseconds() - lastRampTime));
     setRawFrictionWheelOutput(throttleRamp.getValue());
-    lastRampTime = Board::getTimeMicroseconds();
+    lastRampTime = getTimeMicroseconds();
 }
 
 bool PWMFrictionWheelSubsystem::isInitialized() {

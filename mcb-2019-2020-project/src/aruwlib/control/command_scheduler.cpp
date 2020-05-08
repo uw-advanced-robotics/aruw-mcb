@@ -74,9 +74,6 @@ namespace control
         }
     }
 
-    uint32_t fme = 0;
-    int iiii;
-
     void CommandScheduler::run()
     {
         uint32_t runStart = aruwlib::arch::clock::getTimeMicroseconds();
@@ -129,8 +126,7 @@ namespace control
         {
             // shouldn't take more than 1 ms to complete all this stuff, if it does something
             // is seriously wrong (i.e. you are adding subsystems unchecked)
-            std::string s = std::to_string(Board::getTimeMicroseconds() - checkRunPeriod);
-            RAISE_ERROR("scheduler took longer than",
+            RAISE_ERROR("scheduler took longer than MAX_ALLOWABLE_SCHEDULER_RUNTIME",
                     aruwlib::errors::Location::COMMAND_SCHEDULER,
                     aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
         }

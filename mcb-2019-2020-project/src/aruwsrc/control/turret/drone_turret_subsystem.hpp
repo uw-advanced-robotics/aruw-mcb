@@ -2,10 +2,10 @@
 #define __DRONE_TURRET_SUBSYSTEM_HPP__
 
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/subsystem.hpp"
-#include "src/aruwlib/motor/dji_motor.hpp"
-#include "src/aruwlib/algorithms/contiguous_float.hpp"
-#include "src/aruwlib/algorithms/linear_interpolation.hpp"
+#include <aruwlib/control/subsystem.hpp>
+#include <aruwlib/motor/dji_motor.hpp>
+#include <aruwlib/algorithms/contiguous_float.hpp>
+#include <aruwlib/algorithms/linear_interpolation.hpp>
 
 using namespace aruwlib::control;
 

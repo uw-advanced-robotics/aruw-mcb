@@ -2,7 +2,7 @@
 #define __TURRET_MANUAL_COMMAND_H__
 
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/command.hpp"
+#include <aruwlib/control/command.hpp>
 
 using namespace aruwlib::control;
 

@@ -1,10 +1,11 @@
 #ifndef __DRONE_TURRET_SUBSYSTEM_HPP__
 #define __DRONE_TURRET_SUBSYSTEM_HPP__
 
-#include "src/aruwlib/communication/gpio/pwm.hpp"
-#include "src/aruwlib/control/subsystem.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
-#include "src/aruwlib/algorithms/ramp.hpp"
+#include <aruwlib/architecture/clock.hpp>
+#include <aruwlib/communication/gpio/pwm.hpp>
+#include <aruwlib/control/subsystem.hpp>
+#include <aruwlib/algorithms/math_user_utils.hpp>
+#include <aruwlib/algorithms/ramp.hpp>
 
 using namespace aruwlib::control;
 

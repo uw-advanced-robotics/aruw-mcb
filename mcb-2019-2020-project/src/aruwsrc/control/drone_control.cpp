@@ -1,5 +1,5 @@
-#include "robot-type/robot_type.hpp"
-#include "src/aruwlib/control/controller_mapper.hpp"
+#include "robot_type.hpp"
+#include <aruwlib/control/controller_mapper.hpp>
 #include "turret/drone_turret_subsystem.hpp"
 #include "turret/drone_turret_init_command.hpp"
 #include "turret/drone_turret_manual_command.hpp"

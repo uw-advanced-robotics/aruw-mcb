@@ -1,11 +1,11 @@
 #ifndef __DRONE_TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP__
 #define __DRONE_TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP__
 
-#include "src/aruwsrc/algorithms/turret_pid.hpp"
-#include "src/aruwlib/control/command.hpp"
-#include "src/aruwlib/algorithms/contiguous_float.hpp"
-#include "src/aruwsrc/control/turret/drone_turret_subsystem.hpp"
-#include "src/aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include <aruwsrc/algorithms/turret_pid.hpp>
+#include <aruwlib/control/command.hpp>
+#include <aruwlib/algorithms/contiguous_float.hpp>
+#include <aruwsrc/control/turret/drone_turret_subsystem.hpp>
+#include <aruwsrc/control/chassis/chassis_subsystem.hpp>
 
 namespace aruwsrc
 {
