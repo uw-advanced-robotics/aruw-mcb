@@ -2,9 +2,9 @@
 #define __DJI_MOTOR_HPP__
 
 #include <string>
-#include <modm/processing/timer/timeout.hpp>
-#include <rm-dev-board-a/board.hpp>
-#include "src/aruwlib/communication/can/can_rx_handler.hpp"
+#include <aruwlib/architecture/timeout.hpp>
+#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/communication/can/can_rx_handler.hpp"
 
 namespace aruwlib
 {
@@ -160,7 +160,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     std::string motorName;
 
-    modm::ShortTimeout motorDisconnectTimeout;
+    aruwlib::arch::MilliTimeout motorDisconnectTimeout;
 };
 
 }  // namespace motor

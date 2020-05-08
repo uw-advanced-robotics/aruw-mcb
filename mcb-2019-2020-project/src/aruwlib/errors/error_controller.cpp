@@ -1,4 +1,8 @@
 #include <modm/container/linked_list.hpp>
+
+#include "aruwlib/architecture/timeout.hpp"
+#include "aruwlib/communication/gpio/leds.hpp"
+
 #include "error_controller.hpp"
 
 // Overall method to use when receiving errors
@@ -10,7 +14,7 @@ namespace errors
     modm::BoundedDeque<SystemError, ErrorController::ERROR_LIST_MAX_SIZE>
         ErrorController::errorList;
 
-    modm::ShortTimeout ErrorController::prevLedErrorChangeWait(ERROR_ROTATE_TIME);
+    aruwlib::arch::MilliTimeout ErrorController::prevLedErrorChangeWait(ERROR_ROTATE_TIME);
 
     int ErrorController::currentDisplayIndex = 0;
 
@@ -43,7 +47,7 @@ SystemError er;
         // there are no errors to display, default display
         if (errorList.getSize() == 0) {
             setLedError(0);
-            Board::LedGreen::setOutput(modm::Gpio::High);
+            aruwlib::gpio::Leds::set(aruwlib::gpio::Leds::LedPin::Green, true);
             return;
         }
 
@@ -58,10 +62,10 @@ SystemError er;
             errorList.get(currentDisplayIndex).getErrorType(), &displayNum)
         ) {
             setLedError(displayNum);
-            Board::LedGreen::setOutput(modm::Gpio::High);
+            aruwlib::gpio::Leds::set(aruwlib::gpio::Leds::LedPin::Green, true);
         } else {
             setLedError(0);
-            Board::LedGreen::setOutput(modm::Gpio::Low);
+            aruwlib::gpio::Leds::set(aruwlib::gpio::Leds::LedPin::Green, false);
         }
     }
 
@@ -95,28 +99,7 @@ SystemError er;
         // If it is a 1, the LED corresponding will blink
         for (int i = 0; i < 8; i++) {
             bool display = (binaryRep >> i) & 1;
-            ledSwitch(i, display);
-        }
-    }
-
-    void ErrorController::ledSwitch(uint8_t ledOnBoard, bool displayOnBoard) {
-        switch(ledOnBoard) {
-            case 0: Board::LedA::setOutput(!displayOnBoard);
-                break;
-            case 1: Board::LedB::setOutput(!displayOnBoard);
-                break;
-            case 2: Board::LedC::setOutput(!displayOnBoard);
-                break;
-            case 3: Board::LedD::setOutput(!displayOnBoard);
-                break;
-            case 4: Board::LedE::setOutput(!displayOnBoard);
-                break;
-            case 5: Board::LedF::setOutput(!displayOnBoard);
-                break;
-            case 6: Board::LedG::setOutput(!displayOnBoard);
-                break;
-            case 7: Board::LedH::setOutput(!displayOnBoard);
-                break;
+            aruwlib::gpio::Leds::set(static_cast<aruwlib::gpio::Leds::LedPin>(i), display);
         }
     }
 }  // namespace errors

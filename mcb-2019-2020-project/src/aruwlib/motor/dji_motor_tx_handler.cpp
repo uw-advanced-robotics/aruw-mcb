@@ -1,8 +1,9 @@
 #include <modm/architecture/interface/assert.h>
-#include <rm-dev-board-a/board.hpp>
+#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/errors/create_errors.hpp"
+#include "aruwlib/communication/can/can.hpp"
 #include "dji_motor_tx_handler.hpp"
 #include "dji_motor.hpp"
-#include "src/aruwlib/errors/create_errors.hpp"
 
 #define CAN_DJI_MESSAGE_SEND_LENGTH 8
 #define CAN_DJI_LOW_IDENTIFIER 0X200
@@ -78,15 +79,15 @@ namespace motor
         serializeMotorStoreSendData(can1MotorStore, &can1MessageLow, &can1MessageHigh);
         serializeMotorStoreSendData(can2MotorStore, &can2MessageLow, &can2MessageHigh);
 
-        if (Can1::isReadyToSend())
+        if (aruwlib::can::Can::isReadyToSend(aruwlib::can::CanBus::CAN_BUS1))
         {
-            Can1::sendMessage(can1MessageLow);
-            Can1::sendMessage(can1MessageHigh);
+            aruwlib::can::Can::sendMessage(aruwlib::can::CanBus::CAN_BUS1, can1MessageLow);
+            aruwlib::can::Can::sendMessage(aruwlib::can::CanBus::CAN_BUS1, can1MessageHigh);
         }
-        if (Can2::isReadyToSend())
+        if (aruwlib::can::Can::isReadyToSend(aruwlib::can::CanBus::CAN_BUS2))
         {
-            Can2::sendMessage(can2MessageLow);
-            Can2::sendMessage(can2MessageHigh);
+            aruwlib::can::Can::sendMessage(aruwlib::can::CanBus::CAN_BUS2, can1MessageLow);
+            aruwlib::can::Can::sendMessage(aruwlib::can::CanBus::CAN_BUS2, can1MessageHigh);
         }
     }
 

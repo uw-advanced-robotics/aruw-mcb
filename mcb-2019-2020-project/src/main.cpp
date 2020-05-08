@@ -1,32 +1,33 @@
-#include <rm-dev-board-a/board.hpp>
-#include <modm/processing/timer.hpp>
+#include <aruwlib/rm-dev-board-a/board.hpp>
+
+/* arch includes ------------------------------------------------------------*/
+#include <aruwlib/architecture/periodic_timer.hpp>
 
 /* communication includes ---------------------------------------------------*/
-#include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
-#include "src/aruwlib/communication/can/can_rx_listener.hpp"
-#include "src/aruwlib/communication/remote.hpp"
-#include "src/aruwlib/communication/serial/xavier_serial.hpp"
-#include "src/aruwlib/communication/serial/ref_serial.hpp"
-#include "src/aruwlib/display/sh1106.hpp"
+#include <aruwlib/motor/dji_motor_tx_handler.hpp>
+#include <aruwlib/communication/sensors/mpu6500/mpu6500.hpp>
+#include <aruwlib/communication/can/can_rx_listener.hpp>
+#include <aruwlib/communication/remote.hpp>
+#include <aruwlib/communication/serial/xavier_serial.hpp>
+#include <aruwlib/communication/serial/ref_serial.hpp>
+#include <aruwlib/display/sh1106.hpp>
 
 /* error handling includes --------------------------------------------------*/
-#include "src/aruwlib/errors/error_controller.hpp"
-#include "src/aruwlib/errors/create_errors.hpp"
+#include <aruwlib/errors/error_controller.hpp>
 
 /* control includes ---------------------------------------------------------*/
-#include "src/aruwsrc/control/robot_control.hpp"
-#include "src/aruwlib/control/command_scheduler.hpp"
+#include "aruwsrc/control/robot_control.hpp"
+#include <aruwlib/control/command_scheduler.hpp>
 
 /* define timers here -------------------------------------------------------*/
-modm::ShortPeriodicTimer updateImuPeriod(2);
-modm::ShortPeriodicTimer sendMotorTimeout(2);
+aruwlib::arch::PeriodicMilliTimer updateImuPeriod(2);
+aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
 void initializeIo();
 // Anything that you would like to be called place here. It will be called
-// very frequently. Use ShortPeriodicTimers if you don't want something to be
+// very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
 void updateIo();
 
@@ -47,13 +48,17 @@ int main()
             aruwlib::control::CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
+        #ifndef ENV_SIMULATOR
+
         modm::delayMicroseconds(10);
+        #endif
     }
     return 0;
 }
 
 void initializeIo()
 {
+#ifndef ENV_SIMULATOR
     /// \todo this should be an init in the display class
     Board::DisplaySpiMaster::connect<
         Board::DisplayMiso::Miso,
@@ -63,12 +68,14 @@ void initializeIo()
 
     // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
     // 90MHz/64=~14MHz
-    Board::DisplaySpiMaster::initialize<Board::SystemClock, 703125_Hz>();
-
+    Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
+#endif
     aruwlib::display::Sh1106<
+    #ifndef ENV_SIMULATOR
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
         Board::DisplayReset,
+    #endif
         128, 64,
         false
     > display;

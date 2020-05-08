@@ -1,5 +1,6 @@
-#include <rm-dev-board-a/board.hpp>
 #include "analog.hpp"
+
+#include "aruwlib/rm-dev-board-a/board.hpp"
 
 using namespace Board;
 
@@ -10,6 +11,9 @@ namespace gpio
 {
     void Analog::init()
     {
+        #ifndef ENV_SIMULATOR
+        AnalogInPins::setAnalogInput();
+
         // Initial ADC/Timer setup
         Adc1::connect<AnalogInPinS::In0, AnalogInPinT::In1,
                     AnalogInPinU::In2, AnalogInPinV::In3>();
@@ -18,12 +22,16 @@ namespace gpio
         Adc1::setPinChannel<AnalogInPinT>();
         Adc1::setPinChannel<AnalogInPinU>();
         Adc1::setPinChannel<AnalogInPinV>();
+        #endif
     }
 
     /*
     * Reads voltage across the specified pin. Units in mV.
     */
     uint16_t Analog::Read(Pin pin) {
+        #ifdef ENV_SIMULATOR
+        return 0;
+        #else
         switch(pin) {
             case Pin::S :
                 return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinS>());
@@ -40,6 +48,7 @@ namespace gpio
             default:
                 return 0;
         }
+        #endif
     }
 }  // namespace gpio
 

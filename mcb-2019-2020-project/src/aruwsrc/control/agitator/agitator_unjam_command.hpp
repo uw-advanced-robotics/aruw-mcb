@@ -1,10 +1,10 @@
 #ifndef __AGITATOR_UNJAM_COMMAND_HPP__
 #define __AGITATOR_UNJAM_COMMAND_HPP__
 
-#include <modm/processing/timer/timeout.hpp>
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
-#include "src/aruwlib/control/command.hpp"
-#include "src/aruwlib/motor/dji_motor.hpp"
+#include <aruwlib/architecture/timeout.hpp>
+#include <aruwlib/algorithms/math_user_utils.hpp>
+#include <aruwlib/control/command.hpp>
+#include <aruwlib/motor/dji_motor.hpp>
 #include "agitator_subsystem.hpp"
 
 namespace aruwsrc
@@ -22,13 +22,13 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
         uint32_t agitatorMaxWaitTime = AGITATOR_MAX_WAIT_TIME
     );
 
-    void initialize();
+    void initialize() override;
 
-    void execute();
+    void execute() override;
 
-    void end(bool interrupted);
+    void end(bool interrupted) override;
 
-    bool isFinished() const;
+    bool isFinished() const override;
 
  private:
     static constexpr uint32_t SALVATION_TIMEOUT_MS = 2000;
@@ -50,9 +50,9 @@ class AgitatorUnjamCommand : public aruwlib::control::Command
     AgitatorUnjamState currUnjamstate;
 
     // time allowed to rotate back the the currAgitatorUnjamAngle
-    modm::ShortTimeout agitatorUnjamRotateTimeout;
+    aruwlib::arch::MilliTimeout agitatorUnjamRotateTimeout;
 
-    modm::ShortTimeout salvationTimeout;
+    aruwlib::arch::MilliTimeout salvationTimeout;
 
     // usually set to AGITATOR_MAX_WAIT_TIME, but can be user enabled
     uint32_t agitatorMaxWaitTime;

@@ -1,9 +1,9 @@
 #ifndef __COMMAND_SENTINEL_DRIVE_RANDOM_HPP__
 #define __COMMAND_SENTINEL_DRIVE_RANDOM_HPP__
 
-#include "src/aruwlib/control/command.hpp"
+#include <aruwlib/control/command.hpp>
+#include <aruwlib/architecture/timeout.hpp>
 #include "sentinel_drive_subsystem.hpp"
-#include "modm/processing/timer.hpp"
 
 using namespace aruwlib::control;
 
@@ -20,15 +20,13 @@ class SentinelAutoDriveCommand : public Command
  public:
     explicit SentinelAutoDriveCommand(SentinelDriveSubsystem* subsystem);
 
-    void initialize();
+    void initialize() override;
 
-    void execute();
+    void execute() override;
 
-    void end(bool interrupted);
+    void end(bool interrupted) override;
 
-    bool isFinished() const;
-
-    void interrupted();
+    bool isFinished() const override;
 
  private:
     static const int16_t MIN_RPM = 5000;
@@ -40,7 +38,7 @@ class SentinelAutoDriveCommand : public Command
     bool chosenNewRPM = false;
 
     SentinelDriveSubsystem* subsystemSentinelDrive;
-    modm::ShortTimeout changeVelocityTimer;
+    aruwlib::arch::MilliTimeout changeVelocityTimer;
 };
 
 }  // namespace control

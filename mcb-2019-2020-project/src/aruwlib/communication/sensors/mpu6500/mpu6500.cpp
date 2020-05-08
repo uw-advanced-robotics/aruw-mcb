@@ -1,7 +1,8 @@
+#ifndef ENV_SIMULATOR
 #include "mpu6500.hpp"
 #include "mpu6500_reg.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
-#include "src/aruwlib/errors/create_errors.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/errors/create_errors.hpp"
 
 namespace aruwlib {
 
@@ -296,3 +297,4 @@ namespace sensors {
 }  // namespace sensors
 
 }  // namespace aruwlib
+#endif

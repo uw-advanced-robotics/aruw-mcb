@@ -2,8 +2,8 @@
 #define ERROR_CONTROLLER_HPP
 
 #include <modm/container.hpp>
-#include <modm/processing/timer.hpp>
-#include <rm-dev-board-a/board.hpp>
+#include <aruwlib/architecture/timeout.hpp>
+#include "aruwlib/rm-dev-board-a/board.hpp"
 #include "system_error.hpp"
 
 namespace aruwlib
@@ -35,7 +35,7 @@ class ErrorController
 
     static modm::BoundedDeque<SystemError, ERROR_LIST_MAX_SIZE> errorList;
 
-    static modm::ShortTimeout prevLedErrorChangeWait;
+    static aruwlib::arch::MilliTimeout prevLedErrorChangeWait;
 
     static int currentDisplayIndex;
 

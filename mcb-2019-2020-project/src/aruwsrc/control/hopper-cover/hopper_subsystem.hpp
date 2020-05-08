@@ -8,9 +8,9 @@
 #define __OPEN_HOPPER_SUBSYSTEM__
 
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwlib/control/subsystem.hpp"
-#include "src/aruwlib/motor/servo.hpp"
+#include <aruwlib/control/command_scheduler.hpp>
+#include <aruwlib/control/subsystem.hpp>
+#include <aruwlib/motor/servo.hpp>
 
 using namespace aruwlib::control;
 
@@ -23,9 +23,15 @@ namespace control
 class HopperSubsystem : public Subsystem
 {
  public:
+    #if defined(TARGET_SOLDIER)
     static constexpr float SOLDIER_HOPPER_OPEN_PWM = 0.21f;
     static constexpr float SOLDIER_HOPPER_CLOSE_PWM = 0.11f;
     static constexpr float SOLDIER_PWM_RAMP_SPEED = 0.001f;
+    #elif defined(TARGET_OLD_SOLDIER)
+    static constexpr float OLD_SOLDIER_HOPPER_OPEN_PWM = 0.21f;
+    static constexpr float OLD_SOLDIER_HOPPER_CLOSE_PWM = 0.11f;
+    static constexpr float OLD_SOLDIER_PWM_RAMP_SPEED = 0.001f;
+    #endif
 
     /* 
      * constructor
@@ -56,7 +62,7 @@ class HopperSubsystem : public Subsystem
      */
     void setClose();
 
-    void refresh();
+    void refresh() override;
 
  private:
     aruwlib::motor::Servo hopper;

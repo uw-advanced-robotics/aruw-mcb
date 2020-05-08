@@ -7,8 +7,8 @@
 #ifndef MPU6500_H
 #define MPU6500_H
 
-#include <rm-dev-board-a/board.hpp>
-#include "src/aruwlib/algorithms/mahony_ahrs.hpp"
+#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/algorithms/mahony_ahrs.hpp"
 
 using namespace modm::literals;
 
@@ -92,9 +92,10 @@ class  Mpu6500 {
         bool accCalcFlag = true;
     } mpu_cali_t;
 
-    static MahonyAhrs arhsAlgorithm;
-
     static bool imuInitialized;
+
+    #ifndef ENV_SIMULATOR
+    static MahonyAhrs arhsAlgorithm;
 
     static mpu_info_t mpu6500Data;
 
@@ -117,6 +118,7 @@ class  Mpu6500 {
     static void getMpuGyroOffset(void);
 
     static void getMpuAccOffset(void);
+    #endif
 };
 
 }  // namespace sensors

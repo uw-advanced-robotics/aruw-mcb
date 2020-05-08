@@ -1,7 +1,7 @@
 #ifndef __LINEAR_INTERPOLATION_HPP__
 #define __LINEAR_INTERPOLATION_HPP__
 
-#include <rm-dev-board-a/board.hpp>
+#include <cstdint>
 
 namespace aruwlib
 {
@@ -17,7 +17,7 @@ class LinearInterpolation
     // only call this when you receive a new value (use remote rx counter for example)
     void update(float newValue);
 
-    // use modm::Clock::now().getTime()
+    // use a millisecond-resolution timer, e.g. aruwlib::arch::clock::getTimeMilliseconds()
     float getInterpolatedValue(uint32_t currTime);
 
  private:
