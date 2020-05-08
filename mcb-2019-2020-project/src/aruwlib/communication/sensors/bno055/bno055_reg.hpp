@@ -1,5 +1,5 @@
-#ifndef __sss__
-#define __sss__
+#ifndef __BNO055_REG__
+#define __BNO055_REG__
 
 #include <modm/architecture/interface/register.hpp>
 #include <modm/math/geometry/vector3.hpp>
