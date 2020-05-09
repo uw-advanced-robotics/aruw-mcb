@@ -18,9 +18,19 @@ external_scons_libraries = ["modm/", "sim-modm/modm/", "./src/aruwlib"]
 # don't compile this stuff
 ignored = [".lbuild_cache", build_path, "robot-type"] + external_scons_libraries
 
-target_env = ARGUMENTS.get("target-env", "hardware")
-if target_env not in ["hardware", "simulator"]:
-    raise Exception("Illegal target-env: " + target_env)
+if len(COMMAND_LINE_TARGETS) > 1:
+    raise Exception("This build script currently supports only one target per invocation.")
+
+build_target = COMMAND_LINE_TARGETS[0]
+if build_target in ["build-tests", "run-tests"]:
+    target_env = "tests"
+else:
+    target_env = "hardware"
+print(target_env)
+
+# target_env = ARGUMENTS.get("target-env", "hardware")
+# if target_env not in ["hardware", "simulator"]:
+#     raise Exception("Illegal target-env: " + target_env)
 
 # SCons environment with all tools
 env = DefaultEnvironment(tools=[], ENV=os.environ)
@@ -38,7 +48,7 @@ if target_env == "hardware":
     external_scons_libraries.remove("sim-modm/modm/")
 else:
     external_scons_libraries.remove("modm/")
-
+print(external_scons_libraries)
 # Building all libraries (read from sconscript files located in generated_paths)
 env.SConscript(dirs=external_scons_libraries, exports="env")
 
@@ -64,7 +74,7 @@ if profile == "debug":
     ])
 
 env.Append(CPPFLAGS = [
-    "-DENV_" + target_env.upper()
+    "-DENV_" + {"hardware": "HARDWARE", "tests": "SIMULATOR"}[target_env]
 ])
 
 if 'additional-ccflags' in ARGUMENTS:
@@ -78,4 +88,14 @@ env.AppendUnique(CPPPATH=[abspath(r"./src"),
 
 sources = env.FindSourceFiles(".", ignorePaths=ignored)
 
-env.BuildTarget(sources)
+program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".exe", source=sources)
+
+if target_env == "tests":
+    env.Alias("build", program)
+    env.Alias("run", env.Run(program))
+
+# if target_env == "tests":
+#     sources.remove("src/main.cpp")
+#     sources.append(env.FindSourceFiles("."))
+
+#env.BuildTarget(sources)
