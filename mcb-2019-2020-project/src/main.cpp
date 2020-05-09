@@ -24,6 +24,8 @@
 aruwlib::arch::PeriodicMilliTimer updateImuPeriod(2);
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
+aruwlib::sensors::UartBno055<Uart7> bno055;
+aruwlib::sensors::Bno055Data bno055Data;
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
 void initializeIo();
@@ -85,6 +87,10 @@ void initializeIo()
     aruwlib::Remote::initialize();
     aruwlib::sensors::Mpu6500::init();
 
+    Uart7::connect<GpioE7::Rx, GpioE8::Tx>();
+    Uart7::initialize<Board::SystemClock, 115200_Hz>();
+    bno055.initialize();
+
     aruwlib::serial::RefSerial::getRefSerial().initialize();
     aruwlib::serial::XavierSerial::getXavierSerial().initialize();
 }
@@ -95,6 +101,8 @@ void updateIo()
     aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
     aruwlib::serial::RefSerial::getRefSerial().updateSerial();
     aruwlib::Remote::read();
+    bno055.read();
+    bno055Data = *bno055.getData();
     if (updateImuPeriod.execute())
     {
         aruwlib::sensors::Mpu6500::read();

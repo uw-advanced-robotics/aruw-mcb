@@ -51,7 +51,7 @@ DroneTurretWorldRelativePositionCommand::DroneTurretWorldRelativePositionCommand
 void DroneTurretWorldRelativePositionCommand::initialize()
 {
     imuInitialYaw = Mpu6500::getImuAttitude().yaw;
-    imuInitialPitch = Mpu6500::getImuAttitude().pitch;
+    imuInitialPitch = Mpu6500::getImuAttitude().roll;
     yawPid.reset();
     pitchPid.reset();
     yawTargetAbsoluteAngle.setValue(turretSubsystem->getYawTarget());
@@ -67,9 +67,7 @@ void DroneTurretWorldRelativePositionCommand::execute()
 
 void DroneTurretWorldRelativePositionCommand::runYawPositionController()
 {
-    absoluteYawAngle.setValue(
-            projectChassisRelativeYawToWorldRelative(
-                    turretSubsystem->getYawAngle().getValue(), imuInitialYaw));
+    absoluteYawAngle.setValue(aruwlib::sensors::Mpu6500::getImuAttitude().yaw);
 
     yawTargetAbsoluteAngle.shiftValue(USER_YAW_INPUT_SCALAR
             * aruwlib::control::ControlOperatorInterface::getTurretYawInput());
@@ -92,18 +90,16 @@ void DroneTurretWorldRelativePositionCommand::runYawPositionController()
 
 void DroneTurretWorldRelativePositionCommand::runPitchPositionController()
 {
-    absolutePitchAngle.setValue(
-            projectChassisRelativePitchToWorldRelative(
-                    turretSubsystem->getPitchAngle().getValue(), imuInitialPitch));
+    absolutePitchAngle.setValue(-aruwlib::sensors::Mpu6500::getImuAttitude().roll);
 
     pitchTargetAbsoluteAngle.shiftValue(USER_PITCH_INPUT_SCALAR
             * aruwlib::control::ControlOperatorInterface::getTurretPitchInput());
     
     turretSubsystem->setPitchTarget(projectWorldRelativePitchToChassisFrame(
-            pitchTargetAbsoluteAngle.getValue(), imuInitialPitch));
+            pitchTargetAbsoluteAngle.getValue(), -imuInitialPitch));
     
     pitchTargetAbsoluteAngle.setValue(projectChassisRelativePitchToWorldRelative(
-            turretSubsystem->getPitchTarget(), imuInitialPitch));
+            turretSubsystem->getPitchTarget(), -imuInitialPitch));
     
     // position controller based on turret pitch gimbal and imu data
     float positionControllerError = absolutePitchAngle.difference(pitchTargetAbsoluteAngle);
@@ -131,28 +127,28 @@ float DroneTurretWorldRelativePositionCommand::projectChassisRelativeYawToWorldR
     float yawAngle,
     float imuInitialAngle
 ) {
-    return yawAngle + aruwlib::sensors::Mpu6500::getImuAttitude().yaw - imuInitialAngle;
+    return yawAngle + imuInitialAngle - DroneTurretSubsystem::TURRET_YAW_START_ANGLE;
 }
 
 float DroneTurretWorldRelativePositionCommand::projectWorldRelativeYawToChassisFrame(
     float yawAngle,
     float imuInitialAngle
 ) {
-    return yawAngle - aruwlib::sensors::Mpu6500::getImuAttitude().yaw + imuInitialAngle;
+    return yawAngle - imuInitialAngle + DroneTurretSubsystem::TURRET_YAW_START_ANGLE;
 }
 
 float DroneTurretWorldRelativePositionCommand::projectChassisRelativePitchToWorldRelative(
     float pitchAngle,
     float imuInitialAngle
 ) {
-    return pitchAngle - aruwlib::sensors::Mpu6500::getImuAttitude().roll - imuInitialAngle;
+    return pitchAngle + imuInitialAngle - DroneTurretSubsystem::TURRET_PITCH_START_ANGLE;
 }
 
 float DroneTurretWorldRelativePositionCommand::projectWorldRelativePitchToChassisFrame(
     float pitchAngle,
     float imuInitialAngle
 ) {
-    return pitchAngle + aruwlib::sensors::Mpu6500::getImuAttitude().roll + imuInitialAngle;
+    return pitchAngle - imuInitialAngle + DroneTurretSubsystem::TURRET_PITCH_START_ANGLE;
 }
 
 }  // namespace turret

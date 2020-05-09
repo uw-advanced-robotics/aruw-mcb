@@ -1,11 +1,11 @@
-#include "drone_turret_subsystem.hpp"
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/control/controller_mapper.hpp>
 #include <aruwlib/errors/create_errors.hpp>
 #include <aruwlib/communication/sensors/mpu6500/mpu6500.hpp>
+#include "drone_turret_subsystem.hpp"
 
-using namespace aruwlib::motor;
 using namespace aruwlib;
+using namespace aruwlib::motor;
 
 namespace aruwsrc
 {
@@ -190,6 +190,8 @@ namespace turret
         pitchTarget.setValue(aruwlib::algorithms::ContiguousFloat::limitValue(pitchTarget,
                 TURRET_PITCH_MIN_ANGLE, TURRET_PITCH_MAX_ANGLE));
     }
+
+    
 
     float DroneTurretSubsystem::yawFeedForwardCalculation()
     {

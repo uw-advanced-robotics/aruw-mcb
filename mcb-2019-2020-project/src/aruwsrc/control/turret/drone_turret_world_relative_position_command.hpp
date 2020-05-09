@@ -5,7 +5,7 @@
 #include <aruwlib/control/command.hpp>
 #include <aruwlib/algorithms/contiguous_float.hpp>
 #include <aruwsrc/control/turret/drone_turret_subsystem.hpp>
-#include <aruwsrc/control/chassis/chassis_subsystem.hpp>
+#include <aruwlib/communication/sensors/bno055/uart_bno055.hpp>
 
 namespace aruwsrc
 {
@@ -71,11 +71,11 @@ class DroneTurretWorldRelativePositionCommand : public Command
     void runYawPositionController();
     void runPitchPositionController();
 
-    static float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
-    static float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
+   static float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
+   static float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
 
-    static float projectChassisRelativePitchToWorldRelative(float pitchAngle, float imuInitialAngle);
-    static float projectWorldRelativePitchToChassisFrame(float pitchAngle, float imuInitialAngle);
+   static float projectChassisRelativePitchToWorldRelative(float pitchAngle, float imuInitialAngle);
+   static float projectWorldRelativePitchToChassisFrame(float pitchAngle, float imuInitialAngle);
 
    float calculateYawFeedforward(float baseYaw, float basePitch, float baseRoll, float turretYaw) {
       
