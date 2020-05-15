@@ -22,7 +22,9 @@ class DroneTurretSubsystem : public Subsystem {
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_YAW_START_ANGLE + 55.0f;
     static constexpr float TURRET_PITCH_START_ANGLE = 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_PITCH_START_ANGLE - 45.0f;
-    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_PITCH_START_ANGLE + 55.0f;
+    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_PITCH_START_ANGLE + 45.0f;
+    static constexpr float TURRET_DEADBAND = 3.0f;
+    static constexpr float TURRET_DEADBAND_DECAY_COEFFICIENT = 1.0f / TURRET_DEADBAND;
 
     DroneTurretSubsystem();
 
@@ -30,8 +32,8 @@ class DroneTurretSubsystem : public Subsystem {
 
     bool isTurretOnline() const;
 
-    int32_t getYawVelocity() const;
-    int32_t getPitchVelocity() const;
+    float getYawVelocity() const;
+    float getPitchVelocity() const;
 
     float getYawAngleFromCenter() const;
     float getPitchAngleFromCenter() const;
@@ -83,7 +85,7 @@ class DroneTurretSubsystem : public Subsystem {
     void updateCurrentYawAngle();
     void updateCurrentPitchAngle();
 
-    int32_t getVelocity(const aruwlib::motor::DjiMotor &motor) const;
+    float getVelocity(const aruwlib::motor::DjiMotor &motor) const;
 };
 
 

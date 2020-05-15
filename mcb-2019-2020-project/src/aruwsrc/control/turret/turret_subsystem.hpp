@@ -22,7 +22,8 @@ class TurretSubsystem : public Subsystem {
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
-
+    static constexpr float TURRET_DEADBAND = 3.0f;
+    static constexpr float TURRET_DEADBAND_DECAY_COEFFICIENT = 3.0f;
     TurretSubsystem();
 
     void refresh() override;

@@ -24,8 +24,8 @@
 aruwlib::arch::PeriodicMilliTimer updateImuPeriod(2);
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
-aruwlib::sensors::UartBno055<Uart7> bno055;
-aruwlib::sensors::Bno055Data bno055Data;
+extern aruwlib::sensors::UartBno055<Uart7> bno055;
+extern aruwlib::sensors::Bno055Data bno055Data;
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
 void initializeIo();

@@ -6,7 +6,8 @@
 #include <aruwlib/algorithms/contiguous_float.hpp>
 #include <aruwsrc/control/turret/drone_turret_subsystem.hpp>
 #include <aruwlib/communication/sensors/bno055/uart_bno055.hpp>
-
+extern aruwlib::sensors::UartBno055<Uart7> bno055;
+extern aruwlib::sensors::Bno055Data bno055Data;
 namespace aruwsrc
 {
 
@@ -77,13 +78,13 @@ class DroneTurretWorldRelativePositionCommand : public Command
    static float projectChassisRelativePitchToWorldRelative(float pitchAngle, float imuInitialAngle);
    static float projectWorldRelativePitchToChassisFrame(float pitchAngle, float imuInitialAngle);
 
-   float calculateYawFeedforward(float baseYaw, float basePitch, float baseRoll, float turretYaw) {
+   // float calculateYawFeedforward(float baseYaw, float basePitch, float baseRoll, float turretYaw) {
       
-   }
+   // }
 
-   float calculatePitchFeedforward(float baseYaw, float basePitch, float baseRoll, float turretYaw, float turretPitch) {
+   // float calculatePitchFeedforward(float baseYaw, float basePitch, float baseRoll, float turretYaw, float turretPitch) {
       
-   }
+   // }
 
 };
 

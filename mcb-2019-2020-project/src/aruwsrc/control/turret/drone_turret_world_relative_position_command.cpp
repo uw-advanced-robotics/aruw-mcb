@@ -6,7 +6,8 @@
 
 using namespace aruwlib::sensors;
 using namespace aruwlib;
-
+aruwlib::sensors::UartBno055<Uart7> bno055;
+aruwlib::sensors::Bno055Data bno055Data;
 namespace aruwsrc
 {
 
@@ -16,10 +17,10 @@ namespace turret
 DroneTurretWorldRelativePositionCommand::DroneTurretWorldRelativePositionCommand(
     DroneTurretSubsystem *subsystem) :
     turretSubsystem(subsystem),
-    yawTargetAbsoluteAngle(DroneTurretSubsystem::TURRET_YAW_START_ANGLE, 0.0f, 360.0f),
-    pitchTargetAbsoluteAngle(DroneTurretSubsystem::TURRET_PITCH_START_ANGLE, 0.0f, 360.0f),
-    absoluteYawAngle(0.0f, 0.0f, 360.0f),
-    absolutePitchAngle(0.0f, 0.0f, 360.0f),
+    yawTargetAbsoluteAngle(0.0f, -180.0f, 180.0f),
+    pitchTargetAbsoluteAngle(0.0f, -180.0f, 180.0f),
+    absoluteYawAngle(0.0f, -180.0f, 180.0f),
+    absolutePitchAngle(0.0f, -180.0f, 180.0f),
     imuInitialYaw(0.0f),
     imuInitialPitch(0.0f),
     yawPid(
@@ -50,12 +51,10 @@ DroneTurretWorldRelativePositionCommand::DroneTurretWorldRelativePositionCommand
 
 void DroneTurretWorldRelativePositionCommand::initialize()
 {
-    imuInitialYaw = Mpu6500::getImuAttitude().yaw;
-    imuInitialPitch = Mpu6500::getImuAttitude().roll;
+    imuInitialYaw = Mpu6500::getImuAttitude().yaw - turretSubsystem->getYawAngleFromCenter();
+    imuInitialPitch = Mpu6500::getImuAttitude().roll + turretSubsystem->getPitchAngleFromCenter();
     yawPid.reset();
     pitchPid.reset();
-    yawTargetAbsoluteAngle.setValue(turretSubsystem->getYawTarget());
-    pitchTargetAbsoluteAngle.setValue(turretSubsystem->getPitchTarget());
 }
 
 void DroneTurretWorldRelativePositionCommand::execute()
@@ -110,7 +109,7 @@ void DroneTurretWorldRelativePositionCommand::runPitchPositionController()
     // gravity compensation
     pidOutput -= PITCH_GRAVITY_COMPENSATION_KP * cosf(aruwlib::algorithms::degreesToRadians(
             turretSubsystem->getPitchAngleFromCenter()));
-
+    pidOutput += bno055Data.raw.acceleration[0] / 16.0f;
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
 
