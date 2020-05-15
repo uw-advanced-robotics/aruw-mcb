@@ -133,7 +133,8 @@ namespace turret
                         (TURRET_DEADBAND - a) * TURRET_DEADBAND_DECAY_COEFFICIENT);
                 a = (a < 0.0f ? 0.0f : a);
                 pitchMotor.setDesiredOutput(a * out);
-            } else if (getPitchAngleFromCenter() + TURRET_START_ANGLE <
+            }
+            else if (getPitchAngleFromCenter() + TURRET_START_ANGLE <
                     TURRET_PITCH_MIN_ANGLE + TURRET_DEADBAND && out < 0)
             {
                 float a = TURRET_PITCH_MIN_ANGLE + TURRET_DEADBAND -
@@ -167,7 +168,8 @@ namespace turret
                         (TURRET_DEADBAND - a) * TURRET_DEADBAND_DECAY_COEFFICIENT);
                 a = (a < 0.0f ? 0.0f : a);
                 yawMotor.setDesiredOutput(a * out);
-            } else if (getYawAngleFromCenter() + TURRET_START_ANGLE <
+            }
+            else if (getYawAngleFromCenter() + TURRET_START_ANGLE <
                     TURRET_YAW_MIN_ANGLE + TURRET_DEADBAND && out < 0)
             {
                 float a = TURRET_YAW_MIN_ANGLE + TURRET_DEADBAND -
