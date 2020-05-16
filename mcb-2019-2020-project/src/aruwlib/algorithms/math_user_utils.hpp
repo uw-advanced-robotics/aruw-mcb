@@ -48,14 +48,6 @@ T limitVal(T val, T min, T max)
     }
 }
 
-inline float lowPassFilter(float prevValue, float newValue, float alpha)
-{
-    if (alpha < 0.0f || alpha > 1.0f) {
-        return newValue;
-    }
-    return alpha * newValue + (1.0f - alpha) * prevValue;
-}
-
 template< typename T >
 T mapVal(T val, T inMin, T inMax, T outMin, T outMax)
 {
@@ -67,6 +59,14 @@ template< typename T >
 T mapValLimited(T val, T inMin, T inMax, T outMin, T outMax)
 {
     return mapVal<T>(limitVal<T>(val, inMin, inMax), inMin, inMax, outMin, outMax);
+}
+
+inline float lowPassFilter(float prevValue, float newValue, float alpha)
+{
+    if (alpha < 0.0f || alpha > 1.0f) {
+        return newValue;
+    }
+    return alpha * newValue + (1.0f - alpha) * prevValue;
 }
 
 template <typename From, typename To>

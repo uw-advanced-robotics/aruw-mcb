@@ -18,7 +18,6 @@ void PWMFrictionWheelSubsystem::setFrictionWheelOutput(float percentage) {
     } else {
         throttleRamp.setTarget(mapValLimited<float>(percentage,
                         0.0f, 1.0f, MIN_PWM_DUTY, MAX_PWM_DUTY));
-        lastRampTime = getTimeMicroseconds();
     }
 }
 
@@ -33,9 +32,11 @@ void PWMFrictionWheelSubsystem::stopFrictionWheel() {
 }
 
 void PWMFrictionWheelSubsystem::refresh() {
-    throttleRamp.update(RAMP_RATE * (getTimeMicroseconds() - lastRampTime));
+    uint32_t t = getTimeMicroseconds();
+    throttleRamp.update(RAMP_RATE * (t - lastRampTime));
     setRawFrictionWheelOutput(throttleRamp.getValue());
-    lastRampTime = getTimeMicroseconds();
+    lastRampTime = t;
+
 }
 
 bool PWMFrictionWheelSubsystem::isInitialized() {

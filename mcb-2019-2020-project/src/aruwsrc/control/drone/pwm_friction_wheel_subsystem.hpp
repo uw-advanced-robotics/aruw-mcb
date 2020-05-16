@@ -1,5 +1,5 @@
-#ifndef __DRONE_TURRET_SUBSYSTEM_HPP__
-#define __DRONE_TURRET_SUBSYSTEM_HPP__
+#ifndef __PWM_FRICTION_WHEEL_SUBSYSTEM_HPP__
+#define __PWM_FRICTION_WHEEL_SUBSYSTEM_HPP__
 
 #include <aruwlib/architecture/clock.hpp>
 #include <aruwlib/communication/gpio/pwm.hpp>
@@ -31,8 +31,8 @@ class PWMFrictionWheelSubsystem : public Subsystem
     bool initialized;
     float currentFrictionWheelPWMDuty;
 
-    static constexpr uint32_t RAMP_TIME_MS = 250;
-    static constexpr float RAMP_RATE = (MAX_PWM_DUTY - MIN_PWM_DUTY) / RAMP_TIME_MS;
+    static constexpr uint32_t RAMP_TIME_MS = 3500; // Long Ramp Time to reduce voltage fluctuation during acceleration and deceleration
+    static constexpr float RAMP_RATE = (MAX_PWM_DUTY - MIN_PWM_DUTY) / RAMP_TIME_MS / 1000;
     uint32_t lastRampTime;
     aruwlib::algorithms::Ramp throttleRamp;
 
