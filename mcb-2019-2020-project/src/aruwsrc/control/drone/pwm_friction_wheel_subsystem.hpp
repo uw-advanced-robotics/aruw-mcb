@@ -1,5 +1,5 @@
-#ifndef __DRONE_TURRET_SUBSYSTEM_HPP__
-#define __DRONE_TURRET_SUBSYSTEM_HPP__
+#ifndef __PWM_FRICTION_WHEEL_SUBSYSTEM_HPP__
+#define __PWM_FRICTION_WHEEL_SUBSYSTEM_HPP__
 
 #include <aruwlib/architecture/clock.hpp>
 #include <aruwlib/communication/gpio/pwm.hpp>
