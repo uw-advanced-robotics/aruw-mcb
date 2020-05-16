@@ -61,6 +61,14 @@ T mapValLimited(T val, T inMin, T inMax, T outMin, T outMax)
     return mapVal<T>(limitVal<T>(val, inMin, inMax), inMin, inMax, outMin, outMax);
 }
 
+inline float lowPassFilter(float prevValue, float newValue, float alpha)
+{
+    if (alpha < 0.0f || alpha > 1.0f) {
+        return newValue;
+    }
+    return alpha * newValue + (1.0f - alpha) * prevValue;
+}
+
 template <typename From, typename To>
 To reinterpretCopy(From from) {
     static_assert(sizeof(From) == sizeof(To), "can only reinterpret-copy types of the same size");
@@ -75,6 +83,15 @@ To reinterpretCopy(From from) {
   * @retval    1/Sqrt(x)
   */
 float fastInvSqrt(float x);
+
+/** 
+ *  @brief performs a rotation matrix on the given x and y components of a vector
+ *  @param x the x component of the vector to be rotated
+ *  @param y the y component of the vector to be rotated
+ *  @param angle the angle by which to rotate the vector <x, y>, in radians
+ *  @retval none
+ */
+void rotateVector(float* x, float* y, float radians);
 
 }  // namespace algorithms
 

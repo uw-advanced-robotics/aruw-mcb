@@ -1,22 +1,16 @@
 #ifndef __CAN_RX_LISTENER__
 #define __CAN_RX_LISTENER__
 
-#include <rm-dev-board-a/board.hpp>
+#include <cstdint>
+#include <modm/architecture/interface/can_message.hpp>
+
+#include "aruwlib/communication/can/can.hpp"
 
 namespace aruwlib
 {
 
 namespace can
 {
-
-    // must declare a CAN bus when declaring a motor
-    // either CAN 1 or CAN 2 line
-    enum class
-    CanBus
-    {
-        CAN_BUS1,
-        CAN_BUS2,
-    };
 
 // You must extend this class in order to use the features in this
 // namespace.

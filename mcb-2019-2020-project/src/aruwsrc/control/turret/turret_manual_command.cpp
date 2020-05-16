@@ -1,10 +1,15 @@
+#include <aruwlib/communication/remote.hpp>
+#include <aruwlib/control/control_operator_interface.hpp>
 #include "turret_manual_command.hpp"
 #include "turret_subsystem.hpp"
+
+
+using namespace aruwlib;
 
 namespace aruwsrc
 {
 
-namespace control
+namespace turret
 {
 TurretManualCommand::TurretManualCommand(TurretSubsystem *subsystem) :
     turretSubsystem(subsystem),
@@ -28,10 +33,10 @@ void TurretManualCommand::execute()
 
 void TurretManualCommand::updateTurretVelocity()
 {
-    pitchVelocityTarget = turretSubsystem->getRemoteYMovement() +
-                          turretSubsystem->getMouseXMovement();
-    yawVelocityTarget = turretSubsystem->getRemoteXMovement() +
-                        turretSubsystem->getMouseYMovement();
+    pitchVelocityTarget = USER_INPUT_SCALAR
+            * aruwlib::control::ControlOperatorInterface::getTurretPitchInput();
+    yawVelocityTarget = USER_INPUT_SCALAR
+            * aruwlib::control::ControlOperatorInterface::getTurretYawInput();
 
     manualPitchPid.update(pitchVelocityTarget - turretSubsystem->getPitchVelocity());
     manualYawPid.update(yawVelocityTarget - turretSubsystem->getYawVelocity());
@@ -40,6 +45,6 @@ void TurretManualCommand::updateTurretVelocity()
     turretSubsystem->setYawMotorOutput(manualYawPid.getValue());
 }
 
-}  // namespace control
+}  // namespace turret
 
 }  // namespace aruwsrc

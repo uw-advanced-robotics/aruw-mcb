@@ -1,12 +1,12 @@
+#include <aruwlib/control/command.hpp>
+#include <aruwlib/algorithms/math_user_utils.hpp>
 #include "turret_init_command.hpp"
 #include "turret_subsystem.hpp"
-#include "src/aruwlib/control/command.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
 
-namespace control
+namespace turret
 {
 
 TurretInitCommand::TurretInitCommand(TurretSubsystem *subsystem) :
@@ -39,6 +39,6 @@ void TurretInitCommand::updateTurretPosition()
     turretSubsystem->setYawMotorOutput(initYawPid.getValue());
 }
 
-}  // namespace control
+}  // namespace turret
 
 }  // namespace aruwsrc

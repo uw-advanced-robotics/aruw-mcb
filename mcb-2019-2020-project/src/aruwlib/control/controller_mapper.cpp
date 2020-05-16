@@ -1,5 +1,5 @@
 #include "controller_mapper.hpp"
-#include "src/aruwlib/errors/create_errors.hpp"
+#include "aruwlib/errors/create_errors.hpp"
 
 namespace aruwlib {
 
@@ -60,7 +60,7 @@ void IoMapper::handleKeyStateChange(uint16_t key,
                     break;
                 }
         } else {
-            if ((mi->type == HOLD && mi->pressed) || mi->type == HOLD_REPEAT) {
+            if ((mi->type == HOLD && mi->pressed) || (mi->type == HOLD_REPEAT)) {
                 CommandScheduler::getMainScheduler().removeCommand(mi->command, true);
             }
             mi->pressed = false;

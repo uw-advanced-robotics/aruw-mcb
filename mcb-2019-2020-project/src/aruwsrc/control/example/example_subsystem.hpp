@@ -15,9 +15,9 @@
 #define __SUBSYSTEM_EXAMPLE_HPP__
 
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwlib/control/subsystem.hpp"
-#include "src/aruwlib/motor/dji_motor.hpp"
+#include <aruwlib/control/command_scheduler.hpp>
+#include <aruwlib/control/subsystem.hpp>
+#include <aruwlib/motor/dji_motor.hpp>
 
 using namespace aruwlib::control;
 
@@ -33,8 +33,8 @@ class ExampleSubsystem : public Subsystem
     ExampleSubsystem(
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
-        : leftWheel(leftMotorId, CAN_BUS_MOTORS, true),
-        rightWheel(rightMotorId, CAN_BUS_MOTORS, false),
+        : leftWheel(leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
+        rightWheel(rightMotorId, CAN_BUS_MOTORS, false, "right example motor"),
         velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         desiredRpm(0)
@@ -42,7 +42,7 @@ class ExampleSubsystem : public Subsystem
 
     void setDesiredRpm(float desRpm);
 
-    void refresh(void);
+    void refresh() override;
 
  private:
     static const aruwlib::motor::MotorId LEFT_MOTOR_ID;

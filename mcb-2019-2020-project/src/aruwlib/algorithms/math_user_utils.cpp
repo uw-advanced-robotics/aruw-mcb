@@ -1,5 +1,4 @@
 #include <cstdint>
-
 #include "math_user_utils.hpp"
 
 float aruwlib::algorithms::fastInvSqrt(float x)
@@ -12,4 +11,10 @@ float aruwlib::algorithms::fastInvSqrt(float x)
     y = reinterpretCopy<int32_t, float>(i);
     y = y * (1.5f - (halfx * y * y));
     return y;
+}
+
+void aruwlib::algorithms::rotateVector(float* x, float* y, float radians) {
+    float x_temp = *x;
+    *x = (*x) * cosf(radians) - *y * sinf(radians);
+    *y = x_temp * sinf(radians) + *y * cosf(radians);
 }

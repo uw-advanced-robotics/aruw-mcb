@@ -1,10 +1,10 @@
 #ifndef __CHASSIS_SUBSYSTEM_HPP__
 #define __CHASSIS_SUBSYSTEM_HPP__
 
+#include <aruwlib/control/subsystem.hpp>
+#include <aruwlib/motor/dji_motor.hpp>
+#include <aruwlib/algorithms/extended_kalman.hpp>
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/subsystem.hpp"
-#include "src/aruwlib/motor/dji_motor.hpp"
-#include "src/aruwlib/algorithms/extended_kalman.hpp"
 
 using namespace aruwlib::control;
 
@@ -34,9 +34,9 @@ class ChassisSubsystem : public Subsystem {
     static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
  private:
-    #if defined(TARGET_SOLDIER)
+    #if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
     // velocity pid gains and constants
-    const float VELOCITY_PID_KP            = 15.0f;
+    const float VELOCITY_PID_KP            = 20.0f;
     const float VELOCITY_PID_KI            = 0.0f;
     const float VELOCITY_PID_KD            = 0.0f;
     const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
@@ -67,11 +67,11 @@ class ChassisSubsystem : public Subsystem {
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
     // derivative term used in chassis pid
-    static constexpr float CHASSIS_REVOLVE_PID_KD = 235.0f;
+    static constexpr float CHASSIS_REVOLVE_PID_KD = 500.0f;
     // derivative max term
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // the maximum revolve error before we start using the derivative term
-    static const int MIN_ERROR_ROTATION_D = 35;
+    static const int MIN_ERROR_ROTATION_D = 0;
 
     // mechanical chassis constants, all in mm
     // radius of the wheels (mm)
@@ -87,11 +87,11 @@ class ChassisSubsystem : public Subsystem {
 
     #elif defined(TARGET_HERO)
     // velocity pid gains and constants
-    const float VELOCITY_PID_KP            = 0.0f;
-    const float VELOCITY_PID_KI            = 0.0f;
-    const float VELOCITY_PID_KD            = 0.0f;
-    const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-    const float VELOCITY_PID_MAX_OUTPUT    = 0.0f;
+    static constexpr float VELOCITY_PID_KP            = 0.0f;
+    static constexpr float VELOCITY_PID_KI            = 0.0f;
+    static constexpr float VELOCITY_PID_KD            = 0.0f;
+    static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
+    static constexpr float VELOCITY_PID_MAX_OUTPUT    = 0.0f;
 
     // rotation pid gains and constants
     // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
@@ -117,11 +117,11 @@ class ChassisSubsystem : public Subsystem {
 
     #else
     // velocity pid gains and constants
-    const float VELOCITY_PID_KP            = 0.0f;
-    const float VELOCITY_PID_KI            = 0.0f;
-    const float VELOCITY_PID_KD            = 0.0f;
-    const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-    const float VELOCITY_PID_MAX_OUTPUT    = 0.0f;
+    static constexpr float VELOCITY_PID_KP            = 0.0f;
+    static constexpr float VELOCITY_PID_KI            = 0.0f;
+    static constexpr float VELOCITY_PID_KD            = 0.0f;
+    static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
+    static constexpr float VELOCITY_PID_MAX_OUTPUT = 0.0f;
 
     // rotation pid gains and constants
     // no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
@@ -148,12 +148,17 @@ class ChassisSubsystem : public Subsystem {
 
     #endif
 
+ private:
     // hardware constants, not specific to any particular chassis
     static constexpr aruwlib::motor::MotorId LEFT_FRONT_MOTOR_ID  = aruwlib::motor::MOTOR2;
     static constexpr aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID   = aruwlib::motor::MOTOR3;
     static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR1;
     static constexpr aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID  = aruwlib::motor::MOTOR4;
+    #if defined(TARGET_OLD_SOLDIER)
+    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
+    #else
     static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS2;
+    #endif
 
     // motors
     aruwlib::motor::DjiMotor leftFrontMotor;
@@ -173,6 +178,8 @@ class ChassisSubsystem : public Subsystem {
     float rightFrontRpm;
     float rightBackRpm;
 
+    float chassisDesiredR = 0.0f;
+
     // rotation pid variables
     aruwlib::algorithms::ExtendedKalman chassisRotationErrorKalman;
 
@@ -183,10 +190,10 @@ class ChassisSubsystem : public Subsystem {
         aruwlib::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
         aruwlib::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID
     ):
-        leftFrontMotor(leftFrontMotorId, CAN_BUS_MOTORS, false),
-        leftBackMotor(leftBackMotorId, CAN_BUS_MOTORS, false),
-        rightFrontMotor(rightFrontMotorId, CAN_BUS_MOTORS, false),
-        rightBackMotor(rightBackMotorId, CAN_BUS_MOTORS, false),
+        leftFrontMotor(leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
+        leftBackMotor(leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
+        rightFrontMotor(rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
+        rightBackMotor(rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor"),
         leftFrontVelocityPid(
             VELOCITY_PID_KP,
             VELOCITY_PID_KI,
@@ -239,14 +246,8 @@ class ChassisSubsystem : public Subsystem {
     // the max rotation speed
     float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
-    // Returns the value used for chassis movement forward and backward, between -1 and 1
-    static float getChassisX();
-
-    // Returns the value used for chassis movement side to side, between -1 and 1
-    static float getChassisY();
-
-    // Returns the value used for chassis rotation, between -1 and 1
-    static float getChassisR();
+    // returns the desired rotation based on what was input into the subsystem via setDesiredOutput
+    float getChassisDesiredRotation() const;
 
  private:
     /**

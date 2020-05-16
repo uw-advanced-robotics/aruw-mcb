@@ -10,7 +10,12 @@
 #ifndef __REMOTE_HPP__
 #define __REMOTE_HPP__
 
-#include <rm-dev-board-a/board.hpp>
+#include <cstdint>
+
+#ifndef ENV_SIMULATOR
+#include <modm/platform.hpp>
+#endif
+
 namespace aruwlib {
 
 class Remote {
@@ -59,6 +64,8 @@ class Remote {
     // Returns the value of the wheel
     static int16_t getWheel(void);
 
+    static uint32_t getUpdateCounter();
+
  private:
     #define REMOTE_BUF_LEN 18  // Length of the remote recieve buffer
     #define REMOTE_READ_TIMEOUT 6  // Timeout delay between valid packets
@@ -69,6 +76,7 @@ class Remote {
 
     // The current remote information
     static struct RemoteInfo {
+        uint32_t updateCounter = 0;
         int16_t rightHorizontal;
         int16_t rightVertical;
         int16_t leftHorizontal;
@@ -92,8 +100,8 @@ class Remote {
     // uart recieve buffer
     static uint8_t rxBuffer[REMOTE_BUF_LEN];
 
-    // Timestamp when last byte was read
-    static modm::Timestamp lastRead;
+    // Timestamp when last byte was read (milliseconds)
+    static uint32_t lastRead;
 
     // Current count of bytes read
     static uint8_t currentBufferIndex;

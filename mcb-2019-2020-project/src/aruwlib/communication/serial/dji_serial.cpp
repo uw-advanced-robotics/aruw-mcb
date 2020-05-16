@@ -1,7 +1,8 @@
-#include <rm-dev-board-a/board.hpp>
 #include "dji_serial.hpp"
-#include "src/aruwlib/algorithms/crc.hpp"
-#include "src/aruwlib/errors/create_errors.hpp"
+
+#include "aruwlib/communication/serial/uart.hpp"
+#include "aruwlib/algorithms/crc.hpp"
+#include "aruwlib/errors/create_errors.hpp"
 
 namespace aruwlib
 {
@@ -9,7 +10,7 @@ namespace serial
 {
 
 DJISerial::DJISerial(
-    SerialPort port,
+    Uart::UartPort port,
     bool isRxCRCEnforcementEnabled
 ):
 port(port),
@@ -26,13 +27,14 @@ txBuffer()
 
 void DJISerial::initialize() {
     switch (this->port) {
-    case PORT_UART2:
-        Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
-        Usart2::initialize<Board::SystemClock, 115200>();
+    case Uart::UartPort::Uart1:
+        Uart::init<Uart::UartPort::Uart1, 115200>();
         break;
-    case PORT_UART6:
-        Usart6::connect<GpioG14::Tx, GpioG9::Rx>();
-        Usart6::initialize<Board::SystemClock, 115200>();
+    case Uart::UartPort::Uart2:
+        Uart::init<Uart::UartPort::Uart2, 115200>();
+        break;
+    case Uart::UartPort::Uart6:
+        Uart::init<Uart::UartPort::Uart6, 115200>();
         break;
     default:
         break;
@@ -97,12 +99,6 @@ void DJISerial::updateSerial() {
                 }
             }
 
-            // recursively call youself if you have received the frame header. Important that we
-            // don't miss any bytes coming in when polling.
-            if (djiSerialRxState == PROCESS_FRAME_HEADER)
-            {
-                updateSerial();
-            }
             break;
         }
         case PROCESS_FRAME_HEADER:  // the frame header consists of the length, type, and CRC8
@@ -146,17 +142,13 @@ void DJISerial::updateSerial() {
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR("CRC8 failure", aruwlib::errors::Location::DJI_SERIAL,
-                            aruwlib::errors::ErrorType::CRC8_FAILURE);
+                            aruwlib::errors::ErrorType::CRC_FAILURE);
                         return;
                     }
                 }
 
                 // move on to processing message body
                 djiSerialRxState = PROCESS_FRAME_DATA;
-
-                // recursively call yourself so you don't miss any data that is in the process of
-                // being received.
-                updateSerial();
             }
             break;
         }
@@ -196,7 +188,7 @@ void DJISerial::updateSerial() {
                         delete[] crc16CheckData;
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR("CRC16 failure", aruwlib::errors::Location::DJI_SERIAL,
-                            aruwlib::errors::ErrorType::CRC16_FAILURE);
+                            aruwlib::errors::ErrorType::CRC_FAILURE);
                         return;
                     }
                     delete[] crc16CheckData;
@@ -260,44 +252,13 @@ bool DJISerial::verifyCRC16(uint8_t *data, uint32_t length, uint16_t expectedCRC
 }
 
 uint32_t DJISerial::read(uint8_t *data, uint16_t length) {
-    switch (this->port) {
-    case PORT_UART2:
-    {
-        uint32_t successRead = 0;
-        for (int i = 0; i < length && Usart2::read(data[i]); i++) {
-            successRead++;
-        }
-        return successRead;
-    }
-    case PORT_UART6:
-    {
-        uint32_t successRead = 0;
-        for (int i = 0; i < length && Usart6::read(data[i]); i++) {
-            successRead++;
-        }
-        return successRead;
-    }
-        return Usart6::read(data, length);
-    default:
-        return 0;
-    }
+    return Uart::read(this->port, data, length);
 }
 
 uint32_t DJISerial::write(const uint8_t *data, uint16_t length) {
-    switch (this->port) {
-    case PORT_UART2:
-        if (Usart2::isWriteFinished()) {
-            return Usart2::write(data, length);
-        } else {
-            return 0;
-        }
-    case PORT_UART6:
-        if (Usart6::isWriteFinished()) {
-            return Usart6::write(data, length);
-        } else {
-            return 0;
-        }
-    default:
+    if (Uart::isWriteFinished(this->port)) {
+        return Uart::write(this->port, data, length);
+    } else {
         return 0;
     }
 }

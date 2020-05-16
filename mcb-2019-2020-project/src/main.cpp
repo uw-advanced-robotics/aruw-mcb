@@ -1,48 +1,65 @@
-#include <rm-dev-board-a/board.hpp>
-#include <modm/processing/timer.hpp>
+#include <aruwlib/rm-dev-board-a/board.hpp>
 
-#include "src/aruwlib/control/controller_mapper.hpp"
-#include "src/aruwlib/communication/remote.hpp"
-#include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
-#include "src/aruwlib/communication/can/can_rx_listener.hpp"
-#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
-#include "src/aruwlib/communication/serial/ref_serial.hpp"
-#include "src/aruwsrc/control/turret/turret_subsystem.hpp"
-#include "src/aruwsrc/control/turret/turret_cv_command.hpp"
-#include "src/aruwsrc/control/turret/turret_init_command.hpp"
-#include "src/aruwsrc/control/turret/turret_manual_command.hpp"
-#include "src/aruwsrc/control/example/example_comprised_command.hpp"
-#include "src/aruwlib/errors/error_controller.hpp"
-#include "src/aruwlib/communication/serial/xavier_serial.hpp"
-#include "src/aruwlib/display/sh1106.hpp"
-#include "src/aruwsrc/control/drone/init_friction_wheel_command.hpp"
-using namespace aruwsrc::chassis;
-using namespace aruwsrc::control;
-using namespace aruwlib::sensors;
+/* arch includes ------------------------------------------------------------*/
+#include <aruwlib/architecture/periodic_timer.hpp>
 
-#if defined(TARGET_SOLDIER)
-TurretSubsystem turretSubsystem;
-TurretCVCommand turretCVCommand(&turretSubsystem);
-TurretInitCommand turretInitCommand(&turretSubsystem);
-TurretManualCommand turretManualCommand(&turretSubsystem);
+/* communication includes ---------------------------------------------------*/
+#include <aruwlib/motor/dji_motor_tx_handler.hpp>
+#include <aruwlib/communication/sensors/mpu6500/mpu6500.hpp>
+#include <aruwlib/communication/can/can_rx_listener.hpp>
+#include <aruwlib/communication/remote.hpp>
+#include <aruwlib/communication/serial/xavier_serial.hpp>
+#include <aruwlib/communication/serial/ref_serial.hpp>
+#include <aruwlib/display/sh1106.hpp>
 
-ChassisSubsystem soldierChassis;
-ChassisDriveCommand chassisDriveCommand(&soldierChassis);
-#endif
+/* error handling includes --------------------------------------------------*/
+#include <aruwlib/errors/error_controller.hpp>
 
-#if defined(TARGET_DRONE)
-aruwsrc::drone::DroneTurretSubsystem droneTurretSubsystem;
-aruwsrc::drone::InitFrictionWheelCommand initializeFrictionWheelCommand(&droneTurretSubsystem);
-#endif
+/* control includes ---------------------------------------------------------*/
+#include "aruwsrc/control/robot_control.hpp"
+#include <aruwlib/control/command_scheduler.hpp>
+
+/* define timers here -------------------------------------------------------*/
+aruwlib::arch::PeriodicMilliTimer updateImuPeriod(2);
+aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
+
+// Place any sort of input/output initialization here. For example, place
+// serial init stuff here.
+void initializeIo();
+// Anything that you would like to be called place here. It will be called
+// very frequently. Use PeriodicMilliTimers if you don't want something to be
+// called as frequently.
+void updateIo();
 
 int main()
 {
     Board::initialize();
+    initializeIo();
+    aruwsrc::control::initSubsystemCommands();
 
+    while (1)
+    {
+        // do this as fast as you can
+        updateIo();
+
+        if (sendMotorTimeout.execute())
+        {
+            aruwlib::errors::ErrorController::update();
+            aruwlib::control::CommandScheduler::getMainScheduler().run();
+            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+        }
+        #ifndef ENV_SIMULATOR
+
+        modm::delayMicroseconds(10);
+        #endif
+    }
+    return 0;
+}
+
+void initializeIo()
+{
+#ifndef ENV_SIMULATOR
+    /// \todo this should be an init in the display class
     Board::DisplaySpiMaster::connect<
         Board::DisplayMiso::Miso,
         Board::DisplayMosi::Mosi,
@@ -52,78 +69,33 @@ int main()
     // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
     // 90MHz/64=~14MHz
     Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
-
+#endif
     aruwlib::display::Sh1106<
+    #ifndef ENV_SIMULATOR
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
         Board::DisplayReset,
+    #endif
         128, 64,
         false
     > display;
     display.initializeBlocking();
-    display.setCursor(2, 1);
-    display.setFont(modm::font::ScriptoNarrow);
-    display << "ur code is shit" << modm::endl;
-    display.update();
-
-    aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
-    contiguousFloatTest.testCore();
-    contiguousFloatTest.testBadBounds();
-    contiguousFloatTest.testDifference();
-    contiguousFloatTest.testRotationBounds();
-    contiguousFloatTest.testShiftingValue();
-    contiguousFloatTest.testWrapping();
 
     aruwlib::Remote::initialize();
+    aruwlib::sensors::Mpu6500::init();
 
     aruwlib::serial::RefSerial::getRefSerial().initialize();
     aruwlib::serial::XavierSerial::getXavierSerial().initialize();
+}
 
-    Mpu6500::init();
-
-    #if defined(TARGET_SOLDIER)  // only soldier has the proper constants in for chassis code
-    CommandScheduler::getMainScheduler().registerSubsystem(&soldierChassis);
-    soldierChassis.setDefaultCommand(&chassisDriveCommand);
-
-    CommandScheduler::getMainScheduler().registerSubsystem(&turretSubsystem);
-    turretSubsystem.setDefaultCommand(&turretManualCommand);
-    IoMapper::addHoldMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
-        &turretCVCommand);
-    CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
-    #endif
-    #if defined(TARGET_DRONE)
-    CommandScheduler::getMainScheduler().registerSubsystem(&droneTurretSubsystem);
-    droneTurretSubsystem.setDefaultCommand(&initializeFrictionWheelCommand);
-    #endif
-    // timers
-    // arbitrary, taken from last year since this send time doesn't overfill
-    // can bus
-    modm::ShortPeriodicTimer motorSendPeriod(2);
-    // update imu
-    modm::ShortPeriodicTimer updateImuPeriod(2);
-
-    while (1)
+void updateIo()
+{
+    aruwlib::can::CanRxHandler::pollCanData();
+    aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
+    aruwlib::serial::RefSerial::getRefSerial().updateSerial();
+    aruwlib::Remote::read();
+    if (updateImuPeriod.execute())
     {
-        // do this as fast as you can
-        aruwlib::can::CanRxHandler::pollCanData();
-        aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
-        aruwlib::serial::RefSerial::getRefSerial().updateSerial();
-
-        aruwlib::Remote::read();
-
-        if (updateImuPeriod.execute())
-        {
-            Mpu6500::read();
-        }
-
-        if (motorSendPeriod.execute())
-        {
-            aruwlib::errors::ErrorController::update();
-            CommandScheduler::getMainScheduler().run();
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
-        }
-        modm::delayMicroseconds(10);
+        aruwlib::sensors::Mpu6500::read();
     }
-    return 0;
 }

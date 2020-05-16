@@ -1,8 +1,8 @@
 #ifndef __BLINK_LED_COMMAND_HPP__
 #define __BLINK_LED_COMMAND_HPP__
 
-#include <modm/processing/timer/timeout.hpp>
-#include "src/aruwlib/control/command.hpp"
+#include <aruwlib/architecture/timeout.hpp>
+#include <aruwlib/control/command.hpp>
 #include "example_subsystem.hpp"
 
 using namespace aruwlib::control;
@@ -46,17 +46,7 @@ class BlinkLEDCommand : public Command
       */
     bool isFinished(void) const;
 
-    void interrupted(void);
-
-    /**
-      * Whether the given command should run when the robot is disabled.  Override
-      * to return true if the command should run when disabled.
-      *
-      * @return whether the command should run when the robot is disabled
-      */
-    bool runsWhenDisabled(void);
-
-    modm::ShortTimeout completedTimer;
+    aruwlib::arch::MilliTimeout completedTimer;
 
     int refershCounter = 0;
     int endCounter = 0;

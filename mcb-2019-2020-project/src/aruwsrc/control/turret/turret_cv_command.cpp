@@ -1,11 +1,11 @@
+#include <aruwlib/communication/remote.hpp>
 #include "turret_cv_command.hpp"
-#include "src/aruwlib/communication/remote.hpp"
 #include "turret_subsystem.hpp"
 
 namespace aruwsrc
 {
 
-namespace control
+namespace turret
 {
 
 TurretCVCommand::TurretCVCommand(TurretSubsystem *subsystem) :
@@ -54,6 +54,6 @@ void TurretCVCommand::updateTurretPosition()
     turretSubsystem->setYawMotorOutput(CVYawPid.getValue());
 }
 
-}  // namespace control
+}  // namespace turret
 
 }  // namespace aruwsrc

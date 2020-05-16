@@ -1,9 +1,10 @@
 #ifndef __DJI_MOTOR_HPP__
 #define __DJI_MOTOR_HPP__
 
-#include <modm/processing/timer/timeout.hpp>
-#include <rm-dev-board-a/board.hpp>
-#include "src/aruwlib/communication/can/can_rx_handler.hpp"
+#include <string>
+#include <aruwlib/architecture/timeout.hpp>
+#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/communication/can/can_rx_handler.hpp"
 
 namespace aruwlib
 {
@@ -31,10 +32,11 @@ class DjiMotor : public aruwlib::can::CanRxListner
 {
  public:
     // 0 - 8191 for dji motors
-    static constexpr uint16_t ENC_RESOLUTION = 8191;
+    static constexpr uint16_t ENC_RESOLUTION = 8192;
 
     // construct new motor
-    DjiMotor(MotorId desMotorIdentifier, aruwlib::can::CanBus motorCanBus, bool isInverted);
+    DjiMotor(MotorId desMotorIdentifier, aruwlib::can::CanBus motorCanBus, bool isInverted,
+            const std::string& name);
 
     ~DjiMotor();
 
@@ -51,7 +53,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
         friend class DjiMotor;
 
         explicit EncoderStore(
-            uint16_t encWrapped = (ENC_RESOLUTION + 1) / 2,
+            uint16_t encWrapped = ENC_RESOLUTION / 2,
             int64_t encRevolutions = 0
         ) : encoderWrapped(encWrapped),
         encoderRevolutions(encRevolutions)
@@ -106,6 +108,8 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     aruwlib::can::CanBus getCanBus() const;
 
+    const std::string& getName() const;
+
     template<typename T>
     static void assertEncoderType()
     {
@@ -154,7 +158,9 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     bool motorInverted;
 
-    modm::ShortTimeout motorDisconnectTimeout;
+    std::string motorName;
+
+    aruwlib::arch::MilliTimeout motorDisconnectTimeout;
 };
 
 }  // namespace motor
