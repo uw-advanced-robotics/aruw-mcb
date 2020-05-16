@@ -48,17 +48,23 @@ T limitVal(T val, T min, T max)
     }
 }
 
-template< typename T >
-T mapVal(T val, T inMin, T inMax, T outMin, T outMax)
+float mapVal(float val, float inMin, float inMax, float outMin, float outMax)
 {
     return (inMax == inMin) ? 0 :
             (val - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
 }
 
-template< typename T >
-T mapValLimited(T val, T inMin, T inMax, T outMin, T outMax)
+float mapValLimited(float val, float inMin, float inMax, float outMin, float outMax)
 {
-    return mapVal<T>(limitVal<T>(val, inMin, inMax), inMin, inMax, outMin, outMax);
+    return mapVal(limitVal(val, inMin, inMax), inMin, inMax, outMin, outMax);
+}
+
+inline float lowPassFilter(float prevValue, float newValue, float alpha)
+{
+    if (alpha < 0.0f || alpha > 1.0f) {
+        return newValue;
+    }
+    return alpha * newValue + (1.0f - alpha) * prevValue;
 }
 
 inline float lowPassFilter(float prevValue, float newValue, float alpha)

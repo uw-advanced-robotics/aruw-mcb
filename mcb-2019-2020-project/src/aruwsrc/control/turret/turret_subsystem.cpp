@@ -129,9 +129,12 @@ namespace turret
                     TURRET_PITCH_MAX_ANGLE - TURRET_DEADBAND && out > 0) {
                 float a = getPitchAngleFromCenter() + TURRET_START_ANGLE -
                         TURRET_PITCH_MAX_ANGLE + TURRET_DEADBAND;
-                a = (a > TURRET_DEADBAND ? 0 :
-                        (TURRET_DEADBAND - a) * TURRET_DEADBAND_DECAY_COEFFICIENT);
-                a = (a < 0.0f ? 0.0f : a);
+                a = aruwlib::algorithms::mapValLimited(
+                        TURRET_DEADBAND - a,
+                        0.0f,
+                        TURRET_DEADBAND,
+                        0.0f,
+                        1.0f);
                 pitchMotor.setDesiredOutput(a * out);
             }
             else if (getPitchAngleFromCenter() + TURRET_START_ANGLE <
@@ -139,9 +142,12 @@ namespace turret
             {
                 float a = TURRET_PITCH_MIN_ANGLE + TURRET_DEADBAND -
                         getPitchAngleFromCenter() - TURRET_START_ANGLE;
-                a = (a > TURRET_DEADBAND ? 0 :
-                        (TURRET_DEADBAND - a) * TURRET_DEADBAND_DECAY_COEFFICIENT);
-                a = (a < 0.0f ? 0.0f : a);
+                a = aruwlib::algorithms::mapValLimited(
+                        TURRET_DEADBAND - a,
+                        0.0f,
+                        TURRET_DEADBAND,
+                        0.0f,
+                        1.0f);
                 pitchMotor.setDesiredOutput(a * out);
             }
             else
@@ -164,9 +170,12 @@ namespace turret
                     TURRET_YAW_MAX_ANGLE - TURRET_DEADBAND && out > 0) {
                 float a = getYawAngleFromCenter() + TURRET_START_ANGLE -
                         TURRET_YAW_MAX_ANGLE + TURRET_DEADBAND;
-                a = (a > TURRET_DEADBAND ? 0 :
-                        (TURRET_DEADBAND - a) * TURRET_DEADBAND_DECAY_COEFFICIENT);
-                a = (a < 0.0f ? 0.0f : a);
+                a = aruwlib::algorithms::mapValLimited(
+                        TURRET_DEADBAND - a,
+                        0.0f,
+                        TURRET_DEADBAND,
+                        0.0f,
+                        1.0f);
                 yawMotor.setDesiredOutput(a * out);
             }
             else if (getYawAngleFromCenter() + TURRET_START_ANGLE <
@@ -174,9 +183,12 @@ namespace turret
             {
                 float a = TURRET_YAW_MIN_ANGLE + TURRET_DEADBAND -
                         getYawAngleFromCenter() - TURRET_START_ANGLE;
-                a = (a > TURRET_DEADBAND ? 0 :
-                        (TURRET_DEADBAND - a) * TURRET_DEADBAND_DECAY_COEFFICIENT);
-                a = (a < 0.0f ? 0.0f : a);
+                a = aruwlib::algorithms::mapValLimited(
+                        TURRET_DEADBAND - a,
+                        0.0f,
+                        TURRET_DEADBAND,
+                        0.0f,
+                        1.0f);
                 yawMotor.setDesiredOutput(a * out);
             }
             else
