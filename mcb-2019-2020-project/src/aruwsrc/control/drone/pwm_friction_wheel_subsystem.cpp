@@ -16,7 +16,7 @@ void PWMFrictionWheelSubsystem::setFrictionWheelOutput(float percentage) {
     if (!initialized) {
         stopFrictionWheel();
     } else {
-        throttleRamp.setTarget(mapValLimited<float>(percentage,
+        throttleRamp.setTarget(mapValLimited(percentage,
                         0.0f, 1.0f, MIN_PWM_DUTY, MAX_PWM_DUTY));
     }
 }
