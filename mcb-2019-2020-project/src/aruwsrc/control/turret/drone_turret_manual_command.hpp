@@ -24,7 +24,7 @@ class DroneTurretManualCommand : public Command {
     void end(bool);
 
  private:
-    const float USER_INPUT_SCALAR = 200.0f;
+    const float USER_INPUT_SCALAR = 400.0f;
 
     const float YAW_P = 20.0f;
     const float YAW_I = 0.0f;

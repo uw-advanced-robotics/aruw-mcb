@@ -24,7 +24,6 @@ class DroneTurretSubsystem : public Subsystem {
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_PITCH_START_ANGLE - 45.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_PITCH_START_ANGLE + 45.0f;
     static constexpr float TURRET_DEADBAND = 3.0f;
-    static constexpr float TURRET_DEADBAND_DECAY_COEFFICIENT = 1.0f / TURRET_DEADBAND;
 
     DroneTurretSubsystem();
 

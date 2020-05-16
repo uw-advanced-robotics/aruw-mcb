@@ -3,7 +3,6 @@
 
 using namespace aruwlib;
 
-using namespace aruwlib::algorithms;
 using namespace aruwlib::arch::clock;
 
 namespace aruwsrc
@@ -16,8 +15,12 @@ void PWMFrictionWheelSubsystem::setFrictionWheelOutput(float percentage) {
     if (!initialized) {
         stopFrictionWheel();
     } else {
-        throttleRamp.setTarget(mapValLimited<float>(percentage,
-                        0.0f, 1.0f, MIN_PWM_DUTY, MAX_PWM_DUTY));
+        throttleRamp.setTarget(aruwlib::algorithms::mapValLimited(
+                        percentage,
+                        0.0f,
+                        1.0f,
+                        MIN_PWM_DUTY,
+                        MAX_PWM_DUTY));
     }
 }
 
