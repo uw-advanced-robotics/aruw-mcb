@@ -62,15 +62,15 @@ template <typename T> T limitVal(T val, T min, T max)
     }
 }
 
-float mapVal(float val, float inMin, float inMax, float outMin, float outMax)
+inline float mapVal(float val, float inMin, float inMax, float outMin, float outMax)
 {
     return (inMax == inMin) ? 0 :
             (val - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
 }
 
-float mapValLimited(float val, float inMin, float inMax, float outMin, float outMax)
+inline float mapValLimited(float val, float inMin, float inMax, float outMin, float outMax)
 {
-    return mapVal(limitVal(val, inMin, inMax), inMin, inMax, outMin, outMax);
+    return mapVal(limitVal<float>(val, inMin, inMax), inMin, inMax, outMin, outMax);
 }
 
 /**
