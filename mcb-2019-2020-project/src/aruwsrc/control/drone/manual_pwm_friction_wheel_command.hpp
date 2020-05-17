@@ -1,5 +1,5 @@
-#ifndef __CONTROL_FRICTION_WHEEL_COMMAND_HPP__
-#define __CONTROL_FRICTION_WHEEL_COMMAND_HPP__
+#ifndef __PWM_FRICTION_WHEEL_MANUAL_COMMAND_HPP__
+#define __PWM_FRICTION_WHEEL_MANUAL_COMMAND_HPP__
 
 #include <aruwlib/control/command.hpp>
 #include <aruwlib/algorithms/ramp.hpp>

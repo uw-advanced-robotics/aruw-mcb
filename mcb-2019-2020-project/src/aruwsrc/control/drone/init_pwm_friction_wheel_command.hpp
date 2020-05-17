@@ -1,9 +1,8 @@
-#ifndef __INIT_FRICTION_WHEEL_COMMAND_HPP__
-#define __INIT_FRICTION_WHEEL_COMMAND_HPP__
+#ifndef __INIT_PWM_FRICTION_WHEEL_COMMAND_HPP__
+#define __INIT_PWM_FRICTION_WHEEL_COMMAND_HPP__
 
 #include <aruwlib/control/command.hpp>
 #include "pwm_friction_wheel_subsystem.hpp"
-#include <aruwlib/algorithms/ramp.hpp>
 using namespace aruwlib::control;
 
 namespace aruwsrc
@@ -15,23 +14,19 @@ namespace drone
 class InitPWMFrictionWheelCommand : public Command
 {
  private:
-    PWMFrictionWheelSubsystem* turret;
-    aruwlib::algorithms::Ramp ramp;
+    PWMFrictionWheelSubsystem* frictionWheels;
     static constexpr uint32_t ZERO_THROTTLE_TIME_MS = 2000;
-    static constexpr uint32_t RAMP_TIME_MS = 1000;
 
     uint32_t zeroThrottleStartTime;
     uint32_t lastUpdateTime;
 
-    static constexpr float RAMP_TARGET = 0.18;
  public:
-    explicit InitPWMFrictionWheelCommand(PWMFrictionWheelSubsystem* turret) :
-            turret(turret),
-            ramp(turret->MIN_PWM_DUTY),
+    explicit InitPWMFrictionWheelCommand(PWMFrictionWheelSubsystem* frictionWheels) :
+            frictionWheels(frictionWheels),
             zeroThrottleStartTime(0),
             lastUpdateTime(0)
     {
-        addSubsystemRequirement(dynamic_cast<Subsystem*>(turret));
+        addSubsystemRequirement(dynamic_cast<Subsystem*>(frictionWheels));
     }
 
     void initialize(void) override;
