@@ -7,11 +7,11 @@ namespace serial
 {
 
 SerialTestClass::SerialTestClass():
-DJISerial(DJISerial::SerialPort::PORT_UART2, true),
+DJISerial(Uart::UartPort::Uart2, true),
 messageId(0), i(0)
 {}
 
-void SerialTestClass::messageReceiveCallback(SerialMessage completeMessage)
+void SerialTestClass::messageReceiveCallback(const SerialMessage& completeMessage)
 {
     messageId = completeMessage.sequenceNumber;
 }

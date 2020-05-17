@@ -41,11 +41,11 @@ float ContiguousFloat::unwrapAbove() const {
     return upperBound + (value - lowerBound);
 }
 
-float ContiguousFloat::difference(const float& otherValue) {
+float ContiguousFloat::difference(const float& otherValue) const {
     return difference(ContiguousFloat(otherValue, lowerBound, upperBound));
 }
 
-float ContiguousFloat::difference(const ContiguousFloat& otherValue) {
+float ContiguousFloat::difference(const ContiguousFloat& otherValue) const {
     // Find the shortest path to the target (smallest difference)
     float aboveDiff = otherValue.getValue() - this->unwrapAbove();
     float belowDiff = otherValue.getValue() - this->unwrapBelow();
@@ -78,6 +78,38 @@ void ContiguousFloat::shiftBounds(const float& shiftMagnitude) {
 void ContiguousFloat::shiftValue(const float& shiftMagnitude) {
     value += shiftMagnitude;
     reboundValue();
+}
+
+float ContiguousFloat::limitValue(const ContiguousFloat& valueToLimit,
+                                 const float& min,
+                                 const float& max)
+{
+    ContiguousFloat minContig(min, valueToLimit.lowerBound, valueToLimit.upperBound);
+    ContiguousFloat maxContig(max, valueToLimit.lowerBound, valueToLimit.upperBound);
+    return limitValue(valueToLimit, minContig, maxContig);
+}
+
+float ContiguousFloat::limitValue(const ContiguousFloat& valueToLimit,
+                                 const ContiguousFloat& min,
+                                 const ContiguousFloat& max)
+{
+    if (min.getValue() == max.getValue())
+    {
+        return valueToLimit.getValue();
+    }
+    if ((min.getValue() < max.getValue()
+                && (valueToLimit.getValue() > max.getValue()
+                || valueToLimit.getValue() < min.getValue()))
+        || (min.getValue() > max.getValue()
+                && valueToLimit.getValue() > max.getValue()
+                && valueToLimit.getValue() < min.getValue()))
+    {
+        float targetMinDifference = fabs(valueToLimit.difference(min));
+        float targetMaxDifference = fabs(valueToLimit.difference(max));
+        return targetMinDifference < targetMaxDifference ? min.getValue() : max.getValue();
+    } else {
+        return valueToLimit.getValue();
+    }
 }
 
 // Getters/Setters ----------------

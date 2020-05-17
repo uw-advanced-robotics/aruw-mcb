@@ -40,7 +40,7 @@ class ContiguousFloat {
      *            the other value to compare against
      * @return the computed difference
      */
-    float difference(const float& otherValue);
+    float difference(const float& otherValue) const;
 
     /**
      * Computes the difference between two values (other - this), accounting for
@@ -51,7 +51,7 @@ class ContiguousFloat {
      *            as the current instance)
      * @return the computed difference
      */
-    float difference(const ContiguousFloat& otherValue);
+    float difference(const ContiguousFloat& otherValue) const;
 
     /**
      * Shifts both bounds by the specified amount
@@ -68,6 +68,17 @@ class ContiguousFloat {
      *            the amount to add to the current value
      */
     void shiftValue(const float& shiftMagnitude);
+
+    /**
+     * Limits the current contiguous float between the min max value
+     */
+    static float limitValue(const ContiguousFloat& valueToLimit,
+                            const ContiguousFloat& min,
+                            const ContiguousFloat& max);
+
+    static float limitValue(const ContiguousFloat& valueToLimit,
+                            const float& min,
+                            const float& max);
 
     // Getters/Setters ----------------
     // Value

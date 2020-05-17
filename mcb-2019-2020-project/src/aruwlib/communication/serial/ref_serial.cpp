@@ -1,20 +1,30 @@
 #include "ref_serial.hpp"
 
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/architecture/clock.hpp"
+
 namespace aruwlib
 {
 
 namespace serial
 {
 
+RefSerial RefSerial::refSerial;
+
 RefSerial::RefSerial() :
-DJISerial(DJISerial::SerialPort::PORT_UART6, true),
+DJISerial(Uart::UartPort::Uart6, true),
 robotData(),
 gameData(),
 receivedDpsTracker()
 {}
 
+RefSerial& RefSerial::getRefSerial()
+{
+    return refSerial;
+}
+
 // rx stuff
-void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
+void RefSerial::messageReceiveCallback(const SerialMessage& completeMessage)
 {
     updateReceivedDamage();
     switch(completeMessage.type)
@@ -65,7 +75,6 @@ void RefSerial::messageReceiveCallback(SerialMessage completeMessage)
             break;
         }
         default :
-            // THROW-NON-FATAL-ERROR-CHECK
             break;
     }
 }
@@ -79,11 +88,11 @@ void RefSerial::sendDisplayData(const DisplayData& displayData)
 
     // 3 float variables to display on the referee client UI
     const uint32_t ref_comms_float_to_display1
-        = reinterpret_cast<const uint32_t&>(displayData.float1);
+        = aruwlib::algorithms::reinterpretCopy<float, uint32_t>(displayData.float1);
     const uint32_t ref_comms_float_to_display2
-        = reinterpret_cast<const uint32_t&>(displayData.float2);
+        = aruwlib::algorithms::reinterpretCopy<float, uint32_t>(displayData.float2);
     const uint32_t ref_comms_float_to_display3
-        = reinterpret_cast<const uint32_t&>(displayData.float3);
+        = aruwlib::algorithms::reinterpretCopy<float, uint32_t>(displayData.float3);
 
     // 3 custom floats to display
     uint8_t data[13] = {
@@ -136,9 +145,9 @@ void RefSerial::sendCustomData(const CustomData& customData)
         return;
     }
 
-    if (modm::Clock::now().getTime() - this->txMessage.messageTimestamp.getTime()
+    if (aruwlib::arch::clock::getTimeMilliseconds() - this->txMessage.messageTimestamp.getTime()
         < TIME_BETWEEN_REF_UI_DISPLAY_SEND_MS
-    ) {
+) {
         // not enough time has passed before next send
         // send at max every 100 ms (max frequency 10Hz)
         return;
@@ -218,7 +227,7 @@ float RefSerial::decodeTofloat(const uint8_t* startByte)
         | (startByte[2] << 16)
         | (startByte[1] << 8)
         | startByte[0];
-    return reinterpret_cast<float&>(unsigned_value);
+    return aruwlib::algorithms::reinterpretCopy<uint32_t, float>(unsigned_value);
 }
 
 bool RefSerial::decodeToGameStatus(const SerialMessage& message)
@@ -399,7 +408,7 @@ void RefSerial::updateReceivedDamage()
     // decrease receivedDps by that amount of damage and increment head index
     while (
         receivedDpsTracker.getSize() > 0
-        && modm::Clock::now().getTime() -
+        && aruwlib::arch::clock::getTimeMilliseconds() -
         receivedDpsTracker.getFront().timestampMs > 1000
     ) {
         robotData.receivedDps -= receivedDpsTracker.getFront().damageAmount;

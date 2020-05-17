@@ -1,11 +1,12 @@
+#ifndef ENV_SIMULATOR
 #include "mpu6500.hpp"
 #include "mpu6500_reg.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/errors/create_errors.hpp"
 
 namespace aruwlib {
 
 namespace sensors {
-
     MahonyAhrs Mpu6500::arhsAlgorithm;
 
     Mpu6500::mpu_info_t Mpu6500::mpu6500Data;
@@ -43,7 +44,9 @@ namespace sensors {
 
         // verify mpu register ID
         if (MPU6500_ID !=  mpuReadReg(MPU6500_WHO_AM_I)) {
-            // throw NON-FATAL-ERROR-CHECK, imu not receiving properly
+            RAISE_ERROR("failed to initialize the imu properly",
+                    aruwlib::errors::Location::MPU6500,
+                    aruwlib::errors::ErrorType::IMU_NOT_RECEIVING_PROPERLY);
             return;
         }
 
@@ -74,7 +77,7 @@ namespace sensors {
     // parse imu data from data buffer
     void Mpu6500::read() {
         if (imuInitialized) {
-        mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
+            mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
             mpu6500Data.ax = (mpu6500RxBuff[0] << 8 | mpu6500RxBuff[1]) - mpu6500Data.ax_offset;
             mpu6500Data.ay = (mpu6500RxBuff[2] << 8 | mpu6500RxBuff[3]) - mpu6500Data.ay_offset;
             mpu6500Data.az = (mpu6500RxBuff[4] << 8 | mpu6500RxBuff[5]) - mpu6500Data.az_offset;
@@ -85,7 +88,8 @@ namespace sensors {
 
             Mpu6500::calcImuAttitude(&mpu6500Data.imuAtti);
         } else {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
         }
     }
 
@@ -94,74 +98,85 @@ namespace sensors {
         if (imuInitialized) {
             return 21.0f + static_cast<float>(mpu6500Data.temp) / 333.87f;
         } else {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return NAN;
         }
     }
 
     // get accleration reading on x-axis
-    int16_t Mpu6500::getAx() {
+    float Mpu6500::getAx() {
         if (imuInitialized) {
-            return mpu6500Data.ax;
+            return static_cast<float>(mpu6500Data.ax)
+                    / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
     }
 
     // get accleration reading on y-axis
-    int16_t Mpu6500::getAy() {
+    float Mpu6500::getAy() {
         if (imuInitialized) {
-            return mpu6500Data.ay;
+            return static_cast<float>(mpu6500Data.ay)
+                    / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
     }
 
     // get acceleration reading on z-axis
-    int16_t Mpu6500::getAz() {
+    float Mpu6500::getAz() {
         if (imuInitialized) {
-            return mpu6500Data.az;
+            return static_cast<float>(mpu6500Data.az)
+                    / (ACCELERATION_SENSITIVITY / ACCELERATION_GRAVITY);
         } else {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
     }
 
     // get gyro reading on x-axis
-    int16_t Mpu6500::getGx() {
+    float Mpu6500::getGx() {
         if (imuInitialized) {
-            return mpu6500Data.gx;
+            return static_cast<float>(mpu6500Data.gx) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
     }
 
     // get gyro reading on y-axis
-    int16_t Mpu6500::getGy() {
+    float Mpu6500::getGy() {
         if (imuInitialized) {
-            return mpu6500Data.gy;
+            return static_cast<float>(mpu6500Data.gy) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
     }
 
-    // get gyro reading on z-axis
-    int16_t Mpu6500::getGz() {
+    // get gyro reading on z-axis (degrees per second)
+    float Mpu6500::getGz() {
         if (imuInitialized) {
-            return mpu6500Data.gz;
+            return static_cast<float>(mpu6500Data.gz) / LSB_D_PER_S_TO_D_PER_S;
         } else {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
             return -1;
         }
     }
 
     MahonyAhrs::attitude Mpu6500::getImuAttitude() {
         if (!imuInitialized) {
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500,
+                aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
         }
         return mpu6500Data.imuAtti;
     }
@@ -227,7 +242,7 @@ namespace sensors {
             mpuReadRegs(MPU6500_ACCEL_XOUT_H, mpu6500RxBuff, 14);
             mpu6500Data.ax_offset += (mpu6500RxBuff[0] << 8) | mpu6500RxBuff[1];
             mpu6500Data.ay_offset += (mpu6500RxBuff[2] << 8) | mpu6500RxBuff[3];
-            mpu6500Data.az_offset += (mpu6500RxBuff[4] << 8) | mpu6500RxBuff[5];
+            mpu6500Data.az_offset += ((mpu6500RxBuff[4] << 8) | mpu6500RxBuff[5]) - 4096;
             modm::delayMilliseconds(2);
         }
 
@@ -269,8 +284,16 @@ namespace sensors {
         imuSensor.wy = algorithms::degreesToRadians(mpu6500Data.gy / LSB_D_PER_S_TO_D_PER_S);
         imuSensor.wz = algorithms::degreesToRadians(mpu6500Data.gz / LSB_D_PER_S_TO_D_PER_S);
         arhsAlgorithm.mahony_ahrs_updateIMU(&imuSensor, imuAtti);
+        mpu6500Data.tiltAngle = aruwlib::algorithms::radiansToDegrees(acos(
+                cos(aruwlib::algorithms::degreesToRadians(Mpu6500::getImuAttitude().pitch))
+                * cos(aruwlib::algorithms::degreesToRadians(Mpu6500::getImuAttitude().roll))));
     }
 
+    float Mpu6500::getTiltAngle()
+    {
+        return mpu6500Data.tiltAngle;
+    }
 }  // namespace sensors
 
 }  // namespace aruwlib
+#endif

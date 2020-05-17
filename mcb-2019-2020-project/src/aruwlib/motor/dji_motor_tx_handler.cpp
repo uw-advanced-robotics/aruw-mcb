@@ -1,5 +1,7 @@
 #include <modm/architecture/interface/assert.h>
-#include <rm-dev-board-a/board.hpp>
+#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/errors/create_errors.hpp"
+#include "aruwlib/communication/can/can.hpp"
 #include "dji_motor_tx_handler.hpp"
 #include "dji_motor.hpp"
 
@@ -77,15 +79,15 @@ namespace motor
         serializeMotorStoreSendData(can1MotorStore, &can1MessageLow, &can1MessageHigh);
         serializeMotorStoreSendData(can2MotorStore, &can2MessageLow, &can2MessageHigh);
 
-        if (Can1::isReadyToSend())
+        if (aruwlib::can::Can::isReadyToSend(aruwlib::can::CanBus::CAN_BUS1))
         {
-            Can1::sendMessage(can1MessageLow);
-            Can1::sendMessage(can1MessageHigh);
+            aruwlib::can::Can::sendMessage(aruwlib::can::CanBus::CAN_BUS1, can1MessageLow);
+            aruwlib::can::Can::sendMessage(aruwlib::can::CanBus::CAN_BUS1, can1MessageHigh);
         }
-        if (Can2::isReadyToSend())
+        if (aruwlib::can::Can::isReadyToSend(aruwlib::can::CanBus::CAN_BUS2))
         {
-            Can2::sendMessage(can2MessageLow);
-            Can2::sendMessage(can2MessageHigh);
+            aruwlib::can::Can::sendMessage(aruwlib::can::CanBus::CAN_BUS2, can1MessageLow);
+            aruwlib::can::Can::sendMessage(aruwlib::can::CanBus::CAN_BUS2, can1MessageHigh);
         }
     }
 
@@ -129,7 +131,9 @@ namespace motor
         if (motorStore[id] == nullptr)
         {
             // error, trying to remove something that doesn't exist!
-            // NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("trying to remove something that doesn't exist",
+                    aruwlib::errors::Location::MOTOR_CONTROL,
+                    aruwlib::errors::ErrorType::NULL_MOTOR_ID);
             return;
         }
         motorStore[id] = nullptr;
@@ -143,6 +147,15 @@ namespace motor
         }
     }
 
+    DjiMotor const* DjiMotorTxHandler::getCan1MotorData(MotorId motorId)
+    {
+        return can1MotorStore[DJI_MOTOR_NORMALIZED_ID(motorId)];
+    }
+
+    DjiMotor const* DjiMotorTxHandler::getCan2MotorData(MotorId motorId)
+    {
+        return can2MotorStore[DJI_MOTOR_NORMALIZED_ID(motorId)];
+    }
 }  // namespace motor
 
 }  // namespace aruwlib

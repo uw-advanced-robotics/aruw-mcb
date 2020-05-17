@@ -31,8 +31,8 @@
 #define __MOTOR_MANAGER_HPP__
 
 #include <limits.h>
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
-#include "src/aruwlib/communication/can/can_rx_handler.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/communication/can/can_rx_handler.hpp"
 #include "dji_motor.hpp"
 
 namespace aruwlib
@@ -56,6 +56,10 @@ class DjiMotorTxHandler
     DjiMotorTxHandler(const DjiMotorTxHandler&) = delete;
 
     static void removeFromMotorManager(const DjiMotor& motor);
+
+    static DjiMotor const* getCan1MotorData(MotorId motorId);
+
+    static DjiMotor const* getCan2MotorData(MotorId motorId);
 
  private:
     static void addMotorToManager(DjiMotor** canMotorStore, DjiMotor*const motor);

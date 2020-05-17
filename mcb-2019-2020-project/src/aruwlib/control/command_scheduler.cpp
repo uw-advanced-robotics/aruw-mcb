@@ -1,10 +1,14 @@
 #include <utility>
 #include <set>
 #include <algorithm>
-#include <modm/processing/timer.hpp>
+
+#include "aruwlib/motor/dji_motor_tx_handler.hpp"
+#include "aruwlib/communication/can/can_rx_handler.hpp"
+#include "aruwlib/errors/create_errors.hpp"
+#include "aruwlib/architecture/clock.hpp"
+
 #include "command_scheduler.hpp"
-#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
-#include "src/aruwlib/communication/can/can_rx_handler.hpp"
+#include "command.hpp"
 
 using namespace std;
 
@@ -13,42 +17,52 @@ namespace aruwlib
 
 namespace control
 {
-    const float CommandScheduler::MAX_ALLOWABLE_SCHEDULER_RUNTIME = 0.5f;
-
-    const modm::SmartPointer CommandScheduler::defaultNullCommand(0);
-
-    map<Subsystem*, modm::SmartPointer> CommandScheduler::subsystemToCommandMap;
-    // map<Subsystem*, Command*> CommandScheduler::subsystemToCommandMap;
-
     uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
-    bool CommandScheduler::addCommand(modm::SmartPointer commandToAdd)
+    CommandScheduler CommandScheduler::mainScheduler;
+
+    CommandScheduler& CommandScheduler::getMainScheduler()
     {
+        return mainScheduler;
+    }
+
+    void CommandScheduler::addCommand(Command* commandToAdd)
+    {
+        if (commandToAdd == nullptr)
+        {
+            RAISE_ERROR("attempting to add nullptr command",
+                    aruwlib::errors::Location::COMMAND_SCHEDULER,
+                    aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
+            return;
+        }
+
         bool commandAdded = false;
 
-        set<Subsystem*> commandRequirements =
-            *(smrtPtrCommandCast(commandToAdd)->getRequirements());
+        const set<Subsystem*>& commandRequirements = commandToAdd->getRequirements();
         // end all commands running on the subsystem requirements.
         // They were interrupted.
         // Additionally, replace the current command with the commandToAdd
         for (auto& requirement : commandRequirements)
         {
-            map<Subsystem*, modm::SmartPointer>::iterator isDependentSubsystem =
+            map<Subsystem*, Command*>::iterator subsystemRequirementCommandPair =
                 subsystemToCommandMap.find(requirement);
-            if (isDependentSubsystem != subsystemToCommandMap.end())
+            if (subsystemRequirementCommandPair != subsystemToCommandMap.end())
             {
-                if (!(isDependentSubsystem->second == defaultNullCommand))
+                if (subsystemRequirementCommandPair->second != nullptr)
                 {
-                    smrtPtrCommandCast(isDependentSubsystem->second)->end(true);
+                    subsystemRequirementCommandPair->second->end(true);
                 }
-                isDependentSubsystem->second = commandToAdd;
+                subsystemRequirementCommandPair->second = commandToAdd;
                 commandAdded = true;
             }
             else
             {
                 // the command you are trying to add has a subsystem that is not in the
                 // scheduler, so you cannot add it (will lead to undefined control behavior)
-                return false;
+                RAISE_ERROR("Attempting to add a command without subsystem in the scheduler",
+                        aruwlib::errors::Location::COMMAND_SCHEDULER,
+                        aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
+                return;
             }
         }
 
@@ -56,30 +70,32 @@ namespace control
         // multiple subsystems rely on this command.
         if (commandAdded)
         {
-            smrtPtrCommandCast(commandToAdd)->initialize();
+            commandToAdd->initialize();
         }
-        return true;
     }
 
     void CommandScheduler::run()
     {
-        uint32_t checkRunPeriod = DWT->CYCCNT;  // clock cycle count
-        // timestamp for reference and for disallowing a command from running
-        // multiple times during the same call to run
-        commandSchedulerTimestamp++;
+        uint32_t runStart = aruwlib::arch::clock::getTimeMicroseconds();
+        // Timestamp for reference and for disallowing a command from running
+        // multiple times during the same call to run.
+        if (this == &mainScheduler)
+        {
+            commandSchedulerTimestamp++;
+        }
         // refresh all and run all commands
         for (auto& currSubsystemCommandPair : subsystemToCommandMap)
         {
             // add default command if no command is currently being run
-            if (currSubsystemCommandPair.second == defaultNullCommand
-                && !(currSubsystemCommandPair.first->getDefaultCommand() == defaultNullCommand)
+            if (currSubsystemCommandPair.second == nullptr
+                && currSubsystemCommandPair.first->getDefaultCommand() != nullptr
             ){
                 addCommand(currSubsystemCommandPair.first->getDefaultCommand());
             }
             // only run the command if it hasn't been run this time run has been called
-            if (!(currSubsystemCommandPair.second == defaultNullCommand))
+            if (currSubsystemCommandPair.second != nullptr)
             {
-                Command* currCommand = smrtPtrCommandCast(currSubsystemCommandPair.second);
+                Command* currCommand = currSubsystemCommandPair.second;
 
                 if (currCommand->prevSchedulerExecuteTimestamp
                     != commandSchedulerTimestamp
@@ -92,26 +108,36 @@ namespace control
                 if (currCommand->isFinished())
                 {
                     currCommand->end(false);
-                    currSubsystemCommandPair.second = defaultNullCommand;
+                    currSubsystemCommandPair.second = nullptr;
                 }
             }
             // refresh subsystem
-            currSubsystemCommandPair.first->refresh();
+            if (currSubsystemCommandPair.first->prevSchedulerExecuteTimestamp
+                != commandSchedulerTimestamp) {
+                currSubsystemCommandPair.first->refresh();
+                currSubsystemCommandPair.first->prevSchedulerExecuteTimestamp
+                    = commandSchedulerTimestamp;
+            }
         }
         // make sure we are not going over tolerable runtime, otherwise something is really
         // wrong with the code
-        if (static_cast<float>(DWT->CYCCNT - checkRunPeriod)
-            / static_cast<float>(modm::clock::fcpu_kHz)
-            > MAX_ALLOWABLE_SCHEDULER_RUNTIME)
+        uint32_t runEnd = aruwlib::arch::clock::getTimeMicroseconds();
+        if (runEnd - runStart > MAX_ALLOWABLE_SCHEDULER_RUNTIME)
         {
             // shouldn't take more than 1 ms to complete all this stuff, if it does something
             // is seriously wrong (i.e. you are adding subsystems unchecked)
-            // THROW-NON-FATAL-ERROR-CHECK
+            RAISE_ERROR("scheduler took longer than MAX_ALLOWABLE_SCHEDULER_RUNTIME",
+                    aruwlib::errors::Location::COMMAND_SCHEDULER,
+                    aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
         }
     }
 
-    void CommandScheduler::removeCommand(modm::SmartPointer command, bool interrupted)
+    void CommandScheduler::removeCommand(Command* command, bool interrupted)
     {
+        if (command == nullptr)
+        {
+            return;
+        }
         bool commandFound = false;
         for (auto& subsystemCommandPair : subsystemToCommandMap)
         {
@@ -119,42 +145,47 @@ namespace control
             {
                 if (!commandFound)
                 {
-                    smrtPtrCommandCast(subsystemCommandPair.second)->end(interrupted);
+                    subsystemCommandPair.second->end(interrupted);
                     commandFound = true;
                 }
-                subsystemCommandPair.second = defaultNullCommand;
+                subsystemCommandPair.second = nullptr;
             }
         }
     }
 
-    bool CommandScheduler::isCommandScheduled(modm::SmartPointer command)
+    bool CommandScheduler::isCommandScheduled(Command* command) const
     {
+        if (command == nullptr)
+        {
+            return false;
+        }
         return std::any_of(subsystemToCommandMap.begin(), subsystemToCommandMap.end(),
-            [command](pair<Subsystem*, modm::SmartPointer> p)
+            [command](pair<Subsystem*, Command*> p)
             {
                 return p.second == command;
             }
         );
     }
 
-    bool CommandScheduler::registerSubsystem(Subsystem* subsystem)
+    void CommandScheduler::registerSubsystem(Subsystem* subsystem)
     {
-        if (!isSubsystemRegistered(subsystem))
+        if (subsystem != nullptr && !isSubsystemRegistered(subsystem))
         {
-            subsystemToCommandMap[subsystem] = defaultNullCommand;
-            return true;
+            subsystemToCommandMap[subsystem] = nullptr;
+        } else {
+            RAISE_ERROR("subsystem is already added or trying to add nullptr subsystem",
+                    aruwlib::errors::Location::COMMAND_SCHEDULER,
+                    aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
         }
-        return false;
     }
 
-    bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem)
+    bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem) const
     {
+        if (subsystem == nullptr)
+        {
+            return false;
+        }
         return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
-    }
-
-    Command* CommandScheduler::smrtPtrCommandCast(modm::SmartPointer smrtPtr)
-    {
-        return reinterpret_cast<Command*>(smrtPtr.getPointer());
     }
 }  // namespace control
 

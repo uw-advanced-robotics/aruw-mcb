@@ -8,7 +8,12 @@
  */
 
 #include "remote.hpp"
-#include "src/aruwlib/control/controller_mapper.hpp"
+#include "aruwlib/communication/serial/uart.hpp"
+#include "aruwlib/architecture/clock.hpp"
+#include "aruwlib/control/controller_mapper.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+
+using namespace aruwlib::serial;
 
 namespace aruwlib {
     // The current remote information
@@ -21,33 +26,32 @@ namespace aruwlib {
     uint8_t Remote::rxBuffer[REMOTE_BUF_LEN];
 
     // Timestamp when last byte was read
-    modm::Timestamp Remote::lastRead;
+    uint32_t Remote::lastRead;
 
     // Current count of bytes read
     uint8_t Remote::currentBufferIndex = 0;
 
     // Enables and initializes Usart1 communication
     void Remote::initialize() {
-        Usart1::connect<GpioB7::Rx>();
-        Usart1::initialize<Board::SystemClock, 100000>(REMOTE_INT_PRI, Usart1::Parity::Even);
+        Uart::init<Uart::UartPort::Uart1, 100000, Uart::Parity::Even>();
     }
 
     // Reads/parses the current buffer and updates the current remote info states
     void Remote::read() {
         // Check disconnect timeout
-        if (modm::Clock::now().getTime() - lastRead.getTime() > REMOTE_DISCONNECT_TIMEOUT) {
+        if (aruwlib::arch::clock::getTimeMilliseconds() - lastRead > REMOTE_DISCONNECT_TIMEOUT) {
            connected = false;  // Remote no longer connected
            reset();  // Reset current remote values
         }
         uint8_t data;  // Next byte to be read
         // Read next byte if available and more needed for the current packet
-        while (Usart1::read(data) && currentBufferIndex < REMOTE_BUF_LEN) {
+        while (Uart::read(Uart::UartPort::Uart1, &data) && currentBufferIndex < REMOTE_BUF_LEN) {
             rxBuffer[currentBufferIndex] = data;
             currentBufferIndex++;
-            lastRead = modm::Clock::now();
+            lastRead = aruwlib::arch::clock::getTimeMilliseconds();
         }
         // Check read timeout
-        if (modm::Clock::now().getTime() - lastRead.getTime() > REMOTE_READ_TIMEOUT) {
+        if (aruwlib::arch::clock::getTimeMilliseconds() - lastRead > REMOTE_READ_TIMEOUT) {
             clearRxBuffer();
         }
         // Parse buffer if all 18 bytes are read
@@ -64,12 +68,12 @@ namespace aruwlib {
     }
 
     // Returns the value of the given channel
-    int16_t Remote::getChannel(Channel ch) {
+    float Remote::getChannel(Channel ch) {
         switch (ch) {
-            case Channel::RIGHT_HORIZONTAL: return remote.rightHorizontal;
-            case Channel::RIGHT_VERTICAL: return remote.rightVertical;
-            case Channel::LEFT_HORIZONTAL: return remote.leftHorizontal;
-            case Channel::LEFT_VERTICAL: return remote.leftVertical;
+            case Channel::RIGHT_HORIZONTAL: return remote.rightHorizontal / STICK_MAX_VALUE;
+            case Channel::RIGHT_VERTICAL: return remote.rightVertical / STICK_MAX_VALUE;
+            case Channel::LEFT_HORIZONTAL: return remote.leftHorizontal / STICK_MAX_VALUE;
+            case Channel::LEFT_VERTICAL: return remote.leftVertical / STICK_MAX_VALUE;
         }
         return 0;
     }
@@ -187,7 +191,10 @@ namespace aruwlib {
         // Remote wheel
         remote.wheel = (rxBuffer[16] | rxBuffer[17] << 8) - 1024;
 
-        IoMapper::handleKeyStateChange(remote.key, remote.leftSwitch, remote.rightSwitch);
+        aruwlib::control::IoMapper::handleKeyStateChange(
+            remote.key, remote.leftSwitch, remote.rightSwitch);
+
+        remote.updateCounter++;
     }
 
     // Clears the current rxBuffer
@@ -199,7 +206,7 @@ namespace aruwlib {
             rxBuffer[i] = 0;
         }
         // Clear Usart1 rxBuffer
-        Usart1::discardReceiveBuffer();
+        Uart::discardReceiveBuffer(Uart::UartPort::Uart1);
     }
 
     // Resets the current remote info
@@ -218,5 +225,10 @@ namespace aruwlib {
         remote.key = 0;
         remote.wheel = 0;
         clearRxBuffer();
+    }
+
+    uint32_t Remote::getUpdateCounter()
+    {
+        return remote.updateCounter;
     }
 }  // namespace aruwlib

@@ -30,6 +30,7 @@
     <module>modm:platform:gpio</module>
     <module>modm:architecture:spi.device</module>
     <module>modm:platform:spi:5</module>
+    <module>modm:platform:spi:1</module>
     <module>modm:platform:uart:1</module>
     <module>modm:platform:uart:2</module>
     <module>modm:platform:uart:6</module>
@@ -43,5 +44,13 @@
     <module>modm:math:saturated</module>
     <module>modm:math:filter</module>
     <module>modm:processing</module>
+    <module>modm:math:geometry</module>
+    <module>modm:ui:display</module>
+    <module>modm:ui:menu</module>
+    <module>modm:platform:random</module>
+    <module>modm:debug</module>
+    <module>modm:driver:bno055</module>
+    <module>modm:platform:i2c:2</module>
+    <module>modm:processing:protothread</module>
   </modules>
 </library>

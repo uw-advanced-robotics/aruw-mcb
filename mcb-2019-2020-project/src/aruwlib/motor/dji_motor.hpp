@@ -1,9 +1,10 @@
 #ifndef __DJI_MOTOR_HPP__
 #define __DJI_MOTOR_HPP__
 
-#include <modm/processing/timer/timeout.hpp>
-#include <rm-dev-board-a/board.hpp>
-#include "src/aruwlib/communication/can/can_rx_handler.hpp"
+#include <string>
+#include <aruwlib/architecture/timeout.hpp>
+#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/communication/can/can_rx_handler.hpp"
 
 namespace aruwlib
 {
@@ -31,10 +32,11 @@ class DjiMotor : public aruwlib::can::CanRxListner
 {
  public:
     // 0 - 8191 for dji motors
-    #define ENC_RESOLUTION 8191
+    static constexpr uint16_t ENC_RESOLUTION = 8192;
 
     // construct new motor
-    DjiMotor(MotorId desMotorIdentifier, aruwlib::can::CanBus motorCanBus, bool isInverted);
+    DjiMotor(MotorId desMotorIdentifier, aruwlib::can::CanBus motorCanBus, bool isInverted,
+            const std::string& name);
 
     ~DjiMotor();
 
@@ -44,33 +46,24 @@ class DjiMotor : public aruwlib::can::CanRxListner
     class EncoderStore
     {
      public:
-        int32_t getEncoderUnwrapped() const;
+        int64_t getEncoderUnwrapped() const;
 
-        int16_t getEncoderWrapped() const;
+        uint16_t getEncoderWrapped() const;
      private:
         friend class DjiMotor;
 
         explicit EncoderStore(
-            bool inverted,
-            uint16_t encWrapped = (ENC_RESOLUTION + 1) / 2,
-            int16_t encRevolutions = 0
+            uint16_t encWrapped = ENC_RESOLUTION / 2,
+            int64_t encRevolutions = 0
         ) : encoderWrapped(encWrapped),
-        encoderRevolutions(encRevolutions),
-        initialEncValue(0),
-        encStoreInverted(inverted)
+        encoderRevolutions(encRevolutions)
         {}
 
         void updateValue(uint16_t newEncWrapped);
 
-        void setInitialEncoderValue(uint16_t initEncValue);
-
         uint16_t encoderWrapped;
 
-        int16_t encoderRevolutions;
-
-        uint16_t initialEncValue;
-
-        bool encStoreInverted;
+        int64_t encoderRevolutions;
     };
 
     // delete copy constructor
@@ -81,7 +74,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     // overrides virtual method in the can class, called every time a message is
     // received by the can receive handler
-    void processMessage(const modm::can::Message& message)
+    void processMessage(const modm::can::Message& message) override
     {
         parseCanRxData(message);
         motorReceiveMessageCallback();
@@ -93,7 +86,7 @@ class DjiMotor : public aruwlib::can::CanRxListner
     // is simply a sanity check.
     void setDesiredOutput(int32_t desiredOutput);
 
-    bool isMotorOnline();
+    bool isMotorOnline() const;
 
     // Serializes send data and deposits it in a message to be sent.
     void serializeCanSendData(modm::can::Message* txMessage) const;
@@ -115,9 +108,32 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     aruwlib::can::CanBus getCanBus() const;
 
-    EncoderStore encStore;
+    const std::string& getName() const;
 
-    int32_t encw;
+    template<typename T>
+    static void assertEncoderType()
+    {
+        constexpr bool good_type =
+            std::is_same<typename std::decay<T>::type, std::int64_t>::value ||
+            std::is_same<typename std::decay<T>::type, std::uint16_t>::value;
+        static_assert(good_type, "x is not of the correct type");
+    }
+
+    template<typename T>
+    static T degreesToEncoder(float angle)
+    {
+        assertEncoderType<T>();
+        return static_cast<T>((ENC_RESOLUTION * angle) / 360);
+    }
+
+    template<typename T>
+    static float encoderToDegrees(T encoder)
+    {
+        assertEncoderType<T>();
+        return (360.0f * static_cast<float>(encoder)) / ENC_RESOLUTION;
+    }
+
+    EncoderStore encStore;
 
  private:
     // wait time before the motor is considered disconnected, in milliseconds
@@ -142,7 +158,9 @@ class DjiMotor : public aruwlib::can::CanRxListner
 
     bool motorInverted;
 
-    modm::ShortTimeout motorDisconnectTimeout;
+    std::string motorName;
+
+    aruwlib::arch::MilliTimeout motorDisconnectTimeout;
 };
 
 }  // namespace motor

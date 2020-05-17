@@ -1,82 +1,101 @@
-#include <rm-dev-board-a/board.hpp>
-#include <modm/container/smart_pointer.hpp>
-#include <modm/processing/timer.hpp>
+#include <aruwlib/rm-dev-board-a/board.hpp>
 
-#include "src/aruwlib/control/controller_mapper.hpp"
-#include "src/aruwsrc/control/blink_led_command.hpp"
-#include "src/aruwlib/communication/remote.hpp"
-#include "src/aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwsrc/control/example_command.hpp"
-#include "src/aruwsrc/control/example_subsystem.hpp"
-#include "src/aruwlib/motor/dji_motor_tx_handler.hpp"
-#include "src/aruwlib/communication/can/can_rx_listener.hpp"
-#include "src/aruwlib/algorithms/contiguous_float_test.hpp"
-#include "src/aruwlib/communication/serial/ref_serial.hpp"
+/* arch includes ------------------------------------------------------------*/
+#include <aruwlib/architecture/periodic_timer.hpp>
 
-aruwsrc::control::ExampleSubsystem testSubsystem;
+/* communication includes ---------------------------------------------------*/
+#include <aruwlib/motor/dji_motor_tx_handler.hpp>
+#include <aruwlib/communication/sensors/mpu6500/mpu6500.hpp>
+#include <aruwlib/communication/can/can_rx_listener.hpp>
+#include <aruwlib/communication/remote.hpp>
+#include <aruwlib/communication/serial/xavier_serial.hpp>
+#include <aruwlib/communication/serial/ref_serial.hpp>
+#include <aruwlib/display/sh1106.hpp>
 
-aruwlib::serial::RefSerial refereeSerial;
+/* error handling includes --------------------------------------------------*/
+#include <aruwlib/errors/error_controller.hpp>
 
-using namespace aruwlib::sensors;
+/* control includes ---------------------------------------------------------*/
+#include "aruwsrc/control/robot_control.hpp"
+#include <aruwlib/control/command_scheduler.hpp>
+
+/* define timers here -------------------------------------------------------*/
+aruwlib::arch::PeriodicMilliTimer updateImuPeriod(2);
+aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
+
+// Place any sort of input/output initialization here. For example, place
+// serial init stuff here.
+void initializeIo();
+// Anything that you would like to be called place here. It will be called
+// very frequently. Use PeriodicMilliTimers if you don't want something to be
+// called as frequently.
+void updateIo();
 
 int main()
 {
-    aruwlib::algorithms::ContiguousFloatTest contiguousFloatTest;
-    contiguousFloatTest.testCore();
-    contiguousFloatTest.testBadBounds();
-    contiguousFloatTest.testDifference();
-    contiguousFloatTest.testRotationBounds();
-    contiguousFloatTest.testShiftingValue();
-    contiguousFloatTest.testWrapping();
-
     Board::initialize();
-    aruwlib::Remote::initialize();
-
-    refereeSerial.initialize();
-
-    Mpu6500::init();
-
-    modm::SmartPointer testDefaultCommand(
-        new aruwsrc::control::ExampleCommand(&testSubsystem));
-
-    CommandScheduler::registerSubsystem(&testSubsystem);
-
-    modm::SmartPointer blinkCommand(
-        new aruwsrc::control::BlinkLEDCommand(&testSubsystem));
-
-    // timers
-    // arbitrary, taken from last year since this send time doesn't overfill
-    // can bus
-    modm::ShortPeriodicTimer motorSendPeriod(3);
-    // update imu
-    modm::ShortPeriodicTimer updateImuPeriod(2);
-
-    IoMapper::addToggleMapping(
-        IoMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP, {}),
-        blinkCommand
-    );
+    initializeIo();
+    aruwsrc::control::initSubsystemCommands();
 
     while (1)
     {
         // do this as fast as you can
-        aruwlib::can::CanRxHandler::pollCanData();
-        refereeSerial.updateSerial();
+        updateIo();
 
-        aruwlib::Remote::read();
-
-        if (updateImuPeriod.execute())
+        if (sendMotorTimeout.execute())
         {
-            Mpu6500::read();
-        }
-
-        if (motorSendPeriod.execute())
-        {
-            aruwlib::control::CommandScheduler::run();
+            aruwlib::errors::ErrorController::update();
+            aruwlib::control::CommandScheduler::getMainScheduler().run();
             aruwlib::motor::DjiMotorTxHandler::processCanSendData();
         }
+        #ifndef ENV_SIMULATOR
 
         modm::delayMicroseconds(10);
+        #endif
     }
     return 0;
+}
+
+void initializeIo()
+{
+#ifndef ENV_SIMULATOR
+    /// \todo this should be an init in the display class
+    Board::DisplaySpiMaster::connect<
+        Board::DisplayMiso::Miso,
+        Board::DisplayMosi::Mosi,
+        Board::DisplaySck::Sck
+    >();
+
+    // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
+    // 90MHz/64=~14MHz
+    Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
+#endif
+    aruwlib::display::Sh1106<
+    #ifndef ENV_SIMULATOR
+        Board::DisplaySpiMaster,
+        Board::DisplayCommand,
+        Board::DisplayReset,
+    #endif
+        128, 64,
+        false
+    > display;
+    display.initializeBlocking();
+
+    aruwlib::Remote::initialize();
+    aruwlib::sensors::Mpu6500::init();
+
+    aruwlib::serial::RefSerial::getRefSerial().initialize();
+    aruwlib::serial::XavierSerial::getXavierSerial().initialize();
+}
+
+void updateIo()
+{
+    aruwlib::can::CanRxHandler::pollCanData();
+    aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
+    aruwlib::serial::RefSerial::getRefSerial().updateSerial();
+    aruwlib::Remote::read();
+    if (updateImuPeriod.execute())
+    {
+        aruwlib::sensors::Mpu6500::read();
+    }
 }
