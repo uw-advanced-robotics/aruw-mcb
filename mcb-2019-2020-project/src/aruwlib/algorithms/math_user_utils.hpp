@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <cinttypes>
 
 namespace aruwlib
 {

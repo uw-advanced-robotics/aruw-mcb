@@ -1,3 +1,6 @@
+#ifndef CLOCK_HPP_
+#define CLOCK_HPP_
+
 #include <stdint.h>
 
 #ifndef ENV_SIMULATOR
@@ -27,3 +30,5 @@ namespace clock {
 }  // namespace arch
 
 }  // namespace aruwlib
+
+#endif  // CLOCK_HPP_
