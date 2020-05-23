@@ -178,13 +178,14 @@ void UartBno055<Uart>::handleStatusResponse() {
         break;
     }
 }
-
+#ifndef ENV_SIMULATOR
 template class UartBno055<Usart1>;
 template class UartBno055<Usart2>;
 template class UartBno055<Usart3>;
 template class UartBno055<Usart6>;
 template class UartBno055<Uart7>;
 template class UartBno055<Uart8>;
+#endif
 
 }  // namespace sensors
 
