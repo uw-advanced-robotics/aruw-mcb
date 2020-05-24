@@ -1,6 +1,21 @@
 #include <cstdint>
 #include "math_user_utils.hpp"
 
+constexpr uint32_t FNV_PRIME = 16777619u;
+constexpr uint32_t OFFSET_BASIS = 2166136261u;
+
+aruwlib::algorithms::fnvhash_t fnvHash(const char* str)
+{
+    const size_t length = strlen(str) + 1;
+    uint32_t hash = OFFSET_BASIS;
+    for (size_t i = 0; i < length; ++i)
+    {
+        hash ^= *str++;
+        hash *= FNV_PRIME;
+    }
+    return hash;
+}
+
 float aruwlib::algorithms::fastInvSqrt(float x)
 {
     static_assert(sizeof(float) == 4, "fast inverse sqrt requires 32-bit float");

@@ -11,6 +11,10 @@ namespace aruwlib
 namespace algorithms
 {
 
+typedef uint32_t fnvhash_t;
+
+fnvhash_t fnvHash(const char* str);
+
 constexpr float PI = 3.1415926535897932384626f;
 
 inline float degreesToRadians(float degrees)

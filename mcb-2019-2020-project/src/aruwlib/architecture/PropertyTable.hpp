@@ -1,5 +1,5 @@
-#ifndef __PROPERTY_HPP__
-#define __PROPERTY_HPP__
+#ifndef PROPERTY_TABLE_HPP_
+#define PROPERTY_TABLE_HPP_
 
 #include <memory>
 #include <utility>
@@ -10,6 +10,12 @@
 #include "aruwlib/communication/serial/dji_serial.hpp"
 #include <map>
 #include "aruwlib/algorithms/math_user_utils.hpp"
+
+namespace aruwlib
+{
+
+namespace arch
+{
 
 /**
  * Property Serial Protocol
@@ -29,26 +35,6 @@
  * }
  * 
  */
-namespace aruwlib {
-
-// todo(matthew) move this to algorithms? 
-static const uint32_t FNV_PRIME = 16777619u;
-static const uint32_t OFFSET_BASIS = 2166136261u;
-
-typedef uint32_t fnvhash_t;
-
-fnvhash_t fnvHash(const char* str)
-{
-    const size_t length = strlen(str) + 1;
-    uint32_t hash = OFFSET_BASIS;
-    for (size_t i = 0; i < length; ++i)
-    {
-        hash ^= *str++;
-        hash *= FNV_PRIME;
-    }
-    return hash;
-}
-
 class PropertyTable
 {
  public:
@@ -123,7 +109,7 @@ class PropertyTable
     template<typename T>
     bool setProperty(std::string propertyName, T data)
     {
-        fnvhash_t hash = fnvHash(propertyName.c_str());
+        algorithms::fnvhash_t hash = algorithms::fnvHash(propertyName.c_str());
         if (propertyTable.count(hash) != 0)
         {
             propertyTable[hash].dataPointer = static_cast<void*>(data);
@@ -135,7 +121,7 @@ class PropertyTable
     template<typename T>
     bool setArrayPropertyIndex(std::string propertyName, T data, int index)
     {
-        fnvhash_t hash = fnvHash(propertyName.c_str());
+        algorithms::fnvhash_t hash = algorithms::fnvHash(propertyName.c_str());
         if (propertyTable.count(hash) != 0) {
             int arrLen = propertyTable[hash].bcount / sizeof(T);
             if (index < 0 || index >= arrLen)
@@ -158,7 +144,7 @@ class PropertyTable
 
     static PropertyTable mainPropertySystem;
 
-    std::map<fnvhash_t, Property> propertyTable;
+    std::map<algorithms::fnvhash_t, Property> propertyTable;
 
     PropertyTable() {}
 
@@ -172,7 +158,7 @@ class PropertyTable
             return false;
         }
         Property p(typeToEnum(data), sizeof(T), bcount, propertyName, data);
-        fnvhash_t propertyHash = fnvHash(propertyName.c_str());
+        algorithms::fnvhash_t propertyHash = algorithms::fnvHash(propertyName.c_str());
         if (propertyTable.count(propertyHash) != 0)
         {
             return false;
@@ -217,8 +203,10 @@ class PropertyTable
             return BOOL_PROPERTY;
         }
     }
-};
+};  // class PropertyTable
+
+}  // namespace arch
 
 }  // namespace aruwlib
 
-#endif
+#endif  // PROPERTY_TABLE_HPP_

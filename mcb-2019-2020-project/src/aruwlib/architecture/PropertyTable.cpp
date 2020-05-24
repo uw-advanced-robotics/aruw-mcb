@@ -1,7 +1,10 @@
 #include "PropertyTable.hpp"
-
+#include "aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwlib
+{
+
+namespace arch
 {
 
 PropertyTable PropertyTable::mainPropertySystem;
@@ -10,7 +13,8 @@ PropertyTable& PropertyTable::getMainPropertySystem() { return mainPropertySyste
 
 bool PropertyTable::getProperty(std::string propertyName, Property* p)
 {
-    fnvhash_t hash = fnvHash(propertyName.c_str());
+    algorithms::fnvhash_t hash = algorithms::fnvHash(propertyName.c_str());
+
     if (propertyTable.count(hash) == 0)
     {
         *p = propertyTable[hash];
@@ -18,5 +22,7 @@ bool PropertyTable::getProperty(std::string propertyName, Property* p)
     }
     return false;
 }
+
+}  // namespace arch
 
 }  // namespace aruwlib
