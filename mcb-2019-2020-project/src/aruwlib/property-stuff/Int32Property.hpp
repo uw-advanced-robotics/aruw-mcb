@@ -3,33 +3,25 @@
 
 #include <cinttypes>
 
-#include "PrimativeProperty.hpp"
+#include "BaseProperty.hpp"
 
 namespace aruwlib
 {
 
-class Int32Property : public PrimativeProperty
+class Int32Property : public BaseProperty
 {
 public:
     Int32Property() : data(0) {}
     Int32Property(bool data) : data(data) {}
     Int32Property(const Int32Property &other) : data(other.data) {}
 
-    const uint8_t *getData() const override { return reinterpret_cast<const uint8_t *>(&data); }
-    uint8_t getDataLength() const override { return sizeof(int32_t); }
-    uint8_t getPrimativePropertyType() const override { return INT32_PROPERTY_TYPE; }
-    uint32_t get() { return data; }
+    virtual ~Int32Property() = default;
 
-    friend bool operator==(Int32Property p1, Int32Property p2);
-    friend bool operator!=(Int32Property p1, Int32Property p2);
-    friend bool operator<(Int32Property p1, Int32Property p2);
-    friend bool operator>(Int32Property p1, Int32Property p2);
-    friend bool operator<=(Int32Property p1, Int32Property p2);
-    friend bool operator>=(Int32Property p1, Int32Property p2);
-    friend Int32Property operator+(Int32Property p1, Int32Property p2);
-    friend Int32Property operator+(Int32Property p1, int32_t p2);
-    friend Int32Property operator+(int32_t p1, Int32Property p2);
+    uint8_t *serializeData(uint16_t *size) const override;
+    uint8_t getPropertyType() const override { return INT32_PROPERTY_TYPE; }
+    std::string toString() const override { return std::to_string(data); }
 
+    operator int32_t() { return data; }
     Int32Property operator=(Int32Property other);
     Int32Property operator=(int32_t other);
     Int32Property operator+=(Int32Property other);

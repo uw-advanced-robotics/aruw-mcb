@@ -3,64 +3,12 @@
 namespace aruwlib
 {
 
-bool operator==(BoolProperty p1, BoolProperty p2)
+uint8_t *BoolProperty::serializeData(uint16_t *size) const
 {
-    return p1.data == p2.data;
-}
-
-bool operator==(bool p1, BoolProperty p2)
-{
-    return p1 == p2.data;
-}
-
-bool operator==(BoolProperty p1, bool p2)
-{
-    return p1.data == p2;
-}
-
-bool operator!=(BoolProperty p1, BoolProperty p2)
-{
-    return p1.data != p2.data;
-}
-
-bool operator!=(BoolProperty p1, bool p2)
-{
-    return p1.data != p2;
-}
-
-bool operator!=(bool p1, BoolProperty p2)
-{
-    return p1 != p2.data;
-}
-
-bool operator||(BoolProperty p1, BoolProperty p2)
-{
-    return p1.data || p2.data;
-}
-
-bool operator||(BoolProperty p1, bool p2)
-{
-    return p1.data || p2;
-}
-
-bool operator||(bool p1, BoolProperty p2)
-{
-    return p1 || p2.data;
-}
-
-bool operator&&(BoolProperty p1, BoolProperty p2)
-{
-    return p1.data && p2.data;
-}
-
-bool operator&&(BoolProperty p1, bool p2)
-{
-    return p1.data && p2;
-}
-
-bool operator&&(bool p1, BoolProperty p2)
-{
-    return p1 && p2.data;
+    *size = sizeof(bool);
+    uint8_t *arr = new uint8_t[*size];
+    arr[0] = data;
+    return arr;
 }
 
 BoolProperty BoolProperty::operator=(BoolProperty p2)

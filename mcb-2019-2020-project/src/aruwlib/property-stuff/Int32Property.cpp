@@ -3,49 +3,12 @@
 namespace aruwlib
 {
 
-bool operator==(Int32Property p1, Int32Property p2)
+uint8_t *Int32Property::serializeData(uint16_t *size) const
 {
-    return p1.data == p2.data;
-}
-
-bool operator!=(Int32Property p1, Int32Property p2)
-{
-    return p1.data != p2.data;
-}
-
-bool operator<(Int32Property p1, Int32Property p2)
-{
-    return p1.data < p2.data;
-}
-
-bool operator>(Int32Property p1, Int32Property p2)
-{
-    return p1.data > p2.data;
-}
-
-bool operator<=(Int32Property p1, Int32Property p2)
-{
-    return !(p1 > p2);
-}
-
-bool operator>=(Int32Property p1, Int32Property p2)
-{
-    return !(p1 < p2);
-}
-
-Int32Property operator+(Int32Property p1, Int32Property p2)
-{
-    return Int32Property(p1.data + p2.data);
-}
-
-Int32Property operator+(Int32Property p1, int32_t p2)
-{
-    return Int32Property(p1.data + p2);
-}
-
-Int32Property operator+(int32_t p1, Int32Property p2)
-{
-    return Int32Property(p1 + p2.data);
+    *size = sizeof(int32_t);
+    uint8_t *arr = new uint8_t[*size];
+    memcpy(arr, &data, *size);
+    return arr;
 }
 
 Int32Property Int32Property::operator=(Int32Property other)
