@@ -27,3 +27,18 @@ build-code:
     - merge_requests
     - master
     - develop
+
+pages:
+  image: alpine
+  before_script:
+  - apk update
+  - apk add doxygen
+  script:
+    - doxygen doxygen/Doxyfile
+    - mv doxygen/documentation/html/ public/
+    artifacts:
+      paths:
+      - public
+    only:
+    - develop
+    - merge_requests
