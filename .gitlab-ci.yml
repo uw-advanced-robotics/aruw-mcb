@@ -31,14 +31,14 @@ build-code:
 pages:
   image: alpine
   before_script:
-  - apk update
-  - apk add doxygen
+    - apk update
+    - apk add doxygen
   script:
     - doxygen doxygen/Doxyfile
     - mv doxygen/documentation/html/ public/
     artifacts:
       paths:
-      - public
+        - public
     only:
-    - develop
-    - merge_requests
+      - develop
+      - merge_requests
