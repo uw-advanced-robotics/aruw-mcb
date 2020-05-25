@@ -36,9 +36,9 @@ pages:
   script:
     - doxygen doxygen/Doxyfile
     - mv doxygen/documentation/html/ public/
-    artifacts:
-      paths:
-        - public
-    only:
-      - develop
-      - merge_requests
+  artifacts:
+    paths:
+      - public
+  only:
+    - develop
+    - merge_requests
