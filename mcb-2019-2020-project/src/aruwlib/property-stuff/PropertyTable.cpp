@@ -1,23 +1,23 @@
-// #include "PropertyTable.hpp"
-// #include "aruwlib/algorithms/math_user_utils.hpp"
+#include "PropertyTable.hpp"
 
-// namespace aruwlib
-// {
 
-// PropertyTable PropertyTable::mainPropertySystem;
+namespace aruwlib
+{
 
-// PropertyTable& PropertyTable::getMainPropertySystem() { return mainPropertySystem; }
+PropertyTable PropertyTable::mainPropertySystem;
 
-// bool PropertyTable::getProperty(std::string propertyName, Property* p)
-// {
-//     algorithms::fnvhash_t hash = algorithms::fnvHash(propertyName.c_str());
+PropertyTable& PropertyTable::getMainPropertySystem() { return mainPropertySystem; }
 
-//     if (propertyTable.count(hash) == 0)
-//     {
-//         *p = propertyTable[hash];
-//         return true;
-//     }
-//     return false;
-// }
+bool PropertyTable::addProperty(BaseProperty *data)
+{
+    if (!data->getPropertyNameValid()) {
+        return false;
+    }
+    if (propertyTable.count(data->getPropertyName())) {
+        return false;
+    }
+    propertyTable[data->getPropertyName()] = data;
+    return true;
+}
 
-// }  // namespace aruwlib
+}  // namespace aruwlib

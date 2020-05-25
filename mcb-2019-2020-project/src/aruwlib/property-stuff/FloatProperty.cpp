@@ -11,64 +11,55 @@ uint8_t *FloatProperty::serializeData(uint16_t *size) const
     return arr;
 }
 
-FloatProperty FloatProperty::operator=(FloatProperty other)
-{
-    if (this != &other)
-    {
-        data = other.data;
-    }
-    return *this;
-}
-
-FloatProperty FloatProperty::operator=(float other)
+FloatProperty& FloatProperty::operator=(float other)
 {
     data = other;
     return *this;
 }
 
-FloatProperty FloatProperty::operator+=(FloatProperty other)
+FloatProperty& FloatProperty::operator+=(FloatProperty& other)
 {
     data += other.data;
     return *this;
 }
 
-FloatProperty FloatProperty::operator+=(float other)
+FloatProperty& FloatProperty::operator+=(float other)
 {
     data += other;
     return *this;
 }
 
-FloatProperty FloatProperty::operator-=(FloatProperty other)
+FloatProperty& FloatProperty::operator-=(FloatProperty& other)
 {
     data -= other.data;
     return *this;
 }
 
-FloatProperty FloatProperty::operator-=(float other)
+FloatProperty& FloatProperty::operator-=(float other)
 {
     data -= other;
     return *this;
 }
 
-FloatProperty FloatProperty::operator*=(FloatProperty other)
+FloatProperty& FloatProperty::operator*=(FloatProperty& other)
 {
     data *= other.data;
     return *this;
 }
 
-FloatProperty FloatProperty::operator*=(float other)
+FloatProperty& FloatProperty::operator*=(float other)
 {
     data *= other;
     return *this;
 }
 
-FloatProperty FloatProperty::operator/=(FloatProperty other)
+FloatProperty& FloatProperty::operator/=(FloatProperty& other)
 {
     data /= other.data;
     return *this;
 }
 
-FloatProperty FloatProperty::operator/=(float other)
+FloatProperty& FloatProperty::operator/=(float other)
 {
     data /= other;
     return *this;

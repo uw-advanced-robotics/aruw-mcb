@@ -11,9 +11,10 @@ namespace aruwlib
 class Int32Property : public BaseProperty
 {
 public:
-    Int32Property() : data(0) {}
-    Int32Property(bool data) : data(data) {}
-    Int32Property(const Int32Property &other) : data(other.data) {}
+    Int32Property() : BaseProperty(), data(0) {}
+    Int32Property(bool data) : BaseProperty(), data(data) {}
+    Int32Property(bool data, std::string name) : BaseProperty(name), data(data) {}
+    Int32Property(const Int32Property &other) = default;
 
     virtual ~Int32Property() = default;
 
@@ -22,16 +23,16 @@ public:
     std::string toString() const override { return std::to_string(data); }
 
     operator int32_t() { return data; }
-    Int32Property operator=(Int32Property other);
-    Int32Property operator=(int32_t other);
-    Int32Property operator+=(Int32Property other);
-    Int32Property operator+=(int32_t other);
-    Int32Property operator-=(Int32Property other);
-    Int32Property operator-=(int32_t other);
-    Int32Property operator*=(Int32Property other);
-    Int32Property operator*=(int32_t other);
-    Int32Property operator/=(Int32Property other);
-    Int32Property operator/=(int32_t other);
+    Int32Property& operator=(Int32Property& other) = default;
+    Int32Property& operator=(int32_t other);
+    Int32Property& operator+=(Int32Property& other);
+    Int32Property& operator+=(int32_t other);
+    Int32Property& operator-=(Int32Property& other);
+    Int32Property& operator-=(int32_t other);
+    Int32Property& operator*=(Int32Property& other);
+    Int32Property& operator*=(int32_t other);
+    Int32Property& operator/=(Int32Property& other);
+    Int32Property& operator/=(int32_t other);
 
 private:
     int32_t data;

@@ -11,40 +11,31 @@ uint8_t *BoolProperty::serializeData(uint16_t *size) const
     return arr;
 }
 
-BoolProperty BoolProperty::operator=(BoolProperty p2)
-{
-    if (this != &p2)
-    {
-        data = p2.data;
-    }
-    return *this;
-}
-
-BoolProperty BoolProperty::operator=(bool p2)
+BoolProperty& BoolProperty::operator=(bool p2)
 {
     data = p2;
     return *this;
 }
 
-BoolProperty BoolProperty::operator&=(BoolProperty p1)
+BoolProperty& BoolProperty::operator&=(BoolProperty& p1)
 {
     data &= p1.data;
     return *this;
 }
 
-BoolProperty BoolProperty::operator&=(bool p1)
+BoolProperty& BoolProperty::operator&=(bool p1)
 {
     data &= p1;
     return *this;
 }
 
-BoolProperty BoolProperty::operator|=(BoolProperty p1)
+BoolProperty& BoolProperty::operator|=(BoolProperty& p1)
 {
     data |= p1.data;
     return *this;
 }
 
-BoolProperty BoolProperty::operator|=(bool p1)
+BoolProperty& BoolProperty::operator|=(bool p1)
 {
     data |= p1;
     return *this;

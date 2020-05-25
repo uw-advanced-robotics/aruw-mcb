@@ -11,9 +11,10 @@ namespace aruwlib
 class BoolProperty : public BaseProperty
 {
 public:
-    BoolProperty() : data(false) {}
-    BoolProperty(bool data) : data(data) {}
-    BoolProperty(const BoolProperty& other) : data(other.data) {}
+    BoolProperty() : BaseProperty(), data(false) {}
+    BoolProperty(bool data) : BaseProperty(), data(data) {}
+    BoolProperty(bool data, std::string name) : BaseProperty(name), data(data) {}
+    BoolProperty(const BoolProperty& other) = default;
 
     virtual ~BoolProperty() = default;
 
@@ -22,12 +23,12 @@ public:
     std::string toString() const override { return std::string(data ? "true": "false"); }
 
     operator bool() { return data; }
-    BoolProperty operator=(BoolProperty p2);
-    BoolProperty operator=(bool p2);
-    BoolProperty operator&=(BoolProperty p1);
-    BoolProperty operator&=(bool p1);
-    BoolProperty operator|=(BoolProperty p1);
-    BoolProperty operator|=(bool p1);
+    BoolProperty& operator=(BoolProperty& p2) = default;
+    BoolProperty& operator=(bool p2);
+    BoolProperty& operator&=(BoolProperty& p1);
+    BoolProperty& operator&=(bool p1);
+    BoolProperty& operator|=(BoolProperty& p1);
+    BoolProperty& operator|=(bool p1);
 
 private:
     bool data;

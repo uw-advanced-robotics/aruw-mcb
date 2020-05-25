@@ -11,7 +11,8 @@ class FloatProperty : public BaseProperty
 public:
     FloatProperty() : data(0.0f) {}
     FloatProperty(float data) : data(data) {}
-    FloatProperty(const FloatProperty& other) : data(other.data) {}
+    FloatProperty(float data, std::string name) : BaseProperty(name), data(data) {}
+    FloatProperty(const FloatProperty& other) = default;
 
     virtual ~FloatProperty() = default;
 
@@ -20,16 +21,16 @@ public:
     std::string toString() const override { return std::to_string(data); }
 
     operator float() { return data; }
-    FloatProperty operator=(FloatProperty other);
-    FloatProperty operator=(float other);
-    FloatProperty operator+=(FloatProperty other);
-    FloatProperty operator+=(float other);
-    FloatProperty operator-=(FloatProperty other);
-    FloatProperty operator-=(float other);
-    FloatProperty operator*=(FloatProperty other);
-    FloatProperty operator*=(float other);
-    FloatProperty operator/=(FloatProperty other);
-    FloatProperty operator/=(float other);
+    FloatProperty& operator=(FloatProperty& other) = default;
+    FloatProperty& operator=(float other);
+    FloatProperty& operator+=(FloatProperty& other);
+    FloatProperty& operator+=(float other);
+    FloatProperty& operator-=(FloatProperty& other);
+    FloatProperty& operator-=(float other);
+    FloatProperty& operator*=(FloatProperty& other);
+    FloatProperty& operator*=(float other);
+    FloatProperty& operator/=(FloatProperty& other);
+    FloatProperty& operator/=(float other);
 
 private:
     float data;
