@@ -21,12 +21,14 @@ TEST_CASE("Proeprty Table", "[proprety_table]")
             PropertyTable::getMainPropertySystem().addProperty(
                 dynamic_cast<BaseProperty *>(&property))
             == true);
-        Int32Property *propertyPtr =
+        const Int32Property *propertyPtr =
             PropertyTable::getMainPropertySystem().getProperty<Int32Property>("cool property");
         REQUIRE(propertyPtr != nullptr);
         REQUIRE(propertyPtr == &property);
-        *propertyPtr = 30;
-        REQUIRE(property == 30);        
+        bool success = PropertyTable::getMainPropertySystem().setProperty<int32_t>(
+            "cool property", 30);
+        REQUIRE(success);
+        REQUIRE(property == 30);
     }
 
     SECTION("PropertyTable big batch insertion/removal")
@@ -61,7 +63,7 @@ TEST_CASE("Proeprty Table", "[proprety_table]")
             {
                 propertyName += "a";
             }
-            Int32Property *propertyPtr =
+            const Int32Property *propertyPtr =
                 PropertyTable::getMainPropertySystem().getProperty<Int32Property>(propertyName);
             REQUIRE(propertyPtr != nullptr);
             REQUIRE(*propertyPtr == i);
@@ -83,5 +85,6 @@ TEST_CASE("Proeprty Table", "[proprety_table]")
             REQUIRE(propertyPtr != nullptr);
             delete propertyPtr;
         }
+        REQUIRE(PropertyTable::getMainPropertySystem().getSize() == 0);
     }
 }

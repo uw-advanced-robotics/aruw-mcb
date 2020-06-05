@@ -21,6 +21,7 @@ public:
     uint8_t *serializeData(uint16_t *size) const override;
     uint8_t getPropertyType() const override { return INT32_PROPERTY_TYPE; }
     std::string toString() const override { return std::to_string(data); }
+    bool setProperty(void *data) override;
 
     operator int32_t() const { return data; }
     Int32Property& operator=(Int32Property& other) = default;

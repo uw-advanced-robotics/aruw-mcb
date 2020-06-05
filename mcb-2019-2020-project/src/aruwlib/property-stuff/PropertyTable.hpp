@@ -28,6 +28,8 @@ public:
      */
     bool isFull() const { return propertyTable.size() == PROPERTY_TABLE_MAX_SIZE; }
 
+    int getSize() const { return propertyTable.size(); }
+
     /**
      * Add data to the PropertyTable.
      * 
@@ -50,7 +52,7 @@ public:
     }
 
     template<typename T>
-    T* getProperty(const std::string &propertyName)
+    const T* getProperty(const std::string &propertyName)
     {
         if (propertyTable.count(propertyName) != 0)
         {
@@ -58,6 +60,18 @@ public:
             return property;
         }
         return nullptr;
+    }
+
+    template<typename T>
+    bool setProperty(const std::string &propertyName, T data)
+    {
+        if (propertyTable.count(propertyName) != 0)
+        {
+
+            BaseProperty *property = propertyTable[propertyName];
+            return property->setProperty(&data);
+        }
+        return false;
     }
 
 private:

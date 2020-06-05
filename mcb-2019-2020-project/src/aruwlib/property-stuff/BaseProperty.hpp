@@ -21,6 +21,7 @@ public:
     virtual uint8_t *serializeData(uint16_t *size) const = 0;
     virtual uint8_t getPropertyType() const = 0;
     virtual std::string toString() const = 0;
+    virtual bool setProperty(void *data) = 0;
 
     const std::string &getPropertyName() const { return propertyName; }
     bool getPropertyNameValid() const { return propertyName.length() > 0; }
@@ -29,7 +30,6 @@ public:
 
 private:
     std::string propertyName;
-    void *propertyData;
 };  // class BaseProperty
 
 }  // namespace aruwlib

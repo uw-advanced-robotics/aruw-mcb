@@ -11,6 +11,13 @@ uint8_t *FloatProperty::serializeData(uint16_t *size) const
     return arr;
 }
 
+bool FloatProperty::setProperty(void *data)
+{
+    if (data == nullptr) { return false; }
+    this->data = *reinterpret_cast<float *>(data);
+    return true;
+}
+
 FloatProperty& FloatProperty::operator=(float other)
 {
     data = other;

@@ -11,6 +11,13 @@ uint8_t *BoolProperty::serializeData(uint16_t *size) const
     return arr;
 }
 
+bool BoolProperty::setProperty(void *data)
+{
+    if (data == nullptr) { return false; }
+    this->data = (bool *)(&data);
+    return true;
+}
+
 BoolProperty& BoolProperty::operator=(bool p2)
 {
     data = p2;

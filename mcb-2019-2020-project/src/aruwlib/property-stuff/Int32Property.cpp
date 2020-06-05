@@ -11,6 +11,13 @@ uint8_t *Int32Property::serializeData(uint16_t *size) const
     return arr;
 }
 
+bool Int32Property::setProperty(void *data)
+{
+    if (data == nullptr) { return false; }
+    this->data = *reinterpret_cast<int32_t *>(data);
+    return true;
+}
+
 Int32Property& Int32Property::operator=(int32_t other)
 {
     data = other;
