@@ -43,15 +43,13 @@ TEST_CASE("Proeprty Table", "[proprety_table]")
                 propertyName += "a";
             }
             Int32Property *property = new Int32Property(i, propertyName);
-            addSuccess = PropertyTable::getMainPropertySystem().addProperty(
-                dynamic_cast<Int32Property *>(property));
+            addSuccess = PropertyTable::getMainPropertySystem().addProperty(property);
             REQUIRE(addSuccess == true);
         }
 
         // Try and insert another property, this will fail.
         Int32Property property(PropertyTable::PROPERTY_TABLE_MAX_SIZE, "j");
-        addSuccess = PropertyTable::getMainPropertySystem().addProperty(
-                dynamic_cast<Int32Property *>(&property)); 
+        addSuccess = PropertyTable::getMainPropertySystem().addProperty(&property); 
         REQUIRE(addSuccess == false);
         
         // Insure all the elements are accessable and the elements stored in the table
