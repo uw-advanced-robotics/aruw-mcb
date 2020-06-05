@@ -22,7 +22,7 @@ public:
     uint8_t getPropertyType() const override { return BOOL_PROPERTY_TYPE; }
     std::string toString() const override { return std::string(data ? "true": "false"); }
 
-    operator bool() { return data; }
+    operator bool() const { return data; }
     BoolProperty& operator=(BoolProperty& p2) = default;
     BoolProperty& operator=(bool p2);
     BoolProperty& operator&=(BoolProperty& p1);

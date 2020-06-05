@@ -1,0 +1,87 @@
+#include <catch.hpp>
+
+#include <string>
+#include <iostream>
+
+#include <aruwlib/property-stuff/PropertyTable.hpp>
+#include <aruwlib/property-stuff/Int32Property.hpp>
+
+using aruwlib::PropertyTable;
+using aruwlib::Int32Property;
+using aruwlib::BaseProperty;
+
+TEST_CASE("Proeprty Table", "[proprety_table]")
+{
+    PropertyTable::resetMainPropertyTable();
+
+    SECTION("PropertyTable.addProperty/getProperty")
+    {
+        Int32Property property(3, "cool property");
+        REQUIRE(
+            PropertyTable::getMainPropertySystem().addProperty(
+                dynamic_cast<BaseProperty *>(&property))
+            == true);
+        Int32Property *propertyPtr =
+            PropertyTable::getMainPropertySystem().getProperty<Int32Property>("cool property");
+        REQUIRE(propertyPtr != nullptr);
+        REQUIRE(propertyPtr == &property);
+        *propertyPtr = 30;
+        REQUIRE(property == 30);        
+    }
+
+    SECTION("PropertyTable big batch insertion/removal")
+    {
+        bool addSuccess;
+        // Insert the maximum amount of properties in a table.
+        for (int i = 0; i < PropertyTable::PROPERTY_TABLE_MAX_SIZE; i++)
+        {
+            std::string propertyName = "";
+            for (int j = 0; j < i + 1; j++)
+            {
+                propertyName += "a";
+            }
+            Int32Property *property = new Int32Property(i, propertyName);
+            addSuccess = PropertyTable::getMainPropertySystem().addProperty(
+                dynamic_cast<Int32Property *>(property));
+            REQUIRE(addSuccess == true);
+        }
+
+        // Try and insert another property, this will fail.
+        Int32Property property(PropertyTable::PROPERTY_TABLE_MAX_SIZE, "j");
+        addSuccess = PropertyTable::getMainPropertySystem().addProperty(
+                dynamic_cast<Int32Property *>(&property)); 
+        REQUIRE(addSuccess == false);
+        
+        // Insure all the elements are accessable and the elements stored in the table
+        // are correct.
+        for (int i = 0; i < PropertyTable::PROPERTY_TABLE_MAX_SIZE; i++)
+        {
+            std::string propertyName = "";
+            for (int j = 0; j < i + 1; j++)
+            {
+                propertyName += "a";
+            }
+            Int32Property *propertyPtr =
+                PropertyTable::getMainPropertySystem().getProperty<Int32Property>(propertyName);
+            REQUIRE(propertyPtr != nullptr);
+            REQUIRE(*propertyPtr == i);
+        }
+
+        // Remove and delete elements from the table.
+        for (int i = 0; i < PropertyTable::PROPERTY_TABLE_MAX_SIZE; i++)
+        {
+            std::string propertyName = "";
+            for (int j = 0; j < i + 1; j++)
+            {
+                propertyName += "a";
+            }
+            Int32Property *propertyPtr;
+            bool removeSuccess =
+                PropertyTable::getMainPropertySystem().removeProperty<Int32Property>(
+                    propertyName, &propertyPtr);
+            REQUIRE(removeSuccess == true);
+            REQUIRE(propertyPtr != nullptr);
+            delete propertyPtr;
+        }
+    }
+}

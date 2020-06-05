@@ -70,8 +70,7 @@
         "variant": "cpp",
         "SConstruct": "python",
         "SConscript": "python",
-        "bit": "cpp",
-        "shared_mutex": "cpp"
+        "future": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
@@ -80,7 +79,8 @@
         "./mcb-2019-2020-project/modm/ext/cmsis/core",
         "./mcb-2019-2020-project/modm/ext/cmsis/device",
         "./mcb-2019-2020-project/src",
-        "./mcb-2019-2020-project/robot-type"
+        "./mcb-2019-2020-project/robot-type",
+        "./mcb-2019-2020-project/test"
     ],
     "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.default.cStandard": "c11",

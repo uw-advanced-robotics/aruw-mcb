@@ -12,11 +12,15 @@ namespace aruwlib
 class PropertyTable
 {
 public:
+    static const int PROPERTY_TABLE_MAX_SIZE = 512;
+
     static PropertyTable& getMainPropertySystem();
+
+    static void resetMainPropertyTable();
 
     PropertyTable(const PropertyTable&) = delete;
 
-    PropertyTable& operator=(const PropertyTable&) = delete;
+    PropertyTable& operator=(const PropertyTable&) = default;
 
     /**
      * Check if number of properties in PropertyTable reaches maximum
@@ -34,7 +38,19 @@ public:
     bool addProperty(BaseProperty *data);
 
     template<typename T>
-    const T* getProperty(const std::string& propertyName)
+    bool removeProperty(const std::string &propertyName, T **removed)
+    {
+        if (propertyTable.count(propertyName) != 0)
+        {
+            *removed = dynamic_cast<T *>(propertyTable[propertyName]);
+            propertyTable.erase(propertyName);
+            return true;
+        }
+        return false;
+    }
+
+    template<typename T>
+    T* getProperty(const std::string &propertyName)
     {
         if (propertyTable.count(propertyName) != 0)
         {
@@ -45,8 +61,6 @@ public:
     }
 
 private:
-    static const int PROPERTY_TABLE_MAX_SIZE = 512;
-
     static PropertyTable mainPropertySystem;
 
     std::map<std::string, BaseProperty*> propertyTable;

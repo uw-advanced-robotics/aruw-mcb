@@ -20,7 +20,7 @@ public:
     uint8_t getPropertyType() const override { return FLOAT_PROPERTY_TYPE; }
     std::string toString() const override { return std::to_string(data); }
 
-    operator float() { return data; }
+    operator float() const { return data; }
     FloatProperty& operator=(FloatProperty& other) = default;
     FloatProperty& operator=(float other);
     FloatProperty& operator+=(FloatProperty& other);
