@@ -28,14 +28,15 @@ using namespace modm::platform;
 #include "aruwlib/communication/gpio/pwm.hpp"
 #include "aruwlib/communication/gpio/leds.hpp"
 #include "aruwlib/communication/can/can.hpp"
+#include "aruwlib/communication/gpio/digital.hpp"
 
 
-/// @ingroup TODO
+///< @ingroup TODO
 namespace Board
 {
     using namespace modm::literals;
 
-/// STM32F427 running at 180MHz from the external 12MHz crystal
+///< STM32F427 running at 180MHz from the external 12MHz crystal
 struct SystemClock
 {
     static constexpr uint32_t Frequency = 180_MHz;
@@ -205,7 +206,7 @@ using DigitalOutPins = SoftwareGpioPort
 using ImuSck = GpioF7;
 using ImuMiso = GpioF8;
 using ImuMosi = GpioF9;
-using ImuNcc = GpioF6;
+using ImuNss = GpioF6;
 using ImuSpiMaster = SpiMaster5;
 
 using DisplaySck = GpioB3;
@@ -225,7 +226,7 @@ killAllGpioOutput()
     PowerOuts::setOutput(modm::Gpio::Low);
     DigitalOutPins::setOutput(modm::Gpio::Low);
     #endif
-    aruwlib::gpio::Pwm::WriteAll(0.0);
+    aruwlib::gpio::Pwm::writeAll(0.0);
 }
 
 inline void
@@ -245,6 +246,7 @@ initialize()
     // init PWM and analog pins
     aruwlib::gpio::Analog::init();
     aruwlib::gpio::Pwm::init();
+    aruwlib::gpio::Digital::init();
 
     aruwlib::can::Can::initialize();
 }

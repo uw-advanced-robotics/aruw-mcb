@@ -19,9 +19,7 @@
 #include "aruwsrc/control/robot_control.hpp"
 #include <aruwlib/control/command_scheduler.hpp>
 
-#include <aruwlib/property-stuff/Int32Property.hpp>
-#include <aruwlib/property-stuff/FloatProperty.hpp>
-#include <aruwlib/property-stuff/BoolProperty.hpp>
+using namespace modm::literals;
 
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer updateImuPeriod(2);
