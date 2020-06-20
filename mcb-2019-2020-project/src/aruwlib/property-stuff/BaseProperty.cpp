@@ -2,7 +2,6 @@
 
 namespace aruwlib
 {
-
 uint8_t *BaseProperty::fullSerialization() const
 {
     uint16_t dataLength;

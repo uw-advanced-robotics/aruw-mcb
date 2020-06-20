@@ -1,6 +1,5 @@
-#include <catch.hpp>
-
 #include <aruwlib/property-stuff/Int32Property.hpp>
+#include <catch.hpp>
 
 using aruwlib::Int32Property;
 

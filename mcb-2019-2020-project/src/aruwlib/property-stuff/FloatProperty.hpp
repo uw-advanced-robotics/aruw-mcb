@@ -5,7 +5,6 @@
 
 namespace aruwlib
 {
-
 class FloatProperty : public BaseProperty
 {
 public:
@@ -16,10 +15,10 @@ public:
 
     virtual ~FloatProperty() = default;
 
-    uint8_t *serializeData(uint16_t *size) const override;
+    uint8_t* serializeData(uint16_t* size) const override;
     uint8_t getPropertyType() const override { return FLOAT_PROPERTY_TYPE; }
     std::string toString() const override { return std::to_string(data); }
-    bool setProperty(void *data) override;
+    bool setProperty(void* data) override;
 
     operator float() const { return data; }
     FloatProperty& operator=(FloatProperty& other) = default;

@@ -1,9 +1,9 @@
 #ifndef MATH_USER_UTILS_HPP_
 #define MATH_USER_UTILS_HPP_
 
+#include <cinttypes>
 #include <cmath>
 #include <cstring>
-#include <cinttypes>
 
 namespace aruwlib
 {

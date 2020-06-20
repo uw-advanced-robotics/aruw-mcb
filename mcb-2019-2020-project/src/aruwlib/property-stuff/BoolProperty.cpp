@@ -2,19 +2,21 @@
 
 namespace aruwlib
 {
-
-uint8_t *BoolProperty::serializeData(uint16_t *size) const
+uint8_t* BoolProperty::serializeData(uint16_t* size) const
 {
     *size = sizeof(bool);
-    uint8_t *arr = new uint8_t[*size];
+    uint8_t* arr = new uint8_t[*size];
     arr[0] = data;
     return arr;
 }
 
-bool BoolProperty::setProperty(void *data)
+bool BoolProperty::setProperty(void* data)
 {
-    if (data == nullptr) { return false; }
-    this->data = (bool *)(&data);
+    if (data == nullptr)
+    {
+        return false;
+    }
+    this->data = (bool*)(&data);
     return true;
 }
 

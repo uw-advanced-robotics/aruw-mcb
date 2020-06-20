@@ -1,15 +1,16 @@
-#include <catch.hpp>
-
 #include <aruwlib/algorithms/contiguous_float.hpp>
+#include <catch.hpp>
 
 using namespace aruwlib::algorithms;
 
-TEST_CASE("ContiguousFloat: Basic functionality", "[contiguous_float]") {
+TEST_CASE("ContiguousFloat: Basic functionality", "[contiguous_float]")
+{
     ContiguousFloat testInstance(5, 0, 10);
     REQUIRE(5 == testInstance.getValue());
 }
 
-TEST_CASE("ContiguousFloat: Wrapping behavior", "[contiguous_float]") {
+TEST_CASE("ContiguousFloat: Wrapping behavior", "[contiguous_float]")
+{
     ContiguousFloat testInstance(-4, 0, 10);
     REQUIRE(6 == testInstance.getValue());
 
@@ -20,8 +21,8 @@ TEST_CASE("ContiguousFloat: Wrapping behavior", "[contiguous_float]") {
     REQUIRE(8 == testInstance.getValue());
 }
 
-
-TEST_CASE("ContiguousFloat: Difference", "[contiguous_float]") {
+TEST_CASE("ContiguousFloat: Difference", "[contiguous_float]")
+{
     ContiguousFloat testInstance(2, 0, 10);
     REQUIRE(2 == testInstance.difference(4));
     REQUIRE(-1 == testInstance.difference(11));
@@ -35,8 +36,8 @@ TEST_CASE("ContiguousFloat: Difference", "[contiguous_float]") {
     REQUIRE(-1 == testInstance.difference(10));
 }
 
-
-TEST_CASE("ContiguousFloat: Rotation bounds", "[contiguous_float]") {
+TEST_CASE("ContiguousFloat: Rotation bounds", "[contiguous_float]")
+{
     ContiguousFloat testInstance(150, -180, 180);
 
     REQUIRE(40 == testInstance.difference(190));
@@ -54,8 +55,8 @@ TEST_CASE("ContiguousFloat: Rotation bounds", "[contiguous_float]") {
     REQUIRE(-140 == testInstance2.difference(-100));
 }
 
-
-TEST_CASE("ContiguousFloat: Shifting value", "[contiguous_float]") {
+TEST_CASE("ContiguousFloat: Shifting value", "[contiguous_float]")
+{
     ContiguousFloat testInstance(150, -180, 180);
 
     testInstance.shiftValue(40);
@@ -71,8 +72,8 @@ TEST_CASE("ContiguousFloat: Shifting value", "[contiguous_float]") {
     REQUIRE(-130 == testInstance.getValue());
 }
 
-
-TEST_CASE("ContiguousFloat: Bad bounds", "[contiguous_float]") {
+TEST_CASE("ContiguousFloat: Bad bounds", "[contiguous_float]")
+{
     ContiguousFloat testInstance(150, 180, -180);
     REQUIRE(-180 == testInstance.getLowerBound());
     REQUIRE(180 == testInstance.getUpperBound());

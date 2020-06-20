@@ -4,7 +4,7 @@ before_script:
 clang-format:
   image: aruw/mcb-2020-gitlab-ci:2020-05-25.1
   script:
-    - python3 /run-clang-format.py --clang-format-executable clang-format-10 -r mcb-2019-2020-project/src/ mcb-2019-2020-project/test/
+    - python3 /run-clang-format.py --clang-format-executable clang-format-10 -r mcb-2019-2020-project/src/ mcb-2019-2020-project/test/aruwlib
   only:
   - merge_requests
   - master

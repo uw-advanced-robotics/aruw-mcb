@@ -1,14 +1,13 @@
+#include <iostream>
+#include <string>
+
+#include <aruwlib/property-stuff/Int32Property.hpp>
+#include <aruwlib/property-stuff/PropertyTable.hpp>
 #include <catch.hpp>
 
-#include <string>
-#include <iostream>
-
-#include <aruwlib/property-stuff/PropertyTable.hpp>
-#include <aruwlib/property-stuff/Int32Property.hpp>
-
-using aruwlib::PropertyTable;
-using aruwlib::Int32Property;
 using aruwlib::BaseProperty;
+using aruwlib::Int32Property;
+using aruwlib::PropertyTable;
 
 TEST_CASE("Proeprty Table", "[proprety_table]")
 {
@@ -19,14 +18,13 @@ TEST_CASE("Proeprty Table", "[proprety_table]")
         Int32Property property(3, "cool property");
         REQUIRE(
             PropertyTable::getMainPropertySystem().addProperty(
-                dynamic_cast<BaseProperty *>(&property))
-            == true);
+                dynamic_cast<BaseProperty *>(&property)) == true);
         const Int32Property *propertyPtr =
             PropertyTable::getMainPropertySystem().getProperty<Int32Property>("cool property");
         REQUIRE(propertyPtr != nullptr);
         REQUIRE(propertyPtr == &property);
-        bool success = PropertyTable::getMainPropertySystem().setProperty<int32_t>(
-            "cool property", 30);
+        bool success =
+            PropertyTable::getMainPropertySystem().setProperty<int32_t>("cool property", 30);
         REQUIRE(success);
         REQUIRE(property == 30);
     }
@@ -49,9 +47,9 @@ TEST_CASE("Proeprty Table", "[proprety_table]")
 
         // Try and insert another property, this will fail.
         Int32Property property(PropertyTable::PROPERTY_TABLE_MAX_SIZE, "j");
-        addSuccess = PropertyTable::getMainPropertySystem().addProperty(&property); 
+        addSuccess = PropertyTable::getMainPropertySystem().addProperty(&property);
         REQUIRE(addSuccess == false);
-        
+
         // Insure all the elements are accessable and the elements stored in the table
         // are correct.
         for (int i = 0; i < PropertyTable::PROPERTY_TABLE_MAX_SIZE; i++)
@@ -78,7 +76,8 @@ TEST_CASE("Proeprty Table", "[proprety_table]")
             Int32Property *propertyPtr;
             bool removeSuccess =
                 PropertyTable::getMainPropertySystem().removeProperty<Int32Property>(
-                    propertyName, &propertyPtr);
+                    propertyName,
+                    &propertyPtr);
             REQUIRE(removeSuccess == true);
             REQUIRE(propertyPtr != nullptr);
             delete propertyPtr;

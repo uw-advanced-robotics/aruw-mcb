@@ -8,7 +8,6 @@ namespace aruwlib
 {
 namespace serial
 {
-
 DJISerial::DJISerial(Uart::UartPort port, bool isRxCRCEnforcementEnabled)
     : port(port),
       djiSerialRxState(SERIAL_HEADER_SEARCH),

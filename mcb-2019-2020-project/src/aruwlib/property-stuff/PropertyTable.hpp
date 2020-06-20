@@ -8,19 +8,18 @@
 
 namespace aruwlib
 {
-
 class PropertyTable
 {
 public:
     static const int PROPERTY_TABLE_MAX_SIZE = 512;
 
-    static PropertyTable& getMainPropertySystem();
+    static PropertyTable &getMainPropertySystem();
 
     static void resetMainPropertyTable();
 
-    PropertyTable(const PropertyTable&) = delete;
+    PropertyTable(const PropertyTable &) = delete;
 
-    PropertyTable& operator=(const PropertyTable&) = default;
+    PropertyTable &operator=(const PropertyTable &) = default;
 
     /**
      * Check if number of properties in PropertyTable reaches maximum
@@ -32,15 +31,14 @@ public:
 
     /**
      * Add data to the PropertyTable.
-     * 
+     *
      * @paramt the type of the data to be stored.
      * @param data pointer to data to be managed.
      * @param property_name name of property.
      */
     bool addProperty(BaseProperty *data);
 
-    template<typename T>
-    bool removeProperty(const std::string &propertyName, T **removed)
+    template <typename T> bool removeProperty(const std::string &propertyName, T **removed)
     {
         if (propertyTable.count(propertyName) != 0)
         {
@@ -51,23 +49,20 @@ public:
         return false;
     }
 
-    template<typename T>
-    const T* getProperty(const std::string &propertyName)
+    template <typename T> const T *getProperty(const std::string &propertyName)
     {
         if (propertyTable.count(propertyName) != 0)
         {
-            T* property = dynamic_cast<T*>(propertyTable[propertyName]);
+            T *property = dynamic_cast<T *>(propertyTable[propertyName]);
             return property;
         }
         return nullptr;
     }
 
-    template<typename T>
-    bool setProperty(const std::string &propertyName, T data)
+    template <typename T> bool setProperty(const std::string &propertyName, T data)
     {
         if (propertyTable.count(propertyName) != 0)
         {
-
             BaseProperty *property = propertyTable[propertyName];
             return property->setProperty(&data);
         }
@@ -77,7 +72,7 @@ public:
 private:
     static PropertyTable mainPropertySystem;
 
-    std::map<std::string, BaseProperty*> propertyTable;
+    std::map<std::string, BaseProperty *> propertyTable;
 
     PropertyTable() {}
 };  // class PropertyTable

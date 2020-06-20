@@ -6,8 +6,8 @@
 
 namespace aruwlib
 {
-
-class BaseProperty {
+class BaseProperty
+{
 public:
     static const uint8_t BASE_PROPERTY_HEADER_LENGTH = 3;
     static const uint8_t INT32_PROPERTY_TYPE = 0;
@@ -15,7 +15,7 @@ public:
     static const uint8_t BOOL_PROPERTY_TYPE = 2;
 
     BaseProperty() : propertyName("") {}
-    BaseProperty(const std::string& name) : propertyName(name) {}
+    BaseProperty(const std::string &name) : propertyName(name) {}
     virtual ~BaseProperty() = default;
 
     virtual uint8_t *serializeData(uint16_t *size) const = 0;
