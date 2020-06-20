@@ -1,26 +1,23 @@
 #include "distance_sensor.hpp"
 
-namespace aruwlib {
+namespace aruwlib
+{
+namespace sensors
+{
+// Constructor to init boundaries
+DistanceSensor::DistanceSensor(float minDistance, float maxDistance)
+    : distance(0),
+      minDistance(minDistance),
+      maxDistance(maxDistance)
+{
+}
 
-namespace sensors {
-    // Constructor to init boundaries
-    DistanceSensor::DistanceSensor(float minDistance, float maxDistance):
-        distance(0),
-        minDistance(minDistance),
-        maxDistance(maxDistance) {}
+float DistanceSensor::getMinDistance() const { return minDistance; }
 
-    // Destructor
-    DistanceSensor::~DistanceSensor() {}
+float DistanceSensor::getMaxDistance() const { return maxDistance; }
 
-    // Get minumum distance boundary
-    float DistanceSensor::getMinDistance() {
-        return minDistance;
-    }
+float DistanceSensor::getDistance() const { return distance; }
 
-    // Get maximun distance boundary
-    float DistanceSensor::getMaxDistance() {
-        return maxDistance;
-    }
 }  // namespace sensors
 
 }  // namespace aruwlib
