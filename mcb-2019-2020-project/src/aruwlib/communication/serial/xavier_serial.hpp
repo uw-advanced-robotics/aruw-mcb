@@ -138,7 +138,7 @@ private:
     // TX variables.
 
     ///< Used to increment through message send types.
-    uint8_t txMsgSwitchIndex;
+    int txMsgSwitchIndex;
 
     ///< Used for determining when to send robot id.
     aruwlib::arch::MilliTimeout txRobotIdTimeout;
@@ -178,11 +178,7 @@ private:
      * An array that allows us to cycle through message types. Add any additional message
      * types defined above here as well.
      */
-    const uint8_t txMsgSwitchArray[CV_MESSAGE_TYPE_SIZE] = {
-        CV_MESSAGE_TYPE_TURRET_TELEMETRY,
-        CV_MESSAGE_TYPE_IMU,
-        CV_MESSAGE_TYPE_ROBOT_ID,
-        CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
+    static const uint8_t txMsgSwitchArray[CV_MESSAGE_TYPE_SIZE];
 
     // TX functions.
 

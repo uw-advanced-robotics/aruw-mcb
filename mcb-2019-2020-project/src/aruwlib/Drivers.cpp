@@ -40,21 +40,101 @@ void Drivers::reset()
     resetDjiMotorTxHandler();
 }
 
-void Drivers::resetCan() {}
-void Drivers::resetCanRxHandler() {}
-void Drivers::resetAnalog() {}
-void Drivers::resetDigital() {}
-void Drivers::resetLeds() {}
-void Drivers::resetPwm() {}
-void Drivers::resetRemote() {}
-void Drivers::resetMpu6500() {}
-void Drivers::resetUart() {}
-void Drivers::resetXavierSerial() {}
-void Drivers::resetRefSerial() {}
-void Drivers::resetCommandScheduler() {}
-void Drivers::resetControlOperatorInterface() {}
-void Drivers::resetCommandMapper() {}
-void Drivers::resetErrorController() {}
-void Drivers::resetDjiMotorTxHandler() {}
+void Drivers::resetCan()
+{
+    can::Can tmp;
+    can = tmp;
+}
+
+void Drivers::resetCanRxHandler()
+{
+    can::CanRxHandler tmp;
+    canRxHandler = tmp;
+}
+
+void Drivers::resetAnalog()
+{
+    gpio::Analog tmp;
+    analog = tmp;
+}
+
+void Drivers::resetDigital()
+{
+    gpio::Digital tmp;
+    digital = tmp;
+}
+
+void Drivers::resetLeds()
+{
+    gpio::Leds tmp;
+    leds = tmp;
+}
+
+void Drivers::resetPwm()
+{
+    gpio::Pwm tmp;
+    pwm = tmp;
+}
+
+void Drivers::resetRemote()
+{
+    Remote tmp;
+    remote = tmp;
+}
+
+void Drivers::resetMpu6500()
+{
+    sensors::Mpu6500 tmp;
+    mpu6500 = tmp;
+}
+
+void Drivers::resetUart()
+{
+    serial::Uart tmp;
+    uart = tmp;
+}
+
+void Drivers::resetXavierSerial()
+{
+    serial::XavierSerial tmp;
+    xavierSerial = tmp;
+}
+
+void Drivers::resetRefSerial()
+{
+    serial::RefSerial tmp;
+    refSerial = tmp;
+}
+
+void Drivers::resetCommandScheduler()
+{
+    control::CommandScheduler tmp;
+    commandScheduler = tmp;
+}
+
+void Drivers::resetControlOperatorInterface()
+{
+    control::ControlOperatorInterface tmp;
+    controlOperatorInterface = tmp;
+}
+
+void Drivers::resetCommandMapper()
+{
+    control::CommandMapper tmp;
+    commandMapper = tmp;
+}
+
+void Drivers::resetErrorController()
+{
+    errors::ErrorController tmp;
+    errorController = tmp;
+}
+
+void Drivers::resetDjiMotorTxHandler()
+{
+    motor::DjiMotorTxHandler tmp;
+    djiMotorTxHandler = tmp;
+}
+
 #endif
 }  // namespace aruwlib

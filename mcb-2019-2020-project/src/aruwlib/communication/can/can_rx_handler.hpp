@@ -30,7 +30,7 @@ class CanRxHandler
 public:
     CanRxHandler() = default;
     CanRxHandler(const CanRxHandler&) = delete;
-    CanRxHandler& operator=(const CanRxHandler&);
+    CanRxHandler& operator=(const CanRxHandler&) = default;
 
     // Call this function to add a CanRxListner to the list of CanRxListner's
     // that are referenced when a new CAN message is received.
