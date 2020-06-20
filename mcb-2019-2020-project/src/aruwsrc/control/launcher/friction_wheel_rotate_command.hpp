@@ -3,19 +3,15 @@
 
 #include <aruwlib/control/command.hpp>
 
-using namespace aruwlib::control;
-
 namespace aruwsrc
 {
-
 namespace launcher
 {
-
 class FrictionWheelSubsystem;
 
-class FrictionWheelRotateCommand : public Command
+class FrictionWheelRotateCommand : public aruwlib::control::Command
 {
- public:
+public:
     FrictionWheelRotateCommand(FrictionWheelSubsystem* subsystem, int speed);
 
     void initialize() override;
@@ -28,7 +24,7 @@ class FrictionWheelRotateCommand : public Command
 
     static const int16_t DEFAULT_WHEEL_RPM = 6000;
 
- private:
+private:
     FrictionWheelSubsystem* frictionWheelSubsystem;
 
     int speed;
