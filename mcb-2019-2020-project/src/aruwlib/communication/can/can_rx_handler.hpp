@@ -2,7 +2,7 @@
  * This file is part of ARUW's repository.
  *
  * Interfaces with modm receive data from CAN1 and CAN2 buses.
- * 
+ *
  * To use, extend CanRxListner class and create a method called
  * processMessage. Next, call the function attachReceiveHandler,
  * which will add the class you instantiated to a list of classes
@@ -10,7 +10,7 @@
  * attached will be called by the pollCanData function
  * every time there is a message available that has the CAN identifier
  * matching the identifier specified in the CanRxListner constructor.
- * 
+ *
  * For proper closed loop motor control, it is necessary to have the
  * pollCanData function be called at a very high frequency,
  * so call this in a high frequency thread.
@@ -19,60 +19,48 @@
 #ifndef __CAN_INTERFACE_HPP__
 #define __CAN_INTERFACE_HPP__
 
-#ifndef ENV_SIMULATOR
-#include <modm/platform/can/can_1.hpp>
-#include <modm/platform/can/can_2.hpp>
-#endif
-#include <modm/architecture/interface/can_message.hpp>
-
 #include "can_rx_listener.hpp"
 
 namespace aruwlib
 {
-
 namespace can
 {
-
 class CanRxHandler
 {
- public:
-    // delete copy constructor
+public:
+    CanRxHandler() = default;
     CanRxHandler(const CanRxHandler&) = delete;
+    CanRxHandler& operator=(const CanRxHandler&);
 
     // Call this function to add a CanRxListner to the list of CanRxListner's
     // that are referenced when a new CAN message is received.
-    static void attachReceiveHandler(CanRxListner*const f);
+    void attachReceiveHandler(CanRxListner* const f);
 
     // Function handles receiving messages and calling the appropriate
     // processMessage function given the CAN bus and can identifier.
-    static void pollCanData(void);
+    void pollCanData();
 
-    static void removeReceiveHandler(const CanRxListner& rxListner);
+    void removeReceiveHandler(const CanRxListner& rxListner);
 
- private:
-    #define MAX_RECEIVE_UNIQUE_HEADER_CAN1 8
-    #define MAX_RECEIVE_UNIQUE_HEADER_CAN2 8
-    #define LOWEST_RECEIVE_ID (0x201)
+private:
+    static const int MAX_RECEIVE_UNIQUE_HEADER_CAN1 = 8;
+    static const int MAX_RECEIVE_UNIQUE_HEADER_CAN2 = 8;
+    static const uint16_t LOWEST_RECEIVE_ID = 0x201;
 
-    static CanRxListner* messageHandlerStoreCan1[MAX_RECEIVE_UNIQUE_HEADER_CAN1];
+    CanRxListner* messageHandlerStoreCan1[MAX_RECEIVE_UNIQUE_HEADER_CAN1] = {0};
 
-    static CanRxListner* messageHandlerStoreCan2[MAX_RECEIVE_UNIQUE_HEADER_CAN2];
+    CanRxListner* messageHandlerStoreCan2[MAX_RECEIVE_UNIQUE_HEADER_CAN2] = {0};
 
-    static void attachReceiveHandler(
-        CanRxListner *const CanRxHndl,
+    void attachReceiveHandler(
+        CanRxListner* const CanRxHndl,
         CanRxListner** messageHandlerStore,
-        int16_t messageHandlerStoreSize
-    );
+        int16_t messageHandlerStoreSize);
 
-    static void processReceivedCanData(
+    void processReceivedCanData(
         const modm::can::Message& rxMessage,
-        CanRxListner *const* messageHandlerStore
-    );
+        CanRxListner* const* messageHandlerStore);
 
-    static void remoteReceiveHandler(
-        const CanRxListner& rxListner,
-        CanRxListner** messageHandlerStore
-    );
+    void remoteReceiveHandler(const CanRxListner& rxListner, CanRxListner** messageHandlerStore);
 };
 
 }  // namespace can

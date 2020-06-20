@@ -1,17 +1,16 @@
 #ifndef DISTANCE_SENSOR_H_
 #define DISTANCE_SENSOR_H_
 
-#include "aruwlib/rm-dev-board-a/board.hpp"
-
-namespace aruwlib {
-
-namespace sensors {
-
-class DistanceSensor {
- public:
+namespace aruwlib
+{
+namespace sensors
+{
+class DistanceSensor
+{
+public:
     /**
      * Constructor to init boundaries.
-     * 
+     *
      * @param[in] minDistance the min valid distance.
      * @param[in] maxDistance the max valid distance.
      */
@@ -38,7 +37,7 @@ class DistanceSensor {
     ///< Get the current distance.
     float getDistance() const;
 
- protected:
+protected:
     // Distance from sensor
     float distance;
 
