@@ -138,7 +138,7 @@ private:
     // TX variables.
 
     ///< Used to increment through message send types.
-    int txMsgSwitchIndex;
+    uint8_t txMsgSwitchIndex;
 
     ///< Used for determining when to send robot id.
     aruwlib::arch::MilliTimeout txRobotIdTimeout;
