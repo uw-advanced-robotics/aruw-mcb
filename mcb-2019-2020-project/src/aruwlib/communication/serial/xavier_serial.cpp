@@ -4,7 +4,6 @@ namespace aruwlib
 {
 namespace serial
 {
-
 const uint8_t XavierSerial::txMsgSwitchArray[XavierSerial::CV_MESSAGE_TYPE_SIZE] = {
     XavierSerial::CV_MESSAGE_TYPE_TURRET_TELEMETRY,
     XavierSerial::CV_MESSAGE_TYPE_IMU,

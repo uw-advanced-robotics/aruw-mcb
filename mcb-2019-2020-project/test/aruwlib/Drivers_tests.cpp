@@ -12,8 +12,7 @@ TEST_CASE("Drivers reset tests")
     // of the driver in the first section, then insure the
     // state of the driver is reset in the second section.
 
-    SECTION("Test can driver reset") {
-    }
+    SECTION("Test can driver reset") {}
     SECTION("Test can driver reset, 2") {}
     SECTION("Test canRxHandler driver reset") {}
     SECTION("Test canRxHandler driver reset, 2") {}
