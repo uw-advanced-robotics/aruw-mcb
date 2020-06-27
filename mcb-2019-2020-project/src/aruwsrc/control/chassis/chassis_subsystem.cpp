@@ -14,7 +14,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 void ChassisSubsystem::initialize()
 {
     leftBackMotor.initialize();
