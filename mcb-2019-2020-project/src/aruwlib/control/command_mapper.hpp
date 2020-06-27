@@ -123,6 +123,8 @@ public:
         Remote::SwitchState rightSwitchState,
         std::list<Remote::Key> k = {});
 
+    int getSize() const { return remoteMappings.size(); }
+
 private:
     friend class aruwlib::Remote;
 
