@@ -1,5 +1,6 @@
 #include <aruwlib/algorithms/contiguous_float.hpp>
-#include <catch.hpp>
+
+#include "catch/catch.hpp"
 
 using namespace aruwlib::algorithms;
 

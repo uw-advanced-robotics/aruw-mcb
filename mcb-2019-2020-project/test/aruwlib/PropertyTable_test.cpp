@@ -3,7 +3,7 @@
 
 #include <aruwlib/property-stuff/Int32Property.hpp>
 #include <aruwlib/property-stuff/PropertyTable.hpp>
-#include <catch.hpp>
+#include "catch/catch.hpp"
 
 using aruwlib::BaseProperty;
 using aruwlib::Int32Property;
