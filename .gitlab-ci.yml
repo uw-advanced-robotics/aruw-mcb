@@ -18,10 +18,30 @@ build-code:
     - lbuild build # Make sure that modm is setup for linux.
     - cd sim-modm && sed -i -e 's/hosted-windows/hosted-linux/g' project.xml && lbuild build && cd -
     - /usr/bin/env python3 $(which scons) build -j2 additional-ccflags=-Werror # Build the robot code!
-    - /usr/bin/env python3 $(which scons) build-tests -j2 # Build the code for simulation
+    - /usr/bin/env python3 $(which scons) run-tests -j2 # Build the code for simulation
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   only:
     - merge_requests
     - master
+    - develop
+
+pages:
+  image: alpine
+  before_script:
+    - apk update
+    - apk add py-pip python3-dev
+    - apk add make
+    - apk add --no-cache g++ gcc libxml2-dev libxslt-dev
+    - pip3 install lxml
+    - pip3 install sphinx breathe exhale
+    - pip install sphinx_rtd_theme
+    - apk add doxygen
+  script:
+    - cd docs && make html
+    - mv _build/html/ ../public/
+  artifacts:
+    paths:
+      - public
+  only:
     - develop
