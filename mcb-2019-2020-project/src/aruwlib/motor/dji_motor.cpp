@@ -26,8 +26,9 @@ DjiMotor::DjiMotor(
       motorName(name)
 {
     motorDisconnectTimeout.stop();
-    Drivers::djiMotorTxHandler.addMotorToManager(this);
 }
+
+void DjiMotor::initialize() { Drivers::djiMotorTxHandler.addMotorToManager(this); }
 
 void DjiMotor::parseCanRxData(const modm::can::Message& message)
 {

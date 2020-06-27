@@ -12,6 +12,8 @@ namespace control
 {
 void SentinelDriveSubsystem::initialize()
 {
+    leftWheel.initialize();
+    rightWheel.initialize();
     Drivers::digital.configureInputPullMode(
         leftLimitSwitch,
         aruwlib::gpio::Digital::InputPullMode::PullDown);
