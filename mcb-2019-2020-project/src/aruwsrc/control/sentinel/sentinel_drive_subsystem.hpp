@@ -7,6 +7,8 @@
 #include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
 
+#include "robot_type.hpp"
+
 namespace aruwsrc
 {
 namespace control
@@ -32,6 +34,8 @@ public:
     {
     }
 
+    void initialize() override;
+
     /**
      * Returns absolute position of the sentinel, relative to the left end of the rail (when rail
      * is viewed from the front)
@@ -41,8 +45,6 @@ public:
     void setDesiredRpm(float desRpm);
 
     void refresh() override;
-
-    void initLimitSwitches();
 
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR6;
