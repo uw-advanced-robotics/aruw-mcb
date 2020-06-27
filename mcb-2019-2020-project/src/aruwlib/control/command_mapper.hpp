@@ -60,7 +60,7 @@ public:
 
     CommandMapper() = default;
     CommandMapper(CommandMapper&) = delete;
-    CommandMapper& operator=(CommandMapper&) = default;
+    CommandMapper& operator=(const CommandMapper&) = default;
 
     /**
      * Attaches a Command to a remote control mapping which is added to the

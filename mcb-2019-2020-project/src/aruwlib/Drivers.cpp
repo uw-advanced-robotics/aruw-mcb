@@ -2,6 +2,8 @@
 
 namespace aruwlib
 {
+#define RESET_DRIVER(className, namespacePath, ClassName) (className = namespacePath::ClassName())
+
 can::Can Drivers::can;
 can::CanRxHandler Drivers::canRxHandler;
 gpio::Analog Drivers::analog;
@@ -22,119 +24,21 @@ motor::DjiMotorTxHandler Drivers::djiMotorTxHandler;
 #ifdef ENV_SIMULATOR
 void Drivers::reset()
 {
-    resetCan();
-    resetCanRxHandler();
-    resetAnalog();
-    resetDigital();
-    resetLeds();
-    resetPwm();
-    resetRemote();
-    resetMpu6500();
-    resetUart();
-    resetXavierSerial();
-    resetRefSerial();
-    resetCommandScheduler();
-    resetControlOperatorInterface();
-    resetCommandMapper();
-    resetErrorController();
-    resetDjiMotorTxHandler();
+    RESET_DRIVER(can, can, Can);
+    RESET_DRIVER(canRxHandler, can, CanRxHandler);
+    RESET_DRIVER(analog, gpio, Analog);
+    RESET_DRIVER(digital, gpio, Digital);
+    RESET_DRIVER(leds, gpio, Leds);
+    RESET_DRIVER(pwm, gpio, Pwm);
+    RESET_DRIVER(remote, , Remote);
+    RESET_DRIVER(uart, serial, Uart);
+    RESET_DRIVER(xavierSerial, serial, XavierSerial);
+    RESET_DRIVER(refSerial, serial, RefSerial);
+    RESET_DRIVER(commandScheduler, control, CommandScheduler);
+    RESET_DRIVER(controlOperatorInterface, control, ControlOperatorInterface);
+    RESET_DRIVER(commandMapper, control, CommandMapper);
+    RESET_DRIVER(errorController, errors, ErrorController);
+    RESET_DRIVER(djiMotorTxHandler, motor, DjiMotorTxHandler);
 }
-
-void Drivers::resetCan()
-{
-    can::Can tmp;
-    can = tmp;
-}
-
-void Drivers::resetCanRxHandler()
-{
-    can::CanRxHandler tmp;
-    canRxHandler = tmp;
-}
-
-void Drivers::resetAnalog()
-{
-    gpio::Analog tmp;
-    analog = tmp;
-}
-
-void Drivers::resetDigital()
-{
-    gpio::Digital tmp;
-    digital = tmp;
-}
-
-void Drivers::resetLeds()
-{
-    gpio::Leds tmp;
-    leds = tmp;
-}
-
-void Drivers::resetPwm()
-{
-    gpio::Pwm tmp;
-    pwm = tmp;
-}
-
-void Drivers::resetRemote()
-{
-    Remote tmp;
-    remote = tmp;
-}
-
-void Drivers::resetMpu6500()
-{
-    sensors::Mpu6500 tmp;
-    mpu6500 = tmp;
-}
-
-void Drivers::resetUart()
-{
-    serial::Uart tmp;
-    uart = tmp;
-}
-
-void Drivers::resetXavierSerial()
-{
-    serial::XavierSerial tmp;
-    xavierSerial = tmp;
-}
-
-void Drivers::resetRefSerial()
-{
-    serial::RefSerial tmp;
-    refSerial = tmp;
-}
-
-void Drivers::resetCommandScheduler()
-{
-    control::CommandScheduler tmp;
-    commandScheduler = tmp;
-}
-
-void Drivers::resetControlOperatorInterface()
-{
-    control::ControlOperatorInterface tmp;
-    controlOperatorInterface = tmp;
-}
-
-void Drivers::resetCommandMapper()
-{
-    control::CommandMapper tmp;
-    commandMapper = tmp;
-}
-
-void Drivers::resetErrorController()
-{
-    errors::ErrorController tmp;
-    errorController = tmp;
-}
-
-void Drivers::resetDjiMotorTxHandler()
-{
-    motor::DjiMotorTxHandler tmp;
-    djiMotorTxHandler = tmp;
-}
-
 #endif
 }  // namespace aruwlib

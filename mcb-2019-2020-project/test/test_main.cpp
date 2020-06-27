@@ -9,14 +9,13 @@ struct DriverInitListener : Catch::TestEventListenerBase
 {
     using TestEventListenerBase::TestEventListenerBase;  // inherit constructor
 
-    void testCaseStarting(Catch::TestCaseInfo const& testInfo) override
+    void testCaseStarting(Catch::TestCaseInfo const&) override
     {
         // Perform some setup before a test case is run.
         Drivers::reset();
-        std::cout << "HIEFISJKLSDFKSDF" << std::endl;
     }
 
-    void testCaseEnded(Catch::TestCaseStats const& testCaseStats) override
+    void testCaseEnded(Catch::TestCaseStats const&) override
     {
         // Tear-down after a test case is run.
     }

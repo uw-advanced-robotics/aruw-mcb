@@ -42,24 +42,6 @@ public:
 
 #ifdef ENV_SIMULATOR
     static void reset();
-
-private:
-    static void resetCan();
-    static void resetCanRxHandler();
-    static void resetAnalog();
-    static void resetDigital();
-    static void resetLeds();
-    static void resetPwm();
-    static void resetRemote();
-    static void resetMpu6500();
-    static void resetUart();
-    static void resetXavierSerial();
-    static void resetRefSerial();
-    static void resetCommandScheduler();
-    static void resetControlOperatorInterface();
-    static void resetCommandMapper();
-    static void resetErrorController();
-    static void resetDjiMotorTxHandler();
 #endif
 };  // class Drivers
 }  // namespace aruwlib
