@@ -145,6 +145,11 @@ void XavierSerial::stopTargetTracking()
     autoAimRequestState = false;
 }
 
+bool XavierSerial::targetTrackingRequestQueued() const
+{
+    return autoAimRequestQueued;
+}
+
 bool XavierSerial::getLastAimData(TurretAimData* aimData) const
 {
     if (hasAimData)

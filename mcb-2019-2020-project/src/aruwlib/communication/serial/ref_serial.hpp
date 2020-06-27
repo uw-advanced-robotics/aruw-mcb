@@ -5,6 +5,8 @@
 
 #include "dji_serial.hpp"
 
+class DriversTestFixture;
+
 namespace aruwlib
 {
 namespace serial
@@ -238,6 +240,8 @@ public:
     void sendDisplayData(const DisplayData& displayData);
 
 private:
+    friend class ::DriversTestFixture;
+
     RobotData robotData;
     GameData gameData;
     modm::BoundedDeque<DamageEvent, REF_DAMAGE_EVENT_SIZE> receivedDpsTracker;

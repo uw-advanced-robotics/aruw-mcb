@@ -125,6 +125,9 @@ public:
     ///< Stop Requesting Xavier to Track Target.
     void stopTargetTracking();
 
+    ///< @return `true` if a tracking request is queued, `false` otherwise.
+    bool targetTrackingRequestQueued() const;
+
     /**
      * Allows the caller to extract the most up to date xavier aim data.
      *

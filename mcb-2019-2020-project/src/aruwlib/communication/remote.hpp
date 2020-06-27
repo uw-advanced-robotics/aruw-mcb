@@ -16,6 +16,8 @@
 #include <modm/platform.hpp>
 #endif
 
+class DriversTestFixture;
+
 namespace aruwlib
 {
 class Remote
@@ -106,6 +108,8 @@ public:
     uint32_t getUpdateCounter() const;
 
 private:
+    friend class ::DriversTestFixture;
+
 #define REMOTE_BUF_LEN 18              // Length of the remote recieve buffer
 #define REMOTE_READ_TIMEOUT 6          // Timeout delay between valid packets
 #define REMOTE_DISCONNECT_TIMEOUT 100  // Timeout delay for remote disconnect
