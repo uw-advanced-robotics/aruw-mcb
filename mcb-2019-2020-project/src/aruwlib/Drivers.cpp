@@ -2,7 +2,7 @@
 
 namespace aruwlib
 {
-#define RESET_DRIVER(className, namespacePath, ClassName) (className = namespacePath::ClassName())
+#define RESET_DRIVER(className, ClassName) (className = ClassName())
 
 can::Can Drivers::can;
 can::CanRxHandler Drivers::canRxHandler;
@@ -24,21 +24,21 @@ motor::DjiMotorTxHandler Drivers::djiMotorTxHandler;
 #ifdef ENV_SIMULATOR
 void Drivers::reset()
 {
-    RESET_DRIVER(can, can, Can);
-    RESET_DRIVER(canRxHandler, can, CanRxHandler);
-    RESET_DRIVER(analog, gpio, Analog);
-    RESET_DRIVER(digital, gpio, Digital);
-    RESET_DRIVER(leds, gpio, Leds);
-    RESET_DRIVER(pwm, gpio, Pwm);
-    RESET_DRIVER(remote, , Remote);
-    RESET_DRIVER(uart, serial, Uart);
-    RESET_DRIVER(xavierSerial, serial, XavierSerial);
-    RESET_DRIVER(refSerial, serial, RefSerial);
-    RESET_DRIVER(commandScheduler, control, CommandScheduler);
-    RESET_DRIVER(controlOperatorInterface, control, ControlOperatorInterface);
-    RESET_DRIVER(commandMapper, control, CommandMapper);
-    RESET_DRIVER(errorController, errors, ErrorController);
-    RESET_DRIVER(djiMotorTxHandler, motor, DjiMotorTxHandler);
+    RESET_DRIVER(can, can::Can);
+    RESET_DRIVER(canRxHandler, can::CanRxHandler);
+    RESET_DRIVER(analog, gpio::Analog);
+    RESET_DRIVER(digital, gpio::Digital);
+    RESET_DRIVER(leds, gpio::Leds);
+    RESET_DRIVER(pwm, gpio::Pwm);
+    RESET_DRIVER(remote, Remote);
+    RESET_DRIVER(uart, serial::Uart);
+    RESET_DRIVER(xavierSerial, serial::XavierSerial);
+    RESET_DRIVER(refSerial, serial::RefSerial);
+    RESET_DRIVER(commandScheduler, control::CommandScheduler);
+    RESET_DRIVER(controlOperatorInterface, control::ControlOperatorInterface);
+    RESET_DRIVER(commandMapper, control::CommandMapper);
+    RESET_DRIVER(errorController, errors::ErrorController);
+    RESET_DRIVER(djiMotorTxHandler, motor::DjiMotorTxHandler);
 }
 #endif
 }  // namespace aruwlib
