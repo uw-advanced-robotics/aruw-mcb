@@ -1,4 +1,5 @@
 #include <aruwlib/Drivers.hpp>
+
 #include "catch/catch.hpp"
 
 using namespace aruwlib;

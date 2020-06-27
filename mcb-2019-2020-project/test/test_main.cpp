@@ -5,7 +5,6 @@
 
 #include "catch/catch.hpp"
 
-
 struct DriverInitListener : Catch::TestEventListenerBase
 {
     using TestEventListenerBase::TestEventListenerBase;  // inherit constructor
