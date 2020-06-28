@@ -90,8 +90,8 @@ env.AppendUnique(CPPPATH=[
 
 if target_env == "tests":
     env.AppendUnique(CPPPATH=[
-    abspath(r"./test")
-])
+        abspath(r"./test")
+    ])
 
 sources = env.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)
 if target_env == "hardware":
