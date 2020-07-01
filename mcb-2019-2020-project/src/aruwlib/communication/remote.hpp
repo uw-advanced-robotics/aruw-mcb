@@ -67,11 +67,37 @@ public:
         B
     };
 
+    // The current remote information
+    struct RemoteInfo
+    {
+        uint32_t updateCounter = 0;
+        int16_t rightHorizontal = 0;
+        int16_t rightVertical = 0;
+        int16_t leftHorizontal = 0;
+        int16_t leftVertical = 0;
+        SwitchState leftSwitch = SwitchState::UNKNOWN;
+        SwitchState rightSwitch = SwitchState::UNKNOWN;
+        struct
+        {  // Mouse information
+            int16_t x = 0;
+            int16_t y = 0;
+            int16_t z = 0;
+            bool l = false;
+            bool r = false;
+        } mouse;
+        uint16_t key = 0;   // Keyboard information
+        int16_t wheel = 0;  // Remote wheel information
+    };
+
     // Enables and initializes Usart1 communication
     void initialize();
 
+#ifdef ENV_SIMULATOR
+    void read(const RemoteInfo &remoteInfo);
+#else
     // Reads/parses the current buffer and updates the current remote info states
     void read();
+#endif
 
     // Returns if the remote is connected
     bool isConnected() const;
@@ -112,28 +138,6 @@ private:
 #define REMOTE_INT_PRI 12              // Interrupt priority
 
     static constexpr float STICK_MAX_VALUE = 660.0f;
-
-    // The current remote information
-    struct RemoteInfo
-    {
-        uint32_t updateCounter = 0;
-        int16_t rightHorizontal = 0;
-        int16_t rightVertical = 0;
-        int16_t leftHorizontal = 0;
-        int16_t leftVertical = 0;
-        SwitchState leftSwitch = SwitchState::UNKNOWN;
-        SwitchState rightSwitch = SwitchState::UNKNOWN;
-        struct
-        {  // Mouse information
-            int16_t x = 0;
-            int16_t y = 0;
-            int16_t z = 0;
-            bool l = false;
-            bool r = false;
-        } mouse;
-        uint16_t key = 0;   // Keyboard information
-        int16_t wheel = 0;  // Remote wheel information
-    };
 
     RemoteInfo remote;
 
