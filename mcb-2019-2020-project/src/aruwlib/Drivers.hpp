@@ -12,7 +12,7 @@
 #include "communication/serial/ref_serial.hpp"
 #include "communication/serial/uart.hpp"
 #include "communication/serial/xavier_serial.hpp"
-#include "control/command_mapper.hpp"
+#include "control/CommandMapper.hpp"
 #include "control/command_scheduler.hpp"
 #include "control/control_operator_interface.hpp"
 #include "errors/error_controller.hpp"
@@ -42,24 +42,6 @@ public:
 
 #ifdef ENV_SIMULATOR
     static void reset();
-
-private:
-    static void resetCan();
-    static void resetCanRxHandler();
-    static void resetAnalog();
-    static void resetDigital();
-    static void resetLeds();
-    static void resetPwm();
-    static void resetRemote();
-    static void resetMpu6500();
-    static void resetUart();
-    static void resetXavierSerial();
-    static void resetRefSerial();
-    static void resetCommandScheduler();
-    static void resetControlOperatorInterface();
-    static void resetCommandMapper();
-    static void resetErrorController();
-    static void resetDjiMotorTxHandler();
 #endif
 };  // class Drivers
 }  // namespace aruwlib
