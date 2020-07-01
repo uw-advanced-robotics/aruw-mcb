@@ -112,6 +112,38 @@
             }
         },
         {
+            "label": "Build Tests - Debug",
+            "type": "shell",
+            "presentation": {
+                "panel": "new"
+            },
+            "command": "/usr/bin/env python3 $(which scons) build-tests",
+            "windows": {
+                "command": "conda run -n modm scons build-tests profile=debug"
+            },
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceRoot}/mcb-2019-2020-project"
+            }
+        },
+        {
+            "label": "Run Tests - Debug",
+            "type": "shell",
+            "presentation": {
+                "panel": "new"
+            },
+            "command": "/usr/bin/env python3 $(which scons) run-tests",
+            "windows": {
+                "command": "conda run -n modm scons run-tests profile=debug"
+            },
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceRoot}/mcb-2019-2020-project"
+            }
+        },
+        {
             "label": "Setup Build",
             "type":"shell",
             "presentation": {
