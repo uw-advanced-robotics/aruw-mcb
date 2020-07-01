@@ -1,0 +1,190 @@
+#ifndef REMOTE_MAP_STATE_HPP_
+#define REMOTE_MAP_STATE_HPP_
+
+#include <cstdint>
+#include <list>
+
+#include "aruwlib/communication/remote.hpp"
+
+namespace aruwlib
+{
+namespace control
+{
+/**
+ * A class to be used in conjunction with a CommandMapping to be placed in
+ * the CommandMapper. A particular RemoteMapState is used to capture a sequence
+ * of user inputs that must be triggered for a Command to be scheduled.
+ *
+ * To use this class, when possible use one of the constructors provided below
+ * to create a mapping. We have the ability to map any combination of remote
+ * switches, keyboard keys, or mouse buttons to a particular set of `Command`s.
+ * To cover every possible combination, additional initialize functions have
+ * been provided to be used in conjunction with class constructors.
+ *
+ * @see CommandMapper for information about adding a `RemoteMapState` to the
+ *      CommandMapper.
+ *
+ * @note <b>What is a "neg key"?</b> I frequently will refer to a `negKeySet`.
+ *      This can be thought of a key mapping that when matched, no matter what
+ *      the state of the RemoteMapState is, the RemoteMpState is no longer
+ *      satisfied.
+ */
+class RemoteMapState
+{
+public:
+    /**
+     * Use to distinguish between the left and mouse button when initializing
+     * a RemoteMapState that uses the mouse as input.
+     */
+    enum class MouseButton
+    {
+        LEFT,  ///< The left mouse button.
+        RIGHT  ///< The right mouse button.
+    };
+    ///< Empty constructor.
+    RemoteMapState() {}
+    /**
+     * Initializes a RemoteMapState with a single switch to the given switch state.
+     *
+     * @param[in] swh The switch to use in the map state.
+     * @param[in] switchState The switch state of the given switch.
+     */
+    RemoteMapState(Remote::Switch swh, Remote::SwitchState switchState);
+
+    /**
+     * Initializes a RemoteMapState with particular switch states for both remote
+     * switches.
+     *
+     * @param[in] leftss The switch state for the left switch.
+     * @param[in] rightss The switch state for the right switch.
+     */
+    RemoteMapState(Remote::SwitchState leftss, Remote::SwitchState rightss);
+
+    /**
+     * Initializes a RemoteMapState with a particular set of keys and optionally a
+     * particular set of negation keys.
+     *
+     * @param[in] keySet The set of keys to use for initialization.
+     * @param[in] negKeySet The set of keys to be used as negations in the RemoteMapState.
+     * @note `keySet` and `negKeySet` must be mutally exclusive sets, otherwise the
+     *      `negKeySet` will not be properly initialized.
+     */
+    RemoteMapState(
+        const std::list<Remote::Key> &keySet,
+        const std::list<Remote::Key> &negKeySet = {});
+
+    /**
+     * Initializes a RemoteMapState that will use the given mouse button (either left or
+     * right) in the mapping.
+     *
+     * @param[in] button The MouseButton to use.
+     */
+    RemoteMapState(MouseButton button);
+
+    ///< Initializes the left switch with the particular `Remote::SwitchState` provided.
+    void initLSwitch(Remote::SwitchState ss);
+
+    ///< Initializes the right switch with the particular `Remote::SwitchState` provided.
+    void initRSwitch(Remote::SwitchState ss);
+
+    /**
+     * Initializes the keys to the bit mapped set of keys provided.
+     * @note `keys` must be mutally exclusive with any set of `negKeys` already provided.
+     */
+    void initKeys(uint16_t keys);
+
+    /**
+     * Initializes the neg keys to the bit mapped set of neg keys provided.
+     * @note `negKeys` must be mutally exclusive with any set of `keys` already provided.
+     */
+    void initNegKeys(uint16_t negKeys);
+
+    /**
+     * @see `initKeys`. Interprets the list and passes that on as a bit mapped set of keys.
+     */
+    void initKeys(const std::list<Remote::Key> &keySet);
+
+    /**
+     * @see `initNegKeys`. Interprets the list and passes that on as a bit mapped set of keys.
+     */
+    void initNegKeys(const std::list<Remote::Key> &negKeySet);
+
+    /**
+     * Initializes the left mouse button to be mapped when clicked.
+     */
+    void initLMouseButton();
+
+    /**
+     * Initializes the right mouse button to be mapped when clicked.
+     */
+    void initRMouseButton();
+
+    /**
+     * Checks if `this` is a subset of `other`.
+     *
+     * @param[other] The RemoteMapState to check if `this` is a subset of.
+     * @return True if `this` RemoteMapState is a subset of the `other` RemoteMapState.
+     *      `this` is a subset of `other` if the remote mappings used by `this` match
+     *      those present in `other`, regardless of whether or not `other` is using
+     *      a particular mapping. Consider if `this` maps the left mouse button.
+     *      Since the only mapping used by `this` is the left mouse button, we only
+     *      check `other`'s left mouse button. If the `other`'s left mouse button
+     *      matches `this`'s left mouse button, `this` is a subset of `other`.
+     * @attention This function does not use neg keys to determine if the map
+     *      state is a subset.
+     */
+    bool stateSubset(const RemoteMapState &other) const;
+
+    /**
+     * Straight equality.
+     *
+     * @param[in] rms1 The first RemoteMapState to check equality for.
+     * @param[in] rms1 The second RemoteMapState to check equality for.
+     */
+    bool friend operator==(const RemoteMapState &rms1, const RemoteMapState &rms2);
+
+    ///< Opposite of operator==
+    bool friend operator!=(const RemoteMapState &rms1, const RemoteMapState &rms2);
+
+    /**
+     * @return The negKeys currently being used. Only neg keys need a getter, for
+     *      reasons discussed in the CommandMapper class.
+     */
+    uint16_t getNegKeys() const { return negKeys; }
+
+    /**
+     * @return `true` if the neg key set has been initialized, `false` otherwise.
+     */
+    bool getNegKeysUsed() const { return useNegKeys; }
+
+    /**
+     * @return the current keys initialized in the RemoteMapState, for use in CommandMapping
+     *      derived classes.
+     */
+    uint16_t getKeys() const { return keys; }
+
+private:
+    friend class CommandMapperFormatGenerator;
+
+    bool useLSwitch = false;
+    Remote::SwitchState lSwitch = Remote::SwitchState::UNKNOWN;
+
+    bool useRSwitch = false;
+    Remote::SwitchState rSwitch = Remote::SwitchState::UNKNOWN;
+
+    bool useKeys = false;
+    uint16_t keys = 0;
+
+    bool useNegKeys = false;
+    uint16_t negKeys = 0;  // if certain keys are pressed, the remote map will not do mapping
+
+    bool useLMouseButton = false;
+    bool lMouseButton = false;
+
+    bool useRMouseButton = false;
+    bool rMouseButton = false;
+};  // class RemoteState
+}  // namespace control
+}  // namespace aruwlib
+
+#endif  // REMOTE_MAP_STATE_HPP_
