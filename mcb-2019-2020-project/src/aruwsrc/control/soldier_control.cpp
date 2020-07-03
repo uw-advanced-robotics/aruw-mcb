@@ -24,6 +24,7 @@ using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::turret;
+using aruwlib::Remote;
 using aruwlib::Drivers;
 using aruwlib::control::CommandMapper;
 
