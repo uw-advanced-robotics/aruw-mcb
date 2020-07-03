@@ -6,12 +6,6 @@ namespace aruwsrc
 {
 namespace launcher
 {
-void FrictionWheelSubsystem::initialize()
-{
-    leftWheel.initialize();
-    rightWheel.initialize();
-}
-
 void FrictionWheelSubsystem::setDesiredRpm(float desRpm) { desiredRpmRamp.setTarget(desRpm); }
 
 void FrictionWheelSubsystem::refresh()

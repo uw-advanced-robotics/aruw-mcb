@@ -37,18 +37,12 @@ public:
     }
 };  // class DriversTestFixture
 
-aruwlib::motor::DjiMotor motor1(aruwlib::motor::MOTOR3, can::CanBus::CAN_BUS1, false, "motor");
-aruwlib::motor::DjiMotor motor2(aruwlib::motor::MOTOR4, can::CanBus::CAN_BUS1, false, "motor2");
-
-aruwsrc::control::ExampleSubsystem sub;
-aruwsrc::control::ExampleCommand cmd(&sub, 1);
-
 static void testCanRxHandler()
 {
     REQUIRE_FALSE(DriversTestFixture::canRxHandlerCan1ContainsMotor(aruwlib::motor::MOTOR3));
     REQUIRE_FALSE(DriversTestFixture::canRxHandlerCan1ContainsMotor(aruwlib::motor::MOTOR4));
-    Drivers::canRxHandler.attachReceiveHandler(&motor1);
-    Drivers::canRxHandler.attachReceiveHandler(&motor2);
+    aruwlib::motor::DjiMotor motor1(aruwlib::motor::MOTOR3, can::CanBus::CAN_BUS1, false, "motor");
+    aruwlib::motor::DjiMotor motor2(aruwlib::motor::MOTOR4, can::CanBus::CAN_BUS1, false, "motor2");
     REQUIRE(DriversTestFixture::canRxHandlerCan1ContainsMotor(aruwlib::motor::MOTOR3));
     REQUIRE(DriversTestFixture::canRxHandlerCan1ContainsMotor(aruwlib::motor::MOTOR4));
 }
@@ -88,6 +82,9 @@ TEST_CASE("Test refSerial driver reset, 2") { testRefSerial(); }
 
 static void testCommandScheduler()
 {
+    aruwsrc::control::ExampleSubsystem sub;
+    aruwsrc::control::ExampleCommand cmd(&sub, 1);
+
     REQUIRE_FALSE(Drivers::commandScheduler.isSubsystemRegistered(&sub));
     REQUIRE_FALSE(Drivers::commandScheduler.isCommandScheduled(&cmd));
     Drivers::commandScheduler.registerSubsystem(&sub);
@@ -111,6 +108,9 @@ TEST_CASE("Test controlOperatorInterface driver reset, 2") { testControlOperator
 
 static void testCommandMapper()
 {
+    aruwsrc::control::ExampleSubsystem sub;
+    aruwsrc::control::ExampleCommand cmd(&sub, 1);
+
     REQUIRE(Drivers::commandMapper.getSize() == 0);
     Drivers::commandMapper.addHoldMapping(
         aruwlib::control::CommandMapper::newKeyMap(
@@ -140,8 +140,8 @@ static void testDjiMotorTxHandler()
 {
     REQUIRE(Drivers::djiMotorTxHandler.getCan1MotorData(aruwlib::motor::MOTOR3) == nullptr);
     REQUIRE(Drivers::djiMotorTxHandler.getCan1MotorData(aruwlib::motor::MOTOR4) == nullptr);
-    Drivers::djiMotorTxHandler.addMotorToManager(&motor1);
-    Drivers::djiMotorTxHandler.addMotorToManager(&motor2);
+    aruwlib::motor::DjiMotor motor1(aruwlib::motor::MOTOR3, can::CanBus::CAN_BUS1, false, "motor");
+    aruwlib::motor::DjiMotor motor2(aruwlib::motor::MOTOR4, can::CanBus::CAN_BUS1, false, "motor2");
     REQUIRE(Drivers::djiMotorTxHandler.getCan1MotorData(aruwlib::motor::MOTOR3) == &motor1);
     REQUIRE(Drivers::djiMotorTxHandler.getCan1MotorData(aruwlib::motor::MOTOR4) == &motor2);
 }
