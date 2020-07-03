@@ -3,8 +3,6 @@
 
 #include "can_rx_listener.hpp"
 
-class DriversTestFixture;
-
 namespace aruwlib
 {
 namespace can
@@ -81,8 +79,6 @@ public:
     void removeReceiveHandler(const CanRxListener& rxListener);
 
 private:
-    friend class ::DriversTestFixture;
-
     static const int MAX_RECEIVE_UNIQUE_HEADER_CAN1 = 8;
     static const int MAX_RECEIVE_UNIQUE_HEADER_CAN2 = 8;
     static const int LOWEST_RECEIVE_ID = 0x201;

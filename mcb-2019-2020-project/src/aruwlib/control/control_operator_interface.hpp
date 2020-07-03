@@ -3,8 +3,6 @@
 
 #include "aruwlib/algorithms/linear_interpolation.hpp"
 
-class DriversTestFixture;
-
 namespace aruwlib
 {
 namespace control
@@ -56,8 +54,6 @@ public:
     float getSentinelSpeedInput();
 
 private:
-    friend class ::DriversTestFixture;
-
     static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / 1000.0f);
     static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / 1000.0f);
 
