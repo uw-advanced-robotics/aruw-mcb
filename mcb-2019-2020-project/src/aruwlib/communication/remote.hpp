@@ -16,8 +16,6 @@
 #include <modm/platform.hpp>
 #endif
 
-class DriversTestFixture;
-
 namespace aruwlib
 {
 class Remote

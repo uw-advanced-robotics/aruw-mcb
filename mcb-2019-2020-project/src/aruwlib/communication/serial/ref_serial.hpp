@@ -5,8 +5,6 @@
 
 #include "dji_serial.hpp"
 
-class DriversTestFixture;
-
 namespace aruwlib
 {
 namespace serial
