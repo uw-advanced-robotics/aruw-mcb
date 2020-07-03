@@ -11,6 +11,8 @@
 #include "command.hpp"
 #include "command_scheduler.hpp"
 
+using namespace aruwlib;
+
 namespace aruwlib
 {
 namespace control

@@ -13,7 +13,7 @@ namespace errors
     do                                                                             \
     {                                                                              \
         aruwlib::errors::SystemError stringError(desc, __LINE__, __FILE__, l, et); \
-        aruwlib::Drivers::errorController.addToErrorList(stringError);                      \
+        Drivers::errorController.addToErrorList(stringError);                      \
     } while (0);
 
 }  // namespace errors
