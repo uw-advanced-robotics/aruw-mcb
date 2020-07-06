@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "aruwlib/control/control_operator_interface.hpp"
+#include <aruwlib/Drivers.hpp>
 
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
@@ -13,6 +13,7 @@ using namespace fakeit;
 using namespace std;
 using namespace aruwsrc::chassis;
 using namespace aruwlib::control;
+using aruwlib::Drivers;
 
 struct SomeInterface
 {
@@ -22,15 +23,15 @@ struct SomeInterface
 
 TEST_CASE("ChassisDriveCommand: test in bounds")
 {
-    // // Pull out mock setup to dedupe from test case to test case.
-    // Mock<ChassisSubsystem> mockChassisSub;
-    // Mock<Drivers> mockDrivers;
-    // // override necessary functions.
+    // Pull out mock setup to dedupe from test case to test case.
+    Mock<ChassisSubsystem> mockChassisSub;
+    Mock<Drivers> mockDrivers;
+    // override necessary functions.
 
-    // ChassisSubsystem &chassissub = mockChassisSub.get();
-    // ControlOperatorInterface &operatorInterface = mockDrivers.get();
+    ChassisSubsystem &chassissub = mockChassisSub.get();
+    Drivers &drivers = mockDrivers.get();  // todo mock drivers.
 
-    // ChassisDriveCommand cdc(&chassissub);
+    ChassisDriveCommand cdc(&drivers, &chassissub);
     // Run tests.
 }
 
