@@ -3,6 +3,14 @@
 
 #include <cstdint>
 
+
+#ifdef ENV_SIMULATOR
+#define ENV_SIM_MOCKED(func_def) virtual func_def
+#else
+#define ENV_SIM_MOCKED(func_def) func_def
+#endif
+
+
 namespace aruwlib
 {
 namespace control

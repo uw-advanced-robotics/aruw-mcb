@@ -90,8 +90,16 @@ env.AppendUnique(CPPPATH=[
 
 if target_env == "tests":
     env.AppendUnique(CPPPATH=[
-        abspath(r"./test")
+        abspath(r"./test"),
+        abspath(r"./test/catch"),
+        abspath(r"../FakeIt/single_header/catch")
     ])
+    # env.Append(CCFLAGS = [
+    #     "-Werror=effc+",
+    #     "-Werror=non-virtual-dtor",
+    #     "-Werror=old-style-cast",
+    #     "-Werror=sign-conversion"
+    # ])
 
 sources = env.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)
 if target_env == "hardware":

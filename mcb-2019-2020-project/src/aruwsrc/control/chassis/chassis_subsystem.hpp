@@ -224,7 +224,7 @@ public:
     {
     }
 
-    void setDesiredOutput(float x, float y, float r);
+    ENV_SIM_MOCKED(void setDesiredOutput(float x, float y, float r));
 
     /**
      * run chassis rotation pid on some actual turret angle offset
