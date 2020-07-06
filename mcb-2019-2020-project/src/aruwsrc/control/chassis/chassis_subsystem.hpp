@@ -237,7 +237,7 @@ public:
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    float chassisSpeedRotationPID(float currentAngleError, float kp);
+    ENV_SIM_MOCKED(float chassisSpeedRotationPID(float currentAngleError, float kp));
 
     void refresh() override;
 

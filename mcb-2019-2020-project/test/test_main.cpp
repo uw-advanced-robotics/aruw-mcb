@@ -12,7 +12,7 @@ struct DriverInitListener : Catch::TestEventListenerBase
     void testCaseStarting(Catch::TestCaseInfo const&) override
     {
         // Perform some setup before a test case is run.
-        Drivers::reset();
+        aruwlib::Drivers::reset();
     }
 
     void testCaseEnded(Catch::TestCaseStats const&) override

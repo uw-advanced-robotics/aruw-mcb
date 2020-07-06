@@ -17,7 +17,7 @@ class ControlOperatorInterface
 {
 public:
     ControlOperatorInterface() = default;
-    ControlOperatorInterface(const ControlOperatorInterface &) = delete;
+    ControlOperatorInterface(const ControlOperatorInterface &) = default;
     ControlOperatorInterface &operator=(const ControlOperatorInterface &) = default;
 
     ///< @return the value used for chassis movement forward and backward, between -1 and 1.
