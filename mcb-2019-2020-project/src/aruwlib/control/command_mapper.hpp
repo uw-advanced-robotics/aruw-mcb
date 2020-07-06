@@ -58,7 +58,7 @@ public:
 
     CommandMapper() = default;
     CommandMapper(CommandMapper&) = delete;
-    CommandMapper& operator=(CommandMapper&) = default;
+    CommandMapper& operator=(const CommandMapper&) = default;
 
     /**
      * Attaches a Command to a remote control mapping which is added to the
@@ -120,6 +120,8 @@ public:
         Remote::SwitchState leftSwitchState,
         Remote::SwitchState rightSwitchState,
         std::list<Remote::Key> k = {});
+
+    int getSize() const { return remoteMappings.size(); }
 
 private:
     friend class aruwlib::Remote;

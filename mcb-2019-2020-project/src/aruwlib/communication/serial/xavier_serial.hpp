@@ -125,6 +125,9 @@ public:
     ///< Stop Requesting Xavier to Track Target.
     void stopTargetTracking();
 
+    ///< @return `true` if a tracking request is queued, `false` otherwise.
+    bool targetTrackingRequestQueued() const;
+
     /**
      * Allows the caller to extract the most up to date xavier aim data.
      *
@@ -178,11 +181,7 @@ private:
      * An array that allows us to cycle through message types. Add any additional message
      * types defined above here as well.
      */
-    const uint8_t txMsgSwitchArray[CV_MESSAGE_TYPE_SIZE] = {
-        CV_MESSAGE_TYPE_TURRET_TELEMETRY,
-        CV_MESSAGE_TYPE_IMU,
-        CV_MESSAGE_TYPE_ROBOT_ID,
-        CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
+    static const uint8_t txMsgSwitchArray[CV_MESSAGE_TYPE_SIZE];
 
     // TX functions.
 

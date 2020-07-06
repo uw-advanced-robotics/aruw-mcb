@@ -30,6 +30,8 @@ public:
 
     void update();
 
+    int getSize() const { return errorList.getSize(); }
+
 private:
     static const int ERROR_ROTATE_TIME = 5000;
 
