@@ -14,10 +14,7 @@ namespace arch
 {
 namespace clock
 {
-inline uint32_t getTimeMilliseconds()
-{
-    return modm::Clock::now().getTime();
-}
+inline uint32_t getTimeMilliseconds() { return modm::Clock::now().getTime(); }
 
 inline uint32_t getTimeMicroseconds()
 {
