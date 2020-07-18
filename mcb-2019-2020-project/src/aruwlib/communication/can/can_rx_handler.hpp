@@ -35,14 +35,13 @@ namespace can
 class CanRxHandler
 {
 public:
-    ///< Default constructor.
     CanRxHandler() = default;
 
     ///< Delete copy constructor.
     CanRxHandler(const CanRxHandler&) = delete;
 
     ///< Delete operator=.
-    CanRxHandler& operator=(const CanRxHandler&) = default;
+    CanRxHandler& operator=(const CanRxHandler& other) = default;
 
     /**
      * Call this function to add a CanRxListener to the list of CanRxListener's

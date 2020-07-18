@@ -22,8 +22,6 @@ public:
 
     TurretSubsystem();
 
-    void initialize() override;
-
     void refresh() override;
 
     bool isTurretOnline() const;

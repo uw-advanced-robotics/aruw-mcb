@@ -37,8 +37,6 @@ public:
     {
     }
 
-    void initialize() override;
-
     void setDesiredRpm(float desRpm);
 
     void refresh() override;

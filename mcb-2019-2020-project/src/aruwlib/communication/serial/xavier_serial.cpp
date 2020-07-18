@@ -4,12 +4,6 @@ namespace aruwlib
 {
 namespace serial
 {
-const uint8_t XavierSerial::txMsgSwitchArray[XavierSerial::CV_MESSAGE_TYPE_SIZE] = {
-    XavierSerial::CV_MESSAGE_TYPE_TURRET_TELEMETRY,
-    XavierSerial::CV_MESSAGE_TYPE_IMU,
-    XavierSerial::CV_MESSAGE_TYPE_ROBOT_ID,
-    XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
-
 XavierSerial::XavierSerial()
     : DJISerial(Uart::UartPort::Uart2, false),
       txMsgSwitchIndex(CV_MESSAGE_TYPE_TURRET_TELEMETRY),
@@ -144,8 +138,6 @@ void XavierSerial::stopTargetTracking()
     autoAimRequestQueued = false;
     autoAimRequestState = false;
 }
-
-bool XavierSerial::targetTrackingRequestQueued() const { return autoAimRequestQueued; }
 
 bool XavierSerial::getLastAimData(TurretAimData* aimData) const
 {

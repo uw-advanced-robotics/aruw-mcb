@@ -7,6 +7,7 @@
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/architecture/clock.hpp>
+#include <aruwlib/control/command_mapper.hpp>
 #include <aruwlib/errors/create_errors.hpp>
 
 using namespace aruwlib::motor;
@@ -24,12 +25,6 @@ TurretSubsystem::TurretSubsystem()
       yawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
       pitchTarget(TURRET_START_ANGLE, 0.0f, 360.0f)
 {
-}
-
-void TurretSubsystem::initialize()
-{
-    yawMotor.initialize();
-    pitchMotor.initialize();
 }
 
 float TurretSubsystem::getYawAngleFromCenter() const

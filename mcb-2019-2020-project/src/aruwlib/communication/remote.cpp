@@ -21,48 +21,6 @@ namespace aruwlib
 // Enables and initializes Usart1 communication
 void Remote::initialize() { Drivers::uart.init<Uart::Uart1, 100000, Uart::Parity::Even>(); }
 
-#ifdef ENV_SIMULATOR
-void Remote::read(const RemoteInfo &remoteInfo)
-{
-    if (remoteInfo.rightHorizontal > STICK_MAX_VALUE ||
-        remoteInfo.rightVertical > STICK_MAX_VALUE || remoteInfo.leftHorizontal > STICK_MAX_VALUE ||
-        remoteInfo.leftVertical > STICK_MAX_VALUE || remoteInfo.wheel > STICK_MAX_VALUE)
-    {
-        return;
-    }
-
-    connected = true;
-
-    remote.rightHorizontal = remoteInfo.rightHorizontal;
-    remote.rightHorizontal = remoteInfo.rightHorizontal;
-    remote.rightVertical = remoteInfo.rightVertical;
-    remote.rightVertical = remoteInfo.rightVertical;
-    remote.leftHorizontal = remoteInfo.leftHorizontal / STICK_MAX_VALUE;
-    remote.leftHorizontal = remoteInfo.leftHorizontal / STICK_MAX_VALUE;
-    remote.leftVertical = remoteInfo.leftVertical / STICK_MAX_VALUE;
-    remote.leftVertical = remoteInfo.leftVertical / STICK_MAX_VALUE;
-    remote.leftSwitch = remoteInfo.leftSwitch;
-    remote.rightSwitch = remoteInfo.rightSwitch;
-
-    // mouse input
-    remote.mouse.x = remoteInfo.mouse.x;
-    remote.mouse.y = remoteInfo.mouse.y;
-    remote.mouse.z = remoteInfo.mouse.z;
-    remote.mouse.l = remoteInfo.mouse.l;
-    remote.mouse.r = remoteInfo.mouse.r;
-    remote.key = remoteInfo.key;
-    remote.wheel = remoteInfo.wheel;
-
-    Drivers::commandMapper.handleKeyStateChange(
-        remote.key,
-        remote.leftSwitch,
-        remote.rightSwitch,
-        remote.mouse.l,
-        remote.mouse.r);
-
-    remote.updateCounter++;
-}
-#else
 // Reads/parses the current buffer and updates the current remote info states
 void Remote::read()
 {
@@ -93,7 +51,6 @@ void Remote::read()
         clearRxBuffer();
     }
 }
-#endif
 
 // Returns if the remote is connected
 bool Remote::isConnected() const { return connected; }
@@ -219,12 +176,7 @@ void Remote::parseBuffer()
     // Remote wheel
     remote.wheel = (rxBuffer[16] | rxBuffer[17] << 8) - 1024;
 
-    Drivers::commandMapper.handleKeyStateChange(
-        remote.key,
-        remote.leftSwitch,
-        remote.rightSwitch,
-        remote.mouse.l,
-        remote.mouse.r);
+    Drivers::commandMapper.handleKeyStateChange(remote.key, remote.leftSwitch, remote.rightSwitch);
 
     remote.updateCounter++;
 }
