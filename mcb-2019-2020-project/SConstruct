@@ -10,6 +10,11 @@ aruwlib_path = "./src/aruwlib"
 robot_type_file = "./robot-type/robot_type.hpp"
 valid_robot_types = ["TARGET_SOLDIER", "TARGET_OLD_SOLDIER", "TARGET_DRONE", "TARGET_ENGINEER", "TARGET_SENTINEL", "TARGET_HERO"]
 
+# For building cpputest on linux WSL
+cpputest_dir       = abspath(r"../lib/cpputest/")
+cpputest_include   = cpputest_dir + "include"
+cpputest_libs      = ["libCppUTest.a", "libCppUTestExt.a"]
+
 usage = "Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]\n\
     \"<target>\" is one of:\n\
         - \"build\": build all code for the hardware platform.\n\
@@ -113,6 +118,10 @@ if target_env == "tests":
     env.AppendUnique(CPPPATH=[
         abspath(r"./test")
     ])
+
+    env.AppendUnique(CPPPATH=[cpputest_include])
+    env.AppendUnique(LIBS=cpputest_libs)
+    env.AppendUnique(LIBPATH=cpputest_include)
 
 sources = env.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)
 if target_env == "hardware":
