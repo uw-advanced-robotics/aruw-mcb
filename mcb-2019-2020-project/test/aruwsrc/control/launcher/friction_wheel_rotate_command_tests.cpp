@@ -89,14 +89,15 @@ TEST(FrictionWheelRotateCommand, end)
 
 TEST(FrictionWheelRotateCommand, isFinished)
 {
-    mock().expectNCalls(4, "setDesiredRpm");
+    const int EXECUTE_TIMES = 100;
+    mock().expectNCalls(EXECUTE_TIMES, "setDesiredRpm");
 
     FrictionWheelSubsystemMock fs;
     FrictionWheelRotateCommand fc(&fs, 10000);
 
     CHECK_FALSE(fc.isFinished());
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < EXECUTE_TIMES; i++)
     {
         fc.execute();
     }
