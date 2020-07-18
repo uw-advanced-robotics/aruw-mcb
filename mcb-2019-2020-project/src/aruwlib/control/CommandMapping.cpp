@@ -1,10 +1,10 @@
 #include "CommandMapping.hpp"
 
+#include <algorithm>
+
 #include "aruwlib/Drivers.hpp"
 
 #include "command.hpp"
-
-#include <algorithm>
 
 namespace aruwlib
 {
@@ -12,7 +12,7 @@ namespace control
 {
 CommandMapping::CommandMapping(std::vector<Command *> cmds, const RemoteMapState &rms)
     : mapState(rms),
-        mappedCommands(cmds)
+      mappedCommands(cmds)
 {
     std::remove_if(cmds.begin(), cmds.end(), [](Command *c) { return c == nullptr; });
 }

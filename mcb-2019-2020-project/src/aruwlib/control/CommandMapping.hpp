@@ -29,7 +29,7 @@ public:
     /**
      * Initializes the CommandMapping with the set of passed in `Command`s mapped to
      * a particular RemoteMapState.
-     * 
+     *
      * @note All nullptr `Command`s in cmds will be removed.
      * @param[in] cmds A list of `Command`s that are associated with the mapping.
      * @param[in] rms The map state that will be compared to the actual remote state

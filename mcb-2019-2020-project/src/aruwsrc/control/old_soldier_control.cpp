@@ -21,6 +21,8 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc::turret;
 using aruwlib::Drivers;
 using aruwlib::control::CommandMapper;
+using aruwlib::Remote;
+using aruwlib::control::RemoteMapState;
 
 namespace aruwsrc
 {
@@ -85,35 +87,23 @@ void startOldSoldierCommands() { Drivers::commandScheduler.addCommand(&agitatorC
 /* register io mappings here ------------------------------------------------*/
 void registerOldSoldierIoMappings()
 {
+    Drivers::commandMapper.addHoldMapping(
+        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+        {&chassisDriveCommand});
+
+    Drivers::commandMapper.addHoldMapping(
+        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        {&wiggleDriveCommand});
+
     Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::RIGHT_SWITCH,
-            aruwlib::Remote::SwitchState::UP),
-        &agitatorShootFastCommand);
+        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+        {&agitatorShootFastCommand});
 
-    Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::LEFT_SWITCH,
-            aruwlib::Remote::SwitchState::MID),
-        &chassisAutorotateCommand);
+    Drivers::commandMapper.addToggleMapping(
+        RemoteMapState({Remote::Key::F}),
+        {&wiggleDriveCommand});
 
-    Drivers::commandMapper.addHoldMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::LEFT_SWITCH,
-            aruwlib::Remote::SwitchState::DOWN),
-        &chassisDriveCommand);
-
-    Drivers::commandMapper.addHoldMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::LEFT_SWITCH,
-            aruwlib::Remote::SwitchState::DOWN),
-        &openHopperCommand);
-
-    Drivers::commandMapper.addHoldMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::LEFT_SWITCH,
-            aruwlib::Remote::SwitchState::UP),
-        &wiggleDriveCommand);
+    Drivers::commandMapper.addHoldRepeatMapping(RemoteMapState(RemoteMapState::MouseButton::LEFT), {&agitatorShootFastCommand});
 }
 
 void initSubsystemCommands()

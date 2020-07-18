@@ -129,13 +129,9 @@ void registerSoldierIoMappings()
         RemoteMapState({Remote::Key::R}),
         {&openHopperCommand, &stopFrictionWheels});
 
-    // Drivers::commandMapper.addToggleMapping(
-    //     RemoteMapState({Remote::Key::V}),
-    //     {&chassisDriveCommand});
-
-    // Drivers::commandMapper.addToggleMapping(
-    //     RemoteMapState({Remote::Key::F}, {Remote::Key::R, Remote::Key::V}),
-    //     {&wiggleDriveCommand});
+    Drivers::commandMapper.addToggleMapping(
+        RemoteMapState({Remote::Key::F}),
+        {&wiggleDriveCommand});
 
     RemoteMapState shootFastMapping(RemoteMapState::MouseButton::LEFT);
     shootFastMapping.initNegKeys({Remote::Key::SHIFT});
