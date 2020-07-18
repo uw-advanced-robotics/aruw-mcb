@@ -1,6 +1,5 @@
 #include "agitator_subsystem.hpp"
 
-#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <aruwlib/errors/create_errors.hpp>

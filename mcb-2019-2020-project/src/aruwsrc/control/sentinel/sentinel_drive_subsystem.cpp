@@ -1,12 +1,10 @@
 #include "sentinel_drive_subsystem.hpp"
 
-#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/errors/create_errors.hpp>
 #include <aruwlib/motor/dji_motor.hpp>
 
 using namespace aruwlib::gpio;
-using aruwlib::Drivers;
 
 namespace aruwsrc
 {
@@ -14,8 +12,6 @@ namespace control
 {
 void SentinelDriveSubsystem::initialize()
 {
-    leftWheel.initialize();
-    rightWheel.initialize();
     aruwlib::Drivers::digital.configureInputPullMode(
         leftLimitSwitch,
         aruwlib::gpio::Digital::InputPullMode::PullDown);

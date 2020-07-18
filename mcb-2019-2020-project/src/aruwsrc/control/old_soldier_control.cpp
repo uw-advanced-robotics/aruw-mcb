@@ -20,8 +20,8 @@ using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::turret;
 using aruwlib::Drivers;
-using aruwlib::control::CommandMapper;
 using aruwlib::Remote;
+using aruwlib::control::CommandMapper;
 using aruwlib::control::RemoteMapState;
 
 namespace aruwsrc
@@ -103,7 +103,9 @@ void registerOldSoldierIoMappings()
         RemoteMapState({Remote::Key::F}),
         {&wiggleDriveCommand});
 
-    Drivers::commandMapper.addHoldRepeatMapping(RemoteMapState(RemoteMapState::MouseButton::LEFT), {&agitatorShootFastCommand});
+    Drivers::commandMapper.addHoldRepeatMapping(
+        RemoteMapState(RemoteMapState::MouseButton::LEFT),
+        {&agitatorShootFastCommand});
 }
 
 void initSubsystemCommands()
