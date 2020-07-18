@@ -15,8 +15,6 @@
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
-#include "robot_type.hpp"
-
 #if defined(TARGET_SENTINEL)
 
 using namespace aruwsrc::agitator;
@@ -111,23 +109,33 @@ void startSentinelCommands()
 void registerSentinelIoMappings()
 {
     Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        CommandMapper::newKeyMap(
+            aruwlib::Remote::Switch::LEFT_SWITCH,
+            aruwlib::Remote::SwitchState::UP),
         &agitatorShootSlowCommand);
 
     Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+        CommandMapper::newKeyMap(
+            aruwlib::Remote::Switch::RIGHT_SWITCH,
+            aruwlib::Remote::SwitchState::UP),
         &agitatorKickerCommand);
 
     Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
+        CommandMapper::newKeyMap(
+            aruwlib::Remote::Switch::RIGHT_SWITCH,
+            aruwlib::Remote::SwitchState::DOWN),
         &sentinelAutoDrive);
 
     Drivers::commandMapper.addHoldMapping(
-        CommandMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+        CommandMapper::newKeyMap(
+            aruwlib::Remote::Switch::LEFT_SWITCH,
+            aruwlib::Remote::SwitchState::DOWN),
         &stopLowerFrictionWheels);
 
     Drivers::commandMapper.addHoldMapping(
-        CommandMapper::newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
+        CommandMapper::newKeyMap(
+            aruwlib::Remote::Switch::RIGHT_SWITCH,
+            aruwlib::Remote::SwitchState::DOWN),
         &stopUpperFrictionWheels);
 }
 

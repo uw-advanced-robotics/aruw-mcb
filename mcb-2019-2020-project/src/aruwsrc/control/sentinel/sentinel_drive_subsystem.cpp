@@ -16,10 +16,10 @@ void SentinelDriveSubsystem::initialize()
 {
     leftWheel.initialize();
     rightWheel.initialize();
-    Drivers::digital.configureInputPullMode(
+    aruwlib::Drivers::digital.configureInputPullMode(
         leftLimitSwitch,
         aruwlib::gpio::Digital::InputPullMode::PullDown);
-    Drivers::digital.configureInputPullMode(
+    aruwlib::Drivers::digital.configureInputPullMode(
         rightLimitSwitch,
         aruwlib::gpio::Digital::InputPullMode::PullDown);
 }
@@ -78,12 +78,12 @@ float SentinelDriveSubsystem::absolutePosition()
 void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 {
     // DigitalPin where limit switch is placed
-    if (Drivers::digital.read(leftLimitSwitch))
+    if (aruwlib::Drivers::digital.read(leftLimitSwitch))
     {
         leftZeroRailOffset = distanceFromEncoder(&leftWheel);
         rightZeroRailOffset = distanceFromEncoder(&rightWheel);
     }
-    else if (Drivers::digital.read(rightLimitSwitch))
+    else if (aruwlib::Drivers::digital.read(rightLimitSwitch))
     {
         leftZeroRailOffset = RAIL_LENGTH - distanceFromEncoder(&leftWheel);
         rightZeroRailOffset = RAIL_LENGTH - distanceFromEncoder(&rightWheel);
