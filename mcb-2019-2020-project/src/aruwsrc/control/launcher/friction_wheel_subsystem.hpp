@@ -25,7 +25,7 @@ public:
     {
     }
 
-    void setDesiredRpm(float desRpm);
+    virtual void setDesiredRpm(float desRpm);
 
     void refresh() override;
 
