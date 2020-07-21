@@ -42,8 +42,7 @@ void AgitatorSubsystem::armAgitatorUnjamTimer(const uint32_t& predictedRotateTim
     {
         RAISE_ERROR(
             "The predicted rotate time is 0, this is physically impossible",
-            aruwlib::errors::SUBSYSTEM,
-            aruwlib::errors::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
+            aruwlib::errors::SUBSYSTEM);
     }
     agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
     agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);

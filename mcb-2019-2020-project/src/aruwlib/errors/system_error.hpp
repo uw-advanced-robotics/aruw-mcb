@@ -1,13 +1,3 @@
-/**
- * example for how to create and add an error to the ErrorController:
- * use macro in create_errors.hpp
- *
- *     RAISE_ERROR("Error in DJI Serial", aruwlib::errors::Location::DJI_SERIAL,
- *     aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
- *
- * then call ErrorController::update() to update the list of errors
- */
-
 #ifndef __SYSTEM_ERROR_HPP__
 #define __SYSTEM_ERROR_HPP__
 
@@ -17,12 +7,10 @@ namespace aruwlib
 {
 namespace errors
 {
-static const uint8_t ERROR_LOCATION_SIZE = 4;
+static const uint8_t ERROR_LOCATION_SIZE = 8;
 
-static const uint8_t ERROR_TYPE_SIZE = 8 - ERROR_LOCATION_SIZE;
-
-// Location of errors; subject to change
-enum Location
+///< Location of errors; subject to change.
+enum Location : uint8_t
 {
     CAN_RX = 0,
     MOTOR_CONTROL,
@@ -36,34 +24,24 @@ enum Location
     LOCATION_AMOUNT,
 };
 
-// Type of errors; subject to change
-enum ErrorType
-{
-    IMU_DATA_NOT_INITIALIZED = 0,
-    IMU_NOT_RECEIVING_PROPERLY,
-    INVALID_MESSAGE_LENGTH,
-    NULL_MOTOR_ID,
-    CRC_FAILURE,
-    MESSAGE_LENGTH_OVERFLOW,
-    RUN_TIME_OVERFLOW,
-    MOTOR_ID_OUT_OF_BOUNDS,
-    ADDING_NULLPTR_COMMAND,
-    ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES,
-    ZERO_DESIRED_AGITATOR_ROTATE_TIME,
-    INVALID_REMOVE,
-    INVALID_KEY_MAP_TYPE,
-    INVALID_ADD,
-    MOTOR_OFFLINE,
-    INVALID_MOTOR_OUTPUT,
-    ERROR_TYPE_AMOUNT
-};
-
 class SystemError
 {
 public:
+    ///< Default constructs the SystemError.
     SystemError();
 
-    SystemError(const char *desc, int line, const char *file, Location l, ErrorType et);
+    /**
+     * Creates a SystemError with the passed in description, line number, file
+     * name, and location.
+     */
+    SystemError(const char *desc, int line, const char *file, Location l);
+
+    /**
+     * @return `true` if e1 and e2 have identical elements, `false` otherwise.
+     *      `char *` comparison is done using `strcmp` (as opposed to comparing
+     *      the pointer itself).
+     */ 
+    friend bool operator==(const SystemError &e1, const SystemError &e2);
 
     int getLineNumber() const;
 
@@ -73,8 +51,6 @@ public:
 
     Location getLocation() const;
 
-    ErrorType getErrorType() const;
-
 private:
     int lineNumber;
 
@@ -83,8 +59,6 @@ private:
     const char *filename;
 
     Location location;
-
-    ErrorType errorType;
 };
 
 }  // namespace errors

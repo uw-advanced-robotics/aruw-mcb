@@ -116,8 +116,7 @@ void DjiMotorTxHandler::removeFromMotorManager(const DjiMotor& motor, DjiMotor**
         // error, trying to remove something that doesn't exist!
         RAISE_ERROR(
             "trying to remove something that doesn't exist",
-            aruwlib::errors::Location::MOTOR_CONTROL,
-            aruwlib::errors::ErrorType::NULL_MOTOR_ID);
+            aruwlib::errors::Location::MOTOR_CONTROL);
         return;
     }
     motorStore[id] = nullptr;

@@ -35,10 +35,7 @@ void Mpu6500::init()
     // verify mpu register ID
     if (MPU6500_ID != spiReadRegister(MPU6500_WHO_AM_I))
     {
-        RAISE_ERROR(
-            "failed to initialize the imu properly",
-            aruwlib::errors::Location::MPU6500,
-            aruwlib::errors::ErrorType::IMU_NOT_RECEIVING_PROPERLY);
+        RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500);
         return;
     }
 
@@ -88,10 +85,7 @@ void Mpu6500::read()
     }
     else
     {
-        RAISE_ERROR(
-            "failed to initialize the imu properly",
-            aruwlib::errors::Location::MPU6500,
-            aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
+        RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500);
     }
 }
 
@@ -160,10 +154,7 @@ float Mpu6500::validateReading(float reading) const
     {
         return reading;
     }
-    RAISE_ERROR(
-        "failed to initialize the imu properly",
-        aruwlib::errors::Location::MPU6500,
-        aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
+    RAISE_ERROR("failed to initialize the imu properly", aruwlib::errors::Location::MPU6500);
     return 0.0f;
 }
 

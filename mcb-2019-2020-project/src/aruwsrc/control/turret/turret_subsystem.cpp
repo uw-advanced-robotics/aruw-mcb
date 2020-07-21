@@ -49,10 +49,7 @@ int32_t TurretSubsystem::getYawVelocity() const
 {
     if (!yawMotor.isMotorOnline())
     {
-        RAISE_ERROR(
-            "trying to get velocity and yaw motor offline",
-            aruwlib::errors::TURRET,
-            aruwlib::errors::MOTOR_OFFLINE);
+        RAISE_ERROR("trying to get velocity and yaw motor offline", aruwlib::errors::TURRET);
         // throw error
         return 0;
     }
@@ -64,10 +61,7 @@ int32_t TurretSubsystem::getPitchVelocity() const
 {
     if (!pitchMotor.isMotorOnline())
     {
-        RAISE_ERROR(
-            "trying to get velocity and pitch motor offline",
-            aruwlib::errors::TURRET,
-            aruwlib::errors::MOTOR_OFFLINE);
+        RAISE_ERROR("trying to get velocity and pitch motor offline", aruwlib::errors::TURRET);
         return 0;
     }
 
@@ -127,10 +121,7 @@ void TurretSubsystem::setPitchMotorOutput(float out)
 {
     if (out > INT32_MAX || out < INT32_MIN)
     {
-        RAISE_ERROR(
-            "pitch motor output invalid",
-            aruwlib::errors::TURRET,
-            aruwlib::errors::INVALID_MOTOR_OUTPUT);
+        RAISE_ERROR("pitch motor output invalid", aruwlib::errors::TURRET);
         return;
     }
     if (pitchMotor.isMotorOnline())
@@ -151,10 +142,7 @@ void TurretSubsystem::setYawMotorOutput(float out)
 {
     if (out > INT32_MAX || out < INT32_MIN)
     {
-        RAISE_ERROR(
-            "yaw motor output invalid",
-            aruwlib::errors::TURRET,
-            aruwlib::errors::INVALID_MOTOR_OUTPUT);
+        RAISE_ERROR("yaw motor output invalid", aruwlib::errors::TURRET);
         return;
     }
     if (yawMotor.isMotorOnline())

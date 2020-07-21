@@ -22,8 +22,7 @@ void CommandScheduler::addCommand(Command* commandToAdd)
     {
         RAISE_ERROR(
             "attempting to add nullptr command",
-            aruwlib::errors::Location::COMMAND_SCHEDULER,
-            aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
+            aruwlib::errors::Location::COMMAND_SCHEDULER);
         return;
     }
 
@@ -52,8 +51,7 @@ void CommandScheduler::addCommand(Command* commandToAdd)
             // scheduler, so you cannot add it (will lead to undefined control behavior)
             RAISE_ERROR(
                 "Attempting to add a command without subsystem in the scheduler",
-                aruwlib::errors::Location::COMMAND_SCHEDULER,
-                aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
+                aruwlib::errors::Location::COMMAND_SCHEDULER);
             return;
         }
     }
@@ -119,8 +117,7 @@ void CommandScheduler::run()
         // is seriously wrong (i.e. you are adding subsystems unchecked)
         RAISE_ERROR(
             "scheduler took longer than MAX_ALLOWABLE_SCHEDULER_RUNTIME",
-            aruwlib::errors::Location::COMMAND_SCHEDULER,
-            aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
+            aruwlib::errors::Location::COMMAND_SCHEDULER);
     }
 }
 
@@ -172,8 +169,7 @@ void CommandScheduler::registerSubsystem(Subsystem* subsystem)
     {
         RAISE_ERROR(
             "subsystem is already added or trying to add nullptr subsystem",
-            aruwlib::errors::Location::COMMAND_SCHEDULER,
-            aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
+            aruwlib::errors::Location::COMMAND_SCHEDULER);
     }
 }
 

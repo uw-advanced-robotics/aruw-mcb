@@ -54,8 +54,7 @@ bool DJISerial::send()
     {
         RAISE_ERROR(
             "dji serial attempting to send greater than SERIAL_TX_BUFF_SIZE bytes",
-            aruwlib::errors::Location::DJI_SERIAL,
-            aruwlib::errors::ErrorType::MESSAGE_LENGTH_OVERFLOW);
+            aruwlib::errors::Location::DJI_SERIAL);
         return false;
     }
 
@@ -73,10 +72,7 @@ bool DJISerial::send()
     {
         return false;
         // the message did not completely send
-        RAISE_ERROR(
-            "the message did not completely send",
-            aruwlib::errors::Location::DJI_SERIAL,
-            aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+        RAISE_ERROR("the message did not completely send", aruwlib::errors::Location::DJI_SERIAL);
     }
     txMessage.messageTimestamp = modm::Clock::now();
     return true;
@@ -132,8 +128,7 @@ void DJISerial::updateSerial()
                     djiSerialRxState = SERIAL_HEADER_SEARCH;
                     RAISE_ERROR(
                         "invalid message length received",
-                        aruwlib::errors::Location::DJI_SERIAL,
-                        aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+                        aruwlib::errors::Location::DJI_SERIAL);
                     return;
                 }
 
@@ -145,10 +140,7 @@ void DJISerial::updateSerial()
                     if (!verifyCRC8(frameHeader, FRAME_HEADER_LENGTH - 3, CRC8))
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
-                        RAISE_ERROR(
-                            "CRC8 failure",
-                            aruwlib::errors::Location::DJI_SERIAL,
-                            aruwlib::errors::ErrorType::CRC_FAILURE);
+                        RAISE_ERROR("CRC8 failure", aruwlib::errors::Location::DJI_SERIAL);
                         return;
                     }
                 }
@@ -198,10 +190,7 @@ void DJISerial::updateSerial()
                     {
                         delete[] crc16CheckData;
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
-                        RAISE_ERROR(
-                            "CRC16 failure",
-                            aruwlib::errors::Location::DJI_SERIAL,
-                            aruwlib::errors::ErrorType::CRC_FAILURE);
+                        RAISE_ERROR("CRC16 failure", aruwlib::errors::Location::DJI_SERIAL);
                         return;
                     }
                     delete[] crc16CheckData;
@@ -221,10 +210,7 @@ void DJISerial::updateSerial()
                 (frameCurrReadByte > newMessage.length + 2 && rxCRCEnforcementEnabled))
             {
                 frameCurrReadByte = 0;
-                RAISE_ERROR(
-                    "Invalid message length",
-                    aruwlib::errors::Location::DJI_SERIAL,
-                    aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+                RAISE_ERROR("Invalid message length", aruwlib::errors::Location::DJI_SERIAL);
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
             break;

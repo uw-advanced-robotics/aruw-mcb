@@ -40,7 +40,7 @@ int main()
         if (sendMotorTimeout.execute())
         {
             Drivers::mpu6500.read();
-            Drivers::errorController.update();
+            Drivers::errorController.updateLedDisplay();
             Drivers::commandScheduler.run();
             Drivers::djiMotorTxHandler.processCanSendData();
         }
