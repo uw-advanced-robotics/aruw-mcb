@@ -40,7 +40,7 @@ public:
      * @return `true` if e1 and e2 have identical elements, `false` otherwise.
      *      `char *` comparison is done using `strcmp` (as opposed to comparing
      *      the pointer itself).
-     */ 
+     */
     friend bool operator==(const SystemError &e1, const SystemError &e2);
 
     int getLineNumber() const;
