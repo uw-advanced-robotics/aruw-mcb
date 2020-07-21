@@ -26,29 +26,36 @@ void initializeIo();
 // called as frequently.
 void updateIo();
 
+uint16_t duty = 0;
 int main()
 {
     Board::initialize();
     initializeIo();
     aruwsrc::control::initSubsystemCommands();
-
-    while (1)
+    while(1)
     {
-        // do this as fast as you can
-        updateIo();
-
-        if (sendMotorTimeout.execute())
-        {
-            Drivers::mpu6500.read();
-            Drivers::errorController.update();
-            Drivers::commandScheduler.run();
-            Drivers::djiMotorTxHandler.processCanSendData();
-        }
-#ifndef ENV_SIMULATOR
-        modm::delayMicroseconds(10);
-#endif
+        Drivers::pwm.write(1000, aruwlib::gpio::Pwm::BUZZER);
+        modm::delayMilliseconds(2);
+        duty++;
     }
-    return 0;
+
+//     while (1)
+//     {
+//         // do this as fast as you can
+//         updateIo();
+
+//         if (sendMotorTimeout.execute())
+//         {
+//             Drivers::mpu6500.read();
+//             Drivers::errorController.update();
+//             Drivers::commandScheduler.run();
+//             Drivers::djiMotorTxHandler.processCanSendData();
+//         }
+// #ifndef ENV_SIMULATOR
+//         modm::delayMicroseconds(10);
+// #endif
+//     }
+//     return 0;
 }
 
 void initializeIo()
@@ -56,7 +63,7 @@ void initializeIo()
     aruwlib::Drivers::analog.init();
     aruwlib::Drivers::pwm.init();
     aruwlib::Drivers::digital.init();
-    aruwlib::Drivers::leds.init();
+    // aruwlib::Drivers::leds.init();
     aruwlib::Drivers::can.initialize();
 
 #ifndef ENV_SIMULATOR

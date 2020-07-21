@@ -18,6 +18,13 @@ void Pwm::init()
 
     Timer8::setPrescaler(Board::SystemClock::APB2_PRESCALER);
     Timer8::setOverflow(Board::SystemClock::PWM_RESOLUTION);
+
+    Timer3::connect<PWMOutPinBuzzer::Ch1>();
+    Timer3::enable();
+    Timer3::setMode(Timer3::Mode::UpCounter);
+    Timer3::setPrescaler(65535);
+    Timer3::setPrescaler(Board::SystemClock::APB2_PRESCALER);
+    Timer3::setOverflow(Board::SystemClock::PWM_RESOLUTION);
 #endif
     // Set all out pins to 0 duty
     writeAll(0.0f);
@@ -28,6 +35,13 @@ void Pwm::init()
     Timer8::enableOutput();
 #endif
 }
+
+// void buzzer_note(uint16_t freq) {
+//   // prescaler = (SYS CLOCK / (Clock Div * Period / 2)) / frequency
+//   uint32_t prescaler = 11250000 / freq;
+//   tim_buzzer_config(prescaler);
+// }
+
 
 void Pwm::writeAll(float duty)
 {
@@ -42,11 +56,19 @@ void Pwm::writeAll(float duty)
 void Pwm::write(float duty, Pin pin)
 {
 #ifndef ENV_SIMULATOR
-    duty = aruwlib::algorithms::limitVal<float>(duty, 0.0f, 1.0f);
-    Timer8::configureOutputChannel(
-        static_cast<int>(pin),
-        Timer8::OutputCompareMode::Pwm,
-        Board::SystemClock::PWM_RESOLUTION * duty);
+    // if (pin != BUZZER)
+    // {
+    //     duty = aruwlib::algorithms::limitVal<float>(duty, 0.0f, 1.0f);
+    //     Timer8::configureOutputChannel(
+    //         static_cast<int>(pin),
+    //         Timer8::OutputCompareMode::Pwm,
+    //         Board::SystemClock::PWM_RESOLUTION * duty);
+    // }
+    // else
+    // {
+    Timer3::configureOutputChannel(
+        1, Timer3::OutputCompareMode::Pwm, duty);
+    // }
 #endif
 }
 }  // namespace gpio

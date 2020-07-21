@@ -24,6 +24,7 @@
     <module>modm:architecture:clock</module>
     <module>modm:processing:timer</module>
     <module>modm:platform:clock</module>
+    <module>modm:platform:timer:3</module>
     <module>modm:platform:timer:8</module>
     <module>modm:platform:adc:1</module>
     <module>modm:platform:core</module>

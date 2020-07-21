@@ -30,7 +30,8 @@ public:
         W = 1,
         X,
         Y,
-        Z
+        Z,
+        BUZZER,
     };
 
     void init();

@@ -150,6 +150,8 @@ using PWMOutPinW = GpioInputI5;
 using PWMOutPinX = GpioInputI6;
 using PWMOutPinY = GpioInputI7;
 using PWMOutPinZ = GpioInputI2;
+// initialize buzzer pwm output pin
+using PWMOutPinBuzzer = GpioOutputB4;
 
 using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPinZ>;
 
