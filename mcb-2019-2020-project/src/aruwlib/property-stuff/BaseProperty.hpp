@@ -18,7 +18,8 @@ public:
     BaseProperty(const char *name) : propertyName(name) {}
     virtual ~BaseProperty() = default;
 
-    virtual uint8_t *serializeData(uint16_t *size) const = 0;
+    virtual void serializeData(uint8_t *arr) const = 0;
+    virtual uint16_t getSerializationArrSize() const = 0;
     virtual uint8_t getPropertyType() const = 0;
     virtual const char *toString() const = 0;
     virtual bool setProperty(void *data) = 0;
@@ -26,7 +27,8 @@ public:
     const char *getPropertyName() const { return propertyName; }
     bool getPropertyNameValid() const { return strlen(propertyName) > 0; }
 
-    uint8_t *fullSerialization() const;
+    uint16_t getFullSerializationSize() const;
+    void fullSerialization(uint8_t *arr) const;
 
 private:
     const char *propertyName;

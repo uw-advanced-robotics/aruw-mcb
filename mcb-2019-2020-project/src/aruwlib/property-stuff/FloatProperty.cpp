@@ -2,12 +2,13 @@
 
 namespace aruwlib
 {
-uint8_t* FloatProperty::serializeData(uint16_t* size) const
+void FloatProperty::serializeData(uint8_t* arr) const
 {
-    *size = sizeof(float);
-    uint8_t* arr = new uint8_t[*size];
-    memcpy(arr, &data, *size);
-    return arr;
+    if (arr == nullptr)
+    {
+        return;
+    }
+    memcpy(arr, &data, sizeof(float));
 }
 
 bool FloatProperty::setProperty(void* data)

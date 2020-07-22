@@ -2,17 +2,20 @@
 
 namespace aruwlib
 {
-uint8_t *BaseProperty::fullSerialization() const
+uint16_t BaseProperty::getFullSerializationSize() const
 {
-    uint16_t dataLength;
-    uint8_t *data = serializeData(&dataLength);
-    uint8_t *dataWithHeader = new uint8_t[BASE_PROPERTY_HEADER_LENGTH + dataLength];
-    dataWithHeader[0] = getPropertyType();
-    dataWithHeader[1] = (dataLength >> 8) & 0xff;
-    dataWithHeader[2] = dataLength & 0xff;
-    memcpy(dataWithHeader + BASE_PROPERTY_HEADER_LENGTH, data, dataLength);
-    delete[] data;
-    return dataWithHeader;
+    return BASE_PROPERTY_HEADER_LENGTH + getSerializationArrSize();
 }
 
+void BaseProperty::fullSerialization(uint8_t *arr) const
+{
+    if (arr == nullptr)
+    {
+        return;
+    }
+    arr[0] = getPropertyType();
+    arr[1] = (getSerializationArrSize() >> 8) & 0xff;
+    arr[2] = getSerializationArrSize() & 0xff;
+    serializeData(arr + BASE_PROPERTY_HEADER_LENGTH);
+}
 }  // namespace aruwlib
