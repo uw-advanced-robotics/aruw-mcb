@@ -15,7 +15,8 @@ TEST_CASE("PropertyTable, addProperty/getProperty")
     PropertyTable table;
     Int32Property property(3, "cool property");
     REQUIRE(table.addProperty(&property));
-    const Int32Property *propertyPtr = dynamic_cast<const Int32Property*>(table.getProperty("cool property"));
+    const Int32Property *propertyPtr =
+        dynamic_cast<const Int32Property *>(table.getProperty("cool property"));
     REQUIRE(propertyPtr != nullptr);
     REQUIRE(propertyPtr == &property);
     bool success = table.setProperty<int32_t>("cool property", 30);
@@ -68,7 +69,8 @@ TEST_CASE("PropertyTable, bit batch insertion/removal")
         {
             propertyName += "a";
         }
-        Int32Property *propertyPtr = dynamic_cast<Int32Property*>(table.removeProperty(propertyName.c_str()));
+        Int32Property *propertyPtr =
+            dynamic_cast<Int32Property *>(table.removeProperty(propertyName.c_str()));
         REQUIRE(propertyPtr != nullptr);
         delete propertyPtr;
     }

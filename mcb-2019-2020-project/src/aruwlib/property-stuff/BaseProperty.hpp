@@ -1,8 +1,8 @@
 #ifndef BASE_PROPERTY_HPP_
 #define BASE_PROPERTY_HPP_
 
-#include <cstring>
 #include <cinttypes>
+#include <cstring>
 
 namespace aruwlib
 {
@@ -20,7 +20,7 @@ public:
 
     virtual uint8_t *serializeData(uint16_t *size) const = 0;
     virtual uint8_t getPropertyType() const = 0;
-    virtual const char* toString() const = 0;
+    virtual const char *toString() const = 0;
     virtual bool setProperty(void *data) = 0;
 
     const char *getPropertyName() const { return propertyName; }
