@@ -4,17 +4,7 @@
 
 namespace aruwlib
 {
-PropertyTable PropertyTable::mainPropertySystem;
-
-PropertyTable& PropertyTable::getMainPropertySystem() { return mainPropertySystem; }
-
-void PropertyTable::resetMainPropertyTable()
-{
-    PropertyTable p;
-    mainPropertySystem = p;
-}
-
-bool PropertyTable::addProperty(BaseProperty* data)
+bool PropertyTable::addProperty(BaseProperty *data)
 {
     if (propertyTable.size() >= PROPERTY_TABLE_MAX_SIZE)
     {
@@ -32,4 +22,23 @@ bool PropertyTable::addProperty(BaseProperty* data)
     return true;
 }
 
+BaseProperty *PropertyTable::removeProperty(const std::string &propertyName)
+{
+    if (propertyTable.count(propertyName) != 0)
+    {
+        BaseProperty *removed = propertyTable[propertyName];
+        propertyTable.erase(propertyName);
+        return removed;
+    }
+    return nullptr;
+}
+
+const BaseProperty *PropertyTable::getProperty(const std::string &propertyName)
+{
+    if (propertyTable.count(propertyName) != 0)
+    {
+        return propertyTable[propertyName];
+    }
+    return nullptr;
+}
 }  // namespace aruwlib

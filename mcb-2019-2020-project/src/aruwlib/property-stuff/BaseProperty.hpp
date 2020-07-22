@@ -2,7 +2,7 @@
 #define BASE_PROPERTY_HPP_
 
 #include <cstring>
-#include <string>
+#include <cinttypes>
 
 namespace aruwlib
 {
@@ -15,21 +15,21 @@ public:
     static const uint8_t BOOL_PROPERTY_TYPE = 2;
 
     BaseProperty() : propertyName("") {}
-    BaseProperty(const std::string &name) : propertyName(name) {}
+    BaseProperty(const char *name) : propertyName(name) {}
     virtual ~BaseProperty() = default;
 
     virtual uint8_t *serializeData(uint16_t *size) const = 0;
     virtual uint8_t getPropertyType() const = 0;
-    virtual std::string toString() const = 0;
+    virtual const char* toString() const = 0;
     virtual bool setProperty(void *data) = 0;
 
-    const std::string &getPropertyName() const { return propertyName; }
-    bool getPropertyNameValid() const { return propertyName.length() > 0; }
+    const char *getPropertyName() const { return propertyName; }
+    bool getPropertyNameValid() const { return strlen(propertyName) > 0; }
 
     uint8_t *fullSerialization() const;
 
 private:
-    std::string propertyName;
+    const char *propertyName;
 };  // class BaseProperty
 
 }  // namespace aruwlib

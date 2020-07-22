@@ -4,6 +4,7 @@
 #include <cinttypes>
 
 #include "BaseProperty.hpp"
+#include <string>
 
 namespace aruwlib
 {
@@ -12,14 +13,14 @@ class Int32Property : public BaseProperty
 public:
     Int32Property() : BaseProperty(), data(0) {}
     Int32Property(int32_t data) : BaseProperty(), data(data) {}
-    Int32Property(int32_t data, std::string name) : BaseProperty(name), data(data) {}
+    Int32Property(int32_t data, const char * name) : BaseProperty(name), data(data) {}
     Int32Property(const Int32Property& other) = default;
 
     virtual ~Int32Property() = default;
 
     uint8_t* serializeData(uint16_t* size) const override;
     uint8_t getPropertyType() const override { return INT32_PROPERTY_TYPE; }
-    std::string toString() const override { return std::to_string(data); }
+    const char * toString() const override { return std::to_string(data).c_str(); }
     bool setProperty(void* data) override;
 
     operator int32_t() const { return data; }
