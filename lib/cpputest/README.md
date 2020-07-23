@@ -1,4 +1,4 @@
-## Building the CppUTest repository
+## Building the CppUTest repository in Linux
 
 Enter into the cpputest submodule and run the following:
 
