@@ -7,6 +7,8 @@
 #include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
 
+#include "mock_macros.hpp"
+
 namespace aruwsrc
 {
 namespace launcher
@@ -25,7 +27,7 @@ public:
     {
     }
 
-    virtual void setDesiredRpm(float desRpm);
+    MOCKABLE(void setDesiredRpm(float desRpm));
 
     void refresh() override;
 
