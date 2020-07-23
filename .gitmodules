@@ -2,3 +2,6 @@
 	path = modm
 	url = https://github.com/uw-advanced-robotics/modm.git
 	branch = aruw-master
+[submodule "cpputest"]
+	path = cpputest
+	url = https://github.com/cpputest/cpputest.git
