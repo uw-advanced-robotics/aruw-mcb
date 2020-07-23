@@ -84,6 +84,9 @@ public:
         return false;
     }
 
+    ///< @return A `const_iterator` to the beginning of the property table.
+    std::map<std::string, BaseProperty *>::const_iterator getPropertyTableBeginning() const;
+
 private:
     std::map<std::string, BaseProperty *> propertyTable;
 };  // class PropertyTable

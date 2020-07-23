@@ -41,4 +41,11 @@ const BaseProperty *PropertyTable::getProperty(const std::string &propertyName)
     }
     return nullptr;
 }
+
+std::map<std::string, BaseProperty *>::const_iterator PropertyTable::getPropertyTableBeginning()
+    const
+{
+    return propertyTable.begin();
+}
+
 }  // namespace aruwlib
