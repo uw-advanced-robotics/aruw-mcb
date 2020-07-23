@@ -11,8 +11,8 @@ robot_type_file = "./robot-type/robot_type.hpp"
 valid_robot_types = ["TARGET_SOLDIER", "TARGET_OLD_SOLDIER", "TARGET_DRONE", "TARGET_ENGINEER", "TARGET_SENTINEL", "TARGET_HERO"]
 
 # For building cpputest on linux WSL
-cpputest_dir       = abspath(r"../lib/cpputest/")
-cpputest_include   = cpputest_dir + "include"
+cpputest_include   = "../cpputest/include"
+cpputest_lib_path  = "../lib/cpputest"
 cpputest_libs      = ["libCppUTest.a", "libCppUTestExt.a"]
 
 usage = "Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]\n\
