@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include <aruwlib/property-stuff/Int32Property.hpp>
-#include <aruwlib/property-stuff/PropertyTable.hpp>
+#include <aruwlib/Int32Property.hpp>
+#include <aruwlib/PropertyTable.hpp>
 
 #include "catch/catch.hpp"
 

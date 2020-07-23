@@ -1,4 +1,4 @@
-#include <aruwlib/property-stuff/Int32Property.hpp>
+#include <aruwlib/Int32Property.hpp>
 
 #include "catch/catch.hpp"
 
@@ -8,11 +8,12 @@ TEST_CASE("Int32 Property: Constructors", "[Int32Property]")
 {
     Int32Property p1;
     REQUIRE(p1 == 0);
-    REQUIRE(!strcmp(p1.getPropertyName(), ""));
+    REQUIRE(p1.getPropertyName() == nullptr);
+    ;
     REQUIRE(!strcmp(p1.toString(), "0"));
     Int32Property p2(1234);
     REQUIRE(p2 == 1234);
-    REQUIRE(!strcmp(p2.getPropertyName(), ""));
+    REQUIRE(p2.getPropertyName() == nullptr);
     REQUIRE(!strcmp(p2.toString(), "1234"));
     Int32Property p3(4321, "the property");
     REQUIRE(p3 == 4321);

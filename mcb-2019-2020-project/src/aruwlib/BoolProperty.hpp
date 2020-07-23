@@ -19,7 +19,7 @@ public:
 
     void serializeData(uint8_t* arr) const override;
     uint16_t getSerializationArrSize() const override { return sizeof(bool); }
-    uint8_t getPropertyType() const override { return BOOL_PROPERTY_TYPE; }
+    PROPERTY_TYPE_ID getPropertyType() const override { return PROPERTY_TYPE_ID::BOOL; }
     const char* toString() const override { return data ? "true" : "false"; }
     bool setProperty(void* data) override;
 
