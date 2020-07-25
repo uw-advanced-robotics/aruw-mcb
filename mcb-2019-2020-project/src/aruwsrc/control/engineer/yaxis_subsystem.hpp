@@ -1,10 +1,11 @@
 #ifndef YAXIS_SUBSYSTEM_HPP_
 #define YAXIS_SUBSYSTEM_HPP_
 
+#include <aruwlib/algorithms/ramp.hpp>
+#include <aruwlib/communication/gpio/digital.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/ramp.hpp>
-#include <aruwlib/algorithms/ramp.hpp>
 
 #include "aruwsrc/algorithms/turret_pid.hpp"
 
@@ -33,10 +34,10 @@ public:
         MAX_DISTANCE,
     };
 
-    YAxisSubsystem()
+    YAxisSubsystem(aruwlib::gpio::Digital::InputPin limitSwitchInitPin)
         : yAxisPosition(Position::MIN_DISTANCE),
           startEncoder(0),
-          isInitialized(false),
+          initialized(false),
           yAxisMotor(YAXIS_MOTOR_ID, CAN_BUS_MOTORS, true, "yaxis motor"),
           yAxisPositionPid(
               PID_P,
@@ -81,6 +82,13 @@ public:
      */
     float getDesiredPosition() const { return yAxisRamp.getTarget(); }
 
+    /**
+     * Call to start the initialization sequence again.
+     */
+    void reInitialize() { initialized = false; }
+
+    bool isInitialized() const { return initialized; }
+
 private:
     static constexpr aruwlib::motor::MotorId YAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
     static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
@@ -110,7 +118,7 @@ private:
     Position yAxisPosition;
 
     int64_t startEncoder;
-    bool isInitialized;
+    bool initialized;
 
     aruwlib::motor::DjiMotor yAxisMotor;
     algorithms::TurretPid yAxisPositionPid;
@@ -119,6 +127,9 @@ private:
     float currentPosition;
     float desiredPosition;
     uint32_t oldRampTime;
+
+    ///< The limit switch used for initializing the subsystem.
+    aruwlib::gpio::Digital::InputPin limitSwitchInitPin;
 
     void updateMotorDisplacement(
         aruwlib::motor::DjiMotor* const motor,

@@ -2,6 +2,7 @@
 
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/architecture/clock.hpp>
+#include <aruwlib/Drivers.hpp>
 
 namespace aruwsrc
 {
@@ -26,7 +27,7 @@ void YAxisSubsystem::setPosition(Position p)
 
 void YAxisSubsystem::refresh()
 {
-    if (!isInitialized)
+    if (!initialized || !yAxisMotor.isMotorOnline())
     {
         initializeYAxis();
     }
@@ -54,16 +55,16 @@ void YAxisSubsystem::initializeYAxis()
 {
     if (!yAxisMotor.isMotorOnline())
     {
-        isInitialized = false;
+        initialized = false;
         yAxisMotor.setDesiredOutput(0);
     }
     else
     {
-        if (true)  // TODO(matthew)
+        if (aruwlib::Drivers::digital.read(limitSwitchInitPin))
         {
             // The limit switch has been triggered, meaning the initialization is complete.
             startEncoder = yAxisMotor.encStore.getEncoderUnwrapped();
-            isInitialized = true;
+            initialized = true;
             yAxisMotor.setDesiredOutput(0);
         }
         else

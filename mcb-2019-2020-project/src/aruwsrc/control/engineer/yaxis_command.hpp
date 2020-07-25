@@ -22,6 +22,8 @@ public:
 
     bool isFinished() const;
 
+    const char *getName() const { return "y axis command"; }
+
 private:
     static constexpr float COMPLETE_DIFF_CRITERIA = 0.1f;
 
