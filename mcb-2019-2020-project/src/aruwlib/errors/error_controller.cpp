@@ -1,7 +1,5 @@
 #include "error_controller.hpp"
 
-#include <string>
-
 #include <modm/container/linked_list.hpp>
 
 #include "aruwlib/Drivers.hpp"

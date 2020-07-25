@@ -27,7 +27,9 @@ enum Location : uint8_t
 class SystemError
 {
 public:
-    ///< Default constructs the SystemError.
+    /**
+     * Default constructs the SystemError.
+     */
     SystemError();
 
     /**

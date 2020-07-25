@@ -32,10 +32,14 @@ public:
      */
     ErrorController() : prevLedErrorChangeWait(ERROR_ROTATE_TIME), currentDisplayIndex(0) {}
 
-    ///< Default copy constructor.
+    /**
+     * Default copy constructor.
+     */
     ErrorController(const ErrorController&) = default;
 
-    ///< Default equals operator.
+    /**
+     * Default equals operator.
+     */
     ErrorController& operator=(const ErrorController&) = default;
 
     /**
