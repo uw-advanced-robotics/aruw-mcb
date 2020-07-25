@@ -1,24 +1,19 @@
-#ifndef __SUBSYSTEM_YAXIS_HPP__
-#define __SUBSYSTEM_YAXIS_HPP__
+#ifndef XAXIS_SUBSYSTEM_HPP_
+#define XAXIS_SUBSYSTEM_HPP_
 
 #include <modm/math/filter/pid.hpp>
 #include <modm/math/filter/ramp.hpp>
-#include "src/aruwlib/control/command_scheduler.hpp"
 #include "src/aruwlib/control/subsystem.hpp"
 #include "src/aruwlib/motor/dji_motor.hpp"
 
-using namespace aruwlib::control;
-
 namespace aruwsrc
 {
-
-namespace control
+namespace engineer
 {
+class XAxisSubsystem : public aruwlib::control::Subsystem {
 
-class YAxisSubsystem : public Subsystem {
-
- public:
-     YAxisSubsystem(aruwlib::motor::MotorId yAxisId = YAXIS_MOTOR_ID)
+public:
+     XAxisSubsystem(aruwlib::motor::MotorId yAxisId = XAXIS_MOTOR_ID)
         : yAxisMotor(yAxisId, CAN_BUS_MOTORS, true),
         yAxisPositionPid(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
         yAxisRamp(0.1f, 0.1f, currentPosition)
@@ -28,7 +23,7 @@ class YAxisSubsystem : public Subsystem {
        MIN_DISTANCE,
        CENTER_DISTANCE,
        MAX_DISTANCE,
-    } Position ;  
+    } Position;
 
     void setPosition(Position p);
 
@@ -36,26 +31,26 @@ class YAxisSubsystem : public Subsystem {
 
     void refresh();
 
-
- private:
-    static constexpr aruwlib::motor::MotorId YAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
+private:
+    static constexpr aruwlib::motor::MotorId XAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
     Position yAxisPosition = MIN_DISTANCE; 
 
-    const float PID_P = 100000.0f;
-    const float PID_I = 0.0f;
-    const float PID_D = 1000000.0f;
-    const float PID_MAX_ERROR_SUM = 0.0f;
-    const float PID_MAX_OUTPUT = 16000;
+    static constexpr float PID_P = 100000.0f;
+    static constexpr float PID_I = 0.0f;
+    static constexpr float PID_D = 1000000.0f;
+    static constexpr float PID_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PID_MAX_OUTPUT = 16000.0f;
 
     // units below are in centimeter (cm)
-    const float MIN_DIST = 0.0f;
-    const float CENTER_DIST = 15.0f; 
-    const float MAX_DIST = 30.0f;
-    const float Y_AXIS_PULLEY_RADIUS = 2.5f;
-    const int GM_3510_GEAR_RATIO = 19;
-    float startEncoder = 0;
+    static constexpr float MIN_DIST = 0.0f;
+    static constexpr float CENTER_DIST = 15.0f; 
+    static constexpr float MAX_DIST = 30.0f;
+    static constexpr float Y_AXIS_PULLEY_RADIUS = 2.5f;
+    static const int GM_3510_GEAR_RATIO = 19;
+
+    int64_t startEncoder = 0;
     bool isInitialized = false; 
 
     aruwlib::motor::DjiMotor yAxisMotor;
@@ -71,9 +66,7 @@ class YAxisSubsystem : public Subsystem {
     );
 
     float getPosition() const;
-};
-
-}
-
-}
-#endif
+};  // class XAxisSubsystem
+}  // namespace engineer
+}  // namespace control
+#endif  // XAXIS_SUBSYSTEM_HPP_

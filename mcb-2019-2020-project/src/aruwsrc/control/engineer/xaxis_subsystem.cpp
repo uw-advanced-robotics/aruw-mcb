@@ -1,13 +1,11 @@
-#include "yaxis_subsystem.hpp"
+#include "xaxis_subsystem.hpp"
 #include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
-
-namespace control
+namespace engineer
 {
-
-    void YAxisSubsystem::setPosition(Position p) {
+    void XAxisSubsystem::setPosition(Position p) {
         yAxisPosition = p; 
         switch(yAxisPosition) {
             case Position::MIN_DISTANCE:
@@ -22,7 +20,7 @@ namespace control
         }
     }
 
-    void YAxisSubsystem::refresh(void) {
+    void XAxisSubsystem::refresh(void) {
         if (!isInitialized) {
             initializeYAxis();
         }
@@ -34,7 +32,7 @@ namespace control
 
     float error; 
 
-    void YAxisSubsystem::updateMotorDisplacement(
+    void XAxisSubsystem::updateMotorDisplacement(
         aruwlib::motor::DjiMotor* motor,
         modm::filter::Ramp<float>* ramp
     ) {
@@ -46,16 +44,14 @@ namespace control
         currentPosition = ramp->getValue(); 
     }
 
-    void YAxisSubsystem::initializeYAxis() {
+    void XAxisSubsystem::initializeYAxis() {
         startEncoder = yAxisMotor.encStore.getEncoderUnwrapped();
         isInitialized = true; 
         
     }
-    float YAxisSubsystem::getPosition() const
+    float XAxisSubsystem::getPosition() const
     {
         return ((yAxisMotor.encStore.getEncoderUnwrapped() - startEncoder) / 8192.0f) * (2 * aruwlib::algorithms::PI * Y_AXIS_PULLEY_RADIUS / static_cast<float>(GM_3510_GEAR_RATIO));
     }
-
-}
-
-}
+}  // namespace engineer
+}  // namespace control
