@@ -36,7 +36,6 @@ ChassisDriveCommand chassisDriveCommand(&soldierChassis);
 #error "select soldier robot type only"
 #endif
 
-
 int main()
 {
     Board::initialize();
@@ -91,6 +90,8 @@ int main()
     CommandScheduler::getMainScheduler().addCommand(&turretInitCommand);
     #endif
 
+    CommandScheduler::getMainScheduler().registerSubsystem(&soldierYAxis);
+    
     // timers
     // arbitrary, taken from last year since this send time doesn't overfill
     // can bus

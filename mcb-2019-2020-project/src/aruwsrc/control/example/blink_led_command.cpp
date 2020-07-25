@@ -22,7 +22,6 @@ namespace control
         Board::LedA::set();
     }
 
-    // NOLINTNEXTLINE (see https://github.com/cpplint/cpplint/issues/131)
     void BlinkLEDCommand::end(bool)
     {
         endCounter++;

@@ -6,8 +6,8 @@ namespace aruwsrc
 
 namespace control
 {
-    YAxisCommand::YAxisCommand(YAxisSubsystem* subsystem)
-        : Command(), subsystemYAxis(subsystem), positionYAxis(positionYAxis)
+    YAxisCommand::YAxisCommand(YAxisSubsystem* subsystem, YAxisSubsystem::Position positionYAxis)
+        : subsystemYAxis(subsystem), positionYAxis(positionYAxis)
     {
         addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
     }
@@ -15,7 +15,7 @@ namespace control
     void YAxisCommand::initialize()
     {}
 
-    void YAxisCommand::execute(YAxisSubsystem::Position)
+    void YAxisCommand::execute()
     {
         subsystemYAxis->setPosition(positionYAxis); 
     }
