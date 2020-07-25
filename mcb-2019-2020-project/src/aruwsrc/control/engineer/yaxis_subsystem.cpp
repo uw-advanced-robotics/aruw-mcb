@@ -55,19 +55,21 @@ void YAxisSubsystem::initializeYAxis()
     if (!yAxisMotor.isMotorOnline())
     {
         isInitialized = false;
+        yAxisMotor.setDesiredOutput(0);
     }
     else
     {
-        if (false)  // TODO(matthew)
+        if (true)  // TODO(matthew)
         {
-            // The limit switch has been triggered, meaning the initialization is complete
+            // The limit switch has been triggered, meaning the initialization is complete.
             startEncoder = yAxisMotor.encStore.getEncoderUnwrapped();
             isInitialized = true;
+            yAxisMotor.setDesiredOutput(0);
         }
         else
         {
-            // The limit switch has not been triggered, open loop push to the left
-            yAxisMotor.setDesiredOutput(5000);
+            // The limit switch has not been triggered, super simple proportional RPM control.
+            yAxisMotor.setDesiredOutput(RPM_PID_P * (DESIRED_INIT_RPM - yAxisMotor.getShaftRPM()));
         }
     }
 }

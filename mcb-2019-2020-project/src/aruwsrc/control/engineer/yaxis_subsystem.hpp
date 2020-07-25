@@ -12,9 +12,20 @@ namespace aruwsrc
 {
 namespace engineer
 {
+/**
+ * Controls the position of the Y-axis mechanism. Controlled by a belt mechansim
+ * connected to a GM3510. This subsystem contains logic for initializing the motor
+ * using a limit switch located on one side of the mechanism. This class also
+ * contains a position controller in conjunction with ramping used once the motor
+ * is initialized.
+ */
 class YAxisSubsystem : public aruwlib::control::Subsystem
 {
 public:
+    /**
+     * Used in the `setPosition` function to set the desired position. Rather than
+     * passing a raw position, we define some valid positions that can be set.
+     */
     enum class Position
     {
         MIN_DISTANCE,
@@ -22,11 +33,11 @@ public:
         MAX_DISTANCE,
     };
 
-    YAxisSubsystem(aruwlib::motor::MotorId yAxisId = YAXIS_MOTOR_ID)
+    YAxisSubsystem()
         : yAxisPosition(Position::MIN_DISTANCE),
           startEncoder(0),
           isInitialized(false),
-          yAxisMotor(yAxisId, CAN_BUS_MOTORS, true, "yaxis motor"),
+          yAxisMotor(YAXIS_MOTOR_ID, CAN_BUS_MOTORS, true, "yaxis motor"),
           yAxisPositionPid(
               PID_P,
               PID_I,
@@ -46,11 +57,28 @@ public:
 
     void setPosition(Position p);
 
+    /**
+     * Uses a proportional RPM controller to push the mechanism to the left
+     * until a limit switch has been triggered, in which case the y axis motor
+     * has been initialized.
+     */
     void initializeYAxis();
 
+    /**
+     * Initializes the YAxis motor if it is not yet initialized.
+     * If the motor is initialized, the desired position ramp is updated and the
+     * position PID controller is run.
+     */
     void refresh();
 
+    /**
+     * @return The last compouted current position (which is computed on `refresh`).
+     */
     float getCurrentPosition() const { return currentPosition; }
+
+    /**
+     * @return The motor's target position.
+     */
     float getDesiredPosition() const { return yAxisRamp.getTarget(); }
 
 private:
@@ -72,6 +100,12 @@ private:
 
     // 19:1 gear ratio
     static constexpr float GM_3510_GEAR_RATIO = 19.0f;
+
+    ///< The proportional term used for the RPM PID controller used in initialization.
+    static constexpr float RPM_PID_P = 10.0f;
+
+    ///< The target RPM for the PID controller involved in initializing the motor.
+    static constexpr float DESIRED_INIT_RPM = 1000.0f;
 
     Position yAxisPosition;
 
