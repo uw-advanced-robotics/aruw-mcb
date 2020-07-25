@@ -1,17 +1,17 @@
 #ifndef __TURRET_PID_HPP__
 #define __TURRET_PID_HPP__
 
-#include "src/aruwlib/algorithms/extended_kalman.hpp"
+#include <cstdint>
+
+#include <aruwlib/algorithms/extended_kalman.hpp>
 
 namespace aruwsrc
 {
-
 namespace algorithms
 {
-
 class TurretPid
 {
- public:
+public:
     TurretPid(
         float kp,
         float ki,
@@ -21,16 +21,16 @@ class TurretPid
         float tQDerivativeKalman,
         float tRDerivativeKalman,
         float tQProportionalKalman,
-        float tRProportionalKalman
-    ) :
-    kp(kp),
-    ki(ki),
-    kd(kd),
-    maxICumulative(maxICumulative),
-    maxOutput(maxOutput),
-    proportionalKalman(tQProportionalKalman, tRProportionalKalman),
-    derivativeKalman(tQDerivativeKalman, tRDerivativeKalman)
-    {}
+        float tRProportionalKalman)
+        : kp(kp),
+          ki(ki),
+          kd(kd),
+          maxICumulative(maxICumulative),
+          maxOutput(maxOutput),
+          proportionalKalman(tQProportionalKalman, tRProportionalKalman),
+          derivativeKalman(tQDerivativeKalman, tRDerivativeKalman)
+    {
+    }
 
     float runController(float error, float rotationalSpeed);
 
@@ -38,7 +38,9 @@ class TurretPid
 
     float getOutput();
 
- private:
+    void reset();
+
+private:
     // gains and constants, to be set by the user
     float kp = 0.0f;
     float ki = 0.0f;

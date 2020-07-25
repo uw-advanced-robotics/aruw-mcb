@@ -1,31 +1,30 @@
 #ifndef __TURRET_CV_COMMAND_H__
 #define __TURRET_CV_COMMAND_H__
 
+#include <aruwlib/algorithms/contiguous_float.hpp>
+#include <aruwlib/control/command.hpp>
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/command.hpp"
-#include "src/aruwlib/algorithms/contiguous_float.hpp"
-
-using namespace aruwlib::control;
 
 namespace aruwsrc
 {
-
-namespace control
+namespace turret
 {
-
 class TurretSubsystem;
-class TurretCVCommand : public Command {
- public:
+class TurretCVCommand : public aruwlib::control::Command
+{
+public:
     explicit TurretCVCommand(TurretSubsystem *subsystem);
 
-    void initialize();
-    bool isFinished() const;
+    void initialize() override;
+    bool isFinished() const override;
 
-    void execute();
+    void execute() override;
 
-    void end(bool);
+    void end(bool) override;
 
- private:
+    const char *getName() const override { return "turret cv command"; }
+
+private:
     const float YAW_P = 1.0f;
     const float YAW_I = 0.0f;
     const float YAW_D = 0.0f;
@@ -52,7 +51,7 @@ class TurretCVCommand : public Command {
     void yawIncrementAngle(float angle);
 };
 
-}  // namespace control
+}  // namespace turret
 
 }  // namespace aruwsrc
 

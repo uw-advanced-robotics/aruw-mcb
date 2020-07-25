@@ -1,29 +1,30 @@
 #ifndef __TURRET_MANUAL_COMMAND_H__
 #define __TURRET_MANUAL_COMMAND_H__
 
+#include <aruwlib/control/command.hpp>
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/command.hpp"
-
-using namespace aruwlib::control;
 
 namespace aruwsrc
 {
-
-namespace control
+namespace turret
 {
-
 class TurretSubsystem;
-class TurretManualCommand : public Command {
- public:
+class TurretManualCommand : public aruwlib::control::Command
+{
+public:
     explicit TurretManualCommand(TurretSubsystem *subsystem);
 
-    void initialize() {}
-    bool isFinished() const;
+    void initialize() override {}
+    bool isFinished() const override;
 
-    void execute();
-    void end(bool);
+    void execute() override;
+    void end(bool) override;
 
- private:
+    const char *getName() const override { return "turret manual command"; }
+
+private:
+    const float USER_INPUT_SCALAR = 50.0f;
+
     const float YAW_P = 1.0f;
     const float YAW_I = 0.0f;
     const float YAW_D = 0.0f;
@@ -46,7 +47,7 @@ class TurretManualCommand : public Command {
     void updateTurretVelocity();
 };
 
-}  // namespace control
+}  // namespace turret
 
 }  // namespace aruwsrc
 
