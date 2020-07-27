@@ -16,8 +16,6 @@
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
-#include "robot_type.hpp"
-
 #if defined(TARGET_SOLDIER)
 
 using namespace aruwsrc::agitator;
@@ -25,6 +23,7 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::turret;
 using aruwlib::Drivers;
+using aruwlib::Remote;
 using aruwlib::control::CommandMapper;
 
 namespace aruwsrc

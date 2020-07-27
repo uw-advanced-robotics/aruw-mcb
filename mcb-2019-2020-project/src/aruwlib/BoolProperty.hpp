@@ -12,14 +12,15 @@ class BoolProperty : public BaseProperty
 public:
     BoolProperty() : BaseProperty(), data(false) {}
     BoolProperty(bool data) : BaseProperty(), data(data) {}
-    BoolProperty(bool data, std::string name) : BaseProperty(name), data(data) {}
+    BoolProperty(bool data, const char* name) : BaseProperty(name), data(data) {}
     BoolProperty(const BoolProperty& other) = default;
 
     virtual ~BoolProperty() = default;
 
-    uint8_t* serializeData(uint16_t* size) const override;
-    uint8_t getPropertyType() const override { return BOOL_PROPERTY_TYPE; }
-    std::string toString() const override { return std::string(data ? "true" : "false"); }
+    void serializeData(uint8_t* arr) const override;
+    uint16_t getSerializationArrSize() const override { return sizeof(bool); }
+    PROPERTY_TYPE_ID getPropertyType() const override { return PROPERTY_TYPE_ID::BOOL; }
+    const char* toString() const override { return data ? "true" : "false"; }
     bool setProperty(void* data) override;
 
     operator bool() const { return data; }

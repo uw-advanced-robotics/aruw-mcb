@@ -2,12 +2,13 @@
 
 namespace aruwlib
 {
-uint8_t* Int32Property::serializeData(uint16_t* size) const
+void Int32Property::serializeData(uint8_t* arr) const
 {
-    *size = sizeof(int32_t);
-    uint8_t* arr = new uint8_t[*size];
-    memcpy(arr, &data, *size);
-    return arr;
+    if (arr == nullptr)
+    {
+        return;
+    }
+    memcpy(arr, &data, sizeof(int32_t));
 }
 
 bool Int32Property::setProperty(void* data)
