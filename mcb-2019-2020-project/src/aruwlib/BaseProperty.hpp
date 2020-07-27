@@ -45,7 +45,8 @@ public:
     {
         INT32,
         FLOAT,
-        BOOL
+        BOOL,
+        CONTIGUOUS_FLOAT
     };
 
     ///< Using the default constructor, an invalid propertyName is given.
