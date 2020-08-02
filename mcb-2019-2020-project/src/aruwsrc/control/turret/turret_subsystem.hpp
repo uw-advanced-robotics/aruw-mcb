@@ -62,11 +62,8 @@ private:
     const uint16_t YAW_START_ENCODER_POSITION = 8160;
     const uint16_t PITCH_START_ENCODER_POSITION = 4100;
 
-    static constexpr float FEED_FORWARD_KP = 2.0f;
-    static constexpr float FEED_FORWARD_SIN_GAIN = 2.0f;
-    static constexpr float FEED_FORWARD_KD = 1.0f;
+    float FEED_FORWARD_KP = 0.0f;
     static constexpr float FEED_FORWARD_MAX_OUTPUT = 20000.0f;
-    static constexpr float FEED_FORWARD_DERIVATIVE_LOW_PASS = 0.8f;
 
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     static const aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
