@@ -1,7 +1,5 @@
 #include "CapComms.hpp"
 
-#include <modm/platform/spi/spi_hal_4.hpp>
-
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/rm-dev-board-a/board.hpp"
 

@@ -6,6 +6,7 @@ namespace communication
 {
 void Spi::writeRegister(SpiPort spi, uint8_t reg, uint8_t data)
 {
+#ifndef ENV_SIMULATOR
     nssLow(spi);
     uint8_t tx = reg & 0x7F;
     uint8_t rx = 0;
@@ -25,10 +26,12 @@ void Spi::writeRegister(SpiPort spi, uint8_t reg, uint8_t data)
             break;
     }
     nssHigh(spi);
+#endif  // ENV_SIMULATOR
 }
 
 uint8_t Spi::readRegister(SpiPort spi, uint8_t reg)
 {
+#ifndef ENV_SIMULATOR
     nssLow(spi);
     uint8_t tx = reg | 0x80;
     uint8_t rx = 0;
@@ -47,10 +50,14 @@ uint8_t Spi::readRegister(SpiPort spi, uint8_t reg)
     }
     nssHigh(spi);
     return rx;
+#else
+    return 0;
+#endif  // ENV_SIMULATOR
 }
 
-uint8_t Spi::readRegisters(SpiPort spi, uint8_t regAddr, uint8_t *pData, uint8_t len)
+void Spi::readRegisters(SpiPort spi, uint8_t regAddr, uint8_t *pData, uint8_t len)
 {
+#ifndef ENV_SIMULATOR
     nssLow(spi);
     uint8_t tx = regAddr | 0x80;
     uint8_t rx = 0;
@@ -68,11 +75,12 @@ uint8_t Spi::readRegisters(SpiPort spi, uint8_t regAddr, uint8_t *pData, uint8_t
             break;
     }
     nssHigh(spi);
-    return 0;
+#endif  // ENV_SIMULATOR
 }
 
 void Spi::nssLow(SpiPort spi)
 {
+#ifndef ENV_SIMULATOR
     switch (spi)
     {
         case SpiPort::SPI_4:
@@ -83,10 +91,12 @@ void Spi::nssLow(SpiPort spi)
         default:
             break;
     }
+#endif  // ENV_SIMULATOR
 }
 
 void Spi::nssHigh(SpiPort spi)
 {
+#ifndef ENV_SIMULATOR
     switch (spi)
     {
         case SpiPort::SPI_4:
@@ -97,6 +107,7 @@ void Spi::nssHigh(SpiPort spi)
         default:
             break;
     }
+#endif  // ENV_SIMULATOR
 }
 }  // namespace communication
 }  // namespace aruwlib

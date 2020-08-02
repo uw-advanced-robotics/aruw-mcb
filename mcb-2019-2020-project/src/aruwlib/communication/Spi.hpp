@@ -3,7 +3,11 @@
 
 #include <cstdint>
 
+#ifndef ENV_SIMULATOR
 #include <modm/platform.hpp>
+#endif
+
+#include "aruwlib/rm-dev-board-a/board.hpp"
 
 namespace aruwlib
 {
@@ -18,6 +22,7 @@ namespace communication
 class Spi
 {
 public:
+#ifndef ENV_SIMULATOR
     using Spi4Nss = modm::platform::GpioE4;
     using Spi4Sck = modm::platform::GpioE12;
     using Spi4Miso = modm::platform::GpioE5;
@@ -27,7 +32,7 @@ public:
     using Spi5Miso = modm::platform::GpioF8;
     using Spi5Mosi = modm::platform::GpioF9;
     using Spi5Nss = modm::platform::GpioF6;
-
+#endif  // ENV_SIMULATOR
     enum class SpiPort : uint8_t
     {
         SPI_4,
@@ -44,6 +49,7 @@ public:
         modm::percent_t tolerance = modm::pct(5)>
     void initialize(SpiPort spi)
     {
+#ifndef ENV_SIMULATOR
         switch (spi)
         {
             case SpiPort::SPI_4:
@@ -58,6 +64,7 @@ public:
             default:
                 break;
         }
+#endif  // ENV_SIMULATOR
     }
 
     /**
@@ -75,7 +82,7 @@ public:
      * regAddr is the first address read, and it reads len number of addresses
      * from that point.
      */
-    uint8_t readRegisters(SpiPort spi, uint8_t regAddr, uint8_t *pData, uint8_t len);
+    void readRegisters(SpiPort spi, uint8_t regAddr, uint8_t *pData, uint8_t len);
 
     void nssLow(SpiPort spi);
 
