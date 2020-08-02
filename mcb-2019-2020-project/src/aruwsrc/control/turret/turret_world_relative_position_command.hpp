@@ -64,11 +64,13 @@ private:
 
     float imuInitialYaw;
 
+    uint32_t prevTime;
+
     aruwsrc::algorithms::TurretPid yawPid;
     aruwsrc::algorithms::TurretPid pitchPid;
 
-    void runYawPositionController();
-    void runPitchPositionController();
+    void runYawPositionController(float dt);
+    void runPitchPositionController(float dt);
 
     static float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
     static float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);

@@ -2,6 +2,7 @@
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
+#include <aruwlib/architecture/clock.hpp>
 
 using namespace aruwlib::sensors;
 using namespace aruwlib;
@@ -52,14 +53,25 @@ void TurretWorldRelativePositionCommand::initialize()
 
 void TurretWorldRelativePositionCommand::execute()
 {
-    runYawPositionController();
-    runPitchPositionController();
+    turretSubsystem->updateCurrentTurretAngles();
+    uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+    float dt;
+    if (currTime < prevTime)
+    {
+        // time wrapped
+        dt = 0.002;
+    }
+    else
+    {
+        dt = static_cast<float>(currTime - prevTime) / 1000.0f;
+    }
+    prevTime = currTime;
+    runYawPositionController(dt);
+    runPitchPositionController(dt);
 }
 
-void TurretWorldRelativePositionCommand::runYawPositionController()
+void TurretWorldRelativePositionCommand::runYawPositionController(float dt)
 {
-    turretSubsystem->updateCurrentTurretAngles();
-
     yawTargetAngle.shiftValue(
         USER_YAW_INPUT_SCALAR * Drivers::controlOperatorInterface.getTurretYawInput());
 
@@ -79,7 +91,8 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
     float pidOutput = yawPid.runController(
         positionControllerError,
-        turretSubsystem->getYawVelocity() + Drivers::mpu6500.getGz());
+        turretSubsystem->getYawVelocity() + Drivers::mpu6500.getGz(),
+        dt);
 
     pidOutput +=
         turretSubsystem->yawFeedForwardCalculation(chassisSubsystem->getChassisDesiredRotation());
@@ -87,7 +100,7 @@ void TurretWorldRelativePositionCommand::runYawPositionController()
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 
-void TurretWorldRelativePositionCommand::runPitchPositionController()
+void TurretWorldRelativePositionCommand::runPitchPositionController(float dt)
 {
     // limit the yaw min and max angles
     turretSubsystem->setPitchTarget(
@@ -99,7 +112,7 @@ void TurretWorldRelativePositionCommand::runPitchPositionController()
         turretSubsystem->getPitchAngle().difference(turretSubsystem->getPitchTarget());
 
     float pidOutput =
-        pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity());
+        pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity(), dt);
 
     // gravity compensation
     pidOutput +=
