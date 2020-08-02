@@ -1,6 +1,8 @@
 #ifndef DRIVERS_HPP_
 #define DRIVERS_HPP_
 
+#include "communication/CapComms.hpp"
+#include "communication/Spi.hpp"
 #include "communication/can/can.hpp"
 #include "communication/can/can_rx_handler.hpp"
 #include "communication/gpio/analog.hpp"
@@ -39,6 +41,8 @@ public:
     static control::CommandMapper commandMapper;
     static errors::ErrorController errorController;
     static motor::DjiMotorTxHandler djiMotorTxHandler;
+    static communication::CapComms capComms;
+    static communication::Spi spi;
 
 #ifdef ENV_SIMULATOR
     static void reset();

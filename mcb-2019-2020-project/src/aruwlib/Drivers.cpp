@@ -18,6 +18,8 @@ control::ControlOperatorInterface Drivers::controlOperatorInterface;
 control::CommandMapper Drivers::commandMapper;
 errors::ErrorController Drivers::errorController;
 motor::DjiMotorTxHandler Drivers::djiMotorTxHandler;
+communication::CapComms Drivers::capComms;
+communication::Spi Drivers::spi;
 
 #ifdef ENV_SIMULATOR
 void Drivers::reset()

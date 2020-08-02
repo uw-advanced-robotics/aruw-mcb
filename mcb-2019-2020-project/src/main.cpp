@@ -84,6 +84,7 @@ void initializeIo()
     Drivers::mpu6500.init();
     Drivers::refSerial.initialize();
     Drivers::xavierSerial.initialize();
+    Drivers::capComms.initialize();
 }
 
 void updateIo()
@@ -92,4 +93,5 @@ void updateIo()
     Drivers::xavierSerial.updateSerial();
     Drivers::refSerial.updateSerial();
     Drivers::remote.read();
+    Drivers::capComms.update();
 }

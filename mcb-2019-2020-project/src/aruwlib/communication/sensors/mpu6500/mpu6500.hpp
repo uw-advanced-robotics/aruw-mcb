@@ -190,36 +190,11 @@ private:
     ///< Calibrate accelerometer offset values. @note this function blocks.
     void calculateAccOffset();
 
-    // Functions for interacting with hardware directly.
-
-    ///< Pull the NSS pin low to initiate contact with the imu.
-    void mpuNssLow();
-
-    ///< Pull the NSS pin high to end contact with the imu.
-    void mpuNssHigh();
-
     /**
      * If the imu is not initializes, logs an error and returns 0,
      * otherwise returns the value passed in.
      */
     inline float validateReading(float reading) const;
-
-    /**
-     * Write to a given register.
-     */
-    uint8_t spiWriteRegister(uint8_t reg, uint8_t data);
-
-    /**
-     * Read from a given register.
-     */
-    uint8_t spiReadRegister(uint8_t reg);
-
-    /**
-     * Read from several registers.
-     * regAddr is the first address read, and it reads len number of addresses
-     * from that point.
-     */
-    uint8_t spiReadRegisters(uint8_t regAddr, uint8_t *pData, uint8_t len);
 #endif
 };
 
