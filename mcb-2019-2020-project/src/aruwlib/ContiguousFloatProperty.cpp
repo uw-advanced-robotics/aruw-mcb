@@ -8,7 +8,21 @@ void ContiguousFloatProperty::serializeData(uint8_t* arr) const
     {
         return;
     }
-    memcpy(arr, &data, sizeof(ContiguousFloat));
+    float val = data.getValue();
+    float min = data.getLowerBound();
+    float max = data.getUpperBound();
+    memcpy(arr, &val, sizeof(float));
+    memcpy(arr + sizeof(float), &min, sizeof(float));
+    memcpy(arr + (2 * sizeof(float)), &max, sizeof(float));
+}
+
+const char* ContiguousFloatProperty::toString() const
+{
+    // value [minVal, maxVal]
+    std::string str = std::to_string(data.getValue()) + " [" + 
+                      std::to_string(data.getLowerBound());
+    str += ", " + std::to_string(data.getUpperBound()) + "]";
+    return str.c_str();
 }
 
 bool ContiguousFloatProperty::setProperty(void* data)
@@ -17,11 +31,11 @@ bool ContiguousFloatProperty::setProperty(void* data)
     {
         return false;
     }
-    this->data = *reinterpret_cast<ContiguousFloat*>(data);
+    this->data = *reinterpret_cast<aruwlib::algorithms::ContiguousFloat*>(data);
     return true;
 }
 
-ContiguousFloatProperty& ContiguousFloatProperty::operator=(ContiguousFloat& other)
+ContiguousFloatProperty& ContiguousFloatProperty::operator=(aruwlib::algorithms::ContiguousFloat& other)
 {
     this->data = other;
     return *this;
@@ -34,14 +48,14 @@ ContiguousFloatProperty& ContiguousFloatProperty::operator+=(ContiguousFloatProp
     return *this;
 }
 
-ContiguousFloatProperty& ContiguousFloatProperty::operator+=(ContiguousFloat& other)
+ContiguousFloatProperty& ContiguousFloatProperty::operator+=(aruwlib::algorithms::ContiguousFloat& other)
 {
     float sum = this->data.getValue() + other.getValue();
     this->data.setValue(sum);
     return *this;
 }
 
-ContiguousFloatProperty& ContiguousFloatProperty::operator-=(ContiguousFloat& other)
+ContiguousFloatProperty& ContiguousFloatProperty::operator-=(aruwlib::algorithms::ContiguousFloat& other)
 {
     float diff = this->data.getValue() - other.getValue();
     this->data.setValue(diff);
@@ -62,14 +76,14 @@ ContiguousFloatProperty& ContiguousFloatProperty::operator*=(ContiguousFloatProp
     return *this;
 }
 
-ContiguousFloatProperty& ContiguousFloatProperty::operator*=(ContiguousFloat& other)
+ContiguousFloatProperty& ContiguousFloatProperty::operator*=(aruwlib::algorithms::ContiguousFloat& other)
 {
     float prod = this->data.getValue() * other.getValue();
     this->data.setValue(prod);
     return *this;
 }
 
-ContiguousFloatProperty& ContiguousFloatProperty::operator/=(ContiguousFloat& other)
+ContiguousFloatProperty& ContiguousFloatProperty::operator/=(aruwlib::algorithms::ContiguousFloat& other)
 {
     float quot = this->data.getValue() / other.getValue();
     this->data.setValue(quot);
