@@ -21,7 +21,7 @@ public:
     void serializeData(uint8_t* arr) const override;
     uint16_t getSerializationArrSize() const override { return sizeof(int32_t); }
     PROPERTY_TYPE_ID getPropertyType() const override { return PROPERTY_TYPE_ID::INT32; }
-    const char* toString() const override { return std::to_string(data).c_str(); }
+    std::string toString() const override { return std::to_string(data).c_str(); }
     bool setProperty(void* data) override;
 
     operator int32_t() const { return data; }

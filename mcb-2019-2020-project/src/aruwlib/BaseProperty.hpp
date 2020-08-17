@@ -3,6 +3,7 @@
 
 #include <cinttypes>
 #include <cstring>
+#include <string>
 
 namespace aruwlib
 {
@@ -62,7 +63,7 @@ public:
     virtual PROPERTY_TYPE_ID getPropertyType() const = 0;
 
     ///< @return A string representation of the property.
-    virtual const char *toString() const = 0;
+    virtual std::string toString() const = 0;
 
     /**
      * Sets the data stored in the property to the passed in `data`.
