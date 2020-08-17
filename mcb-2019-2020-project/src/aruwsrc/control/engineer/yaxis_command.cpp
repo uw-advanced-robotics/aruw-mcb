@@ -2,7 +2,6 @@
 
 #include <aruwlib/algorithms/math_user_utils.hpp>
 
-
 namespace aruwsrc
 {
 namespace engineer
@@ -18,7 +17,16 @@ void YAxisCommand::initialize() {}
 
 void YAxisCommand::execute() { subsystemYAxis->setPosition(positionYAxis); }
 
-void YAxisCommand::end(bool) {}
+void YAxisCommand::end(bool interrupted)
+{
+    // If interrupted, it is likely that the user stopped the mechanism for some reason, so stop
+    // attempting to reach the target. Otherwise, the mechanism should presumably continue on to
+    // the final setpoint.
+    if (interrupted)
+    {
+        subsystemYAxis->stop();
+    }
+}
 
 bool YAxisCommand::isFinished() const
 {

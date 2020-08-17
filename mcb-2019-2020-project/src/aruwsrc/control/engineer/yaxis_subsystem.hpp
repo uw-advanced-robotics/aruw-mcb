@@ -32,38 +32,25 @@ public:
         MIN_DISTANCE,
         CENTER_DISTANCE,
         MAX_DISTANCE,
+        INTERMEDIATE_DISTANCE,  ///< If `stop` is called this becomes the position.
     };
 
-    YAxisSubsystem(aruwlib::gpio::Digital::InputPin limitSwitchInitPin)
-        : yAxisPosition(Position::MIN_DISTANCE),
-          startEncoder(0),
-          initialized(false),
-          yAxisMotor(YAXIS_MOTOR_ID, CAN_BUS_MOTORS, true, "yaxis motor"),
-          yAxisPositionPid(
-              PID_P,
-              PID_I,
-              PID_D,
-              PID_MAX_ERROR_SUM,
-              PID_MAX_OUTPUT,
-              1.0f,
-              0.0f,
-              1.0f,
-              0.0f),
-          yAxisRamp(0.0f),
-          currentPosition(0.0f),
-          desiredPosition(0.0f),
-          oldRampTime(0)
-    {
-    }
+    YAxisSubsystem(aruwlib::gpio::Digital::InputPin limitSwitchInitPin);
 
+    /**
+     * There are only a limited number of positions that the y axis mechanism
+     * should be set, so through this abstraction we insure only these positions
+     * are set.
+     */
     void setPosition(Position p);
 
     /**
-     * Uses a proportional RPM controller to push the mechanism to the left
-     * until a limit switch has been triggered, in which case the y axis motor
-     * has been initialized.
+     * Sets the position of the motor to be the current position and sets
+     * the current position to be `INTERMEDIATE_DISTANCE`.
      */
-    void initializeYAxis();
+    void stop();
+
+    Position getCurrDesiredPosition() const { return yAxisPosition; }
 
     /**
      * Initializes the YAxis motor if it is not yet initialized.
@@ -93,6 +80,7 @@ private:
     static constexpr aruwlib::motor::MotorId YAXIS_MOTOR_ID = aruwlib::motor::MOTOR8;
     static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
+    // TODO(matthew) these PID parameters must be tuned with an actual mechanism
     static constexpr float PID_P = 100000.0f;
     static constexpr float PID_I = 0.0f;
     static constexpr float PID_D = 1000000.0f;
@@ -109,10 +97,14 @@ private:
     // 19:1 gear ratio
     static constexpr float GM_3510_GEAR_RATIO = 19.0f;
 
-    ///< The proportional term used for the RPM PID controller used in initialization.
+    /**
+     * The proportional term used for the RPM PID controller used in initialization.
+     */
     static constexpr float RPM_PID_P = 10.0f;
 
-    ///< The target RPM for the PID controller involved in initializing the motor.
+    /**
+     * The target RPM for the PID controller involved in initializing the motor.
+     */
     static constexpr float DESIRED_INIT_RPM = 1000.0f;
 
     Position yAxisPosition;
@@ -125,15 +117,23 @@ private:
     aruwlib::algorithms::Ramp yAxisRamp;
 
     float currentPosition;
-    float desiredPosition;
     uint32_t oldRampTime;
 
-    ///< The limit switch used for initializing the subsystem.
+    /**
+     * The limit switch used for initializing the subsystem.
+     */
     aruwlib::gpio::Digital::InputPin limitSwitchInitPin;
 
-    void updateMotorDisplacement(
-        aruwlib::motor::DjiMotor* const motor,
-        modm::filter::Ramp<float>* ramp);
+    /**
+     * Uses a proportional RPM controller to push the mechanism to the left
+     * until a limit switch has been triggered, in which case the y axis motor
+     * has been initialized.
+     *
+     * @note As this function runs a controller and sets the desired output
+     *      of motors, it is not to be used at the same time as other control
+     *      code (i.e. when the position controller is running).
+     */
+    void initializeYAxis();
 
     float getPosition() const;
 };  // class YAxisSubsystem

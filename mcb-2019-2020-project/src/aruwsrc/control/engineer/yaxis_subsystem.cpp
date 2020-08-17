@@ -1,13 +1,34 @@
 #include "yaxis_subsystem.hpp"
 
+#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/architecture/clock.hpp>
-#include <aruwlib/Drivers.hpp>
 
 namespace aruwsrc
 {
 namespace engineer
 {
+YAxisSubsystem::YAxisSubsystem(aruwlib::gpio::Digital::InputPin limitSwitchInitPin)
+    : yAxisPosition(Position::MIN_DISTANCE),
+      startEncoder(0),
+      initialized(false),
+      yAxisMotor(YAXIS_MOTOR_ID, CAN_BUS_MOTORS, true, "yaxis motor"),
+      yAxisPositionPid(
+          PID_P,
+          PID_I,
+          PID_D,
+          PID_MAX_ERROR_SUM,
+          PID_MAX_OUTPUT,
+          1.0f,
+          0.0f,
+          1.0f,
+          0.0f),
+      yAxisRamp(0.0f),
+      currentPosition(0.0f),
+      oldRampTime(0)
+{
+}
+
 void YAxisSubsystem::setPosition(Position p)
 {
     yAxisPosition = p;
@@ -22,8 +43,15 @@ void YAxisSubsystem::setPosition(Position p)
         case Position::MAX_DISTANCE:
             yAxisRamp.setTarget(MAX_DIST);
             break;
+        case Position::INTERMEDIATE_DISTANCE:
+            yAxisRamp.setTarget(currentPosition);
+            break;
+        default:
+            break;
     }
 }
+
+void YAxisSubsystem::stop() { setPosition(Position::INTERMEDIATE_DISTANCE); }
 
 void YAxisSubsystem::refresh()
 {

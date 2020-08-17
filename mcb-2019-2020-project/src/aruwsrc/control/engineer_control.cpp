@@ -14,8 +14,8 @@
 using namespace aruwsrc::engineer;
 using namespace aruwlib::gpio;
 using aruwlib::Drivers;
-using aruwlib::control::CommandMapper;
 using aruwlib::Remote;
+using aruwlib::control::CommandMapper;
 
 namespace aruwsrc
 {
@@ -51,7 +51,8 @@ void setDefaultEngineerCommands() {}
 void startEngineerCommands() {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings() {
+void registerEngineerIoMappings()
+{
     Drivers::commandMapper.addHoldRepeatMapping(
         CommandMapper::newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID),
         &c1);
