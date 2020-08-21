@@ -11,15 +11,7 @@ void FloatProperty::serializeData(uint8_t* arr) const
     memcpy(arr, &data, sizeof(float));
 }
 
-bool FloatProperty::setProperty(void* data)
-{
-    if (data == nullptr)
-    {
-        return false;
-    }
-    this->data = *reinterpret_cast<float*>(data);
-    return true;
-}
+void FloatProperty::setProperty(float data) { this->data = data; }
 
 FloatProperty& FloatProperty::operator=(float other)
 {

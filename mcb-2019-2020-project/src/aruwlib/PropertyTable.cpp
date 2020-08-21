@@ -4,7 +4,7 @@
 
 namespace aruwlib
 {
-bool PropertyTable::addProperty(BaseProperty *data)
+bool PropertyTable::addProperty(IBaseProperty *data)
 {
     if (propertyTable.size() >= PROPERTY_TABLE_MAX_SIZE)
     {
@@ -22,18 +22,18 @@ bool PropertyTable::addProperty(BaseProperty *data)
     return true;
 }
 
-BaseProperty *PropertyTable::removeProperty(const std::string &propertyName)
+IBaseProperty *PropertyTable::removeProperty(const std::string &propertyName)
 {
     if (propertyTable.count(propertyName) != 0)
     {
-        BaseProperty *removed = propertyTable[propertyName];
+        IBaseProperty *removed = propertyTable[propertyName];
         propertyTable.erase(propertyName);
         return removed;
     }
     return nullptr;
 }
 
-const BaseProperty *PropertyTable::getProperty(const std::string &propertyName)
+const IBaseProperty *PropertyTable::getProperty(const std::string &propertyName)
 {
     if (propertyTable.count(propertyName) != 0)
     {
@@ -42,7 +42,7 @@ const BaseProperty *PropertyTable::getProperty(const std::string &propertyName)
     return nullptr;
 }
 
-std::map<std::string, BaseProperty *>::const_iterator PropertyTable::getPropertyTableBeginning()
+std::map<std::string, IBaseProperty *>::const_iterator PropertyTable::getPropertyTableBeginning()
     const
 {
     return propertyTable.begin();

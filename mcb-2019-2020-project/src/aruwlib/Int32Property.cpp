@@ -11,15 +11,7 @@ void Int32Property::serializeData(uint8_t* arr) const
     memcpy(arr, &data, sizeof(int32_t));
 }
 
-bool Int32Property::setProperty(void* data)
-{
-    if (data == nullptr)
-    {
-        return false;
-    }
-    this->data = *reinterpret_cast<int32_t*>(data);
-    return true;
-}
+void Int32Property::setProperty(int32_t data) { this->data = data; }
 
 Int32Property& Int32Property::operator=(int32_t other)
 {

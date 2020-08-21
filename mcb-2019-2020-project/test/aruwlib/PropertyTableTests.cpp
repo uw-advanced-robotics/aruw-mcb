@@ -24,6 +24,18 @@ TEST_CASE("PropertyTable, addProperty/getProperty")
     REQUIRE(property == 30);
 }
 
+TEST_CASE("PropertyTable, setProperty")
+{
+    PropertyTable ptable;
+    Int32Property p(42, "p");
+    ptable.addProperty(&p);
+    const Int32Property *ppointer = dynamic_cast<const Int32Property *>(ptable.getProperty("p"));
+    REQUIRE(ppointer == &p);
+    REQUIRE(*ppointer == 42);
+    REQUIRE(ptable.setProperty<int32_t>("p", 41));
+    REQUIRE(*ppointer == 41);
+}
+
 TEST_CASE("PropertyTable, bit batch insertion/removal")
 {
     PropertyTable table;

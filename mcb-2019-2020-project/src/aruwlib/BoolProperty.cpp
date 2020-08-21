@@ -11,15 +11,7 @@ void BoolProperty::serializeData(uint8_t* arr) const
     arr[0] = data;
 }
 
-bool BoolProperty::setProperty(void* data)
-{
-    if (data == nullptr)
-    {
-        return false;
-    }
-    this->data = (bool*)(&data);
-    return true;
-}
+void BoolProperty::setProperty(bool data) { this->data = data; }
 
 BoolProperty& BoolProperty::operator=(bool p2)
 {

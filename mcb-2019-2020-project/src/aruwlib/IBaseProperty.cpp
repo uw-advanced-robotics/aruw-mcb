@@ -2,12 +2,12 @@
 
 namespace aruwlib
 {
-uint16_t BaseProperty::getFullSerializationSize() const
+uint16_t IBaseProperty::getFullSerializationSize() const
 {
     return BASE_PROPERTY_HEADER_LENGTH + getSerializationArrSize();
 }
 
-void BaseProperty::fullSerialization(uint8_t *arr) const
+void IBaseProperty::fullSerialization(uint8_t *arr) const
 {
     if (arr == nullptr)
     {

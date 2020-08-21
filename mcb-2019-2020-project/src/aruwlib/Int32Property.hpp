@@ -8,7 +8,7 @@
 
 namespace aruwlib
 {
-class Int32Property : public BaseProperty
+class Int32Property : public BaseProperty<int32_t>
 {
 public:
     Int32Property() : BaseProperty(), data(0) {}
@@ -21,8 +21,8 @@ public:
     void serializeData(uint8_t* arr) const override;
     uint16_t getSerializationArrSize() const override { return sizeof(int32_t); }
     PROPERTY_TYPE_ID getPropertyType() const override { return PROPERTY_TYPE_ID::INT32; }
-    const char* toString() const override { return std::to_string(data).c_str(); }
-    bool setProperty(void* data) override;
+    std::string toString() const override { return std::to_string(data).c_str(); }
+    void setProperty(int32_t data) override;
 
     operator int32_t() const { return data; }
     Int32Property& operator=(Int32Property& other) = default;
