@@ -23,8 +23,7 @@ Servo::Servo(aruwlib::gpio::Pwm::Pin pwmPin, float maximumPwm, float minimumPwm,
         maxPwm = 1.0f;
         RAISE_ERROR(
             "min servo PWM > max servo PWM",
-            errors::Location::SERVO,
-            errors::ErrorType::INVALID_ADD);
+            errors::Location::SERVO);
     }
 }
 
