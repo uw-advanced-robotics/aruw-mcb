@@ -76,7 +76,7 @@ void TurretCVCommand::runYawPositionController()
     float positionControllerError =
         turretSubsystem->getYawAngle().difference(turretSubsystem->getYawTarget());
     float pidOutput =
-        yawPid.runController(positionControllerError, turretSubsystem->getYawVelocity());
+        yawPid.runController(positionControllerError, turretSubsystem->getYawVelocity(), 2.0f);
 
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
@@ -87,7 +87,7 @@ void TurretCVCommand::runPitchPositionController()
     float positionControllerError =
         turretSubsystem->getPitchAngle().difference(turretSubsystem->getPitchTarget());
     float pidOutput =
-        pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity());
+        pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity(), 2.0f);
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
