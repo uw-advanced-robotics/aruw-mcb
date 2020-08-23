@@ -64,8 +64,7 @@ template <typename T> T limitVal(T val, T min, T max)
 
 inline float mapVal(float val, float inMin, float inMax, float outMin, float outMax)
 {
-    return (inMax == inMin) ? 0 :
-            (val - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
+    return (inMax == inMin) ? 0 : ((val - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin;
 }
 
 inline float mapValLimited(float val, float inMin, float inMax, float outMin, float outMax)
