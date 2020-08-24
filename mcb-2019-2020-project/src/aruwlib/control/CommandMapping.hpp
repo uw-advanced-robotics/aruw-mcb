@@ -35,21 +35,31 @@ public:
      * @param[in] rms The map state that will be compared to the actual remote state
      *      to determine whether or not to add `cmds`.
      */
-    CommandMapping(std::vector<Command *> cmds, const RemoteMapState &rms);
+    CommandMapping(const std::vector<Command *> cmds, const RemoteMapState &rms);
 
-    ///< Copy construction disallowed.
+    /**
+     * Copy construction disallowed.
+     */
     CommandMapping(const CommandMapping &) = delete;
 
-    ///< Copying disallowed.
+    /**
+     * Copying disallowed.
+     */
     CommandMapping &operator=(const CommandMapping &) = delete;
 
-    ///< Straight equality of the mapState and mappedCommands between cm1 and cm2.
+    /**
+     * Straight equality of the mapState and mappedCommands between cm1 and cm2.
+     */
     friend bool operator==(const CommandMapping &cm1, const CommandMapping &cm2);
 
-    ///< Checks for equality between the `mapState`s of cm1 and cm2.
+    /**
+     * Checks for equality between the `mapState`s of cm1 and cm2.
+     */
     friend bool mapStateEqual(const CommandMapping &cm1, const CommandMapping &cm2);
 
-    ///< Nothing dynamically allocated that isn't taken care of automatically.
+    /**
+     * Nothing dynamically allocated that isn't taken care of automatically.
+     */
     virtual ~CommandMapping() = default;
 
     /**
@@ -67,17 +77,34 @@ public:
      */
     virtual bool mappingSubset(const RemoteMapState &mapState);
 
+    /**
+     * @return `true` if `state1`'s neg keys are a subset of `state2`'s keys pressed, `false`
+     *      otherwise.
+     */
+    static inline bool negKeysSubset(const RemoteMapState &state1, const RemoteMapState &state2)
+    {
+        return state1.getNegKeys() == (state1.getNegKeys() & state2.getKeys());
+    }
+
 protected:
-    ///< The RemoteMapState specified when constructing the CommandMapping.
+    /**
+     * The RemoteMapState specified when constructing the CommandMapping.
+     */
     const RemoteMapState mapState;
 
-    ///< A map of commands to add to and remove from the scheduler.
+    /**
+     * A map of commands to add to and remove from the scheduler.
+     */
     std::vector<Command *> mappedCommands;
 
-    ///< Adds all the `Command`s to the main CommandScheduler.
+    /**
+     * Adds all the `Command`s to the main CommandScheduler.
+     */
     void addCommands();
 
-    ///< Removes all the `Command`s from the main CommandScheduler.
+    /**
+     * Removes all the `Command`s from the main CommandScheduler.
+     */
     void removeCommands();
 
     friend class CommandMapperFormatGenerator;

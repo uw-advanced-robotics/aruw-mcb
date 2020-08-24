@@ -19,14 +19,18 @@ class RemoteMapState;
 class PressCommandMapping : public CommandMapping
 {
 public:
-    ///< Constructor must take the set of `Command`s and the RemoteMapState.
-    PressCommandMapping(std::vector<Command *> cmds, const RemoteMapState &rms)
+    /**
+     * Constructor must take the set of `Command`s and the RemoteMapState.
+     */
+    PressCommandMapping(const std::vector<Command *> cmds, const RemoteMapState &rms)
         : CommandMapping(cmds, rms),
           pressed(false)
     {
     }
 
-    ///< Default destructor.
+    /**
+     * Default destructor.
+     */
     ~PressCommandMapping() override = default;
 
     /**

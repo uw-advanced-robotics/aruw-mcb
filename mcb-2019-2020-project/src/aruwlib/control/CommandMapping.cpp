@@ -10,11 +10,13 @@ namespace aruwlib
 {
 namespace control
 {
-CommandMapping::CommandMapping(std::vector<Command *> cmds, const RemoteMapState &rms)
+CommandMapping::CommandMapping(const std::vector<Command *> cmds, const RemoteMapState &rms)
     : mapState(rms),
       mappedCommands(cmds)
 {
-    std::remove_if(cmds.begin(), cmds.end(), [](Command *c) { return c == nullptr; });
+    std::remove_if(mappedCommands.begin(), mappedCommands.end(), [](Command *c) {
+        return c == nullptr;
+    });
 }
 
 bool operator==(const CommandMapping &cm1, const CommandMapping &cm2)

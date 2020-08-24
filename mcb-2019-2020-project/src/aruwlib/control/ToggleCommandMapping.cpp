@@ -7,9 +7,9 @@ namespace control
 void ToggleCommandMapping::executeCommandMapping(const RemoteMapState &currState)
 {
     // Neg keys are weird in this mapping and must be handled as such. If neg keys of the
-    // currState equal the mapping's state, the mapping must be reset and commands removed.
-    if (mapState.getNegKeysUsed() &&
-        ((mapState.getNegKeys() & currState.getKeys()) == mapState.getNegKeys()))
+    // map state are a subset of the currState's neg keys, the mapping must be reset
+    // and commands removed.
+    if (mapState.getNegKeysUsed() && negKeysSubset(mapState, currState))
     {
         toggled = false;
         pressed = false;

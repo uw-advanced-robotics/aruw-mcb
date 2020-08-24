@@ -41,8 +41,12 @@ public:
         LEFT,  ///< The left mouse button.
         RIGHT  ///< The right mouse button.
     };
-    ///< Empty constructor.
+
+    /**
+     * Empty constructor.
+     */
     RemoteMapState() {}
+
     /**
      * Initializes a RemoteMapState with a single switch to the given switch state.
      *
@@ -81,10 +85,14 @@ public:
      */
     RemoteMapState(MouseButton button);
 
-    ///< Initializes the left switch with the particular `Remote::SwitchState` provided.
+    /**
+     * Initializes the left switch with the particular `Remote::SwitchState` provided.
+     */
     void initLSwitch(Remote::SwitchState ss);
 
-    ///< Initializes the right switch with the particular `Remote::SwitchState` provided.
+    /**
+     * Initializes the right switch with the particular `Remote::SwitchState` provided.
+     */
     void initRSwitch(Remote::SwitchState ss);
 
     /**
@@ -143,7 +151,9 @@ public:
      */
     bool friend operator==(const RemoteMapState &rms1, const RemoteMapState &rms2);
 
-    ///< Opposite of operator==
+    /**
+     * Opposite of operator==
+     */
     bool friend operator!=(const RemoteMapState &rms1, const RemoteMapState &rms2);
 
     /**

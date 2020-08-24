@@ -2,6 +2,7 @@
 #define HOLD_REPEAT_MAPPING_HPP_
 
 #include "CommandMapping.hpp"
+
 namespace aruwlib
 {
 namespace control
@@ -21,13 +22,17 @@ class RemoteMapState;
 class HoldRepeatCommandMapping : public CommandMapping
 {
 public:
-    ///< Constructor must take the set of `Command`s and the RemoteMapState.
-    HoldRepeatCommandMapping(std::vector<Command *> cmds, const RemoteMapState &rms)
+    /**
+     * Constructor must take the set of `Command`s and the RemoteMapState.
+     */
+    HoldRepeatCommandMapping(const std::vector<Command *> cmds, const RemoteMapState &rms)
         : CommandMapping(cmds, rms)
     {
     }
 
-    ///< Default destructor.
+    /**
+     * Default destructor.
+     */
     ~HoldRepeatCommandMapping() override = default;
 
     /**
@@ -37,7 +42,7 @@ public:
      * @param[in] currState The current RemoteMapState of the remote.
      */
     void executeCommandMapping(const RemoteMapState &currState) override;
-};  // class HoldCommandMapping
+};  // class HoldRepeatCommandMapping
 }  // namespace control
 }  // namespace aruwlib
 

@@ -9,8 +9,7 @@ namespace control
 void HoldRepeatCommandMapping::executeCommandMapping(const RemoteMapState &currState)
 {
     if (mappingSubset(currState) &&
-        (!mapState.getNegKeysUsed() ||
-         ((mapState.getNegKeys() & currState.getKeys()) != mapState.getNegKeys())))
+        (!mapState.getNegKeysUsed() || !negKeysSubset(mapState, currState)))
     {
         for (Command *cmd : mappedCommands)
         {

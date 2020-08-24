@@ -4,7 +4,7 @@ namespace aruwlib
 {
 namespace control
 {
-std::vector<std::string> CommandMapperFormatGenerator::generateMappings() const
+const std::vector<std::string> CommandMapperFormatGenerator::generateMappings() const
 {
     std::vector<std::string> out;
 
@@ -17,7 +17,7 @@ std::vector<std::string> CommandMapperFormatGenerator::generateMappings() const
     return out;
 }
 
-std::string CommandMapperFormatGenerator::formattedMapping(const RemoteMapState &ms) const
+const std::string CommandMapperFormatGenerator::formattedMapping(const RemoteMapState &ms) const
 {
     std::string out = "[";
     if (ms.useKeys)
@@ -56,7 +56,7 @@ std::string CommandMapperFormatGenerator::formattedMapping(const RemoteMapState 
     return out + "]";
 }
 
-std::string CommandMapperFormatGenerator::formattedMappedCommands(
+const std::string CommandMapperFormatGenerator::formattedMappedCommands(
     const std::vector<Command *> mc) const
 {
     std::string out;
@@ -74,7 +74,8 @@ std::string CommandMapperFormatGenerator::formattedMappedCommands(
     return out + "]";
 }
 
-std::string CommandMapperFormatGenerator::switchStateToString(Remote::SwitchState state) const
+constexpr std::string_view CommandMapperFormatGenerator::switchStateToString(
+    Remote::SwitchState state) const
 {
     switch (state)
     {
@@ -91,7 +92,7 @@ std::string CommandMapperFormatGenerator::switchStateToString(Remote::SwitchStat
     }
 }
 
-std::string CommandMapperFormatGenerator::keyMapToString(uint16_t keys) const
+const std::string CommandMapperFormatGenerator::keyMapToString(uint16_t keys) const
 {
     if (keys == 0)
     {

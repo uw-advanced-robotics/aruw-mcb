@@ -2,6 +2,7 @@
 #define COMMAND_MAPPER_FORMAT_GENERATOR_HPP_
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "aruwlib/communication/remote.hpp"
@@ -15,7 +16,7 @@ namespace control
 class CommandMapperFormatGenerator
 {
 public:
-    CommandMapperFormatGenerator(const CommandMapper &mapper) : mapper(mapper) {}
+    explicit CommandMapperFormatGenerator(const CommandMapper &mapper) : mapper(mapper) {}
     ~CommandMapperFormatGenerator() = default;
 
     /**
@@ -24,15 +25,15 @@ public:
      * @note This is very slow because of the necessary std::string parsing. Never
      *      call this while performance matters.
      */
-    std::vector<std::string> generateMappings() const;
+    const std::vector<std::string> generateMappings() const;
 
 private:
     const CommandMapper &mapper;
 
-    std::string formattedMapping(const RemoteMapState &ms) const;
-    std::string formattedMappedCommands(const std::vector<Command *> mc) const;
-    std::string switchStateToString(Remote::SwitchState state) const;
-    std::string keyMapToString(uint16_t keys) const;
+    const std::string formattedMapping(const RemoteMapState &ms) const;
+    const std::string formattedMappedCommands(const std::vector<Command *> mc) const;
+    constexpr std::string_view switchStateToString(Remote::SwitchState state) const;
+    const std::string keyMapToString(uint16_t keys) const;
 };  // class CommandMapperFormatGenerator
 }  // namespace control
 }  // namespace aruwlib

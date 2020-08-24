@@ -17,15 +17,19 @@ class RemoteMapState;
 class ToggleCommandMapping : public CommandMapping
 {
 public:
-    ///< Constructor must take the set of `Command`s and the RemoteMapState.
-    ToggleCommandMapping(std::vector<Command *> cmds, const RemoteMapState &rms)
+    /**
+     * Constructor must take the set of `Command`s and the RemoteMapState.
+     */
+    ToggleCommandMapping(const std::vector<Command *> cmds, const RemoteMapState &rms)
         : CommandMapping(cmds, rms),
           pressed(false),
           toggled(false)
     {
     }
 
-    ///< Default destructor.
+    /**
+     * Default destructor.
+     */
     ~ToggleCommandMapping() override = default;
 
     /**
@@ -39,7 +43,7 @@ public:
 private:
     bool pressed;
     bool toggled;
-};  // class PressCommandMapping
+};  // class ToggleCommandMapping
 }  // namespace control
 }  // namespace aruwlib
 

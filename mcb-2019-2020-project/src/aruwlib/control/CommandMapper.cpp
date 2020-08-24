@@ -52,7 +52,7 @@ void CommandMapper::handleKeyStateChange(
 
 void CommandMapper::addMap(CommandMapping *mapping)
 {
-    for (CommandMapping *cmap : commandsToRun)
+    for (const CommandMapping *const cmap : commandsToRun)
     {
         if (mapStateEqual(*cmap, *mapping))
         {
@@ -66,7 +66,9 @@ void CommandMapper::addMap(CommandMapping *mapping)
     commandsToRun.push_back(mapping);
 }
 
-void CommandMapper::addHoldMapping(const RemoteMapState &mapping, std::vector<Command *> commands)
+void CommandMapper::addHoldMapping(
+    const RemoteMapState &mapping,
+    const std::vector<Command *> commands)
 {
     addMap(new HoldCommandMapping(commands, mapping));
 }
@@ -78,12 +80,16 @@ void CommandMapper::addHoldRepeatMapping(
     addMap(new HoldRepeatCommandMapping(commands, mapping));
 }
 
-void CommandMapper::addToggleMapping(const RemoteMapState &mapping, std::vector<Command *> commands)
+void CommandMapper::addToggleMapping(
+    const RemoteMapState &mapping,
+    const std::vector<Command *> commands)
 {
     addMap(new ToggleCommandMapping(commands, mapping));
 }
 
-void CommandMapper::addPressMapping(const RemoteMapState &mapping, std::vector<Command *> commands)
+void CommandMapper::addPressMapping(
+    const RemoteMapState &mapping,
+    const std::vector<Command *> commands)
 {
     addMap(new PressCommandMapping(commands, mapping));
 }

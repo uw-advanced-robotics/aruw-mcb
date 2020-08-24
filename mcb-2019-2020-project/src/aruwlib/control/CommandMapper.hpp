@@ -32,10 +32,14 @@ namespace control
 class CommandMapper
 {
 public:
-    ///< Default construction.
+    /**
+     * Default construction.
+     */
     CommandMapper() = default;
 
-    ///< `delete`s the `CommandMapping`s that are in `commandsToRun`.
+    /**
+     * `delete`s the `CommandMapping`s that are in `commandsToRun`.
+     */
     ~CommandMapper();
 
     /**
@@ -59,7 +63,7 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addHoldMapping(const RemoteMapState &mapping, std::vector<Command *> commands);
+    void addHoldMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which is added to
@@ -70,7 +74,7 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addHoldRepeatMapping(const RemoteMapState &mapping, std::vector<Command *> commands);
+    void addHoldRepeatMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which adds the command
@@ -80,7 +84,7 @@ public:
      * @param[in] Command the Command to be triggered by this mapping.
      * @note a toggle mapping is interrupted when the key is untoggled.
      */
-    void addToggleMapping(const RemoteMapState &mapping, std::vector<Command *> commands);
+    void addToggleMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which is added to the
@@ -89,9 +93,11 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addPressMapping(const RemoteMapState &mapping, std::vector<Command *> commands);
+    void addPressMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
 
-    ///< @return the number of command mappings in the mapper.
+    /**
+     * @return the number of command mappings in the mapper.
+     */
     int getSize() const { return commandsToRun.size(); }
 
 private:

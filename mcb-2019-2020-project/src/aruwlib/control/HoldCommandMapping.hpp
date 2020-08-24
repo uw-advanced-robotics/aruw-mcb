@@ -20,14 +20,18 @@ class RemoteMapState;
 class HoldCommandMapping : public CommandMapping
 {
 public:
-    ///< Constructor must take the set of `Command`s and the RemoteMapState.
-    HoldCommandMapping(std::vector<Command *> cmds, const RemoteMapState &rms)
+    /**
+     * Constructor must take the set of `Command`s and the RemoteMapState.
+     */
+    HoldCommandMapping(const std::vector<Command *> cmds, const RemoteMapState &rms)
         : CommandMapping(cmds, rms),
           commandScheduled(false)
     {
     }
 
-    ///< Default destructor.
+    /**
+     * Default destructor.
+     */
     ~HoldCommandMapping() override = default;
 
     /**
