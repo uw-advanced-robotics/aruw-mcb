@@ -1,40 +1,44 @@
 #include "analog_distance_sensor.hpp"
 
-namespace aruwlib {
+#include "aruwlib/Drivers.hpp"
 
-namespace sensors {
-    // Constructor to init analog IR boundary, distance conversion, and analog pin
-    AnalogDistanceSensor::AnalogDistanceSensor(
-        float minDistance,
-        float maxDistance,
-        float m,
-        float b,
-        float offset,
-        gpio::Analog::Pin pin):
-        DistanceSensor(minDistance, maxDistance),
-        m(m),
-        b(b),
-        offset(offset),
-        pin(pin) {}
+namespace aruwlib
+{
+namespace sensors
+{
+AnalogDistanceSensor::AnalogDistanceSensor(
+    float minDistance,
+    float maxDistance,
+    float m,
+    float b,
+    float offset,
+    gpio::Analog::Pin pin)
+    : DistanceSensor(minDistance, maxDistance),
+      m(m),
+      b(b),
+      offset(offset),
+      pin(pin)
+{
+}
 
-    // Read sensor and update current distance
-    float AnalogDistanceSensor::read() {
-        // Read analog pin and convert to volts
-        float reading = aruwlib::gpio::Analog::Read(pin);
+float AnalogDistanceSensor::read()
+{
+    // Read analog pin and convert to volts
+    float reading = Drivers::analog.read(pin);
 
-        // Linear model
-        float linear = m * reading / 1000.0 + b;
+    // Linear model
+    float linear = m * reading / 1000.0f + b;
 
-        // Convert to cm distance
-        distance = 1 / linear + offset;
+    // Convert to cm distance
+    distance = 1.0f / linear + offset;
 
-        return validReading() ? distance : -1.0f;
-    }
+    return validReading() ? distance : -1.0f;
+}
 
-    // Checks if current reading is within bounds
-    bool AnalogDistanceSensor::validReading() {
-        return (distance > minDistance) && (distance < maxDistance);
-    }
+bool AnalogDistanceSensor::validReading() const
+{
+    return (distance > minDistance) && (distance < maxDistance);
+}
 }  // namespace sensors
 
 }  // namespace aruwlib

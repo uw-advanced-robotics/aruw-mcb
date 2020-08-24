@@ -1,32 +1,24 @@
-#include "robot_type.hpp"
-
 #if defined(TARGET_HERO)
 
 namespace aruwsrc
 {
-
 namespace control
 {
-
 /* define subsystems --------------------------------------------------------*/
 
 /* define commands ----------------------------------------------------------*/
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems()
-{}
+void registerHeroSubsystems() {}
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultHeroCommands()
-{}
+void setDefaultHeroCommands() {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands()
-{}
+void startHeroCommands() {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings()
-{}
+void registerHeroIoMappings() {}
 
 void initSubsystemCommands()
 {

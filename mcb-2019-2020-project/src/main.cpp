@@ -4,23 +4,18 @@
 #include <aruwlib/architecture/periodic_timer.hpp>
 
 /* communication includes ---------------------------------------------------*/
-#include <aruwlib/motor/dji_motor_tx_handler.hpp>
-#include <aruwlib/communication/sensors/mpu6500/mpu6500.hpp>
-#include <aruwlib/communication/can/can_rx_listener.hpp>
-#include <aruwlib/communication/remote.hpp>
-#include <aruwlib/communication/serial/xavier_serial.hpp>
-#include <aruwlib/communication/serial/ref_serial.hpp>
+#include <aruwlib/Drivers.hpp>
 #include <aruwlib/display/sh1106.hpp>
 
 /* error handling includes --------------------------------------------------*/
-#include <aruwlib/errors/error_controller.hpp>
 
 /* control includes ---------------------------------------------------------*/
 #include "aruwsrc/control/robot_control.hpp"
-#include <aruwlib/control/command_scheduler.hpp>
+
+using namespace modm::literals;
+using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/
-aruwlib::arch::PeriodicMilliTimer updateImuPeriod(2);
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
 // Place any sort of input/output initialization here. For example, place
@@ -44,58 +39,57 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            aruwlib::errors::ErrorController::update();
-            aruwlib::control::CommandScheduler::getMainScheduler().run();
-            aruwlib::motor::DjiMotorTxHandler::processCanSendData();
+            Drivers::mpu6500.read();
+            Drivers::errorController.update();
+            Drivers::commandScheduler.run();
+            Drivers::djiMotorTxHandler.processCanSendData();
         }
-        #ifndef ENV_SIMULATOR
-
+#ifndef ENV_SIMULATOR
         modm::delayMicroseconds(10);
-        #endif
+#endif
     }
     return 0;
 }
 
 void initializeIo()
 {
+    aruwlib::Drivers::analog.init();
+    aruwlib::Drivers::pwm.init();
+    aruwlib::Drivers::digital.init();
+    aruwlib::Drivers::leds.init();
+    aruwlib::Drivers::can.initialize();
+
 #ifndef ENV_SIMULATOR
     /// \todo this should be an init in the display class
-    Board::DisplaySpiMaster::connect<
-        Board::DisplayMiso::Miso,
-        Board::DisplayMosi::Mosi,
-        Board::DisplaySck::Sck
-    >();
+    Board::DisplaySpiMaster::
+        connect<Board::DisplayMiso::Miso, Board::DisplayMosi::Mosi, Board::DisplaySck::Sck>();
 
     // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
     // 90MHz/64=~14MHz
     Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
 #endif
     aruwlib::display::Sh1106<
-    #ifndef ENV_SIMULATOR
+#ifndef ENV_SIMULATOR
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
         Board::DisplayReset,
-    #endif
-        128, 64,
-        false
-    > display;
+#endif
+        128,
+        64,
+        false>
+        display;
     display.initializeBlocking();
 
-    aruwlib::Remote::initialize();
-    aruwlib::sensors::Mpu6500::init();
-
-    aruwlib::serial::RefSerial::getRefSerial().initialize();
-    aruwlib::serial::XavierSerial::getXavierSerial().initialize();
+    Drivers::remote.initialize();
+    Drivers::mpu6500.init();
+    Drivers::refSerial.initialize();
+    Drivers::xavierSerial.initialize();
 }
 
 void updateIo()
 {
-    aruwlib::can::CanRxHandler::pollCanData();
-    aruwlib::serial::XavierSerial::getXavierSerial().updateSerial();
-    aruwlib::serial::RefSerial::getRefSerial().updateSerial();
-    aruwlib::Remote::read();
-    if (updateImuPeriod.execute())
-    {
-        aruwlib::sensors::Mpu6500::read();
-    }
+    Drivers::canRxHandler.pollCanData();
+    Drivers::xavierSerial.updateSerial();
+    Drivers::refSerial.updateSerial();
+    Drivers::remote.read();
 }

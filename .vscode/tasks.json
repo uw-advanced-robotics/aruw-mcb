@@ -4,6 +4,15 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Build Doxygen",
+            "type": "shell",
+            "presentation": {
+                "panel": "new"
+            },
+            "command": "doxygen Doxyfile",
+            "problemMatcher": []
+        },
+        {
             "label": "Build - Release",
             "type": "shell",
             "presentation": {
@@ -104,7 +113,7 @@
         },
         {
             "label": "Setup Build",
-            "type":"shell",
+            "type": "shell",
             "presentation": {
                 "panel": "new"
             },

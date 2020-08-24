@@ -1,10 +1,10 @@
 /**
  * example for how to create and add an error to the ErrorController:
  * use macro in create_errors.hpp
- *      
+ *
  *     RAISE_ERROR("Error in DJI Serial", aruwlib::errors::Location::DJI_SERIAL,
  *     aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
- * 
+ *
  * then call ErrorController::update() to update the list of errors
  */
 
@@ -12,20 +12,18 @@
 #define __SYSTEM_ERROR_HPP__
 
 #include <string>
-#include "aruwlib/rm-dev-board-a/board.hpp"
 
 namespace aruwlib
 {
-
 namespace errors
 {
-
 static const uint8_t ERROR_LOCATION_SIZE = 4;
 
 static const uint8_t ERROR_TYPE_SIZE = 8 - ERROR_LOCATION_SIZE;
 
 // Location of errors; subject to change
-enum Location {
+enum Location
+{
     CAN_RX = 0,
     MOTOR_CONTROL,
     MPU6500,
@@ -34,11 +32,13 @@ enum Location {
     SUBSYSTEM,
     CONTROLLER_MAPPER,
     TURRET,
+    SERVO,
     LOCATION_AMOUNT,
 };
 
 // Type of errors; subject to change
-enum ErrorType {
+enum ErrorType
+{
     IMU_DATA_NOT_INITIALIZED = 0,
     IMU_NOT_RECEIVING_PROPERLY,
     INVALID_MESSAGE_LENGTH,
@@ -60,31 +60,27 @@ enum ErrorType {
 
 class SystemError
 {
- public:
+public:
     SystemError();
 
-    SystemError(const std::string& desc,
-                int line,
-                const std::string& file,
-                Location l,
-                ErrorType et);
+    SystemError(const char *desc, int line, const char *file, Location l, ErrorType et);
 
     int getLineNumber() const;
 
-    std::string getDescription() const;
+    const char *getDescription() const;
 
-    std::string getFilename() const;
+    const char *getFilename() const;
 
     Location getLocation() const;
 
     ErrorType getErrorType() const;
 
- private:
+private:
     int lineNumber;
 
-    std::string description;
+    const char *description;
 
-    std::string filename;
+    const char *filename;
 
     Location location;
 
