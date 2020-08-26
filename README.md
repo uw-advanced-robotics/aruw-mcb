@@ -33,8 +33,8 @@ The recommended way to develop is with our pre-build development Docker containe
    <img src="https://gitlab.com/aruw/code-2019-2020/aruw-mcb-2019-2020/uploads/edb88ab3074a99d5eed1a4b2a50b2e53/image.png" width="500px">
 
 7. vscode will now prompt you to open the development container. Choose "Reopen in Container". This
-   step may take a few minutes (or more!); it will download around 2GB of necessary tools. Be
-   patient.
+   step may take a few minutes (or more!); it will download around 500 MB (2GB once uncompressed) of
+   necessary tools. Be patient.
 
    <img src="https://gitlab.com/aruw/code-2019-2020/aruw-mcb-2019-2020/uploads/198095587078b88d67ac674839cf4ad7/image.png" width="500px">
 
