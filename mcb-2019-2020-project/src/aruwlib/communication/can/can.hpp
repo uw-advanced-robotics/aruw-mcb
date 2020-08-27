@@ -3,6 +3,8 @@
 
 #include <modm/architecture/interface/can_message.hpp>
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 namespace can
@@ -41,7 +43,7 @@ public:
      * @param[in] bus the CanBus to check for a message.
      * @return true if a message is available, false otherwise.
      */
-    bool isMessageAvailable(CanBus bus) const;
+    MOCKABLE(bool isMessageAvailable(CanBus bus) const);
 
     /**
      * Checks the CanBus for a message and if a message is successfully

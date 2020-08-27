@@ -1,4 +1,3 @@
-
 #include <aruwsrc/control/launcher/friction_wheel_rotate_command.hpp>
 #include <aruwsrc/control/launcher/friction_wheel_subsystem.hpp>
 
