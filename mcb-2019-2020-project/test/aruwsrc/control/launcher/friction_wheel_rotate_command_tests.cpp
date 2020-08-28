@@ -1,7 +1,7 @@
 
 #include <aruwsrc/control/launcher/friction_wheel_rotate_command.hpp>
 #include <aruwsrc/control/launcher/friction_wheel_subsystem.hpp>
-
+//
 #include <CppUTest/CommandLineTestRunner.h>
 #include <CppUTestExt/MockSupport.h>
 
@@ -9,13 +9,10 @@ using namespace aruwsrc::launcher;
 
 const float EQUAL_THRESHOLD = 0.00001f;
 
-TEST_GROUP(FrictionWheelRotateCommand)
-{
-    void teardown()
-    {
-        mock().clear();
-    }
-};
+TEST_GROUP(FrictionWheelRotateCommand){void teardown(){mock().clear();
+}
+}
+;
 
 class FrictionWheelSubsystemMock : public FrictionWheelSubsystem
 {
@@ -27,9 +24,6 @@ public:
     }
 };
 
-// TODO(matthew) once drivers are not nonstatic update this, adding in constructor
-// test to insure subsystem has been added to constructor.
-
 TEST(FrictionWheelRotateCommand, execute_zero_desired_rpm)
 {
     mock().expectOneCall("setDesiredRpm");
@@ -39,7 +33,7 @@ TEST(FrictionWheelRotateCommand, execute_zero_desired_rpm)
 
     fc.execute();
 
-    DOUBLES_EQUAL(mock().getData("desiredRpm").getDoubleValue(), 0, EQUAL_THRESHOLD);
+    DOUBLES_EQUAL(0, mock().getData("desiredRpm").getDoubleValue(), EQUAL_THRESHOLD);
     mock().checkExpectations();
 }
 
@@ -52,7 +46,7 @@ TEST(FrictionWheelRotateCommand, execute_positive_rpm)
 
     fc.execute();
 
-    DOUBLES_EQUAL(mock().getData("desiredRpm").getDoubleValue(), 10000, EQUAL_THRESHOLD);
+    DOUBLES_EQUAL(10000, mock().getData("desiredRpm").getDoubleValue(), EQUAL_THRESHOLD);
     mock().checkExpectations();
 }
 
@@ -65,7 +59,7 @@ TEST(FrictionWheelRotateCommand, execute_negative_rpm)
 
     fc.execute();
 
-    DOUBLES_EQUAL(mock().getData("desiredRpm").getDoubleValue(), -10000, EQUAL_THRESHOLD);
+    DOUBLES_EQUAL(-10000, mock().getData("desiredRpm").getDoubleValue(), EQUAL_THRESHOLD);
     mock().checkExpectations();
 }
 
@@ -78,11 +72,11 @@ TEST(FrictionWheelRotateCommand, end)
 
     fc.execute();
     fc.end(false);
-    DOUBLES_EQUAL(mock().getData("desiredRpm").getDoubleValue(), 0, EQUAL_THRESHOLD);
+    DOUBLES_EQUAL(0, mock().getData("desiredRpm").getDoubleValue(), EQUAL_THRESHOLD);
 
     fc.execute();
     fc.end(true);
-    DOUBLES_EQUAL(mock().getData("desiredRpm").getDoubleValue(), 0, EQUAL_THRESHOLD);
+    DOUBLES_EQUAL(0, mock().getData("desiredRpm").getDoubleValue(), EQUAL_THRESHOLD);
 
     mock().checkExpectations();
 }
