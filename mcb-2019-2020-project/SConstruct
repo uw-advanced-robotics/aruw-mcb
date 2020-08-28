@@ -25,7 +25,8 @@ usage = "Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TY
 
 # don't compile this stuff
 ignored_dirs = [".lbuild_cache", build_path, sim_modm_path, hardware_modm_path, aruwlib_path]
-ignored_files = [robot_type_file]
+# TODO remove friction_wheel_rotate_command_tests.cpp from the ignored_files once we have an updated Drivers class.
+ignored_files = [robot_type_file, './test/aruwsrc/control/launcher/friction_wheel_rotate_command_tests.cpp']
 
 if len(COMMAND_LINE_TARGETS) not in [1, 2]:
     raise Exception("This build script has 1 required argument and 1 optional argument.\n" + usage)
