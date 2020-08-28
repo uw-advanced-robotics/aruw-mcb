@@ -11,7 +11,7 @@ robot_type_file = "./robot-type/robot_type.hpp"
 valid_robot_types = ["TARGET_SOLDIER", "TARGET_OLD_SOLDIER", "TARGET_DRONE", "TARGET_ENGINEER", "TARGET_SENTINEL", "TARGET_HERO"]
 
 # For building cpputest on linux
-cpputest_libs      = ["libCppUTest.a", "libCppUTestExt.a"]
+cpputest_libs = ["libCppUTest.a", "libCppUTestExt.a"]
 
 usage = "Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]\n\
     \"<target>\" is one of:\n\
