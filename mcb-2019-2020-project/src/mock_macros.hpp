@@ -8,4 +8,4 @@
 #define mockable
 #endif
 
-#endif // MOCK_MACROS_HPP_
+#endif  // MOCK_MACROS_HPP_
