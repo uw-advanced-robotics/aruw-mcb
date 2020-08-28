@@ -3,9 +3,9 @@
 
 #ifdef ENV_SIMULATOR
 ///< Wrap class functions that are not already virtual in this function if you wish to mock them.
-#define MOCKABLE(func) virtual func
+#define mockable virtual
 #else
-#define MOCKABLE(func) func
+#define mockable
 #endif
 
 #endif // MOCK_MACROS_HPP_
