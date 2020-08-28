@@ -1,13 +1,12 @@
 #include <aruwlib/algorithms/contiguous_float.hpp>
+//
 #include <CppUTest/CommandLineTestRunner.h>
 
 using namespace aruwlib::algorithms;
 
-static const float EQUALITY_TOLERANCE = 0.0001f; 
+static const float EQUALITY_TOLERANCE = 0.0001f;
 
-TEST_GROUP(ContiguousFloat)
-{
-};
+TEST_GROUP(ContiguousFloat){};
 
 TEST(ContiguousFloat, Basic_functionality)
 {
