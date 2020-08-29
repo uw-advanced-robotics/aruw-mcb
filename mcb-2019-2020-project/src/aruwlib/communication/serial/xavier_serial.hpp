@@ -9,12 +9,21 @@ namespace aruwlib
 {
 namespace serial
 {
+// AutoAim Data
+typedef struct
+{
+    bool hasTarget;             ///< Whether or not the xavier has a target.
+    float pitch;                ///< The pitch angle in degrees, rounded to two decimals.
+    float yaw;                  ///< The yaw angle in degrees, rounded to two decimals.
+    modm::Timestamp timestamp;  ///< A timestamp in milliseconds.
+} TurretAimData;
+
 /**
  * A class used to communicate with our Xaviers.
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class XavierSerial : public DJISerial
+template <typename Drivers> class XavierSerial : public DJISerial<Drivers>
 {
 private:
     // TX message headers.
@@ -53,15 +62,6 @@ private:
     static const uint8_t AIM_DATA_MESSAGE_SIZE = 5;
 
 public:
-    // AutoAim Data
-    typedef struct
-    {
-        bool hasTarget;             ///< Whether or not the xavier has a target.
-        float pitch;                ///< The pitch angle in degrees, rounded to two decimals.
-        float yaw;                  ///< The yaw angle in degrees, rounded to two decimals.
-        modm::Timestamp timestamp;  ///< A timestamp in milliseconds.
-    } TurretAimData;
-
     /**
      * A struct that stores the imu information sent to the xavier.
      *
@@ -95,20 +95,52 @@ public:
         int16_t rightBackWheelRPM;
     } ChassisData;
 
-    XavierSerial();
+    XavierSerial()
+        : DJISerial<Drivers>(Uart::UartPort::Uart2, false),
+          txMsgSwitchIndex(CV_MESSAGE_TYPE_TURRET_TELEMETRY),
+          autoAimRequestQueued(false),
+          autoAimRequestState(false),
+          lastAimData(),
+          hasAimData(false),
+          isCvOnline(false)
+    {
+    }
     XavierSerial(const XavierSerial&) = delete;
-    XavierSerial& operator=(const XavierSerial&) = default;
+    XavierSerial& operator=(const XavierSerial&) = delete;
 
     /**
      * Call this before using the serial line, initializes the uart line
      * and the callback
      */
-    void initializeCV();
+    void initializeCV()
+    {
+        txRobotIdTimeout.restart(TIME_BETWEEN_ROBOT_ID_SEND_MS);
+        cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
+        this->initialize();
+    }
 
     /**
      * Handles the types of messages defined above in the RX message handlers section.
      */
-    void messageReceiveCallback(const SerialMessage& completeMessage) override;
+    void messageReceiveCallback(const SerialMessage& completeMessage) override
+    {
+        cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
+        switch (completeMessage.type)
+        {
+            case CV_MESSAGE_TYPE_TURRET_AIM:
+            {
+                TurretAimData aimData;
+                if (decodeToTurrentAimData(completeMessage, &aimData))
+                {
+                    lastAimData = aimData;
+                    hasAimData = true;
+                }
+                return;
+            }
+            default:
+                return;
+        }
+    }
 
     /**
      * Cycles through the messages that must be sent to the xavier.
@@ -117,13 +149,78 @@ public:
         const IMUData& imuData,
         const ChassisData& chassisData,
         const TurretAimData& turretData,
-        uint8_t robotId);
+        uint8_t robotId)
+    {
+        isCvOnline = !cvOfflineTimeout.isExpired();
+        switch (txMsgSwitchArray[txMsgSwitchIndex])
+        {
+            case CV_MESSAGE_TYPE_TURRET_TELEMETRY:
+            {
+                if (sendTurretData(turretData.pitch, turretData.yaw))
+                {
+                    incRxMsgSwitchIndex();
+                }
+                break;
+            }
+            case CV_MESSAGE_TYPE_IMU:
+            {
+                if (sendIMUChassisData(imuData, chassisData))
+                {
+                    incRxMsgSwitchIndex();
+                }
+                break;
+            }
+            case CV_MESSAGE_TYPE_ROBOT_ID:
+            {
+                if (txRobotIdTimeout.isExpired())
+                {
+                    if (sendRobotID(robotId))
+                    {
+                        txRobotIdTimeout.restart(TIME_BETWEEN_ROBOT_ID_SEND_MS);
+                        incRxMsgSwitchIndex();
+                    }
+                }
+                else
+                {
+                    incRxMsgSwitchIndex();
+                }
+                break;
+            }
+            case CV_MESSAGE_TYPE_AUTO_AIM_REQUEST:
+            {
+                if (autoAimRequestQueued)
+                {
+                    this->txMessage.data[0] = autoAimRequestState;
+                    this->txMessage.length = 1;
+                    this->txMessage.type = CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
+                    if (this->send())
+                    {
+                        autoAimRequestQueued = false;
+                        incRxMsgSwitchIndex();
+                    }
+                    break;
+                }
+                else
+                {
+                    incRxMsgSwitchIndex();
+                }
+            }
+        }
+    }
 
     ///< Start Requesting Xavier to Track Target.
-    void beginTargetTracking();
+    void beginTargetTracking()
+    {
+        autoAimRequestQueued = true;
+        autoAimRequestState = true;
+    }
 
     ///< Stop Requesting Xavier to Track Target.
-    void stopTargetTracking();
+    void stopTargetTracking()
+    {
+        autoAimRequestQueued = true;
+        autoAimRequestState = false;
+    }
 
     /**
      * Allows the caller to extract the most up to date xavier aim data.
@@ -132,7 +229,15 @@ public:
      * @return `true` if the xavier has sent aim data, `false` otherwise. If `false` is
      *      returned, `aimData` will not be updated.
      */
-    bool getLastAimData(TurretAimData* aimData) const;
+    bool getLastAimData(TurretAimData* aimData) const
+    {
+        if (hasAimData)
+        {
+            *aimData = lastAimData;
+            return true;
+        }
+        return false;
+    }
 
 private:
     // TX variables.
@@ -195,7 +300,27 @@ private:
      * @return `false` if the message length doesn't match `AIM_DATA_MESSAGE_SIZE`, `true`
      *      otherwise.
      */
-    bool decodeToTurrentAimData(const SerialMessage& message, TurretAimData* aimData);
+    bool decodeToTurrentAimData(const SerialMessage& message, TurretAimData* aimData)
+    {
+        if (message.length != AIM_DATA_MESSAGE_SIZE)
+        {
+            return false;
+        }
+
+        int16_t raw_pitch =
+            *(reinterpret_cast<const int16_t*>(message.data + AIM_DATA_MESSAGE_PITCH_OFFSET));
+        int16_t raw_yaw =
+            *(reinterpret_cast<const int16_t*>(message.data + AIM_DATA_MESSAGE_YAW_OFFSET));
+
+        bool raw_has_target = message.data[AIM_DATA_MESSAGE_HAS_TARGET];
+
+        aimData->pitch = static_cast<float>(raw_pitch) / 100.0f;
+        aimData->yaw = static_cast<float>(raw_yaw) / 100.0f;
+        aimData->hasTarget = raw_has_target;
+        aimData->timestamp = message.messageTimestamp;
+
+        return true;
+    }
 
     // RX functions.
 
@@ -206,7 +331,15 @@ private:
      * @param[in] pitch, yaw the data to send.
      * @return `true` if sending was a success, `false` otherwise.
      */
-    bool sendTurretData(float pitch, float yaw);
+    bool sendTurretData(float pitch, float yaw)
+    {
+        int16_t data[2] = {static_cast<int16_t>(pitch * 100), static_cast<int16_t>(yaw * 100)};
+
+        memcpy(this->txMessage.data, reinterpret_cast<uint8_t*>(data), 2 * 2);
+        this->txMessage.length = 4;
+        this->txMessage.type = CV_MESSAGE_TYPE_TURRET_TELEMETRY;
+        return this->send();
+    }
 
     /**
      * Packages `imuData` and `chassisData` data in an acceptable format for the base `DjiSerial`
@@ -215,7 +348,31 @@ private:
      * @param[in] imuData, chassisData the data to send.
      * @return `true` if sending was a success, `false` otherwise.
      */
-    bool sendIMUChassisData(const IMUData& imuData, const ChassisData& chassisData);
+    bool sendIMUChassisData(const IMUData& imuData, const ChassisData& chassisData)
+    {
+        int16_t data[13] = {// Accelerometer readings in static frame
+                            static_cast<int16_t>(imuData.ax * 100),
+                            static_cast<int16_t>(imuData.ay * 100),
+                            static_cast<int16_t>(imuData.az * 100),
+                            // MCB IMU angles are in degrees
+                            static_cast<int16_t>(imuData.rol * 100),
+                            static_cast<int16_t>(imuData.pit * 100),
+                            static_cast<int16_t>(imuData.yaw * 100),
+                            // MCB IMU angular velocities are in radians/s
+                            static_cast<int16_t>(imuData.wx * 100),
+                            static_cast<int16_t>(imuData.wy * 100),
+                            static_cast<int16_t>(imuData.wz * 100),
+                            // Wheel RPMs
+                            chassisData.rightFrontWheelRPM,
+                            chassisData.leftFrontWheelRPM,
+                            chassisData.leftBackWheeRPM,
+                            chassisData.rightBackWheelRPM};
+
+        memcpy(this->txMessage.data, reinterpret_cast<uint8_t*>(data), 13 * sizeof(uint16_t));
+        this->txMessage.length = 2 * 13;
+        this->txMessage.type = CV_MESSAGE_TYPE_IMU;
+        return this->send();
+    }
 
     /**
      * Packages `robotId` in an acceptable format for the base `DjiSerial` class to interpret
@@ -224,10 +381,16 @@ private:
      * @param robotdId the robot ID to send.
      * @return `true` if sending was a success, `false` otherwise.
      */
-    bool sendRobotID(uint8_t robotId);
+    bool sendRobotID(uint8_t robotId)
+    {
+        this->txMessage.data[0] = robotId;
+        this->txMessage.length = 1;
+        this->txMessage.type = CV_MESSAGE_TYPE_ROBOT_ID;
+        return this->send();
+    }
 
     ///< Increments `txMsgSwitchIndex`.
-    void incRxMsgSwitchIndex();
+    void incRxMsgSwitchIndex() { txMsgSwitchIndex = (txMsgSwitchIndex + 1) % CV_MESSAGE_TYPE_SIZE; }
 };
 
 }  // namespace serial

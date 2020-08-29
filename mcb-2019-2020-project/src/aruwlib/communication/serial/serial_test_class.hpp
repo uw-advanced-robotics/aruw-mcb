@@ -14,17 +14,29 @@ namespace serial
  *      TX to RX. You should be able to check if messages are being received.
  *      Additionally, watch `i` to check if you are dropping messages.
  */
-class SerialTestClass : public DJISerial
+template <typename Drivers> class SerialTestClass : public DJISerial<Drivers>
 {
 public:
     ///< Attaches this test class to `Uart2`.
-    SerialTestClass();
+    SerialTestClass() : DJISerial<Drivers>(Uart::UartPort::Uart2, true), messageId(0), i(0) {}
 
     ///< Stores the sequenceNumber in `messageId`.
-    void messageReceiveCallback(const SerialMessage& completeMessage) override;
+    void messageReceiveCallback(const SerialMessage& completeMessage) override
+    {
+        messageId = completeMessage.sequenceNumber;
+    }
 
     ///< Sends a message of length 1, the byte `60`, with the `sequenceNumber` incremented.
-    void sendMessage();
+    void sendMessage()
+    {
+        this->txMessage.length = 1;
+        this->txMessage.headByte = 0xa5;
+        this->txMessage.sequenceNumber = i;
+        this->txMessage.type = 4;
+        this->txMessage.data[0] = 60;
+        this->send();
+        i++;
+    }
 
 private:
     uint8_t messageId;

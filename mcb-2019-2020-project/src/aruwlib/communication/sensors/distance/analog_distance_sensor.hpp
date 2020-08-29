@@ -21,7 +21,7 @@ namespace sensors
  * of the form \f$ y=mx+b \f$
  * and then the output is put into the equation \f$ dist = \frac{1}{linear} + offset \f$.
  */
-class AnalogDistanceSensor : public DistanceSensor
+template <typename Drivers> class AnalogDistanceSensor : public DistanceSensor
 {
 public:
     /**
@@ -45,7 +45,14 @@ public:
         float m,
         float b,
         float offset,
-        gpio::Analog::Pin pin);
+        gpio::Analog::Pin pin)
+        : DistanceSensor(minDistance, maxDistance),
+          m(m),
+          b(b),
+          offset(offset),
+          pin(pin)
+    {
+    }
 
     /**
      * Reads the sensor, updates the current distance, and returns this reading.
@@ -53,7 +60,19 @@ public:
      * @return the updated value.  May or may not be valid. If it is not valid,
      *      -1 is returned.
      */
-    float read() override;
+    float read() override
+    {
+        // Read analog pin and convert to volts
+        float reading = Drivers::analog.read(pin);
+
+        // Linear model
+        float linear = m * reading / 1000.0f + b;
+
+        // Convert to cm distance
+        distance = 1.0f / linear + offset;
+
+        return validReading() ? distance : -1.0f;
+    }
 
     /**
      * Checks if current reading is within bounds.
@@ -61,7 +80,10 @@ public:
      * @return `true` if the reading is within the min and max distance, exclusive.
      *      Returns `false` otherwise.
      */
-    bool validReading() const override;
+    bool validReading() const override
+    {
+        return (distance > minDistance) && (distance < maxDistance);
+    }
 
 private:
     ///< Distance calulation values for linear model \f$ y = mx + b \f$.

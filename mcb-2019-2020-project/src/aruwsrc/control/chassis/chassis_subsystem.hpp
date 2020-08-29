@@ -159,10 +159,10 @@ private:
 #endif
 
     // motors
-    aruwlib::motor::DjiMotor leftFrontMotor;
-    aruwlib::motor::DjiMotor leftBackMotor;
-    aruwlib::motor::DjiMotor rightFrontMotor;
-    aruwlib::motor::DjiMotor rightBackMotor;
+    aruwlib::motor::DjiMotor<Drivers> leftFrontMotor;
+    aruwlib::motor::DjiMotor<Drivers> leftBackMotor;
+    aruwlib::motor::DjiMotor<Drivers> rightFrontMotor;
+    aruwlib::motor::DjiMotor<Drivers> rightBackMotor;
 
     // wheel velocity pid variables
     modm::Pid<float> leftFrontVelocityPid;
@@ -354,7 +354,7 @@ private:
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,
-        aruwlib::motor::DjiMotor* const motor,
+        aruwlib::motor::DjiMotor<Drivers>* const motor,
         float desiredRpm)
     {
         pid->update(desiredRpm - motor->getShaftRPM());

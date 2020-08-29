@@ -24,7 +24,7 @@ class Drivers
 {
 public:
     static can::Can can;
-    static can::CanRxHandler canRxHandler;
+    static can::CanRxHandler<Drivers> canRxHandler;
     static gpio::Analog analog;
     static gpio::Digital digital;
     static gpio::Leds leds;
@@ -32,35 +32,13 @@ public:
     static Remote remote;
     static sensors::Mpu6500 mpu6500;
     static serial::Uart uart;
-    static serial::XavierSerial xavierSerial;
-    static serial::RefSerial refSerial;
+    static serial::XavierSerial<Drivers> xavierSerial;
+    static serial::RefSerial<Drivers> refSerial;
     static control::CommandScheduler commandScheduler;
     static control::ControlOperatorInterface controlOperatorInterface;
     static control::CommandMapper commandMapper;
-    static errors::ErrorController errorController;
-    static motor::DjiMotorTxHandler djiMotorTxHandler;
-
-#ifdef ENV_SIMULATOR
-    static void reset();
-
-private:
-    static void resetCan();
-    static void resetCanRxHandler();
-    static void resetAnalog();
-    static void resetDigital();
-    static void resetLeds();
-    static void resetPwm();
-    static void resetRemote();
-    static void resetMpu6500();
-    static void resetUart();
-    static void resetXavierSerial();
-    static void resetRefSerial();
-    static void resetCommandScheduler();
-    static void resetControlOperatorInterface();
-    static void resetCommandMapper();
-    static void resetErrorController();
-    static void resetDjiMotorTxHandler();
-#endif
+    static errors::ErrorController<Drivers> errorController;
+    static motor::DjiMotorTxHandler<Drivers> djiMotorTxHandler;
 };  // class Drivers
 }  // namespace aruwlib
 

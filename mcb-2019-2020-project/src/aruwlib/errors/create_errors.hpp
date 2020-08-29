@@ -9,13 +9,7 @@ namespace aruwlib
 {
 namespace errors
 {
-#define RAISE_ERROR(desc, l, et)                                                   \
-    do                                                                             \
-    {                                                                              \
-        aruwlib::errors::SystemError stringError(desc, __LINE__, __FILE__, l, et); \
-        aruwlib::Drivers::errorController.addToErrorList(stringError);             \
-    } while (0);
-
+#define RAISE_ERROR(desc, l, et)
 }  // namespace errors
 
 }  // namespace aruwlib

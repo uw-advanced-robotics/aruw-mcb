@@ -1,11 +1,13 @@
 #ifndef __DJI_MOTOR_HPP__
 #define __DJI_MOTOR_HPP__
 
+#include <climits>
+#include <cstdint>
 #include <string>
 
+#include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/architecture/timeout.hpp>
-
-#include "aruwlib/communication/can/can_rx_handler.hpp"
+#include <aruwlib/communication/can/can_rx_listener.hpp>
 
 namespace aruwlib
 {
@@ -25,33 +27,58 @@ enum MotorId : int32_t
     MOTOR8 = 0x208,
 };
 
-// extend the CanRxListener class, which allows one to connect a
-// motor to the receive handler and use the class's built in
-// receive handler
-class DjiMotor : public aruwlib::can::CanRxListener
+/**
+ * extend the CanRxListener class, which allows one to connect a
+ * motor to the receive handler and use the class's built in
+ * receive handler
+ */
+template <typename Drivers> class DjiMotor : public aruwlib::can::CanRxListener<Drivers>
 {
 public:
-    // 0 - 8191 for dji motors
+    /**
+     * 0 - 8191 for dji motors
+     */
     static constexpr uint16_t ENC_RESOLUTION = 8192;
 
-    // construct new motor
     DjiMotor(
         MotorId desMotorIdentifier,
         aruwlib::can::CanBus motorCanBus,
         bool isInverted,
-        const std::string& name);
+        const std::string& name)
+        : aruwlib::can::CanRxListener<Drivers>(
+              static_cast<uint32_t>(desMotorIdentifier),
+              motorCanBus),
+          encStore(),
+          motorIdentifier(desMotorIdentifier),
+          motorCanBus(motorCanBus),
+          desiredOutput(0),
+          shaftRPM(0),
+          temperature(0),
+          torque(0),
+          motorInverted(isInverted),
+          motorName(name)
+    {
+        motorDisconnectTimeout.stop();
+        Drivers::djiMotorTxHandler.addMotorToManager(this);
+    }
 
-    ~DjiMotor();
+    ~DjiMotor() { Drivers::djiMotorTxHandler.removeFromMotorManager(*this); }
 
-    // Data structure for storing encoder values. DjiMotor class may call
-    // update(), which increments or decrements encoder revolutions and
-    // sets the current wrapped encoder value to the updated input.
+    /**
+     * Data structure for storing encoder values. DjiMotor class may call
+     * `update()`, which increments or decrements encoder revolutions and
+     * sets the current wrapped encoder value to the updated input.
+     */
     class EncoderStore
     {
     public:
-        int64_t getEncoderUnwrapped() const;
+        int64_t getEncoderUnwrapped() const
+        {
+            return static_cast<int64_t>(encoderWrapped) +
+                   static_cast<int64_t>(ENC_RESOLUTION) * encoderRevolutions;
+        }
 
-        uint16_t getEncoderWrapped() const;
+        uint16_t getEncoderWrapped() const { return encoderWrapped; }
 
     private:
         friend class DjiMotor;
@@ -62,7 +89,19 @@ public:
         {
         }
 
-        void updateValue(uint16_t newEncWrapped);
+        void updateValue(uint16_t newEncWrapped)
+        {
+            int16_t enc_dif = newEncWrapped - encoderWrapped;
+            if (enc_dif < -ENC_RESOLUTION / 2)
+            {
+                encoderRevolutions++;
+            }
+            else if (enc_dif > ENC_RESOLUTION / 2)
+            {
+                encoderRevolutions--;
+            }
+            encoderWrapped = newEncWrapped;
+        }
 
         uint16_t encoderWrapped;
 
@@ -87,29 +126,51 @@ public:
     // than 2^16, then limit it.
     // Limiting should typically be done on a motor by motor basis in a wrapper class, this
     // is simply a sanity check.
-    void setDesiredOutput(int32_t desiredOutput);
+    void setDesiredOutput(int32_t desiredOutput)
+    {
+        int16_t desOutputNotInverted = static_cast<int16_t>(
+            aruwlib::algorithms::limitVal<int32_t>(desiredOutput, SHRT_MIN, SHRT_MAX));
+        this->desiredOutput = motorInverted ? -desOutputNotInverted : desOutputNotInverted;
+    }
 
-    bool isMotorOnline() const;
+    bool isMotorOnline() const
+    {
+        /*
+         * motor online if the disconnect timout has not expired (if it received message but
+         * somehow got disconnected) and the timeout hasn't been stopped (initially, the timeout)
+         * is stopped
+         */
+        return !motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped();
+    }
 
     // Serializes send data and deposits it in a message to be sent.
-    void serializeCanSendData(modm::can::Message* txMessage) const;
+    void serializeCanSendData(modm::can::Message* txMessage) const
+    {
+        int id = DJI_MOTOR_NORMALIZED_ID(this->getMotorIdentifier());  // number between 0 and 7
+        // this method assumes you have choosen the correct message
+        // to send the data in. Is blind to message type and is a private method
+        // that I use accordingly.
+        id %= 4;
+        txMessage->data[2 * id] = this->getOutputDesired() >> 8;
+        txMessage->data[2 * id + 1] = this->getOutputDesired() & 0xFF;
+    }
 
     // getter functions
-    int16_t getOutputDesired() const;
+    int16_t getOutputDesired() const { return desiredOutput; }
 
-    uint32_t getMotorIdentifier() const;
+    uint32_t getMotorIdentifier() const { return motorIdentifier; }
 
-    int8_t getTemperature() const;
+    int8_t getTemperature() const { return temperature; }
 
-    int16_t getTorque() const;
+    int16_t getTorque() const { return torque; }
 
-    int16_t getShaftRPM() const;
+    int16_t getShaftRPM() const { return shaftRPM; }
 
-    bool isMotorInverted() const;
+    bool isMotorInverted() const { return motorInverted; }
 
-    aruwlib::can::CanBus getCanBus() const;
+    aruwlib::can::CanBus getCanBus() const { return motorCanBus; }
 
-    const std::string& getName() const;
+    const std::string& getName() const { return motorName; }
 
     template <typename T> static void assertEncoderType()
     {
@@ -138,7 +199,27 @@ private:
     static const uint32_t MOTOR_DISCONNECT_TIME = 100;
 
     // Parses receive data given message with the correct identifier.
-    void parseCanRxData(const modm::can::Message& message);
+    void parseCanRxData(const modm::can::Message& message)
+    {
+        if (message.getIdentifier() != DjiMotor::getMotorIdentifier())
+        {
+            return;
+        }
+        uint16_t encoderActual =
+            static_cast<uint16_t>(message.data[0] << 8 | message.data[1]);        // encoder value
+        shaftRPM = static_cast<int16_t>(message.data[2] << 8 | message.data[3]);  // rpm
+        shaftRPM = motorInverted ? -shaftRPM : shaftRPM;
+        torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // torque
+        torque = motorInverted ? -torque : torque;
+        temperature = static_cast<int8_t>(message.data[6]);  // temperature
+
+        // restart disconnect timer, since you just received a message from the motor
+        motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
+
+        // invert motor if necessary
+        encoderActual = motorInverted ? ENC_RESOLUTION - 1 - encoderActual : encoderActual;
+        encStore.updateValue(encoderActual);
+    }
 
     uint32_t motorIdentifier;
 

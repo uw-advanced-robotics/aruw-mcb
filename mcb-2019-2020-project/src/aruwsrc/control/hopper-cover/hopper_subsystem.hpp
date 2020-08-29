@@ -58,7 +58,7 @@ public:
     void refresh() override { hopper.updateSendPwmRamp(); }
 
 private:
-    aruwlib::motor::Servo hopper;
+    aruwlib::motor::Servo<Drivers> hopper;
 
     /*
      * return the angle defined as open as a PWM value
