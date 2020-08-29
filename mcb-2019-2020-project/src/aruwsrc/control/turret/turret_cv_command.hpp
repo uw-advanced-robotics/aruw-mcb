@@ -3,6 +3,7 @@
 
 #include <aruwlib/algorithms/contiguous_float.hpp>
 #include <aruwlib/architecture/timeout.hpp>
+#include <aruwlib/communication/serial/xavier_serial.hpp>
 #include <aruwlib/control/command.hpp>
 
 #include "aruwsrc/algorithms/turret_pid.hpp"
@@ -14,18 +15,41 @@ namespace aruwsrc
 {
 namespace turret
 {
-class TurretCVCommand : public aruwlib::control::Command
+template <typename Drivers> class TurretCVCommand : public aruwlib::control::Command
 {
 public:
-    explicit TurretCVCommand(TurretSubsystem *subsystem);
+    explicit TurretCVCommand(TurretSubsystem<Drivers> *subsystem);
 
-    void initialize() override;
+    void initialize() override
+    {
+        sendRequestTimer.restart(TIME_BETWEEN_CV_REQUESTS);
+        Drivers::xavierSerial.beginTargetTracking();
+        yawPid.reset();
+        pitchPid.reset();
+    }
 
     bool isFinished() const override { return false; }
 
-    void execute() override;
+    void execute() override
+    {
+        aruwlib::serial::XavierSerial::TurretAimData cvData;
+        if (Drivers::xavierSerial.getLastAimData(&cvData))
+        {
+            if (cvData.hasTarget)
+            {
+                turretSubsystem->setYawTarget(cvData.yaw);
+                turretSubsystem->setPitchTarget(cvData.pitch);
+            }
+        }
+        else if (sendRequestTimer.isExpired())
+        {
+            Drivers::xavierSerial.beginTargetTracking();
+        }
+        runYawPositionController();
+        runPitchPositionController();
+    }
 
-    void end(bool isInterrupted) override;
+    void end(bool isInterrupted) override { Drivers::xavierSerial.stopTargetTracking(); }
 
     const char *getName() const override { return "turret cv command"; }
 
@@ -52,7 +76,7 @@ private:
 
     static constexpr uint32_t TIME_BETWEEN_CV_REQUESTS = 1000;
 
-    TurretSubsystem *turretSubsystem;
+    TurretSubsystem<Drivers> *turretSubsystem;
 
     aruwlib::algorithms::ContiguousFloat yawTargetAngle;
     aruwlib::algorithms::ContiguousFloat pitchTargetAngle;
@@ -62,9 +86,27 @@ private:
 
     aruwlib::arch::MilliTimeout sendRequestTimer;
 
-    void runYawPositionController();
+    void runYawPositionController()
+    {
+        // position controller based on gimbal angle
+        float positionControllerError =
+            turretSubsystem->getYawAngle().difference(turretSubsystem->getYawTarget());
+        float pidOutput =
+            yawPid.runController(positionControllerError, turretSubsystem->getYawVelocity());
 
-    void runPitchPositionController();
+        turretSubsystem->setYawMotorOutput(pidOutput);
+    }
+
+    void runPitchPositionController()
+    {
+        // position controller based on turret pitch gimbal
+        float positionControllerError =
+            turretSubsystem->getPitchAngle().difference(turretSubsystem->getPitchTarget());
+        float pidOutput =
+            pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity());
+
+        turretSubsystem->setPitchMotorOutput(pidOutput);
+    }
 };  // class TurretCvCommand
 
 }  // namespace turret

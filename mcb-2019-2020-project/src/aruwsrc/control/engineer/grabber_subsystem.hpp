@@ -13,7 +13,7 @@ namespace engineer
  * The grabber will be actuated by a single solenoid that
  * controls two pneumatic pistons.
  */
-class GrabberSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers> class GrabberSubsystem : public aruwlib::control::Subsystem
 {
 public:
     explicit GrabberSubsystem(aruwlib::gpio::Digital::OutputPin pin)
@@ -22,9 +22,13 @@ public:
     {
     }
 
-    void setSqueezed(bool isGrabberSqueezed);
+    void setSqueezed(bool isGrabberSqueezed)
+    {
+        Drivers::digital.set(pin, isGrabberSqueezed);
+        this->isGrabberSqueezed = isGrabberSqueezed;
+    }
 
-    bool isSqueezed() const;
+    bool isSqueezed() const { return isGrabberSqueezed; }
 
 private:
     aruwlib::gpio::Digital::OutputPin pin;

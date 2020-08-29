@@ -16,23 +16,26 @@ namespace agitator
  *  - a placeholder command initially
  *  - allows you to recalibrate an agitator that has already been calibrated if necessary
  */
-class AgitatorCalibrateCommand : public aruwlib::control::Command
+template <typename Drivers> class AgitatorCalibrateCommand : public aruwlib::control::Command
 {
 public:
-    explicit AgitatorCalibrateCommand(AgitatorSubsystem* agitator);
+    explicit AgitatorCalibrateCommand(AgitatorSubsystem<Drivers>* agitator)
+    {
+        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
+    }
 
     const char* getName() const override { return "agitator calibrate command"; }
 
-    void initialize() override;
+    void initialize() override { agitator->agitatorCalibrateHere(); }
 
-    void execute() override;
+    void execute() override { agitator->agitatorCalibrateHere(); }
 
-    void end(bool interrupted) override;
+    void end(bool) override {}
 
-    bool isFinished() const override;
+    bool isFinished() const override { return agitator->isAgitatorCalibrated(); }
 
 private:
-    AgitatorSubsystem* agitator;
+    AgitatorSubsystem<Drivers>* agitator;
 };
 
 }  // namespace agitator

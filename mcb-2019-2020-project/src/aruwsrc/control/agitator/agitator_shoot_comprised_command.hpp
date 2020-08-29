@@ -11,32 +11,74 @@ namespace aruwsrc
 {
 namespace agitator
 {
-class ShootComprisedCommand : public aruwlib::control::ComprisedCommand
+template <typename Drivers> class ShootComprisedCommand : public aruwlib::control::ComprisedCommand
 {
 public:
     ShootComprisedCommand(
-        AgitatorSubsystem* agitator,
+        AgitatorSubsystem<Drivers>* agitator,
         float agitatorChangeAngle,
         float maxUnjamAngle,
         uint32_t agitatorDesiredRotateTime,
-        uint32_t minAgitatorRotateTime);
+        uint32_t minAgitatorRotateTime)
+        : connectedAgitator(agitator),
+          agitatorRotateCommand(
+              agitator,
+              agitatorChangeAngle,
+              agitatorDesiredRotateTime,
+              false,
+              minAgitatorRotateTime),
+          agitatorUnjamCommand(agitator, maxUnjamAngle),
+          unjamSequenceCommencing(false)
+    {
+        this->comprisedCommandScheduler.registerSubsystem(agitator);
+        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
+    }
 
-    void initialize() override;
+    void initialize() override
+    {
+        this->comprisedCommandScheduler.addCommand(
+            dynamic_cast<aruwlib::control::Command*>(&agitatorRotateCommand));
+        unjamSequenceCommencing = false;
+    }
 
-    void execute() override;
+    void execute() override
+    {
+        if (connectedAgitator->isAgitatorJammed() && !unjamSequenceCommencing)
+        {
+            // when the agitator is jammed, add the agitatorUnjamCommand
+            // the to scheduler. The rotate forward command will be automatically
+            // unscheduled.
+            unjamSequenceCommencing = true;
+            this->comprisedCommandScheduler.addCommand(
+                dynamic_cast<Command*>(&agitatorUnjamCommand));
+        }
+        this->comprisedCommandScheduler.run();
+    }
 
-    void end(bool interrupted) override;
+    void end(bool interrupted) override
+    {
+        this->comprisedCommandScheduler.removeCommand(
+            dynamic_cast<Command*>(&agitatorUnjamCommand),
+            interrupted);
+        this->comprisedCommandScheduler.removeCommand(
+            dynamic_cast<Command*>(&agitatorRotateCommand),
+            interrupted);
+    }
 
-    bool isFinished() const override;
+    bool isFinished() const override
+    {
+        return (agitatorRotateCommand.isFinished() && !unjamSequenceCommencing) ||
+               (agitatorUnjamCommand.isFinished() && unjamSequenceCommencing);
+    }
 
     const char* getName() const override { return "agitator shoot command"; }
 
 private:
-    AgitatorSubsystem* connectedAgitator;
+    AgitatorSubsystem<Drivers>* connectedAgitator;
 
-    AgitatorRotateCommand agitatorRotateCommand;
+    AgitatorRotateCommand<Drivers> agitatorRotateCommand;
 
-    AgitatorUnjamCommand agitatorUnjamCommand;
+    AgitatorUnjamCommand<Drivers> agitatorUnjamCommand;
 
     bool unjamSequenceCommencing;
 };

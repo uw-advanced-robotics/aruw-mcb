@@ -9,28 +9,34 @@
 
 #include <aruwlib/control/command.hpp>
 
+#include "example_subsystem.hpp"
+
 namespace aruwsrc
 {
 namespace control
 {
-class ExampleSubsystem;
-
-class ExampleCommand : public aruwlib::control::Command
+template <typename Drivers> class ExampleCommand : public aruwlib::control::Command
 {
 public:
-    explicit ExampleCommand(ExampleSubsystem* subsystem, int speed);
+    explicit ExampleCommand(ExampleSubsystem<Drivers>* subsystem, int speed)
+        : Command(),
+          subsystemExample(subsystem),
+          speed(speed)
+    {
+        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+    }
 
     /**
      * The initial subroutine of a command.  Called once when the command is
      * initially scheduled.
      */
-    void initialize() override;
+    void initialize() override {}
 
     /**
      * The main body of a command.  Called repeatedly while the command is
      * scheduled.
      */
-    void execute() override;
+    void execute() override { subsystemExample->setDesiredRpm(speed); }
 
     /**
      * The action to take when the command ends.  Called when either the command
@@ -38,7 +44,7 @@ public:
      *
      * @param interrupted whether the command was interrupted/canceled
      */
-    void end(bool interrupted) override;
+    void end(bool interrupted) override { subsystemExample->setDesiredRpm(0); }
 
     /**
      * Whether the command has finished.  Once a command finishes, the scheduler
@@ -46,14 +52,14 @@ public:
      *
      * @return whether the command has finished.
      */
-    bool isFinished() const override;
+    bool isFinished() const override { return false; }
 
     const char* getName() const override { return "example command"; }
 
-    static const int16_t DEFAULT_WHEEL_RPM = 6000;
+    static constexpr int16_t DEFAULT_WHEEL_RPM = 6000;
 
 private:
-    ExampleSubsystem* subsystemExample;
+    ExampleSubsystem<Drivers>* subsystemExample;
 
     int speed;
 };

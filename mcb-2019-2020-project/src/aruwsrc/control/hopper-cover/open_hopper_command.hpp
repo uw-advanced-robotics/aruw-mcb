@@ -9,25 +9,28 @@ namespace aruwsrc
 {
 namespace control
 {
-class OpenHopperCommand;
-
-class OpenHopperCommand : public aruwlib::control::Command
+template <typename Drivers> class OpenHopperCommand : public aruwlib::control::Command
 {
 public:
-    explicit OpenHopperCommand(HopperSubsystem* subsystem);
+    explicit OpenHopperCommand(HopperSubsystem<Drivers>* subsystem)
+        : Command(),
+          subsystemHopper(subsystem)
+    {
+        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+    }
 
-    void initialize() override;
+    void initialize() override { subsystemHopper->setOpen(); }
 
-    void execute() override;
+    void execute() override {}
 
-    void end(bool) override;
+    void end(bool) override { subsystemHopper->setClose(); }
 
-    bool isFinished() const override;
+    bool isFinished() const override { return false; }
 
     const char* getName() const override { return "open hopper command"; }
 
 private:
-    HopperSubsystem* subsystemHopper;
+    HopperSubsystem<Drivers>* subsystemHopper;
 };
 
 }  // namespace control

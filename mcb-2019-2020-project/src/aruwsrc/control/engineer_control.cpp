@@ -22,10 +22,12 @@ const Digital::OutputPin grabberPin = Digital::OutputPin::E;
 const Digital::OutputPin xAxisPin = Digital::OutputPin::F;
 
 /* define subsystems --------------------------------------------------------*/
-GrabberSubsystem grabber(grabberPin);
-XAxisSubsystem xAxis(xAxisPin);
+GrabberSubsystem<Drivers> grabber(grabberPin);
+XAxisSubsystem<Drivers> xAxis(xAxisPin);
 
 /* define commands ----------------------------------------------------------*/
+ExtendXAxisCommand<Drivers> xAxisCommand(&xAxis);
+SqueezeGrabberCommand<Drivers> squeezeGrabberCommand(&grabber);
 
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems()

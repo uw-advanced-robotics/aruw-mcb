@@ -10,22 +10,33 @@ namespace aruwsrc
 {
 namespace control
 {
-class BlinkLEDCommand : public aruwlib::control::Command
+template <typename Drivers> class BlinkLEDCommand : public aruwlib::control::Command
 {
 public:
-    explicit BlinkLEDCommand(aruwsrc::control::ExampleSubsystem* subsystem);
+    explicit BlinkLEDCommand(aruwsrc::control::ExampleSubsystem<Drivers>* subsystem)
+    {
+        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+    }
 
     /**
      * The initial subroutine of a command.  Called once when the command is
      * initially scheduled.
      */
-    void initialize() override;
+    void initialize() override
+    {
+        completedTimer.restart(3000);
+        startCounter++;
+    }
 
     /**
      * The main body of a command.  Called repeatedly while the command is
      * scheduled.
      */
-    void execute() override;
+    void execute() override
+    {
+        refershCounter++;
+        Drivers::leds.set(aruwlib::gpio::Leds::A, true);
+    }
 
     /**
      * Whether the command has finished.  Once a command finishes, the scheduler
@@ -33,7 +44,9 @@ public:
      *
      * @return whether the command has finished.
      */
-    bool isFinished() const override;
+    bool isFinished() const override { return completedTimer.isExpired(); }
+
+    void end(bool) override { completedTimer.stop(); }
 
     const char* getName() const override { return "blink led command"; }
 

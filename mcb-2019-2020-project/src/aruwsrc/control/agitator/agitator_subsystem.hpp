@@ -1,8 +1,10 @@
 #ifndef __AGITATOR_SUBSYSTEM_HPP__
 #define __AGITATOR_SUBSYSTEM_HPP__
 
+#include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/architecture/timeout.hpp>
 #include <aruwlib/control/subsystem.hpp>
+#include <aruwlib/errors/create_errors.hpp>
 #include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
 
@@ -12,7 +14,7 @@ namespace aruwsrc
 {
 namespace agitator
 {
-class AgitatorSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers> class AgitatorSubsystem : public aruwlib::control::Subsystem
 {
 public:
 #if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
@@ -84,34 +86,85 @@ public:
         float agitatorGearRatio,
         aruwlib::motor::MotorId agitatorMotorId,
         aruwlib::can::CanBus agitatorCanBusId,
-        bool isAgitatorInverted);
+        bool isAgitatorInverted)
+        : agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
+          agitatorMotor(agitatorMotorId, agitatorCanBusId, isAgitatorInverted, "agitator motor"),
+          desiredAgitatorAngle(0.0f),
+          agitatorCalibratedZeroAngle(0.0f),
+          agitatorIsCalibrated(false),
+          agitatorJammedTimeout(0),
+          agitatorJammedTimeoutPeriod(0),
+          gearRatio(agitatorGearRatio)
+    {
+        agitatorJammedTimeout.stop();
+    }
 
-    void refresh() override;
+    void refresh() override
+    {
+        if (agitatorIsCalibrated)
+        {
+            agitatorRunPositionPid();
+        }
+        else
+        {
+            agitatorCalibrateHere();
+        }
+    }
 
-    void setAgitatorDesiredAngle(const float& newAngle);
+    void setAgitatorDesiredAngle(const float& newAngle) { desiredAgitatorAngle = newAngle; }
 
-    float getAgitatorAngle() const;
+    float getAgitatorAngle() const
+    {
+        if (!agitatorIsCalibrated)
+        {
+            return 0.0f;
+        }
+        return getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
+    }
 
-    float getAgitatorDesiredAngle() const;
+    float getAgitatorDesiredAngle() const { return desiredAgitatorAngle; }
 
-    bool agitatorCalibrateHere();
+    bool agitatorCalibrateHere()
+    {
+        if (!agitatorMotor.isMotorOnline())
+        {
+            return false;
+        }
+        agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
+        agitatorIsCalibrated = true;
+        return true;
+    }
 
-    void armAgitatorUnjamTimer(const uint32_t& predictedRotateTime);
+    void armAgitatorUnjamTimer(const uint32_t& predictedRotateTime)
+    {
+        if (predictedRotateTime == 0)
+        {
+            RAISE_ERROR(
+                "The predicted rotate time is 0, this is physically impossible",
+                aruwlib::errors::SUBSYSTEM,
+                aruwlib::errors::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
+        }
+        agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
+        agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
+    }
 
-    void disarmAgitatorUnjamTimer();
+    void disarmAgitatorUnjamTimer() { agitatorJammedTimeout.stop(); }
 
-    bool isAgitatorJammed() const;
+    bool isAgitatorJammed() const { return agitatorJammedTimeout.isExpired(); }
 
     // Returns the velocity of the agitator in units of degrees per second
-    float getAgitatorVelocity() const;
+    float getAgitatorVelocity() const
+    {
+        return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / gearRatio;
+    }
 
-    bool isAgitatorCalibrated() const;
+    bool isAgitatorCalibrated() const { return agitatorIsCalibrated; }
 
 private:
     // we add on this amount of "tolerance" to the predicted rotate time since some times it
     // takes longer than predicted and we only want to unjam when we are actually jammed
     // measured in ms
-    static const uint32_t JAMMED_TOLERANCE_PERIOD = 150;
+    static constexpr uint32_t JAMMED_TOLERANCE_PERIOD = 150;
 
     // pid controller for running postiion pid on unwrapped agitator angle (in radians)
     aruwsrc::algorithms::TurretPid agitatorPositionPid;
@@ -142,9 +195,29 @@ private:
     // motor gera ratio, so we use shaft angle rather than encoder angle
     float gearRatio;
 
-    void agitatorRunPositionPid();
+    void agitatorRunPositionPid()
+    {
+        if (!agitatorIsCalibrated)
+        {
+            agitatorPositionPid.reset();
+        }
+        else
+        {
+            agitatorPositionPid.runController(
+                desiredAgitatorAngle - getAgitatorAngle(),
+                getAgitatorVelocity());
+            agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());
+        }
+    }
 
-    float getUncalibratedAgitatorAngle() const;
+    float getUncalibratedAgitatorAngle() const
+    {
+        // position is equal to the following equation:
+        // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
+        return (2.0f * aruwlib::algorithms::PI /
+                static_cast<float>(aruwlib::motor::DjiMotor::ENC_RESOLUTION)) *
+               agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
+    }
 };
 
 }  // namespace agitator

@@ -9,25 +9,32 @@ namespace aruwsrc
 {
 namespace control
 {
-class SentinelDriveSubsystem;
-
-class SentinelDriveManualCommand : public aruwlib::control::Command
+template <typename Drivers> class SentinelDriveManualCommand : public aruwlib::control::Command
 {
 public:
-    explicit SentinelDriveManualCommand(SentinelDriveSubsystem* subsystem);
+    explicit SentinelDriveManualCommand(SentinelDriveSubsystem<Drivers>* subsystem)
+        : Command(),
+          subsystemSentinelDrive(subsystem)
+    {
+        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+    }
 
-    void initialize() override;
+    void initialize() override {}
 
-    void execute() override;
+    void execute() override
+    {
+        subsystemSentinelDrive->setDesiredRpm(
+            Drivers::controlOperatorInterface.getSentinelSpeedInput());
+    }
 
-    void end(bool) override;
+    void end(bool) override { subsystemSentinelDrive->setDesiredRpm(0); }
 
-    bool isFinished() const override;
+    bool isFinished() const override { return false; }
 
     const char* getName() const override { return "sentinel drive manual command"; }
 
 private:
-    SentinelDriveSubsystem* subsystemSentinelDrive;
+    SentinelDriveSubsystem<Drivers>* subsystemSentinelDrive;
 };
 
 }  // namespace control

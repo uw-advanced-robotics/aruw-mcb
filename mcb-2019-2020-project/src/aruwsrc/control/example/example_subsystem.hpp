@@ -23,7 +23,7 @@ namespace aruwsrc
 {
 namespace control
 {
-class ExampleSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers> class ExampleSubsystem : public aruwlib::control::Subsystem
 {
 public:
     ExampleSubsystem(
@@ -37,20 +37,24 @@ public:
     {
     }
 
-    void setDesiredRpm(float desRpm);
+    void setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
 
-    void refresh() override;
+    void refresh() override
+    {
+        updateMotorRpmPid(&velocityPidLeftWheel, &leftWheel, desiredRpm);
+        updateMotorRpmPid(&velocityPidRightWheel, &rightWheel, desiredRpm);
+    }
 
 private:
-    static const aruwlib::motor::MotorId LEFT_MOTOR_ID;
-    static const aruwlib::motor::MotorId RIGHT_MOTOR_ID;
-    const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MotorId::MOTOR2;
+    static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MotorId::MOTOR1;
+    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
-    const float PID_P = 5.0f;
-    const float PID_I = 0.0f;
-    const float PID_D = 1.0f;
-    const float PID_MAX_ERROR_SUM = 0.0f;
-    const float PID_MAX_OUTPUT = 16000;
+    static constexpr float PID_P = 5.0f;
+    static constexpr float PID_I = 0.0f;
+    static constexpr float PID_D = 1.0f;
+    static constexpr float PID_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PID_MAX_OUTPUT = 16000;
 
     aruwlib::motor::DjiMotor leftWheel;
 
@@ -65,7 +69,11 @@ private:
     void updateMotorRpmPid(
         modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
-        float desiredRpm);
+        float desiredRpm)
+    {
+        pid->update(desiredRpm - motor->getShaftRPM());
+        motor->setDesiredOutput(static_cast<int32_t>(pid->getValue()));
+    }
 };
 
 }  // namespace control
