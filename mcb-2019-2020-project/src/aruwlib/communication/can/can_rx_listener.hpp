@@ -54,7 +54,7 @@ namespace can
  * @see `CanRxHandler`
  * @see `DjiMotor` for a usecase implementation of a `CanRxListener`.
  */
-class CanRxListener
+template <typename Drivers> class CanRxListener
 {
 public:
     /**
@@ -66,7 +66,11 @@ public:
      *      rx listener.
      * @param[in] cB the CanBus that you would like to watch.
      */
-    CanRxListener(uint32_t id, CanBus cB);
+    CanRxListener(uint32_t id, CanBus cB) : canIdentifier(id), canBus(cB)
+    {
+        Drivers::canRxHandler.attachReceiveHandler(this);
+    }
+    CanRxListener() = delete;
 
     ///< Delete copy constructor.
     CanRxListener(const CanRxListener&) = delete;
@@ -75,7 +79,7 @@ public:
     CanRxListener& operator=(const CanRxListener& other) = delete;
 
     ///< Here we remove the listener from receive interface.
-    ~CanRxListener();
+    ~CanRxListener() { Drivers::canRxHandler.removeReceiveHandler(*this); }
 
     /**
      * Called when a message is received with the particular id and

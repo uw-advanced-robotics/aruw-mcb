@@ -169,7 +169,7 @@ private:
     // pid controller for running postiion pid on unwrapped agitator angle (in radians)
     aruwsrc::algorithms::TurretPid agitatorPositionPid;
 
-    aruwlib::motor::DjiMotor agitatorMotor;
+    aruwlib::motor::DjiMotor<Drivers> agitatorMotor;
 
     // The user desired angle, measured in radians.
     // The agitator uses unwrapped angle.
@@ -215,7 +215,7 @@ private:
         // position is equal to the following equation:
         // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
         return (2.0f * aruwlib::algorithms::PI /
-                static_cast<float>(aruwlib::motor::DjiMotor::ENC_RESOLUTION)) *
+                static_cast<float>(aruwlib::motor::DjiMotor<Drivers>::ENC_RESOLUTION)) *
                agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
     }
 };

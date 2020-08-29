@@ -13,7 +13,7 @@ namespace motor
  * In particular, this class limits some target PWM to a min and max PWM value and uses
  * ramping to control the speed of the servo.
  */
-class Servo
+template <typename Drivers> class Servo
 {
 public:
     /**
@@ -28,41 +28,69 @@ public:
      * @param[in] minimumPwm The minimum allowable PWM output. This is limited between 0 and 1.
      * @param[in] pwmRampSpeed The speed in PWM percent per millisecond.
      */
-    Servo(aruwlib::gpio::Pwm::Pin pwmPin, float maximumPwm, float minimumPwm, float pwmRampSpeed);
+    Servo(aruwlib::gpio::Pwm::Pin pwmPin, float maximumPwm, float minimumPwm, float pwmRampSpeed)
+        : pwmOutputRamp(0.0f),
+          maxPwm(aruwlib::algorithms::limitVal<float>(maximumPwm, 0.0f, 1.0f)),
+          minPwm(aruwlib::algorithms::limitVal<float>(minimumPwm, 0.0f, 1.0f)),
+          pwmRampSpeed(pwmRampSpeed),
+          prevTime(0),
+          servoPin(pwmPin)
+    {
+        if (maxPwm < minPwm)
+        {
+            minPwm = 0.0f;
+            maxPwm = 1.0f;
+            RAISE_ERROR(
+                "min servo PWM > max servo PWM",
+                errors::Location::SERVO,
+                errors::ErrorType::INVALID_ADD);
+        }
+    }
 
     /**
      * Limits `pwmOutputRamp` to `minPwm` and `maxPwm`, then sets ramp output
      * to the limited value. Do not repeatedly call (i.e. only call in a `Command`'s
      * `initialize` function, for example).
      */
-    void setTargetPwm(float pwm);
+    void setTargetPwm(float pwm)
+    {
+        pwmOutputRamp.setTarget(aruwlib::algorithms::limitVal<float>(pwm, minPwm, maxPwm));
+        prevTime = aruwlib::arch::clock::getTimeMilliseconds();
+    }
 
     /**
      * Updates the `pwmOutputRamp` object and then sets the output PWM to the updated
      * ramp value.
      */
-    void updateSendPwmRamp();
+    void updateSendPwmRamp()
+    {
+        uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+        pwmOutputRamp.update(pwmRampSpeed * (currTime - prevTime));
+        prevTime = currTime;
+        currentPwm = pwmOutputRamp.getValue();
+        Drivers::pwm.write(pwmOutputRamp.getValue(), servoPin);
+    }
 
     /**
      * @return The current PWM output to the servo.
      */
-    float getPWM() const;
+    float getPWM() const { return currentPwm; }
 
     /**
      * @return The minimum PWM output (as a duty cycle).
      */
-    float getMinPWM() const;
+    float getMinPWM() const { return minPwm; }
 
     /**
      * @return The maximum PWM output (as a duty cycle).
      */
-    float getMaxPWM() const;
+    float getMaxPWM() const { return maxPwm; }
 
     /**
      * @return `true` if the ramp has met the desired PWM value (set with `setTargetPwm`).
      *      Use this to estimate when a servo movement is complete.
      */
-    bool isRampTargetMet() const;
+    bool isRampTargetMet() const { return pwmOutputRamp.isTargetReached(); }
 
 private:
     ///< Used to change servo speed. See construtctor for detail.

@@ -12,7 +12,7 @@ namespace sensors
  *
  * The distance conversion can be tweaked depending on the sensor.
  */
-class SharpIrGP2Y0A41 : public AnalogDistanceSensor
+template <typename Drivers> class SharpIrGP2Y0A41 : public AnalogDistanceSensor<Drivers>
 {
 public:
     /**
@@ -20,10 +20,19 @@ public:
      *
      * @param[in] pin the analog pin to attach the sensor to.
      */
-    explicit SharpIrGP2Y0A41(gpio::Analog::Pin pin);
+    explicit SharpIrGP2Y0A41(gpio::Analog::Pin pin)
+        : AnalogDistanceSensor<Drivers>(
+              SHARP_IR_MIN,
+              SHARP_IR_MAX,
+              SHARP_IR_M,
+              SHARP_IR_B,
+              SHARP_IR_OFFSET,
+              pin)
 
-    ///< Init not needed for Sharp IR.
-    void init() override {}
+          ///< Init not needed for Sharp IR.
+          void init() override
+    {
+    }
 
 private:
     ///< Min distance boundary value (in cm).

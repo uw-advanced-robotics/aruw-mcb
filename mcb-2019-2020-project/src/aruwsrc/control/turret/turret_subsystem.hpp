@@ -230,8 +230,8 @@ private:
     float feedforwardChassisRotateDerivative = 0.0f;
     float feedforwardPrevChassisRotationDesired = 0.0f;
 
-    aruwlib::motor::DjiMotor pitchMotor;
-    aruwlib::motor::DjiMotor yawMotor;
+    aruwlib::motor::DjiMotor<Drivers> pitchMotor;
+    aruwlib::motor::DjiMotor<Drivers> yawMotor;
 
     aruwlib::algorithms::ContiguousFloat currPitchAngle;
     aruwlib::algorithms::ContiguousFloat currYawAngle;
@@ -244,7 +244,7 @@ private:
         if (yawMotor.isMotorOnline())
         {
             currYawAngle.setValue(
-                aruwlib::motor::DjiMotor::encoderToDegrees(static_cast<uint16_t>(
+                aruwlib::motor::DjiMotor<Drivers>::encoderToDegrees(static_cast<uint16_t>(
                     yawMotor.encStore.getEncoderWrapped() - YAW_START_ENCODER_POSITION)) +
                 TURRET_START_ANGLE);
         }
@@ -258,7 +258,7 @@ private:
         if (pitchMotor.isMotorOnline())
         {
             currPitchAngle.setValue(
-                aruwlib::motor::DjiMotor::encoderToDegrees(static_cast<uint16_t>(
+                aruwlib::motor::DjiMotor<Drivers>::encoderToDegrees(static_cast<uint16_t>(
                     pitchMotor.encStore.getEncoderWrapped() - PITCH_START_ENCODER_POSITION)) +
                 TURRET_START_ANGLE);
         }
@@ -268,7 +268,7 @@ private:
         }
     }
 
-    int32_t getVelocity(const aruwlib::motor::DjiMotor& motor) const
+    int32_t getVelocity(const aruwlib::motor::DjiMotor<Drivers>& motor) const
     {
         return 360 / 60 * motor.getShaftRPM();
     }

@@ -54,9 +54,9 @@ private:
     static constexpr float PID_MAX_ERROR_SUM = 0.0f;
     static constexpr float PID_MAX_OUTPUT = 16000.0f;
 
-    aruwlib::motor::DjiMotor leftWheel;
+    aruwlib::motor::DjiMotor<Drivers> leftWheel;
 
-    aruwlib::motor::DjiMotor rightWheel;
+    aruwlib::motor::DjiMotor<Drivers> rightWheel;
 
     modm::Pid<float> velocityPidLeftWheel;
 

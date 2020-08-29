@@ -115,9 +115,9 @@ private:
     static constexpr float WHEEL_RADIUS = 35.0f;
     static constexpr float GEAR_RATIO = 19.0f;
 
-    aruwlib::motor::DjiMotor leftWheel;
+    aruwlib::motor::DjiMotor<Drivers> leftWheel;
 
-    aruwlib::motor::DjiMotor rightWheel;
+    aruwlib::motor::DjiMotor<Drivers> rightWheel;
 
     modm::Pid<float> velocityPidLeftWheel;
 
@@ -149,10 +149,11 @@ private:
     // with respect to the encoders
     // Equation used: Arc Length = Angle * numberOfRotations * radius
     // Here we get the radius from the getEncoderUnwrapped function
-    float distanceFromEncoder(aruwlib::motor::DjiMotor* motor)
+    float distanceFromEncoder(aruwlib::motor::DjiMotor<Drivers>* motor)
     {
         float unwrappedAngle = motor->encStore.getEncoderUnwrapped();
-        float numberOfRotations = unwrappedAngle / (aruwlib::motor::DjiMotor::ENC_RESOLUTION);
+        float numberOfRotations =
+            unwrappedAngle / (aruwlib::motor::DjiMotor<Drivers>::ENC_RESOLUTION);
         return numberOfRotations * 2.0f * aruwlib::algorithms::PI * WHEEL_RADIUS / GEAR_RATIO;
     }
 };

@@ -32,7 +32,7 @@ public:
 
     void execute() override
     {
-        aruwlib::serial::XavierSerial::TurretAimData cvData;
+        aruwlib::serial::TurretAimData cvData;
         if (Drivers::xavierSerial.getLastAimData(&cvData))
         {
             if (cvData.hasTarget)
