@@ -19,6 +19,7 @@
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::launcher;
+using namespace aruwsrc::control;
 using aruwlib::Drivers;
 using aruwlib::control::CommandMapper;
 
@@ -27,58 +28,58 @@ namespace aruwsrc
 namespace control
 {
 /* define subsystems --------------------------------------------------------*/
-AgitatorSubsystem agitator(
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
+AgitatorSubsystem<Drivers> agitator(
+    AgitatorSubsystem<Drivers>::PID_17MM_P,
+    AgitatorSubsystem<Drivers>::PID_17MM_I,
+    AgitatorSubsystem<Drivers>::PID_17MM_D,
+    AgitatorSubsystem<Drivers>::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem<Drivers>::PID_17MM_MAX_OUT,
+    AgitatorSubsystem<Drivers>::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_ID,
+    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_CAN_BUS,
     false);
 
-AgitatorSubsystem kickerMotor(
-    AgitatorSubsystem::PID_17MM_KICKER_P,
-    AgitatorSubsystem::PID_17MM_KICKER_I,
-    AgitatorSubsystem::PID_17MM_KICKER_D,
-    AgitatorSubsystem::PID_17MM_KICKER_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_KICKER_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::SENTINEL_KICKER_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
+AgitatorSubsystem<Drivers> kickerMotor(
+    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_P,
+    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_I,
+    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_D,
+    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_MAX_ERR_SUM,
+    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_MAX_OUT,
+    AgitatorSubsystem<Drivers>::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem<Drivers>::SENTINEL_KICKER_MOTOR_ID,
+    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_CAN_BUS,
     false);
 
-aruwsrc::control::SentinelDriveSubsystem sentinelDrive;
+SentinelDriveSubsystem<Drivers> sentinelDrive;
 
-FrictionWheelSubsystem upperFrictionWheels(aruwlib::motor::MOTOR3, aruwlib::motor::MOTOR4);
+FrictionWheelSubsystem<Drivers> upperFrictionWheels(aruwlib::motor::MOTOR3, aruwlib::motor::MOTOR4);
 
-FrictionWheelSubsystem lowerFrictionWheels;
+FrictionWheelSubsystem<Drivers> lowerFrictionWheels;
 
 /* define commands ----------------------------------------------------------*/
-ShootFastComprisedCommand agitatorShootSlowCommand(&agitator);
+ShootFastComprisedCommand<Drivers> agitatorShootSlowCommand(&agitator);
 
-AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
+AgitatorCalibrateCommand<Drivers> agitatorCalibrateCommand(&agitator);
 
-AgitatorRotateCommand agitatorKickerCommand(&kickerMotor, 3.0f, 1, 0, false);
+AgitatorRotateCommand<Drivers> agitatorKickerCommand(&kickerMotor, 3.0f, 1, 0, false);
 
-AgitatorCalibrateCommand agitatorCalibrateKickerCommand(&kickerMotor);
+AgitatorCalibrateCommand<Drivers> agitatorCalibrateKickerCommand(&kickerMotor);
 
-SentinelAutoDriveCommand sentinelAutoDrive(&sentinelDrive);
+SentinelAutoDriveCommand<Drivers> sentinelAutoDrive(&sentinelDrive);
 
-SentinelDriveManualCommand sentinelDriveManual(&sentinelDrive);
+SentinelDriveManualCommand<Drivers> sentinelDriveManual(&sentinelDrive);
 
-FrictionWheelRotateCommand spinUpperFrictionWheels(
+FrictionWheelRotateCommand<Drivers> spinUpperFrictionWheels(
     &upperFrictionWheels,
-    FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
+    FrictionWheelRotateCommand<Drivers>::DEFAULT_WHEEL_RPM);
 
-FrictionWheelRotateCommand spinLowerFrictionWheels(
+FrictionWheelRotateCommand<Drivers> spinLowerFrictionWheels(
     &lowerFrictionWheels,
-    FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
+    FrictionWheelRotateCommand<Drivers>::DEFAULT_WHEEL_RPM);
 
-FrictionWheelRotateCommand stopUpperFrictionWheels(&upperFrictionWheels, 0);
+FrictionWheelRotateCommand<Drivers> stopUpperFrictionWheels(&upperFrictionWheels, 0);
 
-FrictionWheelRotateCommand stopLowerFrictionWheels(&lowerFrictionWheels, 0);
+FrictionWheelRotateCommand<Drivers> stopLowerFrictionWheels(&lowerFrictionWheels, 0);
 
 /* register subsystems here -------------------------------------------------*/
 void registerSentinelSubsystems()

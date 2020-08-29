@@ -2,6 +2,7 @@
 #define __CHASSIS_SUBSYSTEM_HPP__
 
 #include <aruwlib/algorithms/extended_kalman.hpp>
+#include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
@@ -18,13 +19,13 @@ namespace chassis
  *     - in other words, 'x' is the bow/stern and 'y' is starboard/
  *       port in boat terms
  */
-class ChassisSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers> class ChassisSubsystem : public aruwlib::control::Subsystem
 {
 public:
     // public constants
     // max wheel speed, measured in rpm of the encoder (rather than shaft)
     // we use this for wheel speed since this is how dji's motors measures motor speed
-    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;
+    static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;
 
     // the minimum desired wheel speed for chassis rotation, measured in rpm before
     // we start slowing down translational speed
@@ -68,7 +69,7 @@ private:
     // derivative max term
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // the maximum revolve error before we start using the derivative term
-    static const int MIN_ERROR_ROTATION_D = 0;
+    static constexpr int MIN_ERROR_ROTATION_D = 0;
 
     // mechanical chassis constants, all in mm
     // radius of the wheels (mm)
@@ -97,7 +98,7 @@ private:
     // derivative term used in chassis pid
     static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
     // the maximum revolve error before we start using the derivative term
-    static const int MIN_ERROR_ROTATION_D = 0;
+    static constexpr int MIN_ERROR_ROTATION_D = 0;
     // derivative max term
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // mechanical chassis constants
@@ -129,7 +130,7 @@ private:
     // derivative max term
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // the maximum revolve error before we start using the derivative term
-    static const int MIN_ERROR_ROTATION_D = 0;
+    static constexpr int MIN_ERROR_ROTATION_D = 0;
 
     // mechanical chassis constants
     // radius of the wheels
@@ -222,7 +223,10 @@ public:
     {
     }
 
-    void setDesiredOutput(float x, float y, float r);
+    void setDesiredOutput(float x, float y, float r)
+    {
+        mecanumDriveCalculate(x, y, r, MAX_WHEEL_SPEED_SINGLE_MOTOR);
+    }
 
     /**
      * run chassis rotation pid on some actual turret angle offset
@@ -235,28 +239,127 @@ public:
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    float chassisSpeedRotationPID(float currentAngleError, float kp);
+    float chassisSpeedRotationPID(float currentAngleError, float kp)
+    {
+        float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.getLastFiltered();
+        float currentFilteredAngleError = chassisRotationErrorKalman.filterData(currentAngleError);
 
-    void refresh() override;
+        // P
+        float currRotationPidP = currentAngleError * kp;
+        currRotationPidP = aruwlib::algorithms::limitVal<float>(
+            currRotationPidP,
+            -CHASSIS_REVOLVE_PID_MAX_P,
+            CHASSIS_REVOLVE_PID_MAX_P);
+
+        // D
+        float currentRotationPidD = 0.0f;
+        if (abs(currentFilteredAngleError) > MIN_ERROR_ROTATION_D)
+        {
+            float currentErrorRotation =
+                currentFilteredAngleError - currentFilteredAngleErrorPrevious;
+
+            currentRotationPidD = -(currentErrorRotation)*CHASSIS_REVOLVE_PID_KD;
+
+            currentRotationPidD = aruwlib::algorithms::limitVal<float>(
+                currentRotationPidD,
+                -CHASSIS_REVOLVE_PID_MAX_D,
+                CHASSIS_REVOLVE_PID_MAX_D);
+        }
+
+        float wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(
+            currRotationPidP + currentRotationPidD,
+            -MAX_WHEEL_SPEED_SINGLE_MOTOR,
+            MAX_WHEEL_SPEED_SINGLE_MOTOR);
+
+        return wheelRotationSpeed;
+    }
+
+    void refresh() override
+    {
+        updateMotorRpmPid(&leftFrontVelocityPid, &leftFrontMotor, leftFrontRpm);
+        updateMotorRpmPid(&leftBackVelocityPid, &leftBackMotor, leftBackRpm);
+        updateMotorRpmPid(&rightFrontVelocityPid, &rightFrontMotor, rightFrontRpm);
+        updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, rightBackRpm);
+    }
 
     // Returns a number between 0 and 1 that is the ratio between the rotationRpm and
     // the max rotation speed
-    float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
+    float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
+    {
+        // what we will multiply x and y speed by to take into account rotation
+        float rTranslationalGain = 1.0f;
+
+        // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
+        // power consumption when the wheel rotation speed for chassis rotationis greater than the
+        // MIN_ROTATION_THRESHOLD
+        if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
+        {
+            // power(max revolve speed - specified revolve speed, 2)
+            // / power(max revolve speed, 2)
+            rTranslationalGain = powf(
+                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
+                    fabsf(chassisRotationDesiredWheelspeed) /
+                        ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR,
+                2.0f);
+            rTranslationalGain =
+                aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
+        }
+        return rTranslationalGain;
+    }
 
     // returns the desired rotation based on what was input into the subsystem via setDesiredOutput
-    float getChassisDesiredRotation() const;
+    float getChassisDesiredRotation() const { return chassisDesiredR; }
 
 private:
     /**
      * When you input desired x, y, an r values, this function translates
      * and sets the rpm of individual chassis motors
      */
-    void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
+    void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
+    {
+        // this is the distance between the center of the chassis to the wheel
+        float chassisRotationRatio = sqrtf(
+            powf(WIDTH_BETWEEN_WHEELS_X / 2.0f, 2.0f) + powf(WIDTH_BETWEEN_WHEELS_Y / 2.0f, 2.0f));
+
+        // to take into account the location of the turret so we rotate around the turret rather
+        // than the center of the chassis, we calculate the offset and than multiply however
+        // much we want to rotate by
+        float leftFrontRotationRatio = aruwlib::algorithms::degreesToRadians(
+            chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        float rightFroneRotationRatio = aruwlib::algorithms::degreesToRadians(
+            chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+        float leftBackRotationRatio = aruwlib::algorithms::degreesToRadians(
+            chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        float rightBackRotationRatio = aruwlib::algorithms::degreesToRadians(
+            chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+
+        float chassisRotateTranslated =
+            aruwlib::algorithms::radiansToDegrees(r) / chassisRotationRatio;
+        leftFrontRpm = y + x + chassisRotateTranslated * leftFrontRotationRatio;
+        rightFrontRpm = y - x + chassisRotateTranslated * rightFroneRotationRatio;
+        leftBackRpm = -y + x + chassisRotateTranslated * leftBackRotationRatio;
+        rightBackRpm = -y - x + chassisRotateTranslated * rightBackRotationRatio;
+
+        leftFrontRpm =
+            aruwlib::algorithms::limitVal<float>(leftFrontRpm, -maxWheelSpeed, maxWheelSpeed);
+        rightFrontRpm =
+            aruwlib::algorithms::limitVal<float>(rightFrontRpm, -maxWheelSpeed, maxWheelSpeed);
+        leftBackRpm =
+            aruwlib::algorithms::limitVal<float>(leftBackRpm, -maxWheelSpeed, maxWheelSpeed);
+        rightBackRpm =
+            aruwlib::algorithms::limitVal<float>(rightBackRpm, -maxWheelSpeed, maxWheelSpeed);
+
+        chassisDesiredR = r;
+    }
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
-        float desiredRpm);
+        float desiredRpm)
+    {
+        pid->update(desiredRpm - motor->getShaftRPM());
+        motor->setDesiredOutput(pid->getValue());
+    }
 };
 
 }  // namespace chassis

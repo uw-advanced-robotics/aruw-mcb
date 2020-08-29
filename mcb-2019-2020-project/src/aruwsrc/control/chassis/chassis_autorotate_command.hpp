@@ -13,33 +13,61 @@ namespace aruwsrc
 {
 namespace chassis
 {
-class ChassisAutorotateCommand : public aruwlib::control::Command
+template <typename Drivers> class ChassisAutorotateCommand : public aruwlib::control::Command
 {
 public:
     explicit ChassisAutorotateCommand(
-        ChassisSubsystem* chassis,
-        aruwsrc::turret::TurretSubsystem const* turret)
+        ChassisSubsystem<Drivers>* chassis,
+        aruwsrc::turret::TurretSubsystem<Drivers> const* turret)
         : chassis(chassis),
           turret(turret)
     {
         addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
     }
 
-    void initialize() override;
+    void initialize() override {}
 
-    void execute() override;
+    void execute() override
+    {
+        // calculate pid for chassis rotation
+        // returns a chassis rotation speed
+        float chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
+            turret->getYawAngleFromCenter(),
+            CHASSIS_AUTOROTATE_PID_KP);
 
-    void end(bool) override;
+        // what we will multiply x and y speed by to take into account rotation
+        float rTranslationalGain =
+            chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
 
-    bool isFinished() const override;
+        float chassisXDesiredWheelspeed = aruwlib::algorithms::limitVal<float>(
+                                              Drivers::controlOperatorInterface.getChassisXInput(),
+                                              -rTranslationalGain,
+                                              rTranslationalGain) *
+                                          ChassisSubsystem<Drivers>::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+
+        float chassisYDesiredWheelspeed = aruwlib::algorithms::limitVal<float>(
+                                              Drivers::controlOperatorInterface.getChassisYInput(),
+                                              -rTranslationalGain,
+                                              rTranslationalGain) *
+                                          ChassisSubsystem<Drivers>::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+
+        chassis->setDesiredOutput(
+            chassisXDesiredWheelspeed,
+            chassisYDesiredWheelspeed,
+            chassisRotationDesiredWheelspeed);
+    }
+
+    void end(bool) override { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
+
+    bool isFinished() const override { return false; }
 
     const char* getName() const override { return "chassis autorotate command"; }
 
 private:
     static constexpr float CHASSIS_AUTOROTATE_PID_KP = -85.0f;
 
-    ChassisSubsystem* chassis;
-    aruwsrc::turret::TurretSubsystem const* turret;
+    ChassisSubsystem<Drivers>* chassis;
+    aruwsrc::turret::TurretSubsystem<Drivers> const* turret;
 };
 
 }  // namespace chassis

@@ -27,41 +27,41 @@ namespace aruwsrc
 namespace control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret;
+TurretSubsystem<Drivers> turret;
 
-ChassisSubsystem chassis;
+ChassisSubsystem<Drivers> chassis;
 
-AgitatorSubsystem agitator(
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted);
+AgitatorSubsystem<Drivers> agitator(
+    AgitatorSubsystem<Drivers>::PID_17MM_P,
+    AgitatorSubsystem<Drivers>::PID_17MM_I,
+    AgitatorSubsystem<Drivers>::PID_17MM_D,
+    AgitatorSubsystem<Drivers>::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem<Drivers>::PID_17MM_MAX_OUT,
+    AgitatorSubsystem<Drivers>::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_ID,
+    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_CAN_BUS,
+    AgitatorSubsystem<Drivers>::isAgitatorInverted);
 
-HopperSubsystem hopperCover(
+HopperSubsystem<Drivers> hopperCover(
     aruwlib::gpio::Pwm::W,
-    HopperSubsystem::OLD_SOLDIER_HOPPER_OPEN_PWM,
-    HopperSubsystem::OLD_SOLDIER_HOPPER_CLOSE_PWM,
-    HopperSubsystem::OLD_SOLDIER_PWM_RAMP_SPEED);
+    HopperSubsystem<Drivers>::OLD_SOLDIER_HOPPER_OPEN_PWM,
+    HopperSubsystem<Drivers>::OLD_SOLDIER_HOPPER_CLOSE_PWM,
+    HopperSubsystem<Drivers>::OLD_SOLDIER_PWM_RAMP_SPEED);
 
 /* define commands ----------------------------------------------------------*/
-ChassisDriveCommand chassisDriveCommand(&chassis);
+ChassisDriveCommand<Drivers> chassisDriveCommand(&chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(&chassis, &turret);
+ChassisAutorotateCommand<Drivers> chassisAutorotateCommand(&chassis, &turret);
 
-WiggleDriveCommand wiggleDriveCommand(&chassis, &turret);
+WiggleDriveCommand<Drivers> wiggleDriveCommand(&chassis, &turret);
 
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(&turret, &chassis);
+TurretWorldRelativePositionCommand<Drivers> turretWorldRelativeCommand(&turret, &chassis);
 
-AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
+AgitatorCalibrateCommand<Drivers> agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand agitatorShootFastCommand(&agitator);
+ShootFastComprisedCommand<Drivers> agitatorShootFastCommand(&agitator);
 
-OpenHopperCommand openHopperCommand(&hopperCover);
+OpenHopperCommand<Drivers> openHopperCommand(&hopperCover);
 
 /* register subsystems here -------------------------------------------------*/
 void registerOldSoldierSubsystems()

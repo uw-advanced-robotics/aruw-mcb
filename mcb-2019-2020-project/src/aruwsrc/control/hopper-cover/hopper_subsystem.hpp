@@ -16,7 +16,7 @@ namespace aruwsrc
 {
 namespace control
 {
-class HopperSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers> class HopperSubsystem : public aruwlib::control::Subsystem
 {
 public:
 #if defined(TARGET_SOLDIER)
@@ -48,14 +48,14 @@ public:
     /*
      * set servo to the open angle
      */
-    void setOpen();
+    void setOpen() { hopper.setTargetPwm(hopper.getMaxPWM()); }
 
     /*
      * set servo to the close angle
      */
-    void setClose();
+    void setClose() { hopper.setTargetPwm(hopper.getMinPWM()); }
 
-    void refresh() override;
+    void refresh() override { hopper.updateSendPwmRamp(); }
 
 private:
     aruwlib::motor::Servo hopper;
@@ -63,12 +63,12 @@ private:
     /*
      * return the angle defined as open as a PWM value
      */
-    float getOpenPWM();
+    inline float getOpenPWM() { return hopper.getMaxPWM(); }
 
     /*
      * return the angle defined as close as a PWM value
      */
-    float getClosePWM();
+    inline float getClosePWM() { return hopper.getMinPWM(); }
 };
 
 }  // namespace control

@@ -2,6 +2,7 @@
 #define __FRICTION_WHEEL_SUBSYSTEM_HPP__
 
 #include <aruwlib/algorithms/ramp.hpp>
+#include <aruwlib/architecture/clock.hpp>
 #include <aruwlib/control/command_scheduler.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <aruwlib/motor/dji_motor.hpp>
@@ -13,7 +14,7 @@ namespace aruwsrc
 {
 namespace launcher
 {
-class FrictionWheelSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers> class FrictionWheelSubsystem : public aruwlib::control::Subsystem
 {
 public:
     FrictionWheelSubsystem(
@@ -27,9 +28,19 @@ public:
     {
     }
 
-    mockable void setDesiredRpm(float desRpm);
+    void setDesiredRpm(float desRpm) { desiredRpmRamp.setTarget(desRpm); }
 
-    void refresh() override;
+    void refresh() override
+    {
+        uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+        desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
+        prevTime = currTime;
+
+        velocityPidLeftWheel.update(desiredRpmRamp.getValue() - leftWheel.getShaftRPM());
+        leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
+        velocityPidRightWheel.update(desiredRpmRamp.getValue() - rightWheel.getShaftRPM());
+        rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
+    }
 
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;

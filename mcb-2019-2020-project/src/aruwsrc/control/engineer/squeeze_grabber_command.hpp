@@ -3,29 +3,33 @@
 
 #include <aruwlib/control/command.hpp>
 
+#include "grabber_subsystem.hpp"
+
 namespace aruwsrc
 {
 namespace engineer
 {
-class GrabberSubsystem;
-
-class SqueezeGrabberCommand : public aruwlib::control::Command
+template <typename Drivers> class SqueezeGrabberCommand : public aruwlib::control::Command
 {
 public:
-    explicit SqueezeGrabberCommand(GrabberSubsystem* subsystem);
+    explicit SqueezeGrabberCommand(GrabberSubsystem<Drivers>* subsystem)
+        : Command(),
+          grabber(subsystem)
+    {
+        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(grabber));
+    }
+    void initialize() override { grabber->setSqueezed(true); }
 
-    void initialize() override;
+    void execute() override {}
 
-    void execute() override;
+    void end(bool) override { grabber->setSqueezed(false); }
 
-    void end(bool) override;
-
-    bool isFinished() const override;
+    bool isFinished() const override { return false; }
 
     const char* getName() const override { return "squeeze grabber command"; }
 
 private:
-    GrabberSubsystem* grabber;
+    GrabberSubsystem<Drivers>* grabber;
 };  // class SqueezeGrabberCommand
 
 }  // namespace engineer
