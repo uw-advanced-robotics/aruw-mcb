@@ -45,7 +45,7 @@ public:
 
     Uart() = default;
     Uart(const Uart &) = delete;
-    Uart &operator=(const Uart &) = default;
+    Uart &operator=(const Uart &) = delete;
 
     /**
      * .initializes a particular Uart with the pins particular to the RoboMaster type a board.

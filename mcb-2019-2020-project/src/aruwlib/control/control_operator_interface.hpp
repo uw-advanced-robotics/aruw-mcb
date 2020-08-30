@@ -2,6 +2,8 @@
 #define CONTROL_OPERATOR_INTERFACE_HPP_
 
 #include "aruwlib/algorithms/linear_interpolation.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/architecture/clock.hpp"
 
 namespace aruwlib
 {
@@ -13,21 +15,60 @@ namespace control
  * inside of Commands to interact with the remote. Filtering and normalization
  * is done in this class.
  */
-class ControlOperatorInterface
+template <typename Drivers> class ControlOperatorInterface
 {
 public:
     ControlOperatorInterface() = default;
     ControlOperatorInterface(const ControlOperatorInterface &) = delete;
-    ControlOperatorInterface &operator=(const ControlOperatorInterface &) = default;
+    ControlOperatorInterface &operator=(const ControlOperatorInterface &) = delete;
 
     ///< @return the value used for chassis movement forward and backward, between -1 and 1.
-    float getChassisXInput();
+    float getChassisXInput()
+    {
+        if (prevUpdateCounterX != Drivers::remote.getUpdateCounter())
+        {
+            chassisXInput.update(Drivers::remote.getChannel(remote::Channel::LEFT_VERTICAL));
+        }
+        prevUpdateCounterX = Drivers::remote.getUpdateCounter();
+        return aruwlib::algorithms::limitVal<float>(
+            chassisXInput.getInterpolatedValue(aruwlib::arch::clock::getTimeMilliseconds()) +
+                static_cast<float>(Drivers::remote.keyPressed(remote::Key::W)) -
+                static_cast<float>(Drivers::remote.keyPressed(remote::Key::S)),
+            -1.0f,
+            1.0f);
+    }
 
     ///< @return the value used for chassis movement side to side, between -1 and 1.
-    float getChassisYInput();
+    float getChassisYInput()
+    {
+        if (prevUpdateCounterY != Drivers::remote.getUpdateCounter())
+        {
+            chassisYInput.update(Drivers::remote.getChannel(remote::Channel::LEFT_HORIZONTAL));
+        }
+        prevUpdateCounterY = Drivers::remote.getUpdateCounter();
+        return aruwlib::algorithms::limitVal<float>(
+            chassisYInput.getInterpolatedValue(aruwlib::arch::clock::getTimeMilliseconds()) +
+                static_cast<float>(Drivers::remote.keyPressed(remote::Key::A)) -
+                static_cast<float>(Drivers::remote.keyPressed(remote::Key::D)),
+            -1.0f,
+            1.0f);
+    }
 
     ///< @return the value used for chassis rotation, between -1 and 1.
-    float getChassisRInput();
+    float getChassisRInput()
+    {
+        if (prevUpdateCounterZ != Drivers::remote.getUpdateCounter())
+        {
+            chassisRInput.update(Drivers::remote.getChannel(remote::Channel::RIGHT_HORIZONTAL));
+        }
+        prevUpdateCounterZ = Drivers::remote.getUpdateCounter();
+        return aruwlib::algorithms::limitVal<float>(
+            chassisRInput.getInterpolatedValue(aruwlib::arch::clock::getTimeMilliseconds()) +
+                static_cast<float>(Drivers::remote.keyPressed(remote::Key::Q)) -
+                static_cast<float>(Drivers::remote.keyPressed(remote::Key::E)),
+            -1.0f,
+            1.0f);
+    }
 
     /**
      * @return the value used for turret yaw rotation, between about -1 and 1
@@ -36,7 +77,11 @@ public:
      *
      * @todo(matthew) should I limit this?
      */
-    float getTurretYawInput();
+    float getTurretYawInput()
+    {
+        return -static_cast<float>(Drivers::remote.getChannel(remote::Channel::RIGHT_HORIZONTAL)) +
+               static_cast<float>(Drivers::remote.getMouseX()) * USER_MOUSE_YAW_SCALAR;
+    }
 
     /**
      * @returns the value used for turret pitch rotation, between about -1 and 1
@@ -45,13 +90,21 @@ public:
      *
      * @todo(matthew) should I limit this?
      */
-    float getTurretPitchInput();
+    float getTurretPitchInput()
+    {
+        return static_cast<float>(Drivers::remote.getChannel(remote::Channel::RIGHT_VERTICAL)) +
+               static_cast<float>(Drivers::remote.getMouseY()) * USER_MOUSE_PITCH_SCALAR;
+    }
 
     /**
      * @returns the value used for sentiel drive speed, between
      *      [-USER_STICK_SENTINEL_DRIVE_SCALAR, USER_STICK_SENTINEL_DRIVE_SCALAR].
      */
-    float getSentinelSpeedInput();
+    float getSentinelSpeedInput()
+    {
+        return Drivers::remote.getChannel(remote::Channel::LEFT_HORIZONTAL) *
+               USER_STICK_SENTINEL_DRIVE_SCALAR;
+    }
 
 private:
     static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / 1000.0f);

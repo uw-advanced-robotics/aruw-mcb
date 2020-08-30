@@ -19,7 +19,7 @@ class Pwm
 public:
     Pwm() = default;
     Pwm(const Pwm &) = delete;
-    Pwm &operator=(const Pwm &) = default;
+    Pwm &operator=(const Pwm &) = delete;
 
     /**
      * PWM pins whose name corresponds to the names defined on the

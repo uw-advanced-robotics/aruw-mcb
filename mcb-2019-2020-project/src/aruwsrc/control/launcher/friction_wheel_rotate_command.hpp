@@ -9,14 +9,15 @@ namespace aruwsrc
 {
 namespace launcher
 {
-template <typename Drivers> class FrictionWheelRotateCommand : public aruwlib::control::Command
+template <typename Drivers>
+class FrictionWheelRotateCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     FrictionWheelRotateCommand(FrictionWheelSubsystem<Drivers>* subsystem, int speed)
         : frictionWheelSubsystem(subsystem),
           speed(speed)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+        this->addSubsystemRequirement(subsystem);
     }
 
     void initialize() override {}

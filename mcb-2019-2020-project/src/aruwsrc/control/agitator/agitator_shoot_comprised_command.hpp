@@ -11,7 +11,8 @@ namespace aruwsrc
 {
 namespace agitator
 {
-template <typename Drivers> class ShootComprisedCommand : public aruwlib::control::ComprisedCommand
+template <typename Drivers>
+class ShootComprisedCommand : public aruwlib::control::ComprisedCommand<Drivers>
 {
 public:
     ShootComprisedCommand(
@@ -31,13 +32,14 @@ public:
           unjamSequenceCommencing(false)
     {
         this->comprisedCommandScheduler.registerSubsystem(agitator);
-        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
+        this->addSubsystemRequirement(
+            dynamic_cast<aruwlib::control::Subsystem<Drivers>*>(agitator));
     }
 
     void initialize() override
     {
         this->comprisedCommandScheduler.addCommand(
-            dynamic_cast<aruwlib::control::Command*>(&agitatorRotateCommand));
+            dynamic_cast<aruwlib::control::Command<Drivers>*>(&agitatorRotateCommand));
         unjamSequenceCommencing = false;
     }
 
@@ -50,7 +52,7 @@ public:
             // unscheduled.
             unjamSequenceCommencing = true;
             this->comprisedCommandScheduler.addCommand(
-                dynamic_cast<Command*>(&agitatorUnjamCommand));
+                dynamic_cast<aruwlib::control::Command<Drivers>*>(&agitatorUnjamCommand));
         }
         this->comprisedCommandScheduler.run();
     }
@@ -58,10 +60,10 @@ public:
     void end(bool interrupted) override
     {
         this->comprisedCommandScheduler.removeCommand(
-            dynamic_cast<Command*>(&agitatorUnjamCommand),
+            dynamic_cast<aruwlib::control::Command<Drivers>*>(&agitatorUnjamCommand),
             interrupted);
         this->comprisedCommandScheduler.removeCommand(
-            dynamic_cast<Command*>(&agitatorRotateCommand),
+            dynamic_cast<aruwlib::control::Command<Drivers>*>(&agitatorRotateCommand),
             interrupted);
     }
 

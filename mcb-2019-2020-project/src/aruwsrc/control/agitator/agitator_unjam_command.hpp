@@ -12,7 +12,7 @@ namespace aruwsrc
 {
 namespace agitator
 {
-template <typename Drivers> class AgitatorUnjamCommand : public aruwlib::control::Command
+template <typename Drivers> class AgitatorUnjamCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     AgitatorUnjamCommand(
@@ -32,7 +32,8 @@ public:
         {
             agitatorUnjamAngleMax = MIN_AGITATOR_UNJAM_ANGLE;
         }
-        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
+        this->addSubsystemRequirement(
+            dynamic_cast<aruwlib::control::Subsystem<Drivers>*>(agitator));
         salvationTimeout.stop();
         agitatorUnjamRotateTimeout.stop();
     }

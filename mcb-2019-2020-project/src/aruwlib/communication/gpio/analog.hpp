@@ -23,7 +23,7 @@ class Analog
 public:
     Analog() = default;
     Analog(const Analog &) = delete;
-    Analog &operator=(const Analog &) = default;
+    Analog &operator=(const Analog &) = delete;
 
     // Analog pins
     enum Pin

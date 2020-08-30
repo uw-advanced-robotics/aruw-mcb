@@ -15,10 +15,37 @@ namespace aruwsrc
 {
 namespace turret
 {
-template <typename Drivers> class TurretCVCommand : public aruwlib::control::Command
+template <typename Drivers> class TurretCVCommand : public aruwlib::control::Command<Drivers>
 {
 public:
-    explicit TurretCVCommand(TurretSubsystem<Drivers> *subsystem);
+    explicit TurretCVCommand(TurretSubsystem<Drivers> *subsystem)
+        : turretSubsystem(subsystem),
+          yawTargetAngle(TurretSubsystem<Drivers>::TURRET_START_ANGLE, 0.0f, 360.0f),
+          pitchTargetAngle(TurretSubsystem<Drivers>::TURRET_START_ANGLE, 0.0f, 360.0f),
+          yawPid(
+              YAW_P,
+              YAW_I,
+              YAW_D,
+              YAW_MAX_ERROR_SUM,
+              YAW_MAX_OUTPUT,
+              YAW_Q_DERIVATIVE_KALMAN,
+              YAW_R_DERIVATIVE_KALMAN,
+              YAW_Q_PROPORTIONAL_KALMAN,
+              YAW_R_PROPORTIONAL_KALMAN),
+          pitchPid(
+              PITCH_P,
+              PITCH_I,
+              PITCH_D,
+              PITCH_MAX_ERROR_SUM,
+              PITCH_MAX_OUTPUT,
+              PITCH_Q_DERIVATIVE_KALMAN,
+              PITCH_R_DERIVATIVE_KALMAN,
+              PITCH_Q_PROPORTIONAL_KALMAN,
+              PITCH_R_PROPORTIONAL_KALMAN),
+          sendRequestTimer(TIME_BETWEEN_CV_REQUESTS)
+    {
+        this->addSubsystemRequirement(subsystem);
+    }
 
     void initialize() override
     {

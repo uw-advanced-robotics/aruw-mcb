@@ -10,14 +10,15 @@ namespace aruwsrc
 {
 namespace control
 {
-template <typename Drivers> class SentinelAutoDriveCommand : public aruwlib::control::Command
+template <typename Drivers>
+class SentinelAutoDriveCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit SentinelAutoDriveCommand(SentinelDriveSubsystem<Drivers>* subsystem)
         : subsystemSentinelDrive(subsystem),
           changeVelocityTimer(CHANGE_TIME_INTERVAL)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+        this->addSubsystemRequirement(subsystem);
 #ifndef ENV_SIMULATOR
         RandomNumberGenerator::enable();
 #endif

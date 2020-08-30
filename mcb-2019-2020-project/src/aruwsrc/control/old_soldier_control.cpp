@@ -19,6 +19,7 @@
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::turret;
+using namespace aruwlib::remote;
 using aruwlib::Drivers;
 using aruwlib::control::CommandMapper;
 
@@ -86,33 +87,23 @@ void startOldSoldierCommands() { Drivers::commandScheduler.addCommand(&agitatorC
 void registerOldSoldierIoMappings()
 {
     Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::RIGHT_SWITCH,
-            aruwlib::Remote::SwitchState::UP),
+        CommandMapper<Drivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::UP),
         &agitatorShootFastCommand);
 
     Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::LEFT_SWITCH,
-            aruwlib::Remote::SwitchState::MID),
+        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::MID),
         &chassisAutorotateCommand);
 
     Drivers::commandMapper.addHoldMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::LEFT_SWITCH,
-            aruwlib::Remote::SwitchState::DOWN),
+        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::DOWN),
         &chassisDriveCommand);
 
     Drivers::commandMapper.addHoldMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::LEFT_SWITCH,
-            aruwlib::Remote::SwitchState::DOWN),
+        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::DOWN),
         &openHopperCommand);
 
     Drivers::commandMapper.addHoldMapping(
-        CommandMapper::newKeyMap(
-            aruwlib::Remote::Switch::LEFT_SWITCH,
-            aruwlib::Remote::SwitchState::UP),
+        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::UP),
         &wiggleDriveCommand);
 }
 

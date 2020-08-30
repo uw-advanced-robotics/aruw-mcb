@@ -7,8 +7,7 @@ namespace aruwlib
 {
 namespace control
 {
-class Command;
-
+template <typename Drivers> class Command;
 /**
  * A robot subsystem. Subsystems are the basic unit of robot organization in
  * the Command-based framework; they encapsulate low-level hardware objects
@@ -24,16 +23,16 @@ class Command;
  * CommandScheduler.registerSubsystem() function in order for the
  * refresh() function to be called.
  */
-class Subsystem
+template <typename Drivers> class Subsystem
 {
 public:
-    Subsystem();
+    Subsystem() : defaultCommand(nullptr), prevSchedulerExecuteTimestamp(0) {}
 
     /**
      * Called once when you add the Subsystem to the commandScheduler stored in the
      * Drivers class.
      */
-    virtual void initialize();
+    virtual void initialize() {}
 
     /**
      * Sets the default Command of the Subsystem. The default Command will be
@@ -45,7 +44,13 @@ public:
      *
      * @param defaultCommand the default Command to associate with this subsystem
      */
-    void setDefaultCommand(Command* defaultCommand);
+    void setDefaultCommand(Command<Drivers>* command)
+    {
+        if (command != nullptr)
+        {
+            defaultCommand = command;
+        }
+    }
 
     /**
      * Gets the default command for this subsystem. Returns `nullptr` if no default
@@ -53,7 +58,7 @@ public:
      *
      * @return the default command associated with this subsystem
      */
-    Command* getDefaultCommand() const;
+    Command<Drivers>* getDefaultCommand() const { return defaultCommand; }
 
     /**
      * Called in the scheduler's run function assuming this command
@@ -67,12 +72,12 @@ public:
      * Must be virtual otherwise scheduler will refer to this function
      * rather than looking in child for this function.
      */
-    virtual void refresh();
+    virtual void refresh() {}
 
 private:
-    Command* defaultCommand;
+    Command<Drivers>* defaultCommand;
 
-    friend class CommandScheduler;
+    template <typename T> friend class CommandScheduler;
 
     uint32_t prevSchedulerExecuteTimestamp;
 };  // class Subsystem

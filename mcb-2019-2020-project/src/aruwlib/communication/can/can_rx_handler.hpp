@@ -3,7 +3,6 @@
 
 #include <modm/architecture/interface/assert.h>
 
-#include "aruwlib/communication/can/can_rx_listener.hpp"
 #include "aruwlib/errors/create_errors.hpp"
 #include "aruwlib/motor/dji_motor_tx_handler.hpp"
 

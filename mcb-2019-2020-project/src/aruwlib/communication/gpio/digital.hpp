@@ -25,7 +25,7 @@ class Digital
 public:
     Digital() = default;
     Digital(const Digital &) = delete;
-    Digital &operator=(const Digital &) = default;
+    Digital &operator=(const Digital &) = delete;
 
     ///< Currently enabled digital input pins.
     enum InputPin

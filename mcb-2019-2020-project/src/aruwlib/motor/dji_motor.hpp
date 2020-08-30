@@ -5,9 +5,12 @@
 #include <cstdint>
 #include <string>
 
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/architecture/timeout.hpp>
-#include <aruwlib/communication/can/can_rx_listener.hpp>
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/architecture/timeout.hpp"
+#include "aruwlib/communication/can/can_rx_listener.hpp"
+#include "aruwlib/errors/system_error.hpp"
+
+#define DJI_MOTOR_NORMALIZED_ID(id) ((int32_t)id - aruwlib::motor::MotorId::MOTOR1)
 
 namespace aruwlib
 {

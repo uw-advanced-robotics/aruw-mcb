@@ -6,8 +6,10 @@
 #include <modm/processing.hpp>
 
 #include "aruwlib/algorithms/crc.hpp"
-#include "aruwlib/communication/serial/uart.hpp"
 #include "aruwlib/errors/create_errors.hpp"
+#include "aruwlib/errors/system_error.hpp"
+
+#include "uart.hpp"
 
 namespace aruwlib
 {
@@ -110,20 +112,20 @@ public:
      */
     void initialize()
     {
-        // switch (this->port)
-        // {
-        //     case Uart::UartPort::Uart1:
-        //         Drivers::uart.init<Uart::UartPort::Uart1, 115200>();
-        //         break;
-        //     case Uart::UartPort::Uart2:
-        //         Drivers::uart.init<Uart::UartPort::Uart2, 115200>();
-        //         break;
-        //     case Uart::UartPort::Uart6:
-        //         Drivers::uart.init<Uart::UartPort::Uart6, 115200>();
-        //         break;
-        //     default:
-        //         break;
-        // }
+        switch (this->port)
+        {
+            case Uart::UartPort::Uart1:
+                Drivers::uart.template init<Uart::UartPort::Uart1, 115200>();
+                break;
+            case Uart::UartPort::Uart2:
+                Drivers::uart.template init<Uart::UartPort::Uart2, 115200>();
+                break;
+            case Uart::UartPort::Uart6:
+                Drivers::uart.template init<Uart::UartPort::Uart6, 115200>();
+                break;
+            default:
+                break;
+        }
     }
 
     /**

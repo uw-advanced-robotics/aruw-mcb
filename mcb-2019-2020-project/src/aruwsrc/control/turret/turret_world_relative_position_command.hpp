@@ -6,14 +6,15 @@
 
 #include "aruwsrc/algorithms/turret_pid.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+
+#include "turret_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace turret
 {
 template <typename Drivers>
-class TurretWorldRelativePositionCommand : public aruwlib::control::Command
+class TurretWorldRelativePositionCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     TurretWorldRelativePositionCommand(
@@ -45,7 +46,7 @@ public:
               PITCH_Q_PROPORTIONAL_KALMAN,
               PITCH_R_PROPORTIONAL_KALMAN)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem *>(subsystem));
+        this->addSubsystemRequirement(subsystem);
     }
 
     void initialize() override
