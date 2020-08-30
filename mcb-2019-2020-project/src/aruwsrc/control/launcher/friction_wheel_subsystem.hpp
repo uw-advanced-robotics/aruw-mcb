@@ -12,7 +12,8 @@ namespace aruwsrc
 {
 namespace launcher
 {
-template <typename Drivers> class FrictionWheelSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers>
+class FrictionWheelSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
     FrictionWheelSubsystem(

@@ -13,7 +13,7 @@ namespace aruwsrc
 {
 namespace chassis
 {
-template <typename Drivers> class WiggleDriveCommand : public aruwlib::control::Command
+template <typename Drivers> class WiggleDriveCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit WiggleDriveCommand(
@@ -22,7 +22,7 @@ public:
         : chassis(chassis),
           turret(turret)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+        this->addSubsystemRequirement(chassis);
     }
 
     void initialize() override

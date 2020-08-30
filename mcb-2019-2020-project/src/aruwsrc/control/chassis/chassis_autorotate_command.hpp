@@ -13,7 +13,8 @@ namespace aruwsrc
 {
 namespace chassis
 {
-template <typename Drivers> class ChassisAutorotateCommand : public aruwlib::control::Command
+template <typename Drivers>
+class ChassisAutorotateCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit ChassisAutorotateCommand(
@@ -22,7 +23,7 @@ public:
         : chassis(chassis),
           turret(turret)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+        this->addSubsystemRequirement(chassis);
     }
 
     void initialize() override {}

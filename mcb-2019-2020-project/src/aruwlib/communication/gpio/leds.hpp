@@ -16,7 +16,7 @@ class Leds
 public:
     Leds() = default;
     Leds(const Leds &) = delete;
-    Leds &operator=(const Leds &) = default;
+    Leds &operator=(const Leds &) = delete;
 
     /**
      * The LED letters correspond to the letters written next to the LEDs

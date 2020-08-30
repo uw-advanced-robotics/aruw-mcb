@@ -10,7 +10,7 @@ namespace aruwsrc
 {
 namespace turret
 {
-template <typename Drivers> class TurretManualCommand : public aruwlib::control::Command
+template <typename Drivers> class TurretManualCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit TurretManualCommand(TurretSubsystem<Drivers> *subsystem)
@@ -18,7 +18,7 @@ public:
           manualYawPid(YAW_P, YAW_I, YAW_D, YAW_MAX_ERROR_SUM, YAW_MAX_OUTPUT),
           manualPitchPid(PITCH_P, PITCH_I, PITCH_D, PITCH_MAX_ERROR_SUM, PITCH_MAX_OUTPUT)
     {
-        addSubsystemRequirement(subsystem);
+        this->addSubsystemRequirement(subsystem);
     }
 
     void initialize() override {}

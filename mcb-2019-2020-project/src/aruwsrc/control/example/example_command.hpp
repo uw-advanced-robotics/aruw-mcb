@@ -1,9 +1,3 @@
-/**
- * This code is part of aruw's repository
- *
- * Example code for a default command for the subsystem-example subsystem.
- */
-
 #ifndef __COMMAND_EXAMPLE_HPP__
 #define __COMMAND_EXAMPLE_HPP__
 
@@ -15,7 +9,10 @@ namespace aruwsrc
 {
 namespace control
 {
-template <typename Drivers> class ExampleCommand : public aruwlib::control::Command
+/**
+ * Example code for a default command for the subsystem-example subsystem.
+ */
+template <typename Drivers> class ExampleCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit ExampleCommand(ExampleSubsystem<Drivers>* subsystem, int speed)
@@ -23,7 +20,7 @@ public:
           subsystemExample(subsystem),
           speed(speed)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+        this->addSubsystemRequirement(subsystem);
     }
 
     /**

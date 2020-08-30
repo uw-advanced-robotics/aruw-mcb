@@ -9,14 +9,12 @@ namespace aruwsrc
 {
 namespace control
 {
-template <typename Drivers> class OpenHopperCommand : public aruwlib::control::Command
+template <typename Drivers> class OpenHopperCommand : public aruwlib::control::Command<Drivers>
 {
 public:
-    explicit OpenHopperCommand(HopperSubsystem<Drivers>* subsystem)
-        : Command(),
-          subsystemHopper(subsystem)
+    explicit OpenHopperCommand(HopperSubsystem<Drivers>* subsystem) : subsystemHopper(subsystem)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+        this->addSubsystemRequirement(subsystem);
     }
 
     void initialize() override { subsystemHopper->setOpen(); }

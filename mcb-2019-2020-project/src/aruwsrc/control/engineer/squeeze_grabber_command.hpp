@@ -9,14 +9,12 @@ namespace aruwsrc
 {
 namespace engineer
 {
-template <typename Drivers> class SqueezeGrabberCommand : public aruwlib::control::Command
+template <typename Drivers> class SqueezeGrabberCommand : public aruwlib::control::Command<Drivers>
 {
 public:
-    explicit SqueezeGrabberCommand(GrabberSubsystem<Drivers>* subsystem)
-        : Command(),
-          grabber(subsystem)
+    explicit SqueezeGrabberCommand(GrabberSubsystem<Drivers>* subsystem) : grabber(subsystem)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(grabber));
+        this->addSubsystemRequirement(grabber);
     }
     void initialize() override { grabber->setSqueezed(true); }
 

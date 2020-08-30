@@ -1,9 +1,3 @@
-/*
-   Hopper subsystem is made of a servo that will spin
-   to two certain angles determined by the user as
-   the open position and the close position
-*/
-
 #ifndef __OPEN_HOPPER_SUBSYSTEM__
 #define __OPEN_HOPPER_SUBSYSTEM__
 
@@ -16,7 +10,12 @@ namespace aruwsrc
 {
 namespace control
 {
-template <typename Drivers> class HopperSubsystem : public aruwlib::control::Subsystem
+/**
+ * Hopper subsystem is made of a servo that will spin
+ * to two certain angles determined by the user as
+ * the open position and the close position
+ */
+template <typename Drivers> class HopperSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
 #if defined(TARGET_SOLDIER)

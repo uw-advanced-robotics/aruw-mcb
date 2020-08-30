@@ -12,7 +12,8 @@ namespace aruwsrc
 {
 namespace control
 {
-template <typename Drivers> class SentinelDriveSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers>
+class SentinelDriveSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
     static constexpr float MAX_POWER_CONSUMPTION = 30.0f;

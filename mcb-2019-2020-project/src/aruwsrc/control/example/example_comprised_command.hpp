@@ -11,7 +11,7 @@ namespace aruwsrc
 namespace control
 {
 template <typename Drivers>
-class ExampleComprisedCommand : public aruwlib::control::ComprisedCommand
+class ExampleComprisedCommand : public aruwlib::control::ComprisedCommand<Drivers>
 {
 public:
     explicit ExampleComprisedCommand(ExampleSubsystem<Drivers>* subsystem)
@@ -27,7 +27,8 @@ public:
 
     void initialize() override
     {
-        this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&exampleCommand));
+        this->comprisedCommandScheduler.addCommand(
+            dynamic_cast<Command<Drivers>*>(&exampleCommand));
     }
 
     void execute() override
@@ -37,11 +38,13 @@ public:
             switchTimer.restart(2000);
             if (switchCommand)
             {
-                comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&otherExampleCommand));
+                comprisedCommandScheduler.addCommand(
+                    dynamic_cast<Command<Drivers>*>(&otherExampleCommand));
             }
             else
             {
-                comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&exampleCommand));
+                comprisedCommandScheduler.addCommand(
+                    dynamic_cast<Command<Drivers>*>(&exampleCommand));
             }
             switchCommand = !switchCommand;
         }
@@ -52,7 +55,7 @@ public:
     void end(bool interrupted) override
     {
         comprisedCommandScheduler.removeCommand(
-            dynamic_cast<Command*>(&exampleCommand),
+            dynamic_cast<Command<Drivers>*>(&exampleCommand),
             interrupted);
     }
 

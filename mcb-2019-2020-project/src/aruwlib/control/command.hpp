@@ -7,7 +7,7 @@ namespace aruwlib
 {
 namespace control
 {
-class Subsystem;
+template <typename Drivers> class Subsystem;
 
 /**
  * A generic extendable class for implementing a command. Each
@@ -15,7 +15,7 @@ class Subsystem;
  * extend the Command class and instantiate the virtual functions
  * in this class. See example_command.hpp for example of this.
  */
-class Command
+template <typename Drivers> class Command
 {
 public:
     Command() : prevSchedulerExecuteTimestamp(0) {}
@@ -34,7 +34,7 @@ public:
      * @see CommandScheduler
      * @return the set of subsystems that are required.
      */
-    const std::set<Subsystem*>& getRequirements() const;
+    const std::set<Subsystem<Drivers>*>& getRequirements() const { return commandRequirements; }
 
     /**
      * Returns whether the command requires a given subsystem.
@@ -42,7 +42,14 @@ public:
      * @param[in] requirement the subsystem to inquire about.
      * @return `true` if the subsystem is required for this Command, `false` otherwise.
      */
-    bool hasRequirement(Subsystem* requirement) const;
+    bool hasRequirement(Subsystem<Drivers>* requirement) const
+    {
+        if (requirement == nullptr)
+        {
+            return false;
+        }
+        return commandRequirements.find(requirement) != commandRequirements.end();
+    }
 
     /**
      * Adds the required subsystem to a list of required subsystems.
@@ -51,7 +58,20 @@ public:
      *      If the requirement is nullptr or if the requirement is already in the
      *      set, nothing is added.
      */
-    void addSubsystemRequirement(Subsystem* requirement);
+    void addSubsystemRequirement(Subsystem<Drivers>* requirement)
+    {
+        if (requirement == nullptr)
+        {
+            return;
+        }
+        // Ensure the requirement you are trying to add is not already a
+        // command requirement.
+        if (requirement != nullptr &&
+            commandRequirements.find(requirement) == commandRequirements.end())
+        {
+            commandRequirements.insert(requirement);
+        }
+    }
 
     /**
      * @return the name of the command, to be implemented by derived classes.
@@ -91,12 +111,12 @@ public:
     virtual bool isFinished() const = 0;
 
 private:
-    friend class CommandScheduler;
+    template <typename T> friend class CommandScheduler;
 
     uint32_t prevSchedulerExecuteTimestamp;
 
     // contains pointers to const Subsystem pointers that this command requires
-    std::set<Subsystem*> commandRequirements;
+    std::set<Subsystem<Drivers>*> commandRequirements;
 };  // class Command
 
 }  // namespace control

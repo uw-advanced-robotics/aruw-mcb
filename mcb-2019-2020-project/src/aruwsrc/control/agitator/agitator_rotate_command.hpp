@@ -19,7 +19,7 @@ namespace agitator
  * pass in a rotate velocity and it uses modm::Clock::now() to determine the
  * proper ramp increment.
  */
-template <typename Drivers> class AgitatorRotateCommand : public aruwlib::control::Command
+template <typename Drivers> class AgitatorRotateCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     /**
@@ -52,7 +52,8 @@ public:
           agitatorPrevRotateTime(0),
           agitatorSetToFinalAngle(agitatorSetToFinalAngle)
     {
-        this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(agitator));
+        this->addSubsystemRequirement(
+            dynamic_cast<aruwlib::control::Subsystem<Drivers>*>(agitator));
     }
 
     const char* getName() const override { return "agitator rotate command"; }

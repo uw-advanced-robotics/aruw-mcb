@@ -9,14 +9,14 @@ namespace aruwsrc
 {
 namespace control
 {
-template <typename Drivers> class SentinelDriveManualCommand : public aruwlib::control::Command
+template <typename Drivers>
+class SentinelDriveManualCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit SentinelDriveManualCommand(SentinelDriveSubsystem<Drivers>* subsystem)
-        : Command(),
-          subsystemSentinelDrive(subsystem)
+        : subsystemSentinelDrive(subsystem)
     {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+        this->addSubsystemRequirement(subsystem);
     }
 
     void initialize() override {}

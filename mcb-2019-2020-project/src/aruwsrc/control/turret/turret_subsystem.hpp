@@ -1,6 +1,7 @@
 #ifndef __TURRET_SUBSYSTEM_HPP__
 #define __TURRET_SUBSYSTEM_HPP__
 
+#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/contiguous_float.hpp>
 #include <aruwlib/algorithms/linear_interpolation.hpp>
 #include <aruwlib/architecture/clock.hpp>
@@ -13,7 +14,7 @@ namespace aruwsrc
 {
 namespace turret
 {
-template <typename Drivers> class TurretSubsystem : public aruwlib::control::Subsystem
+template <typename Drivers> class TurretSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
     static constexpr float TURRET_START_ANGLE = 90.0f;

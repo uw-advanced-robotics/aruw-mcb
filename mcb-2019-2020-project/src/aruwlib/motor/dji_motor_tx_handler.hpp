@@ -12,8 +12,6 @@ namespace aruwlib
 {
 namespace motor
 {
-#define DJI_MOTOR_NORMALIZED_ID(id) ((int32_t)id - aruwlib::motor::MotorId::MOTOR1)
-
 /**
  * Uses modm can interface to send CAN packets to dji motors. Receiving
  * data is done on the motor level in conjunction with

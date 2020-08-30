@@ -30,13 +30,13 @@ namespace control
  * register Subsystems and add Subsystem dependencies for the Commands that
  * will be added to the scheduler.
  */
-class ComprisedCommand : public Command
+template <typename Drivers> class ComprisedCommand : public Command<Drivers>
 {
 public:
-    ComprisedCommand() : Command(), comprisedCommandScheduler() {}
+    ComprisedCommand() : Command<Drivers>(), comprisedCommandScheduler() {}
 
 protected:
-    CommandScheduler comprisedCommandScheduler;
+    CommandScheduler<Drivers> comprisedCommandScheduler;
 };
 
 }  // namespace control
