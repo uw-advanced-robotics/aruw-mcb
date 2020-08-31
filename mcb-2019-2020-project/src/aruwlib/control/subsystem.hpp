@@ -7,7 +7,8 @@ namespace aruwlib
 {
 namespace control
 {
-template <typename Drivers> class Command;
+template <typename Drivers>
+class Command;
 /**
  * A robot subsystem. Subsystems are the basic unit of robot organization in
  * the Command-based framework; they encapsulate low-level hardware objects
@@ -23,7 +24,8 @@ template <typename Drivers> class Command;
  * CommandScheduler.registerSubsystem() function in order for the
  * refresh() function to be called.
  */
-template <typename Drivers> class Subsystem
+template <typename Drivers>
+class Subsystem
 {
 public:
     Subsystem() : defaultCommand(nullptr), prevSchedulerExecuteTimestamp(0) {}
@@ -77,7 +79,8 @@ public:
 private:
     Command<Drivers>* defaultCommand;
 
-    template <typename T> friend class CommandScheduler;
+    template <typename T>
+    friend class CommandScheduler;
 
     uint32_t prevSchedulerExecuteTimestamp;
 };  // class Subsystem

@@ -1,4 +1,4 @@
-#include <aruwlib/Drivers.hpp>
+#include <aruwlib/HALDrivers.hpp>
 #include <aruwlib/control/command_mapper.hpp>
 
 #include "agitator/agitator_calibrate_command.hpp"
@@ -21,7 +21,7 @@ using namespace aruwsrc::agitator;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::control;
 using namespace aruwlib::remote;
-using aruwlib::Drivers;
+using aruwlib::HALDrivers;
 using aruwlib::control::CommandMapper;
 
 namespace aruwsrc
@@ -29,67 +29,69 @@ namespace aruwsrc
 namespace control
 {
 /* define subsystems --------------------------------------------------------*/
-AgitatorSubsystem<Drivers> agitator(
-    AgitatorSubsystem<Drivers>::PID_17MM_P,
-    AgitatorSubsystem<Drivers>::PID_17MM_I,
-    AgitatorSubsystem<Drivers>::PID_17MM_D,
-    AgitatorSubsystem<Drivers>::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem<Drivers>::PID_17MM_MAX_OUT,
-    AgitatorSubsystem<Drivers>::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_CAN_BUS,
+AgitatorSubsystem<HALDrivers> agitator(
+    AgitatorSubsystem<HALDrivers>::PID_17MM_P,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_I,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_D,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_MAX_OUT,
+    AgitatorSubsystem<HALDrivers>::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem<HALDrivers>::AGITATOR_MOTOR_ID,
+    AgitatorSubsystem<HALDrivers>::AGITATOR_MOTOR_CAN_BUS,
     false);
 
-AgitatorSubsystem<Drivers> kickerMotor(
-    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_P,
-    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_I,
-    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_D,
-    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_MAX_ERR_SUM,
-    AgitatorSubsystem<Drivers>::PID_17MM_KICKER_MAX_OUT,
-    AgitatorSubsystem<Drivers>::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem<Drivers>::SENTINEL_KICKER_MOTOR_ID,
-    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_CAN_BUS,
+AgitatorSubsystem<HALDrivers> kickerMotor(
+    AgitatorSubsystem<HALDrivers>::PID_17MM_KICKER_P,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_KICKER_I,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_KICKER_D,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_KICKER_MAX_ERR_SUM,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_KICKER_MAX_OUT,
+    AgitatorSubsystem<HALDrivers>::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem<HALDrivers>::SENTINEL_KICKER_MOTOR_ID,
+    AgitatorSubsystem<HALDrivers>::AGITATOR_MOTOR_CAN_BUS,
     false);
 
-SentinelDriveSubsystem<Drivers> sentinelDrive;
+SentinelDriveSubsystem<HALDrivers> sentinelDrive;
 
-FrictionWheelSubsystem<Drivers> upperFrictionWheels(aruwlib::motor::MOTOR3, aruwlib::motor::MOTOR4);
+FrictionWheelSubsystem<HALDrivers> upperFrictionWheels(
+    aruwlib::motor::MOTOR3,
+    aruwlib::motor::MOTOR4);
 
-FrictionWheelSubsystem<Drivers> lowerFrictionWheels;
+FrictionWheelSubsystem<HALDrivers> lowerFrictionWheels;
 
 /* define commands ----------------------------------------------------------*/
-ShootFastComprisedCommand<Drivers> agitatorShootSlowCommand(&agitator);
+ShootFastComprisedCommand<HALDrivers> agitatorShootSlowCommand(&agitator);
 
-AgitatorCalibrateCommand<Drivers> agitatorCalibrateCommand(&agitator);
+AgitatorCalibrateCommand<HALDrivers> agitatorCalibrateCommand(&agitator);
 
-AgitatorRotateCommand<Drivers> agitatorKickerCommand(&kickerMotor, 3.0f, 1, 0, false);
+AgitatorRotateCommand<HALDrivers> agitatorKickerCommand(&kickerMotor, 3.0f, 1, 0, false);
 
-AgitatorCalibrateCommand<Drivers> agitatorCalibrateKickerCommand(&kickerMotor);
+AgitatorCalibrateCommand<HALDrivers> agitatorCalibrateKickerCommand(&kickerMotor);
 
-SentinelAutoDriveCommand<Drivers> sentinelAutoDrive(&sentinelDrive);
+SentinelAutoDriveCommand<HALDrivers> sentinelAutoDrive(&sentinelDrive);
 
-SentinelDriveManualCommand<Drivers> sentinelDriveManual(&sentinelDrive);
+SentinelDriveManualCommand<HALDrivers> sentinelDriveManual(&sentinelDrive);
 
-FrictionWheelRotateCommand<Drivers> spinUpperFrictionWheels(
+FrictionWheelRotateCommand<HALDrivers> spinUpperFrictionWheels(
     &upperFrictionWheels,
-    FrictionWheelRotateCommand<Drivers>::DEFAULT_WHEEL_RPM);
+    FrictionWheelRotateCommand<HALDrivers>::DEFAULT_WHEEL_RPM);
 
-FrictionWheelRotateCommand<Drivers> spinLowerFrictionWheels(
+FrictionWheelRotateCommand<HALDrivers> spinLowerFrictionWheels(
     &lowerFrictionWheels,
-    FrictionWheelRotateCommand<Drivers>::DEFAULT_WHEEL_RPM);
+    FrictionWheelRotateCommand<HALDrivers>::DEFAULT_WHEEL_RPM);
 
-FrictionWheelRotateCommand<Drivers> stopUpperFrictionWheels(&upperFrictionWheels, 0);
+FrictionWheelRotateCommand<HALDrivers> stopUpperFrictionWheels(&upperFrictionWheels, 0);
 
-FrictionWheelRotateCommand<Drivers> stopLowerFrictionWheels(&lowerFrictionWheels, 0);
+FrictionWheelRotateCommand<HALDrivers> stopLowerFrictionWheels(&lowerFrictionWheels, 0);
 
 /* register subsystems here -------------------------------------------------*/
 void registerSentinelSubsystems()
 {
-    Drivers::commandScheduler.registerSubsystem(&agitator);
-    Drivers::commandScheduler.registerSubsystem(&kickerMotor);
-    Drivers::commandScheduler.registerSubsystem(&sentinelDrive);
-    Drivers::commandScheduler.registerSubsystem(&upperFrictionWheels);
-    Drivers::commandScheduler.registerSubsystem(&lowerFrictionWheels);
+    HALDrivers::commandScheduler.registerSubsystem(&agitator);
+    HALDrivers::commandScheduler.registerSubsystem(&kickerMotor);
+    HALDrivers::commandScheduler.registerSubsystem(&sentinelDrive);
+    HALDrivers::commandScheduler.registerSubsystem(&upperFrictionWheels);
+    HALDrivers::commandScheduler.registerSubsystem(&lowerFrictionWheels);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -103,31 +105,31 @@ void setDefaultSentinelCommands()
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentinelCommands()
 {
-    Drivers::commandScheduler.addCommand(&agitatorCalibrateCommand);
-    Drivers::commandScheduler.addCommand(&agitatorCalibrateKickerCommand);
+    HALDrivers::commandScheduler.addCommand(&agitatorCalibrateCommand);
+    HALDrivers::commandScheduler.addCommand(&agitatorCalibrateKickerCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
 void registerSentinelIoMappings()
 {
-    Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::UP),
+    HALDrivers::commandMapper.addHoldRepeatMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::UP),
         &agitatorShootSlowCommand);
 
-    Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::UP),
+    HALDrivers::commandMapper.addHoldRepeatMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::UP),
         &agitatorKickerCommand);
 
-    Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::DOWN),
+    HALDrivers::commandMapper.addHoldRepeatMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::DOWN),
         &sentinelAutoDrive);
 
-    Drivers::commandMapper.addHoldMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::DOWN),
+    HALDrivers::commandMapper.addHoldMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::DOWN),
         &stopLowerFrictionWheels);
 
-    Drivers::commandMapper.addHoldMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::DOWN),
+    HALDrivers::commandMapper.addHoldMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::DOWN),
         &stopUpperFrictionWheels);
 }
 

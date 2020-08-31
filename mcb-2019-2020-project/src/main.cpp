@@ -4,7 +4,7 @@
 #include <aruwlib/architecture/periodic_timer.hpp>
 
 /* communication includes ---------------------------------------------------*/
-#include <aruwlib/Drivers.hpp>
+#include <aruwlib/HALDrivers.hpp>
 #include <aruwlib/display/sh1106.hpp>
 
 /* error handling includes --------------------------------------------------*/
@@ -13,7 +13,7 @@
 #include "aruwsrc/control/robot_control.hpp"
 
 using namespace modm::literals;
-using aruwlib::Drivers;
+using aruwlib::HALDrivers;
 
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
@@ -39,10 +39,10 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            Drivers::mpu6500.read();
-            Drivers::errorController.update();
-            Drivers::commandScheduler.run();
-            Drivers::djiMotorTxHandler.processCanSendData();
+            HALDrivers::mpu6500.read();
+            HALDrivers::errorController.update();
+            HALDrivers::commandScheduler.run();
+            HALDrivers::djiMotorTxHandler.processCanSendData();
         }
 #ifndef ENV_SIMULATOR
         modm::delayMicroseconds(10);
@@ -53,11 +53,11 @@ int main()
 
 void initializeIo()
 {
-    aruwlib::Drivers::analog.init();
-    aruwlib::Drivers::pwm.init();
-    aruwlib::Drivers::digital.init();
-    aruwlib::Drivers::leds.init();
-    aruwlib::Drivers::can.initialize();
+    aruwlib::HALDrivers::analog.init();
+    aruwlib::HALDrivers::pwm.init();
+    aruwlib::HALDrivers::digital.init();
+    aruwlib::HALDrivers::leds.init();
+    aruwlib::HALDrivers::can.initialize();
 
 #ifndef ENV_SIMULATOR
     /// \todo this should be an init in the display class
@@ -80,16 +80,16 @@ void initializeIo()
         display;
     display.initializeBlocking();
 
-    Drivers::remote.initialize();
-    Drivers::mpu6500.init();
-    Drivers::refSerial.initialize();
-    Drivers::xavierSerial.initialize();
+    HALDrivers::remote.initialize();
+    HALDrivers::mpu6500.init();
+    HALDrivers::refSerial.initialize();
+    HALDrivers::xavierSerial.initialize();
 }
 
 void updateIo()
 {
-    Drivers::canRxHandler.pollCanData();
-    Drivers::xavierSerial.updateSerial();
-    Drivers::refSerial.updateSerial();
-    Drivers::remote.read();
+    HALDrivers::canRxHandler.pollCanData();
+    HALDrivers::xavierSerial.updateSerial();
+    HALDrivers::refSerial.updateSerial();
+    HALDrivers::remote.read();
 }

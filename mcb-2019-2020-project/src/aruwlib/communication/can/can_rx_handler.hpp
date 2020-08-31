@@ -37,7 +37,8 @@ namespace can
  *      add a listener to the handler.
  * @see `Can` for modm CAN wrapper functions.
  */
-template <typename Drivers> class CanRxHandler
+template <typename Drivers>
+class CanRxHandler
 {
 public:
     CanRxHandler() = default;
@@ -63,7 +64,7 @@ public:
      * @param[in] listener the listener to be attached ot the handler.
      * @return true if listener successfully added, false otherwise.
      */
-    void attachReceiveHandler(CanRxListener<Drivers>* const listener)
+    void attachReceiveHandler(CanRxListener<Drivers>* listener)
     {
         if (listener->canBus == can::CanBus::CAN_BUS1)
         {
@@ -151,7 +152,7 @@ private:
      * @see `attachReceiveHandler`
      */
     void attachReceiveHandler(
-        CanRxListener<Drivers>* const CanRxHndl,
+        CanRxListener<Drivers>* CanRxHndl,
         CanRxListener<Drivers>** messageHandlerStore,
         int messageHandlerStoreSize)
     {
@@ -166,7 +167,7 @@ private:
 
     inline void processReceivedCanData(
         const modm::can::Message& rxMessage,
-        CanRxListener<Drivers>* const* messageHandlerStore,
+        CanRxListener<Drivers>** messageHandlerStore,
         int messageHandlerStoreSize)
     {
         int32_t handlerStoreId = DJI_MOTOR_NORMALIZED_ID(rxMessage.getIdentifier());

@@ -10,7 +10,8 @@ namespace aruwsrc
 {
 namespace turret
 {
-template <typename Drivers> class TurretManualCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class TurretManualCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit TurretManualCommand(TurretSubsystem<Drivers> *subsystem)

@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# This script builds the hardware profile for each robot target.
+# This script builds the simulation profile for each robot target and runs
+# the corresponding unit tests.
 
 set -e
 
@@ -16,5 +17,5 @@ for target in $targets; do
     echo ===============================================================================
     echo building $target
     echo ===============================================================================
-    /usr/bin/env python3 $(which scons) build robot=$target
+    /usr/bin/env python3 $(which scons) run-tests robot=$target
 done

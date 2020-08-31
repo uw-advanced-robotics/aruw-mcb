@@ -23,7 +23,8 @@ typedef struct
  *
  * @note use the static function in Drivers to interact with this class.
  */
-template <typename Drivers> class XavierSerial : public DJISerial<Drivers>
+template <typename Drivers>
+class XavierSerial : public DJISerial<Drivers>
 {
 private:
     // TX message headers.

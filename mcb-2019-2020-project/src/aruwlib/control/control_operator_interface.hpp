@@ -15,7 +15,8 @@ namespace control
  * inside of Commands to interact with the remote. Filtering and normalization
  * is done in this class.
  */
-template <typename Drivers> class ControlOperatorInterface
+template <typename Drivers>
+class ControlOperatorInterface
 {
 public:
     ControlOperatorInterface() = default;

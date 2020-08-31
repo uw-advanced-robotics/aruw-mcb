@@ -19,7 +19,8 @@ namespace agitator
  * pass in a rotate velocity and it uses modm::Clock::now() to determine the
  * proper ramp increment.
  */
-template <typename Drivers> class AgitatorRotateCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class AgitatorRotateCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     /**

@@ -54,7 +54,8 @@ namespace can
  * @see `CanRxHandler`
  * @see `DjiMotor` for a usecase implementation of a `CanRxListener`.
  */
-template <typename Drivers> class CanRxListener
+template <typename Drivers>
+class CanRxListener
 {
 public:
     /**

@@ -19,7 +19,8 @@ namespace chassis
  *     - in other words, 'x' is the bow/stern and 'y' is starboard/
  *       port in boat terms
  */
-template <typename Drivers> class ChassisSubsystem : public aruwlib::control::Subsystem<Drivers>
+template <typename Drivers>
+class ChassisSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
     // public constants

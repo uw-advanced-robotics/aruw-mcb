@@ -21,7 +21,8 @@ namespace sensors
  * of the form \f$ y=mx+b \f$
  * and then the output is put into the equation \f$ dist = \frac{1}{linear} + offset \f$.
  */
-template <typename Drivers> class AnalogDistanceSensor : public DistanceSensor
+template <typename Drivers>
+class AnalogDistanceSensor : public DistanceSensor
 {
 public:
     /**

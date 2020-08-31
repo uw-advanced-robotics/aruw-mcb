@@ -14,7 +14,8 @@ namespace serial
  *      TX to RX. You should be able to check if messages are being received.
  *      Additionally, watch `i` to check if you are dropping messages.
  */
-template <typename Drivers> class SerialTestClass : public DJISerial<Drivers>
+template <typename Drivers>
+class SerialTestClass : public DJISerial<Drivers>
 {
 public:
     ///< Attaches this test class to `Uart2`.

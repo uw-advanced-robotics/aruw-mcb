@@ -13,7 +13,8 @@ namespace engineer
  * grabber back and forward). Connect this to a digital output
  * pin. This controls a solenoid, which actuates a piston.
  */
-template <typename Drivers> class XAxisSubsystem : public aruwlib::control::Subsystem<Drivers>
+template <typename Drivers>
+class XAxisSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
     explicit XAxisSubsystem(aruwlib::gpio::Digital::OutputPin pin) : pin(pin), extended(false) {}

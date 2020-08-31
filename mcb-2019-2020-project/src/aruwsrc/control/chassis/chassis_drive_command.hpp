@@ -9,7 +9,8 @@ namespace aruwsrc
 {
 namespace chassis
 {
-template <typename Drivers> class ChassisDriveCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class ChassisDriveCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit ChassisDriveCommand(ChassisSubsystem<Drivers>* chassis) : chassis(chassis)

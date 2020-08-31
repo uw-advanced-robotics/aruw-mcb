@@ -9,7 +9,8 @@ namespace aruwsrc
 {
 namespace engineer
 {
-template <typename Drivers> class SqueezeGrabberCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class SqueezeGrabberCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit SqueezeGrabberCommand(GrabberSubsystem<Drivers>* subsystem) : grabber(subsystem)

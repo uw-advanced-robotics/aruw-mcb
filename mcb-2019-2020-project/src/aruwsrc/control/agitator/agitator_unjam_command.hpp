@@ -12,7 +12,8 @@ namespace aruwsrc
 {
 namespace agitator
 {
-template <typename Drivers> class AgitatorUnjamCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class AgitatorUnjamCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     AgitatorUnjamCommand(

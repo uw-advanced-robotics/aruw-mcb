@@ -74,7 +74,8 @@ enum class Key
  * A unique UART handler that uses timing in leu of DBUS communication (modm does not
  * support DBUS) to interact with the DR16 receiver.
  */
-template <typename Drivers> class Remote
+template <typename Drivers>
+class Remote
 {
 public:
     Remote() = default;
