@@ -38,7 +38,8 @@ namespace motor
  * a motor without initialization. This must be implemented when
  * error handling is complete.
  */
-template <typename Drivers> class DjiMotorTxHandler
+template <typename Drivers>
+class DjiMotorTxHandler
 {
 public:
     DjiMotorTxHandler() = default;

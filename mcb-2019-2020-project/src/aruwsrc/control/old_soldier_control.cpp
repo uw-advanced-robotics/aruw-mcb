@@ -1,4 +1,4 @@
-#include <aruwlib/Drivers.hpp>
+#include <aruwlib/HALDrivers.hpp>
 #include <aruwlib/control/command_mapper.hpp>
 
 #include "agitator/agitator_calibrate_command.hpp"
@@ -20,7 +20,7 @@ using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::turret;
 using namespace aruwlib::remote;
-using aruwlib::Drivers;
+using aruwlib::HALDrivers;
 using aruwlib::control::CommandMapper;
 
 namespace aruwsrc
@@ -28,49 +28,49 @@ namespace aruwsrc
 namespace control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem<Drivers> turret;
+TurretSubsystem<HALDrivers> turret;
 
-ChassisSubsystem<Drivers> chassis;
+ChassisSubsystem<HALDrivers> chassis;
 
-AgitatorSubsystem<Drivers> agitator(
-    AgitatorSubsystem<Drivers>::PID_17MM_P,
-    AgitatorSubsystem<Drivers>::PID_17MM_I,
-    AgitatorSubsystem<Drivers>::PID_17MM_D,
-    AgitatorSubsystem<Drivers>::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem<Drivers>::PID_17MM_MAX_OUT,
-    AgitatorSubsystem<Drivers>::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem<Drivers>::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem<Drivers>::isAgitatorInverted);
+AgitatorSubsystem<HALDrivers> agitator(
+    AgitatorSubsystem<HALDrivers>::PID_17MM_P,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_I,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_D,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem<HALDrivers>::PID_17MM_MAX_OUT,
+    AgitatorSubsystem<HALDrivers>::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem<HALDrivers>::AGITATOR_MOTOR_ID,
+    AgitatorSubsystem<HALDrivers>::AGITATOR_MOTOR_CAN_BUS,
+    AgitatorSubsystem<HALDrivers>::isAgitatorInverted);
 
-HopperSubsystem<Drivers> hopperCover(
+HopperSubsystem<HALDrivers> hopperCover(
     aruwlib::gpio::Pwm::W,
-    HopperSubsystem<Drivers>::OLD_SOLDIER_HOPPER_OPEN_PWM,
-    HopperSubsystem<Drivers>::OLD_SOLDIER_HOPPER_CLOSE_PWM,
-    HopperSubsystem<Drivers>::OLD_SOLDIER_PWM_RAMP_SPEED);
+    HopperSubsystem<HALDrivers>::OLD_SOLDIER_HOPPER_OPEN_PWM,
+    HopperSubsystem<HALDrivers>::OLD_SOLDIER_HOPPER_CLOSE_PWM,
+    HopperSubsystem<HALDrivers>::OLD_SOLDIER_PWM_RAMP_SPEED);
 
 /* define commands ----------------------------------------------------------*/
-ChassisDriveCommand<Drivers> chassisDriveCommand(&chassis);
+ChassisDriveCommand<HALDrivers> chassisDriveCommand(&chassis);
 
-ChassisAutorotateCommand<Drivers> chassisAutorotateCommand(&chassis, &turret);
+ChassisAutorotateCommand<HALDrivers> chassisAutorotateCommand(&chassis, &turret);
 
-WiggleDriveCommand<Drivers> wiggleDriveCommand(&chassis, &turret);
+WiggleDriveCommand<HALDrivers> wiggleDriveCommand(&chassis, &turret);
 
-TurretWorldRelativePositionCommand<Drivers> turretWorldRelativeCommand(&turret, &chassis);
+TurretWorldRelativePositionCommand<HALDrivers> turretWorldRelativeCommand(&turret, &chassis);
 
-AgitatorCalibrateCommand<Drivers> agitatorCalibrateCommand(&agitator);
+AgitatorCalibrateCommand<HALDrivers> agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand<Drivers> agitatorShootFastCommand(&agitator);
+ShootFastComprisedCommand<HALDrivers> agitatorShootFastCommand(&agitator);
 
-OpenHopperCommand<Drivers> openHopperCommand(&hopperCover);
+OpenHopperCommand<HALDrivers> openHopperCommand(&hopperCover);
 
 /* register subsystems here -------------------------------------------------*/
 void registerOldSoldierSubsystems()
 {
-    Drivers::commandScheduler.registerSubsystem(&agitator);
-    Drivers::commandScheduler.registerSubsystem(&chassis);
-    Drivers::commandScheduler.registerSubsystem(&turret);
-    Drivers::commandScheduler.registerSubsystem(&hopperCover);
+    HALDrivers::commandScheduler.registerSubsystem(&agitator);
+    HALDrivers::commandScheduler.registerSubsystem(&chassis);
+    HALDrivers::commandScheduler.registerSubsystem(&turret);
+    HALDrivers::commandScheduler.registerSubsystem(&hopperCover);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -81,29 +81,32 @@ void setDefaultOldSoldierCommands()
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startOldSoldierCommands() { Drivers::commandScheduler.addCommand(&agitatorCalibrateCommand); }
+void startOldSoldierCommands()
+{
+    HALDrivers::commandScheduler.addCommand(&agitatorCalibrateCommand);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerOldSoldierIoMappings()
 {
-    Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::UP),
+    HALDrivers::commandMapper.addHoldRepeatMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::RIGHT_SWITCH, SwitchState::UP),
         &agitatorShootFastCommand);
 
-    Drivers::commandMapper.addHoldRepeatMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::MID),
+    HALDrivers::commandMapper.addHoldRepeatMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::MID),
         &chassisAutorotateCommand);
 
-    Drivers::commandMapper.addHoldMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::DOWN),
+    HALDrivers::commandMapper.addHoldMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::DOWN),
         &chassisDriveCommand);
 
-    Drivers::commandMapper.addHoldMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::DOWN),
+    HALDrivers::commandMapper.addHoldMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::DOWN),
         &openHopperCommand);
 
-    Drivers::commandMapper.addHoldMapping(
-        CommandMapper<Drivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::UP),
+    HALDrivers::commandMapper.addHoldMapping(
+        CommandMapper<HALDrivers>::newKeyMap(Switch::LEFT_SWITCH, SwitchState::UP),
         &wiggleDriveCommand);
 }
 

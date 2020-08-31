@@ -3,7 +3,6 @@ Import("env")
 from os.path import abspath
 
 files = env.FindSourceFiles(".")
-# files = ['Drivers.cpp', 'communication/can/can.cpp']
 
 library = env.StaticLibrary(target="aruwlib", source=files)
 

@@ -68,7 +68,8 @@ struct SerialMessage
  * +-----------------+------------------------------------------------------------+
  * \endrst
  */
-template <typename Drivers> class DJISerial
+template <typename Drivers>
+class DJISerial
 {
 private:
     static constexpr uint16_t SERIAL_TX_BUFF_SIZE = 256;

@@ -14,7 +14,8 @@ namespace engineer
  * This sends a digital out signal to a solenoid, which actuates
  * a piston, used for collecting far bins.
  */
-template <typename Drivers> class ExtendXAxisCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class ExtendXAxisCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     ExtendXAxisCommand(XAxisSubsystem<Drivers>* subsystem) : xAxisSubsystem(subsystem)

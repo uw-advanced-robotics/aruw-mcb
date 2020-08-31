@@ -7,7 +7,8 @@ namespace aruwsrc
 {
 namespace agitator
 {
-template <typename Drivers> class ShootFastComprisedCommand : public ShootComprisedCommand<Drivers>
+template <typename Drivers>
+class ShootFastComprisedCommand : public ShootComprisedCommand<Drivers>
 {
 public:
     explicit ShootFastComprisedCommand(AgitatorSubsystem<Drivers>* agitator17mm)
@@ -21,7 +22,8 @@ public:
     }
 };
 
-template <typename Drivers> class ShootSlowComprisedCommand : public ShootComprisedCommand<Drivers>
+template <typename Drivers>
+class ShootSlowComprisedCommand : public ShootComprisedCommand<Drivers>
 {
 public:
     explicit ShootSlowComprisedCommand(AgitatorSubsystem<Drivers>* agitator17mm)

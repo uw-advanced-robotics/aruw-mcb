@@ -12,7 +12,8 @@ namespace sensors
  *
  * The distance conversion can be tweaked depending on the sensor.
  */
-template <typename Drivers> class SharpIrGP2Y0A41 : public AnalogDistanceSensor<Drivers>
+template <typename Drivers>
+class SharpIrGP2Y0A41 : public AnalogDistanceSensor<Drivers>
 {
 public:
     /**

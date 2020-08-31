@@ -20,7 +20,8 @@ namespace control
  * control code to pulse the friction wheels should be located
  * outside of this class because pulsing is a specific command.
  */
-template <typename Drivers> class ExampleSubsystem : public aruwlib::control::Subsystem<Drivers>
+template <typename Drivers>
+class ExampleSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
     ExampleSubsystem(

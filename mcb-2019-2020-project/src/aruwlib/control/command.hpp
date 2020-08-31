@@ -7,7 +7,8 @@ namespace aruwlib
 {
 namespace control
 {
-template <typename Drivers> class Subsystem;
+template <typename Drivers>
+class Subsystem;
 
 /**
  * A generic extendable class for implementing a command. Each
@@ -15,7 +16,8 @@ template <typename Drivers> class Subsystem;
  * extend the Command class and instantiate the virtual functions
  * in this class. See example_command.hpp for example of this.
  */
-template <typename Drivers> class Command
+template <typename Drivers>
+class Command
 {
 public:
     Command() : prevSchedulerExecuteTimestamp(0) {}
@@ -111,7 +113,8 @@ public:
     virtual bool isFinished() const = 0;
 
 private:
-    template <typename T> friend class CommandScheduler;
+    template <typename T>
+    friend class CommandScheduler;
 
     uint32_t prevSchedulerExecuteTimestamp;
 

@@ -15,7 +15,8 @@ namespace control
  * to two certain angles determined by the user as
  * the open position and the close position
  */
-template <typename Drivers> class HopperSubsystem : public aruwlib::control::Subsystem<Drivers>
+template <typename Drivers>
+class HopperSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
 #if defined(TARGET_SOLDIER)

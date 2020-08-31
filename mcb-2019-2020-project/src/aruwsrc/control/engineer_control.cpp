@@ -1,4 +1,4 @@
-#include <aruwlib/Drivers.hpp>
+#include <aruwlib/HALDrivers.hpp>
 #include <aruwlib/communication/gpio/digital.hpp>
 #include <aruwlib/control/command_scheduler.hpp>
 
@@ -11,7 +11,7 @@
 
 using namespace aruwsrc::engineer;
 using namespace aruwlib::gpio;
-using aruwlib::Drivers;
+using aruwlib::HALDrivers;
 using aruwlib::control::CommandMapper;
 
 namespace aruwsrc
@@ -22,18 +22,18 @@ const Digital::OutputPin grabberPin = Digital::OutputPin::E;
 const Digital::OutputPin xAxisPin = Digital::OutputPin::F;
 
 /* define subsystems --------------------------------------------------------*/
-GrabberSubsystem<Drivers> grabber(grabberPin);
-XAxisSubsystem<Drivers> xAxis(xAxisPin);
+GrabberSubsystem<HALDrivers> grabber(grabberPin);
+XAxisSubsystem<HALDrivers> xAxis(xAxisPin);
 
 /* define commands ----------------------------------------------------------*/
-ExtendXAxisCommand<Drivers> xAxisCommand(&xAxis);
-SqueezeGrabberCommand<Drivers> squeezeGrabberCommand(&grabber);
+ExtendXAxisCommand<HALDrivers> xAxisCommand(&xAxis);
+SqueezeGrabberCommand<HALDrivers> squeezeGrabberCommand(&grabber);
 
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems()
 {
-    Drivers::commandScheduler.registerSubsystem(&grabber);
-    Drivers::commandScheduler.registerSubsystem(&xAxis);
+    HALDrivers::commandScheduler.registerSubsystem(&grabber);
+    HALDrivers::commandScheduler.registerSubsystem(&xAxis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

@@ -19,7 +19,8 @@ namespace serial
  * @note use the static function located in Drivers to interact with
  *      this class.
  */
-template <typename Drivers> class RefSerial : public DJISerial<Drivers>
+template <typename Drivers>
+class RefSerial : public DJISerial<Drivers>
 {
 private:
     // RX message constants

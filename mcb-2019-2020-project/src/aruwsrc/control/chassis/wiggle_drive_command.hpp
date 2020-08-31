@@ -13,7 +13,8 @@ namespace aruwsrc
 {
 namespace chassis
 {
-template <typename Drivers> class WiggleDriveCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class WiggleDriveCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit WiggleDriveCommand(

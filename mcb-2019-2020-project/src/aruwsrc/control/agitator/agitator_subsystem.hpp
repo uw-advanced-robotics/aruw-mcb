@@ -14,7 +14,8 @@ namespace aruwsrc
 {
 namespace agitator
 {
-template <typename Drivers> class AgitatorSubsystem : public aruwlib::control::Subsystem<Drivers>
+template <typename Drivers>
+class AgitatorSubsystem : public aruwlib::control::Subsystem<Drivers>
 {
 public:
 #if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)

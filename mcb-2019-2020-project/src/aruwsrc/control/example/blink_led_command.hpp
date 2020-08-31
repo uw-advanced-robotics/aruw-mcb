@@ -10,7 +10,8 @@ namespace aruwsrc
 {
 namespace control
 {
-template <typename Drivers> class BlinkLEDCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class BlinkLEDCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit BlinkLEDCommand(aruwsrc::control::ExampleSubsystem<Drivers>* subsystem)

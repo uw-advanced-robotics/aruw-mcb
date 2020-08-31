@@ -55,7 +55,8 @@ struct RemoteMap
  * Also, key negations have not yet been implemented (there is no way
  * to for example have a Command stop executing if a certain key is pressed).
  */
-template <typename Drivers> class CommandMapper
+template <typename Drivers>
+class CommandMapper
 {
 public:
     CommandMapper() = default;

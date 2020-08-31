@@ -66,7 +66,8 @@ namespace control
  * Here, you utilize the CommandScheduler to coordinate multiple commands inside a
  * single command. The usage is exactly the same as using the main CommandScheduler.
  */
-template <typename Drivers> class CommandScheduler
+template <typename Drivers>
+class CommandScheduler
 {
 public:
     CommandScheduler() : subsystemToCommandMap() {}
@@ -326,7 +327,8 @@ private:
     static uint32_t commandSchedulerTimestamp;
 };  // class CommandScheduler
 
-template <typename Drivers> uint32_t CommandScheduler<Drivers>::commandSchedulerTimestamp = 0;
+template <typename Drivers>
+uint32_t CommandScheduler<Drivers>::commandSchedulerTimestamp = 0;
 
 }  // namespace control
 

@@ -23,7 +23,8 @@ using namespace modm::literals;
  * @note if you are shaking the imu while it is initializing, the offsets will likely
  *      be calibrated poorly and unexpectedly bad results may occur.
  */
-template <typename Drivers> class Mpu6500
+template <typename Drivers>
+class Mpu6500
 {
 public:
     Mpu6500() = default;

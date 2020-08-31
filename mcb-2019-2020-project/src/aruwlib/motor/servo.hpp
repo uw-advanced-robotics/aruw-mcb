@@ -13,7 +13,8 @@ namespace motor
  * In particular, this class limits some target PWM to a min and max PWM value and uses
  * ramping to control the speed of the servo.
  */
-template <typename Drivers> class Servo
+template <typename Drivers>
+class Servo
 {
 public:
     /**

@@ -12,7 +12,8 @@ namespace control
 /**
  * Example code for a default command for the subsystem-example subsystem.
  */
-template <typename Drivers> class ExampleCommand : public aruwlib::control::Command<Drivers>
+template <typename Drivers>
+class ExampleCommand : public aruwlib::control::Command<Drivers>
 {
 public:
     explicit ExampleCommand(ExampleSubsystem<Drivers>* subsystem, int speed)

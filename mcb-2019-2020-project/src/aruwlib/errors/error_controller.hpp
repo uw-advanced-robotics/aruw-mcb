@@ -19,7 +19,8 @@ namespace errors
  * when you have added an invalid error. The red led is always on (not used). Default, leds
  * A-H are always off if no errors are detected
  */
-template <typename Drivers> class ErrorController
+template <typename Drivers>
+class ErrorController
 {
 public:
     ErrorController() : prevLedErrorChangeWait(ERROR_ROTATE_TIME) {}
