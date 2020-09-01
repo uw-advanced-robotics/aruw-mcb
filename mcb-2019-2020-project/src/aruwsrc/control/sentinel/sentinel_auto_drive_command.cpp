@@ -53,8 +53,8 @@ void SentinelAutoDriveCommand::execute()
 
     // reverse direction if close to the end of the rail
     float curPos = subsystemSentinelDrive->absolutePosition();
-    if ((currentRPM < 0 && curPos < RAIL_BUFFER) ||
-        (currentRPM > 0 && curPos > SentinelDriveSubsystem::RAIL_LENGTH - RAIL_BUFFER))
+    if ((currentRPM < 0 && curPos < TURNAROUND_BUFFER) ||
+        (currentRPM > 0 && curPos > SentinelDriveSubsystem::RAIL_LENGTH - TURNAROUND_BUFFER))
     {
         currentRPM = -currentRPM;
     }

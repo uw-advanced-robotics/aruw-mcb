@@ -40,7 +40,7 @@ const float& Ramp::getTarget() const { return target; }
 
 void Ramp::reset(const float& resetValue)
 {
-    targetReached &= resetValue != target;
+    targetReached = true;
     target = resetValue;
     value = resetValue;
 }

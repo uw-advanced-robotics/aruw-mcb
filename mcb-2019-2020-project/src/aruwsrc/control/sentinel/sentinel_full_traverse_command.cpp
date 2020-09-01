@@ -1,54 +1,49 @@
 #include "sentinel_full_traverse_command.hpp"
-#include "sentinel_drive_subsystem.hpp"
 
 namespace aruwsrc
 {
-
 namespace control
 {
-    SentinelFullTraverseCommand::SentinelFullTraverseCommand(SentinelDriveSubsystem* subsystem) :
-        velocityTargetGenerator(0),
-        subsystemSentinelDrive(subsystem)
-    {
-        addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
-    }
+SentinelFullTraverseCommand::SentinelFullTraverseCommand(SentinelDriveSubsystem* subsystem)
+    : prevTime(0),
+      velocityTargetGenerator(0),
+      subsystemSentinelDrive(subsystem)
+{
+    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+}
 
-    void SentinelFullTraverseCommand::initialize()
+void SentinelFullTraverseCommand::initialize()
+{
+    prevTime = aruwlib::arch::clock::getTimeMilliseconds();
+    velocityTargetGenerator.reset();
+    velocityTargetGenerator.setTarget(MAX_DESIRED_TRAVERSE_SPEED);
+}
+
+void SentinelFullTraverseCommand::execute()
+{
+    // reverse direction if close to the end of the rail
+    float curPos = subsystemSentinelDrive->absolutePosition();
+    if (velocityTargetGenerator.getValue() < 0 && curPos < TURNAROUND_BUFFER)
     {
-        prevTime = modm::Clock::now().getTime();
-        velocityTargetGenerator.reset();
         velocityTargetGenerator.setTarget(MAX_DESIRED_TRAVERSE_SPEED);
     }
-
-    void SentinelFullTraverseCommand::execute()
+    else if (
+        velocityTargetGenerator.getValue() > 0 &&
+        curPos > SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH -
+                     TURNAROUND_BUFFER)
     {
-        uint32_t currTime = modm::Clock::now().getTime();
-        velocityTargetGenerator.update(RAMP_SPEED * static_cast<float>(currTime - prevTime));
-        prevTime = currTime;
-        // reverse direction if close to the end of the rail
-        float curPos = subsystemSentinelDrive->absolutePosition();
-        if (velocityTargetGenerator.getValue() < 0 && curPos < RAIL_BUFFER)
-        {
-            velocityTargetGenerator.setTarget(MAX_DESIRED_TRAVERSE_SPEED);
-        }
-        else if (velocityTargetGenerator.getValue() > 0 && curPos
-                > SentinelDriveSubsystem::RAIL_LENGTH - RAIL_BUFFER)
-        {
-            velocityTargetGenerator.setTarget(-MAX_DESIRED_TRAVERSE_SPEED);
-        }
-        subsystemSentinelDrive->setDesiredRpm(velocityTargetGenerator.getValue());
+        velocityTargetGenerator.setTarget(-MAX_DESIRED_TRAVERSE_SPEED);
     }
+    // update chassis target velocity
+    uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+    velocityTargetGenerator.update(RAMP_SPEED * static_cast<float>(currTime - prevTime));
+    prevTime = currTime;
+    subsystemSentinelDrive->setDesiredRpm(velocityTargetGenerator.getValue());
+}
 
-    // NOLINTNEXTLINE
-    void SentinelFullTraverseCommand::end(bool)
-    {
-        subsystemSentinelDrive->setDesiredRpm(0.0f);
-    }
+void SentinelFullTraverseCommand::end(bool) { subsystemSentinelDrive->setDesiredRpm(0.0f); }
 
-    bool SentinelFullTraverseCommand::isFinished() const
-    {
-        return false;
-    }
+bool SentinelFullTraverseCommand::isFinished() const { return false; }
 }  // namespace control
 
 }  // namespace aruwsrc

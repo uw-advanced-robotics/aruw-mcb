@@ -17,9 +17,15 @@ public:
     static constexpr float MAX_POWER_CONSUMPTION = 30.0f;
     static constexpr float MAX_ENERGY_BUFFER = 200.0f;
 
-    // length of the rail we own, in mm
-    // the competition rail length is actually 4650mm
+    /**
+     * length of the rail we own, in mm
+     * the competition rail length is actually 4650mm
+     */
     static constexpr float RAIL_LENGTH = 1900;
+    /**
+     * Length of the sentinel, in mm
+     */
+    static constexpr float SENTINEL_LENGTH = 100;
 
     SentinelDriveSubsystem(
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
