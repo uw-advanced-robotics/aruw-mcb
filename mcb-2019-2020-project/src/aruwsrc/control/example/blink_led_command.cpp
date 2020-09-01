@@ -1,48 +1,32 @@
-#include <rm-dev-board-a/board.hpp>
 #include "blink_led_command.hpp"
+
+#include <aruwlib/Drivers.hpp>
+#include <aruwlib/control/subsystem.hpp>
+
+using aruwlib::Drivers;
 
 namespace aruwsrc
 {
-
 namespace control
 {
-    BlinkLEDCommand::BlinkLEDCommand(aruwsrc::control::ExampleSubsystem* subsystem)
-    {
-        this->addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
-    }
+BlinkLEDCommand::BlinkLEDCommand(aruwsrc::control::ExampleSubsystem* subsystem)
+{
+    this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+}
 
-    void BlinkLEDCommand::initialize() {
-        completedTimer.restart(3000);
-        startCounter++;
-    }
+void BlinkLEDCommand::initialize()
+{
+    completedTimer.restart(3000);
+    startCounter++;
+}
 
-    void BlinkLEDCommand::execute()
-    {
-        refershCounter++;
-        Board::LedA::set();
-    }
+void BlinkLEDCommand::execute()
+{
+    refershCounter++;
+    Drivers::leds.set(aruwlib::gpio::Leds::A, true);
+}
 
-    // NOLINTNEXTLINE (see https://github.com/cpplint/cpplint/issues/131)
-    void BlinkLEDCommand::end(bool)
-    {
-        endCounter++;
-        Board::LedA::reset();
-    }
-
-    bool BlinkLEDCommand::isFinished() const
-    {
-        return completedTimer.isExpired();
-    }
-
-    void BlinkLEDCommand::interrupted()
-    {
-        end(true);
-    }
-
-    bool BlinkLEDCommand::runsWhenDisabled()
-    {
-        return false;
-    }
+bool BlinkLEDCommand::isFinished() const { return completedTimer.isExpired(); }
 }  // namespace control
 
 }  // namespace aruwsrc

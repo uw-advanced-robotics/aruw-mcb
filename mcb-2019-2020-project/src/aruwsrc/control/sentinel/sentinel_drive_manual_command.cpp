@@ -2,48 +2,37 @@
 
 #include <stdlib.h>
 
-#include "sentinel_drive_random_command.hpp"
+#include <aruwlib/Drivers.hpp>
+#include <aruwlib/communication/remote.hpp>
+
+#include "sentinel_auto_drive_command.hpp"
 #include "sentinel_drive_subsystem.hpp"
-#include "src/aruwlib/communication/remote.hpp"
+
+using aruwlib::Drivers;
+using aruwlib::control::Subsystem;
 
 namespace aruwsrc
 {
-
 namespace control
 {
-    SentinelDriveManualCommand::SentinelDriveManualCommand(SentinelDriveSubsystem* subsystem)
-        : Command(), subsystemSentinelDrive(subsystem)
-    {
-        addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
-    }
+SentinelDriveManualCommand::SentinelDriveManualCommand(SentinelDriveSubsystem* subsystem)
+    : Command(),
+      subsystemSentinelDrive(subsystem)
+{
+    addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
+}
 
-    void SentinelDriveManualCommand::initialize()
-    {}
+void SentinelDriveManualCommand::initialize() {}
 
-    void SentinelDriveManualCommand::execute()
-    {
-        subsystemSentinelDrive->setDesiredRpm(getUserDesiredSentinelSpeed());
-    }
+void SentinelDriveManualCommand::execute()
+{
+    subsystemSentinelDrive->setDesiredRpm(
+        Drivers::controlOperatorInterface.getSentinelSpeedInput());
+}
 
-    // NOLINTNEXTLINE
-    void SentinelDriveManualCommand::end(bool)
-    {
-        subsystemSentinelDrive->setDesiredRpm(0);
-    }
+void SentinelDriveManualCommand::end(bool) { subsystemSentinelDrive->setDesiredRpm(0); }
 
-    bool SentinelDriveManualCommand::isFinished() const
-    {
-        return false;
-    }
-
-    void SentinelDriveManualCommand::interrupted()
-    {}
-
-    float SentinelDriveManualCommand::getUserDesiredSentinelSpeed()
-    {
-        return aruwlib::Remote::getChannel(aruwlib::Remote::Channel::LEFT_HORIZONTAL)
-                * MAX_USER_DRIVE_SPEED;
-    }
+bool SentinelDriveManualCommand::isFinished() const { return false; }
 }  // namespace control
 
 }  // namespace aruwsrc

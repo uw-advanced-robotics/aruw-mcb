@@ -1,27 +1,20 @@
-// Subsystem for Y-Axis Mechanism
-
 #include "xaxis_subsystem.hpp"
 
-#include <rm-dev-board-a/board.hpp>
+#include <aruwlib/Drivers.hpp>
+
+using aruwlib::Drivers;
 
 namespace aruwsrc
 {
-
 namespace engineer
 {
-    void XAxisSubsystem::refresh() {
-        // for refresh, keep calling set(isExtended);
-        xAxisDigitalOutPin::set(isExtended);
-    }
+void XAxisSubsystem::setExtended(bool isExtended)
+{
+    aruwlib::Drivers::digital.set(pin, extended);
+    extended = isExtended;
+}
 
-    void XAxisSubsystem::setXAxisExtended(bool isExtended) {
-        this->isExtended = isExtended;
-        xAxisDigitalOutPin::set(isExtended);
-    }
-
-    bool XAxisSubsystem::getIsExtended() {
-        return this->isExtended;
-    }
+bool XAxisSubsystem::isExtended() const { return extended; }
 }  // namespace engineer
 
 }  // namespace aruwsrc

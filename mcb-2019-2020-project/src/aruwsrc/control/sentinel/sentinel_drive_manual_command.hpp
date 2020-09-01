@@ -1,42 +1,33 @@
 #ifndef __SENTINEL_DRIVE_MANUAL_COMMAND_HPP__
 #define __SENTINEL_DRIVE_MANUAL_COMMAND_HPP__
 
+#include <aruwlib/control/command.hpp>
 
-#include "src/aruwlib/control/command.hpp"
 #include "sentinel_drive_subsystem.hpp"
-#include "modm/processing/timer.hpp"
-
-using namespace aruwlib::control;
 
 namespace aruwsrc
 {
-
 namespace control
 {
-
 class SentinelDriveSubsystem;
 
-class SentinelDriveManualCommand : public Command
+class SentinelDriveManualCommand : public aruwlib::control::Command
 {
- public:
+public:
     explicit SentinelDriveManualCommand(SentinelDriveSubsystem* subsystem);
 
-    void initialize();
+    void initialize() override;
 
-    void execute();
+    void execute() override;
 
-    void end(bool);
+    void end(bool) override;
 
-    bool isFinished() const;
+    bool isFinished() const override;
 
-    void interrupted();
+    const char* getName() const override { return "sentinel drive manual command"; }
 
- private:
-    static constexpr float MAX_USER_DRIVE_SPEED = 5000.0f;
-
+private:
     SentinelDriveSubsystem* subsystemSentinelDrive;
-
-    float getUserDesiredSentinelSpeed();
 };
 
 }  // namespace control

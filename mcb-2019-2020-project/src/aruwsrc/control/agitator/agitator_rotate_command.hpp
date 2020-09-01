@@ -1,18 +1,18 @@
 #ifndef __AGITATOR_ROTATE_COMMAND_HPP__
 #define __AGITATOR_ROTATE_COMMAND_HPP__
 
+#include <aruwlib/algorithms/math_user_utils.hpp>
+#include <aruwlib/algorithms/ramp.hpp>
+#include <aruwlib/architecture/timeout.hpp>
+#include <aruwlib/control/command.hpp>
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/command.hpp"
+
 #include "agitator_subsystem.hpp"
-#include "src/aruwlib/algorithms/ramp.hpp"
-#include "src/aruwlib/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc
 {
-
 namespace agitator
 {
-
 /**
  * Rotates the connected agitator some angle in some desired time. Currently
  * pass in a rotate velocity and it uses modm::Clock::now() to determine the
@@ -20,7 +20,7 @@ namespace agitator
  */
 class AgitatorRotateCommand : public aruwlib::control::Command
 {
- private:
+private:
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
     AgitatorSubsystem* connectedAgitator;
@@ -34,7 +34,7 @@ class AgitatorRotateCommand : public aruwlib::control::Command
 
     uint32_t agitatorMinRotatePeriod;
 
-    modm::ShortTimeout agitatorMinRotateTimeout;
+    aruwlib::arch::MilliTimeout agitatorMinRotateTimeout;
 
     float agitatorSetpointTolerance;
 
@@ -42,7 +42,7 @@ class AgitatorRotateCommand : public aruwlib::control::Command
 
     bool agitatorSetToFinalAngle;
 
- public:
+public:
     /**
      * @param agitator the agitator associated with the rotate command
      * @param agitatorAngleChange the desired rotation angle
@@ -62,16 +62,17 @@ class AgitatorRotateCommand : public aruwlib::control::Command
         uint32_t agitatorRotateTime,
         uint32_t agitatorPauseAfterRotateTime,
         bool agitatorSetToFinalAngle,
-        float setpointTolerance = AGITATOR_SETPOINT_TOLERANCE
-    );
+        float setpointTolerance = AGITATOR_SETPOINT_TOLERANCE);
 
-    void initialize();
+    const char* getName() const override { return "agitator rotate command"; }
 
-    void execute();
+    void initialize() override;
 
-    void end(bool interrupted);
+    void execute() override;
 
-    bool isFinished() const;
+    void end(bool interrupted) override;
+
+    bool isFinished() const override;
 };
 
 }  // namespace agitator

@@ -1,29 +1,26 @@
 #include "subsystem.hpp"
+
 #include "command.hpp"
-#include "command_scheduler.hpp"
 
 namespace aruwlib
 {
-
 namespace control
 {
-    Subsystem::Subsystem() : prevSchedulerExecuteTimestamp(0), defaultCommand(nullptr)
-    {}
+Subsystem::Subsystem() : defaultCommand(nullptr), prevSchedulerExecuteTimestamp(0) {}
 
-    void Subsystem::setDefaultCommand(Command* command)
+void Subsystem::initialize() {}
+
+void Subsystem::setDefaultCommand(Command* command)
+{
+    if (command != nullptr)
     {
-        if (command != nullptr)
-        {
-            defaultCommand = command;
-        }
+        defaultCommand = command;
     }
+}
 
-    Command* Subsystem::getDefaultCommand() const
-    {
-        return defaultCommand;
-    }
+Command* Subsystem::getDefaultCommand() const { return defaultCommand; }
 
-    void Subsystem::refresh(void) {}
+void Subsystem::refresh() {}
 
 }  // namespace control
 

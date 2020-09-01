@@ -1,15 +1,14 @@
 #ifndef __AGITATOR_CALIBRATE_COMMAND_HPP__
 #define __AGITATOR_CALIBRATE_COMMAND_HPP__
 
-#include "src/aruwlib/control/command.hpp"
+#include <aruwlib/control/command.hpp>
+
 #include "agitator_subsystem.hpp"
 
 namespace aruwsrc
 {
-
 namespace agitator
 {
-
 /**
  * Default command that can be used to calibrate the agitator (i.e. spam calls
  * agitatorCalibrateHere). By default, the agitator will keep calling agitatorCalibrateHere
@@ -19,18 +18,20 @@ namespace agitator
  */
 class AgitatorCalibrateCommand : public aruwlib::control::Command
 {
- public:
+public:
     explicit AgitatorCalibrateCommand(AgitatorSubsystem* agitator);
 
-    void initialize();
+    const char* getName() const override { return "agitator calibrate command"; }
 
-    void execute();
+    void initialize() override;
 
-    void end(bool interrupted);
+    void execute() override;
 
-    bool isFinished() const;
+    void end(bool interrupted) override;
 
- private:
+    bool isFinished() const override;
+
+private:
     AgitatorSubsystem* agitator;
 };
 

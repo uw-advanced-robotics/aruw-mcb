@@ -1,26 +1,22 @@
 #ifndef __SUBSYSTEM_SENTINEL_DRIVE_HPP__
 #define __SUBSYSTEM_SENTINEL_DRIVE_HPP__
 
+#include <aruwlib/communication/gpio/digital.hpp>
+#include <aruwlib/control/command_scheduler.hpp>
+#include <aruwlib/control/subsystem.hpp>
+#include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
-#include "src/aruwlib/control/command_scheduler.hpp"
-#include "src/aruwlib/control/subsystem.hpp"
-#include "src/aruwlib/motor/dji_motor.hpp"
-
-using namespace aruwlib::control;
 
 namespace aruwsrc
 {
-
 namespace control
 {
-
-class SentinelDriveSubsystem : public Subsystem
+class SentinelDriveSubsystem : public aruwlib::control::Subsystem
 {
- public:
+public:
     static constexpr float MAX_POWER_CONSUMPTION = 30.0f;
     static constexpr float MAX_ENERGY_BUFFER = 200.0f;
 
-    static constexpr float SENTINEL_WIDTH = 300;
     // length of the rail we own, in mm
     // the competition rail length is actually 4650mm
     static constexpr float RAIL_LENGTH = 1900;
@@ -29,24 +25,31 @@ class SentinelDriveSubsystem : public Subsystem
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
         : leftWheel(leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
-        rightWheel(rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
-        velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-        desiredRpm(0)
-    {}
+          rightWheel(rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
+          velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+          velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+          desiredRpm(0)
+    {
+    }
 
+    void initialize() override;
+
+    /**
+     * Returns absolute position of the sentinel, relative to the left end of the rail (when rail
+     * is viewed from the front)
+     */
     float absolutePosition();
 
     void setDesiredRpm(float desRpm);
 
-    void refresh();
+    void refresh() override;
 
- private:
+private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR6;
     static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
     const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-    using leftLimitSwitch = Board::DigitalInPinA;
-    using rightLimitSwitch = Board::DigitalInPinB;
+    const aruwlib::gpio::Digital::InputPin leftLimitSwitch = aruwlib::gpio::Digital::InputPin::A;
+    const aruwlib::gpio::Digital::InputPin rightLimitSwitch = aruwlib::gpio::Digital::InputPin::B;
 
     const float PID_P = 5.0f;
     const float PID_I = 0.0f;
@@ -69,16 +72,10 @@ class SentinelDriveSubsystem : public Subsystem
     float desiredRpm;
     float leftZeroRailOffset = 0;
     float rightZeroRailOffset = 0;
-public:
-    void resetOffsetFromLimitSwitch();
-private:
-    float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
 
-    void updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        aruwlib::motor::DjiMotor* const motor,
-        float desiredRpm
-    );
+    void resetOffsetFromLimitSwitch();
+
+    float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
 };
 
 }  // namespace control

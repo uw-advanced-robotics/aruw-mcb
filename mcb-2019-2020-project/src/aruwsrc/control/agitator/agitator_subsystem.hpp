@@ -1,38 +1,37 @@
 #ifndef __AGITATOR_SUBSYSTEM_HPP__
 #define __AGITATOR_SUBSYSTEM_HPP__
 
+#include <aruwlib/architecture/timeout.hpp>
+#include <aruwlib/control/subsystem.hpp>
+#include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
-#include <modm/processing/timer/timeout.hpp>
 
-#include "src/aruwlib/control/subsystem.hpp"
-#include "src/aruwlib/motor/dji_motor.hpp"
-#include "src/aruwsrc/algorithms/turret_pid.hpp"
+#include "aruwsrc/algorithms/turret_pid.hpp"
 
 namespace aruwsrc
 {
-
 namespace agitator
 {
-
-class AgitatorSubsystem : public aruwlib::control::Subsystem {
- public:
-    #if defined(TARGET_SOLDIER)
+class AgitatorSubsystem : public aruwlib::control::Subsystem
+{
+public:
+#if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
     // position pid terms
     // pid terms for soldier
     static constexpr float PID_17MM_P = 170000.0f;
     static constexpr float PID_17MM_I = 0.0f;
     static constexpr float PID_17MM_D = 80.0f;
     static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
-    static constexpr float PID_17MM_MAX_OUT =  16000.0f;
+    static constexpr float PID_17MM_MAX_OUT = 16000.0f;
 
     static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 
     static constexpr bool isAgitatorInverted = false;
 
-    #elif defined(TARGET_SENTRY)
+#elif defined(TARGET_SENTINEL)
     // position pid terms
-    // pid terms for sentry
+    // pid terms for sentinel
     static constexpr float PID_17MM_P = 170000.0f;
     static constexpr float PID_17MM_I = 0.0f;
     static constexpr float PID_17MM_D = 80.0f;
@@ -46,10 +45,10 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr float PID_17MM_KICKER_MAX_OUT = 16000.0f;
 
     static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
-    static constexpr aruwlib::motor::MotorId SENTRY_KICKER_MOTOR_ID = aruwlib::motor::MOTOR8;
+    static constexpr aruwlib::motor::MotorId SENTINEL_KICKER_MOTOR_ID = aruwlib::motor::MOTOR8;
     static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 
-    #elif defined(TARGET_HERO)
+#elif defined(TARGET_HERO)
     /// \todo tune all the things
     // pid terms for hero agitator 1
     static constexpr float PID_HERO1_P = 1500.0f;
@@ -64,13 +63,13 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     static constexpr float PID_HERO2_MAX_ERR_SUM = 0.0f;
 
     static constexpr aruwlib::motor::MotorId HERO1_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
-    static constexpr aruwlib::can::CanBus HERO1_AGITATOR_MOTOR_CAN_BUS
-            = aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr aruwlib::can::CanBus HERO1_AGITATOR_MOTOR_CAN_BUS =
+        aruwlib::can::CanBus::CAN_BUS1;
 
     static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR6;
-    static constexpr aruwlib::can::CanBus HERO2_AGITATOR_MOTOR_CAN_BUS
-            = aruwlib::can::CanBus::CAN_BUS1;
-    #endif
+    static constexpr aruwlib::can::CanBus HERO2_AGITATOR_MOTOR_CAN_BUS =
+        aruwlib::can::CanBus::CAN_BUS1;
+#endif
 
     // agitator gear ratio, for determining shaft rotation angle
     static constexpr float AGITATOR_GEAR_RATIO_M2006 = 36.0f;
@@ -85,10 +84,9 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
         float agitatorGearRatio,
         aruwlib::motor::MotorId agitatorMotorId,
         aruwlib::can::CanBus agitatorCanBusId,
-        bool isAgitatorInverted
-    );
+        bool isAgitatorInverted);
 
-    void refresh();
+    void refresh() override;
 
     void setAgitatorDesiredAngle(const float& newAngle);
 
@@ -109,7 +107,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
 
     bool isAgitatorCalibrated() const;
 
- private:
+private:
     // we add on this amount of "tolerance" to the predicted rotate time since some times it
     // takes longer than predicted and we only want to unjam when we are actually jammed
     // measured in ms
@@ -136,7 +134,7 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem {
     // If the agitator has not reached the desired position in a certain time, the
     // agitator is considered jammed.
     // units: milliseconds
-    modm::ShortTimeout agitatorJammedTimeout;
+    aruwlib::arch::MilliTimeout agitatorJammedTimeout;
 
     // the current agitator timeout time, in milliseconds
     uint32_t agitatorJammedTimeoutPeriod;
