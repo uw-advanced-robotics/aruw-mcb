@@ -18,19 +18,13 @@ void Pwm::init()
 
     Timer8::setPrescaler(Board::SystemClock::APB2_PRESCALER);
     Timer8::setOverflow(Board::SystemClock::PWM_RESOLUTION);
-
-    Timer3::connect<PWMOutPinBuzzer::Ch1>();
     Timer3::enable();
     Timer3::setMode(Timer3::Mode::UpCounter);
     Timer3::setPrescaler(65535);
     Timer3::setPrescaler(Board::SystemClock::APB2_PRESCALER);
     Timer3::setOverflow(Board::SystemClock::PWM_RESOLUTION);
 #endif
-    // Set all out pins to 0 duty
-    writeAll(0.0f);
 
-#ifndef ENV_SIMULATOR
-    // Start the timer
     Timer8::start();
     Timer8::enableOutput();
 #endif

@@ -34,7 +34,6 @@ int main()
     aruwsrc::control::initSubsystemCommands();
     while(1)
     {
-        Drivers::pwm.write(1000, aruwlib::gpio::Pwm::BUZZER);
         modm::delayMilliseconds(2);
         duty++;
     }
@@ -56,9 +55,8 @@ int main()
 // #endif
 //     }
 //     return 0;
-}
 
-void initializeIo()
+    while (1)
 {
     aruwlib::Drivers::analog.init();
     aruwlib::Drivers::pwm.init();
@@ -85,11 +83,6 @@ void initializeIo()
         64,
         false>
         display;
-    display.initializeBlocking();
-
-    Drivers::remote.initialize();
-    Drivers::mpu6500.init();
-    Drivers::refSerial.initialize();
     Drivers::xavierSerial.initialize();
 }
 
