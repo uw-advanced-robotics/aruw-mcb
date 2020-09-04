@@ -1,6 +1,7 @@
 #include <aruwlib/communication/can/can_rx_handler.hpp>
 #include <aruwlib/communication/gpio/leds.hpp>
 #include <aruwlib/errors/error_controller.hpp>
+#include <aruwlib/communication/can/can.hpp>
 
 #include "aruwsrc/control/launcher/friction_wheel_rotate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
@@ -10,17 +11,21 @@
 
 using namespace aruwsrc::launcher;
 
+namespace friction_wheel_rotate_command_tests
+{
 class MockDrivers
 {
 public:
     static aruwlib::can::CanRxHandler<MockDrivers> canRxHandler;
     static aruwlib::motor::DjiMotorTxHandler<MockDrivers> djiMotorTxHandler;
     static aruwlib::errors::ErrorController<MockDrivers> errorController;
+    static aruwlib::can::Can can;
 };
 
 aruwlib::can::CanRxHandler<MockDrivers> MockDrivers::canRxHandler;
 aruwlib::motor::DjiMotorTxHandler<MockDrivers> MockDrivers::djiMotorTxHandler;
 aruwlib::errors::ErrorController<MockDrivers> MockDrivers::errorController;
+aruwlib::can::Can MockDrivers::can;
 
 template <typename Drivers>
 class FrictionWheelSubsystemMock : public FrictionWheelSubsystem<Drivers>
@@ -36,7 +41,7 @@ public:
 const float EQUAL_THRESHOLD = 0.00001f;
 
 TEST_GROUP(FrictionWheelRotateCommand){void teardown(){mock().clear();
-}
+}  // namespace friction_wheel_rotate_command_tests
 }
 ;
 
@@ -114,4 +119,5 @@ TEST(FrictionWheelRotateCommand, isFinished)
 
     CHECK_FALSE(fc.isFinished());
     mock().checkExpectations();
+}
 }

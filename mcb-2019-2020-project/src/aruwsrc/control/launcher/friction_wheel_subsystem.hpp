@@ -43,6 +43,10 @@ public:
         rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
     }
 
+    const aruwlib::motor::DjiMotor<Drivers> &getLeftWheel() const { return leftWheel; }
+
+    const aruwlib::motor::DjiMotor<Drivers> &getRightWheel() const { return rightWheel; }
+
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
     static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
