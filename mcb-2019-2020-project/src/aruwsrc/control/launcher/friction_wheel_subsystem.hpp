@@ -29,7 +29,7 @@ public:
     {
     }
 
-    void setDesiredRpm(float desRpm) { desiredRpmRamp.setTarget(desRpm); }
+    mockable void setDesiredRpm(float desRpm) { desiredRpmRamp.setTarget(desRpm); }
 
     void refresh() override
     {

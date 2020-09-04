@@ -1,8 +1,10 @@
 #ifndef ERROR_CONTROLLER_HPP
 #define ERROR_CONTROLLER_HPP
 
-#include <aruwlib/architecture/timeout.hpp>
 #include <modm/container.hpp>
+
+#include "aruwlib/architecture/timeout.hpp"
+#include "aruwlib/communication/gpio/leds.hpp"
 
 #include "system_error.hpp"
 

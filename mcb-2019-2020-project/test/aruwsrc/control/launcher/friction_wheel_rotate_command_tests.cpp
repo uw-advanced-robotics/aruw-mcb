@@ -1,20 +1,29 @@
+#include <aruwlib/communication/can/can_rx_handler.hpp>
+#include <aruwlib/communication/gpio/leds.hpp>
+#include <aruwlib/errors/error_controller.hpp>
 
-#include <aruwsrc/control/launcher/friction_wheel_rotate_command.hpp>
-#include <aruwsrc/control/launcher/friction_wheel_subsystem.hpp>
+#include "aruwsrc/control/launcher/friction_wheel_rotate_command.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 //
 #include <CppUTest/CommandLineTestRunner.h>
 #include <CppUTestExt/MockSupport.h>
 
 using namespace aruwsrc::launcher;
 
-const float EQUAL_THRESHOLD = 0.00001f;
+class MockDrivers
+{
+public:
+    static aruwlib::can::CanRxHandler<MockDrivers> canRxHandler;
+    static aruwlib::motor::DjiMotorTxHandler<MockDrivers> djiMotorTxHandler;
+    static aruwlib::errors::ErrorController<MockDrivers> errorController;
+};
 
-TEST_GROUP(FrictionWheelRotateCommand){void teardown(){mock().clear();
-}
-}
-;
+aruwlib::can::CanRxHandler<MockDrivers> MockDrivers::canRxHandler;
+aruwlib::motor::DjiMotorTxHandler<MockDrivers> MockDrivers::djiMotorTxHandler;
+aruwlib::errors::ErrorController<MockDrivers> MockDrivers::errorController;
 
-class FrictionWheelSubsystemMock : public FrictionWheelSubsystem
+template <typename Drivers>
+class FrictionWheelSubsystemMock : public FrictionWheelSubsystem<Drivers>
 {
 public:
     void setDesiredRpm(float val) override
@@ -24,12 +33,19 @@ public:
     }
 };
 
+const float EQUAL_THRESHOLD = 0.00001f;
+
+TEST_GROUP(FrictionWheelRotateCommand){void teardown(){mock().clear();
+}
+}
+;
+
 TEST(FrictionWheelRotateCommand, execute_zero_desired_rpm)
 {
     mock().expectOneCall("setDesiredRpm");
 
-    FrictionWheelSubsystemMock fs;
-    FrictionWheelRotateCommand fc(&fs, 0);
+    FrictionWheelSubsystemMock<MockDrivers> fs;
+    FrictionWheelRotateCommand<MockDrivers> fc(&fs, 0);
 
     fc.execute();
 
@@ -41,8 +57,8 @@ TEST(FrictionWheelRotateCommand, execute_positive_rpm)
 {
     mock().expectOneCall("setDesiredRpm");
 
-    FrictionWheelSubsystemMock fs;
-    FrictionWheelRotateCommand fc(&fs, 10000);
+    FrictionWheelSubsystemMock<MockDrivers> fs;
+    FrictionWheelRotateCommand<MockDrivers> fc(&fs, 10000);
 
     fc.execute();
 
@@ -54,8 +70,8 @@ TEST(FrictionWheelRotateCommand, execute_negative_rpm)
 {
     mock().expectOneCall("setDesiredRpm");
 
-    FrictionWheelSubsystemMock fs;
-    FrictionWheelRotateCommand fc(&fs, -10000);
+    FrictionWheelSubsystemMock<MockDrivers> fs;
+    FrictionWheelRotateCommand<MockDrivers> fc(&fs, -10000);
 
     fc.execute();
 
@@ -67,8 +83,8 @@ TEST(FrictionWheelRotateCommand, end)
 {
     mock().expectNCalls(4, "setDesiredRpm");
 
-    FrictionWheelSubsystemMock fs;
-    FrictionWheelRotateCommand fc(&fs, 10000);
+    FrictionWheelSubsystemMock<MockDrivers> fs;
+    FrictionWheelRotateCommand<MockDrivers> fc(&fs, 10000);
 
     fc.execute();
     fc.end(false);
@@ -83,11 +99,11 @@ TEST(FrictionWheelRotateCommand, end)
 
 TEST(FrictionWheelRotateCommand, isFinished)
 {
-    const int EXECUTE_TIMES = 100;
+    constexpr int EXECUTE_TIMES = 100;
     mock().expectNCalls(EXECUTE_TIMES, "setDesiredRpm");
 
-    FrictionWheelSubsystemMock fs;
-    FrictionWheelRotateCommand fc(&fs, 10000);
+    FrictionWheelSubsystemMock<MockDrivers> fs;
+    FrictionWheelRotateCommand<MockDrivers> fc(&fs, 10000);
 
     CHECK_FALSE(fc.isFinished());
 
@@ -97,4 +113,5 @@ TEST(FrictionWheelRotateCommand, isFinished)
     }
 
     CHECK_FALSE(fc.isFinished());
+    mock().checkExpectations();
 }

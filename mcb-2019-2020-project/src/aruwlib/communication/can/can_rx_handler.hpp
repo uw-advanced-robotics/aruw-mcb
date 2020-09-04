@@ -66,6 +66,10 @@ public:
      */
     void attachReceiveHandler(CanRxListener<Drivers>* listener)
     {
+        if (listener == nullptr)
+        {
+            return;
+        }
         if (listener->canBus == can::CanBus::CAN_BUS1)
         {
             attachReceiveHandler(listener, messageHandlerStoreCan1, MAX_RECEIVE_UNIQUE_HEADER_CAN1);
