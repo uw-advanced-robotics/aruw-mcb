@@ -101,6 +101,12 @@ public:
      */
     std::map<std::string, IBaseProperty *>::const_iterator getPropertyTableBeginning() const;
 
+    /**
+     * @return A `const_iterator` to the end of the property table. This allows you to know when
+     *      you have traversed the entire property table if using `getPropertyTableBeginning`.
+     */
+    std::map<std::string, IBaseProperty *>::const_iterator getPropertyTableEnd() const;
+
 private:
     std::map<std::string, IBaseProperty *> propertyTable;
 };  // class PropertyTable

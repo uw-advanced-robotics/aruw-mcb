@@ -1,91 +1,124 @@
 #include <aruwlib/Int32Property.hpp>
-
-#include "catch/catch.hpp"
+#include <gtest/gtest.h>
 
 using aruwlib::Int32Property;
 
-TEST_CASE("Int32 Property: Constructors", "[Int32Property]")
+TEST(Int32Property, Default_constructor)
 {
-    Int32Property p1;
-    REQUIRE(p1 == 0);
-    REQUIRE(p1.getPropertyName() == nullptr);
-    REQUIRE(!strcmp(p1.toString().c_str(), "0"));
-    Int32Property p2(1234);
-    REQUIRE(p2 == 1234);
-    REQUIRE(p2.getPropertyName() == nullptr);
-    REQUIRE(!strcmp(p2.toString().c_str(), "1234"));
-    Int32Property p3(4321, "the property");
-    REQUIRE(p3 == 4321);
-    REQUIRE(!strcmp(p3.getPropertyName(), "the property"));
-    REQUIRE(!strcmp(p3.toString().c_str(), "4321"));
-    Int32Property p4(p3);
-    REQUIRE(p4 == 4321);
-    REQUIRE(!strcmp(p4.getPropertyName(), "the property"));
-    REQUIRE(!strcmp(p4.toString().c_str(), "4321"));
+    Int32Property p;
+    EXPECT_EQ(0, p);
+    EXPECT_EQ(nullptr, p.getPropertyName());
+    EXPECT_EQ("0", p.toString());
 }
 
-TEST_CASE("Int32 Property: Equals operator", "[Int32Property]")
+TEST(Int32Property, Single_arg_constructor)
+{
+    Int32Property p(1234);
+    EXPECT_EQ(1234, p);
+    EXPECT_EQ(nullptr, p.getPropertyName());
+    EXPECT_EQ(p.toString(), "1234");
+}
+
+TEST(Int32Property, Two_arg_constructor)
+{
+    Int32Property p(4321, "the property");
+    EXPECT_EQ(4321, p);
+    EXPECT_EQ("the property", p.getPropertyName());
+    EXPECT_EQ("4321", p.toString());
+}
+
+TEST(Int32Property, Copy_constructor)
+{
+    Int32Property p1(4321, "the property");
+    Int32Property p2(p1);
+    EXPECT_EQ(4321, p2);
+    EXPECT_EQ("the property", p2.getPropertyName());
+    EXPECT_EQ("4321", p2.toString());
+}
+
+TEST(Int32Property, Equals_operator)
 {
     Int32Property p1(1234, "the property");
     Int32Property p2;
     p2 = p1;
-    REQUIRE(p1 == 1234);
-    REQUIRE(!strcmp(p2.getPropertyName(), "the property"));
-    REQUIRE(!strcmp(p2.toString().c_str(), "1234"));
+    EXPECT_EQ(1234, p1);
+    EXPECT_EQ("the property", p2.getPropertyName());
+    EXPECT_EQ("1234", p2.toString());
     p2 = 4321;
-    REQUIRE(p2 == 4321);
-    REQUIRE(!strcmp(p2.getPropertyName(), "the property"));
-    REQUIRE(!strcmp(p2.toString().c_str(), "4321"));
+    EXPECT_EQ(4321, p2);
+    EXPECT_EQ("the property", p2.getPropertyName());
+    EXPECT_EQ("4321", p2.toString());
 }
 
-TEST_CASE("Int32 Property: plus operator", "[Int32Property]")
+TEST(Int32Property, Plus_operator)
 {
     Int32Property p1(1);
     Int32Property p2(2);
-    REQUIRE(p1 + p2 == 3);
-    REQUIRE(p1 + 3 == 4);
-    REQUIRE(3 + p1 == 4);
+    EXPECT_EQ(3, p1 + p2);
+    EXPECT_EQ(4, p1 + 3);
+    EXPECT_EQ(4, 3 + p1);
     p1 += 3;
-    REQUIRE(p1 == 4);
+    EXPECT_EQ(4, p1);
     p1 += p2;
-    REQUIRE(p1 == 6);
+    EXPECT_EQ(6, p1);
 }
 
-TEST_CASE("Int32 Property: minus operator", "[Int32Property]")
+TEST(Int32Property, Minus_operator)
 {
     Int32Property p1(1);
     Int32Property p2(2);
-    REQUIRE(p1 - p2 == -1);
-    REQUIRE(p1 - 3 == -2);
-    REQUIRE(3 - p1 == 2);
+    EXPECT_EQ(-1, p1 - p2);
+    EXPECT_EQ(-2, p1 - 3);
+    EXPECT_EQ(2, 3 - p1);
     p1 -= 3;
-    REQUIRE(p1 == -2);
+    EXPECT_EQ(p1, -2);
     p1 -= p2;
-    REQUIRE(p1 == -4);
+    EXPECT_EQ(p1, -4);
 }
 
-TEST_CASE("Int32 Property: times operator", "[Int32Property]")
+TEST(Int32Property, Times_operator)
 {
     Int32Property p1(2);
     Int32Property p2(3);
-    REQUIRE(p1 * p2 == 6);
-    REQUIRE(p1 * 4 == 8);
-    REQUIRE(4 * p1 == 8);
+    EXPECT_EQ(6, p1 * p2);
+    EXPECT_EQ(8, p1 * 4);
+    EXPECT_EQ(8, 4 * p1);
     p1 *= 4;
-    REQUIRE(p1 == 8);
+    EXPECT_EQ(8, p1);
     p1 *= p2;
-    REQUIRE(p1 == 24);
+    EXPECT_EQ(24, p1);
 }
 
-TEST_CASE("Int32 Property: divide operator", "[Int32Property]")
+TEST(Int32Property, Divide_operator)
 {
     Int32Property p1(10);
     Int32Property p2(2);
-    REQUIRE(p1 / p2 == 5);
-    REQUIRE(p1 / 5 == 2);
-    REQUIRE(20 / p2 == 10);
+    EXPECT_EQ(5, p1 / p2);
+    EXPECT_EQ(2, p1 / 5);
+    EXPECT_EQ(10, 20 / p2);
     p1 /= 2;
-    REQUIRE(p1 == 5);
+    EXPECT_EQ(5, p1);
     p1 /= p2;
-    REQUIRE(p1 == 2);
+    EXPECT_EQ(2, p1);
+}
+
+TEST(Int32Property, Serialize_data)
+{
+    Int32Property p(0x12345678, "the property");
+    EXPECT_EQ(4, p.getSerializationArrSize());
+    uint8_t *arr = new uint8_t[p.getSerializationArrSize()];
+    // cout <<
+    p.serializeData(arr);
+    EXPECT_EQ(0x12, arr[3]);
+    EXPECT_EQ(0x34, arr[2]);
+    EXPECT_EQ(0x56, arr[1]);
+    EXPECT_EQ(0x78, arr[0]);
+}
+
+TEST(Int32Property, Set_data)
+{
+    Int32Property p;
+    p.setProperty(1);
+    EXPECT_EQ(1, p);
+    EXPECT_EQ("1", p.toString());
 }

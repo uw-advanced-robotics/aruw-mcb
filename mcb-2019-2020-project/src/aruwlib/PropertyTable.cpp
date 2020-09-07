@@ -48,4 +48,8 @@ std::map<std::string, IBaseProperty *>::const_iterator PropertyTable::getPropert
     return propertyTable.begin();
 }
 
+std::map<std::string, IBaseProperty *>::const_iterator PropertyTable::getPropertyTableEnd() const
+{
+    return propertyTable.end();
+}
 }  // namespace aruwlib
