@@ -22,39 +22,6 @@ motor::DjiMotorTxHandler Drivers::djiMotorTxHandler;
 #ifdef ENV_SIMULATOR
 void Drivers::reset()
 {
-    resetCan();
-    resetCanRxHandler();
-    resetAnalog();
-    resetDigital();
-    resetLeds();
-    resetPwm();
-    resetRemote();
-    resetMpu6500();
-    resetUart();
-    resetXavierSerial();
-    resetRefSerial();
-    resetCommandScheduler();
-    resetControlOperatorInterface();
-    resetCommandMapper();
-    resetErrorController();
-    resetDjiMotorTxHandler();
 }
-
-void Drivers::resetCan() {}
-void Drivers::resetCanRxHandler() {}
-void Drivers::resetAnalog() {}
-void Drivers::resetDigital() {}
-void Drivers::resetLeds() {}
-void Drivers::resetPwm() {}
-void Drivers::resetRemote() {}
-void Drivers::resetMpu6500() {}
-void Drivers::resetUart() {}
-void Drivers::resetXavierSerial() {}
-void Drivers::resetRefSerial() {}
-void Drivers::resetCommandScheduler() {}
-void Drivers::resetControlOperatorInterface() {}
-void Drivers::resetCommandMapper() {}
-void Drivers::resetErrorController() {}
-void Drivers::resetDjiMotorTxHandler() {}
 #endif
 }  // namespace aruwlib
