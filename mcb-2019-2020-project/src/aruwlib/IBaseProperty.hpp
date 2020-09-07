@@ -12,7 +12,7 @@ namespace aruwlib
  * a bunch of generic typed values together.
  *
  * The IBaseProperty stores the name of the property.
- * This name will be refered to during insertion into the PropertyTable. The
+ * This name will be referred to during insertion into the PropertyTable. The
  * property can then be referenced by name in the table.
  *
  * The IBaseProperty has utilities for serializing a property of generic type. The
@@ -30,7 +30,7 @@ namespace aruwlib
  * +-------------------+----------------------------------------------+
  * | 3 - 3 + len(name) | The name of the property                     |
  * +-------------------+----------------------------------------------+
- * | 4 + len(name) +   | The serializaed property.                    |
+ * | 4 + len(name) +   | The serialized property.                    |
  * +-------------------+----------------------------------------------+
  * \endrst
  */
@@ -92,7 +92,7 @@ public:
     /**
      * @return The length (in bytes) that the serialized property takes up.
      *      Use to insure the array passed in in the `fullSerialization` function
-     *      has enough space to store the serializaed data.
+     *      has enough space to store the serialized data.
      */
     uint16_t getFullSerializationSize() const;
 
