@@ -5,8 +5,8 @@
 
 #include <modm/container/linked_list.hpp>
 
-#include "mock_macros.hpp"
 #include "command.hpp"
+#include "mock_macros.hpp"
 #include "subsystem.hpp"
 
 namespace aruwlib

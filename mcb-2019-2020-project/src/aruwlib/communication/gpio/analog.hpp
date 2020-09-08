@@ -2,6 +2,7 @@
 #define ANALOG_HPP_
 
 #include <stdint.h>
+
 #include "mock_macros.hpp"
 
 #ifndef ENV_SIMULATOR

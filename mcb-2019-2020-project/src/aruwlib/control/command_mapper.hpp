@@ -10,7 +10,6 @@
 
 #include "command.hpp"
 #include "command_scheduler.hpp"
-
 #include "mock_macros.hpp"
 
 namespace aruwlib

@@ -4,9 +4,9 @@
 #ifndef ENV_SIMULATOR
 #include <modm/platform.hpp>
 #endif
-#include "mock_macros.hpp"
-
 #include <stdint.h>
+
+#include "mock_macros.hpp"
 
 namespace aruwlib
 {

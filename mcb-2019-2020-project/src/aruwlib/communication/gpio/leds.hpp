@@ -2,6 +2,7 @@
 #define LEDS_HPP_
 
 #include <stdint.h>
+
 #include "mock_macros.hpp"
 
 namespace aruwlib

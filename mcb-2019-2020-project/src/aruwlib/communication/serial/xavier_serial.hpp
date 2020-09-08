@@ -4,7 +4,6 @@
 #include <aruwlib/architecture/timeout.hpp>
 
 #include "dji_serial.hpp"
-
 #include "mock_macros.hpp"
 
 namespace aruwlib

@@ -4,7 +4,6 @@
 #include <modm/container/deque.hpp>
 
 #include "dji_serial.hpp"
-
 #include "mock_macros.hpp"
 
 namespace aruwlib

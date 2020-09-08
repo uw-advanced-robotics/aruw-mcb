@@ -4,9 +4,8 @@
 #include <aruwlib/architecture/timeout.hpp>
 #include <modm/container.hpp>
 
-#include "system_error.hpp"
-
 #include "mock_macros.hpp"
+#include "system_error.hpp"
 
 namespace aruwlib
 {
