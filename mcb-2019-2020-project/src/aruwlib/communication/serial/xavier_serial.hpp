@@ -5,6 +5,8 @@
 
 #include "dji_serial.hpp"
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 namespace serial
@@ -103,7 +105,7 @@ public:
      * Call this before using the serial line, initializes the uart line
      * and the callback
      */
-    void initializeCV();
+    mockable void initializeCV();
 
     /**
      * Handles the types of messages defined above in the RX message handlers section.
@@ -113,17 +115,17 @@ public:
     /**
      * Cycles through the messages that must be sent to the xavier.
      */
-    void sendMessage(
+    mockable void sendMessage(
         const IMUData& imuData,
         const ChassisData& chassisData,
         const TurretAimData& turretData,
         uint8_t robotId);
 
     ///< Start Requesting Xavier to Track Target.
-    void beginTargetTracking();
+    mockable void beginTargetTracking();
 
     ///< Stop Requesting Xavier to Track Target.
-    void stopTargetTracking();
+    mockable void stopTargetTracking();
 
     /**
      * Allows the caller to extract the most up to date xavier aim data.
@@ -132,7 +134,7 @@ public:
      * @return `true` if the xavier has sent aim data, `false` otherwise. If `false` is
      *      returned, `aimData` will not be updated.
      */
-    bool getLastAimData(TurretAimData* aimData) const;
+    mockable bool getLastAimData(TurretAimData* aimData) const;
 
 private:
     // TX variables.

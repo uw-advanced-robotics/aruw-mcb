@@ -6,6 +6,8 @@
 
 #include "system_error.hpp"
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 namespace errors
@@ -26,9 +28,9 @@ public:
     ErrorController(const ErrorController&) = delete;
     ErrorController& operator=(const ErrorController&) = default;
 
-    void addToErrorList(const SystemError& error);
+    mockable void addToErrorList(const SystemError& error);
 
-    void update();
+    mockable void update();
 
 private:
     static const int ERROR_ROTATE_TIME = 5000;

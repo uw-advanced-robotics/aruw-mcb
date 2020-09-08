@@ -7,6 +7,8 @@
 
 #include "aruwlib/communication/serial/uart.hpp"
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 namespace serial
@@ -95,7 +97,7 @@ public:
      *      file, you should add it to both the `Uart` class and this function.
      * @see `Uart`
      */
-    void initialize();
+    mockable void initialize();
 
     /**
      * Receive messages. Call periodically in order to receive all
@@ -104,7 +106,7 @@ public:
      * @note tested with a delay of 10 microseconds with referee system. The
      *      longer the timeout the more likely a message failure may occur.
      */
-    void updateSerial();
+    mockable void updateSerial();
 
     /**
      * Called when a complete message is received. A derived class must

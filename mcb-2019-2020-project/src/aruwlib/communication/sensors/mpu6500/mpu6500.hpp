@@ -5,6 +5,8 @@
 
 #include "aruwlib/algorithms/MahonyAHRS.h"
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 namespace sensors
@@ -32,80 +34,80 @@ public:
      *
      * @note this function blocks for approximately 1 second.
      */
-    void init();
+    mockable void init();
 
     /**
      * Read data from the imu. Call at 500 hz for best performance.
      */
-    void read();
+    mockable void read();
 
     /**
      * To be safe, whenever you call the functions below, call this function to insure
      * the data you are about to receive is not garbage.
      */
-    bool initialized() const;
+    mockable bool initialized() const;
 
     /**
      * Returns the acceleration reading in the x direction, in
      * \f$\frac{\mbox{m}}{\mbox{second}^2}\f$.
      */
-    float getAx() const;
+    mockable float getAx() const;
 
     /**
      * Returns the acceleration reading in the y direction, in
      * \f$\frac{\mbox{m}}{\mbox{second}^2}\f$.
      */
-    float getAy() const;
+    mockable float getAy() const;
 
     /**
      * Returns the acceleration reading in the z direction, in
      * \f$\frac{\mbox{m}}{\mbox{second}^2}\f$.
      */
-    float getAz() const;
+    mockable float getAz() const;
 
     /**
      * Returns the gyroscope reading in the x direction, in
      * \f$\frac{\mbox{degrees}}{\mbox{second}}\f$.
      */
-    float getGx() const;
+    mockable float getGx() const;
 
     /**
      * Returns the gyroscope reading in the y direction, in
      * \f$\frac{\mbox{degrees}}{\mbox{second}}\f$.
      */
-    float getGy() const;
+    mockable float getGy() const;
 
     /**
      * Returns the gyroscope reading in the z direction, in
      * \f$\frac{\mbox{degrees}}{\mbox{second}}\f$.
      */
-    float getGz() const;
+    mockable float getGz() const;
 
     /**
      * Returns the temperature of the imu in degrees C.
      */
-    float getTemp() const;
+    mockable float getTemp() const;
 
     /**
      * Returns yaw angle. in degrees.
      */
-    float getYaw();
+    mockable float getYaw();
 
     /**
      * Returns pitch angle in degrees.
      */
-    float getPitch();
+    mockable float getPitch();
 
     /**
      * Returns roll angle in degrees.
      */
-    float getRoll();
+    mockable float getRoll();
 
     /**
      * Returns the angle difference between the normal vector of the plane that the
      * type A board lies on and of the angle directly upward.
      */
-    float getTiltAngle();
+    mockable float getTiltAngle();
 
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;

@@ -7,7 +7,7 @@ namespace aruwlib
 {
 namespace motor
 {
-DjiMotor::~DjiMotor() { Drivers::djiMotorTxHandler.removeFromMotorManager(*this); }
+DjiMotor::~DjiMotor() {} //Drivers::djiMotorTxHandler.removeFromMotorManager(*this); }
 
 DjiMotor::DjiMotor(
     MotorId desMotorIdentifier,
@@ -26,7 +26,7 @@ DjiMotor::DjiMotor(
       motorName(name)
 {
     motorDisconnectTimeout.stop();
-    Drivers::djiMotorTxHandler.addMotorToManager(this);
+    // Drivers::djiMotorTxHandler.addMotorToManager(this);
 }
 
 void DjiMotor::parseCanRxData(const modm::can::Message& message)

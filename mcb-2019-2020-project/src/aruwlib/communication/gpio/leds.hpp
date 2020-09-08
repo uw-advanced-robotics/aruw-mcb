@@ -2,6 +2,7 @@
 #define LEDS_HPP_
 
 #include <stdint.h>
+#include "mock_macros.hpp"
 
 namespace aruwlib
 {
@@ -44,7 +45,7 @@ public:
      * Initializes the LEDs by putting the pins in output mode and settting
      * all the pins to low.
      */
-    void init();
+    mockable void init();
 
     /**
      * Sets a given led to either high or low.
@@ -55,7 +56,7 @@ public:
      * @param[in] isSet `true` if you want to turn the LED off, `false` if you want
      *      to turn the LED on.
      */
-    void set(LedPin pin, bool isSet);
+    mockable void set(LedPin pin, bool isSet);
 };  // class Leds
 
 }  // namespace gpio

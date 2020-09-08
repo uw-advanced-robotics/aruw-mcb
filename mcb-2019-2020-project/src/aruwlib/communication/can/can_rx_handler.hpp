@@ -2,6 +2,7 @@
 #define CAN_RX_HANDLER_HPP_
 
 #include "can_rx_listener.hpp"
+#include "mock_macros.hpp"
 
 namespace aruwlib
 {
@@ -58,7 +59,7 @@ public:
      * @param[in] listener the listener to be attached ot the handler.
      * @return true if listener successfully added, false otherwise.
      */
-    void attachReceiveHandler(CanRxListener* const listener);
+    mockable void attachReceiveHandler(CanRxListener* const listener);
 
     /**
      * Function handles receiving messages and calling the appropriate
@@ -69,13 +70,13 @@ public:
      *      modm's IQR puts CAN messages in a queue, and this function
      *      clears out the queue once it is called.
      */
-    void pollCanData();
+    mockable void pollCanData();
 
     /**
      * Removes the passed in `CanRxListener` from the `CanRxHandler`. If the
      * listener isn't in the handler, the
      */
-    void removeReceiveHandler(const CanRxListener& rxListener);
+    mockable void removeReceiveHandler(const CanRxListener& rxListener);
 
 private:
     static const int MAX_RECEIVE_UNIQUE_HEADER_CAN1 = 8;

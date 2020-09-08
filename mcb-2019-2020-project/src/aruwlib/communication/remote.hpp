@@ -7,6 +7,8 @@
 #include <modm/platform.hpp>
 #endif
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 /**
@@ -77,13 +79,13 @@ public:
     /**
      * Enables and initializes `Uart::Uart1` communication.
      */
-    void initialize();
+    mockable void initialize();
 
     /**
      * Reads/parses the current buffer and updates the current remote info state
      * and `CommandMapper` state.
      */
-    void read();
+    mockable void read();
 
     /**
      * @return `true` if the remote is connected, `false` otherwise.
@@ -91,57 +93,57 @@ public:
      *      second or so of delay from disconnecting the remote to this function saying
      *      the remote is disconnected.
      */
-    bool isConnected() const;
+    mockable bool isConnected() const;
 
     /**
      * @return The value of the given channel, between [-1, 1].
      */
-    float getChannel(Channel ch) const;
+    mockable float getChannel(Channel ch) const;
 
     /**
      * @return The state of the given switch.
      */
-    SwitchState getSwitch(Switch sw) const;
+    mockable SwitchState getSwitch(Switch sw) const;
 
     /**
      * @return The current mouse x value.
      */
-    int16_t getMouseX() const;
+    mockable int16_t getMouseX() const;
 
     /**
      * @return The current mouse y value.
      */
-    int16_t getMouseY() const;
+    mockable int16_t getMouseY() const;
 
     /**
      * @return The current mouse z value.
      */
-    int16_t getMouseZ() const;
+    mockable int16_t getMouseZ() const;
 
     /**
      * @return The current mouse l value.
      */
-    bool getMouseL() const;
+    mockable bool getMouseL() const;
 
     /**
      * @return The current mouse r value.
      */
-    bool getMouseR() const;
+    mockable bool getMouseR() const;
 
     /**
      * @return `true` if the given `key` is pressed, `false` otherwise.
      */
-    bool keyPressed(Key key) const;
+    mockable bool keyPressed(Key key) const;
 
     /**
      * @return the value of the wheel, between `[-STICK_MAX_VALUE, STICK_MAX_VALUE]`.
      */
-    int16_t getWheel() const;
+    mockable int16_t getWheel() const;
 
     /**
      * @return the number of times remote info has been received.
      */
-    uint32_t getUpdateCounter() const;
+    mockable uint32_t getUpdateCounter() const;
 
 private:
     static const int REMOTE_BUF_LEN = 18;              ///< Length of the remote recieve buffer.

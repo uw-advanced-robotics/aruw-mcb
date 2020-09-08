@@ -4,6 +4,7 @@
 #ifdef ENV_SIMULATOR
 #include <gmock/gmock.h>
 #include "mocks/MockCan.hpp"
+#include "mocks/DjiMotorTxHandlerMock.hpp"
 #endif
 
 #include "communication/can/can.hpp"
@@ -28,7 +29,7 @@ namespace aruwlib
 class Drivers
 {
 public:
-#ifdef ENV_SIMULATOR
+#ifndef ENV_SIMULATOR
     static can::Can can;
     static can::CanRxHandler canRxHandler;
     static gpio::Analog analog;
@@ -48,7 +49,7 @@ public:
 #else
     static void reset();
 
-    static can::Can can;
+    static MockCan can;
     static can::CanRxHandler canRxHandler;
     static gpio::Analog analog;
     static gpio::Digital digital;
@@ -63,7 +64,7 @@ public:
     static control::ControlOperatorInterface controlOperatorInterface;
     static control::CommandMapper commandMapper;
     static errors::ErrorController errorController;
-    static motor::DjiMotorTxHandler djiMotorTxHandler;
+    static DjiMotorTxHandlerMock djiMotorTxHandler;
 #endif
 };  // class Drivers
 }  // namespace aruwlib

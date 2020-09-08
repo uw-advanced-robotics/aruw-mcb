@@ -5,6 +5,8 @@
 
 #include "dji_serial.hpp"
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 namespace serial
@@ -229,13 +231,13 @@ public:
     void messageReceiveCallback(const SerialMessage& completeMessage) override;
 
     ///< Returns a reference to the most up to date robot data struct.
-    const RobotData& getRobotData() const;
+    mockable const RobotData& getRobotData() const;
 
     ///< Returns a reference to the most up to date game data struct.
-    const GameData& getGameData() const;
+    mockable const GameData& getGameData() const;
 
     ///< Packages the display data in a `CustomData` struct and then sends it via `sendCustomData`.
-    void sendDisplayData(const DisplayData& displayData);
+    mockable void sendDisplayData(const DisplayData& displayData);
 
 private:
     RobotData robotData;

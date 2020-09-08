@@ -11,6 +11,8 @@
 #include "command.hpp"
 #include "command_scheduler.hpp"
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 namespace control
@@ -67,7 +69,7 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addPressMapping(RemoteMap* mapping, Command* Command);
+    mockable void addPressMapping(RemoteMap* mapping, Command* Command);
 
     /**
      * Attaches a Command to a remote control mapping which is added to the
@@ -77,7 +79,7 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addHoldMapping(RemoteMap* mapping, Command* Command);
+    mockable void addHoldMapping(RemoteMap* mapping, Command* Command);
 
     /**
      * Attaches a Command to a remote control mapping which is added to
@@ -88,7 +90,7 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addHoldRepeatMapping(RemoteMap* mapping, Command* Command);
+    mockable void addHoldRepeatMapping(RemoteMap* mapping, Command* Command);
 
     /**
      * Attaches a Command to a remote control mapping which adds the command
@@ -98,7 +100,7 @@ public:
      * @param[in] Command the Command to be triggered by this mapping.
      * @note a toggle mapping is interrupted when the key is untoggled.
      */
-    void addToggleMapping(RemoteMap* mapping, Command* Command);
+    mockable void addToggleMapping(RemoteMap* mapping, Command* Command);
 
     /**
      * @return a RemoteMap with dependencies on specified keys and no switches.

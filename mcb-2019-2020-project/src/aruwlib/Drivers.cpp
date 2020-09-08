@@ -2,7 +2,7 @@
 
 namespace aruwlib
 {
-can::Can Drivers::can;
+MockCan Drivers::can;
 can::CanRxHandler Drivers::canRxHandler;
 gpio::Analog Drivers::analog;
 gpio::Digital Drivers::digital;
@@ -17,11 +17,9 @@ control::CommandScheduler Drivers::commandScheduler;
 control::ControlOperatorInterface Drivers::controlOperatorInterface;
 control::CommandMapper Drivers::commandMapper;
 errors::ErrorController Drivers::errorController;
-motor::DjiMotorTxHandler Drivers::djiMotorTxHandler;
+DjiMotorTxHandlerMock Drivers::djiMotorTxHandler;
 
 #ifdef ENV_SIMULATOR
-void Drivers::reset()
-{
-}
+void Drivers::reset() {}
 #endif
 }  // namespace aruwlib

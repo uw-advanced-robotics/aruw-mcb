@@ -5,6 +5,7 @@
 
 #include <modm/container/linked_list.hpp>
 
+#include "mock_macros.hpp"
 #include "command.hpp"
 #include "subsystem.hpp"
 
@@ -88,7 +89,7 @@ public:
      *      error handler if the time is greater than `MAX_ALLOWABLE_SCHEDULER_RUNTIME`
      *      (in microseconds).
      */
-    void run();
+    mockable void run();
 
     /**
      * Removes the given Command completely from the CommandScheduler. This
@@ -100,7 +101,7 @@ public:
      * @param[in] interrupted an argument passed in to the Command's `end()`
      *      function when removing the desired Command.
      */
-    void removeCommand(Command* command, bool interrupted);
+    mockable void removeCommand(Command* command, bool interrupted);
 
     /**
      * Adds the given Subsystem to the CommandScheduler.  The subsystem is
@@ -110,19 +111,19 @@ public:
      *      registered already (check via `isSubsystemRegistered()`), otherwise
      *      an error is added to the error handler.
      */
-    void registerSubsystem(Subsystem* subsystem);
+    mockable void registerSubsystem(Subsystem* subsystem);
 
     /**
      * @param[in] subsystem the subsystem to check
      * @return `true` if the Subsystem is already scheduled, `false` otherwise.
      */
-    bool isSubsystemRegistered(Subsystem* subsystem) const;
+    mockable bool isSubsystemRegistered(Subsystem* subsystem) const;
 
     /**
      * @return `true` if the CommandScheduler contains the requrested Command.
      *      `false` otherwise.
      */
-    bool isCommandScheduled(Command* command) const;
+    mockable bool isCommandScheduled(Command* command) const;
 
     /**
      * Attempts to add a Command to the scheduler. There are a number of ways this
@@ -143,7 +144,7 @@ public:
      *
      * @param[in] commandToAdd the Command to be added to the scheduler.
      */
-    void addCommand(Command* commandToAdd);
+    mockable void addCommand(Command* commandToAdd);
 
 private:
     ///< Maximum time before we start erroring, in microseconds.

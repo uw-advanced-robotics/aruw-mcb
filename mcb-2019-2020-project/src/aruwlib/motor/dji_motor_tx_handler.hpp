@@ -33,6 +33,7 @@
 #include <limits.h>
 
 #include "dji_motor.hpp"
+#include "mock_macros.hpp"
 
 namespace aruwlib
 {
@@ -51,17 +52,15 @@ public:
 
     // Called when a motor is created, adds to the motor manager
     // and checks to make sure the motor is not already being used.
-    void addMotorToManager(DjiMotor* motor);
+    mockable void addMotorToManager(DjiMotor* motor);
 
-    void processCanSendData();
+    mockable void processCanSendData();
 
-    void removeFromMotorManager(const DjiMotor& motor);
+    mockable void removeFromMotorManager(const DjiMotor& motor);
 
-    DjiMotor const* getCan1MotorData(MotorId motorId);
+    mockable DjiMotor const* getCan1MotorData(MotorId motorId);
 
-    DjiMotor const* getCan2MotorData(MotorId motorId);
-
-    static DjiMotorTxHandler& getMainTxHandler();
+    mockable DjiMotor const* getCan2MotorData(MotorId motorId);
 
 private:
     static const int DJI_MOTORS_PER_CAN = 8;

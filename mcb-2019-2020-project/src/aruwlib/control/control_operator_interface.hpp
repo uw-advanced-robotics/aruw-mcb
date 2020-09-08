@@ -3,6 +3,8 @@
 
 #include "aruwlib/algorithms/linear_interpolation.hpp"
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
 namespace control
@@ -21,13 +23,13 @@ public:
     ControlOperatorInterface &operator=(const ControlOperatorInterface &) = default;
 
     ///< @return the value used for chassis movement forward and backward, between -1 and 1.
-    float getChassisXInput();
+    mockable float getChassisXInput();
 
     ///< @return the value used for chassis movement side to side, between -1 and 1.
-    float getChassisYInput();
+    mockable float getChassisYInput();
 
     ///< @return the value used for chassis rotation, between -1 and 1.
-    float getChassisRInput();
+    mockable float getChassisRInput();
 
     /**
      * @return the value used for turret yaw rotation, between about -1 and 1
@@ -36,7 +38,7 @@ public:
      *
      * @todo(matthew) should I limit this?
      */
-    float getTurretYawInput();
+    mockable float getTurretYawInput();
 
     /**
      * @returns the value used for turret pitch rotation, between about -1 and 1
@@ -45,13 +47,13 @@ public:
      *
      * @todo(matthew) should I limit this?
      */
-    float getTurretPitchInput();
+    mockable float getTurretPitchInput();
 
     /**
      * @returns the value used for sentiel drive speed, between
      *      [-USER_STICK_SENTINEL_DRIVE_SCALAR, USER_STICK_SENTINEL_DRIVE_SCALAR].
      */
-    float getSentinelSpeedInput();
+    mockable float getSentinelSpeedInput();
 
 private:
     static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / 1000.0f);

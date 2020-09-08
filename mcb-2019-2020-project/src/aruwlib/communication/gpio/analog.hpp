@@ -2,6 +2,7 @@
 #define ANALOG_HPP_
 
 #include <stdint.h>
+#include "mock_macros.hpp"
 
 #ifndef ENV_SIMULATOR
 #include <modm/platform/adc/adc_1.hpp>
@@ -35,10 +36,10 @@ public:
     };
 
     ///< Initializes the ADC and connects the configured analog pins to it.
-    void init();
+    mockable void init();
 
     ///< Reads voltage across the specified pin. Units in mV.
-    uint16_t read(Analog::Pin pin) const;
+    mockable uint16_t read(Analog::Pin pin) const;
 };  // class Analog
 }  // namespace gpio
 
