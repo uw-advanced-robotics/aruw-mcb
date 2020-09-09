@@ -36,9 +36,45 @@ ControlOperatorInterfaceMock Drivers::controlOperatorInterface;
 CommandMapperMock Drivers::commandMapper;
 ErrorControllerMock Drivers::errorController;
 DjiMotorTxHandlerMock Drivers::djiMotorTxHandler;
-#endif
 
-#ifdef ENV_SIMULATOR
-void Drivers::reset() {}
+void Drivers::initialize()
+{
+    testing::Mock::AllowLeak(&aruwlib::Drivers::analog);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::can);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::canRxHandler);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::analog);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::digital);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::leds);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::pwm);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::remote);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::mpu6500);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::uart);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::xavierSerial);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::refSerial);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::commandScheduler);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::controlOperatorInterface);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::commandMapper);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::errorController);
+    testing::Mock::AllowLeak(&aruwlib::Drivers::djiMotorTxHandler);
+}
+void Drivers::reset()
+{
+    testing::Mock::VerifyAndClearExpectations(&can);
+    testing::Mock::VerifyAndClearExpectations(&canRxHandler);
+    testing::Mock::VerifyAndClearExpectations(&analog);
+    testing::Mock::VerifyAndClearExpectations(&digital);
+    testing::Mock::VerifyAndClearExpectations(&leds);
+    testing::Mock::VerifyAndClearExpectations(&pwm);
+    testing::Mock::VerifyAndClearExpectations(&remote);
+    testing::Mock::VerifyAndClearExpectations(&mpu6500);
+    testing::Mock::VerifyAndClearExpectations(&uart);
+    testing::Mock::VerifyAndClearExpectations(&xavierSerial);
+    testing::Mock::VerifyAndClearExpectations(&refSerial);
+    testing::Mock::VerifyAndClearExpectations(&commandScheduler);
+    testing::Mock::VerifyAndClearExpectations(&controlOperatorInterface);
+    testing::Mock::VerifyAndClearExpectations(&commandMapper);
+    testing::Mock::VerifyAndClearExpectations(&errorController);
+    testing::Mock::VerifyAndClearExpectations(&djiMotorTxHandler);
+}
 #endif
 }  // namespace aruwlib

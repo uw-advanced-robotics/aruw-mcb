@@ -62,6 +62,7 @@ public:
     static errors::ErrorController errorController;
     static motor::DjiMotorTxHandler djiMotorTxHandler;
 #else
+    static void initialize();
     static void reset();
 
     static CanMock can;
