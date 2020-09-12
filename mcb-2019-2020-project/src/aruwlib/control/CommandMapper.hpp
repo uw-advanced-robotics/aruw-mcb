@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef COMMAND_MAPPER_HPP_
 #define COMMAND_MAPPER_HPP_
 
@@ -7,8 +26,11 @@
 
 #include "CommandMapping.hpp"
 
+#include "mock_macros.hpp"
+
 namespace aruwlib
 {
+class Drivers;
 namespace control
 {
 /**
@@ -32,15 +54,14 @@ namespace control
 class CommandMapper
 {
 public:
-    /**
-     * Default construction.
-     */
-    CommandMapper() = default;
+    explicit CommandMapper(Drivers *drivers) : drivers(drivers) {}
+    CommandMapper(const CommandMapper &) = delete;
+    CommandMapper &operator=(const CommandMapper &) = delete; 
 
     /**
      * `delete`s the `CommandMapping`s that are in `commandsToRun`.
      */
-    ~CommandMapper();
+    mockable ~CommandMapper();
 
     /**
      * The heart of the CommandMapper.
@@ -48,7 +69,7 @@ public:
      * Iterates through all the current mappings to see which buttons are pressed
      * in order to determine which commands should be added to or removed from the scheduler.
      */
-    void handleKeyStateChange(
+    mockable void handleKeyStateChange(
         uint16_t key,
         Remote::SwitchState leftSwitch,
         Remote::SwitchState rightSwitch,
@@ -63,7 +84,7 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addHoldMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
+    mockable void addHoldMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which is added to
@@ -74,7 +95,7 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addHoldRepeatMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
+    mockable void addHoldRepeatMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which adds the command
@@ -84,7 +105,7 @@ public:
      * @param[in] Command the Command to be triggered by this mapping.
      * @note a toggle mapping is interrupted when the key is untoggled.
      */
-    void addToggleMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
+    mockable void addToggleMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which is added to the
@@ -93,12 +114,12 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    void addPressMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
+    mockable void addPressMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
 
     /**
      * @return the number of command mappings in the mapper.
      */
-    int getSize() const { return commandsToRun.size(); }
+    mockable int getSize() const { return commandsToRun.size(); }
 
 private:
     friend class CommandMapperFormatGenerator;
@@ -115,7 +136,9 @@ private:
      * of the program.
      */
     std::vector<CommandMapping *> commandsToRun;
-};
+
+    Drivers *drivers;
+};  // class CommandMapper
 
 }  // namespace control
 }  // namespace aruwlib

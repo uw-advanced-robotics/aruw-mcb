@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "CommandMapper.hpp"
 
 #include "aruwlib/errors/create_errors.hpp"
@@ -57,6 +76,7 @@ void CommandMapper::addMap(CommandMapping *mapping)
         if (mapStateEqual(*cmap, *mapping))
         {
             RAISE_ERROR(
+                drivers,
                 "failed to insert io mapping",
                 aruwlib::errors::CONTROLLER_MAPPER,
                 aruwlib::errors::INVALID_ADD);
@@ -70,28 +90,28 @@ void CommandMapper::addHoldMapping(
     const RemoteMapState &mapping,
     const std::vector<Command *> commands)
 {
-    addMap(new HoldCommandMapping(commands, mapping));
+    addMap(new HoldCommandMapping(drivers, commands, mapping));
 }
 
 void CommandMapper::addHoldRepeatMapping(
     const RemoteMapState &mapping,
     std::vector<Command *> commands)
 {
-    addMap(new HoldRepeatCommandMapping(commands, mapping));
+    addMap(new HoldRepeatCommandMapping(drivers, commands, mapping));
 }
 
 void CommandMapper::addToggleMapping(
     const RemoteMapState &mapping,
     const std::vector<Command *> commands)
 {
-    addMap(new ToggleCommandMapping(commands, mapping));
+    addMap(new ToggleCommandMapping(drivers, commands, mapping));
 }
 
 void CommandMapper::addPressMapping(
     const RemoteMapState &mapping,
     const std::vector<Command *> commands)
 {
-    addMap(new PressCommandMapping(commands, mapping));
+    addMap(new PressCommandMapping(drivers, commands, mapping));
 }
 
 }  // namespace control

@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef COMMAND_MAPPING_HPP_
 #define COMMAND_MAPPING_HPP_
 
@@ -35,7 +54,7 @@ public:
      * @param[in] rms The map state that will be compared to the actual remote state
      *      to determine whether or not to add `cmds`.
      */
-    CommandMapping(const std::vector<Command *> cmds, const RemoteMapState &rms);
+    CommandMapping(Drivers *drivers, const std::vector<Command *> cmds, const RemoteMapState &rms);
 
     /**
      * Copy construction disallowed.
@@ -96,6 +115,8 @@ protected:
      * A map of commands to add to and remove from the scheduler.
      */
     std::vector<Command *> mappedCommands;
+
+    Drivers *drivers;
 
     /**
      * Adds all the `Command`s to the main CommandScheduler.

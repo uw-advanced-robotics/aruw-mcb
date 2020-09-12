@@ -21,7 +21,7 @@
 #define COMMAND_MAPPER_MOCK_HPP_
 
 #include <aruwlib/control/command.hpp>
-#include <aruwlib/control/command_mapper.hpp>
+#include <aruwlib/control/CommandMapper.hpp>
 #include <gmock/gmock.h>
 
 namespace aruwlib
@@ -32,26 +32,13 @@ class CommandMapperMock : public aruwlib::control::CommandMapper
 {
 public:
     CommandMapperMock(aruwlib::Drivers* drivers) : aruwlib::control::CommandMapper(drivers) {}
-    MOCK_METHOD(
-        void,
-        addPressMapping,
-        (aruwlib::control::CommandMapper::RemoteMap * mapping, aruwlib::control::Command* Command),
-        (override));
-    MOCK_METHOD(
-        void,
-        addHoldMapping,
-        (aruwlib::control::CommandMapper::RemoteMap * mapping, aruwlib::control::Command* Command),
-        (override));
-    MOCK_METHOD(
-        void,
-        addHoldRepeatMapping,
-        (aruwlib::control::CommandMapper::RemoteMap * mapping, aruwlib::control::Command* Command),
-        (override));
-    MOCK_METHOD(
-        void,
-        addToggleMapping,
-        (aruwlib::control::CommandMapper::RemoteMap * mapping, aruwlib::control::Command* Command),
-        (override));
+
+    MOCK_METHOD(void, handleKeyStateChange, (uint16_t key, Remote::SwitchState leftSwitch,Remote::SwitchState rightSwitch,bool mouseL,bool mouseR), (override));
+    MOCK_METHOD(void, addHoldMapping, (const aruwlib::control::RemoteMapState &mapping, const std::vector<aruwlib::control::Command *> commands), (override));
+    MOCK_METHOD(void, addHoldRepeatMapping, (const aruwlib::control::RemoteMapState &mapping, const std::vector<aruwlib::control::Command *> commands), (override));
+    MOCK_METHOD(void, addToggleMapping, (const aruwlib::control::RemoteMapState &mapping, const std::vector<aruwlib::control::Command *> commands), (override));
+    MOCK_METHOD(void, addPressMapping, (const aruwlib::control::RemoteMapState &mapping, const std::vector<aruwlib::control::Command *> commands), (override));
+    MOCK_METHOD(int, getSize, (), (const override));
 };  // class CommandMapperMock
 }  // namespace mock
 }  // namespace aruwlib
