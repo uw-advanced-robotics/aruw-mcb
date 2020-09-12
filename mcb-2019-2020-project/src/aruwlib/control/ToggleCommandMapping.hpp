@@ -39,7 +39,10 @@ public:
     /**
      * Constructor must take the set of `Command`s and the RemoteMapState.
      */
-    ToggleCommandMapping(Drivers *drivers, const std::vector<Command *> cmds, const RemoteMapState &rms)
+    ToggleCommandMapping(
+        Drivers *drivers,
+        const std::vector<Command *> cmds,
+        const RemoteMapState &rms)
         : CommandMapping(drivers, cmds, rms),
           pressed(false),
           toggled(false)

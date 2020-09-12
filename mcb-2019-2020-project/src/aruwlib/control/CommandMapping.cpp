@@ -1,4 +1,4 @@
-#/*
+/*
  * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-include "CommandMapping.hpp"
+#include "CommandMapping.hpp"
 
 #include <algorithm>
 
@@ -29,7 +29,10 @@ namespace aruwlib
 {
 namespace control
 {
-CommandMapping::CommandMapping(Drivers *drivers, const std::vector<Command *> cmds, const RemoteMapState &rms)
+CommandMapping::CommandMapping(
+    Drivers *drivers,
+    const std::vector<Command *> cmds,
+    const RemoteMapState &rms)
     : mapState(rms),
       mappedCommands(cmds)
 {

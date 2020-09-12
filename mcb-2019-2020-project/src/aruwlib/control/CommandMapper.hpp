@@ -25,7 +25,6 @@
 #include "aruwlib/communication/remote.hpp"
 
 #include "CommandMapping.hpp"
-
 #include "mock_macros.hpp"
 
 namespace aruwlib
@@ -56,7 +55,7 @@ class CommandMapper
 public:
     explicit CommandMapper(Drivers *drivers) : drivers(drivers) {}
     CommandMapper(const CommandMapper &) = delete;
-    CommandMapper &operator=(const CommandMapper &) = delete; 
+    CommandMapper &operator=(const CommandMapper &) = delete;
 
     /**
      * `delete`s the `CommandMapping`s that are in `commandsToRun`.
@@ -84,7 +83,9 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    mockable void addHoldMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
+    mockable void addHoldMapping(
+        const RemoteMapState &mapping,
+        const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which is added to
@@ -95,7 +96,9 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    mockable void addHoldRepeatMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
+    mockable void addHoldRepeatMapping(
+        const RemoteMapState &mapping,
+        const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which adds the command
@@ -105,7 +108,9 @@ public:
      * @param[in] Command the Command to be triggered by this mapping.
      * @note a toggle mapping is interrupted when the key is untoggled.
      */
-    mockable void addToggleMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
+    mockable void addToggleMapping(
+        const RemoteMapState &mapping,
+        const std::vector<Command *> commands);
 
     /**
      * Attaches a Command to a remote control mapping which is added to the
@@ -114,7 +119,9 @@ public:
      * @param[in] mapping a particular remote mapping associated with the Command.
      * @param[in] Command the Command to be triggered by this mapping.
      */
-    mockable void addPressMapping(const RemoteMapState &mapping, const std::vector<Command *> commands);
+    mockable void addPressMapping(
+        const RemoteMapState &mapping,
+        const std::vector<Command *> commands);
 
     /**
      * @return the number of command mappings in the mapper.

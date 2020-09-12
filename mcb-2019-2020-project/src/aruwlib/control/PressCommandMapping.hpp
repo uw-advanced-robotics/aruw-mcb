@@ -41,7 +41,10 @@ public:
     /**
      * Constructor must take the set of `Command`s and the RemoteMapState.
      */
-    PressCommandMapping(Drivers *drivers, const std::vector<Command *> cmds, const RemoteMapState &rms)
+    PressCommandMapping(
+        Drivers *drivers,
+        const std::vector<Command *> cmds,
+        const RemoteMapState &rms)
         : CommandMapping(drivers, cmds, rms),
           pressed(false)
     {

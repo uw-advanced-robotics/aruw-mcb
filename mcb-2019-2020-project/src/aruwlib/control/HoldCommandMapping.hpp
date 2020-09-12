@@ -42,7 +42,10 @@ public:
     /**
      * Constructor must take the set of `Command`s and the RemoteMapState.
      */
-    HoldCommandMapping(Drivers *drivers, const std::vector<Command *> cmds, const RemoteMapState &rms)
+    HoldCommandMapping(
+        Drivers *drivers,
+        const std::vector<Command *> cmds,
+        const RemoteMapState &rms)
         : CommandMapping(drivers, cmds, rms),
           commandScheduled(false)
     {
