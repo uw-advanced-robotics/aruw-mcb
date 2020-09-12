@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef ANALOG_HPP_
 #define ANALOG_HPP_
 
@@ -6,6 +25,8 @@
 #ifndef ENV_SIMULATOR
 #include <modm/platform/adc/adc_1.hpp>
 #endif
+
+#include "mock_macros.hpp"
 
 namespace aruwlib
 {
@@ -23,7 +44,8 @@ class Analog
 public:
     Analog() = default;
     Analog(const Analog &) = delete;
-    Analog &operator=(const Analog &) = default;
+    Analog &operator=(const Analog &) = delete;
+    mockable ~Analog() = default;
 
     // Analog pins
     enum Pin
@@ -35,10 +57,10 @@ public:
     };
 
     ///< Initializes the ADC and connects the configured analog pins to it.
-    void init();
+    mockable void init();
 
     ///< Reads voltage across the specified pin. Units in mV.
-    uint16_t read(Analog::Pin pin) const;
+    mockable uint16_t read(Analog::Pin pin) const;
 };  // class Analog
 }  // namespace gpio
 

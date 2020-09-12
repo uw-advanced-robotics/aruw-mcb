@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef COMMAND_SCHEDULER_HPP_
 #define COMMAND_SCHEDULER_HPP_
 
@@ -6,10 +25,12 @@
 #include <modm/container/linked_list.hpp>
 
 #include "command.hpp"
+#include "mock_macros.hpp"
 #include "subsystem.hpp"
 
 namespace aruwlib
 {
+class Drivers;
 namespace control
 {
 /**
@@ -64,9 +85,10 @@ namespace control
 class CommandScheduler
 {
 public:
-    CommandScheduler() : subsystemToCommandMap() {}
-    CommandScheduler(const CommandScheduler&) = default;
-    CommandScheduler& operator=(const CommandScheduler&) = default;
+    CommandScheduler(Drivers* drivers) : drivers(drivers), subsystemToCommandMap() {}
+    CommandScheduler(const CommandScheduler&) = delete;
+    CommandScheduler& operator=(const CommandScheduler&) = delete;
+    mockable ~CommandScheduler() = default;
 
     /**
      * Calls the `refresh()` function for all Subsystems and the associated
@@ -88,7 +110,7 @@ public:
      *      error handler if the time is greater than `MAX_ALLOWABLE_SCHEDULER_RUNTIME`
      *      (in microseconds).
      */
-    void run();
+    mockable void run();
 
     /**
      * Removes the given Command completely from the CommandScheduler. This
@@ -100,7 +122,7 @@ public:
      * @param[in] interrupted an argument passed in to the Command's `end()`
      *      function when removing the desired Command.
      */
-    void removeCommand(Command* command, bool interrupted);
+    mockable void removeCommand(Command* command, bool interrupted);
 
     /**
      * Adds the given Subsystem to the CommandScheduler.  The subsystem is
@@ -110,19 +132,19 @@ public:
      *      registered already (check via `isSubsystemRegistered()`), otherwise
      *      an error is added to the error handler.
      */
-    void registerSubsystem(Subsystem* subsystem);
+    mockable void registerSubsystem(Subsystem* subsystem);
 
     /**
      * @param[in] subsystem the subsystem to check
      * @return `true` if the Subsystem is already scheduled, `false` otherwise.
      */
-    bool isSubsystemRegistered(Subsystem* subsystem) const;
+    mockable bool isSubsystemRegistered(Subsystem* subsystem) const;
 
     /**
      * @return `true` if the CommandScheduler contains the requrested Command.
      *      `false` otherwise.
      */
-    bool isCommandScheduled(Command* command) const;
+    mockable bool isCommandScheduled(Command* command) const;
 
     /**
      * Attempts to add a Command to the scheduler. There are a number of ways this
@@ -143,11 +165,13 @@ public:
      *
      * @param[in] commandToAdd the Command to be added to the scheduler.
      */
-    void addCommand(Command* commandToAdd);
+    mockable void addCommand(Command* commandToAdd);
 
 private:
     ///< Maximum time before we start erroring, in microseconds.
     static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 100;
+
+    Drivers* drivers;
 
     ///< a map containing keys of subsystems, pairs of Commands.
     std::map<Subsystem*, Command*> subsystemToCommandMap;

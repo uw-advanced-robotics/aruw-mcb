@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "error_controller.hpp"
 
 #include <modm/container/linked_list.hpp>
@@ -43,7 +62,7 @@ void ErrorController::update()
     if (errorList.getSize() == 0)
     {
         setLedError(0);
-        Drivers::leds.set(aruwlib::gpio::Leds::LedPin::Green, true);
+        drivers->leds.set(aruwlib::gpio::Leds::LedPin::Green, true);
         return;
     }
 
@@ -61,12 +80,12 @@ void ErrorController::update()
             &displayNum))
     {
         setLedError(displayNum);
-        Drivers::leds.set(aruwlib::gpio::Leds::LedPin::Green, true);
+        drivers->leds.set(aruwlib::gpio::Leds::LedPin::Green, true);
     }
     else
     {
         setLedError(0);
-        Drivers::leds.set(aruwlib::gpio::Leds::LedPin::Green, false);
+        drivers->leds.set(aruwlib::gpio::Leds::LedPin::Green, false);
     }
 }
 
@@ -100,7 +119,7 @@ void ErrorController::setLedError(uint8_t binaryRep)
     for (int i = 0; i < 8; i++)
     {
         bool display = (binaryRep >> i) & 1;
-        Drivers::leds.set(static_cast<aruwlib::gpio::Leds::LedPin>(i), display);
+        drivers->leds.set(static_cast<aruwlib::gpio::Leds::LedPin>(i), display);
     }
 }
 }  // namespace errors

@@ -1,12 +1,33 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef __SERIAL_XAVIER_HPP__
 #define __SERIAL_XAVIER_HPP__
 
 #include <aruwlib/architecture/timeout.hpp>
 
 #include "dji_serial.hpp"
+#include "mock_macros.hpp"
 
 namespace aruwlib
 {
+class Drivers;
 namespace serial
 {
 /**
@@ -95,15 +116,16 @@ public:
         int16_t rightBackWheelRPM;
     } ChassisData;
 
-    XavierSerial();
+    XavierSerial(Drivers* drivers);
     XavierSerial(const XavierSerial&) = delete;
-    XavierSerial& operator=(const XavierSerial&) = default;
+    XavierSerial& operator=(const XavierSerial&) = delete;
+    mockable ~XavierSerial() = default;
 
     /**
      * Call this before using the serial line, initializes the uart line
      * and the callback
      */
-    void initializeCV();
+    mockable void initializeCV();
 
     /**
      * Handles the types of messages defined above in the RX message handlers section.
@@ -113,17 +135,17 @@ public:
     /**
      * Cycles through the messages that must be sent to the xavier.
      */
-    void sendMessage(
+    mockable void sendMessage(
         const IMUData& imuData,
         const ChassisData& chassisData,
         const TurretAimData& turretData,
         uint8_t robotId);
 
     ///< Start Requesting Xavier to Track Target.
-    void beginTargetTracking();
+    mockable void beginTargetTracking();
 
     ///< Stop Requesting Xavier to Track Target.
-    void stopTargetTracking();
+    mockable void stopTargetTracking();
 
     /**
      * Allows the caller to extract the most up to date xavier aim data.
@@ -132,7 +154,7 @@ public:
      * @return `true` if the xavier has sent aim data, `false` otherwise. If `false` is
      *      returned, `aimData` will not be updated.
      */
-    bool getLastAimData(TurretAimData* aimData) const;
+    mockable bool getLastAimData(TurretAimData* aimData) const;
 
 private:
     // TX variables.
@@ -178,11 +200,7 @@ private:
      * An array that allows us to cycle through message types. Add any additional message
      * types defined above here as well.
      */
-    const uint8_t txMsgSwitchArray[CV_MESSAGE_TYPE_SIZE] = {
-        CV_MESSAGE_TYPE_TURRET_TELEMETRY,
-        CV_MESSAGE_TYPE_IMU,
-        CV_MESSAGE_TYPE_ROBOT_ID,
-        CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
+    static const uint8_t txMsgSwitchArray[CV_MESSAGE_TYPE_SIZE];
 
     // TX functions.
 

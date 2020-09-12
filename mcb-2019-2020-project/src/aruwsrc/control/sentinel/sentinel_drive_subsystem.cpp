@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "sentinel_drive_subsystem.hpp"
 
 #include <aruwlib/algorithms/math_user_utils.hpp>
@@ -12,10 +31,10 @@ namespace control
 {
 void SentinelDriveSubsystem::initialize()
 {
-    aruwlib::Drivers::digital.configureInputPullMode(
+    drivers->digital.configureInputPullMode(
         leftLimitSwitch,
         aruwlib::gpio::Digital::InputPullMode::PullDown);
-    aruwlib::Drivers::digital.configureInputPullMode(
+    drivers->digital.configureInputPullMode(
         rightLimitSwitch,
         aruwlib::gpio::Digital::InputPullMode::PullDown);
 }
@@ -44,6 +63,7 @@ float SentinelDriveSubsystem::absolutePosition()
     else if (leftWheel.isMotorOnline())
     {
         RAISE_ERROR(
+            drivers,
             "right sentinel drive motor offline",
             aruwlib::errors::Location::SUBSYSTEM,
             aruwlib::errors::ErrorType::MOTOR_OFFLINE);
@@ -52,6 +72,7 @@ float SentinelDriveSubsystem::absolutePosition()
     else if (rightWheel.isMotorOnline())
     {
         RAISE_ERROR(
+            drivers,
             "left sentinel drive motor offline",
             aruwlib::errors::Location::SUBSYSTEM,
             aruwlib::errors::ErrorType::MOTOR_OFFLINE);
@@ -60,6 +81,7 @@ float SentinelDriveSubsystem::absolutePosition()
     else
     {
         RAISE_ERROR(
+            drivers,
             "both sentinel drive motors offline",
             aruwlib::errors::Location::SUBSYSTEM,
             aruwlib::errors::ErrorType::MOTOR_OFFLINE);
@@ -74,12 +96,12 @@ float SentinelDriveSubsystem::absolutePosition()
 void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 {
     // DigitalPin where limit switch is placed
-    if (aruwlib::Drivers::digital.read(leftLimitSwitch))
+    if (drivers->digital.read(leftLimitSwitch))
     {
         leftZeroRailOffset = distanceFromEncoder(&leftWheel);
         rightZeroRailOffset = distanceFromEncoder(&rightWheel);
     }
-    else if (aruwlib::Drivers::digital.read(rightLimitSwitch))
+    else if (drivers->digital.read(rightLimitSwitch))
     {
         leftZeroRailOffset = RAIL_LENGTH - distanceFromEncoder(&leftWheel);
         rightZeroRailOffset = RAIL_LENGTH - distanceFromEncoder(&rightWheel);

@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "dji_motor.hpp"
 
 #include "aruwlib/Drivers.hpp"
@@ -7,15 +26,17 @@ namespace aruwlib
 {
 namespace motor
 {
-DjiMotor::~DjiMotor() { Drivers::djiMotorTxHandler.removeFromMotorManager(*this); }
+DjiMotor::~DjiMotor() { drivers->djiMotorTxHandler.removeFromMotorManager(*this); }
 
 DjiMotor::DjiMotor(
+    Drivers* drivers,
     MotorId desMotorIdentifier,
     aruwlib::can::CanBus motorCanBus,
     bool isInverted,
     const std::string& name)
-    : CanRxListener(static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
+    : CanRxListener(drivers, static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
       encStore(),
+      drivers(drivers),
       motorIdentifier(desMotorIdentifier),
       motorCanBus(motorCanBus),
       desiredOutput(0),
@@ -26,7 +47,7 @@ DjiMotor::DjiMotor(
       motorName(name)
 {
     motorDisconnectTimeout.stop();
-    Drivers::djiMotorTxHandler.addMotorToManager(this);
+    drivers->djiMotorTxHandler.addMotorToManager(this);
 }
 
 void DjiMotor::parseCanRxData(const modm::can::Message& message)

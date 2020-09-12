@@ -1,10 +1,31 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef CAN_RX_HANDLER_HPP_
 #define CAN_RX_HANDLER_HPP_
 
 #include "can_rx_listener.hpp"
+#include "mock_macros.hpp"
 
 namespace aruwlib
 {
+class Drivers;
 namespace can
 {
 /**
@@ -35,13 +56,13 @@ namespace can
 class CanRxHandler
 {
 public:
-    CanRxHandler() = default;
+    CanRxHandler(Drivers* drivers) : drivers(drivers) {}
 
-    ///< Delete copy constructor.
     CanRxHandler(const CanRxHandler&) = delete;
 
-    ///< Delete operator=.
-    CanRxHandler& operator=(const CanRxHandler& other) = default;
+    CanRxHandler& operator=(const CanRxHandler& other) = delete;
+
+    mockable ~CanRxHandler() = default;
 
     /**
      * Call this function to add a CanRxListener to the list of CanRxListener's
@@ -58,7 +79,7 @@ public:
      * @param[in] listener the listener to be attached ot the handler.
      * @return true if listener successfully added, false otherwise.
      */
-    void attachReceiveHandler(CanRxListener* const listener);
+    mockable void attachReceiveHandler(CanRxListener* const listener);
 
     /**
      * Function handles receiving messages and calling the appropriate
@@ -69,18 +90,20 @@ public:
      *      modm's IQR puts CAN messages in a queue, and this function
      *      clears out the queue once it is called.
      */
-    void pollCanData();
+    mockable void pollCanData();
 
     /**
      * Removes the passed in `CanRxListener` from the `CanRxHandler`. If the
      * listener isn't in the handler, the
      */
-    void removeReceiveHandler(const CanRxListener& rxListener);
+    mockable void removeReceiveHandler(const CanRxListener& rxListener);
 
 private:
     static const int MAX_RECEIVE_UNIQUE_HEADER_CAN1 = 8;
     static const int MAX_RECEIVE_UNIQUE_HEADER_CAN2 = 8;
     static const int LOWEST_RECEIVE_ID = 0x201;
+
+    Drivers* drivers;
 
     /**
      * Stores pointers to the `CanRxListeners` for CAN 1, referenced when

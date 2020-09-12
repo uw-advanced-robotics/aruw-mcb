@@ -1,6 +1,26 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef __TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP__
 #define __TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP__
 
+#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/contiguous_float.hpp>
 #include <aruwlib/control/command.hpp>
 
@@ -16,6 +36,7 @@ class TurretWorldRelativePositionCommand : public aruwlib::control::Command
 {
 public:
     TurretWorldRelativePositionCommand(
+        aruwlib::Drivers *drivers,
         TurretSubsystem *subsystem,
         chassis::ChassisSubsystem *chassis);
 
@@ -55,6 +76,8 @@ private:
 
     static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 4000.0f;
 
+    aruwlib::Drivers *drivers;
+
     TurretSubsystem *turretSubsystem;
     chassis::ChassisSubsystem *chassisSubsystem;
 
@@ -70,8 +93,8 @@ private:
     void runYawPositionController();
     void runPitchPositionController();
 
-    static float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
-    static float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
+    float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
+    float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
 };
 
 }  // namespace turret

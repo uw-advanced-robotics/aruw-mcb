@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "turret_subsystem.hpp"
 
 #include <algorithm>
@@ -16,9 +35,10 @@ namespace aruwsrc
 {
 namespace turret
 {
-TurretSubsystem::TurretSubsystem()
-    : pitchMotor(PITCH_MOTOR_ID, CAN_BUS_MOTORS, true, "pitch motor"),
-      yawMotor(YAW_MOTOR_ID, CAN_BUS_MOTORS, false, "yaw motor"),
+TurretSubsystem::TurretSubsystem(aruwlib::Drivers* drivers)
+    : aruwlib::control::Subsystem(drivers),
+      pitchMotor(drivers, PITCH_MOTOR_ID, CAN_BUS_MOTORS, true, "pitch motor"),
+      yawMotor(drivers, YAW_MOTOR_ID, CAN_BUS_MOTORS, false, "yaw motor"),
       currPitchAngle(0.0f, 0.0f, 360.0f),
       currYawAngle(0.0f, 0.0f, 360.0f),
       yawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
@@ -49,6 +69,7 @@ int32_t TurretSubsystem::getYawVelocity() const
     if (!yawMotor.isMotorOnline())
     {
         RAISE_ERROR(
+            drivers,
             "trying to get velocity and yaw motor offline",
             aruwlib::errors::TURRET,
             aruwlib::errors::MOTOR_OFFLINE);
@@ -64,6 +85,7 @@ int32_t TurretSubsystem::getPitchVelocity() const
     if (!pitchMotor.isMotorOnline())
     {
         RAISE_ERROR(
+            drivers,
             "trying to get velocity and pitch motor offline",
             aruwlib::errors::TURRET,
             aruwlib::errors::MOTOR_OFFLINE);
@@ -127,6 +149,7 @@ void TurretSubsystem::setPitchMotorOutput(float out)
     if (out > INT32_MAX || out < INT32_MIN)
     {
         RAISE_ERROR(
+            drivers,
             "pitch motor output invalid",
             aruwlib::errors::TURRET,
             aruwlib::errors::INVALID_MOTOR_OUTPUT);
@@ -151,6 +174,7 @@ void TurretSubsystem::setYawMotorOutput(float out)
     if (out > INT32_MAX || out < INT32_MIN)
     {
         RAISE_ERROR(
+            drivers,
             "yaw motor output invalid",
             aruwlib::errors::TURRET,
             aruwlib::errors::INVALID_MOTOR_OUTPUT);
@@ -212,12 +236,12 @@ float TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
              sinf(getYawAngleFromCenter() * aruwlib::algorithms::PI / 180.0f)) +
          1.0f);
 
-    if (Drivers::remote.getUpdateCounter() != prevUpdateCounterChassisRotateDerivative)
+    if (drivers->remote.getUpdateCounter() != prevUpdateCounterChassisRotateDerivative)
     {
         chassisRotateDerivativeInterpolation.update(
             desiredChassisRotation - feedforwardPrevChassisRotationDesired);
     }
-    prevUpdateCounterChassisRotateDerivative = Drivers::remote.getUpdateCounter();
+    prevUpdateCounterChassisRotateDerivative = drivers->remote.getUpdateCounter();
     float derivativeInterpolated = chassisRotateDerivativeInterpolation.getInterpolatedValue(
         aruwlib::arch::clock::getTimeMilliseconds());
 

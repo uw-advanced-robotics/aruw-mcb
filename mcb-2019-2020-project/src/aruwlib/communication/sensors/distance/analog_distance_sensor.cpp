@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "analog_distance_sensor.hpp"
 
 #include "aruwlib/Drivers.hpp"
@@ -7,6 +26,7 @@ namespace aruwlib
 namespace sensors
 {
 AnalogDistanceSensor::AnalogDistanceSensor(
+    Drivers *drivers,
     float minDistance,
     float maxDistance,
     float m,
@@ -14,6 +34,7 @@ AnalogDistanceSensor::AnalogDistanceSensor(
     float offset,
     gpio::Analog::Pin pin)
     : DistanceSensor(minDistance, maxDistance),
+      drivers(drivers),
       m(m),
       b(b),
       offset(offset),
@@ -24,7 +45,7 @@ AnalogDistanceSensor::AnalogDistanceSensor(
 float AnalogDistanceSensor::read()
 {
     // Read analog pin and convert to volts
-    float reading = Drivers::analog.read(pin);
+    float reading = drivers->analog.read(pin);
 
     // Linear model
     float linear = m * reading / 1000.0f + b;

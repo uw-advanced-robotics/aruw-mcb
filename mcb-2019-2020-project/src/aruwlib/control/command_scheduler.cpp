@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "command_scheduler.hpp"
 
 #include <algorithm>
@@ -21,6 +40,7 @@ void CommandScheduler::addCommand(Command* commandToAdd)
     if (commandToAdd == nullptr)
     {
         RAISE_ERROR(
+            drivers,
             "attempting to add nullptr command",
             aruwlib::errors::Location::COMMAND_SCHEDULER,
             aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
@@ -51,6 +71,7 @@ void CommandScheduler::addCommand(Command* commandToAdd)
             // the command you are trying to add has a subsystem that is not in the
             // scheduler, so you cannot add it (will lead to undefined control behavior)
             RAISE_ERROR(
+                drivers,
                 "Attempting to add a command without subsystem in the scheduler",
                 aruwlib::errors::Location::COMMAND_SCHEDULER,
                 aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
@@ -71,7 +92,7 @@ void CommandScheduler::run()
     uint32_t runStart = aruwlib::arch::clock::getTimeMicroseconds();
     // Timestamp for reference and for disallowing a command from running
     // multiple times during the same call to run.
-    if (this == &Drivers::commandScheduler)
+    if (this == &drivers->commandScheduler)
     {
         commandSchedulerTimestamp++;
     }
@@ -118,6 +139,7 @@ void CommandScheduler::run()
         // shouldn't take more than 1 ms to complete all this stuff, if it does something
         // is seriously wrong (i.e. you are adding subsystems unchecked)
         RAISE_ERROR(
+            drivers,
             "scheduler took longer than MAX_ALLOWABLE_SCHEDULER_RUNTIME",
             aruwlib::errors::Location::COMMAND_SCHEDULER,
             aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
@@ -162,7 +184,7 @@ void CommandScheduler::registerSubsystem(Subsystem* subsystem)
     if (subsystem != nullptr && !isSubsystemRegistered(subsystem))
     {
         // Only initialize the subsystem when adding to main scheduler.
-        if (this == &Drivers::commandScheduler)
+        if (this == &drivers->commandScheduler)
         {
             subsystem->initialize();
         }
@@ -171,6 +193,7 @@ void CommandScheduler::registerSubsystem(Subsystem* subsystem)
     else
     {
         RAISE_ERROR(
+            drivers,
             "subsystem is already added or trying to add nullptr subsystem",
             aruwlib::errors::Location::COMMAND_SCHEDULER,
             aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);

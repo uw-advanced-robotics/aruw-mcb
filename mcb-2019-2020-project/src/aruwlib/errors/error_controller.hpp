@@ -1,13 +1,34 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef ERROR_CONTROLLER_HPP
 #define ERROR_CONTROLLER_HPP
 
 #include <aruwlib/architecture/timeout.hpp>
 #include <modm/container.hpp>
 
+#include "mock_macros.hpp"
 #include "system_error.hpp"
 
 namespace aruwlib
 {
+class Drivers;
 namespace errors
 {
 /**
@@ -22,18 +43,23 @@ namespace errors
 class ErrorController
 {
 public:
-    ErrorController() : prevLedErrorChangeWait(ERROR_ROTATE_TIME) {}
+    ErrorController(Drivers* drivers) : drivers(drivers), prevLedErrorChangeWait(ERROR_ROTATE_TIME)
+    {
+    }
     ErrorController(const ErrorController&) = delete;
-    ErrorController& operator=(const ErrorController&) = default;
+    ErrorController& operator=(const ErrorController&) = delete;
+    mockable ~ErrorController() = default;
 
-    void addToErrorList(const SystemError& error);
+    mockable void addToErrorList(const SystemError& error);
 
-    void update();
+    mockable void update();
 
 private:
     static const int ERROR_ROTATE_TIME = 5000;
 
     static const unsigned ERROR_LIST_MAX_SIZE = 16;
+
+    Drivers* drivers;
 
     modm::BoundedDeque<SystemError, ERROR_LIST_MAX_SIZE> errorList;
 

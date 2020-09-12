@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef MATH_USER_UTILS_HPP_
 #define MATH_USER_UTILS_HPP_
 
@@ -42,7 +61,8 @@ inline bool compareFloatClose(float val1, float val2, float epsilon)
  * @param[in] max the max that val will be limited to.
  * @return the limited value.
  */
-template <typename T> T limitVal(T val, T min, T max)
+template <typename T>
+T limitVal(T val, T min, T max)
 {
     if (min >= max)
     {
@@ -92,7 +112,8 @@ inline float lowPassFilter(float prevValue, float newValue, float alpha)
     return alpha * newValue + (1.0f - alpha) * prevValue;
 }
 
-template <typename From, typename To> To reinterpretCopy(From from)
+template <typename From, typename To>
+To reinterpretCopy(From from)
 {
     static_assert(sizeof(From) == sizeof(To), "can only reinterpret-copy types of the same size");
     To result;

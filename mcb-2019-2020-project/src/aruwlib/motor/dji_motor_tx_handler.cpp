@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "dji_motor_tx_handler.hpp"
 
 #include <modm/architecture/interface/assert.h>
@@ -62,15 +81,15 @@ void DjiMotorTxHandler::processCanSendData()
     serializeMotorStoreSendData(can1MotorStore, &can1MessageLow, &can1MessageHigh);
     serializeMotorStoreSendData(can2MotorStore, &can2MessageLow, &can2MessageHigh);
 
-    if (Drivers::can.isReadyToSend(can::CanBus::CAN_BUS1))
+    if (drivers->can.isReadyToSend(can::CanBus::CAN_BUS1))
     {
-        Drivers::can.sendMessage(can::CanBus::CAN_BUS1, can1MessageLow);
-        Drivers::can.sendMessage(can::CanBus::CAN_BUS1, can1MessageHigh);
+        drivers->can.sendMessage(can::CanBus::CAN_BUS1, can1MessageLow);
+        drivers->can.sendMessage(can::CanBus::CAN_BUS1, can1MessageHigh);
     }
-    if (Drivers::can.isReadyToSend(can::CanBus::CAN_BUS2))
+    if (drivers->can.isReadyToSend(can::CanBus::CAN_BUS2))
     {
-        Drivers::can.sendMessage(can::CanBus::CAN_BUS2, can2MessageLow);
-        Drivers::can.sendMessage(can::CanBus::CAN_BUS2, can2MessageHigh);
+        drivers->can.sendMessage(can::CanBus::CAN_BUS2, can2MessageLow);
+        drivers->can.sendMessage(can::CanBus::CAN_BUS2, can2MessageHigh);
     }
 }
 
@@ -115,6 +134,7 @@ void DjiMotorTxHandler::removeFromMotorManager(const DjiMotor& motor, DjiMotor**
     {
         // error, trying to remove something that doesn't exist!
         RAISE_ERROR(
+            drivers,
             "trying to remove something that doesn't exist",
             aruwlib::errors::Location::MOTOR_CONTROL,
             aruwlib::errors::ErrorType::NULL_MOTOR_ID);

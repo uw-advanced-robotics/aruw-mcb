@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef __DJI_MOTOR_HPP__
 #define __DJI_MOTOR_HPP__
 
@@ -36,6 +55,7 @@ public:
 
     // construct new motor
     DjiMotor(
+        Drivers* drivers,
         MotorId desMotorIdentifier,
         aruwlib::can::CanBus motorCanBus,
         bool isInverted,
@@ -111,7 +131,8 @@ public:
 
     const std::string& getName() const;
 
-    template <typename T> static void assertEncoderType()
+    template <typename T>
+    static void assertEncoderType()
     {
         constexpr bool good_type =
             std::is_same<typename std::decay<T>::type, std::int64_t>::value ||
@@ -119,13 +140,15 @@ public:
         static_assert(good_type, "x is not of the correct type");
     }
 
-    template <typename T> static T degreesToEncoder(float angle)
+    template <typename T>
+    static T degreesToEncoder(float angle)
     {
         assertEncoderType<T>();
         return static_cast<T>((ENC_RESOLUTION * angle) / 360);
     }
 
-    template <typename T> static float encoderToDegrees(T encoder)
+    template <typename T>
+    static float encoderToDegrees(T encoder)
     {
         assertEncoderType<T>();
         return (360.0f * static_cast<float>(encoder)) / ENC_RESOLUTION;
@@ -139,6 +162,8 @@ private:
 
     // Parses receive data given message with the correct identifier.
     void parseCanRxData(const modm::can::Message& message);
+
+    Drivers* drivers;
 
     uint32_t motorIdentifier;
 

@@ -1,11 +1,36 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "xavier_serial.hpp"
 
 namespace aruwlib
 {
 namespace serial
 {
-XavierSerial::XavierSerial()
-    : DJISerial(Uart::UartPort::Uart2, false),
+const uint8_t XavierSerial::txMsgSwitchArray[XavierSerial::CV_MESSAGE_TYPE_SIZE] = {
+    XavierSerial::CV_MESSAGE_TYPE_TURRET_TELEMETRY,
+    XavierSerial::CV_MESSAGE_TYPE_IMU,
+    XavierSerial::CV_MESSAGE_TYPE_ROBOT_ID,
+    XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
+
+XavierSerial::XavierSerial(Drivers* drivers)
+    : DJISerial(drivers, Uart::UartPort::Uart2, false),
       txMsgSwitchIndex(CV_MESSAGE_TYPE_TURRET_TELEMETRY),
       autoAimRequestQueued(false),
       autoAimRequestState(false),

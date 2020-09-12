@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "turret_cv_command.hpp"
 
 #include <aruwlib/Drivers.hpp>
@@ -11,8 +30,9 @@ namespace aruwsrc
 {
 namespace turret
 {
-TurretCVCommand::TurretCVCommand(TurretSubsystem *subsystem)
-    : turretSubsystem(subsystem),
+TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem)
+    : drivers(drivers),
+      turretSubsystem(subsystem),
       yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
       pitchTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
       yawPid(
@@ -43,7 +63,7 @@ TurretCVCommand::TurretCVCommand(TurretSubsystem *subsystem)
 void TurretCVCommand::initialize()
 {
     sendRequestTimer.restart(TIME_BETWEEN_CV_REQUESTS);
-    Drivers::xavierSerial.beginTargetTracking();
+    drivers->xavierSerial.beginTargetTracking();
     yawPid.reset();
     pitchPid.reset();
 }
@@ -51,7 +71,7 @@ void TurretCVCommand::initialize()
 void TurretCVCommand::execute()
 {
     XavierSerial::TurretAimData cvData;
-    if (Drivers::xavierSerial.getLastAimData(&cvData))
+    if (drivers->xavierSerial.getLastAimData(&cvData))
     {
         if (cvData.hasTarget)
         {
@@ -61,14 +81,14 @@ void TurretCVCommand::execute()
     }
     else if (sendRequestTimer.isExpired())
     {
-        Drivers::xavierSerial.beginTargetTracking();
+        drivers->xavierSerial.beginTargetTracking();
     }
     runYawPositionController();
     runPitchPositionController();
 }
 
 // NOLINTNEXTLINE
-void TurretCVCommand::end(bool) { Drivers::xavierSerial.stopTargetTracking(); }
+void TurretCVCommand::end(bool) { drivers->xavierSerial.stopTargetTracking(); }
 
 void TurretCVCommand::runYawPositionController()
 {

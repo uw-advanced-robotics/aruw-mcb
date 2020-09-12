@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef SERVO_HPP_
 #define SERVO_HPP_
 
@@ -6,6 +25,7 @@
 
 namespace aruwlib
 {
+class Drivers;
 namespace motor
 {
 /**
@@ -23,19 +43,25 @@ public:
      *      `maximumPwm` < `minimumPwm`, an error is thrown and [minPwm, maxPwm]
      *      is set to [0, 1].
      *
+     * @param[in] drivers Instance to the drivers class you would like to use.
      * @param[in] pwmPin The pin to attach the Servo class with.
      * @param[in] maximumPwm The maximum allowable PWM output. This is limited between 0 and 1.
      * @param[in] minimumPwm The minimum allowable PWM output. This is limited between 0 and 1.
      * @param[in] pwmRampSpeed The speed in PWM percent per millisecond.
      */
-    Servo(aruwlib::gpio::Pwm::Pin pwmPin, float maximumPwm, float minimumPwm, float pwmRampSpeed);
+    Servo(
+        Drivers *drivers,
+        aruwlib::gpio::Pwm::Pin currpwmPinPort,
+        float maximumPwm,
+        float minimumPwm,
+        float pwmRampSpeed);
 
     /**
      * Limits `pwmOutputRamp` to `minPwm` and `maxPwm`, then sets ramp output
      * to the limited value. Do not repeatedly call (i.e. only call in a `Command`'s
      * `initialize` function, for example).
      */
-    void setTargetPwm(float pwm);
+    void setTargetPwm(float PWM);
 
     /**
      * Updates the `pwmOutputRamp` object and then sets the output PWM to the updated
@@ -65,6 +91,8 @@ public:
     bool isRampTargetMet() const;
 
 private:
+    Drivers *drivers;
+
     ///< Used to change servo speed. See construtctor for detail.
     aruwlib::algorithms::Ramp pwmOutputRamp;
 

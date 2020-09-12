@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "remote.hpp"
 
 #include "aruwlib/Drivers.hpp"
@@ -9,7 +28,7 @@ using namespace aruwlib::serial;
 
 namespace aruwlib
 {
-void Remote::initialize() { Drivers::uart.init<Uart::Uart1, 100000, Uart::Parity::Even>(); }
+void Remote::initialize() { drivers->uart.init<Uart::Uart1, 100000, Uart::Parity::Even>(); }
 
 void Remote::read()
 {
@@ -21,7 +40,7 @@ void Remote::read()
     }
     uint8_t data;  // Next byte to be read
     // Read next byte if available and more needed for the current packet
-    while (Drivers::uart.read(Uart::UartPort::Uart1, &data) && currentBufferIndex < REMOTE_BUF_LEN)
+    while (drivers->uart.read(Uart::UartPort::Uart1, &data) && currentBufferIndex < REMOTE_BUF_LEN)
     {
         rxBuffer[currentBufferIndex] = data;
         currentBufferIndex++;
@@ -155,7 +174,7 @@ void Remote::parseBuffer()
     // Remote wheel
     remote.wheel = (rxBuffer[16] | rxBuffer[17] << 8) - 1024;
 
-    Drivers::commandMapper.handleKeyStateChange(
+    drivers->commandMapper.handleKeyStateChange(
         remote.key,
         remote.leftSwitch,
         remote.rightSwitch,
@@ -175,7 +194,7 @@ void Remote::clearRxBuffer()
         rxBuffer[i] = 0;
     }
     // Clear Usart1 rxBuffer
-    Drivers::uart.discardReceiveBuffer(Uart::UartPort::Uart1);
+    drivers->uart.discardReceiveBuffer(Uart::UartPort::Uart1);
 }
 
 void Remote::reset()

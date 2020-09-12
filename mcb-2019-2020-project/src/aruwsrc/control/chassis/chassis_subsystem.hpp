@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef __CHASSIS_SUBSYSTEM_HPP__
 #define __CHASSIS_SUBSYSTEM_HPP__
 
@@ -182,14 +201,31 @@ private:
 
 public:
     ChassisSubsystem(
+        aruwlib::Drivers* drivers,
         aruwlib::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         aruwlib::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         aruwlib::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
         aruwlib::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID)
-        : leftFrontMotor(leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
-          leftBackMotor(leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
-          rightFrontMotor(rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
-          rightBackMotor(rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor"),
+        : aruwlib::control::Subsystem(drivers),
+          leftFrontMotor(
+              drivers,
+              leftFrontMotorId,
+              CAN_BUS_MOTORS,
+              false,
+              "left front drive motor"),
+          leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
+          rightFrontMotor(
+              drivers,
+              rightFrontMotorId,
+              CAN_BUS_MOTORS,
+              false,
+              "right front drive motor"),
+          rightBackMotor(
+              drivers,
+              rightBackMotorId,
+              CAN_BUS_MOTORS,
+              false,
+              "right back drive motor"),
           leftFrontVelocityPid(
               VELOCITY_PID_KP,
               VELOCITY_PID_KI,
