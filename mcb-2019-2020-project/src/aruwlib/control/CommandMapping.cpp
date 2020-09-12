@@ -35,7 +35,7 @@ CommandMapping::CommandMapping(
     const RemoteMapState &rms)
     : mapState(rms),
       mappedCommands(cmds),
-      drivers(drivers) {}
+      drivers(drivers)
 {
     std::remove_if(mappedCommands.begin(), mappedCommands.end(), [](Command *c) {
         return c == nullptr;
