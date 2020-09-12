@@ -59,13 +59,13 @@ const std::string CommandMapperFormatGenerator::formattedMapping(const RemoteMap
     {
         out += "right mouse pressed, ";
     }
-    if (ms.useLSwitch)
+    if (ms.getRSwitch() != Remote::SwitchState::UNKNOWN)
     {
         out += "left switch: ";
         out += switchStateToString(ms.lSwitch);
         out += ", ";
     }
-    if (ms.useRSwitch)
+    if (ms.getLSwitch() != Remote::SwitchState::UNKNOWN)
     {
         out += "right switch: ";
         out += switchStateToString(ms.rSwitch);

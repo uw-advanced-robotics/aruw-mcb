@@ -147,18 +147,25 @@ public:
     void initRMouseButton();
 
     /**
-     * Checks if `this` is a subset of `other`.
+     * Checks if `this` is a subset of `other`. `this` is a subset of `other` under the following
+     * conditions:
+     * - Either `this`'s left switch state is `UNKNOWN` or `this`'s left switch state is equal to
+     *   `other`'s left switch state.
+     * - Either `this`'s right switch state is `UNKNOWN` or `this`'s right switch state is equal to
+     *   `other`'s left switch state.
+     * - Either `this`'s left mouse button is not initialized or both `this` and `other`'s left
+     *   mouse buttons are both initialized.
+     * - Either `this`'s right mouse button is not initialized or both `this` and `other`'s right
+     *   mouse buttons are both initialized.
+     * - `this`'s key set is a subset of `other`'s key set, i.e. `(this.keySet & other.keySet) ==
+     *   this.keySet`.
      *
-     * @param[other] The RemoteMapState to check if `this` is a subset of.
-     * @return True if `this` RemoteMapState is a subset of the `other` RemoteMapState.
-     *      `this` is a subset of `other` if the remote mappings used by `this` match
-     *      those present in `other`, regardless of whether or not `other` is using
-     *      a particular mapping. Consider if `this` maps the left mouse button.
-     *      Since the only mapping used by `this` is the left mouse button, we only
-     *      check `other`'s left mouse button. If the `other`'s left mouse button
-     *      matches `this`'s left mouse button, `this` is a subset of `other`.
      * @attention This function does not use neg keys to determine if the map
      *      state is a subset.
+     *
+     * @param[other] The RemoteMapState to check if `this` is a subset of.
+     * @return `true` if `this` RemoteMapState is a subset of the `other` RemoteMapState. See above
+     * for description of what it means for a `RemoteMapState` to be a subset of another.
      */
     bool stateSubsetOf(const RemoteMapState &other) const;
 
@@ -176,8 +183,7 @@ public:
     bool friend operator!=(const RemoteMapState &rms1, const RemoteMapState &rms2);
 
     /**
-     * @return The negKeys currently being used. Only neg keys need a getter, for
-     *      reasons discussed in the CommandMapper class.
+     * @return The negKeys currently being used.
      */
     uint16_t getNegKeys() const { return negKeys; }
 
@@ -187,8 +193,7 @@ public:
     bool getNegKeysUsed() const { return negKeys != 0; }
 
     /**
-     * @return the current keys initialized in the RemoteMapState, for use in CommandMapping
-     *      derived classes.
+     * @return the current keys initialized in the `RemoteMapState`.
      */
     uint16_t getKeys() const { return keys; }
 
@@ -203,10 +208,8 @@ public:
 private:
     friend class CommandMapperFormatGenerator;
 
-    bool useLSwitch = false;
     Remote::SwitchState lSwitch = Remote::SwitchState::UNKNOWN;
 
-    bool useRSwitch = false;
     Remote::SwitchState rSwitch = Remote::SwitchState::UNKNOWN;
 
     uint16_t keys = 0;

@@ -71,7 +71,6 @@ void RemoteMapState::initLSwitch(Remote::SwitchState ss)
     {
         return;
     }
-    useLSwitch = true;
     lSwitch = ss;
 }
 
@@ -81,7 +80,6 @@ void RemoteMapState::initRSwitch(Remote::SwitchState ss)
     {
         return;
     }
-    useRSwitch = true;
     rSwitch = ss;
 }
 
@@ -135,11 +133,11 @@ void RemoteMapState::initRMouseButton() { rMouseButton = true; }
 
 bool RemoteMapState::stateSubsetOf(const RemoteMapState &other) const
 {
-    if (useRSwitch && rSwitch != other.rSwitch)
+    if (rSwitch != Remote::SwitchState::UNKNOWN && rSwitch != other.rSwitch)
     {
         return false;
     }
-    if (useLSwitch && lSwitch != other.lSwitch)
+    if (lSwitch != Remote::SwitchState::UNKNOWN && lSwitch != other.lSwitch)
     {
         return false;
     }
@@ -160,10 +158,9 @@ bool RemoteMapState::stateSubsetOf(const RemoteMapState &other) const
 
 bool operator==(const RemoteMapState &rms1, const RemoteMapState &rms2)
 {
-    return rms1.useLSwitch == rms2.useLSwitch && rms1.lSwitch == rms2.lSwitch &&
-           rms1.useRSwitch == rms2.useRSwitch && rms1.rSwitch == rms2.rSwitch &&
-           rms1.keys == rms2.keys && rms1.negKeys == rms2.negKeys &&
-           rms1.lMouseButton == rms2.lMouseButton && rms1.rMouseButton == rms2.rMouseButton;
+    return rms1.lSwitch == rms2.lSwitch && rms1.rSwitch == rms2.rSwitch && rms1.keys == rms2.keys &&
+           rms1.negKeys == rms2.negKeys && rms1.lMouseButton == rms2.lMouseButton &&
+           rms1.rMouseButton == rms2.rMouseButton;
 }
 
 bool operator!=(const RemoteMapState &rms1, const RemoteMapState &rms2) { return !(rms1 == rms2); }
