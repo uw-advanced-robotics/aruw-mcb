@@ -91,11 +91,10 @@ void RemoteMapState::initKeys(uint16_t keys)
     {
         return;
     }
-    if (useNegKeys && ((this->negKeys & keys) != 0))
+    if ((this->negKeys & keys) != 0)
     {
         return;
     }
-    useKeys = true;
     this->keys = keys;
 }
 
@@ -105,11 +104,10 @@ void RemoteMapState::initNegKeys(uint16_t negKeys)
     {
         return;
     }
-    if (useKeys && ((this->keys & negKeys) != 0))
+    if ((this->keys & negKeys) != 0)
     {
         return;
     }
-    useNegKeys = true;
     this->negKeys = negKeys;
 }
 
@@ -118,7 +116,6 @@ void RemoteMapState::initKeys(const std::list<Remote::Key> &keySet)
     uint16_t keys = std::accumulate(keySet.begin(), keySet.end(), 0, [](int acc, Remote::Key key) {
         return acc |= 1 << static_cast<uint16_t>(key);
     });
-
     initKeys(keys);
 }
 
@@ -132,19 +129,11 @@ void RemoteMapState::initNegKeys(const std::list<Remote::Key> &negKeySet)
     initNegKeys(negKeys);
 }
 
-void RemoteMapState::initLMouseButton()
-{
-    useLMouseButton = true;
-    lMouseButton = true;
-}
+void RemoteMapState::initLMouseButton() { lMouseButton = true; }
 
-void RemoteMapState::initRMouseButton()
-{
-    useRMouseButton = true;
-    rMouseButton = true;
-}
+void RemoteMapState::initRMouseButton() { rMouseButton = true; }
 
-bool RemoteMapState::stateSubset(const RemoteMapState &other) const
+bool RemoteMapState::stateSubsetOf(const RemoteMapState &other) const
 {
     if (useRSwitch && rSwitch != other.rSwitch)
     {
@@ -154,15 +143,15 @@ bool RemoteMapState::stateSubset(const RemoteMapState &other) const
     {
         return false;
     }
-    if (useKeys && ((keys & other.keys) != keys))
+    if ((keys & other.keys) != keys)
     {
         return false;
     }
-    if (useLMouseButton && lMouseButton != other.lMouseButton)
+    if (lMouseButton && other.lMouseButton != lMouseButton)
     {
         return false;
     }
-    if (useRMouseButton && rMouseButton != other.rMouseButton)
+    if (rMouseButton && other.rMouseButton != rMouseButton)
     {
         return false;
     }
@@ -173,10 +162,8 @@ bool operator==(const RemoteMapState &rms1, const RemoteMapState &rms2)
 {
     return rms1.useLSwitch == rms2.useLSwitch && rms1.lSwitch == rms2.lSwitch &&
            rms1.useRSwitch == rms2.useRSwitch && rms1.rSwitch == rms2.rSwitch &&
-           rms1.useKeys == rms2.useKeys && rms1.keys == rms2.keys &&
-           rms1.useNegKeys == rms2.useNegKeys && rms1.negKeys == rms2.negKeys &&
-           rms1.useLMouseButton == rms2.useLMouseButton && rms1.lMouseButton == rms2.lMouseButton &&
-           rms1.useRMouseButton == rms2.useRMouseButton && rms1.rMouseButton == rms2.rMouseButton;
+           rms1.keys == rms2.keys && rms1.negKeys == rms2.negKeys &&
+           rms1.lMouseButton == rms2.lMouseButton && rms1.rMouseButton == rms2.rMouseButton;
 }
 
 bool operator!=(const RemoteMapState &rms1, const RemoteMapState &rms2) { return !(rms1 == rms2); }

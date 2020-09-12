@@ -39,23 +39,23 @@ const std::vector<std::string> CommandMapperFormatGenerator::generateMappings() 
 const std::string CommandMapperFormatGenerator::formattedMapping(const RemoteMapState &ms) const
 {
     std::string out = "[";
-    if (ms.useKeys)
+    if (ms.keys != 0)
     {
         out += "keys: ";
         out += keyMapToString(ms.keys);
         out += ", ";
     }
-    if (ms.useNegKeys)
+    if (ms.negKeys != 0)
     {
         out += "neg keys: ";
         out += keyMapToString(ms.negKeys);
         out += ", ";
     }
-    if (ms.useLMouseButton)
+    if (ms.lMouseButton)
     {
         out += "left mouse pressed, ";
     }
-    if (ms.useRMouseButton)
+    if (ms.rMouseButton)
     {
         out += "right mouse pressed, ";
     }

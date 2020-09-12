@@ -57,7 +57,7 @@ bool mapStateEqual(const CommandMapping &cm1, const CommandMapping &cm2)
 
 bool CommandMapping::mappingSubset(const RemoteMapState &mapState)
 {
-    return this->mapState.stateSubset(mapState);
+    return this->mapState.stateSubsetOf(mapState);
 }
 
 void CommandMapping::addCommands()

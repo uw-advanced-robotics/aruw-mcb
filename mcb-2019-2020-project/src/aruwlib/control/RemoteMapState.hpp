@@ -160,7 +160,7 @@ public:
      * @attention This function does not use neg keys to determine if the map
      *      state is a subset.
      */
-    bool stateSubset(const RemoteMapState &other) const;
+    bool stateSubsetOf(const RemoteMapState &other) const;
 
     /**
      * Straight equality.
@@ -184,13 +184,21 @@ public:
     /**
      * @return `true` if the neg key set has been initialized, `false` otherwise.
      */
-    bool getNegKeysUsed() const { return useNegKeys; }
+    bool getNegKeysUsed() const { return negKeys != 0; }
 
     /**
      * @return the current keys initialized in the RemoteMapState, for use in CommandMapping
      *      derived classes.
      */
     uint16_t getKeys() const { return keys; }
+
+    bool getLMouseButton() const { return lMouseButton; }
+
+    bool getRMouseButton() const { return rMouseButton; }
+
+    Remote::SwitchState getLSwitch() const { return lSwitch; }
+
+    Remote::SwitchState getRSwitch() const { return rSwitch; }
 
 private:
     friend class CommandMapperFormatGenerator;
@@ -201,16 +209,12 @@ private:
     bool useRSwitch = false;
     Remote::SwitchState rSwitch = Remote::SwitchState::UNKNOWN;
 
-    bool useKeys = false;
     uint16_t keys = 0;
 
-    bool useNegKeys = false;
     uint16_t negKeys = 0;  // if certain keys are pressed, the remote map will not do mapping
 
-    bool useLMouseButton = false;
     bool lMouseButton = false;
 
-    bool useRMouseButton = false;
     bool rMouseButton = false;
 };  // class RemoteState
 }  // namespace control
