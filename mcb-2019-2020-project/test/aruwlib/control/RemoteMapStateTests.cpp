@@ -202,9 +202,7 @@ TEST(RemoteMapState, operator_equals_all_states_initialized_not_same_not_equal)
     EXPECT_TRUE(ms1 != ms2);
 }
 
-// stateSubsetOf(const RemoteMapState &other) const;
-
-TEST(RemoteMapState, stateSubset_true_if_default_constructed)
+TEST(RemoteMapState, stateSubsetOf_true_if_default_constructed)
 {
     RemoteMapState ms1, ms2;
 
@@ -212,7 +210,9 @@ TEST(RemoteMapState, stateSubset_true_if_default_constructed)
     EXPECT_TRUE(ms2.stateSubsetOf(ms1));
 }
 
-TEST(RemoteMapState, stateSubset_true_simple_equal_case)
+// stateSubsetOf checking key combos
+
+TEST(RemoteMapState, stateSubsetOf_true_keys_equals)
 {
     RemoteMapState ms1, ms2;
     ms1.initKeys(42);
@@ -222,51 +222,108 @@ TEST(RemoteMapState, stateSubset_true_simple_equal_case)
     EXPECT_TRUE(ms2.stateSubsetOf(ms1));
 }
 
-TEST(RemoteMapState, stateSubset_true_if_simple_not_equal_case)
+TEST(RemoteMapState, stateSubsetOf_false_keys_not_subset)
 {
     RemoteMapState ms1, ms2;
-    ms1.initLMouseButton();
-    ms1.initKeys(42);
-    ms2.initKeys(42);
+    ms1.initKeys(0b1);
+    ms2.initKeys(0b10);
 
-    // EXPECT_FALSE(ms1.stateSubsetOf(ms2));
-    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+    EXPECT_FALSE(ms1.stateSubsetOf(ms2));
+    EXPECT_FALSE(ms2.stateSubsetOf(ms1));
 }
 
-TEST(RemoteMapState, stateSubset_key_subset)
+TEST(RemoteMapState, stateSubsetOf_true_one_way_keys_subset)
 {
     RemoteMapState ms1, ms2;
     ms1.initKeys(0xffff);
     ms1.initKeys(0x1234);
+
+    EXPECT_FALSE(ms1.stateSubsetOf(ms2));
+    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
 }
 
-TEST(RemoteMapState, stateSubset_ignores_neg_keys)
+TEST(RemoteMapState, stateSubsetOf_true_one_way_one_keyset_initialized)
 {
     RemoteMapState ms1, ms2;
-    ms1.initKeys(1);
-    ms2.initKeys(3);
+    ms1.initKeys(42);
 
-    EXPECT_TRUE(ms1.stateSubsetOf(ms2));
-    EXPECT_FALSE(ms2.stateSubsetOf(ms1));
+    EXPECT_FALSE(ms1.stateSubsetOf(ms2));
+    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+}
 
-    ms1.initNegKeys(4);
+TEST(RemoteMapState, stateSubsetOf_ignores_neg_keys)
+{
+    RemoteMapState ms1, ms2;
+    ms1.initKeys(0b1);
+    ms2.initKeys(0b11);
+    ms1.initNegKeys(0b100);
 
     EXPECT_TRUE(ms1.stateSubsetOf(ms2));
     EXPECT_FALSE(ms2.stateSubsetOf(ms1));
 }
 
-TEST(RemoteMapState, stateSubset_using_mouse_buttons)
+// stateSubsetOf checking mouse buttons
+
+TEST(RemoteMapState, stateSubsetOf_true_one_way_one_left_mouse_initialized)
 {
     RemoteMapState ms1, ms2;
     ms1.initLMouseButton();
-    ms1.initRMouseButton();
+
+    EXPECT_FALSE(ms1.stateSubsetOf(ms2));
+    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+}
+
+TEST(RemoteMapState, stateSubsetOf_true_left_mice_initialized)
+{
+    RemoteMapState ms1, ms2;
+    ms1.initLMouseButton();
     ms2.initLMouseButton();
 
+    EXPECT_TRUE(ms1.stateSubsetOf(ms2));
+    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+}
+
+TEST(RemoteMapState, stateSubsetOf_true_one_way_one_right_mouse_initialized)
+{
+    RemoteMapState ms1, ms2;
+    ms1.initRMouseButton();
+
     EXPECT_FALSE(ms1.stateSubsetOf(ms2));
     EXPECT_TRUE(ms2.stateSubsetOf(ms1));
 }
 
-TEST(RemoteMapState, stateSubset_using_different_switches)
+TEST(RemoteMapState, stateSubsetOf_true_right_mice_initialized)
+{
+    RemoteMapState ms1, ms2;
+    ms1.initRMouseButton();
+    ms2.initRMouseButton();
+
+    EXPECT_TRUE(ms1.stateSubsetOf(ms2));
+    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+}
+
+// stateSubsetOf checking switch states
+
+TEST(RemoteMapState, stateSubsetOf_true_one_way_left_switch_initialized)
+{
+    RemoteMapState ms1, ms2;
+    ms1.initLSwitch(Remote::SwitchState::DOWN);
+
+    EXPECT_FALSE(ms1.stateSubsetOf(ms2));
+    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+}
+
+TEST(RemoteMapState, stateSubsetOf_true_left_switches_same)
+{
+    RemoteMapState ms1, ms2;
+    ms1.initLSwitch(Remote::SwitchState::DOWN);
+    ms2.initLSwitch(Remote::SwitchState::DOWN);
+
+    EXPECT_TRUE(ms1.stateSubsetOf(ms2));
+    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+}
+
+TEST(RemoteMapState, stateSubsetOf_false_left_switches_different)
 {
     RemoteMapState ms1, ms2;
     ms1.initLSwitch(Remote::SwitchState::DOWN);
@@ -276,21 +333,31 @@ TEST(RemoteMapState, stateSubset_using_different_switches)
     EXPECT_FALSE(ms2.stateSubsetOf(ms1));
 }
 
-TEST(RemoteMapState, stateSubset_using_matching_switches)
+TEST(RemoteMapState, stateSubsetOf_true_one_way_right_switch_initialized)
 {
     RemoteMapState ms1, ms2;
-    ms1.initLSwitch(Remote::SwitchState::DOWN);
-    ms2.initLSwitch(Remote::SwitchState::MID);
-
-    EXPECT_FALSE(ms1.stateSubsetOf(ms2));
-    EXPECT_FALSE(ms2.stateSubsetOf(ms1));
-}
-
-TEST(RemoteMapState, stateSubset_using_single_unknown_switch)
-{
-    RemoteMapState ms1, ms2;
-    ms1.initLSwitch(Remote::SwitchState::DOWN);
+    ms1.initRSwitch(Remote::SwitchState::DOWN);
 
     EXPECT_FALSE(ms1.stateSubsetOf(ms2));
     EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+}
+
+TEST(RemoteMapState, stateSubsetOf_true_right_switches_same)
+{
+    RemoteMapState ms1, ms2;
+    ms1.initRSwitch(Remote::SwitchState::DOWN);
+    ms2.initRSwitch(Remote::SwitchState::DOWN);
+
+    EXPECT_TRUE(ms1.stateSubsetOf(ms2));
+    EXPECT_TRUE(ms2.stateSubsetOf(ms1));
+}
+
+TEST(RemoteMapState, stateSubsetOf_false_right_switches_different)
+{
+    RemoteMapState ms1, ms2;
+    ms1.initRSwitch(Remote::SwitchState::DOWN);
+    ms2.initRSwitch(Remote::SwitchState::MID);
+
+    EXPECT_FALSE(ms1.stateSubsetOf(ms2));
+    EXPECT_FALSE(ms2.stateSubsetOf(ms1));
 }
