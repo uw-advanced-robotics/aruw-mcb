@@ -1,137 +1,190 @@
-# mcb-2019-2020
+# aruw-mcb
 
-All MCB code for the 2020 RoboMaster competition, using the modm framework, gnu
-compiler, openocd debugger, and vscode editor.
+ARUW's "Main Control Board" (MCB) code for the RoboMaster competition.
 
-## New user guide
+The MCB is a [RoboMaster Development Board Type A](https://store.dji.com/product/rm-development-board-type-a)
+which directly operates all major systems on our robots. Among these are drive, turret, launcher
+wheels, and human input.
 
-Note: The beginning of the guide is for windows users. If you are using mac, skip steps 1-3 and instead refer to [modm's guide](https://modm.io/guide/installation/).
+Software we use:
+- `modm`, a C++-native HAL
+- the gcc compiler
+- openocd to deploy and debug
+- VSCode, an editor
 
-1. Download [openocd](https://drive.google.com/file/d/14LnGVDfvSiih2daIdglWiC25xgwJkTM7/view?usp=sharing),
-   [arm-gcc-toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads),
-   and [anaconda](https://www.anaconda.com/distribution/). (During installation, make sure to check the 'Add to PATH' box) If you perfer, rather
-   than downloading openocd and the arm-gcc-toolchain from the provided links, I
-   have created a 7zip file containing both, which can be downloaded
-   [here](https://drive.google.com/file/d/1-GCnAhZSidhW827O36aBPIegsX6G6-6S/view?usp=sharing).
-   To download the 7zip files, if you do not have a 7zip extractor, you can use
-   [this](https://extract.me/) website to extract the file. 
-2. Add the /bin of openocd and the gcc-toolchain to your path. <br><br>
+[[_TOC_]]
+
+# Licensing
+
+aruw-mcb is covered under the GPL-3.0-or-later with the following exceptions:
+- `/modm` and `/aruw-mcb-project/modm` are licensed under MPL 2.0 by the modm project. We _are not_
+  the license holder for these files. See `/modm/LICENSE` for license information.
+- `aruw-mcb-project/src/aruwlib/algorithms/MahonyAHRS.h` and
+  `/aruw-mcb-project/src/aruwlib/algorithms/MahonyAHRS.cpp` are licensed under the GPL by SOH
+  Madgwick. The repo containing this code can be found
+  [here](https://github.com/uw-advanced-robotics/MahonyAHRS).
+
+# New user guide
+
+The recommended way to develop is with our pre-built development Docker container.
+
+1. [Install Docker Desktop](https://docs.docker.com/get-docker/). The macOS and Linux instructions will work
+   as-is. If you are on Windows, there are two options:
+     - If you are on Windows 10 version 2004 or later ([how do I know?](https://support.microsoft.com/en-us/help/13443/windows-which-version-am-i-running)),
+       the relevant guide is [here](https://docs.docker.com/docker-for-windows/install-windows-home/).
+       Make sure you click "Enable WSL 2 Features" in the Docker installer.
+     - If you cannot update to Windows 10 version 2004 (recommended) but are running Windows 10 Pro
+       (not Home), you can follow [this guide](https://docs.docker.com/docker-for-windows/install/)
+       to use the Hyper-V backend instead.
+2. [Install Visual Studio Code](https://code.visualstudio.com/).
+3. [Install git](https://git-scm.com/).
+4. Open Visual Studio Code.
+5. Clone this repo. You can go to the "source control" tab on the left of the editor and choose
+   "Clone Repository". When asked, enter `https://gitlab.com/aruw/controls/aruw-mcb.git`
+   as the source URL. Pick a reasonable location to clone the repo into. Make sure you have your gitlab credentials ready when you clone your repo.
+   
+   If you don't enter them correctly the first time that's okay - If you're on windows open the **Credential Manager** app and go to **Windows Credentials**. Then correct your git credentials stored under `git:https://gitlab.com` before trying to clone again.
+
+   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/d285d45f017f9f714e9f623a32a93de4/image.png" width="500px">
+
+6. Once it opens the new folder, an alert will appear with suggested extensions. Click "Install All".
+
+   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/69c6df320da651b9674446bc9e93b704/image.png" width="500px">
+
+7. vscode will now prompt you to open the development container. Choose "Reopen in Container". This
+   step may take a few minutes (or more!); it will download around 500 MB (2GB once uncompressed) of
+   necessary tools. Be patient.
+
+   _Heads-up:_ If you don't see the dialog, or it goes away, you can press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
+   and type "Reload Window" plus <kbd>Enter</kbd> to reload vscode.
+
+   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/5a72cd1f6b827719bfa1c73f64b77b32/image.png" width="500px">
+
+   vscode is now attached to a "container", which includes all the tools
+   necessary to develop in this repo! In the future, you will always want to open
+   the workspace within its container.
+
+Now that you have the environment, let's test it out! Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>,
+type "Focus Next Terminal", and press <kbd>Enter</kbd>. In this terminal, type `scons run-tests` and
+press <kbd>Enter</kbd>. After building our code, it should run the tests and print a message
+indicating that all tests passed.
+
+### Optional: prevent Docker Desktop from running on startup
+
+By default, Docker will likely be configured to run on startup. Your mileage may vary, but this may
+be frustrating. If so, you can disable it! Open the Docker Desktop settings, which on Windows can be
+accessed via the Docker icon in the system tray:
+
+<img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/851f134487d0743bb857c67c4adbbc43/image.png" width="250px">
 
 
-    ![path-images.PNG](https://i.imgur.com/ZpV4WpX.png)
+The "General" tab has a checkbox for disabling auto-start.
 
-3. When conda is installed run the following commands in the anaconda prompt: <br>
-```
-conda create --name modm python=3 pip
-activate modm
-conda install -c conda-forge git
-pip install jinja2 scons future pyelftools lbuild
-pip install pywin32
-```
-4. Next, clone this repository. When you clone this repository. Insure you type `--recursive` when cloning. Your git clone command should look something like
-   this: `git clone --recursive https://gitlab.com/aruw/code-2019-2020/mcb-2019-2020.git` (if you do not use the command `--recursive`, you will have to clone the modm submodule. From the mcb-2019-2020 file, in the anaconda prompt, cd into mcb-2019-2020/modm and type the following commands: `git submodule init`, `git submodule update`)
+<img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/3f62cd700d1f47632df92d3c96accffd/image.png" width="500px">
 
-This will clone the modm subdirectory.
-5. Restart your computer for anaconda to properly install and for the path variables to be properly updated.
 
-### Instructions for setting up vscode
-1. Install the c/c++ extension.
-2. Install the cortex-debug extension.
-3. For vscode intellisense to work properly, you need to add your compiler path individually. To do so, press "ctrl + p" and type `>c/c++ edit configurations (UI)`. In the screen that comes up, under the compiler path section, add the path of the "arm-none-eabi-gcc.exe" file located in the arm-gcc-toolchain /bin folder. Make sure to put double quotation marks around the path name.
-4. Install the robot chooser extension from VSCode marketplace (just search for it). The repository for the robot chooser can be found [here](https://gitlab.com/aruw/code-2019-2020/vscode-robot-chooser-2019-2020#how-to-install).
+In the future, if you attempt to load the repository within the dev container and haven't manually
+started Docker, you will get the following error:
+
+<img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/7e0672866e62f550c9f91b44d021e40b/image.png" width="500px">
+
+
+In this case, you can launch Docker manually and hit "Retry". On Windows, Docker Desktop can be
+started by searching for "docker" in the Start menu.
+
+<img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/00f31defc4d7855b40777816a4962f12/image.png" width="300px">
+
+**We also recommend you _stop_ Docker when you're done! This can be done on Windows via the same
+icon in the system tray. This will help preserve battery life and RAM.**
+
+## Non-containerized setup (NOT RECOMMENDED; see above)
+
+See the [wiki](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/home) for information about how
+to set up your system manually on a Windows or Ubuntu Linux machine. This should only be necessary
+if you are unable to use the Docker container provided above and is not recommended because of the
+complexity of setting up the environment correctly and because not all features are supported.
 
 ## Workflow guide
 
-### Everyday things to know
+### Branch naming conventions
 
-#### Naming conventions
-
-- When you create a new branch, initially, always branch off of `develop` (not `master`)
+- When you create a new branch, always branch off of `develop` (not `master`)
 - Names should follow the format `FirstL/{Issue Number}/short-description`
 - Example: `RyanT/0/linter-integration`
 
-#### Merge Request Checklist
+### Getting around VSCode
 
-When you submit a merge request, copy the stuff below into the description of the merge request, along with an actual description of what the feature you are merging in does. This will create a checklist that you will follow when the merge request is being processed. When you create a merge request, you should have already completed the `Self review` portion of the checklist.
+Microsoft provides a [helpful website](https://code.visualstudio.com/docs/getstarted/tips-and-tricks) that has a number of helpful shortcuts for getting around VSCode. There are many shortcuts that make programming faster. It is much appreciated when someone asks for help and can quickly navigate through the codebase while we work through a code bug.
 
-```
-- [ ] Self review
-  - [ ] All robot versions of the program compile.
-  - [ ] All robot versions of the program function properly. To complete this task deploy the code to each robot and test each robot.
-  - [ ] You believe the program meets the requirements of the ARUW Embedded/Controls Style Guide, C++.
-  - [ ] You have submitted a merge request and have notified someone to review it. In addition, you have updated the kanban board to reflect the state of the task.
-- [ ] Peer review
-  - [ ] All robot versions of the program compile.
-  - [ ] All robot versions of the program function properly. To complete this task deploy the code to each robot and test each robot.
-  - [ ] You believe the program meets the requirements of the ARUW Embedded/Controls Style Guide, C++.
-- [ ] Name(s) of reviewer: ___________________________________
-  - [ ] you have updated the kanban board to reflect the state of the task.
-- [ ] Peer test
-  - [ ] Someone has tested the program on all robots.
-  - [ ] This persons name: _______________.
-```
+### How to build code and program the MCB
 
-#### Modm examples
+_If you would like to use the terminal instead, see the section "Building and running via the terminal" below._
 
-The modm website provides a great number of examples that can be very useful when implementing something for the first time. The examples are located on modm's website [here](https://modm.io/#examples).
+1. Make sure you have VSCode opened in the folder `aruw-mcb` (**not `aruw-mcb-project`**)
+2. Connect an ST-Link to the MCB and your computer.
+3. In VSCode, open the Command Palette (<kbd>Ctrl</kbd>+<kbd>shift</kbd>+<kbd>P</kbd>)
+4. Find `Tasks: Run Task`. You should see the options below
+<br><br>
+    <img src=https://gitlab.com/aruw/controls/aruw-mcb/uploads/2ffb02c86387916c2c49ac3548151b38/image.png height="200px" />
 
-#### Getting around VSCode
+### How to debug using an ST-Link
 
-[Here](https://code.visualstudio.com/docs/getstarted/tips-and-tricks) is a very helpful website that has a number of helpful shortcuts  or getting around vscode. There are many shortcuts that make programming faster.
-
-#### How to build code
-
-1. In VSCode, open the Command Palette (Ctrl + Shift + P)
-2. Find `Tasks: Run Task`
-3. Select `Build - Release` or `Build - Debug`
-
-#### How to add your own files
-
-1. Find the src directory, located at the same level as main.cpp
-2. You should create .cpp and .hpp files in the same directories. Choose the subdirectory in src that is best suited for file you are creating.
-
-#### How to program an MCB
-
-1. In VSCode, open the Command Palette (Ctrl + Shift + P)
-2. Find `Tasks: Run Task`
-3. Select `Program - Release` or `Program - Debug`
-
-ALTERNATIVELY, if just programming, not debugging:
-
-1. In VSCode, press Ctrl + Shift + B
-
-#### How to debug
-
-1. Open the folder `mcb-2019-2020` in VSCode. Hit the debug tab on the left side. or type "ctrl + shift + D".
+1. Open the folder `aruw-mcb` in VSCode. Hit the debug tab on the left side or type <kbd>Ctrl</kbd>+<kbd>shift</kbd>+<kbd>D</kbd>.
 2. Hit the green play arrow on the left top of the screen.
+3. See [this page](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Software-Tools/Debugging-With-STLink) for more information about using the ST-Link for programming the MCB and debugging.
+<br>
+<img src=https://gitlab.com/aruw/controls/aruw-mcb/uploads/1f62ea310a20ee76092fe18de83d14a7/image.png height="400px" />
 
-![debug-image](https://i.imgur.com/l78vKh0.png)
+### How to debug using a J-Link
 
-ALTERNATIVELY...
+See the [wiki](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Software-Tools/Debugging-With-JLink) for an explanation on the difference between an ST-Link and J-Link and a step-by-step procedure on how to use the J-Link.
 
-1. Open the folder `mcb-2019-2020` in VSCode. Press F5.
+### How to select robot type
 
-#### How to use the linters
-See information in [the .gitlab folder README.md file](.gitlab/README.md#locally-linting)
+With the root directory opened in VSCode, type <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>. Type "ARUW: Select Robot Type" and hit enter. A dropdown menu should appear. Select the robot type from the dropdown.
 
-### Special cases guide
+## Working with modm
 
-#### How to add additional modm modules to the modm directory in mcb-2019-2020-project:
+### What is modm?
 
-1. Open `mcb-2019-2020/mcb-2019-2020-project/project.xml`.
-2. Here you will see a list of items that look like this: `<module>modm:platform:gpio</module>`. See modm [examples](https://modm.io/#examples), where .xml files can be found. Add in items you would like. you must enclose the specified item in `<module> </module>`. Also, the first word enclosed will most likely be modm. Generally speaking, the next word (platform in the example above) signifies the file in the modm submodule's 'src' file. This, however, is not always true, and it can sometimes be difficult to find what exactly to type to include something from the modm submodule. This is why looking at modm's examples are very useful because they include project.xml files. 
-2. Run the `Setup Build` task in VSCode.
+We use an embedded library generator called modm in our codebase. It will eventually be important that you understand what how modm works. For now you can just think about it as handling lower level IO on our MCB. You should read [modm's homepage](https://modm.io/) so you have a general idea of what it does.
 
-## Useful Commands when using Anaconda
+### Modm examples
 
-For these commands to work properly, your anaconda prompt must be in the mcb-2019-2020/mcb-2019-2020-project directory.
+The modm website provides a great number of examples that can be very useful when interacting with modm's hardware architecture layer for the first time. The examples are located on modm's website [here](https://modm.io/#examples).
 
-`lbuild build` references the project.xml file to construct files specified in the .xml file from the modm directory
+### Adding new dependencies on modm modules (advanced)
 
-`scons build` builds the program. Creates a "release" folder located in the build folder which contains the .elf file and the compiled .o files
+Look up the fully-qualified name of the module from the [modm website](https://modm.io/reference/module/modm-architecture/).
+The name will look like `:platform:gpio`. Open `aruw-mcb-project/project.xml` and add an entry to the dependencies section like the following:
 
-`scons build profile=debug` builds the program for a debug configuration. Doing this creates a folder labeled "debug" located in the build folder.
+```xml
+<module>modm:platform:gpio</module>
+```
 
-`scons program` builds and programs the board, using the release version
+Now open the terminal and run `lbuild build`.
 
-`scons program profile=debug` builds and programs the board, using debug version
+# Building and running via the terminal
+
+The below commands require that your working directory is `aruw-mcb/aruw-mcb-project` (where the `SConstruct` and `project.xml` files are).
+
+- `lbuild build`: Re-generates our copy of modm according to the modules specified in `project.xml`. Note that there is a _separate_ instance used for the unit tests, which can be build by runnint the same command from within the `sim-modm` subdirectory.
+- `scons build`: Builds the firmware image for the hardware target. Creates a "release" folder located in `build/hardware/` which contains the final `.elf` file as well as the intermediate object files (`.o`).
+- `scons build-tests`: Builds a program which hosts our unit tests. This executable can be run on your host computer (only supported on Linux) and prints results for each unit test run.
+- `scons program`: Builds as with `scons build` and then programs the board.
+- `scons run-tests`: Builds and runs the unit test program.
+- `scons size`: Prints statistics on program size and (satically-)allocated memory. Note that the reported available heap space is an upper bound, and this tool has no way of knowing about the real size of dynamic allocations.
+
+Note that all `scons` commands have optional `profile` and `target` options; the former controls whether performance and size optimizations are applied to the output, and the latter specifies which robot to build for. The default is to build in release mode for the Soldier.
+
+```
+Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]
+    "<target>" is one of:
+        - "build": build all code for the hardware platform.
+        - "run": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.
+        - "build-tests": build core code and tests for the current host platform.
+        - "run-tests": build core code and tests for the current host platform, and execute them locally with the test runner.
+    "TARGET_<ROBOT_TYPE>" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.
+        - <ROBOT_TYPE> must be one of the following:
+            - SOLDIER, OLD_SOLDIER, DRONE, ENGINEER, SENTINEL, HERO:
+```
