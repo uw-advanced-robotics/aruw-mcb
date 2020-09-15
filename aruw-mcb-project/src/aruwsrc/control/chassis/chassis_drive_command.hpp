@@ -69,7 +69,7 @@ public:
 private:
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
-};  // ChassisDriveCommand
+};  // class ChassisDriveCommand
 
 }  // namespace chassis
 

@@ -380,7 +380,7 @@ private:
         modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
         float desiredRpm);
-};  // Class ChassisSubsystem
+};  // class ChassisSubsystem
 
 }  // namespace chassis
 

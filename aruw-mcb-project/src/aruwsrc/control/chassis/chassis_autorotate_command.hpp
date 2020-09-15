@@ -82,7 +82,7 @@ private:
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
     aruwsrc::turret::TurretSubsystem const* turret;
-};
+};  // class ChassisAutorotateCommand
 
 }  // namespace chassis
 
