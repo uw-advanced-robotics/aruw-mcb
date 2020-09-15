@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __CHASSIS_DRIVE_COMMAND_HPP__
-#define __CHASSIS_DRIVE_COMMAND_HPP__
+#ifndef CHASSIS_DRIVE_COMMAND_HPP_
+#define CHASSIS_DRIVE_COMMAND_HPP_
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/control/command.hpp>
@@ -29,6 +29,9 @@ namespace aruwsrc
 {
 namespace chassis
 {
+/**
+ * A command that applies classic chassis-relative mecanum drive.
+ */
 class ChassisDriveCommand : public aruwlib::control::Command
 {
 public:
@@ -39,12 +42,26 @@ public:
         addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
     }
 
+    /**
+     * No-op.
+     */
     void initialize() override;
 
+    /**
+     * Gets remote x, y, and r commands, limits them, applies a rotation ratio to
+     * the x and y components of movement, and sets `setDesiredOutput` with the
+     * scaled <x, y, r> components.
+     */
     void execute() override;
 
-    void end(bool interrupted) override;
+    /**
+     * Calls `setDesiredOutput(0, 0, 0)`.
+     */
+    void end(bool) override;
 
+    /**
+     * @return `false`.
+     */
     bool isFinished() const override;
 
     const char* getName() const override { return "chassis drive command"; }
@@ -52,10 +69,10 @@ public:
 private:
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
-};
+};  // ChassisDriveCommand
 
 }  // namespace chassis
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // CHASSIS_DRIVE_COMMAND_HPP_
