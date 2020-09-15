@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __CHASSIS_AUTOROTATE_COMMAND_HPP__
-#define __CHASSIS_AUTOROTATE_COMMAND_HPP__
+#ifndef CHASSIS_AUTOROTATE_COMMAND_HPP_
+#define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/control/command.hpp>
@@ -33,6 +33,10 @@ namespace aruwsrc
 {
 namespace chassis
 {
+/**
+ * A command that continuously attempts to rotate the chasis so that the turret is
+ * aligned with the center of the chassis.
+ */
 class ChassisAutorotateCommand : public aruwlib::control::Command
 {
 public:
@@ -47,12 +51,27 @@ public:
         addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
     }
 
+    /**
+     * No-ops.
+     */
     void initialize() override;
 
+    /**
+     * Uses a PD controller to calculate the desired chassis rotation RPM based on the
+     * difference between the turret angle and the center of the chassis, then
+     * applies the desired rotation along with user desired <x, y> components to the
+     * chassis subsystem's `setDesiredRpm` function.
+     */
     void execute() override;
 
+    /**
+     * Calls `setDesiredRpm(0, 0, 0)`.
+     */
     void end(bool) override;
 
+    /**
+     * @return `false`.
+     */
     bool isFinished() const override;
 
     const char* getName() const override { return "chassis autorotate command"; }
@@ -69,4 +88,4 @@ private:
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // CHASSIS_AUTOROTATE_COMMAND_HPP_
