@@ -62,7 +62,7 @@ AgitatorSubsystem::AgitatorSubsystem(
     agitatorJammedTimeout.stop();
 }
 
-void AgitatorSubsystem::armAgitatorUnjamTimer(const uint32_t& predictedRotateTime)
+void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t predictedRotateTime)
 {
     if (predictedRotateTime == 0)
     {
@@ -97,6 +97,10 @@ void AgitatorSubsystem::agitatorRunPositionPid()
     if (!agitatorIsCalibrated)
     {
         agitatorPositionPid.reset();
+    }
+    else if (!agitatorMotor.isMotorOnline())
+    {
+        agitatorIsCalibrated = false;
     }
     else
     {
@@ -135,7 +139,7 @@ float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
            agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
 }
 
-void AgitatorSubsystem::setAgitatorDesiredAngle(const float& newAngle)
+void AgitatorSubsystem::setAgitatorDesiredAngle(float newAngle)
 {
     desiredAgitatorAngle = newAngle;
 }

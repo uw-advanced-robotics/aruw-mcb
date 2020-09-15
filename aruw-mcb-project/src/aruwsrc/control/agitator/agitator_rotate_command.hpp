@@ -86,12 +86,20 @@ public:
 
     const char* getName() const override { return "agitator rotate command"; }
 
+    /**
+     */
     void initialize() override;
 
+    /**
+     */
     void execute() override;
 
+    /**
+     */
     void end(bool interrupted) override;
 
+    /**
+     */
     bool isFinished() const override;
 };
 

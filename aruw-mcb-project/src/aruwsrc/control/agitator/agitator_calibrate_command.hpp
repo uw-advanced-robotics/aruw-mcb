@@ -39,16 +39,26 @@ namespace agitator
 class AgitatorCalibrateCommand : public aruwlib::control::Command
 {
 public:
+    /**
+     */
     explicit AgitatorCalibrateCommand(AgitatorSubsystem* agitator);
 
     const char* getName() const override { return "agitator calibrate command"; }
 
+    /**
+     */
     void initialize() override;
 
+    /**
+     */
     void execute() override;
 
+    /**
+     */
     void end(bool interrupted) override;
 
+    /**
+     */
     bool isFinished() const override;
 
 private:

@@ -28,6 +28,8 @@ namespace aruwsrc
 {
 namespace agitator
 {
+/**
+ */
 class ShootFastComprisedCommand : public ShootComprisedCommand
 {
 public:
@@ -43,6 +45,8 @@ public:
     }
 };
 
+/**
+ */
 class ShootSlowComprisedCommand : public ShootComprisedCommand
 {
 public:

@@ -30,9 +30,24 @@ namespace aruwsrc
 {
 namespace agitator
 {
+/**
+ * A comprised command that combines the agitator unjam and rotate commands and
+ * provides unjam monitoring to perform a "safe" agitator rotation.
+ */
 class ShootComprisedCommand : public aruwlib::control::ComprisedCommand
 {
 public:
+    /**
+     * @param[in] agitator The agitator to interact with.
+     * @param[in] agitatorChangeAngle The angle in radians that the agitator should
+     *      rotate
+     * @param[in] maxUnjamAngle See `AgitatorUnJamCommand`'s constructor for more details,
+     *      passed on directly to this command's constructor.
+     * @param[in] agitatorDesiredRotateTime The desired time it takes to rotate, in
+     *      milliseconds.
+     * @param[in] minAgitatorRotateTime The minimum expected rotation time, in milliseconds.
+     *      See `AgitatorRotateCommand`'s constructorfor more details.
+     */
     ShootComprisedCommand(
         aruwlib::Drivers* drivers,
         AgitatorSubsystem* agitator,
@@ -41,12 +56,20 @@ public:
         uint32_t agitatorDesiredRotateTime,
         uint32_t minAgitatorRotateTime);
 
+    /**
+     */
     void initialize() override;
 
+    /**
+     */
     void execute() override;
 
+    /**
+     */
     void end(bool interrupted) override;
 
+    /**
+     */
     bool isFinished() const override;
 
     const char* getName() const override { return "agitator shoot command"; }
