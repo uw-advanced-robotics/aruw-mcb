@@ -32,20 +32,56 @@ namespace aruwsrc
 {
 namespace agitator
 {
+/**
+ * Command that takes control of an agitator motor and attempts to unjam it. Whether
+ * or not the agitator is actually in a jam condition is not up for this command to
+ * determine. It is assumed that unjamming must occur.
+ */
 class AgitatorUnjamCommand : public aruwlib::control::Command
 {
 public:
+    /**
+     * @param[in] agitator The associated agitator subsystem to control.
+     * @param[in] agitatorMaxUnjamAngle The maximum backwards rotation of the agitator
+     *      to be used in an unjam step. A random backwards angle is subsequently choosen
+     *      each time the agitator unjam command attempts to rotate the agitator backwards.
+     * @param[in] agitatorMaxWaitTime The maximum amount of time the controller will
+     *      wait for the motor to rotate backwards before commencing with a forward rotation.
+     */
     AgitatorUnjamCommand(
         AgitatorSubsystem* agitator,
         float agitatorMaxUnjamAngle,
         uint32_t agitatorMaxWaitTime = AGITATOR_MAX_WAIT_TIME);
 
+    /**
+     * Restarts the timer that will used to determine when to rotate the agitator forward,
+     * defines a random unjam angle between [MIN_AGITATOR_UNJAM_ANGLE, agitatorUnjamAngleMax].
+     * Then a desired agitator angle is set based on the random angle calculated and the agitator's
+     * current position. The `salvationTimeout` is additionally restarted. This will be used to
+     * rapidly rotate the agitator backwards an entire rotation if the timeout expires while still
+     * attempting to unjam.
+     */
     void initialize() override;
 
+    /**
+     * Checks the salvation timer and goes into salvation mode if the timer has expired. Then
+     * checks the state of the unjam sequence. If in salvation mode, wait until the rotate timeout
+     * has expired (which is reset if in salvation mode to be `SALVATION_TIMEOUT_MS`). If in unjam
+     * back mode, check if the agitator unjam back timer has expired or if the agitator has reached
+     * the desired unjam back position and move into the reset state. If in the reset state, attempt
+     * to set the agitator's desired angle back to where it was to start. If the agitator fails to
+     * reach the position in some time, start the unjam process over again.
+     */
     void execute() override;
 
+    /**
+     * No-op
+     */
     void end(bool interrupted) override;
 
+    /**
+     * @return `true` if the current unjam state is `FINISHED`, `false` otherwise. 
+     */
     bool isFinished() const override;
 
     const char* getName() const override { return "agitator unjam command"; }
@@ -57,11 +93,15 @@ private:
 
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
-    // the maximum time that the command will wait from commanding the agitator to rotate
-    // backwards to rotating forwards again.
+    /**
+     * the maximum time that the command will wait from commanding the agitator to rotate
+     * backwards to rotating forwards again.
+     */
     static constexpr uint32_t AGITATOR_MAX_WAIT_TIME = 130;
 
-    // minimum angle the agitator will rotate backwards when unjamming
+    /**
+     * minimum angle the agitator will rotate backwards when unjamming
+     */
     static constexpr float MIN_AGITATOR_UNJAM_ANGLE = aruwlib::algorithms::PI / 4.0f;
 
     enum AgitatorUnjamState
@@ -74,12 +114,16 @@ private:
 
     AgitatorUnjamState currUnjamstate;
 
-    // time allowed to rotate back the the currAgitatorUnjamAngle
+    /**
+     * Time allowed to rotate back the the `currAgitatorUnjamAngle`.
+     */
     aruwlib::arch::MilliTimeout agitatorUnjamRotateTimeout;
 
     aruwlib::arch::MilliTimeout salvationTimeout;
 
-    // usually set to AGITATOR_MAX_WAIT_TIME, but can be user enabled
+    /**
+     * Usually set to `AGITATOR_MAX_WAIT_TIME`, but can be user enabled.
+     */
     uint32_t agitatorMaxWaitTime;
 
     AgitatorSubsystem* connectedAgitator;
