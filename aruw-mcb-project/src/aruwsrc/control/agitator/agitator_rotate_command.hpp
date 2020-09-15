@@ -116,7 +116,7 @@ private:
     uint32_t agitatorPrevRotateTime;
 
     bool agitatorSetToFinalAngle;
-};  // AgitatorRotateCommand
+};  // class AgitatorRotateCommand
 
 }  // namespace agitator
 
