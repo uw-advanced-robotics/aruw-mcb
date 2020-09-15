@@ -139,10 +139,7 @@ float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
            agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
 }
 
-void AgitatorSubsystem::setAgitatorDesiredAngle(float newAngle)
-{
-    desiredAgitatorAngle = newAngle;
-}
+void AgitatorSubsystem::setAgitatorDesiredAngle(float newAngle) { desiredAgitatorAngle = newAngle; }
 
 float AgitatorSubsystem::getAgitatorDesiredAngle() const { return desiredAgitatorAngle; }
 

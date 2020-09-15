@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __AGITATOR_UNJAM_COMMAND_HPP__
-#define __AGITATOR_UNJAM_COMMAND_HPP__
+#ifndef AGITATOR_UNJAM_COMMAND_HPP_
+#define AGITATOR_UNJAM_COMMAND_HPP_
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
@@ -80,7 +80,7 @@ public:
     void end(bool interrupted) override;
 
     /**
-     * @return `true` if the current unjam state is `FINISHED`, `false` otherwise. 
+     * @return `true` if the current unjam state is `FINISHED`, `false` otherwise.
      */
     bool isFinished() const override;
 
@@ -133,10 +133,10 @@ private:
     float currAgitatorUnjamAngle;
 
     float agitatorSetpointBeforeUnjam;
-};
+};  // class AgitatorUnjamCommand
 
 }  // namespace agitator
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // AGITATOR_UNJAM_COMMAND_HPP_

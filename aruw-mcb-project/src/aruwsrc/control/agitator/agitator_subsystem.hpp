@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __AGITATOR_SUBSYSTEM_HPP__
-#define __AGITATOR_SUBSYSTEM_HPP__
+#ifndef AGITATOR_SUBSYSTEM_HPP_
+#define AGITATOR_SUBSYSTEM_HPP_
 
 #include <aruwlib/architecture/timeout.hpp>
 #include <aruwlib/control/subsystem.hpp>
@@ -127,7 +127,7 @@ public:
     /**
      * Sets desired angle in radians of the agitator motor, relative to where the agitator
      * has been initialized.
-     * 
+     *
      * @param[in] newAngle The desired angle.
      */
     void setAgitatorDesiredAngle(float newAngle);
@@ -146,7 +146,7 @@ public:
     /**
      * Attempts to calibrate the agitator at the current position, such that
      * `getAgitatorAngle` will return 0 radians at this position.
-     * 
+     *
      * @return `true` if the agitator has been successfully calibrated, `false`
      *      otherwise.
      */
@@ -157,7 +157,7 @@ public:
      * starts the agitator unjam timer. Call when starting to rotate to a position. Use
      * `isAgitatorJammed` to check the timer. When the agitator has reached a the desired
      * position, stop the unjam timer by calling `armAgitatorUnjamTimer`.
-     * 
+     *
      * @note In addition to the `predictedRotateTime`, an `JAMMED_TOLERANCE_PERIOD` is added
      *      to the timer's timeout.
      * @param[in] predictedRotateTime The time that you expect that agitator to rotate.
@@ -240,10 +240,10 @@ private:
     void agitatorRunPositionPid();
 
     float getUncalibratedAgitatorAngle() const;
-};
+};  // class AgitatorSubsystem
 
 }  // namespace agitator
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // AGITATOR_SUBSYSTEM_HPP_
