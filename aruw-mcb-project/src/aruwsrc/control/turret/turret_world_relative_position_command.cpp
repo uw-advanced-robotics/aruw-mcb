@@ -79,7 +79,6 @@ void TurretWorldRelativePositionCommand::execute()
 
 void TurretWorldRelativePositionCommand::runYawPositionController()
 {
-
     yawTargetAngle.shiftValue(
         USER_YAW_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretYawInput());
 

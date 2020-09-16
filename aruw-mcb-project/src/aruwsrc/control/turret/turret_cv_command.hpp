@@ -54,7 +54,7 @@ public:
 
     /**
      * Attempts to acquire aim data from the vision system, setting the updated position if
-     * aquisition is successful. Also sends an aim request every `TIME_BETWEEN_CV_REQUESTS`. 
+     * aquisition is successful. Also sends an aim request every `TIME_BETWEEN_CV_REQUESTS`.
      */
     void execute() override;
 
