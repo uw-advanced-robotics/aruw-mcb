@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP__
-#define __TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP__
+#ifndef TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
+#define TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/contiguous_float.hpp>
@@ -32,20 +32,42 @@ namespace aruwsrc
 {
 namespace turret
 {
+/**
+ * Turret control, with the yaw gimbal using the world relative frame, such that the
+ * desired turret angle is independent of the direction that the chassis is facing
+ * or rotating.
+ */
 class TurretWorldRelativePositionCommand : public aruwlib::control::Command
 {
 public:
+    /**
+     * This command requires the turret subsystem from a command/subsystem framework perspective.
+     * The `ChassisSubsystem` is only used for for odometry information.
+     */
     TurretWorldRelativePositionCommand(
         aruwlib::Drivers *drivers,
         TurretSubsystem *subsystem,
-        chassis::ChassisSubsystem *chassis);
+        const chassis::ChassisSubsystem *chassis);
 
+    /**
+     * Initializes the initial mpu yaw angle, resets pitch/yaw PID parameters, sets the yaw target
+     * angel to the turret subsystem's yaw target.
+     */
     void initialize() override;
 
+    /**
+     * @return always `false`
+     */
     bool isFinished() const override { return false; }
 
+    /**
+     * Runs the yaw and pitch position PID controllers, using user input.
+     */
     void execute() override;
 
+    /**
+     * Sets the yaw target to the chassis relative desired angle.
+     */
     void end(bool) override;
 
     const char *getName() const override { return "turret world relative position command"; }
@@ -79,7 +101,7 @@ private:
     aruwlib::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
-    chassis::ChassisSubsystem *chassisSubsystem;
+    const chassis::ChassisSubsystem *chassisSubsystem;
 
     aruwlib::algorithms::ContiguousFloat yawTargetAngle;
 
@@ -95,10 +117,10 @@ private:
 
     float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
     float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
-};
+};  // class TurretWorldRelativePositionCommand
 
 }  // namespace turret
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_

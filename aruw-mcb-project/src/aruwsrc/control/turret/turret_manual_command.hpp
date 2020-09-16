@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TURRET_MANUAL_COMMAND_H__
-#define __TURRET_MANUAL_COMMAND_H__
+#ifndef TURRET_MANUAL_COMMAND_H_
+#define TURRET_MANUAL_COMMAND_H_
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/control/command.hpp>
@@ -67,10 +67,10 @@ private:
     float pitchVelocityTarget = 0;
 
     void updateTurretVelocity();
-};
+};  // class TurretManualCommand
 
 }  // namespace turret
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // TURRET_MANUAL_COMMAND_H_

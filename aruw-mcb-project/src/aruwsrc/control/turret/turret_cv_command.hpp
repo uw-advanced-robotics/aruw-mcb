@@ -33,27 +33,44 @@ namespace aruwsrc
 {
 namespace turret
 {
+/**
+ * A command that receives input from the vision system and aims the turret
+ * accordingly.
+ */
 class TurretCVCommand : public aruwlib::control::Command
 {
 public:
     TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem);
 
+    /**
+     * Sends an initial tracking request, resets pitch and yaw PID.
+     */
     void initialize() override;
 
+    /**
+     * @return `false` always.
+     */
     bool isFinished() const override { return false; }
 
+    /**
+     * Attempts to acquire aim data from the vision system, setting the updated position if
+     * aquisition is successful. Also sends an aim request every `TIME_BETWEEN_CV_REQUESTS`. 
+     */
     void execute() override;
 
-    void end(bool isInterrupted) override;
+    /**
+     * Send a signal to the vision to stop tarcking the target.
+     */
+    void end(bool) override;
 
     const char *getName() const override { return "turret cv command"; }
 
 private:
-    static constexpr float YAW_P = 4500.0f;  // 500.0f;
+    static constexpr float YAW_P = 4500.0f;
     static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 140.0f;  // 50.0f
+    static constexpr float YAW_D = 140.0f;
     static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 32000.0f;  // 16000.0f
+    static constexpr float YAW_MAX_OUTPUT = 32000.0f;
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
     static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;

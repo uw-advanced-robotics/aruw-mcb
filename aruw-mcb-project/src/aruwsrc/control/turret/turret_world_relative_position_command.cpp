@@ -31,7 +31,7 @@ namespace turret
 TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
     aruwlib::Drivers *drivers,
     TurretSubsystem *subsystem,
-    chassis::ChassisSubsystem *chassis)
+    const chassis::ChassisSubsystem *chassis)
     : drivers(drivers),
       turretSubsystem(subsystem),
       chassisSubsystem(chassis),

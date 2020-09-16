@@ -43,11 +43,7 @@ bool TurretInitCommand::isFinished() const
            turretSubsystem->isTurretOnline();
 }
 
-void TurretInitCommand::end(bool) {}
-
-void TurretInitCommand::execute() { updateTurretPosition(); }
-
-void TurretInitCommand::updateTurretPosition()
+void TurretInitCommand::execute()
 {
     initPitchPid.update(turretSubsystem->getPitchAngle().difference(pitchTargetAngle));
     initYawPid.update(turretSubsystem->getYawAngle().difference(yawTargetAngle));
