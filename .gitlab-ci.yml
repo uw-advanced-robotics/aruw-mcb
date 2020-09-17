@@ -1,10 +1,29 @@
+# Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+#
+# This file is part of aruw-mcb.
+#
+# aruw-mcb is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# aruw-mcb is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+
+default:
+  image: aruw/mcb-2020-gitlab-ci:2020-09-10.1
+
 before_script:
   - python -V # Print out python version for debugging
 
 clang-format:
-  image: aruw/mcb-2020-gitlab-ci:2020-05-25.1
   script:
-    - python3 /run-clang-format.py --clang-format-executable clang-format-10 -r mcb-2019-2020-project/src/ mcb-2019-2020-project/test/
+    - python3 /run-clang-format.py --clang-format-executable clang-format-10 -r aruw-mcb-project/src/ aruw-mcb-project/test/
   only:
   - merge_requests
   - master
@@ -13,32 +32,31 @@ clang-format:
   - schedules
 
 Weekly Build:
-  image: aruw/mcb-2020-gitlab-ci:2020-05-25.1
   variables:
     ARTIFACT_EXPIRE_TIME: 2 weeks
     ARTIFACT_PATH: isolated-deploy
     GIT_SUBMODULE_STRATEGY: recursive
   script:
-    - cd mcb-2019-2020-project
+    - cd aruw-mcb-project
     - rm -r modm && lbuild build
     # soldier
     - /usr/bin/env python3 $(which scons) build robot=TARGET_SOLDIER -j2 additional-ccflags=-Werror # Build the robot code
-    - cp build/hardware/release/mcb-2019-2020.elf ../$ARTIFACT_PATH/mcb_soldier.elf
+    - cp build/hardware/release/aruw-mcb.elf ../$ARTIFACT_PATH/mcb_soldier.elf
     # old soldier
     - /usr/bin/env python3 $(which scons) build robot=TARGET_OLD_SOLDIER -j2 additional-ccflags=-Werror
-    - cp build/hardware/release/mcb-2019-2020.elf ../$ARTIFACT_PATH/mcb_old_soldier.elf
+    - cp build/hardware/release/aruw-mcb.elf ../$ARTIFACT_PATH/mcb_old_soldier.elf
     # drone
     - /usr/bin/env python3 $(which scons) build robot=TARGET_DRONE -j2 additional-ccflags=-Werror
-    - cp build/hardware/release/mcb-2019-2020.elf ../$ARTIFACT_PATH/mcb_drone.elf
+    - cp build/hardware/release/aruw-mcb.elf ../$ARTIFACT_PATH/mcb_drone.elf
     # hero
     - /usr/bin/env python3 $(which scons) build robot=TARGET_HERO -j2 additional-ccflags=-Werror
-    - cp build/hardware/release/mcb-2019-2020.elf ../$ARTIFACT_PATH/mcb_hero.elf
+    - cp build/hardware/release/aruw-mcb.elf ../$ARTIFACT_PATH/mcb_hero.elf
     # sentinel
     - /usr/bin/env python3 $(which scons) build robot=TARGET_SENTINEL -j2 additional-ccflags=-Werror
-    - cp build/hardware/release/mcb-2019-2020.elf ../$ARTIFACT_PATH/mcb_sentinel.elf
+    - cp build/hardware/release/aruw-mcb.elf ../$ARTIFACT_PATH/mcb_sentinel.elf
     # engineer
     - /usr/bin/env python3 $(which scons) build robot=TARGET_ENGINEER -j2 additional-ccflags=-Werror
-    - cp build/hardware/release/mcb-2019-2020.elf ../$ARTIFACT_PATH/mcb_engineer.elf
+    - cp build/hardware/release/aruw-mcb.elf ../$ARTIFACT_PATH/mcb_engineer.elf
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-build"
     paths:
@@ -49,16 +67,26 @@ Weekly Build:
 
 # Only build the soldier target while doing merge verifications to save time
 Verification Build:
-  image: aruw/mcb-2020-gitlab-ci:2020-05-25.1
   script:
-    - cd mcb-2019-2020-project
+    - cd aruw-mcb-project
     - rm -r modm # Because lbuild clean is broken
     - lbuild build # Make sure that modm is setup for linux.
-    - cd sim-modm && sed -i -e 's/hosted-windows/hosted-linux/g' project.xml && lbuild build && cd -
     - /usr/bin/env python3 $(which scons) build robot=TARGET_SOLDIER -j2 additional-ccflags=-Werror # Build the robot code!
     - /usr/bin/env python3 $(which scons) run-tests robot=TARGET_SOLDIER -j2 # Build the code for simulation
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
+  only:
+    - merge_requests
+    - master
+    - develop
+  except:
+    - schedules
+
+Policy Checks:
+  script:
+    - /usr/local/bin/python3 ./scripts/check_singleton_drivers.py ./aruw-mcb-project/src/ 
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
   only:
     - merge_requests
     - master
