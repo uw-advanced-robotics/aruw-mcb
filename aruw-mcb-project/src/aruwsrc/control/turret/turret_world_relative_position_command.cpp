@@ -75,6 +75,7 @@ void TurretWorldRelativePositionCommand::execute()
 {
     turretSubsystem->updateCurrentTurretAngles();
     uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+    // TODO replace when issue #202 has been completed
     float dt;
     if (currTime < prevTime)
     {
@@ -83,7 +84,7 @@ void TurretWorldRelativePositionCommand::execute()
     }
     else
     {
-        dt = static_cast<float>(currTime - prevTime) / 1000.0f;
+        dt = static_cast<float>(currTime - prevTime);
     }
     prevTime = currTime;
     runYawPositionController(dt);

@@ -92,6 +92,7 @@ void TurretCVCommand::end(bool) { drivers->xavierSerial.stopTargetTracking(); }
 
 void TurretCVCommand::runYawPositionController()
 {
+    // TODO replace constant 2.0f when issue #202 has been completed
     // position controller based on gimbal angle
     float positionControllerError =
         turretSubsystem->getYawAngle().difference(turretSubsystem->getYawTarget());
@@ -103,6 +104,7 @@ void TurretCVCommand::runYawPositionController()
 
 void TurretCVCommand::runPitchPositionController()
 {
+    // TODO replace constant 2.0f when issue #202 has been completed
     // position controller based on turret pitch gimbal
     float positionControllerError =
         turretSubsystem->getPitchAngle().difference(turretSubsystem->getPitchTarget());
