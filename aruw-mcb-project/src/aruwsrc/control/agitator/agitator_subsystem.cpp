@@ -102,6 +102,7 @@ void AgitatorSubsystem::agitatorRunPositionPid()
     }
     else if (!agitatorMotor.isMotorOnline())
     {
+        agitatorPositionPid.reset();
         agitatorIsCalibrated = false;
     }
     else
