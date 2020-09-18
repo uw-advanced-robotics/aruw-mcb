@@ -48,9 +48,9 @@ public:
     void initialize() override;
 
     /**
-     * Gets remote x, y, and r commands, limits them, applies a rotation ratio to
-     * the x and y components of movement, and sets `setDesiredOutput` with the
-     * scaled <x, y, r> components.
+     * Gets remote x, y, and r commands, limits them, applies a rotation ratio between [0, 1]
+     * that is inversely proportional to the rotation component to the x and y components of
+     * movement, and sets `setDesiredOutput` with the scaled <x, y, r> components.
      */
     void execute() override;
 

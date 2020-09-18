@@ -34,31 +34,31 @@ namespace chassis
  * layout, e.g. not swerve drive or similar).
  *
  * Terminology:
- *     - anywhere 'x' is used, we mean this to be when looking down
+ *     - Anywhere 'x' is used, we mean this to be when looking down
  *       at the robot, the vertical axis, and likewise, 'y' is the
- *       horizontal axis of the robot
- *     - in other words, 'x' is the bow/stern and 'y' is starboard/
- *       port in boat terms
+ *       horizontal axis of the robot.
+ *     - In other words, 'x' is the bow/stern and 'y' is starboard/
+ *       port in boat terms.
  */
 class ChassisSubsystem : public aruwlib::control::Subsystem
 {
 public:
     /**
-     * Max wheel speed, measured in rpm of the encoder (rather than shaft)
-     * we use this for wheel speed since this is how dji's motors measures motor speed
+     * Max wheel speed, measured in RPM of the encoder (rather than shaft)
+     * we use this for wheel speed since this is how dji's motors measures motor speed.
      */
     static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;
 
     /**
-     * The minimum desired wheel speed for chassis rotation, measured in rpm before
-     * we start slowing down translational speed
+     * The minimum desired wheel speed for chassis rotation, measured in RPM before
+     * we start slowing down translational speed.
      */
     static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
 private:
 #if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
     /**
-     * Velocity pid gains and constants.
+     * Velocity PID gains and constants.
      */
     const float VELOCITY_PID_KP = 20.0f;
     const float VELOCITY_PID_KI = 0.0f;
@@ -73,62 +73,62 @@ private:
     static constexpr float VELOCITY_PID_MAX_OUTPUT = 16000.0f;
 
     /**
-     * Rotation pid:
-     * A PD controller for chassis autorotation pid that runs on error between
+     * Rotation PID:
+     * A PD controller for chassis autorotation PID that runs on error between
      * chassis rotation error.
      *
      * Description of controller:
-     * First runs kalman filter on the input angle error. All the error calculations in
-     * the controller uses this kalman filtered gain.
-     * Next, calculates the proportional term using the kalman filtered angle.
-     * Also uses kalman filtered angle and previous kalman filtered angle for the
-     * derivative term; however, the derivative term will be calculated only if the
-     * filtered angle is greater than MIN_ERROR_ROTATION_D.
-     * The wheel speed is calculated by then adding p and d terms and clamping the output
-     * to MAX_WHEEL_SPEED_SINGLE_MOTOR
+     * - First runs kalman filter on the input angle error. All the error calculations in
+     *   the controller uses this kalman filtered gain.
+     * - Next, calculates the proportional term using the kalman filtered angle.
+     *   Also uses kalman filtered angle and previous kalman filtered angle for the
+     *   derivative term; however, the derivative term will be calculated only if the
+     *   filtered angle is greater than `MIN_ERROR_ROTATION_D`.
+     * - The wheel speed is calculated by then adding p and d terms and clamping the output
+     *   to `MAX_WHEEL_SPEED_SINGLE_MOTOR`.
      *
-     * the P gain is specified by the user and thus is not specified below
+     * The P gain is specified by the user and thus is not specified below.
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
     /**
-     * derivative term used in chassis pid
+     * Derivative term used in chassis PID.
      */
     static constexpr float CHASSIS_REVOLVE_PID_KD = 500.0f;
     /**
-     * derivative max term
+     * Derivative max term.
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     /**
-     * the maximum revolve error before we start using the derivative term
+     * The maximum revolve error before we start using the derivative term.
      */
     static const int MIN_ERROR_ROTATION_D = 0;
 
     // mechanical chassis constants, all in mm
     /**
-     * radius of the wheels (mm)
+     * Radius of the wheels (mm).
      */
     static constexpr float WHEEL_RADIUS = 76.0f;
     /**
-     * distance from center of the two front wheels (mm)
+     * Distance from center of the two front wheels (mm).
      */
     static constexpr float WIDTH_BETWEEN_WHEELS_Y = 366.0f;
     /**
-     * distance from center of the front and rear wheels (mm)
+     * Distance from center of the front and rear wheels (mm).
      */
     static constexpr float WIDTH_BETWEEN_WHEELS_X = 366.0f;
     /**
-     * gimbal offset from the center of the chassis, see note above for explanation of x and y (mm)
+     * Gimbal offset from the center of the chassis, see note above for explanation of x and y (mm).
      */
     static constexpr float GIMBAL_X_OFFSET = 0.0f;
     /**
-     * @see GIMBAL_X_OFFSET
+     * @see `GIMBAL_X_OFFSET`.
      */
     static constexpr float GIMBAL_Y_OFFSET = 0.0f;
     static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 #elif defined(TARGET_HERO)
     /**
-     * velocity pid gains and constants
+     * Velocity PID gains and constants.
      */
     static constexpr float VELOCITY_PID_KP = 0.0f;
     static constexpr float VELOCITY_PID_KI = 0.0f;
@@ -137,49 +137,49 @@ private:
     static constexpr float VELOCITY_PID_MAX_OUTPUT = 0.0f;
 
     /**
-     * rotation pid gains and constants
-     * no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
-     * gain specified by user
+     * Rotation PID gains and constants.
+     * No i, max error sum the same as `MAX_WHEEL_SPEED_SINGLE_MOTOR`, proportional
+     * gain specified by user.
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
     /**
-     * derivative term used in chassis pid
+     * Derivative term used in chassis PID.
      */
     static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
     /**
-     * the maximum revolve error before we start using the derivative term
+     * The maximum revolve error before we start using the derivative term.
      */
     static const int MIN_ERROR_ROTATION_D = 0;
     /**
-     * derivative max term
+     * Derivative max term.
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     // mechanical chassis constants
     /**
-     * radius of the wheels
+     * Radius of the wheels.
      */
     static constexpr float WHEEL_RADIUS = 76.0f;
     /**
-     * distance from center of the two front wheels
+     * Distance from center of the two front wheels.
      */
     static constexpr float WIDTH_BETWEEN_WHEELS_Y = 517.0f;
     /**
-     * distance from center of the front and rear wheels
+     * Distance from center of the front and rear wheels.
      */
     static constexpr float WIDTH_BETWEEN_WHEELS_X = 600.0f;
     /**
-     * gimbal offset from the center of the chassis, see note above for explanation of x and y
+     * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
      */
     static constexpr float GIMBAL_X_OFFSET = 175.0f;
     /**
-     * @see GIMBAL_X_OFFSET
+     * @see `GIMBAL_X_OFFSET`.
      */
     static constexpr float GIMBAL_Y_OFFSET = 0.0f;
     static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 #else
     /**
-     * velocity pid gains and constants
+     * Velocity PID gains and constants.
      */
     static constexpr float VELOCITY_PID_KP = 0.0f;
     static constexpr float VELOCITY_PID_KI = 0.0f;
@@ -188,43 +188,43 @@ private:
     static constexpr float VELOCITY_PID_MAX_OUTPUT = 0.0f;
 
     /**
-     * rotation pid gains and constants
-     * no i, max error sum the same as MAX_WHEEL_SPEED_SINGLE_MOTOR, proportional
-     * gain specified by user
+     * Rotation PID gains and constants.
+     * No i, max error sum the same as `MAX_WHEEL_SPEED_SINGLE_MOTOR`, proportional
+     * gain specified by user.
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
     /**
-     * derivative term used in chassis pid
+     * Derivative term used in chassis PID.
      */
     static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
     /**
-     * derivative max term
+     * Derivative max term.
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
     /**
-     * the maximum revolve error before we start using the derivative term
+     * The maximum revolve error before we start using the derivative term.
      */
     static const int MIN_ERROR_ROTATION_D = 0;
 
     // mechanical chassis constants
     /**
-     * radius of the wheels
+     * Radius of the wheels.
      */
     static constexpr float WHEEL_RADIUS = 0.0f;
     /**
-     * distance from center of the two front wheels
+     * Distance from center of the two front wheels.
      */
     static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.0f;
     /**
-     * distance from center of the front and rear wheels
+     * Distance from center of the front and rear wheels.
      */
     static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.0f;
     /**
-     * gimbal offset from the center of the chassis, see note above for explanation of x and y
+     * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
      */
     static constexpr float GIMBAL_X_OFFSET = 0.0f;
     /**
-     * @see GIMBAL_X_OFFSET
+     * @see `GIMBAL_X_OFFSET`
      */
     static constexpr float GIMBAL_Y_OFFSET = 0.0f;
     static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
@@ -249,13 +249,13 @@ private:
     aruwlib::motor::DjiMotor rightFrontMotor;
     aruwlib::motor::DjiMotor rightBackMotor;
 
-    // wheel velocity pid variables
+    // wheel velocity PID variables
     modm::Pid<float> leftFrontVelocityPid;
     modm::Pid<float> leftBackVelocityPid;
     modm::Pid<float> rightFrontVelocityPid;
     modm::Pid<float> rightBackVelocityPid;
 
-    // translate all input into a desired wheel rpm when given
+    // translate all input into a desired wheel RPM when given
     float leftFrontRpm;
     float leftBackRpm;
     float rightFrontRpm;
@@ -331,7 +331,7 @@ public:
      * movement. See the class comment for x and y terminology.
      *
      * @param[in] x The desired velocity of the wheels to move in the x direction.
-     *      So if x=1000, the chassis algorithm will attempt to apply 1000 rpm to motors
+     *      So if x=1000, the chassis algorithm will attempt to apply 1000 RPM to motors
      *      in order to move the chassis forward.
      * @param[in] y The desired velocity of the wheels to move in the y direction.
      *      See x param for further description.
@@ -341,12 +341,12 @@ public:
     void setDesiredOutput(float x, float y, float r);
 
     /**
-     * run chassis rotation pid on some actual turret angle offset
+     * run chassis rotation PID on some actual turret angle offset
      *
      * @param currentAngleError the error as an angle. For autorotation,
      * error between gimbal and center of chassis. See description of the
      * controller above.
-     * @param kp[in] proportional gain for pid caluclation
+     * @param kp[in] proportional gain for PID caluclation
      *
      * @retval a desired rotation speed (wheel speed)
      */
@@ -372,7 +372,7 @@ public:
 private:
     /**
      * When you input desired x, y, an r values, this function translates
-     * and sets the rpm of individual chassis motors
+     * and sets the RPM of individual chassis motors.
      */
     void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
 
