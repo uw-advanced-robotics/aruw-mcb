@@ -31,20 +31,18 @@ namespace aruwsrc
 namespace agitator
 {
 /**
- * A comprised command that combines the agitator unjam and rotate commands and
- * provides unjam monitoring to perform a "safe" agitator rotation.
+ * A comprised command that combines the agitator unjam and rotate commands and provides
+ * unjam monitoring to perform a single agitator rotation with unjamming if necessary.
  */
 class ShootComprisedCommand : public aruwlib::control::ComprisedCommand
 {
 public:
     /**
      * @param[in] agitator The agitator to interact with.
-     * @param[in] agitatorChangeAngle The angle in radians that the agitator should
-     *      rotate
+     * @param[in] agitatorChangeAngle The angle in radians that the agitator should rotate.
      * @param[in] maxUnjamAngle See `AgitatorUnJamCommand`'s constructor for more details,
      *      passed on directly to this command's constructor.
-     * @param[in] agitatorDesiredRotateTime The desired time it takes to rotate, in
-     *      milliseconds.
+     * @param[in] agitatorDesiredRotateTime The desired time it takes to rotate, in milliseconds.
      * @param[in] minAgitatorRotateTime The minimum expected rotation time, in milliseconds.
      *      See `AgitatorRotateCommand`'s constructorfor more details.
      */
@@ -57,14 +55,13 @@ public:
         uint32_t minAgitatorRotateTime);
 
     /**
-     * Starts the agitator rotate command
+     * Starts the agitator rotate command.
      */
     void initialize() override;
 
     /**
-     * Checks if the agitator is unjammed and adds the unjam command
-     * if it is (in the process removing the rotate command), then
-     * runs the comprised command scheduler.
+     * Checks if the agitator is unjammed and adds the unjam command if it is (in the
+     * process removing the rotate command), then runs the comprised command scheduler.
      */
     void execute() override;
 
@@ -74,9 +71,9 @@ public:
     void end(bool interrupted) override;
 
     /**
-     * @return `true` if the agitator rotate command has finished and
-     *      the command is not unjamming or if the agitator unjam command
-     *      has finished and the command is unjamming, `false` otherwise.
+     * @return `true` if the agitator rotate command has finished and the command is
+     *      not unjamming or if the agitator unjam command has finished and the command
+     *      is unjamming, `false` otherwise.
      */
     bool isFinished() const override;
 

@@ -55,7 +55,7 @@ public:
 
     /**
      * Restarts the timer that will used to determine when to rotate the agitator forward,
-     * defines a random unjam angle between [MIN_AGITATOR_UNJAM_ANGLE, agitatorUnjamAngleMax].
+     * defines a random unjam angle between `[MIN_AGITATOR_UNJAM_ANGLE, agitatorUnjamAngleMax]`.
      * Then a desired agitator angle is set based on the random angle calculated and the agitator's
      * current position. The `salvationTimeout` is additionally restarted. This will be used to
      * rapidly rotate the agitator backwards an entire rotation if the timeout expires while still
@@ -94,13 +94,13 @@ private:
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = aruwlib::algorithms::PI / 16.0f;
 
     /**
-     * the maximum time that the command will wait from commanding the agitator to rotate
+     * The maximum time that the command will wait from commanding the agitator to rotate
      * backwards to rotating forwards again.
      */
     static constexpr uint32_t AGITATOR_MAX_WAIT_TIME = 130;
 
     /**
-     * minimum angle the agitator will rotate backwards when unjamming
+     * Minimum angle the agitator will rotate backwards when unjamming.
      */
     static constexpr float MIN_AGITATOR_UNJAM_ANGLE = aruwlib::algorithms::PI / 4.0f;
 
@@ -122,7 +122,7 @@ private:
     aruwlib::arch::MilliTimeout salvationTimeout;
 
     /**
-     * Usually set to `AGITATOR_MAX_WAIT_TIME`, but can be user enabled.
+     * Usually set to `AGITATOR_MAX_WAIT_TIME`, but can be user defined.
      */
     uint32_t agitatorMaxWaitTime;
 

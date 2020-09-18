@@ -29,8 +29,9 @@ namespace aruwsrc
 namespace agitator
 {
 /**
- * A class that extends the shoot comprised command and defines the system parameters
- * of the controller. The constants are choosen for speed of rotation.
+ * A class that extends the shoot comprised command and defines the system parameters of the
+ * comprised command. The constants are choosen for fast rotation speed for a soldier robot's
+ * agitator.
  */
 class ShootFastComprisedCommand : public ShootComprisedCommand
 {
@@ -48,8 +49,9 @@ public:
 };  // class ShootFastComprisedCommand
 
 /**
- * A class that extends the shoot comprised command and defines the system parameters
- * of the controller. The constants are choosen for slow rotation.
+ * A class that extends the shoot comprised command and defines the system parameters of the
+ * comprised command. The constants are choosen for slow rotation speed for a soldier robot's
+ * agitator.
  */
 class ShootSlowComprisedCommand : public ShootComprisedCommand
 {

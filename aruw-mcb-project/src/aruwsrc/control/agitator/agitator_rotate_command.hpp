@@ -42,20 +42,20 @@ class AgitatorRotateCommand : public aruwlib::control::Command
 {
 public:
     /**
-     * @param[in] agitator the agitator associated with the rotate command
-     * @param[in] agitatorAngleChange the desired rotation angle
-     * @param[in] agitatorRotateTime the time it takes to rotate the agitator to the desired angle
-     *      in milliseconds
+     * @param[in] agitator The agitator associated with the rotate command.
+     * @param[in] agitatorAngleChange The desired rotation angle, in radians.
+     * @param[in] agitatorRotateTime The time it takes to rotate the agitator to the desired angle
+     *      in milliseconds.
      * @param[in] agitatorPauseAfterRotateTime The time that the command will wait after rotating to
-     *      the desired angle before the command is considered complete
-     * @param[in] setpointTolerance the angle difference between current and desired angle when the
-     *      command will be considered to be completed (used in isFinished
-     *      function). Only set this if you want a different tolerance,
-     *      otherwise the above tolerance is usually fine.
+     *      the desired angle before the command is considered complete.
+     * @param[in] setpointTolerance The angle difference between current and desired angle when the
+     *      command will be considered to be completed (used in the `isFinished` function). Only set
+     *      this if you want a different tolerance. `AGITATOR_SETPOINT_TOLERANCE` is usually fine.
      * @param[in] agitatorSetToFinalAngle `true` if you would like the agitator on `end` to set to
-     *      the final desired rotation angle, `false` otherwise.
+     *      the final desired rotation angle, `false` otherwise (in which case the final desired
+     * angle set may be slightly shorter than the true desired angle change).
      * @attention the ramp value is calculated by finding the rotation speed
-     *      (agitatorAngleChange / agitatorRotateTime), and then multiplying this by
+     *      (\f$agitatorAngleChange / agitatorRotateTime\f$), and then multiplying this by
      *      the period (how often the ramp is called)
      */
     AgitatorRotateCommand(
