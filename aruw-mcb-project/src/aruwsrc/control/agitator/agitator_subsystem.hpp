@@ -41,8 +41,8 @@ class AgitatorSubsystem : public aruwlib::control::Subsystem
 {
 public:
 #if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
-    // position pid terms
-    // pid terms for soldier
+    // position PID terms
+    // PID terms for soldier
     static constexpr float PID_17MM_P = 170000.0f;
     static constexpr float PID_17MM_I = 0.0f;
     static constexpr float PID_17MM_D = 80.0f;
@@ -55,8 +55,8 @@ public:
     static constexpr bool isAgitatorInverted = false;
 
 #elif defined(TARGET_SENTINEL)
-    // position pid terms
-    // pid terms for sentinel
+    // position PID terms
+    // PID terms for sentinel
     static constexpr float PID_17MM_P = 170000.0f;
     static constexpr float PID_17MM_I = 0.0f;
     static constexpr float PID_17MM_D = 80.0f;
@@ -75,13 +75,13 @@ public:
 
 #elif defined(TARGET_HERO)
     /// \todo tune all the things
-    // pid terms for hero agitator 1
+    // PID terms for hero agitator 1
     static constexpr float PID_HERO1_P = 1500.0f;
     static constexpr float PID_HERO1_I = 500.0f;
     static constexpr float PID_HERO1_D = 7000.0f;
     static constexpr float PID_HERO1_MAX_ERR_SUM = 0.0f;
 
-    // pid terms for hero agitator 2
+    // PID terms for hero agitator 2
     static constexpr float PID_HERO2_P = 1500.0f;
     static constexpr float PID_HERO2_I = 500.0f;
     static constexpr float PID_HERO2_D = 7000.0f;
@@ -97,14 +97,14 @@ public:
 #endif
 
     /**
-     * agitator gear ratios of different motors, for determining shaft rotation angle
+     * Agitator gear ratios of different motors, for determining shaft rotation angle.
      */
     static constexpr float AGITATOR_GEAR_RATIO_M2006 = 36.0f;
     static constexpr float AGITATOR_GEAR_RATIO_GM3508 = 19.0f;
 
     /**
-     * Construct an agitator with the passed in PID parameters, gear ratio,
-     * and motor-specific identifiers.
+     * Construct an agitator with the passed in PID parameters, gear ratio, and motor-specific
+     * identifiers.
      */
     AgitatorSubsystem(
         aruwlib::Drivers* drivers,
@@ -119,8 +119,8 @@ public:
         bool isAgitatorInverted);
 
     /**
-     * Either attempts to initialize the agitator motor is it is not initialized
-     * or runs the agitator's position PID controller.
+     * Either attempts to initialize the agitator motor if it is not initialized or runs the
+     * agitator's position PID controller.
      */
     void refresh() override;
 
@@ -133,8 +133,8 @@ public:
     void setAgitatorDesiredAngle(float newAngle);
 
     /**
-     * @return The calibrated agitator angle, in radians. If the agitator is
-     *      uncalibrated, 0 radians is returned.
+     * @return The calibrated agitator angle, in radians. If the agitator is uncalibrated, 0
+     *      radians is returned.
      */
     float getAgitatorAngle() const;
 
@@ -188,14 +188,14 @@ public:
 
 private:
     /**
-     * we add on this amount of "tolerance" to the predicted rotate time since some times it
-     * takes longer than predicted and we only want to unjam when we are actually jammed
-     * measured in ms
+     * We add on this amount of "tolerance" to the predicted rotate time since some times it
+     * takes longer than predicted and we only want to unjam when we are actually jammed.
+     * Measured in ms.
      */
     static constexpr uint32_t JAMMED_TOLERANCE_PERIOD = 150;
 
     /**
-     * pid controller for running postiion pid on unwrapped agitator angle (in radians)
+     * PID controller for running postiion PID on unwrapped agitator angle (in radians).
      */
     aruwsrc::algorithms::TurretPid agitatorPositionPid;
 
@@ -208,22 +208,20 @@ private:
     float desiredAgitatorAngle;
 
     /**
-     * You can calibrate the agitator, which will set the current agitator angle
-     * to zero radians.
+     * You can calibrate the agitator, which will set the current agitator angle to zero radians.
      */
     float agitatorCalibratedZeroAngle;
 
     /**
-     * Whether or not the agitator has been calibrated yet. You should calibrate the
-     * agitator before using it.
+     * Whether or not the agitator has been calibrated yet. You should calibrate the agitator
+     * before using it.
      */
     bool agitatorIsCalibrated;
 
     /**
-     * A timeout that is used to determine whether or not the agitator is jammed.
-     * If the agitator has not reached the desired position in a certain time, the
-     * agitator is considered jammed.
-     * units: milliseconds
+     * A timeout that is used to determine whether or not the agitator is jammed. If the
+     * agitator has not reached the desired position in a certain time, the agitator is
+     * considered jammed. units: milliseconds
      */
     aruwlib::arch::MilliTimeout agitatorJammedTimeout;
 
@@ -233,7 +231,7 @@ private:
     uint32_t agitatorJammedTimeoutPeriod;
 
     /**
-     * motor gera ratio, so we use shaft angle rather than encoder angle.
+     * Motor gear ratio, so we use shaft angle rather than encoder angle.
      */
     float gearRatio;
 
