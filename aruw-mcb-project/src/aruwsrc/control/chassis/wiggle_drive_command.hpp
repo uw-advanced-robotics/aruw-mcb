@@ -33,7 +33,8 @@ namespace chassis
 {
 /**
  * A command that automatically rotates the chassis back and forth, following
- * a sine wave, while still allowing for translational movement.
+ * a sine wave centered around the yaw gimbal angle, while still allowing for
+ * translational movement.
  */
 class WiggleDriveCommand : public aruwlib::control::Command
 {
@@ -51,14 +52,14 @@ public:
 
     /**
      * Calculates the correct start time such that an applied sine wave is in line
-     * with the current turret angle from center.
+     * with the current turret angle from center when the algorithm starts.
      */
     void initialize() override;
 
     /**
      * Updates the sine wave used for wiggling, updates the rotation PD controller,
      * and applies a rotation matrix to the <x, y> vector before passing these to
-     * the chassis subsystem's `setDesiredOutput`.
+     * the chassis subsystem's `setDesiredOutput` function.
      */
     void execute() override;
 
