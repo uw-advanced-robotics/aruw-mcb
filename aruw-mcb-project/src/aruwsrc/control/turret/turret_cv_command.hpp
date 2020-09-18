@@ -34,8 +34,8 @@ namespace aruwsrc
 namespace turret
 {
 /**
- * A command that receives input from the vision system via the `XavierSerial` driver and aims the turret
- * accordingly.
+ * A command that receives input from the vision system via the `XavierSerial` driver and aims the
+ * turret accordingly.
  */
 class TurretCVCommand : public aruwlib::control::Command
 {
@@ -55,8 +55,8 @@ public:
     /**
      * Attempts to acquire aim data from the vision system, setting the updated position if
      * Attempts to acquire aim data from the vision system, setting an updated desired position if
-     * aquisition is successful. Also runs the position PID controller responsible for control of the turret
-     * and sends an aim request every `TIME_BETWEEN_CV_REQUESTS`.
+     * aquisition is successful. Also runs the position PID controller responsible for control of
+     * the turret and sends an aim request every `TIME_BETWEEN_CV_REQUESTS`.
      */
     void execute() override;
 

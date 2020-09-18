@@ -61,7 +61,8 @@ public:
     bool isFinished() const override { return false; }
 
     /**
-     * Runs the yaw and pitch position PID controllers, using user input to update the desired position.
+     * Runs the yaw and pitch position PID controllers, using user input to update the desired
+     * position.
      */
     void execute() override;
 
