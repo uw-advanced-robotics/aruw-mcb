@@ -35,7 +35,7 @@ namespace turret
 /**
  * Turret control, with the yaw gimbal using the world relative frame, such that the
  * desired turret angle is independent of the direction that the chassis is facing
- * or rotating.
+ * or rotating. Assumes the Mpu6500 used for calculations is mounted on the chassis.
  */
 class TurretWorldRelativePositionCommand : public aruwlib::control::Command
 {
@@ -50,8 +50,8 @@ public:
         const chassis::ChassisSubsystem *chassis);
 
     /**
-     * Initializes the initial mpu yaw angle, resets pitch/yaw PID parameters, sets the yaw target
-     * angel to the turret subsystem's yaw target.
+     * Initializes the initial IMU yaw angle, resets pitch/yaw PID parameters, sets the yaw target
+     * angle to the turret subsystem's yaw target.
      */
     void initialize() override;
 
@@ -61,7 +61,7 @@ public:
     bool isFinished() const override { return false; }
 
     /**
-     * Runs the yaw and pitch position PID controllers, using user input.
+     * Runs the yaw and pitch position PID controllers, using user input to update the desired position.
      */
     void execute() override;
 

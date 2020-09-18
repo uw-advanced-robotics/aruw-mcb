@@ -45,8 +45,8 @@ bool TurretInitCommand::isFinished() const
 
 void TurretInitCommand::execute()
 {
-    initPitchPid.update(turretSubsystem->getPitchAngle().difference(pitchTargetAngle));
-    initYawPid.update(turretSubsystem->getYawAngle().difference(yawTargetAngle));
+    initPitchPid.update(turretSubsystem->getPitchAngle().difference(PITCH_TARGET_ANGLE));
+    initYawPid.update(turretSubsystem->getYawAngle().difference(YAW_TARGET_ANGLE));
     turretSubsystem->setPitchMotorOutput(initPitchPid.getValue());
     turretSubsystem->setYawMotorOutput(initYawPid.getValue());
 }

@@ -68,8 +68,8 @@ private:
     static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
     static constexpr float PITCH_MAX_OUTPUT = 16000;
 
-    static constexpr float pitchTargetAngle = 90.0f;
-    static constexpr float yawTargetAngle = 90.0f;
+    static constexpr float PITCH_TARGET_ANGLE = 90.0f;
+    static constexpr float YAW_TARGET_ANGLE = 90.0f;
 
     TurretSubsystem *turretSubsystem;
 

@@ -31,6 +31,8 @@ namespace aruwsrc
 namespace turret
 {
 /**
+ * Stores software necessary for interacting with two gimbals that control the pitch and
+ * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
  */
 class TurretSubsystem : public aruwlib::control::Subsystem
 {
@@ -82,14 +84,14 @@ public:
      * Attempts to set desired yaw output to the passed in value. If the turret is out of
      * bounds, the output is limited.
      *
-     * @param[in] out The desired yaw output, limited to [-30000, 30000]
+     * @param[in] out The desired yaw output, limited to `[-30000, 30000]`.
      */
     void setYawMotorOutput(float out);
     /**
      * Attempts to set desired pitch output to the passed in value. If the turret is out of
      * bounds, the output is limited.
      *
-     * @param[in] out The desired pitch output, limited to [-30000, 30000]
+     * @param[in] out The desired pitch output, limited to `[-30000, 30000]`.
      */
     void setPitchMotorOutput(float out);
 
