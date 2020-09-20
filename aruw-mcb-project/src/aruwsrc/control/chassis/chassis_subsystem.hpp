@@ -324,6 +324,8 @@ public:
     {
     }
 
+    void initialize() override;
+
     /**
      * Updates the desired wheel RPM based on the passed in x, y, and r components of
      * movement. See the class comment for x and y terminology.
