@@ -54,27 +54,12 @@ public:
         uint32_t agitatorDesiredRotateTime,
         uint32_t minAgitatorRotateTime);
 
-    /**
-     * Starts the agitator rotate command.
-     */
     void initialize() override;
 
-    /**
-     * Checks if the agitator is unjammed and adds the unjam command if it is (in the
-     * process removing the rotate command), then runs the comprised command scheduler.
-     */
     void execute() override;
 
-    /**
-     * Removes all commands from the comprised command scheduler.
-     */
     void end(bool interrupted) override;
 
-    /**
-     * @return `true` if the agitator rotate command has finished and the command is
-     *      not unjamming or if the agitator unjam command has finished and the command
-     *      is unjamming, `false` otherwise.
-     */
     bool isFinished() const override;
 
     const char* getName() const override { return "agitator shoot command"; }

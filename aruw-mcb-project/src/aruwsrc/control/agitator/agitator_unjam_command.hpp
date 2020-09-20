@@ -53,35 +53,12 @@ public:
         float agitatorMaxUnjamAngle,
         uint32_t agitatorMaxWaitTime = AGITATOR_MAX_WAIT_TIME);
 
-    /**
-     * Restarts the timer that will used to determine when to rotate the agitator forward,
-     * defines a random unjam angle between `[MIN_AGITATOR_UNJAM_ANGLE, agitatorUnjamAngleMax]`.
-     * Then a desired agitator angle is set based on the random angle calculated and the agitator's
-     * current position. The `salvationTimeout` is additionally restarted. This will be used to
-     * rapidly rotate the agitator backwards an entire rotation if the timeout expires while still
-     * attempting to unjam.
-     */
     void initialize() override;
 
-    /**
-     * Checks the salvation timer and goes into salvation mode if the timer has expired. Then
-     * checks the state of the unjam sequence. If in salvation mode, wait until the rotate timeout
-     * has expired (which is reset if in salvation mode to be `SALVATION_TIMEOUT_MS`). If in unjam
-     * back mode, check if the agitator unjam back timer has expired or if the agitator has reached
-     * the desired unjam back position and move into the reset state. If in the reset state, attempt
-     * to set the agitator's desired angle back to where it was to start. If the agitator fails to
-     * reach the position in some time, start the unjam process over again.
-     */
     void execute() override;
 
-    /**
-     * No-op
-     */
     void end(bool interrupted) override;
 
-    /**
-     * @return `true` if the current unjam state is `FINISHED`, `false` otherwise.
-     */
     bool isFinished() const override;
 
     const char* getName() const override { return "agitator unjam command"; }

@@ -68,26 +68,12 @@ public:
 
     const char* getName() const override { return "agitator rotate command"; }
 
-    /**
-     * Initializes the ramp, resets jam timer and min rotate timers.
-     */
     void initialize() override;
 
-    /**
-     * Updates ramp, sets desired position,
-     */
     void execute() override;
 
-    /**
-     * Updates the final angle depending on if the agitator is jammed or whether or
-     * not agitatorSetToFinalAngle is `true`.
-     */
     void end(bool interrupted) override;
 
-    /**
-     * @return `true` if the agitator has reached the setpoint within the specified
-     *      tolerance and the min agitator rotate timer has expired, `false` otherwise.
-     */
     bool isFinished() const override;
 
 private:

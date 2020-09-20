@@ -118,10 +118,6 @@ public:
         aruwlib::can::CanBus agitatorCanBusId,
         bool isAgitatorInverted);
 
-    /**
-     * Either attempts to initialize the agitator motor if it is not initialized or runs the
-     * agitator's position PID controller.
-     */
     void refresh() override;
 
     /**

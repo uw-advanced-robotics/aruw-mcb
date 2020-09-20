@@ -46,24 +46,12 @@ public:
 
     const char* getName() const override { return "agitator calibrate command"; }
 
-    /**
-     * Calls `agitatorCalibrateHere`.
-     */
     void initialize() override;
 
-    /**
-     * Calls `agitatorCalibrateHere`.
-     */
     void execute() override;
 
-    /**
-     * No-op
-     */
     void end(bool interrupted) override;
 
-    /**
-     * @return `true` if the agitator has been calibrated, `false` otherwise.
-     */
     bool isFinished() const override;
 
 private:
