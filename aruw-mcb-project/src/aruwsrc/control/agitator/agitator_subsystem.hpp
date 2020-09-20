@@ -118,6 +118,8 @@ public:
         aruwlib::can::CanBus agitatorCanBusId,
         bool isAgitatorInverted);
 
+    void initialize() override;
+
     void refresh() override;
 
     /**
