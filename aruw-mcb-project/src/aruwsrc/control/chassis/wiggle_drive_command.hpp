@@ -50,10 +50,6 @@ public:
         addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
     }
 
-    /**
-     * Calculates the correct start time such that an applied sine wave is in line
-     * with the current turret angle from center when the algorithm starts.
-     */
     void initialize() override;
 
     /**
@@ -63,14 +59,8 @@ public:
      */
     void execute() override;
 
-    /**
-     * Call `setDesiredOutput(0, 0, 0)`.
-     */
     void end(bool) override;
 
-    /**
-     * @return `false`.
-     */
     bool isFinished() const override;
 
     const char* getName() const override { return "chassis wiggle drive command"; }

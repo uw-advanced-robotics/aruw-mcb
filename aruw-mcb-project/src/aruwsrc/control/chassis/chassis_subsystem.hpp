@@ -339,7 +339,7 @@ public:
     void setDesiredOutput(float x, float y, float r);
 
     /**
-     * run chassis rotation PID on some actual turret angle offset
+     * Run chassis rotation PID on some actual turret angle offset.
      *
      * @param currentAngleError the error as an angle. For autorotation,
      * error between gimbal and center of chassis. See description of the
@@ -350,9 +350,6 @@ public:
      */
     float chassisSpeedRotationPID(float currentAngleError, float kp);
 
-    /**
-     * Updates the PID controllers controlling the velocity of the wheels.
-     */
     void refresh() override;
 
     /**

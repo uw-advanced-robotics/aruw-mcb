@@ -42,9 +42,6 @@ public:
         addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
     }
 
-    /**
-     * No-op.
-     */
     void initialize() override;
 
     /**
@@ -54,14 +51,8 @@ public:
      */
     void execute() override;
 
-    /**
-     * Calls `setDesiredOutput(0, 0, 0)`.
-     */
     void end(bool) override;
 
-    /**
-     * @return `false`.
-     */
     bool isFinished() const override;
 
     const char* getName() const override { return "chassis drive command"; }

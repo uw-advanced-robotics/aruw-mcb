@@ -51,9 +51,6 @@ public:
         addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
     }
 
-    /**
-     * No-ops.
-     */
     void initialize() override;
 
     /**
@@ -64,14 +61,8 @@ public:
      */
     void execute() override;
 
-    /**
-     * Calls `setDesiredRpm(0, 0, 0)`.
-     */
     void end(bool) override;
 
-    /**
-     * @return `false`.
-     */
     bool isFinished() const override;
 
     const char* getName() const override { return "chassis autorotate command"; }
