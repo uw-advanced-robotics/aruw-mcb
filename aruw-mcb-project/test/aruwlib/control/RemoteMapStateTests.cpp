@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include <aruwlib/communication/remote.hpp>
 #include <aruwlib/control/RemoteMapState.hpp>
 #include <gtest/gtest.h>
@@ -177,8 +196,8 @@ TEST(RemoteMapState, operator_equals_all_states_initialized_same_equal)
     ms2.initLMouseButton();
     ms2.initRMouseButton();
     ms2.initLSwitch(Remote::SwitchState::DOWN);
-    ms2.initRSwitch(Remote::SwitchState::MID);  
-  
+    ms2.initRSwitch(Remote::SwitchState::MID);
+
     EXPECT_EQ(ms1, ms2);
     EXPECT_FALSE(ms1 != ms2);
 }
@@ -196,8 +215,8 @@ TEST(RemoteMapState, operator_equals_all_states_initialized_not_same_not_equal)
     ms2.initNegKeys(~2);
     ms2.initRMouseButton();
     ms2.initLSwitch(Remote::SwitchState::MID);
-    ms2.initRSwitch(Remote::SwitchState::UP);   
- 
+    ms2.initRSwitch(Remote::SwitchState::UP);
+
     EXPECT_NE(ms1, ms2);
     EXPECT_TRUE(ms1 != ms2);
 }
