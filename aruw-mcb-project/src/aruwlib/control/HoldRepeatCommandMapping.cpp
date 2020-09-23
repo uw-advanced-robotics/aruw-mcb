@@ -37,10 +37,17 @@ void HoldRepeatCommandMapping::executeCommandMapping(const RemoteMapState &currS
                 drivers->commandScheduler.addCommand(cmd);
             }
         }
+        commandsScheduled = true;
     }
     else
     {
-        removeCommands();
+        // While comments may not be scheduled this prevents the unnecessary call of the
+        // removeCommand function from the scheduler.
+        if (commandsScheduled)
+        {
+            removeCommands();
+            commandsScheduled = false;
+        }
     }
 }
 }  // namespace control

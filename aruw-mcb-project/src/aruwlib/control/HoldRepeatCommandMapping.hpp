@@ -48,7 +48,8 @@ public:
         Drivers *drivers,
         const std::vector<Command *> cmds,
         const RemoteMapState &rms)
-        : CommandMapping(drivers, cmds, rms)
+        : CommandMapping(drivers, cmds, rms),
+          commandsScheduled(false)
     {
     }
 
@@ -64,6 +65,9 @@ public:
      * @param[in] currState The current RemoteMapState of the remote.
      */
     void executeCommandMapping(const RemoteMapState &currState) override;
+
+private:
+    bool commandsScheduled;
 };  // class HoldRepeatCommandMapping
 }  // namespace control
 }  // namespace aruwlib
