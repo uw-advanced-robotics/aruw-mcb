@@ -128,6 +128,8 @@ public:
      */
     mockable int getSize() const { return commandsToRun.size(); }
 
+    mockable const CommandMapping *getAtIndex(std::size_t index) const;
+
 private:
     friend class CommandMapperFormatGenerator;
     /**

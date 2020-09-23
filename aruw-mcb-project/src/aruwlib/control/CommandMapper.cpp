@@ -114,5 +114,13 @@ void CommandMapper::addPressMapping(
     addMap(new PressCommandMapping(drivers, commands, mapping));
 }
 
+const CommandMapping *CommandMapper::getAtIndex(std::size_t index) const
+{
+    if (index >= commandsToRun.size())
+    {
+        return nullptr;
+    }
+    return commandsToRun[index];
+}
 }  // namespace control
 }  // namespace aruwlib
