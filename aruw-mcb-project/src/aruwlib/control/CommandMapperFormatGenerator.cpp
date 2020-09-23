@@ -27,51 +27,53 @@ const std::vector<std::string> CommandMapperFormatGenerator::generateMappings() 
 {
     std::vector<std::string> out;
 
-    for (const auto &mapping : mapper.commandsToRun)
+    for (std::size_t i = 0; i < mapper.getSize(); i++)
     {
+        const CommandMapping *mapping = mapper.getAtIndex(i);
         out.push_back(
-            formattedMapping(mapping->mapState) + ":\t" +
-            formattedMappedCommands(mapping->mappedCommands));
+            formattedRemoteMapState(mapping->getAssociatedRemoteMapState()) + ":\t" +
+            formattedMappedCommands(mapping->getAssociatedCommands()));
     }
     return out;
 }
 
-const std::string CommandMapperFormatGenerator::formattedMapping(const RemoteMapState &ms) const
+const std::string CommandMapperFormatGenerator::formattedRemoteMapState(
+    const RemoteMapState &ms) const
 {
     std::string out = "[";
-    if (ms.keys != 0)
+    if (ms.getKeys() != 0)
     {
         out += "keys: ";
-        out += keyMapToString(ms.keys);
+        out += keyMapToString(ms.getKeys());
         out += ", ";
     }
-    if (ms.negKeys != 0)
+    if (ms.getNegKeys() != 0)
     {
         out += "neg keys: ";
-        out += keyMapToString(ms.negKeys);
+        out += keyMapToString(ms.getNegKeys());
         out += ", ";
     }
-    if (ms.lMouseButton)
+    if (ms.getLMouseButton())
     {
         out += "left mouse pressed, ";
     }
-    if (ms.rMouseButton)
+    if (ms.getRMouseButton())
     {
         out += "right mouse pressed, ";
     }
-    if (ms.getRSwitch() != Remote::SwitchState::UNKNOWN)
-    {
-        out += "left switch: ";
-        out += switchStateToString(ms.lSwitch);
-        out += ", ";
-    }
     if (ms.getLSwitch() != Remote::SwitchState::UNKNOWN)
     {
-        out += "right switch: ";
-        out += switchStateToString(ms.rSwitch);
+        out += "left switch: ";
+        out += switchStateToString(ms.getLSwitch());
         out += ", ";
     }
-    out = out.length() == 1 ? " none " : out.substr(0, out.length() - 2);
+    if (ms.getRSwitch() != Remote::SwitchState::UNKNOWN)
+    {
+        out += "right switch: ";
+        out += switchStateToString(ms.getRSwitch());
+        out += ", ";
+    }
+    out = out.length() == 1 ? "[none" : out.substr(0, out.length() - 2);
     return out + "]";
 }
 
@@ -89,6 +91,10 @@ const std::string CommandMapperFormatGenerator::formattedMappedCommands(
         }
         out += cmd->getName();
         first = false;
+    }
+    if (out.size() == 1)
+    {
+        out = "[none";
     }
     return out + "]";
 }

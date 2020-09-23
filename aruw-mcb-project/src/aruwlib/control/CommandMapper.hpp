@@ -126,12 +126,11 @@ public:
     /**
      * @return the number of command mappings in the mapper.
      */
-    mockable int getSize() const { return commandsToRun.size(); }
+    mockable std::size_t getSize() const { return commandsToRun.size(); }
 
     mockable const CommandMapping *getAtIndex(std::size_t index) const;
 
 private:
-    friend class CommandMapperFormatGenerator;
     /**
      * A helper function that verifies the mapping passed in can be added to `commandsToRun`
      * and if possible adds the mapping.

@@ -105,6 +105,10 @@ public:
         return state1.getNegKeys() == (state1.getNegKeys() & state2.getKeys());
     }
 
+    const RemoteMapState &getAssociatedRemoteMapState() const { return mapState; }
+
+    const std::vector<Command *> &getAssociatedCommands() const { return mappedCommands; }
+
 protected:
     /**
      * The RemoteMapState specified when constructing the CommandMapping.
@@ -127,8 +131,6 @@ protected:
      * Removes all the `Command`s from the main CommandScheduler.
      */
     void removeCommands();
-
-    friend class CommandMapperFormatGenerator;
 };  // class CommandMapping
 }  // namespace control
 }  // namespace aruwlib

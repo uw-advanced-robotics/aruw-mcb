@@ -49,7 +49,7 @@ public:
 private:
     const CommandMapper &mapper;
 
-    const std::string formattedMapping(const RemoteMapState &ms) const;
+    const std::string formattedRemoteMapState(const RemoteMapState &ms) const;
     const std::string formattedMappedCommands(const std::vector<Command *> mc) const;
     constexpr std::string_view switchStateToString(Remote::SwitchState state) const;
     const std::string keyMapToString(uint16_t keys) const;

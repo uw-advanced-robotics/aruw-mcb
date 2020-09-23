@@ -206,8 +206,6 @@ public:
     Remote::SwitchState getRSwitch() const { return rSwitch; }
 
 private:
-    friend class CommandMapperFormatGenerator;
-
     Remote::SwitchState lSwitch = Remote::SwitchState::UNKNOWN;
 
     Remote::SwitchState rSwitch = Remote::SwitchState::UNKNOWN;
