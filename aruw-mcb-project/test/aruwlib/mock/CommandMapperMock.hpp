@@ -66,7 +66,7 @@ public:
         (const aruwlib::control::RemoteMapState &mapping,
          const std::vector<aruwlib::control::Command *> commands),
         (override));
-    MOCK_METHOD(int, getSize, (), (const override));
+    MOCK_METHOD(std::size_t, getSize, (), (const override));
 };  // class CommandMapperMock
 }  // namespace mock
 }  // namespace aruwlib

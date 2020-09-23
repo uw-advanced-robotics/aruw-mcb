@@ -85,7 +85,7 @@ TEST(
     TestCommand tc2(&ts);
     CommandMapper cm(&drivers);
     RemoteMapState ms(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
-    EXPECT_CALL(drivers.errorController, addToErrorList);
+    EXPECT_CALL(drivers.errorController, addToErrorList).Times(1);
 
     cm.addHoldMapping(ms, {&tc1});
     cm.addHoldMapping(ms, {&tc2});
@@ -105,7 +105,6 @@ TEST(CommandMapper, addHoldRepeatMapping_successfully_adds_mapping)
     const HoldRepeatCommandMapping *holdRepeatMappingPtr =
         dynamic_cast<const HoldRepeatCommandMapping *>(cm.getAtIndex(0));
     EXPECT_NE(nullptr, holdRepeatMappingPtr);
-    std::cout << holdRepeatMappingPtr << std::endl;
     EXPECT_EQ(mappingForCompare, *holdRepeatMappingPtr);
 }
 
@@ -150,6 +149,7 @@ TEST(
     TestCommand tc(&ts);
     CommandMapper cm(&drivers);
     RemoteMapState ms(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    EXPECT_CALL(drivers.errorController, addToErrorList).Times(1);
 
     cm.addHoldMapping(ms, {&tc});
     cm.addHoldMapping(ms, {&tc});

@@ -178,7 +178,7 @@
 //     }
 
 //     SECTION(
-//         "Case 2: the map state for the keys match and one of the neg key matches, \
+//         "Case 2: the map state for the keys match and one of the neg key matches,
 //         still added to the scheduler.")
 //     {
 //         ri.key = KEY_MAPPING | (0x1 << static_cast<uint16_t>(Remote::Key::A));
@@ -215,7 +215,7 @@
 //     }
 
 //     SECTION(
-//         "Case 4: the map state matches initially, so the command is added, but then \
+//         "Case 4: the map state matches initially, so the command is added, but then
 //         the map state changes such that the neg key matches and the command is removed")
 //     {
 //         ri.key = KEY_MAPPING;
@@ -231,8 +231,8 @@
 //     }
 
 //     SECTION(
-//         "Case 5: the map state matches initially, so the command is added, \
-//         and the command expires, but when it should be added again, the neg key \
+//         "Case 5: the map state matches initially, so the command is added,
+//         and the command expires, but when it should be added again, the neg key
 //         matches so the command isn't added")
 //     {
 //         ri.key = KEY_MAPPING;
@@ -274,7 +274,7 @@
 //     Remote::RemoteInfo ri;
 
 //     SECTION(
-//         "Switch random switch minus moving the left switch down. The \
+//         "Switch random switch minus moving the left switch down. The
 //         command should not be added")
 //     {
 //         ri.leftSwitch = Remote::SwitchState::MID;
