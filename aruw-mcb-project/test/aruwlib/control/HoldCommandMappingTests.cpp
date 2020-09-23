@@ -255,7 +255,6 @@ TEST(
     TestSubsystem ts(&drivers);
     TestCommand tc1(&ts);
     TestCommand tc2(&ts);
-
     RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
     RemoteMapState ms2(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
     HoldCommandMapping commandMapping(&drivers, {&tc1, &tc2}, ms1);

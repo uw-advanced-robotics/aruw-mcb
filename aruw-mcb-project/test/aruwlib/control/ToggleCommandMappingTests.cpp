@@ -211,17 +211,21 @@ TEST(
     EXPECT_CALL(drivers.commandScheduler, removeCommand(&tc, false)).Times(2);
 
     commandMapping.executeCommandMapping(ms2);
-    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
+    ms2 = RemoteMapState(
+        {Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
     commandMapping.executeCommandMapping(ms2);  // command is now removed
     ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B});
     commandMapping.executeCommandMapping(ms2);  // command is now added
     ms2 = RemoteMapState();
     commandMapping.executeCommandMapping(ms2);
-    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
+    ms2 = RemoteMapState(
+        {Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
     commandMapping.executeCommandMapping(ms2);  // command is now removed
 }
 
-TEST(ToggleCommandMapping, executeCommandMapping_after_neg_key_removes_command_toggle_works_as_expected)
+TEST(
+    ToggleCommandMapping,
+    executeCommandMapping_after_neg_key_removes_command_toggle_works_as_expected)
 {
     Drivers drivers;
     TestSubsystem ts(&drivers);
@@ -233,7 +237,8 @@ TEST(ToggleCommandMapping, executeCommandMapping_after_neg_key_removes_command_t
     EXPECT_CALL(drivers.commandScheduler, removeCommand(&tc, false)).Times(2);
 
     commandMapping.executeCommandMapping(ms2);
-    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
+    ms2 = RemoteMapState(
+        {Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
     commandMapping.executeCommandMapping(ms2);  // command is now removed
     ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::E});
     commandMapping.executeCommandMapping(ms2);  // command is now added

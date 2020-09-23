@@ -17,338 +17,331 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// #include <iostream>
+#include <aruwlib/Drivers.hpp>
+#include <aruwlib/control/HoldRepeatCommandMapping.hpp>
+#include <aruwlib/control/RemoteMapState.hpp>
+#include <gtest/gtest.h>
 
-// #include <aruwlib/Drivers.hpp>
-// #include <aruwlib/control/CommandMapper.hpp>
-// #include <aruwlib/control/CommandMapping.hpp>
-// #include <aruwlib/control/RemoteMapState.hpp>
+#include "TestCommand.hpp"
+#include "TestSubsystem.hpp"
 
-// #include "catch/catch.hpp"
+using namespace aruwlib::control;
+using aruwlib::Drivers;
+using aruwlib::Remote;
 
-// #include "TestCommand.hpp"
-// #include "TestSubsystem.hpp"
+// A HoldRepetCommandMapping should behave in every way like a HoldCommandMapping except in cases
+// where the command is completed while the hold mapping is still valid.
 
-// using namespace aruwlib::control;
-// using aruwlib::Drivers;
-// using aruwlib::Remote;
+// Adding command with switch state RemoteMapState (RMS)
 
-// static void setupHoldRepeatMapping(Subsystem *sub, Command *cmd, const RemoteMapState &mapState)
-// {
-//     Drivers::commandScheduler.registerSubsystem(sub);
-//     Drivers::commandMapper.addHoldRepeatMapping(mapState, {cmd});
-// }
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_not_added_if_switch_based_RMS_is_not_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2;
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(0);
 
-// TEST_CASE("HoldRepeatCommandMapping: Simple test with switch", "[HoldRepeatCommandMapping]")
-// {
-//     Drivers::reset();
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create a subsystem and command and add the subsystem to the scheduler.
-//     TestSubsystem ts;
-//     TestCommand tc(&ts);
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_added_if_switch_based_RMS_is_equal)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled).Times(1);
 
-//     // Create and add a hold mapping.
-//     RemoteMapState ms;
-//     ms.initLSwitch(Remote::SwitchState::DOWN);
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     setupHoldRepeatMapping(&ts, &tc, ms);
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_added_if_switch_based_RMS_is_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    ms2.initKeys(42);
+    ms2.initRSwitch(Remote::SwitchState::UP);
+    ms2.initLMouseButton();
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled).Times(1);
 
-//     // Create a RemoteInfo struct that we will use to update the state of the remote manually.
-//     Remote::RemoteInfo ri;
-//     ri.leftSwitch = Remote::SwitchState::DOWN;
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // The command should be added when reading.
-//     Drivers::remote.read(ri);
-//     REQUIRE(tc.getTimesInited() == 1);
-//     REQUIRE(tc.getTimesEnded() == 0);
+// Adding commands, key based (including neg keys) RMS
 
-//     for (int i = 0; i < TestCommand::EXECUTE_COUNTS_BEFORE_ENDING; i++)
-//     {
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         Drivers::remote.read(ri);
-//         Drivers::commandScheduler.run();
-//     }
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_not_added_if_key_based_RMS_is_not_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B});
+    RemoteMapState ms2;
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(0);
 
-//     // Since the mapping still matches, the command will be removed when the command scheduler
-//     // is ran next and added again when the remote is ran.
-//     REQUIRE(tc.getTimesEnded() == 1);
-//     Drivers::remote.read(ri);
-//     REQUIRE(tc.getTimesInited() == 2);
-//     REQUIRE(tc.getTimesEnded() == 1);
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // When the mapping doesn't match, the command is removed again.
-//     ri.leftSwitch = Remote::SwitchState::MID;
-//     Drivers::remote.read(ri);
-//     REQUIRE(tc.getTimesEnded() == 2);
-// }
+TEST(HoldRepeatCommandMapping, executeCommandMapping_single_command_added_if_key_based_RMS_is_equal)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B});
+    RemoteMapState ms2 = ms1;
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled).Times(1);
 
-// TEST_CASE("HoldRepeatCommandMapping: Simple test with keys", "[HoldRepeatCommandMapping]")
-// {
-//     // Create a subsystem and command and add the subsystem to the scheduler.
-//     TestSubsystem ts;
-//     TestCommand tc(&ts);
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create and add a hold mapping.
-//     const uint16_t MAP_KEY = 0X1234;
-//     RemoteMapState ms;
-//     ms.initKeys(MAP_KEY);
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_added_if_key_based_RMS_is_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B});
+    RemoteMapState ms2 = ms1;
+    ms2.initLMouseButton();
+    ms2.initLSwitch(Remote::SwitchState::DOWN);
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled).Times(1);
 
-//     setupHoldRepeatMapping(&ts, &tc, ms);
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create a RemoteInfo struct that we will use to update the state of the remote manually.
-//     Remote::RemoteInfo ri;
-//     ri.key = MAP_KEY;
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_not_added_if_key_based_RMS_with_neg_keys_contains_matching_neg_keys)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {Remote::Key::C, Remote::Key::D});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D});
+    ms2.initLMouseButton();
+    ms2.initLSwitch(Remote::SwitchState::DOWN);
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(0);
 
-//     // The command should be added when reading.
-//     Drivers::remote.read(ri);
-//     REQUIRE(tc.getTimesInited() == 1);
-//     REQUIRE(tc.getTimesEnded() == 0);
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     for (int i = 0; i < TestCommand::EXECUTE_COUNTS_BEFORE_ENDING; i++)
-//     {
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         Drivers::remote.read(ri);
-//         Drivers::commandScheduler.run();
-//     }
+// Removing already-added command from scheduler, switches and keys (including neg keys)
 
-//     // The command should now be removed
-//     REQUIRE(tc.getTimesEnded() == 1);
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_removed_if_switch_based_RMS_no_longer_equal)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand(&tc, false)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled(&tc)).Times(1);
 
-//     // The command should now be added again.
-//     Drivers::remote.read(ri);
-//     REQUIRE(tc.getTimesInited() == 2);
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState();
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Switching the remote will remove the command.
-//     ri.key = MAP_KEY & 4;
-//     Drivers::remote.read(ri);
-//     REQUIRE(tc.getTimesInited() == 2);
-//     REQUIRE(tc.getTimesEnded() == 2);
-// }
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_not_removed_if_switch_based_RMS_still_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    ms2.initKeys(42);
+    ms2.initLMouseButton();
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand).Times(0);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled).Times(2);
 
-// TEST_CASE(
-//     "HoldRepeatCommandMapping: Complex test with keys and neg keys",
-//     "[HoldRepeatCommandMapping]")
-// {
-//     // Create a subsystem and command and add the subsystem to the scheduler.
-//     TestSubsystem ts;
-//     TestCommand tc(&ts);
+    commandMapping.executeCommandMapping(ms2);
+    ON_CALL(drivers.commandScheduler, isCommandScheduled).WillByDefault([](Command *) {
+        return true;
+    });
+    ms2.initRMouseButton();
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create and add a hold mapping with some keys and neg keys.
-//     const uint16_t KEY_MAPPING = (0x1 << static_cast<uint16_t>(Remote::Key::A)) |
-//                                  (0x1 << static_cast<uint16_t>(Remote::Key::B));
-//     const uint16_t NEG_KEY_MAPPING = (0x1 << static_cast<uint16_t>(Remote::Key::C)) |
-//                                      (0x1 << static_cast<uint16_t>(Remote::Key::D));
-//     RemoteMapState ms;
-//     ms.initKeys(KEY_MAPPING);
-//     ms.initNegKeys(NEG_KEY_MAPPING);
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_not_removed_if_key_based_RMS_still_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B, Remote::Key::C}, {});
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand).Times(0);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled).Times(2);
 
-//     setupHoldRepeatMapping(&ts, &tc, ms);
+    commandMapping.executeCommandMapping(ms2);
+    ON_CALL(drivers.commandScheduler, isCommandScheduled).WillByDefault([](Command *) {
+        return true;
+    });
+    ms2 = ms1;
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create a RemoteInfo struct that we will use to update the state of the remote manually.
-//     Remote::RemoteInfo ri;
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_removed_if_key_based_RMS_not_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B, Remote::Key::C}, {});
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand(&tc, false)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled(&tc)).Times(1);
 
-//     SECTION("Simple case: the map state for the keys match exactly")
-//     {
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::F});
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//         // Let the command expire, insure the mapper adds it again
-//         for (int i = 0; i < TestCommand::EXECUTE_COUNTS_BEFORE_ENDING; i++)
-//         {
-//             REQUIRE(tc.getTimesInited() == 1);
-//             REQUIRE(tc.getTimesEnded() == 0);
-//             Drivers::remote.read(ri);
-//             Drivers::commandScheduler.run();
-//         }
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_not_removed_if_key_based_RMS_does_not_matche_neg_keys)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {Remote::Key::C});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B, Remote::Key::E});
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand).Times(0);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled(&tc)).Times(2);
 
-//         REQUIRE(tc.getTimesEnded() == 1);
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 1);
+    commandMapping.executeCommandMapping(ms2);
+    ON_CALL(drivers.commandScheduler, isCommandScheduled(&tc)).WillByDefault([](Command *) {
+        return true;
+    });
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::F});
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//         // Remove the command from the scheduler.
-//         ri.key = 0;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 2);
-//     }
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_single_command_removed_if_key_based_RMS_matches_neg_keys)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {Remote::Key::C});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B, Remote::Key::E});
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand(&tc, false)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled(&tc)).Times(1);
 
-//     SECTION(
-//         "Case 2: the map state for the keys match and one of the neg key matches,
-//         still added to the scheduler.")
-//     {
-//         ri.key = KEY_MAPPING | (0x1 << static_cast<uint16_t>(Remote::Key::A));
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::C});
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//         // Let the command expire, insure the mapper adds it again
-//         for (int i = 0; i < TestCommand::EXECUTE_COUNTS_BEFORE_ENDING; i++)
-//         {
-//             REQUIRE(tc.getTimesInited() == 1);
-//             REQUIRE(tc.getTimesEnded() == 0);
-//             Drivers::remote.read(ri);
-//             Drivers::commandScheduler.run();
-//         }
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_multiple_commands_added_and_removed_if_RMS_matches_then_does_not_match)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc1(&ts);
+    TestCommand tc2(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc1, &tc2}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(2);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand).Times(2);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled).Times(2);
 
-//         REQUIRE(tc.getTimesEnded() == 1);
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 1);
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//         // Remove the command from the scheduler.
-//         ri.key = 0;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 2);
-//     }
+// Tests involving the completion of commands while the mapping is still valid
 
-//     SECTION("Case 3: the map state for keys and neg keys matches, don't add to scheduler")
-//     {
-//         ri.key = KEY_MAPPING | NEG_KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 0);
-//     }
+TEST(HoldRepeatCommandMapping, executeCommandMapping_single_command_readded_if_command_finishes)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled(&tc)).Times(2);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(2);
 
-//     SECTION(
-//         "Case 4: the map state matches initially, so the command is added, but then
-//         the map state changes such that the neg key matches and the command is removed")
-//     {
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.key = KEY_MAPPING | (0x1 << static_cast<uint16_t>(Remote::Key::A));
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.key = KEY_MAPPING | NEG_KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//     }
+    commandMapping.executeCommandMapping(ms2);
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     SECTION(
-//         "Case 5: the map state matches initially, so the command is added,
-//         and the command expires, but when it should be added again, the neg key
-//         matches so the command isn't added")
-//     {
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
+TEST(
+    HoldRepeatCommandMapping,
+    executeCommandMapping_multiple_commands_readded_if_they_finish_independently_of_each_other)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc1(&ts);
+    TestCommand tc2(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    HoldRepeatCommandMapping commandMapping(&drivers, {&tc1, &tc2}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled(&tc1)).Times(3);
+    EXPECT_CALL(drivers.commandScheduler, isCommandScheduled(&tc2)).Times(3);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc1)).Times(2);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc2)).Times(2);
 
-//         // Let the command expire, insure the mapper adds it again
-//         for (int i = 0; i < TestCommand::EXECUTE_COUNTS_BEFORE_ENDING; i++)
-//         {
-//             REQUIRE(tc.getTimesInited() == 1);
-//             REQUIRE(tc.getTimesEnded() == 0);
-//             Drivers::remote.read(ri);
-//             Drivers::commandScheduler.run();
-//         }
-
-//         REQUIRE(tc.getTimesEnded() == 1);
-//         ri.key = KEY_MAPPING | NEG_KEY_MAPPING;
-//         // The command shouldn't be added
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//     }
-// }
-
-// TEST_CASE("HoldRepeatCommandMapping: Complex test with mouse", "[HoldRepeatCommandMapping]")
-// {
-//     // Create a subsystem and command and add the subsystem to the scheduler.
-//     TestSubsystem ts;
-//     TestCommand tc(&ts);
-
-//     // Create and add a hold mapping.
-//     RemoteMapState ms;
-//     ms.initRMouseButton();
-
-//     setupHoldRepeatMapping(&ts, &tc, ms);
-
-//     // Create a RemoteInfo struct that we will use to update the state of the remote manually.
-//     Remote::RemoteInfo ri;
-
-//     SECTION(
-//         "Switch random switch minus moving the left switch down. The
-//         command should not be added")
-//     {
-//         ri.leftSwitch = Remote::SwitchState::MID;
-//         ri.rightSwitch = Remote::SwitchState::DOWN;
-//         ri.key = 0x4231;
-//         ri.mouse.l = true;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 0);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//     }
-
-//     SECTION("Change the state of the remote some more to insure the command is not toggled")
-//     {
-//         ri.leftSwitch = Remote::SwitchState::UP;
-//         ri.rightSwitch = Remote::SwitchState::UNKNOWN;
-//         ri.key = 0x1446;
-//         ri.mouse.l = false;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 0);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//     }
-
-//     SECTION("Random state change")
-//     {
-//         // Now initiate the toggle state.
-//         ri.leftSwitch = Remote::SwitchState::DOWN;
-//         ri.rightSwitch = Remote::SwitchState::MID;
-//         ri.key = 0x1250;
-//         ri.mouse.l = true;
-//         ri.mouse.r = true;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-
-//         // Change the state some more, don't end it.
-//         ri.rightSwitch = Remote::SwitchState::DOWN;
-//         ri.key = 0x0876;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-
-//         // Let the command expire, insure the mapper adds it again
-//         for (int i = 0; i < TestCommand::EXECUTE_COUNTS_BEFORE_ENDING; i++)
-//         {
-//             REQUIRE(tc.getTimesInited() == 1);
-//             REQUIRE(tc.getTimesEnded() == 0);
-//             Drivers::remote.read(ri);
-//             Drivers::commandScheduler.run();
-//         }
-
-//         ri.leftSwitch = Remote::SwitchState::UP;
-//         ri.rightSwitch = Remote::SwitchState::MID;
-//         ri.key = 0x5239;
-//         ri.mouse.l = false;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 1);
-
-//         // Let the command expire, insure the mapper adds it again
-//         for (int i = 0; i < TestCommand::EXECUTE_COUNTS_BEFORE_ENDING; i++)
-//         {
-//             REQUIRE(tc.getTimesInited() == 2);
-//             REQUIRE(tc.getTimesEnded() == 1);
-//             Drivers::remote.read(ri);
-//             Drivers::commandScheduler.run();
-//         }
-
-//         // Untoggle.
-//         ri.leftSwitch = Remote::SwitchState::MID;
-//         ri.rightSwitch = Remote::SwitchState::DOWN;
-//         ri.key = 0;
-//         ri.mouse.r = false;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 2);
-//     }
-// }
+    commandMapping.executeCommandMapping(ms2);
+    // tc1 command added, tc2 not added
+    ON_CALL(drivers.commandScheduler, isCommandScheduled(&tc1)).WillByDefault([](Command *) {
+        return true;
+    });
+    commandMapping.executeCommandMapping(ms2);
+    // tc1 not added, tc2 added
+    ON_CALL(drivers.commandScheduler, isCommandScheduled(&tc1)).WillByDefault([](Command *) {
+        return false;
+    });
+    ON_CALL(drivers.commandScheduler, isCommandScheduled(&tc2)).WillByDefault([](Command *) {
+        return true;
+    });
+    commandMapping.executeCommandMapping(ms2);
+}
