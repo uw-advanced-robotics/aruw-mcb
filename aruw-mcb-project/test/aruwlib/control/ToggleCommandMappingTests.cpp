@@ -17,206 +17,228 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// #include <aruwlib/Drivers.hpp>
-// #include <aruwlib/control/CommandMapper.hpp>
-// #include <aruwlib/control/CommandMapping.hpp>
-// #include <aruwlib/control/RemoteMapState.hpp>
+#include <aruwlib/Drivers.hpp>
+#include <aruwlib/control/RemoteMapState.hpp>
+#include <aruwlib/control/ToggleCommandMapping.hpp>
+#include <gtest/gtest.h>
 
-// #include "catch/catch.hpp"
+#include "TestCommand.hpp"
+#include "TestSubsystem.hpp"
 
-// #include "TestCommand.hpp"
-// #include "TestSubsystem.hpp"
+using namespace aruwlib::control;
+using aruwlib::Drivers;
+using aruwlib::Remote;
 
-// using namespace aruwlib::control;
-// using aruwlib::Drivers;
-// using aruwlib::Remote;
+// Adding command with switch state RemoteMapState (RMS)
 
-// static void setupToggleMapping(Subsystem *sub, Command *cmd, const RemoteMapState &mapState)
-// {
-//     Drivers::commandScheduler.registerSubsystem(sub);
-//     Drivers::commandMapper.addToggleMapping(mapState, {cmd});
-// }
+TEST(
+    ToggleCommandMapping,
+    executeCommandMapping_single_command_not_added_if_switch_based_RMS_is_not_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2;
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(0);
 
-// TEST_CASE("ToggleCommandMapping: Test with switch and mouse", "[ToggleCommandMapping]")
-// {
-//     Drivers::reset();
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create a subsystem and command and add the subsystem to the scheduler.
-//     TestSubsystem ts;
-//     TestCommand tc(&ts);
+TEST(ToggleCommandMapping, executeCommandMapping_single_command_added_if_switch_based_RMS_is_equal)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
 
-//     // Create and add a hold mapping.
-//     RemoteMapState ms;
-//     ms.initLSwitch(Remote::SwitchState::DOWN);
-//     ms.initLMouseButton();
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     setupToggleMapping(&ts, &tc, ms);
+TEST(ToggleCommandMapping, executeCommandMapping_single_command_added_if_switch_based_RMS_is_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    ms2.initKeys(42);
+    ms2.initRSwitch(Remote::SwitchState::UP);
+    ms2.initLMouseButton();
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
 
-//     // Create a RemoteInfo struct that we will use to update the state of the remote manually.
-//     Remote::RemoteInfo ri;
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     SECTION(
-//         "Case 1: mapping matches exactly, initiating toggle, then mapping doesn't match, \
-//         then mapping matches again, untoggling")
-//     {
-//         ri.leftSwitch = Remote::SwitchState::DOWN;
-//         ri.mouse.l = true;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         ri.leftSwitch = Remote::SwitchState::UP;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.leftSwitch = Remote::SwitchState::DOWN;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//     }
+// Adding commands, key based (including neg keys) RMS
 
-//     SECTION("Case 2: same as case 1, with some extra remote changes in between")
-//     {
-//         ri.leftSwitch = Remote::SwitchState::DOWN;
-//         ri.key = 0x3421;
-//         ri.mouse.r = true;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 0);
-//         ri.mouse.l = true;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.leftSwitch = Remote::SwitchState::MID;
-//         ri.rightSwitch = Remote::SwitchState::UP;
-//         ri.key = 0x4239;
-//         ri.mouse.r = false;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.rightSwitch = Remote::SwitchState::DOWN;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.leftSwitch = Remote::SwitchState::DOWN;
-//         ri.mouse.l = true;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//     }
-// }
+TEST(
+    ToggleCommandMapping,
+    executeCommandMapping_single_command_not_added_if_key_based_RMS_is_not_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B});
+    RemoteMapState ms2;
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(0);
 
-// TEST_CASE("ToggleCommandMapping: Test with keys and neg keys", "[ToggleCommandMapping]")
-// {
-//     Drivers::reset();
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create a subsystem and command and add the subsystem to the scheduler.
-//     TestSubsystem ts;
-//     TestCommand tc(&ts);
+TEST(ToggleCommandMapping, executeCommandMapping_single_command_added_if_key_based_RMS_is_equal)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B});
+    RemoteMapState ms2 = ms1;
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
 
-//     const uint16_t KEY_MAPPING = (0x1 << static_cast<uint16_t>(Remote::Key::A)) |
-//                                  (0x1 << static_cast<uint16_t>(Remote::Key::B));
-//     const uint16_t NEG_KEY_MAPPING = (0x1 << static_cast<uint16_t>(Remote::Key::C)) |
-//                                      (0x1 << static_cast<uint16_t>(Remote::Key::D));
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create and add a hold mapping.
-//     RemoteMapState ms;
-//     ms.initKeys(KEY_MAPPING);
-//     ms.initNegKeys(NEG_KEY_MAPPING);
+TEST(ToggleCommandMapping, executeCommandMapping_single_command_added_if_key_based_RMS_is_subset)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B});
+    RemoteMapState ms2 = ms1;
+    ms2.initLMouseButton();
+    ms2.initLSwitch(Remote::SwitchState::DOWN);
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
 
-//     setupToggleMapping(&ts, &tc, ms);
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     // Create a RemoteInfo struct that we will use to update the state of the remote manually.
-//     Remote::RemoteInfo ri;
+TEST(
+    ToggleCommandMapping,
+    executeCommandMapping_single_command_not_added_if_key_based_RMS_with_neg_keys_contains_matching_neg_keys)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {Remote::Key::C, Remote::Key::D});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D});
+    ms2.initLMouseButton();
+    ms2.initLSwitch(Remote::SwitchState::DOWN);
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(0);
 
-//     SECTION("Case 1: Simple case, no neg keys")
-//     {
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         ri.key = 0;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//     }
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     SECTION("Case 2: some neg keys")
-//     {
-//         ri.key = KEY_MAPPING | (0x1 << static_cast<uint16_t>(Remote::Key::C));
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         ri.key = 0;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.key = KEY_MAPPING | (0x1 << static_cast<uint16_t>(Remote::Key::C));
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//     }
+// Second stage of toggle command, match RMS to add command, then don't match RMS and match again,
+// which should remove the command
 
-//     SECTION("Case 3: neg key matches while first toggling")
-//     {
-//         ri.key = KEY_MAPPING | NEG_KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 0);
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//     }
+TEST(ToggleCommandMapping, executeCommandMapping_single_command_removed_if_switch_based_RMS_toggled)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand(&tc, false)).Times(1);
 
-//     SECTION("Case 4: neg key matches after initially toggling")
-//     {
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         ri.key = KEY_MAPPING | NEG_KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//         ri.key = 0;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 2);
-//     }
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState();
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = ms1;
+    commandMapping.executeCommandMapping(ms2);
+}
 
-//     SECTION("Case 5: neg key matches during ungoggle phase")
-//     {
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         ri.key = 0;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 0);
-//         ri.key = KEY_MAPPING | NEG_KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 1);
-//         REQUIRE(tc.getTimesEnded() == 1);
+TEST(
+    ToggleCommandMapping,
+    executeCommandMapping_single_command_not_removed_if_switch_based_RMS_never_equal_again)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    RemoteMapState ms2 = ms1;
+    ms2.initKeys(42);
+    ms2.initLMouseButton();
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand).Times(0);
 
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//         ri.key = 0;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 1);
-//         ri.key = KEY_MAPPING;
-//         Drivers::remote.read(ri);
-//         REQUIRE(tc.getTimesInited() == 2);
-//         REQUIRE(tc.getTimesEnded() == 2);
-//     }
-// }
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+    commandMapping.executeCommandMapping(ms2);
+    commandMapping.executeCommandMapping(ms2);
+}
+
+TEST(ToggleCommandMapping, executeCommandMapping_single_command_removed_if_key_based_RMS_toggled)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B, Remote::Key::C}, {});
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(1);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand).Times(1);
+
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState();
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = ms1;
+    commandMapping.executeCommandMapping(ms2);
+}
+
+TEST(
+    ToggleCommandMapping,
+    executeCommandMapping_single_command_removed_if_keys_match_then_neg_keys_match)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {Remote::Key::C, Remote::Key::D});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B}, {});
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(2);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand(&tc, false)).Times(2);
+
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
+    commandMapping.executeCommandMapping(ms2);  // command is now removed
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B});
+    commandMapping.executeCommandMapping(ms2);  // command is now added
+    ms2 = RemoteMapState();
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
+    commandMapping.executeCommandMapping(ms2);  // command is now removed
+}
+
+TEST(ToggleCommandMapping, executeCommandMapping_after_neg_key_removes_command_toggle_works_as_expected)
+{
+    Drivers drivers;
+    TestSubsystem ts(&drivers);
+    TestCommand tc(&ts);
+    RemoteMapState ms1({Remote::Key::A, Remote::Key::B}, {Remote::Key::C, Remote::Key::D});
+    RemoteMapState ms2({Remote::Key::A, Remote::Key::B}, {});
+    ToggleCommandMapping commandMapping(&drivers, {&tc}, ms1);
+    EXPECT_CALL(drivers.commandScheduler, addCommand(&tc)).Times(2);
+    EXPECT_CALL(drivers.commandScheduler, removeCommand(&tc, false)).Times(2);
+
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::C, Remote::Key::D, Remote::Key::E});
+    commandMapping.executeCommandMapping(ms2);  // command is now removed
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::E});
+    commandMapping.executeCommandMapping(ms2);  // command is now added
+    ms2 = RemoteMapState();
+    commandMapping.executeCommandMapping(ms2);
+    ms2 = RemoteMapState({Remote::Key::A, Remote::Key::B, Remote::Key::C});
+    commandMapping.executeCommandMapping(ms2);  // command is now removed
+}
