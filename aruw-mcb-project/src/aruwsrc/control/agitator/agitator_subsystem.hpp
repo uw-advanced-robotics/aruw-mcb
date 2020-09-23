@@ -108,6 +108,8 @@ public:
 
     void initialize() override;
 
+    void onRefreshKillMode() override;
+
     void refresh() override;
 
     void setAgitatorDesiredAngle(const float& newAngle);

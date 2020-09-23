@@ -57,6 +57,8 @@ public:
 
     void initialize() override;
 
+    void onRefreshKillMode() override;
+
     /**
      * Sets target flywheel RPM.
      */

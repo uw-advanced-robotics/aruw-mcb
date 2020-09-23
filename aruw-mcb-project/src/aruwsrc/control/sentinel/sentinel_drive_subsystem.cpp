@@ -41,6 +41,12 @@ void SentinelDriveSubsystem::initialize()
     rightWheel.initialize();
 }
 
+void SentinelDriveSubsystem::onRefreshKillMode()
+{
+    leftWheel.setDesiredOutput(0);
+    rightWheel.setDesiredOutput(0);
+}
+
 void SentinelDriveSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
 
 void SentinelDriveSubsystem::refresh()

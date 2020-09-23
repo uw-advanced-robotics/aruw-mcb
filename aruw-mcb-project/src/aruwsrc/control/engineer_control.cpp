@@ -19,6 +19,8 @@
 
 #include <aruwlib/DriversSingleton.hpp>
 #include <aruwlib/communication/gpio/digital.hpp>
+#include <aruwlib/control/KillAllCommand.hpp>
+#include <aruwlib/control/KillAllSubsystem.hpp>
 #include <aruwlib/control/command_scheduler.hpp>
 
 #include "aruwsrc/control/engineer/extend_xaxis_command.hpp"
@@ -31,6 +33,7 @@
 using namespace aruwsrc::engineer;
 using namespace aruwlib::gpio;
 using aruwlib::DoNotUse_getDrivers;
+using aruwlib::Remote;
 using aruwlib::control::CommandMapper;
 
 /*
@@ -49,10 +52,12 @@ const Digital::OutputPin grabberPin = Digital::OutputPin::E;
 const Digital::OutputPin xAxisPin = Digital::OutputPin::F;
 
 /* define subsystems --------------------------------------------------------*/
+KillAllSubsystem killAllSubsystem(drivers());
 GrabberSubsystem grabber(drivers(), grabberPin);
 XAxisSubsystem xAxis(drivers(), xAxisPin);
 
 /* define commands ----------------------------------------------------------*/
+KillAllCommand killAllCommand(&killAllSubsystem, drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems() {}
@@ -60,6 +65,7 @@ void initializeSubsystems() {}
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwlib::Drivers *drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&killAllSubsystem);
     drivers->commandScheduler.registerSubsystem(&grabber);
     drivers->commandScheduler.registerSubsystem(&xAxis);
 }
@@ -71,7 +77,12 @@ void setDefaultEngineerCommands(aruwlib::Drivers *) {}
 void startEngineerCommands(aruwlib::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwlib::Drivers *) {}
+void registerEngineerIoMappings(aruwlib::Drivers *drivers)
+{
+    drivers->commandMapper.addHoldMapping(
+        drivers->commandMapper.newKeyMap(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN),
+        &killAllCommand);
+}
 
 void initSubsystemCommands(aruwlib::Drivers *drivers)
 {

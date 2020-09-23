@@ -64,6 +64,8 @@ AgitatorSubsystem::AgitatorSubsystem(
 
 void AgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
 
+void AgitatorSubsystem::onRefreshKillMode() { agitatorMotor.setDesiredOutput(0); }
+
 void AgitatorSubsystem::armAgitatorUnjamTimer(const uint32_t& predictedRotateTime)
 {
     if (predictedRotateTime == 0)

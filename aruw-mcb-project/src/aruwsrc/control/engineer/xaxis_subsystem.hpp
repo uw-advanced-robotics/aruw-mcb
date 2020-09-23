@@ -42,6 +42,8 @@ public:
     {
     }
 
+    void onEnterKillMode() override;
+
     void setExtended(bool isExtended);
 
     bool isExtended() const;

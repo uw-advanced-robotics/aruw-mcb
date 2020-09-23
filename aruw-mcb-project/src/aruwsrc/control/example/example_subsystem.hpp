@@ -58,6 +58,8 @@ public:
     {
     }
 
+    void onRefreshKillMode() override;
+
     void initialize() override;
 
     void setDesiredRpm(float desRpm);

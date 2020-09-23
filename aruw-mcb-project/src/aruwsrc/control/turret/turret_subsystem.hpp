@@ -43,6 +43,8 @@ public:
 
     void initialize() override;
 
+    void onRefreshKillMode() override;
+
     void refresh() override;
 
     bool isTurretOnline() const;

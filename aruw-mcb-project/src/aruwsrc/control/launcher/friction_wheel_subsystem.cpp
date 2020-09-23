@@ -31,6 +31,12 @@ void FrictionWheelSubsystem::initialize()
     rightWheel.initialize();
 }
 
+void FrictionWheelSubsystem::onRefreshKillMode()
+{
+    leftWheel.setDesiredOutput(0);
+    rightWheel.setDesiredOutput(0);
+}
+
 void FrictionWheelSubsystem::setDesiredRpm(float desRpm) { desiredRpmRamp.setTarget(desRpm); }
 
 void FrictionWheelSubsystem::refresh()

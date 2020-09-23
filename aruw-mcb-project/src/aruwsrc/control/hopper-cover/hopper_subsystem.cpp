@@ -23,6 +23,8 @@ namespace aruwsrc
 {
 namespace control
 {
+void HopperSubsystem::onEnterKillMode() { hopper.setZeroDesiredPWM(); }
+
 void HopperSubsystem::setOpen() { hopper.setTargetPwm(hopper.getMaxPWM()); }
 
 void HopperSubsystem::setClose() { hopper.setTargetPwm(hopper.getMinPWM()); }

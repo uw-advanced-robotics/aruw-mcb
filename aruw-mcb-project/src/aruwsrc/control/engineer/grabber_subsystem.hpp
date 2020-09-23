@@ -42,6 +42,8 @@ public:
     {
     }
 
+    void onEnterKillMode() override;
+
     void setSqueezed(bool isGrabberSqueezed);
 
     bool isSqueezed() const;

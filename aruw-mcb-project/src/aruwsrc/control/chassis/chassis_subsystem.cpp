@@ -41,6 +41,14 @@ void ChassisSubsystem::initialize()
     rightFrontMotor.initialize();
 }
 
+void ChassisSubsystem::onRefreshKillMode()
+{
+    leftBackMotor.setDesiredOutput(0);
+    leftFrontMotor.setDesiredOutput(0);
+    rightBackMotor.setDesiredOutput(0);
+    rightFrontMotor.setDesiredOutput(0);
+}
+
 void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
     mecanumDriveCalculate(x, y, r, MAX_WHEEL_SPEED_SINGLE_MOTOR);

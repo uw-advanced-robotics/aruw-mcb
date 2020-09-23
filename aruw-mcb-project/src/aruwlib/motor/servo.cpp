@@ -77,6 +77,7 @@ float Servo::getMaxPWM() const { return maxPwm; }
 
 bool Servo::isRampTargetMet() const { return pwmOutputRamp.isTargetReached(); }
 
+void Servo::setZeroDesiredPWM() { drivers->pwm.write(0.0f, servoPin); }
 }  // namespace motor
 
 }  // namespace aruwlib

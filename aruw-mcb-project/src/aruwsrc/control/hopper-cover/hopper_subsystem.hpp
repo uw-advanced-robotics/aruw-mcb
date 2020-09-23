@@ -70,6 +70,8 @@ public:
         hopper.setTargetPwm(close);
     }
 
+    void onEnterKillMode() override;
+
     /*
      * set servo to the open angle
      */

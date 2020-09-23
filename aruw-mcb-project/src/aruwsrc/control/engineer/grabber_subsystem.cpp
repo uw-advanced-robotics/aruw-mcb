@@ -25,6 +25,8 @@ namespace aruwsrc
 {
 namespace engineer
 {
+void GrabberSubsystem::onEnterKillMode() { drivers->digital.set(pin, false); }
+
 void GrabberSubsystem::setSqueezed(bool isGrabberSqueezed)
 {
     drivers->digital.set(pin, isGrabberSqueezed);

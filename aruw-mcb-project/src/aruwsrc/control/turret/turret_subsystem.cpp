@@ -53,6 +53,12 @@ void TurretSubsystem::initialize()
     pitchMotor.initialize();
 }
 
+void TurretSubsystem::onRefreshKillMode()
+{
+    yawMotor.setDesiredOutput(0);
+    pitchMotor.setDesiredOutput(0);
+}
+
 float TurretSubsystem::getYawAngleFromCenter() const
 {
     aruwlib::algorithms::ContiguousFloat yawAngleFromCenter(

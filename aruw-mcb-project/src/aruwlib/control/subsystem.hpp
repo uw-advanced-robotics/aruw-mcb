@@ -89,6 +89,21 @@ public:
      */
     virtual void refresh();
 
+    /**
+     * Called once when we want to start shutting off the robot.
+     */
+    virtual void onEnterKillMode() {}
+
+    /**
+     * Called repeatedly while in kill mode.
+     */
+    virtual void onRefreshKillMode() {}
+
+    /**
+     * Called once when exiting kill mode.
+     */
+    virtual void onExitKillMode() {}
+
 protected:
     Drivers* drivers;
 

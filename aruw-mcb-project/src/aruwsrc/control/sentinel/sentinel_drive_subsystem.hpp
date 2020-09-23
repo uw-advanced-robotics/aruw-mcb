@@ -55,6 +55,8 @@ public:
 
     void initialize() override;
 
+    void onRefreshKillMode() override;
+
     /**
      * Returns absolute position of the sentinel, relative to the left end of the rail (when rail
      * is viewed from the front)

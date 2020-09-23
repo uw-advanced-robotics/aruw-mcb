@@ -27,6 +27,8 @@
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/errors/create_errors.hpp"
 
+#include "KillAllCommand.hpp"
+
 using namespace std;
 
 namespace aruwlib
@@ -37,6 +39,11 @@ uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
 void CommandScheduler::addCommand(Command* commandToAdd)
 {
+    if (inKillMode)
+    {
+        return;
+    }
+
     if (commandToAdd == nullptr)
     {
         RAISE_ERROR(
@@ -89,6 +96,11 @@ void CommandScheduler::addCommand(Command* commandToAdd)
 
 void CommandScheduler::run()
 {
+    if (inKillMode)
+    {
+        killAllSubsystems();
+        return;
+    }
     uint32_t runStart = aruwlib::arch::clock::getTimeMicroseconds();
     // Timestamp for reference and for disallowing a command from running
     // multiple times during the same call to run.
@@ -202,6 +214,63 @@ bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem) const
         return false;
     }
     return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
+}
+
+void CommandScheduler::enterKillMode(const KillAllCommand* killAllCommand)
+{
+    if (killAllCommand == nullptr)
+    {
+        return;
+    }
+    // Remove all commands from the scheduler.
+    std::for_each(
+        subsystemToCommandMap.begin(),
+        subsystemToCommandMap.end(),
+        [killAllCommand](auto& currSubsystemCommandPair) {
+            // Only the single kill command should be left unscheduled (this will be removed by the
+            // command mapper).
+            if (currSubsystemCommandPair.first != nullptr)
+            {
+                currSubsystemCommandPair.first->onEnterKillMode();
+            }
+            if (currSubsystemCommandPair.second != nullptr &&
+                currSubsystemCommandPair.second != killAllCommand)
+            {
+                currSubsystemCommandPair.second->end(true);
+                currSubsystemCommandPair.second = nullptr;
+            }
+        });
+    inKillMode = true;
+}
+
+void CommandScheduler::killAllSubsystems()
+{
+    std::for_each(
+        subsystemToCommandMap.begin(),
+        subsystemToCommandMap.end(),
+        [](auto& currSubsystemCommandPair) {
+            if (currSubsystemCommandPair.first != nullptr)
+            {
+                currSubsystemCommandPair.first->onRefreshKillMode();
+            }
+        });
+}
+
+void CommandScheduler::exitKillMode()
+{
+    std::for_each(
+        subsystemToCommandMap.begin(),
+        subsystemToCommandMap.end(),
+        [](auto& currSubsystemCommandPair) {
+            // Only the single kill command should be left unscheduled (this will be removed by the
+            // command mapper).
+            if (currSubsystemCommandPair.first != nullptr)
+            {
+                currSubsystemCommandPair.first->onExitKillMode();
+                currSubsystemCommandPair.second = nullptr;
+            }
+        });
+    inKillMode = false;
 }
 }  // namespace control
 

@@ -27,6 +27,8 @@ namespace aruwsrc
 {
 namespace engineer
 {
+void XAxisSubsystem::onEnterKillMode() { drivers->digital.set(pin, false); }
+
 void XAxisSubsystem::setExtended(bool isExtended)
 {
     drivers->digital.set(pin, extended);

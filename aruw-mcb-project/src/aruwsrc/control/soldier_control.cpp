@@ -18,6 +18,8 @@
  */
 
 #include <aruwlib/DriversSingleton.hpp>
+#include <aruwlib/control/KillAllCommand.hpp>
+#include <aruwlib/control/KillAllSubsystem.hpp>
 #include <aruwlib/control/command_mapper.hpp>
 
 #include "agitator/agitator_calibrate_command.hpp"
@@ -58,6 +60,8 @@ namespace aruwsrc
 namespace control
 {
 /* define subsystems --------------------------------------------------------*/
+KillAllSubsystem killAllSubsystem(drivers());
+
 TurretSubsystem turret(drivers());
 
 ChassisSubsystem chassis(drivers());
@@ -84,6 +88,8 @@ HopperSubsystem hopperCover(
 FrictionWheelSubsystem frictionWheels(drivers());
 
 /* define commands ----------------------------------------------------------*/
+KillAllCommand killAllCommand(&killAllSubsystem, drivers());
+
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
@@ -102,13 +108,12 @@ FrictionWheelRotateCommand spinFrictionWheels(
     &frictionWheels,
     FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
 
-FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
-
 /// \todo add cv turret
 
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwlib::Drivers *drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&killAllSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
@@ -145,11 +150,7 @@ void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 {
     drivers->commandMapper.addHoldMapping(
         drivers->commandMapper.newKeyMap(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN),
-        &stopFrictionWheels);
-
-    drivers->commandMapper.addHoldMapping(
-        drivers->commandMapper.newKeyMap(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN),
-        &openHopperCommand);
+        &killAllCommand);
 
     drivers->commandMapper.addHoldRepeatMapping(
         drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID),
@@ -162,6 +163,10 @@ void registerSoldierIoMappings(aruwlib::Drivers *drivers)
     drivers->commandMapper.addHoldMapping(
         drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
         &chassisDriveCommand);
+
+    drivers->commandMapper.addHoldMapping(
+        drivers->commandMapper.newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
+        &openHopperCommand);
 
     drivers->commandMapper.addHoldRepeatMapping(
         drivers->commandMapper.newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),

@@ -18,6 +18,8 @@
  */
 
 #include <aruwlib/DriversSingleton.hpp>
+#include <aruwlib/control/KillAllCommand.hpp>
+#include <aruwlib/control/KillAllSubsystem.hpp>
 #include <aruwlib/control/command_mapper.hpp>
 
 #include "agitator/agitator_calibrate_command.hpp"
@@ -55,6 +57,8 @@ namespace aruwsrc
 namespace control
 {
 /* define subsystems --------------------------------------------------------*/
+KillAllSubsystem killAllSubsystem(drivers());
+
 TurretSubsystem turret(drivers());
 
 ChassisSubsystem chassis(drivers());
@@ -79,6 +83,8 @@ HopperSubsystem hopperCover(
     HopperSubsystem::OLD_SOLDIER_PWM_RAMP_SPEED);
 
 /* define commands ----------------------------------------------------------*/
+KillAllCommand killAllCommand(&killAllSubsystem, drivers());
+
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
@@ -105,6 +111,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerOldSoldierSubsystems(aruwlib::Drivers *drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&killAllSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
@@ -127,6 +134,10 @@ void startOldSoldierCommands(aruwlib::Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerOldSoldierIoMappings(aruwlib::Drivers *drivers)
 {
+    drivers->commandMapper.addHoldMapping(
+        drivers->commandMapper.newKeyMap(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN),
+        &killAllCommand);
+
     drivers->commandMapper.addHoldRepeatMapping(
         drivers->commandMapper.newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
         &agitatorShootFastCommand);
@@ -138,10 +149,6 @@ void registerOldSoldierIoMappings(aruwlib::Drivers *drivers)
     drivers->commandMapper.addHoldMapping(
         drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
         &chassisDriveCommand);
-
-    drivers->commandMapper.addHoldMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-        &openHopperCommand);
 
     drivers->commandMapper.addHoldMapping(
         drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),

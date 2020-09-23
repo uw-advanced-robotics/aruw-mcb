@@ -33,6 +33,7 @@ namespace aruwlib
 class Drivers;
 namespace control
 {
+class KillAllCommand;
 /**
  * Class for handling all the commands you would like to currently run.
  * Interfaces with the Subsystem and Command classes to provide a means
@@ -85,7 +86,12 @@ namespace control
 class CommandScheduler
 {
 public:
-    CommandScheduler(Drivers* drivers) : drivers(drivers), subsystemToCommandMap() {}
+    CommandScheduler(Drivers* drivers)
+        : drivers(drivers),
+          subsystemToCommandMap(),
+          inKillMode(false)
+    {
+    }
     CommandScheduler(const CommandScheduler&) = delete;
     CommandScheduler& operator=(const CommandScheduler&) = delete;
     mockable ~CommandScheduler() = default;
@@ -167,6 +173,9 @@ public:
      */
     mockable void addCommand(Command* commandToAdd);
 
+    void enterKillMode(const KillAllCommand* killAllCommand);
+    void exitKillMode();
+
 private:
     ///< Maximum time before we start erroring, in microseconds.
     static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 100;
@@ -176,6 +185,8 @@ private:
     ///< a map containing keys of subsystems, pairs of Commands.
     std::map<Subsystem*, Command*> subsystemToCommandMap;
 
+    bool inKillMode;
+
     /**
      * @note this is not a true timestamp. Rather, we use this such that
      *      with multiple CommandSchedulers running with the same Subsystems,
@@ -183,6 +194,8 @@ private:
      *      the `mainScheduler` is ran.
      */
     static uint32_t commandSchedulerTimestamp;
+
+    void killAllSubsystems();
 };  // class CommandScheduler
 
 }  // namespace control

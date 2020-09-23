@@ -90,6 +90,11 @@ public:
      */
     bool isRampTargetMet() const;
 
+    /**
+     * Sets the servo's PWM duty cycle to 0, effectively disabling the servo motor
+     */
+    void setZeroDesiredPWM();
+
 private:
     Drivers *drivers;
 

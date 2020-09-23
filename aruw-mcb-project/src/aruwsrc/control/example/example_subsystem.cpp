@@ -32,6 +32,12 @@ void ExampleSubsystem::initialize()
     rightWheel.initialize();
 }
 
+void ExampleSubsystem::onRefreshKillMode()
+{
+    leftWheel.setDesiredOutput(0);
+    rightWheel.setDesiredOutput(0);
+}
+
 void ExampleSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
 
 void ExampleSubsystem::refresh()
