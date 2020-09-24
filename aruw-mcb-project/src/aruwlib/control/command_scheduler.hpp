@@ -175,6 +175,7 @@ public:
 
     void enterKillMode(const KillAllCommand* killAllCommand);
     void exitKillMode();
+    bool getInKillMode() const { return inKillMode; }
 
 private:
     ///< Maximum time before we start erroring, in microseconds.

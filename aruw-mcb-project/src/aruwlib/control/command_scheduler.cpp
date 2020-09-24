@@ -275,12 +275,9 @@ void CommandScheduler::exitKillMode()
         subsystemToCommandMap.begin(),
         subsystemToCommandMap.end(),
         [](auto& currSubsystemCommandPair) {
-            // Only the single kill command should be left unscheduled (this will be removed by the
-            // command mapper).
             if (currSubsystemCommandPair.first != nullptr)
             {
                 currSubsystemCommandPair.first->onExitKillMode();
-                currSubsystemCommandPair.second = nullptr;
             }
         });
     inKillMode = false;
