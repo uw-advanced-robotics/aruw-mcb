@@ -222,6 +222,19 @@ void CommandScheduler::enterKillMode(const KillAllCommand* killAllCommand)
     {
         return;
     }
+    // Ensure the command is in the scheduler (otherwise it will never be removed).
+    bool containsKillCommand = false;
+    for (auto& currSubsystemCommandPair : subsystemToCommandMap)
+    {
+        if (currSubsystemCommandPair.second == killAllCommand)
+        {
+            containsKillCommand = true;
+        }
+    }
+    if (!containsKillCommand)
+    {
+        return;
+    }
     // Remove all commands from the scheduler.
     std::for_each(
         subsystemToCommandMap.begin(),
