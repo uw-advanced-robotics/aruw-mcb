@@ -1,0 +1,156 @@
+# Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+#
+# This file is part of aruw-mcb.
+#
+# aruw-mcb is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# aruw-mcb is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+
+import os
+from os.path import join, abspath
+
+# User Configurable Options
+project_name = "aruw-mcb"
+build_path = "build"
+hardware_modm_path = "modm/"
+sim_modm_path = "sim-modm/modm/"
+aruwlib_path = "./src/aruwlib"
+robot_type_file = "./robot-type/robot_type.hpp"
+valid_robot_types = ["TARGET_SOLDIER", "TARGET_OLD_SOLDIER", "TARGET_DRONE", "TARGET_ENGINEER", "TARGET_SENTINEL", "TARGET_HERO"]
+gtest_libs = ["gtest", "gtest_main", "gmock", "gmock_main", "pthread"]
+
+usage = "Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]\n\
+    \"<target>\" is one of:\n\
+        - \"build\": build all code for the hardware platform.\n\
+        - \"run\": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.\n\
+        - \"build-tests\": build core code and tests for the current host platform.\n\
+        - \"run-tests\": build core code and tests for the current host platform, and execute them locally with the test runner.\n\
+    \"TARGET_<ROBOT_TYPE>\" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.\n\
+        - <ROBOT_TYPE> must be one of the following:\n\
+            - SOLDIER, OLD_SOLDIER, DRONE, ENGINEER, SENTINEL, HERO"
+
+# don't compile this stuff
+ignored_dirs = [".lbuild_cache", build_path, sim_modm_path, hardware_modm_path, aruwlib_path]
+ignored_files = [robot_type_file]
+
+if len(COMMAND_LINE_TARGETS) not in [1, 2]:
+    raise Exception("This build script has 1 required argument and 1 optional argument.\n" + usage)
+
+
+
+build_target = COMMAND_LINE_TARGETS[0]
+if build_target in ["build-tests", "run-tests"]:
+    target_env = "tests"
+else:
+    target_env = "hardware"
+
+# SCons environment with all tools
+env = DefaultEnvironment(tools=[], ENV=os.environ)
+env["CONFIG_BUILD_BASE"] = abspath(join(build_path, target_env))
+env["CONFIG_PROJECT_NAME"] = project_name
+
+# Configure build jobs
+if GetOption('num_jobs') == 1:
+    SetOption('num_jobs', 8)
+
+# Configure robot type and check against valid robot type
+robot_type = ARGUMENTS.get("robot")
+# If there is no optional argument, revert back to the macro in robot_type.hpp
+if robot_type == None:
+    with open(robot_type_file, "r") as robot_type_file_reader:
+        for word in robot_type_file_reader.read().splitlines():
+            if "#" in word and "define" in word and "TARGET_" in word:
+                robot_type = word.split()[-1]
+                break
+if robot_type not in valid_robot_types:
+    raise Exception(usage)
+
+print("Configured {0} parallel build jobs (-j{0}), {1}".format(GetOption('num_jobs'), robot_type))
+
+modm_path = None
+if target_env == "hardware":
+    modm_path = hardware_modm_path
+    ignored_dirs.append("test/")
+else:
+    modm_path = sim_modm_path
+    ignored_files.append("src/main.cpp")
+    ignored_files.append("src/aruwsrc/control/*_control.cpp")
+
+# Building all libraries (read from sconscript files located in provided dirs)
+# Ensure that modm is first, otherwise aruwlib won't have the needed build config
+external_scons_libraries = [modm_path, aruwlib_path]
+env.SConscript(dirs=external_scons_libraries, exports="env")
+
+# References:
+#   GCC flags: https://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html
+#   Scons API: https://www.scons.org/doc/latest/HTML/scons-user/apa.html
+# 
+# You can append one or multiple options like this
+#     env.Append(CCFLAGS="-pedantic")
+#     env.Append(CCFLAGS=["-pedantic", "-pedantic-errors"])
+# If you need to remove options, you need to do this:
+#     env["CCFLAGS"].remove("-pedantic")
+# Note that a lot of options also have a "-no-{option}" option
+# that may overwrite previous options.
+
+# Configure build flags that are unique to debug or release profile
+
+profile = ARGUMENTS.get("profile", "release")
+
+if profile == "debug":
+    env.Append(CCFLAGS = [
+        "-fno-inline",
+    ])
+
+env.Append(CPPFLAGS = [
+    "-DENV_" + {"hardware": "HARDWARE", "tests": "SIMULATOR"}[target_env]
+])
+
+if 'additional-ccflags' in ARGUMENTS:
+    env.Append(CCFLAGS = [
+       *ARGUMENTS['additional-ccflags'].split(","),
+    ])
+
+# add this path so you don't have to write #include "src/..."
+env.AppendUnique(CPPPATH=[
+    abspath(r"./src")
+])
+
+# append on the global robot target build flag
+env.Append(CCFLAGS=["-D " + robot_type])
+
+if target_env == "tests":
+    env.AppendUnique(CPPPATH=[
+        abspath(r"./test")
+    ])
+
+    env.AppendUnique(LIBS=gtest_libs)
+
+sources = env.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)
+if target_env == "hardware":
+    program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)
+
+    # SCons functions
+    env.Alias("build", program)
+    # The executable depends on the linkerscript
+    env.Depends(target=program, dependency=abspath("modm/link/linkerscript.ld"))
+    env.Alias("size", env.Size(program))
+    env.Alias("gdb", env.OpenOcdGdb(program))
+
+    env.Alias("program", env.OpenOcd(program, commands=["modm_program {$SOURCE}"]))
+    env.Alias("all", ["build", "size"])
+    env.Default("all")
+else:
+    program = env.Program(target=env["CONFIG_PROJECT_NAME"]+"-tests.elf", source=sources)
+    # WARNING: all test targets must be included in the target_env check earlier in the file
+    env.Alias("build-tests", program)
+    env.Alias("run-tests", env.Run(program))

@@ -1,10 +1,19 @@
-# How to build docker image:
-# Windows CMD: docker build -t aruw/mcb-2020-gitlab-ci:2020-02-17.1 .
-# Windows PS: Get-Content Dockerfile | docker build -t aruw/mcb-2020-gitlab-ci:2020-02-17.1 .
-# Linux: docker build -t aruw/mcb-2020-gitlab-ci:2020-02-17.1 .
+# Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
 #
-# How to publish docker image:
-# docker push aruw/mcb-2020-gitlab-ci:2020-02-17.1
+# This file is part of aruw-mcb.
+#
+# aruw-mcb is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# aruw-mcb is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 # Temporary stages ===========
 FROM debian:buster as gtest-build
@@ -53,14 +62,15 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/RC2.1/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2 -O gcc-arm.tar.bz2 \
+RUN wget -q https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2 -O gcc-arm.tar.bz2 \
     && tar -xjf /gcc-arm.tar.bz2 \
     && rm gcc-arm.tar.bz2
-ENV PATH="/gcc-arm-none-eabi-9-2019-q4-major/bin:$PATH"
+ENV PATH="/gcc-arm-none-eabi-9-2020-q2-update/bin:$PATH"
 
 ARG GTEST_VERSION=1.10.0
 # "install" gtest and gmock
 COPY --from=gtest-build /googletest-release-${GTEST_VERSION}/googletest/include/ /usr/local/include/
+COPY --from=gtest-build /googletest-release-${GTEST_VERSION}/googlemock/include/ /usr/local/include/
 COPY --from=gtest-build /googletest-release-${GTEST_VERSION}/build/lib/libg*.a /usr/local/lib/
 
 RUN pip install modm scons
