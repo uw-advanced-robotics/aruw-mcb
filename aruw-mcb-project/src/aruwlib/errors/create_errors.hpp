@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __CREATE_ERRORS_HPP__
-#define __CREATE_ERRORS_HPP__
+#ifndef CREATE_ERRORS_HPP_
+#define CREATE_ERRORS_HPP_
 
 #include "aruwlib/Drivers.hpp"
 
@@ -28,6 +28,17 @@ namespace aruwlib
 {
 namespace errors
 {
+/**
+ * Example for how to create and add an error to the `ErrorController` in the
+ * instance of the `Drivers` class passed in:
+ * ```cpp
+ * RAISE_ERROR(
+ *     drivers, "Error in DJI Serial",
+ *     aruwlib::errors::Location::DJI_SERIAL,
+ *     aruwlib::errors::ErrorType::INVALID_CRC);
+ * ```
+ * then call ErrorController::updateLedDisplay() to display the error via the LEDs
+ */
 #define RAISE_ERROR(drivers, desc, l, et)                                          \
     do                                                                             \
     {                                                                              \
@@ -39,4 +50,4 @@ namespace errors
 
 }  // namespace aruwlib
 
-#endif
+#endif  // CREATE_ERRORS_HPP_

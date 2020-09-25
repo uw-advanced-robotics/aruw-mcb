@@ -19,21 +19,24 @@
 
 #include "error_controller.hpp"
 
+#include <algorithm>
+
 #include <modm/container/linked_list.hpp>
 
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/architecture/timeout.hpp"
 #include "aruwlib/communication/gpio/leds.hpp"
 
-// Overall method to use when receiving errors
-
 namespace aruwlib
 {
 namespace errors
 {
-// add an error to list of errors
 void ErrorController::addToErrorList(const SystemError& error)
 {
+    if (!validateErrorTypeAndLocation(error))
+    {
+        return;
+    }
     // only add error if it is not already added
     // Note that we are okay with comparing raw char pointers because an error generated
     // in our codebase use char pointers located in literals.
@@ -55,14 +58,12 @@ void ErrorController::addToErrorList(const SystemError& error)
     errorList.append(error);
 }
 
-// Blink the list of errors in a loop on the board
-void ErrorController::update()
+void ErrorController::updateLedDisplay()
 {
     // there are no errors to display, default display
     if (errorList.getSize() == 0)
     {
-        setLedError(0);
-        drivers->leds.set(aruwlib::gpio::Leds::LedPin::Green, true);
+        displayBinaryNumberViaLeds(0);
         return;
     }
 
@@ -71,56 +72,73 @@ void ErrorController::update()
     {
         prevLedErrorChangeWait.restart(ERROR_ROTATE_TIME);
         currentDisplayIndex = (currentDisplayIndex + 1) % errorList.getSize();
-    }
 
-    uint8_t displayNum = 0;
-    if (getLedErrorCodeBits(
-            errorList.get(currentDisplayIndex).getLocation(),
-            errorList.get(currentDisplayIndex).getErrorType(),
-            &displayNum))
-    {
-        setLedError(displayNum);
-        drivers->leds.set(aruwlib::gpio::Leds::LedPin::Green, true);
-    }
-    else
-    {
-        setLedError(0);
-        drivers->leds.set(aruwlib::gpio::Leds::LedPin::Green, false);
+        displayBinaryNumberViaLeds(
+            static_cast<uint8_t>(errorList.get(currentDisplayIndex).getLocation()));
     }
 }
 
-bool ErrorController::getLedErrorCodeBits(Location location, ErrorType errorType, uint8_t* number)
+const SystemError* ErrorController::getSystemError(uint_fast8_t index) const
 {
-    // Limit location and error type
-    // Check to make sure they are within bounds
-
-    // find the bit mask for the location
-    uint8_t locationMask = static_cast<uint8_t>(~(0xffu << ERROR_LOCATION_SIZE));
-    uint8_t errorTypeMask = static_cast<uint8_t>(~(0xffu << ERROR_TYPE_SIZE));
-
-    uint8_t locationMasked = static_cast<uint8_t>(location) & locationMask;
-    uint8_t errorTypeMasked = static_cast<uint8_t>(errorType) & errorTypeMask;
-
-    // set another error if this error is outside of the range of the error handler
-    if (locationMasked != location || errorTypeMasked != errorType)
+    if (index >= errorList.getSize())
     {
-        return false;
+        return nullptr;
     }
-
-    // Combine location and error type
-    *number = location << ERROR_LOCATION_SIZE | errorType;
-    return true;
+    return &errorList[index];
 }
 
-void ErrorController::setLedError(uint8_t binaryRep)
+void ErrorController::removeFront() { errorList.removeFront(); }
+
+void ErrorController::removeBack() { errorList.removeBack(); }
+
+bool ErrorController::removeSystemError(const SystemError& error)
+{
+    uint_fast8_t errorFoundIndex = ERROR_LIST_MAX_SIZE + 1;
+    uint_fast8_t size = errorList.getSize();
+    for (uint_fast8_t i = 0; i < size; i++)
+    {
+        SystemError se = errorList.get(0);
+        errorList.removeFront();
+        if (errorFoundIndex == (ERROR_LIST_MAX_SIZE + 1) && se == error)
+        {
+            errorFoundIndex = i;
+        }
+        else
+        {
+            errorList.append(se);
+        }
+    }
+
+    // If the currentDisplayIndex is greater than or equal to the index we have removed, we must
+    // decrease this value so it points to the same error in the queue.
+    if (errorFoundIndex <= currentDisplayIndex && currentDisplayIndex != 0)
+    {
+        currentDisplayIndex--;
+        displayBinaryNumberViaLeds(
+            static_cast<uint8_t>(errorList.get(currentDisplayIndex).getLocation()));
+    }
+    return errorFoundIndex != (ERROR_LIST_MAX_SIZE + 1);
+}
+
+void ErrorController::displayBinaryNumberViaLeds(uint8_t binaryRep)
 {
     // Mask number and determine if it is a 0 or a 1
     // If it is a 1, the LED corresponding will blink
-    for (int i = 0; i < 8; i++)
+    for (uint_fast8_t i = 0; i < NUM_LEDS; i++)
     {
         bool display = (binaryRep >> i) & 1;
         drivers->leds.set(static_cast<aruwlib::gpio::Leds::LedPin>(i), display);
     }
+}
+
+bool ErrorController::validateErrorTypeAndLocation(const SystemError& error)
+{
+    constexpr uint8_t locationMask = static_cast<uint8_t>(~(0xffu << ERROR_LOCATION_SIZE));
+    constexpr uint8_t errorTypeMask = static_cast<uint8_t>(~(0xffu << ERROR_TYPE_SIZE));
+
+    uint8_t locationMasked = static_cast<uint8_t>(error.getLocation()) & locationMask;
+    uint8_t errorTypeMasked = static_cast<uint8_t>(error.getErrorType()) & errorTypeMask;
+    return locationMasked == error.getLocation() && errorTypeMasked == error.getErrorType();
 }
 }  // namespace errors
 
