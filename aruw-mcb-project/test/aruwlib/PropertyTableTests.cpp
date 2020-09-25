@@ -11,10 +11,13 @@ using aruwlib::IBaseProperty;
 using aruwlib::Int32Property;
 using aruwlib::PropertyTable;
 
-TEST(PropertyTable, addProperty_getProperty)
+TEST(
+    PropertyTable,
+    addProperty_successful_using_Int32Property_getProperty_returns_pointer_to_added_property)
 {
     PropertyTable ptable;
     Int32Property property(3, "cool property");
+
     EXPECT_TRUE(ptable.addProperty(&property));
     const Int32Property *propertyPtr =
         dynamic_cast<const Int32Property *>(ptable.getProperty("cool property"));
@@ -22,10 +25,11 @@ TEST(PropertyTable, addProperty_getProperty)
     EXPECT_EQ(propertyPtr, &property);
 }
 
-TEST(PropertyTable, removeProperty)
+TEST(PropertyTable, removeProperty_successfully_removes_Int32Property_if_in_table)
 {
     PropertyTable ptable;
     Int32Property property(3, "cool property");
+
     EXPECT_TRUE(ptable.addProperty(&property));
     const Int32Property *propertyPtr =
         dynamic_cast<const Int32Property *>(ptable.removeProperty("cool property"));
@@ -37,6 +41,7 @@ TEST(PropertyTable, setProperty)
 {
     PropertyTable ptable;
     Int32Property p(42, "p");
+
     ptable.addProperty(&p);
     const Int32Property *ppointer = dynamic_cast<const Int32Property *>(ptable.getProperty("p"));
     EXPECT_EQ(ppointer, &p);
@@ -46,7 +51,7 @@ TEST(PropertyTable, setProperty)
     EXPECT_EQ(41, p);
 }
 
-TEST(PropertyTable, isFull_getSize)
+TEST(PropertyTable, isFull_getSize_reflect_number_of_properties_in_table)
 {
     PropertyTable ptable;
     for (int i = 0; i < PropertyTable::PROPERTY_TABLE_MAX_SIZE; i++)
@@ -68,7 +73,9 @@ TEST(PropertyTable, isFull_getSize)
     }
 }
 
-TEST(PropertyTable, getPropertyTableBeginning)
+TEST(
+    PropertyTable,
+    getPropertyTableBeginning_getPropertyTableEnd_allows_for_proper_iteration_through_elements)
 {
     PropertyTable ptable;
     std::set<std::string> ptableContents;

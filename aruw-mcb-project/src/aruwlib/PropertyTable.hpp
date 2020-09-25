@@ -75,7 +75,8 @@ public:
      * @param[in] data The data that the property will be set to.
      * @return `true` if the property was set successfully, `false` otherwise.
      */
-    template <typename T> bool setProperty(const std::string &propertyName, T data)
+    template <typename T>
+    bool setProperty(const std::string &propertyName, T data)
     {
         if (propertyTable.count(propertyName) != 0)
         {

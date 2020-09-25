@@ -7,7 +7,8 @@
 
 namespace aruwlib
 {
-template <typename T> class BaseProperty : public IBaseProperty
+template <typename T>
+class BaseProperty : public IBaseProperty
 {
 public:
     BaseProperty() : IBaseProperty() {}
