@@ -68,7 +68,7 @@ public:
 
     /**
      * @return A string representation of the property. This is meant to represent the property's
-     *      _data_, and **not** the name of the property. 
+     *      _data_, and **not** the name of the property.
      */
     virtual std::string toString() const = 0;
 

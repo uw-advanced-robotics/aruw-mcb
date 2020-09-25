@@ -1,5 +1,8 @@
 #include "FloatProperty.hpp"
 
+#include <iomanip>
+#include <sstream>
+
 namespace aruwlib
 {
 void FloatProperty::serializeData(uint8_t* arr) const
@@ -9,6 +12,13 @@ void FloatProperty::serializeData(uint8_t* arr) const
         return;
     }
     memcpy(arr, &data, sizeof(float));
+}
+
+std::string FloatProperty::toString() const
+{
+    std::stringstream ss;
+    ss << data << std::setprecision(4);
+    return ss.str();
 }
 
 void FloatProperty::setProperty(float data) { this->data = data; }

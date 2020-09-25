@@ -59,6 +59,7 @@ TEST(Int32Property, Plus_operator_adds_data)
 {
     Int32Property p1(1);
     Int32Property p2(2);
+
     EXPECT_EQ(3, p1 + p2);
     EXPECT_EQ(4, p1 + 3);
     EXPECT_EQ(4, 3 + p1);
@@ -72,6 +73,7 @@ TEST(Int32Property, Minus_operator_subtracts_data)
 {
     Int32Property p1(1);
     Int32Property p2(2);
+
     EXPECT_EQ(-1, p1 - p2);
     EXPECT_EQ(-2, p1 - 3);
     EXPECT_EQ(2, 3 - p1);
@@ -85,6 +87,7 @@ TEST(Int32Property, Times_operator_multiplies_data)
 {
     Int32Property p1(2);
     Int32Property p2(3);
+
     EXPECT_EQ(6, p1 * p2);
     EXPECT_EQ(8, p1 * 4);
     EXPECT_EQ(8, 4 * p1);
@@ -98,6 +101,7 @@ TEST(Int32Property, Divide_operator)
 {
     Int32Property p1(10);
     Int32Property p2(2);
+
     EXPECT_EQ(5, p1 / p2);
     EXPECT_EQ(2, p1 / 5);
     EXPECT_EQ(10, 20 / p2);
