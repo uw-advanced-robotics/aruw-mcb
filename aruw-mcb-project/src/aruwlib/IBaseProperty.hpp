@@ -67,7 +67,8 @@ public:
     virtual PROPERTY_TYPE_ID getPropertyType() const = 0;
 
     /**
-     * @return A string representation of the property.
+     * @return A string representation of the property. This is meant to represent the property's
+     *      _data_, and **not** the name of the property. 
      */
     virtual std::string toString() const = 0;
 
@@ -91,7 +92,7 @@ public:
 
     /**
      * @return The length (in bytes) that the serialized property takes up.
-     *      Use to insure the array passed in in the `fullSerialization` function
+     *      Use to ensure the array passed in in the `fullSerialization` function
      *      has enough space to store the serialized data.
      */
     uint16_t getFullSerializationSize() const;
