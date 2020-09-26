@@ -86,7 +86,7 @@ inline void CanRxHandler::processReceivedCanData(
     else
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "Invalid can id received - not between 0x200 and 0x208",
             aruwlib::errors::Location::CAN_RX,
             aruwlib::errors::ErrorType::MOTOR_ID_OUT_OF_BOUNDS);
@@ -114,7 +114,7 @@ void CanRxHandler::removeReceiveHandler(
     if (id < 0 || id >= messageHandlerStoreSize)
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "index out of bounds",
             aruwlib::errors::CAN_RX,
             aruwlib::errors::INVALID_REMOVE);

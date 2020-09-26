@@ -40,7 +40,7 @@ void CommandScheduler::addCommand(Command* commandToAdd)
     if (commandToAdd == nullptr)
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "attempting to add nullptr command",
             aruwlib::errors::Location::COMMAND_SCHEDULER,
             aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
@@ -71,7 +71,7 @@ void CommandScheduler::addCommand(Command* commandToAdd)
             // the command you are trying to add has a subsystem that is not in the
             // scheduler, so you cannot add it (will lead to undefined control behavior)
             RAISE_ERROR(
-                drivers,
+                drivers->errorController,
                 "Attempting to add a command without subsystem in the scheduler",
                 aruwlib::errors::Location::COMMAND_SCHEDULER,
                 aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
@@ -139,7 +139,7 @@ void CommandScheduler::run()
         // shouldn't take more than 1 ms to complete all this stuff, if it does something
         // is seriously wrong (i.e. you are adding subsystems unchecked)
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "scheduler took longer than MAX_ALLOWABLE_SCHEDULER_RUNTIME",
             aruwlib::errors::Location::COMMAND_SCHEDULER,
             aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
@@ -188,7 +188,7 @@ void CommandScheduler::registerSubsystem(Subsystem* subsystem)
     else
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "subsystem is already added or trying to add nullptr subsystem",
             aruwlib::errors::Location::COMMAND_SCHEDULER,
             aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);

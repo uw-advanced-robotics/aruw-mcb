@@ -55,7 +55,7 @@ void Mpu6500::init()
     if (MPU6500_ID != spiReadRegister(MPU6500_WHO_AM_I))
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "failed to initialize the imu properly",
             aruwlib::errors::Location::MPU6500,
             aruwlib::errors::ErrorType::IMU_NOT_RECEIVING_PROPERLY);
@@ -111,7 +111,7 @@ void Mpu6500::read()
     else
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "failed to initialize the imu properly",
             aruwlib::errors::Location::MPU6500,
             aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
@@ -185,7 +185,7 @@ float Mpu6500::validateReading(float reading) const
         return reading;
     }
     RAISE_ERROR(
-        drivers,
+        drivers->errorController,
         "failed to initialize the imu properly",
         aruwlib::errors::Location::MPU6500,
         aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);

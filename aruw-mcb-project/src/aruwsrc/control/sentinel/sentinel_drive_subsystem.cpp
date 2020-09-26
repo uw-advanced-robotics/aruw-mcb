@@ -65,7 +65,7 @@ float SentinelDriveSubsystem::absolutePosition()
     else if (leftWheel.isMotorOnline())
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "right sentinel drive motor offline",
             aruwlib::errors::Location::SUBSYSTEM,
             aruwlib::errors::ErrorType::MOTOR_OFFLINE);
@@ -74,7 +74,7 @@ float SentinelDriveSubsystem::absolutePosition()
     else if (rightWheel.isMotorOnline())
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "left sentinel drive motor offline",
             aruwlib::errors::Location::SUBSYSTEM,
             aruwlib::errors::ErrorType::MOTOR_OFFLINE);
@@ -83,7 +83,7 @@ float SentinelDriveSubsystem::absolutePosition()
     else
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "both sentinel drive motors offline",
             aruwlib::errors::Location::SUBSYSTEM,
             aruwlib::errors::ErrorType::MOTOR_OFFLINE);

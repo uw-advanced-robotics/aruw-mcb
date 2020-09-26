@@ -126,7 +126,7 @@ void CommandMapper::addMap(RemoteMap* mapping, MapInfo* mapInfo)
     if (remoteMappings.insert(std::pair<RemoteMap*, MapInfo*>(mapping, mapInfo)).second == false)
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "failed to insert io mapping",
             aruwlib::errors::CONTROLLER_MAPPER,
             aruwlib::errors::INVALID_ADD);
@@ -153,7 +153,7 @@ CommandMapper::RemoteMap* CommandMapper::newKeyMap(
     }
 
     RAISE_ERROR(
-        drivers,
+        drivers->errorController,
         "adding a key map with unknown switch state",
         aruwlib::errors::CONTROLLER_MAPPER,
         aruwlib::errors::INVALID_KEY_MAP_TYPE);

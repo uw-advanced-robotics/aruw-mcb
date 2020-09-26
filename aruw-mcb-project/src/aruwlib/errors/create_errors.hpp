@@ -39,11 +39,11 @@ namespace errors
  * ```
  * then call ErrorController::updateLedDisplay() to display the error via the LEDs
  */
-#define RAISE_ERROR(drivers, desc, l, et)                                          \
+#define RAISE_ERROR(errorController, desc, l, et)                                          \
     do                                                                             \
     {                                                                              \
         aruwlib::errors::SystemError stringError(desc, __LINE__, __FILE__, l, et); \
-        drivers->errorController.addToErrorList(stringError);                      \
+        errorController.addToErrorList(stringError);                      \
     } while (0);
 
 }  // namespace errors

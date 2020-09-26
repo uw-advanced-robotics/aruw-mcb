@@ -69,7 +69,7 @@ void AgitatorSubsystem::armAgitatorUnjamTimer(const uint32_t& predictedRotateTim
     if (predictedRotateTime == 0)
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "The predicted rotate time is 0, this is physically impossible",
             aruwlib::errors::SUBSYSTEM,
             aruwlib::errors::ZERO_DESIRED_AGITATOR_ROTATE_TIME);

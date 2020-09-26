@@ -94,7 +94,7 @@ public:
     void removeBack();
 
     /**
-     * Removes the SystemError that matches the passed in SystemError. This is slow (O(n))
+     * Removes the `SystemError` that matches the passed in SystemError. This is slow (O(n))
      * and `removeHeadSystemError` and `removeTailSystemError` should be used instead
      * whenever possible.
      *
@@ -104,6 +104,15 @@ public:
      *      removed, `false` otherwise.
      */
     bool removeSystemError(const SystemError& error);
+
+    /**
+     * Removes the `SystemError` at the specified index. This is slow (O(n)), so don't use
+     * this except when necessary.
+     *
+     * @param[in] index The index at which to remove the `SystemError`.
+     * @return `true` if the error at the index was successfully removed, `false` otherwise.
+     */
+    bool removeSystemErrorAtIndex(uint_fast8_t index);
 
 private:
     static constexpr int ERROR_ROTATE_TIME = 5000;

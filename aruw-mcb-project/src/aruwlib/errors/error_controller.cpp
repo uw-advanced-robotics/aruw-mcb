@@ -120,6 +120,35 @@ bool ErrorController::removeSystemError(const SystemError& error)
     return errorFoundIndex != (ERROR_LIST_MAX_SIZE + 1);
 }
 
+bool ErrorController::removeSystemErrorAtIndex(uint_fast8_t index)
+{
+    if (index >= errorList.getSize())
+    {
+        return false;
+    }
+    if (index == 0)
+    {
+        errorList.removeFront();
+        return true;
+    }
+    else if (index == errorList.getSize() -1 )
+    {
+        errorList.removeBack();
+        return true;
+    }
+    uint_fast8_t size = errorList.getSize();
+    for (uint_fast8_t i = 0; i < size; i++)
+    {
+        SystemError se = errorList.get(0);
+        errorList.removeFront();
+        if (i != index)
+        {
+            errorList.append(se);
+        }
+    }
+    return true;
+}
+
 void ErrorController::displayBinaryNumberViaLeds(uint8_t binaryRep)
 {
     // Mask number and determine if it is a 0 or a 1

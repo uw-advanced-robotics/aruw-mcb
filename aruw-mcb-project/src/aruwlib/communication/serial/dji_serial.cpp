@@ -73,7 +73,7 @@ bool DJISerial::send()
     if (FRAME_HEADER_LENGTH + txMessage.length + FRAME_CRC16_LENGTH >= SERIAL_TX_BUFF_SIZE)
     {
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "dji serial attempting to send greater than SERIAL_TX_BUFF_SIZE bytes",
             aruwlib::errors::Location::DJI_SERIAL,
             aruwlib::errors::ErrorType::MESSAGE_LENGTH_OVERFLOW);
@@ -95,7 +95,7 @@ bool DJISerial::send()
         return false;
         // the message did not completely send
         RAISE_ERROR(
-            drivers,
+            drivers->errorController,
             "the message did not completely send",
             aruwlib::errors::Location::DJI_SERIAL,
             aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
@@ -153,7 +153,7 @@ void DJISerial::updateSerial()
                 {
                     djiSerialRxState = SERIAL_HEADER_SEARCH;
                     RAISE_ERROR(
-                        drivers,
+                        drivers->errorController,
                         "invalid message length received",
                         aruwlib::errors::Location::DJI_SERIAL,
                         aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
@@ -169,7 +169,7 @@ void DJISerial::updateSerial()
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR(
-                            drivers,
+                            drivers->errorController,
                             "CRC8 failure",
                             aruwlib::errors::Location::DJI_SERIAL,
                             aruwlib::errors::ErrorType::CRC_FAILURE);
@@ -223,7 +223,7 @@ void DJISerial::updateSerial()
                         delete[] crc16CheckData;
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR(
-                            drivers,
+                            drivers->errorController,
                             "CRC16 failure",
                             aruwlib::errors::Location::DJI_SERIAL,
                             aruwlib::errors::ErrorType::CRC_FAILURE);
@@ -247,7 +247,7 @@ void DJISerial::updateSerial()
             {
                 frameCurrReadByte = 0;
                 RAISE_ERROR(
-                    drivers,
+                    drivers->errorController,
                     "Invalid message length",
                     aruwlib::errors::Location::DJI_SERIAL,
                     aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
