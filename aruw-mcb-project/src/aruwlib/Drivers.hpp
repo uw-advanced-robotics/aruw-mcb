@@ -35,6 +35,7 @@
 #include "control/command_mapper.hpp"
 #include "control/command_scheduler.hpp"
 #include "control/control_operator_interface.hpp"
+#include "display/OledDisplay.hpp"
 #include "errors/error_controller.hpp"
 #include "motor/dji_motor_tx_handler.hpp"
 #else
@@ -83,7 +84,8 @@ public:
           controlOperatorInterface(this),
           commandMapper(this),
           errorController(this),
-          djiMotorTxHandler(this)
+          djiMotorTxHandler(this),
+          oledDisplay(this)
     {
     }
 
@@ -105,6 +107,7 @@ public:
     control::CommandMapper commandMapper;
     errors::ErrorController errorController;
     motor::DjiMotorTxHandler djiMotorTxHandler;
+    display::OledDisplay oledDisplay;
 #else
     mock::CanMock can;
     mock::CanRxHandlerMock canRxHandler;

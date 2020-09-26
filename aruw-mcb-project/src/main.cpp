@@ -31,7 +31,6 @@
 /* control includes ---------------------------------------------------------*/
 #include "aruwsrc/control/robot_control.hpp"
 
-using namespace modm::literals;
 using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/
@@ -70,6 +69,7 @@ int main()
             drivers->errorController.update();
             drivers->commandScheduler.run();
             drivers->djiMotorTxHandler.processCanSendData();
+            drivers->oledDisplay.update();
         }
 #ifndef ENV_SIMULATOR
         modm::delayMicroseconds(10);
@@ -85,32 +85,11 @@ void initializeIo(aruwlib::Drivers *drivers)
     drivers->digital.init();
     drivers->leds.init();
     drivers->can.initialize();
-
-#ifndef ENV_SIMULATOR
-    /// \todo this should be an init in the display class
-    Board::DisplaySpiMaster::
-        connect<Board::DisplayMiso::Miso, Board::DisplayMosi::Mosi, Board::DisplaySck::Sck>();
-
-    // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
-    // 90MHz/64=~14MHz
-    Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
-#endif
-    aruwlib::display::Sh1106<
-#ifndef ENV_SIMULATOR
-        Board::DisplaySpiMaster,
-        Board::DisplayCommand,
-        Board::DisplayReset,
-#endif
-        128,
-        64,
-        false>
-        display;
-    display.initializeBlocking();
-
     drivers->remote.initialize();
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
     drivers->xavierSerial.initialize();
+    drivers->oledDisplay.initialize();
 }
 
 void updateIo(aruwlib::Drivers *drivers)
