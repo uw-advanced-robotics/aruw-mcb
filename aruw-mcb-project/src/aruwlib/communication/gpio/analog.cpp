@@ -39,6 +39,9 @@ void Analog::init()
     Adc1::setPinChannel<AnalogInPinT>();
     Adc1::setPinChannel<AnalogInPinU>();
     Adc1::setPinChannel<AnalogInPinV>();
+
+    GpioOutputA6::setAnalogInput();
+    Adc1::setPinChannel<GpioOutputA6>();
 #endif
 }
 
@@ -60,6 +63,9 @@ uint16_t Analog::read(Pin pin) const
 
         case Pin::V:
             return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinV>());
+
+        case Pin::OLED_BUTTON:
+            return Adc1::readChannel(Adc1::getPinChannel<GpioOutputA6>());
 
         default:
             return 0;

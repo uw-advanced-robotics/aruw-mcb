@@ -7,6 +7,7 @@
 #include "aruwlib/rm-dev-board-a/board.hpp"
 
 #include "MainMenu.hpp"
+#include "mock_macros.hpp"
 #include "sh1106.hpp"
 
 namespace aruwlib
@@ -20,11 +21,11 @@ public:
     explicit OledDisplay(Drivers *drivers);
     OledDisplay(const OledDisplay &) = delete;
     OledDisplay &operator=(const OledDisplay &) = delete;
-    ~OledDisplay() = default;
+    mockable ~OledDisplay() = default;
 
-    void initialize();
+    mockable void initialize();
 
-    void update();
+    mockable void update();
 
 private:
     static constexpr int BUTTON_DEBOUNCE_SAMPLES = 10;
@@ -59,6 +60,8 @@ private:
     modm::filter::Debounce<int> leftButtonPressed;
     modm::filter::Debounce<int> rightButtonPressed;
     modm::filter::Debounce<int> okButtonPressed;
+
+    Drivers *drivers;
 };  // class OledDisplay
 }  // namespace display
 }  // namespace aruwlib

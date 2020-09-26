@@ -52,6 +52,7 @@
 #include "aruwlib/mock/ErrorControllerMock.hpp"
 #include "aruwlib/mock/LedsMock.hpp"
 #include "aruwlib/mock/Mpu6500Mock.hpp"
+#include "aruwlib/mock/OledDisplayMock.hpp"
 #include "aruwlib/mock/PwmMock.hpp"
 #include "aruwlib/mock/RefSerialMock.hpp"
 #include "aruwlib/mock/RemoteMock.hpp"
@@ -125,6 +126,7 @@ public:
     mock::CommandMapperMock commandMapper;
     mock::ErrorControllerMock errorController;
     mock::DjiMotorTxHandlerMock djiMotorTxHandler;
+    mock::OledDisplayMock oledDisplay;
 #endif
 };  // class Drivers
 

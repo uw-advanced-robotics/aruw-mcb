@@ -1,5 +1,7 @@
 #include "OledDisplay.hpp"
 
+#include "aruwlib/Drivers.hpp"
+
 using namespace modm::literals;
 
 namespace aruwlib
@@ -15,7 +17,8 @@ OledDisplay::OledDisplay(Drivers *drivers)
       upButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
       leftButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
       rightButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
-      okButtonPressed(BUTTON_DEBOUNCE_SAMPLES)
+      okButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
+      drivers(drivers)
 {
 }
 
@@ -29,8 +32,6 @@ void OledDisplay::initialize()
     // 90MHz/64=~14MHz
     Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
 #endif
-    GpioOutputA6::setAnalogInput();
-    Adc1::setPinChannel<GpioOutputA6>();
 
     display.initializeBlocking();
     display.setFont(modm::font::ScriptoNarrow);
@@ -42,7 +43,7 @@ void OledDisplay::initialize()
 
 void OledDisplay::handleButtonStatus()
 {
-    int buttonADC = Adc1::readChannel(Adc1::getPinChannel<GpioOutputA6>());
+    int buttonADC = drivers->analog.read(gpio::Analog::Pin::OLED_BUTTON);
 
     downButtonPressed.update(abs(buttonADC - DOWN_ADC_VAL) < DEBOUNCE_ADC_PRESSED_RANGE);
     upButtonPressed.update(abs(buttonADC - UP_ADC_VAL) < DEBOUNCE_ADC_PRESSED_RANGE);
