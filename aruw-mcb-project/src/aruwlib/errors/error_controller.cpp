@@ -131,7 +131,7 @@ bool ErrorController::removeSystemErrorAtIndex(uint_fast8_t index)
         errorList.removeFront();
         return true;
     }
-    else if (index == errorList.getSize() -1 )
+    else if (index == errorList.getSize() - 1)
     {
         errorList.removeBack();
         return true;

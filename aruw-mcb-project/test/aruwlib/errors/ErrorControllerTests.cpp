@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
-#include <aruwlib/errors/error_controller.hpp>
-#include <aruwlib/errors/create_errors.hpp>
 #include <aruwlib/Drivers.hpp>
+#include <aruwlib/errors/create_errors.hpp>
+#include <aruwlib/errors/error_controller.hpp>
+#include <gtest/gtest.h>
 
 using aruwlib::Drivers;
 using namespace aruwlib::errors;
@@ -10,9 +10,7 @@ TEST(ErrorController, getSystemError_returns_nullptr_if_out_of_bounds)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
-    SystemError e(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e);
 
     EXPECT_EQ(nullptr, ec.getSystemError(1));
@@ -22,9 +20,7 @@ TEST(ErrorController, getSystemError_returns_element_at_index_with_single_elemen
 {
     Drivers drivers;
     ErrorController ec(&drivers);
-    SystemError e(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e);
 
     EXPECT_EQ(e, *ec.getSystemError(0));
@@ -35,14 +31,13 @@ TEST(ErrorController, getSystemError_returns_element_at_index_with_multiple_elem
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);
@@ -56,9 +51,7 @@ TEST(ErrorController, removeFront_removes_first_element_in_controller_with_one_S
 {
     Drivers drivers;
     ErrorController ec(&drivers);
-    SystemError e(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e);
 
     ec.removeFront();
@@ -70,14 +63,13 @@ TEST(ErrorController, removeFront_removes_first_element_in_controller_with_multi
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);
@@ -92,9 +84,7 @@ TEST(ErrorController, removeBack_removes_last_element_in_controller_with_one_Sys
 {
     Drivers drivers;
     ErrorController ec(&drivers);
-    SystemError e(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e);
 
     ec.removeBack();
@@ -106,14 +96,13 @@ TEST(ErrorController, removeBack_removes_last_element_in_controller_with_multipl
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);
@@ -129,7 +118,8 @@ TEST(ErrorController, removeSystemError_no_SystemErrors_returns_false)
     Drivers drivers;
     ErrorController ec(&drivers);
 
-    EXPECT_FALSE(ec.removeSystemError(SystemError("desc", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE)));
+    EXPECT_FALSE(ec.removeSystemError(
+        SystemError("desc", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE)));
 }
 
 TEST(ErrorController, removeSystemError_single_SystemError_returns_true_and_removes_SystemError)
@@ -137,7 +127,10 @@ TEST(ErrorController, removeSystemError_single_SystemError_returns_true_and_remo
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
     ec.addToErrorList(e);
 
@@ -145,19 +138,20 @@ TEST(ErrorController, removeSystemError_single_SystemError_returns_true_and_remo
     EXPECT_EQ(nullptr, ec.getSystemError(0));
 }
 
-TEST(ErrorController, removeSystemError_start_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
+TEST(
+    ErrorController,
+    removeSystemError_start_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);
@@ -167,19 +161,20 @@ TEST(ErrorController, removeSystemError_start_of_multiple_SystemErrors_returns_t
     EXPECT_EQ(e3, *ec.getSystemError(1));
 }
 
-TEST(ErrorController, removeSystemError_middle_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
+TEST(
+    ErrorController,
+    removeSystemError_middle_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);
@@ -189,19 +184,20 @@ TEST(ErrorController, removeSystemError_middle_of_multiple_SystemErrors_returns_
     EXPECT_EQ(e3, *ec.getSystemError(1));
 }
 
-TEST(ErrorController, removeSystemError_end_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
+TEST(
+    ErrorController,
+    removeSystemError_end_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);
@@ -211,19 +207,20 @@ TEST(ErrorController, removeSystemError_end_of_multiple_SystemErrors_returns_tru
     EXPECT_EQ(e2, *ec.getSystemError(1));
 }
 
-TEST(ErrorController, removeSystemError_SystemError_not_in_error_list_nothing_removed_returned_false)
+TEST(
+    ErrorController,
+    removeSystemError_SystemError_not_in_error_list_nothing_removed_returned_false)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
 
@@ -231,7 +228,6 @@ TEST(ErrorController, removeSystemError_SystemError_not_in_error_list_nothing_re
     EXPECT_EQ(e1, *ec.getSystemError(0));
     EXPECT_EQ(e2, *ec.getSystemError(1));
 }
-
 
 TEST(ErrorController, removeSystemErrorAtIndex_no_SystemErrors_returns_false)
 {
@@ -241,12 +237,17 @@ TEST(ErrorController, removeSystemErrorAtIndex_no_SystemErrors_returns_false)
     EXPECT_FALSE(ec.removeSystemErrorAtIndex(0));
 }
 
-TEST(ErrorController, removeSystemErrorAtIndex_single_SystemError_returns_true_and_removes_SystemError)
+TEST(
+    ErrorController,
+    removeSystemErrorAtIndex_single_SystemError_returns_true_and_removes_SystemError)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
     ec.addToErrorList(e);
 
@@ -254,19 +255,20 @@ TEST(ErrorController, removeSystemErrorAtIndex_single_SystemError_returns_true_a
     EXPECT_EQ(nullptr, ec.getSystemError(0));
 }
 
-TEST(ErrorController, removeSystemErrorAtIndex_start_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
+TEST(
+    ErrorController,
+    removeSystemErrorAtIndex_start_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);
@@ -276,19 +278,20 @@ TEST(ErrorController, removeSystemErrorAtIndex_start_of_multiple_SystemErrors_re
     EXPECT_EQ(e3, *ec.getSystemError(1));
 }
 
-TEST(ErrorController, removeSystemErrorAtIndex_middle_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
+TEST(
+    ErrorController,
+    removeSystemErrorAtIndex_middle_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);
@@ -298,19 +301,20 @@ TEST(ErrorController, removeSystemErrorAtIndex_middle_of_multiple_SystemErrors_r
     EXPECT_EQ(e3, *ec.getSystemError(1));
 }
 
-TEST(ErrorController, removeSystemErrorAtIndex_end_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
+TEST(
+    ErrorController,
+    removeSystemErrorAtIndex_end_of_multiple_SystemErrors_returns_true_and_removes_SystemError)
 {
     Drivers drivers;
     ErrorController ec(&drivers);
     SystemError e1(
-        "err", 1, "file", Location::CAN_RX,
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
         ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
-    SystemError e2(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::ADDING_NULLPTR_COMMAND);
-    SystemError e3(
-        "err", 1, "file", Location::CAN_RX,
-        ErrorType::CRC_FAILURE);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
     ec.addToErrorList(e1);
     ec.addToErrorList(e2);
     ec.addToErrorList(e3);

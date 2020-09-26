@@ -28,7 +28,8 @@ namespace errors
 bool operator==(const SystemError &e1, const SystemError &e2)
 {
     return e1.lineNumber == e2.lineNumber && !strcmp(e1.description, e2.description) &&
-           !strcmp(e1.filename, e2.filename) && e1.location == e2.location && e1.errorType == e2.errorType;
+           !strcmp(e1.filename, e2.filename) && e1.location == e2.location &&
+           e1.errorType == e2.errorType;
 }
 }  // namespace errors
 }  // namespace aruwlib
