@@ -21,6 +21,8 @@
 #define DRIVERS_HPP_
 
 #ifndef ENV_SIMULATOR
+#include <modm/platform.hpp>
+
 #include "communication/can/can.hpp"
 #include "communication/can/can_rx_handler.hpp"
 #include "communication/gpio/analog.hpp"
@@ -29,6 +31,7 @@
 #include "communication/gpio/pwm.hpp"
 #include "communication/remote.hpp"
 #include "communication/sensors/mpu6500/mpu6500.hpp"
+#include "communication/serial/TerminalSerial.hpp"
 #include "communication/serial/ref_serial.hpp"
 #include "communication/serial/uart.hpp"
 #include "communication/serial/xavier_serial.hpp"
@@ -56,6 +59,8 @@
 #include "aruwlib/mock/RemoteMock.hpp"
 #include "aruwlib/mock/UartMock.hpp"
 #include "aruwlib/mock/XavierSerialMock.hpp"
+
+#include "communication/serial/TerminalSerial.hpp"
 #endif
 
 namespace aruwlib
@@ -105,6 +110,7 @@ public:
     control::CommandMapper commandMapper;
     errors::ErrorController errorController;
     motor::DjiMotorTxHandler djiMotorTxHandler;
+    communication::serial::TerminalSerial<modm::platform::Usart3> terminalSerial;
 #else
     mock::CanMock can;
     mock::CanRxHandlerMock canRxHandler;
@@ -122,6 +128,8 @@ public:
     mock::CommandMapperMock commandMapper;
     mock::ErrorControllerMock errorController;
     mock::DjiMotorTxHandlerMock djiMotorTxHandler;
+    communication::serial::TerminalSerial<communication::serial::HostedTerminalDevice>
+        terminalSerial;
 #endif
 };  // class Drivers
 
