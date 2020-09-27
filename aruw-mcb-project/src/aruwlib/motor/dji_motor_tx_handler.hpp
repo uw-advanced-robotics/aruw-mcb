@@ -51,6 +51,8 @@
 
 #include <limits.h>
 
+#include "aruwlib/communication/serial/TerminalSerial.hpp"
+
 #include "dji_motor.hpp"
 #include "mock_macros.hpp"
 
@@ -61,7 +63,7 @@ namespace motor
 {
 #define DJI_MOTOR_NORMALIZED_ID(id) ((int32_t)id - aruwlib::motor::MotorId::MOTOR1)
 
-class DjiMotorTxHandler
+class DjiMotorTxHandler : public communication::serial::ITerminalSerialCallback
 {
 public:
     DjiMotorTxHandler(Drivers* drivers) : drivers(drivers) {}
@@ -81,6 +83,8 @@ public:
 
     mockable DjiMotor const* getCan2MotorData(MotorId motorId);
 
+    std::string terminalSerialCallback(std::stringstream&& inputLine) override;
+
 private:
     static const int DJI_MOTORS_PER_CAN = 8;
 
@@ -99,6 +103,10 @@ private:
     void removeFromMotorManager(const DjiMotor& motor, DjiMotor** motorStore);
 
     void zeroTxMessage(modm::can::Message* message);
+
+    std::string getMotorInfoToString(const DjiMotor& motor);
+
+    void printAllMotorInfo(DjiMotor** motorStore, std::string& outStr);
 };
 
 }  // namespace motor

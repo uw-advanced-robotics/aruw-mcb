@@ -111,6 +111,8 @@ void initializeIo(aruwlib::Drivers *drivers)
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
     drivers->xavierSerial.initialize();
+    drivers->terminalSerial.initialize<115200>();
+    drivers->terminalSerial.addHeader("DjiMotor", &drivers->djiMotorTxHandler);
 }
 
 void updateIo(aruwlib::Drivers *drivers)
