@@ -28,11 +28,11 @@
 #include "sentinel/sentinel_auto_drive_command.hpp"
 #include "sentinel/sentinel_drive_manual_command.hpp"
 #include "sentinel/sentinel_drive_subsystem.hpp"
+#include "turret/TurretChassisRelativePositionCommand.hpp"
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_init_command.hpp"
 #include "turret/turret_manual_command.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_position_command.hpp"
 
 #if defined(TARGET_SENTINEL)
 
@@ -88,6 +88,8 @@ FrictionWheelSubsystem upperFrictionWheels(
 
 FrictionWheelSubsystem lowerFrictionWheels(drivers());
 
+aruwsrc::turret::TurretSubsystem turret(drivers());
+
 /* define commands ----------------------------------------------------------*/
 ShootFastComprisedCommand agitatorShootSlowCommand(drivers(), &agitator);
 
@@ -113,6 +115,8 @@ FrictionWheelRotateCommand stopUpperFrictionWheels(&upperFrictionWheels, 0);
 
 FrictionWheelRotateCommand stopLowerFrictionWheels(&lowerFrictionWheels, 0);
 
+aruwsrc::turret::TurretChassisRelativePositionCommand turretManualCommand(&turret, drivers());
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -121,6 +125,7 @@ void initializeSubsystems()
     sentinelDrive.initialize();
     upperFrictionWheels.initialize();
     lowerFrictionWheels.initialize();
+    turret.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -131,6 +136,7 @@ void registerSentinelSubsystems(aruwlib::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&sentinelDrive);
     drivers->commandScheduler.registerSubsystem(&upperFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&lowerFrictionWheels);
+    drivers->commandScheduler.registerSubsystem(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -139,6 +145,7 @@ void setDefaultSentinelCommands(aruwlib::Drivers *)
     sentinelDrive.setDefaultCommand(&sentinelDriveManual);
     upperFrictionWheels.setDefaultCommand(&spinUpperFrictionWheels);
     lowerFrictionWheels.setDefaultCommand(&spinLowerFrictionWheels);
+    turret.setDefaultCommand(&turretManualCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

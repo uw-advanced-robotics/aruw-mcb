@@ -34,22 +34,22 @@ class TurretSubsystem : public aruwlib::control::Subsystem
 {
 public:
     static constexpr float TURRET_START_ANGLE = 90.0f;
-    #if defined(TARGET_SOLDIER)
+#if defined(TARGET_SOLDIER)
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
-    #elif defined(TARGET_SENTRY)
+#elif defined(TARGET_SENTRY)
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 60.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
-    #else
+#else
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
-    #endif
+#endif
 
     TurretSubsystem(aruwlib::Drivers* drivers);
 
@@ -92,7 +92,7 @@ public:
     void updateCurrentTurretAngles();
 
 private:
-    #if defined(TARGET_SOLDIER)
+#if defined(TARGET_SOLDIER)
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 8160;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 
@@ -108,7 +108,7 @@ private:
 
     static constexpr bool PITCH_MOTOR_INVERTED = true;
     static constexpr bool YAW_MOTOR_INVERTED = false;
-    #elif defined(TARGET_SENTRY)
+#elif defined(TARGET_SENTRY)
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 1400;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 3500;
 
@@ -124,7 +124,7 @@ private:
 
     static constexpr bool PITCH_MOTOR_INVERTED = true;
     static constexpr bool YAW_MOTOR_INVERTED = true;
-    #else
+#else
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 8160;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 
@@ -140,7 +140,7 @@ private:
 
     static constexpr bool PITCH_MOTOR_INVERTED = true;
     static constexpr bool YAW_MOTOR_INVERTED = false;
-    #endif
+#endif
 
     uint32_t prevUpdateCounterChassisRotateDerivative = 0;
     aruwlib::algorithms::LinearInterpolation chassisRotateDerivativeInterpolation;
