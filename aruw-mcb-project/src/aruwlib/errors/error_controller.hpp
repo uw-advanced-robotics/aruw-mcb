@@ -75,23 +75,23 @@ public:
      */
     mockable void updateLedDisplay();
 
-    uint_fast8_t getErrorListSize() const { return errorList.getSize(); }
+    mockable uint_fast8_t getErrorListSize() const { return errorList.getSize(); }
 
     /**
      * Returns the SystemError at the specified index, zero index from the start
      * of the error array.
      */
-    const SystemError* getSystemError(uint_fast8_t index) const;
+    mockable const SystemError* getSystemError(uint_fast8_t index) const;
 
     /**
      * Removes the `SystemError` from the front in O(1) time.
      */
-    void removeFront();
+    mockable void removeFront();
 
     /**
      * Removes the `SystemError` from the back in O(1) time.
      */
-    void removeBack();
+    mockable void removeBack();
 
     /**
      * Removes the `SystemError` that matches the passed in SystemError. This is slow (O(n))
@@ -103,7 +103,7 @@ public:
      * @return `true` if the error was in the ErrorController and was successfully
      *      removed, `false` otherwise.
      */
-    bool removeSystemError(const SystemError& error);
+    mockable bool removeSystemError(const SystemError& error);
 
     /**
      * Removes the `SystemError` at the specified index. This is slow (O(n)), so don't use
@@ -112,7 +112,9 @@ public:
      * @param[in] index The index at which to remove the `SystemError`.
      * @return `true` if the error at the index was successfully removed, `false` otherwise.
      */
-    bool removeSystemErrorAtIndex(uint_fast8_t index);
+    mockable bool removeSystemErrorAtIndex(uint_fast8_t index);
+
+    mockable void removeAllSystemErrors();
 
 private:
     static constexpr int ERROR_ROTATE_TIME = 5000;

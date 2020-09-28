@@ -33,6 +33,13 @@ public:
     ErrorControllerMock(aruwlib::Drivers* drivers) : aruwlib::errors::ErrorController(drivers) {}
     MOCK_METHOD(void, addToErrorList, (const aruwlib::errors::SystemError& error), (override));
     MOCK_METHOD(void, updateLedDisplay, (), (override));
+    MOCK_METHOD(uint_fast8_t, getErrorListSize, (), (const override));
+    MOCK_METHOD(const errors::SystemError*, getSystemError, (uint_fast8_t index), (const override));
+    MOCK_METHOD(void, removeFront, (), (override));
+    MOCK_METHOD(void, removeBack, (), (override));
+    MOCK_METHOD(bool, removeSystemError, (const errors::SystemError& error), (override));
+    MOCK_METHOD(bool, removeSystemErrorAtIndex, (uint_fast8_t index), (override));
+    MOCK_METHOD(void, removeAllSystemErrors, (), (override));
 };  // class ErrorControllerMock
 }  // namespace mock
 }  // namespace aruwlib

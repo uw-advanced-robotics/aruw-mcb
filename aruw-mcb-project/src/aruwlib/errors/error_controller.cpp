@@ -149,6 +149,14 @@ bool ErrorController::removeSystemErrorAtIndex(uint_fast8_t index)
     return true;
 }
 
+void ErrorController::removeAllSystemErrors()
+{
+    while (errorList.getSize() > 0)
+    {
+        errorList.removeBack();
+    }
+}
+
 void ErrorController::displayBinaryNumberViaLeds(uint8_t binaryRep)
 {
     // Mask number and determine if it is a 0 or a 1

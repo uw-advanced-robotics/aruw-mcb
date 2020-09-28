@@ -342,3 +342,32 @@ TEST(
     EXPECT_EQ(e1, *ec.getSystemError(0));
     EXPECT_EQ(e2, *ec.getSystemError(1));
 }
+
+TEST(ErrorController, removeAllSystemErrors_with_zero_SystemErrors_does_nothing)
+{
+    Drivers drivers;
+    ErrorController ec(&drivers);
+
+    ec.removeAllSystemErrors();
+    EXPECT_EQ(0, ec.getErrorListSize());
+}
+
+TEST(ErrorController, removeAllSystemErrors_with_three_SystemErrors_removes_all_of_them)
+{
+    Drivers drivers;
+    ErrorController ec(&drivers);
+    SystemError e1(
+        "err",
+        1,
+        "file",
+        Location::CAN_RX,
+        ErrorType::ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES);
+    SystemError e2("err", 1, "file", Location::CAN_RX, ErrorType::ADDING_NULLPTR_COMMAND);
+    SystemError e3("err", 1, "file", Location::CAN_RX, ErrorType::CRC_FAILURE);
+    ec.addToErrorList(e1);
+    ec.addToErrorList(e2);
+    ec.addToErrorList(e3);
+
+    ec.removeAllSystemErrors();
+    EXPECT_EQ(0, ec.getErrorListSize());
+}
