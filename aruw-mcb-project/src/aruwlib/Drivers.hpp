@@ -88,7 +88,8 @@ public:
           controlOperatorInterface(this),
           commandMapper(this),
           errorController(this),
-          djiMotorTxHandler(this)
+          djiMotorTxHandler(this),
+          terminalSerial(this)
     {
     }
 
@@ -110,7 +111,7 @@ public:
     control::CommandMapper commandMapper;
     errors::ErrorController errorController;
     motor::DjiMotorTxHandler djiMotorTxHandler;
-    communication::serial::TerminalSerial<modm::platform::Usart3> terminalSerial;
+    communication::serial::TerminalSerial terminalSerial;
 #else
     mock::CanMock can;
     mock::CanRxHandlerMock canRxHandler;
@@ -128,8 +129,7 @@ public:
     mock::CommandMapperMock commandMapper;
     mock::ErrorControllerMock errorController;
     mock::DjiMotorTxHandlerMock djiMotorTxHandler;
-    communication::serial::TerminalSerial<communication::serial::HostedTerminalDevice>
-        terminalSerial;
+    communication::serial::TerminalSerial terminalSerial;  // todo fix when we have a good env
 #endif
 };  // class Drivers
 

@@ -63,9 +63,11 @@ namespace motor
 {
 #define DJI_MOTOR_NORMALIZED_ID(id) ((int32_t)id - aruwlib::motor::MotorId::MOTOR1)
 
-class DjiMotorTxHandler : public communication::serial::ITerminalSerialCallback
+class DjiMotorTxHandler
 {
 public:
+    static constexpr int DJI_MOTORS_PER_CAN = 8;
+
     DjiMotorTxHandler(Drivers* drivers) : drivers(drivers) {}
     DjiMotorTxHandler(const DjiMotorTxHandler&) = delete;
     DjiMotorTxHandler& operator=(const DjiMotorTxHandler&) = delete;
@@ -83,11 +85,7 @@ public:
 
     mockable DjiMotor const* getCan2MotorData(MotorId motorId);
 
-    std::string terminalSerialCallback(std::stringstream&& inputLine) override;
-
 private:
-    static const int DJI_MOTORS_PER_CAN = 8;
-
     Drivers* drivers;
 
     DjiMotor* can1MotorStore[DJI_MOTORS_PER_CAN] = {0};
@@ -103,10 +101,6 @@ private:
     void removeFromMotorManager(const DjiMotor& motor, DjiMotor** motorStore);
 
     void zeroTxMessage(modm::can::Message* message);
-
-    std::string getMotorInfoToString(const DjiMotor& motor);
-
-    void printAllMotorInfo(DjiMotor** motorStore, std::string& outStr);
 };
 
 }  // namespace motor
