@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "DjiMotorTerminalSerialHandler.hpp"
 
 #include "dji_motor_tx_handler.hpp"
@@ -6,7 +25,9 @@ namespace aruwlib
 {
 namespace motor
 {
-std::string DjiMotorTerminalSerialHandler::terminalSerialCallback(std::stringstream&& inputLine)
+bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
+    std::stringstream&& inputLine,
+    modm::IOStream& outputStream)
 {
     std::string arg;
     MotorId motorId = MotorId::MOTOR1;
@@ -73,17 +94,17 @@ std::string DjiMotorTerminalSerialHandler::terminalSerialCallback(std::stringstr
         }
         else
         {
-            return "invalid arguments";
+            return false;
         }
     }
+
     if (printAllMotors)
     {
-        std::string allMotors;
-        allMotors += "CAN 1:\n";
-        printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, allMotors);
-        allMotors += "CAN 2:\n";
-        printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, allMotors);
-        return allMotors;
+        outputStream << "CAN 1:" << modm::endl;
+        printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, outputStream);
+        outputStream << "CAN 2:" << modm::endl;
+        printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, outputStream);
+        return true;
     }
     else if (canBusValid && motorIdValid)
     {
@@ -92,41 +113,54 @@ std::string DjiMotorTerminalSerialHandler::terminalSerialCallback(std::stringstr
             case can::CanBus::CAN_BUS1:
                 if (motorHandler->getCan1MotorData(motorId) == nullptr)
                 {
-                    return "motor not in tx handler";
+                    outputStream << "motor no in tx handler" << modm::endl;
                 }
-                return getMotorInfoToString(*motorHandler->getCan1MotorData(motorId));
+                else
+                {
+                    getMotorInfoToString(*motorHandler->getCan1MotorData(motorId), outputStream);
+                }
+                break;
             case can::CanBus::CAN_BUS2:
                 if (motorHandler->getCan2MotorData(motorId) == nullptr)
                 {
-                    return "motor not in tx handler";
+                    outputStream << "motor not in tx handler" << modm::endl;
                 }
-                return getMotorInfoToString(*motorHandler->getCan2MotorData(motorId));
-            default:
-                return "invalid arguments";
+                else
+                {
+                    getMotorInfoToString(*motorHandler->getCan2MotorData(motorId), outputStream);
+                }
+                break;
         }
+        return true;
     }
     else
     {
-        return "invalid agruments";
+        outputStream << "bad args" << modm::endl;
+        return false;
     }
 }
 
-std::string DjiMotorTerminalSerialHandler::getMotorInfoToString(const DjiMotor& motor)
+void DjiMotorTerminalSerialHandler::getMotorInfoToString(
+    const DjiMotor& motor,
+    modm::IOStream& outputStream)
 {
-    return motor.getMotorIdentifier() + ". " + motor.getName() +
-           ": online: " + (motor.isMotorOnline() ? "yes" : "no") +
-           ", enc wrapped: " + std::to_string(motor.encStore.getEncoderWrapped()) +
-           ", rpm: " + std::to_string(motor.getShaftRPM()) + "\n";
+    outputStream << motor.getMotorIdentifier() << ". " << motor.getName()
+                 << ": online: " << (motor.isMotorOnline() ? "yes" : "no")
+                 << ", enc wrapped: " << motor.encStore.getEncoderWrapped()
+                 << ", rpm: " << motor.getShaftRPM() << modm::endl;
 }
 
-void DjiMotorTerminalSerialHandler::printAllMotorInfo(getMotorByIdFunc func, std::string& outStr)
+void DjiMotorTerminalSerialHandler::printAllMotorInfo(
+    getMotorByIdFunc func,
+    modm::IOStream& outputStream)
 {
     for (int i = static_cast<int>(MOTOR1); i <= static_cast<int>(MOTOR8); i++)
     {
         const DjiMotor* motor = (motorHandler->*(func))(static_cast<MotorId>(i));
         if (motor != nullptr)
         {
-            outStr += std::to_string(i) + ") " + getMotorInfoToString(*motor);
+            outputStream << i << ") ";
+            getMotorInfoToString(*motor, outputStream);
         }
     }
 }
