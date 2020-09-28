@@ -33,15 +33,13 @@ void Analog::init()
     AnalogInPins::setAnalogInput();
 
     // Initial ADC/Timer setup
-    Adc1::connect<AnalogInPinS::In0, AnalogInPinT::In1, AnalogInPinU::In2, AnalogInPinV::In3>();
+    Adc1::connect<AnalogInPinS::In0, AnalogInPinT::In1, AnalogInPinU::In2, AnalogInPinV::In3, AnalogInPinOled::In6>();
     Adc1::initialize<SystemClock, 22500000_Bd>();
     Adc1::setPinChannel<AnalogInPinS>();
     Adc1::setPinChannel<AnalogInPinT>();
     Adc1::setPinChannel<AnalogInPinU>();
     Adc1::setPinChannel<AnalogInPinV>();
-
-    GpioOutputA6::setAnalogInput();
-    Adc1::setPinChannel<GpioOutputA6>();
+    Adc1::setPinChannel<AnalogInPinOled>();
 #endif
 }
 
