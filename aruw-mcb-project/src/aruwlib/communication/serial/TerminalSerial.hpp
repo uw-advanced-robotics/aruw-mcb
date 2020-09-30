@@ -32,6 +32,7 @@
 #include "aruwlib/communication/serial/uart.hpp"
 #include "aruwlib/rm-dev-board-a/board.hpp"
 
+#include "mock_macros.hpp"
 #include "terminal_devices.hpp"
 
 namespace aruwlib
@@ -63,21 +64,21 @@ class TerminalSerial
 public:
     TerminalSerial(Drivers *drivers);
 
-    void initialize();
+    mockable void initialize();
 
-    void update();
+    mockable void update();
 
-    void addHeader(const std::string &header, ITerminalSerialCallback *callback);
+    mockable void addHeader(const std::string &header, ITerminalSerialCallback *callback);
 
 private:
     static constexpr int MAX_LINE_LENGTH = 256;
 
-    // TODO fix
 #ifdef ENV_SIMULATOR
     HostedTerminalDevice device;
 #else
     UartTerminalDevice device;
 #endif
+
     modm::IOStream stream;
 
     char rxBuff[MAX_LINE_LENGTH];

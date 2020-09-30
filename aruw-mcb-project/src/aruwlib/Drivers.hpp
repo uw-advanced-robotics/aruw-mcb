@@ -57,10 +57,9 @@
 #include "aruwlib/mock/PwmMock.hpp"
 #include "aruwlib/mock/RefSerialMock.hpp"
 #include "aruwlib/mock/RemoteMock.hpp"
+#include "aruwlib/mock/TerminalSerialMock.hpp"
 #include "aruwlib/mock/UartMock.hpp"
 #include "aruwlib/mock/XavierSerialMock.hpp"
-
-#include "communication/serial/TerminalSerial.hpp"
 #endif
 
 namespace aruwlib
@@ -129,7 +128,7 @@ public:
     mock::CommandMapperMock commandMapper;
     mock::ErrorControllerMock errorController;
     mock::DjiMotorTxHandlerMock djiMotorTxHandler;
-    communication::serial::TerminalSerial terminalSerial;  // todo fix when we have a good env
+    mock::TerminalSerialMock terminalSerial;
 #endif
 };  // class Drivers
 
