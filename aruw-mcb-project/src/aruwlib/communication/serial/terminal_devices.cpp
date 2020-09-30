@@ -28,18 +28,42 @@ namespace communication
 namespace serial
 {
 #ifdef ENV_SIMULATOR
+HostedTerminalDevice::~HostedTerminalDevice() { pthread_mutex_destroy(&cinDataMutex); }
+
 HostedTerminalDevice::HostedTerminalDevice(Drivers *drivers) : drivers(drivers) {}
+
+void *HostedTerminalDevice::readCin(void *vargp)
+{
+    HostedTerminalDevice *device = reinterpret_cast<HostedTerminalDevice *>(vargp);
+
+    while (true)
+    {
+        char c;
+        std::cin >> std::noskipws >> c;
+        pthread_mutex_lock(&device->cinDataMutex);
+        device->rxBuff.appendOverwrite(c);
+        pthread_mutex_unlock(&device->cinDataMutex);
+    }
+}
 
 void HostedTerminalDevice::initialize()
 {
-    // TODO set up background pthread that uses cin to read from terminal
+    pthread_mutex_init(&cinDataMutex, nullptr);
+    pthread_create(&cinRxThread, nullptr, &readCin, reinterpret_cast<void *>(this));
 }
 
 bool HostedTerminalDevice::read(char &c)
 {
-    // TODO: Make non-blocking (use background thread)
-    std::cin >> std::noskipws >> c;
-    return true;
+    pthread_mutex_lock(&cinDataMutex);
+    if (rxBuff.getSize() > 0)
+    {
+        c = rxBuff.getFront();
+        rxBuff.removeFront();
+        pthread_mutex_unlock(&cinDataMutex);
+        return true;
+    }
+    pthread_mutex_unlock(&cinDataMutex);
+    return false;
 }
 
 void HostedTerminalDevice::write(char c) { std::cout << c; }

@@ -144,8 +144,8 @@ void DjiMotorTerminalSerialHandler::getMotorInfoToString(
     const DjiMotor& motor,
     modm::IOStream& outputStream)
 {
-    outputStream << motor.getMotorIdentifier() << ". " << motor.getName()
-                 << ": online: " << (motor.isMotorOnline() ? "yes" : "no")
+    outputStream << (DJI_MOTOR_NORMALIZED_ID(motor.getMotorIdentifier()) + 1) << ". "
+                 << motor.getName() << ": online: " << (motor.isMotorOnline() ? "yes" : "no")
                  << ", enc wrapped: " << motor.encStore.getEncoderWrapped()
                  << ", rpm: " << motor.getShaftRPM() << modm::endl;
 }
@@ -159,7 +159,6 @@ void DjiMotorTerminalSerialHandler::printAllMotorInfo(
         const DjiMotor* motor = (motorHandler->*(func))(static_cast<MotorId>(i));
         if (motor != nullptr)
         {
-            outputStream << i << ") ";
             getMotorInfoToString(*motor, outputStream);
         }
     }

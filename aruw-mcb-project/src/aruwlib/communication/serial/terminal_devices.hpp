@@ -23,6 +23,12 @@
 #include <cstdint>
 #include <iostream>
 
+#ifdef ENV_SIMULATOR
+#include <pthread.h>
+
+#include <modm/container/deque.hpp>
+#endif
+
 #include <modm/io/iodevice.hpp>
 
 #include "aruwlib/communication/serial/uart.hpp"
@@ -45,7 +51,7 @@ public:
     HostedTerminalDevice(Drivers *drivers);
     HostedTerminalDevice(const HostedTerminalDevice &) = delete;
     HostedTerminalDevice &operator=(const HostedTerminalDevice &) = delete;
-    virtual ~HostedTerminalDevice() = default;
+    virtual ~HostedTerminalDevice();
 
     void initialize();
 
@@ -57,7 +63,17 @@ public:
     void flush() override;
 
 private:
+    static constexpr int RX_BUFF_SIZE = 256;
+
     Drivers *drivers;
+
+    pthread_t cinRxThread;
+
+    pthread_mutex_t cinDataMutex;
+
+    modm::BoundedDeque<char, RX_BUFF_SIZE> rxBuff;
+
+    static void *readCin(void *vargp);
 };  // class TerminalDevice
 #endif
 

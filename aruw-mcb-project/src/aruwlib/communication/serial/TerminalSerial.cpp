@@ -37,6 +37,10 @@ void TerminalSerial::update()
 {
     char c;
     stream.get(c);
+    if (c == modm::IOStream::eof)
+    {
+        return;
+    }
     if (c == '\n')
     {
         rxBuff[currLineSize] = '\0';
