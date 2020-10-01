@@ -47,6 +47,9 @@ namespace errors
 class ErrorController
 {
 public:
+    static constexpr std::size_t ERROR_LIST_MAX_SIZE = 16;
+    using error_index_t = modm::BoundedDeque<SystemError, ERROR_LIST_MAX_SIZE>::Index;
+
     /**
      * Constrcuts an ErrorController with a display time for each error specified
      * by `ERROR_ROTATE_TIME`.
@@ -75,13 +78,13 @@ public:
      */
     mockable void updateLedDisplay();
 
-    mockable uint_fast8_t getErrorListSize() const { return errorList.getSize(); }
+    mockable error_index_t getErrorListSize() const { return errorList.getSize(); }
 
     /**
      * Returns the SystemError at the specified index, zero index from the start
      * of the error array.
      */
-    mockable const SystemError* getSystemError(uint_fast8_t index) const;
+    mockable const SystemError* getSystemError(error_index_t index) const;
 
     /**
      * Removes the `SystemError` from the front in O(1) time.
@@ -112,14 +115,13 @@ public:
      * @param[in] index The index at which to remove the `SystemError`.
      * @return `true` if the error at the index was successfully removed, `false` otherwise.
      */
-    mockable bool removeSystemErrorAtIndex(uint_fast8_t index);
+    mockable bool removeSystemErrorAtIndex(error_index_t index);
 
     mockable void removeAllSystemErrors();
 
 private:
     static constexpr int ERROR_ROTATE_TIME = 5000;
-    static constexpr uint_fast8_t ERROR_LIST_MAX_SIZE = 16;
-    static constexpr uint_fast8_t NUM_LEDS = 8;
+    static constexpr error_index_t NUM_LEDS = 8;
 
     Drivers* drivers;
 
@@ -127,7 +129,7 @@ private:
 
     aruwlib::arch::MilliTimeout prevLedErrorChangeWait;
 
-    uint_fast8_t currentDisplayIndex;
+    error_index_t currentDisplayIndex;
 
     /**
      * Displays the `binaryRep` with the LEDs A-H, with LED A as the LSB and LED H as the MSB.

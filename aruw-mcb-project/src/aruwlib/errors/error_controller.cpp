@@ -78,7 +78,7 @@ void ErrorController::updateLedDisplay()
     }
 }
 
-const SystemError* ErrorController::getSystemError(uint_fast8_t index) const
+const SystemError* ErrorController::getSystemError(error_index_t index) const
 {
     if (index >= errorList.getSize())
     {
@@ -93,9 +93,9 @@ void ErrorController::removeBack() { errorList.removeBack(); }
 
 bool ErrorController::removeSystemError(const SystemError& error)
 {
-    uint_fast8_t errorFoundIndex = ERROR_LIST_MAX_SIZE + 1;
-    uint_fast8_t size = errorList.getSize();
-    for (uint_fast8_t i = 0; i < size; i++)
+    error_index_t errorFoundIndex = ERROR_LIST_MAX_SIZE + 1;
+    error_index_t size = errorList.getSize();
+    for (error_index_t i = 0; i < size; i++)
     {
         SystemError se = errorList.get(0);
         errorList.removeFront();
@@ -120,7 +120,7 @@ bool ErrorController::removeSystemError(const SystemError& error)
     return errorFoundIndex != (ERROR_LIST_MAX_SIZE + 1);
 }
 
-bool ErrorController::removeSystemErrorAtIndex(uint_fast8_t index)
+bool ErrorController::removeSystemErrorAtIndex(error_index_t index)
 {
     if (index >= errorList.getSize())
     {
@@ -136,8 +136,8 @@ bool ErrorController::removeSystemErrorAtIndex(uint_fast8_t index)
         errorList.removeBack();
         return true;
     }
-    uint_fast8_t size = errorList.getSize();
-    for (uint_fast8_t i = 0; i < size; i++)
+    error_index_t size = errorList.getSize();
+    for (error_index_t i = 0; i < size; i++)
     {
         SystemError se = errorList.get(0);
         errorList.removeFront();
@@ -161,7 +161,7 @@ void ErrorController::displayBinaryNumberViaLeds(uint8_t binaryRep)
 {
     // Mask number and determine if it is a 0 or a 1
     // If it is a 1, the LED corresponding will blink
-    for (uint_fast8_t i = 0; i < NUM_LEDS; i++)
+    for (error_index_t i = 0; i < NUM_LEDS; i++)
     {
         bool display = (binaryRep >> i) & 1;
         drivers->leds.set(static_cast<aruwlib::gpio::Leds::LedPin>(i), display);
