@@ -29,15 +29,19 @@ namespace aruwlib
 namespace errors
 {
 /**
- * Example for how to create and add an error to the `ErrorController` in the
- * instance of the `Drivers` class passed in:
+ * Example for how to create and add an error. The error is added to the passed in
+ * `errorController`.
+ *
+ * @see ErrorController
+ * @see SystemError
+ *
  * ```cpp
  * RAISE_ERROR(
- *     drivers, "Error in DJI Serial",
+ *     drivers->errorController
+ *     "Error in DJI Serial",
  *     aruwlib::errors::Location::DJI_SERIAL,
  *     aruwlib::errors::ErrorType::INVALID_CRC);
  * ```
- * then call ErrorController::updateLedDisplay() to display the error via the LEDs
  */
 #define RAISE_ERROR(errorController, desc, l, et)                                  \
     do                                                                             \
