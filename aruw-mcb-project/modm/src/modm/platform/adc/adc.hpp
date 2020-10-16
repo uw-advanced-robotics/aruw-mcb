@@ -1,0 +1,307 @@
+// coding: utf-8
+/*
+ * Copyright (c) 2018, Niklas Hauser
+ * Copyright (c) 2018, Álan Crístoffer
+ * Copyright (c) 2018, Carl Treudler
+ *
+ * This file is part of the modm project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+// ----------------------------------------------------------------------------
+
+#ifndef MODM_STM32F0_ADC_HPP
+#define MODM_STM32F0_ADC_HPP
+
+#include <stdint.h>
+#include "../device.hpp"
+#include <modm/architecture/interface/register.hpp>
+#include <modm/platform/gpio/connector.hpp>
+
+namespace modm
+{
+namespace platform
+{
+/**
+ * Analog/Digital-Converter module (ADC1).
+ *
+ * The 12-bit ADC is a successive approximation analog-to-digital
+ * converter. It has up to 19 multiplexed channels allowing it measure
+ * signals from 16 external and three internal sources.
+ * The result of the ADC is stored in a left-aligned or right-aligned
+ * 16-bit data register.
+ *
+ * This API is designed for the internal ADCs of STM32F0x1/STM32F0x2/STM32F0x8
+ *
+ * \author	Álan Crístoffer
+ * \ingroup	modm_platform_adc
+ */
+class Adc
+{
+public:
+/*
+ * TODO: generate the right number of Channels depending on the specific device.
+ * This code was generated using the family datasheet, but not all devices in the
+ * family have 16 channels.
+ */
+
+	/// Channels, which can be used with this ADC.
+	enum class Channel : uint8_t
+	{
+		Channel0 = 0,
+		Channel1 = 1,
+		Channel2 = 2,
+		Channel3 = 3,
+		Channel4 = 4,
+		Channel5 = 5,
+		Channel6 = 6,
+		Channel7 = 7,
+		Channel8 = 8,
+		Channel9 = 9,
+		Channel10 = 10,
+		Channel11 = 11,
+		Channel12 = 12,
+		Channel13 = 13,
+		Channel14 = 14,
+		Channel15 = 15,
+
+		Temperature = 16,
+		InternalReference = 17,
+		Battery = 18
+	};
+
+	enum class ClockMode : uint32_t
+	{
+		DoNotChange = 0xFF,// if you do not want to change the clock mode
+		Dedicated14MHzClock = 0,
+		PCLKDividedBy2 = ADC_CFGR2_CKMODE_0,
+		PCLKDividedBy4 = ADC_CFGR2_CKMODE_1
+	};
+
+	enum class SampleTime : uint8_t	// TODO: What is the best type?
+	{
+		Cycles15 	= 0b000,	//! 000:   1.5 ADC clock cycles
+		Cycles75 	= 0b001,	//! 001:   7.5 ADC clock cycles
+		Cycles135 	= 0b010,	//! 010:  13.5 ADC clock cycles
+		Cycles285 	= 0b011,	//! 011:  28.5 ADC clock cycles
+		Cycles415 	= 0b100,	//! 100:  41.5 ADC clock cycles
+		Cycles555 	= 0b101,	//! 101:  55.5 ADC clock cycles
+		Cycles715 	= 0b110,	//! 110:  71.5 ADC clock cycles
+		Cycles2395 	= 0b111,	//! 111: 239.5 ADC clock cycles
+	};
+
+	enum class CalibrationMode : uint32_t
+	{
+		Calibrate = 0,
+		DoNotCalibrate = 0xff,	// if you want to avoid calibration
+	};
+
+	enum class DataAlignment : uint8_t {
+		Right = ADC_CFGR1_ALIGN,
+		Left = 0
+	};
+
+	enum class Resolution : uint8_t {
+		Bits12 = 0,
+		Bits10 = ADC_CFGR1_RES_0,
+		Bits8  = ADC_CFGR1_RES_1,
+		Bits6  = ADC_CFGR1_RES_0 | ADC_CFGR1_RES_1
+	};
+
+	enum class Interrupt : uint32_t
+	{
+		Ready = ADC_IER_ADRDYIE,
+		EndOfSampling = ADC_IER_EOSMPIE,
+		EndOfConversion = ADC_IER_EOCIE,
+		EndOfSequence = ADC_IER_EOSIE,
+		Overrun = ADC_IER_OVRIE,
+		AnalogWatchdog = ADC_IER_AWD1IE
+	};
+	MODM_FLAGS32(Interrupt);
+
+	enum class InterruptFlag : uint32_t
+	{
+		Ready = ADC_ISR_ADRDY,
+		EndOfSampling = ADC_ISR_EOSMP,
+		EndOfConversion = ADC_ISR_EOC,
+		EndOfSequence = ADC_ISR_EOS,
+		Overrun = ADC_ISR_OVR,
+		AnalogWatchdog = ADC_ISR_AWD1
+	};
+	MODM_FLAGS32(InterruptFlag);
+
+  public:
+  	// start inherited documentation
+  	template< template<Peripheral _> class... Signals >
+  	static void
+  	connect()
+  	{
+  		using Connector = GpioConnector<Peripheral::Adc, Signals...>;
+  		Connector::connect();
+  	}
+
+
+	/**
+	 * Initialize and enable the A/D converter.
+	 *
+	 * Enables the ADC clock and switches on the ADC. The ADC clock
+	 * prescaler will be set as well.
+	 *
+	 * The ADC can be clocked
+	 *
+	 * @param clk
+	 * 		Set to ClockMode::DoNotChange or leave blank if you
+	 * 		want to leave this setting untouched.
+	 *
+	 */
+	static inline uint16_t
+	initialize(const ClockMode clk = ClockMode::DoNotChange,
+			   const CalibrationMode cal = CalibrationMode::Calibrate);
+
+	static inline void
+	disable(const bool blocking = true);
+
+	static inline void
+	setAutoOffMode(const bool enable);
+
+	/**
+	 * Returns true if the ADRDY bit of the ISR is set
+	 **/
+	static inline bool
+	isReady();
+
+	static inline uint16_t
+	calibrate(const CalibrationMode mode);
+
+	/**
+	 * Change the presentation of the ADC conversion result.
+	 *
+	 * @param enable
+	 * 		Set to \c true to left adjust the result.
+	 *		Otherwise, the result is right adjusted.
+	 *
+	 * @pre The ADC clock must be started and the ADC switched on with
+	 * 		initialize()
+	 */
+	static inline void
+	setDataAlignmentAndResolution(const DataAlignment alignment,
+	       						  const Resolution res);
+
+	/**
+	 * Analog channel selection.
+	 *
+	 * This not for scan mode. The number of channels will be set to 1,
+	 * the channel selected and the corresponding pin will be set to
+	 * analog input.
+	 * If the the channel is modified during a conversion, the current
+	 * conversion is reset and a new start pulse is sent to the ADC to
+	 * convert the new chosen channnel / group of channels.
+	 *
+	 *
+	 * @param channel		The channel which shall be read.
+	 * @param sampleTime	The sample time to sample the input voltage.
+	 *
+	 * @pre The ADC clock must be started and the ADC switched on with
+	 * 		initialize()
+	 */
+	static inline bool
+	setChannel(const Channel channel,
+			   const SampleTime sampleTime=static_cast<SampleTime>(0b000));
+
+   	static inline void
+   	clearChannel(const Channel channel);
+
+	/// Setting the channel for a Pin
+	template< class Gpio >
+	static inline bool
+	setPinChannel(SampleTime sampleTime = static_cast<SampleTime>(0b000))
+	{
+		return setChannel(getPinChannel<Gpio>(), sampleTime);
+	}
+	/// Get the channel for a Pin
+	template< class Gpio >
+	static inline constexpr Channel
+	getPinChannel()
+	{
+		constexpr int8_t channel{Gpio::template AdcChannel<Peripheral::Adc>};
+		static_assert(channel >= 0, "Adc does not have a channel for this pin!");
+		return Channel(channel);
+	}
+
+	/**
+	 * Enables free running mode
+	 *
+	 * The ADC will continously start conversions and provide the most
+	 * recent result in the ADC register.
+	 *
+	 * @pre The ADC clock must be started and the ADC switched on with
+	 * 		initialize()
+	 */
+	static inline void
+	setFreeRunningMode(const bool enable);
+
+	/**
+	 * Start a new conversion or continuous conversions.
+	 *
+	 * @pre A ADC channel must be selected with setChannel().
+	 *
+	 * @post The result can be fetched with getValue()
+	 *
+	 * TODO: is there any limitation to when is can be called??
+	 */
+	static inline void
+	startConversion(void);
+
+	/**
+	 * @return If the conversion is finished.
+	 * @pre A conversion should have been stared with startConversion()
+	 */
+	static inline bool
+	isConversionFinished(void);
+
+	/**
+	 * @return The most recent 16bit result of the ADC conversion.
+	 * @pre A conversion should have been stared with startConversion()
+	 *
+	 * To have a blocking GET you might do it this way:
+	 * @code
+		while(!isConversionFinished())
+		{
+			// Waiting for conversion
+		}
+		@endcode
+	 */
+	static inline uint16_t
+	getValue(void)
+	{
+		return ADC1->DR;
+	}
+
+	static inline void
+	enableInterruptVector(const uint32_t priority, const bool enable = true);
+
+	static inline void
+	enableInterrupt(const Interrupt_t interrupt);
+
+	static inline void
+	disableInterrupt(const Interrupt_t interrupt);
+
+	static inline InterruptFlag_t
+	getInterruptFlags();
+
+	static inline void
+	acknowledgeInterruptFlag(const InterruptFlag_t flags);
+
+	static inline void
+	setWaitMode(const bool enable);
+};
+
+}
+
+}
+
+#include "adc_impl.hpp"
+
+#endif	// MODM_STM32F0_ADC_HPP

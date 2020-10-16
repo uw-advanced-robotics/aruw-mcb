@@ -10,14 +10,9 @@
   </options>
   <modules>
     <module>modm:build:scons</module>
-    <module>modm:container</module>
-    <module>modm:debug</module>
-    <module>modm:platform:clock</module>
+    <module>modm:platform:adc</module>
     <module>modm:platform:can</module>
-    <module>modm:platform:gpio</module>
     <module>modm:platform:uart:1</module>
-    <module>modm:processing</module>
     <module>modm:processing:timer</module>
-    <module>modm:platform:spi:1</module>
   </modules>
 </library>
