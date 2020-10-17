@@ -50,24 +50,11 @@ void CommandScheduler::addCommand(Command* commandToAdd)
     bool commandAdded = false;
 
     const set<Subsystem*>& commandRequirements = commandToAdd->getRequirements();
-    // end all commands running on the subsystem requirements.
-    // They were interrupted.
-    // Additionally, replace the current command with the commandToAdd
-    for (auto& requirement : commandRequirements)
+
+    // Check to see if all the requirements are in the subsytemToCommandMap
+    for(auto& requirement : commandRequirements)
     {
-        map<Subsystem*, Command*>::iterator subsystemRequirementCommandPair =
-            subsystemToCommandMap.find(requirement);
-        if (subsystemRequirementCommandPair != subsystemToCommandMap.end())
-        {
-            if (subsystemRequirementCommandPair->second != nullptr)
-            {
-                subsystemRequirementCommandPair->second->end(true);
-            }
-            subsystemRequirementCommandPair->second = commandToAdd;
-            commandAdded = true;
-        }
-        else
-        {
+        if(subsystemToCommandMap.find(requirement) == subsystemToCommandMap.end()){
             // the command you are trying to add has a subsystem that is not in the
             // scheduler, so you cannot add it (will lead to undefined control behavior)
             RAISE_ERROR(
@@ -77,6 +64,22 @@ void CommandScheduler::addCommand(Command* commandToAdd)
                 aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
             return;
         }
+    }
+
+    // end all commands running on the subsystem requirements.
+    // They were interrupted.
+    // Additionally, replace the current command with the commandToAdd
+    for (auto& requirement : commandRequirements)
+    {
+        map<Subsystem*, Command*>::iterator subsystemRequirementCommandPair =
+            subsystemToCommandMap.find(requirement);
+    
+        if (subsystemRequirementCommandPair->second != nullptr)
+        {
+            subsystemRequirementCommandPair->second->end(true);
+        }
+        subsystemRequirementCommandPair->second = commandToAdd;
+        commandAdded = true;
     }
 
     // initialize the commandToAdd. Only do this once even though potentially
