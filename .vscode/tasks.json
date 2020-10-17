@@ -48,12 +48,12 @@
             }
         },
         {
-            "label": "Build Hosted - Debug",
+            "label": "Build Sim - Debug",
             "type": "shell",
             "presentation": {
                 "panel": "new"
             },
-            "command": "/usr/bin/env python3 $(which scons) build-hosted profile=debug",
+            "command": "/usr/bin/env python3 $(which scons) build-sim profile=debug",
             "group": "build",
             "problemMatcher": [],
             "options": {
@@ -61,12 +61,12 @@
             }
         },
         {
-            "label": "Run Hosted - Debug",
+            "label": "Run Sim - Debug",
             "type": "shell",
             "presentation": {
                 "panel": "new"
             },
-            "command": "/usr/bin/env python3 $(which scons) run-hosted profile=debug",
+            "command": "/usr/bin/env python3 $(which scons) run-sim profile=debug",
             "group": "build",
             "problemMatcher": [],
             "options": {
@@ -74,12 +74,12 @@
             }
         },
         {
-            "label": "Build Hosted Tests - Debug",
+            "label": "Build Tests - Debug",
             "type": "shell",
             "presentation": {
                 "panel": "new"
             },
-            "command": "/usr/bin/env python3 $(which scons) build-hosted tests=true profile=debug",
+            "command": "/usr/bin/env python3 $(which scons) build-tests profile=debug",
             "group": "build",
             "problemMatcher": [],
             "options": {
@@ -87,12 +87,12 @@
             }
         },
         {
-            "label": "Run Hosted Tests - Debug",
+            "label": "Run Tests - Debug",
             "type": "shell",
             "presentation": {
                 "panel": "new"
             },
-            "command": "/usr/bin/env python3 $(which scons) run-hosted tests=true profile=debug",
+            "command": "/usr/bin/env python3 $(which scons) run-tests profile=debug",
             "group": "build",
             "problemMatcher": [],
             "options": {
