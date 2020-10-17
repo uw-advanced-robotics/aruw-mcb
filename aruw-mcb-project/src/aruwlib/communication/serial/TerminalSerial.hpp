@@ -23,7 +23,7 @@
 #include <cstring>
 #include <map>
 #include <sstream>
-#ifdef ENV_SIMULATOR
+#ifdef PLATFORM_HOSTED
 #include <iostream>
 #endif
 
@@ -73,7 +73,7 @@ public:
 private:
     static constexpr int MAX_LINE_LENGTH = 256;
 
-#ifdef ENV_SIMULATOR
+#ifdef PLATFORM_HOSTED
     HostedTerminalDevice device;
 #else
     UartTerminalDevice device;

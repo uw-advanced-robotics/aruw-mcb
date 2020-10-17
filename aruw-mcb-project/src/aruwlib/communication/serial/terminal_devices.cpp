@@ -27,7 +27,7 @@ namespace communication
 {
 namespace serial
 {
-#ifdef ENV_SIMULATOR
+#ifdef PLATFORM_HOSTED
 HostedTerminalDevice::~HostedTerminalDevice() { pthread_mutex_destroy(&cinDataMutex); }
 
 HostedTerminalDevice::HostedTerminalDevice(Drivers *drivers) : drivers(drivers) {}

@@ -47,8 +47,8 @@
 #include "communication/gpio/pwm.hpp"
 #include "communication/remote.hpp"
 #include "communication/sensors/mpu6500/mpu6500.hpp"
-#include "communication/serial/ref_serial.hpp"
 #include "communication/serial/TerminalSerial.hpp"
+#include "communication/serial/ref_serial.hpp"
 #include "communication/serial/uart.hpp"
 #include "communication/serial/xavier_serial.hpp"
 #include "control/command_mapper.hpp"
@@ -83,8 +83,8 @@ public:
           controlOperatorInterface(this),
           commandMapper(this),
           errorController(this),
-          djiMotorTxHandler(this),
-          terminalSerial(this)
+          terminalSerial(this),
+          djiMotorTxHandler(this)
     {
     }
 

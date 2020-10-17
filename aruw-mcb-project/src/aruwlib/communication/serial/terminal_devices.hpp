@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <iostream>
 
-#ifdef ENV_SIMULATOR
+#ifdef PLATFORM_HOSTED
 #include <pthread.h>
 
 #include <modm/container/deque.hpp>
@@ -40,7 +40,7 @@ namespace communication
 {
 namespace serial
 {
-#ifdef ENV_SIMULATOR
+#ifdef PLATFORM_HOSTED
 /**
  * A device that interacts with stdin and stdout to be used
  * on the hosted environment

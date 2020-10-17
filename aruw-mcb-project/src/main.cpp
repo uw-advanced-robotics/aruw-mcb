@@ -79,6 +79,7 @@ int main()
             drivers->errorController.update();
             drivers->commandScheduler.run();
             drivers->djiMotorTxHandler.processCanSendData();
+            drivers->terminalSerial.update();
         }
         modm::delayMicroseconds(10);
     }

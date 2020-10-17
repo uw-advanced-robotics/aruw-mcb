@@ -155,7 +155,7 @@ bool Uart::isWriteFinished(UartPort port) const
 
 void Uart::flushWriteBuffer(UartPort port)
 {
-#ifndef ENV_SIMULATOR
+#ifndef PLATFORM_HOSTED
     switch (port)
     {
         case UartPort::Uart1:
