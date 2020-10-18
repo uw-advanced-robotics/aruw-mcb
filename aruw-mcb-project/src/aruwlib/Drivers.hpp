@@ -52,8 +52,8 @@
 #include "communication/serial/xavier_serial.hpp"
 #include "control/command_mapper.hpp"
 #include "control/command_scheduler.hpp"
-#include "display/OledDisplay.hpp"
 #include "control/control_operator_interface.hpp"
+#include "display/OledDisplay.hpp"
 #include "errors/error_controller.hpp"
 #include "motor/dji_motor_tx_handler.hpp"
 #endif

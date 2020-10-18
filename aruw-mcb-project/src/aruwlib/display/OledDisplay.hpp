@@ -60,7 +60,7 @@ private:
     bool buttonIsIdle;
 
     Sh1106<
-#ifndef ENV_SIMULATOR
+#ifndef PLATFORM_HOSTED
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
         Board::DisplayReset,

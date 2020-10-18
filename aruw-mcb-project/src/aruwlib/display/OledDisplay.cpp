@@ -43,7 +43,7 @@ OledDisplay::OledDisplay(Drivers *drivers)
 
 void OledDisplay::initialize()
 {
-#ifndef ENV_SIMULATOR
+#ifndef PLATFORM_HOSTED
     Board::DisplaySpiMaster::
         connect<Board::DisplayMiso::Miso, Board::DisplayMosi::Mosi, Board::DisplaySck::Sck>();
 
