@@ -33,15 +33,11 @@ namespace arch
 {
 namespace clock
 {
-inline uint32_t getTimeMilliseconds() { return modm::Clock::now().getTime(); }
+inline uint32_t getTimeMilliseconds() { return modm::Clock().now().time_since_epoch().count(); }
 
 inline uint32_t getTimeMicroseconds()
 {
-#ifdef PLATFORM_HOSTED
-    return 0;
-#else
-    return DWT->CYCCNT / static_cast<uint32_t>(modm::clock::fcpu_MHz);
-#endif
+    return modm::PreciseClock().now().time_since_epoch().count();
 }
 }  // namespace clock
 
