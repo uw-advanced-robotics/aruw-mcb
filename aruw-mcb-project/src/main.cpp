@@ -17,7 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifdef PLATFORM_HOSTED
+#include <iostream>
+#endif
+
 #include <aruwlib/rm-dev-board-a/board.hpp>
+#include <modm/platform/core/delay.hpp>
 
 /* arch includes ------------------------------------------------------------*/
 #include <aruwlib/architecture/periodic_timer.hpp>
@@ -47,6 +52,10 @@ void updateIo(aruwlib::Drivers *drivers);
 
 int main()
 {
+#ifdef PLATFORM_HOSTED
+    std::cout << "Simulation starting..." << std::endl;
+#endif
+
     /*
      * NOTE: We are using DoNotUse_getDrivers here because in the main
      *      robot loop we must access the singleton drivers to update
@@ -71,9 +80,7 @@ int main()
             drivers->djiMotorTxHandler.processCanSendData();
             drivers->oledDisplay.update();
         }
-#ifndef ENV_SIMULATOR
         modm::delayMicroseconds(10);
-#endif
     }
     return 0;
 }

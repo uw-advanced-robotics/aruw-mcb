@@ -20,27 +20,7 @@
 #ifndef DRIVERS_HPP_
 #define DRIVERS_HPP_
 
-#ifndef ENV_SIMULATOR
-#include "communication/can/can.hpp"
-#include "communication/can/can_rx_handler.hpp"
-#include "communication/gpio/analog.hpp"
-#include "communication/gpio/digital.hpp"
-#include "communication/gpio/leds.hpp"
-#include "communication/gpio/pwm.hpp"
-#include "communication/remote.hpp"
-#include "communication/sensors/mpu6500/mpu6500.hpp"
-#include "communication/serial/ref_serial.hpp"
-#include "communication/serial/uart.hpp"
-#include "communication/serial/xavier_serial.hpp"
-#include "control/command_mapper.hpp"
-#include "control/command_scheduler.hpp"
-#include "control/control_operator_interface.hpp"
-#include "display/OledDisplay.hpp"
-#include "errors/error_controller.hpp"
-#include "motor/dji_motor_tx_handler.hpp"
-#else
-#include <gmock/gmock.h>
-
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwlib/mock/AnalogMock.hpp"
 #include "aruwlib/mock/CanMock.hpp"
 #include "aruwlib/mock/CanRxHandlerMock.hpp"
@@ -58,6 +38,24 @@
 #include "aruwlib/mock/RemoteMock.hpp"
 #include "aruwlib/mock/UartMock.hpp"
 #include "aruwlib/mock/XavierSerialMock.hpp"
+#else
+#include "communication/can/can.hpp"
+#include "communication/can/can_rx_handler.hpp"
+#include "communication/gpio/analog.hpp"
+#include "communication/gpio/digital.hpp"
+#include "communication/gpio/leds.hpp"
+#include "communication/gpio/pwm.hpp"
+#include "communication/remote.hpp"
+#include "communication/sensors/mpu6500/mpu6500.hpp"
+#include "communication/serial/ref_serial.hpp"
+#include "communication/serial/uart.hpp"
+#include "communication/serial/xavier_serial.hpp"
+#include "control/command_mapper.hpp"
+#include "control/command_scheduler.hpp"
+#include "display/OledDisplay.hpp"
+#include "control/control_operator_interface.hpp"
+#include "errors/error_controller.hpp"
+#include "motor/dji_motor_tx_handler.hpp"
 #endif
 
 namespace aruwlib
@@ -66,7 +64,7 @@ class Drivers
 {
     friend class DriversSingleton;
 
-#ifdef ENV_SIMULATOR
+#ifdef ENV_UNIT_TESTS
 public:
 #endif
     Drivers()
@@ -90,7 +88,25 @@ public:
     {
     }
 
-#ifndef ENV_SIMULATOR
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    mock::CanMock can;
+    mock::CanRxHandlerMock canRxHandler;
+    mock::AnalogMock analog;
+    mock::DigitalMock digital;
+    mock::LedsMock leds;
+    mock::PwmMock pwm;
+    mock::RemoteMock remote;
+    mock::Mpu6500Mock mpu6500;
+    mock::UartMock uart;
+    mock::XavierSerialMock xavierSerial;
+    mock::RefSerialMock refSerial;
+    mock::CommandSchedulerMock commandScheduler;
+    mock::ControlOperatorInterfaceMock controlOperatorInterface;
+    mock::CommandMapperMock commandMapper;
+    mock::ErrorControllerMock errorController;
+    mock::DjiMotorTxHandlerMock djiMotorTxHandler;
+    mock::OledDisplayMock oledDisplay;
+#else
 public:
     can::Can can;
     can::CanRxHandler canRxHandler;
@@ -109,24 +125,6 @@ public:
     errors::ErrorController errorController;
     motor::DjiMotorTxHandler djiMotorTxHandler;
     display::OledDisplay oledDisplay;
-#else
-    mock::CanMock can;
-    mock::CanRxHandlerMock canRxHandler;
-    mock::AnalogMock analog;
-    mock::DigitalMock digital;
-    mock::LedsMock leds;
-    mock::PwmMock pwm;
-    mock::RemoteMock remote;
-    mock::Mpu6500Mock mpu6500;
-    mock::UartMock uart;
-    mock::XavierSerialMock xavierSerial;
-    mock::RefSerialMock refSerial;
-    mock::CommandSchedulerMock commandScheduler;
-    mock::ControlOperatorInterfaceMock controlOperatorInterface;
-    mock::CommandMapperMock commandMapper;
-    mock::ErrorControllerMock errorController;
-    mock::DjiMotorTxHandlerMock djiMotorTxHandler;
-    mock::OledDisplayMock oledDisplay;
 #endif
 };  // class Drivers
 
