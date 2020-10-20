@@ -17,20 +17,23 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <aruwlib/control/command_scheduler.hpp>
-#include <aruwlib/control/command.hpp>
 #include <aruwlib/Drivers.hpp>
-#include <aruwsrc/control/example/example_subsystem.hpp>
+#include <aruwlib/control/command.hpp>
+#include <aruwlib/control/command_scheduler.hpp>
 #include <aruwsrc/control/example/example_command.hpp>
+#include <aruwsrc/control/example/example_subsystem.hpp>
 #include <gtest/gtest.h>
 
-class ExampleCommandMock : public aruwsrc::control::ExampleCommand 
+// Will be replaced when !18 is merged in
+class ExampleCommandMock : public aruwsrc::control::ExampleCommand
 {
 public:
-    ExampleCommandMock(aruwsrc::control::ExampleSubsystem* subsystem, int speed) : ExampleCommand(subsystem, speed) {}
+    ExampleCommandMock(aruwsrc::control::ExampleSubsystem* subsystem, int speed)
+        : ExampleCommand(subsystem, speed)
+    {
+    }
     MOCK_METHOD(void, initialize, (), (override));
 };  // class ExampleCommandMock
-
 
 TEST(CommandScheduler, NullAddedCommandRaisesError)
 {
@@ -39,8 +42,8 @@ TEST(CommandScheduler, NullAddedCommandRaisesError)
     aruwlib::control::CommandScheduler instance(&drivers);
 
     // Expect an error when the command is null
-    EXPECT_CALL(drivers.errorController, addToErrorList); 
-    instance.addCommand(nullptr);    
+    EXPECT_CALL(drivers.errorController, addToErrorList);
+    instance.addCommand(nullptr);
 }
 
 TEST(CommandScheduler, AddedCommandWithNoSubsystemRaisesError)
@@ -73,4 +76,3 @@ TEST(CommandScheduler, CommandIsAddedProperly)
     EXPECT_CALL(c, initialize);
     instance.addCommand(&c);
 }
-
