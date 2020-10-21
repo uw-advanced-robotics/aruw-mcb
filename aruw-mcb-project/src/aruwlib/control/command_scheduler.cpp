@@ -52,9 +52,10 @@ void CommandScheduler::addCommand(Command* commandToAdd)
     const set<Subsystem*>& commandRequirements = commandToAdd->getRequirements();
 
     // Check to see if all the requirements are in the subsytemToCommandMap
-    for(auto& requirement : commandRequirements)
+    for (auto& requirement : commandRequirements)
     {
-        if(subsystemToCommandMap.find(requirement) == subsystemToCommandMap.end()){
+        if (subsystemToCommandMap.find(requirement) == subsystemToCommandMap.end())
+        {
             // the command you are trying to add has a subsystem that is not in the
             // scheduler, so you cannot add it (will lead to undefined control behavior)
             RAISE_ERROR(
@@ -73,7 +74,7 @@ void CommandScheduler::addCommand(Command* commandToAdd)
     {
         map<Subsystem*, Command*>::iterator subsystemRequirementCommandPair =
             subsystemToCommandMap.find(requirement);
-    
+
         if (subsystemRequirementCommandPair->second != nullptr)
         {
             subsystemRequirementCommandPair->second->end(true);
