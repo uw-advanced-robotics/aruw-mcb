@@ -151,13 +151,8 @@ files = [
     env.File(r"src/modm/ui/display/image/logo_rca_90x64.cpp"),
     env.File(r"src/modm/ui/display/image/skull_64x64.cpp"),
     env.File(r"src/modm/ui/display/virtual_graphic_display.cpp"),
-    env.File(r"src/modm/ui/menu/abstract_menu.cpp"),
-    env.File(r"src/modm/ui/menu/abstract_view.cpp"),
-    env.File(r"src/modm/ui/menu/choice_menu.cpp"),
     env.File(r"src/modm/ui/menu/choice_menu_entry.cpp"),
     env.File(r"src/modm/ui/menu/scrollable_text.cpp"),
-    env.File(r"src/modm/ui/menu/standard_menu.cpp"),
-    env.File(r"src/modm/ui/menu/view_stack.cpp"),
     env.File(r"src/modm/utils/dummy.cpp"),
 ]
 library = env.StaticLibrary(target="modm", source=files)

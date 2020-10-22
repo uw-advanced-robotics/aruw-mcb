@@ -25,9 +25,13 @@ namespace aruwlib
 {
 namespace display
 {
-MainMenu::MainMenu(modm::ViewStack* stack, uint8_t identifier, Drivers* drivers)
-    : modm::StandardMenu(stack, identifier),
-      drivers(drivers)
+MainMenu::MainMenu(
+    modm::ViewStack<DummyAllocator<modm::IAbstractView> >* stack,
+    uint8_t identifier,
+    Drivers* drivers)
+    : modm::StandardMenu<DummyAllocator<modm::IAbstractView> >(stack, identifier),
+      drivers(drivers),
+      errorMenu(stack, drivers)
 {
 }
 
@@ -35,17 +39,27 @@ void MainMenu::initialize()
 {
     addEntry(
         ErrorMenu::getMenuName(),
-        modm::MenuEntryCallback(this, &MainMenu::addErrorMenuCallback));
-    addEntry("Motor Menu", modm::MenuEntryCallback(this, &MainMenu::addMotorMenuCallback));
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addErrorMenuCallback));
+    addEntry(
+        "Motor Menu",
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addMotorMenuCallback));
     addEntry(
         "Property Table Menu",
-        modm::MenuEntryCallback(this, &MainMenu::addPropertyTableCallback));
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addPropertyTableCallback));
     setTitle("Main Menu");
 }
 
 void MainMenu::addErrorMenuCallback()
 {
-    getViewStack()->push(new ErrorMenu(getViewStack(), drivers));
+    // em actually points to errorMenu
+    ErrorMenu *em = new (&errorMenu) ErrorMenu(getViewStack(), drivers);
+    getViewStack()->push(em);
 }
 
 void MainMenu::addMotorMenuCallback()

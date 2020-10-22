@@ -23,9 +23,8 @@ namespace aruwlib
 {
 namespace display
 {
-ErrorMenu::ErrorMenu(modm::ViewStack *vs, Drivers *drivers)
+ErrorMenu::ErrorMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> > *vs, Drivers *drivers)
     : AbstractMenu(vs, 1),
-      viewStack(vs),
       display_update_time(500),
       drivers(drivers)
 {
@@ -44,7 +43,7 @@ void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
     switch (button)
     {
         case modm::MenuButtons::LEFT:
-            this->viewStack->pop();
+            this->getViewStack()->pop();
             break;
         case modm::MenuButtons::RIGHT:
             break;

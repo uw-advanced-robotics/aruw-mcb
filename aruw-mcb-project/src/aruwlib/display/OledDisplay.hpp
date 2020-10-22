@@ -70,7 +70,7 @@ private:
         false>
         display;
 
-    modm::ViewStack vs;
+    modm::ViewStack<DummyAllocator<modm::IAbstractView> > vs;
 
     MainMenu mainMenu;
 

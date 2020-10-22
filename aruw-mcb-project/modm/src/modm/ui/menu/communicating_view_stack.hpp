@@ -26,11 +26,12 @@
 namespace modm
 {
 	/// @ingroup modm_ui_menu
-	class CommunicatingViewStack : public ViewStack
+	template<typename Allocator = allocator::Dynamic<IAbstractView> >
+	class CommunicatingViewStack : public ViewStack<Allocator>
 	{
 	public:
 		CommunicatingViewStack(modm::GraphicDisplay* display, xpcc::Communicator* communicator) :
-			ViewStack(display),
+			ViewStack<Allocator>(display),
 			communicator(communicator)
 		{
 		}

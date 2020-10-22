@@ -24,18 +24,19 @@
 namespace modm
 {
 	/// @ingroup modm_ui_menu
+	template<typename Allocator = allocator::Dynamic<IAbstractView> >
 	class CommunicatingView : public xpcc::Communicatable
 	{
 	public:
-		CommunicatingView(modm::CommunicatingViewStack* /*stack*/)
+		CommunicatingView(modm::CommunicatingViewStack<Allocator>* /*stack*/)
 		{
 		}
 
 	protected:
-		inline modm::CommunicatingViewStack*
-		getCommunicatingViewStack(modm::ViewStack* viewStack)
+		inline modm::CommunicatingViewStack<Allocator>*
+		getCommunicatingViewStack(modm::ViewStack<Allocator>* viewStack)
 		{
-			return static_cast<modm::CommunicatingViewStack*>(viewStack);
+			return static_cast<modm::CommunicatingViewStack<Allocator>*>(viewStack);
 		}
 	};
 }
