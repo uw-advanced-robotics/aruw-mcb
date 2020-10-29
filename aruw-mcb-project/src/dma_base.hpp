@@ -170,8 +170,8 @@ public:
 
     // End DMA_xCR masks
 
-#define STREAM_TYPEDEF_TO_STREAM_NUM(stream)                          \
-    (stream > DMA1_Stream7)                           \
+#define STREAM_TYPEDEF_TO_STREAM_NUM(stream)                                    \
+    (stream > DMA1_Stream7)                                                     \
         ? ((uint64_t)(stream - DMA2_Stream0_BASE) / sizeof(DMA_Stream_TypeDef)) \
         : ((uint64_t)(stream - DMA1_Stream0_BASE) / sizeof(DMA_Stream_TypeDef))
 

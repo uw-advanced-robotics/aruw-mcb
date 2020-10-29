@@ -36,9 +36,8 @@
 /* control includes ---------------------------------------------------------*/
 #include "aruwsrc/control/robot_control.hpp"
 
-#include "dma_base.hpp"
-#include "dma_hal.hpp"
-#include "dma_request_mapping.hpp"
+#include "dma.hpp"
+#include "uart_1_dma.hpp"
 
 using namespace modm::literals;
 using aruwlib::Drivers;
@@ -54,18 +53,26 @@ void initializeIo(aruwlib::Drivers *drivers);
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
 void updateIo(aruwlib::Drivers *drivers);
-
+using namespace aruwlib::arch;
+using namespace modm::platform;
 int main()
 {
+    using UartDma = Usart1Dma<
+        DmaBase::ChannelSelection::CHANNEL_4,
+        DmaBase::ChannelSelection::CHANNEL_4,
+        Dma2::Stream2,
+        Dma2::Stream7>;
+    UartDma::initialize<Board::SystemClock, 115200>();
+    // channel 4, stream 2
     Board::initialize();
 
-    static_assert(
-        aruwlib::arch::DmaRequestMapping::validateRequestMapping<
-            2,
-            aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
-            aruwlib::arch::DmaBase::Stream::STREAM_7,
-            aruwlib::arch::DmaRequestMapping::Peripheral::USART1_TX>(),
-        "failed fool");
+    // static_assert(
+    //     aruwlib::arch::DmaRequestMapping::validateRequestMapping<
+    //         2,
+    //         aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
+    //         aruwlib::arch::DmaBase::Stream::STREAM_7,
+    //         aruwlib::arch::DmaRequestMapping::Peripheral::USART1_TX>(),
+    //     "failed fool");
 
     while (1)
     {

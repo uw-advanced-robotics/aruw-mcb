@@ -85,12 +85,14 @@ public:
  * ID must match the DMA number for the stream
  */
 template <DmaBase::Stream S, uint32_t StreamBase>
-class DmaStreamHAL : public DmaBase
+class DmaStreamHal : public DmaBase
 {
 public:
-    static_assert(StreamBase == DMA1_Stream0_BASE || StreamBase == DMA2_Stream0_BASE, "StreamBase invalid");
+    static_assert(
+        StreamBase == DMA1_Stream0_BASE || StreamBase == DMA2_Stream0_BASE,
+        "StreamBase invalid");
 
-#define STREAM_PTR(S, StreamBase) (((DMA_Stream_TypeDef *) StreamBase)[uint32_t(S)])
+#define STREAM_PTR(S, StreamBase) (((DMA_Stream_TypeDef *)StreamBase)[uint32_t(S)])
 
     /**
      * Configure the DMA stream (HAL)
@@ -122,42 +124,45 @@ public:
     {
         disable();
 
-        STREAM_PTR(S, StreamBase)->CR = uint32_t(direction) | uint32_t(memoryDataSize) | uint32_t(peripheralDataSize) |
-                     uint32_t(memoryIncrement) | uint32_t(peripheralIncrement) |
-                     uint32_t(peripheralIncrementOffsetSize) | uint32_t(priority) |
-                     uint32_t(circularMode) | uint32_t(memoryBurstMode) |
-                     uint32_t(peripheralBurstMode);
+        STREAM_PTR(S, StreamBase).CR =
+            uint32_t(direction) | uint32_t(memoryDataSize) | uint32_t(peripheralDataSize) |
+            uint32_t(memoryIncrement) | uint32_t(peripheralIncrement) |
+            uint32_t(peripheralIncrementOffsetSize) | uint32_t(priority) | uint32_t(circularMode) |
+            uint32_t(memoryBurstMode) | uint32_t(peripheralBurstMode);
     }
 
     static void configureDoubleBufferMode(DoubleBufferMode bufferMode)
     {
         // TODO
-        STREAM_PTR(S, StreamBase)->CR |= uint32_t(bufferMode);
+        STREAM_PTR(S, StreamBase).CR |= uint32_t(bufferMode);
     }
 
-    static void enableInterrupts(Interrupt_t irq) { STREAM_PTR(S, StreamBase)->CR |= irq.value; }
+    static void enableInterrupts(Interrupt_t irq) { STREAM_PTR(S, StreamBase).CR |= irq.value; }
 
-    static void clearInterruptFlags() { STREAM_PTR(S, StreamBase)->FCR &= (DMA_SxFCR_FEIE); }
+    static void clearInterruptFlags() { STREAM_PTR(S, StreamBase).FCR &= (DMA_SxFCR_FEIE); }
 
     /**
      * Enable the DMA stream to send/receive.
      */
-    static void enable() { STREAM_PTR(S, StreamBase)->CR |= uint32_t(StreamEnableFlag::STREAM_ENABLED); }
+    static void enable()
+    {
+        STREAM_PTR(S, StreamBase).CR |= uint32_t(StreamEnableFlag::STREAM_ENABLED);
+    }
 
     /**
      * Disable send/receive on the DMA stream
      */
     static void disable()
     {
-        STREAM_PTR(S, StreamBase)->CR &= ~uint32_t(StreamEnableFlag::STREAM_ENABLED);
+        STREAM_PTR(S, StreamBase).CR &= ~uint32_t(StreamEnableFlag::STREAM_ENABLED);
         // wait for stream to be stopped
-        while (STREAM_PTR(S, StreamBase)->CR & uint32_t(StreamEnableFlag::STREAM_ENABLED))
+        while (STREAM_PTR(S, StreamBase).CR & uint32_t(StreamEnableFlag::STREAM_ENABLED))
             ;
     }
 
     static void selectChannel(ChannelSelection channel)
     {
-        STREAM_PTR(S, StreamBase)->CR &= (~DMA_SxCR_CHSEL_Msk | uint32_t(channel));
+        STREAM_PTR(S, StreamBase).CR &= (~DMA_SxCR_CHSEL_Msk | uint32_t(channel));
     }
 
     /**
@@ -165,48 +170,51 @@ public:
      */
     static DataTransferDirection getDataTransferDirection()
     {
-        return static_cast<DataTransferDirection>(STREAM_PTR(S, StreamBase)->CR & (DMA_SxCR_DIR_0 | DMA_SxCR_DIR_1));
+        return static_cast<DataTransferDirection>(
+            STREAM_PTR(S, StreamBase).CR & (DMA_SxCR_DIR_0 | DMA_SxCR_DIR_1));
     }
 
     static void setSourceAddress(uintptr_t src)
     {
-        if ((STREAM_PTR(S, StreamBase)->CR & uint32_t(DataTransferDirection::MEMORY_TO_MEMORY)) ==
+        if ((STREAM_PTR(S, StreamBase).CR & uint32_t(DataTransferDirection::MEMORY_TO_MEMORY)) ==
             uint32_t(DataTransferDirection::MEMORY_TO_MEMORY))
         {
-            STREAM_PTR(S, StreamBase)->PAR = src;
+            STREAM_PTR(S, StreamBase).PAR = src;
         }
         else if (
-            (STREAM_PTR(S, StreamBase)->CR & uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL)) ==
+            (STREAM_PTR(S, StreamBase).CR &
+             uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL)) ==
             uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL))
         {
-            STREAM_PTR(S, StreamBase)->M0AR = src;
+            STREAM_PTR(S, StreamBase).M0AR = src;
         }
         else
         {
-            STREAM_PTR(S, StreamBase)->PAR = src;
+            STREAM_PTR(S, StreamBase).PAR = src;
         }
     }
 
     static void setDestinationAddress(uintptr_t dst)
     {
-        if ((STREAM_PTR(S, StreamBase)->CR & uint32_t(DataTransferDirection::MEMORY_TO_MEMORY)) ==
+        if ((STREAM_PTR(S, StreamBase).CR & uint32_t(DataTransferDirection::MEMORY_TO_MEMORY)) ==
             uint32_t(DataTransferDirection::MEMORY_TO_MEMORY))
         {
-            STREAM_PTR(S, StreamBase)->M0AR = dst;
+            STREAM_PTR(S, StreamBase).M0AR = dst;
         }
         else if (
-            (STREAM_PTR(S, StreamBase)->CR & uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL)) ==
+            (STREAM_PTR(S, StreamBase).CR &
+             uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL)) ==
             uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL))
         {
-            STREAM_PTR(S, StreamBase)->PAR = dst;
+            STREAM_PTR(S, StreamBase).PAR = dst;
         }
         else
         {
-            STREAM_PTR(S, StreamBase)->M0AR = dst;
+            STREAM_PTR(S, StreamBase).M0AR = dst;
         }
     }
 
-    static void setDataLength(std::size_t length) { STREAM_PTR(S, StreamBase)->NDTR = length; }
+    static void setDataLength(std::size_t length) { STREAM_PTR(S, StreamBase).NDTR = length; }
 
     // /**
     //  * IRQ handler of the DMA channel
@@ -218,7 +226,8 @@ public:
     // {
     //     uint32_t currIsrs = DMA::getInterruptFlags();
     //     if (currIsrs & (InterruptStatusMsks::TRANSFER_ERROR |
-    //                     InterruptStatusMsks::DIRECT_MODE_ERROR | InterruptStatusMsks::FIFO_ERROR))
+    //                     InterruptStatusMsks::DIRECT_MODE_ERROR |
+    //                     InterruptStatusMsks::FIFO_ERROR))
     //     {
     //         disable();
     //         if (transferError != nullptr)
@@ -241,7 +250,8 @@ public:
     //  */
     // static void enableInterruptVector(uint32_t priority = 1)
     // {
-    //     NVIC_SetPriority(DmaBase::Nvic<ID>::DmaIrqs[STREAM_TYPEDEF_TO_STREAM_NUM(stream)], priority);
+    //     NVIC_SetPriority(DmaBase::Nvic<ID>::DmaIrqs[STREAM_TYPEDEF_TO_STREAM_NUM(stream)],
+    //     priority);
     //     NVIC_EnableIRQ(DmaBase::Nvic<ID>::DmaIrqs[STREAM_TYPEDEF_TO_STREAM_NUM(stream)]);
     // }
 
@@ -270,9 +280,9 @@ public:
     //     transferComplete = irqHandler;
     // }
 
-// private:
-//     static inline DmaBase::IrqHandler transferError = nullptr;
-//     static inline DmaBase::IrqHandler transferComplete = nullptr;
+    // private:
+    //     static inline DmaBase::IrqHandler transferError = nullptr;
+    //     static inline DmaBase::IrqHandler transferComplete = nullptr;
 };  // class DmaStreamHal
 
 }  // namespace arch
