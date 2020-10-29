@@ -36,6 +36,10 @@
 /* control includes ---------------------------------------------------------*/
 #include "aruwsrc/control/robot_control.hpp"
 
+#include "dma_base.hpp"
+#include "dma_hal.hpp"
+#include "dma_request_mapping.hpp"
+
 using namespace modm::literals;
 using aruwlib::Drivers;
 
@@ -53,34 +57,18 @@ void updateIo(aruwlib::Drivers *drivers);
 
 int main()
 {
-#ifdef PLATFORM_HOSTED
-    std::cout << "Simulation starting..." << std::endl;
-#endif
-
-    /*
-     * NOTE: We are using DoNotUse_getDrivers here because in the main
-     *      robot loop we must access the singleton drivers to update
-     *      IO states and run the scheduler.
-     */
-    aruwlib::Drivers *drivers = aruwlib::DoNotUse_getDrivers();
-
     Board::initialize();
-    initializeIo(drivers);
-    aruwsrc::control::initSubsystemCommands(drivers);
+
+    static_assert(
+        aruwlib::arch::DmaRequestMapping::validateRequestMapping<
+            2,
+            aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
+            aruwlib::arch::DmaBase::Stream::STREAM_7,
+            aruwlib::arch::DmaRequestMapping::Peripheral::USART1_TX>(),
+        "failed fool");
 
     while (1)
     {
-        // do this as fast as you can
-        updateIo(drivers);
-
-        if (sendMotorTimeout.execute())
-        {
-            drivers->mpu6500.read();
-            drivers->errorController.update();
-            drivers->commandScheduler.run();
-            drivers->djiMotorTxHandler.processCanSendData();
-        }
-        modm::delay_us(10);
     }
     return 0;
 }
