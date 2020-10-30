@@ -42,6 +42,14 @@
 using namespace modm::literals;
 using aruwlib::Drivers;
 
+int jj=0;
+
+void aruwlib::arch::uart1DmaMessageCompleteCallback(void)
+{
+    jj++;
+}
+
+
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
@@ -55,16 +63,17 @@ void initializeIo(aruwlib::Drivers *drivers);
 void updateIo(aruwlib::Drivers *drivers);
 using namespace aruwlib::arch;
 using namespace modm::platform;
+uint8_t dmatxbuffer[18];
 int main()
 {
+    Board::initialize();
     using UartDma = Usart1Dma<
         DmaBase::ChannelSelection::CHANNEL_4,
         DmaBase::ChannelSelection::CHANNEL_4,
         Dma2::Stream2,
         Dma2::Stream7>;
-    UartDma::initialize<Board::SystemClock, 115200>();
+    UartDma::initialize<Board::SystemClock, 1000000>(dmatxbuffer);
     // channel 4, stream 2
-    Board::initialize();
 
     // static_assert(
     //     aruwlib::arch::DmaRequestMapping::validateRequestMapping<

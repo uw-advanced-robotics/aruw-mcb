@@ -120,7 +120,7 @@ public:
             PeripheralIncrementOffsetSize::LINKED_TO_PSIZE,
         PriorityLevel priority = PriorityLevel::MEDIUM,
         MemoryBurstTransfer memoryBurstMode = MemoryBurstTransfer::SINGLE,
-        PeripheralBurstTransfer peripheralBurstMode = MemoryBurstTransfer::SINGLE)
+        PeripheralBurstTransfer peripheralBurstMode = PeripheralBurstTransfer::SINGLE)
     {
         disable();
 
@@ -137,7 +137,7 @@ public:
         STREAM_PTR(S, StreamBase).CR |= uint32_t(bufferMode);
     }
 
-    static void enableInterrupts(Interrupt_t irq) { STREAM_PTR(S, StreamBase).CR |= irq.value; }
+    static void enableInterrupt(Interrupt_t irq) { STREAM_PTR(S, StreamBase).CR |= irq.value; }
 
     static void clearInterruptFlags() { STREAM_PTR(S, StreamBase).FCR &= (DMA_SxFCR_FEIE); }
 
@@ -163,6 +163,16 @@ public:
     static void selectChannel(ChannelSelection channel)
     {
         STREAM_PTR(S, StreamBase).CR &= (~DMA_SxCR_CHSEL_Msk | uint32_t(channel));
+    }
+
+    static void setPeripheralIncrementMode(PeripheralIncrementMode mode)
+    {
+        STREAM_PTR(S, StreamBase).CR |= (~DMA_SxCR_PINC | uint32_t(mode));
+    }
+
+    static void setMemoryIncrementMode(MemoryIncrementMode mode)
+    {
+        STREAM_PTR(S, StreamBase).CR |= (~DMA_SxCR_MINC | uint32_t(mode));
     }
 
     /**

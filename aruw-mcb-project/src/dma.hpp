@@ -84,11 +84,29 @@ public:
             PeripheralDataSize peripheralDataSize,
             MemoryIncrementMode memoryIncrement,
             PeripheralIncrementMode peripheralIncrement,
+            CircularMode circularMode,
+            PeripheralIncrementOffsetSize peripheralIncrementOffsetSize =
+                PeripheralIncrementOffsetSize::LINKED_TO_PSIZE,
             PriorityLevel priority = PriorityLevel::MEDIUM,
-            CircularMode circularMode = CircularMode::DISABLED)
+            MemoryBurstTransfer memoryBurstMode = MemoryBurstTransfer::SINGLE,
+            PeripheralBurstTransfer peripheralBurstMode = PeripheralBurstTransfer::SINGLE)
         {
-            // ChannelHal::configure(direction, memoryDataSize, peripheralDataSize,
-            // 		memoryIncrement, peripheralIncrement, priority, circularMode);
+            StreamHal::configure(
+                direction,
+                memoryDataSize,
+                peripheralDataSize,
+                memoryIncrement,
+                peripheralIncrement,
+                circularMode,
+                peripheralIncrementOffsetSize,
+                priority,
+                memoryBurstMode,
+                peripheralBurstMode);
+        }
+
+        static void selectChannel(DmaBase::ChannelSelection channel)
+        {
+            StreamHal::selectChannel(channel);
         }
 
         /**
@@ -142,10 +160,11 @@ public:
          *
          * @param[in] increment Enable/disable
          */
-        static void setMemoryIncrementMode(bool increment)
+        static void setMemoryIncrementMode(DmaBase::MemoryIncrementMode mode)
         {
-            // ChannelHal::setMemoryIncrementMode(increment);
+            StreamHal::setMemoryIncrementMode(mode);
         }
+
         /**
          * Enable/disable peripheral increment
          *
@@ -155,18 +174,15 @@ public:
          *
          * @param[in] increment Enable/disable
          */
-        static void setPeripheralIncrementMode(bool increment)
+        static void setPeripheralIncrementMode(DmaBase::PeripheralIncrementMode mode)
         {
-            // ChannelHal::setPeripheralIncrementMode(increment);
+            StreamHal::setPeripheralIncrementMode(mode);
         }
 
         /**
          * Set the length of data to be transfered
          */
-        static void setDataLength(std::size_t length)
-        {
-            // ChannelHal::setDataLength(length);
-        }
+        static void setDataLength(std::size_t length) { StreamHal::setDataLength(length); }
 
         /**
          * Set the IRQ handler for transfer errors
@@ -249,10 +265,7 @@ public:
         /**
          * Enable the specified interrupt of the channel
          */
-        static void enableInterrupt(Interrupt_t irq)
-        {
-            // StreamHal::enableInterrupt(irq);
-        }
+        static void enableInterrupt(Interrupt_t irq) { StreamHal::enableInterrupt(irq); }
         /**
          * Disable the specified interrupt of the channel
          */
