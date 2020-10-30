@@ -78,7 +78,7 @@ public:
          * @param[in] priority Priority of the DMA channel
          * @param[in] circularMode Transfer data in circular mode?
          */
-        static void configure(
+        static void configure(ChannelSelection channel,
             DataTransferDirection direction,
             MemoryDataSize memoryDataSize,
             PeripheralDataSize peripheralDataSize,
@@ -91,7 +91,7 @@ public:
             MemoryBurstTransfer memoryBurstMode = MemoryBurstTransfer::SINGLE,
             PeripheralBurstTransfer peripheralBurstMode = PeripheralBurstTransfer::SINGLE)
         {
-            StreamHal::configure(
+            StreamHal::configure(channel,
                 direction,
                 memoryDataSize,
                 peripheralDataSize,
@@ -114,7 +114,7 @@ public:
          */
         static void enable()
         {
-            StreamHal::clearInterruptFlags();
+            ControlHal::clearInterruptFlags(StreamID);
             StreamHal::enable();
         }
         /**

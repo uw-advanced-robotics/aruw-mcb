@@ -19,7 +19,7 @@ template <
     DmaBase::ChannelSelection ChannelIdTx,
     typename DmaStreamRx,
     typename DmaStreamTx>
-class Usart1Dma : modm::platform::Usart1
+class Usart1Dma : public modm::platform::Usart1
 {
 public:
     static_assert(
@@ -58,9 +58,9 @@ public:
         //     DmaBase::Interrupt::ERROR | DmaBase::Interrupt::TRANSFER_COMPLETE);
         // DmaStreamTx::template setPeripheralRequest<TxRequest>();
 
-        modm::platform::Usart1::initialize<SystemClock, baudrate, tolerance>();
+        modm::platform::Usart1::initialize<SystemClock, baudrate, tolerance>(12, modm::platform::UartBase::Parity::Even);
 
-        DmaStreamRx::configure(
+        DmaStreamRx::configure(ChannelIdRx,
             DmaBase::DataTransferDirection::PERIPHERAL_TO_MEMORY,
             DmaBase::MemoryDataSize::BYTE,
             DmaBase::PeripheralDataSize::BYTE,
@@ -73,7 +73,7 @@ public:
         // Write the USART_DR register address in the DMA control register to configure it as the
         // source of the transfer. The data will be moved from this address to the memory after
         // each RXNE event.
-        DmaStreamRx::setSourceAddress(USART1->DR);
+        DmaStreamRx::setSourceAddress((uintptr_t)&USART1->DR);
 
         // Write the memory address in the DMA control register to configure it as the destination
         // of the transfer. The data will be loaded from USART_DR to this memory area after each
@@ -81,7 +81,7 @@ public:
         DmaStreamRx::setDestinationAddress((uintptr_t)buff);
 
         // configure total # of bytes
-        DmaStreamRx::setDataLength(18);
+        DmaStreamRx::setDataLength(50);
 
         // configure channel priority done above
 
@@ -93,7 +93,7 @@ public:
             DmaBase::Interrupt::ERROR | DmaBase::Interrupt::TRANSFER_COMPLETE);
 
         // activate channel in DMA control register
-        DmaStreamRx::selectChannel(ChannelIdRx);
+        DmaStreamRx::enable();
 
         // When number of data transfers programmed in the DMA controller is reached, the DMA
         // controller generates an interrupt on the DMA channel interrupt vector The DMAR bit should

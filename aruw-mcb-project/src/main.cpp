@@ -63,15 +63,18 @@ void initializeIo(aruwlib::Drivers *drivers);
 void updateIo(aruwlib::Drivers *drivers);
 using namespace aruwlib::arch;
 using namespace modm::platform;
-uint8_t dmatxbuffer[18];
+uint8_t dmatxbuffer[50];
 int main()
 {
+    // DMA2_Stream2
     Board::initialize();
+    Dma2::enableRcc();
     using UartDma = Usart1Dma<
         DmaBase::ChannelSelection::CHANNEL_4,
         DmaBase::ChannelSelection::CHANNEL_4,
         Dma2::Stream2,
         Dma2::Stream7>;
+    UartDma::connect<GpioB7::Rx>();
     UartDma::initialize<Board::SystemClock, 1000000>(dmatxbuffer);
     // channel 4, stream 2
 
@@ -85,6 +88,7 @@ int main()
 
     while (1)
     {
+        // aruwlib::DoNotUse_getDrivers()->remote.read();
     }
     return 0;
 }

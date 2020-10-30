@@ -54,7 +54,13 @@ public:
         }
         else
         {
-            DmaDef()->LIFCR |= dmaStreamIFCRMasks[uint32_t(s)];
+            uint32_t i = dmaStreamIFCRMasks[uint32_t(s)];
+            DMA2->LIFCR |= i;
+            if ((DMA2->LIFCR & i) == i)
+            {
+                DMA2->LIFCR |= i;
+            }
+            // DmaDef()->LIFCR |= dmaStreamIFCRMasks[uint32_t(s)];
         }
     }
 
@@ -92,7 +98,7 @@ public:
         StreamBase == DMA1_Stream0_BASE || StreamBase == DMA2_Stream0_BASE,
         "StreamBase invalid");
 
-#define STREAM_PTR(S, StreamBase) (((DMA_Stream_TypeDef *)StreamBase)[uint32_t(S)])
+#define STREAM_PTR(S, StreamBase) ((DMA_Stream_TypeDef *)StreamBase + uint32_t(S))
 
     /**
      * Configure the DMA stream (HAL)
@@ -110,6 +116,7 @@ public:
      * @param[in] circularMode Transfer data in circular mode?
      */
     static void configure(
+        ChannelSelection channel,
         DataTransferDirection direction,
         MemoryDataSize memoryDataSize,
         PeripheralDataSize peripheralDataSize,
@@ -124,29 +131,43 @@ public:
     {
         disable();
 
-        STREAM_PTR(S, StreamBase).CR =
-            uint32_t(direction) | uint32_t(memoryDataSize) | uint32_t(peripheralDataSize) |
-            uint32_t(memoryIncrement) | uint32_t(peripheralIncrement) |
-            uint32_t(peripheralIncrementOffsetSize) | uint32_t(priority) | uint32_t(circularMode) |
-            uint32_t(memoryBurstMode) | uint32_t(peripheralBurstMode);
+        DMA_Stream_TypeDef  *ssss=STREAM_PTR(S, StreamBase);
+
+        uint32_t tmp = ssss->CR;
+
+        /* Clear CHSEL, MBURST, PBURST, PL, MSIZE, PSIZE, MINC, PINC, CIRC, DIR, CT and DBM bits */
+        tmp &= ((uint32_t)~(DMA_SxCR_CHSEL | DMA_SxCR_MBURST | DMA_SxCR_PBURST | \
+                            DMA_SxCR_PL    | DMA_SxCR_MSIZE  | DMA_SxCR_PSIZE  | \
+                            DMA_SxCR_MINC  | DMA_SxCR_PINC   | DMA_SxCR_CIRC   | \
+                            DMA_SxCR_DIR   | DMA_SxCR_CT     | DMA_SxCR_DBM));
+
+        /* Prepare the DMA Stream configuration */
+        tmp |=  uint32_t(channel) | uint32_t(direction) | uint32_t(peripheralIncrement) | uint32_t(memoryIncrement)
+        | uint32_t(memoryBurstMode) | uint32_t(peripheralIncrementOffsetSize) | uint32_t(priority) | uint32_t(memoryBurstMode) | uint32_t(circularMode)
+        | uint32_t(peripheralBurstMode) | uint32_t(memoryDataSize) | uint32_t(peripheralDataSize);
+
+        // STREAM_PTR(S, StreamBase)->CR =
+        ssss->CR = tmp;
+            // uint32_t(direction) | uint32_t(memoryDataSize) | uint32_t(peripheralDataSize) |
+            // uint32_t(memoryIncrement) | uint32_t(peripheralIncrement) |
+            // uint32_t(peripheralIncrementOffsetSize) | uint32_t(priority) | uint32_t(circularMode) |
+            // uint32_t(memoryBurstMode) | uint32_t(peripheralBurstMode);
     }
 
     static void configureDoubleBufferMode(DoubleBufferMode bufferMode)
     {
         // TODO
-        STREAM_PTR(S, StreamBase).CR |= uint32_t(bufferMode);
+        STREAM_PTR(S, StreamBase)->CR |= uint32_t(bufferMode);
     }
 
-    static void enableInterrupt(Interrupt_t irq) { STREAM_PTR(S, StreamBase).CR |= irq.value; }
-
-    static void clearInterruptFlags() { STREAM_PTR(S, StreamBase).FCR &= (DMA_SxFCR_FEIE); }
+    static void enableInterrupt(Interrupt_t irq) { STREAM_PTR(S, StreamBase)->CR |= irq.value; }
 
     /**
      * Enable the DMA stream to send/receive.
      */
     static void enable()
     {
-        STREAM_PTR(S, StreamBase).CR |= uint32_t(StreamEnableFlag::STREAM_ENABLED);
+        STREAM_PTR(S, StreamBase)->CR |= uint32_t(StreamEnableFlag::STREAM_ENABLED);
     }
 
     /**
@@ -154,25 +175,26 @@ public:
      */
     static void disable()
     {
-        STREAM_PTR(S, StreamBase).CR &= ~uint32_t(StreamEnableFlag::STREAM_ENABLED);
+        STREAM_PTR(S, StreamBase)->CR &= ~uint32_t(StreamEnableFlag::STREAM_ENABLED);
         // wait for stream to be stopped
-        while (STREAM_PTR(S, StreamBase).CR & uint32_t(StreamEnableFlag::STREAM_ENABLED))
+        while (STREAM_PTR(S, StreamBase)->CR & uint32_t(StreamEnableFlag::STREAM_ENABLED))
             ;
     }
 
     static void selectChannel(ChannelSelection channel)
     {
-        STREAM_PTR(S, StreamBase).CR &= (~DMA_SxCR_CHSEL_Msk | uint32_t(channel));
+        // int i = (~DMA_SxCR_CHSEL_Msk | uint32_t(channel));
+        STREAM_PTR(S, StreamBase)->CR &= (~DMA_SxCR_CHSEL_Msk | uint32_t(channel));
     }
 
     static void setPeripheralIncrementMode(PeripheralIncrementMode mode)
     {
-        STREAM_PTR(S, StreamBase).CR |= (~DMA_SxCR_PINC | uint32_t(mode));
+        STREAM_PTR(S, StreamBase)->CR |= (~DMA_SxCR_PINC | uint32_t(mode));
     }
 
     static void setMemoryIncrementMode(MemoryIncrementMode mode)
     {
-        STREAM_PTR(S, StreamBase).CR |= (~DMA_SxCR_MINC | uint32_t(mode));
+        STREAM_PTR(S, StreamBase)->CR |= (~DMA_SxCR_MINC | uint32_t(mode));
     }
 
     /**
@@ -181,50 +203,50 @@ public:
     static DataTransferDirection getDataTransferDirection()
     {
         return static_cast<DataTransferDirection>(
-            STREAM_PTR(S, StreamBase).CR & (DMA_SxCR_DIR_0 | DMA_SxCR_DIR_1));
+            STREAM_PTR(S, StreamBase)->CR & (DMA_SxCR_DIR_0 | DMA_SxCR_DIR_1));
     }
 
     static void setSourceAddress(uintptr_t src)
     {
-        if ((STREAM_PTR(S, StreamBase).CR & uint32_t(DataTransferDirection::MEMORY_TO_MEMORY)) ==
+        if ((STREAM_PTR(S, StreamBase)->CR & uint32_t(DataTransferDirection::MEMORY_TO_MEMORY)) ==
             uint32_t(DataTransferDirection::MEMORY_TO_MEMORY))
         {
-            STREAM_PTR(S, StreamBase).PAR = src;
+            STREAM_PTR(S, StreamBase)->PAR = src;
         }
         else if (
-            (STREAM_PTR(S, StreamBase).CR &
+            (STREAM_PTR(S, StreamBase)->CR &
              uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL)) ==
             uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL))
         {
-            STREAM_PTR(S, StreamBase).M0AR = src;
+            STREAM_PTR(S, StreamBase)->M0AR = src;
         }
         else
         {
-            STREAM_PTR(S, StreamBase).PAR = src;
+            STREAM_PTR(S, StreamBase)->PAR = src;
         }
     }
 
     static void setDestinationAddress(uintptr_t dst)
     {
-        if ((STREAM_PTR(S, StreamBase).CR & uint32_t(DataTransferDirection::MEMORY_TO_MEMORY)) ==
+        if ((STREAM_PTR(S, StreamBase)->CR & uint32_t(DataTransferDirection::MEMORY_TO_MEMORY)) ==
             uint32_t(DataTransferDirection::MEMORY_TO_MEMORY))
         {
-            STREAM_PTR(S, StreamBase).M0AR = dst;
+            STREAM_PTR(S, StreamBase)->M0AR = dst;
         }
         else if (
-            (STREAM_PTR(S, StreamBase).CR &
+            (STREAM_PTR(S, StreamBase)->CR &
              uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL)) ==
             uint32_t(DataTransferDirection::MEMORY_TO_PERIPHERAL))
         {
-            STREAM_PTR(S, StreamBase).PAR = dst;
+            STREAM_PTR(S, StreamBase)->PAR = dst;
         }
         else
         {
-            STREAM_PTR(S, StreamBase).M0AR = dst;
+            STREAM_PTR(S, StreamBase)->M0AR = dst;
         }
     }
 
-    static void setDataLength(std::size_t length) { STREAM_PTR(S, StreamBase).NDTR = length; }
+    static void setDataLength(std::size_t length) { STREAM_PTR(S, StreamBase)->NDTR = length; }
 
     // /**
     //  * IRQ handler of the DMA channel
