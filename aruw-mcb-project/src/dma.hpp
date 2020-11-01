@@ -66,42 +66,35 @@ public:
         /**
          * Configure the DMA channel
          *
-         * Stops the DMA channel and writes the new values to its control register.
-         *
-         * @param[in] direction Direction of the DMA channel
-         * @param[in] memoryDataSize Size of data in memory (byte, halfword, word)
-         * @param[in] peripheralDataSize Size of data in peripheral (byte, halfword, word)
-         * @param[in] memoryIncrement Defines whether the memory address is incremented
-         * 			  after a transfer completed
-         * @param[in] peripheralIncrement Defines whether the peripheral address is
-         * 			  incremented after a transfer completed
-         * @param[in] priority Priority of the DMA channel
-         * @param[in] circularMode Transfer data in circular mode?
+         * @see DmaStreamHal::configure
          */
-        static void configure(ChannelSelection channel,
+        static void configure(
+            ChannelSelection channel,
             DataTransferDirection direction,
-            MemoryDataSize memoryDataSize,
-            PeripheralDataSize peripheralDataSize,
-            MemoryIncrementMode memoryIncrement,
-            PeripheralIncrementMode peripheralIncrement,
-            CircularMode circularMode,
-            PeripheralIncrementOffsetSize peripheralIncrementOffsetSize =
-                PeripheralIncrementOffsetSize::LINKED_TO_PSIZE,
-            PriorityLevel priority = PriorityLevel::MEDIUM,
-            MemoryBurstTransfer memoryBurstMode = MemoryBurstTransfer::SINGLE,
-            PeripheralBurstTransfer peripheralBurstMode = PeripheralBurstTransfer::SINGLE)
+            PeripheralIncrementMode periphInc,
+            MemoryIncrementMode memInc,
+            PeripheralDataSize peripDataSize,
+            MemoryDataSize memDataSize,
+            ControlMode mode,
+            PriorityLevel priority,
+            FifoMode fifoMode,
+            FifoThreshold fifoThreshold,
+            MemoryBurstTransfer memBurst,
+            PeripheralBurstTransfer periphBurst)
         {
-            StreamHal::configure(channel,
+            StreamHal::configure(
+                channel,
                 direction,
-                memoryDataSize,
-                peripheralDataSize,
-                memoryIncrement,
-                peripheralIncrement,
-                circularMode,
-                peripheralIncrementOffsetSize,
+                periphInc,
+                memInc,
+                peripDataSize,
+                memDataSize,
+                mode,
                 priority,
-                memoryBurstMode,
-                peripheralBurstMode);
+                fifoMode,
+                fifoThreshold,
+                memBurst,
+                periphBurst);
         }
 
         static void selectChannel(DmaBase::ChannelSelection channel)
@@ -225,11 +218,11 @@ public:
         static void interruptHandler()
         {
             uint32_t currIsrs = ControlHal::getInterruptFlags(StreamID);
+            ControlHal::clearInterruptFlags(StreamID);
             if (currIsrs & (uint32_t(InterruptStatusMsks::TRANSFER_ERROR) |
                             uint32_t(InterruptStatusMsks::DIRECT_MODE_ERROR) |
                             uint32_t(InterruptStatusMsks::FIFO_ERROR)))
             {
-                disableRcc();
                 if (transferError != nullptr)
                 {
                     transferError();
@@ -239,8 +232,6 @@ public:
             {
                 transferComplete();
             }
-
-            ControlHal::clearInterruptFlags(StreamID);
         }
 
         /**

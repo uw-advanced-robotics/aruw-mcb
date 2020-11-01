@@ -42,13 +42,16 @@
 using namespace modm::literals;
 using aruwlib::Drivers;
 
-int jj=0;
+int jj = 0;
 
-void aruwlib::arch::uart1DmaMessageCompleteCallback(void)
+void aruwlib::arch::uart1DmaMessageCompleteCallback(void) { jj++; }
+uint32_t t1, t2, t3;
+void koolcallback()
 {
-    jj++;
+    jj += 10;
+    t1 = modm::Clock::now().time_since_epoch().count() - t2;
+    t2 = modm::Clock::now().time_since_epoch().count();
 }
-
 
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
@@ -64,10 +67,12 @@ void updateIo(aruwlib::Drivers *drivers);
 using namespace aruwlib::arch;
 using namespace modm::platform;
 uint8_t dmatxbuffer[50];
+uint8_t otherbyte;
 int main()
 {
     // DMA2_Stream2
     Board::initialize();
+    aruwlib::DoNotUse_getDrivers()->leds.init();
     Dma2::enableRcc();
     using UartDma = Usart1Dma<
         DmaBase::ChannelSelection::CHANNEL_4,
@@ -75,7 +80,8 @@ int main()
         Dma2::Stream2,
         Dma2::Stream7>;
     UartDma::connect<GpioB7::Rx>();
-    UartDma::initialize<Board::SystemClock, 1000000>(dmatxbuffer);
+    UartDma::initialize<Board::SystemClock, 1000000>(modm::platform::UartBase::Parity::Disabled, 50, dmatxbuffer);
+    // UartDma::configureContinuousRead(dmatxbuffer, 50, koolcallback);
     // channel 4, stream 2
 
     // static_assert(
@@ -88,6 +94,9 @@ int main()
 
     while (1)
     {
+        modm::platform::Usart1::read(otherbyte);
+        modm::delay_ms(1);
+        t3 = modm::Clock::now().time_since_epoch().count();
         // aruwlib::DoNotUse_getDrivers()->remote.read();
     }
     return 0;

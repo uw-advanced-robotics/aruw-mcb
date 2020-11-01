@@ -42,7 +42,7 @@ public:
         SINGLE = 0,
         INCREMENT_4 = DMA_SxCR_MBURST_0,
         INCREMENT_8 = DMA_SxCR_MBURST_1,
-        INCREMENT_16 = DMA_SxCR_MBURST_1 | DMA_SxCR_MBURST_0,
+        INCREMENT_16 = DMA_SxCR_MBURST,
     };
 
     // Bits 22:21
@@ -51,7 +51,7 @@ public:
         SINGLE = 0,
         INCREMENT_4 = DMA_SxCR_PBURST_0,
         INCREMENT_8 = DMA_SxCR_PBURST_1,
-        INCREMENT_16 = DMA_SxCR_PBURST_1 | DMA_SxCR_PBURST_0,
+        INCREMENT_16 = DMA_SxCR_PBURST,
     };
 
     // Bit 19
@@ -117,11 +117,12 @@ public:
         INCREMENT = DMA_SxCR_PINC,  ///< incremented according to PeripheralDataSize
     };
 
-    // Bit 8
-    enum class CircularMode : uint32_t
+    // Bits 8 and 5
+    enum class ControlMode : uint32_t
     {
-        DISABLED = 0,
-        ENABLED = DMA_SxCR_CIRC,  ///< circular mode
+        NORMAL = 0,
+        CIRCULAR = DMA_SxCR_CIRC,
+        PERIPHERAL_FLOW = DMA_SxCR_PFCTRL,
     };
 
     // Bits 7:6
@@ -135,19 +136,12 @@ public:
         MEMORY_TO_MEMORY = DMA_SxCR_DIR_1,
     };
 
-    // Bit 5
-    enum class FlowControl : uint32_t
-    {
-        DMA = 0,
-        PERIPHERAL = DMA_SxCR_PFCTRL,  ///< the peripheral is the flow controller
-    };
-
     // Bit 1-4 are interrupt enable settings.
     enum class Interrupt
     {
         TRANSFER_COMPLETE = DMA_SxCR_TCIE,
         HALF_TRANSFER_COMPLETE = DMA_SxCR_HTIE,
-        ERROR = DMA_SxCR_DMEIE,
+        ERROR = DMA_SxCR_TEIE,
         ALL = DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_DMEIE,
     };
     MODM_FLAGS32(Interrupt);
@@ -170,10 +164,19 @@ public:
 
     // End DMA_xCR masks
 
-#define STREAM_TYPEDEF_TO_STREAM_NUM(stream)                                    \
-    (stream > DMA1_Stream7)                                                     \
-        ? ((uint64_t)(stream - DMA2_Stream0_BASE) / sizeof(DMA_Stream_TypeDef)) \
-        : ((uint64_t)(stream - DMA1_Stream0_BASE) / sizeof(DMA_Stream_TypeDef))
+    enum class FifoMode : uint32_t
+    {
+        DISABLED = 0,
+        ENABLED = DMA_SxFCR_DMDIS,
+    };
+
+    enum class FifoThreshold : uint32_t
+    {
+        QUARTER_FULL = 0,
+        HALFFULL = DMA_SxFCR_FTH_0,
+        THREE_QUARTER_FULL = DMA_SxFCR_FTH_1,
+        FULL = DMA_SxFCR_FTH,
+    };
 
     enum class Stream : uint32_t
     {
@@ -242,6 +245,7 @@ template <>
 struct DmaBase::Nvic<1>
 {
     static constexpr IRQn_Type DmaIrqs[]{
+        DMA1_Stream0_IRQn,
         DMA1_Stream1_IRQn,
         DMA1_Stream2_IRQn,
         DMA1_Stream3_IRQn,
@@ -256,6 +260,7 @@ template <>
 struct DmaBase::Nvic<2>
 {
     static constexpr IRQn_Type DmaIrqs[]{
+        DMA2_Stream0_IRQn,
         DMA2_Stream1_IRQn,
         DMA2_Stream2_IRQn,
         DMA2_Stream3_IRQn,

@@ -174,24 +174,30 @@ modm::platform::Usart1::clearError()
 		UsartHal1::InterruptFlag::OverrunError | UsartHal1::InterruptFlag::FramingError);
 }
 
-
-MODM_ISR(USART1)
+void modm::platform::Usart1::clearIdleFlag()
 {
-	if (modm::platform::UsartHal1::isReceiveRegisterNotEmpty()) {
-		// TODO: save the errors
-		uint8_t data;
-		modm::platform::UsartHal1::read(data);
-		rxBuffer.push(data);
-	}
-	if (modm::platform::UsartHal1::isTransmitRegisterEmpty()) {
-		if (txBuffer.isEmpty()) {
-			// transmission finished, disable TxEmpty interrupt
-			modm::platform::UsartHal1::disableInterrupt(modm::platform::UsartHal1::Interrupt::TxEmpty);
-		}
-		else {
-			modm::platform::UsartHal1::write(txBuffer.get());
-			txBuffer.pop();
-		}
-	}
-	modm::platform::UsartHal1::acknowledgeInterruptFlags(modm::platform::UsartHal1::InterruptFlag::OverrunError);
+    int val = 0;
+    val = USART1->SR;
+    val = USART1->DR;
 }
+
+// MODM_ISR(USART1)
+// {
+// 	if (modm::platform::UsartHal1::isReceiveRegisterNotEmpty()) {
+// 		// TODO: save the errors
+// 		uint8_t data;
+// 		modm::platform::UsartHal1::read(data);
+// 		rxBuffer.push(data);
+// 	}
+// 	if (modm::platform::UsartHal1::isTransmitRegisterEmpty()) {
+// 		if (txBuffer.isEmpty()) {
+// 			// transmission finished, disable TxEmpty interrupt
+// 			modm::platform::UsartHal1::disableInterrupt(modm::platform::UsartHal1::Interrupt::TxEmpty);
+// 		}
+// 		else {
+// 			modm::platform::UsartHal1::write(txBuffer.get());
+// 			txBuffer.pop();
+// 		}
+// 	}
+// 	modm::platform::UsartHal1::acknowledgeInterruptFlags(modm::platform::UsartHal1::InterruptFlag::OverrunError);
+// }

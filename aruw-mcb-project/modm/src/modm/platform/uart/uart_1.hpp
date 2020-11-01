@@ -123,6 +123,9 @@ public:
 	static void
 	clearError();
 
+    static void
+    clearIdleFlag();
+
 };
 
 }	// namespace platform

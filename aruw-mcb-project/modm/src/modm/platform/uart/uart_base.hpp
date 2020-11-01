@@ -56,6 +56,7 @@ public:
 		TxComplete	= USART_CR1_TCIE,
 		/// Call interrupt when char received (RXNE) or overrun occurred (ORE)
 		RxNotEmpty	= USART_CR1_RXNEIE,
+        RxIdle = USART_CR1_IDLEIE,
 	};
 	MODM_FLAGS32(Interrupt);
 

@@ -54,35 +54,35 @@ public:
         }
         else
         {
-            uint32_t i = dmaStreamIFCRMasks[uint32_t(s)];
-            DMA2->LIFCR |= i;
-            if ((DMA2->LIFCR & i) == i)
-            {
-                DMA2->LIFCR |= i;
-            }
-            // DmaDef()->LIFCR |= dmaStreamIFCRMasks[uint32_t(s)];
+            DmaDef()->LIFCR |= dmaStreamIFCRMasks[uint32_t(s)];
         }
     }
 
-private:
-    static uint32_t getLowInterruptFlags() { return DmaDef()->LISR; }
-
-    static uint32_t getHighInterruptFlags() { return DmaDef()->HISR; }
-
-public:
     /**
      * Interrupt flag, use InterruptStatusMsks enum masks to interpret the interrupt flags
      */
     static uint32_t getInterruptFlags(Stream s)
     {
-        if (uint32_t(s) > uint32_t(Stream::STREAM_3))
+        static constexpr uint32_t INTERRUPT_STREAM_BLOCK_SIZE = 6;
+        int shiftOffset = 0;
+        if (uint32_t(s) >= uint32_t(Stream::STREAM_4))
         {
-            return (getHighInterruptFlags() >> (uint32_t(s) - uint32_t(Stream::STREAM_4))) &
-                   INTERRUPT_STATUS_MSK;
+            shiftOffset = INTERRUPT_STREAM_BLOCK_SIZE * (uint32_t(s) - uint32_t(Stream::STREAM_4));
+            if (uint32_t(s) >= uint32_t(Stream::STREAM_6))
+            {
+                shiftOffset += 4;  // 4 bytes of padding in the middle of the register
+            }
+
+            return (DmaDef()->HISR >> shiftOffset) & INTERRUPT_STATUS_MSK;
         }
         else
         {
-            return (getLowInterruptFlags() >> uint32_t(s)) & INTERRUPT_STATUS_MSK;
+            shiftOffset = INTERRUPT_STREAM_BLOCK_SIZE * uint32_t(s);
+            if (uint32_t(s) >= uint32_t(Stream::STREAM_2))
+            {
+                shiftOffset += 4;
+            }
+            return (DmaDef()->LISR >> shiftOffset) & INTERRUPT_STATUS_MSK;
         }
     }
 };  // class DmaHal
@@ -105,53 +105,111 @@ public:
      *
      * Stops the DMA stream and writes the new values to its control register.
      *
-     * @param[in] direction Direction of the DMA stream
-     * @param[in] memoryDataSize Size of data in memory (byte, halfword, word)
-     * @param[in] peripheralDataSize Size of data in peripheral (byte, halfword, word)
-     * @param[in] memoryIncrement Defines whether the memory address is incremented
-     * 			  after a transfer completed
-     * @param[in] peripheralIncrement Defines whether the peripheral address is
-     * 			  incremented after a transfer completed
-     * @param[in] priority Priority of the DMA stream
-     * @param[in] circularMode Transfer data in circular mode?
+     * @param[in] channel Specifies the channel used for the specified stream.
+     *                                 This parameter can be a value of @ref DMA_Channel_selection
+     *
+     * @param[in] direction  Specifies if the data will be transferred from memory to peripheral,
+     *                                 from memory to memory or from peripheral to memory.
+     *                                 This parameter can be a value of @ref
+     * DMA_Data_transfer_direction
+     *
+     * @param[in] periphInc             Specifies whether the Peripheral address register should be
+     * incremented or not This parameter can be a value of @ref DMA_Peripheral_incremented_mode
+     *
+     * @param[in] memInc                Specifies whether the memory address register should be
+     * incremented or not. This parameter can be a value of @ref DMA_Memory_incremented_mode
+     *
+     * @param[in] periphDataAlignment   Specifies the Peripheral data width.
+     *                                 This parameter can be a value of @ref
+     * DMA_Peripheral_data_size
+     *
+     * @param[in] memDataAlignment;      Specifies the Memory data width.
+     *                                 This parameter can be a value of @ref DMA_Memory_data_size
+     *
+     * @param[in] mode;                  Specifies the operation mode of the DMAy Streamx.
+     *                                 This parameter can be a value of @ref DMA_mode
+     *                                 @note The circular buffer mode cannot be used if the
+     * memory-to-memory data transfer is configured on the selected Stream
+     *
+     * @param[in] priority;              Specifies the software priority for the DMAy Streamx.
+     *                                 This parameter can be a value of @ref DMA_Priority_level
+     *
+     * @param[in] fifoMode;              Specifies if the FIFO mode or Direct mode will be used for
+     * the specified stream. This parameter can be a value of @ref DMA_FIFO_direct_mode
+     *                                 @note The Direct mode (FIFO mode disabled) cannot be used if
+     * the memory-to-memory data transfer is configured on the selected stream
+     *
+     * @param[in] fifoThreshold;         Specifies the FIFO threshold level.
+     *                                 This parameter can be a value of @ref
+     * DMA_FIFO_threshold_level
+     *
+     * @param[in] memBurst;              Specifies the Burst transfer configuration for the memory
+     * transfers. It specifies the amount of data to be transferred in a single non interruptible
+     *                                    transaction.
+     *                                      This parameter can be a value of @ref DMA_Memory_burst
+     *                                      @note The burst mode is possible only if the address
+     * Increment mode is enabled.
+     *
+     *  @param[in] periphBurst;          Specifies the Burst transfer configuration for the
+     * peripheral transfers. It specifies the amount of data to be transferred in a single non
+     * interruptible transaction. This parameter can be a value of @ref DMA_Peripheral_burst
+     *                                      @note The burst mode is possible only if the address
+     * Increment mode is enabled.
      */
     static void configure(
         ChannelSelection channel,
         DataTransferDirection direction,
-        MemoryDataSize memoryDataSize,
-        PeripheralDataSize peripheralDataSize,
-        MemoryIncrementMode memoryIncrement,
-        PeripheralIncrementMode peripheralIncrement,
-        CircularMode circularMode,
-        PeripheralIncrementOffsetSize peripheralIncrementOffsetSize =
-            PeripheralIncrementOffsetSize::LINKED_TO_PSIZE,
-        PriorityLevel priority = PriorityLevel::MEDIUM,
-        MemoryBurstTransfer memoryBurstMode = MemoryBurstTransfer::SINGLE,
-        PeripheralBurstTransfer peripheralBurstMode = PeripheralBurstTransfer::SINGLE)
+        PeripheralIncrementMode periphInc,
+        MemoryIncrementMode memInc,
+        PeripheralDataSize peripDataSize,
+        MemoryDataSize memDataSize,
+        ControlMode mode,
+        PriorityLevel priority,
+        FifoMode fifoMode,
+        FifoThreshold fifoThreshold,
+        MemoryBurstTransfer memBurst,
+        PeripheralBurstTransfer periphBurst)
     {
         disable();
 
-        DMA_Stream_TypeDef  *ssss=STREAM_PTR(S, StreamBase);
+        uint32_t tmp = STREAM_PTR(S, StreamBase)->CR;
 
-        uint32_t tmp = ssss->CR;
+        tmp &= ((uint32_t) ~(
+            DMA_SxCR_CHSEL | DMA_SxCR_MBURST | DMA_SxCR_PBURST | DMA_SxCR_PL | DMA_SxCR_MSIZE |
+            DMA_SxCR_PSIZE | DMA_SxCR_MINC | DMA_SxCR_PINC | DMA_SxCR_CIRC | DMA_SxCR_DIR |
+            DMA_SxCR_CT | DMA_SxCR_DBM));
 
-        /* Clear CHSEL, MBURST, PBURST, PL, MSIZE, PSIZE, MINC, PINC, CIRC, DIR, CT and DBM bits */
-        tmp &= ((uint32_t)~(DMA_SxCR_CHSEL | DMA_SxCR_MBURST | DMA_SxCR_PBURST | \
-                            DMA_SxCR_PL    | DMA_SxCR_MSIZE  | DMA_SxCR_PSIZE  | \
-                            DMA_SxCR_MINC  | DMA_SxCR_PINC   | DMA_SxCR_CIRC   | \
-                            DMA_SxCR_DIR   | DMA_SxCR_CT     | DMA_SxCR_DBM));
+        tmp |= uint32_t(channel) | uint32_t(direction) | uint32_t(periphInc) |
+               uint32_t(memInc) | uint32_t(peripDataSize) |
+               uint32_t(memDataSize) | uint32_t(priority) |
+               uint32_t(mode) | uint32_t(priority);
 
-        /* Prepare the DMA Stream configuration */
-        tmp |=  uint32_t(channel) | uint32_t(direction) | uint32_t(peripheralIncrement) | uint32_t(memoryIncrement)
-        | uint32_t(memoryBurstMode) | uint32_t(peripheralIncrementOffsetSize) | uint32_t(priority) | uint32_t(memoryBurstMode) | uint32_t(circularMode)
-        | uint32_t(peripheralBurstMode) | uint32_t(memoryDataSize) | uint32_t(peripheralDataSize);
+        if (fifoMode == FifoMode::ENABLED)
+        {
+            tmp |= uint32_t(memBurst) | uint32_t(periphBurst);
+        }
 
-        // STREAM_PTR(S, StreamBase)->CR =
-        ssss->CR = tmp;
-            // uint32_t(direction) | uint32_t(memoryDataSize) | uint32_t(peripheralDataSize) |
-            // uint32_t(memoryIncrement) | uint32_t(peripheralIncrement) |
-            // uint32_t(peripheralIncrementOffsetSize) | uint32_t(priority) | uint32_t(circularMode) |
-            // uint32_t(memoryBurstMode) | uint32_t(peripheralBurstMode);
+        STREAM_PTR(S, StreamBase)->CR = tmp;
+
+        tmp = STREAM_PTR(S, StreamBase)->FCR;
+
+        // Clear direct mode and FIFO threshold bits
+        tmp &= ~(DMA_SxFCR_DMDIS | DMA_SxFCR_FTH);
+
+        tmp |= uint32_t(fifoMode);
+
+        if (fifoMode == FifoMode::ENABLED)
+        {
+            tmp |= uint32_t(fifoThreshold);
+
+            if (memBurst != MemoryBurstTransfer::SINGLE)
+            {
+                // Check fifo parameters for compatibility between threshold level and size of
+                // memory burst
+            }
+        }
+
+        STREAM_PTR(S, StreamBase)->FCR = tmp;
     }
 
     static void configureDoubleBufferMode(DoubleBufferMode bufferMode)
@@ -177,6 +235,7 @@ public:
     {
         STREAM_PTR(S, StreamBase)->CR &= ~uint32_t(StreamEnableFlag::STREAM_ENABLED);
         // wait for stream to be stopped
+        // TODO add timeout
         while (STREAM_PTR(S, StreamBase)->CR & uint32_t(StreamEnableFlag::STREAM_ENABLED))
             ;
     }
@@ -220,7 +279,7 @@ public:
         {
             STREAM_PTR(S, StreamBase)->M0AR = src;
         }
-        else
+        else  // peripheral to memory
         {
             STREAM_PTR(S, StreamBase)->PAR = src;
         }
@@ -247,74 +306,6 @@ public:
     }
 
     static void setDataLength(std::size_t length) { STREAM_PTR(S, StreamBase)->NDTR = length; }
-
-    // /**
-    //  * IRQ handler of the DMA channel
-    //  *
-    //  * Reads the IRQ status and checks for error or transfer complete. In case
-    //  * of error the DMA channel will be disabled.
-    //  */
-    // static void interruptHandler()
-    // {
-    //     uint32_t currIsrs = DMA::getInterruptFlags();
-    //     if (currIsrs & (InterruptStatusMsks::TRANSFER_ERROR |
-    //                     InterruptStatusMsks::DIRECT_MODE_ERROR |
-    //                     InterruptStatusMsks::FIFO_ERROR))
-    //     {
-    //         disable();
-    //         if (transferError != nullptr)
-    //         {
-    //             transferError();
-    //         }
-    //     }
-    //     if ((currIsrs & InterruptStatusMsks::TRANSFER_COMPLETE) && transferComplete)
-    //     {
-    //         transferComplete();
-    //     }
-
-    //     DMA::clearInterruptFlags(STREAM_TYPEDEF_TO_STREAM_NUM(stream));
-    // }
-
-    // /**
-    //  * Enable the IRQ vector of the channel
-    //  *
-    //  * @param[in] priority Priority of the IRQ
-    //  */
-    // static void enableInterruptVector(uint32_t priority = 1)
-    // {
-    //     NVIC_SetPriority(DmaBase::Nvic<ID>::DmaIrqs[STREAM_TYPEDEF_TO_STREAM_NUM(stream)],
-    //     priority);
-    //     NVIC_EnableIRQ(DmaBase::Nvic<ID>::DmaIrqs[STREAM_TYPEDEF_TO_STREAM_NUM(stream)]);
-    // }
-
-    // /**
-    //  * Disable the IRQ vector of the channel
-    //  */
-    // static void disableInterruptVector()
-    // {
-    //     NVIC_DisableIRQ(DmaBase::Nvic<ID>::DmaIrqs[STREAM_TYPEDEF_TO_STREAM_NUM(stream)]);
-    // }
-
-    // /**
-    //  * Set the IRQ handler for transfer errors
-    //  *
-    //  * The handler will be called from the channels IRQ handler function
-    //  * when the IRQ status indicates an error occured.
-    //  */
-    // static void setTransferErrorIrqHandler(IrqHandler irqHandler) { transferError = irqHandler; }
-    // /**
-    //  * Set the IRQ handler for transfer complete
-    //  *
-    //  * Called by the channels IRQ handler when the transfer is complete.
-    //  */
-    // static void setTransferCompleteIrqHandler(IrqHandler irqHandler)
-    // {
-    //     transferComplete = irqHandler;
-    // }
-
-    // private:
-    //     static inline DmaBase::IrqHandler transferError = nullptr;
-    //     static inline DmaBase::IrqHandler transferComplete = nullptr;
 };  // class DmaStreamHal
 
 }  // namespace arch
