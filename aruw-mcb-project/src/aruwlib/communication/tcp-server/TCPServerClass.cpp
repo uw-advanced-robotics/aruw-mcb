@@ -1,3 +1,5 @@
+#ifdef PLATFORM_HOSTED
+
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -123,3 +125,5 @@ uint16_t TCPServer::getPortNumber() { return this->serverPortNumber; }
 }  // namespace communication
 
 }  // namespace aruwlib
+
+#endif // PLATFORM_HOSTED

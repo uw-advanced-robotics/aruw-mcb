@@ -39,7 +39,7 @@ private:
     bool socketOpened;
     bool clientConnected;
     uint16_t serverPortNumber;
-    uint16_t listenFileDescriptor;
+    int16_t listenFileDescriptor;
     int16_t clientFileDescriptor;
     sockaddr_in serverAddress;
     unsigned char buffer[BUFFER_SIZE];
