@@ -23,6 +23,7 @@
 #define TCPSERVER_HPP_
 
 #include <netinet/in.h>
+
 #include <cstdint>
 
 namespace aruwlib
@@ -32,15 +33,16 @@ namespace communication
 class TCPServer
 {
 public:
-    static const uint32_t BUFFER_SIZE = 257; // One larger than message length
-        // to store a null character at the end to terminate string.
+    static const uint32_t BUFFER_SIZE =
+        257;  // One larger than message length
+              // to store a null character at the end to terminate string.
     // Number of bytes in the message stored in last read message.
-    static const uint32_t MESSAGE_LENGTH = 256; 
+    static const uint32_t MESSAGE_LENGTH = 256;
 
     /**
      * Pre: Portnumber must not be in use on current machine, throws a string exception
      * otherwise
-     * 
+     *
      * Post: Creates a new TCPServer instance object, with its own unique client file
      * descriptor field and its own buffer.
      */
@@ -59,7 +61,7 @@ public:
 
     /**
      * Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
-     * read, before finally returning a pointer to the beginning of the buffer. 
+     * read, before finally returning a pointer to the beginning of the buffer.
      */
     const unsigned char* readMessage();
 
@@ -76,9 +78,9 @@ public:
 private:
     bool socketOpened;
     bool clientConnected;
-    uint16_t serverPortNumber;
     int16_t listenFileDescriptor;
     int16_t clientFileDescriptor;
+    uint16_t serverPortNumber;
     sockaddr_in serverAddress;
     unsigned char buffer[BUFFER_SIZE];
 };
@@ -87,6 +89,6 @@ private:
 
 }  // namespace aruwlib
 
-#endif // ARUWMCBPROJECT_ARUWLIB_COMMUNICATION_TCPSERVER_HPP_
+#endif  // ARUWMCBPROJECT_ARUWLIB_COMMUNICATION_TCPSERVER_HPP_
 
-#endif // PLATFORM_HOSTED
+#endif  // PLATFORM_HOSTED

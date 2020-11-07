@@ -19,6 +19,8 @@
 
 #ifdef PLATFORM_HOSTED
 
+#include "TCPServerClass.hpp"
+
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,41 +28,49 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include <exception>
 #include <iostream>
-#include "TCPServerClass.hpp"
 using std::cerr;
 /**
  * TCP Server class to allow MCB simulator to communicate with stuff.
- * I actually have no idea what's happening ~ Tenzin 
+ * I actually have no idea what's happening ~ Tenzin
  */
 namespace aruwlib
 {
 namespace communication
 {
-TCPServer::TCPServer(uint16_t portNumber) : socketOpened(false), clientConnected(false)
+TCPServer::TCPServer(uint16_t portNumber)
+    : socketOpened(false),
+      clientConnected(false),
+      listenFileDescriptor(-1),
+      clientFileDescriptor(-1),
+      serverPortNumber(portNumber),
+      buffer()
 {
-    clientFileDescriptor = -1;
-
     // Do sockety stuff.
-    serverPortNumber = portNumber;
     listenFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (listenFileDescriptor < 0)
     {
         perror("ERROR opening socket");
         throw "ServerCreationFailed";
     }
+
     socketOpened = true;
-    memset((char *)&serverAddress, 0, sizeof(serverAddress));  // Initialize
+    memset(reinterpret_cast<char *>(&serverAddress), 0, sizeof(serverAddress));  // Initialize
     // bytes of serverAddress to 0.
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(serverPortNumber);
     serverAddress.sin_addr.s_addr = INADDR_ANY;
-    if (bind(listenFileDescriptor, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
+    if (bind(
+            listenFileDescriptor,
+            reinterpret_cast<sockaddr *>(&serverAddress),
+            sizeof(serverAddress)) < 0)
     {
         perror("ERROR binding socket");
         throw "ServerCreationFailed";
     }
+
     listen(listenFileDescriptor, 5);
 }
 
@@ -70,6 +80,7 @@ TCPServer::~TCPServer()
     {
         close(listenFileDescriptor);
     }
+
     if (clientConnected)
     {
         close(clientFileDescriptor);
@@ -86,11 +97,14 @@ void TCPServer::acceptConnection()
     {
         close(clientFileDescriptor);
     }
+
     clientConnected = false;
     sockaddr_in clientAddress;
     socklen_t clientAddressLength = sizeof(clientAddress);
-    clientFileDescriptor =
-        accept(listenFileDescriptor, (sockaddr *)&clientAddress, &clientAddressLength);
+    clientFileDescriptor = accept(
+        listenFileDescriptor,
+        reinterpret_cast<sockaddr *>(&clientAddress),
+        &clientAddressLength);
     if (clientFileDescriptor < 0)
     {
         cerr << "ERROR on accept";
@@ -104,7 +118,7 @@ void TCPServer::acceptConnection()
 
 /**
  * Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
- * read, before finally returning a pointer to the beginning of the buffer. 
+ * read, before finally returning a pointer to the beginning of the buffer.
  */
 const unsigned char *TCPServer::readMessage()
 {
@@ -115,12 +129,11 @@ const unsigned char *TCPServer::readMessage()
     }
     else
     {
-        buffer[MESSAGE_LENGTH] = '\0'; // Null terminate the message
+        buffer[MESSAGE_LENGTH] = '\0';  // Null terminate the message
         uint16_t bytesRead = read(clientFileDescriptor, buffer, MESSAGE_LENGTH);
         while (bytesRead < MESSAGE_LENGTH)
         {
-            bytesRead +=
-                read(clientFileDescriptor, buffer + bytesRead, MESSAGE_LENGTH - bytesRead);
+            bytesRead += read(clientFileDescriptor, buffer + bytesRead, MESSAGE_LENGTH - bytesRead);
         }
         return buffer;
     }
@@ -139,7 +152,7 @@ void TCPServer::writeToClient(unsigned char *message, uint16_t bytes)
 }
 
 /**
- * Post: Returns the port number of this server. 
+ * Post: Returns the port number of this server.
  */
 uint16_t TCPServer::getPortNumber() { return this->serverPortNumber; }
 
