@@ -30,6 +30,10 @@ namespace aruwlib
 {
 namespace communication
 {
+/**
+ * TCPServer provides an interface for using the POSIX sockets API. It tries it's
+ * best to abstract away the funkier aspects of the sockets API.
+ */
 class TCPServer
 {
 public:
