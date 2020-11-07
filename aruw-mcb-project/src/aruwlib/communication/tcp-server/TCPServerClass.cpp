@@ -26,14 +26,14 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #include <exception>
 #include <iostream>
-// No idea if my include order is right, and honestly, too hard to check.
 #include "TCPServerClass.hpp"
 using std::cerr;
-// TCP Server class to allow MCB simulator to communicate with stuff.
-// I actually have no idea what's happening ~ Tenzin
+/**
+ * TCP Server class to allow MCB simulator to communicate with stuff.
+ * I actually have no idea what's happening ~ Tenzin 
+ */
 namespace aruwlib
 {
 namespace communication
@@ -48,7 +48,6 @@ TCPServer::TCPServer(uint16_t portNumber) : socketOpened(false), clientConnected
     if (listenFileDescriptor < 0)
     {
         perror("ERROR opening socket");
-        // Put better error handling here.
         throw "ServerCreationFailed";
     }
     socketOpened = true;
@@ -60,7 +59,6 @@ TCPServer::TCPServer(uint16_t portNumber) : socketOpened(false), clientConnected
     if (bind(listenFileDescriptor, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
         perror("ERROR binding socket");
-        // Put better error handling here.
         throw "ServerCreationFailed";
     }
     listen(listenFileDescriptor, 5);
@@ -78,8 +76,10 @@ TCPServer::~TCPServer()
     }
 }
 
-// I assume I'll need to learn some threading for this??
-// Accept a new client socket connection. Store file des
+/**
+ * Accept a new client socket connection. Store file descriptor in
+ * the "clientFileDescriptor" field.
+ */
 void TCPServer::acceptConnection()
 {
     if (clientConnected)
@@ -102,9 +102,11 @@ void TCPServer::acceptConnection()
     }
 }
 
-// Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
-// read, before finally returning a pointer to the beginning of the buffer.
-unsigned char *TCPServer::readMessage()
+/**
+ * Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
+ * read, before finally returning a pointer to the beginning of the buffer. 
+ */
+const unsigned char *TCPServer::readMessage()
 {
     if (!clientConnected)
     {
@@ -113,23 +115,21 @@ unsigned char *TCPServer::readMessage()
     }
     else
     {
-        memset(buffer, 0, sizeof(buffer));
-        uint16_t n = read(clientFileDescriptor, buffer, MESSAGE_LENGTH);
-        if (n < MESSAGE_LENGTH)
+        buffer[MESSAGE_LENGTH] = '\0'; // Null terminate the message
+        uint16_t bytesRead = read(clientFileDescriptor, buffer, MESSAGE_LENGTH);
+        while (bytesRead < MESSAGE_LENGTH)
         {
-            uint16_t bytesRead = n;
-            while (bytesRead < MESSAGE_LENGTH)
-            {
-                bytesRead +=
-                    read(clientFileDescriptor, buffer + bytesRead, MESSAGE_LENGTH - bytesRead);
-            }
+            bytesRead +=
+                read(clientFileDescriptor, buffer + bytesRead, MESSAGE_LENGTH - bytesRead);
         }
         return buffer;
     }
 }
 
-// Write to connected ClientFileDescriptor, ensures that all bytes are sent.
-void TCPServer::writeToClient(char *message, uint16_t bytes)
+/**
+ * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
+ */
+void TCPServer::writeToClient(unsigned char *message, uint16_t bytes)
 {
     uint16_t bytesWritten = write(clientFileDescriptor, message, bytes);
     while (bytesWritten < bytes)
@@ -138,7 +138,9 @@ void TCPServer::writeToClient(char *message, uint16_t bytes)
     }
 }
 
-// Post: Returns the port number of this server.
+/**
+ * Post: Returns the port number of this server. 
+ */
 uint16_t TCPServer::getPortNumber() { return this->serverPortNumber; }
 
 }  // namespace communication

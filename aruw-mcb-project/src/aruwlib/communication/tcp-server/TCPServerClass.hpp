@@ -17,12 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifdef PLATFORM_HOSTED
+
 #ifndef ARUWMCBPROJECT_ARUWLIB_COMMUNICATION_TCPSERVER_HPP_
 #define ARUWMCBPROJECT_ARUWLIB_COMMUNICATION_TCPSERVER_HPP_
-#endif
 
 #include <netinet/in.h>
-
 #include <cstdint>
 
 namespace aruwlib
@@ -32,7 +32,8 @@ namespace communication
 class TCPServer
 {
 public:
-    static const uint32_t BUFFER_SIZE = 65536;
+    static const uint32_t BUFFER_SIZE = 257; // One larger than message length
+        // to store a null character at the end to terminate string.
     static const uint32_t MESSAGE_LENGTH =
         256;  // Number of bytes in the message stored in last read message.
 
@@ -46,10 +47,10 @@ public:
 
     // Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
     // read, before finally returning a pointer to the beginning of the buffer.
-    unsigned char* readMessage();
+    const unsigned char* readMessage();
 
     // Write to connected ClientFileDescriptor, ensures that all bytes are sent.
-    void writeToClient(char* message, uint16_t bytes);
+    void writeToClient(unsigned char* message, uint16_t bytes);
 
     // Post: Returns the port number of this server.
     uint16_t getPortNumber();
@@ -63,5 +64,11 @@ private:
     sockaddr_in serverAddress;
     unsigned char buffer[BUFFER_SIZE];
 };
+
 }  // namespace communication
+
 }  // namespace aruwlib
+
+#endif // ARUWMCBPROJECT_ARUWLIB_COMMUNICATION_TCPSERVER_HPP_
+
+#endif // PLATFORM_HOSTED
