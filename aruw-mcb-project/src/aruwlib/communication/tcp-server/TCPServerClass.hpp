@@ -34,25 +34,43 @@ class TCPServer
 public:
     static const uint32_t BUFFER_SIZE = 257; // One larger than message length
         // to store a null character at the end to terminate string.
-    static const uint32_t MESSAGE_LENGTH =
-        256;  // Number of bytes in the message stored in last read message.
+    // Number of bytes in the message stored in last read message.
+    static const uint32_t MESSAGE_LENGTH = 256; 
 
+    /**
+     * Pre: Portnumber must not be in use on current machine, throws a string exception
+     * otherwise
+     * 
+     * Post: Creates a new TCPServer instance object, with its own unique client file
+     * descriptor field and its own buffer.
+     */
     TCPServer(uint16_t portNumber);
 
+    /**
+     * Desctructor. Only special thing is that it closes any open file descriptors.
+     */
     ~TCPServer();
 
-    // Post: Accept a new client connection. Closes old connection if there was one and
-    // then sets "clientFileDescriptor" to be new connection's descriptor.
+    /**
+     * Post: Accept a new client connection. Closes old connection if there was one and
+     * then sets "clientFileDescriptor" to be new connection's descriptor.
+     */
     void acceptConnection();
 
-    // Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
-    // read, before finally returning a pointer to the beginning of the buffer.
+    /**
+     * Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
+     * read, before finally returning a pointer to the beginning of the buffer. 
+     */
     const unsigned char* readMessage();
 
-    // Write to connected ClientFileDescriptor, ensures that all bytes are sent.
+    /**
+     * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
+     */
     void writeToClient(unsigned char* message, uint16_t bytes);
 
-    // Post: Returns the port number of this server.
+    /**
+     * Post: Returns the port number of this server.
+     */
     uint16_t getPortNumber();
 
 private:
