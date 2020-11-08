@@ -87,6 +87,12 @@ private:
     int16_t clientFileDescriptor;
     uint16_t serverPortNumber;
     sockaddr_in serverAddress;
+
+    /**
+     * Read the next four bytes from the TCP stream as an int32_t. It is expected
+     * that the lowest register bytes are most significant (big endian)
+     */
+    int32_t readInt32();
 };
 
 }  // namespace communication

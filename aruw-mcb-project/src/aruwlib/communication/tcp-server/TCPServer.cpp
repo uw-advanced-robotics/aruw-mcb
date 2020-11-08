@@ -164,6 +164,17 @@ void TCPServer::writeToClient(const unsigned char *message, uint16_t bytes)
  */
 uint16_t TCPServer::getPortNumber() { return this->serverPortNumber; }
 
+int32_t TCPServer::readInt32() {
+    unsigned char buffer[4];
+    readMessage(buffer, 4);
+    int32_t answer = 0;
+    for (char i = 0; i < 4; i++) {
+        answer = answer & buffer[i];
+        answer <<= 8;
+    }
+    return answer;
+}
+
 }  // namespace communication
 
 }  // namespace aruwlib
