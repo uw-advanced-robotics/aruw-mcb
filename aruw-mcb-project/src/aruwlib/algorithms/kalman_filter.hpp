@@ -26,28 +26,41 @@ namespace aruwlib
 {
 namespace algorithms
 {
-/**
- * 
- * 
- */
-class Kalman
+template <uint8_t N, uint8_t M>
+class KalmanFilter
 {
 public:
     /**
-     * Initializes a Kalman Filter with the given number of state and measured values.
+     * Initializes a Kalman Filter.
      * 
-     * @param[in] n number of state values.
-     * @param[in] m number of measured values.
+     * @param[in] x the initial state estimate.
+     * @param[in] p the initial prediction error covariance estimate.
+     * @param[in] q the process noise covariance.
+     * @param[in] r the measurement error covariance.
      */
-    Kalman(uint8_t n, uint8_t m);   // idk if these should actually be the parameters
-
+    KalmanFilter(modm::Matrix<float, N, 1> x, modm::Matrix<float, N, N> p,
+        modm::Matrix<float, N, N> q, modm::Matrix<float, M, M> r)
+        : x(x),
+          p(p),
+          q(q),
+          r(r)
+    {
+    }
+    
     /**
      * Performs one iteration of the Kalman Filter algorithm.
      * 
      * @param[in] z the data to be filtered.
      * @return the filtered data.
      */
-    modm::Matrix<float, n, 1> filterData(modm::Matrix<float, n, 1> z);
+    modm::Matrix<float, N, 1> filterData(modm::Matrix<float, N, 1> z)
+    {
+        predictState();
+        predictCovariance(p, f, q);
+        calculateKalmanGain(k, p, h, r);
+        updateState(x, k, z, hx);
+        updateCovariance();
+    }
 
     /**
      * Finds the inverse of a matrix.
@@ -56,34 +69,102 @@ public:
      * @return the inverted matrix.
      */
     template<typename T, uint8_t ROWS, uint8_t COLUMNS>
-    modm::Matrix<T, ROWS, COLUMNS>
-    inverse(modm::Matrix<T, ROWS, COLUMNS> matrix);
+    modm::Matrix<T, ROWS, COLUMNS> inverse(modm::Matrix<T, ROWS, COLUMNS> matrix)
+    {
+        // only used on square matrices
+        return matrix;
+    }
 
     /// Returns the last filtered data point.
-    modm::Matrix<float, n, 1> getLastFiltered() const;
+    modm::Matrix<float, n, 1> getLastFiltered() const { return x; }
 
     /// Resets the covariances and predictions.
-    void reset();
+    void reset()
+    {
+        // I have no idea if this is correct but it didn't give me an error
+        // also I don't know if all the values need to be reset
+        x = modm::Matrix<float, N, 1>().zeroMatrix();
+        z = modm::Matrix<float, M, 1>().zeroMatrix();
+
+        p = modm::Matrix<float, N, N>().zeroMatrix();
+        q = modm::Matrix<float, N, N>().zeroMatrix();
+        r = modm::Matrix<float, M, M>().zeroMatrix();
+
+        k = modm::Matrix<float, N, M>().zeroMatrix();
+
+        f = modm::Matrix<float, N, N>().zeroMatrix();
+        h = modm::Matrix<float, M, N>().zeroMatrix();
+
+        fx = modm::Matrix<float, N, 1>().zeroMatrix();
+        hx = modm::Matrix<float, M, 1>().zeroMatrix();
+    }
+
+    modm::Matrix<float, N, 1> predictState()
+    {
+        // x = f(x, u)
+    }
+
+    modm::Matrix<float, N, N> predictCovariance(
+        modm::Matrix<float, N, N> p,
+        modm::Matrix<float, N, N> f,
+        modm::Matrix<float, N, N> q)
+    {
+        // P = F * P * Ft + Q
+        modm::Matrix<float, n, n> tmp = f;
+        tmp *= p;
+        f.transpose();  // I don't know if I did this correctly
+        tmp *= f;
+        tmp += q;
+        n=1;
+        return tmp;
+    }
+
+    modm::Matrix<float, N, M> calculateKalmanGain(
+        modm::Matrix<float, N, M> k,
+        modm::Matrix<float, N, N> p,
+        modm::Matrix<float, M, N> h,
+        modm::Matrix<float, M, M> r
+        )
+    {
+        // K = P * H * (H * P * Ht + R)^-1
+        modm::Matrix<float, n, n> tmp = (h * p * h.transpose() + r;
+        tmp = inverse(tmp);
+        return p * h * tmp;
+    }
+
+    modm::Matrix<float, N, 1> updateState(
+        modm::Matrix<float, N, 1> x,
+        modm::Matrix<float, N, M> k,
+        modm::Matrix<float, M, 1> z,
+        modm::Matrix<float, M, 1> hx)
+    {
+        // x = x + K * (z - h(x))
+        return x + k * (z - hx);
+    }
+
+    modm::Matrix<float, n, n> updateCovariance()
+    {
+        // P = (I - K * H) * P * (I - K * H)t + K * R * Kt
+    }
 
 private:
-    // idk if the variable names should be capitalized or not
-    modm::Matrix<float, n, 1> x;  ///< state vector
-    modm::Matrix<float, m, 1> z;  ///< measurement vector
+    modm::Matrix<float, N, 1> x;  ///< state vector
+    modm::Matrix<float, N, 1> z;  ///< measurement vector
    
-    modm::Matrix<float, n, n> p;  ///< prediction error covariance
-    modm::Matrix<float, n, n> q;  ///< process noise covariance
-    modm::Matrix<float, m, m> r;  ///< measurement error covariance
+    modm::Matrix<float, N, N> p;  ///< prediction error covariance
+    modm::Matrix<float, N, N> q;  ///< process noise covariance
+    modm::Matrix<float, M, M> r;  ///< measurement error covariance
 
-    modm::Matrix<float, n, m> k;  ///< Kalman gain
+    modm::Matrix<float, N, M> k;  ///< Kalman gain
 
-    modm::Matrix<float, n, n> f;  ///< Jacobian of process model
-    modm::Matrix<float, m, n> h;  ///< Jacobian of measurement model
+    modm::Matrix<float, N, N> f;  ///< Jacobian of process model
+    modm::Matrix<float, M, N> h;  ///< Jacobian of measurement model
 
     // I think this is why Simon "Dlevy" didn't use the first KF equation
     // because he expects the user to input the result from that
-    modm::Matrix<float, n, 1> fx; ///< output of state-transition function (predicted state?)
-    modm::Matrix<float, m, 1> hx; ///< output of measurement function
-};                                // class Kalman
+    modm::Matrix<float, N, 1> fx; ///< output of state-transition function (predicted state?)
+    modm::Matrix<float, M, 1> hx; ///< output of measurement function
+};                                  // class Kalman
 
 }  // namespace algorithms
 
