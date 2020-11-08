@@ -37,11 +37,8 @@ namespace communication
 class TCPServer
 {
 public:
-    static const uint32_t BUFFER_SIZE =
-        257;  // One larger than message length
-              // to store a null character at the end to terminate string.
-    // Number of bytes in the message stored in last read message.
     static const uint32_t MESSAGE_LENGTH = 256;
+    static const uint8_t LISTEN_QUEUE_SIZE = 5;
 
     /**
      * Pre: Portnumber must not be in use on current machine, throws a string exception
@@ -64,15 +61,19 @@ public:
     void acceptConnection();
 
     /**
-     * Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
-     * read, before finally returning a pointer to the beginning of the buffer.
+     * Pre: messageLength <= space allocated for "readBuffer"
+     * 
+     * Post: Reads a message to the given "readBuffer" ensuring that messageLength bytes are
+     * read.
+     * 
+     * Throws: runtime_error if read() fails.
      */
-    const unsigned char* readMessage();
+    void readMessage(unsigned char* readBuffer, uint16_t messageLength);
 
     /**
      * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
      */
-    void writeToClient(unsigned char* message, uint16_t bytes);
+    void writeToClient(const unsigned char* message, uint16_t bytes);
 
     /**
      * Post: Returns the port number of this server.
@@ -86,7 +87,6 @@ private:
     int16_t clientFileDescriptor;
     uint16_t serverPortNumber;
     sockaddr_in serverAddress;
-    unsigned char buffer[BUFFER_SIZE];
 };
 
 }  // namespace communication

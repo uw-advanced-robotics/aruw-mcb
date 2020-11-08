@@ -19,7 +19,7 @@
 
 #ifdef PLATFORM_HOSTED
 
-#include "TCPServerClass.hpp"
+#include "TCPServer.hpp"
 
 #include <netinet/in.h>
 #include <stdio.h>
@@ -45,15 +45,14 @@ TCPServer::TCPServer(uint16_t portNumber)
       clientConnected(false),
       listenFileDescriptor(-1),
       clientFileDescriptor(-1),
-      serverPortNumber(portNumber),
-      buffer()
+      serverPortNumber(portNumber)
 {
     // Do sockety stuff.
     listenFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (listenFileDescriptor < 0)
     {
-        perror("ERROR opening socket");
-        throw "ServerCreationFailed";
+        perror("TCPServer failed to open socket");
+        throw std::runtime_error("SocketError");
     }
 
     socketOpened = true;
@@ -67,11 +66,11 @@ TCPServer::TCPServer(uint16_t portNumber)
             reinterpret_cast<sockaddr *>(&serverAddress),
             sizeof(serverAddress)) < 0)
     {
-        perror("ERROR binding socket");
-        throw "ServerCreationFailed";
+        perror("TCPServer failed to bind socket");
+        throw std::runtime_error("BindError");
     }
 
-    listen(listenFileDescriptor, 5);
+    listen(listenFileDescriptor, LISTEN_QUEUE_SIZE);
 }
 
 TCPServer::~TCPServer()
@@ -107,8 +106,8 @@ void TCPServer::acceptConnection()
         &clientAddressLength);
     if (clientFileDescriptor < 0)
     {
-        cerr << "ERROR on accept";
-        throw "ClientConnectionFailed";
+        perror("TCPServer failed to accept client connection");
+        throw std::runtime_error("AcceptError");
     }
     else
     {
@@ -117,34 +116,43 @@ void TCPServer::acceptConnection()
 }
 
 /**
- * Post: Reads a message to the class's buffer ensuring that MESSAGE_LENGTH bytes are
- * read, before finally returning a pointer to the beginning of the buffer.
+ * Post: Reads a message to the given "readBuffer" ensuring that messageLength bytes are
+ * read.
+ * 
+ * Throws: runtime_error if read() fails.
  */
-const unsigned char *TCPServer::readMessage()
+void TCPServer::readMessage(unsigned char* readBuffer, uint16_t messageLength)
 {
     if (!clientConnected)
     {
         cerr << "Not connected to a client";
-        return nullptr;
+        return;
     }
     else
     {
-        buffer[MESSAGE_LENGTH] = '\0';  // Null terminate the message
-        uint16_t bytesRead = read(clientFileDescriptor, buffer, MESSAGE_LENGTH);
-        while (bytesRead < MESSAGE_LENGTH)
-        {
-            bytesRead += read(clientFileDescriptor, buffer + bytesRead, MESSAGE_LENGTH - bytesRead);
+        readBuffer[messageLength] = '\0';  // Null terminate the message
+        uint16_t bytesRead = read(clientFileDescriptor, readBuffer, messageLength);
+        if (bytesRead < 0) {
+            perror("TCPServer failed to read from client");
+            throw std::runtime_error("ReadingError");
         }
-        return buffer;
+        while (bytesRead < messageLength)
+        {
+            bytesRead += read(clientFileDescriptor, readBuffer + bytesRead, messageLength - bytesRead);
+        }
     }
 }
 
 /**
  * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
  */
-void TCPServer::writeToClient(unsigned char *message, uint16_t bytes)
+void TCPServer::writeToClient(const unsigned char *message, uint16_t bytes)
 {
     uint16_t bytesWritten = write(clientFileDescriptor, message, bytes);
+    if (bytesWritten < 0) {
+        perror("TCPServer failed to write");
+        throw std::runtime_error("WriteError");
+    }
     while (bytesWritten < bytes)
     {
         bytesWritten += write(clientFileDescriptor, message + bytesWritten, bytes - bytesWritten);
