@@ -89,6 +89,17 @@ public:
      */
     virtual void refresh();
 
+    /**
+     * 
+     */
+    bool isHardwareTestComplete() { return true; }
+
+    virtual void setHardwareTestsComplete();
+
+    virtual void runHardwareTests();
+
+    virtual char* getName();
+
 protected:
     Drivers* drivers;
 

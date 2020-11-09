@@ -78,6 +78,14 @@ public:
 
     void refresh() override {}
 
+    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+
+    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+
+    void runHardwareTests() override;
+
+    char* getName() { return "Tow Subsystem"; }
+
 private:
     /**
      * Keeps track of the state of the subsystem - if the tower clamp is open or not.
@@ -89,6 +97,8 @@ private:
     const aruwlib::gpio::Digital::OutputPin RIGHT_TOW_PIN;
     const aruwlib::gpio::Digital::InputPin LEFT_TOW_LIMIT_SWITCH;
     const aruwlib::gpio::Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN;
+
+    bool hardwareTestsComplete = false;
 };  // class TowSubsystem
 }  // namespace engineer
 }  // namespace aruwsrc

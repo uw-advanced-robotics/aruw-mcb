@@ -46,10 +46,21 @@ public:
 
     bool isSqueezed() const;
 
+    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+
+    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+
+    void runHardwareTests() override;
+
+    char* getName() { return "Grabber Subsystem"; }
+
 private:
     aruwlib::gpio::Digital::OutputPin pin;
 
     bool isGrabberSqueezed;
+
+    bool hardwareTestsComplete = false;
+
 };  // GrabberSubsystem
 
 }  // namespace engineer

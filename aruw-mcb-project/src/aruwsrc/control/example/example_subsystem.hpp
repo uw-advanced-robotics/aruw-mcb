@@ -64,6 +64,15 @@ public:
 
     void refresh() override;
 
+
+    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+
+    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+
+    void runHardwareTests() override;
+
+    char* getName() { return "Example Subsystem"; }
+
 private:
     static const aruwlib::motor::MotorId LEFT_MOTOR_ID;
     static const aruwlib::motor::MotorId RIGHT_MOTOR_ID;
@@ -89,6 +98,8 @@ private:
         modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
         float desiredRpm);
+
+    bool hardwareTestsComplete = false;
 };
 
 }  // namespace control

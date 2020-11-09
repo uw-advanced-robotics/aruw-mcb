@@ -366,6 +366,14 @@ public:
      */
     float getChassisDesiredRotation() const;
 
+    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+
+    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+
+    void runHardwareTests() override;
+
+    char* getName() { return "Chassis Subsystem"; }
+
 private:
     /**
      * When you input desired x, y, an r values, this function translates
@@ -377,6 +385,8 @@ private:
         modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
         float desiredRpm);
+
+    bool hardwareTestsComplete = false;
 };  // class ChassisSubsystem
 
 }  // namespace chassis

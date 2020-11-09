@@ -67,6 +67,14 @@ public:
      */
     void refresh() override;
 
+    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+
+    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+
+    void runHardwareTests() override;
+
+    char* getName() { return "Friction Wheel Subsystem"; }
+
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
     static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
@@ -92,6 +100,8 @@ private:
     aruwlib::algorithms::Ramp desiredRpmRamp;
 
     uint32_t prevTime = 0;
+
+    bool hardwareTestsComplete = false;
 };
 
 }  // namespace launcher

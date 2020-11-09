@@ -125,6 +125,14 @@ public:
      */
     void updateCurrentTurretAngles();
 
+    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+
+    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+
+    void runHardwareTests() override;
+
+    char* getName() { return "Turret Subsystem"; }
+
 private:
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 8160;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
@@ -157,6 +165,8 @@ private:
     void updateCurrentPitchAngle();
 
     int32_t getVelocity(const aruwlib::motor::DjiMotor& motor) const;
+
+    bool hardwareTestsComplete = false;
 };  // class TurretSubsystem
 
 }  // namespace turret

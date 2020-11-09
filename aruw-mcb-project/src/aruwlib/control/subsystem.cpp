@@ -46,6 +46,12 @@ Command* Subsystem::getDefaultCommand() const { return defaultCommand; }
 
 void Subsystem::refresh() {}
 
+void Subsystem::setHardwareTestsComplete() {}
+
+void Subsystem::runHardwareTests() {};
+
+char* Subsystem::getName() { return "Subsystem"; }
+
 }  // namespace control
 
 }  // namespace aruwlib

@@ -153,6 +153,10 @@ float AgitatorSubsystem::getAgitatorVelocity() const
 
 bool AgitatorSubsystem::isAgitatorCalibrated() const { return agitatorIsCalibrated; }
 
+void AgitatorSubsystem::runHardwareTests() {
+    // TODO
+}
+
 }  // namespace agitator
 
 }  // namespace aruwsrc

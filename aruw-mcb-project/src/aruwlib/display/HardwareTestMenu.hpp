@@ -17,26 +17,41 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hopper_subsystem.hpp"
+#ifndef HARDWARE_TEST_MENU_HPP_
+#define HARDWARE_TEST_MENU_HPP_
 
-namespace aruwsrc
+#include <list>
+
+#include <modm/ui/menu/abstract_menu.hpp>
+
+#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/Drivers.hpp"
+
+#include "modm/processing/timer/periodic_timer.hpp"
+
+namespace aruwlib
 {
-namespace control
+namespace display
 {
-void HopperSubsystem::setOpen() { hopper.setTargetPwm(hopper.getMaxPWM()); }
+class HardwareTestMenu : public modm::AbstractMenu
+{
+public:
+    HardwareTestMenu(modm::ViewStack *vs, Drivers *drivers);
 
-void HopperSubsystem::setClose() { hopper.setTargetPwm(hopper.getMinPWM()); }
+    void draw() override;
 
-void HopperSubsystem::refresh() { hopper.updateSendPwmRamp(); }
+    void update() override;
 
-float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
+    void shortButtonPress(modm::MenuButtons::Button button) override;
 
-float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
+    bool hasChanged() override;
 
-void HopperSubsystem::runHardwareTests() {
-    // TODO
-}
+    static const char *getMenuName() { return "Hardware Test Menu"; }
 
-}  // namespace control
+private:
+    Drivers *drivers;
+};  // class HardwareTestMenu
+}  // namespace display
+}  // namespace aruwlib
 
-}  // namespace aruwsrc
+#endif  // HARDWARE_TEST_MENU_HPP_

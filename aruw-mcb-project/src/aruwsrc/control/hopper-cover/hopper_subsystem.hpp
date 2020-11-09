@@ -82,6 +82,14 @@ public:
 
     void refresh() override;
 
+    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+
+    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+
+    void runHardwareTests() override;
+
+    char* getName() { return "Hopper Subsystem"; }
+
 private:
     aruwlib::motor::Servo hopper;
 
@@ -94,6 +102,8 @@ private:
      * return the angle defined as close as a PWM value
      */
     float getClosePWM();
+
+    bool hardwareTestsComplete = false;
 };
 
 }  // namespace control

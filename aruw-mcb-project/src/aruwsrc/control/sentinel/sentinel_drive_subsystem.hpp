@@ -65,6 +65,14 @@ public:
 
     void refresh() override;
 
+    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+
+    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+
+    void runHardwareTests() override;
+
+    char* getName() { return "Sentinel Drive Subsystem"; }
+
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR6;
     static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
@@ -97,6 +105,8 @@ private:
     void resetOffsetFromLimitSwitch();
 
     float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
+
+    bool hardwareTestsComplete = false;
 };
 
 }  // namespace control

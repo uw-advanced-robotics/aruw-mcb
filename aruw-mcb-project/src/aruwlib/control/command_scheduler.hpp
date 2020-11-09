@@ -167,6 +167,8 @@ public:
      */
     mockable void addCommand(Command* commandToAdd);
 
+    mockable std::map<Subsystem*, Command*> getSubsystemToCommandMap() { return subsystemToCommandMap; }
+
 private:
     ///< Maximum time before we start erroring, in microseconds.
     static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 100;
