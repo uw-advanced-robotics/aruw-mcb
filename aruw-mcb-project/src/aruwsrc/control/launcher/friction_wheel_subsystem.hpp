@@ -67,13 +67,13 @@ public:
      */
     void refresh() override;
 
-    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+    bool isHardwareTestComplete() override { return hardwareTestsComplete; }
 
-    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+    void setHardwareTestsComplete() override { hardwareTestsComplete = true; }
 
     void runHardwareTests() override;
 
-    char* getName() { return "Friction Wheel Subsystem"; }
+    const char *getName() override { return "Friction Wheel Subsystem"; }
 
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;

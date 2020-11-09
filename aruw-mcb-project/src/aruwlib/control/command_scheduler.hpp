@@ -167,7 +167,7 @@ public:
      */
     mockable void addCommand(Command* commandToAdd);
 
-    mockable std::map<Subsystem*, Command*> getSubsystemToCommandMap() { return subsystemToCommandMap; }
+    mockable const std::map<Subsystem*, Command*> &getSubsystemToCommandMap() const { return subsystemToCommandMap; }
 
 private:
     ///< Maximum time before we start erroring, in microseconds.

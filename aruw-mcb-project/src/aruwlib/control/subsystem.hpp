@@ -92,13 +92,13 @@ public:
     /**
      * 
      */
-    bool isHardwareTestComplete() { return true; }
+    virtual bool isHardwareTestComplete() { return true; }
 
     virtual void setHardwareTestsComplete();
 
     virtual void runHardwareTests();
 
-    virtual char* getName();
+    virtual const char* getName();
 
 protected:
     Drivers* drivers;

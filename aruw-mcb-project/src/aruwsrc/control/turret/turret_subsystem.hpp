@@ -125,13 +125,13 @@ public:
      */
     void updateCurrentTurretAngles();
 
-    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+    bool isHardwareTestComplete() override { return hardwareTestsComplete; }
 
-    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+    void setHardwareTestsComplete() override { hardwareTestsComplete = true; }
 
     void runHardwareTests() override;
 
-    char* getName() { return "Turret Subsystem"; }
+    const char *getName() override { return "Turret Subsystem"; }
 
 private:
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 8160;

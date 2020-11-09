@@ -50,7 +50,7 @@ void Subsystem::setHardwareTestsComplete() {}
 
 void Subsystem::runHardwareTests() {};
 
-char* Subsystem::getName() { return "Subsystem"; }
+const char* Subsystem::getName() { return "Subsystem"; }
 
 }  // namespace control
 

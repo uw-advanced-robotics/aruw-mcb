@@ -82,13 +82,13 @@ public:
 
     void refresh() override;
 
-    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+    bool isHardwareTestComplete() override { return true; }
 
-    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+    void setHardwareTestsComplete() override { hardwareTestsComplete = true; }
 
     void runHardwareTests() override;
 
-    char* getName() { return "Hopper Subsystem"; }
+    const char *getName() override { return "Hopper Subsystem"; }
 
 private:
     aruwlib::motor::Servo hopper;

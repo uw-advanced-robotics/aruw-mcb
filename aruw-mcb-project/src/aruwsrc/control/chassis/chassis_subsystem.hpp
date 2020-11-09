@@ -366,13 +366,13 @@ public:
      */
     float getChassisDesiredRotation() const;
 
-    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+    bool isHardwareTestComplete() override { return hardwareTestsComplete; }
 
-    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+    void setHardwareTestsComplete() override { hardwareTestsComplete = true; }
 
     void runHardwareTests() override;
 
-    char* getName() { return "Chassis Subsystem"; }
+    const char *getName() override { return "Chassis Subsystem"; }
 
 private:
     /**

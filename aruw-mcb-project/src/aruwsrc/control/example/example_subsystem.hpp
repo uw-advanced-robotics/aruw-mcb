@@ -65,13 +65,13 @@ public:
     void refresh() override;
 
 
-    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+    bool isHardwareTestComplete() override { return hardwareTestsComplete; }
 
-    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+    void setHardwareTestsComplete() override { hardwareTestsComplete = true; }
 
     void runHardwareTests() override;
 
-    char* getName() { return "Example Subsystem"; }
+    const char *getName() override { return "Example Subsystem"; }
 
 private:
     static const aruwlib::motor::MotorId LEFT_MOTOR_ID;

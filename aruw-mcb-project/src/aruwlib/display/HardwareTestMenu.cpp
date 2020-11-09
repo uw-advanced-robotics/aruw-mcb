@@ -68,15 +68,15 @@ void HardwareTestMenu::draw()
     modm::GraphicDisplay &display = getViewStack()->getDisplay();
     display.clear();
     display.setCursor(0, 2);
-    display << HardwareTestMenu::getMenuName();
+    display << HardwareTestMenu::getMenuName() << modm::endl;
     int cursorPosY = 3;
     for(auto& subsystemToCommand : drivers->commandScheduler.getSubsystemToCommandMap()) {
         aruwlib::control::Subsystem* subsystem = subsystemToCommand.first;
-        display.setCursor(0, cursorPosY);
-        display.setColor(subsystem->isHardwareTestComplete() ? modm::glcd::Color::green() : modm::glcd::Color::red());
-        display.fillRectangle(0,cursorPosY, display.getWidth(), display.getHeight());
-        display.setColor(modm::glcd::Color::black());
-        display << subsystem->getName();
+        // display.setCursor(0, cursorPosY);
+        // display.setColor(subsystem->isHardwareTestComplete() ? modm::glcd::Color::green() : modm::glcd::Color::red());
+        // display.fillRectangle(0,cursorPosY, display.getWidth(), display.getHeight());
+        // display.setColor(modm::glcd::Color::black());
+        display << (subsystem->isHardwareTestComplete() ? "[done] " : "[not]  ") << subsystem->getName() << modm::endl;
     }
 }
 }  // namespace display

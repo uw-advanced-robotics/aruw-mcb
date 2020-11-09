@@ -46,13 +46,13 @@ public:
 
     bool isSqueezed() const;
 
-    bool isHardwareTestComplete() { return hardwareTestsComplete; }
+    bool isHardwareTestComplete() override { return hardwareTestsComplete; }
 
-    void setHardwareTestsComplete() { hardwareTestsComplete = true; }
+    void setHardwareTestsComplete() override { hardwareTestsComplete = true; }
 
     void runHardwareTests() override;
 
-    char* getName() { return "Grabber Subsystem"; }
+    const char *getName() override { return "Grabber Subsystem"; }
 
 private:
     aruwlib::gpio::Digital::OutputPin pin;

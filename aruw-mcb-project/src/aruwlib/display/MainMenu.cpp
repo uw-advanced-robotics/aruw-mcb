@@ -40,7 +40,7 @@ void MainMenu::initialize()
 
     addEntry(
         HardwareTestMenu::getMenuName(),
-        modm::MenuEntryCallback(this, &MainMenu::addErrorMenuCallback));
+        modm::MenuEntryCallback(this, &MainMenu::addHardwareTestMenuCallback));
 
     addEntry("Motor Menu", modm::MenuEntryCallback(this, &MainMenu::addMotorMenuCallback));
     addEntry(
