@@ -12,7 +12,7 @@ namespace arch
 {
 /**
  * Hardware abstraction of DMA controller
- * 
+ *
  * TODO
  * - Double buffering mode
  * - Add disable timeout error
@@ -72,7 +72,8 @@ public:
         int shiftOffset = 0;
         if (uint32_t(s) >= uint32_t(StreamID::STREAM_4))
         {
-            shiftOffset = INTERRUPT_STREAM_BLOCK_SIZE * (uint32_t(s) - uint32_t(StreamID::STREAM_4));
+            shiftOffset =
+                INTERRUPT_STREAM_BLOCK_SIZE * (uint32_t(s) - uint32_t(StreamID::STREAM_4));
             if (uint32_t(s) >= uint32_t(StreamID::STREAM_6))
             {
                 shiftOffset += 4;  // 4 bytes of padding in the middle of the register
@@ -214,10 +215,7 @@ public:
     /**
      * Enable the DMA stream to send/receive.
      */
-    static void enable()
-    {
-        streamPtr()->CR |= uint32_t(StreamEnableFlag::STREAM_ENABLED);
-    }
+    static void enable() { streamPtr()->CR |= uint32_t(StreamEnableFlag::STREAM_ENABLED); }
 
     /**
      * Disable send/receive on the DMA stream

@@ -20,6 +20,7 @@
 #include "remote.hpp"
 
 #include "aruwlib/Drivers.hpp"
+#include "aruwlib/DriversSingleton.hpp"
 #include "aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/communication/serial/uart.hpp"
@@ -28,15 +29,60 @@ using namespace aruwlib::serial;
 
 namespace aruwlib
 {
+void arch::uart1TxIrqHandler()
+{
+    // Idle flag set
+    if ((USART1->SR & USART_SR_IDLE) && (USART1->CR1 & USART_CR1_IDLEIE))
+    {
+        aruwlib::DoNotUse_getDrivers()->remote.read();
+    }
+}
+
 void Remote::initialize()
 {
-    // drivers->uart.init<Uart::Uart1, 100000, Uart::Parity::Even>();
+    aruwlib::arch::Dma2::enableRcc();
+
     RemoteDma::connect<GpioB7::Rx>();
-    RemoteDma::initialize<Board::SystemClock, 100000>(modm::platform::UartBase::Parity::Even, DMA_BUFF_SIZE);
+
+    // Only configure RX stream
+    aruwlib::arch::Dma2::Stream2::configure(
+        aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
+        aruwlib::arch::DmaBase::DataTransferDirection::PERIPH_TO_MEM,
+        aruwlib::arch::DmaBase::PeripheralIncrementMode::FIXED,
+        aruwlib::arch::DmaBase::MemoryIncrementMode::INCREMENT,
+        aruwlib::arch::DmaBase::PeripheralDataSize::BYTE,
+        aruwlib::arch::DmaBase::MemoryDataSize::BYTE,
+        aruwlib::arch::DmaBase::ControlMode::CIRCULAR,
+        aruwlib::arch::DmaBase::PriorityLevel::LOW,
+        aruwlib::arch::DmaBase::FifoMode::DISABLED,
+        aruwlib::arch::DmaBase::FifoThreshold::QUARTER_FULL,
+        aruwlib::arch::DmaBase::MemoryBurstTransfer::SINGLE,
+        aruwlib::arch::DmaBase::PeripheralBurstTransfer::SINGLE);
+
+    RemoteDma::initialize<Board::SystemClock, 100000>(modm::platform::UartBase::Parity::Even);
+
+    // Disable UART TX
+    modm::platform::UsartHal1::setTransmitterEnable(false);
+
+    // Disalbe RX interrupt, we only want the idle interrupt
+    modm::platform::UsartHal1::enableInterrupt(modm::platform::UsartHal1::Interrupt::RxIdle);
+    modm::platform::UsartHal1::disableInterrupt(modm::platform::UsartHal1::Interrupt::RxNotEmpty);
+
+    modm::platform::Usart1::clearIdleFlag();
+
+    RemoteDma::configureContinuousRead(rxBuffer, DMA_BUFF_SIZE);
 }
 
 void Remote::read()
 {
+    modm::platform::Usart1::clearIdleFlag();
+    aruwlib::arch::Dma2::Stream2::disable();
+    if ((DMA_BUFF_SIZE - DMA2_Stream2->NDTR) == REMOTE_BUF_LEN)
+    {
+        aruwlib::DoNotUse_getDrivers()->remote.parseBuffer();
+    }
+    aruwlib::arch::Dma2::Stream2::setDataLength(DMA_BUFF_SIZE);
+    aruwlib::arch::Dma2::Stream2::enable();
 }
 
 bool Remote::isConnected() const { return connected; }

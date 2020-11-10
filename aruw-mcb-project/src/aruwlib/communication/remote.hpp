@@ -26,26 +26,24 @@
 #include <modm/platform.hpp>
 #endif
 
-#include "mock_macros.hpp"
 #include "dma.hpp"
+#include "mock_macros.hpp"
 #include "uart_1_dma.hpp"
 
 namespace aruwlib
 {
 class Drivers;
-
 /**
- * A unique UART handler that uses timing in leu of DBUS communication (modm does not
- * support DBUS) to interact with the DR16 receiver.
+ * Communication with the remote via UART + DMA
  */
 class Remote
 {
 public:
     using RemoteDma = aruwlib::arch::Usart1Dma<
-        aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
+        aruwlib::arch::Dma2::Stream7,
         aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
         aruwlib::arch::Dma2::Stream2,
-        aruwlib::arch::Dma2::Stream7>;
+        aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4>;
 
     Remote(Drivers *drivers) : drivers(drivers) {}
     Remote(const Remote &) = delete;
@@ -213,7 +211,7 @@ private:
     bool connected = false;
 
     ///< UART recieve buffer.
-    uint8_t rxBuffer[REMOTE_BUF_LEN]{0};
+    uint8_t rxBuffer[DMA_BUFF_SIZE]{0};
 
     ///< Timestamp when last byte was read (milliseconds).
     uint32_t lastRead = 0;

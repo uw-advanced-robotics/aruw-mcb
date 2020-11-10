@@ -13,12 +13,13 @@ namespace aruwlib
 namespace arch
 {
 __attribute__((weak)) void uart1DmaMessageCompleteCallback(void);
+__attribute__((weak)) void uart1TxIrqHandler(void);
 
 template <
+    typename DmaStreamTx,
     DmaBase::ChannelSelection ChannelIdRx,
-    DmaBase::ChannelSelection ChannelIdTx,
     typename DmaStreamRx,
-    typename DmaStreamTx>
+    DmaBase::ChannelSelection ChannelIdTx>
 class Usart1Dma : public modm::platform::Usart1
 {
 public:
@@ -40,93 +41,47 @@ public:
             DmaRequestMapping::Peripheral::USART1_TX>(),
         "dma usart1 tx channel or stream selection invalid");
 
+    /**
+     * Performs DMA/UART specific integration configuration.
+     *
+     * @note DmaStreamRx and DmaStreamTx should be pre-configured (configuration is not done in
+     *      this function). Also, this function **does not** configure any interrupts. The user
+     *      may choose to do this.
+     */
     template <
         typename SystemClock,
         modm::baudrate_t baudrate,
         modm::percent_t tolerance = modm::pct(1)>
     static void initialize(modm::platform::UartBase::Parity parity)
     {
+        modm::platform::Usart1::initialize<SystemClock, baudrate, tolerance>(12, parity);
+
         // See page 1003 in STM32F405/415, STM32F407/417, STM32F427/437 and STM32F429/439 advanced
         // Arm-based 32-bit MCUs - Reference manual
 
-        modm::platform::Usart1::initialize<SystemClock, baudrate, tolerance>(12, parity);
+        // TX
 
-        // Configure tx
-
-        DmaStreamTx::configure(
-            ChannelIdTx,
-            DmaBase::DataTransferDirection::MEM_TO_PERIPH,
-            DmaBase::PeripheralIncrementMode::FIXED,
-            DmaBase::MemoryIncrementMode::INCREMENT,
-            DmaBase::PeripheralDataSize::BYTE,
-            DmaBase::MemoryDataSize::BYTE,
-            DmaBase::ControlMode::CIRCULAR,
-            DmaBase::PriorityLevel::LOW,
-            DmaBase::FifoMode::DISABLED,
-            DmaBase::FifoThreshold::QUARTER_FULL,
-            DmaBase::MemoryBurstTransfer::SINGLE,
-            DmaBase::PeripheralBurstTransfer::SINGLE);
+        DmaStreamTx::disable();
 
         // Write the memory address in the DMA configuration register to configure it as the
-        // source
-        // of the transfer. The data will be loaded into the USART_DR register from this memory
-        // area
-        // after each TXE event.
-        DmaStreamTx::setSourceAddress((uintptr_t)&USART1->DR);
+        // source of the transfer. The data will be loaded into the USART_DR register from this
+        // memory area after each TXE event.
+        DmaStreamTx::setSourceAddress(reinterpret_cast<uintptr_t>(&USART1->DR));
 
         // Clear the TC bit in the SR register by writing 0 to it.
         USART1->SR &= ~USART_SR_TC;
 
-        // Configure destination address, size of bytes to write in write functions
-
-        // Configure DMA interrupt generation
-        DmaStreamTx::setTransferErrorIrqHandler(handleDmaTransferError);
-        DmaStreamTx::setTransferCompleteIrqHandler(handleDmaTransmitComplete);
-        DmaStreamTx::enableInterruptVector();
-        DmaStreamTx::enableInterrupt(
-            DmaBase::Interrupt::ERROR | DmaBase::Interrupt::TRANSFER_COMPLETE);
-
+        // Enable UART DMA TX
         USART1->CR3 |= USART_CR3_DMAT;
 
-
-        modm::platform::UsartHal1::enableInterrupt(modm::platform::UsartHal1::Interrupt::RxIdle);
-        modm::platform::UsartHal1::disableInterrupt(
-            modm::platform::UsartHal1::Interrupt::RxNotEmpty);
-
-        modm::platform::UsartHal1::setTransmitterEnable(false);
-
-        DmaStreamRx::configure(
-            ChannelIdRx,
-            DmaBase::DataTransferDirection::PERIPH_TO_MEM,
-            DmaBase::PeripheralIncrementMode::FIXED,
-            DmaBase::MemoryIncrementMode::INCREMENT,
-            DmaBase::PeripheralDataSize::BYTE,
-            DmaBase::MemoryDataSize::BYTE,
-            DmaBase::ControlMode::CIRCULAR,
-            DmaBase::PriorityLevel::LOW,
-            DmaBase::FifoMode::DISABLED,
-            DmaBase::FifoThreshold::QUARTER_FULL,
-            DmaBase::MemoryBurstTransfer::SINGLE,
-            DmaBase::PeripheralBurstTransfer::SINGLE);
+        // RX
 
         // Write the USART_DR register address in the DMA control register to configure it as the
         // source of the transfer. The data will be moved from this address to the memory after
         // each RXNE event.
-        DmaStreamRx::setSourceAddress((uintptr_t)&USART1->DR);
+        DmaStreamRx::setSourceAddress(reinterpret_cast<uintptr_t>(&USART1->DR));
 
-        // configure interrupt generation
-        DmaStreamRx::setTransferErrorIrqHandler(handleDmaReceiveError);
-        DmaStreamRx::setTransferCompleteIrqHandler(handleDmaReceiveComplete);
-        DmaStreamRx::enableInterruptVector();
-        modm::platform::UsartHal1::enableInterrupt(modm::platform::UartBase::Interrupt::RxIdle);
-
-        clearIdleFlag();
-
-        // Start RX, probably move elsewhere
-        DmaStreamRx::setDataLength(length);
-        DmaStreamRx::setDestinationAddress((uintptr_t)data);
-        DmaStreamRx::enable();
-        USART1->SR &= ~(0x100);
+        // Enable UART DMA RX
         USART1->CR3 |= USART_CR3_DMAR;
     }
 
@@ -136,9 +91,8 @@ public:
      *
      * @note When in continuous read mode, other read operations are disabled.
      */
-    static void configureContinuousRead(uint8_t *data, std::size_t length, IrqHandler)
+    static void configureContinuousRead(uint8_t *data, std::size_t length)
     {
-        rxLength = length;
         // Disable to allow modifications of the DMA stream control register.
         DmaStreamRx::disable();
         // configure total # of bytes
@@ -146,51 +100,10 @@ public:
         // Write the memory address in the DMA control register to configure it as the destination
         // of the transfer. The data will be loaded from USART_DR to this memory area after each
         // RXNE event.
-        DmaStreamRx::setDestinationAddress((uintptr_t)data);
+        DmaStreamRx::setDestinationAddress(reinterpret_cast<uintptr_t>(data));
         // activate channel in DMA control register
         DmaStreamRx::enable();
     }
-
-    // static void writeBlocking(uint8_t data) {}
-
-    // static void writeBlocking(const uint8_t *data, std::size_t length) {}
-
-    // static void flushWriteBuffer() {}
-
-    // static bool write(uint8_t) { return false; }
-
-    // static std::size_t write(const uint8_t *, std::size_t) { return 0; }
-
-    // static bool isWriteFinished() { return false; }
-
-    // static std::size_t transmitBufferSize() { return 0; }
-
-    // static std::size_t discardTransmitBuffer() { return 0; }
-
-    // static bool read(uint8_t &) { return false; }
-
-    static std::size_t read(uint8_t *buffer, std::size_t length)
-    {
-        if (buffer == nullptr || length < 0)
-        {
-            return 0;
-        }
-        DmaStreamRx::setSourceAddress(buffer);
-        DmaStreamRx::setDataLength(length);
-        DmaStreamRx::enable();
-    }
-
-    static std::size_t receiveBufferSize() { return 0; }
-
-    static std::size_t discardReceiveBuffer() { return 0; }
-
-    static bool hasError() { return dmaError; }
-
-    static void clearError() {}
-
-    static void handleDmaReceiveError() {}
-
-    static void handleDmaTransferError() { dmaError = true; }
 
     static void handleDmaReceiveComplete()
     {
@@ -199,31 +112,9 @@ public:
         // be cleared by software in the USART_Cr3 register during the interrupt subroutine
         DmaStreamRx::disable();
         uart1DmaMessageCompleteCallback();
-        if (rxLength != 0)
-        {
-            // Restart stream if in contiguous receive mode
-            DmaStreamRx::setDataLength(rxLength);
-            DmaStreamRx::enable();
-        }
-        else
-        {
-            USART1->CR3 &= ~USART_CR3_DMAR;
-        }
+        USART1->CR3 &= ~USART_CR3_DMAR;
     }
-
-    static void handleDmaTransmitComplete() { DmaStreamTx::disable(); }
-
-private:
-    static inline bool dmaError = false;
-    static std::size_t rxLength;
 };  // class Usart1Dma
-
-template <
-    DmaBase::ChannelSelection ChannelIdRx,
-    DmaBase::ChannelSelection ChannelIdTx,
-    typename DmaStreamRx,
-    typename DmaStreamTx>
-std::size_t Usart1Dma<ChannelIdRx, ChannelIdTx, DmaStreamRx, DmaStreamTx>::rxLength = 0;
 }  // namespace arch
 }  // namespace aruwlib
 

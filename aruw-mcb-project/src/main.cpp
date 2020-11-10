@@ -64,35 +64,16 @@ void initializeIo(aruwlib::Drivers *drivers);
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
 void updateIo(aruwlib::Drivers *drivers);
-using namespace aruwlib::arch;
-using namespace modm::platform;
-uint8_t dmatxbuffer[50];
-uint8_t otherbyte;
+
 int main()
 {
-    // DMA2_Stream2
     Board::initialize();
     aruwlib::DoNotUse_getDrivers()->leds.init();
-    Dma2::enableRcc();
-    using UartDma = Usart1Dma<
-        DmaBase::ChannelSelection::CHANNEL_4,
-        DmaBase::ChannelSelection::CHANNEL_4,
-        Dma2::Stream2,
-        Dma2::Stream7>;
-    UartDma::connect<GpioB7::Rx>();
-    UartDma::initialize<Board::SystemClock, 100000>(
-        modm::platform::UartBase::Parity::Even,
-        50,
-        dmatxbuffer);
-    // UartDma::configureContinuousRead(dmatxbuffer, 50, koolcallback);
-    // channel 4, stream 2
+    aruwlib::DoNotUse_getDrivers()->remote.initialize();
 
     while (1)
     {
-        modm::platform::Usart1::read(otherbyte);
         modm::delay_ms(1);
-        t3 = modm::Clock::now().time_since_epoch().count();
-        // aruwlib::DoNotUse_getDrivers()->remote.read();
     }
     return 0;
 }
