@@ -28,36 +28,15 @@ using namespace aruwlib::serial;
 
 namespace aruwlib
 {
-void Remote::initialize() { drivers->uart.init<Uart::Uart1, 100000, Uart::Parity::Even>(); }
+void Remote::initialize()
+{
+    // drivers->uart.init<Uart::Uart1, 100000, Uart::Parity::Even>();
+    RemoteDma::connect<GpioB7::Rx>();
+    RemoteDma::initialize<Board::SystemClock, 100000>(modm::platform::UartBase::Parity::Even, DMA_BUFF_SIZE);
+}
 
 void Remote::read()
 {
-    // Check disconnect timeout
-    if (aruwlib::arch::clock::getTimeMilliseconds() - lastRead > REMOTE_DISCONNECT_TIMEOUT)
-    {
-        connected = false;  // Remote no longer connected
-        reset();            // Reset current remote values
-    }
-    uint8_t data;  // Next byte to be read
-    // Read next byte if available and more needed for the current packet
-    while (drivers->uart.read(Uart::UartPort::Uart1, &data) && currentBufferIndex < REMOTE_BUF_LEN)
-    {
-        rxBuffer[currentBufferIndex] = data;
-        currentBufferIndex++;
-        lastRead = aruwlib::arch::clock::getTimeMilliseconds();
-    }
-    // Check read timeout
-    if (aruwlib::arch::clock::getTimeMilliseconds() - lastRead > REMOTE_READ_TIMEOUT)
-    {
-        clearRxBuffer();
-    }
-    // Parse buffer if all 18 bytes are read
-    if (currentBufferIndex >= REMOTE_BUF_LEN)
-    {
-        connected = true;
-        parseBuffer();
-        clearRxBuffer();
-    }
 }
 
 bool Remote::isConnected() const { return connected; }

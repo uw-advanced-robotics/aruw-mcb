@@ -27,6 +27,8 @@
 #endif
 
 #include "mock_macros.hpp"
+#include "dma.hpp"
+#include "uart_1_dma.hpp"
 
 namespace aruwlib
 {
@@ -39,6 +41,12 @@ class Drivers;
 class Remote
 {
 public:
+    using RemoteDma = aruwlib::arch::Usart1Dma<
+        aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
+        aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
+        aruwlib::arch::Dma2::Stream2,
+        aruwlib::arch::Dma2::Stream7>;
+
     Remote(Drivers *drivers) : drivers(drivers) {}
     Remote(const Remote &) = delete;
     Remote &operator=(const Remote &) = delete;
@@ -173,6 +181,7 @@ private:
     static const int REMOTE_DISCONNECT_TIMEOUT = 100;  ///< Timeout delay for remote disconnect.
     static const int REMOTE_INT_PRI = 12;              ///< Interrupt priority.
     static constexpr float STICK_MAX_VALUE = 660.0f;   ///< Max value received by one of the sticks.
+    static constexpr int DMA_BUFF_SIZE = 50;
 
     ///< The current remote information
     struct RemoteInfo

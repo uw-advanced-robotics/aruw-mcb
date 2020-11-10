@@ -179,6 +179,7 @@ void modm::platform::Usart1::clearIdleFlag()
     int val = 0;
     val = USART1->SR;
     val = USART1->DR;
+    (void) val;
 }
 
 // MODM_ISR(USART1)

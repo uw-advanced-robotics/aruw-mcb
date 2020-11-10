@@ -129,11 +129,11 @@ public:
     enum class DataTransferDirection : uint32_t
     {
         ///< Source: DMA_SxPAR; Sink: DMA_SxM0AR
-        PERIPHERAL_TO_MEMORY = 0,
+        PERIPH_TO_MEM = 0,
         ///< Source: DMA_SxM0AR; Sink: DMA_SxPAR
-        MEMORY_TO_PERIPHERAL = DMA_SxCR_DIR_0,
+        MEM_TO_PERIPH = DMA_SxCR_DIR_0,
         ///< Source: DMA_SxPAR; Sink: DMA_SxM0AR
-        MEMORY_TO_MEMORY = DMA_SxCR_DIR_1,
+        MEM_TO_MEM = DMA_SxCR_DIR_1,
     };
 
     // Bit 1-4 are interrupt enable settings.
@@ -164,6 +164,8 @@ public:
 
     // End DMA_xCR masks
 
+    // masks for the DMA_SxFCR register (fifo control)
+
     enum class FifoMode : uint32_t
     {
         DISABLED = 0,
@@ -178,7 +180,9 @@ public:
         FULL = DMA_SxFCR_FTH,
     };
 
-    enum class Stream : uint32_t
+    // End DMA_SxFCR masks
+
+    enum class StreamID : uint32_t
     {
         STREAM_0 = 0,
         STREAM_1 = 1,
@@ -190,14 +194,10 @@ public:
         STREAM_7 = 7,
     };
 
-    static constexpr uint8_t getChannelNumber(ChannelSelection channel)
-    {
-        return uint32_t(channel) >> DMA_SxCR_CHSEL_Pos;
-    }
-
 protected:
     /**
-     * Use to clear interrupts on a particular stream.
+     * Use to clear interrupts on a particular stream. Masks all interrupts for the
+     * specified stream.
      */
     static constexpr uint32_t dmaStreamIFCRMasks[]{
         DMA_LIFCR_CFEIF0 | DMA_LIFCR_CDMEIF0 | DMA_LIFCR_CTEIF0 | DMA_LIFCR_CHTIF0 |
@@ -218,9 +218,18 @@ protected:
             DMA_HIFCR_CTCIF7,
     };
 
+    /**
+     * Masks the 5 interrupt bits for stream 0. This may be used to mask any stream's
+     * interrupt status by shifting over the stream's interrupt bits over by some
+     * amount.
+     */
     static constexpr uint32_t INTERRUPT_STATUS_MSK =
         DMA_LISR_TCIF0 | DMA_LISR_HTIF0 | DMA_LISR_TEIF0 | DMA_LISR_DMEIF0 | DMA_LISR_FEIF0;
 
+    /**
+     * When shifted over and masked using `INTERRUPT_STATUS_MSK`, defines the interrupt
+     * status flags for a particular stream.
+     */
     enum class InterruptStatusMsks : uint32_t
     {
         TRANSFER_COMPLETE = DMA_LISR_TCIF0,
@@ -235,7 +244,7 @@ protected:
     /**
      * Defines a list of interrupt vectors to be enabled for each DMA stream.
      *
-     * @tparam The DMA identifier
+     * @tparam The DMA identifier.
      */
     template <uint32_t ID>
     struct Nvic;
@@ -254,7 +263,7 @@ struct DmaBase::Nvic<1>
         DMA1_Stream6_IRQn,
         DMA1_Stream7_IRQn,
     };
-};  // struct Nvic<1>
+};
 
 template <>
 struct DmaBase::Nvic<2>
@@ -269,7 +278,7 @@ struct DmaBase::Nvic<2>
         DMA2_Stream6_IRQn,
         DMA2_Stream7_IRQn,
     };
-};  // struct Nvic<2>
+};
 }  // namespace arch
 }  // namespace aruwlib
 

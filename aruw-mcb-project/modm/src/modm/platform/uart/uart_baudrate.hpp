@@ -47,6 +47,7 @@ public:
 	static constexpr UartBase::OversamplingMode
 	getOversamplingMode(frequency_t clockrate, baudrate_t baudrate)
 	{
+        // return UartBase::OversamplingMode::By16;
 		return (baudrate <= clockrate / 16) ? UartBase::OversamplingMode::By16 : UartBase::OversamplingMode::By8;
 	}
 	/**

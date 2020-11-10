@@ -80,17 +80,12 @@ int main()
         Dma2::Stream2,
         Dma2::Stream7>;
     UartDma::connect<GpioB7::Rx>();
-    UartDma::initialize<Board::SystemClock, 1000000>(modm::platform::UartBase::Parity::Disabled, 50, dmatxbuffer);
+    UartDma::initialize<Board::SystemClock, 100000>(
+        modm::platform::UartBase::Parity::Even,
+        50,
+        dmatxbuffer);
     // UartDma::configureContinuousRead(dmatxbuffer, 50, koolcallback);
     // channel 4, stream 2
-
-    // static_assert(
-    //     aruwlib::arch::DmaRequestMapping::validateRequestMapping<
-    //         2,
-    //         aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
-    //         aruwlib::arch::DmaBase::Stream::STREAM_7,
-    //         aruwlib::arch::DmaRequestMapping::Peripheral::USART1_TX>(),
-    //     "failed fool");
 
     while (1)
     {

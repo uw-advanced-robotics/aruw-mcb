@@ -21,7 +21,7 @@ class DmaController : public DmaBase
 
 public:
     /**
-     * Enable the DMA controller in the RCC
+     * Enable the DMA controller in the RCC.
      */
     static void enableRcc()
     {
@@ -29,14 +29,14 @@ public:
         {
             modm::platform::Rcc::enable<modm::platform::Peripheral::Dma1>();
         }
-        else
+        else if constexpr (ID == 2)
         {
             modm::platform::Rcc::enable<modm::platform::Peripheral::Dma2>();
         }
     }
 
     /**
-     * Disable the DMA controller in the RCC
+     * Disable the DMA controller in the RCC.
      */
     static void disableRcc()
     {
@@ -44,24 +44,24 @@ public:
         {
             modm::platform::Rcc::disable<modm::platform::Peripheral::Dma1>();
         }
-        else
+        else if constexpr (ID == 2)
         {
             modm::platform::Rcc::disable<modm::platform::Peripheral::Dma2>();
         }
     }
 
     /**
-     * Class representing a DMA channel/stream
+     * Class representing a DMA channel/stream.
      */
-    template <DmaBase::Stream StreamID>
+    template <DmaBase::StreamID SID>
     class Stream
     {
         using ControlHal = DmaHal<ID>;
-        using StreamHal = DmaStreamHal<StreamID, ControlHal::StreamBase()>;
+        using StreamHal = DmaStreamHal<SID, ControlHal::streamBase()>;
 
     public:
         static constexpr uint32_t DMA_ID = ID;
-        static constexpr DmaBase::Stream STREAM_ID = StreamID;
+        static constexpr DmaBase::StreamID STREAM_ID = SID;
 
         /**
          * Configure the DMA channel
@@ -107,7 +107,7 @@ public:
          */
         static void enable()
         {
-            ControlHal::clearInterruptFlags(StreamID);
+            ControlHal::clearInterruptFlags(STREAM_ID);
             StreamHal::enable();
         }
         /**
@@ -145,40 +145,12 @@ public:
         }
 
         /**
-         * Enable/disable memory increment
-         *
-         * When enabled, the memory address is incremented by the size of the data
-         * (e.g. 1 for byte transfers, 4 for word transfers) after the transfer
-         * completed.
-         *
-         * @param[in] increment Enable/disable
-         */
-        static void setMemoryIncrementMode(DmaBase::MemoryIncrementMode mode)
-        {
-            StreamHal::setMemoryIncrementMode(mode);
-        }
-
-        /**
-         * Enable/disable peripheral increment
-         *
-         * When enabled, the peripheral address is incremented by the size of the data
-         * (e.g. 1 for byte transfers, 4 for word transfers) after the transfer
-         * completed.
-         *
-         * @param[in] increment Enable/disable
-         */
-        static void setPeripheralIncrementMode(DmaBase::PeripheralIncrementMode mode)
-        {
-            StreamHal::setPeripheralIncrementMode(mode);
-        }
-
-        /**
          * Set the length of data to be transfered
          */
         static void setDataLength(std::size_t length) { StreamHal::setDataLength(length); }
 
         /**
-         * Set the IRQ handler for transfer errors
+         * Set the IRQ handler for transfer errors.
          *
          * The handler will be called from the channels IRQ handler function
          * when the IRQ status indicates an error occured.
@@ -187,8 +159,9 @@ public:
         {
             transferError = irqHandler;
         }
+
         /**
-         * Set the IRQ handler for transfer complete
+         * Set the IRQ handler for transfer complete.
          *
          * Called by the channels IRQ handler when the transfer is complete.
          */
@@ -196,8 +169,10 @@ public:
         {
             transferComplete = irqHandler;
         }
+
         /**
          * Set the peripheral that operates the channel
+         * TODO
          */
         // template <DmaBase::Request dmaRequest>
         // static void
@@ -210,15 +185,15 @@ public:
         // }
 
         /**
-         * IRQ handler of the DMA channel
+         * IRQ handler of the DMA channel.
          *
          * Reads the IRQ status and checks for error or transfer complete. In case
          * of error the DMA channel will be disabled.
          */
         static void interruptHandler()
         {
-            uint32_t currIsrs = ControlHal::getInterruptFlags(StreamID);
-            ControlHal::clearInterruptFlags(StreamID);
+            uint32_t currIsrs = ControlHal::getInterruptFlags(STREAM_ID);
+            ControlHal::clearInterruptFlags(STREAM_ID);
             if (currIsrs & (uint32_t(InterruptStatusMsks::TRANSFER_ERROR) |
                             uint32_t(InterruptStatusMsks::DIRECT_MODE_ERROR) |
                             uint32_t(InterruptStatusMsks::FIFO_ERROR)))
@@ -235,35 +210,33 @@ public:
         }
 
         /**
-         * Enable the IRQ vector of the channel
+         * Enable the IRQ vector of the channel.
          *
          * @param[in] priority Priority of the IRQ
          */
         static void enableInterruptVector(uint32_t priority = 1)
         {
-            NVIC_SetPriority(DmaBase::Nvic<ID>::DmaIrqs[uint32_t(StreamID)], priority);
-            NVIC_EnableIRQ(DmaBase::Nvic<ID>::DmaIrqs[uint32_t(StreamID)]);
+            NVIC_SetPriority(DmaBase::Nvic<ID>::DmaIrqs[uint32_t(STREAM_ID)], priority);
+            NVIC_EnableIRQ(DmaBase::Nvic<ID>::DmaIrqs[uint32_t(STREAM_ID)]);
         }
 
         /**
-         * Disable the IRQ vector of the channel
+         * Disable the IRQ vector of the channel.
          */
         static void disableInterruptVector()
         {
-            NVIC_DisableIRQ(DmaBase::Nvic<ID>::DmaIrqs[uint32_t(StreamID)]);
+            NVIC_DisableIRQ(DmaBase::Nvic<ID>::DmaIrqs[uint32_t(STREAM_ID)]);
         }
 
         /**
-         * Enable the specified interrupt of the channel
+         * Enable the specified interrupt of the channel.
          */
         static void enableInterrupt(Interrupt_t irq) { StreamHal::enableInterrupt(irq); }
+
         /**
-         * Disable the specified interrupt of the channel
+         * Disable the specified interrupt of the channel.
          */
-        static void disableInterrupt(Interrupt_t irq)
-        {
-            // StreamHal::disableInterrupt(irq);
-        }
+        static void disableInterrupt(Interrupt_t irq) { StreamHal::disableInterrupt(irq); }
 
     private:
         static inline DmaBase::IrqHandler transferError{nullptr};
@@ -273,32 +246,32 @@ public:
 
 /*
  * Derive DMA controller classes for convenience. Every derived class defines
- * the channels available on that controller.
+ * the streams available on that controller.
  */
 class Dma1 : public DmaController<1>
 {
 public:
-    using Stream0 = DmaController<1>::Stream<DmaBase::Stream::STREAM_0>;
-    using Stream1 = DmaController<1>::Stream<DmaBase::Stream::STREAM_1>;
-    using Stream2 = DmaController<1>::Stream<DmaBase::Stream::STREAM_2>;
-    using Stream3 = DmaController<1>::Stream<DmaBase::Stream::STREAM_3>;
-    using Stream4 = DmaController<1>::Stream<DmaBase::Stream::STREAM_4>;
-    using Stream5 = DmaController<1>::Stream<DmaBase::Stream::STREAM_5>;
-    using Stream6 = DmaController<1>::Stream<DmaBase::Stream::STREAM_6>;
-    using Stream7 = DmaController<1>::Stream<DmaBase::Stream::STREAM_7>;
+    using Stream0 = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    using Stream1 = DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>;
+    using Stream2 = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    using Stream3 = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    using Stream4 = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    using Stream5 = DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>;
+    using Stream6 = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    using Stream7 = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
 };  // class Dma1
 
 class Dma2 : public DmaController<2>
 {
 public:
-    using Stream0 = DmaController<2>::Stream<DmaBase::Stream::STREAM_0>;
-    using Stream1 = DmaController<2>::Stream<DmaBase::Stream::STREAM_1>;
-    using Stream2 = DmaController<2>::Stream<DmaBase::Stream::STREAM_2>;
-    using Stream3 = DmaController<2>::Stream<DmaBase::Stream::STREAM_3>;
-    using Stream4 = DmaController<2>::Stream<DmaBase::Stream::STREAM_4>;
-    using Stream5 = DmaController<2>::Stream<DmaBase::Stream::STREAM_5>;
-    using Stream6 = DmaController<2>::Stream<DmaBase::Stream::STREAM_6>;
-    using Stream7 = DmaController<2>::Stream<DmaBase::Stream::STREAM_7>;
+    using Stream0 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>;
+    using Stream1 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>;
+    using Stream2 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    using Stream3 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    using Stream4 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    using Stream5 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>;
+    using Stream6 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    using Stream7 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
 };  // class Dma2
 }  // namespace arch
 }  // namespace aruwlib

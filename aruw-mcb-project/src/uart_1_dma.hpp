@@ -31,6 +31,7 @@ public:
             DmaStreamRx::STREAM_ID,
             DmaRequestMapping::Peripheral::USART1_RX>(),
         "dma usart1 tx channel or stream selection invalid");
+
     static_assert(
         DmaRequestMapping::validateRequestMapping<
             DmaStreamTx::DMA_ID,
@@ -43,50 +44,60 @@ public:
         typename SystemClock,
         modm::baudrate_t baudrate,
         modm::percent_t tolerance = modm::pct(1)>
-    static void initialize(modm::platform::UartBase::Parity parity, std::size_t length, uint8_t *data)
+    static void initialize(modm::platform::UartBase::Parity parity)
     {
-        modm::platform::Usart1::initialize<SystemClock, baudrate, tolerance>(12, parity);
-        USART1->BRR = 0x384;
-        USART1->CR1 &= ~USART_CR1_RXNEIE;
-
-        // // Configure tx
-        // USART1->CR3 |= USART_CR3_DMAT;
-
-        // // Disable to allow modification of the DMA configuration register.
-        // DmaStreamTx::disable();
-
-        // DmaStreamTx::configure(
-        //     ChannelIdTx,
-        //     DmaBase::DataTransferDirection::MEMORY_TO_PERIPHERAL,
-        //     DmaBase::MemoryDataSize::BYTE,
-        //     DmaBase::PeripheralDataSize::BYTE,
-        //     DmaBase::MemoryIncrementMode::INCREMENT,
-        //     DmaBase::PeripheralIncrementMode::INCREMENT,
-        //     DmaBase::CircularMode::DISABLED);
-
-        // // Write the memory address in the DMA configuration register to configure it as the source
-        // // of the transfer. The data will be loaded into the USART_DR register from this memory area
-        // // after each TXE event.
-        // DmaStreamTx::setSourceAddress((uintptr_t)&USART1->DR);
-
-        // // Clear the TC bit in the SR register by writing 0 to it.
-        // USART1->SR &= ~USART_SR_TC;
-
-        // // Configure destination address, size of bytes to write in write functions
-
-        // // Configure DMA interrupt generation
-        // DmaStreamTx::setTransferErrorIrqHandler(handleDmaTransferError);
-        // DmaStreamTx::setTransferCompleteIrqHandler(handleDmaTransmitComplete);
-        // DmaStreamTx::enableInterruptVector();
-        // DmaStreamTx::enableInterrupt(
-        //     DmaBase::Interrupt::ERROR | DmaBase::Interrupt::TRANSFER_COMPLETE);
-
         // See page 1003 in STM32F405/415, STM32F407/417, STM32F427/437 and STM32F429/439 advanced
-        // Arm®-based 32-bit MCUs - Reference manual
+        // Arm-based 32-bit MCUs - Reference manual
+
+        modm::platform::Usart1::initialize<SystemClock, baudrate, tolerance>(12, parity);
+
+        // Configure tx
+
+        DmaStreamTx::configure(
+            ChannelIdTx,
+            DmaBase::DataTransferDirection::MEM_TO_PERIPH,
+            DmaBase::PeripheralIncrementMode::FIXED,
+            DmaBase::MemoryIncrementMode::INCREMENT,
+            DmaBase::PeripheralDataSize::BYTE,
+            DmaBase::MemoryDataSize::BYTE,
+            DmaBase::ControlMode::CIRCULAR,
+            DmaBase::PriorityLevel::LOW,
+            DmaBase::FifoMode::DISABLED,
+            DmaBase::FifoThreshold::QUARTER_FULL,
+            DmaBase::MemoryBurstTransfer::SINGLE,
+            DmaBase::PeripheralBurstTransfer::SINGLE);
+
+        // Write the memory address in the DMA configuration register to configure it as the
+        // source
+        // of the transfer. The data will be loaded into the USART_DR register from this memory
+        // area
+        // after each TXE event.
+        DmaStreamTx::setSourceAddress((uintptr_t)&USART1->DR);
+
+        // Clear the TC bit in the SR register by writing 0 to it.
+        USART1->SR &= ~USART_SR_TC;
+
+        // Configure destination address, size of bytes to write in write functions
+
+        // Configure DMA interrupt generation
+        DmaStreamTx::setTransferErrorIrqHandler(handleDmaTransferError);
+        DmaStreamTx::setTransferCompleteIrqHandler(handleDmaTransmitComplete);
+        DmaStreamTx::enableInterruptVector();
+        DmaStreamTx::enableInterrupt(
+            DmaBase::Interrupt::ERROR | DmaBase::Interrupt::TRANSFER_COMPLETE);
+
+        USART1->CR3 |= USART_CR3_DMAT;
+
+
+        modm::platform::UsartHal1::enableInterrupt(modm::platform::UsartHal1::Interrupt::RxIdle);
+        modm::platform::UsartHal1::disableInterrupt(
+            modm::platform::UsartHal1::Interrupt::RxNotEmpty);
+
+        modm::platform::UsartHal1::setTransmitterEnable(false);
 
         DmaStreamRx::configure(
             ChannelIdRx,
-            DmaBase::DataTransferDirection::PERIPHERAL_TO_MEMORY,
+            DmaBase::DataTransferDirection::PERIPH_TO_MEM,
             DmaBase::PeripheralIncrementMode::FIXED,
             DmaBase::MemoryIncrementMode::INCREMENT,
             DmaBase::PeripheralDataSize::BYTE,
@@ -107,16 +118,15 @@ public:
         DmaStreamRx::setTransferErrorIrqHandler(handleDmaReceiveError);
         DmaStreamRx::setTransferCompleteIrqHandler(handleDmaReceiveComplete);
         DmaStreamRx::enableInterruptVector();
-        // DmaStreamRx::enableInterrupt(DmaBase::Interrupt::TRANSFER_COMPLETE);
-        // DmaStreamRx::enableInterrupt(DmaBase::Interrupt::ERROR);
         modm::platform::UsartHal1::enableInterrupt(modm::platform::UartBase::Interrupt::RxIdle);
 
         clearIdleFlag();
 
         // Start RX, probably move elsewhere
         DmaStreamRx::setDataLength(length);
-        DmaStreamRx::setDestinationAddress((uintptr_t) data);
+        DmaStreamRx::setDestinationAddress((uintptr_t)data);
         DmaStreamRx::enable();
+        USART1->SR &= ~(0x100);
         USART1->CR3 |= USART_CR3_DMAR;
     }
 
