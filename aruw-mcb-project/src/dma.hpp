@@ -12,7 +12,7 @@ namespace aruwlib
 namespace arch
 {
 /**
- * DMA controller
+ * DMA controller for stm32f4 series microcontrollers
  */
 template <uint32_t ID>
 class DmaController : public DmaBase
@@ -113,7 +113,7 @@ public:
         /**
          * Stop a DMA channel transfer
          */
-        static void disable() { StreamHal::disable(); }
+        static bool disable() { return StreamHal::disable(); }
 
         /**
          * Get the direction of the data transfer
@@ -121,6 +121,41 @@ public:
         static DataTransferDirection getDataTransferDirection()
         {
             return StreamHal::getDataTransferDirection();
+        }
+
+        /**
+         * Configure the DMA channel to write to the requested data buffer length bytes.
+         *
+         * @note When in continuous read mode, other read operations are disabled.
+         */
+        static bool configureRead(uint8_t *data, std::size_t length)
+        {
+            // Disable to allow modifications of the DMA stream control register.
+            if (!disable())
+            {
+                return false;
+            }
+            // configure total # of bytes
+            setDataLength(length);
+            // Write the memory address in the DMA control register to configure it as the
+            // destination of the transfer. The data will be loaded from USART_DR to this memory
+            // area after each RXNE event.
+            setDestinationAddress(reinterpret_cast<uintptr_t>(data));
+            // activate channel in DMA control register
+            enable();
+            return true;
+        }
+
+        static bool configureWrite(uint8_t *data, std::size_t length)
+        {
+            if (disable())
+            {
+                return false;
+            }
+            setDataLength(length);
+            setSourceAddress(reinterpret_cast<uintptr_t>(data));
+            enable();
+            return true;
         }
 
         /**
@@ -170,19 +205,7 @@ public:
             transferComplete = irqHandler;
         }
 
-        /**
-         * Set the peripheral that operates the channel
-         * TODO
-         */
-        // template <DmaBase::Request dmaRequest>
-        // static void
-        // setPeripheralRequest()
-        // {
-        //     // DMA_Request_TypeDef *DMA_REQ = reinterpret_cast<DMA_Request_TypeDef
-        //     *>(ControlHal::DMA_CSEL);
-        //     // DMA_REQ->CSELR &= ~(0x0f << (uint32_t(ChannelID) * 4));
-        //     // DMA_REQ->CSELR |= uint32_t(dmaRequest) << (uint32_t(ChannelID) * 4);
-        // }
+        static uint32_t getInterruptFlags() { return ControlHal::getInterruptFlags(STREAM_ID); }
 
         /**
          * IRQ handler of the DMA channel.

@@ -10,13 +10,6 @@ namespace aruwlib
 {
 namespace arch
 {
-/**
- * Hardware abstraction of DMA controller
- *
- * TODO
- * - Double buffering mode
- * - Add disable timeout error
- */
 template <uint32_t ID>
 class DmaHal : public DmaBase
 {
@@ -94,7 +87,12 @@ public:
 };  // class DmaHal
 
 /**
- * ID must match the DMA number for the stream
+ * Hardware abstraction of a DMA stream.
+ *
+ * TODO
+ * - Double buffering mode
+ *
+ * @note ID must match the DMA number for the stream
  */
 template <DmaBase::StreamID S, uint32_t StreamBase>
 class DmaStreamHal : public DmaBase
@@ -202,10 +200,9 @@ public:
         streamPtr()->FCR = tmp;
     }
 
-    static void configureDoubleBufferMode(DoubleBufferMode bufferMode)
+    static void configureDoubleBufferMode(DoubleBufferMode)
     {
         // TODO
-        streamPtr()->CR |= uint32_t(bufferMode);
     }
 
     static void enableInterrupt(Interrupt_t irq) { streamPtr()->CR |= irq.value; }
@@ -220,7 +217,7 @@ public:
     /**
      * Disable send/receive on the DMA stream
      */
-    static void disable()
+    static bool disable()
     {
         streamPtr()->CR &= ~uint32_t(StreamEnableFlag::STREAM_ENABLED);
         // wait for stream to be stopped
@@ -230,8 +227,9 @@ public:
             ;
         if (streamPtr()->CR & uint32_t(StreamEnableFlag::STREAM_ENABLED))
         {
-            // TODO handle failure
+            return false;
         }
+        return true;
     }
 
     /**

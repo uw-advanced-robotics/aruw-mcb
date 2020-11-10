@@ -42,17 +42,6 @@
 using namespace modm::literals;
 using aruwlib::Drivers;
 
-int jj = 0;
-
-void aruwlib::arch::uart1DmaMessageCompleteCallback(void) { jj++; }
-uint32_t t1, t2, t3;
-void koolcallback()
-{
-    jj += 10;
-    t1 = modm::Clock::now().time_since_epoch().count() - t2;
-    t2 = modm::Clock::now().time_since_epoch().count();
-}
-
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
@@ -118,5 +107,4 @@ void updateIo(aruwlib::Drivers *drivers)
     drivers->canRxHandler.pollCanData();
     drivers->xavierSerial.updateSerial();
     drivers->refSerial.updateSerial();
-    drivers->remote.read();
 }
