@@ -36,9 +36,6 @@
 /* control includes ---------------------------------------------------------*/
 #include "aruwsrc/control/robot_control.hpp"
 
-#include "dma.hpp"
-#include "uart_1_dma.hpp"
-
 using namespace modm::literals;
 using aruwlib::Drivers;
 
@@ -56,13 +53,35 @@ void updateIo(aruwlib::Drivers *drivers);
 
 int main()
 {
+#ifdef PLATFORM_HOSTED
+    std::cout << "Simulation starting..." << std::endl;
+#endif
+
+    /*
+     * NOTE: We are using DoNotUse_getDrivers here because in the main
+     *      robot loop we must access the singleton drivers to update
+     *      IO states and run the scheduler.
+     */
+    aruwlib::Drivers *drivers = aruwlib::DoNotUse_getDrivers();
+
     Board::initialize();
-    aruwlib::DoNotUse_getDrivers()->leds.init();
-    aruwlib::DoNotUse_getDrivers()->remote.initialize();
+    initializeIo(drivers);
+    aruwsrc::control::initSubsystemCommands(drivers);
 
     while (1)
     {
-        modm::delay_ms(1);
+        // do this as fast as you can
+        updateIo(drivers);
+
+        if (sendMotorTimeout.execute())
+        {
+            drivers->mpu6500.read();
+            drivers->remote.monitorRemoteStatus();
+            drivers->errorController.update();
+            drivers->commandScheduler.run();
+            drivers->djiMotorTxHandler.processCanSendData();
+        }
+        modm::delay_us(10);
     }
     return 0;
 }
