@@ -274,6 +274,9 @@ public:
          */
         static void disableInterrupt(Interrupt_t irq) { StreamHal::disableInterrupt(irq); }
 
+        template<DmaBase::ChannelSelection Ch, Peripheral Periph, Signal Sig>
+        struct RequestMapping {
+        };
     private:
         static inline DmaBase::IrqHandler transferError{nullptr};
         static inline DmaBase::IrqHandler transferComplete{nullptr};
@@ -309,6 +312,1255 @@ public:
     using Stream6 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
     using Stream7 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
 };  // class Dma2
+
+/*
+ * Specialization of the RequestMapping. For all hardware supported by DMA the
+ * RequestMapping structure defines the channel and the Request. It can be used
+ * by hardware classes to verify that the provided channel is valid and to
+ * get the value to set in setPeripheralRequest().
+ *
+ * Example:
+ * template <class DmaRx, class DmaTx>
+ * class SpiMaster1_Dma : public SpiMaster1
+ * {
+ *     using RxChannel = typename DmaRx::template RequestMapping<Peripheral::Spi1, DmaBase::Signal::Rx>::Channel;
+ * 	   using TxChannel = typename DmaTx::template RequestMapping<Peripheral::Spi1, DmaBase::Signal::Tx>::Channel;
+ * 	   static constexpr DmaBase::Request RxRequest = DmaRx::template RequestMapping<Peripheral::Spi1, DmaBase::Signal::Rx>::Request;
+ * 	   static constexpr DmaBase::Request TxRequest = DmaTx::template RequestMapping<Peripheral::Spi1, DmaBase::Signal::Tx>::Request;
+ *
+ *     ...
+ * };
+ */
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Spi3, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::I2c1, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::Tim4, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::I2s3, DmaBase::Signal::Ext_rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Uart5, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Uart8, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Ch3>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Tim2, DmaBase::Signal::Ch3>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Tim2, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Usart3, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Uart7, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Ch4>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Trig>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Tim6, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Spi3, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Tim7, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::I2s3, DmaBase::Signal::Ext_rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::I2c3, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Uart4, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Tim3, DmaBase::Signal::Ch4>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Tim3, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::I2c2, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Spi2, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::Tim4, DmaBase::Signal::Ch2>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::I2s2, DmaBase::Signal::Ext_rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Usart3, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Uart7, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Ch4>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Trig>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::I2c2, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Spi2, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Tim7, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::I2s2, DmaBase::Signal::Ext_tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::I2c3, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Uart4, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Tim3, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Tim3, DmaBase::Signal::Trig>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Ch2>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Usart3, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Spi3, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::I2c1, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::I2s3, DmaBase::Signal::Ext_tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Tim2, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Usart2, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Tim3, DmaBase::Signal::Ch2>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Dac, DmaBase::Signal::Dac1>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::I2c1, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::Tim4, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Tim2, DmaBase::Signal::Ch2>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Tim2, DmaBase::Signal::Ch4>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Usart2, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Uart8, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim5, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Dac, DmaBase::Signal::Dac2>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Spi3, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::I2c1, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::Tim4, DmaBase::Signal::Ch3>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Tim2, DmaBase::Signal::Ch4>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Tim2, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Uart5, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Tim3, DmaBase::Signal::Ch3>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::I2c2, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<1>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Adc1, DmaBase::Signal::NoSignal>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::Adc3, DmaBase::Signal::NoSignal>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Spi1, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Spi4, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Trig>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_0>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Sai1, DmaBase::Signal::A>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Dcmi, DmaBase::Signal::NoSignal>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::Adc3, DmaBase::Signal::NoSignal>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Spi4, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Usart6, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Tim8, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_1>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Tim8, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Tim8, DmaBase::Signal::Ch2>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Tim8, DmaBase::Signal::Ch3>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Adc2, DmaBase::Signal::NoSignal>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Spi1, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Usart1, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Usart6, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Ch2>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Tim8, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_2>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Sai1, DmaBase::Signal::A>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Adc2, DmaBase::Signal::NoSignal>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::Spi5, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Spi1, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Sdio, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Sdio, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Spi4, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Tim8, DmaBase::Signal::Ch2>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_3>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Adc1, DmaBase::Signal::NoSignal>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Sai1, DmaBase::Signal::B>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_2, Peripheral::Spi5, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_2;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Spi4, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Ch4>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Com>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Trig>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Tim8, DmaBase::Signal::Ch3>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_4>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Sai1, DmaBase::Signal::B>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Spi6, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_3, Peripheral::Spi1, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_3;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Usart1, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Up>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Spi5, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_5>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Tim1, DmaBase::Signal::Ch1>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Tim1, DmaBase::Signal::Ch2>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_0, Peripheral::Tim1, DmaBase::Signal::Ch3>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_0;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Spi6, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Sdio, DmaBase::Signal::Rx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Sdio, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Usart6, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_6, Peripheral::Tim1, DmaBase::Signal::Ch3>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_6;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Spi5, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_1, Peripheral::Dcmi, DmaBase::Signal::NoSignal>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_1;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_4, Peripheral::Usart1, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_4;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_5, Peripheral::Usart6, DmaBase::Signal::Tx>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_5;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Tim8, DmaBase::Signal::Ch4>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Tim8, DmaBase::Signal::Com>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
+template<>
+template<>
+template<>
+struct DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>::RequestMapping<DmaBase::ChannelSelection::CHANNEL_7, Peripheral::Tim8, DmaBase::Signal::Trig>
+{
+    using Stream = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
+    static constexpr DmaBase::ChannelSelection Channel = DmaBase::ChannelSelection::CHANNEL_7;
+};
+
+
 }  // namespace platform
 }  // namespace modm
 

@@ -42,10 +42,8 @@ template <
 class Usart1 : public UartBase, public ::modm::Uart
 {
 private:
-    struct Dma
-    {
-
-    };
+    using TxStream = typename DmaStreamTx::template RequestMapping<ChannelIdTx, Peripheral::Usart1, DmaBase::Signal::Tx>::Stream;
+    using RxStream = typename DmaStreamRx::template RequestMapping<ChannelIdRx, Peripheral::Usart1, DmaBase::Signal::Rx>::Stream;
 
 public:
     template <template <Peripheral _> class... Signals>
@@ -67,7 +65,7 @@ public:
     /**
      * Performs DMA/UART specific integration configuration.
      *
-     * @note DmaStreamRx and DmaStreamTx should be pre-configured (configuration is not done in
+     * @note RxStream and TxStream should be pre-configured (configuration is not done in
      *      this function). Also, this function **does not** configure any interrupts. The user
      *      may choose to do this.
      */
@@ -86,19 +84,19 @@ public:
 
         // See page 1003 in STM32F405/415, STM32F407/417, STM32F427/437 and STM32F429/439 advanced
         // Arm-based 32-bit MCUs - Reference manual
-        DmaStreamTx::disable();
+        TxStream::disable();
 
         // Write the memory address in the DMA configuration register to configure it as the
         // source of the transfer. The data will be loaded into the USART_DR register from this
         // memory area after each TXE event.
-        DmaStreamTx::setDestinationAddress(reinterpret_cast<uintptr_t>(&USART1->DR));
+        TxStream::setDestinationAddress(reinterpret_cast<uintptr_t>(&USART1->DR));
 
         if (enableDmaInterrupts)
         {
-            DmaStreamTx::enableInterruptVector(interruptPriority);
-            DmaStreamTx::enableInterrupt(DmaBase::Interrupt::ALL);
-            DmaStreamTx::setTransferErrorIrqHandler(transferErrorHandlerTx);
-            DmaStreamTx::setTransferCompleteIrqHandler(transferCompleteHandlerTx);
+            TxStream::enableInterruptVector(interruptPriority);
+            TxStream::enableInterrupt(DmaBase::Interrupt::ALL);
+            TxStream::setTransferErrorIrqHandler(transferErrorHandlerTx);
+            TxStream::setTransferCompleteIrqHandler(transferCompleteHandlerTx);
         }
 
         // Clear the TC bit in the SR register by writing 0 to it.
@@ -110,14 +108,14 @@ public:
         // Write the USART_DR register address in the DMA control register to configure it as the
         // source of the transfer. The data will be moved from this address to the memory after
         // each RXNE event.
-        DmaStreamRx::setSourceAddress(reinterpret_cast<uintptr_t>(&USART1->DR));
+        RxStream::setSourceAddress(reinterpret_cast<uintptr_t>(&USART1->DR));
 
         if (enableDmaInterrupts)
         {
-            DmaStreamRx::enableInterruptVector(interruptPriority);
-            DmaStreamRx::enableInterrupt(DmaBase::Interrupt::ALL);
-            DmaStreamTx::setTransferErrorIrqHandler(transferErrorHandlerRx);
-            DmaStreamTx::setTransferCompleteIrqHandler(transferCompleteHandlerRx);
+            RxStream::enableInterruptVector(interruptPriority);
+            RxStream::enableInterrupt(DmaBase::Interrupt::ALL);
+            TxStream::setTransferErrorIrqHandler(transferErrorHandlerRx);
+            TxStream::setTransferCompleteIrqHandler(transferCompleteHandlerRx);
         }
 
         // Enable UART DMA RX
@@ -133,13 +131,13 @@ public:
     static bool write(uint8_t &data)
     {
         finishedTx = false;
-        return DmaStreamTx::configureWrite(&data);
+        return TxStream::configureWrite(&data);
     }
 
     static bool write(const uint8_t *buffer, std::size_t length)
     {
         finishedTx = false;
-        return DmaStreamTx::configureWrite(buffer, length);
+        return TxStream::configureWrite(buffer, length);
     }
 
     /**
@@ -149,7 +147,7 @@ public:
      */
     static bool isWriteFinished()
     {
-        if (DmaStreamRx::getInterruptFlags().any(DmaBase::Interrupt::TRANSFER_COMPLETE))
+        if (RxStream::getInterruptFlags().any(DmaBase::Interrupt::TRANSFER_COMPLETE))
         {
             return finishedTx;
         }
@@ -159,11 +157,11 @@ public:
         }
     }
 
-    static bool read(uint8_t &data) { return DmaStreamRx::configureRead(&data, 1); }
+    static bool read(uint8_t &data) { return RxStream::configureRead(&data, 1); }
 
     static bool read(uint8_t *buffer, std::size_t length)
     {
-        return DmaStreamRx::configureRead(buffer, length);
+        return RxStream::configureRead(buffer, length);
     }
 
     static bool hasError()
@@ -198,7 +196,7 @@ public:
 
     static void transferErrorHandlerTx()
     {
-        DmaStreamTx::disable();
+        TxStream::disable();
         hasErrorTx = true;
         uart1DmaTxError();
     }
@@ -208,7 +206,7 @@ public:
         // When number of data transfers programmed in the DMA controller is reached, the DMA
         // controller generates an interrupt on the DMA channel interrupt vector The DMAR bit should
         // be cleared by software in the USART_Cr3 register during the interrupt subroutine
-        DmaStreamRx::disable();
+        RxStream::disable();
         USART1->CR3 &= ~USART_CR3_DMAR;
         finishedTx = true;
         uart1DmaTxComplete();
@@ -216,13 +214,13 @@ public:
 
     static void transferErrorHandlerRx()
     {
-        DmaStreamRx::disable();
+        RxStream::disable();
         uart1DmaRxError();
     }
 
     static void transferCompleteHandlerRx()
     {
-        DmaStreamRx::disable();
+        RxStream::disable();
         uart1DmaRxComplete();
     }
 

@@ -209,7 +209,6 @@ public:
     };
 
 	enum class Signal : uint8_t {
-		NoSignal,
 		A,
 		B,
 		Ch1,
@@ -221,6 +220,7 @@ public:
 		Dac2,
 		Ext_rx,
 		Ext_tx,
+		NoSignal,
 		Rx,
 		Trig,
 		Tx,
