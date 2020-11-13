@@ -31,12 +31,8 @@
 using namespace aruwlib::serial;
 
 #ifndef PLATFORM_HOSTED
-using namespace modm::platform;
-#endif
-
-namespace aruwlib
+namespace modm::platform
 {
-#ifndef PLATFORM_HOSTED
 void uart1IrqHandler()
 {
     // Idle flag set
@@ -45,7 +41,10 @@ void uart1IrqHandler()
         aruwlib::DoNotUse_getDrivers()->remote.read();
     }
 }
+}
 #endif
+
+namespace aruwlib {
 
 void Remote::initialize()
 {
