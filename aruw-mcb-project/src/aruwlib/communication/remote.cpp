@@ -41,11 +41,11 @@ void uart1IrqHandler()
         aruwlib::DoNotUse_getDrivers()->remote.read();
     }
 }
-}
+}  // namespace modm::platform
 #endif
 
-namespace aruwlib {
-
+namespace aruwlib
+{
 void Remote::initialize()
 {
 #ifndef PLATFORM_HOSTED
