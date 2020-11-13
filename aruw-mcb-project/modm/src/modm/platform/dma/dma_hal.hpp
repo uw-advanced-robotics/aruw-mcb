@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2020, Matthew Arnold
+ *
+ * This file is part of the modm project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+// ----------------------------------------------------------------------------
+
+#ifndef PLATFORM_HOSTED
+
 #ifndef DMA_HAL_HPP_
 #define DMA_HAL_HPP_
 
@@ -6,9 +19,9 @@
 
 #include "dma_base.hpp"
 
-namespace aruwlib
+namespace modm
 {
-namespace arch
+namespace platform
 {
 template <uint32_t ID>
 class DmaHal : public DmaBase
@@ -290,7 +303,9 @@ public:
     static void setDataLength(std::size_t length) { streamPtr()->NDTR = length; }
 };  // class DmaStreamHal
 
-}  // namespace arch
-}  // namespace aruwlib
+}  // namespace platform
+}  // namespace modm
 
 #endif  // MODM_STM32_DMA_HAL_HPP
+
+#endif

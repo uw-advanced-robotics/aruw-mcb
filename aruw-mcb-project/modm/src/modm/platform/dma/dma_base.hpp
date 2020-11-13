@@ -1,19 +1,33 @@
+/*
+ * Copyright (c) 2020, Matthew Arnold
+ *
+ * This file is part of the modm project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+// ----------------------------------------------------------------------------
+
 #ifndef MODM_STM32_DMA_BASE_HPP
 #define MODM_STM32_DMA_BASE_HPP
 
 #include <stdint.h>
+#include "../device.hpp"
 
 #include <modm/architecture/interface/assert.hpp>
 #include <modm/architecture/interface/interrupt.hpp>
 #include <modm/architecture/interface/register.hpp>
-#include <modm/platform/device.hpp>
 
-namespace aruwlib
+
+namespace modm
 {
-namespace arch
+namespace platform
 {
 /**
  * Class that defines register masks and interrupt handlers for DMA.
+ * 
+ * @author Matthew Arnold
  */
 class DmaBase
 {
@@ -183,7 +197,7 @@ public:
     // End DMA_SxFCR masks
 
     enum class StreamID : uint32_t
-    {
+    {   
         STREAM_0 = 0,
         STREAM_1 = 1,
         STREAM_2 = 2,
@@ -194,28 +208,39 @@ public:
         STREAM_7 = 7,
     };
 
+	enum class Signal : uint8_t {
+		NoSignal,
+		A,
+		B,
+		Ch1,
+		Ch2,
+		Ch3,
+		Ch4,
+		Com,
+		Dac1,
+		Dac2,
+		Ext_rx,
+		Ext_tx,
+		Rx,
+		Trig,
+		Tx,
+		Up,
+	};
+
 protected:
     /**
      * Use to clear interrupts on a particular stream. Masks all interrupts for the
      * specified stream.
      */
-    static constexpr uint32_t dmaStreamIFCRMasks[]{
-        DMA_LIFCR_CFEIF0 | DMA_LIFCR_CDMEIF0 | DMA_LIFCR_CTEIF0 | DMA_LIFCR_CHTIF0 |
-            DMA_LIFCR_CTCIF0,
-        DMA_LIFCR_CFEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CHTIF1 |
-            DMA_LIFCR_CTCIF1,
-        DMA_LIFCR_CFEIF2 | DMA_LIFCR_CDMEIF2 | DMA_LIFCR_CTEIF2 | DMA_LIFCR_CHTIF2 |
-            DMA_LIFCR_CTCIF2,
-        DMA_LIFCR_CFEIF3 | DMA_LIFCR_CDMEIF3 | DMA_LIFCR_CTEIF3 | DMA_LIFCR_CHTIF3 |
-            DMA_LIFCR_CTCIF3,
-        DMA_HIFCR_CFEIF4 | DMA_HIFCR_CDMEIF4 | DMA_HIFCR_CTEIF4 | DMA_HIFCR_CHTIF4 |
-            DMA_HIFCR_CTCIF4,
-        DMA_HIFCR_CFEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CHTIF5 |
-            DMA_HIFCR_CTCIF5,
-        DMA_HIFCR_CFEIF6 | DMA_HIFCR_CDMEIF6 | DMA_HIFCR_CTEIF6 | DMA_HIFCR_CHTIF6 |
-            DMA_HIFCR_CTCIF6,
-        DMA_HIFCR_CFEIF7 | DMA_HIFCR_CDMEIF7 | DMA_HIFCR_CTEIF7 | DMA_HIFCR_CHTIF7 |
-            DMA_HIFCR_CTCIF7,
+    static constexpr uint32_t dmaStreamIFCRMasks[] {
+        DMA_LIFCR_CFEIF0 | DMA_LIFCR_CDMEIF0 | DMA_LIFCR_CTEIF0 | DMA_LIFCR_CHTIF0 | DMA_LIFCR_CTCIF0,
+        DMA_LIFCR_CFEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTCIF1,
+        DMA_LIFCR_CFEIF2 | DMA_LIFCR_CDMEIF2 | DMA_LIFCR_CTEIF2 | DMA_LIFCR_CHTIF2 | DMA_LIFCR_CTCIF2,
+        DMA_LIFCR_CFEIF3 | DMA_LIFCR_CDMEIF3 | DMA_LIFCR_CTEIF3 | DMA_LIFCR_CHTIF3 | DMA_LIFCR_CTCIF3,
+        DMA_HIFCR_CFEIF4 | DMA_HIFCR_CDMEIF4 | DMA_HIFCR_CTEIF4 | DMA_HIFCR_CHTIF4 | DMA_HIFCR_CTCIF4,
+        DMA_HIFCR_CFEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CHTIF5 | DMA_HIFCR_CTCIF5,
+        DMA_HIFCR_CFEIF6 | DMA_HIFCR_CDMEIF6 | DMA_HIFCR_CTEIF6 | DMA_HIFCR_CHTIF6 | DMA_HIFCR_CTCIF6,
+        DMA_HIFCR_CFEIF7 | DMA_HIFCR_CDMEIF7 | DMA_HIFCR_CTEIF7 | DMA_HIFCR_CHTIF7 | DMA_HIFCR_CTCIF7,
     };
 
     /**
@@ -279,7 +304,8 @@ struct DmaBase::Nvic<2>
         DMA2_Stream7_IRQn,
     };
 };
-}  // namespace arch
-}  // namespace aruwlib
+
+}  // namespace platform
+}  // namespace modm
 
 #endif  // MODM_STM32_DMA_BASE_HPP

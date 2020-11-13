@@ -20,7 +20,8 @@ files_to_whitelist = [
     'aruwsrc/control/soldier_control.cpp',
     'aruwsrc/control/drone_control.cpp',
     'aruwsrc/control/hero_control.cpp',
-    'main.cpp'
+    'main.cpp',
+    'aruwlib/communication/remote.cpp'
 ]
 
 # Add on the project_path to all files in files_to_whitelist

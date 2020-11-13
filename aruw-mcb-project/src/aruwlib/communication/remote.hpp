@@ -24,11 +24,10 @@
 
 #ifndef PLATFORM_HOSTED
 #include <modm/platform.hpp>
+#include <modm/platform/uart/uart_1.hpp>
 #endif
 
-#include "dma.hpp"
 #include "mock_macros.hpp"
-#include "uart_1_dma.hpp"
 
 namespace aruwlib
 {
@@ -39,11 +38,13 @@ class Drivers;
 class Remote
 {
 public:
-    using RemoteDma = aruwlib::arch::Usart1Dma<
-        aruwlib::arch::Dma2::Stream7,
-        aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4,
-        aruwlib::arch::Dma2::Stream2,
-        aruwlib::arch::DmaBase::ChannelSelection::CHANNEL_4>;
+#ifndef PLATFORM_HOSTED
+    using RemoteDma = modm::platform::Usart1<
+        modm::platform::Dma2::Stream7,
+        modm::platform::DmaBase::ChannelSelection::CHANNEL_4,
+        modm::platform::Dma2::Stream2,
+        modm::platform::DmaBase::ChannelSelection::CHANNEL_4>;
+#endif
 
     Remote(Drivers *drivers) : drivers(drivers) {}
     Remote(const Remote &) = delete;

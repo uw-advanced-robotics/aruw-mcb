@@ -1,5 +1,18 @@
-#ifndef DMA_HPP_
-#define DMA_HPP_
+/*
+ * Copyright (c) 2014, Kevin Läufer
+ * Copyright (c) 2014-2017, Niklas Hauser
+ * Copyright (c) 2020, Mike Wolfram
+ *
+ * This file is part of the modm project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+// ----------------------------------------------------------------------------
+
+#ifndef MODM_STM32_DMA_HPP
+#define MODM_STM32_DMA_HPP
 
 #include <stdint.h>
 
@@ -7,9 +20,9 @@
 
 #include "dma_hal.hpp"
 
-namespace aruwlib
+namespace modm
 {
-namespace arch
+namespace platform
 {
 /**
  * DMA controller for stm32f4 series microcontrollers
@@ -27,11 +40,11 @@ public:
     {
         if constexpr (ID == 1)
         {
-            modm::platform::Rcc::enable<modm::platform::Peripheral::Dma1>();
+            Rcc::enable<Peripheral::Dma1>();
         }
         else if constexpr (ID == 2)
         {
-            modm::platform::Rcc::enable<modm::platform::Peripheral::Dma2>();
+            Rcc::enable<Peripheral::Dma2>();
         }
     }
 
@@ -42,11 +55,11 @@ public:
     {
         if constexpr (ID == 1)
         {
-            modm::platform::Rcc::disable<modm::platform::Peripheral::Dma1>();
+            Rcc::disable<Peripheral::Dma1>();
         }
         else if constexpr (ID == 2)
         {
-            modm::platform::Rcc::disable<modm::platform::Peripheral::Dma2>();
+            Rcc::disable<Peripheral::Dma2>();
         }
     }
 
@@ -296,7 +309,7 @@ public:
     using Stream6 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_6>;
     using Stream7 = DmaController<2>::Stream<DmaBase::StreamID::STREAM_7>;
 };  // class Dma2
-}  // namespace arch
-}  // namespace aruwlib
+}  // namespace platform
+}  // namespace modm
 
-#endif  // DMA_HPP_
+#endif  // MODM_STM32_DMA_HPP
