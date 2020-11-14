@@ -24,6 +24,7 @@
 
 #ifndef PLATFORM_HOSTED
 #include <modm/platform.hpp>
+#include <modm/platform/uart/uart_1.hpp>
 #endif
 
 #include "mock_macros.hpp"
@@ -31,14 +32,20 @@
 namespace aruwlib
 {
 class Drivers;
-
 /**
- * A unique UART handler that uses timing in leu of DBUS communication (modm does not
- * support DBUS) to interact with the DR16 receiver.
+ * Communication with the remote via UART + DMA
  */
 class Remote
 {
 public:
+#ifndef PLATFORM_HOSTED
+    using RemoteDma = modm::platform::Usart1<
+        modm::platform::Dma2::Stream7,
+        modm::platform::DmaBase::ChannelSelection::CHANNEL_4,
+        modm::platform::Dma2::Stream2,
+        modm::platform::DmaBase::ChannelSelection::CHANNEL_4>;
+#endif
+
     Remote(Drivers *drivers) : drivers(drivers) {}
     Remote(const Remote &) = delete;
     Remote &operator=(const Remote &) = delete;
@@ -167,12 +174,16 @@ public:
      */
     mockable uint32_t getUpdateCounter() const;
 
+    /**
+     * Checks if the remote is offline and if so resets the remote info struct.
+     */
+    mockable void monitorRemoteStatus();
+
 private:
-    static const int REMOTE_BUF_LEN = 18;              ///< Length of the remote recieve buffer.
-    static const int REMOTE_READ_TIMEOUT = 6;          ///< Timeout delay between valid packets.
-    static const int REMOTE_DISCONNECT_TIMEOUT = 100;  ///< Timeout delay for remote disconnect.
-    static const int REMOTE_INT_PRI = 12;              ///< Interrupt priority.
-    static constexpr float STICK_MAX_VALUE = 660.0f;   ///< Max value received by one of the sticks.
+    static constexpr int DMA_BUFF_SIZE = 50;  ///< Size of DMA buffer used when requesting data.
+    static constexpr int REMOTE_PACKET_SIZE = 18;     ///< Length of the remote recieve buffer.
+    static constexpr float STICK_MAX_VALUE = 660.0f;  ///< Max value received by one of the sticks.
+    static constexpr uint32_t RECEIVE_PERIOD = 14;    ///< Time between message receivals, in ms
 
     ///< The current remote information
     struct RemoteInfo
@@ -200,17 +211,14 @@ private:
 
     RemoteInfo remote;
 
-    ///< Remote connection state.
-    bool connected = false;
-
     ///< UART recieve buffer.
-    uint8_t rxBuffer[REMOTE_BUF_LEN]{0};
+    uint8_t rxBuffer[DMA_BUFF_SIZE]{0};
 
     ///< Timestamp when last byte was read (milliseconds).
     uint32_t lastRead = 0;
 
-    ///< Current count of bytes read.
-    uint8_t currentBufferIndex = 0;
+    ///< An indication that the remote info has been reset.
+    bool resetFlag = false;
 
     ///< Parses the current rxBuffer.
     void parseBuffer();

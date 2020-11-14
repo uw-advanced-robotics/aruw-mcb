@@ -76,6 +76,7 @@ int main()
         if (sendMotorTimeout.execute())
         {
             drivers->mpu6500.read();
+            drivers->remote.monitorRemoteStatus();
             drivers->errorController.update();
             drivers->commandScheduler.run();
             drivers->djiMotorTxHandler.processCanSendData();
@@ -125,5 +126,4 @@ void updateIo(aruwlib::Drivers *drivers)
     drivers->canRxHandler.pollCanData();
     drivers->xavierSerial.updateSerial();
     drivers->refSerial.updateSerial();
-    drivers->remote.read();
 }

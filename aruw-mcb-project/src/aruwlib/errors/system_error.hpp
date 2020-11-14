@@ -53,6 +53,7 @@ enum Location
     TURRET,
     SERVO,
     LOCATION_AMOUNT,
+    REMOTE
 };
 
 // Type of errors; subject to change
