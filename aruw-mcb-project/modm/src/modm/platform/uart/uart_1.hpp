@@ -1,10 +1,5 @@
 /*
- * Copyright (c) 2009-2012, Fabian Greif
- * Copyright (c) 2010, Martin Rosekeit
- * Copyright (c) 2011, Georgi Grinshpun
- * Copyright (c) 2011, 2013-2017, Niklas Hauser
- * Copyright (c) 2012, Sascha Schade
- * Copyright (c) 2013, 2016, Kevin Läufer
+ * Copyright (c) 2020 Matthew Arnold
  *
  * This file is part of the modm project.
  *
@@ -14,119 +9,226 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef MODM_STM32_UART_1_HPP
-#define MODM_STM32_UART_1_HPP
+#ifndef MODM_STM32_UART_1_DMA_HPP
+#define MODM_STM32_UART_1_DMA_HPP
 
 #include <modm/architecture/interface/uart.hpp>
 #include <modm/platform/gpio/connector.hpp>
-#include "uart_base.hpp"
-#include "uart_baudrate.hpp"
 #include "uart_hal_1.hpp"
+
+#include <modm/platform/dma/dma.hpp>
 
 namespace modm
 {
-
 namespace platform
 {
-
 /**
- * Universal asynchronous receiver transmitter (USART1)
- *
- * @author		Kevin Laeufer
- * @author		Niklas Hauser
- * @ingroup		modm_platform_uart modm_platform_uart_1
+ * Interrupt handler callback for USART1_isr.
  */
+__attribute__((weak)) void uart1IrqHandler(void);
+/**
+ * Interrupt handlers for USART1 DMA TX and RX streams.
+ */
+__attribute__((weak)) void uart1DmaTxComplete(void);
+__attribute__((weak)) void uart1DmaTxError(void);
+__attribute__((weak)) void uart1DmaRxComplete(void);
+__attribute__((weak)) void uart1DmaRxError(void);
+
+template <
+    typename DmaStreamTx,
+    DmaBase::ChannelSelection ChannelIdRx,
+    typename DmaStreamRx,
+    DmaBase::ChannelSelection ChannelIdTx>
 class Usart1 : public UartBase, public ::modm::Uart
 {
 private:
-	/// Second stage initialize for buffered uart
-	// that need to be implemented in the .cpp
-	static void
-	initializeBuffered(uint32_t interruptPriority);
-public:
-	using Hal = UsartHal1;
-	// Expose jinja template parameters to be checked by e.g. drivers or application
-	static constexpr size_t RxBufferSize = 256;
-	static constexpr size_t TxBufferSize = 256;
+    using TxStream = typename DmaStreamTx::template RequestMapping<ChannelIdTx, Peripheral::Usart1, DmaBase::Signal::Tx>::Stream;
+    using RxStream = typename DmaStreamRx::template RequestMapping<ChannelIdRx, Peripheral::Usart1, DmaBase::Signal::Rx>::Stream;
 
 public:
-	template< template<Peripheral _> class... Signals >
-	static void
-	connect(Gpio::InputType InputTypeRx = Gpio::InputType::PullUp,
-	        Gpio::OutputType OutputTypeTx = Gpio::OutputType::PushPull)
-	{
-		using Connector = GpioConnector<Peripheral::Usart1, Signals...>;
-		using Tx = typename Connector::template GetSignal< Gpio::Signal::Tx >;
-		using Rx = typename Connector::template GetSignal< Gpio::Signal::Rx >;
-		static_assert(((Connector::template IsValid<Tx> and Connector::template IsValid<Rx>) and sizeof...(Signals) == 2) or
-					  ((Connector::template IsValid<Tx> or  Connector::template IsValid<Rx>) and sizeof...(Signals) == 1),
-					  "Usart1::connect() requires one Tx and/or one Rx signal!");
+    template <template <Peripheral _> class... Signals>
+    static void connect(Gpio::InputType InputTypeRx = Gpio::InputType::PullUp,
+                        Gpio::OutputType OutputTypeTx = Gpio::OutputType::PushPull)
+    {
+        using Connector = GpioConnector<Peripheral::Usart1, Signals...>;
+        using Tx = typename Connector::template GetSignal<Gpio::Signal::Tx>;
+        using Rx = typename Connector::template GetSignal<Gpio::Signal::Rx>;
+        static_assert(((Connector::template IsValid<Tx> and Connector::template IsValid<Rx>)and sizeof...(Signals) == 2) or
+                      ((Connector::template IsValid<Tx> or Connector::template IsValid<Rx>)and sizeof...(Signals) == 1),
+                      "Usart1::connect() requires one Tx and/or one Rx signal!");
 
-		// Connector::disconnect();
-		Tx::setOutput(OutputTypeTx);
-		Rx::setInput(InputTypeRx);
-		Connector::connect();
-	}
+        Tx::setOutput(OutputTypeTx);
+        Rx::setInput(InputTypeRx);
+        Connector::connect();
+    }
 
-	template< class SystemClock, baudrate_t baudrate, percent_t tolerance=pct(1) >
-	static void modm_always_inline
-	initialize(uint32_t interruptPriority = 12, Parity parity = Parity::Disabled)
-	{
-		UsartHal1::initializeWithBrr(
-				UartBaudrate::getBrr<SystemClock::Usart1, baudrate, tolerance>(),
-				parity,
-				UartBaudrate::getOversamplingMode(SystemClock::Usart1, baudrate));
-		initializeBuffered(interruptPriority);
-		UsartHal1::setTransmitterEnable(true);
-		UsartHal1::setReceiverEnable(true);
-	}
+    /**
+     * Performs DMA/UART specific integration configuration.
+     *
+     * @note RxStream and TxStream should be pre-configured (configuration is not done in
+     *      this function). Also, this function **does not** configure any interrupts. The user
+     *      may choose to do this.
+     */
+    template <typename SystemClock, modm::baudrate_t baudrate, modm::percent_t tolerance = modm::pct(1)>
+    static void initialize(bool enableDmaInterrupts = true, uint32_t interruptPriority = 12,
+                           UartBase::Parity parity = Parity::Disabled)
+    {
+        UsartHal1::initializeWithBrr(
+            UartBaudrate::getBrr<SystemClock::Usart1, baudrate, tolerance>(),
+            parity, UartBaudrate::getOversamplingMode(SystemClock::Usart1, baudrate));
 
-	static void
-	writeBlocking(uint8_t data);
+        UsartHal1::enableInterruptVector(true, interruptPriority);
+        UsartHal1::enableInterrupt(Interrupt::RxNotEmpty);
+        UsartHal1::setTransmitterEnable(true);
+        UsartHal1::setReceiverEnable(true);
 
-	static void
-	writeBlocking(const uint8_t *data, std::size_t length);
+        // See page 1003 in STM32F405/415, STM32F407/417, STM32F427/437 and STM32F429/439 advanced
+        // Arm-based 32-bit MCUs - Reference manual
+        TxStream::disable();
 
-	static void
-	flushWriteBuffer();
+        // Write the memory address in the DMA configuration register to configure it as the
+        // source of the transfer. The data will be loaded into the USART_DR register from this
+        // memory area after each TXE event.
+        TxStream::setDestinationAddress(reinterpret_cast<uintptr_t>(&USART1->DR));
 
-	static bool
-	write(uint8_t data);
+        if (enableDmaInterrupts)
+        {
+            TxStream::enableInterruptVector(interruptPriority);
+            TxStream::enableInterrupt(DmaBase::Interrupt::ALL);
+            TxStream::setTransferErrorIrqHandler(transferErrorHandlerTx);
+            TxStream::setTransferCompleteIrqHandler(transferCompleteHandlerTx);
+        }
 
-	static std::size_t
-	write(const uint8_t *data, std::size_t length);
+        // Clear the TC bit in the SR register by writing 0 to it.
+        USART1->SR &= ~USART_SR_TC;
 
-	static bool
-	isWriteFinished();
+        // Enable UART DMA TX
+        USART1->CR3 |= USART_CR3_DMAT;
 
-	static std::size_t
-	transmitBufferSize();
+        // Write the USART_DR register address in the DMA control register to configure it as the
+        // source of the transfer. The data will be moved from this address to the memory after
+        // each RXNE event.
+        RxStream::setSourceAddress(reinterpret_cast<uintptr_t>(&USART1->DR));
 
-	static std::size_t
-	discardTransmitBuffer();
+        if (enableDmaInterrupts)
+        {
+            RxStream::enableInterruptVector(interruptPriority);
+            RxStream::enableInterrupt(DmaBase::Interrupt::ALL);
+            TxStream::setTransferErrorIrqHandler(transferErrorHandlerRx);
+            TxStream::setTransferCompleteIrqHandler(transferCompleteHandlerRx);
+        }
 
-	static bool
-	read(uint8_t &data);
+        // Enable UART DMA RX
+        USART1->CR3 |= USART_CR3_DMAR;
+    }
 
-	static std::size_t
-	read(uint8_t *buffer, std::size_t length);
+    static void flushWriteBuffer()
+    {
+        while (!isWriteFinished())
+            ;
+    }
 
-	static std::size_t
-	receiveBufferSize();
+    static bool write(uint8_t &data)
+    {
+        finishedTx = false;
+        return TxStream::configureWrite(&data);
+    }
 
-	static std::size_t
-	discardReceiveBuffer();
+    static bool write(const uint8_t *buffer, std::size_t length)
+    {
+        finishedTx = false;
+        return TxStream::configureWrite(buffer, length);
+    }
 
-	static bool
-	hasError();
+    /**
+     * @note Write interrupts must be enabled on the tx channel (pass in `enableDmaInterrupts =
+     * true` into `initialize` in order for this function to work, otherwise `true` is always
+     *      returned.
+     */
+    static bool isWriteFinished()
+    {
+        if (RxStream::getInterruptFlags().any(DmaBase::Interrupt::TRANSFER_COMPLETE))
+        {
+            return finishedTx;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-	static void
-	clearError();
+    static bool read(uint8_t &data) { return RxStream::configureRead(&data, 1); }
 
-};
+    static bool read(uint8_t *buffer, std::size_t length)
+    {
+        return RxStream::configureRead(buffer, length);
+    }
 
-}	// namespace platform
+    static bool hasError()
+    {
+        return UsartHal1::getInterruptFlags().any(
+            UsartHal1::InterruptFlag::ParityError |
+#ifdef USART_ISR_NE
+            UsartHal1::InterruptFlag::NoiseError |
+#endif
+            UsartHal1::InterruptFlag::OverrunError |
+            UsartHal1::InterruptFlag::FramingError);
+    }
 
-}	// namespace modm
+    static void clearError()
+    {
+        return UsartHal1::acknowledgeInterruptFlags(
+            UsartHal1::InterruptFlag::ParityError |
+#ifdef USART_ISR_NE
+            UsartHal1::InterruptFlag::NoiseError |
+#endif
+            UsartHal1::InterruptFlag::OverrunError |
+            UsartHal1::InterruptFlag::FramingError);
+    }
 
-#endif // MODM_STM32_UART_1_HPP
+    static void clearIdleFlag()
+    {
+        int val = 0;
+        val = USART1->SR;
+        val = USART1->DR;
+        static_cast<void>(val);
+    }
+
+    static void transferErrorHandlerTx()
+    {
+        TxStream::disable();
+        hasErrorTx = true;
+        uart1DmaTxError();
+    }
+
+    static void transferCompleteHandlerTx()
+    {
+        // When number of data transfers programmed in the DMA controller is reached, the DMA
+        // controller generates an interrupt on the DMA channel interrupt vector The DMAR bit should
+        // be cleared by software in the USART_Cr3 register during the interrupt subroutine
+        RxStream::disable();
+        USART1->CR3 &= ~USART_CR3_DMAR;
+        finishedTx = true;
+        uart1DmaTxComplete();
+    }
+
+    static void transferErrorHandlerRx()
+    {
+        RxStream::disable();
+        uart1DmaRxError();
+    }
+
+    static void transferCompleteHandlerRx()
+    {
+        RxStream::disable();
+        uart1DmaRxComplete();
+    }
+
+private:
+    static inline volatile bool finishedTx{false};
+    static inline volatile bool hasErrorTx{false};
+};  // class Usart1Dma
+}  // namespace platform
+}  // namespace modm
+
+#endif  // MODM_STM32_UART_1_DMA_HPP

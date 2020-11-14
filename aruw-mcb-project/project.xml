@@ -17,6 +17,7 @@
     <option name="modm:platform:uart:2:buffer.tx">256</option>
     <option name="modm:platform:uart:6:buffer.rx">256</option>
     <option name="modm:platform:uart:6:buffer.tx">256</option>
+    <option name="modm:platform:uart:1:usedma">True</option>
 
   </options>
   <modules>
@@ -53,5 +54,6 @@
     <module>modm:driver:bno055</module>
     <module>modm:platform:i2c:2</module>
     <module>modm:processing:protothread</module>
+    <module>modm:platform:dma</module>
   </modules>
 </library>

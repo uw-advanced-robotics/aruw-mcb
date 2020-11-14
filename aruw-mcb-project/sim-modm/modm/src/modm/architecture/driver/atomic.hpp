@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2020 Matthew Arnold
+ * Copyright (c) 2010, Fabian Greif
+ * Copyright (c) 2012, Niklas Hauser
  *
  * This file is part of the modm project.
  *
@@ -9,9 +10,6 @@
  */
 // ----------------------------------------------------------------------------
 
-#include "uart_1.hpp"
-
-MODM_ISR(USART1)
-{
-    modm::platform::uart1IrqHandler();
-}
+#include "atomic/flag.hpp"
+#include "atomic/container.hpp"
+#include "atomic/queue.hpp"
