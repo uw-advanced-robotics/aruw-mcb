@@ -27,6 +27,20 @@ namespace aruwlib
 {
 namespace display
 {
+void *OledDisplay::readCin(void *vargs)
+{
+    OledDisplay *display = reinterpret_cast<OledDisplay *>(vargs);
+
+    while (true)
+    {
+        char c;
+        std::cin >> c;
+        pthread_mutex_lock(&display->cinDataMutex);
+        display->currRequest = c;
+        pthread_mutex_unlock(&display->cinDataMutex);
+    }
+}
+
 OledDisplay::OledDisplay(Drivers *drivers)
     : display(),
       viewStack(&display),
@@ -45,6 +59,9 @@ void OledDisplay::initialize()
     // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
     // 90MHz/64=~14MHz
     Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
+#else
+    pthread_mutex_init(&cinDataMutex, nullptr);
+    pthread_create(&cinRxThread, nullptr, &readCin, reinterpret_cast<void *>(this));
 #endif
 
     display.initializeBlocking();
@@ -57,7 +74,37 @@ void OledDisplay::initialize()
 
 void OledDisplay::update()
 {
+#ifdef PLATFORM_HOSTED
+    OledButtonHandler::Button buttonPressed;
+    pthread_mutex_lock(&cinDataMutex);
+    if (currRequest == DOWN)
+    {
+        buttonPressed = OledButtonHandler::DOWN;
+    }
+    else if (currRequest == UP)
+    {
+        buttonPressed = OledButtonHandler::UP;
+    }
+    else if (currRequest == LEFT)
+    {
+        buttonPressed = OledButtonHandler::LEFT;
+    }
+    else if (currRequest == RIGHT)
+    {
+        buttonPressed = OledButtonHandler::RIGHT;
+    }
+    else if (currRequest == OK)
+    {
+        buttonPressed = OledButtonHandler::OK;
+    }
+    else
+    {
+        buttonPressed = OledButtonHandler::NONE;
+    }
+    pthread_mutex_unlock(&cinDataMutex);
+#else
     OledButtonHandler::Button buttonPressed = buttonHandler.getCurrentButtonState();
+#endif
     if (buttonPressed != OledButtonHandler::NONE && buttonPressed != prevButton)
     {
         // Seperate from above for ease of readability.

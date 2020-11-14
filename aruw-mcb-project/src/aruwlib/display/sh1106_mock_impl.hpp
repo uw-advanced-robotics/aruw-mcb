@@ -21,10 +21,28 @@
 #error "Don't include this file directly, use 'sh1106.hpp' instead!"
 #endif
 
+#include <iostream>
+
 template <unsigned int Width, unsigned int Height, bool Flipped>
 void aruwlib::display::Sh1106<Width, Height, Flipped>::update()
 {
     // no-op
+    for (uint8_t y = 0; y < Height; ++y)
+    {
+        // command mode
+
+        // switch to data mode
+        for (uint8_t x = 0; x < Width; ++x)
+        {
+            uint8_t col = y / 8;
+            uint8_t remainder = 1u << (y % 8);
+
+            bool dark = (this->display_buffer[x][col] & remainder) == remainder;
+            std::cout << (dark ? "\u25A0": " ");
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 template <unsigned int Width, unsigned int Height, bool Flipped>

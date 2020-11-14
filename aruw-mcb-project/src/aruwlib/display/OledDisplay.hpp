@@ -22,6 +22,10 @@
 
 #include <modm/ui/menu/view_stack.hpp>
 
+#ifdef PLATFORM_HOSTED
+#include <pthread.h>
+#endif
+
 #include "aruwlib/rm-dev-board-a/board.hpp"
 
 #include "MainMenu.hpp"
@@ -59,6 +63,20 @@ private:
         64,
         false>
         display;
+
+#ifdef PLATFORM_HOSTED
+    static constexpr char DOWN = 's';
+    static constexpr char UP = 'w';
+    static constexpr char LEFT = 'a';
+    static constexpr char RIGHT = 'd';
+    static constexpr char OK = 'q';
+
+    pthread_mutex_t cinDataMutex;
+    pthread_t cinRxThread;
+    char currRequest = '\0';
+
+    static void *readCin(void *vargs);
+#endif
 
     modm::ViewStack viewStack;
 
