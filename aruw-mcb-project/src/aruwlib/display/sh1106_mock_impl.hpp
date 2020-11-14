@@ -21,17 +21,19 @@
 #error "Don't include this file directly, use 'sh1106.hpp' instead!"
 #endif
 
+#ifdef PLATFORM_HOSTED
+#include <cstdlib>
 #include <iostream>
+#endif
+
 
 template <unsigned int Width, unsigned int Height, bool Flipped>
 void aruwlib::display::Sh1106<Width, Height, Flipped>::update()
 {
-    // no-op
+    system("clear");
+    std::cout << std::flush;
     for (uint8_t y = 0; y < Height; ++y)
     {
-        // command mode
-
-        // switch to data mode
         for (uint8_t x = 0; x < Width; ++x)
         {
             uint8_t col = y / 8;
