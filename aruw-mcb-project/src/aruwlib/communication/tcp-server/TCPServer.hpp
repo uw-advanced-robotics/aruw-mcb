@@ -24,6 +24,7 @@
 
 #include <netinet/in.h>
 
+#include <atomic>
 #include <cstdint>
 
 namespace aruwlib
@@ -31,8 +32,26 @@ namespace aruwlib
 namespace communication
 {
 /**
- * TCPServer provides an interface for using the POSIX sockets API. It tries it's
- * best to abstract away the funkier aspects of the sockets API.
+ * Read from the given fileDescriptor, ensuring to read "messageLength" bytes.
+ */
+void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength);
+
+/**
+ * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
+ */
+void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes);
+
+/**
+ * Read the next four bytes from the TCP stream as an int32_t. It is expected
+ * that the lowest register bytes are most significant (big endian)
+ */
+int32_t readInt32(int16_t fileDescriptor);
+
+/**
+ * TCPServer is an abstract base class for running a TCPServer using a user
+ * defined messaging protocol. The juice of this class is in its mainLoop() method
+ * which is run in a new thread for each client that connects to this server. Every
+ * derived class of TCPServer needs to implement and override the mainLoop() method.
  */
 class TCPServer
 {
@@ -50,30 +69,20 @@ public:
     TCPServer(uint16_t portNumber);
 
     /**
-     * Desctructor. Only special thing is that it closes any open file descriptors.
+     * Destructor. Only special thing is that it closes any open file descriptors.
      */
     ~TCPServer();
 
     /**
-     * Post: Accept a new client connection. Closes old connection if there was one and
-     * then sets "clientFileDescriptor" to be new connection's descriptor.
+     * Start the servers main listening thread. Creates a thread for listening for new
+     * connections, and begins accepting connections and generating new threads once accepted.
      */
-    void acceptConnection();
+    void start();
 
     /**
-     * Pre: messageLength <= space allocated for "readBuffer"
-     * 
-     * Post: Reads a message to the given "readBuffer" ensuring that messageLength bytes are
-     * read.
-     * 
-     * Throws: runtime_error if read() fails.
+     * Stop the servers main listening thread.
      */
-    void readMessage(unsigned char* readBuffer, uint16_t messageLength);
-
-    /**
-     * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
-     */
-    void writeToClient(const unsigned char* message, uint16_t bytes);
+    void stop();
 
     /**
      * Post: Returns the port number of this server.
@@ -84,21 +93,29 @@ private:
     bool socketOpened;
     bool clientConnected;
     int16_t listenFileDescriptor;
-    int16_t clientFileDescriptor;
     uint16_t serverPortNumber;
     sockaddr_in serverAddress;
 
+    std::atomic<bool> running_;
+
     /**
-     * Read the next four bytes from the TCP stream as an int32_t. It is expected
-     * that the lowest register bytes are most significant (big endian)
+     * run() runs a constant listen loop for new connections and creates new
+     * handler threads for each accepted connection.
      */
-    int32_t readInt32();
-};
+    void run();
+
+    void clientLoop(int16_t);
+    /**
+     * MainLoop that will be run for each accepted connection. Should take
+     * an int16_t representing the file descriptor of the connection.
+     */
+    virtual void mainLoop(int16_t) = 0;
+};  // namespace communication
 
 }  // namespace communication
 
 }  // namespace aruwlib
 
-#endif  // ARUWMCBPROJECT_ARUWLIB_COMMUNICATION_TCPSERVER_HPP_
+#endif  // TCP_SERVER_HPP_
 
 #endif  // PLATFORM_HOSTED
