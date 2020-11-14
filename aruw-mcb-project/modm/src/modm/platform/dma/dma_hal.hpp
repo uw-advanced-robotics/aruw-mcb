@@ -119,7 +119,7 @@ public:
     static_assert(
         StreamBase == DMA1_Stream0_BASE ||
         StreamBase == DMA2_Stream0_BASE ||
-        true
+        true,
         "StreamBase invalid");
 
     /**
