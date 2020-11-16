@@ -29,7 +29,10 @@ namespace serial
 {
 UartTerminalDevice::UartTerminalDevice(Drivers *drivers) : drivers(drivers) {}
 
-void UartTerminalDevice::initialize() { drivers->uart.init<aruwlib::serial::Uart::Uart3, 115200>(); }
+void UartTerminalDevice::initialize()
+{
+    drivers->uart.init<aruwlib::serial::Uart::Uart3, 115200>();
+}
 
 bool UartTerminalDevice::read(char &c)
 {
