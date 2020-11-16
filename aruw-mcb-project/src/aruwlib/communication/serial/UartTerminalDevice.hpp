@@ -20,15 +20,6 @@
 #ifndef TERMINAL_DEVICES_HPP_
 #define TERMINAL_DEVICES_HPP_
 
-#include <cstdint>
-#include <iostream>
-
-#ifdef PLATFORM_HOSTED
-#include <pthread.h>
-
-#include <modm/container/deque.hpp>
-#endif
-
 #include <modm/io/iodevice.hpp>
 
 #include "aruwlib/communication/serial/uart.hpp"
@@ -40,44 +31,7 @@ namespace communication
 {
 namespace serial
 {
-#ifdef PLATFORM_HOSTED
-/**
- * A device that interacts with stdin and stdout to be used
- * on the hosted environment
- */
-class HostedTerminalDevice : public modm::IODevice
-{
-public:
-    HostedTerminalDevice(Drivers *drivers);
-    HostedTerminalDevice(const HostedTerminalDevice &) = delete;
-    HostedTerminalDevice &operator=(const HostedTerminalDevice &) = delete;
-    virtual ~HostedTerminalDevice();
-
-    void initialize();
-
-    bool read(char &c) override;
-
-    using IODevice::write;
-    void write(char c) override;
-
-    void flush() override;
-
-private:
-    static constexpr int RX_BUFF_SIZE = 256;
-
-    Drivers *drivers;
-
-    pthread_t cinRxThread;
-
-    pthread_mutex_t cinDataMutex;
-
-    modm::BoundedDeque<char, RX_BUFF_SIZE> rxBuff;
-
-    static void *readCin(void *vargp);
-};  // class TerminalDevice
-#endif
-
-class UartTerminalDevice : public modm::IODevice
+class UartTerminalDevice : public ::modm::IODevice
 {
 public:
     UartTerminalDevice(Drivers *drivers);

@@ -23,8 +23,11 @@
 #include <cstring>
 #include <map>
 #include <sstream>
+
 #ifdef PLATFORM_HOSTED
-#include <iostream>
+#include "HostedTerminalDevice.hpp"
+#else
+#include "UartTerminalDevice.hpp"
 #endif
 
 #include <modm/io.hpp>
@@ -33,7 +36,6 @@
 #include "aruwlib/rm-dev-board-a/board.hpp"
 
 #include "mock_macros.hpp"
-#include "terminal_devices.hpp"
 
 namespace aruwlib
 {

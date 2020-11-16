@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "terminal_devices.hpp"
+#include "UartTerminalDevice.hpp"
 
 #include "aruwlib/Drivers.hpp"
 
@@ -27,53 +27,9 @@ namespace communication
 {
 namespace serial
 {
-#ifdef PLATFORM_HOSTED
-HostedTerminalDevice::~HostedTerminalDevice() { pthread_mutex_destroy(&cinDataMutex); }
-
-HostedTerminalDevice::HostedTerminalDevice(Drivers *drivers) : drivers(drivers) {}
-
-void *HostedTerminalDevice::readCin(void *vargp)
-{
-    HostedTerminalDevice *device = reinterpret_cast<HostedTerminalDevice *>(vargp);
-
-    while (true)
-    {
-        char c;
-        std::cin >> std::noskipws >> c;
-        pthread_mutex_lock(&device->cinDataMutex);
-        device->rxBuff.appendOverwrite(c);
-        pthread_mutex_unlock(&device->cinDataMutex);
-    }
-}
-
-void HostedTerminalDevice::initialize()
-{
-    pthread_mutex_init(&cinDataMutex, nullptr);
-    pthread_create(&cinRxThread, nullptr, &readCin, reinterpret_cast<void *>(this));
-}
-
-bool HostedTerminalDevice::read(char &c)
-{
-    pthread_mutex_lock(&cinDataMutex);
-    if (rxBuff.getSize() > 0)
-    {
-        c = rxBuff.getFront();
-        rxBuff.removeFront();
-        pthread_mutex_unlock(&cinDataMutex);
-        return true;
-    }
-    pthread_mutex_unlock(&cinDataMutex);
-    return false;
-}
-
-void HostedTerminalDevice::write(char c) { std::cout << c; }
-
-void HostedTerminalDevice::flush() { std::cout.flush(); }
-#endif
-
 UartTerminalDevice::UartTerminalDevice(Drivers *drivers) : drivers(drivers) {}
 
-void UartTerminalDevice::initialize() { drivers->uart.init<aruwlib::serial::Uart::Uart3, 9600>(); }
+void UartTerminalDevice::initialize() { drivers->uart.init<aruwlib::serial::Uart::Uart3, 115200>(); }
 
 bool UartTerminalDevice::read(char &c)
 {
