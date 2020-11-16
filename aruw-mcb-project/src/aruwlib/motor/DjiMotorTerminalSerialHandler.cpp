@@ -36,75 +36,25 @@ bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
     bool canBusValid = false;
     bool printAllMotors = false;
 
-    while (inputLine >> arg)
+    if (!(inputLine >> arg))
     {
-        if (arg == "all")
-        {
-            printAllMotors = true;
-        }
-        else if (arg == "motor1")
-        {
-            motorId = MotorId::MOTOR1;
-            motorIdValid = true;
-        }
-        else if (arg == "motor2")
-        {
-            motorId = MotorId::MOTOR2;
-            motorIdValid = true;
-        }
-        else if (arg == "motor3")
-        {
-            motorId = MotorId::MOTOR3;
-            motorIdValid = true;
-        }
-        else if (arg == "motor4")
-        {
-            motorId = MotorId::MOTOR4;
-            motorIdValid = true;
-        }
-        else if (arg == "motor5")
-        {
-            motorId = MotorId::MOTOR5;
-            motorIdValid = true;
-        }
-        else if (arg == "motor6")
-        {
-            motorId = MotorId::MOTOR6;
-            motorIdValid = true;
-        }
-        else if (arg == "motor7")
-        {
-            motorId = MotorId::MOTOR7;
-            motorIdValid = true;
-        }
-        else if (arg == "motor8")
-        {
-            motorId = MotorId::MOTOR8;
-            motorIdValid = true;
-        }
-        else if (arg == "can1")
-        {
-            canBus = can::CanBus::CAN_BUS1;
-            canBusValid = true;
-        }
-        else if (arg == "can2")
-        {
-            canBus = can::CanBus::CAN_BUS2;
-            canBusValid = true;
-        }
-        else
-        {
-            return false;
-        }
+        return false;
     }
-
-    if (printAllMotors)
+    if (arg == "motor"|| arg == "can")
+    {
+    }
+    else if (arg == "all")
     {
         outputStream << "CAN 1:" << modm::endl;
         printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, outputStream);
         outputStream << "CAN 2:" << modm::endl;
         printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, outputStream);
         return true;
+    }
+
+
+    if (printAllMotors)
+    {
     }
     else if (canBusValid && motorIdValid)
     {

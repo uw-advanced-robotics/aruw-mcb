@@ -40,6 +40,8 @@ public:
 private:
     typedef DjiMotor const* (DjiMotorTxHandler::*getMotorByIdFunc)(MotorId);
 
+    constexpr char *USAGE = "Usage: "
+
     void getMotorInfoToString(const DjiMotor& motor, modm::IOStream& outputStream);
 
     void printAllMotorInfo(getMotorByIdFunc func, modm::IOStream& outputStream);
