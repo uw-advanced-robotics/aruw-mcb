@@ -39,8 +39,13 @@ void TerminalSerial::update()
     stream.get(c);
     if (c == modm::IOStream::eof)
     {
+        if (currStreamer != nullptr)
+        {
+            currStreamer->terminalSerialStreamCallback(stream);
+        }
         return;
     }
+    currStreamer = nullptr;
     if (c == '\n')
     {
         rxBuff[currLineSize] = '\0';
@@ -48,6 +53,7 @@ void TerminalSerial::update()
         line << std::string(rxBuff);
         std::string header;
         line >> header;
+
         std::string headerStr = std::string(header);
         if (headerCallbackMap.count(headerStr) == 0)
         {
@@ -55,9 +61,22 @@ void TerminalSerial::update()
         }
         else
         {
-            if (!headerCallbackMap[headerStr]->terminalSerialCallback(std::move(line), stream))
+            std::string se;
+            std::streampos currp = line.tellg();
+            line >> se;
+            if (se == "-S")
+            {
+                currStreamer = headerCallbackMap[headerStr];
+            }
+            else
+            {
+                line.seekg(currp);
+            }
+            if (!headerCallbackMap[headerStr]
+                     ->terminalSerialCallback(std::move(line), stream, currStreamer != nullptr))
             {
                 stream << "invalid arguments" << modm::endl;
+                currStreamer = nullptr;
             }
         }
         currLineSize = 0;

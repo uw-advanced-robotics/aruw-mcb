@@ -36,8 +36,12 @@ public:
 
     DjiMotorTerminalSerialHandler(DjiMotorTxHandler* motorHandler) : motorHandler(motorHandler) {}
 
-    bool terminalSerialCallback(std::stringstream&& inputLine, modm::IOStream& outputStream)
-        override;
+    bool terminalSerialCallback(
+        std::stringstream&& inputLine,
+        modm::IOStream& outputStream,
+        bool streamingEnabled) override;
+
+    void terminalSerialStreamCallback(modm::IOStream& outputStream) override;
 
 private:
     typedef DjiMotor const* (DjiMotorTxHandler::*getMotorByIdFunc)(MotorId);
@@ -50,11 +54,19 @@ private:
         "    - [mid] is the id of a motor, in [1, 8]\n"
         "    - [cid] is some the can id, in [1, 2]\n";
 
+    bool printInfo(modm::IOStream& outputStream);
+
     void getMotorInfoToString(const DjiMotor* motor, modm::IOStream& outputStream);
 
     void printAllMotorInfo(getMotorByIdFunc func, modm::IOStream& outputStream);
 
     DjiMotorTxHandler* motorHandler;
+
+    bool motorIdValid = false;
+    int motorId = 0;
+    bool canBusValid = false;
+    int canBus = 0;
+    bool printAll = false;
 };  // class DjiMotorTerminalSerialHandler
 }  // namespace motor
 }  // namespace aruwlib

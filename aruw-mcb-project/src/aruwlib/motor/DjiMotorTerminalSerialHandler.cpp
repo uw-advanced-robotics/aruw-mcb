@@ -28,16 +28,22 @@ namespace motor
 constexpr char DjiMotorTerminalSerialHandler::HEADER[];
 constexpr char DjiMotorTerminalSerialHandler::USAGE[];
 
+void DjiMotorTerminalSerialHandler::terminalSerialStreamCallback(modm::IOStream& outputStream)
+{
+    printInfo(outputStream);
+}
+
 bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
     std::stringstream&& inputLine,
-    modm::IOStream& outputStream)
+    modm::IOStream& outputStream,
+    bool streamingEnabled)
 {
+    (void)streamingEnabled;
     std::string arg;
-    bool motorIdValid = false;
-    int motorId = 0;
-    bool canBusValid = false;
-    int canBus = 0;
-
+    motorId = 0;
+    canBusValid = false;
+    canBus = 0;
+    printAll = false;
     while (inputLine >> arg)
     {
         if (arg == "motor")
@@ -54,7 +60,7 @@ bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
         }
         else if (arg == "can")
         {
-            if (!(inputLine >> canBus) || canBus != 0 || canBus != 1)
+            if (!(inputLine >> canBus) || (canBus != 0 && canBus != 1))
             {
                 outputStream << USAGE;
                 return false;
@@ -63,11 +69,8 @@ bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
         }
         else if (arg == "all")
         {
-            outputStream << "CAN 1:" << modm::endl;
-            printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, outputStream);
-            outputStream << "CAN 2:" << modm::endl;
-            printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, outputStream);
-            return true;
+            printAll = true;
+            break;
         }
         else
         {
@@ -76,7 +79,19 @@ bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
         }
     }
 
-    if (!canBusValid && !motorIdValid)
+    return printInfo(outputStream);
+}
+
+bool DjiMotorTerminalSerialHandler::printInfo(modm::IOStream& outputStream)
+{
+    if (printAll)
+    {
+        outputStream << "CAN 1:" << modm::endl;
+        printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, outputStream);
+        outputStream << "CAN 2:" << modm::endl;
+        printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, outputStream);
+    }
+    else if (!canBusValid && !motorIdValid)
     {
         outputStream << USAGE;
         return false;

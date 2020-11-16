@@ -54,11 +54,20 @@ public:
     /**
      * @param[in] inputLine The user input to be processed.
      * @param[out] outputStream The stream to write information to.
+     * @param[in] streamingEnabled Set to `true` when the streaming is initially enabled.
+     *      Subsequent interactions with the callback handler will be via
+     *      terminalSerialStreamCallback until streaming has been disabled.
      * @return `true` if the inputLine was valid and was parsed correctly, `false` otherwise.
      */
     virtual bool terminalSerialCallback(
         std::stringstream &&inputLine,
-        modm::IOStream &outputStream) = 0;
+        modm::IOStream &outputStream,
+        bool streamingEnabled) = 0;
+
+    /**
+     * Called repeatedly when in streaming mode.
+     */
+    virtual void terminalSerialStreamCallback(modm::IOStream &outputStream) = 0;
 };  // class ITerminalSerialCallback
 
 class TerminalSerial
@@ -86,6 +95,8 @@ private:
     char rxBuff[MAX_LINE_LENGTH];
 
     uint8_t currLineSize = 0;
+
+    ITerminalSerialCallback *currStreamer;
 
     std::map<std::string, ITerminalSerialCallback *> headerCallbackMap;
 
