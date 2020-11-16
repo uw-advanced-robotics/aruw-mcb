@@ -32,6 +32,8 @@ class DjiMotorTxHandler;
 class DjiMotorTerminalSerialHandler : public communication::serial::ITerminalSerialCallback
 {
 public:
+    static constexpr char HEADER[] = "motorinfo";
+
     DjiMotorTerminalSerialHandler(DjiMotorTxHandler* motorHandler) : motorHandler(motorHandler) {}
 
     bool terminalSerialCallback(std::stringstream&& inputLine, modm::IOStream& outputStream)
@@ -40,9 +42,15 @@ public:
 private:
     typedef DjiMotor const* (DjiMotorTxHandler::*getMotorByIdFunc)(MotorId);
 
-    constexpr char *USAGE = "Usage: "
+    static constexpr char USAGE[] =
+        "Usage: motorinfo <[all] | [motor [mid]] [can [cid]]>\n"
+        "  Where:\n"
+        "    - [all] prints all motor info\n"
+        "    Or specifiy a motor id and/or can id, where\n"
+        "    - [mid] is the id of a motor, in [1, 8]\n"
+        "    - [cid] is some the can id, in [1, 2]\n";
 
-    void getMotorInfoToString(const DjiMotor& motor, modm::IOStream& outputStream);
+    void getMotorInfoToString(const DjiMotor* motor, modm::IOStream& outputStream);
 
     void printAllMotorInfo(getMotorByIdFunc func, modm::IOStream& outputStream);
 

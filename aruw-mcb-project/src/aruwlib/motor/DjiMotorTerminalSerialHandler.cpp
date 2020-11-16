@@ -25,79 +25,120 @@ namespace aruwlib
 {
 namespace motor
 {
+constexpr char DjiMotorTerminalSerialHandler::HEADER[];
+constexpr char DjiMotorTerminalSerialHandler::USAGE[];
+
 bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
     std::stringstream&& inputLine,
     modm::IOStream& outputStream)
 {
     std::string arg;
-    MotorId motorId = MotorId::MOTOR1;
-    can::CanBus canBus = can::CanBus::CAN_BUS1;
     bool motorIdValid = false;
+    int motorId = 0;
     bool canBusValid = false;
-    bool printAllMotors = false;
+    int canBus = 0;
 
-    if (!(inputLine >> arg))
+    while (inputLine >> arg)
     {
+        if (arg == "motor")
+        {
+            if (!(inputLine >> motorId) ||
+                motorId < (DJI_MOTOR_NORMALIZED_ID(MotorId::MOTOR1) + 1) ||
+                motorId > (DJI_MOTOR_NORMALIZED_ID(MotorId::MOTOR8) + 1))
+            {
+                outputStream << USAGE;
+                return false;
+            }
+            motorId--;
+            motorIdValid = true;
+        }
+        else if (arg == "can")
+        {
+            if (!(inputLine >> canBus) || canBus != 0 || canBus != 1)
+            {
+                outputStream << USAGE;
+                return false;
+            }
+            canBusValid = true;
+        }
+        else if (arg == "all")
+        {
+            outputStream << "CAN 1:" << modm::endl;
+            printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, outputStream);
+            outputStream << "CAN 2:" << modm::endl;
+            printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, outputStream);
+            return true;
+        }
+        else
+        {
+            outputStream << USAGE;
+            return false;
+        }
+    }
+
+    if (!canBusValid && !motorIdValid)
+    {
+        outputStream << USAGE;
         return false;
     }
-    if (arg == "motor"|| arg == "can")
+    else if (canBusValid && !motorIdValid)
     {
+        if (canBus == 1)
+        {
+            printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, outputStream);
+        }
+        else if (canBus == 2)
+        {
+            printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, outputStream);
+        }
+        else
+        {
+            outputStream << USAGE;
+            return false;
+        }
     }
-    else if (arg == "all")
+    else if (!canBusValid && motorIdValid)
     {
         outputStream << "CAN 1:" << modm::endl;
-        printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, outputStream);
+        getMotorInfoToString(
+            motorHandler->getCan1MotorData(static_cast<MotorId>(motorId + aruwlib::motor::MOTOR1)),
+            outputStream);
         outputStream << "CAN 2:" << modm::endl;
-        printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, outputStream);
-        return true;
-    }
-
-
-    if (printAllMotors)
-    {
-    }
-    else if (canBusValid && motorIdValid)
-    {
-        switch (canBus)
-        {
-            case can::CanBus::CAN_BUS1:
-                if (motorHandler->getCan1MotorData(motorId) == nullptr)
-                {
-                    outputStream << "motor no in tx handler" << modm::endl;
-                }
-                else
-                {
-                    getMotorInfoToString(*motorHandler->getCan1MotorData(motorId), outputStream);
-                }
-                break;
-            case can::CanBus::CAN_BUS2:
-                if (motorHandler->getCan2MotorData(motorId) == nullptr)
-                {
-                    outputStream << "motor not in tx handler" << modm::endl;
-                }
-                else
-                {
-                    getMotorInfoToString(*motorHandler->getCan2MotorData(motorId), outputStream);
-                }
-                break;
-        }
-        return true;
+        getMotorInfoToString(
+            motorHandler->getCan2MotorData(static_cast<MotorId>(motorId + aruwlib::motor::MOTOR1)),
+            outputStream);
     }
     else
     {
-        outputStream << "bad args" << modm::endl;
-        return false;
+        if (canBus == 1)
+        {
+            getMotorInfoToString(
+                motorHandler->getCan1MotorData(
+                    static_cast<MotorId>(motorId + aruwlib::motor::MOTOR1)),
+                outputStream);
+        }
+        else
+        {
+            getMotorInfoToString(
+                motorHandler->getCan2MotorData(
+                    static_cast<MotorId>(motorId + aruwlib::motor::MOTOR1)),
+                outputStream);
+        }
     }
+    return true;
 }
 
 void DjiMotorTerminalSerialHandler::getMotorInfoToString(
-    const DjiMotor& motor,
+    const DjiMotor* motor,
     modm::IOStream& outputStream)
 {
-    outputStream << (DJI_MOTOR_NORMALIZED_ID(motor.getMotorIdentifier()) + 1) << ". "
-                 << motor.getName() << ": online: " << (motor.isMotorOnline() ? "yes" : "no")
-                 << ", enc wrapped: " << motor.encStore.getEncoderWrapped()
-                 << ", rpm: " << motor.getShaftRPM() << modm::endl;
+    if (motor != nullptr)
+    {
+        outputStream << (DJI_MOTOR_NORMALIZED_ID(motor->getMotorIdentifier()) + 1) << ". "
+                     << motor->getName() << ": online: " << (motor->isMotorOnline() ? "yes" : "no")
+                     << ", enc wrapped: " << motor->encStore.getEncoderWrapped()
+                     << ", rpm: " << motor->getShaftRPM() << modm::endl;
+    }
 }
 
 void DjiMotorTerminalSerialHandler::printAllMotorInfo(
@@ -107,10 +148,7 @@ void DjiMotorTerminalSerialHandler::printAllMotorInfo(
     for (int i = static_cast<int>(MOTOR1); i <= static_cast<int>(MOTOR8); i++)
     {
         const DjiMotor* motor = (motorHandler->*(func))(static_cast<MotorId>(i));
-        if (motor != nullptr)
-        {
-            getMotorInfoToString(*motor, outputStream);
-        }
+        getMotorInfoToString(motor, outputStream);
     }
 }
 }  // namespace motor
