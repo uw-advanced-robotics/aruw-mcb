@@ -37,10 +37,7 @@ HostedTerminalDevice::HostedTerminalDevice(Drivers *drivers)
 {
 }
 
-HostedTerminalDevice::~HostedTerminalDevice()
-{
-    delete readStdinThread;
-}
+HostedTerminalDevice::~HostedTerminalDevice() { delete readStdinThread; }
 
 void HostedTerminalDevice::readCin()
 {
@@ -54,7 +51,8 @@ void HostedTerminalDevice::readCin()
     }
 }
 
-void HostedTerminalDevice::initialize() {
+void HostedTerminalDevice::initialize()
+{
     readStdinThread = new std::thread(&HostedTerminalDevice::readCin, this);
     readStdinThread->detach();
 }
