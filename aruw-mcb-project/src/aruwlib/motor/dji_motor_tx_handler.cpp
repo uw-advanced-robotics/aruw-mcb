@@ -19,8 +19,6 @@
 
 #include "dji_motor_tx_handler.hpp"
 
-#include <cstring>
-
 #include <modm/architecture/interface/assert.h>
 
 #include "aruwlib/Drivers.hpp"

@@ -66,6 +66,8 @@ class TerminalSerial
 public:
     TerminalSerial(Drivers *drivers);
 
+    virtual ~TerminalSerial() = default;
+
     mockable void initialize();
 
     mockable void update();
