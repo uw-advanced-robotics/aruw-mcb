@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Tests",
+            "name": "Debug Tests",
             "type": "cppdbg",
             "request": "launch",
             "preLaunchTask": "Build Tests - Debug",
@@ -22,7 +22,7 @@
             ]
         },
         {
-            "name": "Launch Sim",
+            "name": "Debug Sim",
             "type": "cppdbg",
             "request": "launch",
             "preLaunchTask": "Build Sim - Debug",

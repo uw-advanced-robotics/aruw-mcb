@@ -165,7 +165,7 @@ if target_env == "hardware":
     env.Alias("size", env.Size(program))
     env.Alias("gdb", env.OpenOcdGdb(program))
 
-    env.Alias("program", env.OpenOcd(program, commands=["modm_program {$SOURCE}"]))
+    env.Alias("run", env.OpenOcd(program, commands=["modm_program {$SOURCE}"]))
     env.Alias("all", ["build", "size"])
     env.Default("all")
 elif target_env == "tests":
