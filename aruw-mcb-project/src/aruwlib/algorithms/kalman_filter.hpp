@@ -41,9 +41,15 @@ public:
     KalmanFilter(modm::Matrix<float, N, 1> x, modm::Matrix<float, N, N> p,
         modm::Matrix<float, N, N> q, modm::Matrix<float, M, M> r)
         : x(x),
+          z(modm::Matrix<float, N, 1>::zeroMatrix()),
           p(p),
           q(q),
-          r(r)
+          r(r),
+          k(modm::Matrix<float, N, M>::zeroMatrix()),
+          f(modm::Matrix<float, N, N>::zeroMatrix()),
+          h(modm::Matrix<float, M, N>::zeroMatrix()),
+          fx(modm::Matrix<float, N, 1>::zeroMatrix()),
+          hx(modm::Matrix<float, M, 1>::zeroMatrix())
     {
     }
     
@@ -55,11 +61,12 @@ public:
      */
     modm::Matrix<float, N, 1> filterData(modm::Matrix<float, N, 1> z)
     {
-        predictState();
-        predictCovariance(p, f, q);
-        calculateKalmanGain(k, p, h, r);
-        updateState(x, k, z, hx);
-        updateCovariance();
+        fx = predictState();
+        // update h(x)?
+        p = predictCovariance(p, f, q);
+        k = calculateKalmanGain(k, p, h, r);
+        x = updateState(fx, k, z, hx);
+        p = updateCovariance();
     }
 
     /**
@@ -76,24 +83,17 @@ public:
     }
 
     /// Returns the last filtered data point.
-    modm::Matrix<float, n, 1> getLastFiltered() const { return x; }
+    modm::Matrix<float, N, 1> getLastFiltered() const { return x; }
 
     /// Resets the covariances and predictions.
     void reset()
     {
-        // I have no idea if this is correct but it didn't give me an error
-        // also I don't know if all the values need to be reset
         x = modm::Matrix<float, N, 1>().zeroMatrix();
         z = modm::Matrix<float, M, 1>().zeroMatrix();
 
         p = modm::Matrix<float, N, N>().zeroMatrix();
-        q = modm::Matrix<float, N, N>().zeroMatrix();
-        r = modm::Matrix<float, M, M>().zeroMatrix();
 
         k = modm::Matrix<float, N, M>().zeroMatrix();
-
-        f = modm::Matrix<float, N, N>().zeroMatrix();
-        h = modm::Matrix<float, M, N>().zeroMatrix();
 
         fx = modm::Matrix<float, N, 1>().zeroMatrix();
         hx = modm::Matrix<float, M, 1>().zeroMatrix();
@@ -110,13 +110,7 @@ public:
         modm::Matrix<float, N, N> q)
     {
         // P = F * P * Ft + Q
-        modm::Matrix<float, n, n> tmp = f;
-        tmp *= p;
-        f.transpose();  // I don't know if I did this correctly
-        tmp *= f;
-        tmp += q;
-        n=1;
-        return tmp;
+        return f * p * f.asTransposed() + q;
     }
 
     modm::Matrix<float, N, M> calculateKalmanGain(
@@ -126,20 +120,20 @@ public:
         modm::Matrix<float, M, M> r
         )
     {
-        // K = P * H * (H * P * Ht + R)^-1
-        modm::Matrix<float, n, n> tmp = (h * p * h.transpose() + r;
-        tmp = inverse(tmp);
-        return p * h * tmp;
+        // K = P * Ht * (H * P * Ht + R)^-1
+        modm::Matrix<float, n, n> innovationCovariance = (h * p * h.asTransposed() + r);
+        innovationCovariance = inverse(innovationCovariance);
+        return p * h.asTransposed() * innovationCovariance;
     }
 
     modm::Matrix<float, N, 1> updateState(
-        modm::Matrix<float, N, 1> x,
+        modm::Matrix<float, N, 1> fx,
         modm::Matrix<float, N, M> k,
         modm::Matrix<float, M, 1> z,
         modm::Matrix<float, M, 1> hx)
     {
         // x = x + K * (z - h(x))
-        return x + k * (z - hx);
+        return fx + k * (z - hx);  // I think fx should be used instead of x because fx is the previous predicted state but I could be wrong
     }
 
     modm::Matrix<float, n, n> updateCovariance()
@@ -160,11 +154,9 @@ private:
     modm::Matrix<float, N, N> f;  ///< Jacobian of process model
     modm::Matrix<float, M, N> h;  ///< Jacobian of measurement model
 
-    // I think this is why Simon "Dlevy" didn't use the first KF equation
-    // because he expects the user to input the result from that
-    modm::Matrix<float, N, 1> fx; ///< output of state-transition function (predicted state?)
-    modm::Matrix<float, M, 1> hx; ///< output of measurement function
-};                                  // class Kalman
+    modm::Matrix<float, N, 1> fx; ///< output of state-transition function (predicted state)
+    modm::Matrix<float, M, 1> hx; ///< output of measurement function (used in state update equation)
+};                                // class Kalman
 
 }  // namespace algorithms
 
