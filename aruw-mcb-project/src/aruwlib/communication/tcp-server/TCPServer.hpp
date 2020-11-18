@@ -32,22 +32,6 @@ namespace aruwlib
 namespace communication
 {
 /**
- * Read from the given fileDescriptor, ensuring to read "messageLength" bytes.
- */
-void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength);
-
-/**
- * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
- */
-void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes);
-
-/**
- * Read the next four bytes from the TCP stream as an int32_t. It is expected
- * that the lowest register bytes are most significant (big endian)
- */
-int32_t readInt32(int16_t fileDescriptor);
-
-/**
  * TCPServer is an abstract base class for running a TCPServer using a user
  * defined messaging protocol. The juice of this class is in its mainLoop() method
  * which is run in a new thread for each client that connects to this server. Every
@@ -56,7 +40,6 @@ int32_t readInt32(int16_t fileDescriptor);
 class TCPServer
 {
 public:
-    static const uint32_t MESSAGE_LENGTH = 256;
     static const uint8_t LISTEN_QUEUE_SIZE = 5;
 
     /**
@@ -110,6 +93,24 @@ private:
      * an int16_t representing the file descriptor of the connection.
      */
     virtual void mainLoop(int16_t) = 0;
+
+protected:
+    /**
+     * Read from the given fileDescriptor, ensuring to read "messageLength" bytes.
+     */
+    static void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength);
+
+    /**
+     * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
+     */
+    static void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes);
+
+    /**
+     * Read the next four bytes from the TCP stream as an int32_t. It is expected
+     * that the lowest register bytes are most significant (big endian)
+     */
+    static int32_t readInt32(int16_t fileDescriptor);
+
 };  // namespace communication
 
 }  // namespace communication
