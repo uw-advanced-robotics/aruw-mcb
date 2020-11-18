@@ -78,7 +78,7 @@ public:
     template<typename T, uint8_t ROWS, uint8_t COLUMNS>
     modm::Matrix<T, ROWS, COLUMNS> inverse(modm::Matrix<T, ROWS, COLUMNS> matrix)
     {
-        // only used on square matrices
+        
         return matrix;
     }
 
@@ -99,11 +99,21 @@ public:
         hx = modm::Matrix<float, M, 1>().zeroMatrix();
     }
 
+    /**
+     * Predicts the state at the next time step.
+     * 
+     * @return the predicted state.
+     */
     modm::Matrix<float, N, 1> predictState()
     {
         // x = f(x, u)
     }
 
+    /**
+     * Predicts the covariance at the next time step.
+     * 
+     * @return the predicted covariance.
+     */
     modm::Matrix<float, N, N> predictCovariance(
         modm::Matrix<float, N, N> p,
         modm::Matrix<float, N, N> f,
@@ -113,6 +123,11 @@ public:
         return f * p * f.asTransposed() + q;
     }
 
+    /**
+     * Calculates the Kalman Gain.
+     * 
+     * @return the calculated Kalman Gain.
+     */
     modm::Matrix<float, N, M> calculateKalmanGain(
         modm::Matrix<float, N, M> k,
         modm::Matrix<float, N, N> p,
@@ -121,11 +136,16 @@ public:
         )
     {
         // K = P * Ht * (H * P * Ht + R)^-1
-        modm::Matrix<float, n, n> innovationCovariance = (h * p * h.asTransposed() + r);
+        modm::Matrix<float, N, N> innovationCovariance = (h * p * h.asTransposed() + r);
         innovationCovariance = inverse(innovationCovariance);
         return p * h.asTransposed() * innovationCovariance;
     }
 
+    /**
+     * Updates the state using the measurement.
+     * 
+     * @return the updated state.
+     */
     modm::Matrix<float, N, 1> updateState(
         modm::Matrix<float, N, 1> fx,
         modm::Matrix<float, N, M> k,
@@ -136,8 +156,14 @@ public:
         return fx + k * (z - hx);  // I think fx should be used instead of x because fx is the previous predicted state but I could be wrong
     }
 
-    modm::Matrix<float, n, n> updateCovariance()
+    /**
+     * Updates the covariance.
+     * 
+     * @return the updated covariance.
+     */
+    modm::Matrix<float, N, N> updateCovariance()
     {
+
         // P = (I - K * H) * P * (I - K * H)t + K * R * Kt
     }
 
