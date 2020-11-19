@@ -16,10 +16,6 @@ __In addition to this readme, check out
 [our GitLab wiki](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/home) and
 [generated documentation](https://aruw.gitlab.io/controls/aruw-mcb/)!__
 
-## !!! Important notice for RoboMaster 2020 Robotics Competition Open Source Technical Challenge !!!
-
-If you are here to evaulate our submission check [our **GitHub** wiki](https://github.com/uw-advanced-robotics/aruw-mcb/wiki).
-
 ## Contacting
 
 If you have any questions please contact us at robomstr@uw.edu.
@@ -49,35 +45,32 @@ The recommended way to develop is with our pre-built development Docker containe
 2. [Install Visual Studio Code](https://code.visualstudio.com/).
 3. [Install git](https://git-scm.com/).
 4. Open Visual Studio Code.
-5. Clone this repo. You can go to the "source control" tab on the left of the editor and choose
-   "Clone Repository". When asked, enter `https://gitlab.com/aruw/controls/aruw-mcb.git`
-   as the source URL. Pick a reasonable location to clone the repo into. Make sure you have your gitlab credentials ready when you clone your repo.
-   
-   If you don't enter them correctly the first time that's okay - If you're on windows open the **Credential Manager** app and go to **Windows Credentials**. Then correct your git credentials stored under `git:https://gitlab.com` before trying to clone again.
+5. On the left of the editor, click the "extensions" icon (lools like stacked squares). Search for
+   "Remote - Containers" and press "Install".
 
-   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/d285d45f017f9f714e9f623a32a93de4/image.png" width="500px">
+   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/082462149c27caeba5aad30f5a504285/image.png" width="500px">
+6. Copy this URL onto your clipboard: `https://gitlab.com/aruw/controls/aruw-mcb.git`
+7. Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and search for "Remote-Containers: Clone
+   repository in container volume...". Press enter.
 
-6. Once it opens the new folder, an alert will appear with suggested extensions. Click "Install All".
+   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/b68f8856c603e9790277a465099840eb/image.png" width="500px">
+8. Paste the URL you copied previously. DO NOT select the "GitHub" shortcut. Press enter.
 
-   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/69c6df320da651b9674446bc9e93b704/image.png" width="500px">
+   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/015fef7572f62c15b0497b59dba53201/image.png" width="500px">
+9. Select "Create a unique volume".
 
-7. vscode will now prompt you to open the development container. Choose "Reopen in Container". This
-   step may take a few minutes (or more!); it will download around 500 MB (2GB once uncompressed) of
-   necessary tools. Be patient.
-
-   _Heads-up:_ If you don't see the dialog, or it goes away, you can press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
-   and type "Reload Window" plus <kbd>Enter</kbd> to reload vscode.
-
-   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/5a72cd1f6b827719bfa1c73f64b77b32/image.png" width="500px">
-
-   vscode is now attached to a "container", which includes all the tools
-   necessary to develop in this repo! In the future, you will always want to open
-   the workspace within its container.
+   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/1c662da207f1345ddaf0738a64caee4d/unique_volume.png" width="500px">
+10. Wait for vscode to initialize. This may take minutes, since it is downloading all the required
+   tools in the form of a multi-gigabyte compressed file system image.<br>
+    - **Note:** During this time, if you are having trouble with your git credentials, you can
+      specify or update them through a Windows GUI. If you're on windows open the
+      **Credential Manager** app and go to **Windows Credentials**. Then correct your git
+      credentials stored under `git:https://gitlab.com` before trying to clone again.
 
 Now that you have the environment, let's test it out! Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>,
-type "Focus Next Terminal", and press <kbd>Enter</kbd>. In this terminal, type `scons run-tests` and
-press <kbd>Enter</kbd>. After building our code, it should run the tests and print a message
-indicating that all tests passed.
+type "Focus Next Terminal", and press <kbd>Enter</kbd>. In this terminal, type
+`cd aruw-mcb-project && scons run-tests` and press <kbd>Enter</kbd>. After building our
+code, it should run the tests and print a message indicating that all tests passed.
 
 ### Optional: prevent Docker Desktop from running on startup
 
@@ -153,6 +146,17 @@ See the [wiki](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Software-Tools/
 
 With the root directory opened in VSCode, type <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>. Type "ARUW: Select Robot Type" and hit enter. A dropdown menu should appear. Select the robot type from the dropdown.
 
+### How to select an appropriate VSCode C/C++ configuration
+
+This codebase has a number of different build targets (see [this wiki
+page](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Build-Targets-Overview) for more
+information). Because the build setup is different for the test, sim, and MCB environments, while
+working on a particular portion of code you may select an appropriate profile that provides optimal
+[intellisense](https://code.visualstudio.com/docs/editor/intellisense). To select a configuration,
+in VSCode, type <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, then type "C/C++:Select a Configuration"
+and hit enter. A dropdown menu will appear where you may choose either the "Test", "Sim", or "MCB"
+configuration.
+
 ## Working with modm
 
 ### What is modm?
@@ -194,7 +198,9 @@ Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]
         - "run": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.
         - "build-tests": build core code and tests for the current host platform.
         - "run-tests": build core code and tests for the current host platform, and execute them locally with the test runner.
+        - "build-sim": build all code for the simulated environment, for the current host platform.
+        - "run-sim": build all code for the simulated environment, for the current host platform, and execute the simulator locally.
     "TARGET_<ROBOT_TYPE>" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.
         - <ROBOT_TYPE> must be one of the following:
-            - SOLDIER, OLD_SOLDIER, DRONE, ENGINEER, SENTINEL, HERO:
+            - SOLDIER, OLD_SOLDIER, DRONE, ENGINEER, SENTINEL, HERO
 ```

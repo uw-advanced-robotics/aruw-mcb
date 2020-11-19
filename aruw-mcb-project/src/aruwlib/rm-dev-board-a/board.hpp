@@ -33,7 +33,7 @@
 #ifndef MODM_ROBOMASTER_DEV_BOARD_A_HPP
 #define MODM_ROBOMASTER_DEV_BOARD_A_HPP
 
-#ifndef ENV_SIMULATOR
+#ifndef PLATFORM_HOSTED
 #include <modm/architecture/interface/clock.hpp>
 #include <modm/platform.hpp>
 
@@ -107,7 +107,7 @@ struct SystemClock
 
     static bool inline enable()
     {
-#ifndef ENV_SIMULATOR
+#ifndef PLATFORM_HOSTED
         Rcc::enableExternalCrystal();  // 8 MHz
         Rcc::enablePll(
             Rcc::PllSource::ExternalCrystal,
@@ -127,7 +127,7 @@ struct SystemClock
     }
 };
 
-#ifndef ENV_SIMULATOR
+#ifndef PLATFORM_HOSTED
 
 // initialize a button built into mcb
 using Button = GpioInputB2;
@@ -156,13 +156,15 @@ using PowerOut4 = GpioOutputH5;
 
 using PowerOuts = SoftwareGpioPort<PowerOut1, PowerOut2, PowerOut3, PowerOut4>;
 
-// initialize 4 analog input pins
+// initialize analog input pins
 using AnalogInPinS = GpioOutputA0;
 using AnalogInPinT = GpioOutputA1;
 using AnalogInPinU = GpioOutputA2;
 using AnalogInPinV = GpioOutputA3;
+using AnalogInPinOled = GpioOutputA6;
 
-using AnalogInPins = SoftwareGpioPort<AnalogInPinS, AnalogInPinT, AnalogInPinU, AnalogInPinV>;
+using AnalogInPins =
+    SoftwareGpioPort<AnalogInPinS, AnalogInPinT, AnalogInPinU, AnalogInPinV, AnalogInPinOled>;
 
 // initialize 4 pwm output pins
 using PWMOutPinW = GpioInputI5;
@@ -209,7 +211,7 @@ inline void initialize()
 {
     // init clock
     SystemClock::enable();
-#ifndef ENV_SIMULATOR
+#ifndef PLATFORM_HOSTED
     SysTickTimer::initialize<SystemClock>();
     // init 24V output
     PowerOuts::setOutput(modm::Gpio::High);

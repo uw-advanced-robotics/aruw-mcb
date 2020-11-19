@@ -29,22 +29,28 @@ namespace gpio
 {
 void Analog::init()
 {
-#ifndef ENV_SIMULATOR
+#ifndef PLATFORM_HOSTED
     AnalogInPins::setAnalogInput();
 
     // Initial ADC/Timer setup
-    Adc1::connect<AnalogInPinS::In0, AnalogInPinT::In1, AnalogInPinU::In2, AnalogInPinV::In3>();
+    Adc1::connect<
+        AnalogInPinS::In0,
+        AnalogInPinT::In1,
+        AnalogInPinU::In2,
+        AnalogInPinV::In3,
+        AnalogInPinOled::In6>();
     Adc1::initialize<SystemClock, 22500000_Bd>();
     Adc1::setPinChannel<AnalogInPinS>();
     Adc1::setPinChannel<AnalogInPinT>();
     Adc1::setPinChannel<AnalogInPinU>();
     Adc1::setPinChannel<AnalogInPinV>();
+    Adc1::setPinChannel<AnalogInPinOled>();
 #endif
 }
 
 uint16_t Analog::read(Pin pin) const
 {
-#ifdef ENV_SIMULATOR
+#ifdef PLATFORM_HOSTED
     return 0;
 #else
     switch (pin)
@@ -60,6 +66,9 @@ uint16_t Analog::read(Pin pin) const
 
         case Pin::V:
             return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinV>());
+
+        case Pin::OLED_JOYSTICK:
+            return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinOled>());
 
         default:
             return 0;
