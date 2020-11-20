@@ -45,7 +45,7 @@ public:
     HostedTerminalDevice(Drivers *drivers);
     HostedTerminalDevice(const HostedTerminalDevice &) = delete;
     HostedTerminalDevice &operator=(const HostedTerminalDevice &) = delete;
-    virtual ~HostedTerminalDevice() = default;
+    virtual ~HostedTerminalDevice();
 
     void initialize();
 
@@ -61,7 +61,7 @@ private:
 
     Drivers *drivers;
 
-    std::thread readStdinThread;
+    std::thread *readStdinThread;
 
     modm::BoundedDeque<char, RX_BUFF_SIZE> rxBuff;
 

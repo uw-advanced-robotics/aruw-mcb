@@ -51,8 +51,6 @@
 
 #include <limits.h>
 
-#include "aruwlib/communication/serial/TerminalSerial.hpp"
-
 #include "dji_motor.hpp"
 #include "mock_macros.hpp"
 
@@ -66,8 +64,6 @@ namespace motor
 class DjiMotorTxHandler
 {
 public:
-    static constexpr int DJI_MOTORS_PER_CAN = 8;
-
     DjiMotorTxHandler(Drivers* drivers) : drivers(drivers) {}
     DjiMotorTxHandler(const DjiMotorTxHandler&) = delete;
     DjiMotorTxHandler& operator=(const DjiMotorTxHandler&) = delete;
@@ -86,6 +82,8 @@ public:
     mockable DjiMotor const* getCan2MotorData(MotorId motorId);
 
 private:
+    static const int DJI_MOTORS_PER_CAN = 8;
+
     Drivers* drivers;
 
     DjiMotor* can1MotorStore[DJI_MOTORS_PER_CAN] = {0};

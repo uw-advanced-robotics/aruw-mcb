@@ -31,11 +31,13 @@ namespace serial
 {
 HostedTerminalDevice::HostedTerminalDevice(Drivers *drivers)
     : drivers(drivers),
-      readStdinThread(&HostedTerminalDevice::readCin, this),
+      readStdinThread(nullptr),
       rxBuff(),
       rxBuffMutex()
 {
 }
+
+HostedTerminalDevice::~HostedTerminalDevice() { delete readStdinThread; }
 
 void HostedTerminalDevice::readCin()
 {
@@ -49,7 +51,11 @@ void HostedTerminalDevice::readCin()
     }
 }
 
-void HostedTerminalDevice::initialize() { readStdinThread.detach(); }
+void HostedTerminalDevice::initialize()
+{
+    readStdinThread = new std::thread(&HostedTerminalDevice::readCin, this);
+    readStdinThread->detach();
+}
 
 bool HostedTerminalDevice::read(char &c)
 {
