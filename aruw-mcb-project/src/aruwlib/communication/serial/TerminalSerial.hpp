@@ -65,11 +65,32 @@ public:
         bool streamingEnabled) = 0;
 
     /**
-     * Called repeatedly when in streaming mode.
+     * Called repeatedly by the TerminalSerial when in streaming mode.
      */
     virtual void terminalSerialStreamCallback(modm::IOStream &outputStream) = 0;
 };  // class ITerminalSerialCallback
 
+/**
+ * Handles incoming requests from the "terminal". The "terminal" is either
+ * a uart line connected to a computer with a serial connection open or
+ * when runing on the simulator, stdin/stdout.
+ *
+ * To add a handler to the terminal, extend the ITerminalSerialCallback
+ * and add it to an instance of the TerminalSerial class via `addHeader`.
+ * Whenever the header is received on the terminal line, the contents of
+ * the message (minus the header and any flags specified for the TerminalSerial)
+ * will be passed on to the registered callback via terminalSerialCallback.
+ *
+ * @note If the "-S" flag is specified directly after the header, the terminal
+ *      enters streaming mode. In this mode, so long as terminalSerialCallback
+ *      returns true when streaming mode is initially enabled, the
+ *      ITerminalSerialCallback's `terminalSerialStreamCallback` function will
+ *      be called repeatedly until the user enters any new key presses. If you
+ *      design an ITerminalSerialCallback that does not need/handle streaming,
+ *      simply check the argument in `terminalSerialCallback` called `streamingEnabled`
+ *      `return false` and write to the `outputStream` to notify the user that
+ *      streaming is not enabled.
+ */
 class TerminalSerial
 {
 public:
@@ -84,23 +105,33 @@ public:
 private:
     static constexpr int MAX_LINE_LENGTH = 256;
 
+    // Use either an IO device that interacts with UART or with stdin/stdout.
 #ifdef PLATFORM_HOSTED
     HostedTerminalDevice device;
 #else
     UartTerminalDevice device;
 #endif
 
+    ///< Hardware abstraction of a stream that provides utilities for tx/rx.
     modm::IOStream stream;
 
+    ///< A single line is parsed into this buffer.
     char rxBuff[MAX_LINE_LENGTH];
 
+    ///< Index into the rxBuff.
     uint8_t currLineSize = 0;
 
+    /**
+     * Used when in streaming mode to signify the serial callback that has taken
+     * control of writing to the IOStream
+     */
     ITerminalSerialCallback *currStreamer;
 
     std::map<std::string, ITerminalSerialCallback *> headerCallbackMap;
 
     Drivers *drivers;
+
+    void printUsage();
 };  // class TerminalSerial
 }  // namespace serial
 }  // namespace communication

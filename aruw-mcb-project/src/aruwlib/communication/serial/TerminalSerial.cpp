@@ -58,6 +58,7 @@ void TerminalSerial::update()
         if (headerCallbackMap.count(headerStr) == 0)
         {
             stream << "Header \'" << header.c_str() << "\' not found" << modm::endl;
+            printUsage();
         }
         else
         {
@@ -72,6 +73,7 @@ void TerminalSerial::update()
             {
                 line.seekg(currp);
             }
+
             if (!headerCallbackMap[headerStr]
                      ->terminalSerialCallback(std::move(line), stream, currStreamer != nullptr))
             {
@@ -102,6 +104,19 @@ void TerminalSerial::addHeader(const std::string &header, ITerminalSerialCallbac
         return;
     }
     headerCallbackMap[header] = callback;
+}
+
+void TerminalSerial::printUsage()
+{
+    stream << "Usage: <header> [-S] <args>\n"
+              "  Where\n"
+              "    -S Enable streaming mode\n"
+              "  and <header> is one of\n";
+    for (const auto &header : headerCallbackMap)
+    {
+        stream << "    " << header.first.c_str() << modm::endl;
+    }
+    stream << "  and <args> is specific to <header> (query <header> -H for more help)\n";
 }
 }  // namespace serial
 }  // namespace communication

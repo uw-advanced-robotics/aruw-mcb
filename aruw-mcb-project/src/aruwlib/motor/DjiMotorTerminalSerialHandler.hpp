@@ -47,18 +47,13 @@ private:
     typedef DjiMotor const* (DjiMotorTxHandler::*getMotorByIdFunc)(MotorId);
 
     static constexpr char USAGE[] =
-        "Usage: motorinfo <[all] | [motor [mid]] [can [cid]]>\n"
+        "Usage: motorinfo <[-H] | [all] | [motor [mid]] [can [cid]]>\n"
         "  Where:\n"
+        "    - [-H]  prints usage\n"
         "    - [all] prints all motor info\n"
         "    Or specifiy a motor id and/or can id, where\n"
         "    - [mid] is the id of a motor, in [1, 8]\n"
         "    - [cid] is some the can id, in [1, 2]\n";
-
-    bool printInfo(modm::IOStream& outputStream);
-
-    void getMotorInfoToString(const DjiMotor* motor, modm::IOStream& outputStream);
-
-    void printAllMotorInfo(getMotorByIdFunc func, modm::IOStream& outputStream);
 
     DjiMotorTxHandler* motorHandler;
 
@@ -67,6 +62,12 @@ private:
     bool canBusValid = false;
     int canBus = 0;
     bool printAll = false;
+
+    bool printInfo(modm::IOStream& outputStream);
+
+    void getMotorInfoToString(const DjiMotor* motor, modm::IOStream& outputStream);
+
+    void printAllMotorInfo(getMotorByIdFunc func, modm::IOStream& outputStream);
 };  // class DjiMotorTerminalSerialHandler
 }  // namespace motor
 }  // namespace aruwlib

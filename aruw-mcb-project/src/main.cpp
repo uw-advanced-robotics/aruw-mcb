@@ -30,6 +30,7 @@
 /* communication includes ---------------------------------------------------*/
 #include <aruwlib/DriversSingleton.hpp>
 #include <aruwlib/display/sh1106.hpp>
+#include <aruwlib/motor/DjiMotorTerminalSerialHandler.hpp>
 
 /* error handling includes --------------------------------------------------*/
 
@@ -41,14 +42,18 @@ using aruwlib::Drivers;
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
+/* define terminal serial callbacks here ------------------------------------*/
+aruwlib::motor::DjiMotorTerminalSerialHandler motorTerminalCallback(
+    &aruwlib::DoNotUse_getDrivers()->djiMotorTxHandler);
+
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-void initializeIo(aruwlib::Drivers *drivers);
+static void initializeIo(aruwlib::Drivers *drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-void updateIo(aruwlib::Drivers *drivers);
+static void updateIo(aruwlib::Drivers *drivers);
 
 int main()
 {
@@ -86,7 +91,7 @@ int main()
     return 0;
 }
 
-void initializeIo(aruwlib::Drivers *drivers)
+static void initializeIo(aruwlib::Drivers *drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
@@ -99,9 +104,13 @@ void initializeIo(aruwlib::Drivers *drivers)
     drivers->xavierSerial.initialize();
     drivers->terminalSerial.initialize();
     drivers->oledDisplay.initialize();
+
+    drivers->terminalSerial.addHeader(
+        aruwlib::motor::DjiMotorTerminalSerialHandler::HEADER,
+        &motorTerminalCallback);
 }
 
-void updateIo(aruwlib::Drivers *drivers)
+static void updateIo(aruwlib::Drivers *drivers)
 {
     drivers->canRxHandler.pollCanData();
     drivers->xavierSerial.updateSerial();

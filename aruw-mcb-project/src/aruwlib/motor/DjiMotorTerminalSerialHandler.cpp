@@ -72,6 +72,11 @@ bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
             printAll = true;
             break;
         }
+        else if (arg == "-H")
+        {
+            outputStream << USAGE;
+            return true;
+        }
         else
         {
             outputStream << USAGE;
