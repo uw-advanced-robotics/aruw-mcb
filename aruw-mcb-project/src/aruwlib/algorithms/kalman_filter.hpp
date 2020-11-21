@@ -70,7 +70,7 @@ public:
         predictCovariance();
         calculateKalmanGain();
         updateState();
-        updateCovariance();
+        updatePredictionCovariance();
         return x;
     }
 
@@ -135,8 +135,8 @@ public:
         x = fx + k * (z - hx);
     }
 
-    /// Updates the covariance.
-    modm::Matrix<float, N, N> updateCovariance()
+    /// Updates the prediction error covariance.
+    modm::Matrix<float, N, N> updatePredictionCovariance()
     {
         // P = (I - K * H) * P * (I - K * H)t + K * R * Kt
         // or P = (I - K * H) * P
