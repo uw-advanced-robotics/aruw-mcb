@@ -37,17 +37,21 @@ public:
      * @param[in] p the initial prediction error covariance estimate.
      * @param[in] q the process noise covariance.
      * @param[in] r the measurement error covariance.
+     * @param[in] f the process model Jacobian.
+     * @param[in] h the measurement model Jacobian.
      */
-    KalmanFilter(modm::Matrix<float, N, 1> x, modm::Matrix<float, N, N> p,
-        modm::Matrix<float, N, N> q, modm::Matrix<float, M, M> r)
+    KalmanFilter(
+        modm::Matrix<float, N, 1> x, modm::Matrix<float, N, N> p,
+        modm::Matrix<float, N, N> q, modm::Matrix<float, M, M> r,
+        modm::Matrix<float, N, N> f, modm::Matrix<float, M, N> h)
         : x(x),
-          z(modm::Matrix<float, N, 1>::zeroMatrix()),
+          z(modm::Matrix<float, M, 1>::zeroMatrix()),
           p(p),
           q(q),
           r(r),
           k(modm::Matrix<float, N, M>::zeroMatrix()),
-          f(modm::Matrix<float, N, N>::zeroMatrix()),
-          h(modm::Matrix<float, M, N>::zeroMatrix()),
+          f(f),
+          h(h),
           fx(modm::Matrix<float, N, 1>::zeroMatrix()),
           hx(modm::Matrix<float, M, 1>::zeroMatrix())
     {
@@ -59,14 +63,15 @@ public:
      * @param[in] z the data to be filtered.
      * @return the filtered data.
      */
-    modm::Matrix<float, N, 1> filterData(modm::Matrix<float, N, 1> z)
+    modm::Matrix<float, N, 1> filterData(modm::Matrix<float, M, 1> z)
     {
-        fx = predictState();
-        // update h(x)?
-        p = predictCovariance(p, f, q);
-        k = calculateKalmanGain(k, p, h, r);
-        x = updateState(fx, k, z, hx);
-        p = updateCovariance();
+        this->z = z;
+        predictState();
+        predictCovariance();
+        calculateKalmanGain();
+        updateState();
+        updateCovariance();
+        return x;
     }
 
     /**
@@ -99,77 +104,47 @@ public:
         hx = modm::Matrix<float, M, 1>().zeroMatrix();
     }
 
-    /**
-     * Predicts the state at the next time step.
-     * 
-     * @return the predicted state.
-     */
-    modm::Matrix<float, N, 1> predictState()
+    /// Predicts the state at the next time step.
+    void predictState()
     {
-        // x = f(x, u)
+        // x = f(x)
+        fx = f * x;
     }
 
-    /**
-     * Predicts the covariance at the next time step.
-     * 
-     * @return the predicted covariance.
-     */
-    modm::Matrix<float, N, N> predictCovariance(
-        modm::Matrix<float, N, N> p,
-        modm::Matrix<float, N, N> f,
-        modm::Matrix<float, N, N> q)
+    /// Predicts the prediction error covariance at the next time step.
+    void predictCovariance()
     {
         // P = F * P * Ft + Q
-        return f * p * f.asTransposed() + q;
+        p = f * p * f.asTransposed() + q;
     }
 
-    /**
-     * Calculates the Kalman Gain.
-     * 
-     * @return the calculated Kalman Gain.
-     */
-    modm::Matrix<float, N, M> calculateKalmanGain(
-        modm::Matrix<float, N, M> k,
-        modm::Matrix<float, N, N> p,
-        modm::Matrix<float, M, N> h,
-        modm::Matrix<float, M, M> r
-        )
+    /// Calculates the Kalman Gain.
+    void calculateKalmanGain()
     {
         // K = P * Ht * (H * P * Ht + R)^-1
         modm::Matrix<float, N, N> innovationCovariance = (h * p * h.asTransposed() + r);
         innovationCovariance = inverse(innovationCovariance);
-        return p * h.asTransposed() * innovationCovariance;
+        k = p * h.asTransposed() * innovationCovariance;
     }
 
-    /**
-     * Updates the state using the measurement.
-     * 
-     * @return the updated state.
-     */
-    modm::Matrix<float, N, 1> updateState(
-        modm::Matrix<float, N, 1> fx,
-        modm::Matrix<float, N, M> k,
-        modm::Matrix<float, M, 1> z,
-        modm::Matrix<float, M, 1> hx)
+    /// Updates the state using the measurement.
+    void updateState()
     {
         // x = x + K * (z - h(x))
-        return fx + k * (z - hx);  // I think fx should be used instead of x because fx is the previous predicted state but I could be wrong
+        hx = h * fx;  // I don't know where to put this or if the hx variable is necessary
+        x = fx + k * (z - hx);
     }
 
-    /**
-     * Updates the covariance.
-     * 
-     * @return the updated covariance.
-     */
+    /// Updates the covariance.
     modm::Matrix<float, N, N> updateCovariance()
     {
-
         // P = (I - K * H) * P * (I - K * H)t + K * R * Kt
+        // or P = (I - K * H) * P
     }
 
 private:
     modm::Matrix<float, N, 1> x;  ///< state vector
-    modm::Matrix<float, N, 1> z;  ///< measurement vector
+    modm::Matrix<float, M, 1> z;  ///< measurement vector
    
     modm::Matrix<float, N, N> p;  ///< prediction error covariance
     modm::Matrix<float, N, N> q;  ///< process noise covariance
