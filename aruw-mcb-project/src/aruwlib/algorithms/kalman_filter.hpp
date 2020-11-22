@@ -22,6 +22,8 @@
 
 #include <modm/math/matrix.hpp>
 
+#include "math_user_utils.hpp"
+
 namespace aruwlib
 {
 namespace algorithms
@@ -72,19 +74,6 @@ public:
         updateState();
         updatePredictionCovariance();
         return x;
-    }
-
-    /**
-     * Finds the inverse of a matrix.
-     * 
-     * @param[in] matrix the matrix to be inverted.
-     * @return the inverted matrix.
-     */
-    template<typename T, uint8_t ROWS, uint8_t COLUMNS>
-    modm::Matrix<T, ROWS, COLUMNS> inverse(modm::Matrix<T, ROWS, COLUMNS> matrix)
-    {
-        
-        return matrix;
     }
 
     /// Returns the last filtered data point.

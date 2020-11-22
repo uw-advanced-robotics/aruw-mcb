@@ -23,6 +23,8 @@
 #include <cmath>
 #include <cstring>
 
+#include <modm/math/matrix.hpp>
+
 namespace aruwlib
 {
 namespace algorithms
@@ -50,6 +52,19 @@ inline float radiansToDegrees(float radians) { return radians * 180.f / PI; }
 inline bool compareFloatClose(float val1, float val2, float epsilon)
 {
     return fabsf(val1 - val2) < epsilon;
+}
+
+/**
+ * Finds the inverse of a matrix.
+ * 
+ * @param[in] matrix the matrix to be inverted.
+ * @return the inverted matrix.
+ */
+template<typename T, uint8_t ROWS, uint8_t COLUMNS>
+modm::Matrix<T, ROWS, COLUMNS> inverse(modm::Matrix<T, ROWS, COLUMNS> &matrix)
+{
+    /// \todo
+    return matrix;
 }
 
 /**
