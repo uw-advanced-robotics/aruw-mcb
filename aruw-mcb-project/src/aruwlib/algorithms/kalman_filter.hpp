@@ -77,7 +77,7 @@ public:
     }
 
     /// Returns the last filtered data point.
-    modm::Matrix<float, N, 1> getLastFiltered() const { return x; }
+    const modm::Matrix<float, N, 1> &getLastFiltered() const { return x; }
 
     /// Resets the covariances and predictions.
     void reset()
