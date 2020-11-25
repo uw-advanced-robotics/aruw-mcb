@@ -61,7 +61,7 @@ inline bool compareFloatClose(float val1, float val2, float epsilon)
  * @return the inverted matrix.
  */
 template<typename T, uint8_t ROWS, uint8_t COLUMNS>
-modm::Matrix<T, ROWS, COLUMNS> inverse(modm::Matrix<T, ROWS, COLUMNS> &matrix)
+inline modm::Matrix<T, ROWS, COLUMNS> inverse(const modm::Matrix<T, ROWS, COLUMNS> &matrix)
 {
     /// \todo
     return matrix;
