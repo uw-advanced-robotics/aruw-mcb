@@ -28,7 +28,7 @@
 
 namespace aruwlib
 {
-namespace motor
+namespace motorsim
 {
 class MotorSim
 {
@@ -43,7 +43,6 @@ public:
 
     MotorSim(MotorType type);
     MotorSim(MotorType type, float loading);
-    MotorSim();
 
     /**
      * Sets the input (as an integer) used for simulation.
@@ -101,6 +100,7 @@ private:
     void initConstants(MotorType type);
 
     /* Class Variables */
+    /*const uint8_t portID;*/
     float loading;          // N*m
     float pos;              // Meters
     float rpm;              // RPM

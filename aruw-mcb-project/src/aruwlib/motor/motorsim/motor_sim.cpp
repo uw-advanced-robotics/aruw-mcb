@@ -27,7 +27,7 @@
 
 namespace aruwlib
 {
-namespace motor
+namespace motorsim
 {
 MotorSim::MotorSim(MotorType type) : pos(0), rpm(0), loading(0), input(0)
 {
@@ -37,12 +37,6 @@ MotorSim::MotorSim(MotorType type) : pos(0), rpm(0), loading(0), input(0)
 MotorSim::MotorSim(MotorType type, float loading) : pos(0), rpm(0), loading(loading), input(0)
 {
     initConstants(type);
-}
-
-MotorSim::MotorSim() : pos(0), rpm(0), loading(0), input(0)
-{
-    initConstants(UNSPECIFIED);
-    time = clock();
 }
 
 void MotorSim::setInput(int16_t in)
