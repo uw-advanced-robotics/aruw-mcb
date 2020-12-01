@@ -43,9 +43,12 @@ public:
      * @param[in] h the measurement model Jacobian.
      */
     KalmanFilter(
-        modm::Matrix<float, N, 1> x, modm::Matrix<float, N, N> p,
-        modm::Matrix<float, N, N> q, modm::Matrix<float, M, M> r,
-        modm::Matrix<float, N, N> f, modm::Matrix<float, M, N> h)
+        modm::Matrix<float, N, 1> x,
+        modm::Matrix<float, N, N> p,
+        modm::Matrix<float, N, N> q,
+        modm::Matrix<float, M, M> r,
+        modm::Matrix<float, N, N> f,
+        modm::Matrix<float, M, N> h)
         : x(x),
           z(modm::Matrix<float, M, 1>::zeroMatrix()),
           p(p),
@@ -93,6 +96,7 @@ public:
         hx = modm::Matrix<float, M, 1>().zeroMatrix();
     }
 
+private:
     /// Predicts the state at the next time step.
     void predictState()
     {
@@ -131,7 +135,6 @@ public:
         // or P = (I - K * H) * P
     }
 
-private:
     modm::Matrix<float, N, 1> x;  ///< state vector
     modm::Matrix<float, M, 1> z;  ///< measurement vector
    
