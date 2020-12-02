@@ -17,35 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "serial_test_class.hpp"
+#ifndef MAIN_MENU_HPP_
+#define MAIN_MENU_HPP_
+
+#include <modm/ui/menu/standard_menu.hpp>
 
 namespace aruwlib
 {
-namespace serial
+class Drivers;
+namespace display
 {
-SerialTestClass::SerialTestClass(Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart2),
-      messageId(0),
-      i(0)
+class MainMenu : public modm::StandardMenu
 {
-}
+public:
+    MainMenu(modm::ViewStack *stack, uint8_t identifier, Drivers *drivers);
 
-void SerialTestClass::messageReceiveCallback(const SerialMessage& completeMessage)
-{
-    messageId = completeMessage.sequenceNumber;
-}
+    virtual ~MainMenu() = default;
 
-void SerialTestClass::sendMessage()
-{
-    this->txMessage.length = 1;
-    this->txMessage.headByte = 0xa5;
-    this->txMessage.sequenceNumber = i;
-    this->txMessage.type = 4;
-    this->txMessage.data[0] = 60;
-    this->send();
-    i++;
-}
+    /**
+     * Adds entries to the menu to the necessary submenus.
+     */
+    void initialize();
 
-}  // namespace serial
+private:
+    Drivers *drivers;
 
+    void addErrorMenuCallback();
+    void addMotorMenuCallback();
+    void addPropertyTableCallback();
+};  // class MainMenu
+}  // namespace display
 }  // namespace aruwlib
+
+#endif  // MAIN_MENU_HPP_

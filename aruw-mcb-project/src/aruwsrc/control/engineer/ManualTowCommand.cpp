@@ -17,35 +17,27 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "serial_test_class.hpp"
+#include "ManualTowCommand.hpp"
 
-namespace aruwlib
+namespace aruwsrc
 {
-namespace serial
+namespace engineer
 {
-SerialTestClass::SerialTestClass(Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart2),
-      messageId(0),
-      i(0)
+ManualTowCommand::ManualTowCommand(TowSubsystem* subsystem) : towSubsystem(subsystem)
 {
+    this->addSubsystemRequirement(subsystem);
 }
 
-void SerialTestClass::messageReceiveCallback(const SerialMessage& completeMessage)
+void ManualTowCommand::initialize()
 {
-    messageId = completeMessage.sequenceNumber;
+    towSubsystem->setLeftClamped(true);
+    towSubsystem->setRightClamped(true);
 }
 
-void SerialTestClass::sendMessage()
+void ManualTowCommand::end(bool)
 {
-    this->txMessage.length = 1;
-    this->txMessage.headByte = 0xa5;
-    this->txMessage.sequenceNumber = i;
-    this->txMessage.type = 4;
-    this->txMessage.data[0] = 60;
-    this->send();
-    i++;
+    towSubsystem->setLeftClamped(false);
+    towSubsystem->setRightClamped(false);
 }
-
-}  // namespace serial
-
-}  // namespace aruwlib
+}  // namespace engineer
+}  // namespace aruwsrc
