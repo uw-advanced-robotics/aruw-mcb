@@ -20,10 +20,9 @@
 #ifdef PLATFORM_HOSTED
 
 #include "motor_sim.hpp"
-
 #include <time.h>
-
 #include <cstdint>
+#include <cmath>
 
 namespace aruwlib
 {
@@ -55,19 +54,22 @@ void MotorSim::setLoading(float t)
     }
 }
 
-float MotorSim::getCurrent() { return (input / MAX_INPUT_MAG) * MAX_CURRENT_OUT; }
+float MotorSim::getActualCurrent() { return (input / MAX_INPUT_MAG) * MAX_CURRENT_OUT; }
 
-float MotorSim::getMaxTorque() { return getCurrent() * KT; }
+int16_t MotorSim::getEnc() { return static_cast<int16_t>(pos * MAX_ENCODER_VAL); }
 
-float MotorSim::getEnc() { return pos; }
+int16_t MotorSim::getInput() { return input; }
 
-float MotorSim::getRPM() { return rpm; }
+float MotorSim::getMaxTorque() { return getActualCurrent() * KT; }
+
+int16_t MotorSim::getRPM() { return static_cast<int16_t>(rpm); }
 
 // TODO: Make sure that position simulation is accurate (potential timer issues, encoder tics?)
 void MotorSim::update()
 {
     rpm = (MAX_W - WT_GRAD * loading) * input / (MAX_INPUT_MAG * (CURRENT_LIM / MAX_CURRENT_OUT));
-    pos = (static_cast<float>(clock() - time) / CLOCKS_PER_SEC) * rpm;
+    pos += (static_cast<float>(clock() - time) / CLOCKS_PER_SEC) * rpm;
+    pos = fmod(pos, 1);
     time = clock();
 }
 
@@ -78,6 +80,7 @@ void MotorSim::initConstants(MotorType type)
     {
         case GM6020:
         MAX_INPUT_MAG = 30000;
+        MAX_ENCODER_VAL = 0;
         MAX_CURRENT_OUT = 0;
         CURRENT_LIM = 0;
         MAX_W = 0;
@@ -87,6 +90,7 @@ void MotorSim::initConstants(MotorType type)
 
         case M3508:
         MAX_INPUT_MAG = 16384;
+        MAX_ENCODER_VAL = 8191;
         MAX_CURRENT_OUT = 20;
         CURRENT_LIM = 10;
         MAX_W = 469;

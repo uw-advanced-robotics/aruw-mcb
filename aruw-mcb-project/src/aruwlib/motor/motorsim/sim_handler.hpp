@@ -23,7 +23,10 @@
 #define sim_handler_hpp_
 
 #include <vector>
-#include "aruwlib/motor/motorsim/motor_sim.hpp"
+#include <array>
+#include "motor_sim.hpp"
+#include "aruwlib/communication/can/can.hpp"
+#include "modm/platform.hpp"
 
 namespace aruwlib
 {
@@ -36,13 +39,20 @@ public:
 
     static void registerSim(MotorSim::MotorType type, uint8_t port);
 
-    static void update();
+    static void registerSim(MotorSim::MotorType type, float loading, uint8_t port);
+
+    static bool getMessage(aruwlib::can::CanBus bus, const modm::can::Message& message);
+
+    static bool sendMessage(modm::can::Message* message);
+
+    static void updateSims();
 
     static SimHandler simHandle;
 
 private:
-    std::vector<MotorSim> sims;
-    const uint8_t capacity = 16;
+    static const uint8_t capacity = 16;
+    static std::array<MotorSim*, capacity> sims; // TODO: should this be an array or vector? or something else?
+    static uint8_t nextSendIndex;
 };
 }
 }

@@ -38,11 +38,36 @@ public:
      */
     enum MotorType
     {
-        M3508, GM6020, UNSPECIFIED // Please don't init a MotorSim as unspecified: this is strictly for initConstants()
+        M3508, GM6020
     };
 
     MotorSim(MotorType type);
     MotorSim(MotorType type, float loading);
+
+    /**
+     * Returns the current (in amps) given to the GM3508 for the given input.
+     */
+    float getActualCurrent();
+
+    /**
+     * Returns the angular position of the motor.
+     */
+    int16_t getEnc();
+
+    /**
+     * Returns the input integer given to the motor by the CAN messages.
+     */
+    int16_t getInput();
+
+    /**
+     * Returns the maximum torque (in N*m) that can be held in equilibrium for the given input.
+     */
+    float getMaxTorque();
+
+    /**
+     * Returns the current rotational speed of the motor in RPM.
+     */
+    int16_t getRPM();
 
     /**
      * Sets the input (as an integer) used for simulation.
@@ -59,27 +84,6 @@ public:
     void setLoading(float t);
 
     /**
-     * Returns the current given to the GM3508 for the given input.
-     */
-    float getCurrent();
-
-    /**
-     * Returns the maximum torque (in N*m) that can be held in equilibrium for the given input.
-     */
-    float getMaxTorque();
-
-    /**
-     * Returns the current number of rotations the motor has undergone
-     * since the beginning of the simulation.
-     */
-    float getEnc();
-
-    /**
-     * Returns the current rotational speed of the motor in RPM.
-     */
-    float getRPM();
-
-    /**
      * Updates the relevant quantities for the motor being simulated.
      * Must be run iteratively in order for getEnc() and getRPM() to work correctly.
      */
@@ -89,12 +93,13 @@ private:
     /* Constants */
     /* Note that these should all be constexpr, but because of
     how they are initialized in construction they cannot be. */
-    float MAX_INPUT_MAG = 0;    // Integer
-    float MAX_CURRENT_OUT = 0;  // Amps
-    float CURRENT_LIM = 0;      // Amps
-    float MAX_W = 0;            // RPM
-    float KT = 0;               // (N*m)/A
-    float WT_GRAD = 0;          // RPM/(N*m)
+    int16_t MAX_INPUT_MAG = 0;      // Integer
+    int16_t MAX_ENCODER_VAL = 0;    // Integer
+    float MAX_CURRENT_OUT = 0;      // Amps
+    float CURRENT_LIM = 0;          // Amps
+    float MAX_W = 0;                // RPM
+    float KT = 0;                   // (N*m)/A
+    float WT_GRAD = 0;              // RPM/(N*m)
 
     /** Initializes constant variables based on motor type */
     void initConstants(MotorType type);
@@ -102,8 +107,8 @@ private:
     /* Class Variables */
     /*const uint8_t portID;*/
     float loading;          // N*m
-    float pos;              // Meters
-    float rpm;              // RPM
+    float pos;            // Meters
+    int16_t rpm;            // RPM
     int16_t input;          // 16-bit Integer
     clock_t time;
 };

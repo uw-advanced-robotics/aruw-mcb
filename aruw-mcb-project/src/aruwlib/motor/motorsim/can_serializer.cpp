@@ -20,6 +20,7 @@
 #ifdef PLATFORM_HOSTED
 
 #include "can_serializer.hpp"
+#include "aruwlib/communication/can/can.hpp"
 #include <array>
 #include <cstdint>
 
@@ -27,18 +28,22 @@ namespace aruwlib
 {
 namespace motorsim
 {
-std::array<int, 4> deserializeInput(modm::can::Message* m)
+std::array<int16_t, 4> parseMessage(modm::can::Message* message)
 {
-    std::array<int, 4> out;
-    uint8_t* data = m->data;
+    std::array<int16_t, 4> out;
+    uint8_t* data = message->data;
 
     // Byte Smashing!
-    out[0] = data[0]*256 + data[1];
-    out[1] = data[2]*256 + data[3];
-    out[2] = data[4]*256 + data[5];
-    out[3] = data[6]*256 + data[7];
-
+    out[0] = static_cast<int16_t>(data[0]) << 8 | static_cast<int16_t>(data[1]);
+    out[1] = static_cast<int16_t>(data[2]) << 8 | static_cast<int16_t>(data[3]);
+    out[2] = static_cast<int16_t>(data[4]) << 8 | static_cast<int16_t>(data[5]);
+    out[3] = static_cast<int16_t>(data[6]) << 8 | static_cast<int16_t>(data[7]);
     return out;
+}
+
+modm::can::Message* serializeFeedback(int16_t angle, int16_t rpm, int16_t current)
+{
+    
 }
 
 }

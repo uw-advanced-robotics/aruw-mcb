@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <array>
 #include "modm/architecture/interface/can_message.hpp"
+#include "aruwlib/communication/can/can.hpp"
 
 namespace aruwlib
 {
@@ -32,7 +33,10 @@ namespace motorsim
 {
 class CanSerializer
 {
-    static std::array<int, 4> deserializeInput(modm::can::Message* m);
+public:
+    static std::array<int16_t, 4> parseMessage(modm::can::Message* message);
+
+    static modm::can::Message* serializeFeedback(int16_t angle, int16_t rpm, int16_t current);
 };
 }
 }
