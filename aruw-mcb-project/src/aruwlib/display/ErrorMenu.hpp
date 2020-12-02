@@ -17,35 +17,41 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "serial_test_class.hpp"
+#ifndef ERROR_MENU_HPP_
+#define ERROR_MENU_HPP_
+
+#include <list>
+
+#include <modm/ui/menu/abstract_menu.hpp>
+
+#include "aruwlib/rm-dev-board-a/board.hpp"
+
+#include "modm/processing/timer/periodic_timer.hpp"
 
 namespace aruwlib
 {
-namespace serial
+class Drivers;
+namespace display
 {
-SerialTestClass::SerialTestClass(Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart2),
-      messageId(0),
-      i(0)
+class ErrorMenu : public modm::AbstractMenu
 {
-}
+public:
+    ErrorMenu(modm::ViewStack *vs, Drivers *drivers);
 
-void SerialTestClass::messageReceiveCallback(const SerialMessage& completeMessage)
-{
-    messageId = completeMessage.sequenceNumber;
-}
+    void draw() override;
 
-void SerialTestClass::sendMessage()
-{
-    this->txMessage.length = 1;
-    this->txMessage.headByte = 0xa5;
-    this->txMessage.sequenceNumber = i;
-    this->txMessage.type = 4;
-    this->txMessage.data[0] = 60;
-    this->send();
-    i++;
-}
+    void update() override;
 
-}  // namespace serial
+    void shortButtonPress(modm::MenuButtons::Button button) override;
 
+    bool hasChanged() override;
+
+    static const char *getMenuName() { return "Error Menu"; }
+
+private:
+    Drivers *drivers;
+};  // class ErrorMenu
+}  // namespace display
 }  // namespace aruwlib
+
+#endif  // ERROR_MENU_HPP_

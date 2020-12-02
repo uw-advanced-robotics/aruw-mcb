@@ -17,34 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REF_SERIAL_MOCK_HPP_
-#define REF_SERIAL_MOCK_HPP_
+#ifndef OLED_DISPLAY_MOCK_HPP_
+#define OLED_DISPLAY_MOCK_HPP_
 
-#include <aruwlib/communication/serial/ref_serial.hpp>
+#include <aruwlib/display/OledDisplay.hpp>
 #include <gmock/gmock.h>
 
 namespace aruwlib
 {
 namespace mock
 {
-class RefSerialMock : public aruwlib::serial::RefSerial
+class OledDisplayMock : public display::OledDisplay
 {
 public:
-    RefSerialMock(aruwlib::Drivers* drivers) : aruwlib::serial::RefSerial(drivers) {}
-    MOCK_METHOD(
-        void,
-        messageReceiveCallback,
-        (const aruwlib::serial::DJISerial<true>::SerialMessage& completeMessage),
-        (override));
-    MOCK_METHOD(const aruwlib::serial::RefSerial::RobotData&, getRobotData, (), (const override));
-    MOCK_METHOD(const aruwlib::serial::RefSerial::GameData&, getGameData, (), (const override));
-    MOCK_METHOD(
-        void,
-        sendDisplayData,
-        (const aruwlib::serial::RefSerial::DisplayData& displayData),
-        (override));
-};  // class RefSerialMock
+    explicit OledDisplayMock(Drivers *drivers) : display::OledDisplay(drivers) {}
+    MOCK_METHOD(void, initialize, (), (override));
+    MOCK_METHOD(void, update, (), (override));
+};  // class OledDisplayMock
 }  // namespace mock
 }  // namespace aruwlib
 
-#endif  // REF_SERIAL_MOCK_HPP_
+#endif  // OLED_DISPLAY_MOCK_HPP_
