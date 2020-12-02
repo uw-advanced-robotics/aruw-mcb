@@ -22,7 +22,7 @@
 #endif
 
 #include <aruwlib/rm-dev-board-a/board.hpp>
-#include <modm/platform/core/delay.hpp>
+#include <modm/architecture/interface/delay.hpp>
 
 /* arch includes ------------------------------------------------------------*/
 #include <aruwlib/architecture/periodic_timer.hpp>
@@ -81,7 +81,7 @@ int main()
             drivers->terminalSerial.update();
             drivers->oledDisplay.update();
         }
-        modm::delayMicroseconds(10);
+        modm::delay_us(10);
     }
     return 0;
 }
