@@ -89,7 +89,9 @@ public:
  *      design an ITerminalSerialCallback that does not need/handle streaming,
  *      simply check the argument in `terminalSerialCallback` called `streamingEnabled`
  *      `return false` and write to the `outputStream` to notify the user that
- *      streaming is not enabled.
+ *      streaming is not enabled. An example of where you would use streaming
+ *      mode is if you would like to have a mode that prints out motor information
+ *      constantly without having to retype a command into the terminal.
  */
 class TerminalSerial
 {

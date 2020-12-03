@@ -35,9 +35,9 @@ void TerminalSerial::initialize() { device.initialize(); }
 
 void TerminalSerial::update()
 {
-    char c;
-    stream.get(c);
-    if (c == modm::IOStream::eof)
+    char nextC;
+    stream.get(nextC);
+    if (nextC == modm::IOStream::eof)
     {
         if (currStreamer != nullptr)
         {
@@ -46,13 +46,13 @@ void TerminalSerial::update()
         return;
     }
     currStreamer = nullptr;
-    if (c == '\n')
+    if (nextC == '\n')
     {
         rxBuff[currLineSize] = '\0';
-        std::stringstream line;
-        line << std::string(rxBuff);
+        std::stringstream nextLine;
+        nextLine << std::string(rxBuff);
         std::string header;
-        line >> header;
+        nextLine >> header;
 
         std::string headerStr = std::string(header);
         if (headerCallbackMap.count(headerStr) == 0)
@@ -62,20 +62,20 @@ void TerminalSerial::update()
         }
         else
         {
-            std::string se;
-            std::streampos currp = line.tellg();
-            line >> se;
-            if (se == "-S")
+            std::string currArg;
+            std::streampos currLinePosition = nextLine.tellg();
+            nextLine >> currArg;
+            if (currArg == "-S")
             {
                 currStreamer = headerCallbackMap[headerStr];
             }
             else
             {
-                line.seekg(currp);
+                nextLine.seekg(currLinePosition);
             }
 
             if (!headerCallbackMap[headerStr]
-                     ->terminalSerialCallback(std::move(line), stream, currStreamer != nullptr))
+                     ->terminalSerialCallback(std::move(nextLine), stream, currStreamer != nullptr))
             {
                 stream << "invalid arguments" << modm::endl;
                 currStreamer = nullptr;
@@ -92,7 +92,7 @@ void TerminalSerial::update()
         }
         else
         {
-            rxBuff[currLineSize++] = c;
+            rxBuff[currLineSize++] = nextC;
         }
     }
 }
