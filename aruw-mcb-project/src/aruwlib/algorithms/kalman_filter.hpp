@@ -41,6 +41,8 @@ public:
      * @param[in] r the measurement error covariance.
      * @param[in] f the process model Jacobian.
      * @param[in] h the measurement model Jacobian.
+     * @param[in] fFunction the process function.
+     * @param[in] hFunction the measurement function.
      */
     KalmanFilter(
         modm::Matrix<float, N, 1> x,
@@ -133,7 +135,7 @@ private:
     }
 
     /// Updates the prediction error covariance.
-    modm::Matrix<float, N, N> updatePredictionCovariance()
+    void updatePredictionCovariance()
     {
         // P = (I - K * H) * P * (I - K * H)t + K * R * Kt
         // or P = (I - K * H) * P
