@@ -72,7 +72,7 @@ bool aruwlib::can::Can::isMessageAvailable(aruwlib::can::CanBus bus) const
 bool aruwlib::can::Can::getMessage(aruwlib::can::CanBus bus, modm::can::Message* message)
 {
 #ifdef PLATFORM_HOSTED
-    return aruwlib::motorsim::SimHandler::simHandle.sendMessage(message);
+    return aruwlib::motorsim::SimHandler::simHandle.sendMessage(bus, message);
 #else
     switch (bus)
     {

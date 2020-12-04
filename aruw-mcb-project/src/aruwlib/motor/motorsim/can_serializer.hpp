@@ -34,9 +34,22 @@ namespace motorsim
 class CanSerializer
 {
 public:
+    /**
+     * Parse a given CAN motor message into 4 motor input values.
+     * Returns a 16-bit int array containing the 4 integer input values.
+     */
     static std::array<int16_t, 4> parseMessage(modm::can::Message* message);
 
-    static modm::can::Message* serializeFeedback(int16_t angle, int16_t rpm, int16_t current);
+    /**
+     * Serialize the given motor feedback data into a CAN Message.
+     * Returns a pointer to the created message.
+     */
+    static modm::can::Message* serializeFeedback(int16_t angle, int16_t rpm, int16_t current, uint8_t port);
+private:
+    // HEADER[port] = (appropriate serialization header)
+    static const std::array<uint32_t, 8> HEADER =
+    {0x201, 0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208};
+    static const uint8_t FEEDBACK_MESSAGE_SEND_LENGTH = 8;
 };
 }
 }

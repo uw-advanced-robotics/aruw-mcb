@@ -37,22 +37,50 @@ class SimHandler
 public:
     SimHandler();
 
-    static void registerSim(MotorSim::MotorType type, uint8_t port);
+    /**
+     * Registers a new MotorSim object for the given motor type
+     * that will respond at the given position on the given CAN bus.
+     * 
+     * Default torque loading (0 N*m) is used for this function.
+     */
+    static void registerSim(MotorSim::MotorType type, aruwlib::can::CanBus bus, uint8_t port);
 
-    static void registerSim(MotorSim::MotorType type, float loading, uint8_t port);
+    /**
+     * Overload of earlier registerSim that also allows a torque loading
+     * to be specified for the motor sim.
+     */
+    static void registerSim(MotorSim::MotorType type, float loading, aruwlib::can::CanBus bus, uint8_t port);
 
+    /**
+     * Allows the SimHandler to receive a given CAN message
+     * and stream input values to the motor sims.
+     * Returns true if data is processed (it always should be).
+     */
     static bool getMessage(aruwlib::can::CanBus bus, const modm::can::Message& message);
 
-    static bool sendMessage(modm::can::Message* message);
+    /**
+     * Fills the given pointer with a new motor sim feedback message.
+     * Returns true if successful (it always should be).
+     */
+    static bool sendMessage(aruwlib::can::CanBus bus, modm::can::Message* message);
 
+    /**
+     * Updates all MotorSim objects (position, RPM, time values).
+     */
     static void updateSims();
 
+    /** Singleton SimHandler instance */
     static SimHandler simHandle;
 
 private:
-    static const uint8_t capacity = 16;
-    static std::array<MotorSim*, capacity> sims; // TODO: should this be an array or vector? or something else?
-    static uint8_t nextSendIndex;
+    /* Constants */
+    static const uint8_t CAN_PORTS = 8;
+    static const uint8_t CAN_BUSSES = 2;
+    static const uint8_t INDEX_LAST_PORT = CAN_PORTS - 1;
+
+    /* Singleton Class Variables */
+    static std::array<MotorSim*, CAN_PORTS*CAN_BUSSES> sims; // TODO: should this be an array or vector? or something else?
+    static std::array<uint8_t, 2> nextIndex;
 };
 }
 }

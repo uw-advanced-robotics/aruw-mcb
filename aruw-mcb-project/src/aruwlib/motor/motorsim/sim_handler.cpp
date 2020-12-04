@@ -29,22 +29,60 @@ namespace motorsim
 {
 SimHandler::SimHandler()
 {
-    nextSendIndex = 0;
-}
-
-void SimHandler::registerSim(MotorSim::MotorType type, uint8_t port)
-{
-    if (port < capacity && sims[port] == nullptr)
+    // for-loop used in case addiitonal Can busses are utilized
+    for (int i = 0; i < nextIndex.size(); i++)
     {
-        sims[port] = &MotorSim(type);
+        nextIndex[i] = 0;
     }
 }
 
-void SimHandler::registerSim(MotorSim::MotorType type, float loading, uint8_t port)
+void SimHandler::registerSim(MotorSim::MotorType type, aruwlib::can::CanBus bus, uint8_t port)
 {
-    if (port < capacity && sims[port] == nullptr)
+    if (port < CAN_PORTS)
     {
-        sims[port] = &MotorSim(type, loading);
+        switch(bus)
+        {
+            case aruwlib::can::CanBus::CAN_BUS1:
+            if (sims[port] == nullptr)
+            {
+                sims[port] = &MotorSim(type);
+            }
+            break;
+
+            case aruwlib::can::CanBus::CAN_BUS2:
+            if (sims[port + INDEX_LAST_PORT] == nullptr)
+            {
+                sims[port + INDEX_LAST_PORT] = &MotorSim(type);
+            }
+            break;
+        }
+    }
+}
+
+void SimHandler::registerSim
+(MotorSim::MotorType type,
+float loading,
+aruwlib::can::CanBus bus,
+uint8_t port)
+{
+    if (port < CAN_PORTS)
+    {
+        switch(bus)
+        {
+            case aruwlib::can::CanBus::CAN_BUS1:
+            if (sims[port] == nullptr)
+            {
+                sims[port] = &MotorSim(type, loading);
+            }
+            break;
+
+            case aruwlib::can::CanBus::CAN_BUS2:
+            if (sims[port + INDEX_LAST_PORT] == nullptr)
+            {
+                sims[port + INDEX_LAST_PORT] = &MotorSim(type, loading);
+            }
+            break;
+        }
     }
 }
 
@@ -79,8 +117,7 @@ bool SimHandler::getMessage(aruwlib::can::CanBus bus, const modm::can::Message& 
         break;
 
         default:
-        // throw an exception here
-        startingIndex = capacity;
+        return false;
     }
 
     for (int i = 0; i < 4; i++)
@@ -94,18 +131,34 @@ bool SimHandler::getMessage(aruwlib::can::CanBus bus, const modm::can::Message& 
     return true;
 }
 
-bool SimHandler::sendMessage(modm::can::Message* message)
+bool SimHandler::sendMessage(aruwlib::can::CanBus bus, modm::can::Message* message)
 {
+    uint8_t busInt;
+
+    switch (bus)
+    {
+        case aruwlib::can::CanBus::CAN_BUS1:
+        busInt = 0;
+        break;
+
+        case aruwlib::can::CanBus::CAN_BUS2:
+        busInt = 1;
+        break;
+
+        default:
+        return false;
+    }
     // TODO: Is this proper C++ syntax?
     message = CanSerializer::serializeFeedback(
-        sims[nextSendIndex]->getEnc(),
-        sims[nextSendIndex]->getRPM(),
-        sims[nextSendIndex]->getInput());
+        sims[nextIndex[busInt]]->getEnc(),
+        sims[nextIndex[busInt]]->getRPM(),
+        sims[nextIndex[busInt]]->getInput(),
+        nextIndex[busInt]);
 
-    nextSendIndex++;
-    if (nextSendIndex >= capacity)
+    nextIndex[busInt]++;
+    if (nextIndex[busInt] > INDEX_LAST_PORT)
     {
-        nextSendIndex = 0;
+        nextIndex[busInt] = 0;
     }
     
     return true;
@@ -113,7 +166,7 @@ bool SimHandler::sendMessage(modm::can::Message* message)
 
 void SimHandler::updateSims()
 {
-    for (int i = 0; i < capacity; i++)
+    for (int i = 0; i < sims.size(); i++)
     {
         if (sims[i] != nullptr)
         {

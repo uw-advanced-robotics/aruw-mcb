@@ -28,7 +28,7 @@ namespace aruwlib
 {
 namespace motorsim
 {
-std::array<int16_t, 4> parseMessage(modm::can::Message* message)
+std::array<int16_t, 4> CanSerializer::parseMessage(modm::can::Message* message)
 {
     std::array<int16_t, 4> out;
     uint8_t* data = message->data;
@@ -41,8 +41,10 @@ std::array<int16_t, 4> parseMessage(modm::can::Message* message)
     return out;
 }
 
-modm::can::Message* serializeFeedback(int16_t angle, int16_t rpm, int16_t current)
+modm::can::Message* CanSerializer::serializeFeedback(int16_t angle, int16_t rpm, int16_t current, uint8_t port)
 {
+    modm::can::Message out = modm::can::Message(HEADER[port], FEEDBACK_MESSAGE_SEND_LENGTH);
+
     
 }
 
