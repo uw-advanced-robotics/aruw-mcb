@@ -78,7 +78,7 @@ public:
      * Fills the given pointer with a new motor sim feedback message.
      * Returns true if successful (it always should be).
      */
-    static bool sendMessage(aruwlib::can::CanBus bus, modm::can::Message* message);
+    static bool sendMessage(aruwlib::can::CanBus bus, modm::can::Message*& message);
 
     /**
      * Updates all MotorSim objects (position, RPM, time values).

@@ -121,6 +121,7 @@ bool SimHandler::getMessage(aruwlib::can::CanBus bus, const modm::can::Message& 
             {
                 startingIndex = CAN_PORTS / 2;
             }
+            else return false;
             break;
 
         case aruwlib::can::CanBus::CAN_BUS2:
@@ -132,6 +133,8 @@ bool SimHandler::getMessage(aruwlib::can::CanBus bus, const modm::can::Message& 
             {
                 startingIndex = (INDEX_LAST_PORT + 1) + CAN_PORTS / 2;
             }
+            else return false;
+            
             break;
 
         default:
@@ -149,7 +152,7 @@ bool SimHandler::getMessage(aruwlib::can::CanBus bus, const modm::can::Message& 
     return true;
 }
 
-bool SimHandler::sendMessage(aruwlib::can::CanBus bus, modm::can::Message* message)
+bool SimHandler::sendMessage(aruwlib::can::CanBus bus, modm::can::Message*& message)
 {
     uint8_t busInt;
 
