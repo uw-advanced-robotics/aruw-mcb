@@ -66,7 +66,7 @@ modm::can::Message* CanSerializer::serializeFeedback(
 
 int8_t CanSerializer::idToPort(aruwlib::motor::MotorId id)
 {
-    for (int i = 0; i < static_cast<int>(HEADER.size()); i++)
+    for (uint32_t i = 0; i < HEADER.size(); i++)
     {
         if (id == HEADER[i])
         {

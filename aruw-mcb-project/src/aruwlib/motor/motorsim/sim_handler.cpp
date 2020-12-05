@@ -35,12 +35,12 @@ SimHandler::SimHandler() { resetMotorSims(); }
 void SimHandler::resetMotorSims()
 {
     // for-loop used in case addiitonal Can busses are utilized
-    for (int i = 0; i < nextIndex.size(); i++)
+    for (uint32_t i = 0; i < nextIndex.size(); i++)
     {
         nextIndex[i] = 0;
     }
 
-    for (int i = 0; i < sims.size(); i++)
+    for (uint32_t i = 0; i < sims.size(); i++)
     {
         if (sims[i] != nullptr)
         {
@@ -62,7 +62,7 @@ void SimHandler::registerSim(
             case aruwlib::can::CanBus::CAN_BUS1:
                 if (sims[port] == nullptr)
                 {
-                    sims[port] = &MotorSim(type);
+                    sims[port] = new MotorSim(type);
                 }
                 break;
 
@@ -90,14 +90,14 @@ void SimHandler::registerSim(
             case aruwlib::can::CanBus::CAN_BUS1:
                 if (sims[port] == nullptr)
                 {
-                    sims[port] = &MotorSim(type, loading);
+                    sims[port] = new MotorSim(type, loading);
                 }
                 break;
 
             case aruwlib::can::CanBus::CAN_BUS2:
                 if (sims[port + INDEX_LAST_PORT] == nullptr)
                 {
-                    sims[port + INDEX_LAST_PORT] = &MotorSim(type, loading);
+                    sims[port + INDEX_LAST_PORT] = new MotorSim(type, loading);
                 }
                 break;
         }
@@ -184,7 +184,7 @@ bool SimHandler::sendMessage(aruwlib::can::CanBus bus, modm::can::Message* messa
 
 void SimHandler::updateSims()
 {
-    for (int i = 0; i < sims.size(); i++)
+    for (uint32_t i = 0; i < sims.size(); i++)
     {
         if (sims[i] != nullptr)
         {
