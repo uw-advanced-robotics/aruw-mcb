@@ -108,11 +108,11 @@ private:
     void initConstants(MotorType type);
 
     /* Class Variables */
-    float loading;  // N*m
-    float pos;      // Meters
-    int16_t rpm;    // RPM
-    int16_t input;  // 16-bit Integer
-    clock_t time;
+    float loading = 0;  // N*m
+    float pos = 0;      // Meters
+    int16_t rpm = 0;    // RPM
+    int16_t input = 0;  // 16-bit Integer
+    clock_t time = 0;
 };
 }  // namespace motorsim
 }  // namespace aruwlib

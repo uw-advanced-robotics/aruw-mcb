@@ -62,7 +62,7 @@ public:
 private:
     /* Constants */
     // HEADER[port] = (appropriate serialization header)
-    static constexpr std::array<uint32_t, 8> HEADER =
+    static constexpr std::array<int32_t, 8> HEADER =
         {0x201, 0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208};
     static constexpr uint8_t FEEDBACK_MESSAGE_SEND_LENGTH = 8;
 };

@@ -30,13 +30,13 @@ namespace aruwlib
 {
 namespace motorsim
 {
-MotorSim::MotorSim(MotorType type) : pos(0), rpm(0), loading(0), input(0)
+MotorSim::MotorSim(MotorType type)
 {
     initConstants(type);
     reset();
 }
 
-MotorSim::MotorSim(MotorType type, float loading) : pos(0), rpm(0), loading(loading), input(0)
+MotorSim::MotorSim(MotorType type, float loading)
 {
     initConstants(type);
     reset();
