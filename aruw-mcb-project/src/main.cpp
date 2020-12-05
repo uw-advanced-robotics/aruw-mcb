@@ -19,6 +19,7 @@
 
 #ifdef PLATFORM_HOSTED
 #include <iostream>
+
 #include <aruwlib/motor/motorsim/sim_handler.hpp>
 #endif
 
@@ -102,10 +103,10 @@ void initializeIo(aruwlib::Drivers *drivers)
 
 void updateIo(aruwlib::Drivers *drivers)
 {
-    #ifdef PLATFORM_HOSTED
+#ifdef PLATFORM_HOSTED
     aruwlib::motorsim::SimHandler::simHandle.updateSims();
-    #endif
-    
+#endif
+
     drivers->canRxHandler.pollCanData();
     drivers->xavierSerial.updateSerial();
     drivers->refSerial.updateSerial();

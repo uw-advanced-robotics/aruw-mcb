@@ -20,9 +20,11 @@
 #ifdef PLATFORM_HOSTED
 
 #include "can_serializer.hpp"
-#include "aruwlib/communication/can/can.hpp"
+
 #include <array>
 #include <cstdint>
+
+#include "aruwlib/communication/can/can.hpp"
 
 namespace aruwlib
 {
@@ -41,13 +43,40 @@ std::array<int16_t, 4> CanSerializer::parseMessage(modm::can::Message* message)
     return out;
 }
 
-modm::can::Message* CanSerializer::serializeFeedback(int16_t angle, int16_t rpm, int16_t current, uint8_t port)
+modm::can::Message* CanSerializer::serializeFeedback(
+    int16_t angle,
+    int16_t rpm,
+    int16_t current,
+    uint8_t port)
 {
-    modm::can::Message out = modm::can::Message(HEADER[port], FEEDBACK_MESSAGE_SEND_LENGTH);
+    modm::can::Message* out = &modm::can::Message(HEADER[port], FEEDBACK_MESSAGE_SEND_LENGTH);
 
-    
+    // TODO: Confirm that val & 0xFF is the correct format for lower-order byte
+    out->data[0] = angle >> 8;
+    out->data[1] = angle & 0xFF;
+    out->data[2] = rpm >> 8;
+    out->data[3] = rpm & 0xFF;
+    out->data[4] = current >> 8;
+    out->data[5] = current & 0xFF;
+    out->data[6] = 0;  // Cannot yet simulate temperature
+    out->data[7] = 0;  // Null Byte
+
+    return out;
 }
 
+int8_t CanSerializer::idToPort(aruwlib::motor::MotorId id)
+{
+    for (int i = 0; i < HEADER.size(); i++)
+    {
+        if (id == HEADER[i])
+        {
+            return i;
+        }
+    }
+
+    return -1;
 }
-}
+
+}  // namespace motorsim
+}  // namespace aruwlib
 #endif

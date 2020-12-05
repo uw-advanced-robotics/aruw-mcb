@@ -22,11 +22,14 @@
 
 #define sim_handler_hpp_
 
-#include <vector>
 #include <array>
-#include "motor_sim.hpp"
+#include <vector>
+
 #include "aruwlib/communication/can/can.hpp"
+
 #include "modm/platform.hpp"
+
+#include "motor_sim.hpp"
 
 namespace aruwlib
 {
@@ -38,18 +41,30 @@ public:
     SimHandler();
 
     /**
+     * Reset output stream for SimHandler as well as all of the MotorSim objects.
+     */
+    static void resetMotorSims();
+
+    /**
      * Registers a new MotorSim object for the given motor type
      * that will respond at the given position on the given CAN bus.
-     * 
+     *
      * Default torque loading (0 N*m) is used for this function.
      */
-    static void registerSim(MotorSim::MotorType type, aruwlib::can::CanBus bus, uint8_t port);
+    static void registerSim(
+        MotorSim::MotorType type,
+        aruwlib::can::CanBus bus,
+        aruwlib::motor::MotorId id);
 
     /**
      * Overload of earlier registerSim that also allows a torque loading
      * to be specified for the motor sim.
      */
-    static void registerSim(MotorSim::MotorType type, float loading, aruwlib::can::CanBus bus, uint8_t port);
+    static void registerSim(
+        MotorSim::MotorType type,
+        float loading,
+        aruwlib::can::CanBus bus,
+        aruwlib::motor::MotorId id);
 
     /**
      * Allows the SimHandler to receive a given CAN message
@@ -79,10 +94,11 @@ private:
     static const uint8_t INDEX_LAST_PORT = CAN_PORTS - 1;
 
     /* Singleton Class Variables */
-    static std::array<MotorSim*, CAN_PORTS*CAN_BUSSES> sims; // TODO: should this be an array or vector? or something else?
+    static std::array<MotorSim*, CAN_PORTS * CAN_BUSSES>
+        sims;  // TODO: should this be an array or vector? or something else?
     static std::array<uint8_t, 2> nextIndex;
 };
-}
-}
+}  // namespace motorsim
+}  // namespace aruwlib
 #endif
 #endif

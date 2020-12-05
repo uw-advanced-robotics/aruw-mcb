@@ -22,10 +22,13 @@
 
 #define can_serializer_hpp_
 
-#include <cstdint>
 #include <array>
-#include "modm/architecture/interface/can_message.hpp"
+#include <cstdint>
+
 #include "aruwlib/communication/can/can.hpp"
+#include "aruwlib/motor/dji_motor.hpp"
+
+#include "modm/architecture/interface/can_message.hpp"
 
 namespace aruwlib
 {
@@ -44,14 +47,26 @@ public:
      * Serialize the given motor feedback data into a CAN Message.
      * Returns a pointer to the created message.
      */
-    static modm::can::Message* serializeFeedback(int16_t angle, int16_t rpm, int16_t current, uint8_t port);
+    static modm::can::Message* serializeFeedback(
+        int16_t angle,
+        int16_t rpm,
+        int16_t current,
+        uint8_t port);
+
+    /**
+     * Return the corresponding port number on the can (0-7)
+     * for the given MotorId (uint32_t alias).
+     */
+    static int8_t idToPort(aruwlib::motor::MotorId id);
+
 private:
+    /* Constants */
     // HEADER[port] = (appropriate serialization header)
-    static const std::array<uint32_t, 8> HEADER =
-    {0x201, 0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208};
-    static const uint8_t FEEDBACK_MESSAGE_SEND_LENGTH = 8;
+    static constexpr std::array<uint32_t, 8> HEADER =
+        {0x201, 0x202, 0x203, 0x204, 0x205, 0x206, 0x207, 0x208};
+    static constexpr uint8_t FEEDBACK_MESSAGE_SEND_LENGTH = 8;
 };
-}
-}
+}  // namespace motorsim
+}  // namespace aruwlib
 #endif
 #endif

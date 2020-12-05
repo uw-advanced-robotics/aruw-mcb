@@ -20,9 +20,11 @@
 #ifdef PLATFORM_HOSTED
 
 #include "motor_sim.hpp"
+
 #include <time.h>
-#include <cstdint>
+
 #include <cmath>
+#include <cstdint>
 
 namespace aruwlib
 {
@@ -31,11 +33,21 @@ namespace motorsim
 MotorSim::MotorSim(MotorType type) : pos(0), rpm(0), loading(0), input(0)
 {
     initConstants(type);
+    reset();
 }
 
 MotorSim::MotorSim(MotorType type, float loading) : pos(0), rpm(0), loading(loading), input(0)
 {
     initConstants(type);
+    reset();
+}
+
+void MotorSim::reset()
+{
+    pos = 0;
+    rpm = 0;
+    input = 0;
+    time = clock();
 }
 
 void MotorSim::setInput(int16_t in)
@@ -48,7 +60,7 @@ void MotorSim::setInput(int16_t in)
 
 void MotorSim::setLoading(float t)
 {
-    if (!(t > KT*CURRENT_LIM) && !(t < -KT*CURRENT_LIM))
+    if (!(t > KT * CURRENT_LIM) && !(t < -KT * CURRENT_LIM))
     {
         loading = t;
     }
@@ -73,41 +85,40 @@ void MotorSim::update()
     time = clock();
 }
 
-
 void MotorSim::initConstants(MotorType type)
 {
-    switch(type)
+    switch (type)
     {
         case GM6020:
-        MAX_INPUT_MAG = 30000;
-        MAX_ENCODER_VAL = 0;
-        MAX_CURRENT_OUT = 0;
-        CURRENT_LIM = 0;
-        MAX_W = 0;
-        KT = 0;
-        WT_GRAD = 0;
-        break;
+            MAX_INPUT_MAG = 30000;
+            MAX_ENCODER_VAL = 0;
+            MAX_CURRENT_OUT = 0;
+            CURRENT_LIM = 0;
+            MAX_W = 0;
+            KT = 0;
+            WT_GRAD = 0;
+            break;
 
         case M3508:
-        MAX_INPUT_MAG = 16384;
-        MAX_ENCODER_VAL = 8191;
-        MAX_CURRENT_OUT = 20;
-        CURRENT_LIM = 10;
-        MAX_W = 469;
-        KT = 0.3;
-        WT_GRAD = 72;
-        break;
+            MAX_INPUT_MAG = 16384;
+            MAX_ENCODER_VAL = 8191;
+            MAX_CURRENT_OUT = 20;
+            CURRENT_LIM = 10;
+            MAX_W = 469;
+            KT = 0.3;
+            WT_GRAD = 72;
+            break;
 
         default:
-        MAX_INPUT_MAG = 0;
-        MAX_CURRENT_OUT = 0;
-        CURRENT_LIM = 0;
-        MAX_W = 0;
-        KT = 0;
-        WT_GRAD = 0;
-        break;
+            MAX_INPUT_MAG = 0;
+            MAX_CURRENT_OUT = 0;
+            CURRENT_LIM = 0;
+            MAX_W = 0;
+            KT = 0;
+            WT_GRAD = 0;
+            break;
     }
 }
-}  // namespace motor
+}  // namespace motorsim
 }  // namespace aruwlib
 #endif

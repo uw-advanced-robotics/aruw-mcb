@@ -38,11 +38,14 @@ public:
      */
     enum MotorType
     {
-        M3508, GM6020
+        M3508,
+        GM6020
     };
 
     MotorSim(MotorType type);
     MotorSim(MotorType type, float loading);
+
+    void reset();
 
     /**
      * Returns the current (in amps) given to the GM3508 for the given input.
@@ -93,26 +96,25 @@ private:
     /* Constants */
     /* Note that these should all be constexpr, but because of
     how they are initialized in construction they cannot be. */
-    int16_t MAX_INPUT_MAG = 0;      // Integer
-    int16_t MAX_ENCODER_VAL = 0;    // Integer
-    float MAX_CURRENT_OUT = 0;      // Amps
-    float CURRENT_LIM = 0;          // Amps
-    float MAX_W = 0;                // RPM
-    float KT = 0;                   // (N*m)/A
-    float WT_GRAD = 0;              // RPM/(N*m)
+    int16_t MAX_INPUT_MAG = 0;    // Integer
+    int16_t MAX_ENCODER_VAL = 0;  // Integer
+    float MAX_CURRENT_OUT = 0;    // Amps
+    float CURRENT_LIM = 0;        // Amps
+    float MAX_W = 0;              // RPM
+    float KT = 0;                 // (N*m)/A
+    float WT_GRAD = 0;            // RPM/(N*m)
 
     /** Initializes constant variables based on motor type */
     void initConstants(MotorType type);
 
     /* Class Variables */
-    /*const uint8_t portID;*/
-    float loading;          // N*m
-    float pos;            // Meters
-    int16_t rpm;            // RPM
-    int16_t input;          // 16-bit Integer
+    float loading;  // N*m
+    float pos;      // Meters
+    int16_t rpm;    // RPM
+    int16_t input;  // 16-bit Integer
     clock_t time;
 };
-}  // namespace motor
+}  // namespace motorsim
 }  // namespace aruwlib
 #endif
 #endif

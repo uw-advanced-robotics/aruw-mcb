@@ -19,9 +19,9 @@
 
 #include "can.hpp"
 
+#include <aruwlib/motor/motorsim/sim_handler.hpp>
 #include <aruwlib/rm-dev-board-a/board.hpp>
 #include <modm/platform.hpp>
-#include <aruwlib/motor/motorsim/sim_handler.hpp>
 
 #ifndef PLATFORM_HOSTED
 using namespace modm::platform;
