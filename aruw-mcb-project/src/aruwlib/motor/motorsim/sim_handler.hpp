@@ -26,9 +26,8 @@
 #include <vector>
 
 #include "aruwlib/communication/can/can.hpp"
-
+#include "aruwlib/communication/can/can.hpp"
 #include "modm/platform.hpp"
-
 #include "motor_sim.hpp"
 
 namespace aruwlib
