@@ -49,7 +49,7 @@ modm::can::Message* CanSerializer::serializeFeedback(
     int16_t current,
     uint8_t port)
 {
-    modm::can::Message* out = &modm::can::Message(HEADER[port], FEEDBACK_MESSAGE_SEND_LENGTH);
+    modm::can::Message* out =  new modm::can::Message(HEADER[port], FEEDBACK_MESSAGE_SEND_LENGTH);
 
     // TODO: Confirm that val & 0xFF is the correct format for lower-order byte
     out->data[0] = angle >> 8;

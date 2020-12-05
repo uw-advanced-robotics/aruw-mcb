@@ -69,7 +69,7 @@ void SimHandler::registerSim(
             case aruwlib::can::CanBus::CAN_BUS2:
                 if (sims[port + INDEX_LAST_PORT] == nullptr)
                 {
-                    sims[port + INDEX_LAST_PORT] = &MotorSim(type);
+                    sims[port + INDEX_LAST_PORT] = new MotorSim(type);
                 }
                 break;
         }

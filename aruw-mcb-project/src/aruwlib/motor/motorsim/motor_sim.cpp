@@ -40,6 +40,7 @@ MotorSim::MotorSim(MotorType type, float loading)
 {
     initConstants(type);
     reset();
+    setLoading(loading);
 }
 
 void MotorSim::reset()
