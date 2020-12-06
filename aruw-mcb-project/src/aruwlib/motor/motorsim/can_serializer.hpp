@@ -18,9 +18,9 @@
  */
 
 #ifdef PLATFORM_HOSTED
-#ifndef can_serializer_hpp_
 
-#define can_serializer_hpp_
+#ifndef CAN_SERIALIZER_HPP_
+#define CAN_SERIALIZER_HPP_
 
 #include <array>
 #include <cstdint>
@@ -41,13 +41,13 @@ public:
      * Parse a given CAN motor message into 4 motor input values.
      * Returns a 16-bit int array containing the 4 integer input values.
      */
-    static std::array<int16_t, 4> parseMessage(modm::can::Message* message);
+    static std::array<int16_t, 4> parseMessage(const modm::can::Message* message);
 
     /**
      * Serialize the given motor feedback data into a CAN Message.
      * Returns a pointer to the created message.
      */
-    static modm::can::Message* serializeFeedback(
+    static modm::can::Message serializeFeedback(
         int16_t angle,
         int16_t rpm,
         int16_t current,
@@ -67,6 +67,9 @@ private:
     static constexpr uint8_t FEEDBACK_MESSAGE_SEND_LENGTH = 8;
 };
 }  // namespace motorsim
+
 }  // namespace aruwlib
-#endif
-#endif
+
+#endif  // CAN_SERIALIZER_HPP_
+
+#endif  // PLATFORM_HOSTED

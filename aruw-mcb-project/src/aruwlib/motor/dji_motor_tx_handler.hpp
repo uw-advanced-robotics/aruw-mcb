@@ -81,9 +81,9 @@ public:
 
     mockable DjiMotor const* getCan2MotorData(MotorId motorId);
 
-private:
     static const int DJI_MOTORS_PER_CAN = 8;
 
+private:
     Drivers* drivers;
 
     DjiMotor* can1MotorStore[DJI_MOTORS_PER_CAN] = {0};

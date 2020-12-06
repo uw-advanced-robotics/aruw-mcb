@@ -25,58 +25,54 @@
 #include <cstdint>
 
 #include "aruwlib/communication/can/can.hpp"
+#include "aruwlib/motor/dji_motor_tx_handler.hpp"
 
 namespace aruwlib
 {
 namespace motorsim
 {
-std::array<int16_t, 4> CanSerializer::parseMessage(modm::can::Message* message)
+std::array<int16_t, 4> CanSerializer::parseMessage(const modm::can::Message* message)
 {
     std::array<int16_t, 4> out;
-    uint8_t* data = message->data;
+    const uint8_t* data = message->data;
 
     // Byte Smashing!
-    out[0] = static_cast<int16_t>(data[0]) << 8 | static_cast<int16_t>(data[1]);
-    out[1] = static_cast<int16_t>(data[2]) << 8 | static_cast<int16_t>(data[3]);
-    out[2] = static_cast<int16_t>(data[4]) << 8 | static_cast<int16_t>(data[5]);
-    out[3] = static_cast<int16_t>(data[6]) << 8 | static_cast<int16_t>(data[7]);
+    out[0] = (static_cast<int16_t>(data[0]) << 8) | (static_cast<int16_t>(data[1]));
+    out[1] = (static_cast<int16_t>(data[2]) << 8) | (static_cast<int16_t>(data[3]));
+    out[2] = (static_cast<int16_t>(data[4]) << 8) | (static_cast<int16_t>(data[5]));
+    out[3] = (static_cast<int16_t>(data[6]) << 8) | (static_cast<int16_t>(data[7]));
     return out;
 }
 
-modm::can::Message* CanSerializer::serializeFeedback(
+modm::can::Message CanSerializer::serializeFeedback(
     int16_t angle,
     int16_t rpm,
     int16_t current,
     uint8_t port)
 {
-    modm::can::Message* out =  new modm::can::Message(HEADER[port], FEEDBACK_MESSAGE_SEND_LENGTH);
+    modm::can::Message out(HEADER[port], FEEDBACK_MESSAGE_SEND_LENGTH);
 
-    // TODO: Confirm that val & 0xFF is the correct format for lower-order byte
-    out->data[0] = angle >> 8;
-    out->data[1] = angle & 0xFF;
-    out->data[2] = rpm >> 8;
-    out->data[3] = rpm & 0xFF;
-    out->data[4] = current >> 8;
-    out->data[5] = current & 0xFF;
-    out->data[6] = 0;  // Cannot yet simulate temperature
-    out->data[7] = 0;  // Null Byte
+    out.data[0] = angle >> 8;
+    out.data[1] = angle & 0xFF;
+    out.data[2] = rpm >> 8;
+    out.data[3] = rpm & 0xFF;
+    out.data[4] = current >> 8;
+    out.data[5] = current & 0xFF;
+    out.data[6] = 0;  // Cannot yet simulate temperature
+    out.data[7] = 0;  // Null Byte
 
     return out;
 }
 
 int8_t CanSerializer::idToPort(aruwlib::motor::MotorId id)
 {
-    for (uint32_t i = 0; i < HEADER.size(); i++)
-    {
-        if (id == HEADER[i])
-        {
-            return i;
-        }
-    }
+    int32_t out = DJI_MOTOR_NORMALIZED_ID(id);
 
-    return -1;
+    return (out >= 0 && out < aruwlib::motor::DjiMotorTxHandler::DJI_MOTORS_PER_CAN) ? out : -1;
 }
 
 }  // namespace motorsim
+
 }  // namespace aruwlib
-#endif
+
+#endif  // PLATFORM_HOSTED

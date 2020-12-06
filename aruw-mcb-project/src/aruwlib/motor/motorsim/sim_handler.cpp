@@ -6,7 +6,7 @@
  * aruw-mcb is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any latersd version.
+ * (at your option) any later version.
  *
  * aruw-mcb is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,6 +22,7 @@
 #include "sim_handler.hpp"
 
 #include "aruwlib/motor/dji_motor.hpp"
+#include "aruwlib/motor/dji_motor_tx_handler.hpp"
 
 #include "can_serializer.hpp"
 #include "motor_sim.hpp"
@@ -35,151 +36,87 @@ SimHandler::SimHandler() { resetMotorSims(); }
 void SimHandler::resetMotorSims()
 {
     // for-loop used in case addiitonal Can busses are utilized
-    for (uint32_t i = 0; i < nextIndex.size(); i++)
+    for (uint32_t i = 0; i < nextCanSendIndex.size(); i++)
     {
-        nextIndex[i] = 0;
+        nextCanSendIndex[i] = 0;
     }
 
     for (uint32_t i = 0; i < sims.size(); i++)
     {
-        if (sims[i] != nullptr)
-        {
-            sims[i]->reset();
-        }
+        for (uint32_t j = 0; j < sims[i].size(); j++)
+            if (sims[i][j] != nullptr)
+            {
+                sims[i][j]->reset();
+            }
     }
 }
 
 void SimHandler::registerSim(
     MotorSim::MotorType type,
     aruwlib::can::CanBus bus,
-    aruwlib::motor::MotorId id)
+    aruwlib::motor::MotorId id,
+    float loading)
 {
     int8_t port = CanSerializer::idToPort(id);
-    if (port < CAN_PORTS)
+    int8_t busIndex = static_cast<uint8_t>(bus);
+
+    if (sims[busIndex][port] == nullptr)
     {
-        switch (bus)
-        {
-            case aruwlib::can::CanBus::CAN_BUS1:
-                if (sims[port] == nullptr)
-                {
-                    sims[port] = new MotorSim(type);
-                }
-                break;
-
-            case aruwlib::can::CanBus::CAN_BUS2:
-                if (sims[port + INDEX_LAST_PORT] == nullptr)
-                {
-                    sims[port + INDEX_LAST_PORT] = new MotorSim(type);
-                }
-                break;
-        }
-    }
-}
-
-void SimHandler::registerSim(
-    MotorSim::MotorType type,
-    float loading,
-    aruwlib::can::CanBus bus,
-    aruwlib::motor::MotorId id)
-{
-    int8_t port = CanSerializer::idToPort(id);
-    if (port < CAN_PORTS)
-    {
-        switch (bus)
-        {
-            case aruwlib::can::CanBus::CAN_BUS1:
-                if (sims[port] == nullptr)
-                {
-                    sims[port] = new MotorSim(type, loading);
-                }
-                break;
-
-            case aruwlib::can::CanBus::CAN_BUS2:
-                if (sims[port + INDEX_LAST_PORT] == nullptr)
-                {
-                    sims[port + INDEX_LAST_PORT] = new MotorSim(type, loading);
-                }
-                break;
-        }
+        // TODO: Does this correctly statically allocate the pointer at sims[busIndex][port]?
+        aruwlib::motorsim::MotorSim newSim(type, loading);
+        sims[busIndex][port] = &newSim;
     }
 }
 
 bool SimHandler::getMessage(aruwlib::can::CanBus bus, const modm::can::Message& message)
 {
-    modm::can::Message m = message;
-    std::array<int16_t, 4> newInputs = CanSerializer::parseMessage(&m);
+    std::array<int16_t, 4> newInputs = CanSerializer::parseMessage(&message);
+    uint8_t busIndex = static_cast<uint8_t>(bus);
 
-    int startingIndex;
-    switch (bus)
+    if (message.getIdentifier() == 0x1FF)
     {
-        case aruwlib::can::CanBus::CAN_BUS1:
-            if (m.getIdentifier() == 0x1FF)
-            {
-                startingIndex = 0;
-            }
-            else if (m.getIdentifier() == 0x200)
-            {
-                startingIndex = CAN_PORTS / 2;
-            }
-            else return false;
-            break;
-
-        case aruwlib::can::CanBus::CAN_BUS2:
-            if (m.getIdentifier() == 0x1FF)
-            {
-                startingIndex = INDEX_LAST_PORT + 1;
-            }
-            else if (m.getIdentifier() == 0x200)
-            {
-                startingIndex = (INDEX_LAST_PORT + 1) + CAN_PORTS / 2;
-            }
-            else return false;
-            
-            break;
-
-        default:
-            return false;
-    }
-
-    for (int i = 0; i < 4; i++)
-    {
-        if (sims[startingIndex + i] != nullptr)
+        for (int i = 0; i < (aruwlib::motor::DjiMotorTxHandler::DJI_MOTORS_PER_CAN / 2); i++)
         {
-            sims[startingIndex + i]->setInput(newInputs[i]);
+            if (sims[busIndex][i] != nullptr)
+            {
+                sims[busIndex][i]->setInput(newInputs[i]);
+            }
         }
     }
+
+    else if (message.getIdentifier() == 0x200)
+    {
+        for (int i = (aruwlib::motor::DjiMotorTxHandler::DJI_MOTORS_PER_CAN / 2);
+             i < aruwlib::motor::DjiMotorTxHandler::DJI_MOTORS_PER_CAN;
+             i++)
+        {
+            if (sims[busIndex][i] != nullptr)
+            {
+                sims[busIndex][i]->setInput(newInputs[i]);
+            }
+        }
+    }
+
+    else
+        return false;
 
     return true;
 }
 
-bool SimHandler::sendMessage(aruwlib::can::CanBus bus, modm::can::Message*& message)
+bool SimHandler::sendMessage(aruwlib::can::CanBus bus, modm::can::Message* message)
 {
-    uint8_t busInt;
+    uint8_t busIndex = static_cast<uint8_t>(bus);
 
-    switch (bus)
+    *message = CanSerializer::serializeFeedback(
+        sims[busIndex][nextCanSendIndex[busIndex]]->getEnc(),
+        sims[busIndex][nextCanSendIndex[busIndex]]->getRPM(),
+        sims[busIndex][nextCanSendIndex[busIndex]]->getInput(),
+        nextCanSendIndex[busIndex]);
+
+    nextCanSendIndex[busIndex]++;
+    if (nextCanSendIndex[busIndex] > INDEX_LAST_PORT)
     {
-        case aruwlib::can::CanBus::CAN_BUS1:
-            busInt = 0;
-            break;
-
-        case aruwlib::can::CanBus::CAN_BUS2:
-            busInt = 1;
-            break;
-
-        default:
-            return false;
-    }
-    // TODO: Is this proper C++ syntax?
-    message = CanSerializer::serializeFeedback(
-        sims[nextIndex[busInt]]->getEnc(),
-        sims[nextIndex[busInt]]->getRPM(),
-        sims[nextIndex[busInt]]->getInput(),
-        nextIndex[busInt]);
-
-    nextIndex[busInt]++;
-    if (nextIndex[busInt] > INDEX_LAST_PORT)
-    {
-        nextIndex[busInt] = 0;
+        nextCanSendIndex[busIndex] = 0;
     }
 
     return true;
@@ -189,13 +126,18 @@ void SimHandler::updateSims()
 {
     for (uint32_t i = 0; i < sims.size(); i++)
     {
-        if (sims[i] != nullptr)
+        for (uint32_t j = 0; sims[i].size(); j++)
         {
-            sims[i]->update();
+            if (sims[i][j] != nullptr)
+            {
+                sims[i][j]->update();
+            }
         }
     }
 }
 
 }  // namespace motorsim
+
 }  // namespace aruwlib
-#endif
+
+#endif  // PLATFORM_HOSTED

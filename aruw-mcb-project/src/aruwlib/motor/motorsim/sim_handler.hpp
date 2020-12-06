@@ -18,16 +18,18 @@
  */
 
 #ifdef PLATFORM_HOSTED
-#ifndef sim_handler_hpp_
 
-#define sim_handler_hpp_
+#ifndef SIM_HANDLER_HPP_
+#define SIM_HANDLER_HPP_
 
 #include <array>
 #include <vector>
 
 #include "aruwlib/communication/can/can.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
+#include "aruwlib/motor/dji_motor_tx_handler.hpp"
 
+#include "modm/math.hpp"
 #include "modm/platform.hpp"
 
 #include "motor_sim.hpp"
@@ -50,22 +52,13 @@ public:
      * Registers a new MotorSim object for the given motor type
      * that will respond at the given position on the given CAN bus.
      *
-     * Default torque loading (0 N*m) is used for this function.
+     * Default torque loading for this function is 0 N*m.
      */
     static void registerSim(
         MotorSim::MotorType type,
         aruwlib::can::CanBus bus,
-        aruwlib::motor::MotorId id);
-
-    /**
-     * Overload of earlier registerSim that also allows a torque loading
-     * to be specified for the motor sim.
-     */
-    static void registerSim(
-        MotorSim::MotorType type,
-        float loading,
-        aruwlib::can::CanBus bus,
-        aruwlib::motor::MotorId id);
+        aruwlib::motor::MotorId id,
+        float loading = 0);
 
     /**
      * Allows the SimHandler to receive a given CAN message
@@ -78,28 +71,30 @@ public:
      * Fills the given pointer with a new motor sim feedback message.
      * Returns true if successful (it always should be).
      */
-    static bool sendMessage(aruwlib::can::CanBus bus, modm::can::Message*& message);
+    static bool sendMessage(aruwlib::can::CanBus bus, modm::can::Message* message);
 
     /**
      * Updates all MotorSim objects (position, RPM, time values).
      */
     static void updateSims();
 
-    /** Singleton SimHandler instance */
-    static SimHandler simHandle;
-
 private:
     /* Constants */
-    static const uint8_t CAN_PORTS = 8;
     static const uint8_t CAN_BUSSES = 2;
-    static const uint8_t INDEX_LAST_PORT = CAN_PORTS - 1;
+    static const uint8_t INDEX_LAST_PORT =
+        aruwlib::motor::DjiMotorTxHandler::DJI_MOTORS_PER_CAN - 1;
 
     /* Singleton Class Variables */
-    static std::array<MotorSim*, CAN_PORTS * CAN_BUSSES>
-        sims;  // TODO: should this be an array or vector? or something else?
-    static std::array<uint8_t, 2> nextIndex;
+    static std::array<
+        std::array<MotorSim*, CAN_BUSSES>,
+        aruwlib::motor::DjiMotorTxHandler::DJI_MOTORS_PER_CAN>
+        sims;
+    static std::array<uint8_t, CAN_BUSSES> nextCanSendIndex;
 };
 }  // namespace motorsim
+
 }  // namespace aruwlib
-#endif
-#endif
+
+#endif  // SIM_HANDLER_HPP_
+
+#endif  // PLATFORM_HOSTED

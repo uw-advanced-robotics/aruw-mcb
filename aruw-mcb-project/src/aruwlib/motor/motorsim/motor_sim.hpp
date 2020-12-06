@@ -18,13 +18,13 @@
  */
 
 #ifdef PLATFORM_HOSTED
-#ifndef motor_sim_hpp_
 
-#define motor_sim_hpp_
-
-#include <time.h>
+#ifndef MOTOR_SIM_HPP_
+#define MOTOR_SIM_HPP_
 
 #include <cstdint>
+
+#include "aruwlib/architecture/clock.hpp"
 
 namespace aruwlib
 {
@@ -42,9 +42,12 @@ public:
         GM6020
     };
 
-    MotorSim(MotorType type);
-    MotorSim(MotorType type, float loading);
+    MotorSim(MotorType type, float loading = 0);
 
+    /**
+     * Resets the dynamic values in the motor simulator.
+     * Should be run before any simulation.
+     */
     void reset();
 
     /**
@@ -94,6 +97,8 @@ public:
 
 private:
     /* Constants */
+    static constexpr float MINUTES_PER_MILLISECOND = 1 / 60000;
+
     /* Note that these should all be constexpr, but because of
     how they are initialized in construction they cannot be. */
     int16_t MAX_INPUT_MAG = 0;    // Integer
@@ -110,11 +115,14 @@ private:
     /* Class Variables */
     float loading = 0;  // N*m
     float pos = 0;      // Meters
-    int16_t rpm = 0;    // RPM
+    float rpm = 0;      // RPM
     int16_t input = 0;  // 16-bit Integer
-    clock_t time = 0;
+    uint32_t time = 0;  // Milliseconds
 };
 }  // namespace motorsim
+
 }  // namespace aruwlib
-#endif
-#endif
+
+#endif  // MOTOR_SIM_HPP_
+
+#endif  // PLATFORM_HOSTED

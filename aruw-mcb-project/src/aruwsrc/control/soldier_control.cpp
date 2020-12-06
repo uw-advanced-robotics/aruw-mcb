@@ -35,6 +35,12 @@
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
+#ifdef PLATFORM_HOSTED
+#include "aruwlib/communication/can/can.hpp"
+#include "aruwlib/motor/motorsim/motor_sim.hpp"
+#include "aruwlib/motor/motorsim/sim_handler.hpp"
+#endif  // PLATFORM_HOSTED
+
 #if defined(TARGET_SOLDIER)
 
 using namespace aruwsrc::agitator;
@@ -114,6 +120,27 @@ void registerSoldierSubsystems(aruwlib::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
+
+#ifdef PLATFORM_HOSTED
+    aruwlib::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
+        aruwlib::motorsim::MotorSim::MotorType::M3508;
+    aruwlib::motorsim::SimHandler::registerSim(
+        CHASSIS_MOTOR_TYPE,
+        aruwlib::can::CanBus::CAN_BUS1,
+        chassis::ChassisSubsystem::LEFT_FRONT_MOTOR_ID);
+    aruwlib::motorsim::SimHandler::registerSim(
+        CHASSIS_MOTOR_TYPE,
+        aruwlib::can::CanBus::CAN_BUS1,
+        chassis::ChassisSubsystem::LEFT_BACK_MOTOR_ID);
+    aruwlib::motorsim::SimHandler::registerSim(
+        CHASSIS_MOTOR_TYPE,
+        aruwlib::can::CanBus::CAN_BUS1,
+        chassis::ChassisSubsystem::RIGHT_FRONT_MOTOR_ID);
+    aruwlib::motorsim::SimHandler::registerSim(
+        CHASSIS_MOTOR_TYPE,
+        aruwlib::can::CanBus::CAN_BUS1,
+        chassis::ChassisSubsystem::RIGHT_BACK_MOTOR_ID);
+#endif  // PLATFORM_HOSTED
 }
 
 /* initialize subsystems ----------------------------------------------------*/

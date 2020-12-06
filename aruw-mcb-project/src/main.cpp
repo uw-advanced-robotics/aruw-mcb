@@ -69,6 +69,10 @@ int main()
     initializeIo(drivers);
     aruwsrc::control::initSubsystemCommands(drivers);
 
+#ifdef PLATFORM_HOSTED
+    aruwlib::motorsim::SimHandler::resetMotorSims();
+#endif
+
     while (1)
     {
         // do this as fast as you can
@@ -104,7 +108,7 @@ void initializeIo(aruwlib::Drivers *drivers)
 void updateIo(aruwlib::Drivers *drivers)
 {
 #ifdef PLATFORM_HOSTED
-    aruwlib::motorsim::SimHandler::simHandle.updateSims();
+    aruwlib::motorsim::SimHandler::updateSims();
 #endif
 
     drivers->canRxHandler.pollCanData();

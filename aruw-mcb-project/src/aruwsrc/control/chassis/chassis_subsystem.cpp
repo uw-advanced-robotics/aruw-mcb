@@ -26,12 +26,6 @@
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/communication/remote.hpp>
 
-#ifdef PLATFORM_HOSTED
-#include "aruwlib/communication/can/can.hpp"
-#include "aruwlib/motor/motorsim/motor_sim.hpp"
-#include "aruwlib/motor/motorsim/sim_handler.hpp"
-#endif
-
 using namespace aruwlib;
 using namespace aruwlib::algorithms;
 
@@ -45,27 +39,6 @@ void ChassisSubsystem::initialize()
     leftFrontMotor.initialize();
     rightBackMotor.initialize();
     rightFrontMotor.initialize();
-
-#ifdef PLATFORM_HOSTED
-    aruwlib::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
-        aruwlib::motorsim::MotorSim::MotorType::M3508;
-    aruwlib::motorsim::SimHandler::simHandle.registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwlib::can::CanBus::CAN_BUS1,
-        LEFT_FRONT_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::simHandle.registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwlib::can::CanBus::CAN_BUS1,
-        LEFT_BACK_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::simHandle.registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwlib::can::CanBus::CAN_BUS1,
-        RIGHT_FRONT_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::simHandle.registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwlib::can::CanBus::CAN_BUS1,
-        RIGHT_BACK_MOTOR_ID);
-#endif
 }
 
 void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
