@@ -51,8 +51,8 @@ public:
         modm::Matrix<float, M, M> r,
         modm::Matrix<float, N, N> f,
         modm::Matrix<float, M, N> h,
-        modm::Matrix<float, N, 1>(*fFunction)(),
-        modm::Matrix<float, M, 1>(*hFunction)())
+        modm::Matrix<float, N, 1>(*fFunction)(const modm::Matrix<float, N, 1> &x),
+        modm::Matrix<float, M, 1>(*hFunction)(const modm::Matrix<float, N, 1> &x))
         : x(x),
           z(modm::Matrix<float, M, 1>::zeroMatrix()),
           p(p),
@@ -141,24 +141,24 @@ private:
         // or P = (I - K * H) * P
     }
 
-    modm::Matrix<float, N, 1> x;         ///< state vector
-    modm::Matrix<float, M, 1> z;         ///< measurement vector
+    modm::Matrix<float, N, 1> x;  ///< state vector
+    modm::Matrix<float, M, 1> z;  ///< measurement vector
    
-    modm::Matrix<float, N, N> p;         ///< prediction error covariance
-    modm::Matrix<float, N, N> q;         ///< process noise covariance
-    modm::Matrix<float, M, M> r;         ///< measurement error covariance
+    modm::Matrix<float, N, N> p;  ///< prediction error covariance
+    modm::Matrix<float, N, N> q;  ///< process noise covariance
+    modm::Matrix<float, M, M> r;  ///< measurement error covariance
 
-    modm::Matrix<float, N, M> k;         ///< Kalman gain
+    modm::Matrix<float, N, M> k;  ///< Kalman gain
 
-    modm::Matrix<float, N, N> f;         ///< Jacobian of process model
-    modm::Matrix<float, M, N> h;         ///< Jacobian of measurement model
+    modm::Matrix<float, N, N> f;  ///< Jacobian of process model
+    modm::Matrix<float, M, N> h;  ///< Jacobian of measurement model
 
-    modm::Matrix<float, N, 1> fx;        ///< output of process function (predicted state)
-    modm::Matrix<float, M, 1> hx;        ///< output of measurement function (used in state update equation)
+    modm::Matrix<float, N, 1> fx;  ///< output of process function (predicted state)
+    modm::Matrix<float, M, 1> hx;  ///< output of measurement function (used in state update equation)
 
-    modm::Matrix<float, N, 1>(*fFunc)(); ///< user-defined process function
-    modm::Matrix<float, M, 1>(*hFunc)(); ///< user-defined measurement function
-};                                       // class Kalman
+    modm::Matrix<float, N, 1>(*fFunc)(const modm::Matrix<float, N, 1> &x);  ///< user-defined process function
+    modm::Matrix<float, M, 1>(*hFunc)(const modm::Matrix<float, N, 1> &x);  ///< user-defined measurement function
+};  // class Kalman
 
 }  // namespace algorithms
 
