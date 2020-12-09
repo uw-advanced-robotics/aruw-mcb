@@ -20,6 +20,7 @@
 #ifdef PLATFORM_HOSTED
 
 #include "TCPServer.hpp"
+#include "JSONMessages.hpp"
 
 #include <netinet/in.h>
 #include <stdio.h>
@@ -43,20 +44,19 @@ namespace aruwlib
 namespace communication
 {
 /**
- * TCPServer constructor. Runs a server using the given portnumber.
+ * TCPServer constructor. Runs a server on the given portnumber.
  * Also takes a function pointer. This function is left to the implementer
  * of a specific TCP server to define (it should take an int16_t parameter
  * for client file descriptor). Ideally mainLoop should use a non-blocking
  * loop as currently since threads detach its possible that if a client never
  * responds there could be threads that never close.
  */
-TCPServer::TCPServer(uint16_t portNumber)
+int16_t TCPServer::listenFileDescriptor = -1;
+int16_t TCPServer::mainClientDescriptor = -1;
+TCPServer::TCPServer()
     : socketOpened(false),
       clientConnected(false),
-      listenFileDescriptor(-1),
-      serverPortNumber(portNumber),
-      serverAddress(),
-      running_(false)
+      serverAddress()
 {
     // Do sockety stuff.
     listenFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
@@ -80,51 +80,25 @@ TCPServer::TCPServer(uint16_t portNumber)
     }
 
     listen(listenFileDescriptor, LISTEN_QUEUE_SIZE);
+    std::thread acceptThread(&TCPServer::getConnection, this);
+    acceptThread.detach();
+    cerr << "TCPServer initialized, acceptThread begun" << std::endl;
 }
 
-TCPServer::~TCPServer() { close(listenFileDescriptor); }
-
-void TCPServer::start()
-{
-    if (running_)
-    {
-        throw new std::runtime_error("TCPServer: Cannot start() when already running");
-    }
-    running_ = true;
-    std::thread listenLoop(&TCPServer::run, this);
-    listenLoop.detach();
+TCPServer::~TCPServer() {
+    close(listenFileDescriptor); 
+    close(mainClientDescriptor);    
 }
 
-void TCPServer::stop() { running_ = false; }
-
-void TCPServer::run()
+void TCPServer::getConnection()
 {
     sockaddr_in clientAddress;
     socklen_t clientAddressLength = sizeof(clientAddress);
     int16_t clientFileDescriptor;
-    while (running_ and (clientFileDescriptor = accept(
-                             listenFileDescriptor,
-                             reinterpret_cast<sockaddr *>(&clientAddress),
-                             &clientAddressLength)))
-    {
-        std::thread clientThread(&TCPServer::clientLoop, this, clientFileDescriptor);
-        clientThread.detach();
-        std::cout << "Connection accepted" << std::endl;
-    }
-    cerr << "exited run() loop";
-}
-
-void TCPServer::clientLoop(int16_t clientFileDescriptor)
-{
-    try
-    {
-        mainLoop(clientFileDescriptor);
-    }
-    catch (std::runtime_error e)
-    {
-        // empty catch block, regardless what happened we just want to close fileDescriptor
-    }
-    close(clientFileDescriptor);
+    mainClientDescriptor = accept(listenFileDescriptor, 
+                                reinterpret_cast<sockaddr *>(&clientAddress), 
+                                &clientAddressLength);
+    cerr << "TCPServer: connection accepted";
 }
 
 /**
@@ -133,72 +107,85 @@ void TCPServer::clientLoop(int16_t clientFileDescriptor)
 uint16_t TCPServer::getPortNumber() { return this->serverPortNumber; }
 
 /**
+ * Writes "messageLength" bytes of "message" to the mainClient
+ */
+void TCPServer::writeToClient(const char* message, int32_t messageLength) {
+    if (mainClientDescriptor < 0) {
+        // Not necessarily an error if fileDescriptor still hasn't been opened
+        // so we just don't write to anything and early return.
+        cerr << "TCPServer: mainClientDescriptor not connected yet" << std::endl;
+        return;
+    }
+    writeMessage(mainClientDescriptor, message, messageLength);
+}
+
+/**
+ * Pre: Message readBuffer must be messageLength + 1 bytes long otherwise out of bounds
+ * array access will occur and behavior will be undefined.
  * Post: Reads a message to the given "readBuffer" ensuring that messageLength bytes are
  * read.
- *
+ * 
  * Throws: runtime_error if read() fails.
  */
-void TCPServer::readMessage(int16_t fileDescriptor, char *readBuffer, uint16_t messageLength)
+void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength)
 {
     readBuffer[messageLength] = '\0';  // Null terminate the message
     uint16_t bytesRead = read(fileDescriptor, readBuffer, messageLength);
     while (bytesRead < messageLength)
     {
-        if (bytesRead < 0)
-        {
-            if (errno == EAGAIN or errno == EINTR)
-            {
+        // uint can't hold negative value dumbass
+        int32_t n = read(fileDescriptor, readBuffer + bytesRead, messageLength - bytesRead);
+        if (n < 0) {
+            if (errno == EAGAIN or errno == EINTR) {
                 continue;
-            }
-            else
-            {
+            } else {
                 perror("TCPServer failed to read from client");
                 throw std::runtime_error("ReadingError");
             }
         }
-        bytesRead += read(fileDescriptor, readBuffer + bytesRead, messageLength - bytesRead);
+        bytesRead += n;
     }
 }
 
 /**
  * Write to connected connectionFileDescriptor, ensures that all bytes are sent.
  */
-void TCPServer::writeMessage(int16_t fileDescriptor, const char *message, uint16_t bytes)
+void writeMessage(int16_t fileDescriptor, const char *message, uint16_t bytes)
 {
-    uint16_t bytesWritten = write(fileDescriptor, message, bytes);
+    uint32_t bytesWritten = 0;
     while (bytesWritten < bytes)
     {
-        if (bytesWritten < 0)
-        {
-            if (errno == EAGAIN or errno == EINTR)
-            {
+        int32_t n = write(fileDescriptor, message + bytesWritten, bytes - bytesWritten);
+        // Error handling's completely wrong dumbass.
+        if (n < 0) {
+            if (errno == EAGAIN or errno == EINTR) {
+                std::cout << "EAGAIN/EINTR occurred" << std::endl;
                 continue;
-            }
-            else
-            {
+            } else {
                 perror("TCPServer failed to write");
                 throw std::runtime_error("WriteError");
             }
         }
-        bytesWritten += write(fileDescriptor, message + bytesWritten, bytes - bytesWritten);
+        bytesWritten += n;
     }
 }
 
 /**
  * Read the next 4 bytes as a big endian int32_t
  */
-int32_t TCPServer::readInt32(int16_t fileDescriptor)
-{
+int32_t readInt32(int16_t fileDescriptor) {
     char buffer[4];
     readMessage(fileDescriptor, buffer, 4);
     int32_t answer = 0;
-    for (char i = 0; i < 4; i++)
-    {
+    for (char i = 0; i < 4; i++) {
         answer = answer | buffer[i];
         answer <<= 8;
     }
     return answer;
 }
+
+// Definition of static variable. mainServer never created otherwise.
+TCPServer TCPServer::mainServer;
 
 }  // namespace communication
 

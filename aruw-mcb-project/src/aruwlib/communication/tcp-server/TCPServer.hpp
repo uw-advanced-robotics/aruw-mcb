@@ -32,24 +32,48 @@ namespace aruwlib
 namespace communication
 {
 /**
- * TCPServer is an abstract base class for running a TCPServer using a user
- * defined messaging protocol. The juice of this class is in its mainLoop() method
- * which is run in a new thread for each client that connects to this server. Every
- * derived class of TCPServer needs to implement and override the mainLoop() method.
+ * TCPServer is an singleton class for running a TCPServer using a user
+ * defined messaging protocol.
  */
 class TCPServer
 {
 public:
-    static const uint8_t LISTEN_QUEUE_SIZE = 5;
+    /* PortNumber which the server will try to open on. This seems finicky
+     * as it's possible that port is in use, but I don't know how to do 
+     * better (Tenzin)*/
+    static const int16_t PORT_NUMBER = 8888;
+    static const uint8_t LISTEN_QUEUE_SIZE = 5; // 5 is max on most systems
 
     /**
-     * Pre: Portnumber must not be in use on current machine, throws a string exception
-     * otherwise
-     *
+     * Accepts a new connection and stores the file descriptor in mainClientDescriptor
+     */
+    void getConnection();
+
+    /**
+     * Post: Returns the port number of this server.
+     */
+    uint16_t getPortNumber();
+
+    /**
+     * Writes the null-terminated message "message" to the connected TCP client
+     * if it is connected.
+     */
+    static void writeToClient(const char* message, int32_t messageLength);
+
+private:
+    bool socketOpened;
+    bool clientConnected;
+    static int16_t listenFileDescriptor; // File descriptor which server gets connection requests
+    static int16_t mainClientDescriptor; // File Descriptor which we communciate with
+    const static uint16_t serverPortNumber = PORT_NUMBER;
+    sockaddr_in serverAddress;
+    
+    /**
+     * Pre: 
      * Post: Creates a new TCPServer instance object, with its own unique client file
      * descriptor field and its own buffer.
      */
-    TCPServer(uint16_t portNumber);
+    TCPServer();
 
     /**
      * Destructor. Only special thing is that it closes any open file descriptors.
@@ -57,61 +81,32 @@ public:
     ~TCPServer();
 
     /**
-     * Start the servers main listening thread. Creates a thread for listening for new
-     * connections, and begins accepting connections and generating new threads once accepted.
+     * Listen Loop that will be run to listen for data from the client connection.
      */
-    void start();
+    void listenLoop();
 
-    /**
-     * Stop the servers main listening thread.
-     */
-    void stop();
+    // Singleton server.
+    static TCPServer mainServer;
+};
 
-    /**
-     * Post: Returns the port number of this server.
-     */
-    uint16_t getPortNumber();
+/**
+ * Read from the given fileDescriptor, ensuring to read "messageLength" bytes. readBuffer
+ * must be at least of size messageLength + 1 to allow null-terminated message to fit.
+ */
+static void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength);
 
-private:
-    bool socketOpened;
-    bool clientConnected;
-    int16_t listenFileDescriptor;
-    uint16_t serverPortNumber;
-    sockaddr_in serverAddress;
+/**
+ * Pre: fileDescriptor should be open.
+ * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
+ * Throws std::runtime_error if write() fails, check errno to see exact code why.
+ */
+static void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes);
 
-    std::atomic<bool> running_;
-
-    /**
-     * run() runs a constant listen loop for new connections and creates new
-     * handler threads for each accepted connection.
-     */
-    void run();
-
-    void clientLoop(int16_t);
-    /**
-     * MainLoop that will be run for each accepted connection. Should take
-     * an int16_t representing the file descriptor of the connection.
-     */
-    virtual void mainLoop(int16_t) = 0;
-
-protected:
-    /**
-     * Read from the given fileDescriptor, ensuring to read "messageLength" bytes.
-     */
-    static void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength);
-
-    /**
-     * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
-     */
-    static void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes);
-
-    /**
-     * Read the next four bytes from the TCP stream as an int32_t. It is expected
-     * that the lowest register bytes are most significant (big endian)
-     */
-    static int32_t readInt32(int16_t fileDescriptor);
-
-};  // namespace communication
+/**
+ * Read the next four bytes from the TCP stream as an int32_t. It is expected
+ * that the lowest register bytes are most significant (big endian)
+ */
+static int32_t readInt32(int16_t fileDescriptor);
 
 }  // namespace communication
 
