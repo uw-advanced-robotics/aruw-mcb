@@ -21,16 +21,17 @@
 
 #include "sim_handler.hpp"
 
-#include "aruwlib/motor/dji_motor.hpp"
-#include "aruwlib/motor/dji_motor_tx_handler.hpp"
-
-#include "can_serializer.hpp"
-#include "motor_sim.hpp"
-
 namespace aruwlib
 {
 namespace motorsim
 {
+/* Singleton Class Variables */
+std::array<
+    std::array<MotorSim*, SimHandler::CAN_BUSSES>,
+    aruwlib::motor::DjiMotorTxHandler::DJI_MOTORS_PER_CAN>
+    SimHandler::sims;
+std::array<uint8_t, SimHandler::CAN_BUSSES> SimHandler::nextCanSendIndex;
+
 SimHandler::SimHandler() { resetMotorSims(); }
 
 void SimHandler::resetMotorSims()

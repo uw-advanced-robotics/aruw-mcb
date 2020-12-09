@@ -22,8 +22,10 @@
 #ifndef MOTOR_SIM_HPP_
 #define MOTOR_SIM_HPP_
 
+#include <cmath>
 #include <cstdint>
 
+#include "aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/architecture/clock.hpp"
 
 namespace aruwlib

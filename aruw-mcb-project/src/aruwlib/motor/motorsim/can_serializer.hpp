@@ -26,7 +26,7 @@
 #include <cstdint>
 
 #include "aruwlib/communication/can/can.hpp"
-#include "aruwlib/motor/dji_motor.hpp"
+#include "aruwlib/motor/dji_motor_tx_handler.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
 

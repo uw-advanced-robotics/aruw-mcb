@@ -21,12 +21,6 @@
 
 #include "can_serializer.hpp"
 
-#include <array>
-#include <cstdint>
-
-#include "aruwlib/communication/can/can.hpp"
-#include "aruwlib/motor/dji_motor_tx_handler.hpp"
-
 namespace aruwlib
 {
 namespace motorsim

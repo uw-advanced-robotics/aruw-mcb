@@ -21,12 +21,6 @@
 
 #include "motor_sim.hpp"
 
-#include <cmath>
-#include <cstdint>
-
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-
 namespace aruwlib
 {
 namespace motorsim

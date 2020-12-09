@@ -23,15 +23,11 @@
 #define SIM_HANDLER_HPP_
 
 #include <array>
-#include <vector>
 
 #include "aruwlib/communication/can/can.hpp"
-#include "aruwlib/motor/dji_motor.hpp"
 #include "aruwlib/motor/dji_motor_tx_handler.hpp"
 
-#include "modm/math.hpp"
-#include "modm/platform.hpp"
-
+#include "can_serializer.hpp"
 #include "motor_sim.hpp"
 
 namespace aruwlib

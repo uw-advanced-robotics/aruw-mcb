@@ -19,7 +19,10 @@
 
 #include "can.hpp"
 
+#ifdef PLATFORM_HOSTED
 #include <aruwlib/motor/motorsim/sim_handler.hpp>
+#endif
+
 #include <aruwlib/rm-dev-board-a/board.hpp>
 #include <modm/platform.hpp>
 
