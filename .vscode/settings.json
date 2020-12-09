@@ -69,16 +69,7 @@
         "valarray": "cpp",
         "variant": "cpp",
         "SConstruct": "python",
-        "SConscript": "python",
-        "strstream": "cpp",
-        "bit": "cpp",
-        "codecvt": "cpp",
-        "future": "cpp",
-        "shared_mutex": "cpp",
-        "cfenv": "cpp",
-        "typeindex": "cpp",
-        "*.ipp": "cpp",
-        "*.source": "cpp"
+        "SConscript": "python"
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [

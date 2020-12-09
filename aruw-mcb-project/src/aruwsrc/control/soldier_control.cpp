@@ -39,7 +39,7 @@
 #include "aruwlib/communication/can/can.hpp"
 #include "aruwlib/motor/motorsim/motor_sim.hpp"
 #include "aruwlib/motor/motorsim/sim_handler.hpp"
-#endif  // PLATFORM_HOSTED
+#endif
 
 #if defined(TARGET_SOLDIER)
 
