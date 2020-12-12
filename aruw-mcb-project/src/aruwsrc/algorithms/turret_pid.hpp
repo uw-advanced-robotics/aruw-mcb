@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-#include <aruwlib/algorithms/extended_kalman.hpp>
+#include <aruwlib/algorithms/single_var_kalman.hpp>
 
 namespace aruwsrc
 {
@@ -77,8 +77,8 @@ private:
     // derivative ourselves
     uint32_t previousTimestamp = 0;
 
-    aruwlib::algorithms::ExtendedKalman proportionalKalman;
-    aruwlib::algorithms::ExtendedKalman derivativeKalman;
+    aruwlib::algorithms::SingleVarKalman proportionalKalman;
+    aruwlib::algorithms::SingleVarKalman derivativeKalman;
 };
 
 }  // namespace algorithms

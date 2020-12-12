@@ -55,19 +55,6 @@ inline bool compareFloatClose(float val1, float val2, float epsilon)
 }
 
 /**
- * Finds the inverse of a matrix.
- * 
- * @param[in] matrix the matrix to be inverted.
- * @return the inverted matrix.
- */
-template<typename T, uint8_t ROWS, uint8_t COLUMNS>
-inline modm::Matrix<T, ROWS, COLUMNS> inverse(const modm::Matrix<T, ROWS, COLUMNS> &matrix)
-{
-    /// \todo
-    return matrix;
-}
-
-/**
  * Limits the value between some min an max (between [min, max]).
  *
  * @tparam T the type you would like to limit.
@@ -132,7 +119,7 @@ To reinterpretCopy(From from)
 {
     static_assert(sizeof(From) == sizeof(To), "can only reinterpret-copy types of the same size");
     To result;
-    memcpy(static_cast<void*>(&result), static_cast<void*>(&from), sizeof(To));
+    memcpy(static_cast<void *>(&result), static_cast<void *>(&from), sizeof(To));
     return result;
 }
 
@@ -152,7 +139,149 @@ float fastInvSqrt(float x);
  * @param angle the angle by which to rotate the vector <x, y>, in radians.
  * @retval none.
  */
-void rotateVector(float* x, float* y, float radians);
+void rotateVector(float *x, float *y, float radians);
+
+/**
+ * Copies the matrix in `in` to the matrix in `out`, eliminating row `rowToElim` and
+ * column `colToElim`.
+ *
+ * @tparam T The type stored in the matrix being manipulated.
+ * @tparam ROWS The number of rows in the matrix.
+ * @tparam COLUMNS The number of columns in the matrix.
+ * @param[in] in The matrix to copy. Must be a square matrix.
+ * @param[out] out The location where the matrix will be copied to.
+ * @param[in] rowToElim The row to eliminate during copying.
+ * @param[in] colToElim The column to eliminate during copying.
+ * @return `true` if copying succeeded, `false` otherwise`.
+ * @note does not check if rowToElim or colToElim is out of bounds.
+ */
+template <typename T, uint8_t ROWS, uint8_t COLUMNS>
+inline bool copyRowColElim(
+    const modm::Matrix<T, ROWS, COLUMNS> &in,
+    modm::Matrix<T, ROWS - 1, COLUMNS - 1> *out,
+    int rowToElim,
+    int colToElim)
+{
+    static_assert(ROWS == COLUMNS, "rows must be equal to columns to compute the adjoint");
+
+    if (out == nullptr)
+    {
+        return false;
+    }
+
+    if (ROWS == 1)
+    {
+        return true;
+    }
+
+    // void getCfactor(int M[N][N], int t[N][N], int p, int q, int n) {
+    int i = 0, j = 0;
+    for (int r = 0; r < ROWS; r++)
+    {
+        // Copy only those elements which are not in given row r and column c:
+        for (int c = 0; c < COLUMNS; c++)
+        {
+            if (r != rowToElim && c != colToElim)
+            {
+                (*out)[i][j++] = in[r][c];  // If row is filled increase r index and reset c index
+                if (j == ROWS - 1)
+                {
+                    j = 0;
+                    i++;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+/**
+ * Finds the adjoint matrix of `in` and puts it in `out`.
+ *
+ * @tparam T The type stored in the matrix being manipulated.
+ * @tparam ROWS The number of rows in the matrix.
+ * @tparam COLUMNS The number of columns in the matrix.
+ * @param in[in] The matrix to be used in computing the adjoint set. Must be a square matrix.
+ * @param out[out] A return parameter wherethe inverse matrix will be stored.
+ * @return `true` on success, `false` on failure.
+ */
+template <typename T, uint8_t ROWS, uint8_t COLUMNS>
+inline bool adjoint(const modm::Matrix<T, ROWS, COLUMNS> &in, modm::Matrix<T, ROWS, COLUMNS> *out)
+{
+    static_assert(ROWS == COLUMNS, "rows must be equal to columns to compute the adjoint");
+
+    if (out == nullptr)
+    {
+        return false;
+    }
+
+    if (ROWS == 1)
+    {
+        (*out)[0][0] = 1;
+        return true;
+    }
+
+    // temp is used to store copyRowColElims of the in matrix
+    int sign = 1;
+    modm::Matrix<T, ROWS - 1, COLUMNS - 1> temp;
+
+    for (int i = 0; i < ROWS; i++)
+    {
+        for (int j = 0; j < COLUMNS; j++)
+        {
+            // Get copyRowColElim of A[i][j]
+            if (!copyRowColElim(in, &temp, i, j))
+            {
+                return false;
+            }
+
+            // sign of adj[j][i] positive if sum of row
+            // and column indexes is even.
+            sign = ((i + j) % 2 == 0) ? 1 : -1;
+
+            // Interchanging rows and columns to get the
+            // transpose of the cofactor matrix
+            (*out)[j][i] = temp.determinant() * sign;
+        }
+    }
+    return true;
+}
+
+/**
+ * Takes the inverse of `in` and puts the result in `out`.
+ *
+ * @tparam T The type stored in the matrix being manipulated.
+ * @tparam ROWS The number of rows in the matrix.
+ * @tparam COLUMNS The number of columns in the matrix.
+ * @param in[in] The matrix to be taken an inverse of. Must be a square matrix.
+ * @param out[out] A return parameter wherethe inverse matrix will be stored.
+ * @return `true` on success, `false` on failure.
+ */
+template <typename T, uint8_t ROWS, uint8_t COLUMNS>
+inline bool inverse(const modm::Matrix<T, ROWS, COLUMNS> &in, modm::Matrix<T, ROWS, COLUMNS> *out)
+{
+    static_assert(ROWS == COLUMNS, "rows must be equal to column to convert the inverse");
+
+    if (out == nullptr)
+    {
+        return false;
+    }
+
+    // Find adjiont
+    adjoint(in, out);
+
+    // Find determinant
+    T det = in.determinant();
+
+    if (det == 0)
+    {
+        return false;
+    }
+
+    // Inverse is adjoint dividided by determinant
+    (*out) /= det;
+    return true;
+}
 
 }  // namespace algorithms
 

@@ -20,7 +20,7 @@
 #ifndef __CHASSIS_SUBSYSTEM_HPP__
 #define __CHASSIS_SUBSYSTEM_HPP__
 
-#include <aruwlib/algorithms/extended_kalman.hpp>
+#include <aruwlib/algorithms/single_var_kalman.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
@@ -197,7 +197,7 @@ private:
     float chassisDesiredR = 0.0f;
 
     // rotation pid variables
-    aruwlib::algorithms::ExtendedKalman chassisRotationErrorKalman;
+    aruwlib::algorithms::SingleVarKalman chassisRotationErrorKalman;
 
 public:
     ChassisSubsystem(

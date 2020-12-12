@@ -21,13 +21,13 @@
  * Copyright (c) 2019 Sanger_X
  */
 
-#include "extended_kalman.hpp"
+#include "single_var_kalman.hpp"
 
 namespace aruwlib
 {
 namespace algorithms
 {
-ExtendedKalman::ExtendedKalman(float tQ, float tR)
+SingleVarKalman::SingleVarKalman(float tQ, float tR)
     : xLast(0.0f),
       xMid(0.0f),
       xNow(0.0f),
@@ -43,7 +43,7 @@ ExtendedKalman::ExtendedKalman(float tQ, float tR)
 {
 }
 
-float ExtendedKalman::filterData(float dat)
+float SingleVarKalman::filterData(float dat)
 {
     xMid = A * xLast;
     pMid = A * pLast + Q;
@@ -55,9 +55,9 @@ float ExtendedKalman::filterData(float dat)
     return xNow;
 }
 
-float ExtendedKalman::getLastFiltered() const { return xLast; }
+float SingleVarKalman::getLastFiltered() const { return xLast; }
 
-void ExtendedKalman::reset()
+void SingleVarKalman::reset()
 {
     xNow = 0.0f;
     xMid = 0.0f;

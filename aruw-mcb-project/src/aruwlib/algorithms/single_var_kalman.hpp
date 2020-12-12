@@ -29,7 +29,7 @@ namespace aruwlib
 namespace algorithms
 {
 /**
- * The kalman filter can be used by instantiating an ExtendedKalman
+ * The kalman filter can be used by instantiating an SingleVarKalman
  * object and calling filterData.
  *
  * Example source:
@@ -37,7 +37,7 @@ namespace algorithms
  * \code
  * float sensorData;
  * float filtered;
- * ExtendedKalman kalman(1.0f, 0.0f);
+ * SingleVarKalman kalman(1.0f, 0.0f);
  *
  * while(1)
  * {
@@ -45,7 +45,7 @@ namespace algorithms
  * }
  * \endcode
  */
-class ExtendedKalman
+class SingleVarKalman
 {
 public:
     /**
@@ -58,7 +58,7 @@ public:
      * @param[in] tQ the system noise covariance.
      * @param[in] tR the measurement noise covariance.
      */
-    ExtendedKalman(float tQ, float tR);
+    SingleVarKalman(float tQ, float tR);
 
     /**
      * Runs the kalman filter, returning the current prediction.
@@ -99,7 +99,7 @@ private:
     float Q;      ///< system parameter
     float R;      ///< system parameter.
     float H;      ///< system parameter.
-};                // class ExtendedKalman
+};                // class SingleVarKalman
 
 }  // namespace algorithms
 
