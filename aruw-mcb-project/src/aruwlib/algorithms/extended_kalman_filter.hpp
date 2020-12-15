@@ -21,6 +21,7 @@
 #define KALMAN_FILTER_HPP_
 
 #include <modm/math/matrix.hpp>
+#include <modm/architecture/interface/assert.h>
 
 #include "math_user_utils.hpp"
 
