@@ -27,7 +27,11 @@ namespace communication
 {
 namespace serial
 {
-TerminalSerial::TerminalSerial(Drivers *drivers) : device(drivers), stream(device), drivers(drivers)
+TerminalSerial::TerminalSerial(Drivers *drivers)
+    : device(drivers),
+      stream(device),
+      drivers(drivers),
+      streamingTimer(STREAMING_PERIOD)
 {
 }
 
@@ -39,16 +43,23 @@ void TerminalSerial::update()
     stream.get(nextC);
     if (nextC == modm::IOStream::eof)
     {
-        if (currStreamer != nullptr)
+        if (currStreamer != nullptr && streamingTimer.execute())
         {
             currStreamer->terminalSerialStreamCallback(stream);
         }
         return;
     }
-    currStreamer = nullptr;
-    if (nextC == '\n')
+    if (currStreamer != nullptr)
+    {
+        currStreamer = nullptr;
+    }
+    if (nextC == '\r')
     {
         rxBuff[currLineSize] = '\0';
+        if (strlen(rxBuff) == 0)
+        {
+            return;
+        }
         std::stringstream nextLine;
         nextLine << std::string(rxBuff);
         std::string header;

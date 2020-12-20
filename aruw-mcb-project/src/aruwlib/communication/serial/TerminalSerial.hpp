@@ -32,6 +32,7 @@
 
 #include <modm/io.hpp>
 
+#include "aruwlib/architecture/periodic_timer.hpp"
 #include "aruwlib/communication/serial/uart.hpp"
 #include "aruwlib/rm-dev-board-a/board.hpp"
 
@@ -108,6 +109,7 @@ public:
 
 private:
     static constexpr int MAX_LINE_LENGTH = 256;
+    static constexpr int STREAMING_PERIOD = 500;
 
     // Use either an IO device that interacts with UART or with stdin/stdout.
 #ifdef PLATFORM_HOSTED
@@ -130,6 +132,8 @@ private:
      * control of writing to the IOStream
      */
     ITerminalSerialCallback *currStreamer;
+
+    aruwlib::arch::PeriodicMilliTimer streamingTimer;
 
     std::map<std::string, ITerminalSerialCallback *> headerCallbackMap;
 

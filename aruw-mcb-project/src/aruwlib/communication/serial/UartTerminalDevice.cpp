@@ -31,7 +31,7 @@ UartTerminalDevice::UartTerminalDevice(Drivers *drivers) : drivers(drivers) {}
 
 void UartTerminalDevice::initialize()
 {
-    drivers->uart.init<aruwlib::serial::Uart::Uart3, 115200>();
+    drivers->uart.init<TERMINAL_UART_PORT, 115200>();
 }
 
 bool UartTerminalDevice::read(char &c)

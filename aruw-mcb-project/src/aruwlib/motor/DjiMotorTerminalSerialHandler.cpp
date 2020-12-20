@@ -93,6 +93,7 @@ bool DjiMotorTerminalSerialHandler::printInfo(modm::IOStream& outputStream)
     {
         outputStream << "CAN 1:" << modm::endl;
         printAllMotorInfo(&DjiMotorTxHandler::getCan1MotorData, outputStream);
+        outputStream.flush();
         outputStream << "CAN 2:" << modm::endl;
         printAllMotorInfo(&DjiMotorTxHandler::getCan2MotorData, outputStream);
     }
