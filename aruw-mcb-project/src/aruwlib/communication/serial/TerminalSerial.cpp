@@ -30,8 +30,8 @@ namespace serial
 TerminalSerial::TerminalSerial(Drivers *drivers)
     : device(drivers),
       stream(device),
-      drivers(drivers),
-      streamingTimer(STREAMING_PERIOD)
+      streamingTimer(STREAMING_PERIOD),
+      drivers(drivers)
 {
 }
 
