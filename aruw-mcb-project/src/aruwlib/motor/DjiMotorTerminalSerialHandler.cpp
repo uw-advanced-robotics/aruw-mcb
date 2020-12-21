@@ -36,9 +36,8 @@ void DjiMotorTerminalSerialHandler::terminalSerialStreamCallback(modm::IOStream&
 bool DjiMotorTerminalSerialHandler::terminalSerialCallback(
     std::stringstream&& inputLine,
     modm::IOStream& outputStream,
-    bool streamingEnabled)
+    bool)
 {
-    (void)streamingEnabled;
     std::string arg;
     motorId = 0;
     canBusValid = false;
