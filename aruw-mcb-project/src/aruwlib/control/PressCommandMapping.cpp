@@ -17,24 +17,27 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_CONTROLLER_MOCK_HPP_
-#define ERROR_CONTROLLER_MOCK_HPP_
-
-#include <aruwlib/errors/error_controller.hpp>
-#include <gmock/gmock.h>
+#include "PressCommandMapping.hpp"
 
 namespace aruwlib
 {
-namespace mock
+namespace control
 {
-class ErrorControllerMock : public aruwlib::errors::ErrorController
+void PressCommandMapping::executeCommandMapping(const RemoteMapState &currState)
 {
-public:
-    ErrorControllerMock(aruwlib::Drivers* drivers) : aruwlib::errors::ErrorController(drivers) {}
-    MOCK_METHOD(void, addToErrorList, (const aruwlib::errors::SystemError& error), (override));
-    MOCK_METHOD(void, updateLedDisplay, (), (override));
-};  // class ErrorControllerMock
-}  // namespace mock
+    if (mappingSubset(currState) &&
+        !(mapState.getNegKeysUsed() && negKeysSubset(mapState, currState)))
+    {
+        if (!pressed)
+        {
+            pressed = true;
+            addCommands();
+        }
+    }
+    else
+    {
+        pressed = false;
+    }
+}
+}  // namespace control
 }  // namespace aruwlib
-
-#endif  // ERROR_CONTROLLER_MOCK_HPP_

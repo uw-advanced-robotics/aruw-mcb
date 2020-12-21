@@ -17,24 +17,34 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_CONTROLLER_MOCK_HPP_
-#define ERROR_CONTROLLER_MOCK_HPP_
+#ifndef TEST_COMMAND_HPP_
+#define TEST_COMMAND_HPP_
 
-#include <aruwlib/errors/error_controller.hpp>
-#include <gmock/gmock.h>
+#include <aruwlib/control/command.hpp>
+
+#include "TestSubsystem.hpp"
 
 namespace aruwlib
 {
-namespace mock
+namespace control
 {
-class ErrorControllerMock : public aruwlib::errors::ErrorController
+class TestCommand : public aruwlib::control::Command
 {
 public:
-    ErrorControllerMock(aruwlib::Drivers* drivers) : aruwlib::errors::ErrorController(drivers) {}
-    MOCK_METHOD(void, addToErrorList, (const aruwlib::errors::SystemError& error), (override));
-    MOCK_METHOD(void, updateLedDisplay, (), (override));
-};  // class ErrorControllerMock
-}  // namespace mock
+    TestCommand(TestSubsystem *ts) : finished(false), s(ts) { addSubsystemRequirement(s); }
+
+    void initialize() override {}
+    void execute() override {}
+    void end(bool) override {}
+    bool isFinished() const override { return finished; }
+    const char *getName() const override { return "test command"; }
+    void setFinished(bool finished) { this->finished = finished; }
+
+private:
+    bool finished;
+    TestSubsystem *s;
+};  // TestCommand
+}  // namespace control
 }  // namespace aruwlib
 
-#endif  // ERROR_CONTROLLER_MOCK_HPP_
+#endif  // TEST_COMMAND_HPP_

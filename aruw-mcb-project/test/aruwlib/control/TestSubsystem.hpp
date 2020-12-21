@@ -17,24 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_CONTROLLER_MOCK_HPP_
-#define ERROR_CONTROLLER_MOCK_HPP_
+#ifndef TEST_SUBSYSTEM_HPP_
+#define TEST_SUBSYSTEM_HPP_
 
-#include <aruwlib/errors/error_controller.hpp>
-#include <gmock/gmock.h>
+#include <aruwlib/control/subsystem.hpp>
 
 namespace aruwlib
 {
-namespace mock
+namespace control
 {
-class ErrorControllerMock : public aruwlib::errors::ErrorController
+class TestSubsystem : public aruwlib::control::Subsystem
 {
 public:
-    ErrorControllerMock(aruwlib::Drivers* drivers) : aruwlib::errors::ErrorController(drivers) {}
-    MOCK_METHOD(void, addToErrorList, (const aruwlib::errors::SystemError& error), (override));
-    MOCK_METHOD(void, updateLedDisplay, (), (override));
-};  // class ErrorControllerMock
-}  // namespace mock
+    TestSubsystem(aruwlib::Drivers *drivers) : aruwlib::control::Subsystem(drivers) {}
+    void refresh() override {}
+};
+}  // namespace control
 }  // namespace aruwlib
 
-#endif  // ERROR_CONTROLLER_MOCK_HPP_
+#endif  // TEST_SUBSYSTEM_HPP_
