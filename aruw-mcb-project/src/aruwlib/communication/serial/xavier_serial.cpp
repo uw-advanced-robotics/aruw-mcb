@@ -33,7 +33,7 @@ const uint8_t XavierSerial::txMsgSwitchArray[XavierSerial::CV_MESSAGE_TYPE_SIZE]
 
 XavierSerial::XavierSerial(Drivers* drivers)
     : DJISerial(drivers, Uart::UartPort::Uart2),
-      txMsgSwitchIndex(CV_MESSAGE_TYPE_TURRET_TELEMETRY),
+      txMsgSwitchIndex(0),
       autoAimRequestQueued(false),
       autoAimRequestState(false),
       lastAimData(),
@@ -189,6 +189,7 @@ bool XavierSerial::sendTurretData(float pitch, float yaw)
 // transmit code
 bool XavierSerial::sendIMUChassisData(const IMUData& imuData, const ChassisData& chassisData)
 {
+    // TODO check range of acceleration and velocity values
     int16_t data[13] = {// Accelerometer readings in static frame
                         static_cast<int16_t>(imuData.ax * 100),
                         static_cast<int16_t>(imuData.ay * 100),

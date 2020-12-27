@@ -75,13 +75,13 @@ private:
 
 public:
     // AutoAim Data
-    typedef struct
+    struct TurretAimData
     {
         bool hasTarget;      ///< Whether or not the xavier has a target.
         float pitch;         ///< The pitch angle in degrees, rounded to two decimals.
         float yaw;           ///< The yaw angle in degrees, rounded to two decimals.
         uint32_t timestamp;  ///< A timestamp in milliseconds.
-    } TurretAimData;
+    };
 
     /**
      * A struct that stores the imu information sent to the xavier.
@@ -89,7 +89,7 @@ public:
      * @note we round all the data here to two decimal points while sending
      *      to the xavier.
      */
-    typedef struct
+    struct IMUData
     {
         float ax;  ///< acceleration in \f$\frac{m}{s^2}\f$.
         float ay;
@@ -102,19 +102,19 @@ public:
         float rol;  ///< Measured in degrees.
         float pit;
         float yaw;
-    } IMUData;
+    };
 
     /**
      * Structure for sending telemetry data to the xavier. Sends the raw
      * rpm values from the dji motors.
      */
-    typedef struct
+    struct ChassisData
     {
         int16_t rightFrontWheelRPM;
         int16_t leftFrontWheelRPM;
         int16_t leftBackWheeRPM;
         int16_t rightBackWheelRPM;
-    } ChassisData;
+    };
 
     XavierSerial(Drivers* drivers);
     XavierSerial(const XavierSerial&) = delete;

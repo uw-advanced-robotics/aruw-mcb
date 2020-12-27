@@ -50,6 +50,10 @@ void initializeIo(aruwlib::Drivers *drivers);
 // called as frequently.
 void updateIo(aruwlib::Drivers *drivers);
 
+aruwlib::serial::XavierSerial::ChassisData chassisData;
+aruwlib::serial::XavierSerial::IMUData imuData;
+aruwlib::serial::XavierSerial::TurretAimData turretData;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -67,6 +71,7 @@ int main()
     initializeIo(drivers);
     aruwsrc::control::initSubsystemCommands(drivers);
 
+
     while (1)
     {
         // do this as fast as you can
@@ -74,6 +79,16 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
+            imuData.ax = drivers->mpu6500.getAx();
+            imuData.ay = drivers->mpu6500.getAy();
+            imuData.az = drivers->mpu6500.getAz();
+            imuData.wx = drivers->mpu6500.getGx();
+            imuData.wy = drivers->mpu6500.getGy();
+            imuData.wz = drivers->mpu6500.getGz();
+            imuData.pit = drivers->mpu6500.getPitch();
+            imuData.yaw = drivers->mpu6500.getYaw();
+            imuData.rol = drivers->mpu6500.getRoll();
+            drivers->xavierSerial.sendMessage(imuData, chassisData, turretData, 0);
             drivers->mpu6500.read();
             drivers->errorController.updateLedDisplay();
             drivers->commandScheduler.run();
