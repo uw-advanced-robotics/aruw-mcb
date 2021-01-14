@@ -10,7 +10,7 @@ class TwoDimFilter
     static constexpr float DELTA = 0.002f;
 
 public:
-    using EKF = aruwlib::algorithms::ExtendedKalmanFilter<STATES, MEASUREMENTS>;
+    using EKF = aruwlib::algorithms::ExtendedKalmanFilter;
 
     TwoDimFilter();
 
@@ -18,10 +18,10 @@ public:
 
     const EKF::StateVector &getX() const { return filter.getLastFiltered(); }
 
-    static EKF::StateVector f(const EKF::StateVector &x);
-    static EKF::SquareStateMatrix fJacobian(const EKF::StateVector &x);
-    static EKF::MeasurementVector h(const EKF::StateVector &x);
-    static modm::Matrix<float, MEASUREMENTS, STATES> hJacobian(const EKF::StateVector &x);
+    static const EKF::StateVector &f(const EKF::StateVector &x);
+    static const EKF::SquareStateMatrix &fJacobian(const EKF::StateVector &x);
+    static const EKF::MeasurementVector &h(const EKF::StateVector &x);
+    static const modm::Matrix<float, MEASUREMENTS, STATES> &hJacobian(const EKF::StateVector &x);
 
 private:
     static float fMatArr[STATES * STATES];

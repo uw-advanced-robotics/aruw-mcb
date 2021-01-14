@@ -10,12 +10,15 @@ TwoDimFilter::EKF::SquareStateMatrix TwoDimFilter::fMat =
 modm::Matrix<float, TwoDimFilter::MEASUREMENTS, TwoDimFilter::STATES> TwoDimFilter::hJacobianMat =
     modm::Matrix<float, MEASUREMENTS, STATES>::zeroMatrix();
 
+
+float xArr[25] = {0, 0, 0, 0, 0, 0};
+
 TwoDimFilter::TwoDimFilter()
     : filter(
-          EKF::StateVector::zeroMatrix(),
+          EKF::StateVector(xArr),
           EKF::SquareStateMatrix::zeroMatrix(),
-          EKF::SquareStateMatrix::zeroMatrix(),
-          EKF::SquareMeasurementMatrix::zeroMatrix(),
+          EKF::SquareStateMatrix::identityMatrix(),
+          EKF::SquareMeasurementMatrix::identityMatrix(),
           TwoDimFilter::f,
           TwoDimFilter::fJacobian,
           TwoDimFilter::h,
@@ -42,36 +45,55 @@ void TwoDimFilter::update(
     filter.filterData(z);
 }
 
-TwoDimFilter::EKF::StateVector TwoDimFilter::f(const EKF::StateVector &x) { return fMat * x; }
+TwoDimFilter::EKF::StateVector v;
+const TwoDimFilter::EKF::StateVector &TwoDimFilter::f(const EKF::StateVector &x) { 
+    v = fMat * x;
+    return v;
+}
 
-TwoDimFilter::EKF::SquareStateMatrix TwoDimFilter::fJacobian(const EKF::StateVector &)
+const TwoDimFilter::EKF::SquareStateMatrix &TwoDimFilter::fJacobian(const EKF::StateVector &)
 {
     return fMat;
 }
 
-TwoDimFilter::EKF::MeasurementVector TwoDimFilter::h(const EKF::StateVector &x)
+TwoDimFilter::EKF::MeasurementVector m;
+
+const TwoDimFilter::EKF::MeasurementVector &TwoDimFilter::h(const EKF::StateVector &x)
 {
-    EKF::MeasurementVector m;
-    float c = cosf(x[2][0]);
-    float s = sinf(x[2][0]);
-    m[0][0] = x[0][0] * c - x[1][0] * s;
-    m[1][0] = x[0][0] * s + x[1][0] * c;
+    /*
+     * x = [ x_world
+     *       y_world
+     *       v_x_world
+     *       v_y_world
+     *       theta_z_world
+     *       omega_z_world ]
+     * 
+     * z = [ v_x_chassis
+     *       v_y_chassis
+     *       theta_z_world
+     *       omega_z_wheels
+     *       omega_z_IMU ]
+     */
+    float c = cosf(x[4][0]);
+    float s = sinf(x[4][0]);
+    m[0][0] = x[2][0] * c - x[3][0] * s;  // v_x_world * cos(theta) - v_y_world * sin(theta)
+    m[1][0] = x[2][0] * s + x[3][0] * c;  // v_x_world * sin(theta) + v_y_world * cos(theta)
     m[2][0] = x[4][0];
     m[3][0] = x[5][0];
     m[4][0] = x[5][0];
     return m;
 }
 
-modm::Matrix<float, TwoDimFilter::MEASUREMENTS, TwoDimFilter::STATES> TwoDimFilter::hJacobian(
+const modm::Matrix<float, TwoDimFilter::MEASUREMENTS, TwoDimFilter::STATES> &TwoDimFilter::hJacobian(
     const EKF::StateVector &x)
 {
     float c = cosf(x[4][0]);
     float s = sinf(x[4][0]);
-    hJacobianMat[0][0] = c;
-    hJacobianMat[0][1] = -s;
-    hJacobianMat[0][4] = -x[2][0] * c - x[3][0] * s;
-    hJacobianMat[1][0] = s;
-    hJacobianMat[1][1] = c;
-    hJacobianMat[1][4] = x[2][0] * s + x[3][0] * c;
+    hJacobianMat[0][2] = c;
+    hJacobianMat[0][3] = -s;
+    hJacobianMat[0][4] = -x[2][0] * s - x[3][0] * c;
+    hJacobianMat[1][2] = s;
+    hJacobianMat[1][3] = c;
+    hJacobianMat[1][4] = x[2][0] * c - x[3][0] * s;
     return hJacobianMat;
 }

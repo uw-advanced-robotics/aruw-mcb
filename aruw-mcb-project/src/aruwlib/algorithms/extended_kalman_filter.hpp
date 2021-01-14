@@ -69,10 +69,11 @@ namespace algorithms
  * @tparam M The number of measured states
  * @see https://www.cse.sc.edu/~terejanu/files/tutorialEKF.pdf
  */
-template <uint8_t N, uint8_t M>
 class ExtendedKalmanFilter
 {
 public:
+    static constexpr uint8_t N = 6;
+    static constexpr uint8_t M = 5;
     using StateVector = modm::Matrix<float, N, 1>;
     using SquareStateMatrix = modm::Matrix<float, N, N>;
     using MeasurementVector = modm::Matrix<float, M, 1>;
@@ -95,10 +96,10 @@ public:
         SquareStateMatrix p,
         SquareStateMatrix q,
         SquareMeasurementMatrix r,
-        StateVector (*fFunction)(const StateVector &x),
-        SquareStateMatrix (*jFFunction)(const StateVector &x),
-        MeasurementVector (*hFunction)(const StateVector &x),
-        modm::Matrix<float, M, N> (*jHFunction)(const StateVector &x))
+        const StateVector &(*fFunction)(const StateVector &x),
+        const SquareStateMatrix &(*jFFunction)(const StateVector &x),
+        const MeasurementVector &(*hFunction)(const StateVector &x),
+        const modm::Matrix<float, M, N> &(*jHFunction)(const StateVector &x))
         : x(x),
           p(p),
           q(q),
@@ -122,14 +123,7 @@ public:
      * @param[in] z the data to be filtered.
      * @return the filtered data.
      */
-    StateVector filterData(const MeasurementVector &z)
-    {
-        predictState();
-        predictCovariance();
-        updateState(z);
-        calculateKalmanGain();
-        return x;
-    }
+    void filterData(const MeasurementVector &z);
 
     /// Returns the last filtered data point.
     const StateVector &getLastFiltered() const { return x; }
@@ -144,40 +138,27 @@ public:
 
 private:
     /// Predicts the state at the next time step.
-    inline void predictState()
+    void predictState()
     {
         // x = f(x)
-        x = fFunc(x);
     }
 
     /// Predicts the prediction error covariance at the next time step.
-    inline void predictCovariance()
+    void predictCovariance()
     {
         // P = F * P * Ft + Q
-        auto jF = jFFunc(x);
-        p = jF * p * jF.asTransposed() + q;
     }
 
     /// Updates the state using the measurement.
-    inline void updateState(const MeasurementVector &z)
+    void updateState(const MeasurementVector &z)
     {
         // x = x + K * (z - h(x))
         x = x + k * (z - hFunc(x));
     }
 
     /// Calculates the Kalman Gain.
-    inline void calculateKalmanGain()
+    void calculateKalmanGain()
     {
-        // K = P * Ht * (H * P * Ht + R)^-1
-        modm::Matrix<float, M, N> jH = jHFunc(x);
-        modm::Matrix<float, N, M> jHTrans = jH.asTransposed();
-        SquareMeasurementMatrix innovationCovariance = (jH * p) * jHTrans + r;
-        SquareMeasurementMatrix innovationCovarianceInverse;
-        inverse(innovationCovariance, &innovationCovarianceInverse);
-        k = (p * jHTrans) * innovationCovarianceInverse;
-
-        // P = (I - K * H) * P
-        p = (i - k * jH);
     }
 
     StateVector x;  ///< state vector
@@ -192,13 +173,13 @@ private:
     SquareStateMatrix i;  ///< An I matrix
 
     ///< user-defined process function
-    StateVector (*fFunc)(const StateVector &x);
+    const StateVector &(*fFunc)(const StateVector &x);
     ///< user-defined jacobian of the process function
-    SquareStateMatrix (*jFFunc)(const StateVector &x);
+    const SquareStateMatrix &(*jFFunc)(const StateVector &x);
     ///< user-defined measurement function
-    MeasurementVector (*hFunc)(const StateVector &x);
+    const MeasurementVector &(*hFunc)(const StateVector &x);
     ///< user-defined jacobian of the measurement function
-    modm::Matrix<float, M, N> (*jHFunc)(const StateVector &x);
+    const modm::Matrix<float, M, N> &(*jHFunc)(const StateVector &x);
 
 };  // class ExtendedKalmanFilter
 

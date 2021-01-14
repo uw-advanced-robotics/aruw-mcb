@@ -7,16 +7,22 @@
 TEST(t, tt)
 {
     TwoDimFilter f;
-    float vxWheels = 10;
-    float vyWheels = 10;
+    float vxWheels = 1000;
+    float vyWheels = 1000;
     float yawIMU = 0;
     float omegaWheels = 0;
     float omegaIMU = 0;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 500; i++)
     {
+        if (yawIMU < aruwlib::algorithms::PI / 2) {
+            omegaWheels = aruwlib::algorithms::PI / 0.064;
+            omegaIMU = aruwlib::algorithms::PI / 0.064;
+            yawIMU += aruwlib::algorithms::PI / 32;
+        } else {
+            omegaWheels = 0;
+            omegaIMU = 0;
+        }
         f.update(vxWheels, vyWheels, yawIMU, omegaWheels, omegaIMU);
-        const modm::Matrix<float, 6, 1> &x = f.getX();
-        std::cout << x[0][0] << ", " << x[1][0] << ", " << x[2][0] << ", " << x[3][0] << ", "
-                  << x[4][0] << ", " << x[5][0] << std::endl;
+        // const modm::Matrix<float, 6, 1> &x = f.getX();
     }
 }
