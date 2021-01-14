@@ -95,7 +95,10 @@ public:
     gpio::Digital digital;
     gpio::Leds leds;
     gpio::Pwm pwm;
+    
+    // Use this class to access remote infromation
     Remote remote;
+
     sensors::Mpu6500 mpu6500;
     serial::Uart uart;
     serial::XavierSerial xavierSerial;

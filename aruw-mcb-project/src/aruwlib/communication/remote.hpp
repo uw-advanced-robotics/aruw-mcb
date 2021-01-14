@@ -120,7 +120,7 @@ public:
     /**
      * @return The value of the given channel, between [-1, 1].
      */
-    mockable float getChannel(Channel ch) const;
+    mockable float getChannel(Channel ch) const; //pass in channel enum 
 
     /**
      * @return The state of the given switch.
