@@ -29,7 +29,7 @@ valid_robot_types = ["TARGET_SOLDIER", "TARGET_OLD_SOLDIER", "TARGET_DRONE", "TA
 hosted_libs = ["pthread", "python3.8"]
 gtest_libs = ["gtest", "gtest_main", "gmock", "gmock_main"]
 
-usage = "Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]\n\
+usage = "Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [test_k_filter=<true|false>]\n\
     \"<target>\" is one of:\n\
         - \"build\": build all code for the hardware platform.\n\
         - \"run\": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.\n\
@@ -90,6 +90,11 @@ if target_env == "hardware":
 elif target_env == "sim":
     modm_path = sim_modm_path
     ignored_dirs.append("test/")
+    test_k_filter = ARGUMENTS.get("test_k_filter", "false")
+    if test_k_filter == "true":
+        ignored_files.append("src/main.cpp")
+    else:
+        ignored_files.append("src/kalman_filter_test_main.cpp")
 else:
     modm_path = sim_modm_path
     ignored_files.append("src/main.cpp")

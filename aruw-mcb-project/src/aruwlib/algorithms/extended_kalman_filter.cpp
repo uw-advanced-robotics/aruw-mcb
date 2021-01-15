@@ -41,7 +41,7 @@ void ExtendedKalmanFilter::filterData(const MeasurementVector &z)
     inverse(innovationCovariance, &innovationCovarianceInverse);
     k = (p * jHTrans) * innovationCovarianceInverse;
     p = (i - k * jH) * p;
-    print("x", x);
+    // print("x", x);
 }
 }  // namespace algorithms
 }  // namespace aruwlib
