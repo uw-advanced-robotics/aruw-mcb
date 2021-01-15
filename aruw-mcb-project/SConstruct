@@ -26,7 +26,7 @@ sim_modm_path = "sim-modm/modm/"
 aruwlib_path = "./src/aruwlib"
 robot_type_file = "./robot-type/robot_type.hpp"
 valid_robot_types = ["TARGET_SOLDIER", "TARGET_OLD_SOLDIER", "TARGET_DRONE", "TARGET_ENGINEER", "TARGET_SENTINEL", "TARGET_HERO"]
-hosted_libs = ["pthread"]
+hosted_libs = ["pthread", "python3.8"]
 gtest_libs = ["gtest", "gtest_main", "gmock", "gmock_main"]
 
 usage = "Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]\n\
@@ -152,6 +152,11 @@ if target_env == "tests":
     env.AppendUnique(LIBS=gtest_libs)
     env.AppendUnique(LIBS=hosted_libs)
 elif target_env == "sim":
+    env.AppendUnique(CPPPATH=[
+        "/home/matthew/.local/lib/python3.8/site-packages/numpy/core/include", # todo fix this
+        "/usr/include/python3.8"
+    ])
+
     env.AppendUnique(LIBS=hosted_libs)
 
 sources = env.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)

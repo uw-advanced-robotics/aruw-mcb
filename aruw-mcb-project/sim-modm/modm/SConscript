@@ -39,7 +39,6 @@ env["CCFLAGS"] = [
     "-fdata-sections",
     "-ffunction-sections",
     "-finline-limit=10000",
-    "-fshort-wchar",
     "-funsigned-bitfields",
     "-funsigned-char",
     "-fwrapv",

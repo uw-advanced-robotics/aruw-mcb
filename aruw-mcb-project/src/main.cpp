@@ -36,6 +36,10 @@
 /* control includes ---------------------------------------------------------*/
 #include "aruwsrc/control/robot_control.hpp"
 
+#include "matplotlibcpp.h"
+#include "two_dim_filter.hpp"
+
+namespace plt = matplotlibcpp;
 using namespace modm::literals;
 using aruwlib::Drivers;
 
@@ -56,32 +60,30 @@ int main()
 #ifdef PLATFORM_HOSTED
     std::cout << "Simulation starting..." << std::endl;
 #endif
-
-    /*
-     * NOTE: We are using DoNotUse_getDrivers here because in the main
-     *      robot loop we must access the singleton drivers to update
-     *      IO states and run the scheduler.
-     */
-    aruwlib::Drivers *drivers = aruwlib::DoNotUse_getDrivers();
-
-    Board::initialize();
-    initializeIo(drivers);
-    aruwsrc::control::initSubsystemCommands(drivers);
-
-    while (1)
+    TwoDimFilter f;
+    float vxWheels = 1000;
+    float vyWheels = 1000;
+    float yawIMU = 0;
+    float omegaWheels = 0;
+    float omegaIMU = 0;
+    std::vector<float> xPosition;
+    for (int i = 0; i < 500; i++)
     {
-        // do this as fast as you can
-        updateIo(drivers);
-
-        if (sendMotorTimeout.execute())
-        {
-            drivers->mpu6500.read();
-            drivers->errorController.update();
-            drivers->commandScheduler.run();
-            drivers->djiMotorTxHandler.processCanSendData();
+        if (yawIMU < aruwlib::algorithms::PI / 2) {
+            omegaWheels = aruwlib::algorithms::PI / 0.064;
+            omegaIMU = aruwlib::algorithms::PI / 0.064;
+            yawIMU += aruwlib::algorithms::PI / 32;
+        } else {
+            omegaWheels = 0;
+            omegaIMU = 0;
         }
-        modm::delayMicroseconds(10);
+        f.update(vxWheels, vyWheels, yawIMU, omegaWheels, omegaIMU);
+        const modm::Matrix<float, 6, 1> &x = f.getX();
+        xPosition.push_back(x[5][0]);
     }
+    plt::plot(xPosition);
+    plt::show();
+
     return 0;
 }
 
