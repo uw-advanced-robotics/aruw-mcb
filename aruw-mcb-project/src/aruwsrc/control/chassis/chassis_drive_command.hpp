@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __CHASSIS_DRIVE_COMMAND_HPP__
-#define __CHASSIS_DRIVE_COMMAND_HPP__
+#ifndef CHASSIS_DRIVE_COMMAND_HPP_
+#define CHASSIS_DRIVE_COMMAND_HPP_
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/control/command.hpp>
@@ -29,6 +29,9 @@ namespace aruwsrc
 {
 namespace chassis
 {
+/**
+ * A command that applies classic chassis-relative mecanum drive.
+ */
 class ChassisDriveCommand : public aruwlib::control::Command
 {
 public:
@@ -41,9 +44,14 @@ public:
 
     void initialize() override;
 
+    /**
+     * Gets remote x, y, and r commands, limits them, applies a rotation ratio between [0, 1]
+     * that is inversely proportional to the rotation component to the x and y components of
+     * movement, and sets `setDesiredOutput` with the scaled <x, y, r> components.
+     */
     void execute() override;
 
-    void end(bool interrupted) override;
+    void end(bool) override;
 
     bool isFinished() const override;
 
@@ -52,10 +60,10 @@ public:
 private:
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
-};
+};  // class ChassisDriveCommand
 
 }  // namespace chassis
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // CHASSIS_DRIVE_COMMAND_HPP_

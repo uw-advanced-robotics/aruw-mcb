@@ -111,10 +111,10 @@ public:
           jHFunc(jHFunction)
     {
         this->i = SquareStateMatrix::identityMatrix();
-        if (fFunc == nullptr || jFFunc == nullptr || hFunc == nullptr || jHFunc == nullptr)
-        {
-            modm_assert_fail("ekf");
-        }
+        // if (fFunc == nullptr || jFFunc == nullptr || hFunc == nullptr || jHFunc == nullptr)
+        // {
+        //     modm_assert("ekf");
+        // }
     }
 
     /**

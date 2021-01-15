@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -23,10 +23,9 @@
 #include <cfloat>
 #include <random>
 
-#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/architecture/clock.hpp>
-#include <aruwlib/control/command_mapper.hpp>
+#include <aruwlib/control/CommandMapper.hpp>
 #include <aruwlib/errors/create_errors.hpp>
 
 using namespace aruwlib::motor;
@@ -273,6 +272,12 @@ float TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
     }
     return chassisRotationFeedForward;
 }
+
+void TurretSubsystem::runHardwareTests()
+{
+    // TODO
+}
+
 }  // namespace turret
 
 }  // namespace aruwsrc

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -63,7 +63,7 @@ void ChassisAutorotateCommand::execute()
         chassisRotationDesiredWheelspeed);
 }
 
-void ChassisAutorotateCommand::end(bool) {}
+void ChassisAutorotateCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
 
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 

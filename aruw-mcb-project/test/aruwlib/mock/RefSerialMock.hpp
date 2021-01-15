@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -34,7 +34,7 @@ public:
     MOCK_METHOD(
         void,
         messageReceiveCallback,
-        (const aruwlib::serial::DJISerial::SerialMessage& completeMessage),
+        (const aruwlib::serial::DJISerial<true>::SerialMessage& completeMessage),
         (override));
     MOCK_METHOD(const aruwlib::serial::RefSerial::RobotData&, getRobotData, (), (const override));
     MOCK_METHOD(const aruwlib::serial::RefSerial::GameData&, getGameData, (), (const override));

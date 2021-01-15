@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -46,10 +46,15 @@ public:
 
     bool isSqueezed() const;
 
+    void runHardwareTests() override;
+
+    const char *getName() override { return "Grabber Subsystem"; }
+
 private:
     aruwlib::gpio::Digital::OutputPin pin;
 
     bool isGrabberSqueezed;
+
 };  // GrabberSubsystem
 
 }  // namespace engineer

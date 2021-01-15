@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -53,13 +53,18 @@ public:
         S = 1,
         T,
         U,
-        V
+        V,
+        OLED_JOYSTICK,
     };
 
-    ///< Initializes the ADC and connects the configured analog pins to it.
+    /**
+     * Initializes the ADC and connects the configured analog pins to it.
+     */
     mockable void init();
 
-    ///< Reads voltage across the specified pin. Units in mV.
+    /**
+     * Reads voltage across the specified pin. Units in mV.
+     */
     mockable uint16_t read(Analog::Pin pin) const;
 };  // class Analog
 }  // namespace gpio

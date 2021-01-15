@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -93,25 +93,25 @@ public:
 private:
     Drivers *drivers;
 
-    ///< Used to change servo speed. See construtctor for detail.
+    /// Used to change servo speed. See construtctor for detail.
     aruwlib::algorithms::Ramp pwmOutputRamp;
 
-    ///< The max PWM the servo can handle.
+    /// The max PWM the servo can handle.
     float maxPwm;
 
-    ///< The min PWM the servo can handle.
+    /// The min PWM the servo can handle.
     float minPwm;
 
-    ///< Current PWM output.
+    /// Current PWM output.
     float currentPwm;
 
-    ///< Desired speed of the ramp in PWM / ms
+    /// Desired speed of the ramp in PWM / ms
     float pwmRampSpeed;
 
-    ///< Used to calculate the ramp dt.
+    /// Used to calculate the ramp dt.
     uint32_t prevTime = 0;
 
-    ///< The PWM pin that the servo is attached to.
+    /// The PWM pin that the servo is attached to.
     aruwlib::gpio::Pwm::Pin servoPin;
 };  // class Servo
 

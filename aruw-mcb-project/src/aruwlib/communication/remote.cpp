@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -174,7 +174,12 @@ void Remote::parseBuffer()
     // Remote wheel
     remote.wheel = (rxBuffer[16] | rxBuffer[17] << 8) - 1024;
 
-    drivers->commandMapper.handleKeyStateChange(remote.key, remote.leftSwitch, remote.rightSwitch);
+    drivers->commandMapper.handleKeyStateChange(
+        remote.key,
+        remote.leftSwitch,
+        remote.rightSwitch,
+        remote.mouse.l,
+        remote.mouse.r);
 
     remote.updateCounter++;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -167,13 +167,21 @@ public:
      */
     mockable void addCommand(Command* commandToAdd);
 
+    mockable const std::map<Subsystem*, Command*>& getSubsystemToCommandMap() const
+    {
+        return subsystemToCommandMap;
+    }
+
+    mockable void runSubsystemTests();
+    mockable void stopHardwareTests();
+
 private:
-    ///< Maximum time before we start erroring, in microseconds.
+    /// Maximum time before we start erroring, in microseconds.
     static constexpr float MAX_ALLOWABLE_SCHEDULER_RUNTIME = 100;
 
     Drivers* drivers;
 
-    ///< a map containing keys of subsystems, pairs of Commands.
+    /// a map containing keys of subsystems, pairs of Commands.
     std::map<Subsystem*, Command*> subsystemToCommandMap;
 
     /**
@@ -183,6 +191,8 @@ private:
      *      the `mainScheduler` is ran.
      */
     static uint32_t commandSchedulerTimestamp;
+
+    bool runningHardwareTests = false;
 };  // class CommandScheduler
 
 }  // namespace control

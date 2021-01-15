@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -124,6 +124,10 @@ public:
      * these angles.
      */
     void updateCurrentTurretAngles();
+
+    void runHardwareTests() override;
+
+    const char* getName() override { return "Turret Subsystem"; }
 
 private:
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 8160;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -155,6 +155,12 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
 }
 
 float ChassisSubsystem::getChassisDesiredRotation() const { return chassisDesiredR; }
+
+void ChassisSubsystem::runHardwareTests()
+{
+    // TODO
+}
+
 }  // namespace chassis
 
 }  // namespace aruwsrc

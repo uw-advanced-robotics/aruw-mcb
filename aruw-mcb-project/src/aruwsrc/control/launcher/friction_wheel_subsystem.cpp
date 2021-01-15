@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -44,6 +44,12 @@ void FrictionWheelSubsystem::refresh()
     velocityPidRightWheel.update(desiredRpmRamp.getValue() - rightWheel.getShaftRPM());
     rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
 }
+
+void FrictionWheelSubsystem::runHardwareTests()
+{
+    // TODO
+}
+
 }  // namespace launcher
 
 }  // namespace aruwsrc

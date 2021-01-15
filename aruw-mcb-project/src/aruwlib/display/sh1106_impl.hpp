@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -93,7 +93,7 @@ void aruwlib::display::Sh1106<SPI, A0, Reset, Width, Height, Flipped>::initializ
 
     // reset the controller
     reset.reset();
-    modm::delayMilliseconds(20);
+    modm::delay_ms(20);
     reset.set();
 
     a0.reset();

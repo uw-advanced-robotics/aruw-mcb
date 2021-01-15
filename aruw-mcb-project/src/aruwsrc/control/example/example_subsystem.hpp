@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -63,6 +63,10 @@ public:
     void setDesiredRpm(float desRpm);
 
     void refresh() override;
+
+    void runHardwareTests() override;
+
+    const char* getName() override { return "Example Subsystem"; }
 
 private:
     static const aruwlib::motor::MotorId LEFT_MOTOR_ID;

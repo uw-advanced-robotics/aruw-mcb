@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,9 +21,10 @@
 #define MOCK_MACROS_HPP_
 
 #ifdef PLATFORM_HOSTED
-///< Wrap class functions that are not already virtual in this function if you wish to mock them.
+/// Wrap class functions that are not already virtual in this function if you wish to mock them.
 #define mockable virtual
 #else
+/// Wrap class functions that are not already virtual in this function if you wish to mock them.
 #define mockable
 #endif
 

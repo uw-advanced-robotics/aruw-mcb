@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -47,11 +47,9 @@ AgitatorUnjamCommand::AgitatorUnjamCommand(
 
 void AgitatorUnjamCommand::initialize()
 {
-    // define a random time that the agitator will take to unjam backwards.
     agitatorUnjamRotateTimeout.restart(agitatorMaxWaitTime);
 
     // define a random unjam angle between [MIN_AGITATOR_UNJAM_ANGLE, agitatorUnjamAngleMax]
-
     float randomUnjamAngle =
         fmodf(rand(), agitatorUnjamAngleMax - MIN_AGITATOR_UNJAM_ANGLE) + MIN_AGITATOR_UNJAM_ANGLE;
 

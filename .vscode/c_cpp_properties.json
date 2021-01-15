@@ -10,7 +10,12 @@
             "name": "Sim",
             "defines": ["${default}", "PLATFORM_HOSTED"],
             "compilerPath": "/usr/bin/g++",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "gcc-x64",
+            "includePath": [
+                "${default}",
+                "/usr/include/python3.8",
+                "~/.local/lib/python3.8/site-packages/numpy/core/include"
+            ]
         },
         {
             "name": "MCB",

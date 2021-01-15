@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -120,6 +120,12 @@ float SentinelDriveSubsystem::distanceFromEncoder(aruwlib::motor::DjiMotor* moto
     float numberOfRotations = unwrappedAngle / (aruwlib::motor::DjiMotor::ENC_RESOLUTION);
     return numberOfRotations * 2.0f * aruwlib::algorithms::PI * WHEEL_RADIUS / GEAR_RATIO;
 }
+
+void SentinelDriveSubsystem::runHardwareTests()
+{
+    // TODO
+}
+
 }  // namespace control
 
 }  // namespace aruwsrc
