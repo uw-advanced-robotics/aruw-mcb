@@ -20,8 +20,8 @@
 #ifndef KALMAN_FILTER_HPP_
 #define KALMAN_FILTER_HPP_
 
-#include <modm/math/matrix.hpp>
 #include <modm/architecture/interface/assert.h>
+#include <modm/math/matrix.hpp>
 
 #include "math_user_utils.hpp"
 
@@ -157,9 +157,7 @@ private:
     }
 
     /// Calculates the Kalman Gain.
-    void calculateKalmanGain()
-    {
-    }
+    void calculateKalmanGain() {}
 
     StateVector x;  ///< state vector
 
