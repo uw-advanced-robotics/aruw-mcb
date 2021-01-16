@@ -99,7 +99,7 @@ public:
 
 private:
     /* Constants */
-    static constexpr float MINUTES_PER_MILLISECOND = 1 / 60000;
+    static constexpr float MINUTES_PER_MILLISECOND = 1.0f / 60000.0f;
 
     /* Note that these should all be constexpr, but because of
     how they are initialized in construction they cannot be. */
