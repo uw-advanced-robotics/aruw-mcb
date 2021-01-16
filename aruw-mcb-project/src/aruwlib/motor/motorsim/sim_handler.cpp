@@ -20,6 +20,7 @@
 #ifdef PLATFORM_HOSTED
 
 #include "sim_handler.hpp"
+#include <iostream>
 
 namespace aruwlib
 {
@@ -44,11 +45,13 @@ void SimHandler::resetMotorSims()
 
     for (uint32_t i = 0; i < sims.size(); i++)
     {
-        for (uint32_t j = 0; j < sims[i].size(); j++)
+        for (uint32_t j = 0; j < sims[i].size(); j++) 
+        {
             if (sims[i][j] != nullptr)
             {
                 sims[i][j]->reset();
             }
+        }
     }
 }
 
@@ -64,8 +67,7 @@ void SimHandler::registerSim(
     if (sims[busIndex][port] == nullptr)
     {
         // TODO: Does this correctly statically allocate the pointer at sims[busIndex][port]?
-        aruwlib::motorsim::MotorSim newSim(type, loading);
-        sims[busIndex][port] = &newSim;
+        sims[busIndex][port] = new motorsim::MotorSim(type, loading);
     }
 }
 
@@ -108,6 +110,10 @@ bool SimHandler::sendMessage(aruwlib::can::CanBus bus, modm::can::Message* messa
 {
     uint8_t busIndex = static_cast<uint8_t>(bus);
 
+    // Check to make sure sim actually exists.
+    if (sims[busIndex][nextCanSendIndex[busIndex]] == nullptr) {
+        return false;
+    }
     *message = CanSerializer::serializeFeedback(
         sims[busIndex][nextCanSendIndex[busIndex]]->getEnc(),
         sims[busIndex][nextCanSendIndex[busIndex]]->getRPM(),
@@ -119,7 +125,6 @@ bool SimHandler::sendMessage(aruwlib::can::CanBus bus, modm::can::Message* messa
     {
         nextCanSendIndex[busIndex] = 0;
     }
-
     return true;
 }
 
@@ -127,7 +132,7 @@ void SimHandler::updateSims()
 {
     for (uint32_t i = 0; i < sims.size(); i++)
     {
-        for (uint32_t j = 0; sims[i].size(); j++)
+        for (uint32_t j = 0; j < sims[0].size(); j++)
         {
             if (sims[i][j] != nullptr)
             {
