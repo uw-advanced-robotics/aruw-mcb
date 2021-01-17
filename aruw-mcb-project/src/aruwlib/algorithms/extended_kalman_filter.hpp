@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,8 +20,8 @@
 #ifndef KALMAN_FILTER_HPP_
 #define KALMAN_FILTER_HPP_
 
-#include <modm/math/matrix.hpp>
 #include <modm/architecture/interface/assert.h>
+#include <modm/math/matrix.hpp>
 
 #include "math_user_utils.hpp"
 
