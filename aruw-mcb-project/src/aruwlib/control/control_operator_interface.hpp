@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -43,13 +43,13 @@ public:
     ControlOperatorInterface &operator=(const ControlOperatorInterface &) = delete;
     mockable ~ControlOperatorInterface() = default;
 
-    ///< @return the value used for chassis movement forward and backward, between -1 and 1.
+    /// @return the value used for chassis movement forward and backward, between -1 and 1.
     mockable float getChassisXInput();
 
-    ///< @return the value used for chassis movement side to side, between -1 and 1.
+    /// @return the value used for chassis movement side to side, between -1 and 1.
     mockable float getChassisYInput();
 
-    ///< @return the value used for chassis rotation, between -1 and 1.
+    /// @return the value used for chassis rotation, between -1 and 1.
     mockable float getChassisRInput();
 
     /**

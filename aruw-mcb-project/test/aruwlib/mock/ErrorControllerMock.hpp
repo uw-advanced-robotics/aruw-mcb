@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -32,7 +32,7 @@ class ErrorControllerMock : public aruwlib::errors::ErrorController
 public:
     ErrorControllerMock(aruwlib::Drivers* drivers) : aruwlib::errors::ErrorController(drivers) {}
     MOCK_METHOD(void, addToErrorList, (const aruwlib::errors::SystemError& error), (override));
-    MOCK_METHOD(void, update, (), (override));
+    MOCK_METHOD(void, updateLedDisplay, (), (override));
 };  // class ErrorControllerMock
 }  // namespace mock
 }  // namespace aruwlib

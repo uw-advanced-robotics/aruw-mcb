@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -37,6 +37,16 @@ uint32_t CommandScheduler::commandSchedulerTimestamp = 0;
 
 void CommandScheduler::addCommand(Command* commandToAdd)
 {
+    if (this->runningHardwareTests)
+    {
+        RAISE_ERROR(
+            drivers,
+            "attempting to add command while running tests",
+            aruwlib::errors::Location::COMMAND_SCHEDULER,
+            aruwlib::errors::ErrorType::ADDING_NULLPTR_COMMAND);
+        return;
+    }
+
     if (commandToAdd == nullptr)
     {
         RAISE_ERROR(
@@ -50,23 +60,11 @@ void CommandScheduler::addCommand(Command* commandToAdd)
     bool commandAdded = false;
 
     const set<Subsystem*>& commandRequirements = commandToAdd->getRequirements();
-    // end all commands running on the subsystem requirements.
-    // They were interrupted.
-    // Additionally, replace the current command with the commandToAdd
+
+    // Check to see if all the requirements are in the subsytemToCommandMap
     for (auto& requirement : commandRequirements)
     {
-        map<Subsystem*, Command*>::iterator subsystemRequirementCommandPair =
-            subsystemToCommandMap.find(requirement);
-        if (subsystemRequirementCommandPair != subsystemToCommandMap.end())
-        {
-            if (subsystemRequirementCommandPair->second != nullptr)
-            {
-                subsystemRequirementCommandPair->second->end(true);
-            }
-            subsystemRequirementCommandPair->second = commandToAdd;
-            commandAdded = true;
-        }
-        else
+        if (subsystemToCommandMap.find(requirement) == subsystemToCommandMap.end())
         {
             // the command you are trying to add has a subsystem that is not in the
             // scheduler, so you cannot add it (will lead to undefined control behavior)
@@ -77,6 +75,34 @@ void CommandScheduler::addCommand(Command* commandToAdd)
                 aruwlib::errors::ErrorType::RUN_TIME_OVERFLOW);
             return;
         }
+    }
+
+    // end all commands running on the subsystem requirements.
+    // They were interrupted.
+    // Additionally, replace the current command with the commandToAdd
+    for (auto& requirement : commandRequirements)
+    {
+        map<Subsystem*, Command*>::iterator subsystemRequirementCommandPair =
+            subsystemToCommandMap.find(requirement);
+
+        if (subsystemRequirementCommandPair->second != nullptr)
+        {
+            Command* commandToCancel = subsystemRequirementCommandPair->second;
+            // end the command
+            commandToCancel->end(true);
+            // Loop through all the subsystems, and if they use this command,
+            // remove it to make sure it doesnt continue running.
+            // This also prevents end from being called twice on the same command.
+            for (auto& subsystemToCommandEntry : subsystemToCommandMap)
+            {
+                if (subsystemToCommandEntry.second == commandToCancel)
+                {
+                    subsystemToCommandEntry.second = nullptr;
+                }
+            }
+        }
+        subsystemRequirementCommandPair->second = commandToAdd;
+        commandAdded = true;
     }
 
     // initialize the commandToAdd. Only do this once even though potentially
@@ -96,6 +122,19 @@ void CommandScheduler::run()
     {
         commandSchedulerTimestamp++;
     }
+
+    if (this->runningHardwareTests)
+    {
+        for (auto& subsystemToCommand : subsystemToCommandMap)
+        {
+            if (!subsystemToCommand.first->isHardwareTestComplete())
+            {
+                subsystemToCommand.first->runHardwareTests();
+            }
+        }
+        return;
+    }
+
     // refresh all and run all commands
     for (auto& currSubsystemCommandPair : subsystemToCommandMap)
     {
@@ -202,6 +241,32 @@ bool CommandScheduler::isSubsystemRegistered(Subsystem* subsystem) const
         return false;
     }
     return subsystemToCommandMap.find(subsystem) != subsystemToCommandMap.end();
+}
+
+void CommandScheduler::runSubsystemTests()
+{
+    this->runningHardwareTests = true;
+    for (auto& pair : this->subsystemToCommandMap)
+    {
+        pair.first->hardwareTestsComplete = false;
+        if (pair.second != nullptr)
+        {
+            pair.second->end(true);
+            pair.second = nullptr;
+        }
+    }
+}
+
+void CommandScheduler::stopHardwareTests()
+{
+    this->runningHardwareTests = false;
+    for (auto& pair : this->subsystemToCommandMap)
+    {
+        if (pair.first->isHardwareTestComplete())
+        {
+            pair.first->setHardwareTestsComplete();
+        }
+    }
 }
 }  // namespace control
 

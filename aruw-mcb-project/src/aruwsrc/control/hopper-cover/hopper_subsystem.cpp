@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -32,6 +32,12 @@ void HopperSubsystem::refresh() { hopper.updateSendPwmRamp(); }
 float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
 
 float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
+
+void HopperSubsystem::runHardwareTests()
+{
+    // TODO
+}
+
 }  // namespace control
 
 }  // namespace aruwsrc

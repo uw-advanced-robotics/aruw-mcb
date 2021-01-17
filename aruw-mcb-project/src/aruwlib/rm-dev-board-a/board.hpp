@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -42,12 +42,14 @@ using namespace modm::platform;
 #include <modm/math/units.hpp>
 #endif
 
-///< @ingroup TODO
+/// @ingroup TODO
 namespace Board
 {
 using namespace modm::literals;
 
-///< STM32F427 running at 180MHz from the external 12MHz crystal
+/**
+ * STM32F427 running at 180MHz from the external 12MHz crystal
+ */
 struct SystemClock
 {
     static constexpr uint32_t Frequency = 180_MHz;
@@ -109,12 +111,12 @@ struct SystemClock
     {
 #ifndef PLATFORM_HOSTED
         Rcc::enableExternalCrystal();  // 8 MHz
-        Rcc::enablePll(
-            Rcc::PllSource::ExternalCrystal,
+        Rcc::PllFactors pllF = {
             6,    // 12MHz / N=6 -> 2MHz
             180,  // 2MHz * M=180 -> 360MHz
             2     // 360MHz / P=2 -> 180MHz = F_cpu
-        );
+        };
+        Rcc::enablePll(Rcc::PllSource::ExternalCrystal, pllF);
 
         Rcc::setFlashLatency<Frequency>();
         Rcc::enableSystemClock(Rcc::SystemClockSource::Pll);
@@ -135,14 +137,14 @@ using Button = GpioInputB2;
 // initialize 9 green Leds and 1 red LED
 // leds 1-8 used for error handling codes
 // led9 used for error handling error (unrepresentable error)
-using LedA = GpioOutputG1;
-using LedB = GpioOutputG2;
-using LedC = GpioOutputG3;
-using LedD = GpioOutputG4;
-using LedE = GpioOutputG5;
-using LedF = GpioOutputG6;
-using LedG = GpioOutputG7;
-using LedH = GpioOutputG8;
+using LedA = GpioOutputG8;
+using LedB = GpioOutputG7;
+using LedC = GpioOutputG6;
+using LedD = GpioOutputG5;
+using LedE = GpioOutputG4;
+using LedF = GpioOutputG3;
+using LedG = GpioOutputG2;
+using LedH = GpioOutputG1;
 using LedGreen = GpioOutputF14;
 using LedRed = GpioOutputE11;
 
@@ -156,13 +158,15 @@ using PowerOut4 = GpioOutputH5;
 
 using PowerOuts = SoftwareGpioPort<PowerOut1, PowerOut2, PowerOut3, PowerOut4>;
 
-// initialize 4 analog input pins
+// initialize analog input pins
 using AnalogInPinS = GpioOutputA0;
 using AnalogInPinT = GpioOutputA1;
 using AnalogInPinU = GpioOutputA2;
 using AnalogInPinV = GpioOutputA3;
+using AnalogInPinOled = GpioOutputA6;
 
-using AnalogInPins = SoftwareGpioPort<AnalogInPinS, AnalogInPinT, AnalogInPinU, AnalogInPinV>;
+using AnalogInPins =
+    SoftwareGpioPort<AnalogInPinS, AnalogInPinT, AnalogInPinU, AnalogInPinV, AnalogInPinOled>;
 
 // initialize 4 pwm output pins
 using PWMOutPinW = GpioInputI5;

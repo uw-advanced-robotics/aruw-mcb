@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,6 +19,8 @@
 
 #include "xavier_serial.hpp"
 
+#include <cstring>
+
 namespace aruwlib
 {
 namespace serial
@@ -30,7 +32,7 @@ const uint8_t XavierSerial::txMsgSwitchArray[XavierSerial::CV_MESSAGE_TYPE_SIZE]
     XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
 
 XavierSerial::XavierSerial(Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart2, false),
+    : DJISerial(drivers, Uart::UartPort::Uart2),
       txMsgSwitchIndex(CV_MESSAGE_TYPE_TURRET_TELEMETRY),
       autoAimRequestQueued(false),
       autoAimRequestState(false),

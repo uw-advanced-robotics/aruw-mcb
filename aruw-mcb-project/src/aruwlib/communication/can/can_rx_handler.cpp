@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -50,7 +50,7 @@ void CanRxHandler::attachReceiveHandler(
     bool receiveInterfaceOverloaded = messageHandlerStore[id] != nullptr;
     bool receiveAttachSuccess =
         !receiveInterfaceOverloaded || (id >= 0 && id < messageHandlerStoreSize);
-    modm_assert(receiveAttachSuccess, "can1", "receive init", "overloading", 1);
+    modm_assert(receiveAttachSuccess, "can1", "overloading", 1);
 
     messageHandlerStore[id] = CanRxHndl;
 }

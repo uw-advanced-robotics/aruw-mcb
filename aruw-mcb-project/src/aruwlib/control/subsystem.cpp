@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -45,6 +45,13 @@ void Subsystem::setDefaultCommand(Command* command)
 Command* Subsystem::getDefaultCommand() const { return defaultCommand; }
 
 void Subsystem::refresh() {}
+
+const char* Subsystem::getName() { return "Subsystem"; }
+
+void Subsystem::runHardwareTests()
+{
+    // TODO
+}
 
 }  // namespace control
 

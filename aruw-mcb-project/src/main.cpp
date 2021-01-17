@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,7 +22,7 @@
 #endif
 
 #include <aruwlib/rm-dev-board-a/board.hpp>
-#include <modm/platform/core/delay.hpp>
+#include <modm/architecture/interface/delay.hpp>
 
 /* arch includes ------------------------------------------------------------*/
 #include <aruwlib/architecture/periodic_timer.hpp>
@@ -36,7 +36,6 @@
 /* control includes ---------------------------------------------------------*/
 #include "aruwsrc/control/robot_control.hpp"
 
-using namespace modm::literals;
 using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/
@@ -76,11 +75,12 @@ int main()
         if (sendMotorTimeout.execute())
         {
             drivers->mpu6500.read();
-            drivers->errorController.update();
+            drivers->errorController.updateLedDisplay();
             drivers->commandScheduler.run();
             drivers->djiMotorTxHandler.processCanSendData();
+            drivers->oledDisplay.update();
         }
-        modm::delayMicroseconds(10);
+        modm::delay_us(10);
     }
     return 0;
 }
@@ -92,32 +92,11 @@ void initializeIo(aruwlib::Drivers *drivers)
     drivers->digital.init();
     drivers->leds.init();
     drivers->can.initialize();
-
-#ifndef PLATFORM_HOSTED
-    /// \todo this should be an init in the display class
-    Board::DisplaySpiMaster::
-        connect<Board::DisplayMiso::Miso, Board::DisplayMosi::Mosi, Board::DisplaySck::Sck>();
-
-    // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
-    // 90MHz/64=~14MHz
-    Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
-#endif
-    aruwlib::display::Sh1106<
-#ifndef PLATFORM_HOSTED
-        Board::DisplaySpiMaster,
-        Board::DisplayCommand,
-        Board::DisplayReset,
-#endif
-        128,
-        64,
-        false>
-        display;
-    display.initializeBlocking();
-
     drivers->remote.initialize();
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
     drivers->xavierSerial.initialize();
+    drivers->oledDisplay.initialize();
 }
 
 void updateIo(aruwlib::Drivers *drivers)

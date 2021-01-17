@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -66,6 +66,10 @@ public:
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
     void refresh() override;
+
+    void runHardwareTests() override;
+
+    const char *getName() override { return "Friction Wheel Subsystem"; }
 
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;

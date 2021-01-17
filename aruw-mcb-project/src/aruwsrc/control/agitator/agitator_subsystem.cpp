@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -64,7 +64,7 @@ AgitatorSubsystem::AgitatorSubsystem(
 
 void AgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
 
-void AgitatorSubsystem::armAgitatorUnjamTimer(const uint32_t& predictedRotateTime)
+void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t predictedRotateTime)
 {
     if (predictedRotateTime == 0)
     {
@@ -99,6 +99,11 @@ void AgitatorSubsystem::agitatorRunPositionPid()
     if (!agitatorIsCalibrated)
     {
         agitatorPositionPid.reset();
+    }
+    else if (!agitatorMotor.isMotorOnline())
+    {
+        agitatorPositionPid.reset();
+        agitatorIsCalibrated = false;
     }
     else
     {
@@ -137,10 +142,7 @@ float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
            agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
 }
 
-void AgitatorSubsystem::setAgitatorDesiredAngle(const float& newAngle)
-{
-    desiredAgitatorAngle = newAngle;
-}
+void AgitatorSubsystem::setAgitatorDesiredAngle(float newAngle) { desiredAgitatorAngle = newAngle; }
 
 float AgitatorSubsystem::getAgitatorDesiredAngle() const { return desiredAgitatorAngle; }
 
@@ -150,6 +152,11 @@ float AgitatorSubsystem::getAgitatorVelocity() const
 }
 
 bool AgitatorSubsystem::isAgitatorCalibrated() const { return agitatorIsCalibrated; }
+
+void AgitatorSubsystem::runHardwareTests()
+{
+    // TODO
+}
 
 }  // namespace agitator
 

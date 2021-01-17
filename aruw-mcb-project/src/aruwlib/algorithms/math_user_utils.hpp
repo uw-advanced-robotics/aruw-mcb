@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,13 +29,19 @@ namespace aruwlib
 {
 namespace algorithms
 {
-///< An approximation for pi.
+/**
+ * An approximation for pi.
+ */
 constexpr float PI = 3.1415926535897932384626f;
 
-///< Floating point conversion from degrees to radians using PI.
+/**
+ * Floating point conversion from degrees to radians using PI.
+ */
 inline float degreesToRadians(float degrees) { return degrees * PI / 180.0f; }
 
-///< Floating point conversion from radians to degrees using PI.
+/**
+ * Floating point conversion from radians to degrees using PI.
+ */
 inline float radiansToDegrees(float radians) { return radians * 180.f / PI; }
 
 /**
