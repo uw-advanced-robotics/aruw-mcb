@@ -27,8 +27,8 @@ namespace algorithms
 {
 void Odometry1D::initialize()
 {
-    aruwlib::algorithms::ExtendedKalmanFilter<STATES, MEASUREMENTS>
-        ekf(x, P, Q, R, fFunction, jFFunction, hFunction, jHFunction);
+    aruwlib::algorithms::ExtendedKalmanFilter<STATES, MEASUREMENTS, Odometry1D>
+        ekf(this, x, P, Q, R, fFunction, jFFunction, hFunction, jHFunction);
 }
 
 Odometry1D::StateVector Odometry1D::fFunction(const Odometry1D::StateVector &x) { return F * x; }
@@ -37,7 +37,8 @@ Odometry1D::SquareStateMatrix Odometry1D::jFFunction(const Odometry1D::StateVect
 
 Odometry1D::MeasurementVector Odometry1D::hFunction(const Odometry1D::StateVector &x) { return H * x; }
 
-modm::Matrix<float, MEASUREMENTS, STATES> Odometry1D::jHFunction(const Odometry1D::StateVector &) { return H; }
+modm::Matrix<float, Odometry1D::MEASUREMENTS, Odometry1D::STATES>
+    Odometry1D::jHFunction(const Odometry1D::StateVector &) { return H; }
 
 Odometry1D::StateVector Odometry1D::runIteration()
 {

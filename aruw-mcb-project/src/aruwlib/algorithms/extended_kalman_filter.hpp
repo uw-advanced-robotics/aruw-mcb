@@ -69,7 +69,7 @@ namespace algorithms
  * @tparam M The number of measured states
  * @see https://www.cse.sc.edu/~terejanu/files/tutorialEKF.pdf
  */
-template <uint8_t N, uint8_t M>
+template <uint8_t N, uint8_t M, typename T>
 class ExtendedKalmanFilter
 {
 public:
@@ -91,29 +91,33 @@ public:
      * @param[in] jHFunction The jacobian of the measurement function.
      */
     ExtendedKalmanFilter(
+        T *odom,
         StateVector x,
         SquareStateMatrix p,
         SquareStateMatrix q,
         SquareMeasurementMatrix r,
-        StateVector (*fFunction)(const StateVector &x),
-        SquareStateMatrix (*jFFunction)(const StateVector &x),
-        MeasurementVector (*hFunction)(const StateVector &x),
-        modm::Matrix<float, M, N> (*jHFunction)(const StateVector &x))
-        : x(x),
+        StateVector (T::*fFunction)(const StateVector &x),
+        SquareStateMatrix (T::*jFFunction)(const StateVector &x),
+        MeasurementVector (T::*hFunction)(const StateVector &x),
+        modm::Matrix<float, M, N> (T::*jHFunction)(const StateVector &x))
+        : odom(odom),
+          x(x),
           p(p),
           q(q),
           r(r),
           k(modm::Matrix<float, N, M>::zeroMatrix()),
-          fFunc(fFunction),
-          jFFunc(jFFunction),
-          hFunc(hFunction),
-          jHFunc(jHFunction)
+        //   fFunc(fFunction),
+        //   jFFunc(jFFunction),
+        //   hFunc(hFunction),
+        //   jHFunc(jHFunction)
     {
         this->i = SquareStateMatrix::identityMatrix();
         if (fFunc == nullptr || jFFunc == nullptr || hFunc == nullptr || jHFunc == nullptr)
         {
             modm_assert_fail("ekf");
         }
+
+        fCaller.initialize(odom, fFunction, jFFunction, hFunction, jHFunction);
     }
 
     /**
@@ -147,14 +151,16 @@ private:
     inline void predictState()
     {
         // x = f(x)
-        x = fFunc(x);
+        x = fCaller.fFunction(x);
+        //x = fFunc(x);
     }
 
     /// Predicts the prediction error covariance at the next time step.
     inline void predictCovariance()
     {
         // P = F * P * Ft + Q
-        auto jF = jFFunc(x);
+        auto jF = fCaller.jFFunction(x);
+        //auto jF = jFFunc(x);
         p = jF * p * jF.asTransposed() + q;
     }
 
@@ -162,14 +168,16 @@ private:
     inline void updateState(const MeasurementVector &z)
     {
         // x = x + K * (z - h(x))
-        x = x + k * (z - hFunc(x));
+        x = x + k * (z - fCaller.hFunction(x));
+        //x = x + k * (z - hFunc(x));
     }
 
     /// Calculates the Kalman Gain.
     inline void calculateKalmanGain()
     {
         // K = P * Ht * (H * P * Ht + R)^-1
-        modm::Matrix<float, M, N> jH = jHFunc(x);
+        modm::Matrix<float, M, N> jH = fCaller.jHFunction(x);
+        //modm::Matrix<float, M, N> jH = jHFunc(x);
         modm::Matrix<float, N, M> jHTrans = jH.asTransposed();
         SquareMeasurementMatrix innovationCovariance = (jH * p) * jHTrans + r;
         SquareMeasurementMatrix innovationCovarianceInverse;
@@ -191,16 +199,90 @@ private:
 
     SquareStateMatrix i;  ///< An I matrix
 
-    ///< user-defined process function
-    StateVector (*fFunc)(const StateVector &x);
-    ///< user-defined jacobian of the process function
-    SquareStateMatrix (*jFFunc)(const StateVector &x);
-    ///< user-defined measurement function
-    MeasurementVector (*hFunc)(const StateVector &x);
-    ///< user-defined jacobian of the measurement function
-    modm::Matrix<float, M, N> (*jHFunc)(const StateVector &x);
+    T* odom;
 
+    FunctionCaller<N, M, T> fCaller = FunctionCaller();
+
+    // ///< user-defined process function
+    // StateVector (*fFunc)(const StateVector &x);
+    // ///< user-defined jacobian of the process function
+    // SquareStateMatrix (*jFFunc)(const StateVector &x);
+    // ///< user-defined measurement function
+    // MeasurementVector (*hFunc)(const StateVector &x);
+    // ///< user-defined jacobian of the measurement function
+    // modm::Matrix<float, M, N> (*jHFunc)(const StateVector &x);
 };  // class ExtendedKalmanFilter
+
+template <uint8_t N, uint8_t M, typename T>
+class FunctionCaller
+{
+public:
+    using StateVector = modm::Matrix<float, N, 1>;
+    using SquareStateMatrix = modm::Matrix<float, N, N>;
+    using MeasurementVector = modm::Matrix<float, M, 1>;
+    using SquareMeasurementMatrix = modm::Matrix<float, M, M>;
+
+    // FunctionCaller(
+    //     T *odom,
+    //     StateVector (*fFunction)(const StateVector &x),
+    //     SquareStateMatrix (*jFFunction)(const StateVector &x),
+    //     MeasurementVector (*hFunction)(const StateVector &x),
+    //     modm::Matrix<float, M, N> (*jHFunction)(const StateVector &x))
+    //     : odom(odom),
+    //       fFunc(fFunction),
+    //       jFFunc(jFFunction),
+    //       hFunc(hFunction),
+    //       jHFunc(jHFunction)
+    // {
+    // }
+
+    FunctionCaller() {}
+
+    void initialize(
+        T *od,
+        StateVector (T::*fFunction)(const StateVector &x),
+        SquareStateMatrix (T::*jFFunction)(const StateVector &x),
+        MeasurementVector (T::*hFunction)(const StateVector &x),
+        modm::Matrix<float, M, N> (T::*jHFunction)(const StateVector &x))
+    {
+        odom = od;
+        fFunc = fFunction;
+        jFFunc = jFFunction;
+        hFunc = hFunction;
+        jHFunc = jHFunction;
+    }
+
+    StateVector fFunction(StateVector &x)
+    {
+        return (odom->*fFunc)(x);
+    }
+
+    SquareStateMatrix jFFunction(StateVector &x)
+    {
+        return (odom->*jFFunc)(x);
+    }
+
+    MeasurementVector hFunction(StateVector &x)
+    {
+        return (odom->*hFunc)(x);
+    }
+
+    modm::Matrix<float, M, N> jHFunction(StateVector &x)
+    {
+        return (odom->*jHFunc)(x);
+    }
+
+private:
+    T *odom;
+    ///< user-defined process function
+    StateVector (T::*fFunc)(const StateVector &x);
+    ///< user-defined jacobian of the process function
+    SquareStateMatrix (T::*jFFunc)(const StateVector &x);
+    ///< user-defined measurement function
+    MeasurementVector (T::*hFunc)(const StateVector &x);
+    ///< user-defined jacobian of the measurement function
+    modm::Matrix<float, M, N> (T::*jHFunc)(const StateVector &x);
+};  // class FunctionCaller
 
 }  // namespace algorithms
 

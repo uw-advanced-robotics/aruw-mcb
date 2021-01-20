@@ -60,11 +60,6 @@ public:
         P = SquareStateMatrix::zeroMatrix();
     }
 
-    StateVector fFunction(const StateVector &x);
-    SquareStateMatrix jFFunction(const StateVector &);
-    MeasurementVector hFunction(const StateVector &x);
-    modm::Matrix<float, MEASUREMENTS, STATES> jHFunction(const StateVector &);
-
     void initialize();  // initialize KF
 
     StateVector runIteration();  // run KF
@@ -77,6 +72,11 @@ public:
 
     // reset method
 
+    StateVector fFunction(const StateVector &x);
+    SquareStateMatrix jFFunction(const StateVector &);
+    MeasurementVector hFunction(const StateVector &x);
+    modm::Matrix<float, MEASUREMENTS, STATES> jHFunction(const StateVector &);
+
 private:
     StateVector x;  ///< state vector
     SquareStateMatrix F;
@@ -84,7 +84,7 @@ private:
     SquareStateMatrix Q;        ///< process noise covariance
     SquareMeasurementMatrix R;  ///< measurement error covariance
     SquareStateMatrix P;
-};
+};  // class Odometry1D
 
 }  // namespace algorithms
 
