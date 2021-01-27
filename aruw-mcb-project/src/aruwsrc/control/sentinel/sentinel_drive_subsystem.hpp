@@ -61,6 +61,8 @@ public:
      */
     float absolutePosition();
 
+    float getVelocityChassisRelative();
+
     void setDesiredRpm(float desRpm);
 
     void refresh() override;

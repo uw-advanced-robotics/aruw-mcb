@@ -23,6 +23,8 @@
 #include <aruwlib/algorithms/extended_kalman_filter.hpp>
 #include <modm/math/matrix.hpp>
 
+#include "aruwsrc/control/sentinel/sentinel_drive_subsystem.hpp"
+
 namespace aruwsrc
 {
 namespace algorithms
@@ -30,8 +32,8 @@ namespace algorithms
 class Odometry1D
 {
 public:
-    static constexpr uint8_t STATES = 3;  // x, vx, ax
-    static constexpr uint8_t MEASUREMENTS = 2;  // x, vx
+    static constexpr uint8_t STATES = 3;  // <y, vy, ay>
+    static constexpr uint8_t MEASUREMENTS = 2;  // <y, vy>
 
     static constexpr float DELTA = 1;
 
@@ -39,16 +41,16 @@ public:
     using SquareStateMatrix = modm::Matrix<float, STATES, STATES>;
     using SquareMeasurementMatrix = modm::Matrix<float, MEASUREMENTS, MEASUREMENTS>;
     using MeasurementVector = modm::Matrix<float, MEASUREMENTS, 1>;
+    using ExtendedKalmanFilter = aruwlib::algorithms::ExtendedKalmanFilter<STATES, MEASUREMENTS, Odometry1D>;
 
-    Odometry1D(StateVector x) : x(x)
+    Odometry1D(control::SentinelDriveSubsystem* sentinel, StateVector x)
+        : sentinel(sentinel),
+          x(x)
     {
-        F = SquareStateMatrix::identityMatrix();  // not sure if this should start at t = 0
+        z = MeasurementVector::zeroMatrix();
+        P = SquareStateMatrix::zeroMatrix();
+        F = SquareStateMatrix::identityMatrix();
 
-        H = modm::Matrix<float, MEASUREMENTS, STATES>::zeroMatrix();
-        H[0][0] = 1;  // [1, 0, 0]
-        H[0][1] = 1;  // [0, 1, 0]
-
-        // I got these values from the CV code
         Q = SquareStateMatrix::zeroMatrix();
         Q[0][0] = 0.05 * 0.05;
         Q[1][1] = 0.1 * 0.1;
@@ -57,33 +59,41 @@ public:
         R = SquareMeasurementMatrix::identityMatrix();
         R[0][0] = 0.005;
 
-        P = SquareStateMatrix::zeroMatrix();
+        H = modm::Matrix<float, MEASUREMENTS, STATES>::zeroMatrix();
+        H[0][0] = 1;  // [1, 0, 0]
+        H[0][1] = 1;  // [0, 1, 0]
     }
 
-    void initialize();  // initialize KF
+    ExtendedKalmanFilter initialize();  // initialize EKF
 
-    StateVector runIteration();  // run KF
+    StateVector runIteration(ExtendedKalmanFilter ekf);  // run EKF
 
     SquareStateMatrix configureForUpdate();  // update F with DELTA
 
-    bool shouldReset();  // check if KF needs to be reset
-
     const StateVector &getLastFiltered();  // get last x
 
-    // reset method
+    void reset(ExtendedKalmanFilter ekf);  // reset EKF
 
     StateVector fFunction(const StateVector &x);
+
     SquareStateMatrix jFFunction(const StateVector &);
+
     MeasurementVector hFunction(const StateVector &x);
+
     modm::Matrix<float, MEASUREMENTS, STATES> jHFunction(const StateVector &);
 
 private:
+    control::SentinelDriveSubsystem* sentinel;
+
     StateVector x;  ///< state vector
+    MeasurementVector z;  ///< measurement vector
+
+    SquareStateMatrix P;  ///< prediction error covariance
+    SquareStateMatrix Q;  ///< process noise covariance
+    SquareMeasurementMatrix R;  ///< measurement error covariance
+
     SquareStateMatrix F;
     modm::Matrix<float, MEASUREMENTS, STATES> H;
-    SquareStateMatrix Q;        ///< process noise covariance
-    SquareMeasurementMatrix R;  ///< measurement error covariance
-    SquareStateMatrix P;
 };  // class Odometry1D
 
 }  // namespace algorithms

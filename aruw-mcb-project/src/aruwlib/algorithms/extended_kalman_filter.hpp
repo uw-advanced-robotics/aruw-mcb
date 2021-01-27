@@ -182,25 +182,13 @@ private:
         p = (i - k * jH);
     }
 
-    StateVector fFunction(StateVector &x)
-    {
-        return (odom->*fFunc)(x);
-    }
+    StateVector fFunction(StateVector &x) { return (odom->*fFunc)(x); }
 
-    SquareStateMatrix jFFunction(StateVector &x)
-    {
-        return (odom->*jFFunc)(x);
-    }
+    SquareStateMatrix jFFunction(StateVector &x) { return (odom->*jFFunc)(x); }
 
-    MeasurementVector hFunction(StateVector &x)
-    {
-        return (odom->*hFunc)(x);
-    }
+    MeasurementVector hFunction(StateVector &x) { return (odom->*hFunc)(x); }
 
-    modm::Matrix<float, M, N> jHFunction(StateVector &x)
-    {
-        return (odom->*jHFunc)(x);
-    }
+    modm::Matrix<float, M, N> jHFunction(StateVector &x) { return (odom->*jHFunc)(x); }
 
     T* odom;
     

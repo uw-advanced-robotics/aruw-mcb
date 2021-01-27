@@ -92,6 +92,13 @@ float SentinelDriveSubsystem::absolutePosition()
     return aruwlib::algorithms::limitVal<float>(average, 0.0f, SentinelDriveSubsystem::RAIL_LENGTH);
 }
 
+float SentinelDriveSubsystem::getVelocityChassisRelative()
+{
+    float velocity = (leftWheel.getShaftRPM() + rightWheel.getShaftRPM()) / 2.0f;
+    static constexpr float ratio = 2.0f * aruwlib::algorithms::PI * GEAR_RATIO / 60.0f;
+    return velocity * ratio;
+}
+
 // Resets the encoder offset used to determine position of the sentinel on the rail depending on
 // which limit switch is hit. If neither limit switch is hit, no-op. Left limit switch indicates
 // being at the start of the rail, right limit switch indicates end of rail.

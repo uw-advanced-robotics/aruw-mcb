@@ -25,10 +25,9 @@ namespace aruwsrc
 {
 namespace algorithms
 {
-void Odometry1D::initialize()
+Odometry1D::ExtendedKalmanFilter Odometry1D::initialize()
 {
-    aruwlib::algorithms::ExtendedKalmanFilter<STATES, MEASUREMENTS, Odometry1D>
-        ekf(this, x, P, Q, R, fFunction, jFFunction, hFunction, jHFunction);
+    return Odometry1D::ExtendedKalmanFilter (this, x, P, Q, R, fFunction, jFFunction, hFunction, jHFunction);
 }
 
 Odometry1D::StateVector Odometry1D::fFunction(const Odometry1D::StateVector &x) { return F * x; }
@@ -40,10 +39,11 @@ Odometry1D::MeasurementVector Odometry1D::hFunction(const Odometry1D::StateVecto
 modm::Matrix<float, Odometry1D::MEASUREMENTS, Odometry1D::STATES>
     Odometry1D::jHFunction(const Odometry1D::StateVector &) { return H; }
 
-Odometry1D::StateVector Odometry1D::runIteration()
+Odometry1D::StateVector Odometry1D::runIteration(ExtendedKalmanFilter ekf)
 {
-    // put data in measurement vector z
-    // ekf.filterData(z)
+    z[0][0] = sentinel->absolutePosition() * 1000;     // y, converted from mm to m
+    z[1][0] = sentinel->getVelocityChassisRelative();  // vy
+    x = ekf.filterData(z);
     return x;
 }
 
@@ -58,16 +58,9 @@ Odometry1D::SquareStateMatrix Odometry1D::configureForUpdate()
     return F;
 }
 
-bool Odometry1D::shouldReset()
-{
-    
-    return false;
-}
+const Odometry1D::StateVector &Odometry1D::getLastFiltered() { return x; }
 
-const Odometry1D::StateVector &Odometry1D::getLastFiltered()
-{
-    return x;
-}
+void Odometry1D::reset(ExtendedKalmanFilter ekf) { ekf.reset(); }
 
 }  // namespace algorithms
 
