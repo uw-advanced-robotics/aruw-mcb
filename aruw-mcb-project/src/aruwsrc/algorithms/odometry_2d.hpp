@@ -21,6 +21,7 @@
 #define ODOMETRY_2D_HPP_
 
 #include <aruwlib/algorithms/extended_kalman_filter.hpp>
+#include <aruwlib/Drivers.hpp>
 #include <modm/math/matrix.hpp>
 
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
@@ -44,21 +45,16 @@ public:
     using MeasurementStateMatrix = modm::Matrix<float, MEASUREMENTS, STATES>;
     using ExtendedKalmanFilter = aruwlib::algorithms::ExtendedKalmanFilter<STATES, MEASUREMENTS, Odometry2D>;
 
-    Odometry2D(chassis::ChassisSubsystem* chassis, StateVector x)
-        : chassis(chassis),
+    Odometry2D(aruwlib::Drivers* drivers, chassis::ChassisSubsystem* chassis, StateVector x)
+        : drivers(drivers),
+          chassis(chassis),
           x(x)
     {
         z = MeasurementVector::zeroMatrix();
         P = SquareStateMatrix::zeroMatrix();
         F = SquareStateMatrix::identityMatrix();
-
-        Q = SquareStateMatrix::zeroMatrix();  // to do: fix Q
-        Q[0][0] = 0.05 * 0.05;
-        Q[1][1] = 0.1 * 0.1;
-        Q[2][2] = 0.01 * 0.01;
-
-        R = SquareMeasurementMatrix::identityMatrix();  // to do: fix R
-        R[0][0] = 0.005;
+        Q = SquareStateMatrix::identityMatrix();
+        R = SquareMeasurementMatrix::identityMatrix();
     }
 
     ExtendedKalmanFilter initialize();  // initialize EKF
@@ -80,6 +76,7 @@ public:
     MeasurementStateMatrix jHFunction(const StateVector &x);
 
 private:
+    aruwlib::Drivers* drivers;
     chassis::ChassisSubsystem* chassis;
 
     StateVector x;  ///< state vector

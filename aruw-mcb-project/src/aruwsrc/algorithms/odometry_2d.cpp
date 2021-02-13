@@ -18,9 +18,9 @@
  */
 
 #include "odometry_2d.hpp"
-#include "aruwlib/algorithms/math_user_utils.hpp"
 
 #include <aruwlib/algorithms/extended_kalman_filter.hpp>
+#include <aruwlib/algorithms/math_user_utils.hpp>
 
 using namespace aruwlib::algorithms;
 
@@ -69,7 +69,12 @@ Odometry2D::MeasurementStateMatrix Odometry2D::jHFunction(const Odometry2D::Stat
 
 Odometry2D::StateVector Odometry2D::runIteration(ExtendedKalmanFilter ekf)
 {
-    // to do: put data in measurement vector
+    modm::Matrix<float, 3, 1> velocities = chassis->getActualVelocityChassisRelative();
+    z[0][0] = velocities[0][0];
+    z[1][0] = velocities[1][0];
+    z[2][0] = drivers->mpu6500.getYaw();
+    z[3][0] = velocities[2][0];
+    z[4][0] = drivers->mpu6500.getGz();
     x = ekf.filterData(z);
     return x;
 }
