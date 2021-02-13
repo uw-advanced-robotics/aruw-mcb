@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ODOMETRY_2D_HPP__
-#define __ODOMETRY_2D_HPP__
+#ifndef ODOMETRY_2D_HPP_
+#define ODOMETRY_2D_HPP_
 
 #include <aruwlib/algorithms/extended_kalman_filter.hpp>
 #include <modm/math/matrix.hpp>
@@ -41,6 +41,7 @@ public:
     using SquareStateMatrix = modm::Matrix<float, STATES, STATES>;
     using SquareMeasurementMatrix = modm::Matrix<float, MEASUREMENTS, MEASUREMENTS>;
     using MeasurementVector = modm::Matrix<float, MEASUREMENTS, 1>;
+    using MeasurementStateMatrix = modm::Matrix<float, MEASUREMENTS, STATES>;
     using ExtendedKalmanFilter = aruwlib::algorithms::ExtendedKalmanFilter<STATES, MEASUREMENTS, Odometry2D>;
 
     Odometry2D(chassis::ChassisSubsystem* chassis, StateVector x)
@@ -58,10 +59,6 @@ public:
 
         R = SquareMeasurementMatrix::identityMatrix();  // to do: fix R
         R[0][0] = 0.005;
-
-        H = modm::Matrix<float, MEASUREMENTS, STATES>::zeroMatrix();  // to do: fix H
-        H[0][0] = 1;  // [1, 0, 0]
-        H[0][1] = 1;  // [0, 1, 0]
     }
 
     ExtendedKalmanFilter initialize();  // initialize EKF
@@ -80,7 +77,7 @@ public:
 
     MeasurementVector hFunction(const StateVector &x);
 
-    modm::Matrix<float, MEASUREMENTS, STATES> jHFunction(const StateVector &);
+    MeasurementStateMatrix jHFunction(const StateVector &x);
 
 private:
     chassis::ChassisSubsystem* chassis;
@@ -92,12 +89,11 @@ private:
     SquareStateMatrix Q;  ///< process noise covariance
     SquareMeasurementMatrix R;  ///< measurement error covariance
 
-    SquareStateMatrix F;
-    modm::Matrix<float, MEASUREMENTS, STATES> H;
+    SquareStateMatrix F;  ///< state transition matrix
 };  // class Odometry2D
 
 }  // namespace algorithms
 
 }  // namespace aruwsrc
 
-#endif  // __ODOMETRY_2D_HPP__
+#endif  // ODOMETRY_2D_HPP_

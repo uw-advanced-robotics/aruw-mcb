@@ -18,8 +18,11 @@
  */
 
 #include "odometry_2d.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
 
 #include <aruwlib/algorithms/extended_kalman_filter.hpp>
+
+using namespace aruwlib::algorithms;
 
 namespace aruwsrc
 {
@@ -27,7 +30,7 @@ namespace algorithms
 {
 Odometry2D::ExtendedKalmanFilter Odometry2D::initialize()
 {
-    return Odometry2D::ExtendedKalmanFilter (this, x, P, Q, R, fFunction, jFFunction, hFunction, jHFunction);
+    return ExtendedKalmanFilter (this, x, P, Q, R, fFunction, jFFunction, hFunction, jHFunction);
 }
 
 Odometry2D::StateVector Odometry2D::fFunction(const Odometry2D::StateVector &x) { return F * x; }
@@ -36,20 +39,32 @@ Odometry2D::SquareStateMatrix Odometry2D::jFFunction(const Odometry2D::StateVect
 
 Odometry2D::MeasurementVector Odometry2D::hFunction(const Odometry2D::StateVector &x)
 {
-    // to do: update with measurement function
-    Odometry2D::MeasurementVector hx = Odometry2D::MeasurementVector::zeroMatrix();
-    // vx_world:  x[2][0]
-    // vy_world:  x[3][0]
-    // yaw_world: x[4][0]
-    // wz_world:  x[5][0]
+    float cosYaw = radiansToDegrees(cos(x[4][0]));
+    float sinYaw = radiansToDegrees(sin(x[4][0]));
+    MeasurementVector hx = MeasurementVector::zeroMatrix();
+    hx[0][0] = x[2][0] * cosYaw - x[3][0] * sinYaw;
+    hx[1][0] = x[2][0] * sinYaw + x[3][0] * cosYaw;
+    hx[2][0] = x[4][0];
+    hx[3][0] = x[5][0];
+    hx[4][0] = x[5][0];
     return hx;
 }
 
-modm::Matrix<float, Odometry2D::MEASUREMENTS, Odometry2D::STATES>
-    Odometry2D::jHFunction(const Odometry2D::StateVector &)
+Odometry2D::MeasurementStateMatrix Odometry2D::jHFunction(const Odometry2D::StateVector &x)
 {
-    // to do: update with H Jacobian
-    return H;
+    float cosYaw = radiansToDegrees(cos(x[4][0]));
+    float sinYaw = radiansToDegrees(sin(x[4][0]));
+    MeasurementStateMatrix jH = MeasurementStateMatrix::zeroMatrix();
+    jH[0][2] = cosYaw;
+    jH[0][3] = -sinYaw;
+    jH[0][4] = -x[2][0] * sinYaw - x[3][0] * cosYaw;
+    jH[1][2] = sinYaw;
+    jH[1][3] = cosYaw;
+    jH[1][4] = x[2][0] * cosYaw - x[3][0] * sinYaw;
+    jH[2][4] = 1;
+    jH[3][5] = 1;
+    jH[4][5] = 1;
+    return jH;
 }
 
 Odometry2D::StateVector Odometry2D::runIteration(ExtendedKalmanFilter ekf)
