@@ -69,7 +69,7 @@ namespace algorithms
  * @tparam M The number of measured states
  * @see https://www.cse.sc.edu/~terejanu/files/tutorialEKF.pdf
  */
-template <uint8_t N, uint8_t M>
+template <uint8_t N, uint8_t M, typename T>
 class ExtendedKalmanFilter
 {
 public:
@@ -77,6 +77,11 @@ public:
     using SquareStateMatrix = modm::Matrix<float, N, N>;
     using MeasurementVector = modm::Matrix<float, M, 1>;
     using SquareMeasurementMatrix = modm::Matrix<float, M, M>;
+
+    using FFunc = const StateVector &(T::*)(const StateVector &);
+    using JFFunc = const SquareStateMatrix &(T::*)(const StateVector &);
+    using HFunc = const MeasurementVector &(T::*)(const StateVector &);
+    using JHFunc = const modm::Matrix<float, M, N> &(T::*)(const StateVector &x);
 
     /**
      * Initializes a Kalman Filter.
@@ -91,30 +96,35 @@ public:
      * @param[in] jHFunction The jacobian of the measurement function.
      */
     ExtendedKalmanFilter(
+        T *odom,
         StateVector x,
         SquareStateMatrix p,
         SquareStateMatrix q,
         SquareMeasurementMatrix r,
-        StateVector (*fFunction)(const StateVector &x),
-        SquareStateMatrix (*jFFunction)(const StateVector &x),
-        MeasurementVector (*hFunction)(const StateVector &x),
-        modm::Matrix<float, M, N> (*jHFunction)(const StateVector &x))
+        FFunc fFunction,
+        JFFunc jFFunction,
+        HFunc hFunction,
+        JHFunc jHFunction)
         : x(x),
           p(p),
           q(q),
           r(r),
           k(modm::Matrix<float, N, M>::zeroMatrix()),
+          i(SquareStateMatrix::identityMatrix()),
+          odom(odom),
           fFunc(fFunction),
           jFFunc(jFFunction),
           hFunc(hFunction),
           jHFunc(jHFunction)
     {
-        this->i = SquareStateMatrix::identityMatrix();
-        if (fFunc == nullptr || jFFunc == nullptr || hFunc == nullptr || jHFunc == nullptr)
-        {
-            modm_assert_fail("ekf");
-        }
+        modm_assert(
+            fFunc != nullptr && jFFunc != nullptr && hFunc != nullptr && jHFunc != nullptr,
+            "ekf",
+            "nullptr functions");
     }
+
+    void setQ(const SquareStateMatrix &newQ) { q = newQ; }
+    void setR(const SquareMeasurementMatrix &newR) { r = newR; }
 
     /**
      * Performs one iteration of the Kalman Filter algorithm.
@@ -122,7 +132,7 @@ public:
      * @param[in] z the data to be filtered.
      * @return the filtered data.
      */
-    StateVector filterData(const MeasurementVector &z)
+    const StateVector &filterData(const MeasurementVector &z)
     {
         predictState();
         predictCovariance();
@@ -132,7 +142,7 @@ public:
     }
 
     /// Returns the last filtered data point.
-    const StateVector &getLastFiltered() const { return x; }
+    inline const StateVector &getLastFiltered() const { return x; }
 
     /// Resets the covariances and predictions.
     void reset()
@@ -147,14 +157,14 @@ private:
     inline void predictState()
     {
         // x = f(x)
-        x = fFunc(x);
+        x = (odom->*fFunc)(x);
     }
 
     /// Predicts the prediction error covariance at the next time step.
     inline void predictCovariance()
     {
         // P = F * P * Ft + Q
-        auto jF = jFFunc(x);
+        auto jF = (odom->*jFFunc)(x);
         p = jF * p * jF.asTransposed() + q;
     }
 
@@ -162,14 +172,14 @@ private:
     inline void updateState(const MeasurementVector &z)
     {
         // x = x + K * (z - h(x))
-        x = x + k * (z - hFunc(x));
+        x = x + k * (z - (odom->*hFunc)(x));
     }
 
     /// Calculates the Kalman Gain.
     inline void calculateKalmanGain()
     {
         // K = P * Ht * (H * P * Ht + R)^-1
-        modm::Matrix<float, M, N> jH = jHFunc(x);
+        modm::Matrix<float, M, N> jH = (odom->*jHFunc)(x);
         modm::Matrix<float, N, M> jHTrans = jH.asTransposed();
         SquareMeasurementMatrix innovationCovariance = (jH * p) * jHTrans + r;
         SquareMeasurementMatrix innovationCovarianceInverse;
@@ -177,29 +187,31 @@ private:
         k = (p * jHTrans) * innovationCovarianceInverse;
 
         // P = (I - K * H) * P
-        p = (i - k * jH);
+        p = (i - k * jH) * p;
     }
 
-    StateVector x;  ///< state vector
+    StateVector x;  /// state vector
 
-    SquareStateMatrix p;  ///< prediction error covariance
+    SquareStateMatrix p;  /// prediction error covariance
 
-    SquareStateMatrix q;        ///< process noise covariance
-    SquareMeasurementMatrix r;  ///< measurement error covariance
+    SquareStateMatrix q;        /// process noise covariance
+    SquareMeasurementMatrix r;  /// measurement error covariance
 
-    modm::Matrix<float, N, M> k;  ///< Kalman gain
+    modm::Matrix<float, N, M> k;  /// Kalman gain
 
-    SquareStateMatrix i;  ///< An I matrix
+    SquareStateMatrix i;  /// An I matrix
 
-    ///< user-defined process function
-    StateVector (*fFunc)(const StateVector &x);
-    ///< user-defined jacobian of the process function
-    SquareStateMatrix (*jFFunc)(const StateVector &x);
-    ///< user-defined measurement function
-    MeasurementVector (*hFunc)(const StateVector &x);
-    ///< user-defined jacobian of the measurement function
-    modm::Matrix<float, M, N> (*jHFunc)(const StateVector &x);
-
+    /// Pointer to object that contains function pointers for user defined process and measurement
+    /// matrices
+    T *odom;
+    /// user-defined process function
+    FFunc fFunc;
+    /// user-defined jacobian of the process function
+    JFFunc jFFunc;
+    /// user-defined measurement function
+    HFunc hFunc;
+    /// user-defined jacobian of the measurement function
+    JHFunc jHFunc;
 };  // class ExtendedKalmanFilter
 
 }  // namespace algorithms
