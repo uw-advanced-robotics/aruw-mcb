@@ -20,10 +20,12 @@
 #ifndef CHASSIS_SUBSYSTEM_HPP_
 #define CHASSIS_SUBSYSTEM_HPP_
 
+#include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/algorithms/single_var_kalman.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
+#include <modm/math/matrix.hpp>
 
 namespace aruwsrc
 {
@@ -103,21 +105,21 @@ private:
      */
     static const int MIN_ERROR_ROTATION_D = 0;
 
-    // mechanical chassis constants, all in mm
+    // mechanical chassis constants, all in m
     /**
-     * Radius of the wheels (mm).
+     * Radius of the wheels (m).
      */
-    static constexpr float WHEEL_RADIUS = 76.0f;
+    static constexpr float WHEEL_RADIUS = 0.076f;
     /**
-     * Distance from center of the two front wheels (mm).
+     * Distance from center of the two front wheels (m).
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 366.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
     /**
-     * Distance from center of the front and rear wheels (mm).
+     * Distance from center of the front and rear wheels (m).
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_X = 366.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
     /**
-     * Gimbal offset from the center of the chassis, see note above for explanation of x and y (mm).
+     * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
      */
     static constexpr float GIMBAL_X_OFFSET = 0.0f;
     /**
@@ -158,19 +160,19 @@ private:
     /**
      * Radius of the wheels.
      */
-    static constexpr float WHEEL_RADIUS = 76.0f;
+    static constexpr float WHEEL_RADIUS = 0.076f;
     /**
      * Distance from center of the two front wheels.
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 517.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.517f;
     /**
      * Distance from center of the front and rear wheels.
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_X = 600.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.600f;
     /**
      * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
      */
-    static constexpr float GIMBAL_X_OFFSET = 175.0f;
+    static constexpr float GIMBAL_X_OFFSET = 0.175f;
     /**
      * @see `GIMBAL_X_OFFSET`.
      */
@@ -255,15 +257,29 @@ private:
     modm::Pid<float> rightFrontVelocityPid;
     modm::Pid<float> rightBackVelocityPid;
 
-    // translate all input into a desired wheel RPM when given
-    float leftFrontRpm;
-    float leftBackRpm;
-    float rightFrontRpm;
-    float rightBackRpm;
+    /**
+     * Used to index into the desiredWheelRPM matrix.
+     */
+    enum WheelRPMIndex
+    {
+        LF = 0,
+        RF = 1,
+        LB = 2,
+        RB = 3,
+    };
 
-    float chassisDesiredR = 0.0f;
+    /**
+     * Stores the desired RPM of each of the motors in a matrix of the following form:
+     * [[leftFront],
+     *  [rightFront],
+     *  [leftBack],
+     *  [rightFront]]
+     */
+    modm::Matrix<float, 4, 1> desiredWheelRPM;
 
     aruwlib::algorithms::SingleVarKalman chassisRotationErrorKalman;
+
+    modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
 public:
     ChassisSubsystem(
@@ -316,12 +332,24 @@ public:
               VELOCITY_PID_KD,
               VELOCITY_PID_MAX_ERROR_SUM,
               VELOCITY_PID_MAX_OUTPUT),
-          leftFrontRpm(0),
-          leftBackRpm(0),
-          rightFrontRpm(0),
-          rightBackRpm(0),
           chassisRotationErrorKalman(1.0f, 0.0f)
     {
+        constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
+                                ? 1
+                                : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+        wheelVelToChassisVelMat[0][0] = 1;
+        wheelVelToChassisVelMat[0][1] = -1;
+        wheelVelToChassisVelMat[0][2] = 1;
+        wheelVelToChassisVelMat[0][3] = -1;
+        wheelVelToChassisVelMat[1][0] = 1;
+        wheelVelToChassisVelMat[1][1] = 1;
+        wheelVelToChassisVelMat[1][2] = -1;
+        wheelVelToChassisVelMat[1][3] = -1;
+        wheelVelToChassisVelMat[2][0] = 1.0 / A;
+        wheelVelToChassisVelMat[2][1] = 1.0 / A;
+        wheelVelToChassisVelMat[2][2] = 1.0 / A;
+        wheelVelToChassisVelMat[2][3] = 1.0 / A;
+        wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
     }
 
     void initialize() override;
@@ -361,10 +389,29 @@ public:
     float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
     /**
-     * @return The desired rotation based on what was input into the subsystem via
-     *      `setDesiredOutput`.
+     * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the desired velocity calculated before any
+     *      sort of limiting occurs (other than base max RPM limiting).
+     * @note Equations slightly modified from this paper:
+     *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-    float getChassisDesiredRotation() const;
+    modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+
+    /**
+     * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the velocity calculated from the chassis's
+     *      encoders.
+     */
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const;
+
+    /**
+     * Transforms the chassis relative velocity of the form <vx, vy, vz> into world relative frame,
+     * given some particular chassis heading (z direction, assumed to be in radians). Transforms
+     * the input matrix chassisRelativeVelocity.
+     */
+    void getVelocityWorldRelative(
+        modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
+        float chassisHeading) const;
 
     void runHardwareTests() override;
 
@@ -382,6 +429,15 @@ private:
         aruwlib::motor::DjiMotor* const motor,
         float desiredRpm);
 
+    /**
+     * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
+     */
+    inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
+    {
+        static constexpr float ratio =
+            2.0f * aruwlib::algorithms::PI * CHASSIS_GEARBOX_RATIO / 60.0f;
+        return mat * ratio;
+    }
 };  // class ChassisSubsystem
 
 }  // namespace chassis

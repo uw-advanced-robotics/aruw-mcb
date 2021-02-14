@@ -26,6 +26,8 @@
 #include <aruwlib/motor/dji_motor.hpp>
 #include <modm/math/filter/pid.hpp>
 
+#include "mock_macros.hpp"
+
 namespace aruwsrc
 {
 namespace control
@@ -36,9 +38,9 @@ public:
     static constexpr float MAX_POWER_CONSUMPTION = 30.0f;
     static constexpr float MAX_ENERGY_BUFFER = 200.0f;
 
-    // length of the rail we own, in mm
-    // the competition rail length is actually 4650mm
-    static constexpr float RAIL_LENGTH = 1900;
+    // length of the rail we own, in m
+    // the competition rail length is actually 4.650m
+    static constexpr float RAIL_LENGTH = 1.900;
 
     SentinelDriveSubsystem(
         aruwlib::Drivers* drivers,
@@ -59,9 +61,11 @@ public:
      * Returns absolute position of the sentinel, relative to the left end of the rail (when rail
      * is viewed from the front)
      */
-    float absolutePosition();
+    mockable float absolutePosition() const;
 
-    void setDesiredRpm(float desRpm);
+    mockable float getVelocityChassisRelative() const;
+
+    mockable void setDesiredRpm(float desRpm);
 
     void refresh() override;
 
@@ -83,7 +87,7 @@ private:
     const float PID_MAX_OUTPUT = 16000;
 
     // radius of the wheel in mm
-    static constexpr float WHEEL_RADIUS = 35.0f;
+    static constexpr float WHEEL_RADIUS = 0.035f;
     static constexpr float GEAR_RATIO = 19.0f;
 
     aruwlib::motor::DjiMotor leftWheel;
@@ -100,7 +104,7 @@ private:
 
     void resetOffsetFromLimitSwitch();
 
-    float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
+    float distanceFromEncoder(const aruwlib::motor::DjiMotor* motor) const;
 };
 
 }  // namespace control
