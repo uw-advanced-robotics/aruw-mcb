@@ -127,6 +127,8 @@ float SentinelDriveSubsystem::distanceFromEncoder(const aruwlib::motor::DjiMotor
     float numberOfRotations = unwrappedAngle / (aruwlib::motor::DjiMotor::ENC_RESOLUTION);
     return numberOfRotations * 2.0f * aruwlib::algorithms::PI * WHEEL_RADIUS / GEAR_RATIO;
 }
+
+void SentinelDriveSubsystem::runHardwareTests() {}
 }  // namespace control
 
 }  // namespace aruwsrc
