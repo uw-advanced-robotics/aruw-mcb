@@ -18,6 +18,7 @@
  */
 
 #include "xavier_serial.hpp"
+#include <aruwlib/Drivers.hpp>
 
 #include <cstring>
 
@@ -25,19 +26,10 @@ namespace aruwlib
 {
 namespace serial
 {
-const uint8_t XavierSerial::txMsgSwitchArray[XavierSerial::CV_MESSAGE_TYPE_SIZE] = {
-    XavierSerial::CV_MESSAGE_TYPE_TURRET_TELEMETRY,
-    XavierSerial::CV_MESSAGE_TYPE_IMU,
-    XavierSerial::CV_MESSAGE_TYPE_ROBOT_ID,
-    XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST};
-
 XavierSerial::XavierSerial(Drivers* drivers)
     : DJISerial(drivers, Uart::UartPort::Uart2),
-      txMsgSwitchIndex(CV_MESSAGE_TYPE_TURRET_TELEMETRY),
-      autoAimRequestQueued(false),
-      autoAimRequestState(false),
       lastAimData(),
-      hasAimData(false),
+      aimDataValid(false),
       isCvOnline(false)
 {
 }
@@ -46,7 +38,7 @@ void XavierSerial::initializeCV()
 {
     txRobotIdTimeout.restart(TIME_BETWEEN_ROBOT_ID_SEND_MS);
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-    this->initialize();
+    initialize();
 }
 
 void XavierSerial::messageReceiveCallback(const SerialMessage& completeMessage)
@@ -60,7 +52,7 @@ void XavierSerial::messageReceiveCallback(const SerialMessage& completeMessage)
             if (decodeToTurrentAimData(completeMessage, &aimData))
             {
                 lastAimData = aimData;
-                hasAimData = true;
+                aimDataValid = true;
             }
             return;
         }
@@ -91,141 +83,73 @@ bool XavierSerial::decodeToTurrentAimData(const SerialMessage& message, TurretAi
     return true;
 }
 
-void XavierSerial::sendMessage(
-    const IMUData& imuData,
-    const ChassisData& chassisData,
-    const TurretAimData& turretData,
-    uint8_t robotId)
+void XavierSerial::sendMessage(const RobotData& robotData)
 {
     isCvOnline = !cvOfflineTimeout.isExpired();
-    switch (txMsgSwitchArray[txMsgSwitchIndex])
+
+    if (!isCvOnline)
     {
-        case CV_MESSAGE_TYPE_TURRET_TELEMETRY:
-        {
-            if (sendTurretData(turretData.pitch, turretData.yaw))
-            {
-                incRxMsgSwitchIndex();
-            }
-            break;
-        }
-        case CV_MESSAGE_TYPE_IMU:
-        {
-            if (sendIMUChassisData(imuData, chassisData))
-            {
-                incRxMsgSwitchIndex();
-            }
-            break;
-        }
-        case CV_MESSAGE_TYPE_ROBOT_ID:
-        {
-            if (txRobotIdTimeout.isExpired())
-            {
-                if (sendRobotID(robotId))
-                {
-                    txRobotIdTimeout.restart(TIME_BETWEEN_ROBOT_ID_SEND_MS);
-                    incRxMsgSwitchIndex();
-                }
-            }
-            else
-            {
-                incRxMsgSwitchIndex();
-            }
-            break;
-        }
-        case CV_MESSAGE_TYPE_AUTO_AIM_REQUEST:
-        {
-            if (autoAimRequestQueued)
-            {
-                this->txMessage.data[0] = autoAimRequestState;
-                this->txMessage.length = 1;
-                this->txMessage.type = CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
-                if (this->send())
-                {
-                    autoAimRequestQueued = false;
-                    incRxMsgSwitchIndex();
-                }
-                break;
-            }
-            else
-            {
-                incRxMsgSwitchIndex();
-            }
-        }
+        aimDataValid = false;
     }
+
+    // Send robot measurements every time
+    sendRobotMeasurements(robotData);
+    sendRobotID();
+    sendAutoAimRequest();
 }
 
 void XavierSerial::beginTargetTracking()
 {
-    autoAimRequestQueued = true;
-    autoAimRequestState = true;
+    AutoAimRequest.requestType = true;
+    AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
 void XavierSerial::stopTargetTracking()
 {
-    autoAimRequestQueued = true;
-    autoAimRequestState = false;
+    AutoAimRequest.requestType = true;
+    AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-bool XavierSerial::getLastAimData(TurretAimData* aimData) const
+bool XavierSerial::sendRobotMeasurements(const RobotData& robotData)
 {
-    if (hasAimData)
+    static constexpr int TURRET_DATA_OFFSET = sizeof(robotData.IMU);
+    static constexpr int CHASSIS_DATA_OFFSET = sizeof(robotData.IMU) + sizeof(robotData.Turret);
+}
+
+bool XavierSerial::sendAutoAimRequest()
+{
+    if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_RECEIVED)
     {
-        *aimData = lastAimData;
-        return true;
+        AutoAimRequest.sendAimRequestTimeout.stop();
+        AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
     }
-    return false;
+    else if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
+             (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT && AutoAimRequest.sendAimRequestTimeout.execute()))
+    {
+        txMessage.data[0] = AutoAimRequest.requestType;
+        txMessage.length = 1;
+        txMessage.type = CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
+        if (send())
+        {
+            AutoAimRequest.currAimState = AUTO_AIM_REQUEST_SENT;
+            AutoAimRequest.sendAimRequestTimeout.restart(AUTO_AIM_REQUEST_SEND_PERIOD_MS);
+            return true;
+        }
+        return false;
+    }
+    return true;
 }
 
-bool XavierSerial::sendTurretData(float pitch, float yaw)
+bool XavierSerial::sendRobotID()
 {
-    int16_t data[2] = {static_cast<int16_t>(pitch * 100), static_cast<int16_t>(yaw * 100)};
-
-    memcpy(this->txMessage.data, reinterpret_cast<uint8_t*>(data), 2 * 2);
-    this->txMessage.length = 4;
-    this->txMessage.type = CV_MESSAGE_TYPE_TURRET_TELEMETRY;
-    return this->send();
+    if (txRobotIdTimeout.execute())
+    {
+        txMessage.data[0] = static_cast<uint8_t>(drivers->refSerial.getRobotData().robotId);
+        txMessage.length = 1;
+        txMessage.type = CV_MESSAGE_TYPE_ROBOT_ID;
+        return send();
+    }
+    return true;
 }
-
-// transmit code
-bool XavierSerial::sendIMUChassisData(const IMUData& imuData, const ChassisData& chassisData)
-{
-    int16_t data[13] = {// Accelerometer readings in static frame
-                        static_cast<int16_t>(imuData.ax * 100),
-                        static_cast<int16_t>(imuData.ay * 100),
-                        static_cast<int16_t>(imuData.az * 100),
-                        // MCB IMU angles are in degrees
-                        static_cast<int16_t>(imuData.rol * 100),
-                        static_cast<int16_t>(imuData.pit * 100),
-                        static_cast<int16_t>(imuData.yaw * 100),
-                        // MCB IMU angular velocities are in radians/s
-                        static_cast<int16_t>(imuData.wx * 100),
-                        static_cast<int16_t>(imuData.wy * 100),
-                        static_cast<int16_t>(imuData.wz * 100),
-                        // Wheel RPMs
-                        chassisData.rightFrontWheelRPM,
-                        chassisData.leftFrontWheelRPM,
-                        chassisData.leftBackWheeRPM,
-                        chassisData.rightBackWheelRPM};
-
-    memcpy(this->txMessage.data, reinterpret_cast<uint8_t*>(data), 13 * sizeof(uint16_t));
-    this->txMessage.length = 2 * 13;
-    this->txMessage.type = CV_MESSAGE_TYPE_IMU;
-    return this->send();
-}
-
-bool XavierSerial::sendRobotID(uint8_t robotId)
-{
-    this->txMessage.data[0] = robotId;
-    this->txMessage.length = 1;
-    this->txMessage.type = CV_MESSAGE_TYPE_ROBOT_ID;
-    return this->send();
-}
-
-void XavierSerial::incRxMsgSwitchIndex()
-{
-    txMsgSwitchIndex = (txMsgSwitchIndex + 1) % CV_MESSAGE_TYPE_SIZE;
-}
-
 }  // namespace serial
-
 }  // namespace aruwlib

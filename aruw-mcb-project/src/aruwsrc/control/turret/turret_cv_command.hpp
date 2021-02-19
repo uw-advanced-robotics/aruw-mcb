@@ -85,8 +85,6 @@ private:
     aruwsrc::algorithms::TurretPid yawPid;
     aruwsrc::algorithms::TurretPid pitchPid;
 
-    aruwlib::arch::MilliTimeout sendRequestTimer;
-
     void runYawPositionController();
 
     void runPitchPositionController();

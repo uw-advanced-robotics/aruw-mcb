@@ -54,15 +54,13 @@ TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *sub
           PITCH_Q_DERIVATIVE_KALMAN,
           PITCH_R_DERIVATIVE_KALMAN,
           PITCH_Q_PROPORTIONAL_KALMAN,
-          PITCH_R_PROPORTIONAL_KALMAN),
-      sendRequestTimer(TIME_BETWEEN_CV_REQUESTS)
+          PITCH_R_PROPORTIONAL_KALMAN)
 {
     addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem *>(subsystem));
 }
 
 void TurretCVCommand::initialize()
 {
-    sendRequestTimer.restart(TIME_BETWEEN_CV_REQUESTS);
     drivers->xavierSerial.beginTargetTracking();
     yawPid.reset();
     pitchPid.reset();
@@ -70,18 +68,14 @@ void TurretCVCommand::initialize()
 
 void TurretCVCommand::execute()
 {
-    XavierSerial::TurretAimData cvData;
-    if (drivers->xavierSerial.getLastAimData(&cvData))
+    if (drivers->xavierSerial.lastAimDataValid())
     {
+        const XavierSerial::TurretAimData &cvData = drivers->xavierSerial.getLastAimData();
         if (cvData.hasTarget)
         {
             turretSubsystem->setYawTarget(cvData.yaw);
             turretSubsystem->setPitchTarget(cvData.pitch);
         }
-    }
-    else if (sendRequestTimer.isExpired())
-    {
-        drivers->xavierSerial.beginTargetTracking();
     }
     runYawPositionController();
     runPitchPositionController();
