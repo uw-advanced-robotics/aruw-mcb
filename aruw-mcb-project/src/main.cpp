@@ -30,6 +30,7 @@
 /* communication includes ---------------------------------------------------*/
 #include <aruwlib/DriversSingleton.hpp>
 #include <aruwlib/display/sh1106.hpp>
+#include "aruwsrc/serial/xavier_serial.hpp"
 
 /* error handling includes --------------------------------------------------*/
 
@@ -42,6 +43,8 @@ using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
+
+aruwsrc::serial::XavierSerial xavierSerial(aruwlib::DoNotUse_getDrivers());
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -81,6 +84,7 @@ int main()
             drivers->commandScheduler.run();
             drivers->djiMotorTxHandler.processCanSendData();
             drivers->oledDisplay.updateMenu();
+            xavierSerial.sendMessage();
         }
         modm::delay_us(10);
     }
@@ -97,15 +101,15 @@ void initializeIo(aruwlib::Drivers *drivers)
     drivers->remote.initialize();
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
-    drivers->xavierSerial.initialize();
     drivers->oledDisplay.initialize();
+    xavierSerial.initializeCV();
 }
 
 void updateIo(aruwlib::Drivers *drivers)
 {
     drivers->canRxHandler.pollCanData();
-    drivers->xavierSerial.updateSerial();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
+    xavierSerial.updateSerial();
 }

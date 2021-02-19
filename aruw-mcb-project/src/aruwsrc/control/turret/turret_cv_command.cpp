@@ -22,16 +22,14 @@
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/communication/remote.hpp>
-#include <aruwlib/communication/serial/xavier_serial.hpp>
+#include "aruwsrc/serial/xavier_serial.hpp"
 
-using namespace aruwlib;
-using namespace aruwlib::serial;
 namespace aruwsrc
 {
 namespace turret
 {
-TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem)
-    : drivers(drivers),
+TurretCVCommand::TurretCVCommand(aruwsrc::serial::XavierSerial *xavierSerial, TurretSubsystem *subsystem)
+    : xavierSerial(xavierSerial),
       turretSubsystem(subsystem),
       yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
       pitchTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
@@ -61,16 +59,16 @@ TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *sub
 
 void TurretCVCommand::initialize()
 {
-    drivers->xavierSerial.beginTargetTracking();
+    xavierSerial->beginAutoAim();
     yawPid.reset();
     pitchPid.reset();
 }
 
 void TurretCVCommand::execute()
 {
-    if (drivers->xavierSerial.lastAimDataValid())
+    if (xavierSerial->lastAimDataValid())
     {
-        const XavierSerial::TurretAimData &cvData = drivers->xavierSerial.getLastAimData();
+        const aruwsrc::serial::XavierSerial::TurretAimData &cvData = xavierSerial->getLastAimData();
         if (cvData.hasTarget)
         {
             turretSubsystem->setYawTarget(cvData.yaw);
@@ -81,8 +79,7 @@ void TurretCVCommand::execute()
     runPitchPositionController();
 }
 
-// NOLINTNEXTLINE
-void TurretCVCommand::end(bool) { drivers->xavierSerial.stopTargetTracking(); }
+void TurretCVCommand::end(bool) { xavierSerial->stopAutoAim(); }
 
 void TurretCVCommand::runYawPositionController()
 {

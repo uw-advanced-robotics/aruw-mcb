@@ -37,7 +37,7 @@
 #include "aruwlib/mock/RefSerialMock.hpp"
 #include "aruwlib/mock/RemoteMock.hpp"
 #include "aruwlib/mock/UartMock.hpp"
-#include "aruwlib/mock/XavierSerialMock.hpp"
+// #include "aruwlib/mock/XavierSerialMock.hpp"
 #else
 #include "communication/can/can.hpp"
 #include "communication/can/can_rx_handler.hpp"
@@ -49,7 +49,7 @@
 #include "communication/sensors/mpu6500/mpu6500.hpp"
 #include "communication/serial/ref_serial.hpp"
 #include "communication/serial/uart.hpp"
-#include "communication/serial/xavier_serial.hpp"
+#include "aruwsrc/serial/xavier_serial.hpp"
 #include "control/CommandMapper.hpp"
 #include "control/command_scheduler.hpp"
 #include "control/control_operator_interface.hpp"
@@ -77,7 +77,6 @@ public:
           remote(this),
           mpu6500(this),
           uart(),
-          xavierSerial(this),
           refSerial(this),
           commandScheduler(this),
           controlOperatorInterface(this),
@@ -98,7 +97,6 @@ public:
     mock::RemoteMock remote;
     mock::Mpu6500Mock mpu6500;
     mock::UartMock uart;
-    mock::XavierSerialMock xavierSerial;
     mock::RefSerialMock refSerial;
     mock::CommandSchedulerMock commandScheduler;
     mock::ControlOperatorInterfaceMock controlOperatorInterface;
@@ -117,7 +115,6 @@ public:
     Remote remote;
     sensors::Mpu6500 mpu6500;
     serial::Uart uart;
-    serial::XavierSerial xavierSerial;
     serial::RefSerial refSerial;
     control::CommandScheduler commandScheduler;
     control::ControlOperatorInterface controlOperatorInterface;

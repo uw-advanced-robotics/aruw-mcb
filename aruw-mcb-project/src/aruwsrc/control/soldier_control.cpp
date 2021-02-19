@@ -37,6 +37,8 @@
 
 #if defined(TARGET_SOLDIER)
 
+extern aruwsrc::serial::XavierSerial xavierSerial;
+
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
@@ -107,7 +109,7 @@ FrictionWheelRotateCommand spinFrictionWheels(
 
 FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
 
-/// \todo add cv turret
+TurretCVCommand turretCVCommand(&xavierSerial, &turret);
 
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwlib::Drivers *drivers)
@@ -158,7 +160,7 @@ void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 
     drivers->commandMapper.addHoldMapping(
         RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        {&wiggleDriveCommand});
+        {&wiggleDriveCommand, /*&turretCVCommand*/});
 
     drivers->commandMapper.addHoldRepeatMapping(
         RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
@@ -181,7 +183,9 @@ void registerSoldierIoMappings(aruwlib::Drivers *drivers)
         RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
         {&agitatorshootSlowCommand});
 
-    /// \todo left switch up is cv command
+    drivers->commandMapper.addHoldMapping(
+        RemoteMapState(RemoteMapState::MouseButton::RIGHT),
+        {&turretCVCommand});
 }
 
 void initSubsystemCommands(aruwlib::Drivers *drivers)

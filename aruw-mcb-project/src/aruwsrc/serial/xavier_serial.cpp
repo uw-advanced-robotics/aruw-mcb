@@ -18,16 +18,19 @@
  */
 
 #include "xavier_serial.hpp"
-#include <aruwlib/Drivers.hpp>
 
 #include <cstring>
 
-namespace aruwlib
+#include <aruwlib/Drivers.hpp>
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+
+namespace aruwsrc
 {
 namespace serial
 {
-XavierSerial::XavierSerial(Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart2),
+XavierSerial::XavierSerial(aruwlib::Drivers* drivers)
+    : aruwlib::serial::DJISerial<>(drivers, aruwlib::serial::Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),
       isCvOnline(false)
@@ -48,13 +51,18 @@ void XavierSerial::messageReceiveCallback(const SerialMessage& completeMessage)
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
         {
-            TurretAimData aimData;
-            if (decodeToTurrentAimData(completeMessage, &aimData))
+            if (decodeToTurrentAimData(completeMessage, &lastAimData))
             {
-                lastAimData = aimData;
                 aimDataValid = true;
             }
             return;
+        }
+        case CV_MESSAGE_TYPE_TRACKING_REQUEST_ACKN:
+        {
+            if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT)
+            {
+                AutoAimRequest.currAimState = AUTO_AIM_REQUEST_ACKNOWLEDGED;
+            }
         }
         default:
             return;
@@ -68,22 +76,21 @@ bool XavierSerial::decodeToTurrentAimData(const SerialMessage& message, TurretAi
         return false;
     }
 
-    int16_t raw_pitch =
-        *(reinterpret_cast<const int16_t*>(message.data + AIM_DATA_MESSAGE_PITCH_OFFSET));
-    int16_t raw_yaw =
-        *(reinterpret_cast<const int16_t*>(message.data + AIM_DATA_MESSAGE_YAW_OFFSET));
-
-    bool raw_has_target = message.data[AIM_DATA_MESSAGE_HAS_TARGET];
+    // TODO redo this with proper endianness converter
+    int32_t raw_pitch =
+        *(reinterpret_cast<const int32_t*>(message.data + AIM_DATA_MESSAGE_PITCH_OFFSET));
+    int32_t raw_yaw =
+        *(reinterpret_cast<const int32_t*>(message.data + AIM_DATA_MESSAGE_YAW_OFFSET));
 
     aimData->pitch = static_cast<float>(raw_pitch) / 100.0f;
     aimData->yaw = static_cast<float>(raw_yaw) / 100.0f;
-    aimData->hasTarget = raw_has_target;
+    aimData->hasTarget = message.data[AIM_DATA_MESSAGE_HAS_TARGET];
     aimData->timestamp = message.messageTimestamp;
 
     return true;
 }
 
-void XavierSerial::sendMessage(const RobotData& robotData)
+void XavierSerial::sendMessage()
 {
     isCvOnline = !cvOfflineTimeout.isExpired();
 
@@ -93,38 +100,58 @@ void XavierSerial::sendMessage(const RobotData& robotData)
     }
 
     // Send robot measurements every time
-    sendRobotMeasurements(robotData);
+    // TODO incrementing a counter to alternate between messages seems weird since the robot id and auto aim requests aren't sent often, so I removed it altogether, is this bad? We should test for real
+    sendRobotMeasurements();
     sendRobotID();
     sendAutoAimRequest();
 }
 
-void XavierSerial::beginTargetTracking()
+bool XavierSerial::sendRobotMeasurements()
+{
+    if (chassisSub == nullptr || turretSub == nullptr)
+    {
+        return false;
+    }
+
+    txMessage.data[0] = static_cast<uint8_t>(chassisSub->getLeftFrontRpmActual() >> 8);
+    txMessage.data[1] = static_cast<uint8_t>(chassisSub->getLeftFrontRpmActual());
+    // etc, use helper endian converter func
+
+    int32_t fixedPointPitch = static_cast<int32_t>(turretSub->getPitchAngle().getValue() * 1000.0f);
+    int32_t fixedPointYaw = static_cast<int32_t>(turretSub->getYawAngle().getValue() * 1000.0f);
+    // etc, user helper func, convertToLittleEndian(txMessage.data + sizeof(int16_t) * 4, static_cast<int32_t>(turretSub->getYawAngle().getValue() * 1000)
+    // replace above
+
+    // Do the same for imu data
+
+    txMessage.type = static_cast<uint8_t>(CV_MESSAGE_TYPE_ROBOT_DATA);
+    txMessage.length = 4 * sizeof(int16_t) + (2 + 9) * sizeof(int32_t);
+    return send();
+}
+
+void XavierSerial::beginAutoAim()
 {
     AutoAimRequest.requestType = true;
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-void XavierSerial::stopTargetTracking()
+void XavierSerial::stopAutoAim()
 {
     AutoAimRequest.requestType = true;
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
-}
-
-bool XavierSerial::sendRobotMeasurements(const RobotData& robotData)
-{
-    static constexpr int TURRET_DATA_OFFSET = sizeof(robotData.IMU);
-    static constexpr int CHASSIS_DATA_OFFSET = sizeof(robotData.IMU) + sizeof(robotData.Turret);
 }
 
 bool XavierSerial::sendAutoAimRequest()
 {
-    if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_RECEIVED)
+    if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_ACKNOWLEDGED)
     {
         AutoAimRequest.sendAimRequestTimeout.stop();
         AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
     }
-    else if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
-             (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT && AutoAimRequest.sendAimRequestTimeout.execute()))
+    else if (
+        AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
+        (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT &&
+         AutoAimRequest.sendAimRequestTimeout.execute()))
     {
         txMessage.data[0] = AutoAimRequest.requestType;
         txMessage.length = 1;

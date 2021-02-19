@@ -370,6 +370,11 @@ public:
 
     const char* getName() override { return "Chassis"; }
 
+    int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
+    int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
+    int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
+    int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
+
 private:
     /**
      * When you input desired x, y, an r values, this function translates

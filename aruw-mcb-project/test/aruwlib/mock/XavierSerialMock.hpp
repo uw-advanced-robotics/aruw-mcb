@@ -45,8 +45,8 @@ public:
          const aruwlib::serial::XavierSerial::TurretAimData& turretData,
          uint8_t robotId),
         (override));
-    MOCK_METHOD(void, beginTargetTracking, (), (override));
-    MOCK_METHOD(void, stopTargetTracking, (), (override));
+    MOCK_METHOD(void, beginAutoAim, (), (override));
+    MOCK_METHOD(void, stopAutoAim, (), (override));
     MOCK_METHOD(
         bool,
         getLastAimData,

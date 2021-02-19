@@ -21,13 +21,28 @@
 #define XAVIER_SERIAL_HPP_
 
 #include <aruwlib/architecture/timeout.hpp>
+#include <aruwlib/architecture/periodic_timer.hpp>
+#include <aruwlib/communication/serial/dji_serial.hpp>
 
-#include "dji_serial.hpp"
 #include "mock_macros.hpp"
 
 namespace aruwlib
 {
 class Drivers;
+}
+
+namespace aruwsrc
+{
+namespace turret
+{
+class TurretSubsystem;
+}
+
+namespace chassis
+{
+class ChassisSubsystem;
+}
+
 namespace serial
 {
 /**
@@ -35,39 +50,9 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class XavierSerial : public DJISerial<>
+class XavierSerial : public aruwlib::serial::DJISerial<>
 {
 public:
-    struct RobotData
-    {
-        struct
-        {
-            float ax;  ///< acceleration in \f$\frac{m}{s^2}\f$.
-            float ay;
-            float az;
-
-            float wx;  ///< gyro values in \f$\frac{degrees}{second}\f$.
-            float wy;
-            float wz;
-
-            float rol;  ///< Measured in degrees.
-            float pit;
-            float yaw;
-        } IMU;
-        struct
-        {
-            float pitch;
-            float yaw;
-        } Turret;
-        struct
-        {
-            int16_t rightFrontWheelRPM;
-            int16_t leftFrontWheelRPM;
-            int16_t leftBackWheeRPM;
-            int16_t rightBackWheelRPM;
-        } Chassis;
-    };
-
     // AutoAim Data
     struct TurretAimData
     {
@@ -77,7 +62,7 @@ public:
         uint32_t timestamp;  /// A timestamp in milliseconds.
     };
 
-    XavierSerial(Drivers* drivers);
+    XavierSerial(aruwlib::Drivers* drivers);
     XavierSerial(const XavierSerial&) = delete;
     XavierSerial& operator=(const XavierSerial&) = delete;
     mockable ~XavierSerial() = default;
@@ -96,20 +81,24 @@ public:
     /**
      * Cycles through the messages that must be sent to the xavier.
      */
-    mockable void sendMessage(const RobotData& robotData);
+    mockable void sendMessage();
 
     /**
      * Start Requesting Xavier to Track Target.
      */
-    mockable void beginTargetTracking();
+    mockable void beginAutoAim();
+
     /**
      * Stop Requesting Xavier to Track Target.
      */
-    mockable void stopTargetTracking();
+    mockable void stopAutoAim();
 
-    mockable inline const TurretAimData &getLastAimData() const { return lastAimData; }
+    mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
     mockable inline bool lastAimDataValid() const { return aimDataValid; }
+
+    mockable void attachTurret(turret::TurretSubsystem *turret) { turretSub = turret; }
+    mockable void attachChassis(chassis::ChassisSubsystem *chassis) { chassisSub = chassis; }
 
 private:
     enum AutoAimRequestState
@@ -117,7 +106,7 @@ private:
         AUTO_AIM_REQUEST_COMPLETE,
         AUTO_AIM_REQUEST_QUEUED,
         AUTO_AIM_REQUEST_SENT,
-        AUTO_AIM_REQUEST_RECEIVED,
+        AUTO_AIM_REQUEST_ACKNOWLEDGED,
     };
 
     enum TxMessageTypes
@@ -147,7 +136,7 @@ private:
     static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 9;
 
     /// Used for determining when to send robot id.
-    arch::MilliTimeout txRobotIdTimeout;
+    aruwlib::arch::PeriodicMilliTimer txRobotIdTimeout;
 
     /// The most recent auto aim request state.
     struct
@@ -156,7 +145,7 @@ private:
         bool requestType = false;
         AutoAimRequestState currAimState = AUTO_AIM_REQUEST_COMPLETE;
         /// Timer used to reset the aim request if acknowledgement has not been sent by xavier.
-        arch::MilliTimeout sendAimRequestTimeout;
+        aruwlib::arch::MilliTimeout sendAimRequestTimeout;
     } AutoAimRequest;
 
     /// The last aim data received from the xavier.
@@ -167,10 +156,13 @@ private:
 
     // CV online variables.
     /// Timer for determining if serial is offline.
-    arch::MilliTimeout cvOfflineTimeout;
+    aruwlib::arch::MilliTimeout cvOfflineTimeout;
 
     /// A flag set to `true` if the timeout is not expired, and `false` otherwise.
     bool isCvOnline;
+
+    const turret::TurretSubsystem *turretSub;
+    const chassis::ChassisSubsystem *chassisSub;
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
@@ -183,7 +175,7 @@ private:
      */
     bool decodeToTurrentAimData(const SerialMessage& message, TurretAimData* aimData);
 
-    bool sendRobotMeasurements(const RobotData& robotData);
+    bool sendRobotMeasurements();
 
     /**
      * Packages `robotId` in an acceptable format for the base `DjiSerial` class to interpret
