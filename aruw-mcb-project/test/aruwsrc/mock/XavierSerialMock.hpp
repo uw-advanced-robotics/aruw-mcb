@@ -20,38 +20,26 @@
 #ifndef XAVIER_SERIAL_MOCK_HPP_
 #define XAVIER_SERIAL_MOCK_HPP_
 
-#include <aruwlib/communication/serial/xavier_serial.hpp>
 #include <gmock/gmock.h>
+#include "aruwsrc/serial/xavier_serial.hpp"
 
-namespace aruwlib
+namespace aruwsrc
 {
 namespace mock
 {
-class XavierSerialMock : public aruwlib::serial::XavierSerial
+class XavierSerialMock : public serial::XavierSerial
 {
 public:
-    XavierSerialMock(aruwlib::Drivers* drivers) : aruwlib::serial::XavierSerial(drivers) {}
+    XavierSerialMock(aruwlib::Drivers* drivers) : serial::XavierSerial(drivers) {}
     MOCK_METHOD(void, initializeCV, (), (override));
-    MOCK_METHOD(
-        void,
-        messageReceiveCallback,
-        (const aruwlib::serial::DJISerial<>::SerialMessage& completeMessage),
-        (override));
-    MOCK_METHOD(
-        void,
-        sendMessage,
-        (const aruwlib::serial::XavierSerial::IMUData& imuData,
-         const aruwlib::serial::XavierSerial::ChassisData& chassisData,
-         const aruwlib::serial::XavierSerial::TurretAimData& turretData,
-         uint8_t robotId),
-        (override));
+    MOCK_METHOD(void, messageReceiveCallback, (const SerialMessage& completeMessage), (override));
+    MOCK_METHOD(void, sendMessage, (), (override));
     MOCK_METHOD(void, beginAutoAim, (), (override));
     MOCK_METHOD(void, stopAutoAim, (), (override));
-    MOCK_METHOD(
-        bool,
-        getLastAimData,
-        (aruwlib::serial::XavierSerial::TurretAimData * aimData),
-        (const override));
+    MOCK_METHOD(const TurretAimData&, getLastAimData, (), (const override));
+    MOCK_METHOD(bool, lastAimDataValid, (), (const override));
+    MOCK_METHOD(void, attachTurret, (turret::TurretSubsystem *turret), (override));
+    MOCK_METHOD(void, attachChassis, (chassis::ChassisSubsystem *chassis), (override));
 };  // class XavierSerialMock
 }  // namespace mock
 }  // namespace aruwlib

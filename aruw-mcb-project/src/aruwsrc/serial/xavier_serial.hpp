@@ -26,6 +26,8 @@
 
 #include "mock_macros.hpp"
 
+class XavierSerialTester;
+
 namespace aruwlib
 {
 class Drivers;
@@ -62,6 +64,13 @@ public:
         uint32_t timestamp;  /// A timestamp in milliseconds.
     };
 
+    enum AutoAimRequestState
+    {
+        AUTO_AIM_REQUEST_COMPLETE,
+        AUTO_AIM_REQUEST_QUEUED,
+        AUTO_AIM_REQUEST_SENT,
+    };
+
     XavierSerial(aruwlib::Drivers* drivers);
     XavierSerial(const XavierSerial&) = delete;
     XavierSerial& operator=(const XavierSerial&) = delete;
@@ -93,21 +102,15 @@ public:
      */
     mockable void stopAutoAim();
 
-    mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
+    mockable_inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
-    mockable inline bool lastAimDataValid() const { return aimDataValid; }
+    mockable_inline bool lastAimDataValid() const { return aimDataValid; }
 
     mockable void attachTurret(turret::TurretSubsystem *turret) { turretSub = turret; }
     mockable void attachChassis(chassis::ChassisSubsystem *chassis) { chassisSub = chassis; }
 
 private:
-    enum AutoAimRequestState
-    {
-        AUTO_AIM_REQUEST_COMPLETE,
-        AUTO_AIM_REQUEST_QUEUED,
-        AUTO_AIM_REQUEST_SENT,
-        AUTO_AIM_REQUEST_ACKNOWLEDGED,
-    };
+    friend class ::XavierSerialTester;
 
     enum TxMessageTypes
     {
@@ -128,6 +131,7 @@ private:
     /// Time between each robot id send to CV in milliseconds.
     static constexpr int16_t TIME_BETWEEN_ROBOT_ID_SEND_MS = 5000;
     static constexpr int16_t AUTO_AIM_REQUEST_SEND_PERIOD_MS = 1000;
+    static constexpr float FIXED_POINT_PRECISION = 0.001f;
 
     // RX message constants for decoding an aim data message. These are zero indexed byte offsets.
     static constexpr uint8_t AIM_DATA_MESSAGE_PITCH_OFFSET = 0;

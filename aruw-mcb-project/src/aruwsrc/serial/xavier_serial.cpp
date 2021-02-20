@@ -61,7 +61,8 @@ void XavierSerial::messageReceiveCallback(const SerialMessage& completeMessage)
         {
             if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT)
             {
-                AutoAimRequest.currAimState = AUTO_AIM_REQUEST_ACKNOWLEDGED;
+                AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
+                AutoAimRequest.sendAimRequestTimeout.stop();
             }
         }
         default:
@@ -82,8 +83,8 @@ bool XavierSerial::decodeToTurrentAimData(const SerialMessage& message, TurretAi
     int32_t raw_yaw =
         *(reinterpret_cast<const int32_t*>(message.data + AIM_DATA_MESSAGE_YAW_OFFSET));
 
-    aimData->pitch = static_cast<float>(raw_pitch) / 100.0f;
-    aimData->yaw = static_cast<float>(raw_yaw) / 100.0f;
+    aimData->pitch = static_cast<float>(raw_pitch) * FIXED_POINT_PRECISION;
+    aimData->yaw = static_cast<float>(raw_yaw) * FIXED_POINT_PRECISION;
     aimData->hasTarget = message.data[AIM_DATA_MESSAGE_HAS_TARGET];
     aimData->timestamp = message.messageTimestamp;
 
@@ -117,8 +118,8 @@ bool XavierSerial::sendRobotMeasurements()
     txMessage.data[1] = static_cast<uint8_t>(chassisSub->getLeftFrontRpmActual());
     // etc, use helper endian converter func
 
-    int32_t fixedPointPitch = static_cast<int32_t>(turretSub->getPitchAngle().getValue() * 1000.0f);
-    int32_t fixedPointYaw = static_cast<int32_t>(turretSub->getYawAngle().getValue() * 1000.0f);
+    int32_t fixedPointPitch = static_cast<int32_t>(turretSub->getPitchAngle().getValue() / FIXED_POINT_PRECISION);
+    int32_t fixedPointYaw = static_cast<int32_t>(turretSub->getYawAngle().getValue() / FIXED_POINT_PRECISION);
     // etc, user helper func, convertToLittleEndian(txMessage.data + sizeof(int16_t) * 4, static_cast<int32_t>(turretSub->getYawAngle().getValue() * 1000)
     // replace above
 
@@ -143,12 +144,7 @@ void XavierSerial::stopAutoAim()
 
 bool XavierSerial::sendAutoAimRequest()
 {
-    if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_ACKNOWLEDGED)
-    {
-        AutoAimRequest.sendAimRequestTimeout.stop();
-        AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
-    }
-    else if (
+    if (
         AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
         (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT &&
          AutoAimRequest.sendAimRequestTimeout.execute()))
