@@ -24,6 +24,9 @@
     <module>modm:platform:heap</module>
     <module>modm:architecture:delay</module>
     <module>modm:architecture:clock</module>
+    <module>modm:cmsis:core</module>
+    <module>modm:cmsis:dsp</module>
+    <module>modm:cmsis:dsp:matrix</module>
     <module>modm:processing:timer</module>
     <module>modm:platform:clock</module>
     <module>modm:platform:timer:8</module>
