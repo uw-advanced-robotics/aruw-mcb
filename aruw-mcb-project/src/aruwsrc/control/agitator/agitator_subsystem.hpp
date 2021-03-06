@@ -99,6 +99,30 @@ public:
     static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR6;
     static constexpr aruwlib::can::CanBus HERO2_AGITATOR_MOTOR_CAN_BUS =
         aruwlib::can::CanBus::CAN_BUS1;
+#elif defined(TARGET_ENGINEER)
+    // pid terms for engineer reservoir 17mm agitator
+    static constexpr float PID_RESERVOIR_17MM_P = 80000.0f;
+    static constexpr float PID_RESERVOIR_17MM_I = 0.0f;
+    static constexpr float PID_RESERVOIR_17MM_D = 800000.0f;
+    static constexpr float PID_RESERVOIR_17MM_MAX_ERR_SUM = 0.0f;
+    static constexpr float PID_RESERVOIR_17MM_MAX_OUT = 16000.0f;
+    static constexpr bool RESERVOIR_17MM_INVERTED = false;
+
+    static constexpr aruwlib::motor::MotorId RESERVOIR_17MM_MOTOR_ID = aruwlib::motor::MOTOR5;
+    static constexpr aruwlib::can::CanBus RESERVOIR_17MM_MOTOR_CAN_BUS =
+        aruwlib::can::CanBus::CAN_BUS1;
+
+    // pid terms for engineer reservoir 42mm
+    static constexpr float PID_RESERVOIR_42MM_P = 80000.0f;
+    static constexpr float PID_RESERVOIR_42MM_I = 0.0f;
+    static constexpr float PID_RESERVOIR_42MM_D = 800000.0f;
+    static constexpr float PID_RESERVOIR_42MM_MAX_ERR_SUM = 0.0f;
+    static constexpr float PID_RESERVOIR_42MM_MAX_OUT = 16000.0f;
+    static constexpr bool RESERVOIR_42MM_INVERTED = false;
+
+    static constexpr aruwlib::motor::MotorId RESERVOIR_42MM_MOTOR_ID = aruwlib::motor::MOTOR5;
+    static constexpr aruwlib::can::CanBus RESERVOIR_42MM_MOTOR_CAN_BUS =
+        aruwlib::can::CanBus::CAN_BUS1;
 #endif
 
     /**

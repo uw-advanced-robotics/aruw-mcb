@@ -21,6 +21,12 @@
 #include <aruwlib/communication/gpio/digital.hpp>
 #include <aruwlib/control/command_scheduler.hpp>
 
+#include "aruwsrc/control/agitator/agitator_calibrate_command.hpp"
+#include "aruwsrc/control/agitator/agitator_shoot_comprised_command.hpp"
+#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/engineer/EngineerWristCalibrateCommand.hpp"
+#include "aruwsrc/control/engineer/EngineerWristRotateCommand.hpp"
+#include "aruwsrc/control/engineer/EngineerWristSubsystem.hpp"
 #include "aruwsrc/control/engineer/TowSubsystem.hpp"
 #include "aruwsrc/control/engineer/extend_xaxis_command.hpp"
 #include "aruwsrc/control/engineer/grabber_subsystem.hpp"
@@ -30,6 +36,7 @@
 #if defined(TARGET_ENGINEER)
 
 using namespace aruwsrc::engineer;
+using namespace aruwsrc::agitator;
 using namespace aruwlib::gpio;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::control::CommandMapper;
@@ -62,8 +69,48 @@ TowSubsystem tower(
     TOWER_RIGHT_PIN,
     TOWER_LEFT_LIMIT_SWITCH,
     TOWER_RIGHT_LIMIT_SWITCH);
+AgitatorSubsystem reservoir17mm(
+    drivers(),
+    AgitatorSubsystem::PID_RESERVOIR_17MM_P,
+    AgitatorSubsystem::PID_RESERVOIR_17MM_I,
+    AgitatorSubsystem::PID_RESERVOIR_17MM_D,
+    AgitatorSubsystem::PID_RESERVOIR_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_RESERVOIR_17MM_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508,
+    AgitatorSubsystem::RESERVOIR_17MM_MOTOR_ID,
+    AgitatorSubsystem::RESERVOIR_17MM_MOTOR_CAN_BUS,
+    AgitatorSubsystem::RESERVOIR_17MM_INVERTED);
+AgitatorSubsystem reservoir42mm(
+    drivers(),
+    AgitatorSubsystem::PID_RESERVOIR_42MM_P,
+    AgitatorSubsystem::PID_RESERVOIR_42MM_I,
+    AgitatorSubsystem::PID_RESERVOIR_42MM_D,
+    AgitatorSubsystem::PID_RESERVOIR_42MM_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_RESERVOIR_42MM_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508,
+    AgitatorSubsystem::RESERVOIR_42MM_MOTOR_ID,
+    AgitatorSubsystem::RESERVOIR_42MM_MOTOR_CAN_BUS,
+    AgitatorSubsystem::RESERVOIR_42MM_INVERTED);
+EngineerWristSubsystem wrist(drivers());
 
 /* define commands ----------------------------------------------------------*/
+AgitatorCalibrateCommand reservoir17mmCalibrateCommand(&reservoir17mm);
+AgitatorRotateCommand reservoir17mmRotateCommand(
+    &reservoir17mm,
+    2.0f * aruwlib::algorithms::PI / 3.0f,
+    500,
+    0,
+    true);
+AgitatorCalibrateCommand reservoir42mmCalibrateCommand(&reservoir42mm);
+AgitatorRotateCommand reservoir42mmRotateCommand(
+    &reservoir42mm,
+    2.0f * aruwlib::algorithms::PI / 3.0f,
+    500,
+    0,
+    true);
+EngineerWristCalibrateCommand calibrateWrist(&wrist);
+EngineerWristRotateCommand rotateWristForward(&wrist, EngineerWristSubsystem::MAX_WRIST_ANGLE);
+EngineerWristRotateCommand rotateWristBack(&wrist, EngineerWristSubsystem::MIN_WRIST_ANGLE);
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems() {}
@@ -73,6 +120,8 @@ void registerEngineerSubsystems(aruwlib::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&grabber);
     drivers->commandScheduler.registerSubsystem(&xAxis);
+    drivers->commandScheduler.registerSubsystem(&reservoir17mm);
+    drivers->commandScheduler.registerSubsystem(&wrist);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
