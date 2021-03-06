@@ -32,6 +32,8 @@
 #include "aruwsrc/control/engineer/grabber_subsystem.hpp"
 #include "aruwsrc/control/engineer/squeeze_grabber_command.hpp"
 #include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
+#include "aruwsrc/control/engineer/yaxis_command.hpp"
+#include "aruwsrc/control/engineer/yaxis_subsystem.hpp"
 
 #if defined(TARGET_ENGINEER)
 
@@ -59,6 +61,7 @@ static constexpr Digital::OutputPin TOWER_LEFT_PIN = Digital::OutputPin::G;
 static constexpr Digital::OutputPin TOWER_RIGHT_PIN = Digital::OutputPin::H;
 static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::A;
 static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
+static constexpr Digital::InputPin Y_AXIS_PIN = Digital::InputPin::C;
 
 /* define subsystems --------------------------------------------------------*/
 GrabberSubsystem grabber(drivers(), GRABBER_PIN);
@@ -92,6 +95,7 @@ AgitatorSubsystem reservoir42mm(
     AgitatorSubsystem::RESERVOIR_42MM_MOTOR_CAN_BUS,
     AgitatorSubsystem::RESERVOIR_42MM_INVERTED);
 EngineerWristSubsystem wrist(drivers());
+YAxisSubsystem yAxis(drivers(), Y_AXIS_PIN);
 
 /* define commands ----------------------------------------------------------*/
 AgitatorCalibrateCommand reservoir17mmCalibrateCommand(&reservoir17mm);
@@ -111,6 +115,8 @@ AgitatorRotateCommand reservoir42mmRotateCommand(
 EngineerWristCalibrateCommand calibrateWrist(&wrist);
 EngineerWristRotateCommand rotateWristForward(&wrist, EngineerWristSubsystem::MAX_WRIST_ANGLE);
 EngineerWristRotateCommand rotateWristBack(&wrist, EngineerWristSubsystem::MIN_WRIST_ANGLE);
+YAxisCommand yAxisMin(&yAxis, YAxisSubsystem::Position::MIN_DISTANCE);
+YAxisCommand yAxisMax(&yAxis, YAxisSubsystem::Position::MAX_DISTANCE);
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems() {}
@@ -122,6 +128,7 @@ void registerEngineerSubsystems(aruwlib::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&xAxis);
     drivers->commandScheduler.registerSubsystem(&reservoir17mm);
     drivers->commandScheduler.registerSubsystem(&wrist);
+    drivers->commandScheduler.registerSubsystem(&yAxis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
