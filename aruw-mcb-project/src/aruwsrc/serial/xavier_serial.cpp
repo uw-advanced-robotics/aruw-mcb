@@ -22,8 +22,9 @@
 #include <cstring>
 
 #include <aruwlib/Drivers.hpp>
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -101,7 +102,9 @@ void XavierSerial::sendMessage()
     }
 
     // Send robot measurements every time
-    // TODO incrementing a counter to alternate between messages seems weird since the robot id and auto aim requests aren't sent often, so I removed it altogether, is this bad? We should test for real
+    // TODO incrementing a counter to alternate between messages seems weird since the robot id and
+    // auto aim requests aren't sent often, so I removed it altogether, is this bad? We should test
+    // for real
     sendRobotMeasurements();
     sendRobotID();
     sendAutoAimRequest();
@@ -118,10 +121,12 @@ bool XavierSerial::sendRobotMeasurements()
     txMessage.data[1] = static_cast<uint8_t>(chassisSub->getLeftFrontRpmActual());
     // etc, use helper endian converter func
 
-    int32_t fixedPointPitch = static_cast<int32_t>(turretSub->getPitchAngle().getValue() / FIXED_POINT_PRECISION);
-    int32_t fixedPointYaw = static_cast<int32_t>(turretSub->getYawAngle().getValue() / FIXED_POINT_PRECISION);
-    // etc, user helper func, convertToLittleEndian(txMessage.data + sizeof(int16_t) * 4, static_cast<int32_t>(turretSub->getYawAngle().getValue() * 1000)
-    // replace above
+    int32_t fixedPointPitch =
+        static_cast<int32_t>(turretSub->getPitchAngle().getValue() / FIXED_POINT_PRECISION);
+    int32_t fixedPointYaw =
+        static_cast<int32_t>(turretSub->getYawAngle().getValue() / FIXED_POINT_PRECISION);
+    // etc, user helper func, convertToLittleEndian(txMessage.data + sizeof(int16_t) * 4,
+    // static_cast<int32_t>(turretSub->getYawAngle().getValue() * 1000) replace above
 
     // Do the same for imu data
 
@@ -144,8 +149,7 @@ void XavierSerial::stopAutoAim()
 
 bool XavierSerial::sendAutoAimRequest()
 {
-    if (
-        AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
+    if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
         (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT &&
          AutoAimRequest.sendAimRequestTimeout.execute()))
     {
@@ -175,4 +179,4 @@ bool XavierSerial::sendRobotID()
     return true;
 }
 }  // namespace serial
-}  // namespace aruwlib
+}  // namespace aruwsrc

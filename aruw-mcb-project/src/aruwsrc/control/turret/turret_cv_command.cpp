@@ -22,13 +22,16 @@
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/communication/remote.hpp>
+
 #include "aruwsrc/serial/xavier_serial.hpp"
 
 namespace aruwsrc
 {
 namespace turret
 {
-TurretCVCommand::TurretCVCommand(aruwsrc::serial::XavierSerial *xavierSerial, TurretSubsystem *subsystem)
+TurretCVCommand::TurretCVCommand(
+    aruwsrc::serial::XavierSerial *xavierSerial,
+    TurretSubsystem *subsystem)
     : xavierSerial(xavierSerial),
       turretSubsystem(subsystem),
       yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),

@@ -42,6 +42,7 @@
 #include "architecture/profiler.hpp"
 #else
 #include "architecture/profiler.hpp"
+#include "aruwsrc/serial/xavier_serial.hpp"
 #include "communication/can/can.hpp"
 #include "communication/can/can_rx_handler.hpp"
 #include "communication/gpio/analog.hpp"
@@ -52,7 +53,6 @@
 #include "communication/sensors/mpu6500/mpu6500.hpp"
 #include "communication/serial/ref_serial.hpp"
 #include "communication/serial/uart.hpp"
-#include "aruwsrc/serial/xavier_serial.hpp"
 #include "control/CommandMapper.hpp"
 #include "control/ControlOperatorInterface.hpp"
 #include "control/command_scheduler.hpp"

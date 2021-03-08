@@ -31,6 +31,7 @@
 /* communication includes ---------------------------------------------------*/
 #include <aruwlib/DriversSingleton.hpp>
 #include <aruwlib/display/sh1106.hpp>
+
 #include "aruwsrc/serial/xavier_serial.hpp"
 
 /* error handling includes --------------------------------------------------*/
@@ -56,10 +57,6 @@ void initializeIo(aruwlib::Drivers *drivers);
 // called as frequently.
 void updateIo(aruwlib::Drivers *drivers);
 
-aruwlib::serial::XavierSerial::ChassisData chassisData;
-aruwlib::serial::XavierSerial::IMUData imuData;
-aruwlib::serial::XavierSerial::TurretAimData turretData;
-
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -76,7 +73,6 @@ int main()
     Board::initialize();
     initializeIo(drivers);
     aruwsrc::control::initSubsystemCommands(drivers);
-
 
     while (1)
     {

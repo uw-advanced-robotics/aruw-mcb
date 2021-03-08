@@ -20,11 +20,11 @@
 #ifndef XAVIER_SERIAL_HPP_
 #define XAVIER_SERIAL_HPP_
 
-#include <aruwlib/architecture/timeout.hpp>
 #include <aruwlib/architecture/periodic_timer.hpp>
+#include <aruwlib/architecture/timeout.hpp>
 #include <aruwlib/communication/serial/dji_serial.hpp>
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 class XavierSerialTester;
 
@@ -106,8 +106,8 @@ public:
 
     mockable_inline bool lastAimDataValid() const { return aimDataValid; }
 
-    mockable void attachTurret(turret::TurretSubsystem *turret) { turretSub = turret; }
-    mockable void attachChassis(chassis::ChassisSubsystem *chassis) { chassisSub = chassis; }
+    mockable void attachTurret(turret::TurretSubsystem* turret) { turretSub = turret; }
+    mockable void attachChassis(chassis::ChassisSubsystem* chassis) { chassisSub = chassis; }
 
 private:
     friend class ::XavierSerialTester;
@@ -165,8 +165,8 @@ private:
     /// A flag set to `true` if the timeout is not expired, and `false` otherwise.
     bool isCvOnline;
 
-    const turret::TurretSubsystem *turretSub;
-    const chassis::ChassisSubsystem *chassisSub;
+    const turret::TurretSubsystem* turretSub;
+    const chassis::ChassisSubsystem* chassisSub;
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
@@ -192,6 +192,6 @@ private:
     bool sendAutoAimRequest();
 };
 }  // namespace serial
-}  // namespace aruwlib
+}  // namespace aruwsrc
 
 #endif  // XAVIER_SERIAL_HPP_
