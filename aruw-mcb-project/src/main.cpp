@@ -46,7 +46,9 @@ using aruwlib::Drivers;
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
-aruwsrc::serial::XavierSerial xavierSerial(aruwlib::DoNotUse_getDrivers());
+#if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER) || defined(TARGET_SENTINEL)
+aruwsrc::serial::XavierSerial xavierSerial(aruwlib::DoNotUse_getDrivers(), nullptr, nullptr);
+#endif
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -104,7 +106,9 @@ void initializeIo(aruwlib::Drivers *drivers)
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
     drivers->oledDisplay.initialize();
+#if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER) || defined(TARGET_SENTINEL)
     xavierSerial.initializeCV();
+#endif
 }
 
 void updateIo(aruwlib::Drivers *drivers)
@@ -113,5 +117,7 @@ void updateIo(aruwlib::Drivers *drivers)
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
+#if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER) || defined(TARGET_SENTINEL)
     xavierSerial.updateSerial();
+#endif
 }

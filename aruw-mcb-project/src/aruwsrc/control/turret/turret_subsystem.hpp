@@ -62,28 +62,34 @@ public:
      */
     mockable bool isTurretOnline() const;
 
-    mockable_inline int32_t getYawVelocity() const;
-    mockable_inline int32_t getPitchVelocity() const;
+    mockable int32_t getYawVelocity() const;
+    mockable int32_t getPitchVelocity() const;
 
     /**
      * @return An angle between [-180, 180] that is the angle difference of the yaw gimbal
      *      from center (90 degrees).
      */
-    mockable_inline float getYawAngleFromCenter() const;
+    mockable float getYawAngleFromCenter() const;
     /**
      * @return An angle between [-180, 180] that is the angle difference of the pitch gimbal
      *      from center (90 degrees).
      */
-    mockable_inline float getPitchAngleFromCenter() const;
+    mockable float getPitchAngleFromCenter() const;
 
     /**
      * @return The wrapped yaw angle of the actual yaw gimbal.
      */
-    mockable_inline const aruwlib::algorithms::ContiguousFloat& getYawAngle() const;
+    mockable_inline const aruwlib::algorithms::ContiguousFloat& getYawAngle() const
+    {
+        return currYawAngle;
+    }
     /**
      * @return The wrapped pitch angle of the actual pitch gimbal.
      */
-    mockable_inline const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
+    mockable_inline const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const
+    {
+        return currPitchAngle;
+    }
 
     /**
      * Attempts to set desired yaw output to the passed in value. If the turret is out of
@@ -91,14 +97,14 @@ public:
      *
      * @param[in] out The desired yaw output, limited to `[-30000, 30000]`.
      */
-    mockable_inline void setYawMotorOutput(float out);
+    mockable void setYawMotorOutput(float out);
     /**
      * Attempts to set desired pitch output to the passed in value. If the turret is out of
      * bounds, the output is limited.
      *
      * @param[in] out The desired pitch output, limited to `[-30000, 30000]`.
      */
-    mockable_inline void setPitchMotorOutput(float out);
+    mockable void setPitchMotorOutput(float out);
 
     /**
      * Calculates a yaw output that uses the desired chassis rotation as a feed forward gain.
@@ -121,11 +127,11 @@ public:
     /**
      * @return The yaw target as set by the user in `setYawTarget`.
      */
-    mockable_inline float getYawTarget() const;
+    mockable_inline float getYawTarget() const { return yawTarget.getValue(); }
     /**
      * @return The pitch target as set by the user in `setPitchTarget`.
      */
-    mockable_inline float getPitchTarget() const;
+    mockable_inline float getPitchTarget() const { return pitchTarget.getValue(); }
 
     /**
      * Reads the raw pitch and yaw angles and updates the wrapped versions of
