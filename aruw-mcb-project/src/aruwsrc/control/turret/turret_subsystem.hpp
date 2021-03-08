@@ -32,6 +32,8 @@
 
 #include <modm/math/filter/pid.hpp>
 
+#include "util_macros.hpp"
+
 namespace aruwsrc
 {
 namespace turret
@@ -58,30 +60,30 @@ public:
     /**
      * @return `true` if both pitch and yaw gimbals are connected.
      */
-    bool isTurretOnline() const;
+    mockable bool isTurretOnline() const;
 
-    int32_t getYawVelocity() const;
-    int32_t getPitchVelocity() const;
+    mockable_inline int32_t getYawVelocity() const;
+    mockable_inline int32_t getPitchVelocity() const;
 
     /**
      * @return An angle between [-180, 180] that is the angle difference of the yaw gimbal
      *      from center (90 degrees).
      */
-    float getYawAngleFromCenter() const;
+    mockable_inline float getYawAngleFromCenter() const;
     /**
      * @return An angle between [-180, 180] that is the angle difference of the pitch gimbal
      *      from center (90 degrees).
      */
-    float getPitchAngleFromCenter() const;
+    mockable_inline float getPitchAngleFromCenter() const;
 
     /**
      * @return The wrapped yaw angle of the actual yaw gimbal.
      */
-    const aruwlib::algorithms::ContiguousFloat& getYawAngle() const;
+    mockable_inline const aruwlib::algorithms::ContiguousFloat& getYawAngle() const;
     /**
      * @return The wrapped pitch angle of the actual pitch gimbal.
      */
-    const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
+    mockable_inline const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
 
     /**
      * Attempts to set desired yaw output to the passed in value. If the turret is out of
@@ -89,47 +91,47 @@ public:
      *
      * @param[in] out The desired yaw output, limited to `[-30000, 30000]`.
      */
-    void setYawMotorOutput(float out);
+    mockable_inline void setYawMotorOutput(float out);
     /**
      * Attempts to set desired pitch output to the passed in value. If the turret is out of
      * bounds, the output is limited.
      *
      * @param[in] out The desired pitch output, limited to `[-30000, 30000]`.
      */
-    void setPitchMotorOutput(float out);
+    mockable_inline void setPitchMotorOutput(float out);
 
     /**
      * Calculates a yaw output that uses the desired chassis rotation as a feed forward gain.
      *
      * @param[in] desiredChassisRotation The chassis rotation in RPM (before gearing).
      */
-    float yawFeedForwardCalculation(float desiredChassisRotation);
+    mockable float yawFeedForwardCalculation(float desiredChassisRotation);
 
     /**
      * Set a target angle in chassis frame, the angle is accordingly limited.
      * Note that since there is no controller in this subsystem, this target
      * angle merely acts as a safe way to set angles when using a position controller.
      */
-    void setYawTarget(float target);
+    mockable void setYawTarget(float target);
     /**
      * @see setYawTarget
      */
-    void setPitchTarget(float target);
+    mockable void setPitchTarget(float target);
 
     /**
      * @return The yaw target as set by the user in `setYawTarget`.
      */
-    float getYawTarget() const;
+    mockable_inline float getYawTarget() const;
     /**
      * @return The pitch target as set by the user in `setPitchTarget`.
      */
-    float getPitchTarget() const;
+    mockable_inline float getPitchTarget() const;
 
     /**
      * Reads the raw pitch and yaw angles and updates the wrapped versions of
      * these angles.
      */
-    void updateCurrentTurretAngles();
+    mockable void updateCurrentTurretAngles();
 
     void runHardwareTests() override;
 

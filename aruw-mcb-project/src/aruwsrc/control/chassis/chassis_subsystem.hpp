@@ -31,6 +31,8 @@
 
 #include <modm/math/filter/pid.hpp>
 
+#include "util_macros.hpp"
+
 namespace aruwsrc
 {
 namespace chassis
@@ -349,7 +351,7 @@ public:
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    void setDesiredOutput(float x, float y, float r);
+    mockable void setDesiredOutput(float x, float y, float r);
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
@@ -361,7 +363,7 @@ public:
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    float chassisSpeedRotationPID(float currentAngleError, float kp);
+    mockable float chassisSpeedRotationPID(float currentAngleError, float kp);
 
     void refresh() override;
 
@@ -369,22 +371,22 @@ public:
      * @return A number between 0 and 1 that is the ratio between the rotationRpm and
      *      the max rotation speed.
      */
-    float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
+    mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
     /**
      * @return The desired rotation based on what was input into the subsystem via
      *      `setDesiredOutput`.
      */
-    float getChassisDesiredRotation() const;
+    mockable_inline float getChassisDesiredRotation() const;
 
     void runHardwareTests() override;
 
     const char* getName() override { return "Chassis"; }
 
-    int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
-    int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
-    int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
-    int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
+    mockable_inline int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
+    mockable_inline int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
+    mockable_inline int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
+    mockable_inline int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
 
 private:
     /**

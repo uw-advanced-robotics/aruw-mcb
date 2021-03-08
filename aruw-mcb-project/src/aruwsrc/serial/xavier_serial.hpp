@@ -71,7 +71,10 @@ public:
         AUTO_AIM_REQUEST_SENT,
     };
 
-    XavierSerial(aruwlib::Drivers* drivers);
+    XavierSerial(
+        aruwlib::Drivers* drivers,
+        const turret::TurretSubsystem* turretSub,
+        const chassis::ChassisSubsystem* chassisSub);
     XavierSerial(const XavierSerial&) = delete;
     XavierSerial& operator=(const XavierSerial&) = delete;
     mockable ~XavierSerial() = default;
@@ -138,6 +141,12 @@ private:
     static constexpr uint8_t AIM_DATA_MESSAGE_YAW_OFFSET = 4;
     static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET = 8;
     static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 9;
+
+    // TX message constants for encoding robot data. These are zero indexed byte offsets.
+    static constexpr uint8_t CHASSIS_DATA_OFFSET = 0;
+    static constexpr uint8_t TURRET_DATA_OFFSET = 4 * sizeof(uint16_t);
+    static constexpr uint8_t IMU_DATA_OFFSET = TURRET_DATA_OFFSET + 2 * sizeof(int32_t);
+    static constexpr uint8_t ROBOT_DATA_MSG_SIZE = IMU_DATA_OFFSET + 9 * sizeof(int32_t);
 
     /// Used for determining when to send robot id.
     aruwlib::arch::PeriodicMilliTimer txRobotIdTimeout;

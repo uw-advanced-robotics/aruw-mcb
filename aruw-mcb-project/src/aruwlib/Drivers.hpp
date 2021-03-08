@@ -37,12 +37,10 @@
 #include "aruwlib/mock/RefSerialMock.hpp"
 #include "aruwlib/mock/RemoteMock.hpp"
 #include "aruwlib/mock/UartMock.hpp"
-#include "aruwlib/mock/XavierSerialMock.hpp"
 
 #include "architecture/profiler.hpp"
 #else
 #include "architecture/profiler.hpp"
-#include "aruwsrc/serial/xavier_serial.hpp"
 #include "communication/can/can.hpp"
 #include "communication/can/can_rx_handler.hpp"
 #include "communication/gpio/analog.hpp"
