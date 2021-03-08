@@ -11,7 +11,7 @@ namespace aruwsrc
 namespace engineer
 {
 class EngineerWristSubsystem;
-class EngineerWristRotateCommand : aruwlib::control::Command
+class EngineerWristRotateCommand : public aruwlib::control::Command
 {
 public:
     static constexpr uint32_t WRIST_MIN_ROTATE_TIME = 300;
