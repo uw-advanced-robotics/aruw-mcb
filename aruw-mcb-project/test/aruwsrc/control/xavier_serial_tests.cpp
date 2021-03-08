@@ -21,6 +21,7 @@
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
+#include <aruwlib/architecture/clock.hpp>
 #include <aruwlib/architecture/endianness_wrappers.hpp>
 #include <gtest/gtest.h>
 
@@ -48,6 +49,8 @@ public:
     {
         return &serial->AutoAimRequest.currAimState;
     }
+
+    bool *getCurrAimRequest() { return &serial->AutoAimRequest.requestType; }
 
 private:
     XavierSerial *serial;
@@ -150,8 +153,7 @@ TEST(XavierSerial, messageReceiveCallback_tracking_request_ackn)
 // TX tests
 
 static constexpr int FRAME_HEADER_LENGTH = 7;
-static constexpr int CRC_16_LENGTH = 2;
-static constexpr int TX_MESSAGE_TYPES = 4;
+static constexpr int CRC_LENGTH = 2;
 
 static void setExpectationsForTxTest(Drivers *drivers, int expectedNumMessagesSent)
 {
@@ -159,11 +161,9 @@ static void setExpectationsForTxTest(Drivers *drivers, int expectedNumMessagesSe
     EXPECT_CALL(drivers->uart, isWriteFinished(_))
         .Times(expectedNumMessagesSent)
         .WillRepeatedly(testing::Return(true));
-    EXPECT_CALL(drivers->canRxHandler, removeReceiveHandler).Times(6);
-    EXPECT_CALL(drivers->djiMotorTxHandler, removeFromMotorManager).Times(6);
 }
 
-TEST(XavierSerial, sendMessageValidateRobotData)
+TEST(XavierSerial, sendMessage_validate_robot_data)
 {
     Drivers drivers;
     TurretSubsystemMock ts(&drivers);
@@ -187,9 +187,11 @@ TEST(XavierSerial, sendMessageValidateRobotData)
     static constexpr float pitValsToTest[] = {0, -180, -178.4, -1.6, 3.13, 142.5, 180};
     static constexpr float rollValsToTest[] = {0, -180, -165.4, -12.3, 4.12, 130, 180};
     static constexpr float yawValsToTest[] = {0, -180, -167.5, -1.2, 13.45, 178.9, 180};
-    static constexpr int MESSAGES_TO_SEND = 1;  // sizeof(yawValsToTest) / sizeof(float);
+    static constexpr int MESSAGES_TO_SEND = sizeof(yawValsToTest) / sizeof(float);
 
     setExpectationsForTxTest(&drivers, MESSAGES_TO_SEND);
+    EXPECT_CALL(drivers.canRxHandler, removeReceiveHandler).Times(6);
+    EXPECT_CALL(drivers.djiMotorTxHandler, removeFromMotorManager).Times(6);
 
     for (int i = 0; i < MESSAGES_TO_SEND; i++)
     {
@@ -211,77 +213,84 @@ TEST(XavierSerial, sendMessageValidateRobotData)
         EXPECT_CALL(drivers.mpu6500, getPitch).WillRepeatedly(Return(pitValsToTest[i]));
         EXPECT_CALL(drivers.mpu6500, getRoll).WillRepeatedly(Return(rollValsToTest[i]));
 
-        auto checkExpectations = [=](aruwlib::serial::Uart::UartPort,
-                                     const uint8_t *data,
-                                     std::size_t length) {
-            const uint8_t *dataStart = data + FRAME_HEADER_LENGTH;
+        auto checkExpectations =
+            [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+                EXPECT_EQ(
+                    FRAME_HEADER_LENGTH + 4 * sizeof(int16_t) + 11 * sizeof(int32_t) + CRC_LENGTH,
+                    length);
 
-            // Chassis data
-            int32_t lf, lb, rf, rb, turretPit, turretYaw, gx, gy, gz, ax, ay, az, yaw, pit, roll;
-            convertFromLittleEndian(&lf, dataStart);
-            convertFromLittleEndian(&lb, dataStart + sizeof(int16_t));
-            convertFromLittleEndian(&rf, dataStart + 2 * sizeof(int16_t));
-            convertFromLittleEndian(&rb, dataStart + 3 * sizeof(int16_t));
-            convertFromLittleEndian(&turretPit, dataStart + 4 * sizeof(int16_t));
-            convertFromLittleEndian(&turretYaw, dataStart + 4 * sizeof(int16_t) + sizeof(int32_t));
-            convertFromLittleEndian(&gx, dataStart + 4 * sizeof(int16_t) + 2 * sizeof(int32_t));
-            convertFromLittleEndian(&gy, dataStart + 4 * sizeof(int16_t) + 3 * sizeof(int32_t));
-            convertFromLittleEndian(&gz, dataStart + 4 * sizeof(int16_t) + 4 * sizeof(int32_t));
-            convertFromLittleEndian(&ax, dataStart + 4 * sizeof(int16_t) + 5 * sizeof(int32_t));
-            convertFromLittleEndian(&ay, dataStart + 4 * sizeof(int16_t) + 6 * sizeof(int32_t));
-            convertFromLittleEndian(&az, dataStart + 4 * sizeof(int16_t) + 7 * sizeof(int32_t));
-            convertFromLittleEndian(&yaw, dataStart + 4 * sizeof(int16_t) + 8 * sizeof(int32_t));
-            convertFromLittleEndian(&pit, dataStart + 4 * sizeof(int16_t) + 9 * sizeof(int32_t));
-            convertFromLittleEndian(&roll, dataStart + 4 * sizeof(int16_t) + 10 * sizeof(int32_t));
+                data += FRAME_HEADER_LENGTH;
 
-            EXPECT_NEAR(lfWheelRPMToTest[i], lf, FIXED_POINT_PRECISION);
-            EXPECT_NEAR(rbWheelRPMToTest[i], lb, FIXED_POINT_PRECISION);
-            EXPECT_NEAR(rfWheelRPMToTest[i], rf, FIXED_POINT_PRECISION);
-            EXPECT_NEAR(rbWheelRPMToTest[i], rb, FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                turretPitchValsToTest[i],
-                static_cast<float>(turretPit) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                turretYawValsToTest[i],
-                static_cast<float>(turretYaw) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                gxValsToTest[i],
-                static_cast<float>(gx) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                gyValsToTest[i],
-                static_cast<float>(gy) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                gzValsToTest[i],
-                static_cast<float>(gz) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                axValsToTest[i],
-                static_cast<float>(ax) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                ayValsToTest[i],
-                static_cast<float>(ay) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                azValsToTest[i],
-                static_cast<float>(az) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                yawValsToTest[i],
-                static_cast<float>(yaw) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                pitValsToTest[i],
-                static_cast<float>(pit) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(rollValsToTest[i], static_cast<float>(roll) * FIXED_POINT_PRECISION, FIXED_POINT_PRECISION);
+                // Chassis data
+                int16_t lf, lb, rf, rb;
+                int32_t turretPit, turretYaw, gx, gy, gz, ax, ay, az, yaw, pit, roll;
+                convertFromLittleEndian(&lf, data);
+                convertFromLittleEndian(&lb, data + sizeof(int16_t));
+                convertFromLittleEndian(&rf, data + 2 * sizeof(int16_t));
+                convertFromLittleEndian(&rb, data + 3 * sizeof(int16_t));
+                convertFromLittleEndian(&turretPit, data + 4 * sizeof(int16_t));
+                convertFromLittleEndian(&turretYaw, data + 4 * sizeof(int16_t) + sizeof(int32_t));
+                convertFromLittleEndian(&gx, data + 4 * sizeof(int16_t) + 2 * sizeof(int32_t));
+                convertFromLittleEndian(&gy, data + 4 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&gz, data + 4 * sizeof(int16_t) + 4 * sizeof(int32_t));
+                convertFromLittleEndian(&ax, data + 4 * sizeof(int16_t) + 5 * sizeof(int32_t));
+                convertFromLittleEndian(&ay, data + 4 * sizeof(int16_t) + 6 * sizeof(int32_t));
+                convertFromLittleEndian(&az, data + 4 * sizeof(int16_t) + 7 * sizeof(int32_t));
+                convertFromLittleEndian(&yaw, data + 4 * sizeof(int16_t) + 8 * sizeof(int32_t));
+                convertFromLittleEndian(&pit, data + 4 * sizeof(int16_t) + 9 * sizeof(int32_t));
+                convertFromLittleEndian(&roll, data + 4 * sizeof(int16_t) + 10 * sizeof(int32_t));
 
-            return length;
-        };
+                EXPECT_EQ(lfWheelRPMToTest[i], lf);
+                EXPECT_EQ(lbWheelRPMToTest[i], lb);
+                EXPECT_EQ(rfWheelRPMToTest[i], rf);
+                EXPECT_EQ(rbWheelRPMToTest[i], rb);
+                EXPECT_NEAR(
+                    turretPitchValsToTest[i],
+                    static_cast<float>(turretPit) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    turretYawValsToTest[i],
+                    static_cast<float>(turretYaw) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    gxValsToTest[i],
+                    static_cast<float>(gx) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    gyValsToTest[i],
+                    static_cast<float>(gy) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    gzValsToTest[i],
+                    static_cast<float>(gz) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    axValsToTest[i],
+                    static_cast<float>(ax) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    ayValsToTest[i],
+                    static_cast<float>(ay) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    azValsToTest[i],
+                    static_cast<float>(az) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    yawValsToTest[i],
+                    static_cast<float>(yaw) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    pitValsToTest[i],
+                    static_cast<float>(pit) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    rollValsToTest[i],
+                    static_cast<float>(roll) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+
+                return length;
+            };
 
         ON_CALL(drivers.uart, write(_, _, _)).WillByDefault(checkExpectations);
 
@@ -289,4 +298,183 @@ TEST(XavierSerial, sendMessageValidateRobotData)
     }
 }
 
-TEST(XavierSerial, sendMessageValidateRobotID) {}
+TEST(XavierSerial, sendMessage_validate_robot_ID)
+{
+    static constexpr float TIME_BETWEEN_ROBOT_ID_SEND = 5000;
+    static constexpr int ROBOT_IDS_TO_CHECK =
+        aruwlib::serial::RefSerial::BLUE_SENTINEL - aruwlib::serial::RefSerial::RED_HERO;
+
+    Drivers drivers;
+    XavierSerial xs(&drivers, nullptr, nullptr);
+    aruwlib::serial::RefSerial::RobotData robotData;
+
+    setExpectationsForTxTest(&drivers, ROBOT_IDS_TO_CHECK);
+    EXPECT_CALL(drivers.refSerial, getRobotData)
+        .Times(ROBOT_IDS_TO_CHECK)
+        .WillRepeatedly(ReturnRef(robotData));
+    ON_CALL(drivers.uart, write(_, _, _))
+        .WillByDefault(
+            [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+                data += FRAME_HEADER_LENGTH;
+                EXPECT_EQ(length, FRAME_HEADER_LENGTH + 1 + CRC_LENGTH);
+                EXPECT_EQ(robotData.robotId, data[0]);
+                return length;
+            });
+
+    xs.initializeCV();
+
+    aruwlib::arch::clock::setTime(0);
+
+    for (int i = aruwlib::serial::RefSerial::RED_HERO;
+         i <= aruwlib::serial::RefSerial::BLUE_SENTINEL;
+         i++)
+    {
+        aruwlib::arch::clock::setTime(
+            aruwlib::arch::clock::getTimeMilliseconds() + TIME_BETWEEN_ROBOT_ID_SEND);
+        robotData.robotId = static_cast<aruwlib::serial::RefSerial::RobotId>(i);
+        xs.sendMessage();
+    }
+}
+
+TEST(XavierSerial, beginAutoAim_starts_aim_request)
+{
+    Drivers drivers;
+    XavierSerial xs(&drivers, nullptr, nullptr);
+    XavierSerialTester xst(&xs);
+
+    xs.beginAutoAim();
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(true, *xst.getCurrAimRequest());
+
+    *xst.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_QUEUED;
+    *xst.getCurrAimRequest() = false;
+    xs.beginAutoAim();
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(true, *xst.getCurrAimRequest());
+
+    *xst.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_SENT;
+    *xst.getCurrAimRequest() = false;
+    xs.beginAutoAim();
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(true, *xst.getCurrAimRequest());
+}
+
+TEST(XavierSerial, stopAutoAim_stops_auto_aim_req)
+{
+    Drivers drivers;
+    XavierSerial xs(&drivers, nullptr, nullptr);
+    XavierSerialTester xst(&xs);
+
+    xs.stopAutoAim();
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(false, *xst.getCurrAimRequest());
+
+    *xst.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_QUEUED;
+    *xst.getCurrAimRequest() = true;
+    xs.stopAutoAim();
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(false, *xst.getCurrAimRequest());
+
+    *xst.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_SENT;
+    *xst.getCurrAimRequest() = true;
+    xs.stopAutoAim();
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(false, *xst.getCurrAimRequest());
+}
+
+TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
+{
+    Drivers drivers;
+    XavierSerial xs(&drivers, nullptr, nullptr);
+    XavierSerialTester xst(&xs);
+    bool autoAimRequest;
+
+    setExpectationsForTxTest(&drivers, 2);
+    ON_CALL(drivers.uart, write(_, _, _))
+        .WillByDefault(
+            [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+                EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
+                EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
+                return length;
+            });
+
+    aruwlib::arch::clock::setTime(0);
+    xs.initializeCV();
+
+    // Queue a message
+    xs.beginAutoAim();
+    autoAimRequest = true;
+
+    // Send target tracking request
+    xs.sendMessage();
+
+    // We shall now be waiting for a reply from the Xavier
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+
+    // Send a message from the Xavier
+    DJISerial<>::SerialMessage message;
+    message.length = 1;
+    message.type = 1;
+    message.data[0] = 1;
+    xs.messageReceiveCallback(message);
+
+    // The request was acknowledged, so the request state should be complete
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_COMPLETE);
+
+    // Queue another message to stop auto aiming
+    xs.stopAutoAim();
+    autoAimRequest = false;
+
+    // Send target tracking request
+    xs.sendMessage();
+
+    // We shall now be waiting for a reply from the Xavier
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+
+    // Send a message from the Xavier
+    message.length = 1;
+    message.type = 1;
+    message.data[0] = 1;
+    xs.messageReceiveCallback(message);
+
+    // The request was acknowledged, so the request state should be complete
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_COMPLETE);
+}
+
+TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
+{
+    static constexpr uint32_t RESEND_AIM_REQUEST_TIMEOUT = 1000;
+
+    Drivers drivers;
+    XavierSerial xs(&drivers, nullptr, nullptr);
+    XavierSerialTester xst(&xs);
+    bool autoAimRequest;
+
+    setExpectationsForTxTest(&drivers, 2);
+    ON_CALL(drivers.uart, write(_, _, _))
+        .WillByDefault(
+            [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+                EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
+                EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
+                return length;
+            });
+
+    aruwlib::arch::clock::setTime(0);
+    xs.initializeCV();
+
+    // Queue a message
+    xs.beginAutoAim();
+    autoAimRequest = true;
+
+    // Send target tracking request
+    xs.sendMessage();
+
+    // We shall now be waiting for a reply from the Xavier
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+
+    // Set the time s.t. the resend timer times out and resend message
+    aruwlib::arch::clock::setTime(RESEND_AIM_REQUEST_TIMEOUT);
+    xs.sendMessage();
+
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+}

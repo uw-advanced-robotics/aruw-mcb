@@ -183,7 +183,7 @@ void XavierSerial::beginAutoAim()
 
 void XavierSerial::stopAutoAim()
 {
-    AutoAimRequest.requestType = true;
+    AutoAimRequest.requestType = false;
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
