@@ -377,7 +377,7 @@ public:
      * @return The desired rotation based on what was input into the subsystem via
      *      `setDesiredOutput`.
      */
-    mockable_inline float getChassisDesiredRotation() const;
+    mockable_inline float getChassisDesiredRotation() const { return chassisDesiredR; }
 
     void runHardwareTests() override;
 

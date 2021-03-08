@@ -23,6 +23,7 @@
 #include "agitator/agitator_calibrate_command.hpp"
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "aruwsrc/serial/xavier_serial.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
@@ -145,8 +146,6 @@ void startSoldierCommands(aruwlib::Drivers *drivers)
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 }
 
-// static constexpr int size = sizeof(aruwlib::control::RemoteMapState);
-
 /* register io mappings here ------------------------------------------------*/
 void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 {
@@ -195,6 +194,8 @@ void initSubsystemCommands(aruwlib::Drivers *drivers)
     setDefaultSoldierCommands(drivers);
     startSoldierCommands(drivers);
     registerSoldierIoMappings(drivers);
+    xavierSerial.attachChassis(&chassis);
+    xavierSerial.attachTurret(&turret);
 }
 
 }  // namespace control

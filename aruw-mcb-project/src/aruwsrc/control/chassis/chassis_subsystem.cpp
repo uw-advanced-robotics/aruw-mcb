@@ -154,8 +154,6 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-float ChassisSubsystem::getChassisDesiredRotation() const { return chassisDesiredR; }
-
 void ChassisSubsystem::runHardwareTests()
 {
     // TODO
