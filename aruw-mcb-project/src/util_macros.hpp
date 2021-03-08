@@ -17,40 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ARUW_CLOCK_HPP__
-#define __ARUW_CLOCK_HPP__
-#include <stdint.h>
+#ifndef UTIL_MACROS_HPP_
+#define UTIL_MACROS_HPP_
 
-#ifndef PLATFORM_HOSTED
-#include <modm/platform.hpp>
+#define DISALLOW_COPY_AND_ASSIGN(Typename) \
+    Typename(const Typename &) = delete;   \
+    Typename &operator=(const Typename &) = delete;
+
+#ifdef PLATFORM_HOSTED
+/// Wrap class functions that are not already virtual in this function if you wish to mock them.
+#define mockable virtual
+#define mockable_inline virtual
 #else
-#include <modm/architecture/interface/clock.hpp>
+/// Wrap class functions that are not already virtual in this function if you wish to mock them.
+#define mockable
+#define mockable_inline inline
 #endif
 
-namespace aruwlib
-{
-namespace arch
-{
-namespace clock
-{
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-void setTime(uint32_t timeMilliseconds);
-uint32_t getTimeMilliseconds();
-uint32_t getTimeMicroseconds();
-#else
-inline uint32_t getTimeMilliseconds() { return modm::Clock().now().time_since_epoch().count(); }
-
-/**
- * @warning This clock time will wrap every 72 minutes. Do not use unless absolutely necessary.
- */
-inline uint32_t getTimeMicroseconds()
-{
-    return modm::PreciseClock().now().time_since_epoch().count();
-}
-#endif
-}  // namespace clock
-
-}  // namespace arch
-
-}  // namespace aruwlib
-#endif
+#endif  // UTIL_MACROS_HPP_

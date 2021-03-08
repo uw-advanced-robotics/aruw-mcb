@@ -37,8 +37,11 @@
 #include "aruwlib/mock/RefSerialMock.hpp"
 #include "aruwlib/mock/RemoteMock.hpp"
 #include "aruwlib/mock/UartMock.hpp"
-// #include "aruwlib/mock/XavierSerialMock.hpp"
+#include "aruwlib/mock/XavierSerialMock.hpp"
+
+#include "architecture/profiler.hpp"
 #else
+#include "architecture/profiler.hpp"
 #include "communication/can/can.hpp"
 #include "communication/can/can_rx_handler.hpp"
 #include "communication/gpio/analog.hpp"
@@ -51,8 +54,8 @@
 #include "communication/serial/uart.hpp"
 #include "aruwsrc/serial/xavier_serial.hpp"
 #include "control/CommandMapper.hpp"
+#include "control/ControlOperatorInterface.hpp"
 #include "control/command_scheduler.hpp"
-#include "control/control_operator_interface.hpp"
 #include "display/OledDisplay.hpp"
 #include "errors/error_controller.hpp"
 #include "motor/dji_motor_tx_handler.hpp"
@@ -83,7 +86,8 @@ public:
           commandMapper(this),
           errorController(this),
           djiMotorTxHandler(this),
-          oledDisplay(this)
+          oledDisplay(this),
+          profiler()
     {
     }
 
@@ -104,6 +108,7 @@ public:
     mock::ErrorControllerMock errorController;
     mock::DjiMotorTxHandlerMock djiMotorTxHandler;
     mock::OledDisplayMock oledDisplay;
+    arch::Profiler profiler;
 #else
 public:
     can::Can can;
@@ -122,6 +127,7 @@ public:
     errors::ErrorController errorController;
     motor::DjiMotorTxHandler djiMotorTxHandler;
     display::OledDisplay oledDisplay;
+    arch::Profiler profiler;
 #endif
 };  // class Drivers
 

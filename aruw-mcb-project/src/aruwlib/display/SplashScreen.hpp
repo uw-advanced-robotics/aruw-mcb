@@ -17,40 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ARUW_CLOCK_HPP__
-#define __ARUW_CLOCK_HPP__
-#include <stdint.h>
+#ifndef SPLASH_SCREEN_HPP_
+#define SPLASH_SCREEN_HPP_
 
-#ifndef PLATFORM_HOSTED
-#include <modm/platform.hpp>
-#else
-#include <modm/architecture/interface/clock.hpp>
-#endif
+#include <modm/ui/menu/abstract_menu.hpp>
 
 namespace aruwlib
 {
-namespace arch
+class Drivers;
+namespace display
 {
-namespace clock
+class SplashScreen : public modm::AbstractMenu
 {
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-void setTime(uint32_t timeMilliseconds);
-uint32_t getTimeMilliseconds();
-uint32_t getTimeMicroseconds();
-#else
-inline uint32_t getTimeMilliseconds() { return modm::Clock().now().time_since_epoch().count(); }
+public:
+    SplashScreen(modm::ViewStack *vs, aruwlib::Drivers *drivers);
 
-/**
- * @warning This clock time will wrap every 72 minutes. Do not use unless absolutely necessary.
- */
-inline uint32_t getTimeMicroseconds()
-{
-    return modm::PreciseClock().now().time_since_epoch().count();
-}
-#endif
-}  // namespace clock
+    void draw() override;
 
-}  // namespace arch
+    void update() override;
 
+    void shortButtonPress(modm::MenuButtons::Button button) override;
+
+    bool hasChanged() override;
+
+    inline void resetHasChanged() { drawn = false; }
+
+private:
+    bool drawn = false;
+    aruwlib::Drivers *drivers;
+};
+}  // namespace display
 }  // namespace aruwlib
-#endif
+
+#endif  // SPLASH_SCREEN_HPP_

@@ -17,11 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTROL_OPERATOR_INTERFACE_MOCK_HPP_
-#define CONTROL_OPERATOR_INTERFACE_MOCK_HPP_
+#ifndef SUBSYSTEM_MOCK_HPP_
+#define SUBSYSTEM_MOCK_HPP_
 
-#include <aruwlib/control/ControlOperatorInterface.hpp>
-#include <aruwlib/control/command.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <gmock/gmock.h>
 
@@ -29,21 +27,20 @@ namespace aruwlib
 {
 namespace mock
 {
-class ControlOperatorInterfaceMock : public aruwlib::control::ControlOperatorInterface
+class SubsystemMock : public control::Subsystem
 {
 public:
-    ControlOperatorInterfaceMock(aruwlib::Drivers *drivers)
-        : aruwlib::control::ControlOperatorInterface(drivers)
-    {
-    }
-    MOCK_METHOD(float, getChassisXInput, (), (override));
-    MOCK_METHOD(float, getChassisYInput, (), (override));
-    MOCK_METHOD(float, getChassisRInput, (), (override));
-    MOCK_METHOD(float, getTurretYawInput, (), (override));
-    MOCK_METHOD(float, getTurretPitchInput, (), (override));
-    MOCK_METHOD(float, getSentinelSpeedInput, (), (override));
-};  // class ControlOperatorInterfaceMock
+    SubsystemMock(Drivers *drivers) : control::Subsystem(drivers) {}
+    MOCK_METHOD(void, initialize, (), (override));
+    MOCK_METHOD(void, setDefaultCommand, (control::Command * defaultCommand), (override));
+    MOCK_METHOD(control::Command *, getDefaultCommand, (), (const override));
+    MOCK_METHOD(void, refresh, (), (override));
+    MOCK_METHOD(bool, isHardwareTestComplete, (), (override));
+    MOCK_METHOD(void, setHardwareTestsComplete, (), (override));
+    MOCK_METHOD(void, runHardwareTests, (), (override));
+    MOCK_METHOD(const char *, getName, (), (override));
+};  // class SubsystemMock
 }  // namespace mock
 }  // namespace aruwlib
 
-#endif  // CONTROL_OPERATOR_INTERFACE_MOCK_HPP_
+#endif  // SUBSYSTEM_MOCK_HPP_

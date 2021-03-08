@@ -26,6 +26,7 @@
 
 /* arch includes ------------------------------------------------------------*/
 #include <aruwlib/architecture/periodic_timer.hpp>
+#include <aruwlib/architecture/profiler.hpp>
 
 /* communication includes ---------------------------------------------------*/
 #include <aruwlib/DriversSingleton.hpp>
@@ -80,26 +81,16 @@ int main()
     while (1)
     {
         // do this as fast as you can
-        updateIo(drivers);
+
+        PROFILE(drivers->profiler, updateIo, (drivers));
 
         if (sendMotorTimeout.execute())
         {
-            imuData.ax = drivers->mpu6500.getAx();
-            imuData.ay = drivers->mpu6500.getAy();
-            imuData.az = drivers->mpu6500.getAz();
-            imuData.wx = drivers->mpu6500.getGx();
-            imuData.wy = drivers->mpu6500.getGy();
-            imuData.wz = drivers->mpu6500.getGz();
-            imuData.pit = drivers->mpu6500.getPitch();
-            imuData.yaw = drivers->mpu6500.getYaw();
-            imuData.rol = drivers->mpu6500.getRoll();
-            drivers->xavierSerial.sendMessage(imuData, chassisData, turretData, 0);
-            drivers->mpu6500.read();
-            drivers->errorController.updateLedDisplay();
-            drivers->commandScheduler.run();
-            drivers->djiMotorTxHandler.processCanSendData();
-            drivers->oledDisplay.updateMenu();
-            xavierSerial.sendMessage();
+            PROFILE(drivers->profiler, drivers->mpu6500.read, ());
+            PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
+            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
         }
         modm::delay_us(10);
     }

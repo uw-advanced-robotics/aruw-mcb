@@ -17,17 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOCK_MACROS_HPP_
-#define MOCK_MACROS_HPP_
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "clock.hpp"
 
-#ifdef PLATFORM_HOSTED
-/// Wrap class functions that are not already virtual in this function if you wish to mock them.
-#define mockable virtual
-#define mockable_inline virtual
-#else
-/// Wrap class functions that are not already virtual in this function if you wish to mock them.
-#define mockable
-#define mockable_inline inline
+namespace aruwlib
+{
+namespace arch
+{
+namespace clock
+{
+uint32_t currTimeMilliseconds = 0;
+
+void setTime(uint32_t timeMilliseconds) { currTimeMilliseconds = timeMilliseconds; }
+
+uint32_t getTimeMilliseconds() { return currTimeMilliseconds; }
+
+uint32_t getTimeMicroseconds() { return currTimeMilliseconds * 1000; }
+}  // namespace clock
+}  // namespace arch
+}  // namespace aruwlib
+
 #endif
-
-#endif  // MOCK_MACROS_HPP_
