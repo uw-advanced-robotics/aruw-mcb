@@ -29,6 +29,45 @@
 
 using namespace aruwlib::arch;
 
+#define SEND_MSG(state, func, currTxMsg)                                                     \
+    case state:                                                                              \
+    {                                                                                        \
+        auto res = func();                                                                   \
+        if (res == SUCCESS)                                                                  \
+        {                                                                                    \
+            currTxMsg = static_cast<TxMessageTypes>((currTxMsg + 1) % CV_MESSAGE_TYPE_SIZE); \
+            break;                                                                           \
+        }                                                                                    \
+        else if (res == DID_NOT_SEND)                                                        \
+        {                                                                                    \
+            currTxMsg = static_cast<TxMessageTypes>((currTxMsg + 1) % CV_MESSAGE_TYPE_SIZE); \
+            modm_fallthrough;                                                                \
+        }                                                                                    \
+        else                                                                                 \
+        {                                                                                    \
+            break;                                                                           \
+        }                                                                                    \
+    }
+
+#define BEGIN_SEND_MSG(state, func, currTxMsg)                \
+    {                                                         \
+        TxMessageTypes prevTxMessageType = currTxMessageType; \
+        auto initialFunc = &XavierSerial::func;               \
+        auto initialState = state;                            \
+        switch (currTxMsg)                                    \
+        {                                                     \
+            SEND_MSG(state, func, currTxMsg)
+
+#define END_SEND_MSG()                        \
+    case CV_MESSAGE_TYPE_SIZE:                \
+        if (prevTxMessageType > initialState) \
+        {                                     \
+            (this->*initialFunc)();           \
+        }                                     \
+        break;                                \
+        }                                     \
+        }
+
 namespace aruwsrc
 {
 namespace serial
@@ -37,7 +76,7 @@ XavierSerial::XavierSerial(
     aruwlib::Drivers* drivers,
     const turret::TurretSubsystem* turretSub,
     const chassis::ChassisSubsystem* chassisSub)
-    : aruwlib::serial::DJISerial<>(drivers, aruwlib::serial::Uart::UartPort::Uart2),
+    : aruwlib::serial::DJISerial<true>(drivers, aruwlib::serial::Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),
       isCvOnline(false),
@@ -107,20 +146,17 @@ void XavierSerial::sendMessage()
         aimDataValid = false;
     }
 
-    // Send robot measurements every time
-    // TODO incrementing a counter to alternate between messages seems weird since the robot id and
-    // auto aim requests aren't sent often, so I removed it altogether, is this bad? We should test
-    // for real
-    sendRobotMeasurements();
-    sendRobotID();
-    sendAutoAimRequest();
+    BEGIN_SEND_MSG(CV_MESSAGE_TYPE_ROBOT_DATA, sendRobotMeasurements, currTxMessageType);
+    SEND_MSG(CV_MESSAGE_TYPE_ROBOT_ID, sendRobotID, currTxMessageType);
+    SEND_MSG(CV_MESSAGE_TYPE_AUTO_AIM_REQUEST, sendAutoAimRequest, currTxMessageType);
+    END_SEND_MSG();
 }
 
-bool XavierSerial::sendRobotMeasurements()
+XavierSerial::TxMessageState XavierSerial::sendRobotMeasurements()
 {
     if (chassisSub == nullptr || turretSub == nullptr)
     {
-        return false;
+        return DID_NOT_SEND;
     }
 
     // Chassis data
@@ -172,7 +208,7 @@ bool XavierSerial::sendRobotMeasurements()
 
     txMessage.type = static_cast<uint8_t>(CV_MESSAGE_TYPE_ROBOT_DATA);
     txMessage.length = ROBOT_DATA_MSG_SIZE;
-    return send();
+    return send() ? SUCCESS : FAIL;
 }
 
 void XavierSerial::beginAutoAim()
@@ -187,11 +223,11 @@ void XavierSerial::stopAutoAim()
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-bool XavierSerial::sendAutoAimRequest()
+XavierSerial::TxMessageState XavierSerial::sendAutoAimRequest()
 {
     if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
         (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT &&
-         AutoAimRequest.sendAimRequestTimeout.execute()))
+         AutoAimRequest.sendAimRequestTimeout.isExpired()))
     {
         txMessage.data[0] = AutoAimRequest.requestType;
         txMessage.length = 1;
@@ -200,23 +236,24 @@ bool XavierSerial::sendAutoAimRequest()
         {
             AutoAimRequest.currAimState = AUTO_AIM_REQUEST_SENT;
             AutoAimRequest.sendAimRequestTimeout.restart(AUTO_AIM_REQUEST_SEND_PERIOD_MS);
-            return true;
+            return SUCCESS;
         }
-        return false;
+        return FAIL;
     }
-    return true;
+    return DID_NOT_SEND;
 }
 
-bool XavierSerial::sendRobotID()
+XavierSerial::TxMessageState XavierSerial::sendRobotID()
 {
-    if (txRobotIdTimeout.execute())
+    if (txRobotIdTimeout.execute() || !robotIdSendSucceeded)
     {
         txMessage.data[0] = static_cast<uint8_t>(drivers->refSerial.getRobotData().robotId);
         txMessage.length = 1;
         txMessage.type = CV_MESSAGE_TYPE_ROBOT_ID;
-        return send();
+        robotIdSendSucceeded = send();
+        return robotIdSendSucceeded ? SUCCESS : FAIL;
     }
-    return true;
+    return DID_NOT_SEND;
 }
 }  // namespace serial
 }  // namespace aruwsrc

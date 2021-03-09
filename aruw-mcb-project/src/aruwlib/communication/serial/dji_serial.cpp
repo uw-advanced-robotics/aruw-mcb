@@ -23,6 +23,7 @@
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/communication/serial/uart.hpp"
 #include "aruwlib/errors/create_errors.hpp"
+#include "aruwlib/architecture/endianness_wrappers.hpp"
 
 namespace aruwlib
 {
@@ -218,8 +219,8 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                         newMessage.data,
                         newMessage.length);
 
-                    uint16_t CRC16 = (newMessage.data[newMessage.length + 1] << 8) |
-                                     newMessage.data[newMessage.length];
+                    uint16_t CRC16;
+                    aruwlib::arch::convertFromLittleEndian(&CRC16, newMessage.data + newMessage.length);
                     if (!verifyCRC16(
                             rxCrcEnforcementBuff,
                             FRAME_HEADER_LENGTH + newMessage.length,

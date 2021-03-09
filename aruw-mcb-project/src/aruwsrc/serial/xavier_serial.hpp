@@ -52,7 +52,7 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class XavierSerial : public aruwlib::serial::DJISerial<>
+class XavierSerial : public aruwlib::serial::DJISerial<true>
 {
 public:
     // AutoAim Data
@@ -109,8 +109,8 @@ public:
 
     mockable_inline bool lastAimDataValid() const { return aimDataValid; }
 
-    mockable void attachTurret(turret::TurretSubsystem* turret) { turretSub = turret; }
-    mockable void attachChassis(chassis::ChassisSubsystem* chassis) { chassisSub = chassis; }
+    mockable_inline void attachTurret(turret::TurretSubsystem* turret) { turretSub = turret; }
+    mockable_inline void attachChassis(chassis::ChassisSubsystem* chassis) { chassisSub = chassis; }
 
 private:
     friend class ::XavierSerialTester;
@@ -127,6 +127,13 @@ private:
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 0,
         CV_MESSAGE_TYPE_TRACKING_REQUEST_ACKN
+    };
+
+    enum TxMessageState
+    {
+        FAIL,
+        SUCCESS,
+        DID_NOT_SEND,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -147,6 +154,9 @@ private:
     static constexpr uint8_t TURRET_DATA_OFFSET = 4 * sizeof(uint16_t);
     static constexpr uint8_t IMU_DATA_OFFSET = TURRET_DATA_OFFSET + 2 * sizeof(int32_t);
     static constexpr uint8_t ROBOT_DATA_MSG_SIZE = IMU_DATA_OFFSET + 9 * sizeof(int32_t);
+
+    /// Message that we are currently sending
+    TxMessageTypes currTxMessageType;
 
     /// Used for determining when to send robot id.
     aruwlib::arch::PeriodicMilliTimer txRobotIdTimeout;
@@ -178,6 +188,12 @@ private:
     const chassis::ChassisSubsystem* chassisSub;
 
     /**
+     * Flag indicating if sending robot id succeeded or not, set to false initially so
+     * robot id will be sent right away
+     */
+    bool robotIdSendSucceeded = false;
+
+    /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information.
      *
@@ -188,17 +204,17 @@ private:
      */
     bool decodeToTurrentAimData(const SerialMessage& message, TurretAimData* aimData);
 
-    bool sendRobotMeasurements();
+    TxMessageState sendRobotMeasurements();
 
     /**
      * Packages `robotId` in an acceptable format for the base `DjiSerial` class to interpret
      * and sends the message via `DjiSerial`'s `send` function.
      *
-     * @return `true` if sending was a success, `false` otherwise.
+     * @return `SUCCESS` if sending was a success, `FAIL` if send failed, `DID_NOT_SEND` otherwise.
      */
-    bool sendRobotID();
+    TxMessageState sendRobotID();
 
-    bool sendAutoAimRequest();
+    TxMessageState sendAutoAimRequest();
 };
 }  // namespace serial
 }  // namespace aruwsrc
