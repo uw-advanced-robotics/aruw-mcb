@@ -24,8 +24,8 @@
 
 #include <modm/processing.hpp>
 
-#include "aruwlib/communication/serial/uart.hpp"
 #include "aruwlib/algorithms/crc.hpp"
+#include "aruwlib/communication/serial/uart.hpp"
 
 #include "util_macros.hpp"
 
@@ -108,7 +108,7 @@ public:
      * @param[in] port serial port to work on.
      * @param[in] isRxCRCEnforcementEnabled if to enable Rx CRC Enforcement.
      */
-    DJISerial(Drivers *drivers, Uart::UartPort port, bool isRxCRCEnforcementEnabled=true);
+    DJISerial(Drivers *drivers, Uart::UartPort port, bool isRxCRCEnforcementEnabled = true);
     DISALLOW_COPY_AND_ASSIGN(DJISerial)
     mockable ~DJISerial() = default;
 

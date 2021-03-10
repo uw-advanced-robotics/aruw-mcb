@@ -160,9 +160,7 @@ XavierSerial::TxMessageState XavierSerial::sendRobotMeasurements()
     }
 
     // Chassis data
-    convertToLittleEndian(
-        chassisSub->getRightFrontRpmActual(),
-        txMessage.data);
+    convertToLittleEndian(chassisSub->getRightFrontRpmActual(), txMessage.data);
     convertToLittleEndian(chassisSub->getLeftFrontRpmActual(), txMessage.data + sizeof(int16_t));
     convertToLittleEndian(chassisSub->getLeftBackRpmActual(), txMessage.data + 2 * sizeof(int16_t));
     convertToLittleEndian(

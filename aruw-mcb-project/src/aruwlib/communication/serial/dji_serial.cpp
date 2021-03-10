@@ -20,9 +20,9 @@
 #include "dji_serial.hpp"
 
 #include "aruwlib/architecture/clock.hpp"
+#include "aruwlib/architecture/endianness_wrappers.hpp"
 #include "aruwlib/communication/serial/uart.hpp"
 #include "aruwlib/errors/create_errors.hpp"
-#include "aruwlib/architecture/endianness_wrappers.hpp"
 
 namespace aruwlib
 {
@@ -210,8 +210,11 @@ void DJISerial::updateSerial()
                 if (rxCrcEnabled)
                 {
                     uint16_t CRC16;
-                    aruwlib::arch::convertFromLittleEndian(&CRC16, newMessage.data + newMessage.length);
-                    currCrc16 = algorithms::calculateCRC16(newMessage.data, newMessage.length, currCrc16);
+                    aruwlib::arch::convertFromLittleEndian(
+                        &CRC16,
+                        newMessage.data + newMessage.length);
+                    currCrc16 =
+                        algorithms::calculateCRC16(newMessage.data, newMessage.length, currCrc16);
                     if (currCrc16 != CRC16)
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;

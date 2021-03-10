@@ -153,7 +153,8 @@ private:
     static constexpr uint8_t CHASSIS_DATA_OFFSET = 0;
     static constexpr uint8_t TURRET_DATA_OFFSET = 4 * sizeof(int16_t);
     static constexpr uint8_t IMU_DATA_OFFSET = TURRET_DATA_OFFSET + 2 * sizeof(uint16_t);
-    static constexpr int ROBOT_DATA_MSG_SIZE = IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 6 * sizeof(int16_t);
+    static constexpr int ROBOT_DATA_MSG_SIZE =
+        IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 6 * sizeof(int16_t);
 
     /// Message that we are currently sending
     TxMessageTypes currTxMessageType;
