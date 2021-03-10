@@ -52,7 +52,7 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class XavierSerial : public aruwlib::serial::DJISerial<true>
+class XavierSerial : public aruwlib::serial::DJISerial
 {
 public:
     // AutoAim Data
@@ -141,19 +141,19 @@ private:
     /// Time between each robot id send to CV in milliseconds.
     static constexpr int16_t TIME_BETWEEN_ROBOT_ID_SEND_MS = 5000;
     static constexpr int16_t AUTO_AIM_REQUEST_SEND_PERIOD_MS = 1000;
-    static constexpr float FIXED_POINT_PRECISION = 0.001f;
+    static constexpr float FIXED_POINT_PRECISION = 0.01f;
 
     // RX message constants for decoding an aim data message. These are zero indexed byte offsets.
     static constexpr uint8_t AIM_DATA_MESSAGE_PITCH_OFFSET = 0;
     static constexpr uint8_t AIM_DATA_MESSAGE_YAW_OFFSET = 4;
-    static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET = 8;
-    static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 9;
+    static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 2 * sizeof(uint16_t) + sizeof(uint8_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET = AIM_DATA_MESSAGE_SIZE - 1;
 
     // TX message constants for encoding robot data. These are zero indexed byte offsets.
     static constexpr uint8_t CHASSIS_DATA_OFFSET = 0;
-    static constexpr uint8_t TURRET_DATA_OFFSET = 4 * sizeof(uint16_t);
-    static constexpr uint8_t IMU_DATA_OFFSET = TURRET_DATA_OFFSET + 2 * sizeof(int32_t);
-    static constexpr uint8_t ROBOT_DATA_MSG_SIZE = IMU_DATA_OFFSET + 9 * sizeof(int32_t);
+    static constexpr uint8_t TURRET_DATA_OFFSET = 4 * sizeof(int16_t);
+    static constexpr uint8_t IMU_DATA_OFFSET = TURRET_DATA_OFFSET + 2 * sizeof(uint16_t);
+    static constexpr int ROBOT_DATA_MSG_SIZE = IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 6 * sizeof(int16_t);
 
     /// Message that we are currently sending
     TxMessageTypes currTxMessageType;

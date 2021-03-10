@@ -76,7 +76,7 @@ XavierSerial::XavierSerial(
     aruwlib::Drivers* drivers,
     const turret::TurretSubsystem* turretSub,
     const chassis::ChassisSubsystem* chassisSub)
-    : aruwlib::serial::DJISerial<true>(drivers, aruwlib::serial::Uart::UartPort::Uart2),
+    : aruwlib::serial::DJISerial(drivers, aruwlib::serial::Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),
       isCvOnline(false),
@@ -125,7 +125,7 @@ bool XavierSerial::decodeToTurrentAimData(const SerialMessage& message, TurretAi
         return false;
     }
 
-    int32_t rawPitch, rawYaw;
+    uint16_t rawPitch, rawYaw;
     convertFromLittleEndian(&rawPitch, message.data + AIM_DATA_MESSAGE_PITCH_OFFSET);
     convertFromLittleEndian(&rawYaw, message.data + AIM_DATA_MESSAGE_YAW_OFFSET);
 
@@ -160,22 +160,22 @@ XavierSerial::TxMessageState XavierSerial::sendRobotMeasurements()
     }
 
     // Chassis data
-    convertToLittleEndian(chassisSub->getLeftFrontRpmActual(), txMessage.data);
-    convertToLittleEndian(chassisSub->getLeftBackRpmActual(), txMessage.data + sizeof(int16_t));
     convertToLittleEndian(
         chassisSub->getRightFrontRpmActual(),
-        txMessage.data + 2 * sizeof(int16_t));
+        txMessage.data);
+    convertToLittleEndian(chassisSub->getLeftFrontRpmActual(), txMessage.data + sizeof(int16_t));
+    convertToLittleEndian(chassisSub->getLeftBackRpmActual(), txMessage.data + 2 * sizeof(int16_t));
     convertToLittleEndian(
         chassisSub->getRightBackRpmActual(),
         txMessage.data + 3 * sizeof(int16_t));
 
     // Turret data
     convertToLittleEndian(
-        static_cast<int32_t>(turretSub->getPitchAngle().getValue() / FIXED_POINT_PRECISION),
+        static_cast<uint16_t>(turretSub->getPitchAngle().getValue() / FIXED_POINT_PRECISION),
         txMessage.data + TURRET_DATA_OFFSET);
     convertToLittleEndian(
-        static_cast<int32_t>(turretSub->getYawAngle().getValue() / FIXED_POINT_PRECISION),
-        txMessage.data + TURRET_DATA_OFFSET + sizeof(int32_t));
+        static_cast<uint16_t>(turretSub->getYawAngle().getValue() / FIXED_POINT_PRECISION),
+        txMessage.data + TURRET_DATA_OFFSET + sizeof(uint16_t));
 
     // IMU data
     convertToLittleEndian(
@@ -188,23 +188,23 @@ XavierSerial::TxMessageState XavierSerial::sendRobotMeasurements()
         static_cast<int32_t>(drivers->mpu6500.getGz() / FIXED_POINT_PRECISION),
         txMessage.data + IMU_DATA_OFFSET + 2 * sizeof(int32_t));
     convertToLittleEndian(
-        static_cast<int32_t>(drivers->mpu6500.getAx() / FIXED_POINT_PRECISION),
+        static_cast<int16_t>(drivers->mpu6500.getAx() / FIXED_POINT_PRECISION),
         txMessage.data + IMU_DATA_OFFSET + 3 * sizeof(int32_t));
     convertToLittleEndian(
-        static_cast<int32_t>(drivers->mpu6500.getAy() / FIXED_POINT_PRECISION),
-        txMessage.data + IMU_DATA_OFFSET + 4 * sizeof(int32_t));
+        static_cast<int16_t>(drivers->mpu6500.getAy() / FIXED_POINT_PRECISION),
+        txMessage.data + IMU_DATA_OFFSET + 3 * sizeof(int32_t) + sizeof(int16_t));
     convertToLittleEndian(
-        static_cast<int32_t>(drivers->mpu6500.getAz() / FIXED_POINT_PRECISION),
-        txMessage.data + IMU_DATA_OFFSET + 5 * sizeof(int32_t));
+        static_cast<int16_t>(drivers->mpu6500.getAz() / FIXED_POINT_PRECISION),
+        txMessage.data + IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 2 * sizeof(int16_t));
     convertToLittleEndian(
-        static_cast<int32_t>(drivers->mpu6500.getYaw() / FIXED_POINT_PRECISION),
-        txMessage.data + IMU_DATA_OFFSET + 6 * sizeof(int32_t));
+        static_cast<uint16_t>(drivers->mpu6500.getYaw() / FIXED_POINT_PRECISION),
+        txMessage.data + IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 3 * sizeof(int16_t));
     convertToLittleEndian(
-        static_cast<int32_t>(drivers->mpu6500.getPitch() / FIXED_POINT_PRECISION),
-        txMessage.data + IMU_DATA_OFFSET + 7 * sizeof(int32_t));
+        static_cast<int16_t>(drivers->mpu6500.getPitch() / FIXED_POINT_PRECISION),
+        txMessage.data + IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 4 * sizeof(int16_t));
     convertToLittleEndian(
-        static_cast<int32_t>(drivers->mpu6500.getRoll() / FIXED_POINT_PRECISION),
-        txMessage.data + IMU_DATA_OFFSET + 8 * sizeof(int32_t));
+        static_cast<int16_t>(drivers->mpu6500.getRoll() / FIXED_POINT_PRECISION),
+        txMessage.data + IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 5 * sizeof(int16_t));
 
     txMessage.type = static_cast<uint8_t>(CV_MESSAGE_TYPE_ROBOT_DATA);
     txMessage.length = ROBOT_DATA_MSG_SIZE;

@@ -37,7 +37,7 @@ namespace serial
  * @note use the static function located in Drivers to interact with
  *      this class.
  */
-class RefSerial : public DJISerial<true>
+class RefSerial : public DJISerial
 {
 private:
     // RX message constants
