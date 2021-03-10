@@ -37,7 +37,7 @@ using namespace aruwsrc::mock;
 using namespace testing;
 using namespace aruwlib::arch;
 
-static constexpr float FIXED_POINT_PRECISION = 0.001f;
+static constexpr float FIXED_POINT_PRECISION = 0.01f;
 
 // class for accessing internals of XavierSerial class for testing purposes
 class XavierSerialTester
@@ -49,6 +49,8 @@ public:
     {
         return &serial->AutoAimRequest.currAimState;
     }
+
+    XavierSerial::TxMessageTypes *getCurrTxMessageType() { return &serial->currTxMessageType; }
 
     bool *getCurrAimRequest() { return &serial->AutoAimRequest.requestType; }
 
@@ -62,17 +64,19 @@ static void initAndRunAutoAimRxTest(float pitchDesired, float yawDesired, bool h
 {
     Drivers drivers;
     XavierSerial serial(&drivers, nullptr, nullptr);
-    DJISerial<>::SerialMessage message;
+    DJISerial::SerialMessage message;
     message.headByte = 0xA5;
     message.type = 0;
-    message.length = 9;
+    message.length = 2 * sizeof(uint16_t) + sizeof(uint8_t);
 
     // Store in little endian, todo replace with helper
-    convertToLittleEndian(static_cast<int32_t>(pitchDesired / FIXED_POINT_PRECISION), message.data);
     convertToLittleEndian(
-        static_cast<int32_t>(yawDesired / FIXED_POINT_PRECISION),
-        message.data + sizeof(int32_t));
-    message.data[2 * sizeof(int32_t)] = static_cast<uint8_t>(hasTarget);
+        static_cast<uint16_t>(pitchDesired / FIXED_POINT_PRECISION),
+        message.data);
+    convertToLittleEndian(
+        static_cast<uint16_t>(yawDesired / FIXED_POINT_PRECISION),
+        message.data + sizeof(uint16_t));
+    message.data[2 * sizeof(uint16_t)] = static_cast<uint8_t>(hasTarget);
     message.messageTimestamp = 1234;
 
     serial.messageReceiveCallback(message);
@@ -97,11 +101,10 @@ TEST(XavierSerial, messageReceiveCallback_turret_aim_message_has_target)
 
 TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_whole_numbers)
 {
-    // Pitch/yaw values should at least be correct between [0, 360]...test from [-360, 360]
-    // since negative numbers should work as well
-    for (int i = -360; i < 360; i += 10)
+    // Pitch/yaw values should at least be correct between [0, 360]
+    for (int i = 0; i < 360; i += 10)
     {
-        for (int j = -360; j < 360; j += 10)
+        for (int j = 360; j >= 0; j -= 10)
         {
             initAndRunAutoAimRxTest(i, j, false);
         }
@@ -110,9 +113,9 @@ TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_whole_numbers)
 
 TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_single_decimals)
 {
-    for (float i = -1; i < 1; i += 0.01)
+    for (float i = 0; i < 1; i += 0.01)
     {
-        for (float j = -1; j < 1; j += 0.01)
+        for (float j = 1; j >= 0; j -= 0.01)
         {
             initAndRunAutoAimRxTest(i, j, false);
         }
@@ -124,7 +127,7 @@ TEST(XavierSerial, messageReceiveCallback_tracking_request_ackn)
     Drivers drivers;
     XavierSerial serial(&drivers, nullptr, nullptr);
     XavierSerialTester serialTester(&serial);
-    DJISerial<>::SerialMessage message;
+    DJISerial::SerialMessage message;
     message.headByte = 0xA5;
     message.type = 1;
     message.length = 1;
@@ -169,24 +172,23 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
     TurretSubsystemMock ts(&drivers);
     ChassisSubsystemMock cs(&drivers);
     XavierSerial xs(&drivers, &ts, &cs);
+    XavierSerialTester xst(&xs);
 
     static constexpr int16_t rfWheelRPMToTest[] = {0, -16000, -12345, 231, 12331, 14098, 16000};
     static constexpr int16_t lfWheelRPMToTest[] = {0, -16000, -14889, -1, 3123, 12000, 16000};
     static constexpr int16_t lbWheelRPMToTest[] = {0, -16000, -534, 123, 12394, 15999, 16000};
     static constexpr int16_t rbWheelRPMToTest[] = {0, -16000, -1, 1, 14, 343, 16000};
-    static constexpr float turretYawValsToTest[] =
-        {0.0f, -180.0f, -360.0f - 24.0, 36.34f, 120.6f, 180.0f};
-    static constexpr float turretPitchValsToTest[] =
-        {0.0f, -180.0f, -360.0f, -139.45f, 12.9f, 176.48f, 180.0f};
+    static constexpr float turretYawValsToTest[] = {0.0, 36.34, 90.04, 120.6, 180.0, 270.3, 360};
+    static constexpr float turretPitchValsToTest[] = {0.0, 12.9, 93.4, 176.48, 180, 270.3, 360};
     static constexpr float axValsToTest[] = {0, -180, -123.45, -2.34, 45.9, 54.65, 120.90, 180};
     static constexpr float ayValsToTest[] = {0, -180, -149.43, -75.9, 34.5, 76.9, 176.32, 180};
     static constexpr float azValsToTest[] = {0, -180, -130.54, -34.32, 56.7, 90.4, 130.4, 180};
-    static constexpr float gxValsToTest[] = {0, -180, -158.45, -65.4, 43.9, 130.9, 180};
-    static constexpr float gyValsToTest[] = {0, -180, -111.32, -65.2, 12.5, 160.8, 180};
-    static constexpr float gzValsToTest[] = {0, -180, -167.9, -1.54, 18.5, 169.8, 180};
-    static constexpr float pitValsToTest[] = {0, -180, -178.4, -1.6, 3.13, 142.5, 180};
-    static constexpr float rollValsToTest[] = {0, -180, -165.4, -12.3, 4.12, 130, 180};
-    static constexpr float yawValsToTest[] = {0, -180, -167.5, -1.2, 13.45, 178.9, 180};
+    static constexpr float gxValsToTest[] = {0, -1002, -158.45, -65.4, 43.9, 130.9, 1000};
+    static constexpr float gyValsToTest[] = {0, -1000, -111.32, -65.2, 12.5, 160.8, 1001};
+    static constexpr float gzValsToTest[] = {0, -1001, -167.9, -1.54, 18.5, 169.8, 1002};
+    static constexpr float pitValsToTest[] = {-180, -145.54, -90, 0, 1.12, 3.13, 142.5, 180};
+    static constexpr float rollValsToTest[] = {-180, -156, -91.1, 1.14, 4.12, 130, 180};
+    static constexpr float yawValsToTest[] = {0, 1.52, 13.45, 178.9, 180, 200.3, 360.0};
     static constexpr int MESSAGES_TO_SEND = sizeof(yawValsToTest) / sizeof(float);
 
     setExpectationsForTxTest(&drivers, MESSAGES_TO_SEND);
@@ -213,32 +215,36 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
         EXPECT_CALL(drivers.mpu6500, getPitch).WillRepeatedly(Return(pitValsToTest[i]));
         EXPECT_CALL(drivers.mpu6500, getRoll).WillRepeatedly(Return(rollValsToTest[i]));
 
+        // Set message sending type to robot data to ensure that robot data will be sent each time
+        *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_ROBOT_DATA;
+
         auto checkExpectations =
             [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
                 EXPECT_EQ(
-                    FRAME_HEADER_LENGTH + 4 * sizeof(int16_t) + 11 * sizeof(int32_t) + CRC_LENGTH,
+                    FRAME_HEADER_LENGTH + 12 * sizeof(int16_t) + 3 * sizeof(int32_t) + CRC_LENGTH,
                     length);
 
                 data += FRAME_HEADER_LENGTH;
 
                 // Chassis data
-                int16_t lf, lb, rf, rb;
-                int32_t turretPit, turretYaw, gx, gy, gz, ax, ay, az, yaw, pit, roll;
-                convertFromLittleEndian(&lf, data);
-                convertFromLittleEndian(&lb, data + sizeof(int16_t));
-                convertFromLittleEndian(&rf, data + 2 * sizeof(int16_t));
+                int16_t lf, lb, rf, rb, ax, ay, az, pit, roll;
+                uint16_t turretPit, turretYaw, yaw;
+                int32_t gx, gy, gz;
+                convertFromLittleEndian(&rf, data);
+                convertFromLittleEndian(&lf, data + sizeof(int16_t));
+                convertFromLittleEndian(&lb, data + 2 * sizeof(int16_t));
                 convertFromLittleEndian(&rb, data + 3 * sizeof(int16_t));
                 convertFromLittleEndian(&turretPit, data + 4 * sizeof(int16_t));
-                convertFromLittleEndian(&turretYaw, data + 4 * sizeof(int16_t) + sizeof(int32_t));
-                convertFromLittleEndian(&gx, data + 4 * sizeof(int16_t) + 2 * sizeof(int32_t));
-                convertFromLittleEndian(&gy, data + 4 * sizeof(int16_t) + 3 * sizeof(int32_t));
-                convertFromLittleEndian(&gz, data + 4 * sizeof(int16_t) + 4 * sizeof(int32_t));
-                convertFromLittleEndian(&ax, data + 4 * sizeof(int16_t) + 5 * sizeof(int32_t));
-                convertFromLittleEndian(&ay, data + 4 * sizeof(int16_t) + 6 * sizeof(int32_t));
-                convertFromLittleEndian(&az, data + 4 * sizeof(int16_t) + 7 * sizeof(int32_t));
-                convertFromLittleEndian(&yaw, data + 4 * sizeof(int16_t) + 8 * sizeof(int32_t));
-                convertFromLittleEndian(&pit, data + 4 * sizeof(int16_t) + 9 * sizeof(int32_t));
-                convertFromLittleEndian(&roll, data + 4 * sizeof(int16_t) + 10 * sizeof(int32_t));
+                convertFromLittleEndian(&turretYaw, data + 5 * sizeof(int16_t));
+                convertFromLittleEndian(&gx, data + 6 * sizeof(int16_t));
+                convertFromLittleEndian(&gy, data + 6 * sizeof(int16_t) + sizeof(int32_t));
+                convertFromLittleEndian(&gz, data + 6 * sizeof(int16_t) + 2 * sizeof(int32_t));
+                convertFromLittleEndian(&ax, data + 6 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&ay, data + 7 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&az, data + 8 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&yaw, data + 9 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&pit, data + 10 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&roll, data + 11 * sizeof(int16_t) + 3 * sizeof(int32_t));
 
                 EXPECT_EQ(lfWheelRPMToTest[i], lf);
                 EXPECT_EQ(lbWheelRPMToTest[i], lb);
@@ -302,10 +308,11 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
 {
     static constexpr float TIME_BETWEEN_ROBOT_ID_SEND = 5000;
     static constexpr int ROBOT_IDS_TO_CHECK =
-        aruwlib::serial::RefSerial::BLUE_SENTINEL - aruwlib::serial::RefSerial::RED_HERO;
+        aruwlib::serial::RefSerial::BLUE_SENTINEL - aruwlib::serial::RefSerial::RED_HERO + 1;
 
     Drivers drivers;
     XavierSerial xs(&drivers, nullptr, nullptr);
+    XavierSerialTester xst(&xs);
     aruwlib::serial::RefSerial::RobotData robotData;
 
     setExpectationsForTxTest(&drivers, ROBOT_IDS_TO_CHECK);
@@ -331,6 +338,7 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
     {
         aruwlib::arch::clock::setTime(
             aruwlib::arch::clock::getTimeMilliseconds() + TIME_BETWEEN_ROBOT_ID_SEND);
+        *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_ROBOT_ID;
         robotData.robotId = static_cast<aruwlib::serial::RefSerial::RobotId>(i);
         xs.sendMessage();
     }
@@ -406,13 +414,14 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     autoAimRequest = true;
 
     // Send target tracking request
+    *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
     xs.sendMessage();
 
     // We shall now be waiting for a reply from the Xavier
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
 
     // Send a message from the Xavier
-    DJISerial<>::SerialMessage message;
+    DJISerial::SerialMessage message;
     message.length = 1;
     message.type = 1;
     message.data[0] = 1;
@@ -426,6 +435,7 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     autoAimRequest = false;
 
     // Send target tracking request
+    *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
     xs.sendMessage();
 
     // We shall now be waiting for a reply from the Xavier
@@ -467,6 +477,7 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
     autoAimRequest = true;
 
     // Send target tracking request
+    *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
     xs.sendMessage();
 
     // We shall now be waiting for a reply from the Xavier
@@ -474,6 +485,7 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
 
     // Set the time s.t. the resend timer times out and resend message
     aruwlib::arch::clock::setTime(RESEND_AIM_REQUEST_TIMEOUT);
+    *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
     xs.sendMessage();
 
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);

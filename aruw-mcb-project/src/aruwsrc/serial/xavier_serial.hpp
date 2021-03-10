@@ -71,6 +71,14 @@ public:
         AUTO_AIM_REQUEST_SENT,
     };
 
+    enum TxMessageTypes
+    {
+        CV_MESSAGE_TYPE_ROBOT_DATA = 0,
+        CV_MESSAGE_TYPE_ROBOT_ID,
+        CV_MESSAGE_TYPE_AUTO_AIM_REQUEST,
+        CV_MESSAGE_TYPE_SIZE,
+    };
+
     XavierSerial(
         aruwlib::Drivers* drivers,
         const turret::TurretSubsystem* turretSub,
@@ -115,14 +123,6 @@ public:
 private:
     friend class ::XavierSerialTester;
 
-    enum TxMessageTypes
-    {
-        CV_MESSAGE_TYPE_ROBOT_DATA = 0,
-        CV_MESSAGE_TYPE_ROBOT_ID,
-        CV_MESSAGE_TYPE_AUTO_AIM_REQUEST,
-        CV_MESSAGE_TYPE_SIZE,
-    };
-
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 0,
@@ -145,7 +145,7 @@ private:
 
     // RX message constants for decoding an aim data message. These are zero indexed byte offsets.
     static constexpr uint8_t AIM_DATA_MESSAGE_PITCH_OFFSET = 0;
-    static constexpr uint8_t AIM_DATA_MESSAGE_YAW_OFFSET = 4;
+    static constexpr uint8_t AIM_DATA_MESSAGE_YAW_OFFSET = sizeof(uint16_t);
     static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 2 * sizeof(uint16_t) + sizeof(uint8_t);
     static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET = AIM_DATA_MESSAGE_SIZE - 1;
 
