@@ -387,7 +387,7 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     Drivers drivers;
     XavierSerial xs(&drivers, nullptr, nullptr);
     XavierSerialTester xst(&xs);
-    bool autoAimRequest;
+    bool autoAimRequest = false;
 
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
@@ -448,7 +448,7 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
     Drivers drivers;
     XavierSerial xs(&drivers, nullptr, nullptr);
     XavierSerialTester xst(&xs);
-    bool autoAimRequest;
+    bool autoAimRequest = false;
 
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))

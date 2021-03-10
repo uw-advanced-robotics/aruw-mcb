@@ -31,15 +31,15 @@ namespace serial
 DJISerial::DJISerial(Drivers *drivers, Uart::UartPort port, bool isRxCRCEnforcementEnabled)
     : port(port),
       djiSerialRxState(SERIAL_HEADER_SEARCH),
+      newMessage(),
+      mostRecentMessage(),
       frameCurrReadByte(0),
       frameHeader(),
       rxCrcEnabled(isRxCRCEnforcementEnabled),
       txBuffer(),
-      drivers(drivers)
+      drivers(drivers),
+      txMessage()
 {
-    txMessage.length = 0;
-    newMessage.length = 0;
-    mostRecentMessage.length = 0;
 }
 
 void DJISerial::initialize()
