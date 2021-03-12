@@ -57,7 +57,8 @@ TCPServer::TCPServer(int targetPortNumber)
       clientConnected(false),
       mainClientDescriptor(-1),
       serverAddress(),
-      portNumber(-1)
+      portNumber(-1),
+      remoteMessageReady(false)
 {
     // Do sockety stuff.
     listenFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
@@ -109,7 +110,7 @@ TCPServer::~TCPServer()
     close(mainClientDescriptor);
 }
 
-TCPServer* TCPServer::MainServer()
+TCPServer* const TCPServer::MainServer()
 {
 #ifdef ENV_UNIT_TESTS
     return nullptr;
@@ -162,6 +163,18 @@ void TCPServer::writeToClient(const char* message, int32_t messageLength)
     {
         std::cerr << e.what() << std::endl;
     }
+}
+
+bool TCPServer::isRemoteMessageReady() {
+    return this->remoteMessageReady;
+}
+
+void TCPServer::setRemoteMessageReady(bool ready) {
+    this->remoteMessageReady = ready;
+}
+
+const uint8_t* const TCPServer::getRemoteMessageBuffer() {
+    return this->remoteMessageBuffer;
 }
 
 void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength)

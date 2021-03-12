@@ -24,6 +24,11 @@
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/communication/serial/uart.hpp"
 
+#ifdef PLATFORM_HOSTED
+#include "aruwlib/communication/tcp-server/TCPServer.hpp"
+using namespace aruwlib::communication;
+#endif
+
 using namespace aruwlib::serial;
 
 namespace aruwlib
@@ -38,7 +43,19 @@ void Remote::read()
         connected = false;  // Remote no longer connected
         reset();            // Reset current remote values
     }
+
     uint8_t data;  // Next byte to be read
+
+#ifdef PLATFORM_HOSTED
+    TCPServer* const mainServer = TCPServer::MainServer();
+    // If message is available read it into buffer and mark msgReady as false. Also update
+    // read timeout.
+    if (mainServer->isRemoteMessageReady()) {
+        memcpy(rxBuffer, mainServer->getRemoteMessageBuffer(), REMOTE_BUF_LEN * sizeof(rxBuffer[0]));
+        mainServer->setRemoteMessageReady(false);
+        lastRead = aruwlib::arch::clock::getTimeMilliseconds();
+    }
+#else
     // Read next byte if available and more needed for the current packet
     while (drivers->uart.read(Uart::UartPort::Uart1, &data) && currentBufferIndex < REMOTE_BUF_LEN)
     {
@@ -46,6 +63,7 @@ void Remote::read()
         currentBufferIndex++;
         lastRead = aruwlib::arch::clock::getTimeMilliseconds();
     }
+#endif
     // Check read timeout
     if (aruwlib::arch::clock::getTimeMilliseconds() - lastRead > REMOTE_READ_TIMEOUT)
     {

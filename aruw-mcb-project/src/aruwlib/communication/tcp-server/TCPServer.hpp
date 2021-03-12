@@ -27,6 +27,8 @@
 #include <atomic>
 #include <cstdint>
 
+#include "aruwlib/communication/remote.hpp"
+
 namespace aruwlib
 {
 namespace communication
@@ -61,9 +63,9 @@ public:
     static const uint8_t LISTEN_QUEUE_SIZE = 5;  // 5 is max on most systems
 
     /**
-     * Return a const reference to the singleton static instance of this class.
+     * Return a const pointer to the singleton static instance of this class.
      */
-    static TCPServer* MainServer();
+    static TCPServer* const MainServer();
 
     /**
      * Accepts a new connection and stores the file descriptor in mainClientDescriptor
@@ -86,6 +88,22 @@ public:
      */
     void writeToClient(const char* message, int32_t messageLength);
 
+    /**
+     * Returns whether or not the server has a message ready from the remote control
+     */
+    bool isRemoteMessageReady();
+
+    /**
+     * Set the status of the remoteMessageReady flag
+     */
+    void setRemoteMessageReady(bool ready);
+
+    /**
+     * Returns a const pointer to a const buffer containing the most recent remote
+     * control message
+     */
+    const uint8_t* const getRemoteMessageBuffer();
+
 private:
     bool socketOpened;
     bool clientConnected;
@@ -93,6 +111,12 @@ private:
     int16_t mainClientDescriptor;  // File Descriptor which we communciate with
     sockaddr_in serverAddress;
     int16_t portNumber;  // portNumber the server is bound to
+
+    /** Variables for handling and storing messages for Remote Control */
+    // Whether or not server has valid and new message ready from remote control
+    bool remoteMessageReady; 
+    // Buffer for storing most recent message from remote control simulator.
+    uint8_t remoteMessageBuffer[aruwlib::Remote::REMOTE_BUF_LEN];
 
     // Singleton server.
     static TCPServer mainServer;
