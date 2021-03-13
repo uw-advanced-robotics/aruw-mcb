@@ -123,10 +123,16 @@ void TCPServer::getConnection()
 {
     sockaddr_in clientAddress;
     socklen_t clientAddressLength = sizeof(clientAddress);
-    mainClientDescriptor = accept(
+    // Accept next connection in queue and create new non-blocking socket.
+    mainClientDescriptor = accept4(
         listenFileDescriptor,
         reinterpret_cast<sockaddr*>(&clientAddress),
-        &clientAddressLength);
+        &clientAddressLength,
+        SOCK_NONBLOCK);
+    if (mainClientDescriptor < 0) {
+        perror("TCPServer failed to accept connection");
+        throw std::runtime_error("AcceptError");
+    }
     cerr << "TCPServer: connection accepted" << std::endl;
 }
 
@@ -175,6 +181,42 @@ void TCPServer::setRemoteMessageReady(bool ready) {
 
 const uint8_t* const TCPServer::getRemoteMessageBuffer() {
     return this->remoteMessageBuffer;
+}
+
+void TCPServer::updateInput() {
+    int8_t messageType = getMessageType();
+    // For now read one message at a time otherwise concerns
+    // of blocking are real as we just infinitely read. To accomplish
+    // this better multithreading of some type would be important.
+    switch (messageType) {
+        case 0:
+            readRemoteMessage();
+            break;
+    }
+}
+
+void TCPServer::readRemoteMessage() {
+    readMessage(mainClientDescriptor, 
+        reinterpret_cast<char*>(remoteMessageBuffer), 
+        aruwlib::Remote::REMOTE_BUF_LEN);
+    remoteMessageReady = true;
+}
+
+int8_t TCPServer::getMessageType() {
+    int8_t messageType = -1;
+    int n = read(mainClientDescriptor, &messageType, 1);
+    while (n < 0) {
+        // Socket should be non-blocking, so EAGAIN or EWOULDBLOCK means
+        // that no data is available.
+        if (errno & (EAGAIN | EWOULDBLOCK)) {
+            return -1;
+        } else if (errno != EINTR) {
+            // All other errors besides EINTR are fatal pretty much.
+            perror("TCPServer: Read error");
+            throw new std::runtime_error("ReadError");
+        }
+    }
+    return messageType;
 }
 
 void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength)

@@ -117,6 +117,7 @@ void updateIo(aruwlib::Drivers *drivers)
 {
 #ifdef PLATFORM_HOSTED
     aruwlib::motorsim::SimHandler::updateSims();
+    aruwlib::communication::TCPServer::MainServer()->updateInput();
 #endif
 
     drivers->canRxHandler.pollCanData();

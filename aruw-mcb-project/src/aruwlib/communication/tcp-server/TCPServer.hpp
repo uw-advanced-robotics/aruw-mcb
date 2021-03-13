@@ -104,6 +104,12 @@ public:
      */
     const uint8_t* const getRemoteMessageBuffer();
 
+    /**
+     * Check connection for any new input messages, and if so store those messages in
+     * appropriate buffer.
+     */
+    void updateInput();
+
 private:
     bool socketOpened;
     bool clientConnected;
@@ -120,6 +126,16 @@ private:
 
     // Singleton server.
     static TCPServer mainServer;
+
+    // Checks if there is a byte in the TCPStream and returns its value if so, otherwise
+    // returns -1.
+    int8_t getMessageType();
+
+    /** 
+     * Read a series of bytes representing a remote message and update TCPServer's
+     * state accordingly
+     */
+    void readRemoteMessage();
 };  // TCPServer
 
 /**
