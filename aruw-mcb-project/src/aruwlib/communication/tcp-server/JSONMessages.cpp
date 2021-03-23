@@ -40,6 +40,8 @@ namespace json
 using std::cout;
 using std::string;
 
+static constexpr char MESSAGE_TERMINATOR[] = "\n\r\n\r";
+
 /**
  * returns JSON string representing motor message.
  */
@@ -52,7 +54,8 @@ string makeMotorMessage(const aruwlib::motor::DjiMotor& motor)
         "\"motorID\":" + std::to_string(motor.getMotorIdentifier()) + "," +
         "\"shaftRPM\":" + std::to_string(motor.getShaftRPM()) + "," +
         "\"torque\":" + std::to_string(motor.getTorque()) + "," +
-        "\"encoderValue\":" + std::to_string(motor.getEncoderUnwrapped()) + "}";
+        "\"encoderValue\":" + std::to_string(motor.getEncoderUnwrapped()) + "}" +
+        MESSAGE_TERMINATOR;
     return jsonMessage;
 }
 

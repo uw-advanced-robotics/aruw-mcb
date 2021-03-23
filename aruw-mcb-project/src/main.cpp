@@ -70,15 +70,15 @@ int main()
      */
     aruwlib::Drivers *drivers = aruwlib::DoNotUse_getDrivers();
 
-    Board::initialize();
-    initializeIo(drivers);
-    aruwsrc::control::initSubsystemCommands(drivers);
-
 #ifdef PLATFORM_HOSTED
     aruwlib::motorsim::SimHandler::resetMotorSims();
     // Blocking call, waits until Windows Simulator connects.
     aruwlib::communication::TCPServer::MainServer()->getConnection();
 #endif
+
+    Board::initialize();
+    initializeIo(drivers);
+    aruwsrc::control::initSubsystemCommands(drivers);
 
     while (1)
     {

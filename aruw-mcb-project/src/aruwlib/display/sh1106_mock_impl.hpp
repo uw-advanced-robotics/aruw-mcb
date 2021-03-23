@@ -21,6 +21,10 @@
 #error "Don't include this file directly, use 'sh1106.hpp' instead!"
 #endif
 
+#include <string>
+
+#include "aruwlib/communication/tcp-server/TCPServer.hpp"
+
 template <unsigned int Width, unsigned int Height, bool Flipped>
 modm::ResumableResult<bool> aruwlib::display::Sh1106<Width, Height, Flipped>::updateNonblocking()
 {
@@ -32,7 +36,19 @@ modm::ResumableResult<bool> aruwlib::display::Sh1106<Width, Height, Flipped>::up
 template <unsigned int Width, unsigned int Height, bool Flipped>
 void aruwlib::display::Sh1106<Width, Height, Flipped>::update()
 {
-    // no-op
+    using namespace aruwlib::communication;
+
+    std::string jsonMessage = "{\"messageType\":\"oled\",\"bitmap\":\"";
+    for (size_t y = 0; y < Height / 8; y++)
+    {
+        for (size_t x = 0; x < Width; x++)
+        {
+            jsonMessage += " " + std::to_string(this->display_buffer[x][y]);
+        }
+    }
+    jsonMessage += "\"}\n\r\n\r";
+    const char* jsonCString = jsonMessage.c_str();
+    TCPServer::MainServer()->writeToClient(jsonCString, strlen(jsonCString));
 }
 
 template <unsigned int Width, unsigned int Height, bool Flipped>
