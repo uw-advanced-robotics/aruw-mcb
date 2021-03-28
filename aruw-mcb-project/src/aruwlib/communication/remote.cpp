@@ -50,8 +50,12 @@ void Remote::read()
     TCPServer* const mainServer = TCPServer::MainServer();
     // If message is available read it into buffer and mark msgReady as false. Also update
     // read timeout.
-    if (mainServer->isRemoteMessageReady()) {
-        memcpy(rxBuffer, mainServer->getRemoteMessageBuffer(), REMOTE_BUF_LEN * sizeof(rxBuffer[0]));
+    if (mainServer->isRemoteMessageReady())
+    {
+        memcpy(
+            rxBuffer,
+            mainServer->getRemoteMessageBuffer(),
+            REMOTE_BUF_LEN * sizeof(rxBuffer[0]));
         mainServer->setRemoteMessageReady(false);
         lastRead = aruwlib::arch::clock::getTimeMilliseconds();
     }

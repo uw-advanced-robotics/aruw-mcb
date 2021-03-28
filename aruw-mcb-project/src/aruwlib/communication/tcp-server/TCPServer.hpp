@@ -120,7 +120,7 @@ private:
 
     /** Variables for handling and storing messages for Remote Control */
     // Whether or not server has valid and new message ready from remote control
-    bool remoteMessageReady; 
+    bool remoteMessageReady;
     // Buffer for storing most recent message from remote control simulator.
     uint8_t remoteMessageBuffer[aruwlib::Remote::REMOTE_BUF_LEN];
 
@@ -131,7 +131,7 @@ private:
     // returns -1.
     int8_t getMessageType();
 
-    /** 
+    /**
      * Read a series of bytes representing a remote message and update TCPServer's
      * state accordingly
      */

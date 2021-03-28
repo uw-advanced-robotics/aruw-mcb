@@ -129,7 +129,8 @@ void TCPServer::getConnection()
         reinterpret_cast<sockaddr*>(&clientAddress),
         &clientAddressLength,
         SOCK_NONBLOCK);
-    if (mainClientDescriptor < 0) {
+    if (mainClientDescriptor < 0)
+    {
         perror("TCPServer failed to accept connection");
         throw std::runtime_error("AcceptError");
     }
@@ -171,46 +172,49 @@ void TCPServer::writeToClient(const char* message, int32_t messageLength)
     }
 }
 
-bool TCPServer::isRemoteMessageReady() {
-    return this->remoteMessageReady;
-}
+bool TCPServer::isRemoteMessageReady() { return this->remoteMessageReady; }
 
-void TCPServer::setRemoteMessageReady(bool ready) {
-    this->remoteMessageReady = ready;
-}
+void TCPServer::setRemoteMessageReady(bool ready) { this->remoteMessageReady = ready; }
 
-const uint8_t* const TCPServer::getRemoteMessageBuffer() {
-    return this->remoteMessageBuffer;
-}
+const uint8_t* const TCPServer::getRemoteMessageBuffer() { return this->remoteMessageBuffer; }
 
-void TCPServer::updateInput() {
+void TCPServer::updateInput()
+{
     int8_t messageType = getMessageType();
     // For now read one message at a time otherwise concerns
     // of blocking are real as we just infinitely read. To accomplish
     // this better multithreading of some type would be important.
-    switch (messageType) {
+    switch (messageType)
+    {
         case 0:
             readRemoteMessage();
             break;
     }
 }
 
-void TCPServer::readRemoteMessage() {
-    readMessage(mainClientDescriptor, 
-        reinterpret_cast<char*>(remoteMessageBuffer), 
+void TCPServer::readRemoteMessage()
+{
+    readMessage(
+        mainClientDescriptor,
+        reinterpret_cast<char*>(remoteMessageBuffer),
         aruwlib::Remote::REMOTE_BUF_LEN);
     remoteMessageReady = true;
 }
 
-int8_t TCPServer::getMessageType() {
+int8_t TCPServer::getMessageType()
+{
     int8_t messageType = -1;
     int n = read(mainClientDescriptor, &messageType, 1);
-    while (n < 0) {
+    while (n < 0)
+    {
         // Socket should be non-blocking, so EAGAIN or EWOULDBLOCK means
         // that no data is available.
-        if (errno & (EAGAIN | EWOULDBLOCK)) {
+        if (errno & (EAGAIN | EWOULDBLOCK))
+        {
             return -1;
-        } else if (errno != EINTR) {
+        }
+        else if (errno != EINTR)
+        {
             // All other errors besides EINTR are fatal pretty much.
             perror("TCPServer: Read error");
             throw new std::runtime_error("ReadError");

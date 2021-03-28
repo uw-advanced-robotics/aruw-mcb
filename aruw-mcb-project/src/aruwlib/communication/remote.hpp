@@ -39,8 +39,8 @@ class Drivers;
 class Remote
 {
 public:
-    static const int REMOTE_BUF_LEN = 18;              /// Length of the remote recieve buffer.
-    
+    static const int REMOTE_BUF_LEN = 18;  /// Length of the remote recieve buffer.
+
     Remote(Drivers *drivers) : drivers(drivers) {}
     DISALLOW_COPY_AND_ASSIGN(Remote)
     mockable ~Remote() = default;
