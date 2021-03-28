@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <threads.h>
+#include <thread>
 
 #include <string>
 
@@ -60,4 +60,26 @@ TEST(TCPServerTests, SendingCorrectMessages)
     while ((finished_child = wait(&status)) > 0)
         ;
     EXPECT_STREQ(response, "Test message 1 2 3");
+}
+
+void sendTestMessage(const char* message, int port) 
+{
+    TCPClient client("localhost", port);
+    client.Write(message);
+}
+
+TEST(TCPServerTests, ReadingCorrectMessages) 
+{
+    char readBuffer[32];
+    const int serverPort = 8889;
+    TCPServer tcpServer(serverPort);
+
+    std::thread client(sendTestMessage, "123abc", serverPort);
+    tcpServer.getConnection();
+    tcpServer.readFromClient(readBuffer, 6);
+
+    client.join();
+
+    tcpServer.closeConnection();
+    EXPECT_STREQ(readBuffer, "123abc");
 }

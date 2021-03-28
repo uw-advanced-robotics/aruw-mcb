@@ -44,8 +44,6 @@ void Remote::read()
         reset();            // Reset current remote values
     }
 
-    uint8_t data;  // Next byte to be read
-
 #ifdef PLATFORM_HOSTED
     TCPServer* const mainServer = TCPServer::MainServer();
     // If message is available read it into buffer and mark msgReady as false. Also update
@@ -60,6 +58,8 @@ void Remote::read()
         lastRead = aruwlib::arch::clock::getTimeMilliseconds();
     }
 #else
+    uint8_t data;  // Next byte to be read
+    
     // Read next byte if available and more needed for the current packet
     while (drivers->uart.read(Uart::UartPort::Uart1, &data) && currentBufferIndex < REMOTE_BUF_LEN)
     {

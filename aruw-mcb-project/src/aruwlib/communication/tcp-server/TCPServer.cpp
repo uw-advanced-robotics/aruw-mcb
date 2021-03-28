@@ -110,7 +110,7 @@ TCPServer::~TCPServer()
     close(mainClientDescriptor);
 }
 
-TCPServer* const TCPServer::MainServer()
+TCPServer* TCPServer::MainServer()
 {
 #ifdef ENV_UNIT_TESTS
     return nullptr;
@@ -142,7 +142,7 @@ void TCPServer::closeConnection()
     close(mainClientDescriptor);
     mainClientDescriptor = -1;
     std::cout << "TCPServer: closed connection with client, "
-                 "use getConnection() to connect to a new one";
+                 "use getConnection() to connect to a new one\n";
 }
 
 /**
@@ -172,11 +172,16 @@ void TCPServer::writeToClient(const char* message, int32_t messageLength)
     }
 }
 
+void TCPServer::readFromClient(char* readBuffer, int32_t n) 
+{
+    readMessage(mainClientDescriptor, readBuffer, n);
+}
+
 bool TCPServer::isRemoteMessageReady() { return this->remoteMessageReady; }
 
 void TCPServer::setRemoteMessageReady(bool ready) { this->remoteMessageReady = ready; }
 
-const uint8_t* const TCPServer::getRemoteMessageBuffer() { return this->remoteMessageBuffer; }
+const uint8_t* TCPServer::getRemoteMessageBuffer() { return this->remoteMessageBuffer; }
 
 void TCPServer::updateInput()
 {

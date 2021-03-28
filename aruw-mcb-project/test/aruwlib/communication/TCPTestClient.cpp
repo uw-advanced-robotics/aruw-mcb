@@ -85,7 +85,7 @@ void TCPClient::Read(char *buffer, int length)
     }
 }
 
-void TCPClient::Write(char *message)
+void TCPClient::Write(const char *message)
 {
     int length = strlen(message);
     int n = write(sockfd, message, length);

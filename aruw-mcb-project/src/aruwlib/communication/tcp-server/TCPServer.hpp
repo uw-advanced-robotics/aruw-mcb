@@ -63,9 +63,9 @@ public:
     static const uint8_t LISTEN_QUEUE_SIZE = 5;  // 5 is max on most systems
 
     /**
-     * Return a const pointer to the singleton static instance of this class.
+     * Return a pointer to the singleton static instance of this class.
      */
-    static TCPServer* const MainServer();
+    static TCPServer* MainServer();
 
     /**
      * Accepts a new connection and stores the file descriptor in mainClientDescriptor
@@ -89,6 +89,14 @@ public:
     void writeToClient(const char* message, int32_t messageLength);
 
     /**
+     * Pre: readBuffer must have length n + 1 else behavior undefined.
+     * 
+     * Post: Reads n bytes from the connected client and stores it in the given buffer.
+     * Blocks until all bytes are read. 
+     */
+    void readFromClient(char* readBuffer, int32_t n);
+
+    /**
      * Returns whether or not the server has a message ready from the remote control
      */
     bool isRemoteMessageReady();
@@ -102,7 +110,7 @@ public:
      * Returns a const pointer to a const buffer containing the most recent remote
      * control message
      */
-    const uint8_t* const getRemoteMessageBuffer();
+    const uint8_t* getRemoteMessageBuffer();
 
     /**
      * Check connection for any new input messages, and if so store those messages in

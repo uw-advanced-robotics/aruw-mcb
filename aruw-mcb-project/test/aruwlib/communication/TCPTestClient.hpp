@@ -55,7 +55,7 @@ public:
     /**
      * Writes the given message to the server this client is connected to.
      */
-    void Write(char* message);
+    void Write(const char* message);
 
 private:
     int sockfd;
