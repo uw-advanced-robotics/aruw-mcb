@@ -37,20 +37,12 @@
 using std::cerr;
 /**
  * TCP Server class to allow MCB simulator to communicate with stuff.
- * I actually have no idea what's happening ~ Tenzin
+ * I only have some idea of what's happening ~ Tenzin
  */
 namespace aruwlib
 {
 namespace communication
 {
-/**
- * TCPServer constructor. Runs a server on the given portnumber.
- * Also takes a function pointer. This function is left to the implementer
- * of a specific TCP server to define (it should take an int16_t parameter
- * for client file descriptor). Ideally mainLoop should use a non-blocking
- * loop as currently since threads detach its possible that if a client never
- * responds there could be threads that never close.
- */
 
 TCPServer::TCPServer(int targetPortNumber)
     : socketOpened(false),
@@ -145,14 +137,8 @@ void TCPServer::closeConnection()
                  "use getConnection() to connect to a new one\n";
 }
 
-/**
- * Post: Returns the port number of this server.
- */
 uint16_t TCPServer::getPortNumber() { return this->portNumber; }
 
-/**
- * Writes "messageLength" bytes of "message" to the mainClient
- */
 void TCPServer::writeToClient(const char* message, int32_t messageLength)
 {
     if (mainClientDescriptor < 0)
@@ -251,10 +237,6 @@ void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLengt
     }
 }
 
-/**
- * Write to connected connectionFileDescriptor, ensures that all bytes are sent.
- * Throws runtime_error if irrecoverable error occurs.
- */
 void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes)
 {
     uint32_t bytesWritten = 0;
@@ -277,9 +259,6 @@ void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes)
     }
 }
 
-/**
- * Read the next 4 bytes as a big endian int32_t
- */
 int32_t readInt32(int16_t fileDescriptor)
 {
     char buffer[4];
