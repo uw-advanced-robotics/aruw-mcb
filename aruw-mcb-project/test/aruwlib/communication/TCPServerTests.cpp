@@ -30,11 +30,16 @@
 using namespace aruwlib::communication;
 using test::communication::TCPClient;
 
+
+void sendingCorrectMessagesHelper(TCPServer* tcpServer, const char* message) 
+{
+    tcpServer->getConnection();
+    tcpServer->writeToClient(message, strlen(message));
+    tcpServer->closeConnection();
+}
+
 TEST(TCPServerTests, SendingCorrectMessages)
 {
-    pid_t finished_child;
-    pid_t child_pid;
-    int status = 0;
     char response[32];
     memset(response, 0, sizeof(response));
 
@@ -43,26 +48,17 @@ TEST(TCPServerTests, SendingCorrectMessages)
     // Fork since calls to accept() and connect() are blocking
     // so we need some form of multi-threading to be able to test
     // TCPServer.
-    if ((child_pid = fork()) == 0)
-    {
-        tcpServer.getConnection();
-        tcpServer.writeToClient("Test message 1 2 3", 18);
-        tcpServer.closeConnection();
-        exit(0);
-    }
-    else
-    {
-        TCPClient client("localhost", serverPort);
-        client.Read(response, 18);
-    }
+    std::thread serverThread(sendingCorrectMessagesHelper, &tcpServer, "Test message 1 2 3");
 
-    // Wait for all children to exit
-    while ((finished_child = wait(&status)) > 0)
-        ;
+    TCPClient client("localhost", serverPort);
+    client.Read(response, 18);
+
+    serverThread.join();
+
     EXPECT_STREQ(response, "Test message 1 2 3");
 }
 
-void sendTestMessage(const char* message, int port) 
+void sendMessageFromClientToServer(const char* message, int port) 
 {
     TCPClient client("localhost", port);
     client.Write(message);
@@ -71,10 +67,11 @@ void sendTestMessage(const char* message, int port)
 TEST(TCPServerTests, ReadingCorrectMessages) 
 {
     char readBuffer[32];
+    memset(readBuffer, 0, sizeof(readBuffer)); // unnecessary, but sanity check
     const int serverPort = 8889;
     TCPServer tcpServer(serverPort);
 
-    std::thread client(sendTestMessage, "123abc", serverPort);
+    std::thread client(sendMessageFromClientToServer, "123abc", serverPort);
     tcpServer.getConnection();
     tcpServer.readFromClient(readBuffer, 6);
 
