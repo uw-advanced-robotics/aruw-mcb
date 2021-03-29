@@ -33,6 +33,11 @@ namespace aruwlib
 {
 namespace communication
 {
+enum class MessageType : int8_t
+{
+    REMOTE = 0,
+};
+
 /**
  * TCPServer is an singleton class for running a TCPServer using a user
  * defined messaging protocol.
@@ -90,14 +95,14 @@ public:
 
     /**
      * Pre: readBuffer must have length n + 1 else behavior undefined.
-     * 
+     *
      * Post: Reads n bytes from the connected client and stores it in the given buffer.
-     * Blocks until all bytes are read. 
+     * Blocks until all bytes are read.
      */
     void readFromClient(char* readBuffer, int32_t n);
 
     /**
-     * Returns whether or not the server has a message ready from the remote control
+     * Returns whether or not the server has a message of specified type ready
      */
     bool isRemoteMessageReady();
 
@@ -137,7 +142,7 @@ private:
 
     // Checks if there is a byte in the TCPStream and returns its value if so, otherwise
     // returns -1.
-    int8_t getMessageType();
+    MessageType getMessageType();
 
     /**
      * Read a series of bytes representing a remote message and update TCPServer's

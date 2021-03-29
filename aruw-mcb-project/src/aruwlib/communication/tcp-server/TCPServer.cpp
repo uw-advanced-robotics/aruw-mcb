@@ -43,7 +43,6 @@ namespace aruwlib
 {
 namespace communication
 {
-
 TCPServer::TCPServer(int targetPortNumber)
     : socketOpened(false),
       clientConnected(false),
@@ -158,7 +157,7 @@ void TCPServer::writeToClient(const char* message, int32_t messageLength)
     }
 }
 
-void TCPServer::readFromClient(char* readBuffer, int32_t n) 
+void TCPServer::readFromClient(char* readBuffer, int32_t n)
 {
     readMessage(mainClientDescriptor, readBuffer, n);
 }
@@ -171,13 +170,13 @@ const uint8_t* TCPServer::getRemoteMessageBuffer() { return this->remoteMessageB
 
 void TCPServer::updateInput()
 {
-    int8_t messageType = getMessageType();
+    MessageType messageType = getMessageType();
     // For now read one message at a time otherwise concerns
     // of blocking are real as we just infinitely read. To accomplish
     // this better multithreading of some type would be important.
     switch (messageType)
     {
-        case 0:
+        case MessageType::REMOTE:
             readRemoteMessage();
             break;
     }
@@ -192,7 +191,7 @@ void TCPServer::readRemoteMessage()
     remoteMessageReady = true;
 }
 
-int8_t TCPServer::getMessageType()
+MessageType TCPServer::getMessageType()
 {
     int8_t messageType = -1;
     int n = read(mainClientDescriptor, &messageType, 1);
@@ -202,7 +201,7 @@ int8_t TCPServer::getMessageType()
         // that no data is available.
         if (errno & (EAGAIN | EWOULDBLOCK))
         {
-            return -1;
+            break;  // break and skip to return statement
         }
         else if (errno != EINTR)
         {
@@ -213,7 +212,7 @@ int8_t TCPServer::getMessageType()
         // The one error that we do want to retry the read after is EINTR.
         n = read(mainClientDescriptor, &messageType, 1);
     }
-    return messageType;
+    return static_cast<MessageType>(messageType);
 }
 
 void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength)

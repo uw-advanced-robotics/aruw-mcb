@@ -17,9 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <thread>
-
 #include <string>
+#include <thread>
 
 #include <aruwlib/communication/tcp-server/TCPServer.hpp>
 #include <gmock/gmock.h>
@@ -30,8 +29,7 @@
 using namespace aruwlib::communication;
 using test::communication::TCPClient;
 
-
-void sendingCorrectMessagesHelper(TCPServer* tcpServer, const char* message) 
+void sendingCorrectMessagesHelper(TCPServer* tcpServer, const char* message)
 {
     tcpServer->getConnection();
     tcpServer->writeToClient(message, strlen(message));
@@ -58,16 +56,16 @@ TEST(TCPServerTests, SendingCorrectMessages)
     EXPECT_STREQ(response, "Test message 1 2 3");
 }
 
-void sendMessageFromClientToServer(const char* message, int port) 
+void sendMessageFromClientToServer(const char* message, int port)
 {
     TCPClient client("localhost", port);
     client.Write(message);
 }
 
-TEST(TCPServerTests, ReadingCorrectMessages) 
+TEST(TCPServerTests, ReadingCorrectMessages)
 {
     char readBuffer[32];
-    memset(readBuffer, 0, sizeof(readBuffer)); // unnecessary, but sanity check
+    memset(readBuffer, 0, sizeof(readBuffer));  // unnecessary, but sanity check
     const int serverPort = 8889;
     TCPServer tcpServer(serverPort);
 
