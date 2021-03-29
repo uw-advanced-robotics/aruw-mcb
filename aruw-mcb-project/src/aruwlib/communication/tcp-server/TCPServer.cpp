@@ -100,8 +100,12 @@ TCPServer::TCPServer(int targetPortNumber)
 
 TCPServer::~TCPServer()
 {
-    close(listenFileDescriptor);
-    close(mainClientDescriptor);
+    if (listenFileDescriptor >= 0) {
+        close(listenFileDescriptor);
+    }
+    if (mainClientDescriptor >= 0) {
+        close(mainClientDescriptor);
+    }
 }
 
 TCPServer* TCPServer::MainServer()
