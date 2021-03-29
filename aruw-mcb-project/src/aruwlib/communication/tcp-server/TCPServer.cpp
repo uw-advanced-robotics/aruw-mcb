@@ -260,7 +260,7 @@ void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLengt
         int32_t n = read(fileDescriptor, readBuffer + bytesRead, messageLength - bytesRead);
         if (n < 0)
         {
-            if (errno == EAGAIN or errno == EINTR)
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
             {
                 continue;
             }
@@ -282,7 +282,7 @@ void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes)
         int32_t n = write(fileDescriptor, message + bytesWritten, bytes - bytesWritten);
         if (n < 0)
         {
-            if (errno == EAGAIN or errno == EINTR)
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
             {
                 continue;
             }

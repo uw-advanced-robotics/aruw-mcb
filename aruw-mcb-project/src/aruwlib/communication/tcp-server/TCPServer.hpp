@@ -160,7 +160,7 @@ private:
  * Pre: Message readBuffer must be messageLength + 1 bytes long otherwise out of bounds
  * array access will occur and behavior will be undefined.
  * Post: Reads a message to the given "readBuffer" ensuring that messageLength bytes are
- * read.
+ * read, done in a "blocking" fashion even if socket is nonblocking.
  *
  * Throws: runtime_error if read() fails.
  */
@@ -169,6 +169,7 @@ void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLengt
 /**
  * Pre: fileDescriptor should be open.
  * Write to connected ClientFileDescriptor, ensures that all bytes are sent.
+ * done in a "blocking" fashion even if socket is nonblocking.
  * Throws std::runtime_error if write() fails, check errno to see exact code why.
  */
 void writeMessage(int16_t fileDescriptor, const char* message, uint16_t bytes);

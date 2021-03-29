@@ -78,3 +78,9 @@ TEST(TCPServerTests, ReadingCorrectMessages)
     tcpServer.closeConnection();
     EXPECT_STREQ(readBuffer, "123abc");
 }
+
+TEST(TCPServerTests, MessageReadyFlagsDefaultInitialized) 
+{
+    TCPServer tcpServer(8889);
+    EXPECT_EQ(false, tcpServer.isMessageReady(REMOTE));
+}
