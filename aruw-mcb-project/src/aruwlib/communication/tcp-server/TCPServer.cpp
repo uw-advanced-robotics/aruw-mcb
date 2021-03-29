@@ -210,6 +210,8 @@ int8_t TCPServer::getMessageType()
             perror("TCPServer: Read error");
             throw new std::runtime_error("ReadError");
         }
+        // The one error that we do want to retry the read after is EINTR.
+        n = read(mainClientDescriptor, &messageType, 1);
     }
     return messageType;
 }
