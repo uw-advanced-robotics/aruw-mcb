@@ -33,9 +33,13 @@ namespace aruwlib
 {
 namespace communication
 {
-enum class MessageType : int8_t
+enum MessageType : int8_t
 {
-    REMOTE = 0,
+    REMOTE,
+    NUMBER_OF_MESSAGE_TYPES 
+    // NUMBER_OF_MESSAGE_TYPES should always be last. Careful TO NOT DEFINE
+    // value of enum, could mess up numbering otherwise. Just add your enum wherever
+    // but do NOT assign it an integer value.
 };
 
 /**
@@ -104,18 +108,19 @@ public:
     /**
      * Returns whether or not the server has a message of specified type ready
      */
-    bool isRemoteMessageReady();
+    bool isMessageReady(MessageType messageType);
 
     /**
-     * Set the status of the remoteMessageReady flag
+     * Set the ready status of the given messageType. Typically should set to false
+     * after reading a message.
      */
-    void setRemoteMessageReady(bool ready);
+    void setMessageReady(MessageType messageType, bool ready);
 
     /**
-     * Returns a const pointer to a const buffer containing the most recent remote
-     * control message
+     * Returns a const pointer to a message of the desired type. Throws runtime error
+     * if requested messagetype does not exist/isn't supported.
      */
-    const uint8_t* getRemoteMessageBuffer();
+    const void* getMessage(MessageType);
 
     /**
      * Check connection for any new input messages, and if so store those messages in
@@ -132,17 +137,17 @@ private:
     int16_t portNumber;  // portNumber the server is bound to
 
     /** Variables for handling and storing messages for Remote Control */
-    // Whether or not server has valid and new message ready from remote control
-    bool remoteMessageReady;
+    // Stores bool 
+    bool messageReadyFlags[NUMBER_OF_MESSAGE_TYPES];
     // Buffer for storing most recent message from remote control simulator.
     uint8_t remoteMessageBuffer[aruwlib::Remote::REMOTE_BUF_LEN];
 
     // Singleton server.
     static TCPServer mainServer;
 
-    // Checks if there is a byte in the TCPStream and returns its value if so, otherwise
-    // returns -1.
-    MessageType getMessageType();
+    // Checks next byte in TCP stream and returns its value if present, otherwise
+    // if no data available at time of call returns -1.
+    int8_t getMessageType();
 
     /**
      * Read a series of bytes representing a remote message and update TCPServer's

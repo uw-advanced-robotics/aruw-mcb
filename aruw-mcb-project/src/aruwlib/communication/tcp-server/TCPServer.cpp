@@ -48,9 +48,12 @@ TCPServer::TCPServer(int targetPortNumber)
       clientConnected(false),
       mainClientDescriptor(-1),
       serverAddress(),
-      portNumber(-1),
-      remoteMessageReady(false)
+      portNumber(-1)
 {
+    // 0-initialize class arrays
+    memset(messageReadyFlags, false, sizeof(messageReadyFlags));
+    memset(remoteMessageBuffer, 0, sizeof(remoteMessageBuffer));
+
     // Do sockety stuff.
     listenFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (listenFileDescriptor < 0)
@@ -162,23 +165,52 @@ void TCPServer::readFromClient(char* readBuffer, int32_t n)
     readMessage(mainClientDescriptor, readBuffer, n);
 }
 
-bool TCPServer::isRemoteMessageReady() { return this->remoteMessageReady; }
+bool TCPServer::isMessageReady(MessageType messageType) 
+{
+    // Bounds checking
+    if (messageType < 0 || messageType >= NUMBER_OF_MESSAGE_TYPES) {
+            throw new std::runtime_error("TCPServer: invalid messagetype requested");
+    }
+    return messageReadyFlags[messageType];
+}
 
-void TCPServer::setRemoteMessageReady(bool ready) { this->remoteMessageReady = ready; }
+void TCPServer::setMessageReady(MessageType messageType, bool ready) 
+{
+    // Bounds checking
+    if (messageType < 0 || messageType >= NUMBER_OF_MESSAGE_TYPES) {
+            throw new std::runtime_error("TCPServer: invalid messagetype requested");
+    } 
+    messageReadyFlags[messageType] = ready;
+}
 
-const uint8_t* TCPServer::getRemoteMessageBuffer() { return this->remoteMessageBuffer; }
+const void* TCPServer::getMessage(MessageType messageType) 
+{ 
+    switch (messageType) {
+        case REMOTE:
+            return this->remoteMessageBuffer;
+        default:
+            throw new std::runtime_error("TCPServer.getMessage(): requested messageType is invalid");
+    }
+    return nullptr;
+}
 
 void TCPServer::updateInput()
 {
-    MessageType messageType = getMessageType();
-    // For now read one message at a time otherwise concerns
-    // of blocking are real as we just infinitely read. To accomplish
-    // this better multithreading of some type would be important.
-    switch (messageType)
-    {
-        case MessageType::REMOTE:
-            readRemoteMessage();
-            break;
+    int n = getMessageType();
+    // n < 0 if message unavailable, so skip this logic if that's the case
+    if (n >= 0) {
+        MessageType messageType = static_cast<MessageType>(n);
+        // For now read one message at a time otherwise concerns
+        // of blocking are real as we just infinitely read. To accomplish
+        // this better multithreading of some type would be important.
+        switch (messageType)
+        {
+            case MessageType::REMOTE:
+                readRemoteMessage();
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -188,10 +220,10 @@ void TCPServer::readRemoteMessage()
         mainClientDescriptor,
         reinterpret_cast<char*>(remoteMessageBuffer),
         aruwlib::Remote::REMOTE_BUF_LEN);
-    remoteMessageReady = true;
+    messageReadyFlags[REMOTE] = true;
 }
 
-MessageType TCPServer::getMessageType()
+int8_t TCPServer::getMessageType()
 {
     int8_t messageType = -1;
     int n = read(mainClientDescriptor, &messageType, 1);
@@ -212,7 +244,7 @@ MessageType TCPServer::getMessageType()
         // The one error that we do want to retry the read after is EINTR.
         n = read(mainClientDescriptor, &messageType, 1);
     }
-    return static_cast<MessageType>(messageType);
+    return messageType;
 }
 
 void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength)
