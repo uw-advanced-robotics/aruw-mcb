@@ -77,7 +77,7 @@ bool DJISerial::send()
             drivers,
             "dji serial attempting to send greater than SERIAL_TX_BUFF_SIZE bytes",
             aruwlib::errors::Location::DJI_SERIAL,
-            aruwlib::errors::ErrorType::MESSAGE_LENGTH_OVERFLOW);
+            aruwlib::errors::DjiSerialErrorType::MESSAGE_LENGTH_OVERFLOW);
         return false;
     }
 
@@ -99,7 +99,7 @@ bool DJISerial::send()
             drivers,
             "the message did not completely send",
             aruwlib::errors::Location::DJI_SERIAL,
-            aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+            aruwlib::errors::DjiSerialErrorType::INVALID_MESSAGE_LENGTH);
     }
     txMessage.messageTimestamp = arch::clock::getTimeMilliseconds();
     return true;
@@ -157,7 +157,7 @@ void DJISerial::updateSerial()
                         drivers,
                         "invalid message length received",
                         aruwlib::errors::Location::DJI_SERIAL,
-                        aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+                        aruwlib::errors::DjiSerialErrorType::INVALID_MESSAGE_LENGTH);
                     return;
                 }
 
@@ -173,7 +173,7 @@ void DJISerial::updateSerial()
                             drivers,
                             "CRC8 failure",
                             aruwlib::errors::Location::DJI_SERIAL,
-                            aruwlib::errors::ErrorType::CRC_FAILURE);
+                            aruwlib::errors::DjiSerialErrorType::CRC_FAILURE);
                         return;
                     }
                 }
@@ -222,7 +222,7 @@ void DJISerial::updateSerial()
                             drivers,
                             "CRC16 failure",
                             aruwlib::errors::Location::DJI_SERIAL,
-                            aruwlib::errors::ErrorType::CRC_FAILURE);
+                            aruwlib::errors::DjiSerialErrorType::CRC_FAILURE);
                         return;
                     }
                 }
@@ -245,7 +245,7 @@ void DJISerial::updateSerial()
                     drivers,
                     "Invalid message length",
                     aruwlib::errors::Location::DJI_SERIAL,
-                    aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+                    aruwlib::errors::DjiSerialErrorType::INVALID_MESSAGE_LENGTH);
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
             break;
