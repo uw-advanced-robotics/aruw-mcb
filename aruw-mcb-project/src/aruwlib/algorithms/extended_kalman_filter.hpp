@@ -20,6 +20,7 @@
 #ifndef KALMAN_FILTER_HPP_
 #define KALMAN_FILTER_HPP_
 
+#include <aruw-mcb-project/modm/ext/cmsis/dsp/arm_math.h>
 #include <modm/architecture/interface/assert.h>
 #include <modm/math/matrix.hpp>
 
@@ -73,23 +74,83 @@ template <uint8_t N, uint8_t M, typename T>
 class ExtendedKalmanFilter
 {
 public:
-    using StateVector = modm::Matrix<float, N, 1>;
-    using SquareStateMatrix = modm::Matrix<float, N, N>;
-    using MeasurementVector = modm::Matrix<float, M, 1>;
-    using SquareMeasurementMatrix = modm::Matrix<float, M, M>;
+    using StateVector = arm_matrix_instance_f32;
+    using SquareStateMatrix = arm_matrix_instance_f32;
+    using MeasurementVector = arm_matrix_instance_f32;
+    using SquareMeasurementMatrix = arm_matrix_instance_f32;
+    using ZeroMatrix = arm_matrix_instance_f32;
 
     using FFunc = const StateVector &(T::*)(const StateVector &);
     using JFFunc = const SquareStateMatrix &(T::*)(const StateVector &);
     using HFunc = const MeasurementVector &(T::*)(const StateVector &);
-    using JHFunc = const modm::Matrix<float, M, N> &(T::*)(const StateVector &x);
+    using JHFunc = const arm_matrix_instance_f32 &(T::*)(const StateVector &x);
+
+    // Matrix addition overload.
+    inline arm_matrix_instance_f32 operator+(
+        const arm_matrix_instance_f32 lhs,
+        const arm_matrix_instance_f32 rhs)
+    {
+        arm_matrix_instance_f32 sum;
+        arm_mat_add_f32(*lhs, *rhs, sum);
+        return sum;
+    }
+
+    // Matrix subtraction overload.
+    inline arm_matrix_instance_f32 operator-(
+        const arm_matrix_instance_f32 lhs,
+        const arm_matrix_instance_f32 rhs)
+    {
+        arm_matrix_instance_f32 difference;
+        arm_mat_sub_f32(*lhs, *rhs, difference);
+        return difference;
+    }
+
+    // Matrix multiplication overload.
+    inline arm_matrix_instance_f32 operator*(
+        const arm_matrix_instance_f32 lhs,
+        const arm_matrix_instance_f32 rhs)
+    {
+        arm_matrix_instance_f32 product;
+        arm_mat_mult_f32(*lhs, *rhs, product);
+        return product;
+    }
+
+    /**
+     * Initializes a floating-point identity matrix.
+     *
+     * @param[in, out] S    points to the instance of the floating-point matrix structure.
+     * @param[in] n         number of rows/columns in the matrix.
+     */
+    inline void initIdentityMatrix(arm_matrix_instance_f32 S, const u_int16_t n)
+    {
+        float32_t pData[n * n] = {};
+        for (int i = 0; i < n * n; i += n + 1)
+        {
+            pData[i] = 1;
+        }
+        arm_mat_init_f32(S, n, n, *pData);
+    }
+
+    /**
+     * Initializes a floating-point zero matrix.
+     *
+     * @param[in, out] S    points to the instance of the floating-point matrix structure.
+     * @param[in] n         number of rows in the matrix.
+     * @param[in] m         number of columns in the matrix.
+     */
+    inline void initZeroMatrix(arm_matrix_instance_f32 S, const u_int16_t n, const u_int16_t m)
+    {
+        float32_t pData[n * m] = {};
+        arm_mat_init_f32(S, n, m, *pData);
+    }
 
     /**
      * Initializes a Kalman Filter.
      *
-     * @param[in] x the initial state estimate.
-     * @param[in] p the initial prediction error covariance estimate.
-     * @param[in] q the process noise covariance.
-     * @param[in] r the measurement error covariance.
+     * @param[in] xData the initial state estimate.
+     * @param[in] pData the initial prediction error covariance estimate.
+     * @param[in] qData the process noise covariance.
+     * @param[in] rData the measurement error covariance.
      * @param[in] fFunction the process function.
      * @param[in] jFFunction The jacobian of the process function.
      * @param[in] hFunction the measurement function.
@@ -97,26 +158,40 @@ public:
      */
     ExtendedKalmanFilter(
         T *odom,
-        StateVector x,
-        SquareStateMatrix p,
-        SquareStateMatrix q,
-        SquareMeasurementMatrix r,
+        float32_t xData[],
+        float32_t pData[],
+        float32_t qData[],
+        float32_t rData[],
         FFunc fFunction,
         JFFunc jFFunction,
         HFunc hFunction,
         JHFunc jHFunction)
-        : x(x),
-          p(p),
-          q(q),
-          r(r),
-          k(modm::Matrix<float, N, M>::zeroMatrix()),
-          i(SquareStateMatrix::identityMatrix()),
+        : x(),
+          p(),
+          q(),
+          r(),
+          k(),
+          i(),
           odom(odom),
           fFunc(fFunction),
           jFFunc(jFFunction),
           hFunc(hFunction),
           jHFunc(jHFunction)
     {
+        float32_t xDataCopy[sizeof(xData)];
+        float32_t pDataCopy[sizeof(pData)];
+        float32_t qDataCopy[sizeof(qData)];
+        float32_t rDataCopy[sizeof(rData)];
+        std::copy(std::begin(xData), std::end(xData), std::begin(xDataCopy));
+        std::copy(std::begin(pData), std::end(pData), std::begin(pDataCopy));
+        std::copy(std::begin(qData), std::end(qData), std::begin(qDataCopy));
+        std::copy(std::begin(rData), std::end(rData), std::begin(rDataCopy));
+        arm_mat_init_f32(x, N, 1, xDataCopy);  // StateVector
+        arm_mat_init_f32(p, N, N, pDataCopy);  // SquareStateMatrix
+        arm_mat_init_f32(q, N, N, qDataCopy);  // SquareStateMatrix
+        arm_mat_init_f32(r, M, M, rDataCopy);  // SquareMeasurementMatrix
+        initZeroMatrix(k, N, M);               // Zero matrix
+        initIdentityMatrix(i, N);              // State identity matrix
         modm_assert(
             fFunc != nullptr && jFFunc != nullptr && hFunc != nullptr && jHFunc != nullptr,
             "ekf",
@@ -147,9 +222,9 @@ public:
     /// Resets the covariances and predictions.
     void reset()
     {
-        x = StateVector().zeroMatrix();
-        p = SquareStateMatrix().zeroMatrix();
-        k = modm::Matrix<float, N, M>().zeroMatrix();
+        initZeroMatrix(x, N, 1);
+        initZeroMatrix(p, N, N);
+        initZeroMatrix(k, N, M);
     }
 
 private:
@@ -179,11 +254,11 @@ private:
     inline void calculateKalmanGain()
     {
         // K = P * Ht * (H * P * Ht + R)^-1
-        modm::Matrix<float, M, N> jH = (odom->*jHFunc)(x);
-        modm::Matrix<float, N, M> jHTrans = jH.asTransposed();
+        arm_matrix_instance_f32 jH = (odom->*jHFunc)(x);
+        arm_matrix_instance_f32 jHTrans = jH.asTransposed();
         SquareMeasurementMatrix innovationCovariance = (jH * p) * jHTrans + r;
         SquareMeasurementMatrix innovationCovarianceInverse;
-        inverse(innovationCovariance, &innovationCovarianceInverse);
+        arm_mat_inverse_f32(*innovationCovariance, *innovationCovarianceInverse);
         k = (p * jHTrans) * innovationCovarianceInverse;
 
         // P = (I - K * H) * P
@@ -197,7 +272,7 @@ private:
     SquareStateMatrix q;        /// process noise covariance
     SquareMeasurementMatrix r;  /// measurement error covariance
 
-    modm::Matrix<float, N, M> k;  /// Kalman gain
+    ZeroMatrix k;  /// Kalman gain
 
     SquareStateMatrix i;  /// An I matrix
 
