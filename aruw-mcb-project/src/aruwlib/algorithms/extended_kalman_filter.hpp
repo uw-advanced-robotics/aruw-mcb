@@ -78,7 +78,6 @@ public:
     using SquareStateMatrix = arm_matrix_instance_f32;
     using MeasurementVector = arm_matrix_instance_f32;
     using SquareMeasurementMatrix = arm_matrix_instance_f32;
-    using ZeroMatrix = arm_matrix_instance_f32;
 
     using FFunc = const StateVector &(T::*)(const StateVector &);
     using JFFunc = const SquareStateMatrix &(T::*)(const StateVector &);
@@ -121,14 +120,14 @@ public:
      * @param[in, out] S    points to the instance of the floating-point matrix structure.
      * @param[in] n         number of rows/columns in the matrix.
      */
-    inline void initIdentityMatrix(arm_matrix_instance_f32 S, const u_int16_t n)
+    inline void initIdentityMatrix(arm_matrix_instance_f32 S, const u_int16_t n, float32_t *data)
     {
-        float32_t pData[n * n] = {};
+        data = {};
         for (int i = 0; i < n * n; i += n + 1)
         {
-            pData[i] = 1;
+            data[i] = 1;
         }
-        arm_mat_init_f32(S, n, n, *pData);
+        arm_mat_init_f32(S, n, n, data);
     }
 
     /**
@@ -138,10 +137,14 @@ public:
      * @param[in] n         number of rows in the matrix.
      * @param[in] m         number of columns in the matrix.
      */
-    inline void initZeroMatrix(arm_matrix_instance_f32 S, const u_int16_t n, const u_int16_t m)
+    inline void initZeroMatrix(
+        arm_matrix_instance_f32 S,
+        const u_int16_t n,
+        const u_int16_t m,
+        float32_t *data)
     {
-        float32_t pData[n * m] = {};
-        arm_mat_init_f32(S, n, m, *pData);
+        data = {};
+        arm_mat_init_f32(S, n, m, data);
     }
 
     /**
@@ -178,20 +181,16 @@ public:
           hFunc(hFunction),
           jHFunc(jHFunction)
     {
-        float32_t xDataCopy[sizeof(xData)];
-        float32_t pDataCopy[sizeof(pData)];
-        float32_t qDataCopy[sizeof(qData)];
-        float32_t rDataCopy[sizeof(rData)];
-        std::copy(std::begin(xData), std::end(xData), std::begin(xDataCopy));
-        std::copy(std::begin(pData), std::end(pData), std::begin(pDataCopy));
-        std::copy(std::begin(qData), std::end(qData), std::begin(qDataCopy));
-        std::copy(std::begin(rData), std::end(rData), std::begin(rDataCopy));
-        arm_mat_init_f32(x, N, 1, xDataCopy);  // StateVector
-        arm_mat_init_f32(p, N, N, pDataCopy);  // SquareStateMatrix
-        arm_mat_init_f32(q, N, N, qDataCopy);  // SquareStateMatrix
-        arm_mat_init_f32(r, M, M, rDataCopy);  // SquareMeasurementMatrix
-        initZeroMatrix(k, N, M);               // Zero matrix
-        initIdentityMatrix(i, N);              // State identity matrix
+        std::copy(std::begin(xData), std::end(xData), std::begin(this->xData));
+        std::copy(std::begin(pData), std::end(pData), std::begin(this->pData));
+        std::copy(std::begin(qData), std::end(qData), std::begin(this->qData));
+        std::copy(std::begin(rData), std::end(rData), std::begin(this->rData));
+        arm_mat_init_f32(x, N, 1, this->xData);
+        arm_mat_init_f32(p, N, N, this->pData);
+        arm_mat_init_f32(q, N, N, this->qData);
+        arm_mat_init_f32(r, M, M, this->rData);
+        initZeroMatrix(k, N, M, this->kData);
+        initIdentityMatrix(i, N, this->iData);
         modm_assert(
             fFunc != nullptr && jFFunc != nullptr && hFunc != nullptr && jHFunc != nullptr,
             "ekf",
@@ -228,6 +227,13 @@ public:
     }
 
 private:
+    float32_t xData[N];      // state estimate
+    float32_t pData[N * N];  // prediction error covariance data
+    float32_t qData[N * N];  // process noise covariance data
+    float32_t rData[M * M];  // measurement error covariance data
+    float32_t kData[N * M];  // kalman gain
+    float32_t iData[N * N];  // identity matrix
+
     /// Predicts the state at the next time step.
     inline void predictState()
     {
@@ -258,7 +264,7 @@ private:
         arm_matrix_instance_f32 jHTrans = jH.asTransposed();
         SquareMeasurementMatrix innovationCovariance = (jH * p) * jHTrans + r;
         SquareMeasurementMatrix innovationCovarianceInverse;
-        arm_mat_inverse_f32(*innovationCovariance, *innovationCovarianceInverse);
+        arm_mat_inverse_f32(&innovationCovariance, &innovationCovarianceInverse);
         k = (p * jHTrans) * innovationCovarianceInverse;
 
         // P = (I - K * H) * P
@@ -272,7 +278,7 @@ private:
     SquareStateMatrix q;        /// process noise covariance
     SquareMeasurementMatrix r;  /// measurement error covariance
 
-    ZeroMatrix k;  /// Kalman gain
+    arm_matrix_instance_f32 k;  /// Kalman gain
 
     SquareStateMatrix i;  /// An I matrix
 
