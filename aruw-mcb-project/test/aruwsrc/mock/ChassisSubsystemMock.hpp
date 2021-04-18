@@ -17,34 +17,34 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMAND_MOCK_HPP_
-#define COMMAND_MOCK_HPP_
+#ifndef CHASSIS_SUBSYSTEM_MOCK_HPP_
+#define CHASSIS_SUBSYSTEM_MOCK_HPP_
 
-#include <aruwlib/control/command.hpp>
+#include <aruwlib/Drivers.hpp>
 #include <gmock/gmock.h>
 
-namespace aruwlib
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+
+namespace aruwsrc
 {
 namespace mock
 {
-class CommandMock : public control::Command
+class ChassisSubsystemMock : public aruwsrc::chassis::ChassisSubsystem
 {
 public:
-    CommandMock() = default;
-    virtual ~CommandMock() = default;
-    MOCK_METHOD(
-        control::subsystem_scheduler_bitmap_t,
-        getRequirementsBitwise,
-        (),
-        (const override));
-    MOCK_METHOD(void, addSubsystemRequirement, (control::Subsystem * requirement), (override));
-    MOCK_METHOD(const char*, getName, (), (const override));
+    ChassisSubsystemMock(aruwlib::Drivers *drivers) : ChassisSubsystem(drivers) {}
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, execute, (), (override));
-    MOCK_METHOD(void, end, (bool interrupted), (override));
-    MOCK_METHOD(bool, isFinished, (), (const override));
-};  // class CommandMock
+    MOCK_METHOD(void, setDesiredOutput, (float x, float y, float z), ());
+    MOCK_METHOD(float, chassisSpeedRotationPID, (float currentAngleError, float kp), ());
+    MOCK_METHOD(void, refresh, (), (override));
+    MOCK_METHOD(
+        float,
+        calculateRotationTranslationalGain,
+        (float chassisRotationDesiredWheelspeed),
+        ());
+    MOCK_METHOD(float, getChassisDesiredRotation, (), (const));
+};  // class ChassisSubsystemMock
 }  // namespace mock
-}  // namespace aruwlib
+}  // namespace aruwsrc
 
-#endif  // COMMAND_MOCK_HPP_
+#endif  // CHASSIS_SUBSYSTEM_MOCK_HPP_

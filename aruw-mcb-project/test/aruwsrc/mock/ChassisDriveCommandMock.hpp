@@ -17,31 +17,31 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMAND_MAPPER_MOCK_HPP_
-#define COMMAND_MAPPER_MOCK_HPP_
+#ifndef CHASSIS_DRIVE_COMMAND_MOCK_HPP_
+#define CHASSIS_DRIVE_COMMAND_MOCK_HPP_
 
-#include <aruwlib/control/CommandMapper.hpp>
-#include <aruwlib/control/command.hpp>
 #include <gmock/gmock.h>
 
-namespace aruwlib
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
+
+namespace aruwsrc
 {
 namespace mock
 {
-class CommandMapperMock : public aruwlib::control::CommandMapper
+class ChassisDriveCommandMock : public chassis::ChassisDriveCommand
 {
 public:
-    CommandMapperMock(aruwlib::Drivers *drivers) : aruwlib::control::CommandMapper(drivers) {}
-
-    MOCK_METHOD(
-        void,
-        handleKeyStateChange,
-        (uint16_t, Remote::SwitchState, Remote::SwitchState, bool, bool),
-        (override));
-    MOCK_METHOD(void, addMap, (aruwlib::control::CommandMapping *), (override));
-    MOCK_METHOD(std::size_t, getSize, (), (const override));
-};  // class CommandMapperMock
+    ChassisDriveCommandMock(aruwlib::Drivers *d, chassis::ChassisSubsystem *cs)
+        : chassis::ChassisDriveCommand(d, cs)
+    {
+    }
+    MOCK_METHOD(void, initialize, (), (override));
+    MOCK_METHOD(void, execute, (), (override));
+    MOCK_METHOD(void, end, (bool interrupted), (override));
+    MOCK_METHOD(bool, isFinished, (), (const override));
+    MOCK_METHOD(const char *, getName, (), (const override));
+};
 }  // namespace mock
-}  // namespace aruwlib
+}  // namespace aruwsrc
 
-#endif  // COMMAND_MAPPER_MOCK_HPP_
+#endif  // CHASSIS_DRIVE_COMMAND_MOCK_HPP_

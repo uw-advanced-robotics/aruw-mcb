@@ -78,7 +78,7 @@ int32_t TurretSubsystem::getYawVelocity() const
             drivers,
             "trying to get velocity and yaw motor offline",
             aruwlib::errors::TURRET,
-            aruwlib::errors::MOTOR_OFFLINE);
+            aruwlib::errors::TurretErrorType::MOTOR_OFFLINE);
         // throw error
         return 0;
     }
@@ -94,7 +94,7 @@ int32_t TurretSubsystem::getPitchVelocity() const
             drivers,
             "trying to get velocity and pitch motor offline",
             aruwlib::errors::TURRET,
-            aruwlib::errors::MOTOR_OFFLINE);
+            aruwlib::errors::TurretErrorType::MOTOR_OFFLINE);
         return 0;
     }
 
@@ -158,7 +158,7 @@ void TurretSubsystem::setPitchMotorOutput(float out)
             drivers,
             "pitch motor output invalid",
             aruwlib::errors::TURRET,
-            aruwlib::errors::INVALID_MOTOR_OUTPUT);
+            aruwlib::errors::TurretErrorType::INVALID_MOTOR_OUTPUT);
         return;
     }
     if (pitchMotor.isMotorOnline())
@@ -183,7 +183,7 @@ void TurretSubsystem::setYawMotorOutput(float out)
             drivers,
             "yaw motor output invalid",
             aruwlib::errors::TURRET,
-            aruwlib::errors::INVALID_MOTOR_OUTPUT);
+            aruwlib::errors::TurretErrorType::INVALID_MOTOR_OUTPUT);
         return;
     }
     if (yawMotor.isMotorOnline())
@@ -234,36 +234,7 @@ void TurretSubsystem::setPitchTarget(float target)
 
 float TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
 {
-    // calculate feed forward
-    float chassisRotationProportional =
-        FEED_FORWARD_KP * desiredChassisRotation *
-        (fabsf(
-             FEED_FORWARD_SIN_GAIN *
-             sinf(getYawAngleFromCenter() * aruwlib::algorithms::PI / 180.0f)) +
-         1.0f);
-
-    uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
-    if (drivers->remote.getUpdateCounter() != prevUpdateCounterChassisRotateDerivative)
-    {
-        chassisRotateDerivativeInterpolation.update(
-            desiredChassisRotation - feedforwardPrevChassisRotationDesired,
-            currTime);
-    }
-    prevUpdateCounterChassisRotateDerivative = drivers->remote.getUpdateCounter();
-    float derivativeInterpolated =
-        chassisRotateDerivativeInterpolation.getInterpolatedValue(currTime);
-
-    feedforwardChassisRotateDerivative = aruwlib::algorithms::lowPassFilter(
-        feedforwardChassisRotateDerivative,
-        derivativeInterpolated,
-        FEED_FORWARD_DERIVATIVE_LOW_PASS);
-
-    float chassisRotationFeedForward = aruwlib::algorithms::limitVal<float>(
-        chassisRotationProportional + FEED_FORWARD_KD * feedforwardChassisRotateDerivative,
-        -FEED_FORWARD_MAX_OUTPUT,
-        FEED_FORWARD_MAX_OUTPUT);
-
-    feedforwardPrevChassisRotationDesired = desiredChassisRotation;
+    float chassisRotationFeedForward = FEED_FORWARD_KP * desiredChassisRotation;
 
     if ((chassisRotationFeedForward > 0.0f &&
          getYawAngle().getValue() > TurretSubsystem::TURRET_YAW_MAX_ANGLE) ||
@@ -272,7 +243,10 @@ float TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
     {
         chassisRotationFeedForward = 0.0f;
     }
-    return chassisRotationFeedForward;
+    return aruwlib::algorithms::limitVal<float>(
+        chassisRotationFeedForward,
+        -FEED_FORWARD_MAX_OUTPUT,
+        FEED_FORWARD_MAX_OUTPUT);
 }
 
 void TurretSubsystem::runHardwareTests()
