@@ -254,7 +254,7 @@ int8_t TCPServer::getMessageType()
 void readMessage(int16_t fileDescriptor, char* readBuffer, uint16_t messageLength)
 {
     readBuffer[messageLength] = '\0';  // Null terminate the message
-    uint16_t bytesRead = read(fileDescriptor, readBuffer, messageLength);
+    uint16_t bytesRead = 0;
     while (bytesRead < messageLength)
     {
         int32_t n = read(fileDescriptor, readBuffer + bytesRead, messageLength - bytesRead);
