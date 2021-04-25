@@ -21,9 +21,12 @@
 
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
+#include <aruwlib/architecture/clock.hpp>
 #include <aruwlib/communication/remote.hpp>
 
 #include "aruwsrc/serial/xavier_serial.hpp"
+
+using namespace aruwlib::arch::clock;
 
 namespace aruwsrc
 {
@@ -78,30 +81,34 @@ void TurretCVCommand::execute()
             turretSubsystem->setPitchTarget(cvData.pitch);
         }
     }
-    runYawPositionController();
-    runPitchPositionController();
+
+    uint32_t currTime = getTimeMilliseconds();
+    uint32_t dt = currTime - prevTime;
+    prevTime = currTime;
+    runYawPositionController(dt);
+    runPitchPositionController(dt);
 }
 
 void TurretCVCommand::end(bool) { xavierSerial->stopAutoAim(); }
 
-void TurretCVCommand::runYawPositionController()
+void TurretCVCommand::runYawPositionController(float dt)
 {
     // position controller based on gimbal angle
     float positionControllerError =
         turretSubsystem->getYawAngle().difference(turretSubsystem->getYawTarget());
     float pidOutput =
-        yawPid.runController(positionControllerError, turretSubsystem->getYawVelocity());
+        yawPid.runController(positionControllerError, turretSubsystem->getYawVelocity(), dt);
 
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 
-void TurretCVCommand::runPitchPositionController()
+void TurretCVCommand::runPitchPositionController(float dt)
 {
     // position controller based on turret pitch gimbal
     float positionControllerError =
         turretSubsystem->getPitchAngle().difference(turretSubsystem->getPitchTarget());
     float pidOutput =
-        pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity());
+        pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity(), dt);
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }

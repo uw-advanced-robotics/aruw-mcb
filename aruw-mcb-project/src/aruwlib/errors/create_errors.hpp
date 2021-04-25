@@ -27,6 +27,14 @@ namespace aruwlib
 {
 namespace errors
 {
+enum class OLEDErrors : uint8_t
+{
+    INVALID_VERT_SCROLL_SIZE = 0,
+    INVAILD_VERT_SCROLL_SMALLEST_AND_LARGEST_INDEX = 1,
+    INVALID_VERT_SCROLL_MAX_ENTRIES = 2,
+    NULLPTR_DJI_MOTOR_IN_MOTOR_SPECIFIC_MENU = 3,
+};
+
 enum class CanRxErrorType : uint8_t
 {
     MOTOR_ID_OUT_OF_BOUNDS = 0,
@@ -54,7 +62,13 @@ enum class DjiSerialErrorType : uint8_t
 enum class CommandSchedulerErrorType : uint8_t
 {
     ADDING_NULLPTR_COMMAND = 0,
-    RUN_TIME_OVERFLOW
+    ADDING_NULLPTR_SUBSYSTEM,
+    ADDING_ALREADY_ADDED_SUBSYSTEM,
+    MASTER_SCHEDULER_ALREADY_EXISTS,
+    ADD_COMMAND_WHILE_TESTING,
+    ADD_COMMAND_WITHOUT_REGISTERED_SUB,
+    RUN_TIME_OVERFLOW,
+    REMOVE_NULLPTR_COMMAND
 };
 
 enum class SubsystemErrorType : uint8_t

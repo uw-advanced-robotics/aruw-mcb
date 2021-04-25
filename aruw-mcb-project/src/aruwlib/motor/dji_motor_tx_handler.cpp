@@ -39,7 +39,7 @@ void DjiMotorTxHandler::addMotorToManager(DjiMotor** canMotorStore, DjiMotor* co
     bool motorOverloaded = canMotorStore[idIndex] != nullptr;
     bool motorOutOfBounds = (idIndex < 0) || (idIndex >= DJI_MOTORS_PER_CAN);
     // kill start
-    modm_assert(!motorOverloaded && !motorOutOfBounds, "can", "overloading", 1);
+    modm_assert(!motorOverloaded && !motorOutOfBounds, "DjiMotorTxHandler:can", "overloading", 1);
     canMotorStore[idIndex] = motor;
 }
 
@@ -151,12 +151,12 @@ void DjiMotorTxHandler::zeroTxMessage(modm::can::Message* message)
     }
 }
 
-DjiMotor const* DjiMotorTxHandler::getCan1MotorData(MotorId motorId)
+DjiMotor const* DjiMotorTxHandler::getCan1Motor(MotorId motorId)
 {
     return can1MotorStore[DJI_MOTOR_NORMALIZED_ID(motorId)];
 }
 
-DjiMotor const* DjiMotorTxHandler::getCan2MotorData(MotorId motorId)
+DjiMotor const* DjiMotorTxHandler::getCan2Motor(MotorId motorId)
 {
     return can2MotorStore[DJI_MOTOR_NORMALIZED_ID(motorId)];
 }

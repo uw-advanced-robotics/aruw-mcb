@@ -16,9 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#if defined(TARGET_SOLDIER)
 
 #include <aruwlib/DriversSingleton.hpp>
 #include <aruwlib/control/CommandMapper.hpp>
+#include <aruwlib/control/HoldCommandMapping.hpp>
+#include <aruwlib/control/HoldRepeatCommandMapping.hpp>
+#include <aruwlib/control/PressCommandMapping.hpp>
+#include <aruwlib/control/ToggleCommandMapping.hpp>
 
 #include "agitator/agitator_calibrate_command.hpp"
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
@@ -42,18 +47,13 @@
 #include "aruwlib/motor/motorsim/sim_handler.hpp"
 #endif
 
-#if defined(TARGET_SOLDIER)
-
-extern aruwsrc::serial::XavierSerial xavierSerial;
-
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::turret;
+using namespace aruwlib::control;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::Remote;
-using aruwlib::control::CommandMapper;
-using aruwlib::control::RemoteMapState;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -62,6 +62,8 @@ using aruwlib::control::RemoteMapState;
  *      Drivers class to all of these objects.
  */
 aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
+
+extern aruwsrc::serial::XavierSerial xavierSerial;
 
 namespace aruwsrc
 {
@@ -102,6 +104,8 @@ WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
 
 TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
 
+TurretCVCommand turretCVCommand(&xavierSerial, &turret);
+
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
 
 ShootFastComprisedCommand agitatorShootFastCommand(drivers(), &agitator);
@@ -116,7 +120,43 @@ FrictionWheelRotateCommand spinFrictionWheels(
 
 FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
 
-TurretCVCommand turretCVCommand(&xavierSerial, &turret);
+/* define command mappings --------------------------------------------------*/
+// Remote related mappings
+HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&openHopperCommand, &stopFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&chassisDriveCommand, &turretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&wiggleDriveCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&agitatorShootFastCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+// Keyboard/Mouse related mappings
+ToggleCommandMapping rToggled(
+    drivers(),
+    {&openHopperCommand, &stopFrictionWheels},
+    RemoteMapState({Remote::Key::R}));
+ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
+HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
+    drivers(),
+    {&agitatorShootFastCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
+HoldCommandMapping leftMousePressedShiftPressed(
+    drivers(),
+    {&agitatorshootSlowCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}));
+HoldCommandMapping rightMousePressed(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwlib::Drivers *drivers)
@@ -186,6 +226,8 @@ void initializeSubsystems()
     agitator.initialize();
     frictionWheels.initialize();
     hopperCover.initialize();
+    xavierSerial.attachChassis(&chassis);
+    xavierSerial.attachTurret(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -205,42 +247,15 @@ void startSoldierCommands(aruwlib::Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 {
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN),
-        {&openHopperCommand, &stopFrictionWheels});
-
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-        {&chassisDriveCommand});
-
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        {&wiggleDriveCommand, /*&turretCVCommand*/});
-
-    drivers->commandMapper.addHoldRepeatMapping(
-        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-        {&agitatorShootFastCommand});
-
-    // Keyboard/Mouse related mappings
-    drivers->commandMapper.addToggleMapping(
-        RemoteMapState({Remote::Key::R}),
-        {&openHopperCommand, &stopFrictionWheels});
-
-    drivers->commandMapper.addToggleMapping(
-        RemoteMapState({Remote::Key::F}),
-        {&wiggleDriveCommand});
-
-    drivers->commandMapper.addHoldRepeatMapping(
-        RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
-        {&agitatorShootFastCommand});
-
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
-        {&agitatorshootSlowCommand});
-
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(RemoteMapState::MouseButton::RIGHT),
-        {&turretCVCommand});
+    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&rToggled);
+    drivers->commandMapper.addMap(&fToggled);
+    drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
 }
 
 void initSubsystemCommands(aruwlib::Drivers *drivers)
@@ -250,8 +265,6 @@ void initSubsystemCommands(aruwlib::Drivers *drivers)
     setDefaultSoldierCommands(drivers);
     startSoldierCommands(drivers);
     registerSoldierIoMappings(drivers);
-    xavierSerial.attachChassis(&chassis);
-    xavierSerial.attachTurret(&turret);
 }
 
 }  // namespace control

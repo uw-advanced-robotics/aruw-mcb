@@ -79,7 +79,11 @@ public:
           mpu6500(this),
           uart(),
           refSerial(this),
+#ifdef ENV_UNIT_TESTS
           commandScheduler(this),
+#else
+          commandScheduler(this, true),
+#endif
           controlOperatorInterface(this),
           commandMapper(this),
           errorController(this),

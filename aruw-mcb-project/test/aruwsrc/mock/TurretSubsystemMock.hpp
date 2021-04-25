@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef TURRET_SUBSYSTEM_MOCK_HPP_
+#define TURRET_SUBSYSTEM_MOCK_HPP_
+
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -49,6 +52,8 @@ public:
     MOCK_METHOD(void, updateCurrentTurretAngles, (), (override));
     MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char*, getName, (), (override));
-};  // class TowSubsystem
+};  // class TurretSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc
+
+#endif  // TURRET_SUBSYSTEM_MOCK_HPP_

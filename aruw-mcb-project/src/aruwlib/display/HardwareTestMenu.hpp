@@ -27,6 +27,8 @@
 
 #include "modm/processing/timer/periodic_timer.hpp"
 
+#include "VerticalScrollLogicHandler.hpp"
+
 namespace aruwlib
 {
 namespace display
@@ -47,18 +49,14 @@ public:
     static const char *getMenuName() { return "Hardware Test Menu"; }
 
 private:
+    static constexpr int HARDWARE_TEST_MENU_ID = 4;
+    static constexpr int MAX_ENTRIES_DISPLAYED = 6;
+
     Drivers *drivers;
 
-    int selectedSubsystem = 0;
+    control::subsystem_scheduler_bitmap_t completeSubsystems = 0;
 
-    int bottomIndex = 0;
-    int topIndex = 8;  // TODO: unhardcode this eventually
-
-    bool changed = false;
-
-    uint64_t completeSubsystems = 0;
-
-    bool updateHasChanged();
+    VerticalScrollLogicHandler vertScrollHandler;
 };  // class HardwareTestMenu
 }  // namespace display
 }  // namespace aruwlib

@@ -89,9 +89,11 @@ private:
     aruwsrc::algorithms::TurretPid yawPid;
     aruwsrc::algorithms::TurretPid pitchPid;
 
-    void runYawPositionController();
+    uint32_t prevTime;
 
-    void runPitchPositionController();
+    void runYawPositionController(float dt);
+
+    void runPitchPositionController(float dt);
 };  // class TurretCvCommand
 
 }  // namespace turret

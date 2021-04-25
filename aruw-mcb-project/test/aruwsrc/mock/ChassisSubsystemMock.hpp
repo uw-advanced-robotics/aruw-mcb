@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef CHASSIS_SUBSYSTEM_MOCK_HPP_
+#define CHASSIS_SUBSYSTEM_MOCK_HPP_
+
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
@@ -29,24 +32,18 @@ class ChassisSubsystemMock : public aruwsrc::chassis::ChassisSubsystem
 {
 public:
     explicit ChassisSubsystemMock(aruwlib::Drivers *drivers) : ChassisSubsystem(drivers) {}
-
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, setDesiredOutput, (float x, float y, float r), (override));
+    MOCK_METHOD(void, setDesiredOutput, (float x, float y, float z), (override));
     MOCK_METHOD(float, chassisSpeedRotationPID, (float currentAngleError, float kp), (override));
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(
         float,
         calculateRotationTranslationalGain,
         (float chassisRotationDesiredWheelspeed),
-        (override));
+        ());
     MOCK_METHOD(float, getChassisDesiredRotation, (), (const override));
-    MOCK_METHOD(void, runHardwareTests, (), (override));
-    MOCK_METHOD(const char *, getName, (), (override));
-    MOCK_METHOD(int16_t, getLeftFrontRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getLeftBackRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getRightFrontRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getRightBackRpmActual, (), (const override));
-
-};  // class TowSubsystem
+};  // class ChassisSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc
+
+#endif  // CHASSIS_SUBSYSTEM_MOCK_HPP_
