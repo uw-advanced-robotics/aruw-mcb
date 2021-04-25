@@ -454,10 +454,10 @@ public:
         modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
         float chassisHeading) const;
 
-    mockable_inline int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
-    mockable_inline int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
-    mockable_inline int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
-    mockable_inline int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
+    mockable inline int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
+    mockable inline int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
+    mockable inline int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
+    mockable inline int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
 
 private:
     /**

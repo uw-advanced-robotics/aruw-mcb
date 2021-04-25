@@ -113,12 +113,12 @@ public:
      */
     mockable void stopAutoAim();
 
-    mockable_inline const TurretAimData& getLastAimData() const { return lastAimData; }
+    mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
-    mockable_inline bool lastAimDataValid() const { return aimDataValid; }
+    mockable inline bool lastAimDataValid() const { return aimDataValid; }
 
-    mockable_inline void attachTurret(turret::TurretSubsystem* turret) { turretSub = turret; }
-    mockable_inline void attachChassis(chassis::ChassisSubsystem* chassis) { chassisSub = chassis; }
+    mockable inline void attachTurret(turret::TurretSubsystem* turret) { turretSub = turret; }
+    mockable inline void attachChassis(chassis::ChassisSubsystem* chassis) { chassisSub = chassis; }
 
 private:
     friend class ::XavierSerialTester;

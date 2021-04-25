@@ -83,14 +83,14 @@ public:
     /**
      * @return The wrapped yaw angle of the actual yaw gimbal.
      */
-    mockable_inline const aruwlib::algorithms::ContiguousFloat& getYawAngle() const
+    mockable inline const aruwlib::algorithms::ContiguousFloat& getYawAngle() const
     {
         return currYawAngle;
     }
     /**
      * @return The wrapped pitch angle of the actual pitch gimbal.
      */
-    mockable_inline const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const
+    mockable inline const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const
     {
         return currPitchAngle;
     }
@@ -131,11 +131,11 @@ public:
     /**
      * @return The yaw target as set by the user in `setYawTarget`.
      */
-    mockable_inline float getYawTarget() const { return yawTarget.getValue(); }
+    mockable inline float getYawTarget() const { return yawTarget.getValue(); }
     /**
      * @return The pitch target as set by the user in `setPitchTarget`.
      */
-    mockable_inline float getPitchTarget() const { return pitchTarget.getValue(); }
+    mockable inline float getPitchTarget() const { return pitchTarget.getValue(); }
 
     /**
      * Reads the raw pitch and yaw angles and updates the wrapped versions of
