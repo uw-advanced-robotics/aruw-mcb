@@ -23,6 +23,7 @@
 #include <aruwlib/architecture/periodic_timer.hpp>
 #include <aruwlib/architecture/timeout.hpp>
 #include <aruwlib/communication/serial/dji_serial.hpp>
+#include <modm/processing/protothread.hpp>
 
 #include "util_macros.hpp"
 
@@ -52,7 +53,7 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class XavierSerial : public aruwlib::serial::DJISerial
+class XavierSerial : public aruwlib::serial::DJISerial, ::modm::pt::Protothread, modm::Resumable<3>
 {
 public:
     // AutoAim Data
@@ -76,7 +77,6 @@ public:
         CV_MESSAGE_TYPE_ROBOT_DATA = 0,
         CV_MESSAGE_TYPE_ROBOT_ID,
         CV_MESSAGE_TYPE_AUTO_AIM_REQUEST,
-        CV_MESSAGE_TYPE_SIZE,
     };
 
     XavierSerial(
@@ -101,7 +101,7 @@ public:
     /**
      * Cycles through the messages that must be sent to the xavier.
      */
-    mockable void sendMessage();
+    mockable bool sendMessage();
 
     /**
      * Start Requesting Xavier to Track Target.
@@ -136,6 +136,9 @@ private:
         DID_NOT_SEND,
     };
 
+    /// Max period that we can send messages to the Xavier
+    static constexpr uint32_t MAX_TX_MSG_PERIOD = 3;
+
     /// Time in ms since last CV aim data was received before deciding CV is offline.
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 5000;
     /// Time between each robot id send to CV in milliseconds.
@@ -156,8 +159,7 @@ private:
     static constexpr int ROBOT_DATA_MSG_SIZE =
         IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 6 * sizeof(int16_t);
 
-    /// Message that we are currently sending
-    TxMessageTypes currTxMessageType;
+    aruwlib::arch::PeriodicMilliTimer txDelayTimer{MAX_TX_MSG_PERIOD};
 
     /// Used for determining when to send robot id.
     aruwlib::arch::PeriodicMilliTimer txRobotIdTimeout;
@@ -189,12 +191,6 @@ private:
     const chassis::ChassisSubsystem* chassisSub;
 
     /**
-     * Flag indicating if sending robot id succeeded or not, set to false initially so
-     * robot id will be sent right away
-     */
-    bool robotIdSendSucceeded = false;
-
-    /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information.
      *
@@ -205,7 +201,7 @@ private:
      */
     bool decodeToTurrentAimData(const SerialMessage& message, TurretAimData* aimData);
 
-    TxMessageState sendRobotMeasurements();
+    modm::ResumableResult<bool> sendRobotMeasurements();
 
     /**
      * Packages `robotId` in an acceptable format for the base `DjiSerial` class to interpret
@@ -213,9 +209,9 @@ private:
      *
      * @return `SUCCESS` if sending was a success, `FAIL` if send failed, `DID_NOT_SEND` otherwise.
      */
-    TxMessageState sendRobotID();
+    modm::ResumableResult<bool> sendRobotID();
 
-    TxMessageState sendAutoAimRequest();
+    modm::ResumableResult<bool> sendAutoAimRequest();
 };
 }  // namespace serial
 }  // namespace aruwsrc

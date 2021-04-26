@@ -29,44 +29,7 @@
 
 using namespace aruwlib::arch;
 
-#define SEND_MSG(state, func, currTxMsg)                                                     \
-    case state:                                                                              \
-    {                                                                                        \
-        auto res = func();                                                                   \
-        if (res == SUCCESS)                                                                  \
-        {                                                                                    \
-            currTxMsg = static_cast<TxMessageTypes>((currTxMsg + 1) % CV_MESSAGE_TYPE_SIZE); \
-            break;                                                                           \
-        }                                                                                    \
-        else if (res == DID_NOT_SEND)                                                        \
-        {                                                                                    \
-            currTxMsg = static_cast<TxMessageTypes>((currTxMsg + 1) % CV_MESSAGE_TYPE_SIZE); \
-            modm_fallthrough;                                                                \
-        }                                                                                    \
-        else                                                                                 \
-        {                                                                                    \
-            break;                                                                           \
-        }                                                                                    \
-    }
-
-#define BEGIN_SEND_MSG(state, func, currTxMsg)                \
-    {                                                         \
-        TxMessageTypes prevTxMessageType = currTxMessageType; \
-        auto initialFunc = &XavierSerial::func;               \
-        auto initialState = state;                            \
-        switch (currTxMsg)                                    \
-        {                                                     \
-            SEND_MSG(state, func, currTxMsg)
-
-#define END_SEND_MSG()                        \
-    case CV_MESSAGE_TYPE_SIZE:                \
-        if (prevTxMessageType > initialState) \
-        {                                     \
-            (this->*initialFunc)();           \
-        }                                     \
-        break;                                \
-        }                                     \
-        }
+#define delay() RF_WAIT_UNTIL(txDelayTimer.execute());
 
 namespace aruwsrc
 {
@@ -137,27 +100,22 @@ bool XavierSerial::decodeToTurrentAimData(const SerialMessage& message, TurretAi
     return true;
 }
 
-void XavierSerial::sendMessage()
+bool XavierSerial::sendMessage()
 {
-    isCvOnline = !cvOfflineTimeout.isExpired();
-
-    if (!isCvOnline)
+    PT_BEGIN();
+    while (true)
     {
-        aimDataValid = false;
+        isCvOnline = !cvOfflineTimeout.isExpired();
+        PT_CALL(sendRobotMeasurements());
+        PT_CALL(sendRobotID());
+        PT_CALL(sendAutoAimRequest());
     }
-
-    BEGIN_SEND_MSG(CV_MESSAGE_TYPE_ROBOT_DATA, sendRobotMeasurements, currTxMessageType);
-    SEND_MSG(CV_MESSAGE_TYPE_ROBOT_ID, sendRobotID, currTxMessageType);
-    SEND_MSG(CV_MESSAGE_TYPE_AUTO_AIM_REQUEST, sendAutoAimRequest, currTxMessageType);
-    END_SEND_MSG();
+    PT_END();
 }
 
-XavierSerial::TxMessageState XavierSerial::sendRobotMeasurements()
+modm::ResumableResult<bool> XavierSerial::sendRobotMeasurements()
 {
-    if (chassisSub == nullptr || turretSub == nullptr)
-    {
-        return DID_NOT_SEND;
-    }
+    RF_BEGIN(0);
 
     // Chassis data
     convertToLittleEndian(chassisSub->getRightFrontRpmActual(), txMessage.data);
@@ -206,7 +164,12 @@ XavierSerial::TxMessageState XavierSerial::sendRobotMeasurements()
 
     txMessage.type = static_cast<uint8_t>(CV_MESSAGE_TYPE_ROBOT_DATA);
     txMessage.length = ROBOT_DATA_MSG_SIZE;
-    return send() ? SUCCESS : FAIL;
+
+    send();
+
+    delay();
+
+    RF_END_RETURN(true);
 }
 
 void XavierSerial::beginAutoAim()
@@ -221,8 +184,9 @@ void XavierSerial::stopAutoAim()
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-XavierSerial::TxMessageState XavierSerial::sendAutoAimRequest()
+modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
 {
+    RF_BEGIN(1);
     if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
         (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT &&
          AutoAimRequest.sendAimRequestTimeout.isExpired()))
@@ -230,28 +194,29 @@ XavierSerial::TxMessageState XavierSerial::sendAutoAimRequest()
         txMessage.data[0] = AutoAimRequest.requestType;
         txMessage.length = 1;
         txMessage.type = CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
-        if (send())
+        // Keep sending until sent
+        while (!send())
         {
-            AutoAimRequest.currAimState = AUTO_AIM_REQUEST_SENT;
-            AutoAimRequest.sendAimRequestTimeout.restart(AUTO_AIM_REQUEST_SEND_PERIOD_MS);
-            return SUCCESS;
+            delay();
         }
-        return FAIL;
+        AutoAimRequest.currAimState = AUTO_AIM_REQUEST_SENT;
+        AutoAimRequest.sendAimRequestTimeout.restart(AUTO_AIM_REQUEST_SEND_PERIOD_MS);
+        delay();
     }
-    return DID_NOT_SEND;
+    RF_END_RETURN(true);
 }
 
-XavierSerial::TxMessageState XavierSerial::sendRobotID()
+modm::ResumableResult<bool> XavierSerial::sendRobotID()
 {
-    if (txRobotIdTimeout.execute() || !robotIdSendSucceeded)
+    RF_BEGIN(2);
+    if (txRobotIdTimeout.execute())
     {
         txMessage.data[0] = static_cast<uint8_t>(drivers->refSerial.getRobotData().robotId);
         txMessage.length = 1;
         txMessage.type = CV_MESSAGE_TYPE_ROBOT_ID;
-        robotIdSendSucceeded = send();
-        return robotIdSendSucceeded ? SUCCESS : FAIL;
+        send();
     }
-    return DID_NOT_SEND;
+    RF_END_RETURN(true);
 }
 }  // namespace serial
 }  // namespace aruwsrc

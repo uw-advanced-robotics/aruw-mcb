@@ -34,7 +34,7 @@ public:
     XavierSerialMock(aruwlib::Drivers* drivers) : serial::XavierSerial(drivers, nullptr, nullptr) {}
     MOCK_METHOD(void, initializeCV, (), (override));
     MOCK_METHOD(void, messageReceiveCallback, (const SerialMessage& completeMessage), (override));
-    MOCK_METHOD(void, sendMessage, (), (override));
+    MOCK_METHOD(bool, sendMessage, (), (override));
     MOCK_METHOD(void, beginAutoAim, (), (override));
     MOCK_METHOD(void, stopAutoAim, (), (override));
     MOCK_METHOD(const TurretAimData&, getLastAimData, (), (const override));
