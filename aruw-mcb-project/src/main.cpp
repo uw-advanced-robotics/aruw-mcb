@@ -93,6 +93,8 @@ int main()
         if (sendXavierTimeout.execute())
         {
             PROFILE(drivers->profiler, xavierSerial.sendMessage, ());
+            // TOOD try faster baude rate so we can send more frequently (currently mcb's serial
+            // buffers are overflowing if you try and send faster than 3 ms).
         }
 
         if (sendMotorTimeout.execute())
