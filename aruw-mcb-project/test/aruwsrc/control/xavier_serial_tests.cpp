@@ -38,6 +38,7 @@ using namespace testing;
 using namespace aruwlib::arch;
 
 static constexpr float FIXED_POINT_PRECISION = 0.01f;
+static constexpr float TX_MAX_PERIOD_BTWN_SEND = 3;
 
 // class for accessing internals of XavierSerial class for testing purposes
 class XavierSerialTester
@@ -49,8 +50,6 @@ public:
     {
         return &serial->AutoAimRequest.currAimState;
     }
-
-    XavierSerial::TxMessageTypes *getCurrTxMessageType() { return &serial->currTxMessageType; }
 
     bool *getCurrAimRequest() { return &serial->AutoAimRequest.requestType; }
 
@@ -168,6 +167,8 @@ static void setExpectationsForTxTest(Drivers *drivers, int expectedNumMessagesSe
 
 TEST(XavierSerial, sendMessage_validate_robot_data)
 {
+    clock::setTime(0);
+
     Drivers drivers;
     TurretSubsystemMock ts(&drivers);
     ChassisSubsystemMock cs(&drivers);
@@ -214,9 +215,6 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
         EXPECT_CALL(drivers.mpu6500, getYaw).WillRepeatedly(Return(yawValsToTest[i]));
         EXPECT_CALL(drivers.mpu6500, getPitch).WillRepeatedly(Return(pitValsToTest[i]));
         EXPECT_CALL(drivers.mpu6500, getRoll).WillRepeatedly(Return(rollValsToTest[i]));
-
-        // Set message sending type to robot data to ensure that robot data will be sent each time
-        *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_ROBOT_DATA;
 
         auto checkExpectations =
             [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
@@ -299,13 +297,15 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
             };
 
         ON_CALL(drivers.uart, write(_, _, _)).WillByDefault(checkExpectations);
-
-        xs.sendMessage();
+        clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
+        xs.sendRobotMeasurements();
     }
 }
 
 TEST(XavierSerial, sendMessage_validate_robot_ID)
 {
+    clock::setTime(0);
+
     static constexpr float TIME_BETWEEN_ROBOT_ID_SEND = 5000;
     static constexpr int ROBOT_IDS_TO_CHECK =
         aruwlib::serial::RefSerial::BLUE_SENTINEL - aruwlib::serial::RefSerial::RED_HERO + 1;
@@ -338,9 +338,8 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
     {
         aruwlib::arch::clock::setTime(
             aruwlib::arch::clock::getTimeMilliseconds() + TIME_BETWEEN_ROBOT_ID_SEND);
-        *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_ROBOT_ID;
         robotData.robotId = static_cast<aruwlib::serial::RefSerial::RobotId>(i);
-        xs.sendMessage();
+        xs.sendRobotID();
     }
 }
 
@@ -392,6 +391,8 @@ TEST(XavierSerial, stopAutoAim_stops_auto_aim_req)
 
 TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
 {
+    aruwlib::arch::clock::setTime(0);
+
     Drivers drivers;
     XavierSerial xs(&drivers, nullptr, nullptr);
     XavierSerialTester xst(&xs);
@@ -406,16 +407,20 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
                 return length;
             });
 
-    aruwlib::arch::clock::setTime(0);
     xs.initializeCV();
 
     // Queue a message
     xs.beginAutoAim();
     autoAimRequest = true;
 
+    // Step forward in time
+    clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
+
     // Send target tracking request
-    *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
-    xs.sendMessage();
+    xs.sendAutoAimRequest();
+
+    // Step forward in time
+    clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
 
     // We shall now be waiting for a reply from the Xavier
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
@@ -435,8 +440,7 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     autoAimRequest = false;
 
     // Send target tracking request
-    *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
-    xs.sendMessage();
+    xs.sendAutoAimRequest();
 
     // We shall now be waiting for a reply from the Xavier
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
@@ -455,6 +459,8 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
 {
     static constexpr uint32_t RESEND_AIM_REQUEST_TIMEOUT = 1000;
 
+    aruwlib::arch::clock::setTime(0);
+
     Drivers drivers;
     XavierSerial xs(&drivers, nullptr, nullptr);
     XavierSerialTester xst(&xs);
@@ -469,24 +475,27 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
                 return length;
             });
 
-    aruwlib::arch::clock::setTime(0);
     xs.initializeCV();
 
     // Queue a message
     xs.beginAutoAim();
     autoAimRequest = true;
 
+    // Step forward in time
+    clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
+
     // Send target tracking request
-    *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
-    xs.sendMessage();
+    xs.sendAutoAimRequest();
+
+    // Step forward in time
+    clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
 
     // We shall now be waiting for a reply from the Xavier
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
 
     // Set the time s.t. the resend timer times out and resend message
-    aruwlib::arch::clock::setTime(RESEND_AIM_REQUEST_TIMEOUT);
-    *xst.getCurrTxMessageType() = XavierSerial::CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
-    xs.sendMessage();
+    clock::setTime(clock::getTimeMilliseconds() + RESEND_AIM_REQUEST_TIMEOUT);
+    xs.sendAutoAimRequest();
 
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
 }

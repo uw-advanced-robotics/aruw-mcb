@@ -77,6 +77,7 @@ public:
         CV_MESSAGE_TYPE_ROBOT_DATA = 0,
         CV_MESSAGE_TYPE_ROBOT_ID,
         CV_MESSAGE_TYPE_AUTO_AIM_REQUEST,
+        CV_NUM_MESSAGE_TYPES,
     };
 
     XavierSerial(
@@ -201,6 +202,9 @@ private:
      */
     bool decodeToTurrentAimData(const SerialMessage& message, TurretAimData* aimData);
 
+#ifdef ENV_UNIT_TESTS
+public:
+#endif
     modm::ResumableResult<bool> sendRobotMeasurements();
 
     /**

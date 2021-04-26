@@ -117,21 +117,31 @@ modm::ResumableResult<bool> XavierSerial::sendRobotMeasurements()
 {
     RF_BEGIN(0);
 
-    // Chassis data
-    convertToLittleEndian(chassisSub->getRightFrontRpmActual(), txMessage.data);
-    convertToLittleEndian(chassisSub->getLeftFrontRpmActual(), txMessage.data + sizeof(int16_t));
-    convertToLittleEndian(chassisSub->getLeftBackRpmActual(), txMessage.data + 2 * sizeof(int16_t));
-    convertToLittleEndian(
-        chassisSub->getRightBackRpmActual(),
-        txMessage.data + 3 * sizeof(int16_t));
+    if (chassisSub != nullptr)
+    {
+        // Chassis data
+        convertToLittleEndian(chassisSub->getRightFrontRpmActual(), txMessage.data);
+        convertToLittleEndian(
+            chassisSub->getLeftFrontRpmActual(),
+            txMessage.data + sizeof(int16_t));
+        convertToLittleEndian(
+            chassisSub->getLeftBackRpmActual(),
+            txMessage.data + 2 * sizeof(int16_t));
+        convertToLittleEndian(
+            chassisSub->getRightBackRpmActual(),
+            txMessage.data + 3 * sizeof(int16_t));
+    }
 
-    // Turret data
-    convertToLittleEndian(
-        static_cast<uint16_t>(turretSub->getPitchAngle().getValue() / FIXED_POINT_PRECISION),
-        txMessage.data + TURRET_DATA_OFFSET);
-    convertToLittleEndian(
-        static_cast<uint16_t>(turretSub->getYawAngle().getValue() / FIXED_POINT_PRECISION),
-        txMessage.data + TURRET_DATA_OFFSET + sizeof(uint16_t));
+    if (turretSub != nullptr)
+    {
+        // Turret data
+        convertToLittleEndian(
+            static_cast<uint16_t>(turretSub->getPitchAngle().getValue() / FIXED_POINT_PRECISION),
+            txMessage.data + TURRET_DATA_OFFSET);
+        convertToLittleEndian(
+            static_cast<uint16_t>(turretSub->getYawAngle().getValue() / FIXED_POINT_PRECISION),
+            txMessage.data + TURRET_DATA_OFFSET + sizeof(uint16_t));
+    }
 
     // IMU data
     convertToLittleEndian(
