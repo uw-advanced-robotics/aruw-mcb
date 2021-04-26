@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -43,7 +43,7 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "open hopper command"; }
+    const char* getName() const override { return "open hopper"; }
 
 private:
     HopperSubsystem* subsystemHopper;

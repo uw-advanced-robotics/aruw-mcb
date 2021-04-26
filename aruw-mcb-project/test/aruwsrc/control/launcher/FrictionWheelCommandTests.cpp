@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -30,7 +30,7 @@ using aruwlib::Drivers;
 using aruwsrc::mock::FrictionWheelSubsystemMock;
 using namespace testing;
 
-void setDefaultExpectations(Drivers *drivers)
+static void setDefaultExpectations(Drivers *drivers)
 {
     EXPECT_CALL(drivers->canRxHandler, removeReceiveHandler).Times(2);
     EXPECT_CALL(drivers->djiMotorTxHandler, removeFromMotorManager).Times(2);

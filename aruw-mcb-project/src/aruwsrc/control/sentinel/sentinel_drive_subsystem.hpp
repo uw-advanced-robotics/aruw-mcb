@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -23,7 +23,13 @@
 #include <aruwlib/communication/gpio/digital.hpp>
 #include <aruwlib/control/command_scheduler.hpp>
 #include <aruwlib/control/subsystem.hpp>
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <aruwlib/mock/DJIMotorMock.hpp>
+#else
 #include <aruwlib/motor/dji_motor.hpp>
+#endif
+
 #include <modm/math/filter/pid.hpp>
 
 namespace aruwsrc
@@ -36,20 +42,21 @@ public:
     static constexpr float MAX_POWER_CONSUMPTION = 30.0f;
     static constexpr float MAX_ENERGY_BUFFER = 200.0f;
 
-    // length of the rail we own, in mm
-    // the competition rail length is actually 4650mm
-    static constexpr float RAIL_LENGTH = 1900;
+    // RMUL length of the rail, in mm
+    static constexpr float RAIL_LENGTH = 2130;
+    // Our length of the rail, in mm
+    // static constexpr float RAIL_LENGTH = 1900;
 
     SentinelDriveSubsystem(
         aruwlib::Drivers* drivers,
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
         : aruwlib::control::Subsystem(drivers),
-          leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
-          rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
           velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
           velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-          desiredRpm(0)
+          desiredRpm(0),
+          leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
+          rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor")
     {
     }
 
@@ -64,6 +71,10 @@ public:
     void setDesiredRpm(float desRpm);
 
     void refresh() override;
+
+    void runHardwareTests() override;
+
+    const char* getName() override { return "Sentinel Drive"; }
 
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR6;
@@ -82,10 +93,6 @@ private:
     static constexpr float WHEEL_RADIUS = 35.0f;
     static constexpr float GEAR_RATIO = 19.0f;
 
-    aruwlib::motor::DjiMotor leftWheel;
-
-    aruwlib::motor::DjiMotor rightWheel;
-
     modm::Pid<float> velocityPidLeftWheel;
 
     modm::Pid<float> velocityPidRightWheel;
@@ -97,6 +104,17 @@ private:
     void resetOffsetFromLimitSwitch();
 
     float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    aruwlib::mock::DjiMotorMock leftWheel;
+    aruwlib::mock::DjiMotorMock rightWheel;
+
+private:
+#else
+    aruwlib::motor::DjiMotor leftWheel;
+    aruwlib::motor::DjiMotor rightWheel;
+#endif
 };
 
 }  // namespace control

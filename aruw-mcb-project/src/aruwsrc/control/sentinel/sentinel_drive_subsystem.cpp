@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,7 +21,12 @@
 
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/errors/create_errors.hpp>
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <aruwlib/mock/DJIMotorMock.hpp>
+#else
 #include <aruwlib/motor/dji_motor.hpp>
+#endif
 
 using namespace aruwlib::gpio;
 
@@ -68,7 +73,7 @@ float SentinelDriveSubsystem::absolutePosition()
             drivers,
             "right sentinel drive motor offline",
             aruwlib::errors::Location::SUBSYSTEM,
-            aruwlib::errors::ErrorType::MOTOR_OFFLINE);
+            aruwlib::errors::SubsystemErrorType::MOTOR_OFFLINE);
         average = leftPosition;
     }
     else if (rightWheel.isMotorOnline())
@@ -77,7 +82,7 @@ float SentinelDriveSubsystem::absolutePosition()
             drivers,
             "left sentinel drive motor offline",
             aruwlib::errors::Location::SUBSYSTEM,
-            aruwlib::errors::ErrorType::MOTOR_OFFLINE);
+            aruwlib::errors::SubsystemErrorType::MOTOR_OFFLINE);
         average = rightPosition;
     }
     else
@@ -86,7 +91,7 @@ float SentinelDriveSubsystem::absolutePosition()
             drivers,
             "both sentinel drive motors offline",
             aruwlib::errors::Location::SUBSYSTEM,
-            aruwlib::errors::ErrorType::MOTOR_OFFLINE);
+            aruwlib::errors::SubsystemErrorType::MOTOR_OFFLINE);
         average = 0.0f;
     }
     return aruwlib::algorithms::limitVal<float>(average, 0.0f, SentinelDriveSubsystem::RAIL_LENGTH);
@@ -116,10 +121,16 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 // Here we get the radius from the getEncoderUnwrapped function
 float SentinelDriveSubsystem::distanceFromEncoder(aruwlib::motor::DjiMotor* motor)
 {
-    float unwrappedAngle = motor->encStore.getEncoderUnwrapped();
+    float unwrappedAngle = motor->getEncoderUnwrapped();
     float numberOfRotations = unwrappedAngle / (aruwlib::motor::DjiMotor::ENC_RESOLUTION);
     return numberOfRotations * 2.0f * aruwlib::algorithms::PI * WHEEL_RADIUS / GEAR_RATIO;
 }
+
+void SentinelDriveSubsystem::runHardwareTests()
+{
+    // TODO
+}
+
 }  // namespace control
 
 }  // namespace aruwsrc

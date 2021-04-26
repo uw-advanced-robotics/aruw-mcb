@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -50,7 +50,7 @@ Servo::Servo(
             drivers,
             "min servo PWM > max servo PWM",
             errors::Location::SERVO,
-            errors::ErrorType::INVALID_ADD);
+            errors::ServoErrorType::INVALID_ADD);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,9 +29,12 @@ LinearInterpolation::LinearInterpolation() : lastUpdateCallTime(0), previousValu
 {
 }
 
-void LinearInterpolation::update(float newValue)
+void LinearInterpolation::update(float newValue, uint32_t currTime)
 {
-    uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+    if (currTime == lastUpdateCallTime)
+    {
+        return;
+    }
     slope = (newValue - previousValue) / (currTime - lastUpdateCallTime);
     previousValue = newValue;
     lastUpdateCallTime = currTime;

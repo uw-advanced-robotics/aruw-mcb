@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -26,7 +26,7 @@
 
 #include "aruwlib/communication/serial/uart.hpp"
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -71,7 +71,10 @@ namespace serial
  * | 8 + Data Length | CRC16 of header and frame, MSB                             |
  * +-----------------+------------------------------------------------------------+
  * \endrst
+ *
+ * @tparam RxCrcEnabled `true` if crc8 and crc16 enforcement are enabled.
  */
+template <bool RxCrcEnabled = false>
 class DJISerial
 {
 private:
@@ -84,6 +87,8 @@ private:
     static const uint8_t FRAME_HEADER_LENGTH = 7;
     static const uint8_t FRAME_TYPE_OFFSET = 5;
     static const uint8_t FRAME_CRC16_LENGTH = 2;
+    static constexpr uint16_t SERIAL_RX_FRAME_HEADER_AND_BUF_SIZE =
+        SERIAL_RX_BUFF_SIZE + FRAME_HEADER_LENGTH;
 
 public:
     /**
@@ -91,12 +96,12 @@ public:
      */
     struct SerialMessage
     {
-        uint8_t headByte;  ///< Use SERIAL_HEAD_BYTE.
-        uint16_t length;   ///< Must be less than SERIAL_RX_BUFF_SIZE or SERIAL_TX_BUFF_SIZE.
-        uint16_t type;     ///< The type is specified and interpreted by a derived class.
+        uint8_t headByte;  /// Use `SERIAL_HEAD_BYTE`.
+        uint16_t length;   /// Must be less than SERIAL_RX_BUFF_SIZE or SERIAL_TX_BUFF_SIZE.
+        uint16_t type;     /// The type is specified and interpreted by a derived class.
         uint8_t data[SERIAL_RX_BUFF_SIZE];
-        modm::Timestamp messageTimestamp;  ///< The timestamp is in milliseconds.
-        uint8_t sequenceNumber;  ///< A derived class may increment this for debugging purposes.
+        uint32_t messageTimestamp;  /// The timestamp is in milliseconds.
+        uint8_t sequenceNumber;     /// A derived class may increment this for debugging purposes.
     };
 
     /**
@@ -105,8 +110,8 @@ public:
      * @param[in] port serial port to work on.
      * @param[in] isRxCRCEnforcementEnabled if to enable Rx CRC Enforcement.
      */
-    DJISerial(Drivers *drivers, Uart::UartPort port, bool isRxCRCEnforcementEnabled);
-
+    DJISerial(Drivers *drivers, Uart::UartPort port);
+    DISALLOW_COPY_AND_ASSIGN(DJISerial)
     mockable ~DJISerial() = default;
 
     /**
@@ -144,21 +149,21 @@ private:
 
     enum SerialRxState
     {
-        SERIAL_HEADER_SEARCH,  ///< A header byte has not yet been received.
-        PROCESS_FRAME_HEADER,  ///< A header is received and the frame header is being processed.
-        PROCESS_FRAME_DATA     ///< The data is being processed.
+        SERIAL_HEADER_SEARCH,  /// A header byte has not yet been received.
+        PROCESS_FRAME_HEADER,  /// A header is received and the frame header is being processed.
+        PROCESS_FRAME_DATA     /// The data is being processed.
     };
 
-    ///< The serial port you are connected to.
+    /// The serial port you are connected to.
     Uart::UartPort port;
 
-    ///< stuff for RX, buffers to store parts of the header, state machine.
+    /// stuff for RX, buffers to store parts of the header, state machine.
     SerialRxState djiSerialRxState;
 
-    ///< Message in middle of being constructed.
+    /// Message in middle of being constructed.
     SerialMessage newMessage;
 
-    ///< Most recent complete message.
+    /// Most recent complete message.
     SerialMessage mostRecentMessage;
     /**
      * The current zero indexed byte that is being read from the `Uart` class.
@@ -173,12 +178,9 @@ private:
      */
     uint8_t frameHeader[FRAME_HEADER_LENGTH];
 
-    ///< Whether or not to handle electrical noise.
-    bool rxCRCEnforcementEnabled;
-
     // TX related information.
 
-    ///< TX buffer.
+    /// TX buffer.
     uint8_t txBuffer[SERIAL_TX_BUFF_SIZE];
 
     /**
@@ -214,7 +216,7 @@ protected:
      */
     SerialMessage txMessage;
 
-    uint8_t txSequenceNumber;
+    uint8_t rxCrcEnforcementBuff[RxCrcEnabled ? SERIAL_RX_FRAME_HEADER_AND_BUF_SIZE : 1];
 
     /**
      * Send a Message. This constructs a message from the `txMessage`,

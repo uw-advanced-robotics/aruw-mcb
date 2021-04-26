@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,7 +22,12 @@
 
 #include <aruwlib/architecture/timeout.hpp>
 #include <aruwlib/control/subsystem.hpp>
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <aruwlib/mock/DJIMotorMock.hpp>
+#else
 #include <aruwlib/motor/dji_motor.hpp>
+#endif
+
 #include <modm/math/filter/pid.hpp>
 
 #include "aruwsrc/algorithms/turret_pid.hpp"
@@ -80,20 +85,28 @@ public:
     static constexpr float PID_HERO1_I = 500.0f;
     static constexpr float PID_HERO1_D = 7000.0f;
     static constexpr float PID_HERO1_MAX_ERR_SUM = 0.0f;
+    // max out added by Tenzin since it wasn't here. This should
+    // also be changed by someone who know's what they're doing!
+    static constexpr float PID_HERO1_MAX_OUT = 16000.0f;
 
     // PID terms for hero agitator 2
     static constexpr float PID_HERO2_P = 1500.0f;
     static constexpr float PID_HERO2_I = 500.0f;
     static constexpr float PID_HERO2_D = 7000.0f;
     static constexpr float PID_HERO2_MAX_ERR_SUM = 0.0f;
+    // max out added by Tenzin since it wasn't here. This should
+    // also be changed by someone who know's what they're doing!
+    static constexpr float PID_HERO2_MAX_OUT = 16000.0f;
 
     static constexpr aruwlib::motor::MotorId HERO1_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::can::CanBus HERO1_AGITATOR_MOTOR_CAN_BUS =
         aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr bool HERO1_AGITATOR_INVERTED = false;
 
-    static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR6;
+    static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR8;
     static constexpr aruwlib::can::CanBus HERO2_AGITATOR_MOTOR_CAN_BUS =
         aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr bool HERO2_AGITATOR_INVERTED = false;
 #endif
 
     /**
@@ -184,6 +197,10 @@ public:
      */
     float getAgitatorVelocity() const;
 
+    void runHardwareTests() override;
+
+    const char* getName() override { return "Agitator"; }
+
 private:
     /**
      * We add on this amount of "tolerance" to the predicted rotate time since some times it
@@ -196,8 +213,6 @@ private:
      * PID controller for running postiion PID on unwrapped agitator angle (in radians).
      */
     aruwsrc::algorithms::TurretPid agitatorPositionPid;
-
-    aruwlib::motor::DjiMotor agitatorMotor;
 
     /**
      * The user desired angle, measured in radians.
@@ -236,6 +251,16 @@ private:
     void agitatorRunPositionPid();
 
     float getUncalibratedAgitatorAngle() const;
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    aruwlib::mock::DjiMotorMock agitatorMotor;
+
+private:
+#else
+    aruwlib::motor::DjiMotor agitatorMotor;
+#endif
+
 };  // class AgitatorSubsystem
 
 }  // namespace agitator

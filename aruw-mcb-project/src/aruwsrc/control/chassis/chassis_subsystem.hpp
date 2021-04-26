@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,9 +21,19 @@
 #define CHASSIS_SUBSYSTEM_HPP_
 
 #include <aruwlib/algorithms/extended_kalman.hpp>
+#include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/control/subsystem.hpp>
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <aruwlib/mock/DJIMotorMock.hpp>
+#else
 #include <aruwlib/motor/dji_motor.hpp>
+#endif
+
 #include <modm/math/filter/pid.hpp>
+#include <modm/math/matrix.hpp>
+
+#include "util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -103,21 +113,26 @@ private:
      */
     static const int MIN_ERROR_ROTATION_D = 0;
 
-    // mechanical chassis constants, all in mm
     /**
-     * Radius of the wheels (mm).
+     * The maximum output allowed out of the rotation PID controller.
      */
-    static constexpr float WHEEL_RADIUS = 76.0f;
+    static constexpr float MAX_OUTPUT_ROTATION_PID = 5000.0f;
+
+    // mechanical chassis constants, all in m
     /**
-     * Distance from center of the two front wheels (mm).
+     * Radius of the wheels (m).
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 366.0f;
+    static constexpr float WHEEL_RADIUS = 0.076;
     /**
-     * Distance from center of the front and rear wheels (mm).
+     * Distance from center of the two front wheels (m).
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_X = 366.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
     /**
-     * Gimbal offset from the center of the chassis, see note above for explanation of x and y (mm).
+     * Distance from center of the front and rear wheels (m).
+     */
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+    /**
+     * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
      */
     static constexpr float GIMBAL_X_OFFSET = 0.0f;
     /**
@@ -151,6 +166,10 @@ private:
      */
     static const int MIN_ERROR_ROTATION_D = 0;
     /**
+     * The maximum output allowed out of the rotation PID controller.
+     */
+    static constexpr float MAX_OUTPUT_ROTATION_PID = 5000.0f;
+    /**
      * Derivative max term.
      */
     static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
@@ -158,19 +177,19 @@ private:
     /**
      * Radius of the wheels.
      */
-    static constexpr float WHEEL_RADIUS = 76.0f;
+    static constexpr float WHEEL_RADIUS = 0.076f;
     /**
      * Distance from center of the two front wheels.
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 517.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.517f;
     /**
      * Distance from center of the front and rear wheels.
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_X = 600.0f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.600f;
     /**
      * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
      */
-    static constexpr float GIMBAL_X_OFFSET = 175.0f;
+    static constexpr float GIMBAL_X_OFFSET = 0.175f;
     /**
      * @see `GIMBAL_X_OFFSET`.
      */
@@ -205,6 +224,10 @@ private:
      * The maximum revolve error before we start using the derivative term.
      */
     static const int MIN_ERROR_ROTATION_D = 0;
+    /**
+     * The maximum output allowed out of the rotation PID controller.
+     */
+    static constexpr float MAX_OUTPUT_ROTATION_PID = 5000.0f;
 
     // mechanical chassis constants
     /**
@@ -231,23 +254,18 @@ private:
 
 #endif
 
-private:
+public:
     // hardware constants, not specific to any particular chassis
     static constexpr aruwlib::motor::MotorId LEFT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR2;
     static constexpr aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID = aruwlib::motor::MOTOR3;
     static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR1;
     static constexpr aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID = aruwlib::motor::MOTOR4;
+
 #if defined(TARGET_OLD_SOLDIER)
     static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 #else
     static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS2;
 #endif
-
-    // motors
-    aruwlib::motor::DjiMotor leftFrontMotor;
-    aruwlib::motor::DjiMotor leftBackMotor;
-    aruwlib::motor::DjiMotor rightFrontMotor;
-    aruwlib::motor::DjiMotor rightBackMotor;
 
     // wheel velocity PID variables
     modm::Pid<float> leftFrontVelocityPid;
@@ -255,15 +273,55 @@ private:
     modm::Pid<float> rightFrontVelocityPid;
     modm::Pid<float> rightBackVelocityPid;
 
-    // translate all input into a desired wheel RPM when given
-    float leftFrontRpm;
-    float leftBackRpm;
-    float rightFrontRpm;
-    float rightBackRpm;
+    /**
+     * Used to index into the desiredWheelRPM matrix.
+     */
+    enum WheelRPMIndex
+    {
+        LF = 0,
+        RF = 1,
+        LB = 2,
+        RB = 3,
+    };
 
-    float chassisDesiredR = 0.0f;
+    /**
+     * Used to index into matrices returned by functions of the form get*Velocity*().
+     */
+    enum ChassisVelIndex
+    {
+        X = 0,
+        Y = 1,
+        R = 2,
+    };
+
+    /**
+     * Stores the desired RPM of each of the motors in a matrix of the following form:
+     * [[leftFront],
+     *  [rightFront],
+     *  [leftBack],
+     *  [rightFront]]
+     */
+    modm::Matrix<float, 4, 1> desiredWheelRPM;
 
     aruwlib::algorithms::ExtendedKalman chassisRotationErrorKalman;
+
+    modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    aruwlib::mock::DjiMotorMock leftFrontMotor;
+    aruwlib::mock::DjiMotorMock leftBackMotor;
+    aruwlib::mock::DjiMotorMock rightFrontMotor;
+    aruwlib::mock::DjiMotorMock rightBackMotor;
+
+private:
+#else
+    // motors
+    aruwlib::motor::DjiMotor leftFrontMotor;
+    aruwlib::motor::DjiMotor leftBackMotor;
+    aruwlib::motor::DjiMotor rightFrontMotor;
+    aruwlib::motor::DjiMotor rightBackMotor;
+#endif
 
 public:
     ChassisSubsystem(
@@ -273,25 +331,6 @@ public:
         aruwlib::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
         aruwlib::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID)
         : aruwlib::control::Subsystem(drivers),
-          leftFrontMotor(
-              drivers,
-              leftFrontMotorId,
-              CAN_BUS_MOTORS,
-              false,
-              "left front drive motor"),
-          leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
-          rightFrontMotor(
-              drivers,
-              rightFrontMotorId,
-              CAN_BUS_MOTORS,
-              false,
-              "right front drive motor"),
-          rightBackMotor(
-              drivers,
-              rightBackMotorId,
-              CAN_BUS_MOTORS,
-              false,
-              "right back drive motor"),
           leftFrontVelocityPid(
               VELOCITY_PID_KP,
               VELOCITY_PID_KI,
@@ -316,12 +355,38 @@ public:
               VELOCITY_PID_KD,
               VELOCITY_PID_MAX_ERROR_SUM,
               VELOCITY_PID_MAX_OUTPUT),
-          leftFrontRpm(0),
-          leftBackRpm(0),
-          rightFrontRpm(0),
-          rightBackRpm(0),
-          chassisRotationErrorKalman(1.0f, 0.0f)
+          chassisRotationErrorKalman(1.0f, 0.0f),
+          leftFrontMotor(
+              drivers,
+              leftFrontMotorId,
+              CAN_BUS_MOTORS,
+              false,
+              "left front drive motor"),
+          leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
+          rightFrontMotor(
+              drivers,
+              rightFrontMotorId,
+              CAN_BUS_MOTORS,
+              false,
+              "right front drive motor"),
+          rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor")
     {
+        constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
+                                ? 1
+                                : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+        wheelVelToChassisVelMat[0][0] = 1;
+        wheelVelToChassisVelMat[0][1] = -1;
+        wheelVelToChassisVelMat[0][2] = 1;
+        wheelVelToChassisVelMat[0][3] = -1;
+        wheelVelToChassisVelMat[1][0] = 1;
+        wheelVelToChassisVelMat[1][1] = 1;
+        wheelVelToChassisVelMat[1][2] = -1;
+        wheelVelToChassisVelMat[1][3] = -1;
+        wheelVelToChassisVelMat[2][0] = 1.0 / A;
+        wheelVelToChassisVelMat[2][1] = 1.0 / A;
+        wheelVelToChassisVelMat[2][2] = 1.0 / A;
+        wheelVelToChassisVelMat[2][3] = 1.0 / A;
+        wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
     }
 
     void initialize() override;
@@ -338,7 +403,7 @@ public:
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    void setDesiredOutput(float x, float y, float r);
+    mockable void setDesiredOutput(float x, float y, float r);
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
@@ -360,11 +425,34 @@ public:
      */
     float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
+    void runHardwareTests() override;
+
+    const char* getName() override { return "Chassis"; }
+
     /**
-     * @return The desired rotation based on what was input into the subsystem via
-     *      `setDesiredOutput`.
+     * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the desired velocity calculated before any
+     *      sort of limiting occurs (other than base max RPM limiting). Units: m/s
+     * @note Equations slightly modified from this paper:
+     *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-    float getChassisDesiredRotation() const;
+    modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+
+    /**
+     * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the velocity calculated from the chassis's
+     *      encoders. Units: m/s
+     */
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const;
+
+    /**
+     * Transforms the chassis relative velocity of the form <vx, vy, vz> into world relative frame,
+     * given some particular chassis heading (z direction, assumed to be in radians). Transforms
+     * the input matrix chassisRelativeVelocity. Units: m/s
+     */
+    void getVelocityWorldRelative(
+        modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
+        float chassisHeading) const;
 
 private:
     /**
@@ -377,6 +465,16 @@ private:
         modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
         float desiredRpm);
+
+    /**
+     * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
+     */
+    inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
+    {
+        static constexpr float ratio =
+            2.0f * aruwlib::algorithms::PI * CHASSIS_GEARBOX_RATIO / 60.0f;
+        return mat * ratio;
+    }
 };  // class ChassisSubsystem
 
 }  // namespace chassis

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -30,7 +30,7 @@ namespace display
 class MainMenu : public modm::StandardMenu
 {
 public:
-    MainMenu(modm::ViewStack *stack, uint8_t identifier, Drivers *drivers);
+    MainMenu(modm::ViewStack *stack, Drivers *drivers);
 
     virtual ~MainMenu() = default;
 
@@ -40,11 +40,15 @@ public:
     void initialize();
 
 private:
+    static constexpr int MAIN_MENU_ID = 2;
+
     Drivers *drivers;
 
     void addErrorMenuCallback();
+    void addHardwareTestMenuCallback();
     void addMotorMenuCallback();
     void addPropertyTableCallback();
+    void addCommandSchedulerCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwlib

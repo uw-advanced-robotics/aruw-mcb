@@ -1,3 +1,6 @@
+[![pipeline status](https://gitlab.com/aruw/controls/aruw-mcb/badges/develop/pipeline.svg)](https://gitlab.com/aruw/controls/aruw-mcb/-/commits/develop)
+[![coverage report](https://gitlab.com/aruw/controls/aruw-mcb/badges/develop/coverage.svg)](https://gitlab.com/aruw/controls/aruw-mcb/-/commits/develop)
+
 # aruw-mcb
 
 ARUW's "Main Control Board" (MCB) code for the RoboMaster competition.
@@ -192,7 +195,7 @@ The below commands require that your working directory is `aruw-mcb/aruw-mcb-pro
 Note that all `scons` commands have optional `profile` and `target` options; the former controls whether performance and size optimizations are applied to the output, and the latter specifies which robot to build for. The default is to build in release mode for the Soldier.
 
 ```
-Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]
+Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [profiling=<true|false>]
     "<target>" is one of:
         - "build": build all code for the hardware platform.
         - "run": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.

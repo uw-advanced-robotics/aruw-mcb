@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,15 +21,15 @@
 
 // In simulation, we'll let modm's default implementation handle this.
 #ifndef PLATFORM_HOSTED
-modm_extern_c void modm_abandon(const char *, const char *, const char *, uintptr_t)
+modm_extern_c void modm_abandon(const modm::AssertionInfo &)
 {
     Board::LedsPort::setOutput();
     for (int times = 10; times >= 0; times--)
     {
         Board::LedsPort::toggle();
-        modm::delayMilliseconds(100);
+        modm::delay_ms(100);
         Board::LedsPort::toggle();
-        modm::delayMilliseconds(100);
+        modm::delay_ms(100);
     }
 }
 

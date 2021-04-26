@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -81,6 +81,10 @@ public:
     void setClose();
 
     void refresh() override;
+
+    void runHardwareTests() override;
+
+    const char *getName() override { return "Hopper"; }
 
 private:
     aruwlib::motor::Servo hopper;

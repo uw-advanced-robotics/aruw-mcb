@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -38,7 +38,10 @@
 #include "aruwlib/mock/RemoteMock.hpp"
 #include "aruwlib/mock/UartMock.hpp"
 #include "aruwlib/mock/XavierSerialMock.hpp"
+
+#include "architecture/profiler.hpp"
 #else
+#include "architecture/profiler.hpp"
 #include "communication/can/can.hpp"
 #include "communication/can/can_rx_handler.hpp"
 #include "communication/gpio/analog.hpp"
@@ -50,9 +53,9 @@
 #include "communication/serial/ref_serial.hpp"
 #include "communication/serial/uart.hpp"
 #include "communication/serial/xavier_serial.hpp"
-#include "control/command_mapper.hpp"
+#include "control/CommandMapper.hpp"
+#include "control/ControlOperatorInterface.hpp"
 #include "control/command_scheduler.hpp"
-#include "control/control_operator_interface.hpp"
 #include "display/OledDisplay.hpp"
 #include "errors/error_controller.hpp"
 #include "motor/dji_motor_tx_handler.hpp"
@@ -79,12 +82,17 @@ public:
           uart(),
           xavierSerial(this),
           refSerial(this),
+#ifdef ENV_UNIT_TESTS
           commandScheduler(this),
+#else
+          commandScheduler(this, true),
+#endif
           controlOperatorInterface(this),
           commandMapper(this),
           errorController(this),
           djiMotorTxHandler(this),
-          oledDisplay(this)
+          oledDisplay(this),
+          profiler()
     {
     }
 
@@ -106,6 +114,7 @@ public:
     mock::ErrorControllerMock errorController;
     mock::DjiMotorTxHandlerMock djiMotorTxHandler;
     mock::OledDisplayMock oledDisplay;
+    arch::Profiler profiler;
 #else
 public:
     can::Can can;
@@ -125,6 +134,7 @@ public:
     errors::ErrorController errorController;
     motor::DjiMotorTxHandler djiMotorTxHandler;
     display::OledDisplay oledDisplay;
+    arch::Profiler profiler;
 #endif
 };  // class Drivers
 

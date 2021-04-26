@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,6 +20,7 @@
 #include "subsystem.hpp"
 
 #include "command.hpp"
+#include "command_scheduler.hpp"
 
 namespace aruwlib
 {
@@ -28,11 +29,11 @@ namespace control
 Subsystem::Subsystem(Drivers* drivers)
     : drivers(drivers),
       defaultCommand(nullptr),
-      prevSchedulerExecuteTimestamp(0)
+      globalIdentifier(CommandScheduler::constructSubsystem(this))
 {
 }
 
-void Subsystem::initialize() {}
+Subsystem::~Subsystem() { CommandScheduler::destructSubsystem(this); }
 
 void Subsystem::setDefaultCommand(Command* command)
 {
@@ -42,10 +43,7 @@ void Subsystem::setDefaultCommand(Command* command)
     }
 }
 
-Command* Subsystem::getDefaultCommand() const { return defaultCommand; }
-
-void Subsystem::refresh() {}
-
+const char* Subsystem::getName() { return "Subsystem"; }
 }  // namespace control
 
 }  // namespace aruwlib

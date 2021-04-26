@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,7 +21,7 @@
 #define CAN_RX_HANDLER_HPP_
 
 #include "can_rx_listener.hpp"
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -57,12 +57,8 @@ class CanRxHandler
 {
 public:
     CanRxHandler(Drivers* drivers) : drivers(drivers) {}
-
-    CanRxHandler(const CanRxHandler&) = delete;
-
-    CanRxHandler& operator=(const CanRxHandler& other) = delete;
-
     mockable ~CanRxHandler() = default;
+    DISALLOW_COPY_AND_ASSIGN(CanRxHandler)
 
     /**
      * Call this function to add a CanRxListener to the list of CanRxListener's

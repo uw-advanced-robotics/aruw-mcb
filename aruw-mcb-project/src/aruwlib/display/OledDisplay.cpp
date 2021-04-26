@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -31,7 +31,7 @@ OledDisplay::OledDisplay(Drivers *drivers)
     : display(),
       viewStack(&display),
       buttonHandler(drivers),
-      mainMenu(&viewStack, 0, drivers),
+      splashScreen(&viewStack, drivers),
       drivers(drivers)
 {
 }
@@ -50,12 +50,22 @@ void OledDisplay::initialize()
     display.initializeBlocking();
     display.setFont(modm::font::ScriptoNarrow);
 
-    mainMenu.initialize();
-
-    viewStack.push(&mainMenu);
+    viewStack.push(&splashScreen);
 }
 
-void OledDisplay::update()
+bool OledDisplay::updateDisplay()
+{
+    PT_BEGIN();
+    while (true)
+    {
+        PT_CALL(display.updateNonblocking());
+        PT_WAIT_UNTIL(displayThreadTimer.execute());
+    }
+    PT_END();
+    return false;
+}
+
+void OledDisplay::updateMenu()
 {
     OledButtonHandler::Button buttonPressed = buttonHandler.getCurrentButtonState();
     if (buttonPressed != OledButtonHandler::NONE && buttonPressed != prevButton)
@@ -63,7 +73,7 @@ void OledDisplay::update()
         // Seperate from above for ease of readability.
         // For now the main menu should never be removed from the stack (which is what the left
         // button does in a StandardMenu).
-        if (buttonPressed != OledButtonHandler::LEFT || viewStack.get() != &mainMenu)
+        if (buttonPressed != OledButtonHandler::LEFT || viewStack.get() != &splashScreen)
         {
             viewStack.shortButtonPress(static_cast<modm::MenuButtons::Button>(buttonPressed));
         }

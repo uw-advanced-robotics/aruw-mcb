@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,7 +22,7 @@
 
 #include <modm/architecture/interface/can_message.hpp>
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -41,8 +41,7 @@ class Can
 {
 public:
     Can() = default;
-    Can(const Can &) = delete;
-    Can &operator=(const Can &) = delete;
+    DISALLOW_COPY_AND_ASSIGN(Can)
     mockable ~Can() = default;
 
     /**

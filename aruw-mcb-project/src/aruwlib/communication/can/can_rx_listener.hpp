@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -91,14 +91,12 @@ public:
      */
     CanRxListener(Drivers* drivers, uint32_t id, CanBus cB);
 
-    ///< Delete copy constructor.
-    CanRxListener(const CanRxListener&) = delete;
-
-    ///< Delete operator=.
-    CanRxListener& operator=(const CanRxListener& other) = delete;
-
-    ///< Here we remove the listener from receive interface.
+    /**
+     * Here we remove the listener from receive interface.
+     */
     ~CanRxListener();
+
+    DISALLOW_COPY_AND_ASSIGN(CanRxListener)
 
     /**
      * Adds itself to the CanRxHandler.

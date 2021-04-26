@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,6 +19,7 @@
 
 #include "command.hpp"
 
+#include "command_scheduler.hpp"
 #include "subsystem.hpp"
 
 using namespace std;
@@ -27,14 +28,9 @@ namespace aruwlib
 {
 namespace control
 {
-bool Command::hasRequirement(Subsystem* requirement) const
-{
-    if (requirement == nullptr)
-    {
-        return false;
-    }
-    return commandRequirements.find(requirement) != commandRequirements.end();
-}
+Command::Command() : globalIdentifier(CommandScheduler::constructCommand(this)) {}
+
+Command::~Command() { CommandScheduler::destructCommand(this); }
 
 void Command::addSubsystemRequirement(Subsystem* requirement)
 {
@@ -42,17 +38,7 @@ void Command::addSubsystemRequirement(Subsystem* requirement)
     {
         return;
     }
-    // Ensure the requirement you are trying to add is not already a
-    // command requirement.
-    if (requirement != nullptr &&
-        commandRequirements.find(requirement) == commandRequirements.end())
-    {
-        commandRequirements.insert(requirement);
-    }
+    commandRequirementsBitwise |= (1UL << requirement->getGlobalIdentifier());
 }
-
-const set<Subsystem*>& Command::getRequirements() const { return commandRequirements; }
-
 }  // namespace control
-
 }  // namespace aruwlib

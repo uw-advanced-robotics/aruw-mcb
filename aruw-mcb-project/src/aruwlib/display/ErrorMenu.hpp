@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -49,6 +49,8 @@ public:
     static const char *getMenuName() { return "Error Menu"; }
 
 private:
+    static constexpr int ERROR_MENU_ID = 3;
+
     Drivers *drivers;
 };  // class ErrorMenu
 }  // namespace display

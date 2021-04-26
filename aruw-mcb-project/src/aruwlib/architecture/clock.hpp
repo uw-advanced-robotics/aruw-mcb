@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -33,16 +33,21 @@ namespace arch
 {
 namespace clock
 {
-inline uint32_t getTimeMilliseconds() { return modm::Clock::now().getTime(); }
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+void setTime(uint32_t timeMilliseconds);
+uint32_t getTimeMilliseconds();
+uint32_t getTimeMicroseconds();
+#else
+inline uint32_t getTimeMilliseconds() { return modm::Clock().now().time_since_epoch().count(); }
 
+/**
+ * @warning This clock time will wrap every 72 minutes. Do not use unless absolutely necessary.
+ */
 inline uint32_t getTimeMicroseconds()
 {
-#ifdef PLATFORM_HOSTED
-    return 0;
-#else
-    return DWT->CYCCNT / static_cast<uint32_t>(modm::clock::fcpu_MHz);
-#endif
+    return modm::PreciseClock().now().time_since_epoch().count();
 }
+#endif
 }  // namespace clock
 
 }  // namespace arch

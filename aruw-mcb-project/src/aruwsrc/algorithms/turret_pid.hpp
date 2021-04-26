@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -51,7 +51,7 @@ public:
     {
     }
 
-    float runController(float error, float rotationalSpeed);
+    float runController(float error, float rotationalSpeed, float dt);
 
     float runControllerDerivateError(float error, float dt);
 
@@ -72,10 +72,7 @@ private:
     float currErrorI = 0.0f;
     float currErrorD = 0.0f;
     float output = 0.0f;
-
-    // if you run the controller without inputting a rotationalSpeed, we find the
-    // derivative ourselves
-    uint32_t previousTimestamp = 0;
+    float prevError = 0.0f;
 
     aruwlib::algorithms::ExtendedKalman proportionalKalman;
     aruwlib::algorithms::ExtendedKalman derivativeKalman;

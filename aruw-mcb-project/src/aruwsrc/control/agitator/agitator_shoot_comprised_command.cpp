@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -85,7 +85,8 @@ void ShootComprisedCommand::end(bool interrupted)
 bool ShootComprisedCommand::isFinished() const
 {
     return (agitatorRotateCommand.isFinished() && !unjamSequenceCommencing) ||
-           (agitatorUnjamCommand.isFinished() && unjamSequenceCommencing);
+           (agitatorUnjamCommand.isFinished() && unjamSequenceCommencing) ||
+           (!connectedAgitator->isAgitatorCalibrated());
 }
 
 }  // namespace agitator

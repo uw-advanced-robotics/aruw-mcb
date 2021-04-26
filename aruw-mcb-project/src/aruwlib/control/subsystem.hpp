@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,6 +22,8 @@
 
 #include <cstdint>
 
+#include "util_macros.hpp"
+
 namespace aruwlib
 {
 class Drivers;
@@ -36,9 +38,9 @@ class Command;
  * be used by Commands. Subsystems are used by the CommandScheduler's resource
  * management system to ensure multiple robot actions are not "fighting" over
  * the same hardware; Commands that use a subsystem should include that
- * subsystem in their getRequirements() function, and resources used within a
- * subsystem should generally remain encapsulated and not be shared by other
- * parts of the robot.
+ * subsystem by adding it as a requirement via addSubsystemRequirement, and
+ * resources used within a subsystem should generally remain encapsulated and
+ * not be shared by other parts of the robot.
  *
  * Subsystems must be registered with the scheduler with the
  * CommandScheduler.registerSubsystem() function in order for the
@@ -49,11 +51,13 @@ class Subsystem
 public:
     Subsystem(Drivers* drivers);
 
+    virtual ~Subsystem();
+
     /**
      * Called once when you add the Subsystem to the commandScheduler stored in the
      * Drivers class.
      */
-    virtual void initialize();
+    virtual void initialize() {}
 
     /**
      * Sets the default Command of the Subsystem. The default Command will be
@@ -65,7 +69,7 @@ public:
      *
      * @param defaultCommand the default Command to associate with this subsystem
      */
-    void setDefaultCommand(Command* defaultCommand);
+    mockable void setDefaultCommand(Command* defaultCommand);
 
     /**
      * Gets the default command for this subsystem. Returns `nullptr` if no default
@@ -73,7 +77,7 @@ public:
      *
      * @return the default command associated with this subsystem
      */
-    Command* getDefaultCommand() const;
+    mockable inline Command* getDefaultCommand() const { return defaultCommand; }
 
     /**
      * Called in the scheduler's run function assuming this command
@@ -87,17 +91,46 @@ public:
      * Must be virtual otherwise scheduler will refer to this function
      * rather than looking in child for this function.
      */
-    virtual void refresh();
+    virtual void refresh() {}
+
+    mockable inline bool isHardwareTestComplete() const { return hardwareTestsComplete; }
+
+    mockable inline void setHardwareTestsIncomplete()
+    {
+        hardwareTestsComplete = false;
+        onHardwareTestStart();
+    }
+
+    mockable inline void setHardwareTestsComplete()
+    {
+        hardwareTestsComplete = true;
+        onHardwareTestComplete();
+    }
+
+    virtual void runHardwareTests() {}
+
+    virtual const char* getName();
+
+    // This shouldn't be mockable
+    inline int getGlobalIdentifier() const { return globalIdentifier; }
 
 protected:
     Drivers* drivers;
 
+    bool hardwareTestsComplete = false;
+
+    virtual void onHardwareTestStart() {}
+
+    virtual void onHardwareTestComplete() {}
+
 private:
     Command* defaultCommand;
 
-    friend class CommandScheduler;
-
-    uint32_t prevSchedulerExecuteTimestamp;
+    /**
+     * An identifier unique to a subsystem that will be assigned to it automatically upon
+     * construction and unassigned during destruction.
+     */
+    const int globalIdentifier;
 };  // class Subsystem
 
 }  // namespace control

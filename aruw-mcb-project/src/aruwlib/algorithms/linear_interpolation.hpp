@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -58,8 +58,9 @@ public:
      *      counter to tell when there is new data from the remote, for
      *      example).
      * @param[in] newValue the new data used in the interpolation.
+     * @param[in] currTime The time that this function was called.
      */
-    void update(float newValue);
+    void update(float newValue, uint32_t currTime);
 
     /**
      * Returns the current value, that is: \f$y\f$ in the equation
@@ -73,9 +74,9 @@ public:
     float getInterpolatedValue(uint32_t currTime);
 
 private:
-    uint32_t lastUpdateCallTime;  ///< The previous timestamp from when update was called.
-    float previousValue;          ///< The previous data value.
-    float slope;  ///< The current slope, calculated using the previous and most current data.
+    uint32_t lastUpdateCallTime;  /// The previous timestamp from when update was called.
+    float previousValue;          /// The previous data value.
+    float slope;  /// The current slope, calculated using the previous and most current data.
 };                // class LinearInterpolation
 
 }  // namespace algorithms

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -45,7 +45,7 @@ public:
 
     void end(bool) override {}
 
-    const char *getName() const override { return "turret manual command"; }
+    const char *getName() const override { return "turret manual"; }
 
 private:
     static constexpr float USER_INPUT_SCALAR = 50.0f;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -45,11 +45,12 @@ class Digital
 {
 public:
     Digital() = default;
-    Digital(const Digital &) = delete;
-    Digital &operator=(const Digital &) = delete;
+    DISALLOW_COPY_AND_ASSIGN(Digital)
     mockable ~Digital() = default;
 
-    ///< Currently enabled digital input pins.
+    /**
+     * Currently enabled digital input pins.
+     */
     enum InputPin
     {
         A,
@@ -58,7 +59,9 @@ public:
         D
     };
 
-    ///< Currently enabled digital output pins.
+    /**
+     * Currently enabled digital output pins.
+     */
     enum OutputPin
     {
         E,
@@ -75,7 +78,9 @@ public:
         PullDown
     };
 #else
-    ///< This references a struct defined by modm.  Can either be floating, pull-up, or pull-down.
+    /**
+     * This references a struct defined by modm.  Can either be floating, pull-up, or pull-down.
+     */
     using InputPullMode = modm::platform::Gpio::InputType;
 #endif
 

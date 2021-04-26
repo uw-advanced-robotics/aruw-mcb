@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -18,7 +18,11 @@
  */
 
 #include <aruwlib/DriversSingleton.hpp>
-#include <aruwlib/control/command_mapper.hpp>
+#include <aruwlib/control/CommandMapper.hpp>
+#include <aruwlib/control/HoldCommandMapping.hpp>
+#include <aruwlib/control/HoldRepeatCommandMapping.hpp>
+#include <aruwlib/control/PressCommandMapping.hpp>
+#include <aruwlib/control/ToggleCommandMapping.hpp>
 
 #include "agitator/agitator_calibrate_command.hpp"
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
@@ -38,9 +42,9 @@
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::launcher;
+using namespace aruwlib::control;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::Remote;
-using aruwlib::control::CommandMapper;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -113,6 +117,26 @@ FrictionWheelRotateCommand stopUpperFrictionWheels(&upperFrictionWheels, 0);
 
 FrictionWheelRotateCommand stopLowerFrictionWheels(&lowerFrictionWheels, 0);
 
+/* define command mappings --------------------------------------------------*/
+HoldRepeatCommandMapping leftSwitchUp(
+    drivers(),
+    {&agitatorShootSlowCommand, &agitatorKickerCommand},
+    aruwlib::control::RemoteMapState(
+        aruwlib::Remote::Switch::LEFT_SWITCH,
+        aruwlib::Remote::SwitchState::UP));
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&stopLowerFrictionWheels, &stopUpperFrictionWheels},
+    aruwlib::control::RemoteMapState(
+        aruwlib::Remote::Switch::LEFT_SWITCH,
+        aruwlib::Remote::SwitchState::DOWN));
+HoldRepeatCommandMapping rightSwitchDown(
+    drivers(),
+    {&sentinelAutoDrive},
+    aruwlib::control::RemoteMapState(
+        aruwlib::Remote::Switch::RIGHT_SWITCH,
+        aruwlib::Remote::SwitchState::DOWN));
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -151,25 +175,9 @@ void startSentinelCommands(aruwlib::Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentinelIoMappings(aruwlib::Drivers *drivers)
 {
-    drivers->commandMapper.addHoldRepeatMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        &agitatorShootSlowCommand);
-
-    drivers->commandMapper.addHoldRepeatMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-        &agitatorKickerCommand);
-
-    drivers->commandMapper.addHoldRepeatMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
-        &sentinelAutoDrive);
-
-    drivers->commandMapper.addHoldMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-        &stopLowerFrictionWheels);
-
-    drivers->commandMapper.addHoldMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
-        &stopUpperFrictionWheels);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchDown);
 }
 
 void initSubsystemCommands(aruwlib::Drivers *drivers)
@@ -180,9 +188,7 @@ void initSubsystemCommands(aruwlib::Drivers *drivers)
     startSentinelCommands(drivers);
     registerSentinelIoMappings(drivers);
 }
-
 }  // namespace control
-
 }  // namespace aruwsrc
 
 #endif

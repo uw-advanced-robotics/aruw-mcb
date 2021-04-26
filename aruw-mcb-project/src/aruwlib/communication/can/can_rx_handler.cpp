@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -50,7 +50,7 @@ void CanRxHandler::attachReceiveHandler(
     bool receiveInterfaceOverloaded = messageHandlerStore[id] != nullptr;
     bool receiveAttachSuccess =
         !receiveInterfaceOverloaded || (id >= 0 && id < messageHandlerStoreSize);
-    modm_assert(receiveAttachSuccess, "can1", "receive init", "overloading", 1);
+    modm_assert(receiveAttachSuccess, "can1", "overloading", 1);
 
     messageHandlerStore[id] = CanRxHndl;
 }
@@ -89,7 +89,7 @@ inline void CanRxHandler::processReceivedCanData(
             drivers,
             "Invalid can id received - not between 0x200 and 0x208",
             aruwlib::errors::Location::CAN_RX,
-            aruwlib::errors::ErrorType::MOTOR_ID_OUT_OF_BOUNDS);
+            aruwlib::errors::CanRxErrorType::MOTOR_ID_OUT_OF_BOUNDS);
     }
 }
 
@@ -117,7 +117,7 @@ void CanRxHandler::removeReceiveHandler(
             drivers,
             "index out of bounds",
             aruwlib::errors::CAN_RX,
-            aruwlib::errors::INVALID_REMOVE);
+            aruwlib::errors::CanRxErrorType::INVALID_REMOVE);
         return;
     }
     messageHandlerStore[id] = nullptr;
