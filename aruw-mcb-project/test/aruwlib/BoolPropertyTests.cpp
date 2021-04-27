@@ -112,7 +112,7 @@ TEST(BoolProperty, serializeData)
     p.serializeData(arr);
     EXPECT_EQ(0x01, arr[0]);
 
-    delete arr;
+    delete[] arr;
 }
 
 TEST(BoolProperty, setProperty_updates_data)

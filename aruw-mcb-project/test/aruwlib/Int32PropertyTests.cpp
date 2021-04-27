@@ -148,7 +148,7 @@ TEST(Int32Property, serializeData)
     EXPECT_EQ(0x56, arr[1]);
     EXPECT_EQ(0x78, arr[0]);
 
-    delete arr;
+    delete[] arr;
 }
 
 TEST(Int32Property, setProperty_updates_data)

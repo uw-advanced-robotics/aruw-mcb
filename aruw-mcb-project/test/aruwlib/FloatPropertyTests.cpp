@@ -151,7 +151,7 @@ TEST(FloatProperty, serializeData)
     EXPECT_EQ(datArr[2], arr[2]);
     EXPECT_EQ(datArr[3], arr[3]);
 
-    delete arr;
+    delete[] arr;
 }
 
 TEST(FloatProperty, setProperty_updates_data)
