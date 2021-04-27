@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -147,6 +147,8 @@ TEST(Int32Property, serializeData)
     EXPECT_EQ(0x34, arr[2]);
     EXPECT_EQ(0x56, arr[1]);
     EXPECT_EQ(0x78, arr[0]);
+
+    delete arr;
 }
 
 TEST(Int32Property, setProperty_updates_data)
