@@ -139,9 +139,9 @@ TEST(FloatProperty, getSerializationArrSize_returns_sizeof_float)
 
 TEST(FloatProperty, serializeData)
 {
-    float dat = 42.4;
+    const float dat = 42.4f;
     uint8_t datArr[sizeof(float)];
-    memcpy(&dat, &datArr, sizeof(float));
+    memcpy(&datArr, &dat, sizeof(float));
     FloatProperty p(dat, "the property");
     uint8_t *arr = new uint8_t[p.getSerializationArrSize()];
 
