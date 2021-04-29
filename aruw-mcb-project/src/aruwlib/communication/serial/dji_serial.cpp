@@ -210,9 +210,7 @@ void DJISerial::updateSerial()
                 if (rxCrcEnabled)
                 {
                     uint16_t CRC16;
-                    aruwlib::arch::convertFromLittleEndian(
-                        &CRC16,
-                        newMessage.data + newMessage.length);
+                    arch::convertFromLittleEndian(&CRC16, newMessage.data + newMessage.length);
                     currCrc16 =
                         algorithms::calculateCRC16(newMessage.data, newMessage.length, currCrc16);
                     if (currCrc16 != CRC16)

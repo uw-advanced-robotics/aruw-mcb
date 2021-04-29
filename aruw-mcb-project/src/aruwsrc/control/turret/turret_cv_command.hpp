@@ -79,7 +79,7 @@ private:
 
     static constexpr uint32_t TIME_BETWEEN_CV_REQUESTS = 1000;
 
-    aruwsrc::serial::XavierSerial *xavierSerial;
+    serial::XavierSerial *xavierSerial;
 
     TurretSubsystem *turretSubsystem;
 

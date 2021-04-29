@@ -29,7 +29,8 @@
 
 using namespace aruwlib::arch;
 
-#define delay() RF_WAIT_UNTIL(txDelayTimer.execute());
+// Instead of using some timer to delay, we just yield.
+#define delay() RF_YIELD()
 
 namespace aruwsrc
 {
@@ -106,6 +107,7 @@ bool XavierSerial::sendMessage()
     while (true)
     {
         isCvOnline = !cvOfflineTimeout.isExpired();
+        aimDataValid &= isCvOnline;
         PT_CALL(sendRobotMeasurements());
         PT_CALL(sendRobotID());
         PT_CALL(sendAutoAimRequest());
@@ -179,7 +181,7 @@ modm::ResumableResult<bool> XavierSerial::sendRobotMeasurements()
 
     delay();
 
-    RF_END_RETURN(true);
+    RF_END();
 }
 
 void XavierSerial::beginAutoAim()
@@ -213,7 +215,7 @@ modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
         AutoAimRequest.sendAimRequestTimeout.restart(AUTO_AIM_REQUEST_SEND_PERIOD_MS);
         delay();
     }
-    RF_END_RETURN(true);
+    RF_END();
 }
 
 modm::ResumableResult<bool> XavierSerial::sendRobotID()
@@ -226,7 +228,7 @@ modm::ResumableResult<bool> XavierSerial::sendRobotID()
         txMessage.type = CV_MESSAGE_TYPE_ROBOT_ID;
         send();
     }
-    RF_END_RETURN(true);
+    RF_END();
 }
 }  // namespace serial
 }  // namespace aruwsrc

@@ -84,8 +84,7 @@ public:
         aruwlib::Drivers* drivers,
         const turret::TurretSubsystem* turretSub,
         const chassis::ChassisSubsystem* chassisSub);
-    XavierSerial(const XavierSerial&) = delete;
-    XavierSerial& operator=(const XavierSerial&) = delete;
+    DISALLOW_COPY_AND_ASSIGN(XavierSerial);
     mockable ~XavierSerial() = default;
 
     /**
@@ -130,16 +129,6 @@ private:
         CV_MESSAGE_TYPE_TRACKING_REQUEST_ACKN
     };
 
-    enum TxMessageState
-    {
-        FAIL,
-        SUCCESS,
-        DID_NOT_SEND,
-    };
-
-    /// Max period that we can send messages to the Xavier
-    static constexpr uint32_t MAX_TX_MSG_PERIOD = 3;
-
     /// Time in ms since last CV aim data was received before deciding CV is offline.
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 5000;
     /// Time between each robot id send to CV in milliseconds.
@@ -159,8 +148,6 @@ private:
     static constexpr uint8_t IMU_DATA_OFFSET = TURRET_DATA_OFFSET + 2 * sizeof(uint16_t);
     static constexpr int ROBOT_DATA_MSG_SIZE =
         IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 6 * sizeof(int16_t);
-
-    aruwlib::arch::PeriodicMilliTimer txDelayTimer{MAX_TX_MSG_PERIOD};
 
     /// Used for determining when to send robot id.
     aruwlib::arch::PeriodicMilliTimer txRobotIdTimeout;
