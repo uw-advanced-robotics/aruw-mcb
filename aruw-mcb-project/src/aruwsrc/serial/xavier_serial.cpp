@@ -209,8 +209,15 @@ modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
         {
             delay();
         }
-        AutoAimRequest.currAimState = AUTO_AIM_REQUEST_SENT;
-        AutoAimRequest.sendAimRequestTimeout.restart(AUTO_AIM_REQUEST_SEND_PERIOD_MS);
+        if (AutoAimRequest.requestType)
+        {
+            AutoAimRequest.currAimState = AUTO_AIM_REQUEST_SENT;
+            AutoAimRequest.sendAimRequestTimeout.restart(AUTO_AIM_REQUEST_SEND_PERIOD_MS);
+        }
+        else
+        {
+            AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
+        }
         delay();
     }
     RF_END();
