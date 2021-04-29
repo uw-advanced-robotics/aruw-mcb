@@ -126,7 +126,6 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 0,
-        CV_MESSAGE_TYPE_TRACKING_REQUEST_ACKN
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.

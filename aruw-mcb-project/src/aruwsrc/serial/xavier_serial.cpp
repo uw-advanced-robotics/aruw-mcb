@@ -67,15 +67,13 @@ void XavierSerial::messageReceiveCallback(const SerialMessage& completeMessage)
             {
                 aimDataValid = true;
             }
-            return;
-        }
-        case CV_MESSAGE_TYPE_TRACKING_REQUEST_ACKN:
-        {
+
             if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT)
             {
                 AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
                 AutoAimRequest.sendAimRequestTimeout.stop();
             }
+            return;
         }
         default:
             return;
