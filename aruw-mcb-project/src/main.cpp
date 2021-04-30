@@ -34,11 +34,14 @@
 
 /* communication includes ---------------------------------------------------*/
 #include <aruwlib/DriversSingleton.hpp>
+#include <aruwlib/control/SchedulerTerminalHandler.hpp>
 #include <aruwlib/display/sh1106.hpp>
+#include <aruwlib/motor/DjiMotorTerminalSerialHandler.hpp>
 
 #include "aruwsrc/serial/xavier_serial.hpp"
 
 /* error handling includes --------------------------------------------------*/
+#include <aruwlib/errors/create_errors.hpp>
 
 /* control includes ---------------------------------------------------------*/
 #include <aruwlib/architecture/clock.hpp>
@@ -55,12 +58,12 @@ aruwsrc::serial::XavierSerial xavierSerial(aruwlib::DoNotUse_getDrivers(), nullp
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-void initializeIo(aruwlib::Drivers *drivers);
+static void initializeIo(aruwlib::Drivers *drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-void updateIo(aruwlib::Drivers *drivers);
+static void updateIo(aruwlib::Drivers *drivers);
 
 int main()
 {
@@ -103,6 +106,7 @@ int main()
             PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
+            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
         }
         modm::delay_us(10);
@@ -110,21 +114,25 @@ int main()
     return 0;
 }
 
-void initializeIo(aruwlib::Drivers *drivers)
+static void initializeIo(aruwlib::Drivers *drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
     drivers->digital.init();
     drivers->leds.init();
     drivers->can.initialize();
+    drivers->errorController.init();
     drivers->remote.initialize();
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
+    drivers->terminalSerial.initialize();
     drivers->oledDisplay.initialize();
+    drivers->schedulerTerminalHandler.init();
+    drivers->djiMotorTerminalSerialHandler.init();
     xavierSerial.initializeCV();
 }
 
-void updateIo(aruwlib::Drivers *drivers)
+static void updateIo(aruwlib::Drivers *drivers)
 {
 #ifdef PLATFORM_HOSTED
     aruwlib::motorsim::SimHandler::updateSims();
