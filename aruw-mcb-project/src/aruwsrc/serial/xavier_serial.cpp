@@ -66,12 +66,12 @@ void XavierSerial::messageReceiveCallback(const SerialMessage& completeMessage)
             if (decodeToTurrentAimData(completeMessage, &lastAimData))
             {
                 aimDataValid = true;
-            }
 
-            if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT)
-            {
-                AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
-                AutoAimRequest.sendAimRequestTimeout.stop();
+                if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT)
+                {
+                    AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
+                    AutoAimRequest.sendAimRequestTimeout.stop();
+                }
             }
             return;
         }
@@ -204,11 +204,13 @@ modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
         txMessage.data[0] = AutoAimRequest.requestType;
         txMessage.length = 1;
         txMessage.type = CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
+
         // Keep sending until sent
         while (!send())
         {
             delay();
         }
+
         if (AutoAimRequest.requestType)
         {
             AutoAimRequest.currAimState = AUTO_AIM_REQUEST_SENT;

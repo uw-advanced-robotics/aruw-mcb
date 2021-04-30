@@ -63,6 +63,10 @@ using aruwlib::Remote;
  */
 aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
 
+/*
+ * The xavier serial object is declared in main.cpp but is required by cv commands
+ * and depends upon the chassis and turret subsystems, so declare it extern here.
+ */
 extern aruwsrc::serial::XavierSerial xavierSerial;
 
 namespace aruwsrc

@@ -128,8 +128,9 @@ TEST(XavierSerial, messageReceiveCallback_tracking_request_ackn)
     XavierSerialTester serialTester(&serial);
     DJISerial::SerialMessage message;
     message.headByte = 0xA5;
-    message.type = 1;
-    message.length = 1;
+    message.type = 0;
+    message.length = 5;
+    memset(message.data, 0, 5);
 
     serial.messageReceiveCallback(message);
 
@@ -143,7 +144,7 @@ TEST(XavierSerial, messageReceiveCallback_tracking_request_ackn)
     EXPECT_EQ(XavierSerial::AUTO_AIM_REQUEST_SENT, *serialTester.getCurrAimState());
 
     // Send correct message type, curr aim state will change to complete
-    message.type = 1;
+    message.type = 0;
     serial.messageReceiveCallback(message);
     EXPECT_EQ(XavierSerial::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
 
@@ -297,7 +298,8 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
             };
 
         ON_CALL(drivers.uart, write(_, _, _)).WillByDefault(checkExpectations);
-        clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
+        xs.sendRobotMeasurements();
+        // Call this function again to clear the RF delay
         xs.sendRobotMeasurements();
     }
 }
@@ -391,12 +393,10 @@ TEST(XavierSerial, stopAutoAim_stops_auto_aim_req)
 
 TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
 {
-    aruwlib::arch::clock::setTime(0);
-
     Drivers drivers;
     XavierSerial xs(&drivers, nullptr, nullptr);
     XavierSerialTester xst(&xs);
-    bool autoAimRequest = false;
+    bool autoAimRequest = true;
 
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
@@ -411,25 +411,29 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
 
     // Queue a message
     xs.beginAutoAim();
-    autoAimRequest = true;
-
-    // Step forward in time
-    clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
 
     // Send target tracking request
     xs.sendAutoAimRequest();
-
-    // Step forward in time
-    clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
+    // Call this function again to clear the RF delay
+    xs.sendAutoAimRequest();
 
     // We shall now be waiting for a reply from the Xavier
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
 
-    // Send a message from the Xavier
+    // Send a malformed message from the Xavier
     DJISerial::SerialMessage message;
+    message.headByte = 0xa5;
     message.length = 1;
-    message.type = 1;
-    message.data[0] = 1;
+    message.type = 0;
+    memset(message.data, 0, 5);
+
+    xs.messageReceiveCallback(message);
+
+    // Bad message so the request state should not be complete
+    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+
+    // Send a message from the Xavier that isn't malformed
+    message.length = 5;
     xs.messageReceiveCallback(message);
 
     // The request was acknowledged, so the request state should be complete
@@ -442,16 +446,7 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     // Send target tracking request
     xs.sendAutoAimRequest();
 
-    // We shall now be waiting for a reply from the Xavier
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
-
-    // Send a message from the Xavier
-    message.length = 1;
-    message.type = 1;
-    message.data[0] = 1;
-    xs.messageReceiveCallback(message);
-
-    // The request was acknowledged, so the request state should be complete
+    // We don't wait for a reply, only send the request once
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_COMPLETE);
 }
 
@@ -464,7 +459,7 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
     Drivers drivers;
     XavierSerial xs(&drivers, nullptr, nullptr);
     XavierSerialTester xst(&xs);
-    bool autoAimRequest = false;
+    bool autoAimRequest = true;
 
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
@@ -479,22 +474,17 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
 
     // Queue a message
     xs.beginAutoAim();
-    autoAimRequest = true;
-
-    // Step forward in time
-    clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
 
     // Send target tracking request
     xs.sendAutoAimRequest();
-
-    // Step forward in time
-    clock::setTime(clock::getTimeMilliseconds() + TX_MAX_PERIOD_BTWN_SEND);
 
     // We shall now be waiting for a reply from the Xavier
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
 
     // Set the time s.t. the resend timer times out and resend message
-    clock::setTime(clock::getTimeMilliseconds() + RESEND_AIM_REQUEST_TIMEOUT);
+    clock::setTime(RESEND_AIM_REQUEST_TIMEOUT);
+    // send auto aim request twice, once to "clear" the rf delay(), once to resend the message
+    xs.sendAutoAimRequest();
     xs.sendAutoAimRequest();
 
     EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
