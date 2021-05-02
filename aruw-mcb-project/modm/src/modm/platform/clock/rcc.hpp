@@ -3,7 +3,7 @@
  * Copyright (c) 2012, 2017, Fabian Greif
  * Copyright (c) 2012, 2014-2017, Niklas Hauser
  * Copyright (c) 2013-2014, Kevin Läufer
- * Copyright (c) 2018, Christopher Durand
+ * Copyright (c) 2018, 2021, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include "../device.hpp"
 #include <modm/platform/core/peripherals.hpp>
+#include <modm/architecture/interface/delay.hpp>
 
 namespace modm::platform
 {
@@ -177,6 +178,7 @@ public:
 		const uint8_t pllM;
 		const uint16_t pllN;
 		const uint8_t pllP;
+ 		const uint8_t pllQ = 0xff;
 	};
 
 	/**
@@ -289,6 +291,8 @@ public:
 		RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_PPRE2) | uint32_t(prescaler);
 		return true;
 	}
+	static bool
+	enableOverdriveMode(uint32_t waitCycles = 2048);
 public:
 	/** Set flash latency for CPU frequency and voltage.
 	 * Does nothing if CPU frequency is too high for the available

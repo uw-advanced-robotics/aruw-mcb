@@ -187,7 +187,6 @@
 #include "platform/uart/uart_3.hpp"
 #include "platform/uart/uart_6.hpp"
 #include "platform/uart/uart_base.hpp"
-#include "platform/uart/uart_baudrate.hpp"
 #include "platform/uart/uart_hal_1.hpp"
 #include "platform/uart/uart_hal_2.hpp"
 #include "platform/uart/uart_hal_3.hpp"

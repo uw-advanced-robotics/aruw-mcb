@@ -5,7 +5,7 @@
  * Copyright (c) 2012, 2016, Sascha Schade
  * Copyright (c) 2012, 2014-2019, Niklas Hauser
  * Copyright (c) 2013-2014, Kevin Läufer
- * Copyright (c) 2018, Christopher Durand
+ * Copyright (c) 2018, 2021, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -17,14 +17,15 @@
 
 #include "rcc.hpp"
 
-/// @cond
+// CMSIS Core compliance
+uint32_t modm_fastdata SystemCoreClock(8'000'000);
+modm_weak void SystemCoreClockUpdate() { /* Nothing to update */ }
+
 namespace modm::platform
 {
-uint32_t modm_fastdata fcpu(8'000'000);
 uint16_t modm_fastdata delay_fcpu_MHz(8);
 uint16_t modm_fastdata delay_ns_per_loop(375);
 }
-/// @endcond
 
 // ----------------------------------------------------------------------------
 bool
@@ -92,7 +93,7 @@ modm::platform::Rcc::enablePll(PllSource source, const PllFactors& pllFactors, u
 {
 	// Read reserved values and clear all other values
 	uint32_t tmp = RCC->PLLCFGR & ~(RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM
-			| RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLP | RCC_PLLCFGR_PLLQ);
+			| RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLP);
 
 	// PLLSRC source for pll and for plli2s
 	tmp |= static_cast<uint32_t>(source);
@@ -107,7 +108,10 @@ modm::platform::Rcc::enablePll(PllSource source, const PllFactors& pllFactors, u
 	tmp |= (((uint32_t) (pllFactors.pllP / 2) - 1) << RCC_PLLCFGR_PLLP_Pos) & RCC_PLLCFGR_PLLP;
 
 	// PLLQ (24) divider for USB frequency; (0-15)
-	// tmp |= (((uint32_t) pllQ) << RCC_PLLCFGR_PLLQ_Pos) & RCC_PLLCFGR_PLLQ;
+	if (pllFactors.pllQ != 0xff) {
+		tmp &= ~RCC_PLLCFGR_PLLQ;
+		tmp |= (((uint32_t) pllFactors.pllQ) << RCC_PLLCFGR_PLLQ_Pos) & RCC_PLLCFGR_PLLQ;
+	}
 
 	RCC->PLLCFGR = tmp;
 
@@ -121,6 +125,29 @@ modm::platform::Rcc::enablePll(PllSource source, const PllFactors& pllFactors, u
 
 }
 
+bool
+modm::platform::Rcc::enableOverdriveMode(uint32_t waitCycles)
+{
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+
+	PWR->CR |= PWR_CR_ODEN;
+	auto waitCounter = waitCycles;
+	while (!(PWR->CSR & PWR_CSR_ODRDY))
+	{
+		if (--waitCounter == 0)
+			return false;
+	}
+
+	PWR->CR |= PWR_CR_ODSWEN;
+	waitCounter = waitCycles;
+	while (!(PWR->CSR & PWR_CSR_ODSWRDY))
+	{
+		if (--waitCounter == 0)
+			return false;
+	}
+
+	return true;
+}
 // ----------------------------------------------------------------------------
 bool
 modm::platform::Rcc::enableSystemClock(SystemClockSource src, uint32_t waitCycles)
@@ -137,3 +164,5 @@ modm::platform::Rcc::enableSystemClock(SystemClockSource src, uint32_t waitCycle
 
 	return true;
 }
+
+

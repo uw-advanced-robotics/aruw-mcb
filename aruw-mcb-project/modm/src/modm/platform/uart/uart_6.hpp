@@ -20,13 +20,9 @@
 #include <modm/architecture/interface/uart.hpp>
 #include <modm/platform/gpio/connector.hpp>
 #include "uart_base.hpp"
-#include "uart_baudrate.hpp"
 #include "uart_hal_6.hpp"
 
-namespace modm
-{
-
-namespace platform
+namespace modm::platform
 {
 
 /**
@@ -38,11 +34,6 @@ namespace platform
  */
 class Usart6 : public UartBase, public ::modm::Uart
 {
-private:
-	/// Second stage initialize for buffered uart
-	// that need to be implemented in the .cpp
-	static void
-	initializeBuffered(uint32_t interruptPriority);
 public:
 	using Hal = UsartHal6;
 	// Expose jinja template parameters to be checked by e.g. drivers or application
@@ -68,17 +59,17 @@ public:
 		Connector::connect();
 	}
 
+	/// @warning Remember to set word length correctly when using the parity bit!
 	template< class SystemClock, baudrate_t baudrate, percent_t tolerance=pct(1) >
-	static void modm_always_inline
-	initialize(uint32_t interruptPriority = 12, Parity parity = Parity::Disabled)
+	static inline void
+	initialize(Parity parity=Parity::Disabled, WordLength length=WordLength::Bit8)
 	{
-		UsartHal6::initializeWithBrr(
-				UartBaudrate::getBrr<SystemClock::Usart6, baudrate, tolerance>(),
-				parity,
-				UartBaudrate::getOversamplingMode(SystemClock::Usart6, baudrate));
-		initializeBuffered(interruptPriority);
+		UsartHal6::initialize<SystemClock, baudrate, tolerance>(parity, length);
+		UsartHal6::enableInterruptVector(true, 12);
+		UsartHal6::enableInterrupt(Interrupt::RxNotEmpty);
 		UsartHal6::setTransmitterEnable(true);
 		UsartHal6::setReceiverEnable(true);
+		UsartHal6::enableOperation();
 	}
 
 	static void
@@ -125,8 +116,6 @@ public:
 
 };
 
-}	// namespace platform
-
-}	// namespace modm
+}	// namespace modm::platform
 
 #endif // MODM_STM32_UART_6_HPP

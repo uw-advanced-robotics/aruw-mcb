@@ -127,6 +127,10 @@ elif args["TARGET_ENV"] == "tests":
 else:  # hardware target env
     pass
 
+cxxflags = env["CXXFLAGS"]
+cxxflags.remove("-std=c++20")
+cxxflags.append("-std=c++2a")
+
 # Append little endian flag to all
 env.AppendUnique(CPPFLAGS=["-DLITTLE_ENDIAN"])
 

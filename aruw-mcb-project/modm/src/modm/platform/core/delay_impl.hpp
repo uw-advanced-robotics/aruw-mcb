@@ -28,16 +28,18 @@ extern uint16_t delay_ns_per_loop;
 extern uint16_t delay_fcpu_MHz;
 }
 
-inline void delay_ns(uint32_t ns)
+inline void modm_fastcode delay_ns(uint32_t ns)
 {
+	volatile uint32_t cycles;
 	// ns_per_loop = nanoseconds per cycle times cycles per loop (3 cycles)
 	asm volatile (
-		".syntax unified"       "\n\t"
-		"muls.n	%2, %2, %1"     "\n\t"  // multiply the overhead cycles with the ns per cycle:  1-2 cycles on cm3, up to 32 cycles on cm0
-		"subs.n	%0, %0, %2"     "\n\t"  // subtract the overhead in ns from the input:          1 cycle
-	"1:  subs.n	%0, %0, %1"     "\n\t"  // subtract the ns per loop from the input:             1 cycle
-		"bpl.n	1b"             "\n\t"  // keep doing that while result is still positive:      2 cycles (when taken)
-	:: "r" (ns), "r" (platform::delay_ns_per_loop), "r" (8));
+		".syntax unified \n\t"
+		".align 4 \n\t"
+		"muls.n	%[cyc], %[cyc], %[dnpl] \n\t"	// multiply the overhead cycles with the ns per cycle:  1-2 cycles on cm3, up to 32 cycles on cm0
+		"subs.n	%[cyc], %[cyc], %[ovhd] \n\t"	// subtract the overhead in ns from the input:          1 cycle
+	"1:  subs.n	%[cyc], %[cyc], %[dnpl] \n\t"	// subtract the ns per loop from the input:             1 cycle
+		"bpl.n	1b"								// keep doing that while result is still positive:      2 cycles (when taken)
+	: [cyc] "=l" (cycles) : "0" (ns), [dnpl] "l" (platform::delay_ns_per_loop), [ovhd] "l" (8));
 	// => loop is 3 cycles long
 }
 void delay_us(uint32_t us);

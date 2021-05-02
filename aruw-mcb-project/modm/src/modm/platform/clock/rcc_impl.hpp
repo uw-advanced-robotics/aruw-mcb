@@ -14,7 +14,6 @@
 namespace modm::platform
 {
 /// @cond
-extern uint32_t fcpu;
 extern uint16_t delay_fcpu_MHz;
 extern uint16_t delay_ns_per_loop;
 /// @endcond
@@ -114,8 +113,8 @@ template< uint32_t Core_Hz >
 void
 Rcc::updateCoreFrequency()
 {
+	SystemCoreClock = Core_Hz;
 	delay_fcpu_MHz = Core_Hz / 1'000'000;
-	fcpu = Core_Hz;
 	delay_ns_per_loop = std::round(3000.f / (Core_Hz / 1'000'000));
 }
 
@@ -171,6 +170,8 @@ rcc_check_enable(Peripheral peripheral)
 		case Peripheral::Usart2:
 		case Peripheral::Usart3:
 		case Peripheral::Usart6:
+		case Peripheral::Usbotgfs:
+		case Peripheral::Usbotghs:
 		case Peripheral::Wwdg:
 			return true;
 		default:
@@ -468,6 +469,17 @@ Rcc::enable()
 			RCC->APB2RSTR |= RCC_APB2RSTR_USART6RST; __DSB();
 			RCC->APB2RSTR &= ~RCC_APB2RSTR_USART6RST;
 		}
+	if constexpr (peripheral == Peripheral::Usbotgfs)
+		if (not Rcc::isEnabled<peripheral>()) {
+			RCC->AHB2ENR |= RCC_AHB2ENR_OTGFSEN; __DSB();
+			RCC->AHB2RSTR |= RCC_AHB2RSTR_OTGFSRST; __DSB();
+			RCC->AHB2RSTR &= ~RCC_AHB2RSTR_OTGFSRST;
+		}
+	if constexpr (peripheral == Peripheral::Usbotghs)
+		if (not Rcc::isEnabled<peripheral>()) {
+			RCC->AHB1ENR |= RCC_AHB1ENR_OTGHSEN; __DSB();
+			RCC->AHB1ENR |= RCC_AHB1ENR_OTGHSULPIEN;
+		}
 	if constexpr (peripheral == Peripheral::Wwdg)
 		if (not Rcc::isEnabled<peripheral>()) {
 			RCC->APB1ENR |= RCC_APB1ENR_WWDGEN; __DSB();
@@ -583,6 +595,11 @@ Rcc::disable()
 		RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN;
 	if constexpr (peripheral == Peripheral::Usart6)
 		RCC->APB2ENR &= ~RCC_APB2ENR_USART6EN;
+	if constexpr (peripheral == Peripheral::Usbotgfs)
+		RCC->AHB2ENR &= ~RCC_AHB2ENR_OTGFSEN;
+	if constexpr (peripheral == Peripheral::Usbotghs)
+		RCC->AHB1ENR &= ~RCC_AHB1ENR_OTGHSEN; __DSB();
+		RCC->AHB1ENR &= ~RCC_AHB1ENR_OTGHSULPIEN;
 	if constexpr (peripheral == Peripheral::Wwdg)
 		RCC->APB1ENR &= ~RCC_APB1ENR_WWDGEN;
 	__DSB();
@@ -691,6 +708,10 @@ Rcc::isEnabled()
 		return RCC->APB1ENR & RCC_APB1ENR_USART3EN;
 	if constexpr (peripheral == Peripheral::Usart6)
 		return RCC->APB2ENR & RCC_APB2ENR_USART6EN;
+	if constexpr (peripheral == Peripheral::Usbotgfs)
+		return RCC->AHB2ENR & RCC_AHB2ENR_OTGFSEN;
+	if constexpr (peripheral == Peripheral::Usbotghs)
+		return RCC->AHB1ENR & RCC_AHB1ENR_OTGHSEN;
 	if constexpr (peripheral == Peripheral::Wwdg)
 		return RCC->APB1ENR & RCC_APB1ENR_WWDGEN;
 }

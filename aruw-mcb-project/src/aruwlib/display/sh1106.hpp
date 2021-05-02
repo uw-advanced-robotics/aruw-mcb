@@ -22,7 +22,7 @@
 
 #include <modm/architecture/driver/atomic/flag.hpp>
 #include <modm/processing/resumable.hpp>
-#include <modm/ui/display/monochrome_graphic_display_buffered_vertical.hpp>
+#include <modm/ui/display/monochrome_graphic_display_vertical.hpp>
 
 namespace aruwlib
 {
@@ -40,7 +40,7 @@ template <
     unsigned int Width,
     unsigned int Height,
     bool Flipped>
-class Sh1106 : public modm::MonochromeGraphicDisplayBufferedVertical<Width, Height>,
+class Sh1106 : public modm::MonochromeGraphicDisplayVertical<Width, Height>,
                modm::Resumable<1>
 {
 public:
