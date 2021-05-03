@@ -78,7 +78,7 @@ void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t predictedRotateTime)
             drivers,
             "The predicted rotate time is 0, this is physically impossible",
             aruwlib::errors::SUBSYSTEM,
-            aruwlib::errors::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
+            aruwlib::errors::SubsystemErrorType::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
     }
     agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
     agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
@@ -113,16 +113,19 @@ void AgitatorSubsystem::agitatorRunPositionPid()
     }
     else
     {
+        // dt doesn't need to be exact since we don't use an integral term and we calculate
+        // the velocity ourselves, so it currently isn't used.
         agitatorPositionPid.runController(
             desiredAgitatorAngle - getAgitatorAngle(),
-            getAgitatorVelocity());
+            getAgitatorVelocity(),
+            2.0f);
         agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());
     }
 }
 
 bool AgitatorSubsystem::agitatorCalibrateHere()
 {
-    if (!agitatorMotor.isMotorOnline())
+    if (!isAgitatorOnline())
     {
         return false;
     }
@@ -158,6 +161,8 @@ float AgitatorSubsystem::getAgitatorVelocity() const
 }
 
 bool AgitatorSubsystem::isAgitatorCalibrated() const { return agitatorIsCalibrated; }
+
+bool AgitatorSubsystem::isAgitatorOnline() const { return agitatorMotor.isMotorOnline(); }
 
 void AgitatorSubsystem::runHardwareTests()
 {

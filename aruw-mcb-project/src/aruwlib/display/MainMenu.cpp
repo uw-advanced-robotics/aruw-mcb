@@ -19,15 +19,17 @@
 
 #include "MainMenu.hpp"
 
+#include "CommandSchedulerMenu.hpp"
 #include "ErrorMenu.hpp"
 #include "HardwareTestMenu.hpp"
+#include "MotorMenu.hpp"
 
 namespace aruwlib
 {
 namespace display
 {
-MainMenu::MainMenu(modm::ViewStack* stack, uint8_t identifier, Drivers* drivers)
-    : modm::StandardMenu(stack, identifier),
+MainMenu::MainMenu(modm::ViewStack* stack, Drivers* drivers)
+    : modm::StandardMenu(stack, MAIN_MENU_ID),
       drivers(drivers)
 {
 }
@@ -42,10 +44,18 @@ void MainMenu::initialize()
         HardwareTestMenu::getMenuName(),
         modm::MenuEntryCallback(this, &MainMenu::addHardwareTestMenuCallback));
 
-    addEntry("Motor Menu", modm::MenuEntryCallback(this, &MainMenu::addMotorMenuCallback));
+    addEntry(
+        MotorMenu::getMenuName(),
+        modm::MenuEntryCallback(this, &MainMenu::addMotorMenuCallback));
+
     addEntry(
         "Property Table Menu",
         modm::MenuEntryCallback(this, &MainMenu::addPropertyTableCallback));
+
+    addEntry(
+        CommandSchedulerMenu::getMenuName(),
+        modm::MenuEntryCallback(this, &MainMenu::addCommandSchedulerCallback));
+
     setTitle("Main Menu");
 }
 
@@ -61,12 +71,17 @@ void MainMenu::addHardwareTestMenuCallback()
 
 void MainMenu::addMotorMenuCallback()
 {
-    // TODO, see issue #105
+    getViewStack()->push(new MotorMenu(getViewStack(), drivers));
 }
 
 void MainMenu::addPropertyTableCallback()
 {
     // TODO, see issue #221
+}
+
+void MainMenu::addCommandSchedulerCallback()
+{
+    getViewStack()->push(new CommandSchedulerMenu(getViewStack(), drivers));
 }
 }  // namespace display
 

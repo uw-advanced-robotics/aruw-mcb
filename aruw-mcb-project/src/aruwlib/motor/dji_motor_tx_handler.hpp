@@ -60,10 +60,15 @@ class Drivers;
 namespace motor
 {
 #define DJI_MOTOR_NORMALIZED_ID(id) ((int32_t)id - aruwlib::motor::MotorId::MOTOR1)
+#define NORMALIZED_ID_TO_DJI_MOTOR(idx)   \
+    static_cast<aruwlib::motor::MotorId>( \
+        idx + static_cast<int32_t>(aruwlib::motor::MotorId::MOTOR1))
 
 class DjiMotorTxHandler
 {
 public:
+    static constexpr int DJI_MOTORS_PER_CAN = 8;
+
     DjiMotorTxHandler(Drivers* drivers) : drivers(drivers) {}
     mockable ~DjiMotorTxHandler() = default;
     DISALLOW_COPY_AND_ASSIGN(DjiMotorTxHandler)
@@ -76,13 +81,11 @@ public:
 
     mockable void removeFromMotorManager(const DjiMotor& motor);
 
-    mockable DjiMotor const* getCan1MotorData(MotorId motorId);
+    mockable DjiMotor const* getCan1Motor(MotorId motorId);
 
-    mockable DjiMotor const* getCan2MotorData(MotorId motorId);
+    mockable DjiMotor const* getCan2Motor(MotorId motorId);
 
 private:
-    static const int DJI_MOTORS_PER_CAN = 8;
-
     Drivers* drivers;
 
     DjiMotor* can1MotorStore[DJI_MOTORS_PER_CAN] = {0};

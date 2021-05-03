@@ -43,6 +43,10 @@ namespace turret
 class TurretSubsystem : public aruwlib::control::Subsystem
 {
 public:
+    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
+    static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
+
     static constexpr float TURRET_START_ANGLE = 90.0f;
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
@@ -51,9 +55,9 @@ public:
 
     explicit TurretSubsystem(aruwlib::Drivers* drivers);
 
-    void initialize() override;
+    mockable void initialize() override;
 
-    void refresh() override;
+    mockable void refresh() override;
 
     /**
      * @return `true` if both pitch and yaw gimbals are connected.
@@ -67,7 +71,7 @@ public:
      * @return An angle between [-180, 180] that is the angle difference of the yaw gimbal
      *      from center (90 degrees).
      */
-    float getYawAngleFromCenter() const;
+    mockable float getYawAngleFromCenter() const;
     /**
      * @return An angle between [-180, 180] that is the angle difference of the pitch gimbal
      *      from center (90 degrees).
@@ -139,15 +143,8 @@ private:
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 8160;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 
-    static constexpr float FEED_FORWARD_KP = 2.0f;
-    static constexpr float FEED_FORWARD_SIN_GAIN = 2.0f;
-    static constexpr float FEED_FORWARD_KD = 1.0f;
+    static constexpr float FEED_FORWARD_KP = 0.0f;  // TODO tune this value
     static constexpr float FEED_FORWARD_MAX_OUTPUT = 20000.0f;
-    static constexpr float FEED_FORWARD_DERIVATIVE_LOW_PASS = 0.8f;
-
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-    static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
-    static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
 
     uint32_t prevUpdateCounterChassisRotateDerivative = 0;
     aruwlib::algorithms::LinearInterpolation chassisRotateDerivativeInterpolation;

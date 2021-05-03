@@ -18,7 +18,11 @@
  */
 
 #ifdef PLATFORM_HOSTED
+/* hosted environment (simulator) includes --------------------------------- */
 #include <iostream>
+
+#include <aruwlib/communication/tcp-server/TCPServer.hpp>
+#include <aruwlib/motor/motorsim/sim_handler.hpp>
 #endif
 
 #include <aruwlib/rm-dev-board-a/board.hpp>
@@ -30,9 +34,12 @@
 
 /* communication includes ---------------------------------------------------*/
 #include <aruwlib/DriversSingleton.hpp>
+#include <aruwlib/control/SchedulerTerminalHandler.hpp>
 #include <aruwlib/display/sh1106.hpp>
+#include <aruwlib/motor/DjiMotorTerminalSerialHandler.hpp>
 
 /* error handling includes --------------------------------------------------*/
+#include <aruwlib/errors/create_errors.hpp>
 
 /* control includes ---------------------------------------------------------*/
 #include <aruwlib/architecture/clock.hpp>
@@ -46,12 +53,12 @@ aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-void initializeIo(aruwlib::Drivers *drivers);
+static void initializeIo(aruwlib::Drivers *drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-void updateIo(aruwlib::Drivers *drivers);
+static void updateIo(aruwlib::Drivers *drivers);
 
 int main()
 {
@@ -70,18 +77,24 @@ int main()
     initializeIo(drivers);
     aruwsrc::control::initSubsystemCommands(drivers);
 
+#ifdef PLATFORM_HOSTED
+    aruwlib::motorsim::SimHandler::resetMotorSims();
+    // Blocking call, waits until Windows Simulator connects.
+    aruwlib::communication::TCPServer::MainServer()->getConnection();
+#endif
+
     while (1)
     {
         // do this as fast as you can
-
         PROFILE(drivers->profiler, updateIo, (drivers));
 
         if (sendMotorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->mpu6500.read, ());
+            PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
             PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
+            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
         }
         modm::delay_us(10);
@@ -89,25 +102,34 @@ int main()
     return 0;
 }
 
-void initializeIo(aruwlib::Drivers *drivers)
+static void initializeIo(aruwlib::Drivers *drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
     drivers->digital.init();
     drivers->leds.init();
     drivers->can.initialize();
+    drivers->errorController.init();
     drivers->remote.initialize();
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
     drivers->xavierSerial.initialize();
+    drivers->terminalSerial.initialize();
     drivers->oledDisplay.initialize();
+    drivers->schedulerTerminalHandler.init();
+    drivers->djiMotorTerminalSerialHandler.init();
 }
 
-void updateIo(aruwlib::Drivers *drivers)
+static void updateIo(aruwlib::Drivers *drivers)
 {
+#ifdef PLATFORM_HOSTED
+    aruwlib::motorsim::SimHandler::updateSims();
+#endif
+
     drivers->canRxHandler.pollCanData();
     drivers->xavierSerial.updateSerial();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
+    drivers->mpu6500.read();
 }

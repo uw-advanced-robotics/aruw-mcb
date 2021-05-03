@@ -16,9 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#if defined(TARGET_SOLDIER)
 
 #include <aruwlib/DriversSingleton.hpp>
 #include <aruwlib/control/CommandMapper.hpp>
+#include <aruwlib/control/HoldCommandMapping.hpp>
+#include <aruwlib/control/HoldRepeatCommandMapping.hpp>
+#include <aruwlib/control/PressCommandMapping.hpp>
+#include <aruwlib/control/ToggleCommandMapping.hpp>
 
 #include "agitator/agitator_calibrate_command.hpp"
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
@@ -27,6 +32,8 @@
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
 #include "chassis/wiggle_drive_command.hpp"
+#include "cilent-display/client_display_command.hpp"
+#include "cilent-display/client_display_subsystem.hpp"
 #include "hopper-cover/hopper_subsystem.hpp"
 #include "hopper-cover/open_hopper_command.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
@@ -35,16 +42,20 @@
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
-#if defined(TARGET_SOLDIER)
+#ifdef PLATFORM_HOSTED
+#include "aruwlib/communication/can/can.hpp"
+#include "aruwlib/motor/motorsim/motor_sim.hpp"
+#include "aruwlib/motor/motorsim/sim_handler.hpp"
+#endif
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::turret;
+using namespace aruwlib::control;
+using namespace aruwsrc::display;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::Remote;
-using aruwlib::control::CommandMapper;
-using aruwlib::control::RemoteMapState;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -84,6 +95,8 @@ HopperSubsystem hopperCover(
 
 FrictionWheelSubsystem frictionWheels(drivers());
 
+ClientDisplaySubsystem clientDisplay(drivers());
+
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
@@ -92,6 +105,8 @@ ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
 WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
 
 TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
+
+TurretCVCommand turretCVCommand(drivers(), &turret);
 
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -107,7 +122,51 @@ FrictionWheelRotateCommand spinFrictionWheels(
 
 FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
 
-/// \todo add cv turret
+ClientDisplayCommand clientDisplayCommand(
+    drivers(),
+    &clientDisplay,
+    &wiggleDriveCommand,
+    &chassisAutorotateCommand,
+    nullptr,
+    &chassisDriveCommand);
+
+/* define command mappings --------------------------------------------------*/
+// Remote related mappings
+HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&openHopperCommand, &stopFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&chassisDriveCommand, &turretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&wiggleDriveCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&agitatorShootFastCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+// Keyboard/Mouse related mappings
+ToggleCommandMapping rToggled(
+    drivers(),
+    {&openHopperCommand, &stopFrictionWheels},
+    RemoteMapState({Remote::Key::R}));
+ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
+HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
+    drivers(),
+    {&agitatorShootFastCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
+HoldCommandMapping leftMousePressedShiftPressed(
+    drivers(),
+    {&agitatorshootSlowCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}));
+HoldCommandMapping rightMousePressed(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwlib::Drivers *drivers)
@@ -117,6 +176,57 @@ void registerSoldierSubsystems(aruwlib::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&clientDisplay);
+
+#ifdef PLATFORM_HOSTED
+    // Register the motor sims for the Agitator subsystem
+    // TODO: Create simulator for correct motor
+    aruwlib::motorsim::SimHandler::registerSim(
+        aruwlib::motorsim::MotorSim::MotorType::M3508,
+        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
+        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_ID);
+
+    // Register the motor sims for the Chassis subsystem
+    aruwlib::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
+        aruwlib::motorsim::MotorSim::MotorType::M3508;
+    aruwlib::motorsim::SimHandler::registerSim(
+        CHASSIS_MOTOR_TYPE,
+        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
+        chassis::ChassisSubsystem::LEFT_FRONT_MOTOR_ID);
+    aruwlib::motorsim::SimHandler::registerSim(
+        CHASSIS_MOTOR_TYPE,
+        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
+        chassis::ChassisSubsystem::LEFT_BACK_MOTOR_ID);
+    aruwlib::motorsim::SimHandler::registerSim(
+        CHASSIS_MOTOR_TYPE,
+        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
+        chassis::ChassisSubsystem::RIGHT_FRONT_MOTOR_ID);
+    aruwlib::motorsim::SimHandler::registerSim(
+        CHASSIS_MOTOR_TYPE,
+        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
+        chassis::ChassisSubsystem::RIGHT_BACK_MOTOR_ID);
+
+    // Register the motor sims for the turret subsystem
+    aruwlib::motorsim::SimHandler::registerSim(
+        aruwlib::motorsim::MotorSim::MotorType::GM6020,
+        aruwsrc::turret::TurretSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::turret::TurretSubsystem::PITCH_MOTOR_ID);
+    aruwlib::motorsim::SimHandler::registerSim(
+        aruwlib::motorsim::MotorSim::MotorType::GM6020,
+        aruwsrc::turret::TurretSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::turret::TurretSubsystem::YAW_MOTOR_ID);
+
+    // Register the motor sims for the Hopper Cover (There aren't any)
+    // Register the motor sims for the Friction Wheels
+    aruwlib::motorsim::SimHandler::registerSim(
+        aruwlib::motorsim::MotorSim::MotorType::M3508,
+        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
+    aruwlib::motorsim::SimHandler::registerSim(
+        aruwlib::motorsim::MotorSim::MotorType::M3508,
+        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
+#endif  // PLATFORM_HOSTED
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -127,6 +237,7 @@ void initializeSubsystems()
     agitator.initialize();
     frictionWheels.initialize();
     hopperCover.initialize();
+    clientDisplay.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -135,6 +246,7 @@ void setDefaultSoldierCommands(aruwlib::Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -143,43 +255,18 @@ void startSoldierCommands(aruwlib::Drivers *drivers)
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 }
 
-// static constexpr int size = sizeof(aruwlib::control::RemoteMapState);
-
 /* register io mappings here ------------------------------------------------*/
 void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 {
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN),
-        {&openHopperCommand, &stopFrictionWheels});
-
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-        {&chassisDriveCommand});
-
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        {&wiggleDriveCommand});
-
-    drivers->commandMapper.addHoldRepeatMapping(
-        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-        {&agitatorShootFastCommand});
-
-    // Keyboard/Mouse related mappings
-    drivers->commandMapper.addToggleMapping(
-        RemoteMapState({Remote::Key::R}),
-        {&openHopperCommand, &stopFrictionWheels});
-
-    drivers->commandMapper.addToggleMapping(
-        RemoteMapState({Remote::Key::F}),
-        {&wiggleDriveCommand});
-
-    drivers->commandMapper.addHoldRepeatMapping(
-        RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
-        {&agitatorShootFastCommand});
-
-    drivers->commandMapper.addHoldMapping(
-        RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
-        {&agitatorshootSlowCommand});
+    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&rToggled);
+    drivers->commandMapper.addMap(&fToggled);
+    drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
 
     /// \todo left switch up is cv command
 }

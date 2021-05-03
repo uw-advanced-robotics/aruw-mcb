@@ -22,7 +22,10 @@
 
 #include <cstdint>
 
+#include <modm/processing/protothread.hpp>
+
 #include "aruwlib/algorithms/MahonyAHRS.h"
+#include "aruwlib/architecture/timeout.hpp"
 
 #include "util_macros.hpp"
 
@@ -35,16 +38,16 @@ namespace sensors
  * A class specifically designed for interfacing with the RoboMaster type A board Mpu6500.
  *
  * To use this class, call Remote::init() to properly initialize and calibrate
- * the MPU6500. Next, call Remote::read() to read acceleration, gyro, and temp
+ * the MPU6500. Next, call Remote::read() to read acceleration, gyro, and temperature
  * values from the imu. Use the getter methods to access imu information.
  *
  * @note if you are shaking the imu while it is initializing, the offsets will likely
  *      be calibrated poorly and unexpectedly bad results may occur.
  */
-class Mpu6500
+class Mpu6500 : public ::modm::pt::Protothread
 {
 public:
-    Mpu6500(Drivers *drivers) : drivers(drivers) {}
+    Mpu6500(Drivers *drivers) : drivers(drivers), raw() {}
     DISALLOW_COPY_AND_ASSIGN(Mpu6500)
     mockable ~Mpu6500() = default;
 
@@ -57,9 +60,18 @@ public:
     mockable void init();
 
     /**
-     * Read data from the imu. Call at 500 hz for best performance.
+     * Calculates the IMU's pitch, roll, and yaw angles usign the Mahony AHRS algorithm.
+     * Call at 500 hz for best performance.
      */
-    mockable void read();
+    mockable void calcIMUAngles();
+
+    /**
+     * Read data from the imu. This is a protothread that reads the SPI bus using
+     * nonblocking I/O.
+     *
+     * @return `true` if the function is not done, `false` otherwise
+     */
+    mockable bool read();
 
     /**
      * To be safe, whenever you call the functions below, call this function to insure
@@ -141,8 +153,14 @@ private:
     /// The number of samples we take in order to determine the mpu offsets.
     static constexpr float MPU6500_OFFSET_SAMPLES = 300;
 
-    /// The number of bytes read to read acceleration, gyro, and temp.
-    static const uint8_t ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE = 14;
+    /// The number of bytes read to read acceleration, gyro, and temperature.
+    static constexpr uint8_t ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE = 14;
+
+    /**
+     * The delay between calculation of imu angles and the start of reading new raw IMU data,
+     * in microseconds.
+     */
+    static constexpr int DELAY_BTWN_CALC_AND_READ_REG = 1550;
 
     /**
      * Storage for the raw data we receive from the mpu6500, as well as offsets
@@ -150,51 +168,34 @@ private:
      */
     struct RawData
     {
+        struct Vector
+        {
+            int16_t x = 0;
+            int16_t y = 0;
+            int16_t z = 0;
+        };
+
         /// Raw acceleration data.
-        struct Accel
-        {
-            int16_t x = 0;
-            int16_t y = 0;
-            int16_t z = 0;
-        };
-
+        Vector accel;
         /// Raw gyroscope data.
-        struct Gyro
-        {
-            int16_t x = 0;
-            int16_t y = 0;
-            int16_t z = 0;
-        };
-
-        /// Acceleration offset calculated in init.
-        struct AccelOffset
-        {
-            int16_t x = 0;
-            int16_t y = 0;
-            int16_t z = 0;
-        };
-
-        /// Gyroscope offset calculated in init.
-        struct GyroOffset
-        {
-            int16_t x = 0;
-            int16_t y = 0;
-            int16_t z = 0;
-        };
-
-        Accel accel;
-        Gyro gyro;
+        Vector gyro;
 
         /// Raw temperature.
-        uint16_t temp = 0;
+        uint16_t temperature = 0;
 
-        AccelOffset accelOffset;
-        GyroOffset gyroOffset;
+        /// Acceleration offset calculated in init.
+        Vector accelOffset;
+        /// Gyroscope offset calculated in init.
+        Vector gyroOffset;
     };
 
     Drivers *drivers;
 
     bool imuInitialized = false;
+
+    aruwlib::arch::MicroTimeout readRegistersTimeout;
+    uint8_t tx = 0;  // Byte used for reading data in the read protothread
+    uint8_t rx = 0;  // Byte used for reading data in the read protothread
 
     RawData raw;
 
