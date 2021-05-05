@@ -93,7 +93,7 @@ bool XavierSerial::decodeToTurrentAimData(const SerialMessage& message, TurretAi
 
     aimData->pitch = static_cast<float>(rawPitch) * FIXED_POINT_PRECISION;
     aimData->yaw = static_cast<float>(rawYaw) * FIXED_POINT_PRECISION;
-    aimData->hasTarget = message.data[AIM_DATA_MESSAGE_HAS_TARGET];
+    aimData->hasTarget = message.data[AIM_DATA_MESSAGE_HAS_TARGET_OFFSET];
     aimData->timestamp = message.messageTimestamp;
 
     return true;
@@ -197,6 +197,9 @@ void XavierSerial::stopAutoAim()
 modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
 {
     RF_BEGIN(1);
+    // If there is an auto aim request queued or if the request aim
+    // timeout is expired (we haven't recceived a auto aim message),
+    // send an auto aim request message.
     if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
         (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT &&
          AutoAimRequest.sendAimRequestTimeout.isExpired()))

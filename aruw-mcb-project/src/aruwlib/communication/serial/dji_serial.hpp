@@ -178,7 +178,11 @@ private:
 
     bool rxCrcEnabled;
 
-    /// Currently calculated crc16 value
+    /**
+     * Currently calculated crc16 value. The crc16 is computed it two parts - the header and
+     * the main body. Between receiving the header and the body, we store the intermediate
+     * crc value here.
+     */
     uint16_t currCrc16 = 0;
 
     // TX related information.

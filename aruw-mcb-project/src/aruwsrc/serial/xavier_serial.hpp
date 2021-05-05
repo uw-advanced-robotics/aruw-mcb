@@ -136,10 +136,14 @@ private:
     static constexpr float FIXED_POINT_PRECISION = 0.01f;
 
     // RX message constants for decoding an aim data message. These are zero indexed byte offsets.
+    /// Offset for pitch angle
     static constexpr uint8_t AIM_DATA_MESSAGE_PITCH_OFFSET = 0;
+    /// Offset for yaw angle
     static constexpr uint8_t AIM_DATA_MESSAGE_YAW_OFFSET = sizeof(uint16_t);
+    /// Offset for whether or not cv has data
+    static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET_OFFSET = 2 * sizeof(uint16_t);
+    /// Size of entire message
     static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 2 * sizeof(uint16_t) + sizeof(uint8_t);
-    static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET = AIM_DATA_MESSAGE_SIZE - 1;
 
     // TX message constants for encoding robot data. These are zero indexed byte offsets.
     static constexpr uint8_t CHASSIS_DATA_OFFSET = 0;

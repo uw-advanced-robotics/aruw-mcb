@@ -38,7 +38,6 @@ using namespace testing;
 using namespace aruwlib::arch;
 
 static constexpr float FIXED_POINT_PRECISION = 0.01f;
-static constexpr float TX_MAX_PERIOD_BTWN_SEND = 3;
 
 // class for accessing internals of XavierSerial class for testing purposes
 class XavierSerialTester
