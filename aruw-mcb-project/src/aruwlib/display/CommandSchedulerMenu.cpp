@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "MenuIdentifiers.h"
 
 #include "CommandSchedulerMenu.hpp"
 
@@ -29,7 +30,7 @@ namespace aruwlib
 namespace display
 {
 CommandSchedulerMenu::CommandSchedulerMenu(modm::ViewStack *stack, Drivers *drivers)
-    : modm::AbstractMenu(stack, 1),
+    : modm::AbstractMenu(stack, COMMAND_SCHEDULER_MENU_ID),
       drivers(drivers),
       vertScrollHandler(drivers, 0, MAX_ENTRIES_DISPLAYED),
       firstDrawTime(true)

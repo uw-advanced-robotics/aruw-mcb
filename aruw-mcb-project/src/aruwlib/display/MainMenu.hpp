@@ -40,8 +40,6 @@ public:
     void initialize();
 
 private:
-    static constexpr int MAIN_MENU_ID = 2;
-
     Drivers *drivers;
 
     void addErrorMenuCallback();

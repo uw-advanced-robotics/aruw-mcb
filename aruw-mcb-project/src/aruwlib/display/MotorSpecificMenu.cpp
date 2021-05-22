@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "MenuIdentifiers.h"
 
 #include "MotorSpecificMenu.hpp"
 
@@ -34,7 +35,7 @@ MotorSpecificMenu::MotorSpecificMenu(
     modm::ViewStack *stack,
     Drivers *drivers,
     const DjiMotor *motor)
-    : modm::AbstractMenu(stack, 1),
+    : modm::AbstractMenu(stack, MOTOR_SPECIFIC_MENU_ID),
       drivers(drivers),
       associatedMotor(motor)
 {

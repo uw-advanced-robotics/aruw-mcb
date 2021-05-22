@@ -16,37 +16,51 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "MenuIdentifiers.h"
 
-#ifndef SPLASH_SCREEN_HPP_
-#define SPLASH_SCREEN_HPP_
-
-#include <modm/ui/menu/abstract_menu.hpp>
+#include "CVMenu.hpp"
 
 namespace aruwlib
 {
-class Drivers;
 namespace display
 {
-class SplashScreen : public modm::AbstractMenu
+CVMenu::CVMenu(modm::ViewStack *vs, Drivers *drivers)
+    : AbstractMenu(vs, CV_MENU_ID),
+      drivers(drivers)
 {
-public:
-    SplashScreen(modm::ViewStack *vs, aruwlib::Drivers *drivers);
+}
 
-    void draw() override;
+void CVMenu::update()
+{
+    if (this->hasChanged())
+    {
+        this->draw();
+    }
+}
 
-    void update() override;
+void CVMenu::shortButtonPress(modm::MenuButtons::Button button)
+{
+    if (button == modm::MenuButtons::LEFT)
+    {
+        this->remove();
+    }
+}
 
-    void shortButtonPress(modm::MenuButtons::Button button) override;
+bool CVMenu::hasChanged()
+{
+    // TODO implement, see issue #222
+    // This should return true only when the state of the CVMenu has changed
+    // (the stuff on the display has changed) to minimize I/O usage.
+    return true;
+}
 
-    bool hasChanged() override;
-
-    inline void resetHasChanged() { drawn = false; }
-
-private:
-    bool drawn = false;
-    aruwlib::Drivers *drivers;
-};
+void CVMenu::draw()
+{
+    modm::GraphicDisplay &display = getViewStack()->getDisplay();
+    display.clear();
+    display.setCursor(0, 2);
+    display << CVMenu::getMenuName();
+    // TODO implement, see issue #222
+}
 }  // namespace display
 }  // namespace aruwlib
-
-#endif  // SPLASH_SCREEN_HPP_

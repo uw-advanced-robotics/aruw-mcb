@@ -55,7 +55,6 @@ public:
     static const char *getMenuName() { return "Motor Menu"; }
 
 private:
-    static constexpr int MOTOR_MENU_ID = 5;
     static constexpr int DISPLAY_MAX_ENTRIES = 7;
 
     Drivers *drivers;

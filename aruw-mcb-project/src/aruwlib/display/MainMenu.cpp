@@ -17,6 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "MenuIdentifiers.h"
+
 #include "MainMenu.hpp"
 
 #include "CommandSchedulerMenu.hpp"
