@@ -19,8 +19,6 @@
 
 #include "linear_interpolation.hpp"
 
-#include <aruwlib/architecture/clock.hpp>
-
 namespace aruwlib
 {
 namespace algorithms

@@ -19,12 +19,12 @@
 
 #include "command_scheduler.hpp"
 
-#include <algorithm>
-#include <utility>
-
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/errors/create_errors.hpp"
+
+#include "command.hpp"
+#include "subsystem.hpp"
 
 using namespace aruwlib::errors;
 
@@ -241,6 +241,11 @@ void CommandScheduler::addCommand(Command *commandToAdd)
             "attempting to add nullptr command",
             Location::COMMAND_SCHEDULER,
             CommandSchedulerErrorType::ADDING_NULLPTR_COMMAND);
+        return;
+    }
+    else if (!commandToAdd->isReady())
+    {
+        // Do not add command if it is not ready to be scheduled.
         return;
     }
 

@@ -21,7 +21,6 @@
 
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/algorithms/crc.hpp"
-#include "aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/architecture/endianness_wrappers.hpp"
 
@@ -37,11 +36,19 @@ RefSerial::RefSerial(Drivers* drivers)
       gameData(),
       receivedDpsTracker()
 {
+    refSerialOfflineTimeout.stop();
+}
+
+bool RefSerial::getRefSerialReceivingData() const
+{
+    return !(refSerialOfflineTimeout.isStopped() || refSerialOfflineTimeout.isExpired());
 }
 
 // rx stuff
 void RefSerial::messageReceiveCallback(const SerialMessage& completeMessage)
 {
+    refSerialOfflineTimeout.restart(TIME_OFFLINE_REF_DATA_MS);
+
     updateReceivedDamage();
     switch (completeMessage.type)
     {

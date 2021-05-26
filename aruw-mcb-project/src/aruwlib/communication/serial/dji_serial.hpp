@@ -22,8 +22,6 @@
 
 #include <cstdint>
 
-#include <modm/processing.hpp>
-
 #include "aruwlib/algorithms/crc.hpp"
 #include "aruwlib/communication/serial/uart.hpp"
 

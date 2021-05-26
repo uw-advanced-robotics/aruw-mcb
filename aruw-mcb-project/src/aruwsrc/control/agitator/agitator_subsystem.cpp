@@ -51,10 +51,10 @@ AgitatorSubsystem::AgitatorSubsystem(
     aruwlib::can::CanBus agitatorCanBusId,
     bool isAgitatorInverted)
     : aruwlib::control::Subsystem(drivers),
+      agitatorIsCalibrated(false),
       agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
       desiredAgitatorAngle(0.0f),
       agitatorCalibratedZeroAngle(0.0f),
-      agitatorIsCalibrated(false),
       agitatorJammedTimeout(0),
       agitatorJammedTimeoutPeriod(0),
       gearRatio(agitatorGearRatio),
@@ -131,6 +131,7 @@ bool AgitatorSubsystem::agitatorCalibrateHere()
     }
     agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
     agitatorIsCalibrated = true;
+    desiredAgitatorAngle = 0.0f;
     return true;
 }
 
@@ -150,19 +151,6 @@ float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
     return (2.0f * aruwlib::algorithms::PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
            agitatorMotor.getEncoderUnwrapped() / gearRatio;
 }
-
-void AgitatorSubsystem::setAgitatorDesiredAngle(float newAngle) { desiredAgitatorAngle = newAngle; }
-
-float AgitatorSubsystem::getAgitatorDesiredAngle() const { return desiredAgitatorAngle; }
-
-float AgitatorSubsystem::getAgitatorVelocity() const
-{
-    return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / gearRatio;
-}
-
-bool AgitatorSubsystem::isAgitatorCalibrated() const { return agitatorIsCalibrated; }
-
-bool AgitatorSubsystem::isAgitatorOnline() const { return agitatorMotor.isMotorOnline(); }
 
 void AgitatorSubsystem::runHardwareTests()
 {

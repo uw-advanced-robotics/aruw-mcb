@@ -22,9 +22,13 @@
 
 #include <cstdint>
 
-#include <modm/architecture/interface/can_message.hpp>
-
+#include "CanBus.hpp"
 #include "can.hpp"
+
+namespace modm::can
+{
+class Message;
+}
 
 namespace aruwlib
 {
@@ -101,7 +105,7 @@ public:
     /**
      * Adds itself to the CanRxHandler.
      */
-    void attachSelfToRxHandler();
+    mockable void attachSelfToRxHandler();
 
     /**
      * Called when a message is received with the particular id and

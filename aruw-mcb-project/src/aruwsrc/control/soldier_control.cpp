@@ -35,8 +35,7 @@
 #include "chassis/wiggle_drive_command.hpp"
 #include "cilent-display/client_display_command.hpp"
 #include "cilent-display/client_display_subsystem.hpp"
-#include "hopper-cover/hopper_subsystem.hpp"
-#include "hopper-cover/open_hopper_command.hpp"
+#include "hopper-cover/hopper_commands.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_cv_command.hpp"
@@ -93,12 +92,19 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
     AgitatorSubsystem::isAgitatorInverted);
 
-HopperSubsystem hopperCover(
+// TODO: validate and tune these constexpr parameters for hopper lid motor
+// also find out what kind of motor hopper lid uses lol
+AgitatorSubsystem hopperCover(
     drivers(),
-    aruwlib::gpio::Pwm::W,
-    HopperSubsystem::SOLDIER_HOPPER_OPEN_PWM,
-    HopperSubsystem::SOLDIER_HOPPER_CLOSE_PWM,
-    HopperSubsystem::SOLDIER_PWM_RAMP_SPEED);
+    AgitatorSubsystem::PID_17MM_P,
+    AgitatorSubsystem::PID_17MM_I,
+    AgitatorSubsystem::PID_17MM_D,
+    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem::HOPPER_COVER_MOTOR_ID,
+    AgitatorSubsystem::HOPPER_COVER_MOTOR_CAN_BUS,
+    AgitatorSubsystem::IS_HOPPER_COVER_INVERTED);
 
 FrictionWheelSubsystem frictionWheels(drivers());
 
@@ -117,11 +123,13 @@ TurretCVCommand turretCVCommand(&xavierSerial, &turret);
 
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand agitatorShootFastCommand(drivers(), &agitator);
+ShootFastComprisedCommand17MM agitatorShootFastLimited(drivers(), &agitator);
 
-ShootSlowComprisedCommand agitatorshootSlowCommand(drivers(), &agitator);
+ShootFastComprisedCommand17MM agitatorShootFastNotLimited(drivers(), &agitator, false);
 
-OpenHopperCommand openHopperCommand(&hopperCover);
+SoldierOpenHopperCommand openHopperCommand(&hopperCover);
+
+SoldierCloseHopperCommand closeHopperCommand(&hopperCover);
 
 FrictionWheelRotateCommand spinFrictionWheels(
     &frictionWheels,
@@ -143,18 +151,18 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&openHopperCommand, &stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping leftSwitchUp(
+HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    {&agitatorShootFastLimited},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&wiggleDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-HoldRepeatCommandMapping rightSwitchUp(
+HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&agitatorShootFastCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    {&chassisDriveCommand, &turretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
 ToggleCommandMapping rToggled(
@@ -164,11 +172,11 @@ ToggleCommandMapping rToggled(
 ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&agitatorShootFastCommand},
+    {&agitatorShootFastLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
-HoldCommandMapping leftMousePressedShiftPressed(
+HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&agitatorshootSlowCommand},
+    {&agitatorShootFastNotLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}));
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -256,6 +264,7 @@ void setDefaultSoldierCommands(aruwlib::Drivers *)
     turret.setDefaultCommand(&turretWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    hopperCover.setDefaultCommand(&closeHopperCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -268,9 +277,9 @@ void startSoldierCommands(aruwlib::Drivers *drivers)
 void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&rToggled);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);

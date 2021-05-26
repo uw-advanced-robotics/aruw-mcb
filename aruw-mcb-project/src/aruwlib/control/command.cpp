@@ -22,8 +22,6 @@
 #include "command_scheduler.hpp"
 #include "subsystem.hpp"
 
-using namespace std;
-
 namespace aruwlib
 {
 namespace control
@@ -40,5 +38,8 @@ void Command::addSubsystemRequirement(Subsystem* requirement)
     }
     commandRequirementsBitwise |= (1UL << requirement->getGlobalIdentifier());
 }
+
+bool Command::isReady() { return true; }
+
 }  // namespace control
 }  // namespace aruwlib

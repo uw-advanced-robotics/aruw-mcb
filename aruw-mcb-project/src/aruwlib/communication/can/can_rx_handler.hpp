@@ -20,14 +20,22 @@
 #ifndef CAN_RX_HANDLER_HPP_
 #define CAN_RX_HANDLER_HPP_
 
-#include "can_rx_listener.hpp"
+#include "CanBus.hpp"
 #include "util_macros.hpp"
+
+namespace modm::can
+{
+class Message;
+}
 
 namespace aruwlib
 {
 class Drivers;
+
 namespace can
 {
+class CanRxListener;
+
 /**
  * A handler that stores pointers to CanRxListener and that watches
  * CAN 1 and CAN 2 for messages. If messages are received, it checks
@@ -56,7 +64,7 @@ namespace can
 class CanRxHandler
 {
 public:
-    CanRxHandler(Drivers* drivers) : drivers(drivers) {}
+    CanRxHandler(Drivers* drivers);
     mockable ~CanRxHandler() = default;
     DISALLOW_COPY_AND_ASSIGN(CanRxHandler)
 
@@ -113,18 +121,16 @@ private:
      */
     CanRxListener* messageHandlerStoreCan2[MAX_RECEIVE_UNIQUE_HEADER_CAN2];
 
-    /**
-     * Does the work of the public `attachReceiveHandler` function, but
-     * handles a particular CAN bus.
-     *
-     * @see `attachReceiveHandler`
-     */
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+#endif
+
     void attachReceiveHandler(
         CanRxListener* const CanRxHndl,
         CanRxListener** messageHandlerStore,
         int messageHandlerStoreSize);
 
-    inline void processReceivedCanData(
+    void processReceivedCanData(
         const modm::can::Message& rxMessage,
         CanRxListener* const* messageHandlerStore,
         int messageHandlerStoreSize);
@@ -133,6 +139,8 @@ private:
         const CanRxListener& listener,
         CanRxListener** messageHandlerStore,
         int messageHandlerStoreSize);
+
+    aruwlib::can::CanRxListener** getHandlerStore(aruwlib::can::CanBus bus);
 };  // class CanRxHandler
 
 }  // namespace can
