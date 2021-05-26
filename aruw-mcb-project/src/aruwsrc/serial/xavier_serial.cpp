@@ -28,9 +28,7 @@
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 using namespace aruwlib::arch;
-
-// Instead of using some timer to delay, we just yield.
-#define delay() RF_YIELD()
+using namespace aruwlib::serial;
 
 namespace aruwsrc
 {
@@ -40,7 +38,7 @@ XavierSerial::XavierSerial(
     aruwlib::Drivers* drivers,
     const turret::TurretSubsystem* turretSub,
     const chassis::ChassisSubsystem* chassisSub)
-    : aruwlib::serial::DJISerial(drivers, aruwlib::serial::Uart::UartPort::Uart2),
+    : DJISerial(drivers, Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),
       isCvOnline(false),
@@ -177,7 +175,7 @@ modm::ResumableResult<bool> XavierSerial::sendRobotMeasurements()
 
     send();
 
-    delay();
+    RF_YIELD()
 
     RF_END();
 }
@@ -211,7 +209,7 @@ modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
         // Keep sending until sent
         while (!send())
         {
-            delay();
+            RF_YIELD();
         }
 
         if (AutoAimRequest.requestType)
@@ -223,7 +221,7 @@ modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
         {
             AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
         }
-        delay();
+        RF_YIELD();
     }
     RF_END();
 }

@@ -24,6 +24,7 @@
 #include <aruwlib/architecture/timeout.hpp>
 #include <aruwlib/communication/serial/dji_serial.hpp>
 #include <modm/processing/protothread.hpp>
+#include <modm/processing/resumable.hpp>
 
 #include "util_macros.hpp"
 
