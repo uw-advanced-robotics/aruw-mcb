@@ -425,8 +425,6 @@ public:
      */
     mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
-    void runHardwareTests() override;
-
     const char* getName() override { return "Chassis"; }
 
     /**
@@ -458,6 +456,8 @@ public:
     mockable inline int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
     mockable inline int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
     mockable inline int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
+
+    void onHardwareTestStart() override;
 
 private:
     /**
