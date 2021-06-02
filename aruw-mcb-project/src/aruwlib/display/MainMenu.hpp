@@ -22,15 +22,21 @@
 
 #include <modm/ui/menu/standard_menu.hpp>
 
+#include "CommandSchedulerMenu.hpp"
+#include "DummyAllocator.hpp"
+#include "ErrorMenu.hpp"
+#include "HardwareTestMenu.hpp"
+#include "MotorMenu.hpp"
+
 namespace aruwlib
 {
 class Drivers;
 namespace display
 {
-class MainMenu : public modm::StandardMenu
+class MainMenu : public modm::StandardMenu<DummyAllocator<modm::IAbstractView> >
 {
 public:
-    MainMenu(modm::ViewStack *stack, Drivers *drivers);
+    MainMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> > *stack, Drivers *drivers);
 
     virtual ~MainMenu() = default;
 
@@ -43,6 +49,11 @@ private:
     static constexpr int MAIN_MENU_ID = 2;
 
     Drivers *drivers;
+
+    ErrorMenu errorMenu;
+    HardwareTestMenu hardwareTestMenu;
+    MotorMenu motorMenu;
+    CommandSchedulerMenu commandSchedulerMenu;
 
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();

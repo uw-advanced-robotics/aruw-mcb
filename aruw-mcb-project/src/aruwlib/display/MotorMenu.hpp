@@ -24,6 +24,8 @@
 
 #include "aruwlib/communication/can/CanBus.hpp"
 
+#include "DummyAllocator.hpp"
+#include "MotorSpecificMenu.hpp"
 #include "VerticalScrollLogicHandler.hpp"
 
 namespace aruwlib
@@ -36,10 +38,10 @@ class Drivers;
 
 namespace display
 {
-class MotorMenu : public modm::AbstractMenu
+class MotorMenu : public modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >
 {
 public:
-    MotorMenu(modm::ViewStack *stack, Drivers *drivers);
+    MotorMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> > *stack, Drivers *drivers);
 
     virtual ~MotorMenu() = default;
 
@@ -63,6 +65,8 @@ private:
 
     uint8_t can1PrevDisplayedStatus;
     uint8_t can2PrevDisplayedStatus;
+
+    MotorSpecificMenu motorSpecificMenu;
 
     void drawMotor(aruwlib::can::CanBus canBus, int normalizedMotorId);
 };

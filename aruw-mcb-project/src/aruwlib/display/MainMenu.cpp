@@ -19,18 +19,17 @@
 
 #include "MainMenu.hpp"
 
-#include "CommandSchedulerMenu.hpp"
-#include "ErrorMenu.hpp"
-#include "HardwareTestMenu.hpp"
-#include "MotorMenu.hpp"
-
 namespace aruwlib
 {
 namespace display
 {
-MainMenu::MainMenu(modm::ViewStack* stack, Drivers* drivers)
-    : modm::StandardMenu(stack, MAIN_MENU_ID),
-      drivers(drivers)
+MainMenu::MainMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> >* stack, Drivers* drivers)
+    : modm::StandardMenu<DummyAllocator<modm::IAbstractView> >(stack, MAIN_MENU_ID),
+      drivers(drivers),
+      errorMenu(stack, drivers),
+      hardwareTestMenu(stack, drivers),
+      motorMenu(stack, drivers),
+      commandSchedulerMenu(stack, drivers)
 {
 }
 
@@ -38,40 +37,50 @@ void MainMenu::initialize()
 {
     addEntry(
         ErrorMenu::getMenuName(),
-        modm::MenuEntryCallback(this, &MainMenu::addErrorMenuCallback));
-
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addErrorMenuCallback));
     addEntry(
         HardwareTestMenu::getMenuName(),
-        modm::MenuEntryCallback(this, &MainMenu::addHardwareTestMenuCallback));
-
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addHardwareTestMenuCallback));
     addEntry(
         MotorMenu::getMenuName(),
-        modm::MenuEntryCallback(this, &MainMenu::addMotorMenuCallback));
-
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addMotorMenuCallback));
     addEntry(
         "Property Table Menu",
-        modm::MenuEntryCallback(this, &MainMenu::addPropertyTableCallback));
-
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addPropertyTableCallback));
     addEntry(
         CommandSchedulerMenu::getMenuName(),
-        modm::MenuEntryCallback(this, &MainMenu::addCommandSchedulerCallback));
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addCommandSchedulerCallback));
 
     setTitle("Main Menu");
 }
 
 void MainMenu::addErrorMenuCallback()
 {
-    getViewStack()->push(new ErrorMenu(getViewStack(), drivers));
+    // em actually points to errorMenu
+    ErrorMenu* em = new (&errorMenu) ErrorMenu(getViewStack(), drivers);
+    getViewStack()->push(em);
 }
 
 void MainMenu::addHardwareTestMenuCallback()
 {
-    getViewStack()->push(new HardwareTestMenu(getViewStack(), drivers));
+    HardwareTestMenu* htm = new (&hardwareTestMenu) HardwareTestMenu(getViewStack(), drivers);
+    getViewStack()->push(htm);
 }
 
 void MainMenu::addMotorMenuCallback()
 {
-    getViewStack()->push(new MotorMenu(getViewStack(), drivers));
+    MotorMenu* mm = new (&motorMenu) MotorMenu(getViewStack(), drivers);
+    getViewStack()->push(mm);
 }
 
 void MainMenu::addPropertyTableCallback()
@@ -81,7 +90,9 @@ void MainMenu::addPropertyTableCallback()
 
 void MainMenu::addCommandSchedulerCallback()
 {
-    getViewStack()->push(new CommandSchedulerMenu(getViewStack(), drivers));
+    CommandSchedulerMenu* csm =
+        new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers);
+    getViewStack()->push(csm);
 }
 }  // namespace display
 

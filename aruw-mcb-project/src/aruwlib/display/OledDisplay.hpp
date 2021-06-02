@@ -75,7 +75,7 @@ private:
         false>
         display;
 
-    modm::ViewStack viewStack;
+    modm::ViewStack<DummyAllocator<modm::IAbstractView> > viewStack;
 
     OledButtonHandler buttonHandler;
 

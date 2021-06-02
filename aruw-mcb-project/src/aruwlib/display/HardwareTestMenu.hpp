@@ -24,18 +24,18 @@
 
 #include "aruwlib/control/command_scheduler_types.hpp"
 
+#include "DummyAllocator.hpp"
 #include "VerticalScrollLogicHandler.hpp"
 
 namespace aruwlib
 {
 class Drivers;
-
 namespace display
 {
-class HardwareTestMenu : public modm::AbstractMenu
+class HardwareTestMenu : public modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >
 {
 public:
-    HardwareTestMenu(modm::ViewStack *vs, Drivers *drivers);
+    HardwareTestMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> > *vs, Drivers *drivers);
 
     void draw() override;
 

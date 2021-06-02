@@ -19,6 +19,8 @@
 
 #include "SplashScreen.hpp"
 
+#include "aruwlib/Drivers.hpp"
+
 #include "MainMenu.hpp"
 
 namespace aruwlib
@@ -81,9 +83,12 @@ FLASH_STORAGE(uint8_t aruwImage[]) = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   7,   7,   7,   7,   7,   7,   7,   7,   7,
     7,   7,   7,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
 
-SplashScreen::SplashScreen(modm::ViewStack* vs, aruwlib::Drivers* drivers)
-    : modm::AbstractMenu(vs, SPLASH_SCREEN_MENU_ID),
-      drivers(drivers)
+SplashScreen::SplashScreen(
+    modm::ViewStack<DummyAllocator<modm::IAbstractView> >* vs,
+    Drivers* drivers)
+    : AbstractMenu(vs, SPLASH_SCREEN_MENU_ID),
+      drivers(drivers),
+      mainMenu(vs, drivers)
 {
 }
 
@@ -106,7 +111,7 @@ void SplashScreen::shortButtonPress(modm::MenuButtons::Button button)
             break;
         case modm::MenuButtons::RIGHT:
         {
-            MainMenu* mm = new MainMenu(getViewStack(), drivers);
+            MainMenu* mm = new (&mainMenu) MainMenu(getViewStack(), drivers);
             mm->initialize();
             getViewStack()->push(mm);
             break;

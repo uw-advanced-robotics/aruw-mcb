@@ -23,7 +23,7 @@ namespace aruwlib
 {
 namespace display
 {
-ErrorMenu::ErrorMenu(modm::ViewStack *vs, Drivers *drivers)
+ErrorMenu::ErrorMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> > *vs, Drivers *drivers)
     : AbstractMenu(vs, ERROR_MENU_ID),
       drivers(drivers)
 {
