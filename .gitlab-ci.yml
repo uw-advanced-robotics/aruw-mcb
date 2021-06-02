@@ -21,8 +21,8 @@ default:
 variables:
   ARTIFACT_PATH: isolated-deploy
   GIT_SUBMODULE_STRATEGY: recursive
-  DEFAULT_BUILD_ELF_FILE: build/hardware/release/aruw-mcb.elf
-  DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/fast/aruw-mcb-tests.elf
+  DEFAULT_BUILD_ELF_FILE: build/hardware/scons-release/aruw-mcb.elf
+  DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/scons-fast/aruw-mcb-tests.elf
   NUM_JOBS: 4
 
 .default_only: &default_only
