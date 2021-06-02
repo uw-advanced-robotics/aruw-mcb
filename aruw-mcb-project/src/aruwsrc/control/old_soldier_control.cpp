@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,8 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(TARGET_OLD_SOLDIER)
+
 #include <aruwlib/DriversSingleton.hpp>
-#include <aruwlib/control/command_mapper.hpp>
+#include <aruwlib/control/CommandMapper.hpp>
+#include <aruwlib/control/HoldCommandMapping.hpp>
+#include <aruwlib/control/HoldRepeatCommandMapping.hpp>
+#include <aruwlib/control/PressCommandMapping.hpp>
+#include <aruwlib/control/ToggleCommandMapping.hpp>
 
 #include "agitator/agitator_calibrate_command.hpp"
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
@@ -28,19 +34,17 @@
 #include "chassis/chassis_subsystem.hpp"
 #include "chassis/wiggle_drive_command.hpp"
 #include "hopper-cover/hopper_subsystem.hpp"
-#include "hopper-cover/open_hopper_command.hpp"
+#include "hopper-cover/open_hopper_command_old.hpp"
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
-#if defined(TARGET_OLD_SOLDIER)
-
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::turret;
+using namespace aruwlib::control;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::Remote;
-using aruwlib::control::CommandMapper;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -89,9 +93,31 @@ TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret
 
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand agitatorShootFastCommand(drivers(), &agitator);
+ShootFastComprisedCommand17MM agitatorShootFastCommand(drivers(), &agitator);
 
 OpenHopperCommand openHopperCommand(&hopperCover);
+
+/* define command mappings --------------------------------------------------*/
+// Remote related mappings
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&chassisDriveCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&wiggleDriveCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&agitatorShootFastCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+// Keyboard/Mouse related mappings
+ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
+HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
+    drivers(),
+    {&agitatorShootFastCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -127,25 +153,11 @@ void startOldSoldierCommands(aruwlib::Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerOldSoldierIoMappings(aruwlib::Drivers *drivers)
 {
-    drivers->commandMapper.addHoldRepeatMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-        &agitatorShootFastCommand);
-
-    drivers->commandMapper.addHoldRepeatMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID),
-        &chassisAutorotateCommand);
-
-    drivers->commandMapper.addHoldMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-        &chassisDriveCommand);
-
-    drivers->commandMapper.addHoldMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-        &openHopperCommand);
-
-    drivers->commandMapper.addHoldMapping(
-        drivers->commandMapper.newKeyMap(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
-        &wiggleDriveCommand);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&fToggled);
+    drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
 }
 
 void initSubsystemCommands(aruwlib::Drivers *drivers)

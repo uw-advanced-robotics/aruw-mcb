@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -30,6 +30,8 @@
 #include <aruwlib/control/subsystem.hpp>
 #include <aruwlib/motor/servo.hpp>
 #include <modm/math/filter/pid.hpp>
+
+#include "util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -73,14 +75,22 @@ public:
     /*
      * set servo to the open angle
      */
-    void setOpen();
+    mockable void setOpen();
 
     /*
      * set servo to the close angle
      */
-    void setClose();
+    mockable void setClose();
 
     void refresh() override;
+
+    void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
+
+    const char *getName() override { return "Hopper"; }
 
 private:
     aruwlib::motor::Servo hopper;
@@ -94,6 +104,8 @@ private:
      * return the angle defined as close as a PWM value
      */
     float getClosePWM();
+
+    uint64_t testTime;
 };
 
 }  // namespace control

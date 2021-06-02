@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,10 +22,17 @@
 
 #include <aruwlib/architecture/timeout.hpp>
 #include <aruwlib/control/subsystem.hpp>
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <aruwlib/mock/DJIMotorMock.hpp>
+#else
 #include <aruwlib/motor/dji_motor.hpp>
+#endif
+
 #include <modm/math/filter/pid.hpp>
 
 #include "aruwsrc/algorithms/turret_pid.hpp"
+
+#include "util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -54,6 +61,14 @@ public:
 
     static constexpr bool isAgitatorInverted = false;
 
+    // The motor that controls the hopper lid is an agitator_subsystem instance, so
+    // I'm adding its constants here as well.
+    static constexpr aruwlib::motor::MotorId HOPPER_COVER_MOTOR_ID = aruwlib::motor::MOTOR8;
+    static constexpr aruwlib::can::CanBus HOPPER_COVER_MOTOR_CAN_BUS =
+        aruwlib::can::CanBus::CAN_BUS1;
+
+    static constexpr bool IS_HOPPER_COVER_INVERTED = false;
+
 #elif defined(TARGET_SENTINEL)
     // position PID terms
     // PID terms for sentinel
@@ -80,20 +95,28 @@ public:
     static constexpr float PID_HERO1_I = 500.0f;
     static constexpr float PID_HERO1_D = 7000.0f;
     static constexpr float PID_HERO1_MAX_ERR_SUM = 0.0f;
+    // max out added by Tenzin since it wasn't here. This should
+    // also be changed by someone who know's what they're doing!
+    static constexpr float PID_HERO1_MAX_OUT = 16000.0f;
 
     // PID terms for hero agitator 2
     static constexpr float PID_HERO2_P = 1500.0f;
     static constexpr float PID_HERO2_I = 500.0f;
     static constexpr float PID_HERO2_D = 7000.0f;
     static constexpr float PID_HERO2_MAX_ERR_SUM = 0.0f;
+    // max out added by Tenzin since it wasn't here. This should
+    // also be changed by someone who know's what they're doing!
+    static constexpr float PID_HERO2_MAX_OUT = 16000.0f;
 
     static constexpr aruwlib::motor::MotorId HERO1_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
     static constexpr aruwlib::can::CanBus HERO1_AGITATOR_MOTOR_CAN_BUS =
         aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr bool HERO1_AGITATOR_INVERTED = false;
 
-    static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR6;
+    static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR8;
     static constexpr aruwlib::can::CanBus HERO2_AGITATOR_MOTOR_CAN_BUS =
         aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr bool HERO2_AGITATOR_INVERTED = false;
 #endif
 
     /**
@@ -128,18 +151,21 @@ public:
      *
      * @param[in] newAngle The desired angle.
      */
-    void setAgitatorDesiredAngle(float newAngle);
+    mockable inline void setAgitatorDesiredAngle(float newAngle)
+    {
+        desiredAgitatorAngle = newAngle;
+    }
 
     /**
      * @return The calibrated agitator angle, in radians. If the agitator is uncalibrated, 0
      *      radians is returned.
      */
-    float getAgitatorAngle() const;
+    mockable float getAgitatorAngle() const;
 
     /**
      * @return The angle set in `setAgitatorDesiredAngle`.
      */
-    float getAgitatorDesiredAngle() const;
+    mockable inline float getAgitatorDesiredAngle() const { return desiredAgitatorAngle; }
 
     /**
      * Attempts to calibrate the agitator at the current position, such that
@@ -148,41 +174,67 @@ public:
      * @return `true` if the agitator has been successfully calibrated, `false`
      *      otherwise.
      */
-    bool agitatorCalibrateHere();
+    mockable bool agitatorCalibrateHere();
 
     /**
      * A timer system may be used for determining if an agitator is jammed. This function
      * starts the agitator unjam timer. Call when starting to rotate to a position. Use
      * `isAgitatorJammed` to check the timer. When the agitator has reached a the desired
-     * position, stop the unjam timer by calling `armAgitatorUnjamTimer`.
+     * position, stop the unjam timer by calling `disarmAgitatorUnjamTimer`.
      *
      * @note In addition to the `predictedRotateTime`, an `JAMMED_TOLERANCE_PERIOD` is added
      *      to the timer's timeout.
-     * @param[in] predictedRotateTime The time that you expect that agitator to rotate.
+     * @param[in] predictedRotateTime The time that you expect that agitator to rotate in
+     *      milliseconds.
      */
-    void armAgitatorUnjamTimer(uint32_t predictedRotateTime);
+    mockable void armAgitatorUnjamTimer(uint32_t predictedRotateTime);
 
     /**
      * Stops the agitator unjam timer.
      */
-    void disarmAgitatorUnjamTimer();
+    mockable void disarmAgitatorUnjamTimer();
 
     /**
      * @return `true` if the agitator unjam timer has expired, signaling that the agitator
      *      has jammed, `false` otherwise.
      */
-    bool isAgitatorJammed() const;
+    mockable bool isAgitatorJammed() const;
 
     /**
      * @return `true` if the agitator has been calibrated (`agitatorCalibrateHere` has been
-     *      called and the agitator motor is online.
+     *      called and the agitator motor is online).
      */
-    bool isAgitatorCalibrated() const;
+    mockable inline bool isAgitatorCalibrated() const { return agitatorIsCalibrated; }
+
+    /**
+     * @return `true` if the agitator motor is online (i.e.: is connected)
+     */
+    mockable inline bool isAgitatorOnline() const { return agitatorMotor.isMotorOnline(); }
 
     /**
      * @return The velocity of the agitator in units of degrees per second.
      */
-    float getAgitatorVelocity() const;
+    mockable inline float getAgitatorVelocity() const
+    {
+        return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / gearRatio;
+    }
+
+    void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
+
+    mockable const char* getName() override { return "Agitator"; }
+
+protected:
+    /**
+     * Whether or not the agitator has been calibrated yet. You should calibrate the agitator
+     * before using it.
+     */
+    bool agitatorIsCalibrated;
+
+    void agitatorRunPositionPid();
 
 private:
     /**
@@ -197,8 +249,6 @@ private:
      */
     aruwsrc::algorithms::TurretPid agitatorPositionPid;
 
-    aruwlib::motor::DjiMotor agitatorMotor;
-
     /**
      * The user desired angle, measured in radians.
      * The agitator uses unwrapped angle.
@@ -209,12 +259,6 @@ private:
      * You can calibrate the agitator, which will set the current agitator angle to zero radians.
      */
     float agitatorCalibratedZeroAngle;
-
-    /**
-     * Whether or not the agitator has been calibrated yet. You should calibrate the agitator
-     * before using it.
-     */
-    bool agitatorIsCalibrated;
 
     /**
      * A timeout that is used to determine whether or not the agitator is jammed. If the
@@ -233,9 +277,17 @@ private:
      */
     float gearRatio;
 
-    void agitatorRunPositionPid();
-
     float getUncalibratedAgitatorAngle() const;
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    aruwlib::mock::DjiMotorMock agitatorMotor;
+
+private:
+#else
+    aruwlib::motor::DjiMotor agitatorMotor;
+#endif
+
 };  // class AgitatorSubsystem
 
 }  // namespace agitator

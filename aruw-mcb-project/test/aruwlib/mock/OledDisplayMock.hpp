@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -32,7 +32,8 @@ class OledDisplayMock : public display::OledDisplay
 public:
     explicit OledDisplayMock(Drivers *drivers) : display::OledDisplay(drivers) {}
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, update, (), (override));
+    MOCK_METHOD(bool, updateDisplay, (), (override));
+    MOCK_METHOD(void, updateMenu, (), (override));
 };  // class OledDisplayMock
 }  // namespace mock
 }  // namespace aruwlib

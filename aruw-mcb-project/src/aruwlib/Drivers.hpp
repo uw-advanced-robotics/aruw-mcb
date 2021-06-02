@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -28,6 +28,7 @@
 #include "aruwlib/mock/CommandSchedulerMock.hpp"
 #include "aruwlib/mock/ControlOperatorInterfaceMock.hpp"
 #include "aruwlib/mock/DigitalMock.hpp"
+#include "aruwlib/mock/DjiMotorTerminalSerialHandlerMock.hpp"
 #include "aruwlib/mock/DjiMotorTxHandlerMock.hpp"
 #include "aruwlib/mock/ErrorControllerMock.hpp"
 #include "aruwlib/mock/LedsMock.hpp"
@@ -36,9 +37,14 @@
 #include "aruwlib/mock/PwmMock.hpp"
 #include "aruwlib/mock/RefSerialMock.hpp"
 #include "aruwlib/mock/RemoteMock.hpp"
+#include "aruwlib/mock/SchedulerTerminalHandlerMock.hpp"
+#include "aruwlib/mock/TerminalSerialMock.hpp"
 #include "aruwlib/mock/UartMock.hpp"
 #include "aruwlib/mock/XavierSerialMock.hpp"
+
+#include "architecture/profiler.hpp"
 #else
+#include "architecture/profiler.hpp"
 #include "communication/can/can.hpp"
 #include "communication/can/can_rx_handler.hpp"
 #include "communication/gpio/analog.hpp"
@@ -47,14 +53,17 @@
 #include "communication/gpio/pwm.hpp"
 #include "communication/remote.hpp"
 #include "communication/sensors/mpu6500/mpu6500.hpp"
+#include "communication/serial/TerminalSerial.hpp"
 #include "communication/serial/ref_serial.hpp"
 #include "communication/serial/uart.hpp"
 #include "communication/serial/xavier_serial.hpp"
-#include "control/command_mapper.hpp"
+#include "control/CommandMapper.hpp"
+#include "control/ControlOperatorInterface.hpp"
+#include "control/SchedulerTerminalHandler.hpp"
 #include "control/command_scheduler.hpp"
-#include "control/control_operator_interface.hpp"
 #include "display/OledDisplay.hpp"
 #include "errors/error_controller.hpp"
+#include "motor/DjiMotorTerminalSerialHandler.hpp"
 #include "motor/dji_motor_tx_handler.hpp"
 #endif
 
@@ -79,33 +88,45 @@ public:
           uart(),
           xavierSerial(this),
           refSerial(this),
+#ifdef ENV_UNIT_TESTS
           commandScheduler(this),
+#else
+          commandScheduler(this, true),
+#endif
           controlOperatorInterface(this),
           commandMapper(this),
           errorController(this),
+          terminalSerial(this),
           djiMotorTxHandler(this),
-          oledDisplay(this)
+          oledDisplay(this),
+          profiler(),
+          djiMotorTerminalSerialHandler(this),
+          schedulerTerminalHandler(this)
     {
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    mock::CanMock can;
-    mock::CanRxHandlerMock canRxHandler;
-    mock::AnalogMock analog;
-    mock::DigitalMock digital;
-    mock::LedsMock leds;
-    mock::PwmMock pwm;
-    mock::RemoteMock remote;
-    mock::Mpu6500Mock mpu6500;
-    mock::UartMock uart;
-    mock::XavierSerialMock xavierSerial;
-    mock::RefSerialMock refSerial;
-    mock::CommandSchedulerMock commandScheduler;
-    mock::ControlOperatorInterfaceMock controlOperatorInterface;
-    mock::CommandMapperMock commandMapper;
+    testing::NiceMock<mock::CanMock> can;
+    testing::NiceMock<mock::CanRxHandlerMock> canRxHandler;
+    testing::NiceMock<mock::AnalogMock> analog;
+    testing::NiceMock<mock::DigitalMock> digital;
+    testing::NiceMock<mock::LedsMock> leds;
+    testing::NiceMock<mock::PwmMock> pwm;
+    testing::NiceMock<mock::RemoteMock> remote;
+    testing::NiceMock<mock::Mpu6500Mock> mpu6500;
+    testing::NiceMock<mock::UartMock> uart;
+    testing::NiceMock<mock::XavierSerialMock> xavierSerial;
+    testing::NiceMock<mock::RefSerialMock> refSerial;
+    testing::NiceMock<mock::CommandSchedulerMock> commandScheduler;
+    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    testing::NiceMock<mock::CommandMapperMock> commandMapper;
     mock::ErrorControllerMock errorController;
-    mock::DjiMotorTxHandlerMock djiMotorTxHandler;
-    mock::OledDisplayMock oledDisplay;
+    testing::NiceMock<mock::TerminalSerialMock> terminalSerial;
+    testing::NiceMock<mock::DjiMotorTxHandlerMock> djiMotorTxHandler;
+    testing::NiceMock<mock::OledDisplayMock> oledDisplay;
+    arch::Profiler profiler;
+    testing::NiceMock<mock::DjiMotorTerminalSerialHandlerMock> djiMotorTerminalSerialHandler;
+    testing::NiceMock<mock::SchedulerTerminalHandlerMock> schedulerTerminalHandler;
 #else
 public:
     can::Can can;
@@ -123,8 +144,12 @@ public:
     control::ControlOperatorInterface controlOperatorInterface;
     control::CommandMapper commandMapper;
     errors::ErrorController errorController;
+    communication::serial::TerminalSerial terminalSerial;
     motor::DjiMotorTxHandler djiMotorTxHandler;
     display::OledDisplay oledDisplay;
+    arch::Profiler profiler;
+    motor::DjiMotorTerminalSerialHandler djiMotorTerminalSerialHandler;
+    control::SchedulerTerminalHandler schedulerTerminalHandler;
 #endif
 };  // class Drivers
 

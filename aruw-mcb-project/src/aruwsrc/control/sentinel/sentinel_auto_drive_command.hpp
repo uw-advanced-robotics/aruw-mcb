@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,8 +29,6 @@ namespace aruwsrc
 {
 namespace control
 {
-class SentinelDriveSubsystem;
-
 class SentinelAutoDriveCommand : public aruwlib::control::Command
 {
 public:
@@ -44,7 +42,7 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "sentinel auto drive command"; }
+    const char* getName() const override { return "sentinel auto drive"; }
 
 private:
     static const int16_t MIN_RPM = 5000;

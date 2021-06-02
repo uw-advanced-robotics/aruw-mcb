@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -48,6 +48,12 @@ void ExampleSubsystem::updateMotorRpmPid(
     pid->update(desiredRpm - motor->getShaftRPM());
     motor->setDesiredOutput(static_cast<int32_t>(pid->getValue()));
 }
+
+void ExampleSubsystem::runHardwareTests()
+{
+    // TODO
+}
+
 }  // namespace control
 
 }  // namespace aruwsrc

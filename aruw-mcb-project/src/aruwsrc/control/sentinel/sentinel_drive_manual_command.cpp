@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,12 +19,9 @@
 
 #include "sentinel_drive_manual_command.hpp"
 
-#include <stdlib.h>
-
 #include <aruwlib/Drivers.hpp>
 #include <aruwlib/communication/remote.hpp>
 
-#include "sentinel_auto_drive_command.hpp"
 #include "sentinel_drive_subsystem.hpp"
 
 using aruwlib::Drivers;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,31 +20,46 @@
 #ifndef OLED_DISPLAY_HPP_
 #define OLED_DISPLAY_HPP_
 
+#include <modm/processing/protothread.hpp>
 #include <modm/ui/menu/view_stack.hpp>
 
+#include "aruwlib/architecture/periodic_timer.hpp"
 #include "aruwlib/rm-dev-board-a/board.hpp"
 
-#include "MainMenu.hpp"
 #include "OledButtonHandler.hpp"
-#include "mock_macros.hpp"
+#include "SplashScreen.hpp"
 #include "sh1106.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
 class Drivers;
 namespace display
 {
-class OledDisplay
+class OledDisplay : public ::modm::pt::Protothread
 {
 public:
     explicit OledDisplay(Drivers *drivers);
-    OledDisplay(const OledDisplay &) = delete;
-    OledDisplay &operator=(const OledDisplay &) = delete;
+    DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 
     mockable void initialize();
 
-    mockable void update();
+    /**
+     * Updates the display in a nonblocking fashion. This function uses protothreads
+     * to call the sh1106's updateNonblocking function at a rate of 2 hz.
+     *
+     * @note This function uses protothreads (http://dunkels.com/adam/pt/).
+     *      Local variables *do not* necessarily behave correctly and this
+     *      function should be edited with care.
+     */
+    mockable bool updateDisplay();
+
+    /**
+     * Checks button state and updates the view stack responsible for determining what
+     * should be displayed on the OLED.
+     */
+    mockable void updateMenu();
 
 private:
     OledButtonHandler::Button prevButton = OledButtonHandler::NONE;
@@ -64,9 +79,11 @@ private:
 
     OledButtonHandler buttonHandler;
 
-    MainMenu mainMenu;
+    SplashScreen splashScreen;
 
     Drivers *drivers;
+
+    aruwlib::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
 }  // namespace display
 }  // namespace aruwlib

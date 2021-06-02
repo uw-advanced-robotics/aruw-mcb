@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,30 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * example for how to create and add an error to the ErrorController:
- * use macro in create_errors.hpp
- *
- *     RAISE_ERROR(drivers, "Error in DJI Serial", aruwlib::errors::Location::DJI_SERIAL,
- *     aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
- *
- * then call ErrorController::update() to update the list of errors
- */
-
-#ifndef __SYSTEM_ERROR_HPP__
-#define __SYSTEM_ERROR_HPP__
-
-#include <string>
+#ifndef SYSTEM_ERROR_HPP_
+#define SYSTEM_ERROR_HPP_
 
 namespace aruwlib
 {
 namespace errors
 {
-static const uint8_t ERROR_LOCATION_SIZE = 4;
-
-static const uint8_t ERROR_TYPE_SIZE = 8 - ERROR_LOCATION_SIZE;
-
-// Location of errors; subject to change
+/// Location of errors; subject to change
 enum Location
 {
     CAN_RX = 0,
@@ -52,47 +36,56 @@ enum Location
     CONTROLLER_MAPPER,
     TURRET,
     SERVO,
+    OLED_DISPLAY,
     LOCATION_AMOUNT,
-};
-
-// Type of errors; subject to change
-enum ErrorType
-{
-    IMU_DATA_NOT_INITIALIZED = 0,
-    IMU_NOT_RECEIVING_PROPERLY,
-    INVALID_MESSAGE_LENGTH,
-    NULL_MOTOR_ID,
-    CRC_FAILURE,
-    MESSAGE_LENGTH_OVERFLOW,
-    RUN_TIME_OVERFLOW,
-    MOTOR_ID_OUT_OF_BOUNDS,
-    ADDING_NULLPTR_COMMAND,
-    ADDING_COMMAND_WITH_NULL_SUBSYSTEM_DEPENDENCIES,
-    ZERO_DESIRED_AGITATOR_ROTATE_TIME,
-    INVALID_REMOVE,
-    INVALID_KEY_MAP_TYPE,
-    INVALID_ADD,
-    MOTOR_OFFLINE,
-    INVALID_MOTOR_OUTPUT,
-    ERROR_TYPE_AMOUNT
 };
 
 class SystemError
 {
 public:
-    SystemError();
+    static const uint8_t ERROR_LOCATION_SIZE = 5;
 
-    SystemError(const char *desc, int line, const char *file, Location l, ErrorType et);
+    static const uint8_t ERROR_TYPE_SIZE = 3;
 
-    int getLineNumber() const;
+    constexpr SystemError()
+        : lineNumber(0),
+          description("default"),
+          filename("none"),
+          location(LOCATION_AMOUNT),
+          errorType(ERROR_TYPE_AMOUNT)
+    {
+        static_assert(
+            LOCATION_AMOUNT <= ERROR_LOCATION_SIZE * ERROR_LOCATION_SIZE,
+            "You have declared too many locations!");
+        static_assert(
+            ERROR_TYPE_AMOUNT <= ERROR_TYPE_SIZE * ERROR_TYPE_SIZE,
+            "You have declared too many error types!");
+    }
 
-    const char *getDescription() const;
+    constexpr SystemError(const char *desc, int line, const char *file, Location l, uint8_t et)
+        : lineNumber(line),
+          description(desc),
+          filename(file),
+          location(l),
+          errorType(et)
+    {
+        static_assert(
+            LOCATION_AMOUNT <= ERROR_LOCATION_SIZE * ERROR_LOCATION_SIZE,
+            "You have declared too many locations!");
+        static_assert(
+            ERROR_TYPE_AMOUNT <= ERROR_TYPE_SIZE * ERROR_TYPE_SIZE,
+            "You have declared too many error types!");
+    }
 
-    const char *getFilename() const;
+    constexpr int getLineNumber() const { return lineNumber; }
 
-    Location getLocation() const;
+    const char *getDescription() const { return description; }
 
-    ErrorType getErrorType() const;
+    const char *getFilename() const { return filename; }
+
+    constexpr Location getLocation() const { return location; }
+
+    constexpr uint8_t getErrorType() const { return errorType; }
 
 private:
     int lineNumber;
@@ -101,13 +94,13 @@ private:
 
     const char *filename;
 
+    static const uint8_t ERROR_TYPE_AMOUNT = 8;
+
     Location location;
 
-    ErrorType errorType;
-};
-
+    uint8_t errorType;
+};  // class SystemError
 }  // namespace errors
-
 }  // namespace aruwlib
 
-#endif
+#endif  // SYSTEM_ERROR_HPP_

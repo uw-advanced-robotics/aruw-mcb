@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,18 +20,27 @@
 #ifndef TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
 #define TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
 
-#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/contiguous_float.hpp>
 #include <aruwlib/control/command.hpp>
 
 #include "aruwsrc/algorithms/turret_pid.hpp"
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+
+namespace aruwlib
+{
+class Drivers;
+}
 
 namespace aruwsrc
 {
+namespace chassis
+{
+class ChassisSubsystem;
+}
+
 namespace turret
 {
+class TurretSubsystem;
+
 /**
  * Turret control, with the yaw gimbal using the world relative frame, such that the
  * desired turret angle is independent of the direction that the chassis is facing
@@ -57,30 +66,30 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret world relative position command"; }
+    const char *getName() const override { return "turret world relative position"; }
 
 private:
-    static constexpr float YAW_P = 4500.0f;
+    static constexpr float YAW_P = 4000.0f;
     static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 140.0f;
+    static constexpr float YAW_D = 180.0f;
     static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 32000.0f;
+    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
     static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
+    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 10.0f;
 
     static constexpr float PITCH_P = 4500.0f;
     static constexpr float PITCH_I = 0.0f;
     static constexpr float PITCH_D = 90.0f;
     static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
+    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
     static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
     static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    static constexpr float USER_YAW_INPUT_SCALAR = 0.75f;
+    static constexpr float USER_YAW_INPUT_SCALAR = 1.0f;
     static constexpr float USER_PITCH_INPUT_SCALAR = 0.5f;
 
     static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 4000.0f;
@@ -96,11 +105,13 @@ private:
 
     float imuInitialYaw;
 
+    uint32_t prevTime;
+
     aruwsrc::algorithms::TurretPid yawPid;
     aruwsrc::algorithms::TurretPid pitchPid;
 
-    void runYawPositionController();
-    void runPitchPositionController();
+    void runYawPositionController(float dt);
+    void runPitchPositionController(float dt);
 
     float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
     float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);

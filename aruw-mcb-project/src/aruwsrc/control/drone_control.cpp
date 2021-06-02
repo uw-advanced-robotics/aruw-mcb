@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,9 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <aruwlib/DriversSingleton.hpp>
-
 #if defined(TARGET_DRONE)
+
+#include <aruwlib/DriversSingleton.hpp>
 
 using aruwlib::DoNotUse_getDrivers;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,6 +22,15 @@
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/algorithms/math_user_utils.hpp"
 
+#ifdef PLATFORM_HOSTED
+#include <iostream>
+
+#include <modm/architecture/interface/can_message.hpp>
+
+#include "aruwlib/communication/tcp-server/JSONMessages.hpp"
+#include "aruwlib/communication/tcp-server/TCPServer.hpp"
+#endif
+
 namespace aruwlib
 {
 namespace motor
@@ -33,9 +42,11 @@ DjiMotor::DjiMotor(
     MotorId desMotorIdentifier,
     aruwlib::can::CanBus motorCanBus,
     bool isInverted,
-    const char* name)
+    const char* name,
+    uint16_t encWrapped,
+    int64_t encRevolutions)
     : CanRxListener(drivers, static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
-      encStore(),
+      motorName(name),
       drivers(drivers),
       motorIdentifier(desMotorIdentifier),
       motorCanBus(motorCanBus),
@@ -44,7 +55,8 @@ DjiMotor::DjiMotor(
       temperature(0),
       torque(0),
       motorInverted(isInverted),
-      motorName(name)
+      encoderWrapped(encWrapped),
+      encoderRevolutions(encRevolutions)
 {
     motorDisconnectTimeout.stop();
 }
@@ -74,7 +86,18 @@ void DjiMotor::parseCanRxData(const modm::can::Message& message)
 
     // invert motor if necessary
     encoderActual = motorInverted ? ENC_RESOLUTION - 1 - encoderActual : encoderActual;
-    encStore.updateValue(encoderActual);
+    updateEncoderValue(encoderActual);
+
+#ifdef PLATFORM_HOSTED
+    /* So the trace of this function to main() goes through a lot, but inside of main
+     * this function is eventually called through a sequence of functions by
+     * canRxHandler.pollCanData(). In fact this seems to be the only driver that
+     * extends the can_rx_listener class... so it's the only thing that uses CAN? */
+    using namespace aruwlib::communication;
+    std::string jsonMessage = json::makeMotorMessage(*this);
+    const char* jsonCString = jsonMessage.c_str();
+    TCPServer::MainServer()->writeToClient(jsonCString, strlen(jsonCString));
+#endif
 }
 
 void DjiMotor::setDesiredOutput(int32_t desiredOutput)
@@ -88,8 +111,8 @@ bool DjiMotor::isMotorOnline() const
 {
     /*
      * motor online if the disconnect timout has not expired (if it received message but
-     * somehow got disconnected) and the timeout hasn't been stopped (initially, the timeout)
-     * is stopped
+     * somehow got disconnected) and the timeout hasn't been stopped (initially, the timeout
+     * is stopped)
      */
     return !motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped();
 }
@@ -122,15 +145,15 @@ aruwlib::can::CanBus DjiMotor::getCanBus() const { return motorCanBus; }
 
 const char* DjiMotor::getName() const { return motorName; }
 
-int64_t DjiMotor::EncoderStore::getEncoderUnwrapped() const
+int64_t DjiMotor::getEncoderUnwrapped() const
 {
     return static_cast<int64_t>(encoderWrapped) +
            static_cast<int64_t>(ENC_RESOLUTION) * encoderRevolutions;
 }
 
-uint16_t DjiMotor::EncoderStore::getEncoderWrapped() const { return encoderWrapped; }
+uint16_t DjiMotor::getEncoderWrapped() const { return encoderWrapped; }
 
-void DjiMotor::EncoderStore::updateValue(uint16_t newEncWrapped)
+void DjiMotor::updateEncoderValue(uint16_t newEncWrapped)
 {
     int16_t enc_dif = newEncWrapped - encoderWrapped;
     if (enc_dif < -ENC_RESOLUTION / 2)

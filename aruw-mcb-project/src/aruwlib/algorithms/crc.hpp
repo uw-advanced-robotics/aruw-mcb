@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,7 +20,7 @@
 #ifndef CRC_HPP_
 #define CRC_HPP_
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace aruwlib
 {

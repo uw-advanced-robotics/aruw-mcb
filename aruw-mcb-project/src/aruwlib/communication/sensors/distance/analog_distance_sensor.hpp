@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -87,14 +87,14 @@ public:
 private:
     Drivers *drivers;
 
-    ///< Distance calulation values for linear model \f$ y = mx + b \f$.
+    /// Distance calulation values for linear model \f$ y = mx + b \f$.
     float m;
     float b;
 
-    ///< Offset value of inverse of the model.
+    /// Offset value of inverse of the model.
     float offset;
 
-    ///< The analog pin which the sensor is connected to.
+    /// The analog pin which the sensor is connected to.
     gpio::Analog::Pin pin;
 };  // class AnalogDistanceSensor
 

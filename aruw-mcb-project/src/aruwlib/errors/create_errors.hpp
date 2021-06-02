@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -16,11 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __CREATE_ERRORS_HPP__
-#define __CREATE_ERRORS_HPP__
-
-#include "aruwlib/Drivers.hpp"
+#ifndef CREATE_ERRORS_HPP_
+#define CREATE_ERRORS_HPP_
 
 #include "system_error.hpp"
 
@@ -28,15 +25,101 @@ namespace aruwlib
 {
 namespace errors
 {
-#define RAISE_ERROR(drivers, desc, l, et)                                          \
-    do                                                                             \
-    {                                                                              \
-        aruwlib::errors::SystemError stringError(desc, __LINE__, __FILE__, l, et); \
-        drivers->errorController.addToErrorList(stringError);                      \
+enum class OLEDErrors : uint8_t
+{
+    INVALID_VERT_SCROLL_SIZE = 0,
+    INVAILD_VERT_SCROLL_SMALLEST_AND_LARGEST_INDEX = 1,
+    INVALID_VERT_SCROLL_MAX_ENTRIES = 2,
+    NULLPTR_DJI_MOTOR_IN_MOTOR_SPECIFIC_MENU = 3,
+};
+
+enum class CanRxErrorType : uint8_t
+{
+    MOTOR_ID_OUT_OF_BOUNDS = 0,
+    INVALID_REMOVE
+};
+
+enum class MotorControlErrorType : uint8_t
+{
+    NULL_MOTOR_ID = 0
+};
+
+enum class Mpu6500ErrorType : uint8_t
+{
+    IMU_DATA_NOT_INITIALIZED = 0,
+    IMU_NOT_RECEIVING_PROPERLY
+};
+
+enum class DjiSerialErrorType : uint8_t
+{
+    MESSAGE_LENGTH_OVERFLOW = 0,
+    INVALID_MESSAGE_LENGTH,
+    CRC_FAILURE
+};
+
+enum class CommandSchedulerErrorType : uint8_t
+{
+    ADDING_NULLPTR_COMMAND = 0,
+    ADDING_NULLPTR_SUBSYSTEM,
+    ADDING_ALREADY_ADDED_SUBSYSTEM,
+    MASTER_SCHEDULER_ALREADY_EXISTS,
+    ADD_COMMAND_WHILE_TESTING,
+    ADD_COMMAND_WITHOUT_REGISTERED_SUB,
+    RUN_TIME_OVERFLOW,
+    REMOVE_NULLPTR_COMMAND
+};
+
+enum class SubsystemErrorType : uint8_t
+{
+    MOTOR_OFFLINE = 0,
+    ZERO_DESIRED_AGITATOR_ROTATE_TIME
+};
+
+enum class ControllerMapperErrorType : uint8_t
+{
+    INVALID_ADD = 0
+};
+
+enum class TurretErrorType : uint8_t
+{
+    MOTOR_OFFLINE = 0,
+    INVALID_MOTOR_OUTPUT
+};
+
+enum class ServoErrorType : uint8_t
+{
+    INVALID_ADD = 0
+};
+
+/**
+ * Example for how to create and add an error. `drivers` is a pointer to an
+ * `aruwlib::Drivers`, which contains an instance of an `ErrorController`.
+ *
+ * @see ErrorController
+ * @see SystemError
+ *
+ * ```cpp
+ * RAISE_ERROR(
+ *     drivers
+ *     "Error in DJI Serial",
+ *     aruwlib::errors::Location::DJI_SERIAL,
+ *     aruwlib::errors::ErrorType::INVALID_CRC);
+ * ```
+ */
+#define RAISE_ERROR(drivers, desc, l, et)                     \
+    do                                                        \
+    {                                                         \
+        aruwlib::errors::SystemError stringError(             \
+            desc,                                             \
+            __LINE__,                                         \
+            __FILE__,                                         \
+            l,                                                \
+            static_cast<uint8_t>(et));                        \
+        drivers->errorController.addToErrorList(stringError); \
     } while (0);
 
 }  // namespace errors
 
 }  // namespace aruwlib
 
-#endif
+#endif  // CREATE_ERRORS_HPP_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -44,7 +44,7 @@ public:
      */
     explicit AgitatorCalibrateCommand(AgitatorSubsystem* agitator);
 
-    const char* getName() const override { return "agitator calibrate command"; }
+    const char* getName() const override { return "agitator calibrate"; }
 
     void initialize() override;
 

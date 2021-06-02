@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -68,7 +68,7 @@ public:
      */
     bool isFinished() const override;
 
-    const char* getName() const override { return "example command"; }
+    const char* getName() const override { return "example"; }
 
     static const int16_t DEFAULT_WHEEL_RPM = 6000;
 

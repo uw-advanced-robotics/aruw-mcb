@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,6 +22,7 @@
 
 #include <aruwlib/motor/dji_motor_tx_handler.hpp>
 #include <gmock/gmock.h>
+#include <modm/architecture/interface/can_message.hpp>
 
 namespace aruwlib
 {
@@ -36,12 +37,12 @@ public:
     MOCK_METHOD(void, removeFromMotorManager, (const aruwlib::motor::DjiMotor &motor), (override));
     MOCK_METHOD(
         const aruwlib::motor::DjiMotor *,
-        getCan1MotorData,
+        getCan1Motor,
         (aruwlib::motor::MotorId motorId),
         (override));
     MOCK_METHOD(
         const aruwlib::motor::DjiMotor *,
-        getCan2MotorData,
+        getCan2Motor,
         (aruwlib::motor::MotorId motorId),
         (override));
 };  // class DjiMotorTxHandlerMock

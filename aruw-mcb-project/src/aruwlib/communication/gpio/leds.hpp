@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,9 +20,9 @@
 #ifndef LEDS_HPP_
 #define LEDS_HPP_
 
-#include <stdint.h>
+#include <cstdint>
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -36,8 +36,7 @@ class Leds
 {
 public:
     Leds() = default;
-    Leds(const Leds &) = delete;
-    Leds &operator=(const Leds &) = delete;
+    DISALLOW_COPY_AND_ASSIGN(Leds)
     mockable ~Leds() = default;
 
     /**

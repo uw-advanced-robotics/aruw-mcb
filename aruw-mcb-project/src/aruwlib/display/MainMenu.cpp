@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,14 +19,17 @@
 
 #include "MainMenu.hpp"
 
+#include "CommandSchedulerMenu.hpp"
 #include "ErrorMenu.hpp"
+#include "HardwareTestMenu.hpp"
+#include "MotorMenu.hpp"
 
 namespace aruwlib
 {
 namespace display
 {
-MainMenu::MainMenu(modm::ViewStack* stack, uint8_t identifier, Drivers* drivers)
-    : modm::StandardMenu(stack, identifier),
+MainMenu::MainMenu(modm::ViewStack* stack, Drivers* drivers)
+    : modm::StandardMenu(stack, MAIN_MENU_ID),
       drivers(drivers)
 {
 }
@@ -36,10 +39,23 @@ void MainMenu::initialize()
     addEntry(
         ErrorMenu::getMenuName(),
         modm::MenuEntryCallback(this, &MainMenu::addErrorMenuCallback));
-    addEntry("Motor Menu", modm::MenuEntryCallback(this, &MainMenu::addMotorMenuCallback));
+
+    addEntry(
+        HardwareTestMenu::getMenuName(),
+        modm::MenuEntryCallback(this, &MainMenu::addHardwareTestMenuCallback));
+
+    addEntry(
+        MotorMenu::getMenuName(),
+        modm::MenuEntryCallback(this, &MainMenu::addMotorMenuCallback));
+
     addEntry(
         "Property Table Menu",
         modm::MenuEntryCallback(this, &MainMenu::addPropertyTableCallback));
+
+    addEntry(
+        CommandSchedulerMenu::getMenuName(),
+        modm::MenuEntryCallback(this, &MainMenu::addCommandSchedulerCallback));
+
     setTitle("Main Menu");
 }
 
@@ -48,14 +64,24 @@ void MainMenu::addErrorMenuCallback()
     getViewStack()->push(new ErrorMenu(getViewStack(), drivers));
 }
 
+void MainMenu::addHardwareTestMenuCallback()
+{
+    getViewStack()->push(new HardwareTestMenu(getViewStack(), drivers));
+}
+
 void MainMenu::addMotorMenuCallback()
 {
-    // TODO, see issue #105
+    getViewStack()->push(new MotorMenu(getViewStack(), drivers));
 }
 
 void MainMenu::addPropertyTableCallback()
 {
     // TODO, see issue #221
+}
+
+void MainMenu::addCommandSchedulerCallback()
+{
+    getViewStack()->push(new CommandSchedulerMenu(getViewStack(), drivers));
 }
 }  // namespace display
 

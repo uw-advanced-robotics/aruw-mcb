@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -23,12 +23,21 @@
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/communication/remote.hpp>
 
+#include "chassis_subsystem.hpp"
+
 using aruwlib::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
+ChassisDriveCommand::ChassisDriveCommand(aruwlib::Drivers* drivers, ChassisSubsystem* chassis)
+    : drivers(drivers),
+      chassis(chassis)
+{
+    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+}
+
 void ChassisDriveCommand::initialize() {}
 
 void ChassisDriveCommand::execute()

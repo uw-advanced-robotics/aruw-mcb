@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -66,5 +66,25 @@ bool TowSubsystem::getRightLeftLimitSwitchTriggered() const
 {
     return drivers->digital.read(RIGHT_TOW_LIMIT_SWITCH_PIN);
 }
+
+void TowSubsystem::runHardwareTests()
+{
+    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+        this->setHardwareTestsComplete();
+}
+
+void TowSubsystem::onHardwareTestStart()
+{
+    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    this->setLeftClamped(!getLeftClamped());
+    this->setRightClamped(!getRightClamped());
+}
+
+void TowSubsystem::onHardwareTestComplete()
+{
+    this->setLeftClamped(!getLeftClamped());
+    this->setRightClamped(!getRightClamped());
+}
+
 }  // namespace engineer
 }  // namespace aruwsrc

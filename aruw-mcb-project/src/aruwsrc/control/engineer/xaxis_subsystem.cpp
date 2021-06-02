@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -34,6 +34,21 @@ void XAxisSubsystem::setExtended(bool isExtended)
 }
 
 bool XAxisSubsystem::isExtended() const { return extended; }
+
+void XAxisSubsystem::runHardwareTests()
+{
+    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+        this->setHardwareTestsComplete();
+}
+
+void XAxisSubsystem::onHardwareTestStart()
+{
+    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    this->setExtended(!isExtended());
+}
+
+void XAxisSubsystem::onHardwareTestComplete() { this->setExtended(!isExtended()); }
+
 }  // namespace engineer
 
 }  // namespace aruwsrc

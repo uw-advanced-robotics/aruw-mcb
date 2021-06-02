@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -32,6 +32,21 @@ void GrabberSubsystem::setSqueezed(bool isGrabberSqueezed)
 }
 
 bool GrabberSubsystem::isSqueezed() const { return isGrabberSqueezed; }
+
+void GrabberSubsystem::runHardwareTests()
+{
+    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+        this->setHardwareTestsComplete();
+}
+
+void GrabberSubsystem::onHardwareTestStart()
+{
+    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    this->setSqueezed(!isGrabberSqueezed);
+}
+
+void GrabberSubsystem::onHardwareTestComplete() { this->setSqueezed(!isGrabberSqueezed); }
+
 }  // namespace engineer
 
 }  // namespace aruwsrc
