@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -32,7 +32,8 @@ class Mpu6500Mock : public aruwlib::sensors::Mpu6500
 public:
     Mpu6500Mock(aruwlib::Drivers *drivers) : aruwlib::sensors::Mpu6500(drivers) {}
     MOCK_METHOD(void, init, (), (override));
-    MOCK_METHOD(void, read, (), (override));
+    MOCK_METHOD(void, calcIMUAngles, (), (override));
+    MOCK_METHOD(bool, read, (), (override));
     MOCK_METHOD(bool, initialized, (), (const override));
     MOCK_METHOD(float, getAx, (), (const override));
     MOCK_METHOD(float, getAy, (), (const override));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,7 +20,6 @@
 #include "turret_pid.hpp"
 
 #include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/architecture/clock.hpp>
 
 using namespace aruwlib::algorithms;
 
@@ -28,13 +27,13 @@ namespace aruwsrc
 {
 namespace algorithms
 {
-float TurretPid::runController(float error, float errorDerivative)
+float TurretPid::runController(float error, float errorDerivative, float dt)
 {
     // p
     currErrorP = kp * proportionalKalman.filterData(error);
     // i
     currErrorI = limitVal<float>(
-        currErrorI + ki * proportionalKalman.getLastFiltered(),
+        currErrorI + ki * proportionalKalman.getLastFiltered() * dt,
         -maxICumulative,
         maxICumulative);
     // d
@@ -46,9 +45,9 @@ float TurretPid::runController(float error, float errorDerivative)
 
 float TurretPid::runControllerDerivateError(float error, float dt)
 {
-    float errorDerivative = error / dt;
-    previousTimestamp = aruwlib::arch::clock::getTimeMilliseconds();
-    return runController(error, errorDerivative);
+    float errorDerivative = (error - prevError) / dt;
+    prevError = error;
+    return runController(error, errorDerivative, dt);
 }
 
 float TurretPid::getOutput() { return output; }

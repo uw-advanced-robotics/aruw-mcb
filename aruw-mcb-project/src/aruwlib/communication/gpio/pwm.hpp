@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -39,8 +39,7 @@ class Pwm
 {
 public:
     Pwm() = default;
-    Pwm(const Pwm &) = delete;
-    Pwm &operator=(const Pwm &) = delete;
+    DISALLOW_COPY_AND_ASSIGN(Pwm)
     mockable ~Pwm() = default;
 
     /**

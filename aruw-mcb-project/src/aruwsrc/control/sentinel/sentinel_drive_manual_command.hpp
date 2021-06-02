@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,10 +20,12 @@
 #ifndef __SENTINEL_DRIVE_MANUAL_COMMAND_HPP__
 #define __SENTINEL_DRIVE_MANUAL_COMMAND_HPP__
 
-#include <aruwlib/Drivers.hpp>
 #include <aruwlib/control/command.hpp>
 
-#include "sentinel_drive_subsystem.hpp"
+namespace aruwlib
+{
+class Drivers;
+}
 
 namespace aruwsrc
 {
@@ -44,7 +46,7 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "sentinel drive manual command"; }
+    const char* getName() const override { return "sentinel drive manual"; }
 
 private:
     aruwlib::Drivers* drivers;

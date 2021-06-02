@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,8 +20,8 @@
 #ifndef CONTROL_OPERATOR_INTERFACE_MOCK_HPP_
 #define CONTROL_OPERATOR_INTERFACE_MOCK_HPP_
 
+#include <aruwlib/control/ControlOperatorInterface.hpp>
 #include <aruwlib/control/command.hpp>
-#include <aruwlib/control/control_operator_interface.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <gmock/gmock.h>
 

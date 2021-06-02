@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -48,6 +48,7 @@ public:
         (aruwlib::serial::Uart::UartPort port, const uint8_t *data, std::size_t length),
         (override));
     MOCK_METHOD(bool, isWriteFinished, (aruwlib::serial::Uart::UartPort port), (const override));
+    MOCK_METHOD(void, flushWriteBuffer, (aruwlib::serial::Uart::UartPort port), (override));
 };  // class UartMock
 }  // namespace mock
 }  // namespace aruwlib

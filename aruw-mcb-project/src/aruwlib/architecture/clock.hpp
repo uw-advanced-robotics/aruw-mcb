@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,7 +19,7 @@
 
 #ifndef __ARUW_CLOCK_HPP__
 #define __ARUW_CLOCK_HPP__
-#include <stdint.h>
+#include <cstdint>
 
 #ifndef PLATFORM_HOSTED
 #include <modm/platform.hpp>
@@ -33,6 +33,11 @@ namespace arch
 {
 namespace clock
 {
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+void setTime(uint32_t timeMilliseconds);
+uint32_t getTimeMilliseconds();
+uint32_t getTimeMicroseconds();
+#else
 inline uint32_t getTimeMilliseconds() { return modm::Clock().now().time_since_epoch().count(); }
 
 /**
@@ -42,6 +47,7 @@ inline uint32_t getTimeMicroseconds()
 {
     return modm::PreciseClock().now().time_since_epoch().count();
 }
+#endif
 }  // namespace clock
 
 }  // namespace arch

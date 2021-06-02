@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,13 +20,13 @@
 #ifndef ANALOG_HPP_
 #define ANALOG_HPP_
 
-#include <stdint.h>
+#include <cstdint>
 
 #ifndef PLATFORM_HOSTED
 #include <modm/platform/adc/adc_1.hpp>
 #endif
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -43,8 +43,7 @@ class Analog
 {
 public:
     Analog() = default;
-    Analog(const Analog &) = delete;
-    Analog &operator=(const Analog &) = delete;
+    DISALLOW_COPY_AND_ASSIGN(Analog)
     mockable ~Analog() = default;
 
     // Analog pins
@@ -57,10 +56,14 @@ public:
         OLED_JOYSTICK,
     };
 
-    ///< Initializes the ADC and connects the configured analog pins to it.
+    /**
+     * Initializes the ADC and connects the configured analog pins to it.
+     */
     mockable void init();
 
-    ///< Reads voltage across the specified pin. Units in mV.
+    /**
+     * Reads voltage across the specified pin. Units in mV.
+     */
     mockable uint16_t read(Analog::Pin pin) const;
 };  // class Analog
 }  // namespace gpio

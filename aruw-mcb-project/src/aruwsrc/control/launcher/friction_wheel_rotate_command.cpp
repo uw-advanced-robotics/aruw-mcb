@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,8 +19,6 @@
 
 #include "friction_wheel_rotate_command.hpp"
 
-#include <aruwlib/control/subsystem.hpp>
-
 #include "friction_wheel_subsystem.hpp"
 
 using aruwlib::control::Subsystem;
@@ -33,7 +31,7 @@ FrictionWheelRotateCommand::FrictionWheelRotateCommand(FrictionWheelSubsystem* s
     : frictionWheelSubsystem(subsystem),
       speed(speed)
 {
-    addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
+    addSubsystemRequirement(subsystem);
 }
 
 void FrictionWheelRotateCommand::initialize() {}

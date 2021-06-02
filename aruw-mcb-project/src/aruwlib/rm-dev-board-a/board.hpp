@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -42,12 +42,14 @@ using namespace modm::platform;
 #include <modm/math/units.hpp>
 #endif
 
-///< @ingroup TODO
+/// @ingroup TODO
 namespace Board
 {
 using namespace modm::literals;
 
-///< STM32F427 running at 180MHz from the external 12MHz crystal
+/**
+ * STM32F427 running at 180MHz from the external 12MHz crystal
+ */
 struct SystemClock
 {
     static constexpr uint32_t Frequency = 180_MHz;
@@ -135,14 +137,14 @@ using Button = GpioInputB2;
 // initialize 9 green Leds and 1 red LED
 // leds 1-8 used for error handling codes
 // led9 used for error handling error (unrepresentable error)
-using LedA = GpioOutputG1;
-using LedB = GpioOutputG2;
-using LedC = GpioOutputG3;
-using LedD = GpioOutputG4;
-using LedE = GpioOutputG5;
-using LedF = GpioOutputG6;
-using LedG = GpioOutputG7;
-using LedH = GpioOutputG8;
+using LedA = GpioOutputG8;
+using LedB = GpioOutputG7;
+using LedC = GpioOutputG6;
+using LedD = GpioOutputG5;
+using LedE = GpioOutputG4;
+using LedF = GpioOutputG3;
+using LedG = GpioOutputG2;
+using LedH = GpioOutputG1;
 using LedGreen = GpioOutputF14;
 using LedRed = GpioOutputE11;
 

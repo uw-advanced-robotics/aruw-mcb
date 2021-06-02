@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -23,7 +23,7 @@
 #include <aruwlib/communication/gpio/digital.hpp>
 #include <aruwlib/control/subsystem.hpp>
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -78,6 +78,14 @@ public:
 
     void refresh() override {}
 
+    void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
+
+    const char *getName() override { return "Tow"; }
+
 private:
     /**
      * Keeps track of the state of the subsystem - if the tower clamp is open or not.
@@ -89,6 +97,8 @@ private:
     const aruwlib::gpio::Digital::OutputPin RIGHT_TOW_PIN;
     const aruwlib::gpio::Digital::InputPin LEFT_TOW_LIMIT_SWITCH;
     const aruwlib::gpio::Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN;
+
+    uint64_t testTime;
 };  // class TowSubsystem
 }  // namespace engineer
 }  // namespace aruwsrc

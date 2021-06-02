@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,6 +19,7 @@
 
 #include "dji_serial.hpp"
 
+#include "aruwlib/Drivers.hpp"
 #include "aruwlib/algorithms/crc.hpp"
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/communication/serial/uart.hpp"
@@ -79,7 +80,7 @@ bool DJISerial<RxCrcEnabled>::send()
             drivers,
             "dji serial attempting to send greater than SERIAL_TX_BUFF_SIZE bytes",
             aruwlib::errors::Location::DJI_SERIAL,
-            aruwlib::errors::ErrorType::MESSAGE_LENGTH_OVERFLOW);
+            aruwlib::errors::DjiSerialErrorType::MESSAGE_LENGTH_OVERFLOW);
         return false;
     }
 
@@ -101,7 +102,7 @@ bool DJISerial<RxCrcEnabled>::send()
             drivers,
             "the message did not completely send",
             aruwlib::errors::Location::DJI_SERIAL,
-            aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+            aruwlib::errors::DjiSerialErrorType::INVALID_MESSAGE_LENGTH);
     }
     txMessage.messageTimestamp = arch::clock::getTimeMilliseconds();
     return true;
@@ -160,7 +161,7 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                         drivers,
                         "invalid message length received",
                         aruwlib::errors::Location::DJI_SERIAL,
-                        aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+                        aruwlib::errors::DjiSerialErrorType::INVALID_MESSAGE_LENGTH);
                     return;
                 }
 
@@ -176,7 +177,7 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                             drivers,
                             "CRC8 failure",
                             aruwlib::errors::Location::DJI_SERIAL,
-                            aruwlib::errors::ErrorType::CRC_FAILURE);
+                            aruwlib::errors::DjiSerialErrorType::CRC_FAILURE);
                         return;
                     }
                 }
@@ -227,7 +228,7 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                             drivers,
                             "CRC16 failure",
                             aruwlib::errors::Location::DJI_SERIAL,
-                            aruwlib::errors::ErrorType::CRC_FAILURE);
+                            aruwlib::errors::DjiSerialErrorType::CRC_FAILURE);
                         return;
                     }
                 }
@@ -250,7 +251,7 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                     drivers,
                     "Invalid message length",
                     aruwlib::errors::Location::DJI_SERIAL,
-                    aruwlib::errors::ErrorType::INVALID_MESSAGE_LENGTH);
+                    aruwlib::errors::DjiSerialErrorType::INVALID_MESSAGE_LENGTH);
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
             break;

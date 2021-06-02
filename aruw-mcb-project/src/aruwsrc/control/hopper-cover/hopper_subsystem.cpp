@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,6 +19,8 @@
 
 #include "hopper_subsystem.hpp"
 
+#include <aruwlib/architecture/clock.hpp>
+
 namespace aruwsrc
 {
 namespace control
@@ -32,6 +34,21 @@ void HopperSubsystem::refresh() { hopper.updateSendPwmRamp(); }
 float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
 
 float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
+
+void HopperSubsystem::runHardwareTests()
+{
+    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+        this->setHardwareTestsComplete();
+}
+
+void HopperSubsystem::onHardwareTestStart()
+{
+    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    this->setOpen();
+}
+
+void HopperSubsystem::onHardwareTestComplete() { this->setClose(); }
+
 }  // namespace control
 
 }  // namespace aruwsrc

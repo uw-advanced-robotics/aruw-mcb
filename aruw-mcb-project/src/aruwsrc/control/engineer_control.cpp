@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,6 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(TARGET_ENGINEER)
+
 #include <aruwlib/DriversSingleton.hpp>
 #include <aruwlib/communication/gpio/digital.hpp>
 #include <aruwlib/control/command_scheduler.hpp>
@@ -26,8 +28,6 @@
 #include "aruwsrc/control/engineer/grabber_subsystem.hpp"
 #include "aruwsrc/control/engineer/squeeze_grabber_command.hpp"
 #include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
-
-#if defined(TARGET_ENGINEER)
 
 using namespace aruwsrc::engineer;
 using namespace aruwlib::gpio;

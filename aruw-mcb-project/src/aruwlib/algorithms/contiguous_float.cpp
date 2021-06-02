@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,7 +19,7 @@
 
 #include "contiguous_float.hpp"
 
-#include <math.h>
+#include <cmath>
 
 namespace aruwlib
 {
@@ -43,11 +43,11 @@ float ContiguousFloat::reboundValue()
 {
     if (value < lowerBound)
     {
-        value = upperBound + fmod(value - lowerBound, upperBound - lowerBound);
+        value = upperBound + fmodf(value - lowerBound, upperBound - lowerBound);
     }
     else if (value > upperBound)
     {
-        value = lowerBound + fmod(value - upperBound, upperBound - lowerBound);
+        value = lowerBound + fmodf(value - upperBound, upperBound - lowerBound);
     }
 
     return value;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -35,7 +35,13 @@
 
 #include <aruwlib/control/command_scheduler.hpp>
 #include <aruwlib/control/subsystem.hpp>
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <aruwlib/mock/DJIMotorMock.hpp>
+#else
 #include <aruwlib/motor/dji_motor.hpp>
+#endif
+
 #include <modm/math/filter/pid.hpp>
 
 namespace aruwsrc
@@ -50,11 +56,11 @@ public:
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
         : aruwlib::control::Subsystem(drivers),
-          leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
-          rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right example motor"),
           velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
           velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-          desiredRpm(0)
+          desiredRpm(0),
+          leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
+          rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right example motor")
     {
     }
 
@@ -63,6 +69,10 @@ public:
     void setDesiredRpm(float desRpm);
 
     void refresh() override;
+
+    void runHardwareTests() override;
+
+    const char* getName() override { return "Example"; }
 
 private:
     static const aruwlib::motor::MotorId LEFT_MOTOR_ID;
@@ -75,10 +85,6 @@ private:
     const float PID_MAX_ERROR_SUM = 0.0f;
     const float PID_MAX_OUTPUT = 16000;
 
-    aruwlib::motor::DjiMotor leftWheel;
-
-    aruwlib::motor::DjiMotor rightWheel;
-
     modm::Pid<float> velocityPidLeftWheel;
 
     modm::Pid<float> velocityPidRightWheel;
@@ -89,6 +95,17 @@ private:
         modm::Pid<float>* pid,
         aruwlib::motor::DjiMotor* const motor,
         float desiredRpm);
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    aruwlib::mock::DjiMotorMock leftWheel;
+    aruwlib::mock::DjiMotorMock rightWheel;
+
+private:
+#else
+    aruwlib::motor::DjiMotor leftWheel;
+    aruwlib::motor::DjiMotor rightWheel;
+#endif
 };
 
 }  // namespace control

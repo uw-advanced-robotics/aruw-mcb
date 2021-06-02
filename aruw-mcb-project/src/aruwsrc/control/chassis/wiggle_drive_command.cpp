@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -26,6 +26,8 @@
 #include <aruwlib/communication/remote.hpp>
 #include <aruwlib/communication/sensors/mpu6500/mpu6500.hpp>
 
+#include "chassis_subsystem.hpp"
+
 using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
 using aruwlib::Drivers;
@@ -34,6 +36,17 @@ namespace aruwsrc
 {
 namespace chassis
 {
+WiggleDriveCommand::WiggleDriveCommand(
+    aruwlib::Drivers* drivers,
+    ChassisSubsystem* chassis,
+    aruwsrc::turret::TurretSubsystem* turret)
+    : drivers(drivers),
+      chassis(chassis),
+      turret(turret)
+{
+    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+}
+
 void WiggleDriveCommand::initialize()
 {
     float turretCurAngle = turret->getYawAngleFromCenter();

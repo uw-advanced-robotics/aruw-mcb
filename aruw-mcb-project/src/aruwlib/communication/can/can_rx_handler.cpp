@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,15 +20,24 @@
 #include "can_rx_handler.hpp"
 
 #include <modm/architecture/interface/assert.h>
+#include <modm/architecture/interface/can.hpp>
 
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/errors/create_errors.hpp"
-#include "aruwlib/motor/dji_motor_tx_handler.hpp"
+
+#include "can_rx_listener.hpp"
 
 namespace aruwlib
 {
 namespace can
 {
+CanRxHandler::CanRxHandler(Drivers* drivers)
+    : drivers(drivers),
+      messageHandlerStoreCan1(),
+      messageHandlerStoreCan2()
+{
+}
+
 void CanRxHandler::attachReceiveHandler(CanRxListener* const listener)
 {
     if (listener->canBus == can::CanBus::CAN_BUS1)
@@ -70,7 +79,7 @@ void CanRxHandler::pollCanData()
     }
 }
 
-inline void CanRxHandler::processReceivedCanData(
+void CanRxHandler::processReceivedCanData(
     const modm::can::Message& rxMessage,
     CanRxListener* const* messageHandlerStore,
     int messageHandlerStoreSize)
@@ -89,7 +98,7 @@ inline void CanRxHandler::processReceivedCanData(
             drivers,
             "Invalid can id received - not between 0x200 and 0x208",
             aruwlib::errors::Location::CAN_RX,
-            aruwlib::errors::ErrorType::MOTOR_ID_OUT_OF_BOUNDS);
+            aruwlib::errors::CanRxErrorType::MOTOR_ID_OUT_OF_BOUNDS);
     }
 }
 
@@ -117,10 +126,19 @@ void CanRxHandler::removeReceiveHandler(
             drivers,
             "index out of bounds",
             aruwlib::errors::CAN_RX,
-            aruwlib::errors::INVALID_REMOVE);
+            aruwlib::errors::CanRxErrorType::INVALID_REMOVE);
         return;
     }
     messageHandlerStore[id] = nullptr;
+}
+
+aruwlib::can::CanRxListener** CanRxHandler::getHandlerStore(aruwlib::can::CanBus bus)
+{
+    if (bus == aruwlib::can::CanBus::CAN_BUS1)
+    {
+        return this->messageHandlerStoreCan1;
+    }
+    return this->messageHandlerStoreCan2;
 }
 }  // namespace can
 

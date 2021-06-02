@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,6 +19,7 @@
 
 #include "mpu6500.hpp"
 
+#include "aruwlib/Drivers.hpp"
 #include "aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/errors/create_errors.hpp"
 #include "aruwlib/rm-dev-board-a/board.hpp"
@@ -47,7 +48,7 @@ void Mpu6500::init()
 
     modm::delay_ms(100);
 
-    // reset gyro, accel, and temp
+    // reset gyro, accel, and temperature
     spiWriteRegister(MPU6500_SIGNAL_PATH_RESET, 0x07);
     modm::delay_ms(100);
 
@@ -58,7 +59,7 @@ void Mpu6500::init()
             drivers,
             "failed to initialize the imu properly",
             aruwlib::errors::Location::MPU6500,
-            aruwlib::errors::ErrorType::IMU_NOT_RECEIVING_PROPERLY);
+            aruwlib::errors::Mpu6500ErrorType::IMU_NOT_RECEIVING_PROPERLY);
         return;
     }
 
@@ -86,27 +87,19 @@ void Mpu6500::init()
 
     calculateAccOffset();
     calculateGyroOffset();
+
+    readRegistersTimeout.restart(DELAY_BTWN_CALC_AND_READ_REG);
 #endif
 }
 
-void Mpu6500::read()
+void Mpu6500::calcIMUAngles()
 {
-#ifndef PLATFORM_HOSTED
     if (imuInitialized)
     {
-        spiReadRegisters(MPU6500_ACCEL_XOUT_H, rxBuff, ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE);
-        raw.accel.x = (rxBuff[0] << 8 | rxBuff[1]) - raw.accelOffset.x;
-        raw.accel.y = (rxBuff[2] << 8 | rxBuff[3]) - raw.accelOffset.y;
-        raw.accel.z = (rxBuff[4] << 8 | rxBuff[5]) - raw.accelOffset.z;
-
-        raw.temp = rxBuff[6] << 8 | rxBuff[7];
-
-        raw.gyro.x = ((rxBuff[8] << 8 | rxBuff[9]) - raw.gyroOffset.x);
-        raw.gyro.y = ((rxBuff[10] << 8 | rxBuff[11]) - raw.gyroOffset.y);
-        raw.gyro.z = ((rxBuff[12] << 8 | rxBuff[13]) - raw.gyroOffset.z);
-
         mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
         tiltAngleCalculated = false;
+        // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
+        readRegistersTimeout.restart(DELAY_BTWN_CALC_AND_READ_REG);
     }
     else
     {
@@ -114,8 +107,39 @@ void Mpu6500::read()
             drivers,
             "failed to initialize the imu properly",
             aruwlib::errors::Location::MPU6500,
-            aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
+            aruwlib::errors::Mpu6500ErrorType::IMU_DATA_NOT_INITIALIZED);
     }
+}
+
+bool Mpu6500::read()
+{
+#ifndef PLATFORM_HOSTED
+    PT_BEGIN();
+    while (true)
+    {
+        PT_WAIT_UNTIL(readRegistersTimeout.execute());
+
+        mpuNssLow();
+        tx = MPU6500_ACCEL_XOUT_H | 0x80;
+        rx = 0;
+        txBuff[0] = tx;
+        PT_CALL(Board::ImuSpiMaster::transfer(&tx, &rx, 1));
+        PT_CALL(Board::ImuSpiMaster::transfer(txBuff, rxBuff, ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE));
+        mpuNssHigh();
+
+        raw.accel.x = (rxBuff[0] << 8 | rxBuff[1]) - raw.accelOffset.x;
+        raw.accel.y = (rxBuff[2] << 8 | rxBuff[3]) - raw.accelOffset.y;
+        raw.accel.z = (rxBuff[4] << 8 | rxBuff[5]) - raw.accelOffset.z;
+
+        raw.temperature = rxBuff[6] << 8 | rxBuff[7];
+
+        raw.gyro.x = ((rxBuff[8] << 8 | rxBuff[9]) - raw.gyroOffset.x);
+        raw.gyro.y = ((rxBuff[10] << 8 | rxBuff[11]) - raw.gyroOffset.y);
+        raw.gyro.z = ((rxBuff[12] << 8 | rxBuff[13]) - raw.gyroOffset.z);
+    }
+    PT_END();
+#else
+    return false;
 #endif
 }
 
@@ -158,7 +182,7 @@ float Mpu6500::getGz() const
 
 float Mpu6500::getTemp() const
 {
-    return validateReading(21.0f + static_cast<float>(raw.temp) / 333.87f);
+    return validateReading(21.0f + static_cast<float>(raw.temperature) / 333.87f);
 }
 
 float Mpu6500::getYaw() { return validateReading(mahonyAlgorithm.getYaw()); }
@@ -188,7 +212,7 @@ float Mpu6500::validateReading(float reading) const
         drivers,
         "failed to initialize the imu properly",
         aruwlib::errors::Location::MPU6500,
-        aruwlib::errors::ErrorType::IMU_DATA_NOT_INITIALIZED);
+        aruwlib::errors::Mpu6500ErrorType::IMU_DATA_NOT_INITIALIZED);
     return 0.0f;
 }
 
@@ -230,7 +254,7 @@ void Mpu6500::calculateAccOffset()
 #endif
 }
 
-// Hardware interface functions.
+// Hardware interface functions (blocking functions, for initialization only)
 
 uint8_t Mpu6500::spiWriteRegister(uint8_t reg, uint8_t data)
 {

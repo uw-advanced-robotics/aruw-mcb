@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -18,10 +18,6 @@
  */
 
 #include "crc.hpp"
-
-#include <stdint.h>
-
-#include <cstddef>
 
 namespace aruwlib
 {
@@ -72,7 +68,7 @@ const uint16_t CRC16Table[256] = {
 
 uint8_t calculateCRC8(const uint8_t *message, uint32_t messageLength, uint8_t initCRC8)
 {
-    if (message == NULL)
+    if (message == nullptr)
     {
         return initCRC8;
     }
@@ -86,7 +82,7 @@ uint8_t calculateCRC8(const uint8_t *message, uint32_t messageLength, uint8_t in
 
 uint16_t calculateCRC16(const uint8_t *message, uint32_t messageLength, uint16_t initCRC16)
 {
-    if (message == NULL)
+    if (message == nullptr)
     {
         return initCRC16;
     }

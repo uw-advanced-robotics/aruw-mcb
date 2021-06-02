@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,7 +20,8 @@
 #ifndef COMMAND_HPP_
 #define COMMAND_HPP_
 
-#include <set>
+#include "command_scheduler_types.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -37,10 +38,12 @@ class Subsystem;
 class Command
 {
 public:
-    Command() : prevSchedulerExecuteTimestamp(0) {}
+    Command();
+
+    virtual ~Command();
 
     /**
-     * Specifies the set of subsystems used by this command. Two commands cannot
+     * Specifies the encoded set of subsystems used by this command. Two commands cannot
      * use the same subsystem at the same time.  If another command is scheduled
      * that shares a requirement, the command will be interrupted. If no subsystems
      * are required, return an empty set.
@@ -53,15 +56,13 @@ public:
      * @see CommandScheduler
      * @return the set of subsystems that are required.
      */
-    const std::set<Subsystem*>& getRequirements() const;
+    mockable inline subsystem_scheduler_bitmap_t getRequirementsBitwise() const
+    {
+        return commandRequirementsBitwise;
+    }
 
-    /**
-     * Returns whether the command requires a given subsystem.
-     *
-     * @param[in] requirement the subsystem to inquire about.
-     * @return `true` if the subsystem is required for this Command, `false` otherwise.
-     */
-    bool hasRequirement(Subsystem* requirement) const;
+    // This shouldn't be mockable
+    inline int getGlobalIdentifier() const { return globalIdentifier; }
 
     /**
      * Adds the required subsystem to a list of required subsystems.
@@ -70,12 +71,21 @@ public:
      *      If the requirement is nullptr or if the requirement is already in the
      *      set, nothing is added.
      */
-    void addSubsystemRequirement(Subsystem* requirement);
+    mockable void addSubsystemRequirement(Subsystem* requirement);
 
     /**
      * @return the name of the command, to be implemented by derived classes.
      */
     virtual const char* getName() const = 0;
+
+    /**
+     * A check called right before a command is scheduled to determine whether
+     * or not a command should be scheduled. If return is true then the command
+     * is scheduled, if false then the command is not scheduled.
+     *
+     * Not forced to be overridden, returns true by default.
+     */
+    virtual bool isReady();
 
     /**
      * The initial subroutine of a command. Called once when the command is
@@ -110,12 +120,13 @@ public:
     virtual bool isFinished() const = 0;
 
 private:
-    friend class CommandScheduler;
+    /**
+     * An identifier unique to a command that will be assigned to it automatically upon
+     * construction and unassigned during destruction.
+     */
+    const int globalIdentifier;
 
-    uint32_t prevSchedulerExecuteTimestamp;
-
-    // contains pointers to const Subsystem pointers that this command requires
-    std::set<Subsystem*> commandRequirements;
+    command_scheduler_bitmap_t commandRequirementsBitwise = 0;
 };  // class Command
 
 }  // namespace control

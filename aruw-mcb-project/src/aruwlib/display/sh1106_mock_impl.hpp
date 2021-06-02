@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,6 +20,14 @@
 #ifndef SH1106_HPP
 #error "Don't include this file directly, use 'sh1106.hpp' instead!"
 #endif
+
+template <unsigned int Width, unsigned int Height, bool Flipped>
+modm::ResumableResult<bool> aruwlib::display::Sh1106<Width, Height, Flipped>::updateNonblocking()
+{
+    RF_BEGIN(0);
+    // no-op
+    RF_END_RETURN(false);
+}
 
 template <unsigned int Width, unsigned int Height, bool Flipped>
 void aruwlib::display::Sh1106<Width, Height, Flipped>::update()

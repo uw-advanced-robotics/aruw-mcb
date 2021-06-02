@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,13 +20,7 @@
 #ifndef ERROR_MENU_HPP_
 #define ERROR_MENU_HPP_
 
-#include <list>
-
 #include <modm/ui/menu/abstract_menu.hpp>
-
-#include "aruwlib/rm-dev-board-a/board.hpp"
-
-#include "modm/processing/timer/periodic_timer.hpp"
 
 namespace aruwlib
 {
@@ -49,6 +43,8 @@ public:
     static const char *getMenuName() { return "Error Menu"; }
 
 private:
+    static constexpr int ERROR_MENU_ID = 3;
+
     Drivers *drivers;
 };  // class ErrorMenu
 }  // namespace display

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -27,7 +27,7 @@
 #include <modm/platform/uart/uart_1.hpp>
 #endif
 
-#include "mock_macros.hpp"
+#include "util_macros.hpp"
 
 namespace aruwlib
 {
@@ -47,8 +47,7 @@ public:
 #endif
 
     Remote(Drivers *drivers) : drivers(drivers) {}
-    Remote(const Remote &) = delete;
-    Remote &operator=(const Remote &) = delete;
+    DISALLOW_COPY_AND_ASSIGN(Remote)
     mockable ~Remote() = default;
 
     /**
@@ -180,13 +179,12 @@ public:
     mockable void monitorRemoteStatus();
 
 private:
-    static constexpr int DMA_BUFF_SIZE = 50;  ///< Size of DMA buffer used when requesting data.
-    static constexpr int REMOTE_PACKET_SIZE = 18;     ///< Length of the remote recieve buffer.
-    static constexpr float STICK_MAX_VALUE = 660.0f;  ///< Max value received by one of the sticks.
-    static constexpr uint32_t RECEIVE_PERIOD = 14;    ///< Time between message receivals, in ms
+    static constexpr int DMA_BUFF_SIZE = 50;       /// Size of DMA buffer used when requesting data.
+    static constexpr int REMOTE_PACKET_SIZE = 18;  /// Length of the remote recieve buffer.
+    static constexpr float STICK_MAX_VALUE = 660.0f;  /// Max value received by one of the sticks.
+    static constexpr uint32_t RECEIVE_PERIOD = 14;    /// Time between message receivals, in ms
 
-    ///< The current remote information
-    struct RemoteInfo
+    struct RemoteInfo  /// The current remote information
     {
         uint32_t updateCounter = 0;
         int16_t rightHorizontal = 0;
@@ -196,39 +194,33 @@ private:
         SwitchState leftSwitch = SwitchState::UNKNOWN;
         SwitchState rightSwitch = SwitchState::UNKNOWN;
         struct
-        {  ///< Mouse information
+        {  /// Mouse information
             int16_t x = 0;
             int16_t y = 0;
             int16_t z = 0;
             bool l = false;
             bool r = false;
         } mouse;
-        uint16_t key = 0;   ///< Keyboard information
-        int16_t wheel = 0;  ///< Remote wheel information
+        uint16_t key = 0;   /// Keyboard information
+        int16_t wheel = 0;  /// Remote wheel information
     };
 
     Drivers *drivers;
 
     RemoteInfo remote;
 
-    ///< UART recieve buffer.
-    uint8_t rxBuffer[DMA_BUFF_SIZE]{0};
+    uint8_t rxBuffer[DMA_BUFF_SIZE]{0};  /// UART recieve buffer.
 
-    ///< Timestamp when last byte was read (milliseconds).
-    uint32_t lastRead = 0;
+    uint32_t lastRead = 0;  /// Timestamp when last byte was read (milliseconds).
 
-    ///< An indication that the remote info has been reset.
-    bool resetFlag = false;
+    bool resetFlag = false;  ///< An indication that the remote info has been reset.
 
-    ///< Parses the current rxBuffer.
-    void parseBuffer();
+    void parseBuffer();  /// Parses the current rxBuffer.
 
-    ///< Clears the current rxBuffer.
-    void clearRxBuffer();
+    void clearRxBuffer();  /// Clears the current rxBuffer.
 
-    ///< Resets the current remote info.
-    void reset();
-};  // class Remote
+    void reset();  /// Resets the current remote info.
+};                 // class Remote
 
 }  // namespace aruwlib
 

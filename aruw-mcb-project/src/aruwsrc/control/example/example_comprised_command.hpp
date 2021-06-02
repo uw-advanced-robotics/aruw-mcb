@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -42,7 +42,7 @@ public:
 
     bool isFinished() const override { return false; }
 
-    const char* getName() const override { return "example comprised command"; }
+    const char* getName() const override { return "example comprised"; }
 
 private:
     ExampleCommand exampleCommand;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,17 +20,21 @@
 #ifndef WIGGLE_DRIVE_COMMAND_HPP_
 #define WIGGLE_DRIVE_COMMAND_HPP_
 
-#include <aruwlib/Drivers.hpp>
 #include <aruwlib/control/command.hpp>
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
-#include "chassis_subsystem.hpp"
+namespace aruwlib
+{
+class Drivers;
+}
 
 namespace aruwsrc
 {
 namespace chassis
 {
+class ChassisSubsystem;
+
 /**
  * A command that automatically rotates the chassis back and forth, following
  * a sine wave centered around the yaw gimbal angle, while still allowing for
@@ -42,13 +46,7 @@ public:
     WiggleDriveCommand(
         aruwlib::Drivers* drivers,
         ChassisSubsystem* chassis,
-        aruwsrc::turret::TurretSubsystem* turret)
-        : drivers(drivers),
-          chassis(chassis),
-          turret(turret)
-    {
-        addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
-    }
+        aruwsrc::turret::TurretSubsystem* turret);
 
     void initialize() override;
 
@@ -63,7 +61,7 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "chassis wiggle drive command"; }
+    const char* getName() const override { return "chassis wiggle drive"; }
 
 private:
     static constexpr float WIGGLE_PERIOD = 1600.0f;

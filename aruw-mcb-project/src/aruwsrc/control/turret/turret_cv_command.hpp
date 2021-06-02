@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -50,7 +50,7 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret cv command"; }
+    const char *getName() const override { return "turret cv"; }
 
 private:
     static constexpr float YAW_P = 4500.0f;
@@ -87,9 +87,11 @@ private:
 
     aruwlib::arch::MilliTimeout sendRequestTimer;
 
-    void runYawPositionController();
+    uint32_t prevTime;
 
-    void runPitchPositionController();
+    void runYawPositionController(float dt);
+
+    void runPitchPositionController(float dt);
 };  // class TurretCvCommand
 
 }  // namespace turret

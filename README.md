@@ -1,3 +1,6 @@
+[![pipeline status](https://gitlab.com/aruw/controls/aruw-mcb/badges/develop/pipeline.svg)](https://gitlab.com/aruw/controls/aruw-mcb/-/commits/develop)
+[![coverage report](https://gitlab.com/aruw/controls/aruw-mcb/badges/develop/coverage.svg)](https://gitlab.com/aruw/controls/aruw-mcb/-/commits/develop)
+
 # aruw-mcb
 
 ARUW's "Main Control Board" (MCB) code for the RoboMaster competition.
@@ -66,6 +69,8 @@ The recommended way to develop is with our pre-built development Docker containe
       specify or update them through a Windows GUI. If you're on windows open the
       **Credential Manager** app and go to **Windows Credentials**. Then correct your git
       credentials stored under `git:https://gitlab.com` before trying to clone again.
+
+11. Open a terminal, navigate to `aruw-mcb`, and type `./scripts/git-pre-commit-format install`.
 
 Now that you have the environment, let's test it out! Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>,
 type "Focus Next Terminal", and press <kbd>Enter</kbd>. In this terminal, type
@@ -192,7 +197,7 @@ The below commands require that your working directory is `aruw-mcb/aruw-mcb-pro
 Note that all `scons` commands have optional `profile` and `target` options; the former controls whether performance and size optimizations are applied to the output, and the latter specifies which robot to build for. The default is to build in release mode for the Soldier.
 
 ```
-Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>]
+Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [profiling=<true|false>]
     "<target>" is one of:
         - "build": build all code for the hardware platform.
         - "run": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.

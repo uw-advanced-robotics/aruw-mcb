@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -87,8 +87,8 @@ void Remote::initialize()
         RAISE_ERROR(
             drivers,
             "failed to configure DMA read",
-            aruwlib::errors::REMOTE,
-            aruwlib::errors::INVALID_ADD);
+            errors::Location::REMOTE,
+            errors::RemoteType::INVALID_DMA_READ);
     }
 #endif
 }
@@ -262,7 +262,12 @@ void Remote::parseBuffer()
     }
     // TODO I don't think this has to be done atomically since this will only be interrupted every
     // 14 ms max
-    drivers->commandMapper.handleKeyStateChange(remote.key, remote.leftSwitch, remote.rightSwitch);
+    drivers->commandMapper.handleKeyStateChange(
+        remote.key,
+        remote.leftSwitch,
+        remote.rightSwitch,
+        remote.mouse.l,
+        remote.mouse.r);
 }
 
 void Remote::clearRxBuffer()

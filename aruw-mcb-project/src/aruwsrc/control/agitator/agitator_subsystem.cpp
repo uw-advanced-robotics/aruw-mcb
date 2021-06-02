@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,7 +22,13 @@
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/control/subsystem.hpp>
 #include <aruwlib/errors/create_errors.hpp>
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <aruwlib/mock/DJIMotorMock.hpp>
+#else
 #include <aruwlib/motor/dji_motor.hpp>
+#endif
+
 #include <modm/math/filter/pid.hpp>
 
 #include "agitator_rotate_command.hpp"
@@ -45,19 +51,19 @@ AgitatorSubsystem::AgitatorSubsystem(
     aruwlib::can::CanBus agitatorCanBusId,
     bool isAgitatorInverted)
     : aruwlib::control::Subsystem(drivers),
+      agitatorIsCalibrated(false),
       agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
+      desiredAgitatorAngle(0.0f),
+      agitatorCalibratedZeroAngle(0.0f),
+      agitatorJammedTimeout(0),
+      agitatorJammedTimeoutPeriod(0),
+      gearRatio(agitatorGearRatio),
       agitatorMotor(
           drivers,
           agitatorMotorId,
           agitatorCanBusId,
           isAgitatorInverted,
-          "agitator motor"),
-      desiredAgitatorAngle(0.0f),
-      agitatorCalibratedZeroAngle(0.0f),
-      agitatorIsCalibrated(false),
-      agitatorJammedTimeout(0),
-      agitatorJammedTimeoutPeriod(0),
-      gearRatio(agitatorGearRatio)
+          "agitator motor")
 {
     agitatorJammedTimeout.stop();
 }
@@ -72,7 +78,7 @@ void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t predictedRotateTime)
             drivers,
             "The predicted rotate time is 0, this is physically impossible",
             aruwlib::errors::SUBSYSTEM,
-            aruwlib::errors::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
+            aruwlib::errors::SubsystemErrorType::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
     }
     agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
     agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
@@ -107,21 +113,25 @@ void AgitatorSubsystem::agitatorRunPositionPid()
     }
     else
     {
+        // dt doesn't need to be exact since we don't use an integral term and we calculate
+        // the velocity ourselves, so it currently isn't used.
         agitatorPositionPid.runController(
             desiredAgitatorAngle - getAgitatorAngle(),
-            getAgitatorVelocity());
+            getAgitatorVelocity(),
+            2.0f);
         agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());
     }
 }
 
 bool AgitatorSubsystem::agitatorCalibrateHere()
 {
-    if (!agitatorMotor.isMotorOnline())
+    if (!isAgitatorOnline())
     {
         return false;
     }
     agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
     agitatorIsCalibrated = true;
+    desiredAgitatorAngle = 0.0f;
     return true;
 }
 
@@ -139,19 +149,26 @@ float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
     // position is equal to the following equation:
     // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
     return (2.0f * aruwlib::algorithms::PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
-           agitatorMotor.encStore.getEncoderUnwrapped() / gearRatio;
+           agitatorMotor.getEncoderUnwrapped() / gearRatio;
 }
 
-void AgitatorSubsystem::setAgitatorDesiredAngle(float newAngle) { desiredAgitatorAngle = newAngle; }
-
-float AgitatorSubsystem::getAgitatorDesiredAngle() const { return desiredAgitatorAngle; }
-
-float AgitatorSubsystem::getAgitatorVelocity() const
+void AgitatorSubsystem::runHardwareTests()
 {
-    return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / gearRatio;
+    if (aruwlib::algorithms::compareFloatClose(
+            this->getAgitatorDesiredAngle(),
+            this->getAgitatorAngle(),
+            aruwlib::algorithms::PI / 16))
+    {
+        this->setHardwareTestsComplete();
+    }
 }
 
-bool AgitatorSubsystem::isAgitatorCalibrated() const { return agitatorIsCalibrated; }
+void AgitatorSubsystem::onHardwareTestStart()
+{
+    this->setAgitatorDesiredAngle(this->getAgitatorAngle() + aruwlib::algorithms::PI / 2);
+}
+
+void AgitatorSubsystem::onHardwareTestComplete() {}
 
 }  // namespace agitator
 

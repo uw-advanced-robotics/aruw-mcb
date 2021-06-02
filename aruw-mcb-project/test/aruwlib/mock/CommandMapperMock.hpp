@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,8 +20,8 @@
 #ifndef COMMAND_MAPPER_MOCK_HPP_
 #define COMMAND_MAPPER_MOCK_HPP_
 
+#include <aruwlib/control/CommandMapper.hpp>
 #include <aruwlib/control/command.hpp>
-#include <aruwlib/control/command_mapper.hpp>
 #include <gmock/gmock.h>
 
 namespace aruwlib
@@ -31,27 +31,15 @@ namespace mock
 class CommandMapperMock : public aruwlib::control::CommandMapper
 {
 public:
-    CommandMapperMock(aruwlib::Drivers* drivers) : aruwlib::control::CommandMapper(drivers) {}
+    CommandMapperMock(aruwlib::Drivers *drivers) : aruwlib::control::CommandMapper(drivers) {}
+
     MOCK_METHOD(
         void,
-        addPressMapping,
-        (aruwlib::control::CommandMapper::RemoteMap * mapping, aruwlib::control::Command* Command),
+        handleKeyStateChange,
+        (uint16_t, Remote::SwitchState, Remote::SwitchState, bool, bool),
         (override));
-    MOCK_METHOD(
-        void,
-        addHoldMapping,
-        (aruwlib::control::CommandMapper::RemoteMap * mapping, aruwlib::control::Command* Command),
-        (override));
-    MOCK_METHOD(
-        void,
-        addHoldRepeatMapping,
-        (aruwlib::control::CommandMapper::RemoteMap * mapping, aruwlib::control::Command* Command),
-        (override));
-    MOCK_METHOD(
-        void,
-        addToggleMapping,
-        (aruwlib::control::CommandMapper::RemoteMap * mapping, aruwlib::control::Command* Command),
-        (override));
+    MOCK_METHOD(void, addMap, (aruwlib::control::CommandMapping *), (override));
+    MOCK_METHOD(std::size_t, getSize, (), (const override));
 };  // class CommandMapperMock
 }  // namespace mock
 }  // namespace aruwlib

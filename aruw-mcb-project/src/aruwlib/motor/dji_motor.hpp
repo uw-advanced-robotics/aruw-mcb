@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -24,7 +24,7 @@
 
 #include <aruwlib/architecture/timeout.hpp>
 
-#include "aruwlib/communication/can/can_rx_handler.hpp"
+#include "aruwlib/communication/can/can_rx_listener.hpp"
 
 namespace aruwlib
 {
@@ -47,7 +47,7 @@ enum MotorId : int32_t
 // extend the CanRxListener class, which allows one to connect a
 // motor to the receive handler and use the class's built in
 // receive handler
-class DjiMotor : public aruwlib::can::CanRxListener
+class DjiMotor : public can::CanRxListener
 {
 public:
     // 0 - 8191 for dji motors
@@ -59,79 +59,53 @@ public:
         MotorId desMotorIdentifier,
         aruwlib::can::CanBus motorCanBus,
         bool isInverted,
-        const char* name);
+        const char* name,
+        uint16_t encWrapped = ENC_RESOLUTION / 2,
+        int64_t encRevolutions = 0);
 
-    ~DjiMotor();
+    mockable ~DjiMotor();
 
-    void initialize();
+    mockable void initialize();
 
-    // Data structure for storing encoder values. DjiMotor class may call
-    // update(), which increments or decrements encoder revolutions and
-    // sets the current wrapped encoder value to the updated input.
-    class EncoderStore
-    {
-    public:
-        int64_t getEncoderUnwrapped() const;
+    // formerly encoderstore
+    mockable int64_t getEncoderUnwrapped() const;
 
-        uint16_t getEncoderWrapped() const;
+    // formerly encoderstore
+    mockable uint16_t getEncoderWrapped() const;
 
-    private:
-        friend class DjiMotor;
-
-        explicit EncoderStore(uint16_t encWrapped = ENC_RESOLUTION / 2, int64_t encRevolutions = 0)
-            : encoderWrapped(encWrapped),
-              encoderRevolutions(encRevolutions)
-        {
-        }
-
-        void updateValue(uint16_t newEncWrapped);
-
-        uint16_t encoderWrapped;
-
-        int64_t encoderRevolutions;
-    };
-
-    // delete copy constructor
-    DjiMotor(const DjiMotor&) = delete;
-
-    // whenever you process a message, this callback is meant to be used by a subclass
-    void motorReceiveMessageCallback() {}
+    DISALLOW_COPY_AND_ASSIGN(DjiMotor)
 
     // overrides virtual method in the can class, called every time a message is
     // received by the can receive handler
-    void processMessage(const modm::can::Message& message) override
-    {
-        parseCanRxData(message);
-        motorReceiveMessageCallback();
-    }
+    void processMessage(const modm::can::Message& message) override { parseCanRxData(message); }
 
     // Accept a larger value in case someone is stupid and gave something smaller or greater
     // than 2^16, then limit it.
     // Limiting should typically be done on a motor by motor basis in a wrapper class, this
     // is simply a sanity check.
-    void setDesiredOutput(int32_t desiredOutput);
+    mockable void setDesiredOutput(int32_t desiredOutput);
 
-    bool isMotorOnline() const;
+    mockable bool isMotorOnline() const;
 
     // Serializes send data and deposits it in a message to be sent.
-    void serializeCanSendData(modm::can::Message* txMessage) const;
+    mockable void serializeCanSendData(modm::can::Message* txMessage) const;
 
     // getter functions
-    int16_t getOutputDesired() const;
+    mockable int16_t getOutputDesired() const;
 
-    uint32_t getMotorIdentifier() const;
+    mockable uint32_t getMotorIdentifier() const;
 
-    int8_t getTemperature() const;
+    mockable int8_t getTemperature() const;
 
-    int16_t getTorque() const;
+    mockable int16_t getTorque() const;
 
-    int16_t getShaftRPM() const;
+    mockable int16_t getShaftRPM() const;
 
-    bool isMotorInverted() const;
+    mockable bool isMotorInverted() const;
 
-    aruwlib::can::CanBus getCanBus() const;
+    mockable aruwlib::can::CanBus getCanBus() const;
 
-    const char* getName() const;
+    mockable const char* getName() const;
 
     template <typename T>
     static void assertEncoderType()
@@ -156,11 +130,14 @@ public:
         return (360.0f * static_cast<float>(encoder)) / ENC_RESOLUTION;
     }
 
-    EncoderStore encStore;
-
 private:
     // wait time before the motor is considered disconnected, in milliseconds
     static const uint32_t MOTOR_DISCONNECT_TIME = 100;
+
+    const char* motorName;
+
+    // formerly encoderstore
+    void updateEncoderValue(uint16_t newEncWrapped);
 
     // Parses receive data given message with the correct identifier.
     void parseCanRxData(const modm::can::Message& message);
@@ -181,7 +158,11 @@ private:
 
     bool motorInverted;
 
-    const char* motorName;
+    // formerly encoderstore
+    uint16_t encoderWrapped;
+
+    // formerly encoderstore
+    int64_t encoderRevolutions;
 
     aruwlib::arch::MilliTimeout motorDisconnectTimeout;
 };

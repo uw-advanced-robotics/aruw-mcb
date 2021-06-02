@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,20 +20,18 @@
 #ifndef CAN_HPP_
 #define CAN_HPP_
 
-#include <modm/architecture/interface/can_message.hpp>
+#include "CanBus.hpp"
+#include "util_macros.hpp"
 
-#include "mock_macros.hpp"
+namespace modm::can
+{
+class Message;
+}
 
 namespace aruwlib
 {
 namespace can
 {
-enum class CanBus
-{
-    CAN_BUS1,
-    CAN_BUS2,
-};
-
 /**
  * A simple CAN wrapper class that handles I/O from both CAN bus 1 and 2.
  */
@@ -41,8 +39,7 @@ class Can
 {
 public:
     Can() = default;
-    Can(const Can &) = delete;
-    Can &operator=(const Can &) = delete;
+    DISALLOW_COPY_AND_ASSIGN(Can)
     mockable ~Can() = default;
 
     /**

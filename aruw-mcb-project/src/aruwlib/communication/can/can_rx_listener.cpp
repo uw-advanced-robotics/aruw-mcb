@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -18,6 +18,8 @@
  */
 
 #include "can_rx_listener.hpp"
+
+#include <modm/architecture/interface/can_message.hpp>
 
 #include "aruwlib/Drivers.hpp"
 
