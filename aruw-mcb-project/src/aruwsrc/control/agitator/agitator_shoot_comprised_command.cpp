@@ -36,16 +36,16 @@ ShootComprisedCommand::ShootComprisedCommand(
     AgitatorSubsystem* agitator,
     float agitatorChangeAngle,
     float maxUnjamAngle,
-    uint32_t agitatorDesiredRotateTime,
-    uint32_t minAgitatorRotateTime)
+    uint32_t agitatorRotateTime,
+    uint32_t agitatorPauseAfterRotateTime)
     : aruwlib::control::ComprisedCommand(drivers),
       connectedAgitator(agitator),
       agitatorRotateCommand(
           agitator,
           agitatorChangeAngle,
-          agitatorDesiredRotateTime,
-          false,
-          minAgitatorRotateTime),
+          agitatorRotateTime,
+          agitatorPauseAfterRotateTime,
+          false),
       agitatorUnjamCommand(agitator, maxUnjamAngle),
       unjamSequenceCommencing(false),
       agitatorDisconnectFault(false)
@@ -103,8 +103,9 @@ void ShootComprisedCommand::end(bool interrupted)
 
 bool ShootComprisedCommand::isFinished() const
 {
-    return (agitatorRotateCommand.isFinished() && !unjamSequenceCommencing) ||
-           (agitatorUnjamCommand.isFinished() && unjamSequenceCommencing) ||
+    return (!unjamSequenceCommencing && agitatorRotateCommand.isFinished()) ||
+           ((unjamSequenceCommencing && agitatorUnjamCommand.isFinished()) ||
+            !this->comprisedCommandScheduler.isCommandScheduled(&agitatorRotateCommand)) ||
            agitatorDisconnectFault;
 }
 

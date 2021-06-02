@@ -23,6 +23,8 @@
 #include <aruwlib/communication/gpio/digital.hpp>
 #include <aruwlib/control/subsystem.hpp>
 
+#include "util_macros.hpp"
+
 namespace aruwsrc
 {
 namespace engineer
@@ -42,11 +44,15 @@ public:
     {
     }
 
-    void setSqueezed(bool isGrabberSqueezed);
+    mockable void setSqueezed(bool isGrabberSqueezed);
 
-    bool isSqueezed() const;
+    mockable bool isSqueezed() const;
 
     void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
 
     const char *getName() override { return "Grabber"; }
 
@@ -54,6 +60,8 @@ private:
     aruwlib::gpio::Digital::OutputPin pin;
 
     bool isGrabberSqueezed;
+
+    uint64_t testTime;
 
 };  // GrabberSubsystem
 

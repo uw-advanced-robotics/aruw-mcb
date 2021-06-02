@@ -23,6 +23,8 @@
 #include <aruwlib/communication/gpio/digital.hpp>
 #include <aruwlib/control/subsystem.hpp>
 
+#include "util_macros.hpp"
+
 namespace aruwsrc
 {
 namespace engineer
@@ -42,11 +44,15 @@ public:
     {
     }
 
-    void setExtended(bool isExtended);
+    mockable void setExtended(bool isExtended);
 
-    bool isExtended() const;
+    mockable bool isExtended() const;
 
     void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
 
     const char *getName() override { return "X-Axis"; }
 
@@ -54,6 +60,8 @@ private:
     aruwlib::gpio::Digital::OutputPin pin;
 
     bool extended;
+
+    uint64_t testTime;
 };  // class XAxisSubsystem
 
 }  // namespace engineer

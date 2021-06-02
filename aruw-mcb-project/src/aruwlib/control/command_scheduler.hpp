@@ -22,9 +22,7 @@
 
 #include <iterator>
 
-#include "command.hpp"
 #include "command_scheduler_types.hpp"
-#include "subsystem.hpp"
 #include "util_macros.hpp"
 
 namespace aruwlib
@@ -32,6 +30,9 @@ namespace aruwlib
 class Drivers;
 namespace control
 {
+class Command;
+class Subsystem;
+
 /**
  * Class for handling all the commands you would like to currently run.
  * Interfaces with the Subsystem and Command classes to provide a means
@@ -147,7 +148,7 @@ public:
      * @return `true` if the CommandScheduler contains the requrested Command.
      *      `false` otherwise.
      */
-    mockable bool isCommandScheduled(Command* command) const;
+    mockable bool isCommandScheduled(const Command* command) const;
 
     /**
      * Adds the given Subsystem to the CommandScheduler.  The subsystem is
@@ -163,7 +164,7 @@ public:
      * @param[in] subsystem the subsystem to check
      * @return `true` if the Subsystem is already scheduled, `false` otherwise.
      */
-    mockable bool isSubsystemRegistered(Subsystem* subsystem) const;
+    mockable bool isSubsystemRegistered(const Subsystem* subsystem) const;
 
     mockable void startHardwareTests();
     mockable void stopHardwareTests();

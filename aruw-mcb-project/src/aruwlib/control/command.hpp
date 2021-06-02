@@ -20,8 +20,6 @@
 #ifndef COMMAND_HPP_
 #define COMMAND_HPP_
 
-#include <set>
-
 #include "command_scheduler_types.hpp"
 #include "util_macros.hpp"
 
@@ -79,6 +77,15 @@ public:
      * @return the name of the command, to be implemented by derived classes.
      */
     virtual const char* getName() const = 0;
+
+    /**
+     * A check called right before a command is scheduled to determine whether
+     * or not a command should be scheduled. If return is true then the command
+     * is scheduled, if false then the command is not scheduled.
+     *
+     * Not forced to be overridden, returns true by default.
+     */
+    virtual bool isReady();
 
     /**
      * The initial subroutine of a command. Called once when the command is

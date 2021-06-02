@@ -19,12 +19,12 @@
 
 #include "command_scheduler.hpp"
 
-#include <algorithm>
-#include <utility>
-
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/errors/create_errors.hpp"
+
+#include "command.hpp"
+#include "subsystem.hpp"
 
 using namespace aruwlib::errors;
 
@@ -169,10 +169,12 @@ void CommandScheduler::run()
         // if a hardware test is not already complete
         for (auto it = subMapBegin(); it != subMapEnd(); it++)
         {
-            if (!(*it)->isHardwareTestComplete())
+            Subsystem *sub = *it;
+            if (!sub->isHardwareTestComplete())
             {
-                (*it)->runHardwareTests();
+                sub->runHardwareTests();
             }
+            sub->refresh();
         }
         return;
     }
@@ -243,6 +245,11 @@ void CommandScheduler::addCommand(Command *commandToAdd)
             CommandSchedulerErrorType::ADDING_NULLPTR_COMMAND);
         return;
     }
+    else if (!commandToAdd->isReady())
+    {
+        // Do not add command if it is not ready to be scheduled.
+        return;
+    }
 
     subsystem_scheduler_bitmap_t requirementsBitwise = commandToAdd->getRequirementsBitwise();
 
@@ -277,7 +284,7 @@ void CommandScheduler::addCommand(Command *commandToAdd)
     addedCommandBitmap |= (1UL << commandToAdd->getGlobalIdentifier());
 }
 
-bool CommandScheduler::isCommandScheduled(Command *command) const
+bool CommandScheduler::isCommandScheduled(const Command *command) const
 {
     return command != nullptr && (addedCommandBitmap & (1UL << command->getGlobalIdentifier()));
 }
@@ -332,7 +339,7 @@ void CommandScheduler::registerSubsystem(Subsystem *subsystem)
     }
 }
 
-bool CommandScheduler::isSubsystemRegistered(Subsystem *subsystem) const
+bool CommandScheduler::isSubsystemRegistered(const Subsystem *subsystem) const
 {
     return subsystem != nullptr &&
            ((1ul << subsystem->getGlobalIdentifier()) & registeredSubsystemBitmap);

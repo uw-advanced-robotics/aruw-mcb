@@ -17,29 +17,30 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "open_hopper_command.hpp"
+#ifndef CAN_RX_LISTENER_MOCK_HPP_
+#define CAN_RX_LISTENER_MOCK_HPP_
 
-namespace aruwsrc
+#include <iostream>
+
+#include <aruwlib/communication/can/can_rx_listener.hpp>
+#include <gmock/gmock.h>
+#include <modm/architecture/interface/can_message.hpp>
+
+namespace aruwlib
 {
-namespace control
+namespace mock
 {
-OpenHopperCommand::OpenHopperCommand(HopperSubsystem* subsystem)
-    : Command(),
-      subsystemHopper(subsystem)
+class CanRxListenerMock : public aruwlib::can::CanRxListener
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
-}
+public:
+    CanRxListenerMock(aruwlib::Drivers* drivers, uint32_t id, aruwlib::can::CanBus bus)
+        : aruwlib::can::CanRxListener(drivers, id, bus)
+    {
+    }
+    MOCK_METHOD(void, processMessage, (const modm::can::Message& message), (override));
 
-void OpenHopperCommand::initialize() { subsystemHopper->setOpen(); }
+};  // class CanRxListenerMock
+}  // namespace mock
+}  // namespace aruwlib
 
-// set the hopper servo to the open position
-void OpenHopperCommand::execute() {}
-
-// set the hopper servo to the close position
-void OpenHopperCommand::end(bool) { subsystemHopper->setClose(); }
-
-bool OpenHopperCommand::isFinished() const { return false; }
-
-}  // namespace control
-
-}  // namespace aruwsrc
+#endif  //  CAN_RX_LISTENER_MOCK_HPP_

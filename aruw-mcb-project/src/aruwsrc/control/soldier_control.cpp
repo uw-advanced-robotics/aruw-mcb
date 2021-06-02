@@ -32,8 +32,9 @@
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
 #include "chassis/wiggle_drive_command.hpp"
-#include "hopper-cover/hopper_subsystem.hpp"
-#include "hopper-cover/open_hopper_command.hpp"
+#include "cilent-display/client_display_command.hpp"
+#include "cilent-display/client_display_subsystem.hpp"
+#include "hopper-cover/hopper_commands.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_cv_command.hpp"
@@ -51,6 +52,7 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::turret;
 using namespace aruwlib::control;
+using namespace aruwsrc::display;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::Remote;
 
@@ -83,14 +85,23 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
     AgitatorSubsystem::isAgitatorInverted);
 
-HopperSubsystem hopperCover(
+// TODO: validate and tune these constexpr parameters for hopper lid motor
+// also find out what kind of motor hopper lid uses lol
+AgitatorSubsystem hopperCover(
     drivers(),
-    aruwlib::gpio::Pwm::W,
-    HopperSubsystem::SOLDIER_HOPPER_OPEN_PWM,
-    HopperSubsystem::SOLDIER_HOPPER_CLOSE_PWM,
-    HopperSubsystem::SOLDIER_PWM_RAMP_SPEED);
+    AgitatorSubsystem::PID_17MM_P,
+    AgitatorSubsystem::PID_17MM_I,
+    AgitatorSubsystem::PID_17MM_D,
+    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem::HOPPER_COVER_MOTOR_ID,
+    AgitatorSubsystem::HOPPER_COVER_MOTOR_CAN_BUS,
+    AgitatorSubsystem::IS_HOPPER_COVER_INVERTED);
 
 FrictionWheelSubsystem frictionWheels(drivers());
+
+ClientDisplaySubsystem clientDisplay(drivers());
 
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
@@ -105,11 +116,13 @@ TurretCVCommand turretCVCommand(drivers(), &turret);
 
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand agitatorShootFastCommand(drivers(), &agitator);
+ShootFastComprisedCommand17MM agitatorShootFastLimited(drivers(), &agitator);
 
-ShootSlowComprisedCommand agitatorshootSlowCommand(drivers(), &agitator);
+ShootFastComprisedCommand17MM agitatorShootFastNotLimited(drivers(), &agitator, false);
 
-OpenHopperCommand openHopperCommand(&hopperCover);
+SoldierOpenHopperCommand openHopperCommand(&hopperCover);
+
+SoldierCloseHopperCommand closeHopperCommand(&hopperCover);
 
 FrictionWheelRotateCommand spinFrictionWheels(
     &frictionWheels,
@@ -117,24 +130,32 @@ FrictionWheelRotateCommand spinFrictionWheels(
 
 FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
 
+ClientDisplayCommand clientDisplayCommand(
+    drivers(),
+    &clientDisplay,
+    &wiggleDriveCommand,
+    &chassisAutorotateCommand,
+    nullptr,
+    &chassisDriveCommand);
+
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
     drivers(),
     {&openHopperCommand, &stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping leftSwitchUp(
+HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    {&agitatorShootFastLimited},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&wiggleDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-HoldRepeatCommandMapping rightSwitchUp(
+HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&agitatorShootFastCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    {&chassisDriveCommand, &turretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
 ToggleCommandMapping rToggled(
@@ -144,11 +165,11 @@ ToggleCommandMapping rToggled(
 ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&agitatorShootFastCommand},
+    {&agitatorShootFastLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
-HoldCommandMapping leftMousePressedShiftPressed(
+HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&agitatorshootSlowCommand},
+    {&agitatorShootFastNotLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}));
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -163,6 +184,7 @@ void registerSoldierSubsystems(aruwlib::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&clientDisplay);
 
 #ifdef PLATFORM_HOSTED
     // Register the motor sims for the Agitator subsystem
@@ -223,6 +245,7 @@ void initializeSubsystems()
     agitator.initialize();
     frictionWheels.initialize();
     hopperCover.initialize();
+    clientDisplay.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -231,6 +254,8 @@ void setDefaultSoldierCommands(aruwlib::Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    hopperCover.setDefaultCommand(&closeHopperCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -243,9 +268,9 @@ void startSoldierCommands(aruwlib::Drivers *drivers)
 void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&rToggled);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);

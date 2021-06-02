@@ -17,6 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(TARGET_OLD_SOLDIER)
+
 #include <aruwlib/DriversSingleton.hpp>
 #include <aruwlib/control/CommandMapper.hpp>
 #include <aruwlib/control/HoldCommandMapping.hpp>
@@ -32,12 +34,10 @@
 #include "chassis/chassis_subsystem.hpp"
 #include "chassis/wiggle_drive_command.hpp"
 #include "hopper-cover/hopper_subsystem.hpp"
-#include "hopper-cover/open_hopper_command.hpp"
+#include "hopper-cover/open_hopper_command_old.hpp"
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
-
-#if defined(TARGET_OLD_SOLDIER)
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
@@ -93,7 +93,7 @@ TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret
 
 AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand agitatorShootFastCommand(drivers(), &agitator);
+ShootFastComprisedCommand17MM agitatorShootFastCommand(drivers(), &agitator);
 
 OpenHopperCommand openHopperCommand(&hopperCover);
 

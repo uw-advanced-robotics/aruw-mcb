@@ -21,7 +21,6 @@
 #define __SUBSYSTEM_SENTINEL_DRIVE_HPP__
 
 #include <aruwlib/communication/gpio/digital.hpp>
-#include <aruwlib/control/command_scheduler.hpp>
 #include <aruwlib/control/subsystem.hpp>
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -31,6 +30,8 @@
 #endif
 
 #include <modm/math/filter/pid.hpp>
+
+#include "util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -49,9 +50,13 @@ public:
 
     SentinelDriveSubsystem(
         aruwlib::Drivers* drivers,
+        aruwlib::gpio::Digital::InputPin leftLimitSwitch,
+        aruwlib::gpio::Digital::InputPin rightLimitSwitch,
         aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
         aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
         : aruwlib::control::Subsystem(drivers),
+          leftLimitSwitch(leftLimitSwitch),
+          rightLimitSwitch(rightLimitSwitch),
           velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
           velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
           desiredRpm(0),
@@ -66,32 +71,37 @@ public:
      * Returns absolute position of the sentinel, relative to the left end of the rail (when rail
      * is viewed from the front)
      */
-    float absolutePosition();
+    mockable float absolutePosition();
 
-    void setDesiredRpm(float desRpm);
+    mockable void setDesiredRpm(float desRpm);
 
     void refresh() override;
 
     void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
 
     const char* getName() override { return "Sentinel Drive"; }
 
 private:
     static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR6;
     static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
-    const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-    const aruwlib::gpio::Digital::InputPin leftLimitSwitch = aruwlib::gpio::Digital::InputPin::A;
-    const aruwlib::gpio::Digital::InputPin rightLimitSwitch = aruwlib::gpio::Digital::InputPin::B;
+    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
 
-    const float PID_P = 5.0f;
-    const float PID_I = 0.0f;
-    const float PID_D = 0.1f;
-    const float PID_MAX_ERROR_SUM = 0.0f;
-    const float PID_MAX_OUTPUT = 16000;
+    static constexpr float PID_P = 5.0f;
+    static constexpr float PID_I = 0.0f;
+    static constexpr float PID_D = 0.1f;
+    static constexpr float PID_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PID_MAX_OUTPUT = 16000;
 
     // radius of the wheel in mm
     static constexpr float WHEEL_RADIUS = 35.0f;
     static constexpr float GEAR_RATIO = 19.0f;
+
+    aruwlib::gpio::Digital::InputPin leftLimitSwitch;
+    aruwlib::gpio::Digital::InputPin rightLimitSwitch;
 
     modm::Pid<float> velocityPidLeftWheel;
 
