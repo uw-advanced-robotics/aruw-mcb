@@ -44,9 +44,6 @@ stages:
   - Build all Other Targets
   - Deploy Pages
 
-before_script:
-  - python -V # Print out python version for debugging
-
 clang-format:
   stage: Initial Verification
   script:
