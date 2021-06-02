@@ -22,15 +22,17 @@
 
 #include <modm/ui/menu/abstract_menu.hpp>
 
+#include "DummyAllocator.hpp"
+
 namespace aruwlib
 {
 class Drivers;
 namespace display
 {
-class ErrorMenu : public modm::AbstractMenu
+class ErrorMenu : public modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >
 {
 public:
-    ErrorMenu(modm::ViewStack *vs, Drivers *drivers);
+    ErrorMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> > *vs, Drivers *drivers);
 
     void draw() override;
 

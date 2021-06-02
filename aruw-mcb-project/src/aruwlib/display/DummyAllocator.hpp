@@ -17,44 +17,28 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SPLASH_SCREEN_HPP_
-#define SPLASH_SCREEN_HPP_
+#ifndef DUMMY_ALLOCATOR_HPP_
+#define DUMMY_ALLOCATOR_HPP_
 
-#include <modm/ui/menu/abstract_menu.hpp>
-
-#include "DummyAllocator.hpp"
-#include "MainMenu.hpp"
+#include <modm/utils/allocator/allocator_base.hpp>
 
 namespace aruwlib
 {
-class Drivers;
 namespace display
 {
-class SplashScreen : public modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >
+template <typename T>
+class DummyAllocator : public modm::allocator::AllocatorBase<T>
 {
 public:
-    SplashScreen(
-        modm::ViewStack<DummyAllocator<modm::IAbstractView> > *vs,
-        aruwlib::Drivers *drivers);
+    DummyAllocator() : modm::allocator::AllocatorBase<T>() {}
 
-    void draw() override;
+    DummyAllocator(const DummyAllocator& other) = default;
 
-    void update() override;
+    T* allocate(size_t) {}
 
-    void shortButtonPress(modm::MenuButtons::Button button) override;
-
-    bool hasChanged() override;
-
-    inline void resetHasChanged() { drawn = false; }
-
-private:
-    static constexpr int SPLASH_SCREEN_MENU_ID = 1;
-
-    bool drawn = false;
-    aruwlib::Drivers *drivers;
-    MainMenu mainMenu;
-};
+    void deallocate(T*) {}
+};  // class DummyAllocator
 }  // namespace display
 }  // namespace aruwlib
 
-#endif  // SPLASH_SCREEN_HPP_
+#endif  // DUMMY_ALLOCATOR_HPP_

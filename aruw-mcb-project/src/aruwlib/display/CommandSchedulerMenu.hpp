@@ -25,6 +25,7 @@
 #include "aruwlib/architecture/periodic_timer.hpp"
 #include "aruwlib/control/command_scheduler_types.hpp"
 
+#include "DummyAllocator.hpp"
 #include "VerticalScrollLogicHandler.hpp"
 
 namespace aruwlib
@@ -39,10 +40,12 @@ class Subsystem;
 
 namespace display
 {
-class CommandSchedulerMenu : public modm::AbstractMenu
+class CommandSchedulerMenu : public modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >
 {
 public:
-    CommandSchedulerMenu(modm::ViewStack *stack, Drivers *drivers);
+    CommandSchedulerMenu(
+        modm::ViewStack<DummyAllocator<modm::IAbstractView> > *stack,
+        Drivers *drivers);
 
     ~CommandSchedulerMenu() = default;
 

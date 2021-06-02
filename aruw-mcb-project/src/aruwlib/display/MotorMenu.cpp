@@ -35,10 +35,11 @@ namespace aruwlib
 {
 namespace display
 {
-MotorMenu::MotorMenu(modm::ViewStack* stack, Drivers* drivers)
-    : modm::AbstractMenu(stack, MOTOR_MENU_ID),
+MotorMenu::MotorMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> >* stack, Drivers* drivers)
+    : modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >(stack, MOTOR_MENU_ID),
       drivers(drivers),
-      verticalScroll(drivers, DjiMotorTxHandler::DJI_MOTORS_PER_CAN * 2, DISPLAY_MAX_ENTRIES)
+      verticalScroll(drivers, DjiMotorTxHandler::DJI_MOTORS_PER_CAN * 2, DISPLAY_MAX_ENTRIES),
+      motorSpecificMenu(stack, drivers, nullptr)
 {
 }
 
@@ -156,25 +157,22 @@ void MotorMenu::shortButtonPress(modm::MenuButtons::Button button)
         case modm::MenuButtons::RIGHT:
         {
             int8_t idx = verticalScroll.getCursorIndex();
+            const DjiMotor* motor;
             if (idx < DjiMotorTxHandler::DJI_MOTORS_PER_CAN)  // idx between [0, 8)
             {
-                const DjiMotor* motor =
-                    drivers->djiMotorTxHandler.getCan1Motor(NORMALIZED_ID_TO_DJI_MOTOR(idx));
-                if (motor != nullptr)
-                {
-                    this->getViewStack()->push(
-                        new MotorSpecificMenu(getViewStack(), drivers, motor));
-                }
+                motor = drivers->djiMotorTxHandler.getCan1Motor(NORMALIZED_ID_TO_DJI_MOTOR(idx));
             }
             else  // idx between [8, 16)
             {
-                const DjiMotor* motor = drivers->djiMotorTxHandler.getCan2Motor(
+                motor = drivers->djiMotorTxHandler.getCan2Motor(
                     NORMALIZED_ID_TO_DJI_MOTOR(idx - DjiMotorTxHandler::DJI_MOTORS_PER_CAN));
-                if (motor != nullptr)
-                {
-                    this->getViewStack()->push(
-                        new MotorSpecificMenu(getViewStack(), drivers, motor));
-                }
+            }
+
+            if (motor != nullptr)
+            {
+                MotorSpecificMenu* mm =
+                    new (&motorSpecificMenu) MotorSpecificMenu(getViewStack(), drivers, motor);
+                this->getViewStack()->push(mm);
             }
             break;
         }

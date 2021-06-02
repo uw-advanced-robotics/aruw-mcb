@@ -31,10 +31,10 @@ namespace aruwlib
 namespace display
 {
 MotorSpecificMenu::MotorSpecificMenu(
-    modm::ViewStack *stack,
+    modm::ViewStack<DummyAllocator<modm::IAbstractView> > *stack,
     Drivers *drivers,
     const DjiMotor *motor)
-    : modm::AbstractMenu(stack, 1),
+    : modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >(stack, 1),
       drivers(drivers),
       associatedMotor(motor)
 {
@@ -81,6 +81,11 @@ void MotorSpecificMenu::shortButtonPress(modm::MenuButtons::Button button)
 
 bool MotorSpecificMenu::hasChanged()
 {
+    if (associatedMotor == nullptr)
+    {
+        return false;
+    }
+
     bool sameOutputDesired = (associatedMotor->getOutputDesired() == currDesiredOutput);
     bool sameInverted = (associatedMotor->isMotorInverted() == currIsInverted);
     bool sameEncoderWrapped = (associatedMotor->getEncoderWrapped() == currEncoderWrapped);
