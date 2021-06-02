@@ -39,7 +39,7 @@ void aruwlib::can::Can::initialize()
     CanFilter::setStartFilterBankForCan2(14);
     // initialize CAN 1
     Can1::connect<GpioD0::Rx, GpioD1::Tx>(Gpio::InputType::PullUp);
-    modm_assert((Can1::initialize< Board::SystemClock, 1000_kbps >(9)), "Can2", "initialize-failed");
+    modm_assert((Can1::initialize<Board::SystemClock, 1000_kbps>(9)), "Can2", "initialize-failed");
     // receive every message for CAN 1
     CanFilter::setFilter(
         0,

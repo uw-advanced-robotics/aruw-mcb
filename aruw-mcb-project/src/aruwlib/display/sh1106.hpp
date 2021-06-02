@@ -40,8 +40,7 @@ template <
     unsigned int Width,
     unsigned int Height,
     bool Flipped>
-class Sh1106 : public modm::MonochromeGraphicDisplayVertical<Width, Height>,
-               modm::Resumable<1>
+class Sh1106 : public modm::MonochromeGraphicDisplayVertical<Width, Height>, modm::Resumable<1>
 {
 public:
     virtual ~Sh1106() {}
