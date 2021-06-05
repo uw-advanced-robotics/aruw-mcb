@@ -24,13 +24,15 @@
 
 #include <modm/ui/menu/abstract_menu.hpp>
 
+#include "aruwlib/Drivers.hpp"
 #include "aruwlib/rm-dev-board-a/board.hpp"
 
 #include "modm/processing/timer/periodic_timer.hpp"
 
+#include "VerticalScrollLogicHandler.hpp"
+
 namespace aruwlib
 {
-class Drivers;
 namespace display
 {
 class CVMenu : public modm::AbstractMenu
@@ -50,6 +52,8 @@ public:
 
 private:
     Drivers *drivers;
+    VerticalScrollLogicHandler *verticalScrollLogic;
+
 };  // class CVMenu
 }  // namespace display
 }  // namespace aruwlib

@@ -16,9 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "MenuIdentifiers.h"
-
-
 #include "HardwareTestMenu.hpp"
 
 #include <algorithm>
@@ -26,6 +23,8 @@
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/control/command_scheduler.hpp"
 #include "aruwlib/control/subsystem.hpp"
+
+#include "MenuIdentifiers.h"
 
 namespace aruwlib
 {

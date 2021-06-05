@@ -17,13 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "MenuIdentifiers.h"
-
 #include "MainMenu.hpp"
 
 #include "CommandSchedulerMenu.hpp"
 #include "ErrorMenu.hpp"
 #include "HardwareTestMenu.hpp"
+#include "MenuIdentifiers.h"
 #include "MotorMenu.hpp"
 
 namespace aruwlib

@@ -35,7 +35,7 @@
 /* communication includes ---------------------------------------------------*/
 #include <aruwlib/DriversSingleton.hpp>
 
-#include "aruwsrc/serial/xavier_serial.hpp"
+#include "main.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include <aruwlib/errors/create_errors.hpp>
@@ -50,8 +50,6 @@ using aruwlib::Drivers;
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 aruwlib::arch::PeriodicMilliTimer sendXavierTimeout(3);
-
-aruwsrc::serial::XavierSerial xavierSerial(aruwlib::DoNotUse_getDrivers(), nullptr, nullptr);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.

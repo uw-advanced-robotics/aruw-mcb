@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "MenuIdentifiers.h"
-
 #include "MotorMenu.hpp"
 
 #include <algorithm>
@@ -27,6 +25,7 @@
 #include "aruwlib/motor/dji_motor.hpp"
 #include "aruwlib/motor/dji_motor_tx_handler.hpp"
 
+#include "MenuIdentifiers.h"
 #include "MotorSpecificMenu.hpp"
 
 using namespace aruwlib::motor;

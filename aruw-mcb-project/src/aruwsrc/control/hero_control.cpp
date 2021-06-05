@@ -28,12 +28,8 @@
 
 #include "agitator/agitator_calibrate_command.hpp"
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
-<<<<<<< HEAD
 #include "agitator/agitator_subsystem.hpp"
 #include "aruwsrc/serial/xavier_serial.hpp"
-=======
-#include "agitator/limited_agitator_subsystem.hpp"
->>>>>>> origin/develop
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
