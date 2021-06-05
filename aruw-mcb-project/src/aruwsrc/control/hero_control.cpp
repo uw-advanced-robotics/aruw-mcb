@@ -28,8 +28,12 @@
 
 #include "agitator/agitator_calibrate_command.hpp"
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
+<<<<<<< HEAD
 #include "agitator/agitator_subsystem.hpp"
 #include "aruwsrc/serial/xavier_serial.hpp"
+=======
+#include "agitator/limited_agitator_subsystem.hpp"
+>>>>>>> origin/develop
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
@@ -74,7 +78,7 @@ TurretSubsystem turret(drivers());
 ChassisSubsystem chassis(drivers());
 
 // Hero has two agitators, one waterWheel and then a kicker
-AgitatorSubsystem waterWheelAgitator(
+LimitedAgitatorSubsystem waterWheelAgitator(
     drivers(),
     AgitatorSubsystem::PID_HERO1_P,
     AgitatorSubsystem::PID_HERO1_I,
@@ -84,7 +88,11 @@ AgitatorSubsystem waterWheelAgitator(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::HERO1_AGITATOR_MOTOR_ID,
     AgitatorSubsystem::HERO1_AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO1_AGITATOR_INVERTED);
+    AgitatorSubsystem::HERO1_AGITATOR_INVERTED,
+    LimitedAgitatorSubsystem::WATERWHEEL_LIMIT_PIN,
+    LimitedAgitatorSubsystem::WATERWHEEL_DEBOUNCE_MAX_SUM,
+    LimitedAgitatorSubsystem::WATERWHEEL_DEBOUNCE_LOWER_BOUND,
+    LimitedAgitatorSubsystem::WATERWHEEL_DEBOUNCE_UPPER_BOUND);
 
 AgitatorSubsystem kickerAgitator(
     drivers(),
@@ -109,13 +117,10 @@ TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret
 
 TurretCVCommand turretCVCommand(&xavierSerial, &turret);
 
-AgitatorCalibrateCommand waterWheelAgitatorCalibrateCommand(&waterWheelAgitator);
-ShootFastComprisedCommand17MM waterWheelAgitatorShootFastCommand(drivers(), &waterWheelAgitator);
-ShootSlowComprisedCommand17MM waterWheelAgitatorShootSlowCommand(drivers(), &waterWheelAgitator);
+WaterwheelLoadCommand42mm waterwheelLoadCommand(drivers(), &waterWheelAgitator);
 
-AgitatorCalibrateCommand kickerAgitatorCalibrateCommand(&kickerAgitator);
-ShootFastComprisedCommand17MM kickerAgitatorShootFastCommand(drivers(), &kickerAgitator);
-ShootSlowComprisedCommand17MM kickerAgitatorShootSlowCommand(drivers(), &kickerAgitator);
+ShootComprisedCommand42mm kickerShootHeatLimitedCommand(drivers(), &kickerAgitator, true);
+ShootComprisedCommand42mm kickerShootUnlimitedCommand(drivers(), &kickerAgitator, false);
 
 FrictionWheelRotateCommand spinFrictionWheels(
     &frictionWheels,
@@ -136,10 +141,9 @@ HoldCommandMapping leftSwitchDown(
     drivers(),
     {&wiggleDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-HoldRepeatCommandMapping rightSwitchUp(
+HoldCommandMapping rightSwitchUp(
     drivers(),
-    {&waterWheelAgitatorShootFastCommand,
-     &kickerAgitatorShootFastCommand},  // TODO: update these agitator commands
+    {&kickerShootHeatLimitedCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
@@ -147,14 +151,14 @@ ToggleCommandMapping rToggled(drivers(), {&stopFrictionWheels}, RemoteMapState({
 
 ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
 
-HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
+HoldCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&waterWheelAgitatorShootFastCommand, &kickerAgitatorShootFastCommand},
+    {&kickerShootHeatLimitedCommand},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
 
 HoldCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&waterWheelAgitatorShootSlowCommand, &kickerAgitatorShootSlowCommand},
+    {&kickerShootUnlimitedCommand},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}));
 
 HoldCommandMapping rightMousePressed(
@@ -189,15 +193,12 @@ void setDefaultHeroCommands(aruwlib::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
+    waterWheelAgitator.setDefaultCommand(&waterwheelLoadCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(aruwlib::Drivers *drivers)
-{
-    drivers->commandScheduler.addCommand(&waterWheelAgitatorCalibrateCommand);
-    drivers->commandScheduler.addCommand(&kickerAgitatorCalibrateCommand);
-}
+void startHeroCommands(aruwlib::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
 void registerHeroIoMappings(aruwlib::Drivers *drivers)
