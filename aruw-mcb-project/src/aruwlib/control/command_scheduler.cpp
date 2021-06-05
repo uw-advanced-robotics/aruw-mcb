@@ -19,12 +19,12 @@
 
 #include "command_scheduler.hpp"
 
-#include <algorithm>
-#include <utility>
-
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/errors/create_errors.hpp"
+
+#include "command.hpp"
+#include "subsystem.hpp"
 
 using namespace aruwlib::errors;
 
@@ -169,10 +169,12 @@ void CommandScheduler::run()
         // if a hardware test is not already complete
         for (auto it = subMapBegin(); it != subMapEnd(); it++)
         {
-            if (!(*it)->isHardwareTestComplete())
+            Subsystem *sub = *it;
+            if (!sub->isHardwareTestComplete())
             {
-                (*it)->runHardwareTests();
+                sub->runHardwareTests();
             }
+            sub->refresh();
         }
         return;
     }

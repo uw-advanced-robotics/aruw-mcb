@@ -19,6 +19,7 @@
 
 #include "sentinel_drive_subsystem.hpp"
 
+#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/errors/create_errors.hpp>
 
@@ -128,8 +129,12 @@ float SentinelDriveSubsystem::distanceFromEncoder(aruwlib::motor::DjiMotor* moto
 
 void SentinelDriveSubsystem::runHardwareTests()
 {
-    // TODO
+    if (abs(rightWheel.getShaftRPM()) > 50.0f) this->setHardwareTestsComplete();
 }
+
+void SentinelDriveSubsystem::onHardwareTestStart() { this->setDesiredRpm(100.0f); }
+
+void SentinelDriveSubsystem::onHardwareTestComplete() { this->setDesiredRpm(0.0f); }
 
 }  // namespace control
 

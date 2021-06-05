@@ -23,6 +23,7 @@
 #include <cfloat>
 #include <random>
 
+#include <aruwlib/Drivers.hpp>
 #include <aruwlib/algorithms/math_user_utils.hpp>
 #include <aruwlib/architecture/clock.hpp>
 #include <aruwlib/control/CommandMapper.hpp>
@@ -200,20 +201,6 @@ void TurretSubsystem::setYawMotorOutput(float out)
     }
 }
 
-const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getYawAngle() const
-{
-    return currYawAngle;
-}
-
-const aruwlib::algorithms::ContiguousFloat& TurretSubsystem::getPitchAngle() const
-{
-    return currPitchAngle;
-}
-
-float TurretSubsystem::getYawTarget() const { return yawTarget.getValue(); }
-
-float TurretSubsystem::getPitchTarget() const { return pitchTarget.getValue(); }
-
 void TurretSubsystem::setYawTarget(float target)
 {
     yawTarget.setValue(target);
@@ -249,9 +236,10 @@ float TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
         FEED_FORWARD_MAX_OUTPUT);
 }
 
-void TurretSubsystem::runHardwareTests()
+void TurretSubsystem::onHardwareTestStart()
 {
-    // TODO
+    pitchMotor.setDesiredOutput(0);
+    yawMotor.setDesiredOutput(0);
 }
 
 }  // namespace turret

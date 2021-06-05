@@ -19,8 +19,9 @@
 
 #include "dji_serial.hpp"
 
-#include "aruwlib/algorithms/crc.hpp"
+#include "aruwlib/Drivers.hpp"
 #include "aruwlib/architecture/clock.hpp"
+#include "aruwlib/architecture/endianness_wrappers.hpp"
 #include "aruwlib/communication/serial/uart.hpp"
 #include "aruwlib/errors/create_errors.hpp"
 
@@ -28,25 +29,21 @@ namespace aruwlib
 {
 namespace serial
 {
-template class DJISerial<false>;
-template class DJISerial<true>;
-
-template <bool RxCrcEnabled>
-DJISerial<RxCrcEnabled>::DJISerial(Drivers *drivers, Uart::UartPort port)
+DJISerial::DJISerial(Drivers *drivers, Uart::UartPort port, bool isRxCRCEnforcementEnabled)
     : port(port),
       djiSerialRxState(SERIAL_HEADER_SEARCH),
+      newMessage(),
+      mostRecentMessage(),
       frameCurrReadByte(0),
       frameHeader(),
+      rxCrcEnabled(isRxCRCEnforcementEnabled),
       txBuffer(),
-      drivers(drivers)
+      drivers(drivers),
+      txMessage()
 {
-    txMessage.length = 0;
-    newMessage.length = 0;
-    mostRecentMessage.length = 0;
 }
 
-template <bool RxCrcEnabled>
-void DJISerial<RxCrcEnabled>::initialize()
+void DJISerial::initialize()
 {
     switch (this->port)
     {
@@ -64,8 +61,7 @@ void DJISerial<RxCrcEnabled>::initialize()
     }
 }
 
-template <bool RxCrcEnabled>
-bool DJISerial<RxCrcEnabled>::send()
+bool DJISerial::send()
 {
     txBuffer[0] = SERIAL_HEAD_BYTE;
     txBuffer[FRAME_DATA_LENGTH_OFFSET] = txMessage.length & 0xFF;
@@ -110,8 +106,7 @@ bool DJISerial<RxCrcEnabled>::send()
     return true;
 }
 
-template <bool RxCrcEnabled>
-void DJISerial<RxCrcEnabled>::updateSerial()
+void DJISerial::updateSerial()
 {
     switch (djiSerialRxState)
     {
@@ -168,7 +163,7 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                 }
 
                 // check crc8 on header
-                if (RxCrcEnabled)
+                if (rxCrcEnabled)
                 {
                     uint8_t CRC8 = frameHeader[FRAME_CRC8_OFFSET];
                     // don't look at crc8 or frame type when calculating crc8
@@ -184,6 +179,9 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                     }
                 }
 
+                // Calculate header portion of crc16
+                currCrc16 = algorithms::calculateCRC16(frameHeader, FRAME_HEADER_LENGTH);
+
                 // move on to processing message body
                 djiSerialRxState = PROCESS_FRAME_DATA;
             }
@@ -193,7 +191,7 @@ void DJISerial<RxCrcEnabled>::updateSerial()
         {
             // add on extra 2 bytes for crc enforcement, and read bytes until
             // the length has been reached
-            if (RxCrcEnabled)
+            if (rxCrcEnabled)
             {
                 frameCurrReadByte += read(
                     newMessage.data + frameCurrReadByte,
@@ -206,24 +204,17 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                     newMessage.length - frameCurrReadByte);
             }
 
-            if ((frameCurrReadByte == newMessage.length && !RxCrcEnabled) ||
-                (frameCurrReadByte == newMessage.length + 2 && RxCrcEnabled))
+            if ((frameCurrReadByte == newMessage.length && !rxCrcEnabled) ||
+                (frameCurrReadByte == newMessage.length + 2 && rxCrcEnabled))
             {
                 frameCurrReadByte = 0;
-                if (RxCrcEnabled)
+                if (rxCrcEnabled)
                 {
-                    memcpy(rxCrcEnforcementBuff, frameHeader, FRAME_HEADER_LENGTH);
-                    memcpy(
-                        rxCrcEnforcementBuff + FRAME_HEADER_LENGTH,
-                        newMessage.data,
-                        newMessage.length);
-
-                    uint16_t CRC16 = (newMessage.data[newMessage.length + 1] << 8) |
-                                     newMessage.data[newMessage.length];
-                    if (!verifyCRC16(
-                            rxCrcEnforcementBuff,
-                            FRAME_HEADER_LENGTH + newMessage.length,
-                            CRC16))
+                    uint16_t CRC16;
+                    arch::convertFromLittleEndian(&CRC16, newMessage.data + newMessage.length);
+                    currCrc16 =
+                        algorithms::calculateCRC16(newMessage.data, newMessage.length, currCrc16);
+                    if (currCrc16 != CRC16)
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR(
@@ -245,8 +236,8 @@ void DJISerial<RxCrcEnabled>::updateSerial()
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
             else if (
-                (frameCurrReadByte > newMessage.length && !RxCrcEnabled) ||
-                (frameCurrReadByte > newMessage.length + 2 && RxCrcEnabled))
+                (frameCurrReadByte > newMessage.length && !rxCrcEnabled) ||
+                (frameCurrReadByte > newMessage.length + 2 && rxCrcEnabled))
             {
                 frameCurrReadByte = 0;
                 RAISE_ERROR(
@@ -261,38 +252,12 @@ void DJISerial<RxCrcEnabled>::updateSerial()
     }
 }
 
-template <bool RxCrcEnabled>
-bool DJISerial<RxCrcEnabled>::verifyCRC8(uint8_t *data, uint32_t length, uint8_t expectedCRC8)
-{
-    uint8_t actualCRC8 = 0;
-    if (data == NULL)
-    {
-        return false;
-    }
-    actualCRC8 = algorithms::calculateCRC8(data, length);
-    return actualCRC8 == expectedCRC8;
-}
-
-template <bool RxCrcEnabled>
-bool DJISerial<RxCrcEnabled>::verifyCRC16(uint8_t *data, uint32_t length, uint16_t expectedCRC16)
-{
-    uint16_t actualCRC16 = 0;
-    if (data == NULL)
-    {
-        return false;
-    }
-    actualCRC16 = algorithms::calculateCRC16(data, length);
-    return actualCRC16 == expectedCRC16;
-}
-
-template <bool RxCrcEnabled>
-uint32_t DJISerial<RxCrcEnabled>::read(uint8_t *data, uint16_t length)
+uint32_t DJISerial::read(uint8_t *data, uint16_t length)
 {
     return drivers->uart.read(this->port, data, length);
 }
 
-template <bool RxCrcEnabled>
-uint32_t DJISerial<RxCrcEnabled>::write(const uint8_t *data, uint16_t length)
+uint32_t DJISerial::write(const uint8_t *data, uint16_t length)
 {
     if (drivers->uart.isWriteFinished(this->port))
     {

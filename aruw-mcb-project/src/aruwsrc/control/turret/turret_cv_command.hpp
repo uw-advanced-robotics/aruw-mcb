@@ -31,6 +31,10 @@
 
 namespace aruwsrc
 {
+namespace serial
+{
+class XavierSerial;
+}
 namespace turret
 {
 /**
@@ -40,7 +44,7 @@ namespace turret
 class TurretCVCommand : public aruwlib::control::Command
 {
 public:
-    TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem);
+    TurretCVCommand(serial::XavierSerial *xavierSerial, TurretSubsystem *subsystem);
 
     void initialize() override;
 
@@ -75,7 +79,7 @@ private:
 
     static constexpr uint32_t TIME_BETWEEN_CV_REQUESTS = 1000;
 
-    aruwlib::Drivers *drivers;
+    serial::XavierSerial *xavierSerial;
 
     TurretSubsystem *turretSubsystem;
 
@@ -84,8 +88,6 @@ private:
 
     aruwsrc::algorithms::TurretPid yawPid;
     aruwsrc::algorithms::TurretPid pitchPid;
-
-    aruwlib::arch::MilliTimeout sendRequestTimer;
 
     uint32_t prevTime;
 
