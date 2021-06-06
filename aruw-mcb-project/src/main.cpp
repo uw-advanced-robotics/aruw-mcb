@@ -43,6 +43,8 @@
 
 #include "aruwsrc/control/robot_control.hpp"
 
+#include "aruwlib/architecture/endianness_wrappers.hpp"
+
 using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/
@@ -59,10 +61,6 @@ static void updateIo(aruwlib::Drivers *drivers);
 
 int main()
 {
-#ifdef PLATFORM_HOSTED
-    std::cout << "Simulation starting..." << std::endl;
-#endif
-
     /*
      * NOTE: We are using DoNotUse_getDrivers here because in the main
      *      robot loop we must access the singleton drivers to update
@@ -72,13 +70,6 @@ int main()
 
     Board::initialize();
     initializeIo(drivers);
-    aruwsrc::control::initSubsystemCommands(drivers);
-
-#ifdef PLATFORM_HOSTED
-    aruwlib::motorsim::SimHandler::resetMotorSims();
-    // Blocking call, waits until Windows Simulator connects.
-    aruwlib::communication::TCPServer::MainServer()->getConnection();
-#endif
 
     while (1)
     {
@@ -89,10 +80,25 @@ int main()
         {
             PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
             PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
-            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
-            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+
+            // I think these are all between -180 and 180 but I'm not sure
+            float pitch = drivers->mpu6500.getPitch();
+            float yaw = drivers->mpu6500.getYaw();
+            // TODO check how large these get
+            int16_t gxRaw = drivers->mpu6500.getGx();
+            int16_t gzRaw = drivers->mpu6500.getGz();
+
+            if (drivers->can.isReadyToSend(aruwlib::can::CanBus::CAN_BUS1))
+            {
+                // We need to send > 8 bytes, so send two messages
+                modm::can::Message msg(0x201, 8);
+                msg.setExtended(false);
+                aruwlib::arch::convertToLittleEndian(static_cast<int16_t>(pitch * 100.0f), msg.data);
+                aruwlib::arch::convertToLittleEndian(static_cast<int16_t>(yaw * 100.0f), msg.data + 2);
+                aruwlib::arch::convertToLittleEndian(gxRaw, msg.data + 4);
+                aruwlib::arch::convertToLittleEndian(gzRaw, msg.data + 6);
+                drivers->can.sendMessage(aruwlib::can::CanBus::CAN_BUS1, msg);
+            }
         }
         modm::delay_us(10);
     }
@@ -101,32 +107,13 @@ int main()
 
 static void initializeIo(aruwlib::Drivers *drivers)
 {
-    drivers->analog.init();
-    drivers->pwm.init();
-    drivers->digital.init();
     drivers->leds.init();
     drivers->can.initialize();
     drivers->errorController.init();
-    drivers->remote.initialize();
     drivers->mpu6500.init();
-    drivers->refSerial.initialize();
-    drivers->xavierSerial.initialize();
-    drivers->terminalSerial.initialize();
-    drivers->oledDisplay.initialize();
-    drivers->schedulerTerminalHandler.init();
-    drivers->djiMotorTerminalSerialHandler.init();
 }
 
 static void updateIo(aruwlib::Drivers *drivers)
 {
-#ifdef PLATFORM_HOSTED
-    aruwlib::motorsim::SimHandler::updateSims();
-#endif
-
-    drivers->canRxHandler.pollCanData();
-    drivers->xavierSerial.updateSerial();
-    drivers->refSerial.updateSerial();
-    drivers->remote.read();
-    drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
 }
