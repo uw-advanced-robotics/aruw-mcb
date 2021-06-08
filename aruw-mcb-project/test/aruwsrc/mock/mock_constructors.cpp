@@ -24,6 +24,7 @@
 #include "FrictionWheelSubsystemMock.hpp"
 #include "GrabberSubsystemMock.hpp"
 #include "HopperSubsystemMock.hpp"
+#include "OledDisplayMock.hpp"
 #include "SentinelDriveSubsystemMock.hpp"
 #include "TowSubsystemMock.hpp"
 #include "TurretSubsystemMock.hpp"
@@ -103,6 +104,9 @@ HopperSubsystemMock::HopperSubsystemMock(
 {
 }
 HopperSubsystemMock::~HopperSubsystemMock() {}
+
+OledDisplayMock::OledDisplayMock(aruwlib::Drivers *drivers) : display::OledDisplay(drivers) {}
+OledDisplayMock::~OledDisplayMock() {}
 
 SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
     aruwlib::Drivers *drivers,

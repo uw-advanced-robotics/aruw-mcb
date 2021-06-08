@@ -24,11 +24,15 @@
 
 namespace aruwlib
 {
+class Drivers;
 namespace motor
 {
 class DjiMotor;
 }
-class Drivers;
+}  // namespace aruwlib
+
+namespace aruwsrc
+{
 namespace display
 {
 class MotorSpecificMenu : public modm::AbstractMenu
@@ -36,7 +40,7 @@ class MotorSpecificMenu : public modm::AbstractMenu
 public:
     MotorSpecificMenu(
         modm::ViewStack* stack,
-        Drivers* drivers,
+        aruwlib::Drivers* drivers,
         const aruwlib::motor::DjiMotor* motor);
 
     void draw() override;
@@ -48,7 +52,7 @@ public:
     bool hasChanged() override;
 
 private:
-    Drivers* drivers;
+    aruwlib::Drivers* drivers;
     const aruwlib::motor::DjiMotor* associatedMotor;
 
     int16_t currDesiredOutput = 0;
@@ -57,6 +61,6 @@ private:
     int16_t currRPM = 0;
 };
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc
 
 #endif  // MOTOR_SPECIFIC_MENU_HPP_

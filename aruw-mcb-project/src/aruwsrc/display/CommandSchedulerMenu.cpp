@@ -26,11 +26,11 @@
 #include "aruwlib/control/command_scheduler.hpp"
 #include "aruwlib/control/subsystem.hpp"
 
-namespace aruwlib
+namespace aruwsrc
 {
 namespace display
 {
-CommandSchedulerMenu::CommandSchedulerMenu(modm::ViewStack *stack, Drivers *drivers)
+CommandSchedulerMenu::CommandSchedulerMenu(modm::ViewStack *stack, aruwlib::Drivers *drivers)
     : modm::AbstractMenu(stack, 1),
       drivers(drivers),
       vertScrollHandler(drivers, 0, MAX_ENTRIES_DISPLAYED),
@@ -98,7 +98,7 @@ void CommandSchedulerMenu::draw()
     std::for_each(
         drivers->commandScheduler.subMapBegin(),
         drivers->commandScheduler.subMapEnd(),
-        [&](control::Subsystem *sub) {
+        [&](aruwlib::control::Subsystem *sub) {
             if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
                 index <= vertScrollHandler.getLargestIndexDisplayed())
             {
@@ -115,7 +115,7 @@ void CommandSchedulerMenu::draw()
     std::for_each(
         drivers->commandScheduler.cmdMapBegin(),
         drivers->commandScheduler.cmdMapEnd(),
-        [&](control::Command *cmd) {
+        [&](aruwlib::control::Command *cmd) {
             // Only display stuff within bounds of the scroll handler.
             if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
                 index <= vertScrollHandler.getLargestIndexDisplayed())
@@ -127,4 +127,4 @@ void CommandSchedulerMenu::draw()
         });
 }
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc

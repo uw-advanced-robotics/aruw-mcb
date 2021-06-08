@@ -26,13 +26,13 @@
 
 using namespace aruwlib::motor;
 
-namespace aruwlib
+namespace aruwsrc
 {
 namespace display
 {
 MotorSpecificMenu::MotorSpecificMenu(
     modm::ViewStack *stack,
-    Drivers *drivers,
+    aruwlib::Drivers *drivers,
     const DjiMotor *motor)
     : modm::AbstractMenu(stack, 1),
       drivers(drivers),
@@ -49,8 +49,8 @@ void MotorSpecificMenu::draw()
         RAISE_ERROR(
             drivers,
             "MotorSpecificMenu has nullptr associated motor",
-            errors::OLED_DISPLAY,
-            errors::OLEDErrors::NULLPTR_DJI_MOTOR_IN_MOTOR_SPECIFIC_MENU);
+            aruwlib::errors::OLED_DISPLAY,
+            aruwlib::errors::OLEDErrors::NULLPTR_DJI_MOTOR_IN_MOTOR_SPECIFIC_MENU);
         return;
     }
 
@@ -88,4 +88,4 @@ bool MotorSpecificMenu::hasChanged()
     return !(sameOutputDesired && sameInverted && sameEncoderWrapped);
 }
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc

@@ -24,10 +24,9 @@
 
 #include "aruwlib/architecture/periodic_timer.hpp"
 #include "aruwlib/control/command_scheduler_types.hpp"
+#include "aruwlib/display/VerticalScrollLogicHandler.hpp"
 
-#include "VerticalScrollLogicHandler.hpp"
-
-namespace aruwlib
+namespace aruwsrc
 {
 class Drivers;
 
@@ -42,7 +41,7 @@ namespace display
 class CommandSchedulerMenu : public modm::AbstractMenu
 {
 public:
-    CommandSchedulerMenu(modm::ViewStack *stack, Drivers *drivers);
+    CommandSchedulerMenu(modm::ViewStack *stack, aruwlib::Drivers *drivers);
 
     ~CommandSchedulerMenu() = default;
 
@@ -59,13 +58,13 @@ public:
 private:
     static constexpr int MAX_ENTRIES_DISPLAYED = 5;
 
-    Drivers *drivers;
-    VerticalScrollLogicHandler vertScrollHandler;
+    aruwlib::Drivers *drivers;
+    aruwlib::display::VerticalScrollLogicHandler vertScrollHandler;
     bool firstDrawTime;
-    control::subsystem_scheduler_bitmap_t prevRegisteredSubsystems = 0;
-    control::command_scheduler_bitmap_t prevAddedCommands = 0;
+    aruwlib::control::subsystem_scheduler_bitmap_t prevRegisteredSubsystems = 0;
+    aruwlib::control::command_scheduler_bitmap_t prevAddedCommands = 0;
 };  // class CommandSchedulerMenu
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc
 
 #endif  // COMMAND_SCHEDULER_MENU_HPP_

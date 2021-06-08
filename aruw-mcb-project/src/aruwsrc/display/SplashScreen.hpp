@@ -17,55 +17,42 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTOR_MENU_HPP_
-#define MOTOR_MENU_HPP_
+#ifndef SPLASH_SCREEN_HPP_
+#define SPLASH_SCREEN_HPP_
 
 #include <modm/ui/menu/abstract_menu.hpp>
 
-#include "aruwlib/communication/can/CanBus.hpp"
-
-#include "VerticalScrollLogicHandler.hpp"
-
 namespace aruwlib
 {
-namespace motor
-{
-class DjiMotor;
-}
 class Drivers;
+}
 
+namespace aruwsrc
+{
 namespace display
 {
-class MotorMenu : public modm::AbstractMenu
+class SplashScreen : public modm::AbstractMenu
 {
 public:
-    MotorMenu(modm::ViewStack *stack, Drivers *drivers);
-
-    virtual ~MotorMenu() = default;
+    SplashScreen(modm::ViewStack *vs, aruwlib::Drivers *drivers);
 
     void draw() override;
 
     void update() override;
 
-    bool hasChanged() override;
-
     void shortButtonPress(modm::MenuButtons::Button button) override;
 
-    static const char *getMenuName() { return "Motor Menu"; }
+    bool hasChanged() override;
+
+    inline void resetHasChanged() { drawn = false; }
 
 private:
-    static constexpr int MOTOR_MENU_ID = 5;
-    static constexpr int DISPLAY_MAX_ENTRIES = 7;
+    static constexpr int SPLASH_SCREEN_MENU_ID = 1;
 
-    Drivers *drivers;
-
-    VerticalScrollLogicHandler verticalScroll;
-
-    uint8_t can1PrevDisplayedStatus;
-    uint8_t can2PrevDisplayedStatus;
-
-    void drawMotor(aruwlib::can::CanBus canBus, int normalizedMotorId);
+    bool drawn = false;
+    aruwlib::Drivers *drivers;
 };
 }  // namespace display
-}  // namespace aruwlib
-#endif  // MOTOR_MENU_HPP_
+}  // namespace aruwsrc
+
+#endif  // SPLASH_SCREEN_HPP_

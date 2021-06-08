@@ -24,11 +24,11 @@
 #include "HardwareTestMenu.hpp"
 #include "MotorMenu.hpp"
 
-namespace aruwlib
+namespace aruwsrc
 {
 namespace display
 {
-MainMenu::MainMenu(modm::ViewStack* stack, Drivers* drivers)
+MainMenu::MainMenu(modm::ViewStack* stack, aruwlib::Drivers* drivers)
     : modm::StandardMenu(stack, MAIN_MENU_ID),
       drivers(drivers)
 {
@@ -85,4 +85,4 @@ void MainMenu::addCommandSchedulerCallback()
 }
 }  // namespace display
 
-}  // namespace aruwlib
+}  // namespace aruwsrc

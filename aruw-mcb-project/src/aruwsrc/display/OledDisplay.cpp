@@ -22,12 +22,13 @@
 #include "aruwlib/Drivers.hpp"
 
 using namespace modm::literals;
+using namespace aruwlib::display;
 
-namespace aruwlib
+namespace aruwsrc
 {
 namespace display
 {
-OledDisplay::OledDisplay(Drivers *drivers)
+OledDisplay::OledDisplay(aruwlib::Drivers *drivers)
     : display(),
       viewStack(&display),
       buttonHandler(drivers),
@@ -67,7 +68,7 @@ bool OledDisplay::updateDisplay()
 
 void OledDisplay::updateMenu()
 {
-    OledButtonHandler::Button buttonPressed = buttonHandler.getCurrentButtonState();
+    auto buttonPressed = buttonHandler.getCurrentButtonState();
     if (buttonPressed != OledButtonHandler::NONE && buttonPressed != prevButton)
     {
         // Seperate from above for ease of readability.
@@ -83,4 +84,4 @@ void OledDisplay::updateMenu()
     viewStack.update();
 }
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc

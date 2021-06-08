@@ -17,40 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MAIN_MENU_HPP_
-#define MAIN_MENU_HPP_
+#ifndef OLED_DISPLAY_MOCK_HPP_
+#define OLED_DISPLAY_MOCK_HPP_
 
-#include <modm/ui/menu/standard_menu.hpp>
+#include <gmock/gmock.h>
 
-namespace aruwlib
+#include "aruwsrc/display/OledDisplay.hpp"
+
+namespace aruwsrc::mcok
 {
-class Drivers;
-namespace display
-{
-class MainMenu : public modm::StandardMenu
+class OledDisplayMock : public display::OledDisplay
 {
 public:
-    MainMenu(modm::ViewStack *stack, Drivers *drivers);
+    explicit OledDisplayMock(aruwlib::Drivers *drivers);
+    virtual ~OledDisplayMock();
+    MOCK_METHOD(void, initialize, (), (override));
+    MOCK_METHOD(bool, updateDisplay, (), (override));
+    MOCK_METHOD(void, updateMenu, (), (override));
+};  // class OledDisplayMock
+}  // namespace aruwsrc::mcok
 
-    virtual ~MainMenu() = default;
-
-    /**
-     * Adds entries to the menu to the necessary submenus.
-     */
-    void initialize();
-
-private:
-    static constexpr int MAIN_MENU_ID = 2;
-
-    Drivers *drivers;
-
-    void addErrorMenuCallback();
-    void addHardwareTestMenuCallback();
-    void addMotorMenuCallback();
-    void addPropertyTableCallback();
-    void addCommandSchedulerCallback();
-};  // class MainMenu
-}  // namespace display
-}  // namespace aruwlib
-
-#endif  // MAIN_MENU_HPP_
+#endif  // OLED_DISPLAY_MOCK_HPP_

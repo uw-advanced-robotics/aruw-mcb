@@ -35,6 +35,7 @@
 /* communication includes ---------------------------------------------------*/
 #include <aruwlib/DriversSingleton.hpp>
 
+#include "aruwsrc/display/OledDisplay.hpp"
 #include "aruwsrc/serial/xavier_serial.hpp"
 
 /* error handling includes --------------------------------------------------*/
@@ -52,6 +53,7 @@ aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
 aruwlib::arch::PeriodicMilliTimer sendXavierTimeout(3);
 
 aruwsrc::serial::XavierSerial xavierSerial(aruwlib::DoNotUse_getDrivers(), nullptr, nullptr);
+aruwsrc::display::OledDisplay oledDisplay(aruwlib::DoNotUse_getDrivers());
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -104,7 +106,7 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            PROFILE(drivers->profiler, oledDisplay.updateMenu, ());
         }
         modm::delay_us(10);
     }
@@ -123,10 +125,10 @@ static void initializeIo(aruwlib::Drivers *drivers)
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
     drivers->terminalSerial.initialize();
-    drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
     xavierSerial.initializeCV();
+    oledDisplay.initialize();
 }
 
 static void updateIo(aruwlib::Drivers *drivers)
@@ -138,7 +140,7 @@ static void updateIo(aruwlib::Drivers *drivers)
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
-    drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
     xavierSerial.updateSerial();
+    oledDisplay.updateDisplay();
 }

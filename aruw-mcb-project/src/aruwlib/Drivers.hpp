@@ -33,7 +33,6 @@
 #include "aruwlib/mock/ErrorControllerMock.hpp"
 #include "aruwlib/mock/LedsMock.hpp"
 #include "aruwlib/mock/Mpu6500Mock.hpp"
-#include "aruwlib/mock/OledDisplayMock.hpp"
 #include "aruwlib/mock/PwmMock.hpp"
 #include "aruwlib/mock/RefSerialMock.hpp"
 #include "aruwlib/mock/RemoteMock.hpp"
@@ -59,7 +58,6 @@
 #include "control/ControlOperatorInterface.hpp"
 #include "control/SchedulerTerminalHandler.hpp"
 #include "control/command_scheduler.hpp"
-#include "display/OledDisplay.hpp"
 #include "errors/error_controller.hpp"
 #include "motor/DjiMotorTerminalSerialHandler.hpp"
 #include "motor/dji_motor_tx_handler.hpp"
@@ -95,7 +93,6 @@ public:
           errorController(this),
           terminalSerial(this),
           djiMotorTxHandler(this),
-          oledDisplay(this),
           profiler(),
           djiMotorTerminalSerialHandler(this),
           schedulerTerminalHandler(this)
@@ -141,7 +138,6 @@ public:
     errors::ErrorController errorController;
     communication::serial::TerminalSerial terminalSerial;
     motor::DjiMotorTxHandler djiMotorTxHandler;
-    display::OledDisplay oledDisplay;
     arch::Profiler profiler;
     motor::DjiMotorTerminalSerialHandler djiMotorTerminalSerialHandler;
     control::SchedulerTerminalHandler schedulerTerminalHandler;

@@ -31,11 +31,11 @@
 using namespace aruwlib::motor;
 using namespace aruwlib::can;
 
-namespace aruwlib
+namespace aruwsrc
 {
 namespace display
 {
-MotorMenu::MotorMenu(modm::ViewStack* stack, Drivers* drivers)
+MotorMenu::MotorMenu(modm::ViewStack* stack, aruwlib::Drivers* drivers)
     : modm::AbstractMenu(stack, MOTOR_MENU_ID),
       drivers(drivers),
       verticalScroll(drivers, DjiMotorTxHandler::DJI_MOTORS_PER_CAN * 2, DISPLAY_MAX_ENTRIES)
@@ -189,4 +189,4 @@ void MotorMenu::shortButtonPress(modm::MenuButtons::Button button)
     }
 }
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc

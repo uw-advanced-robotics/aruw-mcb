@@ -25,11 +25,11 @@
 #include "aruwlib/control/command_scheduler.hpp"
 #include "aruwlib/control/subsystem.hpp"
 
-namespace aruwlib
+namespace aruwsrc
 {
 namespace display
 {
-HardwareTestMenu::HardwareTestMenu(modm::ViewStack* vs, Drivers* drivers)
+HardwareTestMenu::HardwareTestMenu(modm::ViewStack* vs, aruwlib::Drivers* drivers)
     : AbstractMenu(vs, HARDWARE_TEST_MENU_ID),
       drivers(drivers),
       vertScrollHandler(drivers, 0, MAX_ENTRIES_DISPLAYED)
@@ -71,12 +71,12 @@ void HardwareTestMenu::shortButtonPress(modm::MenuButtons::Button button)
 
 bool HardwareTestMenu::hasChanged()
 {
-    control::subsystem_scheduler_bitmap_t changedSubsystems = 0;
+    aruwlib::control::subsystem_scheduler_bitmap_t changedSubsystems = 0;
     int i = 0;
     std::for_each(
         drivers->commandScheduler.subMapBegin(),
         drivers->commandScheduler.subMapEnd(),
-        [&](control::Subsystem* sub) {
+        [&](aruwlib::control::Subsystem* sub) {
             changedSubsystems += (sub->isHardwareTestComplete() ? 1UL : 0UL) << i;
             i++;
         });
@@ -105,7 +105,7 @@ void HardwareTestMenu::draw()
     std::for_each(
         drivers->commandScheduler.subMapBegin(),
         drivers->commandScheduler.subMapEnd(),
-        [&](control::Subsystem* sub) {
+        [&](aruwlib::control::Subsystem* sub) {
             if (subsystemIndex <= vertScrollHandler.getLargestIndexDisplayed() &&
                 subsystemIndex >= vertScrollHandler.getSmallestIndexDisplayed())
             {
@@ -117,4 +117,4 @@ void HardwareTestMenu::draw()
         });
 }
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc

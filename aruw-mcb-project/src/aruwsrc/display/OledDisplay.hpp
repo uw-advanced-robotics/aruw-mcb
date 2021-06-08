@@ -24,14 +24,14 @@
 #include <modm/ui/menu/view_stack.hpp>
 
 #include "aruwlib/architecture/periodic_timer.hpp"
+#include "aruwlib/display/OledButtonHandler.hpp"
+#include "aruwlib/display/sh1106.hpp"
 #include "aruwlib/rm-dev-board-a/board.hpp"
 
-#include "OledButtonHandler.hpp"
 #include "SplashScreen.hpp"
-#include "sh1106.hpp"
 #include "util_macros.hpp"
 
-namespace aruwlib
+namespace aruwsrc
 {
 class Drivers;
 namespace display
@@ -39,7 +39,7 @@ namespace display
 class OledDisplay : public ::modm::pt::Protothread
 {
 public:
-    explicit OledDisplay(Drivers *drivers);
+    explicit OledDisplay(aruwlib::Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 
@@ -62,9 +62,10 @@ public:
     mockable void updateMenu();
 
 private:
-    OledButtonHandler::Button prevButton = OledButtonHandler::NONE;
+    aruwlib::display::OledButtonHandler::Button prevButton =
+        aruwlib::display::OledButtonHandler::NONE;
 
-    Sh1106<
+    aruwlib::display::Sh1106<
 #ifndef PLATFORM_HOSTED
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
@@ -77,15 +78,15 @@ private:
 
     modm::ViewStack viewStack;
 
-    OledButtonHandler buttonHandler;
+    aruwlib::display::OledButtonHandler buttonHandler;
 
     SplashScreen splashScreen;
 
-    Drivers *drivers;
+    aruwlib::Drivers *drivers;
 
     aruwlib::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc
 
 #endif  // OLED_DISPLAY_HPP_

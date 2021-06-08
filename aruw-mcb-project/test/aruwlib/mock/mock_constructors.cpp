@@ -32,7 +32,6 @@
 #include "ErrorControllerMock.hpp"
 #include "LedsMock.hpp"
 #include "Mpu6500Mock.hpp"
-#include "OledDisplayMock.hpp"
 #include "PwmMock.hpp"
 #include "RefSerialMock.hpp"
 #include "RemoteMock.hpp"
@@ -121,9 +120,6 @@ ErrorControllerMock::~ErrorControllerMock() {}
 
 Mpu6500Mock::Mpu6500Mock(aruwlib::Drivers *drivers) : aruwlib::sensors::Mpu6500(drivers) {}
 Mpu6500Mock::~Mpu6500Mock() {}
-
-OledDisplayMock::OledDisplayMock(Drivers *drivers) : display::OledDisplay(drivers) {}
-OledDisplayMock::~OledDisplayMock() {}
 
 PwmMock::PwmMock() {}
 PwmMock::~PwmMock() {}

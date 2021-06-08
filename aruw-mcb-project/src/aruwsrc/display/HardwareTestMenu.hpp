@@ -23,10 +23,9 @@
 #include <modm/ui/menu/abstract_menu.hpp>
 
 #include "aruwlib/control/command_scheduler_types.hpp"
+#include "aruwlib/display/VerticalScrollLogicHandler.hpp"
 
-#include "VerticalScrollLogicHandler.hpp"
-
-namespace aruwlib
+namespace aruwsrc
 {
 class Drivers;
 
@@ -35,7 +34,7 @@ namespace display
 class HardwareTestMenu : public modm::AbstractMenu
 {
 public:
-    HardwareTestMenu(modm::ViewStack *vs, Drivers *drivers);
+    HardwareTestMenu(modm::ViewStack *vs, aruwlib::Drivers *drivers);
 
     void draw() override;
 
@@ -51,13 +50,13 @@ private:
     static constexpr int HARDWARE_TEST_MENU_ID = 4;
     static constexpr int MAX_ENTRIES_DISPLAYED = 6;
 
-    Drivers *drivers;
+    aruwlib::Drivers *drivers;
 
-    control::subsystem_scheduler_bitmap_t completeSubsystems = 0;
+    aruwlib::control::subsystem_scheduler_bitmap_t completeSubsystems = 0;
 
-    VerticalScrollLogicHandler vertScrollHandler;
+    aruwlib::display::VerticalScrollLogicHandler vertScrollHandler;
 };  // class HardwareTestMenu
 }  // namespace display
-}  // namespace aruwlib
+}  // namespace aruwsrc
 
 #endif  // HARDWARE_TEST_MENU_HPP_

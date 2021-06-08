@@ -17,37 +17,54 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_MENU_HPP_
-#define ERROR_MENU_HPP_
+#ifndef MOTOR_MENU_HPP_
+#define MOTOR_MENU_HPP_
 
 #include <modm/ui/menu/abstract_menu.hpp>
 
-namespace aruwlib
+#include "aruwlib/communication/can/CanBus.hpp"
+#include "aruwlib/display/VerticalScrollLogicHandler.hpp"
+
+namespace aruwsrc
 {
+namespace motor
+{
+class DjiMotor;
+}
 class Drivers;
+
 namespace display
 {
-class ErrorMenu : public modm::AbstractMenu
+class MotorMenu : public modm::AbstractMenu
 {
 public:
-    ErrorMenu(modm::ViewStack *vs, Drivers *drivers);
+    MotorMenu(modm::ViewStack *stack, aruwlib::Drivers *drivers);
+
+    virtual ~MotorMenu() = default;
 
     void draw() override;
 
     void update() override;
 
-    void shortButtonPress(modm::MenuButtons::Button button) override;
-
     bool hasChanged() override;
 
-    static const char *getMenuName() { return "Error Menu"; }
+    void shortButtonPress(modm::MenuButtons::Button button) override;
+
+    static const char *getMenuName() { return "Motor Menu"; }
 
 private:
-    static constexpr int ERROR_MENU_ID = 3;
+    static constexpr int MOTOR_MENU_ID = 5;
+    static constexpr int DISPLAY_MAX_ENTRIES = 7;
 
-    Drivers *drivers;
-};  // class ErrorMenu
+    aruwlib::Drivers *drivers;
+
+    aruwlib::display::VerticalScrollLogicHandler verticalScroll;
+
+    uint8_t can1PrevDisplayedStatus;
+    uint8_t can2PrevDisplayedStatus;
+
+    void drawMotor(aruwlib::can::CanBus canBus, int normalizedMotorId);
+};
 }  // namespace display
-}  // namespace aruwlib
-
-#endif  // ERROR_MENU_HPP_
+}  // namespace aruwsrc
+#endif  // MOTOR_MENU_HPP_

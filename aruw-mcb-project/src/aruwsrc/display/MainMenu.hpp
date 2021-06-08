@@ -17,38 +17,44 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SPLASH_SCREEN_HPP_
-#define SPLASH_SCREEN_HPP_
+#ifndef MAIN_MENU_HPP_
+#define MAIN_MENU_HPP_
 
-#include <modm/ui/menu/abstract_menu.hpp>
+#include <modm/ui/menu/standard_menu.hpp>
 
 namespace aruwlib
 {
 class Drivers;
+}
+
+namespace aruwsrc
+{
 namespace display
 {
-class SplashScreen : public modm::AbstractMenu
+class MainMenu : public modm::StandardMenu
 {
 public:
-    SplashScreen(modm::ViewStack *vs, aruwlib::Drivers *drivers);
+    MainMenu(modm::ViewStack *stack, aruwlib::Drivers *drivers);
 
-    void draw() override;
+    virtual ~MainMenu() = default;
 
-    void update() override;
-
-    void shortButtonPress(modm::MenuButtons::Button button) override;
-
-    bool hasChanged() override;
-
-    inline void resetHasChanged() { drawn = false; }
+    /**
+     * Adds entries to the menu to the necessary submenus.
+     */
+    void initialize();
 
 private:
-    static constexpr int SPLASH_SCREEN_MENU_ID = 1;
+    static constexpr int MAIN_MENU_ID = 2;
 
-    bool drawn = false;
     aruwlib::Drivers *drivers;
-};
-}  // namespace display
-}  // namespace aruwlib
 
-#endif  // SPLASH_SCREEN_HPP_
+    void addErrorMenuCallback();
+    void addHardwareTestMenuCallback();
+    void addMotorMenuCallback();
+    void addPropertyTableCallback();
+    void addCommandSchedulerCallback();
+};  // class MainMenu
+}  // namespace display
+}  // namespace aruwsrc
+
+#endif  // MAIN_MENU_HPP_
