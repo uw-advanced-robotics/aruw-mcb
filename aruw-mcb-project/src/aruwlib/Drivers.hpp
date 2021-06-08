@@ -116,7 +116,6 @@ public:
     mock::ErrorControllerMock errorController;
     testing::NiceMock<mock::TerminalSerialMock> terminalSerial;
     testing::NiceMock<mock::DjiMotorTxHandlerMock> djiMotorTxHandler;
-    testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     arch::Profiler profiler;
     testing::NiceMock<mock::DjiMotorTerminalSerialHandlerMock> djiMotorTerminalSerialHandler;
     testing::NiceMock<mock::SchedulerTerminalHandlerMock> schedulerTerminalHandler;

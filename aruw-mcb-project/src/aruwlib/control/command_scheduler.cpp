@@ -19,6 +19,8 @@
 
 #include "command_scheduler.hpp"
 
+#include <modm/architecture/interface/assert.h>
+
 #include "aruwlib/Drivers.hpp"
 #include "aruwlib/architecture/clock.hpp"
 #include "aruwlib/errors/create_errors.hpp"

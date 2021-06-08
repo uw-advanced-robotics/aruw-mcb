@@ -24,7 +24,7 @@
 
 #include "aruwsrc/display/OledDisplay.hpp"
 
-namespace aruwsrc::mcok
+namespace aruwsrc::mock
 {
 class OledDisplayMock : public display::OledDisplay
 {
@@ -35,6 +35,6 @@ public:
     MOCK_METHOD(bool, updateDisplay, (), (override));
     MOCK_METHOD(void, updateMenu, (), (override));
 };  // class OledDisplayMock
-}  // namespace aruwsrc::mcok
+}  // namespace aruwsrc::mock
 
 #endif  // OLED_DISPLAY_MOCK_HPP_
