@@ -174,9 +174,9 @@ bool RefSerial::decodeToRobotStatus(const SerialMessage& message)
     convertFromLittleEndian(&robotData.turret.heatLimit42, message.data + 20);
     convertFromLittleEndian(&robotData.turret.barrelSpeedLimit42, message.data + 22);
     convertFromLittleEndian(&robotData.chassis.powerConsumptionLimit, message.data + 24);
-    robotData.gimbalHasPower = message.data[26];
-    robotData.chassisHasPower = (message.data[26] >> 1);
-    robotData.shooterHasPower = (message.data[26] >> 2);
+    robotData.gimbalHasPower = message.data[26] & 1;
+    robotData.chassisHasPower = (message.data[26] >> 1) & 1;
+    robotData.shooterHasPower = (message.data[26] >> 2) & 1;
 
     processReceivedDamage(clock::getTimeMilliseconds(), robotData.previousHp - robotData.currentHp);
     robotData.previousHp = robotData.currentHp;
