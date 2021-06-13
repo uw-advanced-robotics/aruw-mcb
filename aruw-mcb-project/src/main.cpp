@@ -45,6 +45,8 @@
 
 #include "aruwlib/architecture/endianness_wrappers.hpp"
 
+#include "aruwlib/architecture/endianness_wrappers.hpp"
+
 using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/
@@ -71,6 +73,8 @@ int main()
     Board::initialize();
     initializeIo(drivers);
 
+    int i = 0;
+
     while (1)
     {
         // do this as fast as you can
@@ -79,24 +83,18 @@ int main()
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
-            PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
 
-            // I think these are all between -180 and 180 but I'm not sure
-            float pitch = drivers->mpu6500.getPitch();
             float yaw = drivers->mpu6500.getYaw();
-            // TODO check how large these get
-            int16_t gxRaw = drivers->mpu6500.getGx();
             int16_t gzRaw = drivers->mpu6500.getGz();
 
             if (drivers->can.isReadyToSend(aruwlib::can::CanBus::CAN_BUS1))
             {
-                // We need to send > 8 bytes, so send two messages
-                modm::can::Message msg(0x201, 8);
+                drivers->leds.set(aruwlib::gpio::Leds::Green, i < 50);
+                i = (i + 1) % 100;
+                modm::can::Message msg(0x203, 8);
                 msg.setExtended(false);
-                aruwlib::arch::convertToLittleEndian(static_cast<int16_t>(pitch * 100.0f), msg.data);
-                aruwlib::arch::convertToLittleEndian(static_cast<int16_t>(yaw * 100.0f), msg.data + 2);
-                aruwlib::arch::convertToLittleEndian(gxRaw, msg.data + 4);
-                aruwlib::arch::convertToLittleEndian(gzRaw, msg.data + 6);
+                aruwlib::arch::convertToLittleEndian(yaw, msg.data);
+                aruwlib::arch::convertToLittleEndian(gzRaw, msg.data + 4);
                 drivers->can.sendMessage(aruwlib::can::CanBus::CAN_BUS1, msg);
             }
         }
@@ -107,13 +105,14 @@ int main()
 
 static void initializeIo(aruwlib::Drivers *drivers)
 {
-    drivers->leds.init();
     drivers->can.initialize();
-    drivers->errorController.init();
+    drivers->leds.init();
+    drivers->digital.init();
     drivers->mpu6500.init();
 }
 
 static void updateIo(aruwlib::Drivers *drivers)
 {
     drivers->mpu6500.read();
+    drivers->canRxHandler.pollCanData();
 }
