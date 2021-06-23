@@ -41,7 +41,7 @@ class ShootFastComprisedCommand17MM : public aruwlib::control::setpoint::MoveUnj
 {
 public:
     /// Buffer from max heat limit in which limiting occurs (3 bullet buffer)
-    static constexpr uint16_t HEAT_LIMIT_BUFFER = 30;
+    static constexpr uint16_t HEAT_LIMIT_BUFFER = 40;
 
     ShootFastComprisedCommand17MM(
         aruwlib::Drivers* drivers,
