@@ -34,6 +34,113 @@ namespace aruwsrc
 {
 namespace chassis
 {
+ChassisSubsystem::ChassisSubsystem(
+    aruwlib::Drivers* drivers,
+    float motorGearboxRatio,
+    float widthBetweenWheelsX,
+    float widthBetweenWheelsY,
+    float wheelRadius,
+    float maxWheelSpeedSingleMotor,
+    float gimbalXOffset,
+    float gimbalYOffset,
+    float chassisRevolvePidMaxP,
+    float chassisRevolvePidMaxD,
+    float chassisRevolvePidKD,
+    float chassisRevolvePidMaxOutput,
+    float minErrorRotationD,
+    float minRotationThreshold,
+    float velocityPidKp,
+    float velocityPidKi,
+    float velocityPidKd,
+    float velocityPidMaxErrSum,
+    float velocityPidMaxOutput,
+    float maxEnergyBuffer,
+    float energyBufferLimitThreshold,
+    float energyBufferCritThreshold,
+    float powerConsumptionThreshold,
+    float currentAllocatedForEnergyBufferLimiting,
+    aruwlib::can::CanBus canBus,
+    aruwlib::motor::MotorId leftFrontMotorId,
+    aruwlib::motor::MotorId leftBackMotorId,
+    aruwlib::motor::MotorId rightFrontMotorId,
+    aruwlib::motor::MotorId rightBackMotorId,
+    aruwlib::gpio::Analog::Pin currentPin)
+    : aruwlib::control::chassis::IChassisSubsystem(drivers),
+      MOTOR_GEARBOX_RATIO(motorGearboxRatio),
+      WIDTH_BETWEEN_WHEELS_X(widthBetweenWheelsX),
+      WIDTH_BETWEEN_WHEELS_Y(widthBetweenWheelsY),
+      WHEEL_RADIUS(wheelRadius),
+      MAX_WHEEL_SPEED_SINGLE_MOTOR(maxWheelSpeedSingleMotor),
+      GIMBAL_X_OFFSET(gimbalXOffset),
+      GIMBAL_Y_OFFSET(gimbalYOffset),
+        CHASSIS_REVOLVE_PID_MAX_P(),
+        CHASSIS_REVOLVE_PID_MAX_D(),
+        CHASSIS_REVOLVE_PID_KD(),
+        CHASSIS_REVOLVE_PID_MAX_OUTPUT(),
+        MIN_ERROR_ROTATION_D(),
+        MIN_ROTATION_THRESHOLD(),
+      leftFrontVelocityPid(
+          velocityPidKp,
+          velocityPidKi,
+          velocityPidKd,
+          velocityPidMaxErrSum,
+          velocityPidMaxOutput),
+      leftBackVelocityPid(
+          velocityPidKp,
+          velocityPidKi,
+          velocityPidKd,
+          velocityPidMaxErrSum,
+          velocityPidMaxOutput),
+      rightFrontVelocityPid(
+          velocityPidKp,
+          velocityPidKi,
+          velocityPidKd,
+          velocityPidMaxErrSum,
+          velocityPidMaxOutput),
+      rightBackVelocityPid(
+          velocityPidKp,
+          velocityPidKi,
+          velocityPidKd,
+          velocityPidMaxErrSum,
+          velocityPidMaxOutput),
+      chassisRotationErrorKalman(1.0f, 0.0f),
+      leftFrontMotor(drivers, leftFrontMotorId, canBus, false, "left front drive motor"),
+      leftBackMotor(drivers, leftBackMotorId, canBus, false, "left back drive motor"),
+      rightFrontMotor(drivers, rightFrontMotorId, canBus, false, "right front drive motor"),
+      rightBackMotor(drivers, rightBackMotorId, canBus, false, "right back drive motor"),
+      chassisPowerLimiter(
+          drivers,
+          currentPin,
+          maxEnergyBuffer,
+          energyBufferLimitThreshold,
+          energyBufferCritThreshold,
+          powerConsumptionThreshold,
+          currentAllocatedForEnergyBufferLimiting,
+          motorConstants)
+{
+    const float A = (widthBetweenWheelsX + widthBetweenWheelsY == 0)
+                        ? 1
+                        : 2 / (widthBetweenWheelsX + widthBetweenWheelsY);
+    wheelVelToChassisVelMat[0][0] = 1;
+    wheelVelToChassisVelMat[0][1] = -1;
+    wheelVelToChassisVelMat[0][2] = 1;
+    wheelVelToChassisVelMat[0][3] = -1;
+    wheelVelToChassisVelMat[1][0] = 1;
+    wheelVelToChassisVelMat[1][1] = 1;
+    wheelVelToChassisVelMat[1][2] = -1;
+    wheelVelToChassisVelMat[1][3] = -1;
+    wheelVelToChassisVelMat[2][0] = 1.0 / A;
+    wheelVelToChassisVelMat[2][1] = 1.0 / A;
+    wheelVelToChassisVelMat[2][2] = 1.0 / A;
+    wheelVelToChassisVelMat[2][3] = 1.0 / A;
+    wheelVelToChassisVelMat *= (wheelRadius / 4);
+
+    motors[LF] = &leftFrontMotor;
+    motors[RF] = &rightFrontMotor;
+    motors[LB] = &leftBackMotor;
+    motors[RB] = &rightBackMotor;
+}
+
 void ChassisSubsystem::initialize()
 {
     // All of these DjiMotors are registered on CAN_BUS2
@@ -133,8 +240,8 @@ float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float k
 
     float wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(
         currRotationPidP + currentRotationPidD,
-        -MAX_OUTPUT_ROTATION_PID,
-        MAX_OUTPUT_ROTATION_PID);
+        -CHASSIS_REVOLVE_PID_MAX_OUTPUT,
+        CHASSIS_REVOLVE_PID_MAX_OUTPUT);
 
     return wheelRotationSpeed;
 }
@@ -152,9 +259,9 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
         // power(max revolve speed - specified revolve speed, 2)
         // / power(max revolve speed, 2)
         rTranslationalGain = powf(
-            ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
+            MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
                 fabsf(chassisRotationDesiredWheelspeed) /
-                    ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR,
+                    MAX_WHEEL_SPEED_SINGLE_MOTOR,
             2.0f);
         rTranslationalGain = aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
     }
