@@ -34,15 +34,38 @@ using namespace aruwlib;
 
 namespace aruwsrc::control::turret
 {
-TurretSubsystem::TurretSubsystem(aruwlib::Drivers* drivers, bool limitYaw)
+TurretSubsystem::TurretSubsystem(
+    aruwlib::Drivers* drivers,
+    float startAngle,
+    float yawMinAngle,
+    float yawMaxAngle,
+    float pitchMinAngle,
+    float pitchMaxAngle,
+    float yawStartEncoderPosition,
+    float pitchStartEncoderPosition,
+    float feedForwardKp,
+    float feedForwardMaxOutput,
+    aruwlib::can::CanBus motorCanBus,
+    aruwlib::motor::MotorId pitchMotorId,
+    aruwlib::motor::MotorId yawMotorId,
+    bool limitYaw)
     : aruwlib::control::turret::iTurretSubsystem(drivers),
+      TURRET_START_ANGLE(startAngle),
+      TURRET_YAW_MIN_ANGLE(yawMinAngle),
+      TURRET_YAW_MAX_ANGLE(yawMaxAngle),
+      TURRET_PITCH_MIN_ANGLE(pitchMinAngle),
+      TURRET_PITCH_MAX_ANGLE(pitchMaxAngle),
+      YAW_START_ENCODER_POSITION(yawStartEncoderPosition),
+      PITCH_START_ENCODER_POSITION(pitchStartEncoderPosition),
+      FEED_FORWARD_KP(feedForwardKp),
+      FEED_FORWARD_MAX_OUTPUT(feedForwardMaxOutput),
       currPitchAngle(0.0f, 0.0f, 360.0f),
       currYawAngle(0.0f, 0.0f, 360.0f),
       yawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
       pitchTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
       limitYaw(limitYaw),
-      pitchMotor(drivers, PITCH_MOTOR_ID, CAN_BUS_MOTORS, true, "pitch motor"),
-      yawMotor(drivers, YAW_MOTOR_ID, CAN_BUS_MOTORS, false, "yaw motor")
+      pitchMotor(drivers, pitchMotorId, motorCanBus, true, "pitch motor"),
+      yawMotor(drivers, yawMotorId, motorCanBus, false, "yaw motor")
 {
 }
 

@@ -25,6 +25,25 @@ namespace aruwsrc
 {
 namespace launcher
 {
+FrictionWheelSubsystem::FrictionWheelSubsystem(
+    aruwlib::Drivers *drivers,
+    float pidP,
+    float pidI,
+    float pidD,
+    float pidMaxErrorSum,
+    float pidMaxOutput,
+    aruwlib::motor::MotorId leftMotorId,
+    aruwlib::motor::MotorId rightMotorId,
+    aruwlib::can::CanBus canBus)
+    : aruwlib::control::Subsystem(drivers),
+      velocityPidLeftWheel(pidP, pidI, pidD, pidMaxErrorSum, pidMaxOutput),
+      velocityPidRightWheel(pidP, pidI, pidD, pidMaxErrorSum, pidMaxOutput),
+      desiredRpmRamp(0),
+      leftWheel(drivers, leftMotorId, canBus, true, "left example motor"),
+      rightWheel(drivers, rightMotorId, canBus, false, "right example motor")
+{
+}
+
 void FrictionWheelSubsystem::initialize()
 {
     leftWheel.initialize();

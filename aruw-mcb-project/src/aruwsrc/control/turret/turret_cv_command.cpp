@@ -28,31 +28,52 @@ using namespace aruwlib::arch::clock;
 
 namespace aruwsrc::control::turret
 {
-TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem)
+TurretCVCommand::TurretCVCommand(
+    aruwlib::Drivers *drivers,
+    TurretSubsystem *subsystem,
+    float turretStartAngle,
+    float yawKp,
+    float yawKi,
+    float yawKd,
+    float yawMaxICumulative,
+    float yawMaxOutput,
+    float yawTQDerivativeKalman,
+    float yawTRDerivativeKalman,
+    float yawTQProportionalKalman,
+    float yawTRProportionalKalman,
+    float pitchKp,
+    float pitchKi,
+    float pitchKd,
+    float pitchMaxICumulative,
+    float pitchMaxOutput,
+    float pitchTQDerivativeKalman,
+    float pitchTRDerivativeKalman,
+    float pitchTQProportionalKalman,
+    float pitchTRProportionalKalman)
     : drivers(drivers),
       turretSubsystem(subsystem),
-      yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
-      pitchTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
+      yawTargetAngle(turretStartAngle, 0.0f, 360.0f),
+      pitchTargetAngle(turretStartAngle, 0.0f, 360.0f),
       yawPid(
-          YAW_P,
-          YAW_I,
-          YAW_D,
-          YAW_MAX_ERROR_SUM,
-          YAW_MAX_OUTPUT,
-          YAW_Q_DERIVATIVE_KALMAN,
-          YAW_R_DERIVATIVE_KALMAN,
-          YAW_Q_PROPORTIONAL_KALMAN,
-          YAW_R_PROPORTIONAL_KALMAN),
+          yawKp,
+          yawKi,
+          yawKd,
+          yawMaxICumulative,
+          yawMaxOutput,
+          yawTQDerivativeKalman,
+          yawTRDerivativeKalman,
+          yawTQProportionalKalman,
+          yawTRProportionalKalman),
       pitchPid(
-          PITCH_P,
-          PITCH_I,
-          PITCH_D,
-          PITCH_MAX_ERROR_SUM,
-          PITCH_MAX_OUTPUT,
-          PITCH_Q_DERIVATIVE_KALMAN,
-          PITCH_R_DERIVATIVE_KALMAN,
-          PITCH_Q_PROPORTIONAL_KALMAN,
-          PITCH_R_PROPORTIONAL_KALMAN)
+          pitchKp,
+          pitchKi,
+          pitchKd,
+          pitchMaxICumulative,
+          pitchMaxOutput,
+          pitchTQDerivativeKalman,
+          pitchTRDerivativeKalman,
+          pitchTQProportionalKalman,
+          pitchTRProportionalKalman)
 {
     addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem *>(subsystem));
 }

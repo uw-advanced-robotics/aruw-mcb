@@ -60,11 +60,10 @@ void WiggleDriveCommand::initialize()
 
 void WiggleDriveCommand::execute()
 {
+    const float maxWheelSpeed = chassis->getMaxWheelSpeedSingleMotor();
     float r;
-    float x = drivers->controlOperatorInterface.getChassisXInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-    float y = drivers->controlOperatorInterface.getChassisYInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    float x = drivers->controlOperatorInterface.getChassisXInput() * maxWheelSpeed;
+    float y = drivers->controlOperatorInterface.getChassisYInput() * maxWheelSpeed;
 
     // We only wiggle when the turret is online.
     if (turret->isOnline())
@@ -100,12 +99,10 @@ void WiggleDriveCommand::execute()
     }
     else
     {
-        r = drivers->controlOperatorInterface.getChassisRInput() *
-            ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+        r = drivers->controlOperatorInterface.getChassisRInput() * maxWheelSpeed;
     }
 
-    float rTranslationalGain = chassis->calculateRotationTranslationalGain(r) *
-                               ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    float rTranslationalGain = chassis->calculateRotationTranslationalGain(r) * maxWheelSpeed;
 
     x = limitVal<float>(x, -rTranslationalGain, rTranslationalGain);
     y = limitVal<float>(y, -rTranslationalGain, rTranslationalGain);

@@ -161,6 +161,8 @@ public:
     inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
     inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
 
+    inline float getMaxWheelSpeedSingleMotor() const { return MAX_WHEEL_SPEED_SINGLE_MOTOR; }
+
     void onHardwareTestStart() override;
 
     /**

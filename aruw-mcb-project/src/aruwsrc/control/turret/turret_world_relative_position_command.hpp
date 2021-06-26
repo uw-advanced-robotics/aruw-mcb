@@ -57,6 +57,29 @@ public:
         aruwlib::Drivers *drivers,
         TurretSubsystem *subsystem,
         const chassis::ChassisSubsystem *chassis,
+        float turretStartAngle,
+        float yawKp,
+        float yawKi,
+        float yawKdTurretImu,
+        float yawKdChassisImu,
+        float yawMaxICumulative,
+        float yawMaxOutput,
+        float yawTQDerivativeKalman,
+        float yawTRDerivativeKalman,
+        float yawTQProportionalKalman,
+        float yawTRProportionalKalman,
+        float pitchKp,
+        float pitchKi,
+        float pitchKd,
+        float pitchMaxICumulative,
+        float pitchMaxOutput,
+        float pitchTQDerivativeKalman,
+        float pitchTRDerivativeKalman,
+        float pitchTQProportionalKalman,
+        float pitchTRProportionalKalman,
+        float userYawInputScalar,
+        float userPitchInputScalar,
+        float pitchGravityCompensationKp,
         bool useImuOnTurret = false);
 
     void initialize() override;
@@ -70,59 +93,11 @@ public:
     const char *getName() const override { return "turret world relative position"; }
 
 private:
-#ifdef TARGET_SOLDIER
-    static constexpr float YAW_P = 3800.0f;
-    static constexpr float YAW_I = 50.0f;
-    static constexpr float YAW_D_TURRET_IMU = 4300.0f;
-    static constexpr float YAW_D_CHASSIS_IMU = 180.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 10.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 10.0f;
-
-    static constexpr float PITCH_P = 3200.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 120.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 47.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-
-    static constexpr float USER_YAW_INPUT_SCALAR = 1.5f;
-    static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
-
-    static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 4000.0f;
-#else
-    static constexpr float YAW_P = 2200.0f;
-    static constexpr float YAW_I = 50.0f;
-    static constexpr float YAW_D_TURRET_IMU = 10.0f;
-    static constexpr float YAW_D_CHASSIS_IMU = 60.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 50.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 10.0f;
-
-    static constexpr float PITCH_P = 3400.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 150.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 47.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-
-    static constexpr float USER_YAW_INPUT_SCALAR = 1.5f;
-    static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
-
-    static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 0.0f;
-#endif
+    const float USER_YAW_INPUT_SCALAR;
+    const float USER_PITCH_INPUT_SCALAR;
+    const float PITCH_GRAVITY_COMPENSATION_KP;
+    const float YAW_D_TURRET_IMU;
+    const float YAW_D_CHASSIS_IMU;
 
     aruwlib::Drivers *drivers;
 

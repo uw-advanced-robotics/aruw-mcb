@@ -44,6 +44,8 @@ public:
         ChassisSubsystem* chassis,
         const aruwlib::control::turret::iTurretSubsystem* turret);
 
+    // TODO remove step function logic and pass in as parameters instead of constants
+
     // fractional multiplier for user input and maximum motor speed to calculate desired x and y
     // speeds
     static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE = 0.5f;

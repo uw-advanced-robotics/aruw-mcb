@@ -63,18 +63,19 @@ void BeybladeCommand::execute()
 {
     // Gets current turret yaw angle
     float turretYawAngle = turret->getYawAngleFromCenter();
+    const float maxWheelSpeed = chassis->getMaxWheelSpeedSingleMotor();
 
     // Get X and Y speed inputs with translational movement
     float x = drivers->controlOperatorInterface.getChassisXInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR *
+              maxWheelSpeed *
               TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
     float y = drivers->controlOperatorInterface.getChassisYInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR *
+              maxWheelSpeed *
               TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
 
-    static constexpr float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
+    const float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
                                                TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
-                                               ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+                                               maxWheelSpeed;
 
     rampTarget = rotationDirection * getRotationTarget();
     if (x > TRANSLATION_LIMIT || y > TRANSLATION_LIMIT)

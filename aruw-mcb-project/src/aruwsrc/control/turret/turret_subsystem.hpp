@@ -43,30 +43,6 @@ namespace aruwsrc::control::turret
 class TurretSubsystem : public aruwlib::control::turret::iTurretSubsystem
 {
 public:
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-    static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
-    static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
-
-#if defined(TARGET_SOLDIER)
-    static constexpr float TURRET_START_ANGLE = 90.0f;
-    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
-    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
-    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
-    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 30.0f;
-#elif defined(TARGET_HERO)
-    static constexpr float TURRET_START_ANGLE = 90.0f;
-    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 70.0f;
-    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 70.0f;
-    static constexpr float TURRET_PITCH_MIN_ANGLE = 65.0f;
-    static constexpr float TURRET_PITCH_MAX_ANGLE = 104.0f;
-#else
-    static constexpr float TURRET_START_ANGLE = 90.0f;
-    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
-    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
-    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
-    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 30.0f;
-#endif
-
     /**
      * Constructs a TurretSubsystem.
      *
@@ -75,7 +51,21 @@ public:
      *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
      */
-    explicit TurretSubsystem(aruwlib::Drivers* drivers, bool limitYaw = true);
+    explicit TurretSubsystem(
+        aruwlib::Drivers* drivers,
+        float startAngle,
+        float yawMinAngle,
+        float yawMaxAngle,
+        float pitchMinAngle,
+        float pitchMaxAngle,
+        float yawStartEncoderPosition,
+        float pitchStartEncoderPosition,
+        float feedForwardKp,
+        float feedForwardMaxOutput,
+        aruwlib::can::CanBus motorCanBus,
+        aruwlib::motor::MotorId pitchMotorId,
+        aruwlib::motor::MotorId yawMotorId,
+        bool limitYaw = true);
 
     inline bool yawLimited() const { return limitYaw; }
 
@@ -185,19 +175,15 @@ public:
     mockable void updateCurrentTurretAngles();
 
 private:
-#if defined(TARGET_SOLDIER)
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
-#elif defined(TARGET_HERO)
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 3000;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1418;
-#else
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
-#endif
-
-    static constexpr float FEED_FORWARD_KP = 11800.0f;
-    static constexpr float FEED_FORWARD_MAX_OUTPUT = 20000.0f;
+    const float TURRET_START_ANGLE;
+    const float TURRET_YAW_MIN_ANGLE;
+    const float TURRET_YAW_MAX_ANGLE;
+    const float TURRET_PITCH_MIN_ANGLE;
+    const float TURRET_PITCH_MAX_ANGLE;
+    const uint16_t YAW_START_ENCODER_POSITION;
+    const uint16_t PITCH_START_ENCODER_POSITION;
+    const float FEED_FORWARD_KP;
+    const float FEED_FORWARD_MAX_OUTPUT;
 
     uint32_t prevUpdateCounterChassisRotateDerivative = 0;
     aruwlib::algorithms::LinearInterpolation chassisRotateDerivativeInterpolation;

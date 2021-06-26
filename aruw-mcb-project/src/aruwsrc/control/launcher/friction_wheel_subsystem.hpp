@@ -43,26 +43,20 @@ namespace launcher
 class FrictionWheelSubsystem : public aruwlib::control::Subsystem
 {
 public:
-    static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
-    static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-
     /**
      * Creates a new friction wheel subsystem with DJI motor1 and motor2
      * unless otherwise specified on CAN bus 1.
      */
     FrictionWheelSubsystem(
         aruwlib::Drivers *drivers,
-        aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
-        : aruwlib::control::Subsystem(drivers),
-          velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-          velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-          desiredRpmRamp(0),
-          leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
-          rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right example motor")
-    {
-    }
+        float pidP,
+        float pidI,
+        float pidD,
+        float pidMaxErrorSum,
+        float pidMaxOutput,
+        aruwlib::motor::MotorId leftMotorId,
+        aruwlib::motor::MotorId rightMotorId,
+        aruwlib::can::CanBus canBus);
 
     void initialize() override;
 

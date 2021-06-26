@@ -73,6 +73,8 @@ private:
                                        /// each time step
     };
 
+    // TODO remove step function logic and pass in as parameters instead of constants
+
     /**
      * Use these wiggle parameters if power consumption limit is <= 45 W
      */

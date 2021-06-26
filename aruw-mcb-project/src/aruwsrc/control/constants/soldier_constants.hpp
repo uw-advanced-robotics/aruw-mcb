@@ -26,6 +26,7 @@
 
 #include "aruwlib/communication/can/can_bus.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
+#include "aruwlib/communication/gpio/analog.hpp"
 
 // For comments, see constants.md
 namespace soldier_control::constants
@@ -34,8 +35,8 @@ namespace soldier_control::constants
 namespace motor
 {
 // CAN 1
-static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
-static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
+static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID = aruwlib::motor::MOTOR1;
+static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID = aruwlib::motor::MOTOR2;
 static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
 static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
 static constexpr aruwlib::motor::MotorId HOPPER_COVER_MOTOR_ID = aruwlib::motor::MOTOR8;
@@ -58,6 +59,11 @@ static constexpr aruwlib::can::CanBus HOPPER_COVER_MOTOR_CAN_BUS = aruwlib::can:
 static constexpr aruwlib::can::CanBus CHASSIS_CAN_BUS = aruwlib::can::CanBus::CAN_BUS2;
 }  // namespace can
 
+namespace gpio
+{
+static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S; 
+}
+
 // PID and mechanical constants
 
 namespace agitator
@@ -69,8 +75,13 @@ static constexpr float PID_17MM_I = 0.0f;
 static constexpr float PID_17MM_D = 80.0f;
 static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
 static constexpr float PID_17MM_MAX_OUT = 16000.0f;
+static constexpr float AGITATOR_GEARBOX_RATIO = 36.0f;
 static constexpr bool AGITATOR_INVERTED = false;
+static constexpr float AGITATOR_JAMMING_DISTANCE = 1.0f;
+static constexpr uint32_t AGITATOR_JAMMING_TIME = 250;
 static constexpr bool IS_HOPPER_COVER_INVERTED = false;
+static constexpr float HOPPER_COVER_JAMMING_DISTANCE = 1.0f;
+static constexpr uint32_t HOPPER_COVER_JAMMING_TIME = 250;
 }  // namespace agitator
 
 namespace chassis
@@ -88,6 +99,7 @@ static constexpr float CHASSIS_REVOLVE_PID_KD = 500.0f;
 static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
 static constexpr int CHASSIS_REVOLVE_PID_MIN_ERROR_ROTATION_D = 0;
 static constexpr float CHASSIS_REVOLVE_PID_MAX_OUTPUT = 5000.0f;
+static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
 static constexpr float WHEEL_RADIUS = 0.076;
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
@@ -95,6 +107,12 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
+
+static constexpr float MAX_ENERGY_BUFFER = 60.0f;
+static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 40.0f;
+static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 5;
+static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
+static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
 static constexpr float WIGGLE_PERIOD = 1600.0f;
 static constexpr float WIGGLE_MAX_ROTATE_ANGLE = 60.0f;
@@ -145,7 +163,8 @@ static constexpr float PITCH_CV_R_PROPORTIONAL_KALMAN = 2.0f;
 // World relative control
 static constexpr float YAW_WR_P = 4000.0f;
 static constexpr float YAW_WR_I = 0.0f;
-static constexpr float YAW_WR_D = 180.0f;
+static constexpr float YAW_WR_TURRET_IMU_D = 180.0f;
+static constexpr float YAW_WR_CHASSIS_IMU_D = 180.0f;
 static constexpr float YAW_WR_MAX_ERROR_SUM = 0.0f;
 static constexpr float YAW_WR_MAX_OUTPUT = 30000.0f;
 static constexpr float YAW_WR_Q_DERIVATIVE_KALMAN = 1.0f;

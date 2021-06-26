@@ -34,6 +34,7 @@
 #include "chassis/chassis_subsystem.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
+#include "constants/robot_constants.hpp"
 #include "hopper-cover/hopper_commands.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
@@ -69,41 +70,96 @@ aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
 namespace soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers(), false);
+TurretSubsystem turret(
+    drivers(),
+    constants::turret::TURRET_START_ANGLE,
+    constants::turret::TURRET_YAW_MIN_ANGLE,
+    constants::turret::TURRET_YAW_MAX_ANGLE,
+    constants::turret::TURRET_PITCH_MIN_ANGLE,
+    constants::turret::TURRET_PITCH_MAX_ANGLE,
+    constants::turret::YAW_START_ENCODER_POSITION,
+    constants::turret::PITCH_START_ENCODER_POSITION,
+    constants::turret::FEED_FORWARD_KP,
+    constants::turret::FEED_FORWARD_MAX_OUTPUT,
+    constants::can::TURRET_CAN_BUS,
+    constants::motor::PITCH_MOTOR_ID,
+    constants::motor::YAW_MOTOR_ID,
+    false);
 
-ChassisSubsystem chassis(drivers());
+ChassisSubsystem chassis(
+    drivers(),
+    constants::chassis::CHASSIS_GEARBOX_RATIO,
+    constants::chassis::WIDTH_BETWEEN_WHEELS_X,
+    constants::chassis::WIDTH_BETWEEN_WHEELS_Y,
+    constants::chassis::WHEEL_RADIUS,
+    constants::chassis::MAX_WHEEL_SPEED_SINGLE_MOTOR,
+    constants::chassis::GIMBAL_X_OFFSET,
+    constants::chassis::GIMBAL_Y_OFFSET,
+    constants::chassis::CHASSIS_REVOLVE_PID_MAX_P,
+    constants::chassis::CHASSIS_REVOLVE_PID_MAX_D,
+    constants::chassis::CHASSIS_REVOLVE_PID_KD,
+    constants::chassis::CHASSIS_REVOLVE_PID_MAX_OUTPUT,
+    constants::chassis::CHASSIS_REVOLVE_PID_MIN_ERROR_ROTATION_D,
+    constants::chassis::MIN_ROTATION_THRESHOLD,
+    constants::chassis::VELOCITY_PID_KP,
+    constants::chassis::VELOCITY_PID_KI,
+    constants::chassis::VELOCITY_PID_KD,
+    constants::chassis::VELOCITY_PID_MAX_ERROR_SUM,
+    constants::chassis::VELOCITY_PID_MAX_OUTPUT,
+    constants::chassis::MAX_ENERGY_BUFFER,
+    constants::chassis::ENERGY_BUFFER_LIMIT_THRESHOLD,
+    constants::chassis::ENERGY_BUFFER_CRIT_THRESHOLD,
+    constants::chassis::POWER_CONSUMPTION_THRESHOLD,
+    constants::chassis::CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
+    constants::can::CHASSIS_CAN_BUS,
+    constants::motor::RIGHT_FRONT_MOTOR_ID,
+    constants::motor::LEFT_FRONT_MOTOR_ID,
+    constants::motor::LEFT_BACK_MOTOR_ID,
+    constants::motor::RIGHT_BACK_MOTOR_ID,
+    constants::gpio::CURRENT_SENSOR_PIN);
 
 AgitatorSubsystem agitator(
     drivers(),
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted,
+    constants::agitator::PID_17MM_P,
+    constants::agitator::PID_17MM_I,
+    constants::agitator::PID_17MM_D,
+    constants::agitator::PID_17MM_MAX_ERR_SUM,
+    constants::agitator::PID_17MM_MAX_OUT,
+    constants::agitator::AGITATOR_GEARBOX_RATIO,
+    constants::motor::AGITATOR_MOTOR_ID,
+    constants::can::AGITATOR_MOTOR_CAN_BUS,
+    constants::agitator::AGITATOR_INVERTED,
     true,
-    AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
-    AgitatorSubsystem::JAMMING_TIME);
+    constants::agitator::AGITATOR_JAMMING_DISTANCE,
+    constants::agitator::AGITATOR_JAMMING_TIME);
 
 // TODO: validate and tune these constexpr parameters for hopper lid motor
 // also find out what kind of motor hopper lid uses lol
 AgitatorSubsystem hopperCover(
     drivers(),
-    AgitatorSubsystem::PID_HOPPER_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HOPPER_COVER_MOTOR_ID,
-    AgitatorSubsystem::HOPPER_COVER_MOTOR_CAN_BUS,
-    AgitatorSubsystem::IS_HOPPER_COVER_INVERTED,
-    true);
+    constants::agitator::PID_17MM_P,
+    constants::agitator::PID_17MM_I,
+    constants::agitator::PID_17MM_D,
+    constants::agitator::PID_17MM_MAX_ERR_SUM,
+    constants::agitator::PID_17MM_MAX_OUT,
+    constants::agitator::AGITATOR_GEARBOX_RATIO,
+    constants::motor::HOPPER_COVER_MOTOR_ID,
+    constants::can::HOPPER_COVER_MOTOR_CAN_BUS,
+    constants::agitator::IS_HOPPER_COVER_INVERTED,
+    true,
+    constants::agitator::HOPPER_COVER_JAMMING_DISTANCE,
+    constants::agitator::HOPPER_COVER_JAMMING_TIME);
 
-FrictionWheelSubsystem frictionWheels(drivers(), aruwlib::motor::MOTOR1, aruwlib::motor::MOTOR2);
+FrictionWheelSubsystem frictionWheels(
+    drivers(),
+    constants::launcher::LAUNCHER_PID_P,
+    constants::launcher::LAUNCHER_PID_I,
+    constants::launcher::LAUNCHER_PID_D,
+    constants::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+    constants::launcher::LAUNCHER_PID_MAX_OUTPUT,
+    constants::motor::LAUNCHER_LEFT_MOTOR_ID,
+    constants::motor::LAUNCHER_RIGHT_MOTOR_ID,
+    constants::can::LAUNCHER_CAN_BUS);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -114,9 +170,57 @@ ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis, true);
+TurretWorldRelativePositionCommand turretWorldRelativeCommand(
+    drivers(),
+    &turret,
+    &chassis,
+    constants::turret::TURRET_START_ANGLE,
+    constants::turret::YAW_WR_P,
+    constants::turret::YAW_WR_I,
+    constants::turret::YAW_WR_TURRET_IMU_D,
+    constants::turret::YAW_WR_CHASSIS_IMU_D,
+    constants::turret::YAW_WR_MAX_ERROR_SUM,
+    constants::turret::YAW_WR_MAX_OUTPUT,
+    constants::turret::YAW_WR_Q_DERIVATIVE_KALMAN,
+    constants::turret::YAW_WR_R_DERIVATIVE_KALMAN,
+    constants::turret::YAW_WR_Q_PROPORTIONAL_KALMAN,
+    constants::turret::YAW_WR_R_PROPORTIONAL_KALMAN,
+    constants::turret::PITCH_WR_P,
+    constants::turret::PITCH_WR_I,
+    constants::turret::PITCH_WR_D,
+    constants::turret::PITCH_WR_MAX_ERROR_SUM,
+    constants::turret::PITCH_WR_MAX_OUTPUT,
+    constants::turret::PITCH_WR_Q_DERIVATIVE_KALMAN,
+    constants::turret::PITCH_WR_R_DERIVATIVE_KALMAN,
+    constants::turret::PITCH_WR_Q_PROPORTIONAL_KALMAN,
+    constants::turret::PITCH_WR_R_PROPORTIONAL_KALMAN,
+    constants::turret::USER_YAW_INPUT_SCALAR,
+    constants::turret::USER_PITCH_INPUT_SCALAR,
+    constants::turret::PITCH_GRAVITY_COMPENSATION_KP,
+    true);
 
-TurretCVCommand turretCVCommand(drivers(), &turret);
+TurretCVCommand turretCVCommand(
+    drivers(),
+    &turret,
+    constants::turret::TURRET_START_ANGLE,
+    constants::turret::YAW_CV_P,
+    constants::turret::YAW_CV_I,
+    constants::turret::YAW_CV_D,
+    constants::turret::YAW_CV_MAX_ERROR_SUM,
+    constants::turret::YAW_CV_MAX_OUTPUT,
+    constants::turret::YAW_CV_Q_DERIVATIVE_KALMAN,
+    constants::turret::YAW_CV_R_DERIVATIVE_KALMAN,
+    constants::turret::YAW_CV_Q_PROPORTIONAL_KALMAN,
+    constants::turret::YAW_CV_R_PROPORTIONAL_KALMAN,
+    constants::turret::PITCH_CV_P,
+    constants::turret::PITCH_CV_I,
+    constants::turret::PITCH_CV_D,
+    constants::turret::PITCH_CV_MAX_ERROR_SUM,
+    constants::turret::PITCH_CV_MAX_OUTPUT,
+    constants::turret::PITCH_CV_Q_DERIVATIVE_KALMAN,
+    constants::turret::PITCH_CV_R_DERIVATIVE_KALMAN,
+    constants::turret::PITCH_CV_Q_PROPORTIONAL_KALMAN,
+    constants::turret::PITCH_CV_R_PROPORTIONAL_KALMAN);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
