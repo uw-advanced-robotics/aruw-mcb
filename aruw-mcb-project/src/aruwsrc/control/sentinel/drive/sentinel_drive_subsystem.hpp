@@ -41,23 +41,31 @@ namespace aruwsrc::control::sentinel::drive
 class SentinelDriveSubsystem : public aruwlib::control::chassis::iChassisSubsystem
 {
 public:
-    /// @see power_limiter.hpp for what these mean
-    static constexpr float MAX_ENERGY_BUFFER = 200.0f;
-    static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 100.0f;
-    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 0;
-    static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 5;
-    static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 15000;
-
-    // RMUL length of the rail, in mm
-    static constexpr float RAIL_LENGTH = 2130;
-    // Our length of the rail, in mm
-    // static constexpr float RAIL_LENGTH = 1900;
-
     /**
-     * Length of the sentinel, in mm
+     * @brief Constructs a SentinelDriveSubsystem with the specified parameters.
+     *
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] leftLimitSwitch
+     * @param[in] rightLimitSwitch
+     * @param[in] currentSensorPin
+     * @param[in] pidP
+     * @param[in] pidI
+     * @param[in] pidD
+     * @param[in] pidMaxErrorSum
+     * @param[in] pidMaxOutput
+     * @param[in] wheelRadius Wheel radius of chassis motors, (mm).
+     * @param[in] gearRatio Gear ratio of the chassis motors.
+     * @param[in] railLength
+     * @param[in] sentinelLength
+     * @param[in] maxEnergyBuffer @see PowerLimiter
+     * @param[in] energyBufferLimitThreshold @see PowerLimiter
+     * @param[in] energyBufferCritThreshold @see PowerLimiter
+     * @param[in] powerConsumptionThreshold @see PowerLimiter
+     * @param[in] currentAllocatedForEnergyBufferLimiting @see PowerLimiter
+     * @param[in] leftMotorId DJI motor id for left motor.
+     * @param[in] rightMotorId DJI motor id for right motor.
+     * @param[in] chassisCanBus CAN bus chassis is connected to.
      */
-    static constexpr float SENTINEL_LENGTH = 480;
-
     SentinelDriveSubsystem(
         aruwlib::Drivers* drivers,
         aruwlib::gpio::Digital::InputPin leftLimitSwitch,
@@ -70,6 +78,13 @@ public:
         float pidMaxOutput,
         float wheelRadius,
         float gearRatio,
+        float railLength,
+        float sentinelLength,
+        float maxEnergyBuffer,
+        float energyBufferLimitThreshold,
+        float energyBufferCritThreshold,
+        float powerConsumptionThreshold,
+        float currentAllocatedForEnergyBufferLimiting,
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId,
         aruwlib::can::CanBus chassisCanBus);
@@ -109,6 +124,8 @@ private:
     // radius of the wheel in mm
     const float WHEEL_RADIUS;
     const float GEAR_RATIO;
+    const float RAIL_LENGTH;
+    const float SENTINEL_LENGTH;
 
     modm::Pid<float> velocityPidLeftWheel;
 

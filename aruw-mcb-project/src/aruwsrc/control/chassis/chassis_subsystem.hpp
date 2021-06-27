@@ -57,6 +57,58 @@ namespace chassis
 class ChassisSubsystem : public aruwlib::control::chassis::iChassisSubsystem
 {
 public:
+    /**
+     * @brief Constructs a ChassisSubsystem
+     *
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] motorGearboxRatio
+     * @param[in] widthBetweenWheelsX Distance from center of the front and rear wheels (m).
+     * @param[in] widthBetweenWheelsY Distance from center of the two front wheels (m).
+     * @param[in] wheelRadius The radius of the chassis wheels (m).
+     * @param[in] maxWheelSpeedSingleMotor Max wheel speed, measured in RPM of the encoder (rather
+     *      than shaft) we use this for wheel speed since this is how dji's motors measures motor
+     *      speed.
+     * @param[in] gimbalXOffset Gimbal offset from the center of the chassis, see note above for
+     *      explanation of x and y (m).
+     * @param[in] gimbalYOffset @see gimbalXOffset
+     * @param[in] chassisRevolvePidMaxP Max proportional used for chassis rotation PID controller.
+     * @param[in] chassisRevolvePidMaxD Max derivative used for chassis rotation PID controller.
+     * @param[in] chassisRevolvePidKD Derivative term used for the chassis rotation PID controller
+     *      (see description of controller below).
+     * @param[in] chassisRevolvePidMaxOutput The maximum output allowed out of the rotation PID
+     *      controller.
+     * @param[in] minErrorRotationD The maximum revolve error before we start using the
+     *      derivative term.
+     * @param[in] minRotationThreshold
+     * @param[in] velocityPidKp Proportional term for chassis wheel velocity PID controller.
+     * @param[in] velocityPidKi Integral term for chassis wheel velocity PID controller.
+     * @param[in] velocityPidKd Derivative term for chassis wheel velocity PID controller.
+     * @param[in] velocityPidMaxErrSum Max integral sum for chassis wheel velocity PID controller.
+     * @param[in] velocityPidMaxOutput This max output is measured in the c620 robomaster translated
+     *      current. Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384. The
+     *      corresponding speed controller output torque current range is -20 ~ 0 ~ 20 A.
+     * @param[in] maxEnergyBuffer @see PowerLimiter
+     * @param[in] energyBufferLimitThreshold @see PowerLimiter
+     * @param[in] energyBufferCritThreshold @see PowerLimiter
+     * @param[in] powerConsumptionThreshold @see PowerLimiter
+     * @param[in] currentAllocatedForEnergyBufferLimiting @see PowerLimiter
+     * @param[in] canBus The can bus that the chassis is connected to.
+     * @param[in] leftFrontMotorId LF motor id.
+     * @param[in] leftBackMotorId LB motor id.
+     * @param[in] rightFrontMotorId RF motor id.
+     * @param[in] rightBackMotorId RB motor id.
+     * @param[in] currentPin The analog input pin that the chassis current sensor is connected to.
+     *
+     * @note Description of velocity PID controller:
+     *  First runs kalman filter on the input angle error. All the error calculations in the
+     * controller uses this kalman filtered gain.
+     * - Next, calculates the proportional term using the kalman filtered angle. Also uses kalman
+     *   filtered angle and previous kalman filtered angle for the derivative term; however, the
+     *   derivative term will be calculated only if the filtered angle is greater than
+     *   `MIN_ERROR_ROTATION_D`.
+     * - The wheel speed is calculated by then adding p and d terms and clamping the output to
+     *   `MAX_WHEEL_SPEED_SINGLE_MOTOR`.
+     */
     ChassisSubsystem(
         aruwlib::Drivers* drivers,
         float motorGearboxRatio,

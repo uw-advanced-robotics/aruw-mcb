@@ -32,10 +32,12 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
     float pidD,
     float pidMaxErrorSum,
     float pidMaxOutput,
+    float frictionWheelRampSpeed,
     aruwlib::motor::MotorId leftMotorId,
     aruwlib::motor::MotorId rightMotorId,
     aruwlib::can::CanBus canBus)
     : aruwlib::control::Subsystem(drivers),
+      FRICTION_WHEEL_RAMP_SPEED(frictionWheelRampSpeed),
       velocityPidLeftWheel(pidP, pidI, pidD, pidMaxErrorSum, pidMaxOutput),
       velocityPidRightWheel(pidP, pidI, pidD, pidMaxErrorSum, pidMaxOutput),
       desiredRpmRamp(0),

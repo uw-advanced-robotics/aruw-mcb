@@ -38,6 +38,9 @@ namespace aruwsrc::control::turret
 class TurretCVCommand : public aruwlib::control::Command
 {
 public:
+    /**
+     * @param
+     */
     TurretCVCommand(
         aruwlib::Drivers *xavierSerial,
         TurretSubsystem *subsystem,

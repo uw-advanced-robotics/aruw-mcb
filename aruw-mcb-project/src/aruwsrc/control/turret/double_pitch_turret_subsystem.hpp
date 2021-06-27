@@ -42,48 +42,88 @@ namespace aruwsrc::control::turret
 class DoublePitchTurretSubsystem : public aruwlib::control::turret::iTurretSubsystem
 {
 public:
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-    static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID_LEFT = aruwlib::motor::MOTOR8;
-    static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID_RIGHT = aruwlib::motor::MOTOR5;
-    static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR6;
-
-    static constexpr float TURRET_YAW_START_ANGLE = 90.0f;
-    static constexpr float TURRET_YAW_MIN_ANGLE = 5.0f;
-    static constexpr float TURRET_YAW_MAX_ANGLE = 175.0f;
-    static constexpr float TURRET_PITCH_START_ANGLE = 62.0f;
-    static constexpr float TURRET_PITCH_MIN_ANGLE = 45.0f;
-    static constexpr float TURRET_PITCH_MAX_ANGLE = 90.0f;
-
-    static constexpr float YAW_P = 2000.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 120.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 30.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 1300.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 80.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 30.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-
-    static constexpr float USER_YAW_INPUT_SCALAR = 0.75f;
-    static constexpr float USER_PITCH_INPUT_SCALAR = 0.5f;
-
-    static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 0.0f;
-
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 6704;
-    static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_LEFT = 5835;
-    static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_RIGHT = 3123;
-
-    explicit DoublePitchTurretSubsystem(aruwlib::Drivers* drivers, bool limitYaw = true);
+    /**
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] yawKp
+     * @param[in] yawKi
+     * @param[in] yawKd
+     * @param[in] yawMaxICumulative
+     * @param[in] yawMaxOutput
+     * @param[in] yawTQDerivativeKalman
+     * @param[in] yawTRDerivativeKalman
+     * @param[in] yawTQProportionalKalman
+     * @param[in] yawTRProportionalKalman
+     * @param[in] pitchKp
+     * @param[in] pitchKi
+     * @param[in] pitchKd
+     * @param[in] pitchMaxICumulative
+     * @param[in] pitchMaxOutput
+     * @param[in] pitchTQDerivativeKalman
+     * @param[in] pitchTRDerivativeKalman
+     * @param[in] pitchTQProportionalKalman
+     * @param[in] pitchTRProportionalKalman
+     * @param[in] userYawInputScalar
+     * @param[in] userPitchInputScalar
+     * @param[in] pitchGravityCompensationKp
+     * @param[in] yawStartAngle
+     * @param[in] pitchStartAngle
+     * @param[in] yawMinAngle Minimum yaw angle that the turret is limited to (in degrees).
+     * @param[in] yawMaxAngle Maximum yaw angle that the turret is limited to (in degrees).
+     * @param[in] pitchMinAngle Minimum pitch angle that the turret is limited to (in degrees).
+     * @param[in] pitchMaxAngle Maximum pitch angle that the turret is limited to (in degrees).
+     * @param[in] yawStartEncoderPosition The yaw encoder value that is associated with the
+     *      `startAngle`.
+pitch90DegEncoderPositionLeft
+pitch90DegEncoderPositionRight
+     * @param[in] feedForwardKp Proportional term used in turret feedforward controller.
+     * @param[in] feedForwardMaxOutput Max output that the feedforward proportional controller is
+     *      limited to.
+     * @param[in] motorCanBus Can bus that the turret is connected to.
+     * @param[in] pitchMotorLeftId, pitchMotorRightId DJI motor id for pitch motor.
+     * @param[in] yawMotorId DJI motor id for yaw motor.
+     * @param[in] limitYaw `true` if the yaw should be limited between `TURRET_YAW_MIN_ANGLE` and
+     *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
+     *      ring).
+     */
+    explicit DoublePitchTurretSubsystem(
+        aruwlib::Drivers* drivers,
+        float yawKp,
+        float yawKi,
+        float yawKd,
+        float yawMaxICumulative,
+        float yawMaxOutput,
+        float yawTQDerivativeKalman,
+        float yawTRDerivativeKalman,
+        float yawTQProportionalKalman,
+        float yawTRProportionalKalman,
+        float pitchKp,
+        float pitchKi,
+        float pitchKd,
+        float pitchMaxICumulative,
+        float pitchMaxOutput,
+        float pitchTQDerivativeKalman,
+        float pitchTRDerivativeKalman,
+        float pitchTQProportionalKalman,
+        float pitchTRProportionalKalman,
+        float userYawInputScalar,
+        float userPitchInputScalar,
+        float pitchGravityCompensationKp,
+        float yawStartAngle,
+        float pitchStartAngle,
+        float yawMinAngle,
+        float yawMaxAngle,
+        float pitchMinAngle,
+        float pitchMaxAngle,
+        float yawStartEncoderPosition,
+        float pitch90DegEncoderPositionLeft,
+        float pitch90DegEncoderPositionRight,
+        float feedForwardKp,
+        float feedForwardMaxOutput,
+        aruwlib::can::CanBus motorCanBus,
+        aruwlib::motor::MotorId pitchMotorRightId,
+        aruwlib::motor::MotorId pitchMotorLeftId,
+        aruwlib::motor::MotorId yawMotorId,
+        bool limitYaw = true);
 
     void initialize() override;
 
@@ -158,6 +198,19 @@ public:
     const char* getName() override { return "Sentinel Turret"; }
 
 private:
+    const float TURRET_YAW_START_ANGLE;
+    const float TURRET_YAW_MIN_ANGLE;
+    const float TURRET_YAW_MAX_ANGLE;
+    const float TURRET_PITCH_START_ANGLE;
+    const float TURRET_PITCH_MIN_ANGLE;
+    const float TURRET_PITCH_MAX_ANGLE;
+    const float USER_YAW_INPUT_SCALAR;
+    const float USER_PITCH_INPUT_SCALAR;
+    const float PITCH_GRAVITY_COMPENSATION_KP;
+    const uint16_t YAW_START_ENCODER_POSITION;
+    const uint16_t PITCH_90DEG_ENCODER_POSITION_LEFT;
+    const uint16_t PITCH_90DEG_ENCODER_POSITION_RIGHT;
+
     aruwlib::algorithms::ContiguousFloat currLeftPitchAngle;
     aruwlib::algorithms::ContiguousFloat currRightPitchAngle;
     aruwlib::algorithms::ContiguousFloat currYawAngle;

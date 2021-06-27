@@ -44,9 +44,24 @@ class TurretSubsystem : public aruwlib::control::turret::iTurretSubsystem
 {
 public:
     /**
-     * Constructs a TurretSubsystem.
+     * @brief Constructs a TurretSubsystem.
      *
-     * @param[in] drivers Pointer to a drivers singleton object
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] startAngle Angle that the turret pitch/yaw angles start at (in degrees).
+     * @param[in] yawMinAngle Minimum yaw angle that the turret is limited to (in degrees).
+     * @param[in] yawMaxAngle Maximum yaw angle that the turret is limited to (in degrees).
+     * @param[in] pitchMinAngle Minimum pitch angle that the turret is limited to (in degrees).
+     * @param[in] pitchMaxAngle Maximum pitch angle that the turret is limited to (in degrees).
+     * @param[in] yawStartEncoderPosition The yaw encoder value that is associated with the
+     *      `startAngle`.
+     * @param[in] pitchStartEncoderPosition The pitch encoder value that is associated with the
+     *      `startAngle`
+     * @param[in] feedForwardKp Proportional term used in turret feedforward controller.
+     * @param[in] feedForwardMaxOutput Max output that the feedforward proportional controller is
+     *      limited to.
+     * @param[in] motorCanBus Can bus that the turret is connected to.
+     * @param[in] pitchMotorId DJI motor id for pitch motor.
+     * @param[in] yawMotorId DJI motor id for yaw motor.
      * @param[in] limitYaw `true` if the yaw should be limited between `TURRET_YAW_MIN_ANGLE` and
      *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).

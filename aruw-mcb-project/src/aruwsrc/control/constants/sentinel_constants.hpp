@@ -40,16 +40,22 @@ static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID_LOWER = aruwlib:
 static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID_LOWER = aruwlib::motor::MOTOR2;
 static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID_UPPER = aruwlib::motor::MOTOR3;
 static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID_UPPER = aruwlib::motor::MOTOR4;
+static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID_RIGHT = aruwlib::motor::MOTOR5;
+static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR6;
+static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
+static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID_LEFT = aruwlib::motor::MOTOR8;
+
+// CAN 2
 static constexpr aruwlib::motor::MotorId CHASSIS_RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
 static constexpr aruwlib::motor::MotorId CHASSIS_LEFT_MOTOR_ID = aruwlib::motor::MOTOR6;
-static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
 }  // namespace motor
 
 namespace can
 {
 static constexpr aruwlib::can::CanBus LAUNCHER_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
-static constexpr aruwlib::can::CanBus CHASSIS_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+static constexpr aruwlib::can::CanBus CHASSIS_CAN_BUS = aruwlib::can::CanBus::CAN_BUS2;
 static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+static constexpr aruwlib::can::CanBus TURRET_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 }  // namespace can
 
 namespace gpio
@@ -78,6 +84,23 @@ static constexpr float CHASSIS_PID_MAX_OUTPUT = 16000;
 // radius of the wheel in mm
 static constexpr float WHEEL_RADIUS = 35.0f;
 static constexpr float GEAR_RATIO = GEAR_RATIO_GM3508;
+
+/// @see power_limiter.hpp for what these mean
+static constexpr float MAX_ENERGY_BUFFER = 200.0f;
+static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 100.0f;
+static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 0;
+static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 5;
+static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 15000;
+
+// RMUL length of the rail, in mm
+static constexpr float RAIL_LENGTH = 2130;
+// Our length of the rail, in mm
+// static constexpr float RAIL_LENGTH = 1900;
+
+/**
+ * Length of the sentinel, in mm
+ */
+static constexpr float SENTINEL_LENGTH = 480;
 }  // namespace chassis
 
 namespace agitator
@@ -97,16 +120,35 @@ static constexpr float JAMMING_TIME = 0;
 
 namespace turret
 {
-static constexpr float TURRET_START_ANGLE = 90.0f;
-static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
-static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
-static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
-static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
-static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
-static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
-static constexpr uint16_t YAW_START_ENCODER_POSITION = 8160;
-static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
+static constexpr float TURRET_YAW_START_ANGLE = 90.0f;
+static constexpr float TURRET_YAW_MIN_ANGLE = 5.0f;
+static constexpr float TURRET_YAW_MAX_ANGLE = 175.0f;
+static constexpr float TURRET_PITCH_START_ANGLE = 62.0f;
+static constexpr float TURRET_PITCH_MIN_ANGLE = 45.0f;
+static constexpr float TURRET_PITCH_MAX_ANGLE = 90.0f;
+
+static constexpr float YAW_P = 2000.0f;
+static constexpr float YAW_I = 0.0f;
+static constexpr float YAW_D = 120.0f;
+static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
+static constexpr float YAW_MAX_OUTPUT = 30000.0f;
+static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
+static constexpr float YAW_R_DERIVATIVE_KALMAN = 30.0f;
+static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
+static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
+
+static constexpr float PITCH_P = 1300.0f;
+static constexpr float PITCH_I = 0.0f;
+static constexpr float PITCH_D = 80.0f;
+static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
+static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
+static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
+static constexpr float PITCH_R_DERIVATIVE_KALMAN = 30.0f;
+static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
+static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
+
+static constexpr float USER_YAW_INPUT_SCALAR = 0.75f;
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.5f;
 }  // namespace turret
 
 namespace launcher
@@ -116,6 +158,7 @@ static constexpr float LAUNCHER_PID_I = 0.0f;
 static constexpr float LAUNCHER_PID_D = 5.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16000.0f;
+static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
 
 static constexpr float SWITCHER_UPPER_PWM = 0.13f;
 static constexpr float SWITCHER_LOWER_PWM = 0.19f;

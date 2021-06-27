@@ -39,7 +39,6 @@
 #include "sentinel/firing/sentinel_switcher_subsystem.hpp"
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_init_command.hpp"
-#include "turret/turret_manual_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
@@ -92,6 +91,13 @@ SentinelDriveSubsystem sentinelDrive(
     constants::chassis::CHASSIS_PID_MAX_OUTPUT,
     constants::chassis::WHEEL_RADIUS,
     constants::chassis::GEAR_RATIO,
+    constants::chassis::RAIL_LENGTH,
+    constants::chassis::SENTINEL_LENGTH,
+    constants::chassis::MAX_ENERGY_BUFFER,
+    constants::chassis::ENERGY_BUFFER_LIMIT_THRESHOLD,
+    constants::chassis::ENERGY_BUFFER_CRIT_THRESHOLD,
+    constants::chassis::POWER_CONSUMPTION_THRESHOLD,
+    constants::chassis::CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
     constants::motor::CHASSIS_LEFT_MOTOR_ID,
     constants::motor::CHASSIS_RIGHT_MOTOR_ID,
     constants::can::CHASSIS_CAN_BUS);
@@ -103,6 +109,7 @@ FrictionWheelSubsystem upperFrictionWheels(
     constants::launcher::LAUNCHER_PID_D,
     constants::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
     constants::launcher::LAUNCHER_PID_MAX_OUTPUT,
+    constants::launcher::FRICTION_WHEEL_RAMP_SPEED,
     constants::motor::LAUNCHER_LEFT_MOTOR_ID_UPPER,
     constants::motor::LAUNCHER_RIGHT_MOTOR_ID_UPPER,
     constants::can::LAUNCHER_CAN_BUS);
@@ -114,6 +121,7 @@ FrictionWheelSubsystem lowerFrictionWheels(
     constants::launcher::LAUNCHER_PID_D,
     constants::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
     constants::launcher::LAUNCHER_PID_MAX_OUTPUT,
+    constants::launcher::FRICTION_WHEEL_RAMP_SPEED,
     constants::motor::LAUNCHER_LEFT_MOTOR_ID_LOWER,
     constants::motor::LAUNCHER_RIGHT_MOTOR_ID_LOWER,
     constants::can::LAUNCHER_CAN_BUS);

@@ -44,8 +44,19 @@ class FrictionWheelSubsystem : public aruwlib::control::Subsystem
 {
 public:
     /**
-     * Creates a new friction wheel subsystem with DJI motor1 and motor2
+     * @brief Creates a new friction wheel subsystem with DJI motor1 and motor2
      * unless otherwise specified on CAN bus 1.
+     *
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] pidP
+     * @param[in] pidI
+     * @param[in] pidD
+     * @param[in] pidMaxErrorSum
+     * @param[in] pidMaxOutput
+     * @param[in] frictionWheelRampSpeed Speed of ramp when you set a new desired ramp speed [rpm / ms].
+     * @param[in] leftMotorId
+     * @param[in] rightMotorId
+     * @param[in] canBus
      */
     FrictionWheelSubsystem(
         aruwlib::Drivers *drivers,
@@ -54,6 +65,7 @@ public:
         float pidD,
         float pidMaxErrorSum,
         float pidMaxOutput,
+        float frictionWheelRampSpeed,
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId,
         aruwlib::can::CanBus canBus);
@@ -80,17 +92,7 @@ public:
 
 private:
     // speed of ramp when you set a new desired ramp speed [rpm / ms]
-#ifdef TARGET_SENTINEL
-    static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
-#else
-    static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
-#endif
-
-    static constexpr float PID_P = 30.0f;
-    static constexpr float PID_I = 0.0f;
-    static constexpr float PID_D = 0.0f;
-    static constexpr float PID_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PID_MAX_OUTPUT = 16000.0f;
+    const float FRICTION_WHEEL_RAMP_SPEED;
 
     modm::Pid<float> velocityPidLeftWheel;
 

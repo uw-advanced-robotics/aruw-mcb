@@ -50,8 +50,22 @@ class AgitatorSubsystem : public aruwlib::control::setpoint::SetpointSubsystem
 {
 public:
     /**
-     * Construct an agitator with the passed in PID parameters, gear ratio, and motor-specific
-     * identifiers.
+     * @brief Construct an agitator with the passed in PID parameters, gear ratio, and
+     * motor-specific identifiers.
+     *
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] kp
+     * @param[in] ki
+     * @param[in] kd
+     * @param[in] maxIAccum
+     * @param[in] maxOutput
+     * @param[in] agitatorGearRatio
+     * @param[in] agitatorMotorId
+     * @param[in] agitatorCanBusId
+     * @param[in] isAgitatorInverted
+     * @param[in] jamLogicEnabled
+     * @param[in] jammingDistance
+     * @param[in] jammingTime
      */
     AgitatorSubsystem(
         aruwlib::Drivers* drivers,

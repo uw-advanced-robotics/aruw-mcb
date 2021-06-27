@@ -45,6 +45,13 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
     float pidMaxOutput,
     float wheelRadius,
     float gearRatio,
+    float railLength,
+    float sentinelLength,
+    float maxEnergyBuffer,
+    float energyBufferLimitThreshold,
+    float energyBufferCritThreshold,
+    float powerConsumptionThreshold,
+    float currentAllocatedForEnergyBufferLimiting,
     aruwlib::motor::MotorId leftMotorId,
     aruwlib::motor::MotorId rightMotorId,
     aruwlib::can::CanBus chassisCanBus)
@@ -54,6 +61,8 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       CURRENT_SENSOR_PIN(currentSensorPin),
       WHEEL_RADIUS(wheelRadius),
       GEAR_RATIO(gearRatio),
+      RAIL_LENGTH(railLength),
+      SENTINEL_LENGTH(sentinelLength),
       velocityPidLeftWheel(pidP, pidI, pidD, pidMaxErrorSum, pidMaxOutput),
       velocityPidRightWheel(pidP, pidI, pidD, pidMaxErrorSum, pidMaxOutput),
       desiredRpm(0),
@@ -62,11 +71,11 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       powerLimiter(
           drivers,
           currentSensorPin,
-          MAX_ENERGY_BUFFER,
-          ENERGY_BUFFER_LIMIT_THRESHOLD,
-          ENERGY_BUFFER_CRIT_THRESHOLD,
-          POWER_CONSUMPTION_THRESHOLD,
-          CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
+          maxEnergyBuffer,
+          energyBufferLimitThreshold,
+          energyBufferCritThreshold,
+          powerConsumptionThreshold,
+          currentAllocatedForEnergyBufferLimiting,
           motorConstants)
 {
     chassisMotors[0] = &leftWheel;

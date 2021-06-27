@@ -34,6 +34,14 @@ namespace aruwsrc::control::sentinel::firing
 class SentinelSwitcherSubsystem : public aruwlib::control::Subsystem
 {
 public:
+    /**
+     * @brief Constructs a SentinelSwitcherSubsystem with the specified parameters.
+     *
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] switcherServoPin
+     * @param[in] lowerPwm The 
+     * @param[in] upperPwm
+     */
     SentinelSwitcherSubsystem(
         aruwlib::Drivers *drivers,
         aruwlib::gpio::Pwm::Pin switcherServoPin,
