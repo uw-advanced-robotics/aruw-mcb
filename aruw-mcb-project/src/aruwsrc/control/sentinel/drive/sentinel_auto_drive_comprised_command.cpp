@@ -24,6 +24,8 @@
 #include "aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/drivers.hpp"
 
+#include "aruwsrc/control/constants/robot_constants.hpp"
+
 #include "sentinel_drive_subsystem.hpp"
 
 using namespace aruwlib::algorithms;
@@ -36,8 +38,21 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     : aruwlib::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelChassis(sentinelChassis),
-      fullTraverse(sentinelChassis),
-      randomDrive(sentinelChassis),
+      fullTraverse(
+          sentinelChassis,
+          sentinel_control::constants::chassis::RAMP_SPEED,
+          sentinel_control::constants::chassis::MAX_DESIRED_TRAVERSE_SPEED,
+          sentinel_control::constants::chassis::TURNAROUND_BUFFER,
+          sentinel_control::constants::chassis::RAIL_LENGTH,
+          sentinel_control::constants::chassis::SENTINEL_LENGTH),
+      randomDrive(
+          sentinelChassis,
+          sentinel_control::constants::chassis::RANDOM_DRIVE_MIN_RPM,
+          sentinel_control::constants::chassis::RANDOM_DRIVE_MAX_RPM,
+          sentinel_control::constants::chassis::RANDOM_DRIVE_CHANGE_TIME_INTERVAL,
+          sentinel_control::constants::chassis::TURNAROUND_BUFFER,
+          sentinel_control::constants::chassis::RAIL_LENGTH,
+          sentinel_control::constants::chassis::SENTINEL_LENGTH),
       evadeMode(false)
 {
     addSubsystemRequirement(sentinelChassis);

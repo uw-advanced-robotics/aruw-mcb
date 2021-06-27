@@ -73,11 +73,8 @@ public:
      * @param[in] pitchMaxAngle Maximum pitch angle that the turret is limited to (in degrees).
      * @param[in] yawStartEncoderPosition The yaw encoder value that is associated with the
      *      `startAngle`.
-pitch90DegEncoderPositionLeft
-pitch90DegEncoderPositionRight
-     * @param[in] feedForwardKp Proportional term used in turret feedforward controller.
-     * @param[in] feedForwardMaxOutput Max output that the feedforward proportional controller is
-     *      limited to.
+     * @param[in] pitch90DegEncoderPositionLeft
+     * @param[in] pitch90DegEncoderPositionRight
      * @param[in] motorCanBus Can bus that the turret is connected to.
      * @param[in] pitchMotorLeftId, pitchMotorRightId DJI motor id for pitch motor.
      * @param[in] yawMotorId DJI motor id for yaw motor.
@@ -117,8 +114,6 @@ pitch90DegEncoderPositionRight
         float yawStartEncoderPosition,
         float pitch90DegEncoderPositionLeft,
         float pitch90DegEncoderPositionRight,
-        float feedForwardKp,
-        float feedForwardMaxOutput,
         aruwlib::can::CanBus motorCanBus,
         aruwlib::motor::MotorId pitchMotorRightId,
         aruwlib::motor::MotorId pitchMotorLeftId,

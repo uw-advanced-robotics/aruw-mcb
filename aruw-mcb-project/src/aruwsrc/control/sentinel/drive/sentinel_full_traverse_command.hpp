@@ -42,12 +42,16 @@ public:
      *      gearing is applied, in RPM.
      * @param[in] turnaroundBuffer The distance from the end of the rail at which the sentinel will
      *      referse direction.
+     * @param[in] railLength The length of the rail.
+     * @param[in] sentinelLength The length of the sentinel.
      */
     explicit SentinelFullTraverseCommand(
         SentinelDriveSubsystem* subsystem,
         float rampSpeed,
         float maxDesiredTraverseSpeed,
-        float turnaroundBuffer);
+        float turnaroundBuffer,
+        float railLength,
+        float sentinelLength);
 
     const char* getName() const override { return "sentinel full traverse"; }
     void initialize() override;
@@ -56,20 +60,11 @@ public:
     bool isFinished() const override;
 
 private:
-    /**
-     * Rate of change of the sentinel when changing direction, in wheel RPM / ms
-     */
-    static constexpr float RAMP_SPEED = 10.0f;
-
-    /**
-     * The rotational speed of the sentinel's wheels before gearing is applied, in RPM.
-     */
-    static constexpr float MAX_DESIRED_TRAVERSE_SPEED = 3000.0f;
-
-    /**
-     * The distance from the end of the rail at which the sentinel will referse direction.
-     */
-    static constexpr float TURNAROUND_BUFFER = 0.2f * SentinelDriveSubsystem::RAIL_LENGTH;
+    const float RAMP_SPEED;
+    const float MAX_DESIRED_TRAVERSE_SPEED;
+    const float TURNAROUND_BUFFER;
+    const float RAIL_LENGTH;
+    const float SENTINEL_LENGTH;
 
     uint32_t prevTime;
 

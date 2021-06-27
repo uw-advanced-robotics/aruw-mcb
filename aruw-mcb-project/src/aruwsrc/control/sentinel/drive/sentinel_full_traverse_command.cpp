@@ -25,8 +25,19 @@ using namespace aruwlib::arch::clock;
 
 namespace aruwsrc::control::sentinel::drive
 {
-SentinelFullTraverseCommand::SentinelFullTraverseCommand(SentinelDriveSubsystem* subsystem)
-    : prevTime(0),
+SentinelFullTraverseCommand::SentinelFullTraverseCommand(
+    SentinelDriveSubsystem* subsystem,
+    float rampSpeed,
+    float maxDesiredTraverseSpeed,
+    float turnaroundBuffer,
+    float railLength,
+    float sentinelLength)
+    : RAMP_SPEED(rampSpeed),
+      MAX_DESIRED_TRAVERSE_SPEED(maxDesiredTraverseSpeed),
+      TURNAROUND_BUFFER(turnaroundBuffer),
+      RAIL_LENGTH(railLength),
+      SENTINEL_LENGTH(sentinelLength),
+      prevTime(0),
       velocityTargetGenerator(0),
       subsystemSentinelDrive(subsystem)
 {
@@ -50,8 +61,7 @@ void SentinelFullTraverseCommand::execute()
     }
     else if (
         velocityTargetGenerator.getValue() > 0 &&
-        curPos > SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH -
-                     TURNAROUND_BUFFER)
+        curPos > RAIL_LENGTH - SENTINEL_LENGTH - TURNAROUND_BUFFER)
     {
         velocityTargetGenerator.setTarget(-MAX_DESIRED_TRAVERSE_SPEED);
     }

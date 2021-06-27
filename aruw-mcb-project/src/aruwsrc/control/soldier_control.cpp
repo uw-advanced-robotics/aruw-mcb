@@ -159,6 +159,7 @@ FrictionWheelSubsystem frictionWheels(
     constants::launcher::LAUNCHER_PID_D,
     constants::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
     constants::launcher::LAUNCHER_PID_MAX_OUTPUT,
+    constants::launcher::FRICTION_WHEEL_RAMP_SPEED,
     constants::motor::LAUNCHER_LEFT_MOTOR_ID,
     constants::motor::LAUNCHER_RIGHT_MOTOR_ID,
     constants::can::LAUNCHER_CAN_BUS);
@@ -168,7 +169,11 @@ ClientDisplaySubsystem clientDisplay(drivers());
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
+ChassisAutorotateCommand chassisAutorotateCommand(
+    drivers(),
+    &chassis,
+    &turret,
+    constants::chassis::CHASSIS_AUTOROTATE_PID_KP);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 

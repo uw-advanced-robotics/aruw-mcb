@@ -205,6 +205,8 @@ static constexpr float LAUNCHER_PID_I = 0.0f;
 static constexpr float LAUNCHER_PID_D = 5.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16000.0f;
+static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
+static constexpr float FRICTION_WHEEL_TARGET_RPM = 7000;
 }  // namespace launcher
 }  // namespace hero_control::constants
 

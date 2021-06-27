@@ -63,7 +63,9 @@ public:
         aruwlib::Drivers *drivers,
         aruwlib::control::turret::iTurretSubsystem *DoublePitchTurretSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
-        sentinel::firing::SentinelSwitcherSubsystem *switcher);
+        sentinel::firing::SentinelSwitcherSubsystem *switcher,
+        float minYawAngle, float maxYawAngle,
+        float minPitchAngle, float maxPitchAngle);
 
     bool isReady() override { return sentinelTurret->isOnline(); }
 
@@ -81,6 +83,8 @@ public:
 
 private:
     aruwlib::Drivers *drivers;
+
+    const float MIN_YAW_ANGLE, MAX_YAW_ANGLE, MIN_PITCH_ANGLE, MAX_PITCH_ANGLE;
 
     aruwlib::control::turret::iTurretSubsystem *sentinelTurret;
 

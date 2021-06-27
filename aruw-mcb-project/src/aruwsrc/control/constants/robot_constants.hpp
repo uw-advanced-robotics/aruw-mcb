@@ -20,7 +20,6 @@
 #ifndef ROBOT_CONSTANTS_HPP_
 #define ROBOT_CONSTANTS_HPP_
 
-#include "shared_constants.hpp"
 #if defined(TARGET_SOLDIER)
 #include "soldier_constants.hpp"
 #elif defined(TARGET_HERO)

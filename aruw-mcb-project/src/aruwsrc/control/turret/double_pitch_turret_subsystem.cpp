@@ -63,8 +63,6 @@ DoublePitchTurretSubsystem::DoublePitchTurretSubsystem(
     float yawStartEncoderPosition,
     float pitch90DegEncoderPositionLeft,
     float pitch90DegEncoderPositionRight,
-    float feedForwardKp,
-    float feedForwardMaxOutput,
     aruwlib::can::CanBus motorCanBus,
     aruwlib::motor::MotorId pitchMotorRightId,
     aruwlib::motor::MotorId pitchMotorLeftId,
@@ -81,8 +79,8 @@ DoublePitchTurretSubsystem::DoublePitchTurretSubsystem(
       USER_PITCH_INPUT_SCALAR(userPitchInputScalar),
       PITCH_GRAVITY_COMPENSATION_KP(pitchGravityCompensationKp),
       YAW_START_ENCODER_POSITION(yawStartEncoderPosition),
-      PITCH_90DEG_ENCODER_POSITION_LEFT(),
-      PITCH_90DEG_ENCODER_POSITION_RIGHT(),
+      PITCH_90DEG_ENCODER_POSITION_LEFT(pitch90DegEncoderPositionLeft),
+      PITCH_90DEG_ENCODER_POSITION_RIGHT(pitch90DegEncoderPositionRight),
       currLeftPitchAngle(0.0f, 0.0f, 360.0f),
       currRightPitchAngle(0.0f, 0.0f, 360.0f),
       currYawAngle(0.0f, 0.0f, 360.0f),
@@ -120,8 +118,8 @@ DoublePitchTurretSubsystem::DoublePitchTurretSubsystem(
           pitchTRProportionalKalman),
       prevTime(0),
       limitYaw(limitYaw),
-      pitchMotorLeft(drivers, pitchMotorRightId, motorCanBus, true, "pitch motor left"),
-      pitchMotorRight(drivers, pitchMotorLeftId, motorCanBus, false, "pitch motor right"),
+      pitchMotorLeft(drivers, pitchMotorLeftId, motorCanBus, true, "pitch motor left"),
+      pitchMotorRight(drivers, pitchMotorRightId, motorCanBus, false, "pitch motor right"),
       yawMotor(drivers, yawMotorId, motorCanBus, true, "yaw motor")
 {
 }

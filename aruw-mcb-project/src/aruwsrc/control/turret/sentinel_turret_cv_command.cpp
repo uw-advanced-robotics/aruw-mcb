@@ -35,9 +35,17 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     aruwlib::Drivers *drivers,
     aruwlib::control::turret::iTurretSubsystem *sentinelTurret,
     aruwsrc::agitator::AgitatorSubsystem *agitator,
-    sentinel::firing::SentinelSwitcherSubsystem *switcher)
+    sentinel::firing::SentinelSwitcherSubsystem *switcher,
+    float minYawAngle,
+    float maxYawAngle,
+    float minPitchAngle,
+    float maxPitchAngle)
     : aruwlib::control::ComprisedCommand(drivers),
       drivers(drivers),
+      MIN_YAW_ANGLE(minYawAngle),
+      MAX_YAW_ANGLE(maxYawAngle),
+      MIN_PITCH_ANGLE(minPitchAngle),
+      MAX_PITCH_ANGLE(maxPitchAngle),
       sentinelTurret(sentinelTurret),
       rotateAgitator(drivers, agitator, switcher),
       aimingAtTarget(false),
@@ -136,22 +144,14 @@ void SentinelTurretCVCommand::scanForTarget()
 
     const float pitchSetpoint = sentinelTurret->getPitchSetpoint();
 
-    updateScanningUp(
-        pitchSetpoint,
-        DoublePitchTurretSubsystem::TURRET_PITCH_MIN_ANGLE,
-        DoublePitchTurretSubsystem::TURRET_PITCH_MAX_ANGLE,
-        &pitchScanningUp);
+    updateScanningUp(pitchSetpoint, MIN_PITCH_ANGLE, MAX_PITCH_ANGLE, &pitchScanningUp);
 
     sentinelTurret->setPitchSetpoint(
         pitchSetpoint + (pitchScanningUp ? SCAN_DELTA_ANGLE_PITCH : -SCAN_DELTA_ANGLE_PITCH));
 
     const float yawSetpoint = sentinelTurret->getYawSetpoint();
 
-    updateScanningUp(
-        yawSetpoint,
-        DoublePitchTurretSubsystem::TURRET_YAW_MIN_ANGLE,
-        DoublePitchTurretSubsystem::TURRET_YAW_MAX_ANGLE,
-        &yawScanningRight);
+    updateScanningUp(yawSetpoint, MIN_YAW_ANGLE, MAX_YAW_ANGLE, &yawScanningRight);
 
     sentinelTurret->setYawSetpoint(
         yawSetpoint + (yawScanningRight ? SCAN_DELTA_ANGLE_YAW : -SCAN_DELTA_ANGLE_YAW));

@@ -193,7 +193,11 @@ aruwsrc::control::turret::SentinelTurretCVCommand turretCVCommand(
     drivers(),
     &turretSubsystem,
     &agitator,
-    &switcher);
+    &switcher,
+    constants::turret::TURRET_YAW_MIN_ANGLE,
+    constants::turret::TURRET_YAW_MAX_ANGLE,
+    constants::turret::TURRET_PITCH_MIN_ANGLE,
+    constants::turret::TURRET_PITCH_MAX_ANGLE);
 
 aruwlib::control::turret::commands::TurretSetpointCommand turretManual(
     drivers(),

@@ -84,7 +84,7 @@ static constexpr float CHASSIS_PID_MAX_OUTPUT = 16000;
 
 // radius of the wheel in mm
 static constexpr float WHEEL_RADIUS = 35.0f;
-static constexpr float GEAR_RATIO = GEAR_RATIO_GM3508;
+static constexpr float GEAR_RATIO = 19.0f;
 
 /// @see power_limiter.hpp for what these mean
 static constexpr float MAX_ENERGY_BUFFER = 200.0f;
@@ -117,8 +117,8 @@ static constexpr float AGITATOR_PID_17MM_MAX_ERR_SUM = 0.0f;
 static constexpr float AGITATOR_PID_17MM_MAX_OUT = 16000.0f;
 static constexpr float AGITATOR_MOTOR_INVERTED = false;
 static constexpr float AGITATOR_GEAR_RATIO = 36.0f;
-static constexpr float JAMMING_DISTANCE = 0;
-static constexpr float JAMMING_TIME = 0;
+static constexpr float JAMMING_DISTANCE = aruwlib::algorithms::PI / 10.0f;
+static constexpr float JAMMING_TIME = 150;
 }  // namespace agitator
 
 namespace turret
@@ -152,6 +152,12 @@ static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.75f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.5f;
+
+static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 0.0f;
+
+static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
+static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_LEFT = 0;
+static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_RIGHT = 0;
 }  // namespace turret
 
 namespace launcher
@@ -163,10 +169,10 @@ static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16000.0f;
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
 
+static constexpr float FRICTION_WHEEL_TARGET_RPM = 5150;
+
 static constexpr float SWITCHER_UPPER_PWM = 0.13f;
 static constexpr float SWITCHER_LOWER_PWM = 0.19f;
-
-static constexpr float FRICTION_WHEEL_TARGET_RPM = 5150;
 }  // namespace launcher
 }  // namespace sentinel_control::constants
 
