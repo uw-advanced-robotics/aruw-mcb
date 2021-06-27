@@ -64,8 +64,10 @@ public:
         aruwlib::control::turret::iTurretSubsystem *DoublePitchTurretSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
         sentinel::firing::SentinelSwitcherSubsystem *switcher,
-        float minYawAngle, float maxYawAngle,
-        float minPitchAngle, float maxPitchAngle);
+        float minYawAngle,
+        float maxYawAngle,
+        float minPitchAngle,
+        float maxPitchAngle);
 
     bool isReady() override { return sentinelTurret->isOnline(); }
 

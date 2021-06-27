@@ -45,7 +45,8 @@ public:
      * @param[in] pwmPin The pin that the servo is connected to.
      * @param[in] open The angle defined as open; a PWM value (between 0 and 1).
      * @param[in] close The angle defined as close; a PWM value (between 0 and 1).
-     * @param[in] pwmRampSpeed Determines the speed of servo operation; a PWM value (between 0 and 1).
+     * @param[in] pwmRampSpeed Determines the speed of servo operation; a PWM value (between 0 and
+     * 1).
      */
     HopperSubsystem(
         aruwlib::Drivers *drivers,

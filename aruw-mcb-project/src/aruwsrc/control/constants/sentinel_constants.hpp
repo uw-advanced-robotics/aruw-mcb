@@ -25,9 +25,9 @@
 #endif
 
 #include "aruwlib/communication/can/can_bus.hpp"
+#include "aruwlib/communication/gpio/analog.hpp"
 #include "aruwlib/communication/gpio/digital.hpp"
 #include "aruwlib/communication/gpio/pwm.hpp"
-#include "aruwlib/communication/gpio/analog.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
 // For comments, see constants.md
