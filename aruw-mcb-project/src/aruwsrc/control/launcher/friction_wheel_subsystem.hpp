@@ -48,15 +48,16 @@ public:
      * unless otherwise specified on CAN bus 1.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
-     * @param[in] pidP
-     * @param[in] pidI
-     * @param[in] pidD
-     * @param[in] pidMaxErrorSum
-     * @param[in] pidMaxOutput
-     * @param[in] frictionWheelRampSpeed Speed of ramp when you set a new desired ramp speed [rpm / ms].
-     * @param[in] leftMotorId
-     * @param[in] rightMotorId
-     * @param[in] canBus
+     * @param[in] pidP Proportioanl parameter for RPM PID controller.
+     * @param[in] pidI Integral parameter for RPM PID controller.
+     * @param[in] pidD Derivative parameter for RPM PID controller.
+     * @param[in] pidMaxErrorSum Max integral sum for RPM PID controller.
+     * @param[in] pidMaxOutput Max output for RPM PID controller.
+     * @param[in] frictionWheelRampSpeed Speed of ramp when you set a new desired ramp speed
+     *      [rpm / ms].
+     * @param[in] leftMotorId DJI motor ID for left motor.
+     * @param[in] rightMotorId DJI motor ID for right motor.
+     * @param[in] canBus CAN bus that the friction wheels are connected to.
      */
     FrictionWheelSubsystem(
         aruwlib::Drivers *drivers,

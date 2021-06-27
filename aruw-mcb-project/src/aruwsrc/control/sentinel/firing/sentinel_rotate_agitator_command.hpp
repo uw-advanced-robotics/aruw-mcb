@@ -58,6 +58,7 @@ public:
     bool isFinished() const override;
 
 private:
+    // I could pull these out from this file but why bother since we won't ever use this again
     static constexpr uint32_t SWITCH_BARREL_TIMEOUT = 100;
     static constexpr uint16_t BARREL_OVERHEAT_THRESHOLD = 30;
     static constexpr float AGITATOR_ROTATE_ANGLE = 3 * aruwlib::algorithms::PI / 10;

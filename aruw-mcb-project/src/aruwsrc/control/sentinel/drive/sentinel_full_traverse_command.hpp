@@ -34,7 +34,20 @@ class SentinelDriveSubsystem;
 class SentinelFullTraverseCommand : public aruwlib::control::Command
 {
 public:
-    explicit SentinelFullTraverseCommand(SentinelDriveSubsystem* subsystem);
+    /**
+     * @param[in] subsystem The sentinel chassis to drive.
+     * @param[in] rampSpeed Rate of change of the sentinel when changing direction, in wheel RPM /
+     *      ms.
+     * @param[in] maxDesiredTraverseSpeed The rotational speed of the sentinel's wheels before
+     *      gearing is applied, in RPM.
+     * @param[in] turnaroundBuffer The distance from the end of the rail at which the sentinel will
+     *      referse direction.
+     */
+    explicit SentinelFullTraverseCommand(
+        SentinelDriveSubsystem* subsystem,
+        float rampSpeed,
+        float maxDesiredTraverseSpeed,
+        float turnaroundBuffer);
 
     const char* getName() const override { return "sentinel full traverse"; }
     void initialize() override;

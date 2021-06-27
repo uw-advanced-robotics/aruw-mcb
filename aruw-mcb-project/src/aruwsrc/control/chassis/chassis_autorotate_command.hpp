@@ -42,7 +42,8 @@ public:
     ChassisAutorotateCommand(
         aruwlib::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const aruwlib::control::turret::iTurretSubsystem* turret);
+        const aruwlib::control::turret::iTurretSubsystem* turret,
+        float chassisAutorotatePidKp);
 
     void initialize() override;
 
@@ -61,11 +62,11 @@ public:
     const char* getName() const override { return "chassis autorotate"; }
 
 private:
-    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
-
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
     const aruwlib::control::turret::iTurretSubsystem* turret;
+
+    const float CHASSIS_AUTOROTATE_PID_KP;
 };  // class ChassisAutorotateCommand
 
 }  // namespace aruwsrc::chassis

@@ -45,18 +45,23 @@ public:
      * @brief Constructs a SentinelDriveSubsystem with the specified parameters.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
-     * @param[in] leftLimitSwitch
-     * @param[in] rightLimitSwitch
-     * @param[in] currentSensorPin
-     * @param[in] pidP
-     * @param[in] pidI
-     * @param[in] pidD
-     * @param[in] pidMaxErrorSum
-     * @param[in] pidMaxOutput
+     * @param[in] leftLimitSwitch Left limit switch connected to the side of the chassis
+     *      and is triggered when the sentinel reaches the end of the rail.
+     * @param[in] rightLimitSwitch Right limit switch connected to the side of the chassis
+     *      and is triggered when the sentinel reaches the end of the rail.
+     * @param[in] currentSensorPin The analog input pin that the chassis current sensor is connected
+     *      to.
+     * @param[in] pidP Proportional term for chassis wheel velocity PID controller.
+     * @param[in] pidI Integral term for chassis wheel velocity PID controller
+     * @param[in] pidD Derivative term for chassis wheel velocity PID controller.
+     * @param[in] pidMaxErrorSum Max integral sum for chassis wheel velocity PID controller.
+     * @param[in] pidMaxOutput This max output is measured in the c620 robomaster translated
+     *      current. Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384. The
+     *      corresponding speed controller output torque current range is -20 ~ 0 ~ 20 A.
      * @param[in] wheelRadius Wheel radius of chassis motors, (mm).
      * @param[in] gearRatio Gear ratio of the chassis motors.
-     * @param[in] railLength
-     * @param[in] sentinelLength
+     * @param[in] railLength Length of the sentinel rail (mm).
+     * @param[in] sentinelLength Length of the sentinel (mm).
      * @param[in] maxEnergyBuffer @see PowerLimiter
      * @param[in] energyBufferLimitThreshold @see PowerLimiter
      * @param[in] energyBufferCritThreshold @see PowerLimiter

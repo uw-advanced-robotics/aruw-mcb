@@ -108,6 +108,8 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
+static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
+
 static constexpr float MAX_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 40.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 5;

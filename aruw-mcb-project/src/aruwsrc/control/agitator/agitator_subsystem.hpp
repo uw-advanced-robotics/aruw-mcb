@@ -54,18 +54,19 @@ public:
      * motor-specific identifiers.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
-     * @param[in] kp
-     * @param[in] ki
-     * @param[in] kd
-     * @param[in] maxIAccum
-     * @param[in] maxOutput
-     * @param[in] agitatorGearRatio
-     * @param[in] agitatorMotorId
-     * @param[in] agitatorCanBusId
-     * @param[in] isAgitatorInverted
-     * @param[in] jamLogicEnabled
-     * @param[in] jammingDistance
-     * @param[in] jammingTime
+     * @param[in] kp Proportional constant for position PID controller.
+     * @param[in] ki Integral constant for positional PID controller.
+     * @param[in] kd Derivative constant for positional PID controller.
+     * @param[in] maxIAccum Max integral sum for position PID controller.
+     * @param[in] maxOutput Maximum output for position PID controller.
+     * @param[in] agitatorGearRatio Gear ratio of agitator motor.
+     * @param[in] agitatorMotorId DJI motor id of agitator motor.
+     * @param[in] agitatorCanBusId CAN bus that the agitator motor is on.
+     * @param[in] isAgitatorInverted Whether or not the agitator is inverted.
+     * @param[in] jamLogicEnabled Whether or not jam logic is enabled. If `false`,
+     *      `isJammed` always returns `false`.
+     * @param[in] jamDistanceTolerance @see SetpointContinuousJamChecker.
+     * @param[in] jamTemporalTolerance @see SetpointContinuousJamChecker.
      */
     AgitatorSubsystem(
         aruwlib::Drivers* drivers,
@@ -79,8 +80,8 @@ public:
         aruwlib::can::CanBus agitatorCanBusId,
         bool isAgitatorInverted,
         bool jamLogicEnabled,
-        float jammingDistance,
-        uint32_t jammingTime);
+        float jamDistanceTolerance,
+        uint32_t jamTemporalTolerance);
 
     void initialize() override;
 

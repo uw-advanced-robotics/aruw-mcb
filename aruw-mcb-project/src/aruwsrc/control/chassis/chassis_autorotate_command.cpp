@@ -36,10 +36,12 @@ namespace chassis
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     aruwlib::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const aruwlib::control::turret::iTurretSubsystem* turret)
+    const aruwlib::control::turret::iTurretSubsystem* turret,
+    float chassisAutorotatePidKp)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret)
+      turret(turret),
+      CHASSIS_AUTOROTATE_PID_KP(chassisAutorotatePidKp)
 {
     addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
 }

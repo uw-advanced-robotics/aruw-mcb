@@ -38,8 +38,8 @@ LimitSwitchAgitatorSubsystem::LimitSwitchAgitatorSubsystem(
     aruwlib::motor::MotorId agitatorMotorId,
     aruwlib::can::CanBus agitatorCanBusId,
     bool isAgitatorInverted,
-    float distanceTolerance,
-    uint32_t temporalTolerance,
+    float jamDistanceTolerance,
+    uint32_t jamTemporalTolerance,
     aruwlib::gpio::Digital::InputPin limitSwitchPin)
     : Subsystem(drivers),
       AgitatorSubsystem(
@@ -54,8 +54,8 @@ LimitSwitchAgitatorSubsystem::LimitSwitchAgitatorSubsystem(
           agitatorCanBusId,
           isAgitatorInverted,
           true,
-          distanceTolerance,
-          temporalTolerance),
+          jamDistanceTolerance,
+          jamTemporalTolerance),
       limitSwitchPin(limitSwitchPin),
       digital(&drivers->digital),
       ballsInTube(0)

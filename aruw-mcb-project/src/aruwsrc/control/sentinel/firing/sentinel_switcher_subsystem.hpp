@@ -39,7 +39,7 @@ public:
      *
      * @param[in] drivers Pointer to a drivers singleton object.
      * @param[in] switcherServoPin
-     * @param[in] lowerPwm The 
+     * @param[in] lowerPwm The
      * @param[in] upperPwm
      */
     SentinelSwitcherSubsystem(

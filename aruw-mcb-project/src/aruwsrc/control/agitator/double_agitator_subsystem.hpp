@@ -48,17 +48,26 @@ class DoubleAgitatorSubsystem : public aruwlib::control::setpoint::SetpointSubsy
 {
 public:
     /**
-     * The angular difference between the current angle and desired angle within which
-     * the jam timer will be reset (i.e.: the subsystem won't consider itself jammed)
-     * in radians (? I think)
+     * @brief Construct an agitator with the passed in PID parameters, gear ratio, and
+     * motor-specific identifiers.
+     *
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] kp Proportional constant for position PID controller.
+     * @param[in] ki Integral constant for positional PID controller.
+     * @param[in] kd Derivative constant for positional PID controller.
+     * @param[in] maxIAccum Max integral sum for position PID controller.
+     * @param[in] maxOutput Maximum output for position PID controller.
+     * @param[in] agitatorGearRatio Gear ratio of agitator motor.
+     * @param[in] agitator1MotorId DJI motor id of first agitator motor.
+     * @param[in] agitator1CanBusId CAN bus that the first agitator motor is on.
+     * @param[in] agitator2MotorId DJI motor id of second agitator motor.
+     * @param[in] agitator2CanBusId CAN bus that the second agitator motor is on.
+     * @param[in] isAgitatorInverted Whether or not the agitator is inverted.
+     * @param[in] jamDistanceTolerance @see SetpointContinuousJamChecker.
+     * @param[in] jamTemporalTolerance @see SetpointContinuousJamChecker.
+     * @param[in] jamLogicEnabled Whether or not jam logic is enabled. If `false`,
+     *      `isJammed` always returns `false`.
      */
-    static constexpr float JAM_DISTANCE_TOLERANCE = 0.5f;
-    /**
-     * The jam timeout period in milliseconds. Timeout starts and runs while subsystem
-     * is outside JAM_DISTANCE_TOLERANCE. Timeout resets when subsystem returns to within tolerance.
-     */
-    static constexpr uint32_t JAM_TEMPORAL_TOLERANCE = 150;
-
     DoubleAgitatorSubsystem(
         aruwlib::Drivers *drivers,
         float kp,
@@ -72,9 +81,9 @@ public:
         aruwlib::motor::MotorId agitator2MotorId,
         aruwlib::can::CanBus agitator2CanBusId,
         bool isAgitatorInverted,
-        float jamDistanceTolerance = JAM_DISTANCE_TOLERANCE,
-        uint32_t jamTemporalTolerance = JAM_TEMPORAL_TOLERANCE,
-        bool jamLogicEnabled = true);
+        float jamDistanceTolerance,
+        uint32_t jamTemporalTolerance,
+        bool jamLogicEnabled);
 
     void initialize() override;
 

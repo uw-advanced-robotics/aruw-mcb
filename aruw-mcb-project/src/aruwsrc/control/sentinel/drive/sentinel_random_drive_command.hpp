@@ -32,7 +32,24 @@ namespace aruwsrc::control::sentinel::drive
 class SentinelRandomDriveCommand : public aruwlib::control::Command
 {
 public:
-    explicit SentinelRandomDriveCommand(SentinelDriveSubsystem* subsystem);
+    /**
+     * @param[in] subsystem The sentinel chassis to drive.
+     * @param[in] minRpm Minimum target RPM for random driving.
+     * @param[in] maxRpm Maximum target RPM for random driving.
+     * @param[in] changeTimerInterval Time between changing the target RPM.
+     * @param[in] turnaroundBuffer The distance from the end of the rail at which the sentinel will
+     *      referse direction.
+     * @param[in] railLength
+     * @param[in] sentinelLength
+     */
+    explicit SentinelRandomDriveCommand(
+        SentinelDriveSubsystem* subsystem,
+        uint16_t minRpm,
+        uint16_t maxRpm,
+        uint16_t changeTimeInterval,
+        float turnaroundBuffer,
+        float railLength,
+        float sentinelLength);
 
     void initialize() override;
 
@@ -45,10 +62,12 @@ public:
     const char* getName() const override { return "sentinel random drive"; }
 
 private:
-    static const int16_t MIN_RPM = 5000;
-    static const int16_t MAX_RPM = 7000;
-    static const int16_t CHANGE_TIME_INTERVAL = 750;
-    static constexpr float TURNAROUND_BUFFER = 0.25f * SentinelDriveSubsystem::RAIL_LENGTH;
+    const int16_t MIN_RPM;
+    const int16_t MAX_RPM;
+    const int16_t CHANGE_TIME_INTERVAL;
+    const float TURNAROUND_BUFFER;
+    const float RAIL_LENGTH;
+    const float SENTINEL_LENGTH;
 
     float currentRPM = 0;
     bool chosenNewRPM = false;

@@ -100,7 +100,7 @@ public:
      * @param[in] currentPin The analog input pin that the chassis current sensor is connected to.
      *
      * @note Description of velocity PID controller:
-     *  First runs kalman filter on the input angle error. All the error calculations in the
+     * First runs kalman filter on the input angle error. All the error calculations in the
      * controller uses this kalman filtered gain.
      * - Next, calculates the proportional term using the kalman filtered angle. Also uses kalman
      *   filtered angle and previous kalman filtered angle for the derivative term; however, the

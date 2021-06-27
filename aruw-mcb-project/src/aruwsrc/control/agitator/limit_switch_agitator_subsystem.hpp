@@ -48,19 +48,10 @@ namespace agitator
 class LimitSwitchAgitatorSubsystem : public AgitatorSubsystem
 {
 public:
-#if defined(TARGET_HERO)
     /**
-     * The pin to check for the limit switch input, needs to be set by someone who
-     * knows what they're doing.
-     */
-    static constexpr aruwlib::gpio::Digital::InputPin WATERWHEEL_LIMIT_PIN =
-        aruwlib::gpio::Digital::InputPin::B;
-#endif
-
-    /**
-     * @param[in] limitSwitchPin the pin to be checked for limit switch input.
+     * @brief Construct a limit switch agitator with the passed in parameters.
      * @note for all params before `limitSwitchPin` see `AgitatorSubsystem.hpp`
-     * @note for all debounce params see `debounce.hpp` for reference
+     * @param[in] limitSwitchPin the pin to be checked for limit switch input.
      */
     LimitSwitchAgitatorSubsystem(
         aruwlib::Drivers* drivers,
@@ -73,8 +64,8 @@ public:
         aruwlib::motor::MotorId agitatorMotorId,
         aruwlib::can::CanBus agitatorCanBusId,
         bool isAgitatorInverted,
-        float distanceTolerance,
-        uint32_t temporalTolerance,
+        float jamDistanceTolerance,
+        uint32_t jamTemporalTolerance,
         aruwlib::gpio::Digital::InputPin limitSwitchPin);
 
     void refresh() override;

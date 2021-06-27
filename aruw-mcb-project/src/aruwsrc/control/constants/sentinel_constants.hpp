@@ -27,6 +27,7 @@
 #include "aruwlib/communication/can/can_bus.hpp"
 #include "aruwlib/communication/gpio/digital.hpp"
 #include "aruwlib/communication/gpio/pwm.hpp"
+#include "aruwlib/communication/gpio/analog.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
 // For comments, see constants.md
@@ -96,11 +97,13 @@ static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 15000;
 static constexpr float RAIL_LENGTH = 2130;
 // Our length of the rail, in mm
 // static constexpr float RAIL_LENGTH = 1900;
-
-/**
- * Length of the sentinel, in mm
- */
 static constexpr float SENTINEL_LENGTH = 480;
+static constexpr float RAMP_SPEED = 10.0f;
+static constexpr float MAX_DESIRED_TRAVERSE_SPEED = 3000.0f;
+static constexpr float TURNAROUND_BUFFER = 0.2f * RAIL_LENGTH;
+static constexpr int16_t RANDOM_DRIVE_MIN_RPM = 5000;
+static constexpr int16_t RANDOM_DRIVE_MAX_RPM = 7000;
+static constexpr int16_t RANDOM_DRIVE_CHANGE_TIME_INTERVAL = 750;
 }  // namespace chassis
 
 namespace agitator
@@ -162,6 +165,8 @@ static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
 
 static constexpr float SWITCHER_UPPER_PWM = 0.13f;
 static constexpr float SWITCHER_LOWER_PWM = 0.19f;
+
+static constexpr float FRICTION_WHEEL_TARGET_RPM = 5150;
 }  // namespace launcher
 }  // namespace sentinel_control::constants
 

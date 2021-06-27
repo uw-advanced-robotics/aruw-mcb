@@ -38,7 +38,6 @@
 #include "sentinel/firing/sentinel_rotate_agitator_command.hpp"
 #include "sentinel/firing/sentinel_switcher_subsystem.hpp"
 #include "turret/turret_cv_command.hpp"
-#include "turret/turret_init_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
@@ -143,7 +142,7 @@ SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
 
 FrictionWheelRotateCommand spinUpperFrictionWheels(
     &upperFrictionWheels,
-    FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
+    constants::launcher::FRICTION_WHEEL_TARGET_RPM);
 
 FrictionWheelRotateCommand spinLowerFrictionWheels(
     &lowerFrictionWheels,

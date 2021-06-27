@@ -87,16 +87,16 @@ public:
     const char *getName() override { return "Tow"; }
 
 private:
+    const aruwlib::gpio::Digital::OutputPin LEFT_TOW_PIN;
+    const aruwlib::gpio::Digital::OutputPin RIGHT_TOW_PIN;
+    const aruwlib::gpio::Digital::InputPin LEFT_TOW_LIMIT_SWITCH;
+    const aruwlib::gpio::Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN;
+
     /**
      * Keeps track of the state of the subsystem - if the tower clamp is open or not.
      */
     bool leftClamped;
     bool rightClamped;
-
-    const aruwlib::gpio::Digital::OutputPin LEFT_TOW_PIN;
-    const aruwlib::gpio::Digital::OutputPin RIGHT_TOW_PIN;
-    const aruwlib::gpio::Digital::InputPin LEFT_TOW_LIMIT_SWITCH;
-    const aruwlib::gpio::Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN;
 
     uint64_t testTime;
 };  // class TowSubsystem

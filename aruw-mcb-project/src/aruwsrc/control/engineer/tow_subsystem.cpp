@@ -32,12 +32,12 @@ TowSubsystem::TowSubsystem(
     aruwlib::gpio::Digital::InputPin leftTowLimitSwitchPin,
     aruwlib::gpio::Digital::InputPin rightTowLimitSwitchPin)
     : aruwlib::control::Subsystem(drivers),
-      leftClamped(false),
-      rightClamped(false),
       LEFT_TOW_PIN(leftTowPin),
       RIGHT_TOW_PIN(rightTowPin),
       LEFT_TOW_LIMIT_SWITCH(leftTowLimitSwitchPin),
-      RIGHT_TOW_LIMIT_SWITCH_PIN(rightTowLimitSwitchPin)
+      RIGHT_TOW_LIMIT_SWITCH_PIN(rightTowLimitSwitchPin),
+      leftClamped(false),
+      rightClamped(false)
 {
 }
 

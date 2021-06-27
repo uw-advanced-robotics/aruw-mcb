@@ -75,26 +75,6 @@ public:
     const char *getName() const override { return "turret cv"; }
 
 private:
-    static constexpr float YAW_P = 4500.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 140.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 32000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 3500.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 80.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-
     aruwlib::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;

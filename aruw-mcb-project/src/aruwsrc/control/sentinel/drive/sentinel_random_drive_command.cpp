@@ -33,9 +33,22 @@ using aruwlib::control::Subsystem;
 
 namespace aruwsrc::control::sentinel::drive
 {
-SentinelRandomDriveCommand::SentinelRandomDriveCommand(SentinelDriveSubsystem* subsystem)
-    : subsystemSentinelDrive(subsystem),
-      changeVelocityTimer(CHANGE_TIME_INTERVAL)
+SentinelRandomDriveCommand::SentinelRandomDriveCommand(
+    SentinelDriveSubsystem* subsystem,
+    uint16_t minRpm,
+    uint16_t maxRpm,
+    uint16_t changeTimeInterval,
+    float turnaroundBuffer,
+    float railLength,
+    float sentinelLength)
+    : MIN_RPM(minRpm),
+      MAX_RPM(maxRpm),
+      CHANGE_TIME_INTERVAL(changeTimeInterval),
+      TURNAROUND_BUFFER(turnaroundBuffer),
+      RAIL_LENGTH(railLength),
+      SENTINEL_LENGTH(sentinelLength),
+      subsystemSentinelDrive(subsystem),
+      changeVelocityTimer(changeTimeInterval)
 {
     addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
 #ifndef PLATFORM_HOSTED
@@ -73,9 +86,7 @@ void SentinelRandomDriveCommand::execute()
     // reverse direction if close to the end of the rail
     float curPos = subsystemSentinelDrive->absolutePosition();
     if ((currentRPM < 0 && curPos < TURNAROUND_BUFFER) ||
-        (currentRPM > 0 && curPos > SentinelDriveSubsystem::RAIL_LENGTH -
-                                        SentinelDriveSubsystem::SENTINEL_LENGTH -
-                                        TURNAROUND_BUFFER))
+        (currentRPM > 0 && curPos > RAIL_LENGTH - SENTINEL_LENGTH - TURNAROUND_BUFFER))
     {
         currentRPM = -currentRPM;
     }

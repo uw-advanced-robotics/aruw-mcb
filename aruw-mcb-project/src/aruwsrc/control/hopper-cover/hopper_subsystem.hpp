@@ -41,15 +41,11 @@ namespace control
 class HopperSubsystem : public aruwlib::control::Subsystem
 {
 public:
-    /*
-     * constructor
-     * @param pwmPin the pin that the servo is connected to
-     * @param open     the angle defined as open; a PWM value
-     *                 (between 0 and 1)
-     * @param close    the angle defined as close; a PWM value
-     *                 (between 0 and 1)
-     * @param pwmRampSpeed   determines the speed of servo operation;
-     *                 a PWM value (between 0 and 1)
+    /**
+     * @param[in] pwmPin The pin that the servo is connected to.
+     * @param[in] open The angle defined as open; a PWM value (between 0 and 1).
+     * @param[in] close The angle defined as close; a PWM value (between 0 and 1).
+     * @param[in] pwmRampSpeed Determines the speed of servo operation; a PWM value (between 0 and 1).
      */
     HopperSubsystem(
         aruwlib::Drivers *drivers,
@@ -63,12 +59,12 @@ public:
         hopper.setTargetPwm(close);
     }
 
-    /*
+    /**
      * set servo to the open angle
      */
     mockable void setOpen();
 
-    /*
+    /**
      * set servo to the close angle
      */
     mockable void setClose();

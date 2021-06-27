@@ -52,7 +52,7 @@ public:
     /**
      * This command requires the turret subsystem from a command/subsystem framework perspective.
      * The `ChassisSubsystem` is only used for for odometry information.
-     * 
+     *
      * @param
      */
     TurretWorldRelativePositionCommand(

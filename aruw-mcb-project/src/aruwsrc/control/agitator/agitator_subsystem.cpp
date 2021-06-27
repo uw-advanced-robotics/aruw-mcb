@@ -50,11 +50,11 @@ AgitatorSubsystem::AgitatorSubsystem(
     aruwlib::can::CanBus agitatorCanBusId,
     bool isAgitatorInverted,
     bool jamLogicEnabled,
-    float jammingDistance,
-    uint32_t jammingTime)
+    float jamDistanceTolerance,
+    uint32_t jamTemporalTolerance)
     : aruwlib::control::Subsystem(drivers),
       agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
-      jamChecker(this, jammingDistance, jammingTime),
+      jamChecker(this, jamDistanceTolerance, jamTemporalTolerance),
       gearRatio(agitatorGearRatio),
       jamLogicEnabled(jamLogicEnabled),
       agitatorMotor(
