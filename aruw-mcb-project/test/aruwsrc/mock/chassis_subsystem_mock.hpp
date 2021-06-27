@@ -61,7 +61,7 @@ public:
         aruwlib::motor::MotorId leftBackMotorId = aruwlib::motor::MOTOR2,
         aruwlib::motor::MotorId rightFrontMotorId = aruwlib::motor::MOTOR3,
         aruwlib::motor::MotorId rightBackMotorId = aruwlib::motor::MOTOR4,
-        aruwlib::gpio::Analog::Pin currentPin);
+        aruwlib::gpio::Analog::Pin currentPin = aruwlib::gpio::Analog::Pin::S);
 
     virtual ~ChassisSubsystemMock();
 
