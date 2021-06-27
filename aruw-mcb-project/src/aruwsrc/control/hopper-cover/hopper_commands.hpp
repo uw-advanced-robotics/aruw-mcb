@@ -23,8 +23,6 @@
 #include "aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/control/setpoint/commands/move_absolute_command.hpp"
 
-using aruwlib::control::setpoint::MoveAbsoluteCommand;
-
 namespace aruwsrc
 {
 namespace control
@@ -37,7 +35,7 @@ namespace control
  * move and set it there. With this approach regardless of disconnects
  * and recalibrations we can hope to utilize the full hopper range of motion.
  */
-class SoldierOpenHopperCommand : public MoveAbsoluteCommand
+class SoldierOpenHopperCommand : public aruwlib::control::setpoint::MoveAbsoluteCommand
 {
 public:
     // 3.12 revolutions
@@ -48,7 +46,7 @@ public:
     // Allowable error in radians within which motor will consider target angle reached.
     static constexpr float SOLDIER_OPEN_HOPPER_TOLERANCE = 0.05f;
     SoldierOpenHopperCommand(agitator::AgitatorSubsystem* agitator)
-        : MoveAbsoluteCommand(
+        : aruwlib::control::setpoint::MoveAbsoluteCommand(
               agitator,
               SOLDIER_OPEN_HOPPER_TARGET_ANGLE,
               SOLDIER_OPEN_HOPPER_ANGULAR_SPEED,
@@ -73,7 +71,7 @@ public:
  * of motion) we set desired position to current position and continuously
  * return `false` from isFinished.
  */
-class SoldierCloseHopperCommand : public MoveAbsoluteCommand
+class SoldierCloseHopperCommand : public aruwlib::control::setpoint::MoveAbsoluteCommand
 {
 public:
     // 0 revolutions
@@ -85,7 +83,7 @@ public:
     static constexpr float SOLDIER_CLOSE_HOPPER_TOLERANCE = 0.05f;
 
     SoldierCloseHopperCommand(aruwlib::control::setpoint::SetpointSubsystem* agitator)
-        : MoveAbsoluteCommand(
+        : aruwlib::control::setpoint::MoveAbsoluteCommand(
               agitator,
               SOLDIER_CLOSE_HOPPER_TARGET_ANGLE,
               SOLDIER_CLOSE_HOPPER_ANGULAR_SPEED,
