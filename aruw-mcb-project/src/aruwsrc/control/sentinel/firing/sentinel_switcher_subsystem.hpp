@@ -34,7 +34,11 @@ namespace aruwsrc::control::sentinel::firing
 class SentinelSwitcherSubsystem : public aruwlib::control::Subsystem
 {
 public:
-    SentinelSwitcherSubsystem(aruwlib::Drivers *drivers, aruwlib::gpio::Pwm::Pin switcherServoPin);
+    SentinelSwitcherSubsystem(
+        aruwlib::Drivers *drivers,
+        aruwlib::gpio::Pwm::Pin switcherServoPin,
+        float lowerPwm,
+        float upperPwm);
 
     const char *getName() override { return "sentinel switcher"; }
 
@@ -45,9 +49,6 @@ public:
     mockable bool isLowerUsed() const;
 
 private:
-    static constexpr float UPPER_PWM = 0.13f;
-    static constexpr float LOWER_PWM = 0.19f;
-
     aruwlib::motor::Servo switcherMotor;
     bool useLower = true;
 };

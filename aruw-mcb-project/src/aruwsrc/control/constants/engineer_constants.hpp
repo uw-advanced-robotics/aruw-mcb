@@ -25,7 +25,7 @@
 #endif
 
 #include "aruwlib/communication/can/can_bus.hpp"
-#include "aruwlib/communication/gpio/analog.hpp"
+#include "aruwlib/communication/gpio/digital.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
 namespace engineer_control::constants
@@ -33,18 +33,7 @@ namespace engineer_control::constants
 namespace motor
 {
 // CAN 1
-static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
-static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
-static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
-static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
-static constexpr aruwlib::motor::MotorId HOPPER_COVER_MOTOR_ID = aruwlib::motor::MOTOR8;
-static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
-
 // CAN 2
-static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR1;
-static constexpr aruwlib::motor::MotorId LEFT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR2;
-static constexpr aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID = aruwlib::motor::MOTOR3;
-static constexpr aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID = aruwlib::motor::MOTOR4;
 }  // namespace motor
 
 namespace can
@@ -59,10 +48,18 @@ static constexpr aruwlib::can::CanBus CHASSIS_CAN_BUS = aruwlib::can::CanBus::CA
 
 namespace gpio
 {
-/**
- * Pin to use for current sensing
- */
-static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S;
+static constexpr aruwlib::gpio::Digital::OutputPin GRABBER_PIN =
+    aruwlib::gpio::Digital::OutputPin::E;
+static constexpr aruwlib::gpio::Digital::OutputPin X_AXIS_PIN =
+    aruwlib::gpio::Digital::OutputPin::F;
+static constexpr aruwlib::gpio::Digital::OutputPin TOWER_LEFT_PIN =
+    aruwlib::gpio::Digital::OutputPin::G;
+static constexpr aruwlib::gpio::Digital::OutputPin TOWER_RIGHT_PIN =
+    aruwlib::gpio::Digital::OutputPin::H;
+static constexpr aruwlib::gpio::Digital::InputPin TOWER_LEFT_LIMIT_SWITCH =
+    aruwlib::gpio::Digital::InputPin::A;
+static constexpr aruwlib::gpio::Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH =
+    aruwlib::gpio::Digital::InputPin::B;
 }  // namespace gpio
 
 namespace chassis

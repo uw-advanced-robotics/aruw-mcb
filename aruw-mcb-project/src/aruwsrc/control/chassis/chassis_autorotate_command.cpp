@@ -61,8 +61,8 @@ void ChassisAutorotateCommand::execute()
     }
     else
     {
-        chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput() *
-                                           maxWheelSpeed;
+        chassisRotationDesiredWheelspeed =
+            drivers->controlOperatorInterface.getChassisRInput() * maxWheelSpeed;
     }
 
     // what we will multiply x and y speed by to take into account rotation

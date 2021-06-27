@@ -73,12 +73,12 @@ ChassisSubsystem::ChassisSubsystem(
       MAX_WHEEL_SPEED_SINGLE_MOTOR(maxWheelSpeedSingleMotor),
       GIMBAL_X_OFFSET(gimbalXOffset),
       GIMBAL_Y_OFFSET(gimbalYOffset),
-        CHASSIS_REVOLVE_PID_MAX_P(),
-        CHASSIS_REVOLVE_PID_MAX_D(),
-        CHASSIS_REVOLVE_PID_KD(),
-        CHASSIS_REVOLVE_PID_MAX_OUTPUT(),
-        MIN_ERROR_ROTATION_D(),
-        MIN_ROTATION_THRESHOLD(),
+      CHASSIS_REVOLVE_PID_MAX_P(),
+      CHASSIS_REVOLVE_PID_MAX_D(),
+      CHASSIS_REVOLVE_PID_KD(),
+      CHASSIS_REVOLVE_PID_MAX_OUTPUT(),
+      MIN_ERROR_ROTATION_D(),
+      MIN_ROTATION_THRESHOLD(),
       leftFrontVelocityPid(
           velocityPidKp,
           velocityPidKi,
@@ -260,8 +260,7 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
         // / power(max revolve speed, 2)
         rTranslationalGain = powf(
             MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
-                fabsf(chassisRotationDesiredWheelspeed) /
-                    MAX_WHEEL_SPEED_SINGLE_MOTOR,
+                fabsf(chassisRotationDesiredWheelspeed) / MAX_WHEEL_SPEED_SINGLE_MOTOR,
             2.0f);
         rTranslationalGain = aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
     }

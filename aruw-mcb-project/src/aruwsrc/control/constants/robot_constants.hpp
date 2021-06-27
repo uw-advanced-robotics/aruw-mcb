@@ -29,8 +29,6 @@
 #include "engineer_constants.hpp"
 #elif defined(TARGET_SENTINEL)
 #include "sentinel_constants.hpp"
-#elif defined(TARGET_OLD_SOLDIER)
-#include "old_soldier_constants.hpp"
 #elif defined(TARGET_DRONE)
 #endif
 

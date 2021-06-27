@@ -31,7 +31,38 @@ namespace mock
 class ChassisSubsystemMock : public aruwsrc::chassis::ChassisSubsystem
 {
 public:
-    ChassisSubsystemMock(aruwlib::Drivers *drivers);
+    ChassisSubsystemMock(
+        aruwlib::Drivers* drivers,
+        float motorGearboxRatio = 0,
+        float widthBetweenWheelsX = 0,
+        float widthBetweenWheelsY = 0,
+        float wheelRadius = 0,
+        float maxWheelSpeedSingleMotor = 0,
+        float gimbalXOffset = 0,
+        float gimbalYOffset = 0,
+        float chassisRevolvePidMaxP = 0,
+        float chassisRevolvePidMaxD = 0,
+        float chassisRevolvePidKD = 0,
+        float chassisRevolvePidMaxOutput = 0,
+        float minErrorRotationD = 0,
+        float minRotationThreshold = 0,
+        float velocityPidKp = 0,
+        float velocityPidKi = 0,
+        float velocityPidKd = 0,
+        float velocityPidMaxErrSum = 0,
+        float velocityPidMaxOutput = 0,
+        float maxEnergyBuffer = 0,
+        float energyBufferLimitThreshold = 0,
+        float energyBufferCritThreshold = 0,
+        float powerConsumptionThreshold = 0,
+        float currentAllocatedForEnergyBufferLimiting = 0,
+        aruwlib::can::CanBus canBus = aruwlib::can::CanBus::CAN_BUS1,
+        aruwlib::motor::MotorId leftFrontMotorId = aruwlib::motor::MOTOR1,
+        aruwlib::motor::MotorId leftBackMotorId = aruwlib::motor::MOTOR2,
+        aruwlib::motor::MotorId rightFrontMotorId = aruwlib::motor::MOTOR3,
+        aruwlib::motor::MotorId rightBackMotorId = aruwlib::motor::MOTOR4,
+        aruwlib::gpio::Analog::Pin currentPin);
+
     virtual ~ChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

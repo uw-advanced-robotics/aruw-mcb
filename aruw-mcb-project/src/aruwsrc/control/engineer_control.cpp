@@ -28,9 +28,9 @@
 #include "aruwsrc/control/engineer/squeeze_grabber_command.hpp"
 #include "aruwsrc/control/engineer/tow_subsystem.hpp"
 #include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
+#include "constants/robot_constants.hpp"
 
 using namespace aruwsrc::engineer;
-using namespace aruwlib::gpio;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::control::CommandMapper;
 
@@ -42,26 +42,17 @@ using aruwlib::control::CommandMapper;
  */
 aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
 
-namespace aruwsrc
+namespace engineer_control
 {
-namespace control
-{
-static constexpr Digital::OutputPin GRABBER_PIN = Digital::OutputPin::E;
-static constexpr Digital::OutputPin X_AXIS_PIN = Digital::OutputPin::F;
-static constexpr Digital::OutputPin TOWER_LEFT_PIN = Digital::OutputPin::G;
-static constexpr Digital::OutputPin TOWER_RIGHT_PIN = Digital::OutputPin::H;
-static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::A;
-static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
-
 /* define subsystems --------------------------------------------------------*/
-GrabberSubsystem grabber(drivers(), GRABBER_PIN);
-XAxisSubsystem xAxis(drivers(), X_AXIS_PIN);
+GrabberSubsystem grabber(drivers(), constants::gpio::GRABBER_PIN);
+XAxisSubsystem xAxis(drivers(), constants::gpio::X_AXIS_PIN);
 TowSubsystem tower(
     drivers(),
-    TOWER_LEFT_PIN,
-    TOWER_RIGHT_PIN,
-    TOWER_LEFT_LIMIT_SWITCH,
-    TOWER_RIGHT_LIMIT_SWITCH);
+    constants::gpio::TOWER_LEFT_PIN,
+    constants::gpio::TOWER_RIGHT_PIN,
+    constants::gpio::TOWER_LEFT_LIMIT_SWITCH,
+    constants::gpio::TOWER_RIGHT_LIMIT_SWITCH);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -83,18 +74,18 @@ void startEngineerCommands(aruwlib::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwlib::Drivers *) {}
+}  // namespace engineer_control
 
+namespace aruwsrc::control
+{
 void initSubsystemCommands(aruwlib::Drivers *drivers)
 {
-    initializeSubsystems();
-    registerEngineerSubsystems(drivers);
-    setDefaultEngineerCommands(drivers);
-    startEngineerCommands(drivers);
-    registerEngineerIoMappings(drivers);
+    engineer_control::initializeSubsystems();
+    engineer_control::registerEngineerSubsystems(drivers);
+    engineer_control::setDefaultEngineerCommands(drivers);
+    engineer_control::startEngineerCommands(drivers);
+    engineer_control::registerEngineerIoMappings(drivers);
 }
-
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control
 
 #endif

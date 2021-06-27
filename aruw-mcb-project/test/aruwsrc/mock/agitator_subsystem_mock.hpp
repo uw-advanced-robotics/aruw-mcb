@@ -41,7 +41,10 @@ public:
         float agitatorGearRatio = 0,
         aruwlib::motor::MotorId agitatorMotorId = aruwlib::motor::MOTOR7,
         aruwlib::can::CanBus agitatorCanBusId = aruwlib::can::CanBus::CAN_BUS1,
-        bool isAgitatorInverted = false);
+        bool isAgitatorInverted = false,
+        bool jamLogicEnabled = false,
+        float jammingDistance = 0,
+        uint32_t jammingTime = 0);
     virtual ~AgitatorSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

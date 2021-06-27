@@ -37,17 +37,28 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
     aruwlib::Drivers* drivers,
     aruwlib::gpio::Digital::InputPin leftLimitSwitch,
     aruwlib::gpio::Digital::InputPin rightLimitSwitch,
+    aruwlib::gpio::Analog::Pin currentSensorPin,
+    float pidP,
+    float pidI,
+    float pidD,
+    float pidMaxErrorSum,
+    float pidMaxOutput,
+    float wheelRadius,
+    float gearRatio,
     aruwlib::motor::MotorId leftMotorId,
     aruwlib::motor::MotorId rightMotorId,
-    aruwlib::gpio::Analog::Pin currentSensorPin)
+    aruwlib::can::CanBus chassisCanBus)
     : aruwlib::control::chassis::iChassisSubsystem(drivers),
-      leftLimitSwitch(leftLimitSwitch),
-      rightLimitSwitch(rightLimitSwitch),
-      velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-      velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+      LEFT_LIMIT_SWITCH(leftLimitSwitch),
+      RIGHT_LIMIT_SWITCH(rightLimitSwitch),
+      CURRENT_SENSOR_PIN(currentSensorPin),
+      WHEEL_RADIUS(wheelRadius),
+      GEAR_RATIO(gearRatio),
+      velocityPidLeftWheel(pidP, pidI, pidD, pidMaxErrorSum, pidMaxOutput),
+      velocityPidRightWheel(pidP, pidI, pidD, pidMaxErrorSum, pidMaxOutput),
       desiredRpm(0),
-      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
-      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
+      leftWheel(drivers, leftMotorId, chassisCanBus, false, "left sentinel drive motor"),
+      rightWheel(drivers, rightMotorId, chassisCanBus, false, "right sentinel drive motor"),
       powerLimiter(
           drivers,
           currentSensorPin,
@@ -65,10 +76,10 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
 void SentinelDriveSubsystem::initialize()
 {
     drivers->digital.configureInputPullMode(
-        leftLimitSwitch,
+        LEFT_LIMIT_SWITCH,
         aruwlib::gpio::Digital::InputPullMode::PullDown);
     drivers->digital.configureInputPullMode(
-        rightLimitSwitch,
+        RIGHT_LIMIT_SWITCH,
         aruwlib::gpio::Digital::InputPullMode::PullDown);
     leftWheel.initialize();
     rightWheel.initialize();
@@ -134,12 +145,12 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
     // DigitalPin where limit switch is placed
 
     // Note: the left limit switch is active low
-    if (!drivers->digital.read(leftLimitSwitch))
+    if (!drivers->digital.read(LEFT_LIMIT_SWITCH))
     {
         leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel);
         rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel);
     }
-    else if (drivers->digital.read(rightLimitSwitch))
+    else if (drivers->digital.read(RIGHT_LIMIT_SWITCH))
     {
         leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
         rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel) - RAIL_LENGTH + SENTINEL_LENGTH;

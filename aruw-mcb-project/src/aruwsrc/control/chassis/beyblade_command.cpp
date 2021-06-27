@@ -66,16 +66,13 @@ void BeybladeCommand::execute()
     const float maxWheelSpeed = chassis->getMaxWheelSpeedSingleMotor();
 
     // Get X and Y speed inputs with translational movement
-    float x = drivers->controlOperatorInterface.getChassisXInput() *
-              maxWheelSpeed *
+    float x = drivers->controlOperatorInterface.getChassisXInput() * maxWheelSpeed *
               TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
-    float y = drivers->controlOperatorInterface.getChassisYInput() *
-              maxWheelSpeed *
+    float y = drivers->controlOperatorInterface.getChassisYInput() * maxWheelSpeed *
               TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
 
-    const float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
-                                               TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
-                                               maxWheelSpeed;
+    const float TRANSLATION_LIMIT =
+        TRANSLATION_LIMITING_FRACTION * TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE * maxWheelSpeed;
 
     rampTarget = rotationDirection * getRotationTarget();
     if (x > TRANSLATION_LIMIT || y > TRANSLATION_LIMIT)

@@ -189,26 +189,6 @@ Hero Test Build:
   variables:
     ROBOT: HERO
 
-# Old Soldier build
-
-Old Soldier MCB Build:
-  extends:
-    - .mcb build
-  variables:
-    ROBOT: OLD_SOLDIER
-
-Old Soldier Sim Build:
-  extends:
-    - .sim build
-  variables:
-    ROBOT: OLD_SOLDIER
-
-Old Soldier Test Build:
-  extends:
-    - .test build
-  variables:
-    ROBOT: OLD_SOLDIER
-
 # Sentinel build
 
 Sentinel MCB Build:

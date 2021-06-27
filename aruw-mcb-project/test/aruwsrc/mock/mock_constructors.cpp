@@ -45,7 +45,10 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
     float agitatorGearRatio,
     aruwlib::motor::MotorId agitatorMotorId,
     aruwlib::can::CanBus agitatorCanBusId,
-    bool isAgitatorInverted)
+    bool isAgitatorInverted,
+    bool jamLogicEnabled,
+    float jammingDistance,
+    uint32_t jammingTime)
     : AgitatorSubsystem(
           drivers,
           kp,
@@ -56,7 +59,10 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
           agitatorGearRatio,
           agitatorMotorId,
           agitatorCanBusId,
-          isAgitatorInverted)
+          isAgitatorInverted,
+          jamLogicEnabled,
+          jammingDistance,
+          jammingTime)
 {
     ON_CALL(*this, isOnline).WillByDefault(testing::Return(true));
 }
@@ -77,11 +83,78 @@ ChassisDriveCommandMock::ChassisDriveCommandMock(aruwlib::Drivers *d, chassis::C
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
-ChassisSubsystemMock::ChassisSubsystemMock(aruwlib::Drivers *drivers) : ChassisSubsystem(drivers) {}
+ChassisSubsystemMock::ChassisSubsystemMock(
+    aruwlib::Drivers *drivers,
+    float motorGearboxRatio,
+    float widthBetweenWheelsX,
+    float widthBetweenWheelsY,
+    float wheelRadius,
+    float maxWheelSpeedSingleMotor,
+    float gimbalXOffset,
+    float gimbalYOffset,
+    float chassisRevolvePidMaxP,
+    float chassisRevolvePidMaxD,
+    float chassisRevolvePidKD,
+    float chassisRevolvePidMaxOutput,
+    float minErrorRotationD,
+    float minRotationThreshold,
+    float velocityPidKp,
+    float velocityPidKi,
+    float velocityPidKd,
+    float velocityPidMaxErrSum,
+    float velocityPidMaxOutput,
+    float maxEnergyBuffer,
+    float energyBufferLimitThreshold,
+    float energyBufferCritThreshold,
+    float powerConsumptionThreshold,
+    float currentAllocatedForEnergyBufferLimiting,
+    aruwlib::can::CanBus canBus,
+    aruwlib::motor::MotorId leftFrontMotorId,
+    aruwlib::motor::MotorId leftBackMotorId,
+    aruwlib::motor::MotorId rightFrontMotorId,
+    aruwlib::motor::MotorId rightBackMotorId,
+    aruwlib::gpio::Analog::Pin currentPin)
+    : ChassisSubsystem(
+          drivers,
+          motorGearboxRatio,
+          widthBetweenWheelsX,
+          widthBetweenWheelsY,
+          wheelRadius,
+          maxWheelSpeedSingleMotor,
+          gimbalXOffset,
+          gimbalYOffset,
+          chassisRevolvePidMaxP,
+          chassisRevolvePidMaxD,
+          chassisRevolvePidKD,
+          chassisRevolvePidMaxOutput,
+          minErrorRotationD,
+          minRotationThreshold,
+          velocityPidKp,
+          velocityPidKi,
+          velocityPidKd,
+          velocityPidMaxErrSum,
+          velocityPidMaxOutput,
+          maxEnergyBuffer,
+          energyBufferLimitThreshold,
+          energyBufferCritThreshold,
+          powerConsumptionThreshold,
+          currentAllocatedForEnergyBufferLimiting,
+          canBus,
+          leftFrontMotorId,
+          leftBackMotorId,
+          rightFrontMotorId,
+          rightBackMotorId,
+          currentPin)
+{
+}
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
-FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwlib::Drivers *drivers)
-    : FrictionWheelSubsystem(drivers)
+FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
+    aruwlib::Drivers *drivers,
+    aruwlib::motor::MotorId leftMotor,
+    aruwlib::motor::MotorId rightMotor,
+    aruwlib::can::CanBus canBus)
+    : FrictionWheelSubsystem(drivers, 0, 0, 0, 0, 0, leftMotor, rightMotor, canBus)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
@@ -108,8 +181,33 @@ HopperSubsystemMock::~HopperSubsystemMock() {}
 SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
     aruwlib::Drivers *drivers,
     aruwlib::gpio::Digital::InputPin leftLimitSwitch,
-    aruwlib::gpio::Digital::InputPin rightLimitSwitch)
-    : control::sentinel::drive::SentinelDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
+    aruwlib::gpio::Digital::InputPin rightLimitSwitch,
+    aruwlib::gpio::Analog::Pin currentSensorPin,
+    float pidP,
+    float pidI,
+    float pidD,
+    float pidMaxErrorSum,
+    float pidMaxOutput,
+    float wheelRadius,
+    float gearRatio,
+    aruwlib::motor::MotorId leftMotorId,
+    aruwlib::motor::MotorId rightMotorId,
+    aruwlib::can::CanBus chassisCanBus)
+    : control::sentinel::drive::SentinelDriveSubsystem(
+          drivers,
+          leftLimitSwitch,
+          rightLimitSwitch,
+          currentSensorPin,
+          pidP,
+          pidI,
+          pidD,
+          pidMaxErrorSum,
+          pidMaxOutput,
+          wheelRadius,
+          gearRatio,
+          leftMotorId,
+          rightMotorId,
+          chassisCanBus)
 {
 }
 SentinelDriveSubsystemMock::~SentinelDriveSubsystemMock() {}
@@ -117,7 +215,7 @@ SentinelDriveSubsystemMock::~SentinelDriveSubsystemMock() {}
 SentinelSwitcherSubsystemMock::SentinelSwitcherSubsystemMock(
     aruwlib::Drivers *drivers,
     aruwlib::gpio::Pwm::Pin switcherServoPin)
-    : control::sentinel::firing::SentinelSwitcherSubsystem(drivers, switcherServoPin)
+    : control::sentinel::firing::SentinelSwitcherSubsystem(drivers, switcherServoPin, 0, 0)
 {
 }
 SentinelSwitcherSubsystemMock::~SentinelSwitcherSubsystemMock() {}
@@ -138,7 +236,36 @@ TowSubsystemMock::TowSubsystemMock(
 }
 TowSubsystemMock::~TowSubsystemMock() {}
 
-TurretSubsystemMock::TurretSubsystemMock(aruwlib::Drivers *drivers) : TurretSubsystem(drivers) {}
+TurretSubsystemMock::TurretSubsystemMock(
+    aruwlib::Drivers *drivers,
+    float startAngle,
+    float yawMinAngle,
+    float yawMaxAngle,
+    float pitchMinAngle,
+    float pitchMaxAngle,
+    float yawStartEncoderPosition,
+    float pitchStartEncoderPosition,
+    float feedForwardKp,
+    float feedForwardMaxOutput,
+    aruwlib::can::CanBus motorCanBus,
+    aruwlib::motor::MotorId pitchMotorId,
+    aruwlib::motor::MotorId yawMotorId)
+    : TurretSubsystem(
+          drivers,
+          startAngle,
+          yawMinAngle,
+          yawMaxAngle,
+          pitchMinAngle,
+          pitchMaxAngle,
+          yawStartEncoderPosition,
+          pitchStartEncoderPosition,
+          feedForwardKp,
+          feedForwardMaxOutput,
+          motorCanBus,
+          pitchMotorId,
+          yawMotorId)
+{
+}
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
 XAxisSubsystemMock::XAxisSubsystemMock(

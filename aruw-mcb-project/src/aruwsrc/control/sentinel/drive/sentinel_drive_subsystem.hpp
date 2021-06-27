@@ -62,9 +62,17 @@ public:
         aruwlib::Drivers* drivers,
         aruwlib::gpio::Digital::InputPin leftLimitSwitch,
         aruwlib::gpio::Digital::InputPin rightLimitSwitch,
-        aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID,
-        aruwlib::gpio::Analog::Pin currentSensorPin = CURRENT_SENSOR_PIN);
+        aruwlib::gpio::Analog::Pin currentSensorPin,
+        float pidP,
+        float pidI,
+        float pidD,
+        float pidMaxErrorSum,
+        float pidMaxOutput,
+        float wheelRadius,
+        float gearRatio,
+        aruwlib::motor::MotorId leftMotorId,
+        aruwlib::motor::MotorId rightMotorId,
+        aruwlib::can::CanBus chassisCanBus);
 
     void initialize() override;
 
@@ -94,23 +102,13 @@ public:
     inline int16_t getRightBackRpmActual() const override { return 0; }
 
 private:
-    static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
-    static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS2;
-    static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S;
-
-    static constexpr float PID_P = 5.0f;
-    static constexpr float PID_I = 0.0f;
-    static constexpr float PID_D = 0.1f;
-    static constexpr float PID_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PID_MAX_OUTPUT = 10000;
+    const aruwlib::gpio::Digital::InputPin LEFT_LIMIT_SWITCH;
+    const aruwlib::gpio::Digital::InputPin RIGHT_LIMIT_SWITCH;
+    const aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN;
 
     // radius of the wheel in mm
-    static constexpr float WHEEL_RADIUS = 35.0f;
-    static constexpr float GEAR_RATIO = 19.0f;
-
-    aruwlib::gpio::Digital::InputPin leftLimitSwitch;
-    aruwlib::gpio::Digital::InputPin rightLimitSwitch;
+    const float WHEEL_RADIUS;
+    const float GEAR_RATIO;
 
     modm::Pid<float> velocityPidLeftWheel;
 

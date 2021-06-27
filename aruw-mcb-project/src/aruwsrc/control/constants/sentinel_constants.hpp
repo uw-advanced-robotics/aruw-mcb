@@ -26,6 +26,7 @@
 
 #include "aruwlib/communication/can/can_bus.hpp"
 #include "aruwlib/communication/gpio/digital.hpp"
+#include "aruwlib/communication/gpio/pwm.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
 // For comments, see constants.md
@@ -53,10 +54,13 @@ static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::Can
 
 namespace gpio
 {
-static constexpr Pwm::Pin SWITCHER_SERVO_PIN = Pwm::Pin::W;
-static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::A;
-static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
-}
+static constexpr aruwlib::gpio::Pwm::Pin SWITCHER_SERVO_PIN = aruwlib::gpio::Pwm::Pin::W;
+static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S;
+static constexpr aruwlib::gpio::Digital::InputPin LEFT_LIMIT_SWITCH =
+    aruwlib::gpio::Digital::InputPin::A;
+static constexpr aruwlib::gpio::Digital::InputPin RIGHT_LIMIT_SWITCH =
+    aruwlib::gpio::Digital::InputPin::B;
+}  // namespace gpio
 
 namespace chassis
 {
@@ -74,7 +78,7 @@ static constexpr float CHASSIS_PID_MAX_OUTPUT = 16000;
 // radius of the wheel in mm
 static constexpr float WHEEL_RADIUS = 35.0f;
 static constexpr float GEAR_RATIO = GEAR_RATIO_GM3508;
-}  // namespace sentinel
+}  // namespace chassis
 
 namespace agitator
 {
@@ -112,7 +116,10 @@ static constexpr float LAUNCHER_PID_I = 0.0f;
 static constexpr float LAUNCHER_PID_D = 5.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16000.0f;
+
+static constexpr float SWITCHER_UPPER_PWM = 0.13f;
+static constexpr float SWITCHER_LOWER_PWM = 0.19f;
 }  // namespace launcher
-}  // namespace aruwsrc
+}  // namespace sentinel_control::constants
 
 #endif  // SENTINEL_CONSTANTS_HPP_

@@ -29,9 +29,20 @@ namespace aruwsrc::mock
 class SentinelDriveSubsystemMock : public control::sentinel::drive::SentinelDriveSubsystem
 {
     SentinelDriveSubsystemMock(
-        aruwlib::Drivers *drivers,
-        aruwlib::gpio::Digital::InputPin leftLimitSwitch,
-        aruwlib::gpio::Digital::InputPin rightLimitSwitch);
+        aruwlib::Drivers* drivers,
+        aruwlib::gpio::Digital::InputPin leftLimitSwitch = aruwlib::gpio::Digital::InputPin::A,
+        aruwlib::gpio::Digital::InputPin rightLimitSwitch = aruwlib::gpio::Digital::InputPin::B,
+        aruwlib::gpio::Analog::Pin currentSensorPin = aruwlib::gpio::Analog::Pin::S,
+        float pidP = 0,
+        float pidI = 0,
+        float pidD = 0,
+        float pidMaxErrorSum = 0,
+        float pidMaxOutput = 0,
+        float wheelRadius = 0,
+        float gearRatio = 0,
+        aruwlib::motor::MotorId leftMotorId = aruwlib::motor::MOTOR1,
+        aruwlib::motor::MotorId rightMotorId = aruwlib::motor::MOTOR2,
+        aruwlib::can::CanBus chassisCanBus = aruwlib::can::CanBus::CAN_BUS1);
     virtual ~SentinelDriveSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
@@ -39,7 +50,7 @@ class SentinelDriveSubsystemMock : public control::sentinel::drive::SentinelDriv
     MOCK_METHOD(void, setDesiredRpm, (float), (override));
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(void, runHardwareTests, (), (override));
-    MOCK_METHOD(const char *, getName, (), (override));
+    MOCK_METHOD(const char*, getName, (), (override));
 };
 }  // namespace aruwsrc::mock
 

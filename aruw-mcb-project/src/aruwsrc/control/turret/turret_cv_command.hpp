@@ -38,8 +38,10 @@ namespace aruwsrc::control::turret
 class TurretCVCommand : public aruwlib::control::Command
 {
 public:
-    TurretCVCommand(aruwlib::Drivers *xavierSerial, TurretSubsystem *subsystem,
-    float turretStartAngle,
+    TurretCVCommand(
+        aruwlib::Drivers *xavierSerial,
+        TurretSubsystem *subsystem,
+        float turretStartAngle,
         float yawKp,
         float yawKi,
         float yawKd,

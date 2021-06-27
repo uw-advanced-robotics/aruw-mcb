@@ -31,7 +31,20 @@ namespace mock
 class TurretSubsystemMock : public aruwsrc::control::turret::TurretSubsystem
 {
 public:
-    TurretSubsystemMock(aruwlib::Drivers *drivers);
+    TurretSubsystemMock(
+        aruwlib::Drivers *drivers,
+        float startAngle = 0,
+        float yawMinAngle = 0,
+        float yawMaxAngle = 0,
+        float pitchMinAngle = 0,
+        float pitchMaxAngle = 0,
+        float yawStartEncoderPosition = 0,
+        float pitchStartEncoderPosition = 0,
+        float feedForwardKp = 0,
+        float feedForwardMaxOutput = 0,
+        aruwlib::can::CanBus motorCanBus = aruwlib::can::CanBus::CAN_BUS1,
+        aruwlib::motor::MotorId pitchMotorId = aruwlib::motor::MOTOR1,
+        aruwlib::motor::MotorId yawMotorId = aruwlib::motor::MOTOR2);
     virtual ~TurretSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

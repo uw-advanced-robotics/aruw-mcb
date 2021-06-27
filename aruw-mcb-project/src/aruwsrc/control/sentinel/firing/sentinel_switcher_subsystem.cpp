@@ -27,9 +27,11 @@ namespace aruwsrc::control::sentinel::firing
 {
 SentinelSwitcherSubsystem::SentinelSwitcherSubsystem(
     aruwlib::Drivers *drivers,
-    aruwlib::gpio::Pwm::Pin switcherServoPin)
+    aruwlib::gpio::Pwm::Pin switcherServoPin,
+    float lowerPwm,
+    float upperPwm)
     : aruwlib::control::Subsystem(drivers),
-      switcherMotor(drivers, switcherServoPin, LOWER_PWM, UPPER_PWM, 0.1f)
+      switcherMotor(drivers, switcherServoPin, lowerPwm, upperPwm, 0.1f)
 {
     useLowerBarrel(this->useLower);
 }
@@ -38,7 +40,7 @@ void SentinelSwitcherSubsystem::refresh() { switcherMotor.updateSendPwmRamp(); }
 
 void SentinelSwitcherSubsystem::useLowerBarrel(bool useLower)
 {
-    switcherMotor.setTargetPwm(useLower ? LOWER_PWM : UPPER_PWM);
+    switcherMotor.setTargetPwm(useLower ? switcherMotor.getMinPWM() : switcherMotor.getMaxPWM());
     this->useLower = useLower;
 }
 

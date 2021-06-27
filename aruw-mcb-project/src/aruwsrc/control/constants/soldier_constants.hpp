@@ -25,8 +25,8 @@
 #endif
 
 #include "aruwlib/communication/can/can_bus.hpp"
-#include "aruwlib/motor/dji_motor.hpp"
 #include "aruwlib/communication/gpio/analog.hpp"
+#include "aruwlib/motor/dji_motor.hpp"
 
 // For comments, see constants.md
 namespace soldier_control::constants
@@ -61,7 +61,7 @@ static constexpr aruwlib::can::CanBus CHASSIS_CAN_BUS = aruwlib::can::CanBus::CA
 
 namespace gpio
 {
-static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S; 
+static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S;
 }
 
 // PID and mechanical constants
@@ -195,6 +195,6 @@ static constexpr float LAUNCHER_PID_D = 5.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16000.0f;
 }  // namespace launcher
-}  // namespace aruwsrc::control::constants
+}  // namespace soldier_control::constants
 
 #endif  // SOLDIER_CONSTANTS_HPP_

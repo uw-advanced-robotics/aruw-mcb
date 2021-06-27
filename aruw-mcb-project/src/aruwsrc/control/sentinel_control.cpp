@@ -48,7 +48,6 @@ using namespace aruwsrc::agitator;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::sentinel::firing;
 using namespace aruwsrc::control::sentinel::drive;
-using namespace aruwlib::gpio;
 using namespace aruwsrc::control;
 using namespace aruwlib::control;
 using namespace aruwlib::motor;
@@ -84,7 +83,18 @@ AgitatorSubsystem agitator(
 SentinelDriveSubsystem sentinelDrive(
     drivers(),
     constants::gpio::LEFT_LIMIT_SWITCH,
-    constants::gpio::RIGHT_LIMIT_SWITCH);
+    constants::gpio::RIGHT_LIMIT_SWITCH,
+    constants::gpio::CURRENT_SENSOR_PIN,
+    constants::chassis::CHASSIS_PID_P,
+    constants::chassis::CHASSIS_PID_I,
+    constants::chassis::CHASSIS_PID_D,
+    constants::chassis::CHASSIS_PID_MAX_ERROR_SUM,
+    constants::chassis::CHASSIS_PID_MAX_OUTPUT,
+    constants::chassis::WHEEL_RADIUS,
+    constants::chassis::GEAR_RATIO,
+    constants::motor::CHASSIS_LEFT_MOTOR_ID,
+    constants::motor::CHASSIS_RIGHT_MOTOR_ID,
+    constants::can::CHASSIS_CAN_BUS);
 
 FrictionWheelSubsystem upperFrictionWheels(
     drivers(),
@@ -108,7 +118,11 @@ FrictionWheelSubsystem lowerFrictionWheels(
     constants::motor::LAUNCHER_RIGHT_MOTOR_ID_LOWER,
     constants::can::LAUNCHER_CAN_BUS);
 
-SentinelSwitcherSubsystem switcher(drivers(), constants::gpio::SWITCHER_SERVO_PIN);
+SentinelSwitcherSubsystem switcher(
+    drivers(),
+    constants::gpio::SWITCHER_SERVO_PIN,
+    constants::launcher::SWITCHER_LOWER_PWM,
+    constants::launcher::SWITCHER_UPPER_PWM);
 
 /* define commands ----------------------------------------------------------*/
 SentinelRotateAgitatorCommand rotateAgitatorManual(drivers(), &agitator, &switcher);

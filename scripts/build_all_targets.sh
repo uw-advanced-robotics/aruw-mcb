@@ -7,7 +7,6 @@ set -e
 
 targets="\
     TARGET_SOLDIER \
-    TARGET_OLD_SOLDIER \
     TARGET_ENGINEER \
     TARGET_HERO \
     TARGET_SENTINEL \
