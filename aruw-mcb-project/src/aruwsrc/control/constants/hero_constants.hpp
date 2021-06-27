@@ -24,7 +24,7 @@
 #error "Don't include this file directly, include robot_constants.hpp instead"
 #endif
 
-#include "aruwlib/communication/can/CanBus.hpp"
+#include "aruwlib/communication/can/can_bus.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
 // For comments, see constants.md
@@ -36,10 +36,11 @@ namespace motor
 // CAN 1
 static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
 static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
+static constexpr aruwlib::motor::MotorId WATERWHEEL_MOTOR_ID = aruwlib::motor::MOTOR3;
 static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
 static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
-static constexpr aruwlib::motor::MotorId HERO1_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
-static constexpr aruwlib::motor::MotorId HERO2_AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR8;
+static constexpr aruwlib::motor::MotorId KICKER1_MOTOR_ID = aruwlib::motor::MOTOR7;
+static constexpr aruwlib::motor::MotorId KICKER2_MOTOR_ID = aruwlib::motor::MOTOR8;
 
 // CAN 2
 static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR1;
@@ -50,37 +51,51 @@ static constexpr aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID = aruwlib::motor::M
 
 namespace can
 {
-static constexpr aruwlib::can::CanBus HERO1_AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
-static constexpr aruwlib::can::CanBus HERO2_AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+static constexpr aruwlib::can::CanBus WATERWHEEL_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 static constexpr aruwlib::can::CanBus LAUNCHER_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 static constexpr aruwlib::can::CanBus TURRET_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+static constexpr aruwlib::can::CanBus KICKER1_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+static constexpr aruwlib::can::CanBus KICKER2_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 
 static constexpr aruwlib::can::CanBus CHASSIS_CAN_BUS = aruwlib::can::CanBus::CAN_BUS2;
 }  // namespace can
+
+namespace gpio
+{
+static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S;
+static constexpr aruwlib::gpio::Digital::InputPin WATERWHEEL_LIMIT_SWITCH_PIN =
+    aruwlib::gpio::Digital::InputPin::B;
+}  // namespace gpio
 
 // PID and mechanical constants
 
 namespace agitator
 {
-/// \todo tune all the things
-static constexpr float PID_HERO1_P = 1500.0f;
-static constexpr float PID_HERO1_I = 500.0f;
-static constexpr float PID_HERO1_D = 7000.0f;
-static constexpr float PID_HERO1_MAX_ERR_SUM = 0.0f;
-// max out added by Tenzin since it wasn't here. This should
-// also be changed by someone who know's what they're doing!
-static constexpr float PID_HERO1_MAX_OUT = 16000.0f;
+// Hero's waterwheel constants
+static constexpr float PID_WATERWHEEL_P = 100000.0f;
+static constexpr float PID_WATERWHEEL_I = 0.0f;
+static constexpr float PID_WATERWHEEL_D = 10.0f;
+static constexpr float PID_WATERWHEEL_MAX_ERR_SUM = 0.0f;
+static constexpr float PID_WATERWHEEL_MAX_OUT = 16000.0f;
+static constexpr float WATERWHEEL_GEARBOX_RATIO = 19.0f;
+static constexpr bool WATERWHEEL_INVERTED = false;
+/**
+ * The jamming constants for waterwheel. Waterwheel is considered jammed if difference between
+ * setpoint and current angle is > `JAM_DISTANCE_TOLERANCE_WATERWHEEL` radians for >=
+ * `JAM_TEMPORAL_TOLERANCE_WATERWHEEL` ms;
+ */
+static constexpr float WATERWHEEL_JAM_DISTANCE_TOLERANCE = aruwlib::algorithms::PI / 28.0f;
+static constexpr uint32_t WATERWHEEL_JAM_TEMPORAL_TOLERANCE = 100.0f;
 
-static constexpr float PID_HERO2_P = 1500.0f;
-static constexpr float PID_HERO2_I = 500.0f;
-static constexpr float PID_HERO2_D = 7000.0f;
-static constexpr float PID_HERO2_MAX_ERR_SUM = 0.0f;
-// max out added by Tenzin since it wasn't here. This should
-// also be changed by someone who know's what they're doing!
-static constexpr float PID_HERO2_MAX_OUT = 16000.0f;
+// PID terms for the hero kicker
+static constexpr float PID_HERO_KICKER_P = 50000.0f;
+static constexpr float PID_HERO_KICKER_I = 0.0f;
+static constexpr float PID_HERO_KICKER_D = 10.0f;
+static constexpr float PID_HERO_KICKER_MAX_ERR_SUM = 0.0f;
+static constexpr float PID_HERO_KICKER_MAX_OUT = 16000.0f;
+static constexpr float KICKER_GEARBOX_RATIO = 36.0f;
+static constexpr bool KICKER_INVERTED = false;
 
-static constexpr bool HERO1_AGITATOR_INVERTED = false;
-static constexpr bool HERO2_AGITATOR_INVERTED = false;
 }  // namespace agitator
 
 namespace chassis
@@ -97,6 +112,7 @@ static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
 static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
 static constexpr int CHASSIS_REVOLVE_PID_MIN_ERROR_ROTATION_D = 0;
 static constexpr float CHASSIS_REVOLVE_PID_MAX_OUTPUT = 5000.0f;
+static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
 static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
 
@@ -106,6 +122,12 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.600f;
 static constexpr float GIMBAL_X_OFFSET = 0.175f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
+
+static constexpr float MAX_ENERGY_BUFFER = 60.0f;
+static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 40.0f;
+static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 5;
+static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
+static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
 static constexpr float WIGGLE_PERIOD = 1600.0f;
 static constexpr float WIGGLE_MAX_ROTATE_ANGLE = 60.0f;
@@ -182,6 +204,6 @@ static constexpr float LAUNCHER_PID_D = 5.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16000.0f;
 }  // namespace launcher
-}  // namespace aruwsrc
+}  // namespace hero_control::constants
 
 #endif  // HERO_CONSTANTS_HPP_

@@ -39,6 +39,7 @@
 #include "chassis/wiggle_drive_command.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
+#include "constants/robot_constants.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
@@ -67,44 +68,97 @@ aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
 namespace hero_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers());
+TurretSubsystem turret(
+    drivers(),
+    constants::turret::TURRET_START_ANGLE,
+    constants::turret::TURRET_YAW_MIN_ANGLE,
+    constants::turret::TURRET_YAW_MAX_ANGLE,
+    constants::turret::TURRET_PITCH_MIN_ANGLE,
+    constants::turret::TURRET_PITCH_MAX_ANGLE,
+    constants::turret::YAW_START_ENCODER_POSITION,
+    constants::turret::PITCH_START_ENCODER_POSITION,
+    constants::turret::FEED_FORWARD_KP,
+    constants::turret::FEED_FORWARD_MAX_OUTPUT,
+    constants::can::TURRET_CAN_BUS,
+    constants::motor::PITCH_MOTOR_ID,
+    constants::motor::YAW_MOTOR_ID,
+    false);
 
-ChassisSubsystem chassis(drivers());
+ChassisSubsystem chassis(
+    drivers(),
+    constants::chassis::CHASSIS_GEARBOX_RATIO,
+    constants::chassis::WIDTH_BETWEEN_WHEELS_X,
+    constants::chassis::WIDTH_BETWEEN_WHEELS_Y,
+    constants::chassis::WHEEL_RADIUS,
+    constants::chassis::MAX_WHEEL_SPEED_SINGLE_MOTOR,
+    constants::chassis::GIMBAL_X_OFFSET,
+    constants::chassis::GIMBAL_Y_OFFSET,
+    constants::chassis::CHASSIS_REVOLVE_PID_MAX_P,
+    constants::chassis::CHASSIS_REVOLVE_PID_MAX_D,
+    constants::chassis::CHASSIS_REVOLVE_PID_KD,
+    constants::chassis::CHASSIS_REVOLVE_PID_MAX_OUTPUT,
+    constants::chassis::CHASSIS_REVOLVE_PID_MIN_ERROR_ROTATION_D,
+    constants::chassis::MIN_ROTATION_THRESHOLD,
+    constants::chassis::VELOCITY_PID_KP,
+    constants::chassis::VELOCITY_PID_KI,
+    constants::chassis::VELOCITY_PID_KD,
+    constants::chassis::VELOCITY_PID_MAX_ERROR_SUM,
+    constants::chassis::VELOCITY_PID_MAX_OUTPUT,
+    constants::chassis::MAX_ENERGY_BUFFER,
+    constants::chassis::ENERGY_BUFFER_LIMIT_THRESHOLD,
+    constants::chassis::ENERGY_BUFFER_CRIT_THRESHOLD,
+    constants::chassis::POWER_CONSUMPTION_THRESHOLD,
+    constants::chassis::CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
+    constants::can::CHASSIS_CAN_BUS,
+    constants::motor::RIGHT_FRONT_MOTOR_ID,
+    constants::motor::LEFT_FRONT_MOTOR_ID,
+    constants::motor::LEFT_BACK_MOTOR_ID,
+    constants::motor::RIGHT_BACK_MOTOR_ID,
+    constants::gpio::CURRENT_SENSOR_PIN);
 
 // Hero has two agitators, one waterWheel and then a kicker
 LimitSwitchAgitatorSubsystem waterWheelAgitator(
     drivers(),
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_P,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_I,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_D,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_ID,
-    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_WATERWHEEL_INVERTED,
-    AgitatorSubsystem::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
-    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
-    LimitSwitchAgitatorSubsystem::WATERWHEEL_LIMIT_PIN);
+    constants::agitator::PID_WATERWHEEL_P,
+    constants::agitator::PID_WATERWHEEL_I,
+    constants::agitator::PID_WATERWHEEL_D,
+    constants::agitator::PID_WATERWHEEL_MAX_ERR_SUM,
+    constants::agitator::PID_WATERWHEEL_MAX_OUT,
+    constants::agitator::WATERWHEEL_GEARBOX_RATIO,
+    constants::motor::WATERWHEEL_MOTOR_ID,
+    constants::can::WATERWHEEL_MOTOR_CAN_BUS,
+    constants::agitator::WATERWHEEL_INVERTED,
+    constants::agitator::WATERWHEEL_JAM_DISTANCE_TOLERANCE,
+    constants::agitator::WATERWHEEL_JAM_TEMPORAL_TOLERANCE,
+    constants::gpio::WATERWHEEL_LIMIT_SWITCH_PIN);
 
 DoubleAgitatorSubsystem kickerSubsystem(
     drivers(),
-    AgitatorSubsystem::PID_HERO_KICKER_P,
-    AgitatorSubsystem::PID_HERO_KICKER_I,
-    AgitatorSubsystem::PID_HERO_KICKER_D,
-    AgitatorSubsystem::PID_HERO_KICKER_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_HERO_KICKER_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HERO_KICKER1_MOTOR_ID,
-    AgitatorSubsystem::HERO_KICKER1_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_KICKER2_MOTOR_ID,
-    AgitatorSubsystem::HERO_KICKER2_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_KICKER_INVERTED,
-    DoubleAgitatorSubsystem::JAM_DISTANCE_TOLERANCE,
-    DoubleAgitatorSubsystem::JAM_TEMPORAL_TOLERANCE,
+    constants::agitator::PID_HERO_KICKER_P,
+    constants::agitator::PID_HERO_KICKER_I,
+    constants::agitator::PID_HERO_KICKER_D,
+    constants::agitator::PID_HERO_KICKER_MAX_ERR_SUM,
+    constants::agitator::PID_HERO_KICKER_MAX_OUT,
+    constants::agitator::KICKER_GEARBOX_RATIO,
+    constants::motor::KICKER1_MOTOR_ID,
+    constants::can::KICKER1_MOTOR_CAN_BUS,
+    constants::motor::KICKER2_MOTOR_ID,
+    constants::can::KICKER2_MOTOR_CAN_BUS,
+    constants::agitator::KICKER_INVERTED,
+    0,
+    0,
     false);
 
-FrictionWheelSubsystem frictionWheels(drivers());
+FrictionWheelSubsystem frictionWheels(
+    drivers(),
+    constants::launcher::LAUNCHER_PID_P,
+    constants::launcher::LAUNCHER_PID_I,
+    constants::launcher::LAUNCHER_PID_D,
+    constants::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+    constants::launcher::LAUNCHER_PID_MAX_OUTPUT,
+    constants::motor::LAUNCHER_LEFT_MOTOR_ID,
+    constants::motor::LAUNCHER_RIGHT_MOTOR_ID,
+    constants::can::LAUNCHER_CAN_BUS);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -115,7 +169,34 @@ CalibrateCommand calibrateDoubleAgitator(&kickerSubsystem);
 
 ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
 WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
+TurretWorldRelativePositionCommand turretWorldRelativeCommand(
+    drivers(),
+    &turret,
+    &chassis,
+    constants::turret::TURRET_START_ANGLE,
+    constants::turret::YAW_WR_P,
+    constants::turret::YAW_WR_I,
+    0,  // No IMU on the hero turret
+    constants::turret::YAW_WR_D,
+    constants::turret::YAW_WR_MAX_ERROR_SUM,
+    constants::turret::YAW_WR_MAX_OUTPUT,
+    constants::turret::YAW_WR_Q_DERIVATIVE_KALMAN,
+    constants::turret::YAW_WR_R_DERIVATIVE_KALMAN,
+    constants::turret::YAW_WR_Q_PROPORTIONAL_KALMAN,
+    constants::turret::YAW_WR_R_PROPORTIONAL_KALMAN,
+    constants::turret::PITCH_WR_P,
+    constants::turret::PITCH_WR_I,
+    constants::turret::PITCH_WR_D,
+    constants::turret::PITCH_WR_MAX_ERROR_SUM,
+    constants::turret::PITCH_WR_MAX_OUTPUT,
+    constants::turret::PITCH_WR_Q_DERIVATIVE_KALMAN,
+    constants::turret::PITCH_WR_R_DERIVATIVE_KALMAN,
+    constants::turret::PITCH_WR_Q_PROPORTIONAL_KALMAN,
+    constants::turret::PITCH_WR_R_PROPORTIONAL_KALMAN,
+    constants::turret::USER_YAW_INPUT_SCALAR,
+    constants::turret::USER_PITCH_INPUT_SCALAR,
+    constants::turret::PITCH_GRAVITY_COMPENSATION_KP,
+    false);
 
 WaterwheelLoadCommand42mm waterwheelLoadCommand(drivers(), &waterWheelAgitator);
 
