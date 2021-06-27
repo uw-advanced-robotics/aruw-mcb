@@ -29,6 +29,7 @@
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "constants/robot_constants.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
@@ -64,30 +65,50 @@ aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
 
 namespace sentinel_control
 {
-static constexpr Pwm::Pin SWITCHER_SERVO_PIN = Pwm::Pin::W;
-static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::A;
-static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
-
 /* define subsystems --------------------------------------------------------*/
 AgitatorSubsystem agitator(
     drivers(),
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    false);
+    constants::agitator::AGITATOR_PID_17MM_P,
+    constants::agitator::AGITATOR_PID_17MM_I,
+    constants::agitator::AGITATOR_PID_17MM_D,
+    constants::agitator::AGITATOR_PID_17MM_MAX_ERR_SUM,
+    constants::agitator::AGITATOR_PID_17MM_MAX_OUT,
+    constants::agitator::AGITATOR_GEAR_RATIO,
+    constants::motor::AGITATOR_MOTOR_ID,
+    constants::can::AGITATOR_MOTOR_CAN_BUS,
+    constants::agitator::AGITATOR_MOTOR_INVERTED,
+    true,
+    constants::agitator::JAMMING_DISTANCE,
+    constants::agitator::JAMMING_TIME);
 
-SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
+SentinelDriveSubsystem sentinelDrive(
+    drivers(),
+    constants::gpio::LEFT_LIMIT_SWITCH,
+    constants::gpio::RIGHT_LIMIT_SWITCH);
 
-FrictionWheelSubsystem upperFrictionWheels(drivers(), MOTOR4, MOTOR3);
+FrictionWheelSubsystem upperFrictionWheels(
+    drivers(),
+    constants::launcher::LAUNCHER_PID_P,
+    constants::launcher::LAUNCHER_PID_I,
+    constants::launcher::LAUNCHER_PID_D,
+    constants::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+    constants::launcher::LAUNCHER_PID_MAX_OUTPUT,
+    constants::motor::LAUNCHER_LEFT_MOTOR_ID_UPPER,
+    constants::motor::LAUNCHER_RIGHT_MOTOR_ID_UPPER,
+    constants::can::LAUNCHER_CAN_BUS);
 
-FrictionWheelSubsystem lowerFrictionWheels(drivers(), MOTOR1, MOTOR2);
+FrictionWheelSubsystem lowerFrictionWheels(
+    drivers(),
+    constants::launcher::LAUNCHER_PID_P,
+    constants::launcher::LAUNCHER_PID_I,
+    constants::launcher::LAUNCHER_PID_D,
+    constants::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+    constants::launcher::LAUNCHER_PID_MAX_OUTPUT,
+    constants::motor::LAUNCHER_LEFT_MOTOR_ID_LOWER,
+    constants::motor::LAUNCHER_RIGHT_MOTOR_ID_LOWER,
+    constants::can::LAUNCHER_CAN_BUS);
 
-SentinelSwitcherSubsystem switcher(drivers(), SWITCHER_SERVO_PIN);
+SentinelSwitcherSubsystem switcher(drivers(), constants::gpio::SWITCHER_SERVO_PIN);
 
 /* define commands ----------------------------------------------------------*/
 SentinelRotateAgitatorCommand rotateAgitatorManual(drivers(), &agitator, &switcher);

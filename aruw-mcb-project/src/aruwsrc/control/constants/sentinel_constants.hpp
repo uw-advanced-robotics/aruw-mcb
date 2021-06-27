@@ -35,8 +35,8 @@ namespace sentinel_control::constants
 namespace motor
 {
 // CAN 1
-static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
-static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
+static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID_LOWER = aruwlib::motor::MOTOR1;
+static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID_LOWER = aruwlib::motor::MOTOR2;
 static constexpr aruwlib::motor::MotorId LAUNCHER_RIGHT_MOTOR_ID_UPPER = aruwlib::motor::MOTOR3;
 static constexpr aruwlib::motor::MotorId LAUNCHER_LEFT_MOTOR_ID_UPPER = aruwlib::motor::MOTOR4;
 static constexpr aruwlib::motor::MotorId CHASSIS_RIGHT_MOTOR_ID = aruwlib::motor::MOTOR5;
@@ -51,7 +51,14 @@ static constexpr aruwlib::can::CanBus CHASSIS_CAN_BUS = aruwlib::can::CanBus::CA
 static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
 }  // namespace can
 
-namespace sentinel
+namespace gpio
+{
+static constexpr Pwm::Pin SWITCHER_SERVO_PIN = Pwm::Pin::W;
+static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::A;
+static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
+}
+
+namespace chassis
 {
 static constexpr aruwlib::gpio::Digital::InputPin LEFT_LIMIT_SWITCH =
     aruwlib::gpio::Digital::InputPin::A;
@@ -79,6 +86,9 @@ static constexpr float AGITATOR_PID_17MM_D = 80.0f;
 static constexpr float AGITATOR_PID_17MM_MAX_ERR_SUM = 0.0f;
 static constexpr float AGITATOR_PID_17MM_MAX_OUT = 16000.0f;
 static constexpr float AGITATOR_MOTOR_INVERTED = false;
+static constexpr float AGITATOR_GEAR_RATIO = 36.0f;
+static constexpr float JAMMING_DISTANCE = 0;
+static constexpr float JAMMING_TIME = 0;
 }  // namespace agitator
 
 namespace turret
