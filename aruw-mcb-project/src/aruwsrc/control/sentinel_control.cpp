@@ -25,6 +25,7 @@
 #include "aruwlib/control/press_command_mapping.hpp"
 #include "aruwlib/control/setpoint/commands/calibrate_command.hpp"
 #include "aruwlib/control/toggle_command_mapping.hpp"
+#include "aruwlib/control/turret/commands/turret_setpoint_command.hpp"
 #include "aruwlib/drivers_singleton.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
@@ -37,9 +38,8 @@
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "sentinel/firing/sentinel_rotate_agitator_command.hpp"
 #include "sentinel/firing/sentinel_switcher_subsystem.hpp"
-#include "turret/turret_cv_command.hpp"
-#include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_position_command.hpp"
+#include "turret/double_pitch_turret_subsystem.hpp"
+#include "turret/sentinel_turret_cv_command.hpp"
 
 using namespace aruwlib::control::setpoint;
 using namespace aruwsrc::agitator;
@@ -131,14 +131,51 @@ SentinelSwitcherSubsystem switcher(
     constants::launcher::SWITCHER_LOWER_PWM,
     constants::launcher::SWITCHER_UPPER_PWM);
 
+aruwsrc::control::turret::DoublePitchTurretSubsystem turretSubsystem(
+    drivers(),
+    constants::turret::YAW_P,
+    constants::turret::YAW_I,
+    constants::turret::YAW_D,
+    constants::turret::YAW_MAX_ERROR_SUM,
+    constants::turret::YAW_MAX_OUTPUT,
+    constants::turret::YAW_Q_DERIVATIVE_KALMAN,
+    constants::turret::YAW_R_DERIVATIVE_KALMAN,
+    constants::turret::YAW_Q_PROPORTIONAL_KALMAN,
+    constants::turret::YAW_R_PROPORTIONAL_KALMAN,
+    constants::turret::PITCH_P,
+    constants::turret::PITCH_I,
+    constants::turret::PITCH_D,
+    constants::turret::PITCH_MAX_ERROR_SUM,
+    constants::turret::PITCH_MAX_OUTPUT,
+    constants::turret::PITCH_Q_DERIVATIVE_KALMAN,
+    constants::turret::PITCH_R_DERIVATIVE_KALMAN,
+    constants::turret::PITCH_Q_PROPORTIONAL_KALMAN,
+    constants::turret::PITCH_R_PROPORTIONAL_KALMAN,
+    constants::turret::USER_YAW_INPUT_SCALAR,
+    constants::turret::USER_PITCH_INPUT_SCALAR,
+    constants::turret::PITCH_GRAVITY_COMPENSATION_KP,
+    constants::turret::TURRET_YAW_START_ANGLE,
+    constants::turret::TURRET_PITCH_START_ANGLE,
+    constants::turret::TURRET_YAW_MIN_ANGLE,
+    constants::turret::TURRET_YAW_MAX_ANGLE,
+    constants::turret::TURRET_PITCH_MIN_ANGLE,
+    constants::turret::TURRET_PITCH_MAX_ANGLE,
+    constants::turret::YAW_START_ENCODER_POSITION,
+    constants::turret::PITCH_90DEG_ENCODER_POSITION_LEFT,
+    constants::turret::PITCH_90DEG_ENCODER_POSITION_RIGHT,
+    constants::can::TURRET_CAN_BUS,
+    constants::motor::PITCH_MOTOR_ID_RIGHT,
+    constants::motor::PITCH_MOTOR_ID_LEFT,
+    constants::motor::YAW_MOTOR_ID);
+
 /* define commands ----------------------------------------------------------*/
 SentinelRotateAgitatorCommand rotateAgitatorManual(drivers(), &agitator, &switcher);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
-SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
-
+// Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
+SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
 FrictionWheelRotateCommand spinUpperFrictionWheels(
     &upperFrictionWheels,
@@ -146,11 +183,25 @@ FrictionWheelRotateCommand spinUpperFrictionWheels(
 
 FrictionWheelRotateCommand spinLowerFrictionWheels(
     &lowerFrictionWheels,
-    FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
+    constants::launcher::FRICTION_WHEEL_TARGET_RPM);
 
 FrictionWheelRotateCommand stopUpperFrictionWheels(&upperFrictionWheels, 0);
 
 FrictionWheelRotateCommand stopLowerFrictionWheels(&lowerFrictionWheels, 0);
+
+aruwsrc::control::turret::SentinelTurretCVCommand turretCVCommand(
+    drivers(),
+    &turretSubsystem,
+    &agitator,
+    &switcher);
+
+aruwlib::control::turret::commands::TurretSetpointCommand turretManual(
+    drivers(),
+    &turretSubsystem,
+    0.75f,
+    0.75f);
+
+SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
 /* define command mappings --------------------------------------------------*/
 
@@ -164,12 +215,12 @@ HoldRepeatCommandMapping rightSwitchUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&sentinelDriveManual},
+    {&sentinelDriveManual, &turretManual},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-HoldRepeatCommandMapping leftSwitchUp(
+HoldCommandMapping leftSwitchMid(
     drivers(),
-    {&sentinelAutoDrive},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    {&sentinelDriveManual2},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -179,7 +230,9 @@ void initializeSubsystems()
     upperFrictionWheels.initialize();
     lowerFrictionWheels.initialize();
     switcher.initialize();
+    turretSubsystem.initialize();
     drivers()->xavierSerial.attachChassis(&sentinelDrive);
+    drivers()->xavierSerial.attachTurret(&turretSubsystem);
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -190,6 +243,7 @@ void registerSentinelSubsystems(aruwlib::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&upperFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&lowerFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&switcher);
+    drivers->commandScheduler.registerSubsystem(&turretSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -198,6 +252,7 @@ void setDefaultSentinelCommands(aruwlib::Drivers *)
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     upperFrictionWheels.setDefaultCommand(&spinUpperFrictionWheels);
     lowerFrictionWheels.setDefaultCommand(&spinLowerFrictionWheels);
+    turretSubsystem.setDefaultCommand(&turretCVCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -209,10 +264,10 @@ void startSentinelCommands(aruwlib::Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentinelIoMappings(aruwlib::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchMid);
 }
 }  // namespace sentinel_control
 
