@@ -40,6 +40,13 @@ class SentinelDriveSubsystemMock : public control::sentinel::drive::SentinelDriv
         float pidMaxOutput = 0,
         float wheelRadius = 0,
         float gearRatio = 0,
+        float railLength = 0,
+        float sentinelLength = 0,
+        float maxEnergyBuffer = 0,
+        float energyBufferLimitThreshold = 0,
+        float energyBufferCritThreshold = 0,
+        float powerConsumptionThreshold = 0,
+        float currentAllocatedForEnergyBufferLimiting = 0,
         aruwlib::motor::MotorId leftMotorId = aruwlib::motor::MOTOR1,
         aruwlib::motor::MotorId rightMotorId = aruwlib::motor::MOTOR2,
         aruwlib::can::CanBus chassisCanBus = aruwlib::can::CanBus::CAN_BUS1);

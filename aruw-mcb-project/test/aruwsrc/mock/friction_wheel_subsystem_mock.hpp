@@ -35,6 +35,12 @@ class FrictionWheelSubsystemMock : public aruwsrc::launcher::FrictionWheelSubsys
 public:
     FrictionWheelSubsystemMock(
         aruwlib::Drivers *drivers,
+        float pidP = 0,
+        float pidI = 0,
+        float pidD = 0,
+        float pidMaxErrorSum = 0,
+        float pidMaxOutput = 0,
+        float frictionWheelRampSpeed = 0,
         aruwlib::motor::MotorId leftMotor = aruwlib::motor::MOTOR1,
         aruwlib::motor::MotorId rightMotor = aruwlib::motor::MOTOR2,
         aruwlib::can::CanBus canBus = aruwlib::can::CanBus::CAN_BUS1);

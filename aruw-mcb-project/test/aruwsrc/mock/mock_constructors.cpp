@@ -151,10 +151,26 @@ ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
     aruwlib::Drivers *drivers,
-    aruwlib::motor::MotorId leftMotor,
-    aruwlib::motor::MotorId rightMotor,
+    float pidP,
+    float pidI,
+    float pidD,
+    float pidMaxErrorSum,
+    float pidMaxOutput,
+    float frictionWheelRampSpeed,
+    aruwlib::motor::MotorId leftMotorId,
+    aruwlib::motor::MotorId rightMotorId,
     aruwlib::can::CanBus canBus)
-    : FrictionWheelSubsystem(drivers, 0, 0, 0, 0, 0, leftMotor, rightMotor, canBus)
+    : FrictionWheelSubsystem(
+          drivers,
+          pidP,
+          pidI,
+          pidD,
+          pidMaxErrorSum,
+          pidMaxOutput,
+          frictionWheelRampSpeed,
+          leftMotorId,
+          rightMotorId,
+          canBus)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
@@ -190,6 +206,13 @@ SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
     float pidMaxOutput,
     float wheelRadius,
     float gearRatio,
+    float railLength,
+    float sentinelLength,
+    float maxEnergyBuffer,
+    float energyBufferLimitThreshold,
+    float energyBufferCritThreshold,
+    float powerConsumptionThreshold,
+    float currentAllocatedForEnergyBufferLimiting,
     aruwlib::motor::MotorId leftMotorId,
     aruwlib::motor::MotorId rightMotorId,
     aruwlib::can::CanBus chassisCanBus)
@@ -205,6 +228,13 @@ SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
           pidMaxOutput,
           wheelRadius,
           gearRatio,
+          railLength,
+          sentinelLength,
+          maxEnergyBuffer,
+          energyBufferLimitThreshold,
+          energyBufferCritThreshold,
+          powerConsumptionThreshold,
+          currentAllocatedForEnergyBufferLimiting,
           leftMotorId,
           rightMotorId,
           chassisCanBus)

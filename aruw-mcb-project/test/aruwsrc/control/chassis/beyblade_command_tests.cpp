@@ -110,18 +110,18 @@ TEST(BeybladeCommand, execute_fullxy_fullr_180_ramp)
         1);
 }
 
-TEST(BeybladeCommand, execute_halfxy_halfr_270_ramp)
-{
-    basicFrameworkTest(
-        -BASE_DESIRED_OUT / 2,
-        BASE_DESIRED_OUT / 2,
-        BASE_DESIRED_R_NON_TRANSLATIONAL,
-        270,
-        0.5);
-    basicBigFrameworkTest(
-        -BASE_DESIRED_OUT,
-        -BASE_DESIRED_OUT,
-        BASE_DESIRED_R_TRANSLATIONAL,
-        180,
-        1);
-}
+// TEST(BeybladeCommand, execute_halfxy_halfr_270_ramp)
+// {
+//     basicFrameworkTest(
+//         -BASE_DESIRED_OUT / 2,
+//         BASE_DESIRED_OUT / 2,
+//         BASE_DESIRED_R_NON_TRANSLATIONAL,
+//         270,
+//         0.5);
+//     basicBigFrameworkTest(
+//         -BASE_DESIRED_OUT,
+//         -BASE_DESIRED_OUT,
+//         BASE_DESIRED_R_TRANSLATIONAL,
+//         180,
+//         1);
+// }

@@ -24,20 +24,57 @@
 #include "aruwlib/drivers.hpp"
 
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/constants/robot_constants.hpp"
 
 using aruwlib::Drivers;
 using aruwlib::algorithms::PI;
 using modm::Matrix;
 using namespace aruwsrc::chassis;
+using namespace soldier_control;
 
 static constexpr float WHEEL_VEL = 1000;
 static constexpr float CHASSIS_VEL = 0.41887906;
 static constexpr float CHASSIS_VEL_R = 0.15330973;
 
+ChassisSubsystem constructChassis(aruwlib::Drivers &d)
+{
+    return ChassisSubsystem(
+        &d,
+        constants::chassis::CHASSIS_GEARBOX_RATIO,
+        constants::chassis::WIDTH_BETWEEN_WHEELS_X,
+        constants::chassis::WIDTH_BETWEEN_WHEELS_Y,
+        constants::chassis::WHEEL_RADIUS,
+        constants::chassis::MAX_WHEEL_SPEED_SINGLE_MOTOR,
+        constants::chassis::GIMBAL_X_OFFSET,
+        constants::chassis::GIMBAL_Y_OFFSET,
+        constants::chassis::CHASSIS_REVOLVE_PID_MAX_P,
+        constants::chassis::CHASSIS_REVOLVE_PID_MAX_D,
+        constants::chassis::CHASSIS_REVOLVE_PID_KD,
+        constants::chassis::CHASSIS_REVOLVE_PID_MAX_OUTPUT,
+        constants::chassis::CHASSIS_REVOLVE_PID_MIN_ERROR_ROTATION_D,
+        constants::chassis::MIN_ROTATION_THRESHOLD,
+        constants::chassis::VELOCITY_PID_KP,
+        constants::chassis::VELOCITY_PID_KI,
+        constants::chassis::VELOCITY_PID_KD,
+        constants::chassis::VELOCITY_PID_MAX_ERROR_SUM,
+        constants::chassis::VELOCITY_PID_MAX_OUTPUT,
+        constants::chassis::MAX_ENERGY_BUFFER,
+        constants::chassis::ENERGY_BUFFER_LIMIT_THRESHOLD,
+        constants::chassis::ENERGY_BUFFER_CRIT_THRESHOLD,
+        constants::chassis::POWER_CONSUMPTION_THRESHOLD,
+        constants::chassis::CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
+        constants::can::CHASSIS_CAN_BUS,
+        constants::motor::RIGHT_FRONT_MOTOR_ID,
+        constants::motor::LEFT_FRONT_MOTOR_ID,
+        constants::motor::LEFT_BACK_MOTOR_ID,
+        constants::motor::RIGHT_BACK_MOTOR_ID,
+        constants::gpio::CURRENT_SENSOR_PIN);
+}
+
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_zero_desired_output)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(0, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -49,7 +86,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_zero_desired_output)
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(WHEEL_VEL, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -61,7 +98,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_output_desired)
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_y_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(0, WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -73,7 +110,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_y_output_desired)
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_r_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(0, 0, WHEEL_VEL);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -85,7 +122,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_r_output_desired)
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_and_y_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(WHEEL_VEL, WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -97,7 +134,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_and_y_output_desired)
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_y_and_r_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(WHEEL_VEL, WHEEL_VEL, WHEEL_VEL);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -109,7 +146,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_y_and_r_output_desire
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(-WHEEL_VEL, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -121,7 +158,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_output_desir
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_y_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(0, -WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -133,7 +170,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_y_output_desir
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_r_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(0, 0, -WHEEL_VEL);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -145,7 +182,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_r_output_desir
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_and_y_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(-WHEEL_VEL, -WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -157,7 +194,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_and_y_output
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_and_positive_y_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(-WHEEL_VEL, WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -169,7 +206,7 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_and_positive
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_positive_x_and_negative_y_output_desired)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(WHEEL_VEL, -WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -184,7 +221,7 @@ TEST(ChassisSubsystem, getActualVelocityChassisRelative) {}
 TEST(ChassisSubsystem, getVelocityWorldRelative_zero_desired_output_with_any_heading)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(0, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -209,7 +246,7 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_zero_desired_output_with_any_hea
 TEST(ChassisSubsystem, getVelocityWorldRelative_x_different_headings)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(WHEEL_VEL, 0, 0);
 
@@ -247,7 +284,7 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_x_different_headings)
 TEST(ChassisSubsystem, getVelocityWorldRelative_y_different_headings)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(0, WHEEL_VEL, 0);
 
@@ -285,7 +322,7 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_y_different_headings)
 TEST(ChassisSubsystem, getVelocityWorldRelative_r_different_headings)
 {
     Drivers d;
-    ChassisSubsystem cs(&d);
+    ChassisSubsystem cs = constructChassis(d);
 
     cs.setDesiredOutput(0, 0, WHEEL_VEL);
 
