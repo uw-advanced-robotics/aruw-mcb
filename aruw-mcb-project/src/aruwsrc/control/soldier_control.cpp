@@ -301,49 +301,49 @@ void registerSoldierSubsystems(aruwlib::Drivers *drivers)
     // TODO: Create simulator for correct motor
     aruwlib::motorsim::SimHandler::registerSim(
         aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_ID);
+        constants::can::AGITATOR_MOTOR_CAN_BUS,
+        constants::motor::AGITATOR_MOTOR_ID);
 
     // Register the motor sims for the Chassis subsystem
     aruwlib::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
         aruwlib::motorsim::MotorSim::MotorType::M3508;
     aruwlib::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::LEFT_FRONT_MOTOR_ID);
+        constants::can::CHASSIS_CAN_BUS,
+        constants::motor::LEFT_FRONT_MOTOR_ID);
     aruwlib::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::LEFT_BACK_MOTOR_ID);
+        constants::can::CHASSIS_CAN_BUS,
+        constants::motor::LEFT_BACK_MOTOR_ID);
     aruwlib::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::RIGHT_FRONT_MOTOR_ID);
+        constants::can::CHASSIS_CAN_BUS,
+        constants::motor::RIGHT_FRONT_MOTOR_ID);
     aruwlib::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::RIGHT_BACK_MOTOR_ID);
+        constants::can::CHASSIS_CAN_BUS,
+        constants::motor::RIGHT_BACK_MOTOR_ID);
 
     // Register the motor sims for the turret subsystem
     aruwlib::motorsim::SimHandler::registerSim(
         aruwlib::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::control::turret::TurretSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::control::turret::TurretSubsystem::PITCH_MOTOR_ID);
+        constants::can::TURRET_CAN_BUS,
+        constants::motor::PITCH_MOTOR_ID);
     aruwlib::motorsim::SimHandler::registerSim(
         aruwlib::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::control::turret::TurretSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::control::turret::TurretSubsystem::YAW_MOTOR_ID);
+        constants::can::TURRET_CAN_BUS,
+        constants::motor::YAW_MOTOR_ID);
 
     // Register the motor sims for the Hopper Cover (There aren't any)
     // Register the motor sims for the Friction Wheels
     aruwlib::motorsim::SimHandler::registerSim(
         aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
+        constants::can::LAUNCHER_CAN_BUS,
+        constants::motor::LAUNCHER_LEFT_MOTOR_ID);
     aruwlib::motorsim::SimHandler::registerSim(
         aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
+        constants::can::LAUNCHER_CAN_BUS,
+        constants::motor::LAUNCHER_RIGHT_MOTOR_ID);
 #endif  // PLATFORM_HOSTED
 }
 
