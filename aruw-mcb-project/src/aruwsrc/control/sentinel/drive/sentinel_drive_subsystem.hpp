@@ -31,10 +31,9 @@
 
 #include "aruwlib/control/chassis/power_limiter.hpp"
 #include "aruwlib/motor/m3508_constants.hpp"
+#include "aruwlib/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
-
-#include "util_macros.hpp"
 
 namespace aruwsrc::control::sentinel::drive
 {

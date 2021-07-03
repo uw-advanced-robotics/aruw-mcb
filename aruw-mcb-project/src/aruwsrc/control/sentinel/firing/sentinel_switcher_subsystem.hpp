@@ -22,8 +22,7 @@
 
 #include "aruwlib/control/subsystem.hpp"
 #include "aruwlib/motor/servo.hpp"
-
-#include "util_macros.hpp"
+#include "aruwlib/util_macros.hpp"
 
 namespace aruwsrc::control::sentinel::firing
 {

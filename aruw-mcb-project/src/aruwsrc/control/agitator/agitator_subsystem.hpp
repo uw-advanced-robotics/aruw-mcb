@@ -32,8 +32,7 @@
 #include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
 #include "aruwlib/control/setpoint/interfaces/setpoint_subsystem.hpp"
-
-#include "util_macros.hpp"
+#include "aruwlib/util_macros.hpp"
 
 namespace aruwsrc
 {
