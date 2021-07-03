@@ -24,12 +24,12 @@
 #include "aruwlib/display/oled_button_handler.hpp"
 #include "aruwlib/display/sh1106.hpp"
 #include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"
 #include "modm/ui/menu/view_stack.hpp"
 
 #include "splash_screen.hpp"
-#include "util_macros.hpp"
 
 namespace aruwlib
 {

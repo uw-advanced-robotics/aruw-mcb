@@ -25,9 +25,9 @@
 #include "aruwlib/control/setpoint/interfaces/setpoint_subsystem.hpp"
 #include "aruwlib/drivers.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
+#include "aruwlib/util_macros.hpp"
 
 #include "agitator_subsystem.hpp"
-#include "util_macros.hpp"
 
 namespace aruwsrc
 {

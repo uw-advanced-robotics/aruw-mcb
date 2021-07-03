@@ -23,11 +23,10 @@
 #include "aruwlib/architecture/periodic_timer.hpp"
 #include "aruwlib/architecture/timeout.hpp"
 #include "aruwlib/communication/serial/dji_serial.hpp"
+#include "aruwlib/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
-
-#include "util_macros.hpp"
 
 class XavierSerialTester;
 

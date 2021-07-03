@@ -29,9 +29,9 @@
 #include "aruwlib/motor/dji_motor.hpp"
 #endif
 
-#include "modm/math/filter/pid.hpp"
+#include "aruwlib/util_macros.hpp"
 
-#include "util_macros.hpp"
+#include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc
 {
