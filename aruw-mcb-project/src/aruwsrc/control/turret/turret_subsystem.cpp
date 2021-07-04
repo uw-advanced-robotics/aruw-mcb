@@ -49,7 +49,7 @@ TurretSubsystem::TurretSubsystem(
     aruwlib::motor::MotorId pitchMotorId,
     aruwlib::motor::MotorId yawMotorId,
     bool limitYaw)
-    : aruwlib::control::turret::iTurretSubsystem(drivers),
+    : aruwlib::control::turret::TurretSubsystemInterface(drivers),
       TURRET_START_ANGLE(startAngle),
       TURRET_YAW_MIN_ANGLE(yawMinAngle),
       TURRET_YAW_MAX_ANGLE(yawMaxAngle),

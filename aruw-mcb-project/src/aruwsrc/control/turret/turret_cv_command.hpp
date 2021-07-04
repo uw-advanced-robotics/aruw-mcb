@@ -21,10 +21,10 @@
 #define TURRET_CV_COMMAND_HPP_
 
 #include "aruwlib/algorithms/contiguous_float.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/architecture/timeout.hpp"
 #include "aruwlib/control/command.hpp"
 
-#include "aruwsrc/algorithms/turret_pid.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 
 #include "turret_subsystem.hpp"
@@ -82,8 +82,8 @@ private:
     aruwlib::algorithms::ContiguousFloat yawTargetAngle;
     aruwlib::algorithms::ContiguousFloat pitchTargetAngle;
 
-    aruwsrc::algorithms::TurretPid yawPid;
-    aruwsrc::algorithms::TurretPid pitchPid;
+    aruwlib::algorithms::SmoothPid yawPid;
+    aruwlib::algorithms::SmoothPid pitchPid;
 
     uint32_t prevTime;
 

@@ -21,7 +21,7 @@
 #define SUBSYSTEM_SENTINEL_DRIVE_HPP_
 
 #include "aruwlib/communication/gpio/digital.hpp"
-#include "aruwlib/control/chassis/i_chassis_subsystem.hpp"
+#include "aruwlib/control/chassis/chassis_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwlib/mock/dji_motor_mock.hpp"
@@ -29,16 +29,15 @@
 #include "aruwlib/motor/dji_motor.hpp"
 #endif
 
+#include "aruwlib/control/chassis/power_limiter.hpp"
 #include "aruwlib/motor/m3508_constants.hpp"
+#include "aruwlib/util_macros.hpp"
 
-#include "aruwsrc/control/chassis/power_limiter.hpp"
 #include "modm/math/filter/pid.hpp"
-
-#include "util_macros.hpp"
 
 namespace aruwsrc::control::sentinel::drive
 {
-class SentinelDriveSubsystem : public aruwlib::control::chassis::iChassisSubsystem
+class SentinelDriveSubsystem : public aruwlib::control::chassis::ChassisSubsystemInterface
 {
 public:
     /**
@@ -159,7 +158,7 @@ private:
 
     const aruwlib::motor::M3508Constants motorConstants;
 
-    aruwsrc::chassis::PowerLimiter powerLimiter;
+    aruwlib::control::chassis::PowerLimiter powerLimiter;
 };
 
 }  // namespace aruwsrc::control::sentinel::drive

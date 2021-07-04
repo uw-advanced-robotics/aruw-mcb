@@ -74,9 +74,11 @@
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
         "${workspaceRoot}",
-        "./aruw-mcb-project/modm/src",
-        "./aruw-mcb-project/modm/ext/cmsis/core",
-        "./aruw-mcb-project/modm/ext/cmsis/device",
+        "./aruw-mcb-project/aruwlib/modm/src",
+        "./aruw-mcb-project/aruwlib/modm/ext/cmsis/core",
+        "./aruw-mcb-project/aruwlib/modm/ext/cmsis/device",
+        "./aruw-mcb-project/aruwlib/src",
+        "./aruw-mcb-project/aruwlib/test",
         "./aruw-mcb-project/src",
         "./aruw-mcb-project/test"
     ],

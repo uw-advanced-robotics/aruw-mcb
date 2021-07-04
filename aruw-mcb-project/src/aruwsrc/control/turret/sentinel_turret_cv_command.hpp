@@ -21,11 +21,11 @@
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
 #include "aruwlib/algorithms/contiguous_float.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/architecture/timeout.hpp"
 #include "aruwlib/control/comprised_command.hpp"
-#include "aruwlib/control/turret/i_turret_subsystem.hpp"
+#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
 
-#include "aruwsrc/algorithms/turret_pid.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/sentinel/firing/sentinel_rotate_agitator_command.hpp"
 #include "aruwsrc/control/sentinel/firing/sentinel_switcher_subsystem.hpp"
@@ -61,7 +61,7 @@ public:
 
     SentinelTurretCVCommand(
         aruwlib::Drivers *drivers,
-        aruwlib::control::turret::iTurretSubsystem *DoublePitchTurretSubsystem,
+        aruwlib::control::turret::TurretSubsystemInterface *DoublePitchTurretSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
         sentinel::firing::SentinelSwitcherSubsystem *switcher,
         float minYawAngle,
@@ -88,7 +88,7 @@ private:
 
     const float MIN_YAW_ANGLE, MAX_YAW_ANGLE, MIN_PITCH_ANGLE, MAX_PITCH_ANGLE;
 
-    aruwlib::control::turret::iTurretSubsystem *sentinelTurret;
+    aruwlib::control::turret::TurretSubsystemInterface *sentinelTurret;
 
     sentinel::firing::SentinelRotateAgitatorCommand rotateAgitator;
 

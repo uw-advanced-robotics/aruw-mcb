@@ -22,7 +22,7 @@
 
 #include "aruwlib/algorithms/ramp.hpp"
 #include "aruwlib/control/command.hpp"
-#include "aruwlib/control/turret/i_turret_subsystem.hpp"
+#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
 
 namespace aruwlib
 {
@@ -42,7 +42,7 @@ public:
     BeybladeCommand(
         aruwlib::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const aruwlib::control::turret::iTurretSubsystem* turret);
+        const aruwlib::control::turret::TurretSubsystemInterface* turret);
 
     // TODO remove step function logic and pass in as parameters instead of constants
 
@@ -106,7 +106,7 @@ private:
 
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const aruwlib::control::turret::iTurretSubsystem* turret;
+    const aruwlib::control::turret::TurretSubsystemInterface* turret;
 
     float getRotationTarget() const;
 };  // class BeybladeCommand

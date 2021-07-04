@@ -21,9 +21,8 @@
 #define TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
 
 #include "aruwlib/algorithms/contiguous_float.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/control/command.hpp"
-
-#include "aruwsrc/algorithms/turret_pid.hpp"
 
 namespace aruwlib
 {
@@ -114,8 +113,8 @@ private:
 
     uint32_t prevTime;
 
-    aruwsrc::algorithms::TurretPid yawPid;
-    aruwsrc::algorithms::TurretPid pitchPid;
+    aruwlib::algorithms::SmoothPid yawPid;
+    aruwlib::algorithms::SmoothPid pitchPid;
 
     const bool useImuOnTurret;
     bool usingImuOnTurret;

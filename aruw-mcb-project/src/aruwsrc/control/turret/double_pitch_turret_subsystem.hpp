@@ -24,14 +24,13 @@
 
 #include "aruwlib/algorithms/contiguous_float.hpp"
 #include "aruwlib/algorithms/linear_interpolation.hpp"
-#include "aruwlib/control/turret/i_turret_subsystem.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
+#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwlib/mock/dji_motor_mock.hpp"
 #else
 #include "aruwlib/motor/dji_motor.hpp"
 #endif
-
-#include "aruwsrc/algorithms/turret_pid.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -39,7 +38,7 @@ namespace aruwsrc::control::turret
  * Stores software necessary for interacting with two gimbals that control the pitch and
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
  */
-class DoublePitchTurretSubsystem : public aruwlib::control::turret::iTurretSubsystem
+class DoublePitchTurretSubsystem : public aruwlib::control::turret::TurretSubsystemInterface
 {
 public:
     /**
@@ -213,9 +212,9 @@ private:
     aruwlib::algorithms::ContiguousFloat yawTarget;
     aruwlib::algorithms::ContiguousFloat pitchTarget;
 
-    aruwsrc::algorithms::TurretPid yawMotorPid;
-    aruwsrc::algorithms::TurretPid leftPitchPid;
-    aruwsrc::algorithms::TurretPid rightPitchPid;
+    aruwlib::algorithms::SmoothPid yawMotorPid;
+    aruwlib::algorithms::SmoothPid leftPitchPid;
+    aruwlib::algorithms::SmoothPid rightPitchPid;
 
     uint32_t prevTime;
 
@@ -276,7 +275,7 @@ private:
         const uint32_t dt,
         const float errorBtwnMotors,
         const float pitchGravityCompensation,
-        algorithms::TurretPid& pidController,
+        aruwlib::algorithms::SmoothPid& pidController,
         aruwlib::motor::DjiMotor& motor);
 
     /**

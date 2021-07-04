@@ -68,7 +68,7 @@ DoublePitchTurretSubsystem::DoublePitchTurretSubsystem(
     aruwlib::motor::MotorId pitchMotorLeftId,
     aruwlib::motor::MotorId yawMotorId,
     bool limitYaw)
-    : iTurretSubsystem(drivers),
+    : TurretSubsystemInterface(drivers),
       TURRET_YAW_START_ANGLE(yawStartAngle),
       TURRET_YAW_MIN_ANGLE(yawMinAngle),
       TURRET_YAW_MAX_ANGLE(yawMaxAngle),
@@ -183,7 +183,7 @@ void DoublePitchTurretSubsystem::runPositionPid(
     const uint32_t dt,
     const float errorBtwnMotors,
     const float pitchGravityCompensation,
-    algorithms::TurretPid& pidController,
+    aruwlib::algorithms::SmoothPid& pidController,
     DjiMotor& motor)
 {
     const float positionControllerError = errorBtwnMotors + currAngle.difference(setpoint);

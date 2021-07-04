@@ -65,7 +65,7 @@ ChassisSubsystem::ChassisSubsystem(
     aruwlib::motor::MotorId rightFrontMotorId,
     aruwlib::motor::MotorId rightBackMotorId,
     aruwlib::gpio::Analog::Pin currentPin)
-    : aruwlib::control::chassis::iChassisSubsystem(drivers),
+    : aruwlib::control::chassis::ChassisSubsystemInterface(drivers),
       MOTOR_GEARBOX_RATIO(motorGearboxRatio),
       WIDTH_BETWEEN_WHEELS_X(widthBetweenWheelsX),
       WIDTH_BETWEEN_WHEELS_Y(widthBetweenWheelsY),

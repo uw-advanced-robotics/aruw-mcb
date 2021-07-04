@@ -23,7 +23,7 @@
 #include "aruwlib/algorithms/extended_kalman.hpp"
 #include "aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/communication/gpio/analog.hpp"
-#include "aruwlib/control/chassis/i_chassis_subsystem.hpp"
+#include "aruwlib/control/chassis/chassis_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwlib/mock/dji_motor_mock.hpp"
@@ -31,13 +31,12 @@
 #include "aruwlib/motor/dji_motor.hpp"
 #endif
 
+#include "aruwlib/control/chassis/power_limiter.hpp"
 #include "aruwlib/motor/m3508_constants.hpp"
+#include "aruwlib/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
-
-#include "power_limiter.hpp"
-#include "util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -54,7 +53,7 @@ namespace chassis
  *     - In other words, 'x' is the bow/stern and 'y' is starboard/
  *       port in boat terms.
  */
-class ChassisSubsystem : public aruwlib::control::chassis::iChassisSubsystem
+class ChassisSubsystem : public aruwlib::control::chassis::ChassisSubsystemInterface
 {
 public:
     /**
@@ -298,7 +297,7 @@ private:
 #endif
 
     aruwlib::motor::DjiMotor* motors[4];
-    PowerLimiter chassisPowerLimiter;
+    aruwlib::control::chassis::PowerLimiter chassisPowerLimiter;
     const aruwlib::motor::M3508Constants motorConstants;
 
     /**

@@ -55,7 +55,7 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
     aruwlib::motor::MotorId leftMotorId,
     aruwlib::motor::MotorId rightMotorId,
     aruwlib::can::CanBus chassisCanBus)
-    : aruwlib::control::chassis::iChassisSubsystem(drivers),
+    : aruwlib::control::chassis::ChassisSubsystemInterface(drivers),
       LEFT_LIMIT_SWITCH(leftLimitSwitch),
       RIGHT_LIMIT_SWITCH(rightLimitSwitch),
       CURRENT_SENSOR_PIN(currentSensorPin),
