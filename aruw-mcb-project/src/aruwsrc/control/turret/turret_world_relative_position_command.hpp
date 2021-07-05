@@ -52,32 +52,28 @@ public:
      * This command requires the turret subsystem from a command/subsystem framework perspective.
      * The `ChassisSubsystem` is only used for for odometry information.
      *
-     * @param
+     * @param[in] drivers
+     * @param[in] subsystem
+     * @param[in] chassis
+     * @param[in] turretStartAngle
+     * @param[in] yawKdTurretImu
+     * @param[in] yawKdChassisImu
+     * @param[in] yawPidConfig
+     * @param[in] pitchPidConfig
+     * @param[in] userYawInputScalar
+     * @param[in] userPitchInputScalar
+     * @param[in] pitchGravityCompensationKp
+     * @param[in] useImuOnTurret
      */
     TurretWorldRelativePositionCommand(
         aruwlib::Drivers *drivers,
         TurretSubsystem *subsystem,
         const chassis::ChassisSubsystem *chassis,
         float turretStartAngle,
-        float yawKp,
-        float yawKi,
         float yawKdTurretImu,
         float yawKdChassisImu,
-        float yawMaxICumulative,
-        float yawMaxOutput,
-        float yawTQDerivativeKalman,
-        float yawTRDerivativeKalman,
-        float yawTQProportionalKalman,
-        float yawTRProportionalKalman,
-        float pitchKp,
-        float pitchKi,
-        float pitchKd,
-        float pitchMaxICumulative,
-        float pitchMaxOutput,
-        float pitchTQDerivativeKalman,
-        float pitchTRDerivativeKalman,
-        float pitchTQProportionalKalman,
-        float pitchTRProportionalKalman,
+        const aruwlib::algorithms::PidConfigStruct &yawPidConfig,
+        const aruwlib::algorithms::PidConfigStruct &pitchPidConfig,
         float userYawInputScalar,
         float userPitchInputScalar,
         float pitchGravityCompensationKp,

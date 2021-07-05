@@ -39,30 +39,18 @@ class TurretCVCommand : public aruwlib::control::Command
 {
 public:
     /**
-     * @param
+     * @param[in] drivers
+     * @param[in] subsystem
+     * @param[in] turretStartAngle
+     * @param[in] yawPidConfig
+     * @param[in] pitchPidConfig
      */
     TurretCVCommand(
-        aruwlib::Drivers *xavierSerial,
+        aruwlib::Drivers *drivers,
         TurretSubsystem *subsystem,
         float turretStartAngle,
-        float yawKp,
-        float yawKi,
-        float yawKd,
-        float yawMaxICumulative,
-        float yawMaxOutput,
-        float yawTQDerivativeKalman,
-        float yawTRDerivativeKalman,
-        float yawTQProportionalKalman,
-        float yawTRProportionalKalman,
-        float pitchKp,
-        float pitchKi,
-        float pitchKd,
-        float pitchMaxICumulative,
-        float pitchMaxOutput,
-        float pitchTQDerivativeKalman,
-        float pitchTRDerivativeKalman,
-        float pitchTQProportionalKalman,
-        float pitchTRProportionalKalman);
+        const aruwlib::algorithms::PidConfigStruct &yawPidConfig,
+        const aruwlib::algorithms::PidConfigStruct &pitchPidConfig);
 
     void initialize() override;
 

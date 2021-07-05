@@ -43,24 +43,8 @@ class DoublePitchTurretSubsystem : public aruwlib::control::turret::TurretSubsys
 public:
     /**
      * @param[in] drivers Pointer to a drivers singleton object.
-     * @param[in] yawKp
-     * @param[in] yawKi
-     * @param[in] yawKd
-     * @param[in] yawMaxICumulative
-     * @param[in] yawMaxOutput
-     * @param[in] yawTQDerivativeKalman
-     * @param[in] yawTRDerivativeKalman
-     * @param[in] yawTQProportionalKalman
-     * @param[in] yawTRProportionalKalman
-     * @param[in] pitchKp
-     * @param[in] pitchKi
-     * @param[in] pitchKd
-     * @param[in] pitchMaxICumulative
-     * @param[in] pitchMaxOutput
-     * @param[in] pitchTQDerivativeKalman
-     * @param[in] pitchTRDerivativeKalman
-     * @param[in] pitchTQProportionalKalman
-     * @param[in] pitchTRProportionalKalman
+     * @param[in] yawPidConfig PID configuration for yaw controller.
+     * @param[in] pitchPidConfig PID configuration for pitch controller.
      * @param[in] userYawInputScalar
      * @param[in] userPitchInputScalar
      * @param[in] pitchGravityCompensationKp
@@ -83,24 +67,8 @@ public:
      */
     explicit DoublePitchTurretSubsystem(
         aruwlib::Drivers* drivers,
-        float yawKp,
-        float yawKi,
-        float yawKd,
-        float yawMaxICumulative,
-        float yawMaxOutput,
-        float yawTQDerivativeKalman,
-        float yawTRDerivativeKalman,
-        float yawTQProportionalKalman,
-        float yawTRProportionalKalman,
-        float pitchKp,
-        float pitchKi,
-        float pitchKd,
-        float pitchMaxICumulative,
-        float pitchMaxOutput,
-        float pitchTQDerivativeKalman,
-        float pitchTRDerivativeKalman,
-        float pitchTQProportionalKalman,
-        float pitchTRProportionalKalman,
+        const aruwlib::algorithms::PidConfigStruct& yawPidConfig,
+        const aruwlib::algorithms::PidConfigStruct& pitchPidConfig,
         float userYawInputScalar,
         float userPitchInputScalar,
         float pitchGravityCompensationKp,

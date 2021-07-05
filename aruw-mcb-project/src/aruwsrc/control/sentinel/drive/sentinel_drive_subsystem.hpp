@@ -20,6 +20,7 @@
 #ifndef SUBSYSTEM_SENTINEL_DRIVE_HPP_
 #define SUBSYSTEM_SENTINEL_DRIVE_HPP_
 
+#include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/communication/gpio/digital.hpp"
 #include "aruwlib/control/chassis/chassis_subsystem_interface.hpp"
 
@@ -50,13 +51,7 @@ public:
      *      and is triggered when the sentinel reaches the end of the rail.
      * @param[in] currentSensorPin The analog input pin that the chassis current sensor is connected
      *      to.
-     * @param[in] pidP Proportional term for chassis wheel velocity PID controller.
-     * @param[in] pidI Integral term for chassis wheel velocity PID controller
-     * @param[in] pidD Derivative term for chassis wheel velocity PID controller.
-     * @param[in] pidMaxErrorSum Max integral sum for chassis wheel velocity PID controller.
-     * @param[in] pidMaxOutput This max output is measured in the c620 robomaster translated
-     *      current. Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384. The
-     *      corresponding speed controller output torque current range is -20 ~ 0 ~ 20 A.
+     * @param[in] velocityPidConfig PID configuration for friction wheel velocity PID controllers.
      * @param[in] wheelRadius Wheel radius of chassis motors, (mm).
      * @param[in] gearRatio Gear ratio of the chassis motors.
      * @param[in] railLength Length of the sentinel rail (mm).
@@ -75,11 +70,7 @@ public:
         aruwlib::gpio::Digital::InputPin leftLimitSwitch,
         aruwlib::gpio::Digital::InputPin rightLimitSwitch,
         aruwlib::gpio::Analog::Pin currentSensorPin,
-        float pidP,
-        float pidI,
-        float pidD,
-        float pidMaxErrorSum,
-        float pidMaxOutput,
+        const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
         float wheelRadius,
         float gearRatio,
         float railLength,
@@ -131,9 +122,8 @@ private:
     const float RAIL_LENGTH;
     const float SENTINEL_LENGTH;
 
-    modm::Pid<float> velocityPidLeftWheel;
-
-    modm::Pid<float> velocityPidRightWheel;
+    aruwlib::algorithms::SmoothPid velocityPidLeftWheel;
+    aruwlib::algorithms::SmoothPid velocityPidRightWheel;
 
     float desiredRpm;
     float leftWheelZeroRailOffset = 0;

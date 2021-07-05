@@ -32,48 +32,14 @@ TurretCVCommand::TurretCVCommand(
     aruwlib::Drivers *drivers,
     TurretSubsystem *subsystem,
     float turretStartAngle,
-    float yawKp,
-    float yawKi,
-    float yawKd,
-    float yawMaxICumulative,
-    float yawMaxOutput,
-    float yawTQDerivativeKalman,
-    float yawTRDerivativeKalman,
-    float yawTQProportionalKalman,
-    float yawTRProportionalKalman,
-    float pitchKp,
-    float pitchKi,
-    float pitchKd,
-    float pitchMaxICumulative,
-    float pitchMaxOutput,
-    float pitchTQDerivativeKalman,
-    float pitchTRDerivativeKalman,
-    float pitchTQProportionalKalman,
-    float pitchTRProportionalKalman)
+    const aruwlib::algorithms::PidConfigStruct &yawPidConfig,
+    const aruwlib::algorithms::PidConfigStruct &pitchPidConfig)
     : drivers(drivers),
       turretSubsystem(subsystem),
       yawTargetAngle(turretStartAngle, 0.0f, 360.0f),
       pitchTargetAngle(turretStartAngle, 0.0f, 360.0f),
-      yawPid(
-          yawKp,
-          yawKi,
-          yawKd,
-          yawMaxICumulative,
-          yawMaxOutput,
-          yawTQDerivativeKalman,
-          yawTRDerivativeKalman,
-          yawTQProportionalKalman,
-          yawTRProportionalKalman),
-      pitchPid(
-          pitchKp,
-          pitchKi,
-          pitchKd,
-          pitchMaxICumulative,
-          pitchMaxOutput,
-          pitchTQDerivativeKalman,
-          pitchTRDerivativeKalman,
-          pitchTQProportionalKalman,
-          pitchTRProportionalKalman)
+      yawPid(yawPidConfig),
+      pitchPid(pitchPidConfig)
 {
     addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem *>(subsystem));
 }

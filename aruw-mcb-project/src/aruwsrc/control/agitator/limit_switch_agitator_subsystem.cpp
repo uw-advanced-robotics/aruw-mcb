@@ -29,11 +29,7 @@ namespace agitator
 {
 LimitSwitchAgitatorSubsystem::LimitSwitchAgitatorSubsystem(
     aruwlib::Drivers* drivers,
-    float kp,
-    float ki,
-    float kd,
-    float maxIAccum,
-    float maxOutput,
+    const aruwlib::algorithms::PidConfigStruct& pidConfig,
     float agitatorGearRatio,
     aruwlib::motor::MotorId agitatorMotorId,
     aruwlib::can::CanBus agitatorCanBusId,
@@ -44,11 +40,7 @@ LimitSwitchAgitatorSubsystem::LimitSwitchAgitatorSubsystem(
     : Subsystem(drivers),
       AgitatorSubsystem(
           drivers,
-          kp,
-          ki,
-          kd,
-          maxIAccum,
-          maxOutput,
+          pidConfig,
           agitatorGearRatio,
           agitatorMotorId,
           agitatorCanBusId,

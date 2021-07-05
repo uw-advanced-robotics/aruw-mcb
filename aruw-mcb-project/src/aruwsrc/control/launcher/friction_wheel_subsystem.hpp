@@ -21,6 +21,7 @@
 #define __FRICTION_WHEEL_SUBSYSTEM_HPP__
 
 #include "aruwlib/algorithms/ramp.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/control/subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -48,11 +49,7 @@ public:
      * unless otherwise specified on CAN bus 1.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
-     * @param[in] pidP Proportioanl parameter for RPM PID controller.
-     * @param[in] pidI Integral parameter for RPM PID controller.
-     * @param[in] pidD Derivative parameter for RPM PID controller.
-     * @param[in] pidMaxErrorSum Max integral sum for RPM PID controller.
-     * @param[in] pidMaxOutput Max output for RPM PID controller.
+     * @param[in] velocityPidConfig PID configuration for friction wheel velocity PID controllers.
      * @param[in] frictionWheelRampSpeed Speed of ramp when you set a new desired ramp speed
      *      [rpm / ms].
      * @param[in] leftMotorId DJI motor ID for left motor.
@@ -61,11 +58,7 @@ public:
      */
     FrictionWheelSubsystem(
         aruwlib::Drivers *drivers,
-        float pidP,
-        float pidI,
-        float pidD,
-        float pidMaxErrorSum,
-        float pidMaxOutput,
+        const aruwlib::algorithms::PidConfigStruct &velocityPidConfig,
         float frictionWheelRampSpeed,
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId,
@@ -95,9 +88,8 @@ private:
     // speed of ramp when you set a new desired ramp speed [rpm / ms]
     const float FRICTION_WHEEL_RAMP_SPEED;
 
-    modm::Pid<float> velocityPidLeftWheel;
-
-    modm::Pid<float> velocityPidRightWheel;
+    aruwlib::algorithms::SmoothPid velocityPidLeftWheel;
+    aruwlib::algorithms::SmoothPid velocityPidRightWheel;
 
     aruwlib::algorithms::Ramp desiredRpmRamp;
 

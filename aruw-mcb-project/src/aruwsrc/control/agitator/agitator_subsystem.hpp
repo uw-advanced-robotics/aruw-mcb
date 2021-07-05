@@ -52,11 +52,7 @@ public:
      * motor-specific identifiers.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
-     * @param[in] kp Proportional constant for position PID controller.
-     * @param[in] ki Integral constant for positional PID controller.
-     * @param[in] kd Derivative constant for positional PID controller.
-     * @param[in] maxIAccum Max integral sum for position PID controller.
-     * @param[in] maxOutput Maximum output for position PID controller.
+     * @param[in] pidConfig PID configuration for position controller.
      * @param[in] agitatorGearRatio Gear ratio of agitator motor.
      * @param[in] agitatorMotorId DJI motor id of agitator motor.
      * @param[in] agitatorCanBusId CAN bus that the agitator motor is on.
@@ -68,11 +64,7 @@ public:
      */
     AgitatorSubsystem(
         aruwlib::Drivers* drivers,
-        float kp,
-        float ki,
-        float kd,
-        float maxIAccum,
-        float maxOutput,
+        const aruwlib::algorithms::PidConfigStruct& pidConfig,
         float agitatorGearRatio,
         aruwlib::motor::MotorId agitatorMotorId,
         aruwlib::can::CanBus agitatorCanBusId,

@@ -22,6 +22,7 @@
 
 #include "aruwlib/algorithms/extended_kalman.hpp"
 #include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/communication/gpio/analog.hpp"
 #include "aruwlib/control/chassis/chassis_subsystem_interface.hpp"
 
@@ -79,18 +80,8 @@ public:
      * @param[in] minErrorRotationD The maximum revolve error before we start using the
      *      derivative term.
      * @param[in] minRotationThreshold
-     * @param[in] velocityPidKp Proportional term for chassis wheel velocity PID controller.
-     * @param[in] velocityPidKi Integral term for chassis wheel velocity PID controller.
-     * @param[in] velocityPidKd Derivative term for chassis wheel velocity PID controller.
-     * @param[in] velocityPidMaxErrSum Max integral sum for chassis wheel velocity PID controller.
-     * @param[in] velocityPidMaxOutput This max output is measured in the c620 robomaster translated
-     *      current. Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384. The
-     *      corresponding speed controller output torque current range is -20 ~ 0 ~ 20 A.
-     * @param[in] maxEnergyBuffer @see PowerLimiter
-     * @param[in] energyBufferLimitThreshold @see PowerLimiter
-     * @param[in] energyBufferCritThreshold @see PowerLimiter
-     * @param[in] powerConsumptionThreshold @see PowerLimiter
-     * @param[in] currentAllocatedForEnergyBufferLimiting @see PowerLimiter
+     * @param[in] velocityPidConfig
+     * @param[in] powerLimiterConfig
      * @param[in] canBus The can bus that the chassis is connected to.
      * @param[in] leftFrontMotorId LF motor id.
      * @param[in] leftBackMotorId LB motor id.
@@ -123,16 +114,8 @@ public:
         float chassisRevolvePidMaxOutput,
         float minErrorRotationD,
         float minRotationThreshold,
-        float velocityPidKp,
-        float velocityPidKi,
-        float velocityPidKd,
-        float velocityPidMaxErrSum,
-        float velocityPidMaxOutput,
-        float maxEnergyBuffer,
-        float energyBufferLimitThreshold,
-        float energyBufferCritThreshold,
-        float powerConsumptionThreshold,
-        float currentAllocatedForEnergyBufferLimiting,
+        const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
+        const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
         aruwlib::can::CanBus canBus,
         aruwlib::motor::MotorId leftFrontMotorId,
         aruwlib::motor::MotorId leftBackMotorId,

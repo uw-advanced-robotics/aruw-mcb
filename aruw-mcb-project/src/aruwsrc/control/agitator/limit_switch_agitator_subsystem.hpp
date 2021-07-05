@@ -55,11 +55,7 @@ public:
      */
     LimitSwitchAgitatorSubsystem(
         aruwlib::Drivers* drivers,
-        float kp,
-        float ki,
-        float kd,
-        float maxIAccum,
-        float maxOutput,
+        const aruwlib::algorithms::PidConfigStruct& pidConfig,
         float agitatorGearRatio,
         aruwlib::motor::MotorId agitatorMotorId,
         aruwlib::can::CanBus agitatorCanBusId,

@@ -40,11 +40,7 @@ namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
     aruwlib::Drivers* drivers,
-    float kp,
-    float ki,
-    float kd,
-    float maxIAccum,
-    float maxOutput,
+    const aruwlib::algorithms::PidConfigStruct& pidConfig,
     float agitatorGearRatio,
     aruwlib::motor::MotorId agitatorMotorId,
     aruwlib::can::CanBus agitatorCanBusId,
@@ -53,8 +49,8 @@ AgitatorSubsystem::AgitatorSubsystem(
     float jamDistanceTolerance,
     uint32_t jamTemporalTolerance)
     : aruwlib::control::Subsystem(drivers),
-      agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
       jamChecker(this, jamDistanceTolerance, jamTemporalTolerance),
+      agitatorPositionPid(pidConfig),
       gearRatio(agitatorGearRatio),
       jamLogicEnabled(jamLogicEnabled),
       agitatorMotor(
