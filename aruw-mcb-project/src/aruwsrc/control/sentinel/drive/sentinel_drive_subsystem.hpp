@@ -56,11 +56,7 @@ public:
      * @param[in] gearRatio Gear ratio of the chassis motors.
      * @param[in] railLength Length of the sentinel rail (mm).
      * @param[in] sentinelLength Length of the sentinel (mm).
-     * @param[in] maxEnergyBuffer @see PowerLimiter
-     * @param[in] energyBufferLimitThreshold @see PowerLimiter
-     * @param[in] energyBufferCritThreshold @see PowerLimiter
-     * @param[in] powerConsumptionThreshold @see PowerLimiter
-     * @param[in] currentAllocatedForEnergyBufferLimiting @see PowerLimiter
+     * @param[in] powerLimiterConfig @see PowerLimiter
      * @param[in] leftMotorId DJI motor id for left motor.
      * @param[in] rightMotorId DJI motor id for right motor.
      * @param[in] chassisCanBus CAN bus chassis is connected to.
@@ -75,11 +71,7 @@ public:
         float gearRatio,
         float railLength,
         float sentinelLength,
-        float maxEnergyBuffer,
-        float energyBufferLimitThreshold,
-        float energyBufferCritThreshold,
-        float powerConsumptionThreshold,
-        float currentAllocatedForEnergyBufferLimiting,
+        const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId,
         aruwlib::can::CanBus chassisCanBus);

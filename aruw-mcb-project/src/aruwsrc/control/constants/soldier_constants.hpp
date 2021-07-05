@@ -24,8 +24,10 @@
 #error "Don't include this file directly, include robot_constants.hpp instead"
 #endif
 
+#include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/communication/can/can_bus.hpp"
 #include "aruwlib/communication/gpio/analog.hpp"
+#include "aruwlib/control/chassis/power_limiter.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
 // For comments, see constants.md
@@ -70,11 +72,8 @@ namespace agitator
 {
 // position PID terms
 // PID terms for soldier
-static constexpr float PID_17MM_P = 170000.0f;
-static constexpr float PID_17MM_I = 0.0f;
-static constexpr float PID_17MM_D = 80.0f;
-static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
-static constexpr float PID_17MM_MAX_OUT = 16000.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct AGITATOR_PID_CONFIG =
+    {170000.0f, 0.0f, 80.0f, 0.0f, 16000.0f, 1.0f, 0.0f, 1.0f, 0.0f};
 static constexpr float AGITATOR_GEARBOX_RATIO = 36.0f;
 static constexpr bool AGITATOR_INVERTED = false;
 static constexpr float AGITATOR_JAMMING_DISTANCE = 1.0f;
@@ -88,11 +87,8 @@ namespace chassis
 {
 static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
-static constexpr float VELOCITY_PID_KI = 0.0f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-static constexpr float VELOCITY_PID_MAX_OUTPUT = 16000.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct CHASSIS_PID_CONFIG =
+    {20.0f, 0.0f, 0.0f, 0.0f, 16000.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
 static constexpr float CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
 static constexpr float CHASSIS_REVOLVE_PID_KD = 500.0f;
@@ -110,11 +106,8 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
 
-static constexpr float MAX_ENERGY_BUFFER = 60.0f;
-static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 40.0f;
-static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 5;
-static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
-static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
+static constexpr aruwlib::control::chassis::PowerLimiterConfig CHASSIS_POWER_LIMIT_CONFIG =
+    {60.0f, 40.0f, 5, 20, 30000};
 
 static constexpr float WIGGLE_PERIOD = 1600.0f;
 static constexpr float WIGGLE_MAX_ROTATE_ANGLE = 60.0f;
@@ -143,45 +136,18 @@ static constexpr float FEED_FORWARD_KP = 0.0f;  // TODO tune this value
 static constexpr float FEED_FORWARD_MAX_OUTPUT = 20000.0f;
 
 // CV control
-static constexpr float YAW_CV_P = 4500.0f;
-static constexpr float YAW_CV_I = 0.0f;
-static constexpr float YAW_CV_D = 140.0f;
-static constexpr float YAW_CV_MAX_ERROR_SUM = 0.0f;
-static constexpr float YAW_CV_MAX_OUTPUT = 32000.0f;
-static constexpr float YAW_CV_Q_DERIVATIVE_KALMAN = 1.0f;
-static constexpr float YAW_CV_R_DERIVATIVE_KALMAN = 20.0f;
-static constexpr float YAW_CV_Q_PROPORTIONAL_KALMAN = 1.0f;
-static constexpr float YAW_CV_R_PROPORTIONAL_KALMAN = 0.0f;
-static constexpr float PITCH_CV_P = 3500.0f;
-static constexpr float PITCH_CV_I = 0.0f;
-static constexpr float PITCH_CV_D = 80.0f;
-static constexpr float PITCH_CV_MAX_ERROR_SUM = 0.0f;
-static constexpr float PITCH_CV_MAX_OUTPUT = 32000.0f;
-static constexpr float PITCH_CV_Q_DERIVATIVE_KALMAN = 1.5f;
-static constexpr float PITCH_CV_R_DERIVATIVE_KALMAN = 20.0f;
-static constexpr float PITCH_CV_Q_PROPORTIONAL_KALMAN = 1.0f;
-static constexpr float PITCH_CV_R_PROPORTIONAL_KALMAN = 2.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct CV_YAW_PID_CONFIG =
+    {4500.0f, 0.0f, 140.0f, 0.0f, 32000.0f, 1.0f, 20.0f, 1.0f, 0.0f};
+static constexpr aruwlib::algorithms::PidConfigStruct CV_PITCH_PID_CONFIG =
+    {3500.0f, 0.0f, 80.0f, 0.0f, 32000.0f, 1.5f, 20.0f, 1.0f, 2.0f};
 
 // World relative control
-static constexpr float YAW_WR_P = 4000.0f;
-static constexpr float YAW_WR_I = 0.0f;
 static constexpr float YAW_WR_TURRET_IMU_D = 180.0f;
 static constexpr float YAW_WR_CHASSIS_IMU_D = 180.0f;
-static constexpr float YAW_WR_MAX_ERROR_SUM = 0.0f;
-static constexpr float YAW_WR_MAX_OUTPUT = 30000.0f;
-static constexpr float YAW_WR_Q_DERIVATIVE_KALMAN = 1.0f;
-static constexpr float YAW_WR_R_DERIVATIVE_KALMAN = 20.0f;
-static constexpr float YAW_WR_Q_PROPORTIONAL_KALMAN = 1.0f;
-static constexpr float YAW_WR_R_PROPORTIONAL_KALMAN = 10.0f;
-static constexpr float PITCH_WR_P = 4500.0f;
-static constexpr float PITCH_WR_I = 0.0f;
-static constexpr float PITCH_WR_D = 90.0f;
-static constexpr float PITCH_WR_MAX_ERROR_SUM = 0.0f;
-static constexpr float PITCH_WR_MAX_OUTPUT = 30000.0f;
-static constexpr float PITCH_WR_Q_DERIVATIVE_KALMAN = 1.5f;
-static constexpr float PITCH_WR_R_DERIVATIVE_KALMAN = 20.0f;
-static constexpr float PITCH_WR_Q_PROPORTIONAL_KALMAN = 1.0f;
-static constexpr float PITCH_WR_R_PROPORTIONAL_KALMAN = 2.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct WR_YAW_PID_CONFIG =
+    {4000.0f, 0.0f, YAW_WR_TURRET_IMU_D, 0.0f, 30000.0f, 1.0f, 20.0f, 1.0f, 10.0f};
+static constexpr aruwlib::algorithms::PidConfigStruct WR_PITCH_PID_CONFIG =
+    {4500.0f, 0.0f, 90.0f, 0.0f, 30000.0f, 1.5f, 20.0f, 1.0f, 2.0f};
 
 static constexpr float USER_YAW_INPUT_SCALAR = 1.0f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.5f;
@@ -191,11 +157,8 @@ static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 4000.0f;
 
 namespace launcher
 {
-static constexpr float LAUNCHER_PID_P = 30.0f;
-static constexpr float LAUNCHER_PID_I = 0.0f;
-static constexpr float LAUNCHER_PID_D = 5.0f;
-static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 0.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16000.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct LAUNCHER_PID_CONFIG =
+    {30.0f, 0.0f, 5.0f, 0.0f, 16000.0f, 1.0f, 0.0f, 1.0f, 0.0f};
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
 }  // namespace launcher
 }  // namespace soldier_control::constants

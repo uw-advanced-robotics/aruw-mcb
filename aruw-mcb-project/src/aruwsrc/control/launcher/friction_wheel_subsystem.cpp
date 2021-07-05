@@ -27,8 +27,8 @@ namespace launcher
 {
 FrictionWheelSubsystem::FrictionWheelSubsystem(
     aruwlib::Drivers* drivers,
-    float frictionWheelRampSpeed,
     const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
+    float frictionWheelRampSpeed,
     aruwlib::motor::MotorId leftMotorId,
     aruwlib::motor::MotorId rightMotorId,
     aruwlib::can::CanBus canBus)
@@ -56,10 +56,14 @@ void FrictionWheelSubsystem::refresh()
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
     prevTime = currTime;
 
-    velocityPidLeftWheel.update(desiredRpmRamp.getValue() - leftWheel.getShaftRPM());
-    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
-    velocityPidRightWheel.update(desiredRpmRamp.getValue() - rightWheel.getShaftRPM());
-    rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
+    velocityPidLeftWheel.runControllerDerivateError(
+        desiredRpmRamp.getValue() - leftWheel.getShaftRPM(),
+        1);
+    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getOutput()));
+    velocityPidRightWheel.runControllerDerivateError(
+        desiredRpmRamp.getValue() - rightWheel.getShaftRPM(),
+        1);
+    rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getOutput()));
 }
 
 void FrictionWheelSubsystem::runHardwareTests()

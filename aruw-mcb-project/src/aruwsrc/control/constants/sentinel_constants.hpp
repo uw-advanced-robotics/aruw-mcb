@@ -24,10 +24,12 @@
 #error "Don't include this file directly, include robot_constants.hpp instead"
 #endif
 
+#include "aruwlib/algorithms/smooth_pid.hpp"
 #include "aruwlib/communication/can/can_bus.hpp"
 #include "aruwlib/communication/gpio/analog.hpp"
 #include "aruwlib/communication/gpio/digital.hpp"
 #include "aruwlib/communication/gpio/pwm.hpp"
+#include "aruwlib/control/chassis/power_limiter.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
 // For comments, see constants.md
@@ -76,22 +78,16 @@ static constexpr aruwlib::gpio::Digital::InputPin LEFT_LIMIT_SWITCH =
 static constexpr aruwlib::gpio::Digital::InputPin RIGHT_LIMIT_SWITCH =
     aruwlib::gpio::Digital::InputPin::B;
 
-static constexpr float CHASSIS_PID_P = 5.0f;
-static constexpr float CHASSIS_PID_I = 0.0f;
-static constexpr float CHASSIS_PID_D = 0.1f;
-static constexpr float CHASSIS_PID_MAX_ERROR_SUM = 0.0f;
-static constexpr float CHASSIS_PID_MAX_OUTPUT = 16000;
+static constexpr aruwlib::algorithms::PidConfigStruct CHASSIS_PID_CONFIG =
+    {5.0f, 0.0f, 0.1f, 0.0f, 16000, 1.0f, 0.0f, 1.0f, 0.0f};
 
 // radius of the wheel in mm
 static constexpr float WHEEL_RADIUS = 35.0f;
 static constexpr float GEAR_RATIO = 19.0f;
 
 /// @see power_limiter.hpp for what these mean
-static constexpr float MAX_ENERGY_BUFFER = 200.0f;
-static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 100.0f;
-static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 0;
-static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 5;
-static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 15000;
+static constexpr aruwlib::control::chassis::PowerLimiterConfig CHASSIS_POWER_LIMIT_CONFIG =
+    {200.0f, 100.0f, 0, 5, 15000};
 
 // RMUL length of the rail, in mm
 static constexpr float RAIL_LENGTH = 2130;
@@ -110,11 +106,8 @@ namespace agitator
 {
 // position PID terms
 // PID terms for sentinel
-static constexpr float AGITATOR_PID_17MM_P = 170000.0f;
-static constexpr float AGITATOR_PID_17MM_I = 0.0f;
-static constexpr float AGITATOR_PID_17MM_D = 80.0f;
-static constexpr float AGITATOR_PID_17MM_MAX_ERR_SUM = 0.0f;
-static constexpr float AGITATOR_PID_17MM_MAX_OUT = 16000.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct AGITATOR_PID_CONFIG =
+    {170000.0f, 0.0f, 80.0f, 0.0f, 16000.0f, 1.0f, 0.0f, 1.0f, 0.0f};
 static constexpr float AGITATOR_MOTOR_INVERTED = false;
 static constexpr float AGITATOR_GEAR_RATIO = 36.0f;
 static constexpr float JAMMING_DISTANCE = aruwlib::algorithms::PI / 10.0f;
@@ -130,25 +123,11 @@ static constexpr float TURRET_PITCH_START_ANGLE = 62.0f;
 static constexpr float TURRET_PITCH_MIN_ANGLE = 45.0f;
 static constexpr float TURRET_PITCH_MAX_ANGLE = 90.0f;
 
-static constexpr float YAW_P = 2000.0f;
-static constexpr float YAW_I = 0.0f;
-static constexpr float YAW_D = 120.0f;
-static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-static constexpr float YAW_R_DERIVATIVE_KALMAN = 30.0f;
-static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct YAW_PID_CONFIG =
+    {2000.0f, 0.0f, 120.0f, 0.0f, 30000.0f, 1.0f, 30.0f, 1.0f, 0.0f};
 
-static constexpr float PITCH_P = 1300.0f;
-static constexpr float PITCH_I = 0.0f;
-static constexpr float PITCH_D = 80.0f;
-static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-static constexpr float PITCH_R_DERIVATIVE_KALMAN = 30.0f;
-static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct PITCH_PID_CONFIG =
+    {1300.0f, 0.0f, 80.0f, 0.0f, 30000.0f, 1.5f, 30.0f, 1.0f, 2.0f};
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.75f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.5f;
@@ -162,11 +141,9 @@ static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_RIGHT = 0;
 
 namespace launcher
 {
-static constexpr float LAUNCHER_PID_P = 30.0f;
-static constexpr float LAUNCHER_PID_I = 0.0f;
-static constexpr float LAUNCHER_PID_D = 5.0f;
-static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 0.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16000.0f;
+static constexpr aruwlib::algorithms::PidConfigStruct LAUNCHER_PID_CONFIG =
+    {30.0f, 0.0f, 5.0f, 0.0f, 16000.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
 
 static constexpr float FRICTION_WHEEL_TARGET_RPM = 5150;

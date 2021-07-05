@@ -43,11 +43,7 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
     float gearRatio,
     float railLength,
     float sentinelLength,
-    float maxEnergyBuffer,
-    float energyBufferLimitThreshold,
-    float energyBufferCritThreshold,
-    float powerConsumptionThreshold,
-    float currentAllocatedForEnergyBufferLimiting,
+    const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
     aruwlib::motor::MotorId leftMotorId,
     aruwlib::motor::MotorId rightMotorId,
     aruwlib::can::CanBus chassisCanBus)
@@ -64,15 +60,7 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       desiredRpm(0),
       leftWheel(drivers, leftMotorId, chassisCanBus, false, "left sentinel drive motor"),
       rightWheel(drivers, rightMotorId, chassisCanBus, false, "right sentinel drive motor"),
-      powerLimiter(
-          drivers,
-          currentSensorPin,
-          maxEnergyBuffer,
-          energyBufferLimitThreshold,
-          energyBufferCritThreshold,
-          powerConsumptionThreshold,
-          currentAllocatedForEnergyBufferLimiting,
-          motorConstants)
+      powerLimiter(drivers, currentSensorPin, powerLimiterConfig, motorConstants)
 {
     chassisMotors[0] = &leftWheel;
     chassisMotors[1] = &rightWheel;
@@ -94,10 +82,10 @@ void SentinelDriveSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; 
 
 void SentinelDriveSubsystem::refresh()
 {
-    velocityPidLeftWheel.update(desiredRpm - leftWheel.getShaftRPM());
-    leftWheel.setDesiredOutput(velocityPidLeftWheel.getValue());
-    velocityPidRightWheel.update(desiredRpm - rightWheel.getShaftRPM());
-    rightWheel.setDesiredOutput(velocityPidRightWheel.getValue());
+    velocityPidLeftWheel.runControllerDerivateError(desiredRpm - leftWheel.getShaftRPM(), 1);
+    leftWheel.setDesiredOutput(velocityPidLeftWheel.getOutput());
+    velocityPidRightWheel.runControllerDerivateError(desiredRpm - rightWheel.getShaftRPM(), 1);
+    rightWheel.setDesiredOutput(velocityPidRightWheel.getOutput());
     powerLimiter.performPowerLimiting(chassisMotors, MODM_ARRAY_SIZE(chassisMotors));
     // constantly poll the limit switches, resetting offset if needed
     resetOffsetFromLimitSwitch();

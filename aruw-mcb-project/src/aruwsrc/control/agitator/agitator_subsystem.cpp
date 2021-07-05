@@ -49,8 +49,8 @@ AgitatorSubsystem::AgitatorSubsystem(
     float jamDistanceTolerance,
     uint32_t jamTemporalTolerance)
     : aruwlib::control::Subsystem(drivers),
-      jamChecker(this, jamDistanceTolerance, jamTemporalTolerance),
       agitatorPositionPid(pidConfig),
+      jamChecker(this, jamDistanceTolerance, jamTemporalTolerance),
       gearRatio(agitatorGearRatio),
       jamLogicEnabled(jamLogicEnabled),
       agitatorMotor(
