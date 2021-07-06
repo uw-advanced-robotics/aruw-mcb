@@ -95,7 +95,7 @@ public:
     static constexpr aruwlib::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = aruwlib::motor::MOTOR3;
     static constexpr aruwlib::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS =
         aruwlib::can::CanBus::CAN_BUS1;
-    static constexpr bool HERO_WATERWHEEL_INVERTED = false;
+    static constexpr bool HERO_WATERWHEEL_INVERTED = true;
 
     // PID terms for the hero kicker
     static constexpr float PID_HERO_KICKER_P = 50000.0f;
@@ -120,7 +120,7 @@ public:
      * setpoint and current angle is > `JAM_DISTANCE_TOLERANCE_WATERWHEEL` radians for >=
      * `JAM_TEMPORAL_TOLERANCE_WATERWHEEL` ms;
      */
-    static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = aruwlib::algorithms::PI / 28.0f;
+    static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = aruwlib::algorithms::PI / 14.0f;
     static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
 #endif
 

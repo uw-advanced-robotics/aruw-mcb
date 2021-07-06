@@ -30,6 +30,7 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
       frictionWheels(frictionWheels)
 {
     modm_assert(drivers != nullptr, "FrictionWheelSpinRefLimitedCommand", "nullptr exception");
+    addSubsystemRequirement(frictionWheels);
 }
 
 void FrictionWheelSpinRefLimitedCommand::execute()

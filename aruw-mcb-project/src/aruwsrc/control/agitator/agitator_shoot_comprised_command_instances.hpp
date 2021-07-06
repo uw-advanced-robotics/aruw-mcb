@@ -67,9 +67,9 @@ class WaterwheelLoadCommand42mm : public aruwlib::control::setpoint::MoveUnjamCo
 {
 public:
     // Angle the command tries to move the agitator whenever it is scheduled
-    static constexpr float WATERWHEEL_42MM_CHANGE_ANGLE = -aruwlib::algorithms::PI / 7;
+    static constexpr float WATERWHEEL_42MM_CHANGE_ANGLE = aruwlib::algorithms::PI / 7;
     // Max angle the agitator will move while unjamming
-    static constexpr float WATERWHEEL_42MM_MAX_UNJAM_ANGLE = aruwlib::algorithms::PI / 21;
+    static constexpr float WATERWHEEL_42MM_MAX_UNJAM_ANGLE = aruwlib::algorithms::PI / 35;
     // Expected time for the water wheel to rotate the specified angle in ms
     static constexpr uint32_t WATERWHEEL_42MM_ROTATE_TIME = 1000;
     // How long the command should wait after reaching the target angle
@@ -120,10 +120,17 @@ public:
     // Override for heat limiting logic
     bool isReady() override;
 
+    void initialize() override;
+
+    static int getInitializeCount() { return initializeCount; }
+    static void resetInitializeCount() { initializeCount = 0; }
+
 private:
     aruwlib::Drivers* drivers;
 
     const bool heatLimiting;
+
+    static int initializeCount;
 };
 
 }  // namespace agitator
