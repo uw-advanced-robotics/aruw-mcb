@@ -21,6 +21,8 @@
 
 #include "aruwlib/drivers.hpp"
 
+#include "aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
+
 using namespace aruwlib::algorithms;
 
 namespace aruwsrc
@@ -58,37 +60,28 @@ LimitSwitchAgitatorSubsystem::LimitSwitchAgitatorSubsystem(
           temporalTolerance),
       limitSwitchPin(limitSwitchPin),
       digital(&drivers->digital),
-      ballsInTube(0)
+      ballsInTube(0),
+      prevInitializeCount(0)
 {
 }
 
 void LimitSwitchAgitatorSubsystem::refresh()
 {
-    if (agitatorIsCalibrated)
-    {
-        agitatorRunPositionPid();
-    }
-    else
-    {
-        calibrateHere();
-    }
+    AgitatorSubsystem::refresh();
 
-    const bool newLimitSwitchPressed = !digital->read(limitSwitchPin);
-    const float heat42 = drivers->refSerial.getRobotData().turret.heat42;
-
-    // Ball has been fired
-    if (heat42 - prevHeat42 > FIRING_HEAT_INCREASE_42 - 10)
+    // Ball has been removed from between waterwheel and kicker
+    if (agitator::ShootCommand42mm::getInitializeCount() != prevInitializeCount)
     {
         ballsInTube = std::max(0, ballsInTube - 1);
+        prevInitializeCount = agitator::ShootCommand42mm::getInitializeCount();
     }
 
     // Limit switch rising edge
+    const bool newLimitSwitchPressed = !digital->read(limitSwitchPin);
     if (newLimitSwitchPressed && !limitSwitchPressed)
     {
         ballsInTube++;
     }
-
-    prevHeat42 = heat42;
     limitSwitchPressed = newLimitSwitchPressed;
 }
 

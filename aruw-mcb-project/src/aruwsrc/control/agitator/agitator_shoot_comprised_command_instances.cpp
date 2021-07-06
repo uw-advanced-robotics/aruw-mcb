@@ -19,6 +19,8 @@
 
 #include "agitator_shoot_comprised_command_instances.hpp"
 
+using namespace aruwlib::control::setpoint;
+
 namespace aruwsrc
 {
 namespace agitator
@@ -79,17 +81,13 @@ WaterwheelLoadCommand42mm::WaterwheelLoadCommand42mm(
 
 bool WaterwheelLoadCommand42mm::isReady()
 {
-    return waterwheel->getBallsInTube() < BALLS_QUEUED_IN_TUBE;
+    return (waterwheel->getBallsInTube() < BALLS_QUEUED_IN_TUBE);
 }
 
 bool WaterwheelLoadCommand42mm::isFinished() const
 {
-    return waterwheel->getBallsInTube() >= BALLS_QUEUED_IN_TUBE ||
-           (!unjamSequenceCommencing &&
-            !comprisedCommandScheduler.isCommandScheduled(&agitatorRotateCommand)) ||
-           (unjamSequenceCommencing &&
-            !comprisedCommandScheduler.isCommandScheduled(&agitatorUnjamCommand)) ||
-           agitatorDisconnectFault;
+    return MoveUnjamComprisedCommand::isFinished() ||
+           (waterwheel->getBallsInTube() >= BALLS_QUEUED_IN_TUBE);
 }
 
 ShootCommand42mm::ShootCommand42mm(
@@ -107,16 +105,23 @@ ShootCommand42mm::ShootCommand42mm(
 {
 }
 
+int ShootCommand42mm::initializeCount = 0;
+
 bool ShootCommand42mm::isReady()
 {
     const auto &robotData = drivers->refSerial.getRobotData();
 
     // !(heat limiting data available && apply heat limiting && heat is over limit)
-    return !(
-        drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
-        (robotData.turret.heat42 + HEAT_LIMIT_BUFFER > robotData.turret.heatLimit42));
+    return MoveCommand::isReady() &&
+           !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
+             (robotData.turret.heat42 + HEAT_LIMIT_BUFFER > robotData.turret.heatLimit42));
 }
 
+void ShootCommand42mm::initialize()
+{
+    MoveCommand::initialize();
+    initializeCount++;
+}
 }  // namespace agitator
 
 }  // namespace aruwsrc

@@ -92,7 +92,7 @@ private:
     static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
 #endif
 
-    static constexpr float PID_P = 30.0f;
+    static constexpr float PID_P = 20.0f;
     static constexpr float PID_I = 0.0f;
     static constexpr float PID_D = 0.0f;
     static constexpr float PID_MAX_ERROR_SUM = 0.0f;

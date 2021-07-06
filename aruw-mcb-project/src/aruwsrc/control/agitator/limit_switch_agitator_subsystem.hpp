@@ -101,7 +101,7 @@ private:
 
     int ballsInTube;
 
-    float prevHeat42;
+    int prevInitializeCount;
 };
 
 }  // namespace agitator
