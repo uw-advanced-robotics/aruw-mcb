@@ -17,25 +17,25 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <aruwlib/DriversSingleton.hpp>
-#include <aruwlib/communication/gpio/digital.hpp>
-#include <aruwlib/control/command_scheduler.hpp>
-
-#include "aruwsrc/control/agitator/agitator_calibrate_command.hpp"
-#include "aruwsrc/control/agitator/agitator_shoot_comprised_command.hpp"
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "aruwsrc/control/engineer/EngineerWristCalibrateCommand.hpp"
-#include "aruwsrc/control/engineer/EngineerWristRotateCommand.hpp"
-#include "aruwsrc/control/engineer/EngineerWristSubsystem.hpp"
-#include "aruwsrc/control/engineer/TowSubsystem.hpp"
-#include "aruwsrc/control/engineer/extend_xaxis_command.hpp"
-#include "aruwsrc/control/engineer/grabber_subsystem.hpp"
-#include "aruwsrc/control/engineer/squeeze_grabber_command.hpp"
-#include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
-#include "aruwsrc/control/engineer/yaxis_command.hpp"
-#include "aruwsrc/control/engineer/yaxis_subsystem.hpp"
-
 #if defined(TARGET_ENGINEER)
+
+#include "aruwlib/communication/gpio/digital.hpp"
+#include "aruwlib/control/command_scheduler.hpp"
+#include "aruwlib/control/setpoint/commands/calibrate_command.hpp"
+#include "aruwlib/control/setpoint/commands/move_command.hpp"
+#include "aruwlib/drivers_singleton.hpp"
+
+#include "agitator/agitator_subsystem.hpp"
+#include "engineer/EngineerWristCalibrateCommand.hpp"
+#include "engineer/EngineerWristRotateCommand.hpp"
+#include "engineer/EngineerWristSubsystem.hpp"
+#include "engineer/extend_xaxis_command.hpp"
+#include "engineer/grabber_subsystem.hpp"
+#include "engineer/squeeze_grabber_command.hpp"
+#include "engineer/tow_subsystem.hpp"
+#include "engineer/xaxis_subsystem.hpp"
+#include "engineer/yaxis_command.hpp"
+#include "engineer/yaxis_subsystem.hpp"
 
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::agitator;
@@ -98,15 +98,15 @@ EngineerWristSubsystem wrist(drivers());
 YAxisSubsystem yAxis(drivers(), Y_AXIS_PIN);
 
 /* define commands ----------------------------------------------------------*/
-AgitatorCalibrateCommand reservoir17mmCalibrateCommand(&reservoir17mm);
-AgitatorRotateCommand reservoir17mmRotateCommand(
+aruwlib::control::setpoint::CalibrateCommand reservoir17mmCalibrateCommand(&reservoir17mm);
+aruwlib::control::setpoint::MoveCommand reservoir17mmRotateCommand(
     &reservoir17mm,
     2.0f * aruwlib::algorithms::PI / 3.0f,
     500,
     0,
     true);
-AgitatorCalibrateCommand reservoir42mmCalibrateCommand(&reservoir42mm);
-AgitatorRotateCommand reservoir42mmRotateCommand(
+aruwlib::control::setpoint::CalibrateCommand reservoir42mmCalibrateCommand(&reservoir42mm);
+aruwlib::control::setpoint::MoveCommand reservoir42mmRotateCommand(
     &reservoir42mm,
     2.0f * aruwlib::algorithms::PI / 3.0f,
     500,

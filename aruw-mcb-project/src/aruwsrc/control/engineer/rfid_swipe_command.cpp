@@ -19,7 +19,7 @@
 
 #include "rfid_swipe_command.hpp"
 
-#include <aruwlib/control/subsystem.hpp>
+#include "aruwlib/control/subsystem.hpp"
 
 #include "rfid_swipe_subsystem.hpp"
 
@@ -27,9 +27,7 @@ namespace aruwsrc
 {
 namespace engineer
 {
-RfidSwipeCommand::RfidSwipeCommand(RfidSwipeSubsystem* subsystem)
-    : Command(),
-      grabber(subsystem)
+RfidSwipeCommand::RfidSwipeCommand(RfidSwipeSubsystem* subsystem) : Command(), grabber(subsystem)
 {
     addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(grabber));
 }

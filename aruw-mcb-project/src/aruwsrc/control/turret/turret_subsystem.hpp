@@ -20,72 +20,140 @@
 #ifndef TURRET_SUBSYSTEM_HPP_
 #define TURRET_SUBSYSTEM_HPP_
 
-#include <aruwlib/algorithms/contiguous_float.hpp>
-#include <aruwlib/algorithms/linear_interpolation.hpp>
-#include <aruwlib/control/subsystem.hpp>
+#include "aruwlib/algorithms/contiguous_float.hpp"
+#include "aruwlib/algorithms/linear_interpolation.hpp"
+#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include <aruwlib/mock/DJIMotorMock.hpp>
+#include "aruwlib/mock/dji_motor_mock.hpp"
 #else
-#include <aruwlib/motor/dji_motor.hpp>
+#include "aruwlib/motor/dji_motor.hpp"
 #endif
 
-#include <modm/math/filter/pid.hpp>
+#include "aruwlib/util_macros.hpp"
 
-namespace aruwsrc
-{
-namespace turret
+#include "modm/math/filter/pid.hpp"
+
+namespace aruwsrc::control::turret
 {
 /**
  * Stores software necessary for interacting with two gimbals that control the pitch and
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
  */
-class TurretSubsystem : public aruwlib::control::Subsystem
+class TurretSubsystem : public aruwlib::control::turret::TurretSubsystemInterface
 {
 public:
     static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
     static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
     static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
 
+#if defined(TARGET_SOLDIER)
     static constexpr float TURRET_START_ANGLE = 90.0f;
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
-    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 20.0f;
+    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 30.0f;
+#elif defined(TARGET_HERO)
+    static constexpr float TURRET_START_ANGLE = 90.0f;
+    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 70.0f;
+    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 70.0f;
+    static constexpr float TURRET_PITCH_MIN_ANGLE = 65.0f;
+    static constexpr float TURRET_PITCH_MAX_ANGLE = 104.0f;
+#else
+    static constexpr float TURRET_START_ANGLE = 90.0f;
+    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
+    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
+    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
+    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 30.0f;
+#endif
 
-    explicit TurretSubsystem(aruwlib::Drivers* drivers);
+    /**
+     * Constructs a TurretSubsystem.
+     *
+     * @param[in] drivers Pointer to a drivers singleton object
+     * @param[in] limitYaw `true` if the yaw should be limited between `TURRET_YAW_MIN_ANGLE` and
+     *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
+     *      ring).
+     */
+    explicit TurretSubsystem(aruwlib::Drivers* drivers, bool limitYaw = true);
 
-    mockable void initialize() override;
+    inline bool yawLimited() const { return limitYaw; }
 
-    mockable void refresh() override;
+    void initialize() override;
+
+    void refresh() override;
+
+    const char* getName() override { return "Turret"; }
+
+    void onHardwareTestStart() override;
 
     /**
      * @return `true` if both pitch and yaw gimbals are connected.
      */
-    bool isTurretOnline() const;
+    inline bool isOnline() const override
+    {
+        return yawMotor.isMotorOnline() && pitchMotor.isMotorOnline();
+    }
 
-    int32_t getYawVelocity() const;
-    int32_t getPitchVelocity() const;
+    /**
+     * @return The wrapped yaw angle of the actual yaw gimbal, in degrees
+     */
+    inline const aruwlib::algorithms::ContiguousFloat& getCurrentYawValue() const override
+    {
+        return currYawAngle;
+    }
+
+    /**
+     * @return The wrapped pitch angle of the actual pitch gimbal, in degrees.
+     */
+    inline const aruwlib::algorithms::ContiguousFloat& getCurrentPitchValue() const override
+    {
+        return currPitchAngle;
+    }
+
+    /**
+     * @return The yaw target as set by the user in `setYawSetpoint`.
+     */
+    inline float getYawSetpoint() const override { return yawTarget.getValue(); }
+
+    /**
+     * @return The pitch target as set by the user in `setPitchSetpoint`.
+     */
+    inline float getPitchSetpoint() const override { return pitchTarget.getValue(); }
+
+    /**
+     * @return The velocity, in degrees / second, of the turret's pitch yaw
+     */
+    inline float getYawVelocity() const override { return getVelocity(yawMotor); }
+
+    /**
+     * @return The velocity, in degrees / second, of the turret's pitch motor
+     */
+    inline float getPitchVelocity() const override { return getVelocity(pitchMotor); }
+
+    /**
+     * Set a target angle in chassis frame, the angle is accordingly limited.
+     * Note that since there is no controller in this subsystem, this target
+     * angle merely acts as a safe way to set angles when using a position controller.
+     */
+    void setYawSetpoint(float target) override;
+
+    /**
+     * @see setYawSetpoint
+     */
+    void setPitchSetpoint(float target) override;
 
     /**
      * @return An angle between [-180, 180] that is the angle difference of the yaw gimbal
-     *      from center (90 degrees).
+     *      from center (90 degrees), in degrees.
      */
-    mockable float getYawAngleFromCenter() const;
-    /**
-     * @return An angle between [-180, 180] that is the angle difference of the pitch gimbal
-     *      from center (90 degrees).
-     */
-    float getPitchAngleFromCenter() const;
+    float getYawAngleFromCenter() const override;
 
     /**
-     * @return The wrapped yaw angle of the actual yaw gimbal.
+     * @return An angle between [-180, 180] that is the angle difference of the pitch gimbal
+     *      from center (90 degrees), in degrees.
      */
-    const aruwlib::algorithms::ContiguousFloat& getYawAngle() const;
-    /**
-     * @return The wrapped pitch angle of the actual pitch gimbal.
-     */
-    const aruwlib::algorithms::ContiguousFloat& getPitchAngle() const;
+    float getPitchAngleFromCenter() const override;
 
     /**
      * Attempts to set desired yaw output to the passed in value. If the turret is out of
@@ -93,57 +161,42 @@ public:
      *
      * @param[in] out The desired yaw output, limited to `[-30000, 30000]`.
      */
-    void setYawMotorOutput(float out);
+    mockable void setYawMotorOutput(float out);
+
     /**
      * Attempts to set desired pitch output to the passed in value. If the turret is out of
      * bounds, the output is limited.
      *
      * @param[in] out The desired pitch output, limited to `[-30000, 30000]`.
      */
-    void setPitchMotorOutput(float out);
+    mockable void setPitchMotorOutput(float out);
 
     /**
      * Calculates a yaw output that uses the desired chassis rotation as a feed forward gain.
      *
      * @param[in] desiredChassisRotation The chassis rotation in RPM (before gearing).
      */
-    float yawFeedForwardCalculation(float desiredChassisRotation);
-
-    /**
-     * Set a target angle in chassis frame, the angle is accordingly limited.
-     * Note that since there is no controller in this subsystem, this target
-     * angle merely acts as a safe way to set angles when using a position controller.
-     */
-    void setYawTarget(float target);
-    /**
-     * @see setYawTarget
-     */
-    void setPitchTarget(float target);
-
-    /**
-     * @return The yaw target as set by the user in `setYawTarget`.
-     */
-    float getYawTarget() const;
-    /**
-     * @return The pitch target as set by the user in `setPitchTarget`.
-     */
-    float getPitchTarget() const;
+    mockable float yawFeedForwardCalculation(float desiredChassisRotation);
 
     /**
      * Reads the raw pitch and yaw angles and updates the wrapped versions of
      * these angles.
      */
-    void updateCurrentTurretAngles();
-
-    void runHardwareTests() override;
-
-    const char* getName() override { return "Turret"; }
+    mockable void updateCurrentTurretAngles();
 
 private:
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 8160;
+#if defined(TARGET_SOLDIER)
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
+#elif defined(TARGET_HERO)
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 3000;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1418;
+#else
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
+#endif
 
-    static constexpr float FEED_FORWARD_KP = 0.0f;  // TODO tune this value
+    static constexpr float FEED_FORWARD_KP = 11800.0f;
     static constexpr float FEED_FORWARD_MAX_OUTPUT = 20000.0f;
 
     uint32_t prevUpdateCounterChassisRotateDerivative = 0;
@@ -157,10 +210,18 @@ private:
     aruwlib::algorithms::ContiguousFloat yawTarget;
     aruwlib::algorithms::ContiguousFloat pitchTarget;
 
+    bool limitYaw;
+
     void updateCurrentYawAngle();
     void updateCurrentPitchAngle();
 
-    int32_t getVelocity(const aruwlib::motor::DjiMotor& motor) const;
+    /**
+     * @return velocity of 6020 motor, in degrees / sec
+     */
+    static inline float getVelocity(const aruwlib::motor::DjiMotor& motor)
+    {
+        return 360 / 60 * motor.getShaftRPM();
+    }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
@@ -175,8 +236,6 @@ private:
 
 };  // class TurretSubsystem
 
-}  // namespace turret
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::turret
 
 #endif  // TURRET_SUBSYSTEM_HPP_

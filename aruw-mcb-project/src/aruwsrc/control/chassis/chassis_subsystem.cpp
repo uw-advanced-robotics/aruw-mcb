@@ -23,8 +23,9 @@
 
 #include "chassis_subsystem.hpp"
 
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/communication/remote.hpp>
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/communication/remote.hpp"
+#include "aruwlib/drivers.hpp"
 
 using namespace aruwlib;
 using namespace aruwlib::algorithms;
@@ -53,6 +54,7 @@ void ChassisSubsystem::refresh()
     updateMotorRpmPid(&rightFrontVelocityPid, &rightFrontMotor, *desiredWheelRPM[RF]);
     updateMotorRpmPid(&leftBackVelocityPid, &leftBackMotor, *desiredWheelRPM[LB]);
     updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, *desiredWheelRPM[RB]);
+    chassisPowerLimiter.performPowerLimiting(motors, MODM_ARRAY_SIZE(motors));
 }
 
 void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
@@ -90,6 +92,8 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
         -y - x + chassisRotateTranslated * rightBackRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
+
+    desiredRotation = r;
 }
 
 void ChassisSubsystem::updateMotorRpmPid(
@@ -157,11 +161,6 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-void ChassisSubsystem::runHardwareTests()
-{
-    // TODO
-}
-
 modm::Matrix<float, 3, 1> ChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
     return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
@@ -198,6 +197,9 @@ void ChassisSubsystem::getVelocityWorldRelative(
     transform[2][2] = 1;
     chassisRelativeVelocity = transform * chassisRelativeVelocity;
 }
+
+void ChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
+
 }  // namespace chassis
 
 }  // namespace aruwsrc

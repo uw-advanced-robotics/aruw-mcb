@@ -1,12 +1,11 @@
 #ifndef ENGINEER_WRIST_SUBSYSTEM_HPP_
 #define ENGINEER_WRIST_SUBSYSTEM_HPP_
 
-#include <aruwlib/control/subsystem.hpp>
-#include <aruwlib/motor/dji_motor.hpp>
-
-#include "aruwsrc/algorithms/turret_pid.hpp"
-
-#include "util_macros.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
+#include "aruwlib/control/subsystem.hpp"
+#include "aruwlib/motor/dji_motor.hpp"
+#include "aruwlib/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -30,9 +29,18 @@ public:
 
     mockable void setWristAngle(float newAngle);
 
-    mockable_inline float getWristAngle() const;
+    mockable inline float getWristAngle() const
+    {
+        if (!wristIsCalibrated)
+        {
+            return 0.0f;
+        }
+        return ((getUncalibratedWristAngleLeft() - wristCalibratedAngleLeft) +
+                (getUncalibratedWristAngleRight() - wristCalibratedAngleRight)) /
+               2.0f;
+    }
 
-    mockable_inline float getWristDesiredAngle() const { return desiredWristAngle; }
+    mockable inline float getWristDesiredAngle() const { return desiredWristAngle; }
 
 private:
     static constexpr float WRIST_GEAR_RATIO = 19.0f;
@@ -47,8 +55,8 @@ private:
     aruwlib::motor::DjiMotor leftMotor;
     aruwlib::motor::DjiMotor rightMotor;
 
-    aruwsrc::algorithms::TurretPid leftPositionPid;
-    aruwsrc::algorithms::TurretPid rightPositionPid;
+    aruwlib::algorithms::SmoothPid leftPositionPid;
+    aruwlib::algorithms::SmoothPid rightPositionPid;
 
     // Desired angle in radian, unwrapped
     float desiredWristAngle;
@@ -62,8 +70,20 @@ private:
 
     void wristRunPositionPid();
 
-    inline float getUncalibratedWristAngleLeft() const;
-    inline float getUncalibratedWristAngleRight() const;
+    // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
+    inline float getUncalibratedWristAngleLeft() const
+    {
+        return (2.0f * aruwlib::algorithms::PI /
+                static_cast<float>(aruwlib::motor::DjiMotor::ENC_RESOLUTION)) *
+               leftMotor.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
+    }
+
+    inline float getUncalibratedWristAngleRight() const
+    {
+        return (2.0f * aruwlib::algorithms::PI /
+                static_cast<float>(aruwlib::motor::DjiMotor::ENC_RESOLUTION)) *
+               rightMotor.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
+    }
 };
 }  // namespace engineer
 }  // namespace aruwsrc

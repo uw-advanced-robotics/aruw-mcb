@@ -1,7 +1,7 @@
 #ifndef YAXIS_COMMAND_HPP_
 #define YAXIS_COMMAND_HPP_
 
-#include <aruwlib/control/command.hpp>
+#include "aruwlib/control/command.hpp"
 
 #include "yaxis_subsystem.hpp"
 

@@ -17,14 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <aruwlib/DriversSingleton.hpp>
-#include <aruwlib/control/CommandMapper.hpp>
-#include <aruwlib/control/HoldCommandMapping.hpp>
-#include <aruwlib/control/HoldRepeatCommandMapping.hpp>
-#include <aruwlib/control/PressCommandMapping.hpp>
-#include <aruwlib/control/ToggleCommandMapping.hpp>
+#if defined(TARGET_OLD_SOLDIER)
 
-#include "agitator/agitator_calibrate_command.hpp"
+#include "aruwlib/control/command_mapper.hpp"
+#include "aruwlib/control/hold_command_mapping.hpp"
+#include "aruwlib/control/hold_repeat_command_mapping.hpp"
+#include "aruwlib/control/press_command_mapping.hpp"
+#include "aruwlib/control/setpoint/commands/calibrate_command.hpp"
+#include "aruwlib/control/toggle_command_mapping.hpp"
+#include "aruwlib/drivers_singleton.hpp"
+
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
@@ -32,17 +34,17 @@
 #include "chassis/chassis_subsystem.hpp"
 #include "chassis/wiggle_drive_command.hpp"
 #include "hopper-cover/hopper_subsystem.hpp"
-#include "hopper-cover/open_hopper_command.hpp"
+#include "hopper-cover/open_hopper_command_old.hpp"
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
-#if defined(TARGET_OLD_SOLDIER)
-
+using namespace aruwlib::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
-using namespace aruwsrc::turret;
+using namespace aruwsrc::control::turret;
 using namespace aruwlib::control;
+using namespace aruwsrc::control;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::Remote;
 
@@ -54,9 +56,7 @@ using aruwlib::Remote;
  */
 aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
 
-namespace aruwsrc
-{
-namespace control
+namespace old_soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
 TurretSubsystem turret(drivers());
@@ -91,9 +91,9 @@ WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
 
 TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
 
-AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
+CalibrateCommand agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand agitatorShootFastCommand(drivers(), &agitator);
+ShootFastComprisedCommand17MM agitatorShootFastCommand(drivers(), &agitator);
 
 OpenHopperCommand openHopperCommand(&hopperCover);
 
@@ -159,18 +159,18 @@ void registerOldSoldierIoMappings(aruwlib::Drivers *drivers)
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
 }
+}  // namespace old_soldier_control
 
+namespace aruwsrc::control
+{
 void initSubsystemCommands(aruwlib::Drivers *drivers)
 {
-    initializeSubsystems();
-    registerOldSoldierSubsystems(drivers);
-    setDefaultOldSoldierCommands(drivers);
-    startOldSoldierCommands(drivers);
-    registerOldSoldierIoMappings(drivers);
+    old_soldier_control::initializeSubsystems();
+    old_soldier_control::registerOldSoldierSubsystems(drivers);
+    old_soldier_control::setDefaultOldSoldierCommands(drivers);
+    old_soldier_control::startOldSoldierCommands(drivers);
+    old_soldier_control::registerOldSoldierIoMappings(drivers);
 }
-
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control
 
 #endif

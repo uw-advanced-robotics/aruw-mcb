@@ -21,28 +21,26 @@
 /* hosted environment (simulator) includes --------------------------------- */
 #include <iostream>
 
-#include <aruwlib/communication/tcp-server/TCPServer.hpp>
-#include <aruwlib/motor/motorsim/sim_handler.hpp>
+#include "aruwlib/communication/tcp-server/tcp_server.hpp"
+#include "aruwlib/motor/motorsim/sim_handler.hpp"
 #endif
 
-#include <aruwlib/rm-dev-board-a/board.hpp>
-#include <modm/architecture/interface/delay.hpp>
+#include "aruwlib/rm-dev-board-a/board.hpp"
+
+#include "modm/architecture/interface/delay.hpp"
 
 /* arch includes ------------------------------------------------------------*/
-#include <aruwlib/architecture/periodic_timer.hpp>
-#include <aruwlib/architecture/profiler.hpp>
+#include "aruwlib/architecture/periodic_timer.hpp"
+#include "aruwlib/architecture/profiler.hpp"
 
 /* communication includes ---------------------------------------------------*/
-#include <aruwlib/DriversSingleton.hpp>
-#include <aruwlib/control/SchedulerTerminalHandler.hpp>
-#include <aruwlib/display/sh1106.hpp>
-#include <aruwlib/motor/DjiMotorTerminalSerialHandler.hpp>
+#include "aruwlib/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
-#include <aruwlib/errors/create_errors.hpp>
+#include "aruwlib/errors/create_errors.hpp"
 
 /* control includes ---------------------------------------------------------*/
-#include <aruwlib/architecture/clock.hpp>
+#include "aruwlib/architecture/clock.hpp"
 
 #include "aruwsrc/control/robot_control.hpp"
 
@@ -50,6 +48,7 @@ using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/
 aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
+aruwlib::arch::PeriodicMilliTimer sendXavierTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -88,6 +87,13 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
+        if (sendXavierTimeout.execute())
+        {
+            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            // TODO try faster baude rate so we can send more frequently (currently mcb's serial
+            // buffers are overflowing if you try and send faster than 3 ms).
+        }
+
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
@@ -113,11 +119,14 @@ static void initializeIo(aruwlib::Drivers *drivers)
     drivers->remote.initialize();
     drivers->mpu6500.init();
     drivers->refSerial.initialize();
-    drivers->xavierSerial.initialize();
     drivers->terminalSerial.initialize();
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
+    drivers->xavierSerial.initializeCV();
+#ifdef TARGET_SOLDIER
+    drivers->imuRxHandler.init();
+#endif
 }
 
 static void updateIo(aruwlib::Drivers *drivers)
@@ -127,9 +136,9 @@ static void updateIo(aruwlib::Drivers *drivers)
 #endif
 
     drivers->canRxHandler.pollCanData();
-    drivers->xavierSerial.updateSerial();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
+    drivers->xavierSerial.updateSerial();
 }

@@ -20,8 +20,8 @@
 #ifndef RFID_SWIPE_SUBSYSTEM_
 #define RFID_SWIPE_SUBSYSTEM_
 
-#include <aruwlib/communication/gpio/digital.hpp>
-#include <aruwlib/control/subsystem.hpp>
+#include "aruwlib/communication/gpio/digital.hpp"
+#include "aruwlib/control/subsystem.hpp"
 
 namespace aruwsrc
 {

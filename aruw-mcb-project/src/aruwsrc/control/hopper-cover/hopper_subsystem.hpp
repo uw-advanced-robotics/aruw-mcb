@@ -26,10 +26,12 @@
 #ifndef __OPEN_HOPPER_SUBSYSTEM__
 #define __OPEN_HOPPER_SUBSYSTEM__
 
-#include <aruwlib/control/command_scheduler.hpp>
-#include <aruwlib/control/subsystem.hpp>
-#include <aruwlib/motor/servo.hpp>
-#include <modm/math/filter/pid.hpp>
+#include "aruwlib/control/command_scheduler.hpp"
+#include "aruwlib/control/subsystem.hpp"
+#include "aruwlib/motor/servo.hpp"
+#include "aruwlib/util_macros.hpp"
+
+#include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc
 {
@@ -73,16 +75,20 @@ public:
     /*
      * set servo to the open angle
      */
-    void setOpen();
+    mockable void setOpen();
 
     /*
      * set servo to the close angle
      */
-    void setClose();
+    mockable void setClose();
 
     void refresh() override;
 
     void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
 
     const char *getName() override { return "Hopper"; }
 
@@ -98,6 +104,8 @@ private:
      * return the angle defined as close as a PWM value
      */
     float getClosePWM();
+
+    uint64_t testTime;
 };
 
 }  // namespace control

@@ -20,19 +20,18 @@
 #ifndef __FRICTION_WHEEL_SUBSYSTEM_HPP__
 #define __FRICTION_WHEEL_SUBSYSTEM_HPP__
 
-#include <aruwlib/algorithms/ramp.hpp>
-#include <aruwlib/control/command_scheduler.hpp>
-#include <aruwlib/control/subsystem.hpp>
+#include "aruwlib/algorithms/ramp.hpp"
+#include "aruwlib/control/subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include <aruwlib/mock/DJIMotorMock.hpp>
+#include "aruwlib/mock/dji_motor_mock.hpp"
 #else
-#include <aruwlib/motor/dji_motor.hpp>
+#include "aruwlib/motor/dji_motor.hpp"
 #endif
 
-#include <modm/math/filter/pid.hpp>
+#include "aruwlib/util_macros.hpp"
 
-#include "util_macros.hpp"
+#include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc
 {
@@ -79,15 +78,23 @@ public:
 
     void runHardwareTests() override;
 
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
+
     const char *getName() override { return "Friction Wheel"; }
 
 private:
     // speed of ramp when you set a new desired ramp speed [rpm / ms]
+#ifdef TARGET_SENTINEL
+    static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
+#else
     static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
+#endif
 
-    static constexpr float PID_P = 30.0f;
+    static constexpr float PID_P = 20.0f;
     static constexpr float PID_I = 0.0f;
-    static constexpr float PID_D = 5.0f;
+    static constexpr float PID_D = 0.0f;
     static constexpr float PID_MAX_ERROR_SUM = 0.0f;
     static constexpr float PID_MAX_OUTPUT = 16000.0f;
 

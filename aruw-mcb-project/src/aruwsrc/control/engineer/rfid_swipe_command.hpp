@@ -20,7 +20,7 @@
 #ifndef RFID_SWIPE_COMMAND_HPP_
 #define RFID_SWIPE_COMMAND_HPP_
 
-#include <aruwlib/control/command.hpp>
+#include "aruwlib/control/command.hpp"
 
 namespace aruwsrc
 {

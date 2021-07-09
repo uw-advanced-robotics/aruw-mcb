@@ -19,7 +19,7 @@
 
 #include "xaxis_subsystem.hpp"
 
-#include <aruwlib/Drivers.hpp>
+#include "aruwlib/drivers.hpp"
 
 using aruwlib::Drivers;
 
@@ -37,8 +37,17 @@ bool XAxisSubsystem::isExtended() const { return extended; }
 
 void XAxisSubsystem::runHardwareTests()
 {
-    // TODO
+    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+        this->setHardwareTestsComplete();
 }
+
+void XAxisSubsystem::onHardwareTestStart()
+{
+    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    this->setExtended(!isExtended());
+}
+
+void XAxisSubsystem::onHardwareTestComplete() { this->setExtended(!isExtended()); }
 
 }  // namespace engineer
 

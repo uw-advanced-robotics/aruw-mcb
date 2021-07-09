@@ -19,11 +19,13 @@
 
 #include "chassis_autorotate_command.hpp"
 
-#include <aruwlib/Drivers.hpp>
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/communication/remote.hpp>
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/communication/remote.hpp"
+#include "aruwlib/drivers.hpp"
 
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+
+#include "chassis_subsystem.hpp"
 
 using aruwlib::Drivers;
 
@@ -31,15 +33,35 @@ namespace aruwsrc
 {
 namespace chassis
 {
+ChassisAutorotateCommand::ChassisAutorotateCommand(
+    aruwlib::Drivers* drivers,
+    ChassisSubsystem* chassis,
+    const aruwlib::control::turret::TurretSubsystemInterface* turret)
+    : drivers(drivers),
+      chassis(chassis),
+      turret(turret)
+{
+    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+}
+
 void ChassisAutorotateCommand::initialize() {}
 
 void ChassisAutorotateCommand::execute()
 {
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
-    float chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
-        turret->getYawAngleFromCenter(),
-        CHASSIS_AUTOROTATE_PID_KP);
+    float chassisRotationDesiredWheelspeed;
+    if (turret->isOnline())
+    {
+        chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
+            turret->getYawAngleFromCenter(),
+            CHASSIS_AUTOROTATE_PID_KP);
+    }
+    else
+    {
+        chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput() *
+                                           ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    }
 
     // what we will multiply x and y speed by to take into account rotation
     float rTranslationalGain =
@@ -56,6 +78,12 @@ void ChassisAutorotateCommand::execute()
                                           -rTranslationalGain,
                                           rTranslationalGain) *
                                       ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+
+    // Rotate X and Y depending on turret angle
+    aruwlib::algorithms::rotateVector(
+        &chassisXDesiredWheelspeed,
+        &chassisYDesiredWheelspeed,
+        -aruwlib::algorithms::degreesToRadians(turret->getYawAngleFromCenter()));
 
     chassis->setDesiredOutput(
         chassisXDesiredWheelspeed,

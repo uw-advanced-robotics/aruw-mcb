@@ -1,6 +1,6 @@
 #include "EngineerWristSubsystem.hpp"
 
-#include <aruwlib/algorithms/math_user_utils.hpp>
+#include "aruwlib/algorithms/math_user_utils.hpp"
 
 using aruwlib::algorithms::limitVal;
 
@@ -60,17 +60,6 @@ void EngineerWristSubsystem::setWristAngle(float newAngle)
     desiredWristAngle = limitVal<float>(newAngle, MIN_WRIST_ANGLE, MAX_WRIST_ANGLE);
 }
 
-float EngineerWristSubsystem::getWristAngle() const
-{
-    if (!wristIsCalibrated)
-    {
-        return 0.0f;
-    }
-    return ((getUncalibratedWristAngleLeft() - wristCalibratedAngleLeft) +
-            (getUncalibratedWristAngleRight() - wristCalibratedAngleRight)) /
-           2.0f;
-}
-
 bool EngineerWristSubsystem::wristCalibrateHere()
 {
     if (!leftMotor.isMotorOnline() || !rightMotor.isMotorOnline())
@@ -92,30 +81,15 @@ void EngineerWristSubsystem::wristRunPositionPid()
         return;
     }
 
-    leftPositionPid.runController(
+    leftPositionPid.runControllerDerivateError(
         desiredWristAngle - getUncalibratedWristAngleLeft() - wristCalibratedAngleLeft,
         leftMotor.getShaftRPM());
-    rightPositionPid.runController(
+    rightPositionPid.runControllerDerivateError(
         desiredWristAngle - getUncalibratedWristAngleRight() - wristCalibratedAngleRight,
         rightMotor.getShaftRPM());
 
     leftMotor.setDesiredOutput(leftPositionPid.getOutput());
     rightMotor.setDesiredOutput(rightPositionPid.getOutput());
-}
-
-// position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
-float EngineerWristSubsystem::getUncalibratedWristAngleLeft() const
-{
-    return (2.0f * aruwlib::algorithms::PI /
-            static_cast<float>(aruwlib::motor::DjiMotor::ENC_RESOLUTION)) *
-           leftMotor.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
-}
-
-float EngineerWristSubsystem::getUncalibratedWristAngleRight() const
-{
-    return (2.0f * aruwlib::algorithms::PI /
-            static_cast<float>(aruwlib::motor::DjiMotor::ENC_RESOLUTION)) *
-           rightMotor.getEncoderUnwrapped() / WRIST_GEAR_RATIO;
 }
 }  // namespace engineer
 }  // namespace aruwsrc

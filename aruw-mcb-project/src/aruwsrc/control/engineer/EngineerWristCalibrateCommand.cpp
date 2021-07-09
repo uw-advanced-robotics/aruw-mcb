@@ -1,6 +1,6 @@
 #include "EngineerWristCalibrateCommand.hpp"
 
-#include <aruwlib/control/subsystem.hpp>
+#include "aruwlib/control/subsystem.hpp"
 
 #include "EngineerWristSubsystem.hpp"
 

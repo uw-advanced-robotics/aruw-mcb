@@ -1,8 +1,8 @@
 #include "yaxis_subsystem.hpp"
 
-#include <aruwlib/Drivers.hpp>
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/architecture/clock.hpp>
+#include "aruwlib/Drivers.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/architecture/clock.hpp"
 
 namespace aruwsrc
 {
@@ -78,7 +78,7 @@ void YAxisSubsystem::refresh()
         yAxisRamp.update(increment);
         // Update the PID controller.
         currentPosition = getPosition();
-        yAxisPositionPid.runController(
+        yAxisPositionPid.runControllerDerivateError(
             yAxisRamp.getValue() - currentPosition,
             yAxisMotor.getShaftRPM());
     }

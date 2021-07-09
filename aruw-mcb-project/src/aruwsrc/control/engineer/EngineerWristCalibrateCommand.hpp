@@ -1,7 +1,7 @@
 #ifndef ENGINEER_WRIST_CALIBRATE_COMMAND_HPP_
 #define ENGINEER_WRIST_CALIBRATE_COMMAND_HPP_
 
-#include <aruwlib/control/command.hpp>
+#include "aruwlib/control/command.hpp"
 
 namespace aruwsrc
 {

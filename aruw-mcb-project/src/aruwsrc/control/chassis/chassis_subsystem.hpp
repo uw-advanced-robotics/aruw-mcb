@@ -20,20 +20,23 @@
 #ifndef CHASSIS_SUBSYSTEM_HPP_
 #define CHASSIS_SUBSYSTEM_HPP_
 
-#include <aruwlib/algorithms/extended_kalman.hpp>
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/control/subsystem.hpp>
+#include "aruwlib/algorithms/extended_kalman.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/communication/gpio/analog.hpp"
+#include "aruwlib/control/chassis/chassis_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include <aruwlib/mock/DJIMotorMock.hpp>
+#include "aruwlib/mock/dji_motor_mock.hpp"
 #else
-#include <aruwlib/motor/dji_motor.hpp>
+#include "aruwlib/motor/dji_motor.hpp"
 #endif
 
-#include <modm/math/filter/pid.hpp>
-#include <modm/math/matrix.hpp>
+#include "aruwlib/control/chassis/power_limiter.hpp"
+#include "aruwlib/motor/m3508_constants.hpp"
+#include "aruwlib/util_macros.hpp"
 
-#include "util_macros.hpp"
+#include "modm/math/filter/pid.hpp"
+#include "modm/math/matrix.hpp"
 
 namespace aruwsrc
 {
@@ -50,7 +53,7 @@ namespace chassis
  *     - In other words, 'x' is the bow/stern and 'y' is starboard/
  *       port in boat terms.
  */
-class ChassisSubsystem : public aruwlib::control::Subsystem
+class ChassisSubsystem : public aruwlib::control::chassis::ChassisSubsystemInterface
 {
 public:
     /**
@@ -65,15 +68,27 @@ public:
      */
     static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
+    /**
+     * Pin to use for current sensing
+     */
+    static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S;
+
+    /// @see power_limiter.hpp for what these mean
+    static constexpr float MAX_ENERGY_BUFFER = 60.0f;
+    static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 40.0f;
+    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 5;
+    static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
+    static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
+
 private:
 #if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
     /**
      * Velocity PID gains and constants.
      */
-    const float VELOCITY_PID_KP = 20.0f;
-    const float VELOCITY_PID_KI = 0.0f;
-    const float VELOCITY_PID_KD = 0.0f;
-    const float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
+    static constexpr float VELOCITY_PID_KP = 20.0f;
+    static constexpr float VELOCITY_PID_KI = 0.0f;
+    static constexpr float VELOCITY_PID_KD = 0.0f;
+    static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
     /**
      * This max output is measured in the c620 robomaster translated current.
      * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
@@ -99,7 +114,7 @@ private:
      *
      * The P gain is specified by the user and thus is not specified below.
      */
-    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 3000;
     /**
      * Derivative term used in chassis PID.
      */
@@ -107,16 +122,16 @@ private:
     /**
      * Derivative max term.
      */
-    static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 3500.0f;
     /**
      * The maximum revolve error before we start using the derivative term.
      */
-    static const int MIN_ERROR_ROTATION_D = 0;
+    static constexpr int MIN_ERROR_ROTATION_D = 0;
 
     /**
      * The maximum output allowed out of the rotation PID controller.
      */
-    static constexpr float MAX_OUTPUT_ROTATION_PID = 5000.0f;
+    static constexpr float MAX_OUTPUT_ROTATION_PID = 4000.0f;
 
     // mechanical chassis constants, all in m
     /**
@@ -145,22 +160,22 @@ private:
     /**
      * Velocity PID gains and constants.
      */
-    static constexpr float VELOCITY_PID_KP = 0.0f;
+    static constexpr float VELOCITY_PID_KP = 20.0f;
     static constexpr float VELOCITY_PID_KI = 0.0f;
     static constexpr float VELOCITY_PID_KD = 0.0f;
     static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-    static constexpr float VELOCITY_PID_MAX_OUTPUT = 0.0f;
+    static constexpr float VELOCITY_PID_MAX_OUTPUT = 16000.0f;
 
     /**
      * Rotation PID gains and constants.
      * No i, max error sum the same as `MAX_WHEEL_SPEED_SINGLE_MOTOR`, proportional
      * gain specified by user.
      */
-    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 3000.0;
     /**
      * Derivative term used in chassis PID.
      */
-    static constexpr float CHASSIS_REVOLVE_PID_KD = 0.0;
+    static constexpr float CHASSIS_REVOLVE_PID_KD = 500.0;
     /**
      * The maximum revolve error before we start using the derivative term.
      */
@@ -172,7 +187,7 @@ private:
     /**
      * Derivative max term.
      */
-    static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 3500.0f;
     // mechanical chassis constants
     /**
      * Radius of the wheels.
@@ -307,6 +322,8 @@ public:
 
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
+    float desiredRotation = 0.0f;
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     aruwlib::mock::DjiMotorMock leftFrontMotor;
@@ -323,14 +340,19 @@ private:
     aruwlib::motor::DjiMotor rightBackMotor;
 #endif
 
+    aruwlib::motor::DjiMotor* motors[4];
+    aruwlib::control::chassis::PowerLimiter chassisPowerLimiter;
+    const aruwlib::motor::M3508Constants motorConstants;
+
 public:
     ChassisSubsystem(
         aruwlib::Drivers* drivers,
         aruwlib::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         aruwlib::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         aruwlib::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        aruwlib::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID)
-        : aruwlib::control::Subsystem(drivers),
+        aruwlib::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
+        aruwlib::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN)
+        : aruwlib::control::chassis::ChassisSubsystemInterface(drivers),
           leftFrontVelocityPid(
               VELOCITY_PID_KP,
               VELOCITY_PID_KI,
@@ -369,7 +391,21 @@ public:
               CAN_BUS_MOTORS,
               false,
               "right front drive motor"),
-          rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor")
+          rightBackMotor(
+              drivers,
+              rightBackMotorId,
+              CAN_BUS_MOTORS,
+              false,
+              "right back drive motor"),
+          chassisPowerLimiter(
+              drivers,
+              currentPin,
+              MAX_ENERGY_BUFFER,
+              ENERGY_BUFFER_LIMIT_THRESHOLD,
+              ENERGY_BUFFER_CRIT_THRESHOLD,
+              POWER_CONSUMPTION_THRESHOLD,
+              CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
+              motorConstants)
     {
         constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
                                 ? 1
@@ -387,7 +423,16 @@ public:
         wheelVelToChassisVelMat[2][2] = 1.0 / A;
         wheelVelToChassisVelMat[2][3] = 1.0 / A;
         wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
+
+        motors[LF] = &leftFrontMotor;
+        motors[RF] = &rightFrontMotor;
+        motors[LB] = &leftBackMotor;
+        motors[RB] = &rightBackMotor;
     }
+
+    inline int getNumChassisMotors() const override { return 4; }
+
+    inline const aruwlib::motor::DjiMotor* const* getChassisMotorArray() const { return motors; }
 
     void initialize() override;
 
@@ -415,7 +460,7 @@ public:
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    float chassisSpeedRotationPID(float currentAngleError, float kp);
+    mockable float chassisSpeedRotationPID(float currentAngleError, float kp);
 
     void refresh() override;
 
@@ -423,9 +468,7 @@ public:
      * @return A number between 0 and 1 that is the ratio between the rotationRpm and
      *      the max rotation speed.
      */
-    float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
-
-    void runHardwareTests() override;
+    mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
     const char* getName() override { return "Chassis"; }
 
@@ -453,6 +496,18 @@ public:
     void getVelocityWorldRelative(
         modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
         float chassisHeading) const;
+
+    inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
+    inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
+    inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
+    inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
+
+    void onHardwareTestStart() override;
+
+    /**
+     * @return the desired rotation component of the chassis speed controller, in shft RPM.
+     */
+    mockable float getDesiredRotation() const { return desiredRotation; }
 
 private:
     /**

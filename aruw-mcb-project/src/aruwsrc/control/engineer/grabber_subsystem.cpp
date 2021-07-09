@@ -19,7 +19,7 @@
 
 #include "grabber_subsystem.hpp"
 
-#include <aruwlib/Drivers.hpp>
+#include "aruwlib/drivers.hpp"
 
 namespace aruwsrc
 {
@@ -35,8 +35,17 @@ bool GrabberSubsystem::isSqueezed() const { return isGrabberSqueezed; }
 
 void GrabberSubsystem::runHardwareTests()
 {
-    // TODO
+    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+        this->setHardwareTestsComplete();
 }
+
+void GrabberSubsystem::onHardwareTestStart()
+{
+    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    this->setSqueezed(!isGrabberSqueezed);
+}
+
+void GrabberSubsystem::onHardwareTestComplete() { this->setSqueezed(!isGrabberSqueezed); }
 
 }  // namespace engineer
 

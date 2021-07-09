@@ -19,12 +19,14 @@
 
 #include "wiggle_drive_command.hpp"
 
-#include <aruwlib/Drivers.hpp>
-#include <aruwlib/algorithms/contiguous_float.hpp>
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/architecture/clock.hpp>
-#include <aruwlib/communication/remote.hpp>
-#include <aruwlib/communication/sensors/mpu6500/mpu6500.hpp>
+#include "aruwlib/algorithms/contiguous_float.hpp"
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/architecture/clock.hpp"
+#include "aruwlib/communication/remote.hpp"
+#include "aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
+#include "aruwlib/drivers.hpp"
+
+#include "chassis_subsystem.hpp"
 
 using namespace aruwlib::algorithms;
 using namespace aruwlib::sensors;
@@ -34,32 +36,26 @@ namespace aruwsrc
 {
 namespace chassis
 {
-void WiggleDriveCommand::initialize()
+WiggleDriveCommand::WiggleDriveCommand(
+    aruwlib::Drivers* drivers,
+    ChassisSubsystem* chassis,
+    const aruwlib::control::turret::TurretSubsystemInterface* turret)
+    : drivers(drivers),
+      chassis(chassis),
+      turret(turret),
+      rotationSpeedRamp(0)
 {
-    float turretCurAngle = turret->getYawAngleFromCenter();
-
-    // We don't apply the sine wave if we are out of the angle of the sine wave.
-    outOfCenter = fabsf(turretCurAngle) > WIGGLE_MAX_ROTATE_ANGLE;
-
-    turretCurAngle = aruwlib::algorithms::limitVal(
-        turretCurAngle,
-        -WIGGLE_MAX_ROTATE_ANGLE,
-        WIGGLE_MAX_ROTATE_ANGLE);
-
-    // We use the limited current turret angle to calculate a time offset in
-    // a angle vs. time graph so when we start at some angle from center we
-    // are still in phase.
-    startTimeForAngleOffset = asinf(turretCurAngle / WIGGLE_MAX_ROTATE_ANGLE) * WIGGLE_PERIOD /
-                              (2.0f * aruwlib::algorithms::PI);
-
-    // The offset so when we start calculating a rotation angle, the initial
-    // time is zero.
-    timeOffset = aruwlib::arch::clock::getTimeMilliseconds();
+    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
 }
 
-float WiggleDriveCommand::wiggleSin(float t)
+void WiggleDriveCommand::initialize()
 {
-    return WIGGLE_MAX_ROTATE_ANGLE * sinf((2.0f * aruwlib::algorithms::PI / WIGGLE_PERIOD) * t);
+    rotationSign = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
+
+    // TODO replace with chassis rotation speed
+    rotationSpeedRamp.reset(0);
+    const WiggleParams& wiggleParams = getWiggleParams();
+    rotationSpeedRamp.setTarget(rotationSign * wiggleParams.rotationSpeed);
 }
 
 void WiggleDriveCommand::execute()
@@ -71,43 +67,36 @@ void WiggleDriveCommand::execute()
               ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
     // We only wiggle when the turret is online.
-    if (turret->isTurretOnline())
+    if (turret->isOnline())
     {
-        float curTime =
-            static_cast<float>(aruwlib::arch::clock::getTimeMilliseconds() - timeOffset) -
-            startTimeForAngleOffset;
-        float desiredAngleError;
-        float turretYawAngle = turret->getYawAngleFromCenter();
+        const float turretYawFromCenter = turret->getYawAngleFromCenter();
+        const WiggleParams& wiggleParams = getWiggleParams();
 
-        if (outOfCenter)
+        if (turretYawFromCenter > wiggleParams.turnaroundAngle)
         {
-            outOfCenter = fabsf(turretYawAngle) > WIGGLE_MAX_ROTATE_ANGLE;
-            if (!outOfCenter)
+            if (rotationSign > 0)
             {
-                initialize();
+                rotationSign = -rotationSign;
+                rotationSpeedRamp.setTarget(rotationSign * wiggleParams.rotationSpeed);
+            }
+        }
+        else if (turretYawFromCenter < -wiggleParams.turnaroundAngle)
+        {
+            if (rotationSign < 0)
+            {
+                rotationSign = -rotationSign;
+                rotationSpeedRamp.setTarget(rotationSign * wiggleParams.rotationSpeed);
             }
         }
 
-        if (!outOfCenter)
-        {
-            desiredAngleError = wiggleSin(curTime) + turretYawAngle;
-        }
-        else
-        {
-            desiredAngleError = aruwlib::algorithms::limitVal(
-                turretYawAngle,
-                -WIGGLE_OUT_OF_CENTER_MAX_ROTATE_ERR,
-                WIGGLE_OUT_OF_CENTER_MAX_ROTATE_ERR);
-        }
+        rotationSpeedRamp.update(wiggleParams.rotationSpeedIncrement);
 
-        // Wrapping between -180 and 180.
-        ContiguousFloat rotationError(desiredAngleError, -180.0f, 180.0f);
-        r = chassis->chassisSpeedRotationPID(rotationError.getValue(), WIGGLE_ROTATE_KP);
+        r = rotationSpeedRamp.getValue();
         x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         // Apply a rotation matrix to the user input so you drive turret
         // relative while wiggling.
-        aruwlib::algorithms::rotateVector(&x, &y, -degreesToRadians(turretYawAngle));
+        rotateVector(&x, &y, -degreesToRadians(turretYawFromCenter));
     }
     else
     {
@@ -115,12 +104,41 @@ void WiggleDriveCommand::execute()
             ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
     }
 
+    float rTranslationalGain = chassis->calculateRotationTranslationalGain(r) *
+                               ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+
+    x = limitVal<float>(x, -rTranslationalGain, rTranslationalGain);
+    y = limitVal<float>(y, -rTranslationalGain, rTranslationalGain);
+
     chassis->setDesiredOutput(x, y, r);
 }
 
 void WiggleDriveCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
 
 bool WiggleDriveCommand::isFinished() const { return false; }
+
+const WiggleDriveCommand::WiggleParams& WiggleDriveCommand::getWiggleParams() const
+{
+    return WIGGLE_PARAMS_45W_CUTOFF;
+    uint16_t powerConsumptionLimit =
+        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+    if (powerConsumptionLimit <= 45 || !drivers->refSerial.getRefSerialReceivingData())
+    {
+        return WIGGLE_PARAMS_45W_CUTOFF;
+    }
+    else if (powerConsumptionLimit <= 60)
+    {
+        return WIGGLE_PARAMS_60W_CUTOFF;
+    }
+    else if (powerConsumptionLimit <= 80)
+    {
+        return WIGGLE_PARAMS_80W_CUTOFF;
+    }
+    else
+    {
+        return WIGGLE_PARAMS_MAX_CUTOFF;
+    }
+}
 
 }  // namespace chassis
 

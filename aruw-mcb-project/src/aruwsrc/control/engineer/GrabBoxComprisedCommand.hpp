@@ -1,8 +1,8 @@
 #ifndef GRAB_BOX_COMPRISED_COMMAND_HPP_
 #define GRAB_BOX_COMPRISED_COMMAND_HPP_
 
-#include <aruwlib/architecture/timeout.hpp>
-#include <aruwlib/control/comprised_command.hpp>
+#include "aruwlib/architecture/timeout.hpp"
+#include "aruwlib/control/comprised_command.hpp"
 
 #include "EngineerWristCalibrateCommand.hpp"
 #include "EngineerWristRotateCommand.hpp"

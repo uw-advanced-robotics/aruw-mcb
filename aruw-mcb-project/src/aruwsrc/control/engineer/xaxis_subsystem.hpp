@@ -20,8 +20,9 @@
 #ifndef XAXIS_SUBSYSTEM_HPP_
 #define XAXIS_SUBSYSTEM_HPP_
 
-#include <aruwlib/communication/gpio/digital.hpp>
-#include <aruwlib/control/subsystem.hpp>
+#include "aruwlib/communication/gpio/digital.hpp"
+#include "aruwlib/control/subsystem.hpp"
+#include "aruwlib/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -42,11 +43,15 @@ public:
     {
     }
 
-    void setExtended(bool isExtended);
+    mockable void setExtended(bool isExtended);
 
-    bool isExtended() const;
+    mockable bool isExtended() const;
 
     void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
 
     const char *getName() override { return "X-Axis"; }
 
@@ -54,6 +59,8 @@ private:
     aruwlib::gpio::Digital::OutputPin pin;
 
     bool extended;
+
+    uint64_t testTime;
 };  // class XAxisSubsystem
 
 }  // namespace engineer

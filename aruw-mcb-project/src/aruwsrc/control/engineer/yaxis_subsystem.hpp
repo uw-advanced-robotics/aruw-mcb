@@ -1,13 +1,13 @@
 #ifndef YAXIS_SUBSYSTEM_HPP_
 #define YAXIS_SUBSYSTEM_HPP_
 
-#include <aruwlib/algorithms/ramp.hpp>
-#include <aruwlib/communication/gpio/digital.hpp>
-#include <aruwlib/control/subsystem.hpp>
-#include <aruwlib/motor/dji_motor.hpp>
-#include <modm/math/filter/ramp.hpp>
+#include "aruwlib/algorithms/ramp.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
+#include "aruwlib/communication/gpio/digital.hpp"
+#include "aruwlib/control/subsystem.hpp"
+#include "aruwlib/motor/dji_motor.hpp"
 
-#include "aruwsrc/algorithms/turret_pid.hpp"
+#include "modm/math/filter/ramp.hpp"
 
 namespace aruwsrc
 {
@@ -64,24 +64,24 @@ public:
      * @return The desired Position (an enum value, one of the descrete positions that
      *      may be set, **not** a measured value in cm).
      */
-    mockable_inline Position getCurrDesiredPosition() const { return yAxisPosition; }
+    mockable inline Position getCurrDesiredPosition() const { return yAxisPosition; }
 
     /**
      * @return The last computed current position (which is computed on `refresh`), in cm.
      */
-    mockable_inline float getCurrentPosition() const { return currentPosition; }
+    mockable inline float getCurrentPosition() const { return currentPosition; }
 
     /**
      * @return The motor's target position, in cm.
      */
-    mockable_inline float getDesiredPosition() const { return yAxisRamp.getTarget(); }
+    mockable inline float getDesiredPosition() const { return yAxisRamp.getTarget(); }
 
     /**
      * Call to start the initialization sequence again.
      */
-    mockable_inline void reInitialize() { initialized = false; }
+    mockable inline void reInitialize() { initialized = false; }
 
-    mockable_inline bool isInitialized() const { return initialized; }
+    mockable inline bool isInitialized() const { return initialized; }
 
 private:
     // TODO(matthew) these PID parameters must be tuned with an actual mechanism
@@ -119,7 +119,7 @@ private:
     bool initialized;
 
     aruwlib::motor::DjiMotor yAxisMotor;
-    algorithms::TurretPid yAxisPositionPid;
+    aruwlib::algorithms::SmoothPid yAxisPositionPid;
     aruwlib::algorithms::Ramp yAxisRamp;
 
     float currentPosition;

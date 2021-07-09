@@ -19,7 +19,7 @@
 
 #include "friction_wheel_subsystem.hpp"
 
-#include <aruwlib/architecture/clock.hpp>
+#include "aruwlib/architecture/clock.hpp"
 
 namespace aruwsrc
 {
@@ -47,8 +47,12 @@ void FrictionWheelSubsystem::refresh()
 
 void FrictionWheelSubsystem::runHardwareTests()
 {
-    // TODO
+    if (abs(rightWheel.getShaftRPM()) > 4000.0f) this->setHardwareTestsComplete();
 }
+
+void FrictionWheelSubsystem::onHardwareTestStart() { this->setDesiredRpm(5000.0f); }
+
+void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredRpm(0.0f); }
 
 }  // namespace launcher
 

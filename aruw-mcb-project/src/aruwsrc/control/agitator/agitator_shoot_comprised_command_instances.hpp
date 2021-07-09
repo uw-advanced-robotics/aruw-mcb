@@ -20,53 +20,118 @@
 #ifndef AGITATOR_SHOOT_COMPRISED_COMMAND_INSTANCES_HPP_
 #define AGITATOR_SHOOT_COMPRISED_COMMAND_INSTANCES_HPP_
 
-#include <aruwlib/Drivers.hpp>
+#include "aruwlib/control/setpoint/commands/move_unjam_comprised_command.hpp"
+#include "aruwlib/control/setpoint/interfaces/setpoint_subsystem.hpp"
+#include "aruwlib/drivers.hpp"
 
-#include "agitator_shoot_comprised_command.hpp"
+#include "limit_switch_agitator_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace agitator
 {
+class AgitatorSubsystem;
+
 /**
  * A class that extends the shoot comprised command and defines the system parameters of the
  * comprised command. The constants are choosen for fast rotation speed for a soldier robot's
  * agitator.
  */
-class ShootFastComprisedCommand : public ShootComprisedCommand
+class ShootFastComprisedCommand17MM : public aruwlib::control::setpoint::MoveUnjamComprisedCommand
 {
 public:
-    ShootFastComprisedCommand(aruwlib::Drivers* drivers, AgitatorSubsystem* agitator17mm)
-        : ShootComprisedCommand(
-              drivers,
-              agitator17mm,
-              aruwlib::algorithms::PI / 5.0f,
-              aruwlib::algorithms::PI / 2.0f,
-              50,
-              20)
-    {
-    }
+    /// Buffer from max heat limit in which limiting occurs (3 bullet buffer)
+    static constexpr uint16_t HEAT_LIMIT_BUFFER = 30;
+
+    ShootFastComprisedCommand17MM(
+        aruwlib::Drivers* drivers,
+        AgitatorSubsystem* agitator17mm,
+        bool heatLimiting = true,
+        float agitatorRotateAngle = aruwlib::algorithms::PI / 2.5f);
+
+    bool isReady() override;
+
+    bool isFinished() const override;
+
+private:
+    aruwlib::Drivers* drivers;
+
+    const bool heatLimiting;
 };  // class ShootFastComprisedCommand
 
 /**
- * A class that extends the shoot comprised command and defines the system parameters of the
- * comprised command. The constants are choosen for slow rotation speed for a soldier robot's
- * agitator.
+ * Command that rotates the associated waterwheel if there are less than some number
+ * of balls in the tube between the waterwheel and the firing mechanism.
  */
-class ShootSlowComprisedCommand : public ShootComprisedCommand
+class WaterwheelLoadCommand42mm : public aruwlib::control::setpoint::MoveUnjamComprisedCommand
 {
 public:
-    ShootSlowComprisedCommand(aruwlib::Drivers* drivers, AgitatorSubsystem* agitator17mm)
-        : ShootComprisedCommand(
-              drivers,
-              agitator17mm,
-              aruwlib::algorithms::PI / 5.0f,
-              aruwlib::algorithms::PI / 2.0f,
-              300,
-              100)
-    {
-    }
-};  // class ShootSlowComprisedCommand
+    // Angle the command tries to move the agitator whenever it is scheduled
+    static constexpr float WATERWHEEL_42MM_CHANGE_ANGLE = aruwlib::algorithms::PI / 7;
+    // Max angle the agitator will move while unjamming
+    static constexpr float WATERWHEEL_42MM_MAX_UNJAM_ANGLE = aruwlib::algorithms::PI / 35;
+    // Expected time for the water wheel to rotate the specified angle in ms
+    static constexpr uint32_t WATERWHEEL_42MM_ROTATE_TIME = 1000;
+    // How long the command should wait after reaching the target angle
+    static constexpr uint32_t WATERWHEEL_42MM_PAUSE_AFTER_ROTATE_TIME = 10;
+
+    // Buffer from max heat limit in which limiting occurs, for hero 100 is one shot.
+    static constexpr float HEAT_LIMIT_BUFFER = 100;
+
+    static constexpr int BALLS_QUEUED_IN_TUBE = 3;
+
+    WaterwheelLoadCommand42mm(
+        aruwlib::Drivers* drivers,
+        aruwsrc::agitator::LimitSwitchAgitatorSubsystem* waterwheel);
+
+    bool isReady() override;
+
+    bool isFinished() const override;
+
+private:
+    // Store instance of drivers to be able to access digital
+    aruwlib::Drivers* drivers;
+
+    // Store pointer to limited agitator subsystem with derived class type
+    aruwsrc::agitator::LimitSwitchAgitatorSubsystem* waterwheel;
+};  // class Waterwheel42mmLoadCommand
+
+/**
+ * This command rotates the kicker subsystem, no jamming required so just uses a MoveCommand
+ */
+class ShootCommand42mm : public aruwlib::control::setpoint::MoveCommand
+{
+public:
+    // Angle the command tries to move the agitator whenever it is scheduled
+    static constexpr float KICKER_42MM_CHANGE_ANGLE = 1.3f * aruwlib::algorithms::PI;
+    // Expected time for the water wheel to rotate the specified angle in ms
+    static constexpr uint32_t KICKER_42MM_ROTATE_TIME = 300;
+    // How long the command should wait after reaching the target angle
+    static constexpr uint32_t KICKER_42MM_PAUSE_AFTER_ROTATE_TIME = 0;
+
+    // Buffer from max heat limit in which limiting occurs, for hero 100 is one shot.
+    static constexpr uint16_t HEAT_LIMIT_BUFFER = 100;
+
+    ShootCommand42mm(
+        aruwlib::Drivers* drivers,
+        aruwlib::control::setpoint::SetpointSubsystem* kicker,
+        bool heatLimiting = true);
+
+    // Override for heat limiting logic
+    bool isReady() override;
+
+    void initialize() override;
+
+    static int getInitializeCount() { return initializeCount; }
+    static void resetInitializeCount() { initializeCount = 0; }
+
+private:
+    aruwlib::Drivers* drivers;
+
+    const bool heatLimiting;
+
+    static int initializeCount;
+};
 
 }  // namespace agitator
 
