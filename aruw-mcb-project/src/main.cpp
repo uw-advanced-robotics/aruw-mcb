@@ -44,6 +44,8 @@
 
 #include "aruwsrc/control/robot_control.hpp"
 
+#include "aruwsrc/algorithms/matrix_test.hpp"
+
 using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/
@@ -74,7 +76,16 @@ int main()
 
     Board::initialize();
     initializeIo(drivers);
+
+    MatrixTest mtest;
+
+    mtest.multiplicationSpeedCompare();
+    mtest.additionSpeedCompare();
+    mtest.inverseSpeedCompare();
+    mtest.transposeSpeedCompare();
+
     aruwsrc::control::initSubsystemCommands(drivers);
+
 
 #ifdef PLATFORM_HOSTED
     aruwlib::motorsim::SimHandler::resetMotorSims();
