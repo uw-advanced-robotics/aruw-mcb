@@ -31,31 +31,23 @@ namespace mock
 class ChassisSubsystemMock : public aruwsrc::chassis::ChassisSubsystem
 {
 public:
+    static constexpr ChassisMechanicalConstants chassisConstants{};
+    static constexpr aruwlib::algorithms::PidConfigStruct pidConfig{};
+    static constexpr aruwlib::control::chassis::PowerLimiterConfig powerLimitingConfig{};
+
     ChassisSubsystemMock(
         aruwlib::Drivers* drivers,
-        float motorGearboxRatio = 0,
-        float widthBetweenWheelsX = 0,
-        float widthBetweenWheelsY = 0,
-        float wheelRadius = 0,
+        const ChassisMechanicalConstants& mechanicalConstants = chassisConstants,
+        const aruwlib::algorithms::PidConfigStruct& velocityPidConfig = pidConfig,
+        const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig =
+            powerLimitingConfig,
         float maxWheelSpeedSingleMotor = 0,
-        float gimbalXOffset = 0,
-        float gimbalYOffset = 0,
         float chassisRevolvePidMaxP = 0,
         float chassisRevolvePidMaxD = 0,
         float chassisRevolvePidKD = 0,
         float chassisRevolvePidMaxOutput = 0,
         float minErrorRotationD = 0,
         float minRotationThreshold = 0,
-        float velocityPidKp = 0,
-        float velocityPidKi = 0,
-        float velocityPidKd = 0,
-        float velocityPidMaxErrSum = 0,
-        float velocityPidMaxOutput = 0,
-        float maxEnergyBuffer = 0,
-        float energyBufferLimitThreshold = 0,
-        float energyBufferCritThreshold = 0,
-        float powerConsumptionThreshold = 0,
-        float currentAllocatedForEnergyBufferLimiting = 0,
         aruwlib::can::CanBus canBus = aruwlib::can::CanBus::CAN_BUS1,
         aruwlib::motor::MotorId leftFrontMotorId = aruwlib::motor::MOTOR1,
         aruwlib::motor::MotorId leftBackMotorId = aruwlib::motor::MOTOR2,

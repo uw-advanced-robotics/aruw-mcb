@@ -45,19 +45,21 @@ public:
      * @param[in] drivers Pointer to a drivers singleton object.
      * @param[in] yawPidConfig PID configuration for yaw controller.
      * @param[in] pitchPidConfig PID configuration for pitch controller.
-     * @param[in] userYawInputScalar
-     * @param[in] userPitchInputScalar
-     * @param[in] pitchGravityCompensationKp
-     * @param[in] yawStartAngle
-     * @param[in] pitchStartAngle
+     * @param[in] userYawInputScalar Scaler to multiply user input by.
+     * @param[in] userPitchInputScalar @see userYawInputScalar.
+     * @param[in] pitchGravityCompensationKp Gravity compensation proportional gain.
+     * @param[in] yawStartAngle The angle that the yaw motor starts at.
+     * @param[in] pitchStartAngle The angle that the pitch motor starts at.
      * @param[in] yawMinAngle Minimum yaw angle that the turret is limited to (in degrees).
      * @param[in] yawMaxAngle Maximum yaw angle that the turret is limited to (in degrees).
      * @param[in] pitchMinAngle Minimum pitch angle that the turret is limited to (in degrees).
      * @param[in] pitchMaxAngle Maximum pitch angle that the turret is limited to (in degrees).
      * @param[in] yawStartEncoderPosition The yaw encoder value that is associated with the
      *      `startAngle`.
-     * @param[in] pitch90DegEncoderPositionLeft
-     * @param[in] pitch90DegEncoderPositionRight
+     * @param[in] pitch90DegEncoderPositionLeft The left pitch encoder value that is associated with
+     *      90 degrees.
+     * @param[in] pitch90DegEncoderPositionRight The right pitch encoder value that is associated
+     *      with 90 degrees.
      * @param[in] motorCanBus Can bus that the turret is connected to.
      * @param[in] pitchMotorLeftId, pitchMotorRightId DJI motor id for pitch motor.
      * @param[in] yawMotorId DJI motor id for yaw motor.

@@ -30,6 +30,8 @@
 #include "aruwlib/control/chassis/power_limiter.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+
 // For comments, see constants.md
 namespace soldier_control::constants
 {
@@ -97,12 +99,8 @@ static constexpr int CHASSIS_REVOLVE_PID_MIN_ERROR_ROTATION_D = 0;
 static constexpr float CHASSIS_REVOLVE_PID_MAX_OUTPUT = 5000.0f;
 static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
-static constexpr float WHEEL_RADIUS = 0.076;
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
-static constexpr float GIMBAL_X_OFFSET = 0.0f;
-static constexpr float GIMBAL_Y_OFFSET = 0.0f;
-static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
+static constexpr aruwsrc::chassis::ChassisSubsystem::ChassisMechanicalConstants
+    CHASSIS_MECHANICAL_CONSTANTS = {1.0f / 19.0f, 0.366f, 0.366f, 0.076f, 0.0f, 0.0f};
 
 static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
 

@@ -45,33 +45,33 @@ public:
      * @brief Constructs a SentinelDriveSubsystem with the specified parameters.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] velocityPidConfig PID configuration for friction wheel velocity PID controllers.
+     * @param[in] powerLimiterConfig @see PowerLimiter
      * @param[in] leftLimitSwitch Left limit switch connected to the side of the chassis
      *      and is triggered when the sentinel reaches the end of the rail.
      * @param[in] rightLimitSwitch Right limit switch connected to the side of the chassis
      *      and is triggered when the sentinel reaches the end of the rail.
      * @param[in] currentSensorPin The analog input pin that the chassis current sensor is connected
      *      to.
-     * @param[in] velocityPidConfig PID configuration for friction wheel velocity PID controllers.
      * @param[in] wheelRadius Wheel radius of chassis motors, (mm).
      * @param[in] gearRatio Gear ratio of the chassis motors.
      * @param[in] railLength Length of the sentinel rail (mm).
      * @param[in] sentinelLength Length of the sentinel (mm).
-     * @param[in] powerLimiterConfig @see PowerLimiter
      * @param[in] leftMotorId DJI motor id for left motor.
      * @param[in] rightMotorId DJI motor id for right motor.
      * @param[in] chassisCanBus CAN bus chassis is connected to.
      */
     SentinelDriveSubsystem(
         aruwlib::Drivers* drivers,
+        const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
+        const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
         aruwlib::gpio::Digital::InputPin leftLimitSwitch,
         aruwlib::gpio::Digital::InputPin rightLimitSwitch,
         aruwlib::gpio::Analog::Pin currentSensorPin,
-        const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
         float wheelRadius,
         float gearRatio,
         float railLength,
         float sentinelLength,
-        const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
         aruwlib::motor::MotorId leftMotorId,
         aruwlib::motor::MotorId rightMotorId,
         aruwlib::can::CanBus chassisCanBus);

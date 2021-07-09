@@ -39,11 +39,11 @@ class TurretCVCommand : public aruwlib::control::Command
 {
 public:
     /**
-     * @param[in] drivers
-     * @param[in] subsystem
-     * @param[in] turretStartAngle
-     * @param[in] yawPidConfig
-     * @param[in] pitchPidConfig
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] subsystem The turret subsystem to control.
+     * @param[in] turretStartAngle The starting target angle for the pitch/yaw motors.
+     * @param[in] yawPidConfig PID configuration for yaw controller.
+     * @param[in] pitchPidConfig PID configuration for pitch controller.
      */
     TurretCVCommand(
         aruwlib::Drivers *drivers,

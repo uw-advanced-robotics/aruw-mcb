@@ -35,15 +35,15 @@ namespace aruwsrc::control::sentinel::drive
 {
 SentinelDriveSubsystem::SentinelDriveSubsystem(
     aruwlib::Drivers* drivers,
+    const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
+    const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
     aruwlib::gpio::Digital::InputPin leftLimitSwitch,
     aruwlib::gpio::Digital::InputPin rightLimitSwitch,
     aruwlib::gpio::Analog::Pin currentSensorPin,
-    const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
     float wheelRadius,
     float gearRatio,
     float railLength,
     float sentinelLength,
-    const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
     aruwlib::motor::MotorId leftMotorId,
     aruwlib::motor::MotorId rightMotorId,
     aruwlib::can::CanBus chassisCanBus)

@@ -57,20 +57,27 @@ namespace chassis
 class ChassisSubsystem : public aruwlib::control::chassis::ChassisSubsystemInterface
 {
 public:
+    struct ChassisMechanicalConstants
+    {
+        float motorGearboxRatio;    /// Gearbox ratio of chassis motors.
+        float widthBetweenWheelsX;  /// Distance from center of the front and rear wheels (m).
+        float widthBetweenWheelsY;  /// Distance from center of the two front wheels (m).
+        float wheelRadius;          /// The radius of the chassis wheels (m).
+        float gimbalXOffset;  /// Gimbal offset from the center of the chassis, see note above for
+                              /// explanation of x and y (m).
+        float gimbalYOffset;  /// @see gimbalXOffset
+    };
+
     /**
      * @brief Constructs a ChassisSubsystem
      *
      * @param[in] drivers Pointer to a drivers singleton object.
-     * @param[in] motorGearboxRatio
-     * @param[in] widthBetweenWheelsX Distance from center of the front and rear wheels (m).
-     * @param[in] widthBetweenWheelsY Distance from center of the two front wheels (m).
-     * @param[in] wheelRadius The radius of the chassis wheels (m).
+     * @param[in] mechanicalConstants Mechanical constants of the chassis.
+     * @param[in] velocityPidConfig Velocity constants for the chassis PID controllers.
+     * @param[in] powerLimiterConfig Power limiting constants.
      * @param[in] maxWheelSpeedSingleMotor Max wheel speed, measured in RPM of the encoder (rather
      *      than shaft) we use this for wheel speed since this is how dji's motors measures motor
      *      speed.
-     * @param[in] gimbalXOffset Gimbal offset from the center of the chassis, see note above for
-     *      explanation of x and y (m).
-     * @param[in] gimbalYOffset @see gimbalXOffset
      * @param[in] chassisRevolvePidMaxP Max proportional used for chassis rotation PID controller.
      * @param[in] chassisRevolvePidMaxD Max derivative used for chassis rotation PID controller.
      * @param[in] chassisRevolvePidKD Derivative term used for the chassis rotation PID controller
@@ -80,8 +87,6 @@ public:
      * @param[in] minErrorRotationD The maximum revolve error before we start using the
      *      derivative term.
      * @param[in] minRotationThreshold
-     * @param[in] velocityPidConfig
-     * @param[in] powerLimiterConfig
      * @param[in] canBus The can bus that the chassis is connected to.
      * @param[in] leftFrontMotorId LF motor id.
      * @param[in] leftBackMotorId LB motor id.
@@ -101,21 +106,16 @@ public:
      */
     ChassisSubsystem(
         aruwlib::Drivers* drivers,
-        float motorGearboxRatio,
-        float widthBetweenWheelsX,
-        float widthBetweenWheelsY,
-        float wheelRadius,
+        const ChassisMechanicalConstants& mechanicalConstants,
+        const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
+        const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
         float maxWheelSpeedSingleMotor,
-        float gimbalXOffset,
-        float gimbalYOffset,
         float chassisRevolvePidMaxP,
         float chassisRevolvePidMaxD,
         float chassisRevolvePidKD,
         float chassisRevolvePidMaxOutput,
         float minErrorRotationD,
         float minRotationThreshold,
-        const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
-        const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
         aruwlib::can::CanBus canBus,
         aruwlib::motor::MotorId leftFrontMotorId,
         aruwlib::motor::MotorId leftBackMotorId,
@@ -226,11 +226,12 @@ private:
         R = 2,
     };
 
+    const float MAX_WHEEL_SPEED_SINGLE_MOTOR;
+
     const float MOTOR_GEARBOX_RATIO;
     const float WIDTH_BETWEEN_WHEELS_X;
     const float WIDTH_BETWEEN_WHEELS_Y;
     const float WHEEL_RADIUS;
-    const float MAX_WHEEL_SPEED_SINGLE_MOTOR;
     const float GIMBAL_X_OFFSET;
     const float GIMBAL_Y_OFFSET;
 

@@ -52,18 +52,19 @@ public:
      * This command requires the turret subsystem from a command/subsystem framework perspective.
      * The `ChassisSubsystem` is only used for for odometry information.
      *
-     * @param[in] drivers
-     * @param[in] subsystem
-     * @param[in] chassis
-     * @param[in] turretStartAngle
-     * @param[in] yawKdTurretImu
-     * @param[in] yawKdChassisImu
-     * @param[in] yawPidConfig
-     * @param[in] pitchPidConfig
-     * @param[in] userYawInputScalar
-     * @param[in] userPitchInputScalar
-     * @param[in] pitchGravityCompensationKp
-     * @param[in] useImuOnTurret
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] subsystem The turret subsystem to control.
+     * @param[in] chassis The chassis subsystem to reference while running the turret controller.
+     * @param[in] turretStartAngle The starting target angle for the pitch/yaw motors.
+     * @param[in] yawKdTurretImu The derivative gain to be used while the IMU is on the turret.
+     * @param[in] yawKdChassisImu The derivative gain to be used while the IMU is on the chassis.
+     * @param[in] yawPidConfig PID configuration for yaw controller.
+     * @param[in] pitchPidConfig PID configuration for pitch controller.
+     * @param[in] userYawInputScalar Scaler to multiply user input by.
+     * @param[in] userPitchInputScalar @see userYawInputScalar.
+     * @param[in] pitchGravityCompensationKp Gravity compensation proportional gain.
+     * @param[in] useImuOnTurret `true` if the IMU is on the turret. The `imuRxHandler` is used
+     *      if this is the case, otherwise if `false`, uses the chassis IMU (the IMU on the MCB).
      */
     TurretWorldRelativePositionCommand(
         aruwlib::Drivers *drivers,

@@ -36,33 +36,20 @@ static constexpr float WHEEL_VEL = 1000;
 static constexpr float CHASSIS_VEL = 0.41887906;
 static constexpr float CHASSIS_VEL_R = 0.15330973;
 
-ChassisSubsystem constructChassis(aruwlib::Drivers &d)
+static ChassisSubsystem constructChassis(aruwlib::Drivers &d)
 {
     return ChassisSubsystem(
         &d,
-        constants::chassis::CHASSIS_GEARBOX_RATIO,
-        constants::chassis::WIDTH_BETWEEN_WHEELS_X,
-        constants::chassis::WIDTH_BETWEEN_WHEELS_Y,
-        constants::chassis::WHEEL_RADIUS,
+        constants::chassis::CHASSIS_MECHANICAL_CONSTANTS,
+        constants::chassis::CHASSIS_PID_CONFIG,
+        constants::chassis::CHASSIS_POWER_LIMIT_CONFIG,
         constants::chassis::MAX_WHEEL_SPEED_SINGLE_MOTOR,
-        constants::chassis::GIMBAL_X_OFFSET,
-        constants::chassis::GIMBAL_Y_OFFSET,
         constants::chassis::CHASSIS_REVOLVE_PID_MAX_P,
         constants::chassis::CHASSIS_REVOLVE_PID_MAX_D,
         constants::chassis::CHASSIS_REVOLVE_PID_KD,
         constants::chassis::CHASSIS_REVOLVE_PID_MAX_OUTPUT,
         constants::chassis::CHASSIS_REVOLVE_PID_MIN_ERROR_ROTATION_D,
         constants::chassis::MIN_ROTATION_THRESHOLD,
-        constants::chassis::VELOCITY_PID_KP,
-        constants::chassis::VELOCITY_PID_KI,
-        constants::chassis::VELOCITY_PID_KD,
-        constants::chassis::VELOCITY_PID_MAX_ERROR_SUM,
-        constants::chassis::VELOCITY_PID_MAX_OUTPUT,
-        constants::chassis::MAX_ENERGY_BUFFER,
-        constants::chassis::ENERGY_BUFFER_LIMIT_THRESHOLD,
-        constants::chassis::ENERGY_BUFFER_CRIT_THRESHOLD,
-        constants::chassis::POWER_CONSUMPTION_THRESHOLD,
-        constants::chassis::CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
         constants::can::CHASSIS_CAN_BUS,
         constants::motor::RIGHT_FRONT_MOTOR_ID,
         constants::motor::LEFT_FRONT_MOTOR_ID,

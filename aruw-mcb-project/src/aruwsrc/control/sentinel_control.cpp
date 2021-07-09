@@ -76,15 +76,15 @@ AgitatorSubsystem agitator(
 
 SentinelDriveSubsystem sentinelDrive(
     drivers(),
+    constants::chassis::CHASSIS_PID_CONFIG,
+    constants::chassis::CHASSIS_POWER_LIMIT_CONFIG,
     constants::gpio::LEFT_LIMIT_SWITCH,
     constants::gpio::RIGHT_LIMIT_SWITCH,
     constants::gpio::CURRENT_SENSOR_PIN,
-    constants::chassis::CHASSIS_PID_CONFIG,
     constants::chassis::WHEEL_RADIUS,
     constants::chassis::GEAR_RATIO,
     constants::chassis::RAIL_LENGTH,
     constants::chassis::SENTINEL_LENGTH,
-    constants::chassis::CHASSIS_POWER_LIMIT_CONFIG,
     constants::motor::CHASSIS_LEFT_MOTOR_ID,
     constants::motor::CHASSIS_RIGHT_MOTOR_ID,
     constants::can::CHASSIS_CAN_BUS);

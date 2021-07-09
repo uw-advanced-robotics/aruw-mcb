@@ -39,8 +39,8 @@ public:
      * @param[in] changeTimerInterval Time between changing the target RPM.
      * @param[in] turnaroundBuffer The distance from the end of the rail at which the sentinel will
      *      referse direction.
-     * @param[in] railLength
-     * @param[in] sentinelLength
+     * @param[in] railLength Length of the rail the sentinel is driving on.
+     * @param[in] sentinelLength Horizontal length of the sentienl.
      */
     explicit SentinelRandomDriveCommand(
         SentinelDriveSubsystem* subsystem,

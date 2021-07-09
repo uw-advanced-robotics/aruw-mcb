@@ -33,13 +33,11 @@ namespace mock
 class FrictionWheelSubsystemMock : public aruwsrc::launcher::FrictionWheelSubsystem
 {
 public:
+    static constexpr aruwlib::algorithms::PidConfigStruct pidConfig{};
+
     FrictionWheelSubsystemMock(
         aruwlib::Drivers *drivers,
-        float pidP = 0,
-        float pidI = 0,
-        float pidD = 0,
-        float pidMaxErrorSum = 0,
-        float pidMaxOutput = 0,
+        const aruwlib::algorithms::PidConfigStruct &velocityPidConfig = pidConfig,
         float frictionWheelRampSpeed = 0,
         aruwlib::motor::MotorId leftMotor = aruwlib::motor::MOTOR1,
         aruwlib::motor::MotorId rightMotor = aruwlib::motor::MOTOR2,

@@ -30,6 +30,8 @@
 #include "aruwlib/control/chassis/power_limiter.hpp"
 #include "aruwlib/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+
 // For comments, see constants.md
 namespace hero_control::constants
 {
@@ -110,12 +112,8 @@ static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
 static constexpr float CHASSIS_REVOLVE_PID_MAX_D = 0.0f;
 
-static constexpr float WHEEL_RADIUS = 0.076f;
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.517f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.600f;
-static constexpr float GIMBAL_X_OFFSET = 0.175f;
-static constexpr float GIMBAL_Y_OFFSET = 0.0f;
-static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
+static constexpr aruwsrc::chassis::ChassisSubsystem::ChassisMechanicalConstants
+    CHASSIS_MECHANICAL_CONSTANTS = {1.0f / 19.0f, 0.517f, 0.600f, 0.076f, 0.175f, 0.0f};
 
 static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
 

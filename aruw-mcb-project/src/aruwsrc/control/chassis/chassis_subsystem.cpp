@@ -36,21 +36,16 @@ namespace chassis
 {
 ChassisSubsystem::ChassisSubsystem(
     aruwlib::Drivers* drivers,
-    float motorGearboxRatio,
-    float widthBetweenWheelsX,
-    float widthBetweenWheelsY,
-    float wheelRadius,
+    const ChassisMechanicalConstants& mechanicalConstants,
+    const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
+    const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
     float maxWheelSpeedSingleMotor,
-    float gimbalXOffset,
-    float gimbalYOffset,
     float chassisRevolvePidMaxP,
     float chassisRevolvePidMaxD,
     float chassisRevolvePidKD,
     float chassisRevolvePidMaxOutput,
     float minErrorRotationD,
     float minRotationThreshold,
-    const aruwlib::algorithms::PidConfigStruct& velocityPidConfig,
-    const aruwlib::control::chassis::PowerLimiterConfig& powerLimiterConfig,
     aruwlib::can::CanBus canBus,
     aruwlib::motor::MotorId leftFrontMotorId,
     aruwlib::motor::MotorId leftBackMotorId,
@@ -58,13 +53,13 @@ ChassisSubsystem::ChassisSubsystem(
     aruwlib::motor::MotorId rightBackMotorId,
     aruwlib::gpio::Analog::Pin currentPin)
     : aruwlib::control::chassis::ChassisSubsystemInterface(drivers),
-      MOTOR_GEARBOX_RATIO(motorGearboxRatio),
-      WIDTH_BETWEEN_WHEELS_X(widthBetweenWheelsX),
-      WIDTH_BETWEEN_WHEELS_Y(widthBetweenWheelsY),
-      WHEEL_RADIUS(wheelRadius),
       MAX_WHEEL_SPEED_SINGLE_MOTOR(maxWheelSpeedSingleMotor),
-      GIMBAL_X_OFFSET(gimbalXOffset),
-      GIMBAL_Y_OFFSET(gimbalYOffset),
+      MOTOR_GEARBOX_RATIO(mechanicalConstants.motorGearboxRatio),
+      WIDTH_BETWEEN_WHEELS_X(mechanicalConstants.widthBetweenWheelsX),
+      WIDTH_BETWEEN_WHEELS_Y(mechanicalConstants.widthBetweenWheelsY),
+      WHEEL_RADIUS(mechanicalConstants.wheelRadius),
+      GIMBAL_X_OFFSET(mechanicalConstants.gimbalXOffset),
+      GIMBAL_Y_OFFSET(mechanicalConstants.gimbalYOffset),
       CHASSIS_REVOLVE_PID_MAX_P(chassisRevolvePidMaxP),
       CHASSIS_REVOLVE_PID_MAX_D(chassisRevolvePidMaxD),
       CHASSIS_REVOLVE_PID_KD(chassisRevolvePidKD),
@@ -102,9 +97,9 @@ ChassisSubsystem::ChassisSubsystem(
       rightBackMotor(drivers, rightBackMotorId, canBus, false, "right back drive motor"),
       chassisPowerLimiter(drivers, currentPin, powerLimiterConfig, motorConstants)
 {
-    const float A = (widthBetweenWheelsX + widthBetweenWheelsY == 0)
+    const float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
                         ? 1
-                        : 2 / (widthBetweenWheelsX + widthBetweenWheelsY);
+                        : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
     wheelVelToChassisVelMat[0][0] = 1;
     wheelVelToChassisVelMat[0][1] = -1;
     wheelVelToChassisVelMat[0][2] = 1;
@@ -117,7 +112,7 @@ ChassisSubsystem::ChassisSubsystem(
     wheelVelToChassisVelMat[2][1] = 1.0 / A;
     wheelVelToChassisVelMat[2][2] = 1.0 / A;
     wheelVelToChassisVelMat[2][3] = 1.0 / A;
-    wheelVelToChassisVelMat *= (wheelRadius / 4);
+    wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
 
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;

@@ -31,20 +31,19 @@ namespace mock
 class AgitatorSubsystemMock : public agitator::AgitatorSubsystem
 {
 public:
+    static constexpr aruwlib::algorithms::PidConfigStruct config{};
+
     AgitatorSubsystemMock(
         aruwlib::Drivers* drivers,
-        float kp = 0,
-        float ki = 0,
-        float kd = 0,
-        float maxIAccum = 0,
-        float maxOutput = 0,
+        const aruwlib::algorithms::PidConfigStruct& pidConfig = config,
         float agitatorGearRatio = 0,
         aruwlib::motor::MotorId agitatorMotorId = aruwlib::motor::MOTOR7,
         aruwlib::can::CanBus agitatorCanBusId = aruwlib::can::CanBus::CAN_BUS1,
         bool isAgitatorInverted = false,
         bool jamLogicEnabled = false,
-        float jammingDistance = 0,
-        uint32_t jammingTime = 0);
+        float jamDistanceTolerance = 0,
+        uint32_t jamTemporalTolerance = 0);
+
     virtual ~AgitatorSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
