@@ -77,6 +77,7 @@
         "./aruw-mcb-project/aruwlib/modm/src",
         "./aruw-mcb-project/aruwlib/modm/ext/cmsis/core",
         "./aruw-mcb-project/aruwlib/modm/ext/cmsis/device",
+        "./aruw-mcb-project/aruwlib/modm/ext/cmsis/dsp",
         "./aruw-mcb-project/aruwlib/src",
         "./aruw-mcb-project/aruwlib/test",
         "./aruw-mcb-project/src",
