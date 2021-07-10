@@ -26,22 +26,17 @@ PROJECT_NAME        = "aruw-mcb"
 BUILD_PATH          = "build"
 HARDWARE_MODM_PATH  = "aruwlib/modm"
 HOSTED_MODM_PATH    = "aruwlib/sim-modm/modm"
-LINKERSCRIPT_FILE   = join(HARDWARE_MODM_PATH, "link/linkerscript.ld")
 ARUWLIB_SRC_PATH    = "aruwlib/src"
-ARUWLIB_PATH        = join(ARUWLIB_SRC_PATH, "aruwlib")
 ARUWLIB_TEST_PATH   = "aruwlib/test"
-ARUWSRC_TEST_PATH   = "test"
+ARUWLIB_PATH        = join(ARUWLIB_SRC_PATH, "aruwlib")
+LINKERSCRIPT_FILE   = join(HARDWARE_MODM_PATH, "link/linkerscript.ld")
+SRC_PATH            = "src"
+TEST_PATH           = "test"
 
 # Define libraries
 HOSTED_LIBS         = ["pthread"]
 GTEST_LIBS          = ["gtest", "gtest_main", "gmock", "gmock_main"]
 COVERAGE_LIBS       = ["-lgcov"]
-
-# Don't compile this stuff
-ignored_dirs        = [".lbuild_cache", BUILD_PATH, HOSTED_MODM_PATH, HARDWARE_MODM_PATH, ARUWLIB_PATH]
-ignored_files       = [extract_robot_type.ROBOT_TYPE_FILE]
-# Don't compile this stuff when testing
-IGNORED_FILES_WHILE_TESTING = ["src/main.cpp", "src/aruwsrc/control/*_control.cpp"]
 
 
 # Parse and validate arguments
@@ -51,15 +46,10 @@ args = parse_args.parse_args()
 # Set up target environment-specific paths
 if args["TARGET_ENV"] == "tests":
     modm_path = HOSTED_MODM_PATH
-    ignored_files.extend(IGNORED_FILES_WHILE_TESTING)
 elif args["TARGET_ENV"] == "sim":
     modm_path = HOSTED_MODM_PATH
-    ignored_dirs.append(ARUWLIB_TEST_PATH)
-    ignored_dirs.append(ARUWSRC_TEST_PATH)
 elif args["TARGET_ENV"] == "hardware":
     modm_path = HARDWARE_MODM_PATH
-    ignored_dirs.append(ARUWLIB_TEST_PATH)
-    ignored_dirs.append(ARUWSRC_TEST_PATH)
 
 
 # Set the number of threads unless it has already been set to anything but 1
@@ -103,9 +93,6 @@ env.AppendUnique(CPPPATH=[
     abspath(r"./src")
 ])
 
-# Append on the global robot target build flag
-env.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
-
 # Add build-specific flags
 if args["BUILD_PROFILE"] == "debug":
     env.AppendUnique(CCFLAGS=["-fno-inline"])
@@ -132,7 +119,7 @@ elif args["TARGET_ENV"] == "tests":
         "-DPLATFORM_HOSTED",
         "-DENV_UNIT_TESTS"])
     env.AppendUnique(CPPPATH=[abspath(ARUWLIB_TEST_PATH)])
-    env.AppendUnique(CPPPATH=[abspath(ARUWSRC_TEST_PATH)])
+    env.AppendUnique(CPPPATH=[abspath(TEST_PATH)])
     env.AppendUnique(LIBS=GTEST_LIBS)
     env.AppendUnique(LIBS=HOSTED_LIBS)
 
@@ -156,8 +143,16 @@ if "additional-ccflags" in ARGUMENTS:
     env.AppendUnique(CCFLAGS=[*ARGUMENTS["additional-ccflags"].split(",")])
 
 
-# Find source files to compile
-sources = env.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)
+# Find aruwlib test source files if necessary
+if args["TARGET_ENV"] == "tests":
+    sources = env.FindSourceFiles(ARUWLIB_TEST_PATH)
+else:
+    sources = []
+
+
+# Use a SConscript file in the source directory to enable building with
+# source-specific build flags (e.g. robot type)
+env.SConscript(dirs=[SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
 
 
 if args["TARGET_ENV"] == "hardware":
