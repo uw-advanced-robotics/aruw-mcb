@@ -25,8 +25,9 @@ SIM_BUILD_TARGET_ACCEPTED_ARGS      = ["build-sim", "run-sim"]
 HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all"]
 VALID_BUILD_PROFILES                = ["debug", "release", "fast"]
 VALID_PROFILING_TYPES               = ["true", "false"]
+VALID_COMPILE_LIB_TYPES             = ["mcb", "sim", "test", "none"]
 
-USAGE = "Usage: scons <target> [profile=<debug|release|fast>] [robot=TARGET_<ROBOT_TYPE>] [profiling=<true|false>]\n\
+USAGE = "Usage: scons <target> [profile=<debug|release|fast>] [robot=TARGET_<ROBOT_TYPE>] [profiling=<true|false>] [compile_lib_only=<mcb|sim|test>]\n\
     \"<target>\" is one of:\n\
         - \"build\": build all code for the hardware platform.\n\
         - \"run\": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.\n\
@@ -37,7 +38,9 @@ USAGE = "Usage: scons <target> [profile=<debug|release|fast>] [robot=TARGET_<ROB
         - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
     \"TARGET_<ROBOT_TYPE>\" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.\n\
         - <ROBOT_TYPE> must be one of the following:\n\
-            - SOLDIER, OLD_SOLDIER, DRONE, ENGINEER, SENTINEL, HERO"
+            - SOLDIER, OLD_SOLDIER, DRONE, ENGINEER, SENTINEL, HERO\n\
+    \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
+                          the sim libraries, for example, run `scons build compile_lib_only=sim`."
 
 
 def parse_args():
@@ -46,19 +49,25 @@ def parse_args():
         "BUILD_PROFILE": "",
         "PROFILING": "",
         "ROBOT_TYPE": "",
+        "COMPILE_SRC": "",
     }
     if len(COMMAND_LINE_TARGETS) > CMD_LINE_ARGS:
         raise Exception("You did not enter the correct number of arguments.\n" + USAGE)
+
+    lib_to_compile = ARGUMENTS.get("compile_lib_only", "none")
+    if lib_to_compile not in VALID_COMPILE_LIB_TYPES:
+        raise Exception("You specified an invalid lib to build.\n" + USAGE)
+    args["COMPILE_SRC"] = lib_to_compile == "none"
 
     # Extract the target environment from the first command line argument
     # and determine modm build path as well as add any extra files to ignore
     if len(COMMAND_LINE_TARGETS) != 0:
         build_target = COMMAND_LINE_TARGETS[0]
-        if build_target in TEST_BUILD_TARGET_ACCEPTED_ARGS:
+        if lib_to_compile == "test" or build_target in TEST_BUILD_TARGET_ACCEPTED_ARGS:
             args["TARGET_ENV"] = "tests"
-        elif build_target in SIM_BUILD_TARGET_ACCEPTED_ARGS:
+        elif lib_to_compile == "sim" or build_target in SIM_BUILD_TARGET_ACCEPTED_ARGS:
             args["TARGET_ENV"] = "sim"
-        elif build_target in HARDWARE_BUILD_TARGET_ACCEPTED_ARGS:
+        elif lib_to_compile == "mcb" or build_target in HARDWARE_BUILD_TARGET_ACCEPTED_ARGS:
             args["TARGET_ENV"] = "hardware"
         else:
             raise Exception("You did not select a valid target.\n" + USAGE)

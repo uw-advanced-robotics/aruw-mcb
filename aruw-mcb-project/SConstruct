@@ -150,42 +150,44 @@ else:
     sources = []
 
 
-# Use a SConscript file in the source directory to enable building with
+# Use an SConscript file in the source directory to enable building with
 # source-specific build flags (e.g. robot type)
 env.SConscript(dirs=[SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
 
 
-if args["TARGET_ENV"] == "hardware":
-    program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)
+if args["COMPILE_SRC"]:
+    # Only add aliases when we are compiling source. When we don't add alias, the default
+    # build environment will only build the static libraries (modm and aruwlib)
+    if args["TARGET_ENV"] == "hardware":
+        program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)
 
-    # The executable depends on the linkerscript
-    env.Depends(target=program, dependency=abspath("aruwlib/modm/link/linkerscript.ld"))
+        # The executable depends on the linkerscript
+        env.Depends(target=program, dependency=abspath("aruwlib/modm/link/linkerscript.ld"))
 
-    # Add target environment-specific SCons aliases
-    # WARNING: all aliases must be checked during argument validation
-    env.Alias("build", program)
-    env.Alias("size", env.Size(program))
-    env.Alias("gdb", env.DebugGdbRemote(program))
-    env.Alias("run", [env.ProgramOpenOcd(program)])
-    env.Alias("all", ["build", "size"])
-    env.Default("all")  # For the hardware target env, "all" runs if you don't
-                        # specify anything (i.e. just type "scons")
-elif args["TARGET_ENV"] == "tests":
-    env.Append(toolpath=[abspath(r"build_tools")])
-    env.Tool("run_gcov")
+        # Add target environment-specific SCons aliases
+        # WARNING: all aliases must be checked during argument validation
+        env.Alias("build", program)
+        env.Alias("size", env.Size(program))
+        env.Alias("gdb", env.DebugGdbRemote(program))
+        env.Alias("run", [env.ProgramOpenOcd(program)])
+        env.Alias("all", ["build", "size"])
+        env.Default("all")  # For the hardware target env, "all" runs if you don't
+                            # specify anything (i.e. just type "scons")
+    elif args["TARGET_ENV"] == "tests":
+        env.Append(toolpath=[abspath(r"build_tools")])
+        env.Tool("run_gcov")
 
-    program = env.Program(target=env["CONFIG_PROJECT_NAME"]+"-tests.elf", source=sources)
+        program = env.Program(target=env["CONFIG_PROJECT_NAME"]+"-tests.elf", source=sources)
 
-    # Add target environment-specific SCons aliases
-    # WARNING: all aliases must be checked during argument validation
-    env.Alias("build-tests", program)
-    env.Alias("run-tests", env.Run(program))
-    env.Alias("run-tests-gcov", [env.RunGCOV(program)])
+        # Add target environment-specific SCons aliases
+        # WARNING: all aliases must be checked during argument validation
+        env.Alias("build-tests", program)
+        env.Alias("run-tests", env.Run(program))
+        env.Alias("run-tests-gcov", [env.RunGCOV(program)])
+    else:
+        program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)
 
-else:
-    program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)
-
-    # Add target environment-specific SCons aliases
-    # WARNING: all aliases must be checked during argument validation
-    env.Alias("build-sim", program)
-    env.Alias("run-sim", env.Run(program))
+        # Add target environment-specific SCons aliases
+        # WARNING: all aliases must be checked during argument validation
+        env.Alias("build-sim", program)
+        env.Alias("run-sim", env.Run(program))

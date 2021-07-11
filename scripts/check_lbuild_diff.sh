@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
 #
 # This file is part of aruw-mcb.
@@ -14,32 +16,33 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+#
+# This script validates that the git repository has the most up to date
+# lbuild directory structure. Note at this script may change the state
+# of your repository's generated code and thus you should not use it on
+# a repository that has uncommitted changes.
 
-Import("env")
-Import("args")
-Import("sources")
+if [[ "$#" -ne 1 ]]; then
+    echo "usage: ./check_lbuild_diff.sh ./path/to/lbuild/dir"
+    exit 1
+fi
 
-# Don't compile this stuff when testing
-IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/control/*_control.cpp"]
+LBUILD_DIR=$1
+TEMP_DIR="tmp"
 
-ignored_files = []
-ignored_dirs = []
+cd "$LBUILD_DIR"
 
-if args["TARGET_ENV"] == "tests":
-    ignored_files.extend(IGNORED_FILES_WHILE_TESTING)
+cp -r "aruwlib" $TEMP_DIR
 
-env_cpy = env.Clone()
+lbuild build
+if [[ "$?" != 0 ]]; then
+    exit 1
+fi
 
-# Append on the global robot target build flag
-env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
-
-if args["COMPILE_SRC"]:
-    ignored_files.append("main_src_not_compiled.cpp")
-    rawSrcs = env_cpy.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)
-else:
-    rawSrcs = []
-
-for source in rawSrcs:
-    sources.append(env_cpy.Object(source))
-
-Return('sources')
+if [[ ! -z "$(git diff "$TEMP_DIR" "aruwlib")" ]]; then
+    echo "Generated lbuild is different, diff:"
+    git diff "$TEMP_DIR" "aruwlib"
+    exit 1
+else
+    exit 0
+fi
