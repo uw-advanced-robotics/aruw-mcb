@@ -17,8 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SENTINEL)
-
 #include "sentinel_full_traverse_command.hpp"
 
 using namespace aruwlib::arch::clock;
@@ -66,5 +64,3 @@ void SentinelFullTraverseCommand::end(bool) { subsystemSentinelDrive->setDesired
 
 bool SentinelFullTraverseCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::control::sentinel::drive
-
-#endif

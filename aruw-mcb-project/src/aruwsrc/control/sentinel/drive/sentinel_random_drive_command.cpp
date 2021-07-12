@@ -17,8 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SENTINEL)
-
 #ifndef PLATFORM_HOSTED
 #include "modm/platform/random/random_number_generator.hpp"
 #endif
@@ -88,5 +86,3 @@ void SentinelRandomDriveCommand::end(bool) { subsystemSentinelDrive->setDesiredR
 bool SentinelRandomDriveCommand::isFinished() const { return false; }
 
 }  // namespace aruwsrc::control::sentinel::drive
-
-#endif
