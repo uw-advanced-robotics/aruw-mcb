@@ -17,6 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifdef TARGET_SENTINEL
 #ifndef SENTINEL_DRIVE_SUBSYSTEM_MOCK_HPP_
 #define SENTINEL_DRIVE_SUBSYSTEM_MOCK_HPP_
 
@@ -44,3 +45,4 @@ class SentinelDriveSubsystemMock : public control::sentinel::drive::SentinelDriv
 }  // namespace aruwsrc::mock
 
 #endif  // SENTINEL_DRIVE_SUBSYSTEM_MOCK_HPP_
+#endif

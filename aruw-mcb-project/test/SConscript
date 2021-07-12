@@ -15,9 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
+from build_tools.extract_robot_type import VALID_ROBOT_TYPES
+from os.path import join
+
 Import("env")
 Import("args")
 Import("sources")
+
+IGNORED_ROBOT_TYPE_WORKING_DIRECTORY = "aruwsrc/control"
+
+ignored_files = []
+ignored_dirs = []
 
 if args["TARGET_ENV"] == "tests":
     env_cpy = env.Clone()
@@ -26,7 +34,12 @@ if args["TARGET_ENV"] == "tests":
     env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
 
     if args["COMPILE_SRC"]:
-        rawSrcs = env_cpy.FindSourceFiles(".")
+        for robot in VALID_ROBOT_TYPES:
+            if robot != args["ROBOT_TYPE"]:
+                robot_dir = str.lower(robot)[len("robot_") + 1:]
+                ignored_dirs.append(join(IGNORED_ROBOT_TYPE_WORKING_DIRECTORY, robot_dir))
+
+        rawSrcs = env_cpy.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)
     else:
         rawSrcs = []
 

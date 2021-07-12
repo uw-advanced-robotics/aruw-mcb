@@ -17,6 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifdef TARGET_SENTINEL
 #ifndef X_AXIS_SUBSYSTEM_MOCK_HPP_
 #define X_AXIS_SUBSYSTEM_MOCK_HPP_
 
@@ -39,3 +40,4 @@ class XAxisSubsystemMock : public engineer::XAxisSubsystem
 }  // namespace aruwsrc::mock
 
 #endif  // X_AXIS_SUBSYSTEM_MOCK_HPP_
+#endif

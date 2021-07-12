@@ -88,14 +88,6 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwlib::Drivers *drivers
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
-GrabberSubsystemMock::GrabberSubsystemMock(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Digital::OutputPin pin)
-    : engineer::GrabberSubsystem(drivers, pin)
-{
-}
-GrabberSubsystemMock::~GrabberSubsystemMock() {}
-
 OledDisplayMock::OledDisplayMock(aruwlib::Drivers *drivers) : display::OledDisplay(drivers) {}
 OledDisplayMock::~OledDisplayMock() {}
 
@@ -110,6 +102,7 @@ HopperSubsystemMock::HopperSubsystemMock(
 }
 HopperSubsystemMock::~HopperSubsystemMock() {}
 
+#ifdef TARGET_SENTINEL
 SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
     aruwlib::Drivers *drivers,
     aruwlib::gpio::Digital::InputPin leftLimitSwitch,
@@ -126,7 +119,9 @@ SentinelSwitcherSubsystemMock::SentinelSwitcherSubsystemMock(
 {
 }
 SentinelSwitcherSubsystemMock::~SentinelSwitcherSubsystemMock() {}
+#endif
 
+#ifdef TARGET_ENGINEER
 TowSubsystemMock::TowSubsystemMock(
     aruwlib::Drivers *drivers,
     aruwlib::gpio::Digital::OutputPin leftTowPin,
@@ -143,9 +138,6 @@ TowSubsystemMock::TowSubsystemMock(
 }
 TowSubsystemMock::~TowSubsystemMock() {}
 
-TurretSubsystemMock::TurretSubsystemMock(aruwlib::Drivers *drivers) : TurretSubsystem(drivers) {}
-TurretSubsystemMock::~TurretSubsystemMock() {}
-
 XAxisSubsystemMock::XAxisSubsystemMock(
     aruwlib::Drivers *drivers,
     aruwlib::gpio::Digital::OutputPin pin)
@@ -153,6 +145,18 @@ XAxisSubsystemMock::XAxisSubsystemMock(
 {
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
+
+GrabberSubsystemMock::GrabberSubsystemMock(
+    aruwlib::Drivers *drivers,
+    aruwlib::gpio::Digital::OutputPin pin)
+    : engineer::GrabberSubsystem(drivers, pin)
+{
+}
+GrabberSubsystemMock::~GrabberSubsystemMock() {}
+#endif
+
+TurretSubsystemMock::TurretSubsystemMock(aruwlib::Drivers *drivers) : TurretSubsystem(drivers) {}
+TurretSubsystemMock::~TurretSubsystemMock() {}
 
 XavierSerialMock::XavierSerialMock(aruwlib::Drivers *drivers) : serial::XavierSerial(drivers) {}
 XavierSerialMock::~XavierSerialMock() {}

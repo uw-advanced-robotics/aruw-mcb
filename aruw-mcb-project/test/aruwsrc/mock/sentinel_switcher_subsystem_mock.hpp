@@ -17,6 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifdef TARGET_SENTINEL
 #ifndef SENTINEL_SWITCHER_SUBSYSTEM_MOCK_HPP_
 #define SENTINEL_SWITCHER_SUBSYSTEM_MOCK_HPP_
 
@@ -42,3 +43,4 @@ public:
 }  // namespace aruwsrc::mock
 
 #endif  // SENTINEL_SWITCHER_SUBSYSTEM_MOCK_HPP_
+#endif

@@ -17,6 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifdef TARGET_SENTINEL
 #ifndef GRABBER_SUBSYSTEM_MOCK_HPP_
 #define GRABBER_SUBSYSTEM_MOCK_HPP_
 
@@ -39,3 +40,4 @@ class GrabberSubsystemMock : public engineer::GrabberSubsystem
 }  // namespace aruwsrc::mock
 
 #endif  // GRABBER_SUBSYSTEM_MOCK_HPP_
+#endif
