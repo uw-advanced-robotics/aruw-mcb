@@ -42,7 +42,9 @@ fi
 if [[ ! -z "$(git diff "$TEMP_DIR" "aruwlib")" ]]; then
     echo "Generated lbuild is different, diff:"
     git diff "$TEMP_DIR" "aruwlib"
+    rm -r $TEMP_DIR
     exit 1
 else
+    rm -r $TEMP_DIR
     exit 0
 fi

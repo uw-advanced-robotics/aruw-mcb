@@ -32,13 +32,17 @@ variables:
   - develop
   - schedules
 
+.default_except: &default_except
+  variables:
+    - $UPDATE_SUBMODULE
+
 .verification_only: &verification_only
   - merge_requests
   - master
   - develop
 
 .verification_except: &verification_except
-  - schedules 
+  - schedules
 
 stages:
   - Initial Verification
@@ -73,6 +77,7 @@ Policy Checks:
 .mcb build:
   stage: Build all Targets
   only: *default_only
+  except: *default_except
   needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
@@ -94,6 +99,7 @@ Policy Checks:
 .sim build:
   stage: Build all Targets
   only: *default_only
+  except: *default_except
   needs: ["Sim Lib Build"]
   script:
     - cd aruw-mcb-project
@@ -105,6 +111,7 @@ Policy Checks:
 .test build:
   stage: Build all Targets
   only: *default_only
+  except: *default_except
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
@@ -118,6 +125,7 @@ Policy Checks:
 MCB Lib Build:
   stage: Initial Verification
   only: *default_only
+  except: *default_except
   needs: []
   script:
     - cd aruw-mcb-project
@@ -170,6 +178,7 @@ Soldier Test Build:
   stage: Initial Verification
   needs: []
   only: *default_only
+  except: *default_except
   script:
     - cd aruw-mcb-project
     - python3 $(which scons) run-tests-gcov profile=fast robot=TARGET_SOLDIER -j${NUM_JOBS}
@@ -307,3 +316,31 @@ pages:
     - develop
   except:
     - schedules
+
+Update submodule:
+  stage: Initial Verification
+  needs: []
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - apt-get update -y && apt-get install -yqqf curl openssh-client git unzip sshpass rsync --fix-missing
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_TOOLKIT" | base64 -d | ssh-add - > /dev/null
+
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+    - git config --global user.email "robomstr@uw.edu"
+    - git config --global user.name "Gitlab Runner"
+
+    - git remote rm origin
+    - git remote add origin git@gitlab.com:aruw/controls/aruw-mcb.git
+  script:
+    - ./scripts/update_aruwlib_submodule.sh ./aruw-mcb-project
+  only:
+    variables:
+      - $UPDATE_SUBMODULE
