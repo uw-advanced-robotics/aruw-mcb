@@ -43,6 +43,7 @@
 #include "aruwlib/architecture/clock.hpp"
 
 #include "aruwsrc/control/robot_control.hpp"
+#include "aruwsrc/sim-initialization/robot_sim.hpp"
 
 using aruwlib::Drivers;
 
@@ -77,6 +78,7 @@ int main()
     aruwsrc::control::initSubsystemCommands(drivers);
 
 #ifdef PLATFORM_HOSTED
+    aruwsrc::sim::initialize_robot_sim();
     aruwlib::motorsim::SimHandler::resetMotorSims();
     // Blocking call, waits until Windows Simulator connects.
     aruwlib::communication::TCPServer::MainServer()->getConnection();
