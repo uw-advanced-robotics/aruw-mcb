@@ -29,6 +29,8 @@
 
 #include "aruwlib/util_macros.hpp"
 
+#include "dma/dma_uart_rx_irqhandler.hpp"
+
 namespace aruwlib
 {
 class Drivers;
@@ -37,6 +39,12 @@ class Drivers;
  */
 class Remote
 {
+private:
+    static constexpr int DMA_BUFF_SIZE = 50;       /// Size of DMA buffer used when requesting data.
+    static constexpr int REMOTE_PACKET_SIZE = 18;  /// Length of the remote recieve buffer.
+    static constexpr float STICK_MAX_VALUE = 660.0f;  /// Max value received by one of the sticks.
+    static constexpr uint32_t RECEIVE_PERIOD = 14;    /// Time between message receivals, in ms
+
 public:
 #ifndef PLATFORM_HOSTED
     using RemoteDma = modm::platform::Usart1<
@@ -44,6 +52,11 @@ public:
         modm::platform::DmaBase::ChannelSelection::CHANNEL_4,
         modm::platform::Dma2::Stream2,
         modm::platform::DmaBase::ChannelSelection::CHANNEL_4>;
+
+    using RemoteDmaTxISRHandler =
+        aruwlib::dma::DmaRXISR<REMOTE_PACKET_SIZE, RemoteDma, modm::platform::Dma2::Stream2>;
+#else
+    using RemoteDmaTxISRHandler = aruwlib::dma::DmaRXISRStub;
 #endif
 
     Remote(Drivers *drivers) : drivers(drivers) {}
@@ -173,18 +186,11 @@ public:
      */
     mockable uint32_t getUpdateCounter() const;
 
-    /**
-     * Checks if the remote is offline and if so resets the remote info struct.
-     */
-    mockable void monitorRemoteStatus();
-
 private:
-    static constexpr int DMA_BUFF_SIZE = 50;       /// Size of DMA buffer used when requesting data.
-    static constexpr int REMOTE_PACKET_SIZE = 18;  /// Length of the remote recieve buffer.
-    static constexpr float STICK_MAX_VALUE = 660.0f;  /// Max value received by one of the sticks.
-    static constexpr uint32_t RECEIVE_PERIOD = 14;    /// Time between message receivals, in ms
-
-    struct RemoteInfo  /// The current remote information
+    /**
+     * The current remote information
+     */
+    struct RemoteInfo
     {
         uint32_t updateCounter = 0;
         int16_t rightHorizontal = 0;
@@ -213,14 +219,10 @@ private:
 
     uint32_t lastRead = 0;  /// Timestamp when last byte was read (milliseconds).
 
-    bool resetFlag = false;  ///< An indication that the remote info has been reset.
-
     void parseBuffer();  /// Parses the current rxBuffer.
 
-    void clearRxBuffer();  /// Clears the current rxBuffer.
-
     void reset();  /// Resets the current remote info.
-};                 // class Remote
+};
 
 }  // namespace aruwlib
 

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2020, Mike Wolfram
  * Copyright (c) 2020, Matthew Arnold
  *
  * This file is part of the modm project.

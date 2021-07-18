@@ -206,7 +206,7 @@ public:
         // When number of data transfers programmed in the DMA controller is reached, the DMA
         // controller generates an interrupt on the DMA channel interrupt vector The DMAR bit should
         // be cleared by software in the USART_Cr3 register during the interrupt subroutine
-        RxStream::disable();
+        TxStream::disable();
         USART1->CR3 &= ~USART_CR3_DMAR;
         finishedTx = true;
         uart1DmaTxComplete();

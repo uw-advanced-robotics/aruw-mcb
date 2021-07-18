@@ -98,7 +98,7 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->remote.monitorRemoteStatus, ());
+            PROFILE(drivers->profiler, drivers->remote.read, ());
             PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
             PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());

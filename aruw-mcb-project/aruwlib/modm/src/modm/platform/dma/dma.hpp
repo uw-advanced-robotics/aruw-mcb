@@ -2,6 +2,7 @@
  * Copyright (c) 2014, Kevin Läufer
  * Copyright (c) 2014-2017, Niklas Hauser
  * Copyright (c) 2020, Mike Wolfram
+ * Copyright (c) 2020, Matthew Arnold
  *
  * This file is part of the modm project.
  *
