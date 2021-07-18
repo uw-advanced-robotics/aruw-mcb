@@ -16,26 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #if defined(TARGET_SOLDIER)
 
-#include <aruwlib/DriversSingleton.hpp>
-#include <aruwlib/control/CommandMapper.hpp>
-#include <aruwlib/control/HoldCommandMapping.hpp>
-#include <aruwlib/control/HoldRepeatCommandMapping.hpp>
-#include <aruwlib/control/PressCommandMapping.hpp>
-#include <aruwlib/control/ToggleCommandMapping.hpp>
+#include "aruwlib/control/command_mapper.hpp"
+#include "aruwlib/control/hold_command_mapping.hpp"
+#include "aruwlib/control/hold_repeat_command_mapping.hpp"
+#include "aruwlib/control/press_command_mapping.hpp"
+#include "aruwlib/control/setpoint/commands/calibrate_command.hpp"
+#include "aruwlib/control/toggle_command_mapping.hpp"
+#include "aruwlib/drivers_singleton.hpp"
 
-#include "agitator/agitator_calibrate_command.hpp"
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
-#include "chassis/wiggle_drive_command.hpp"
-#include "cilent-display/client_display_command.hpp"
-#include "cilent-display/client_display_subsystem.hpp"
+#include "client-display/client_display_command.hpp"
+#include "client-display/client_display_subsystem.hpp"
 #include "hopper-cover/hopper_commands.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
+#include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
@@ -47,12 +49,15 @@
 #include "aruwlib/motor/motorsim/sim_handler.hpp"
 #endif
 
+using namespace aruwlib::control::setpoint;
+using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
+using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
-using namespace aruwsrc::turret;
 using namespace aruwlib::control;
 using namespace aruwsrc::display;
+using namespace aruwsrc::control;
 using aruwlib::DoNotUse_getDrivers;
 using aruwlib::Remote;
 
@@ -64,12 +69,10 @@ using aruwlib::Remote;
  */
 aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
 
-namespace aruwsrc
-{
-namespace control
+namespace soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers());
+TurretSubsystem turret(drivers(), false);
 
 ChassisSubsystem chassis(drivers());
 
@@ -83,13 +86,16 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted);
+    AgitatorSubsystem::isAgitatorInverted,
+    true,
+    AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
+    AgitatorSubsystem::JAMMING_TIME);
 
 // TODO: validate and tune these constexpr parameters for hopper lid motor
 // also find out what kind of motor hopper lid uses lol
 AgitatorSubsystem hopperCover(
     drivers(),
-    AgitatorSubsystem::PID_17MM_P,
+    AgitatorSubsystem::PID_HOPPER_P,
     AgitatorSubsystem::PID_17MM_I,
     AgitatorSubsystem::PID_17MM_D,
     AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
@@ -97,9 +103,10 @@ AgitatorSubsystem hopperCover(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     AgitatorSubsystem::HOPPER_COVER_MOTOR_ID,
     AgitatorSubsystem::HOPPER_COVER_MOTOR_CAN_BUS,
-    AgitatorSubsystem::IS_HOPPER_COVER_INVERTED);
+    AgitatorSubsystem::IS_HOPPER_COVER_INVERTED,
+    true);
 
-FrictionWheelSubsystem frictionWheels(drivers());
+FrictionWheelSubsystem frictionWheels(drivers(), aruwlib::motor::MOTOR1, aruwlib::motor::MOTOR2);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -108,13 +115,13 @@ ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
 
-WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
+BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
+TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis, true);
 
 TurretCVCommand turretCVCommand(drivers(), &turret);
 
-AgitatorCalibrateCommand agitatorCalibrateCommand(&agitator);
+CalibrateCommand agitatorCalibrateCommand(&agitator);
 
 ShootFastComprisedCommand17MM agitatorShootFastLimited(drivers(), &agitator);
 
@@ -124,16 +131,14 @@ SoldierOpenHopperCommand openHopperCommand(&hopperCover);
 
 SoldierCloseHopperCommand closeHopperCommand(&hopperCover);
 
-FrictionWheelRotateCommand spinFrictionWheels(
-    &frictionWheels,
-    FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels);
 
 FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
-    &wiggleDriveCommand,
+    &beybladeCommand,
     &chassisAutorotateCommand,
     nullptr,
     &chassisDriveCommand);
@@ -150,7 +155,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&wiggleDriveCommand},
+    {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
@@ -158,11 +163,8 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-ToggleCommandMapping rToggled(
-    drivers(),
-    {&openHopperCommand, &stopFrictionWheels},
-    RemoteMapState({Remote::Key::R}));
-ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
+ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
     {&agitatorShootFastLimited},
@@ -185,56 +187,6 @@ void registerSoldierSubsystems(aruwlib::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
-
-#ifdef PLATFORM_HOSTED
-    // Register the motor sims for the Agitator subsystem
-    // TODO: Create simulator for correct motor
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_ID);
-
-    // Register the motor sims for the Chassis subsystem
-    aruwlib::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
-        aruwlib::motorsim::MotorSim::MotorType::M3508;
-    aruwlib::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        chassis::ChassisSubsystem::LEFT_FRONT_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        chassis::ChassisSubsystem::LEFT_BACK_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        chassis::ChassisSubsystem::RIGHT_FRONT_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        chassis::ChassisSubsystem::RIGHT_BACK_MOTOR_ID);
-
-    // Register the motor sims for the turret subsystem
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::turret::TurretSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::turret::TurretSubsystem::PITCH_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::turret::TurretSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::turret::TurretSubsystem::YAW_MOTOR_ID);
-
-    // Register the motor sims for the Hopper Cover (There aren't any)
-    // Register the motor sims for the Friction Wheels
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
-#endif  // PLATFORM_HOSTED
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -246,6 +198,8 @@ void initializeSubsystems()
     frictionWheels.initialize();
     hopperCover.initialize();
     clientDisplay.initialize();
+    drivers()->xavierSerial.attachChassis(&chassis);
+    drivers()->xavierSerial.attachTurret(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -276,21 +230,19 @@ void registerSoldierIoMappings(aruwlib::Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
-
-    /// \todo left switch up is cv command
 }
+}  // namespace soldier_control
 
+namespace aruwsrc::control
+{
 void initSubsystemCommands(aruwlib::Drivers *drivers)
 {
-    initializeSubsystems();
-    registerSoldierSubsystems(drivers);
-    setDefaultSoldierCommands(drivers);
-    startSoldierCommands(drivers);
-    registerSoldierIoMappings(drivers);
+    soldier_control::initializeSubsystems();
+    soldier_control::registerSoldierSubsystems(drivers);
+    soldier_control::setDefaultSoldierCommands(drivers);
+    soldier_control::startSoldierCommands(drivers);
+    soldier_control::registerSoldierIoMappings(drivers);
 }
-
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control
 
 #endif

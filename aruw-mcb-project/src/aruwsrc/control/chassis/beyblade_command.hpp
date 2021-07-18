@@ -20,22 +20,16 @@
 #ifndef BEYBLADE_COMMAND_HPP_
 #define BEYBLADE_COMMAND_HPP_
 
-#include <aruwlib/algorithms/ramp.hpp>
-#include <aruwlib/control/command.hpp>
+#include "aruwlib/algorithms/ramp.hpp"
+#include "aruwlib/control/command.hpp"
+#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
 
 namespace aruwlib
 {
 class Drivers;
 }
 
-namespace aruwsrc
-{
-namespace turret
-{
-class TurretSubsystem;
-}
-
-namespace chassis
+namespace aruwsrc::chassis
 {
 class ChassisSubsystem;
 
@@ -48,7 +42,7 @@ public:
     BeybladeCommand(
         aruwlib::Drivers* drivers,
         ChassisSubsystem* chassis,
-        aruwsrc::turret::TurretSubsystem* turret);
+        const aruwlib::control::turret::TurretSubsystemInterface* turret);
 
     // fractional multiplier for user input and maximum motor speed to calculate desired x and y
     // speeds
@@ -59,8 +53,31 @@ public:
     static constexpr float TRANSLATION_LIMITING_FRACTION = 0.5f;
 
     // set ramp targets for rotational speed + units unknown(?)
-    static constexpr float RAMP_TARGET_NON_TRANSLATIONAL = 7000;
-    static constexpr float RAMP_TARGET_TRANSLATIONAL = 3500;
+    /**
+     * Use this rotation speed if power consumption limit is <= 45 W
+     */
+    static constexpr float ROTATION_TARGET_45W_CUTOFF = 3000.0f;
+    /**
+     * Use this rotation speed if power consumption limit is <= 60 W and > 45 W
+     */
+    static constexpr float ROTATION_TARGET_60W_CUTOFF = 3500.0f;
+    /**
+     * Use this rotation speed if power consumption limit is <= 80 W and > 60 W
+     */
+    static constexpr float ROTATION_TARGET_80W_CUTOFF = 4000.0f;
+    /**
+     * Use this rotation speed if power consumption limit is > 80 W
+     */
+    static constexpr float ROTATION_TARGET_MAX_CUTOFF = 4500.0f;
+    /**
+     * The fraction to cut rotation speed while moving and beyblading
+     */
+    static constexpr float RAMP_TARGET_TRANSLATIONAL_FRAC = 0.5f;
+    /**
+     * Fraction of the final setpoint to update the ramp target each time until
+     * the final setpoint is reached
+     */
+    static constexpr float RAMP_UPDATE_FRAC = 0.125;
 
     /**
      * Sets rotational input target on Ramp
@@ -81,18 +98,17 @@ public:
 
 private:
     float rampTarget;
-    static constexpr float rampUpdate = 0.125;
+    float rotationDirection;
 
     aruwlib::algorithms::Ramp rotateSpeedRamp;
 
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
-    aruwsrc::turret::TurretSubsystem* turret;
+    const aruwlib::control::turret::TurretSubsystemInterface* turret;
 
+    float getRotationTarget() const;
 };  // class BeybladeCommand
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::chassis
 
 #endif  // BEYBLADE_COMMAND_HPP_

@@ -20,10 +20,9 @@
 #ifndef TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
 #define TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
 
-#include <aruwlib/algorithms/contiguous_float.hpp>
-#include <aruwlib/control/command.hpp>
-
-#include "aruwsrc/algorithms/turret_pid.hpp"
+#include "aruwlib/algorithms/contiguous_float.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
+#include "aruwlib/control/command.hpp"
 
 namespace aruwlib
 {
@@ -37,7 +36,7 @@ namespace chassis
 class ChassisSubsystem;
 }
 
-namespace turret
+namespace control::turret
 {
 class TurretSubsystem;
 
@@ -56,7 +55,8 @@ public:
     TurretWorldRelativePositionCommand(
         aruwlib::Drivers *drivers,
         TurretSubsystem *subsystem,
-        const chassis::ChassisSubsystem *chassis);
+        const chassis::ChassisSubsystem *chassis,
+        bool useImuOnTurret = false);
 
     void initialize() override;
 
@@ -69,30 +69,59 @@ public:
     const char *getName() const override { return "turret world relative position"; }
 
 private:
-    static constexpr float YAW_P = 4000.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 180.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
+#ifdef TARGET_SOLDIER
+    static constexpr float YAW_P = 3800.0f;
+    static constexpr float YAW_I = 50.0f;
+    static constexpr float YAW_D_TURRET_IMU = 4300.0f;
+    static constexpr float YAW_D_CHASSIS_IMU = 180.0f;
+    static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
     static constexpr float YAW_MAX_OUTPUT = 30000.0f;
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 10.0f;
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float YAW_R_PROPORTIONAL_KALMAN = 10.0f;
 
-    static constexpr float PITCH_P = 4500.0f;
+    static constexpr float PITCH_P = 3200.0f;
     static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 90.0f;
+    static constexpr float PITCH_D = 120.0f;
     static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
     static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
     static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 47.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    static constexpr float USER_YAW_INPUT_SCALAR = 1.0f;
-    static constexpr float USER_PITCH_INPUT_SCALAR = 0.5f;
+    static constexpr float USER_YAW_INPUT_SCALAR = 1.5f;
+    static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
 
     static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 4000.0f;
+#else
+    static constexpr float YAW_P = 2200.0f;
+    static constexpr float YAW_I = 50.0f;
+    static constexpr float YAW_D_TURRET_IMU = 10.0f;
+    static constexpr float YAW_D_CHASSIS_IMU = 60.0f;
+    static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
+    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
+    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 50.0f;
+    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 10.0f;
+
+    static constexpr float PITCH_P = 3400.0f;
+    static constexpr float PITCH_I = 0.0f;
+    static constexpr float PITCH_D = 150.0f;
+    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
+    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 47.0f;
+    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
+
+    static constexpr float USER_YAW_INPUT_SCALAR = 1.5f;
+    static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
+
+    static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 0.0f;
+#endif
 
     aruwlib::Drivers *drivers;
 
@@ -107,8 +136,13 @@ private:
 
     uint32_t prevTime;
 
-    aruwsrc::algorithms::TurretPid yawPid;
-    aruwsrc::algorithms::TurretPid pitchPid;
+    aruwlib::algorithms::SmoothPid yawPid;
+    aruwlib::algorithms::SmoothPid pitchPid;
+
+    const bool useImuOnTurret;
+    bool usingImuOnTurret;
+
+    int blinkCounter = 0;
 
     void runYawPositionController(float dt);
     void runPitchPositionController(float dt);
@@ -117,7 +151,7 @@ private:
     float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
 };  // class TurretWorldRelativePositionCommand
 
-}  // namespace turret
+}  // namespace control::turret
 
 }  // namespace aruwsrc
 

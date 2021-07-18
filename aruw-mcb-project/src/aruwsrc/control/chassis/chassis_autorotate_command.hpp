@@ -20,21 +20,15 @@
 #ifndef CHASSIS_AUTOROTATE_COMMAND_HPP_
 #define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
-#include <aruwlib/control/command.hpp>
+#include "aruwlib/control/command.hpp"
+#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
 
 namespace aruwlib
 {
 class Drivers;
 }
 
-namespace aruwsrc
-{
-namespace turret
-{
-class TurretSubsystem;
-}
-
-namespace chassis
+namespace aruwsrc::chassis
 {
 class ChassisSubsystem;
 
@@ -48,7 +42,7 @@ public:
     ChassisAutorotateCommand(
         aruwlib::Drivers* drivers,
         ChassisSubsystem* chassis,
-        aruwsrc::turret::TurretSubsystem const* turret);
+        const aruwlib::control::turret::TurretSubsystemInterface* turret);
 
     void initialize() override;
 
@@ -67,15 +61,13 @@ public:
     const char* getName() const override { return "chassis autorotate"; }
 
 private:
-    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -85.0f;
+    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
 
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
-    aruwsrc::turret::TurretSubsystem const* turret;
+    const aruwlib::control::turret::TurretSubsystemInterface* turret;
 };  // class ChassisAutorotateCommand
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::chassis
 
 #endif  // CHASSIS_AUTOROTATE_COMMAND_HPP_

@@ -19,48 +19,109 @@
 
 #include "agitator_shoot_comprised_command_instances.hpp"
 
+using namespace aruwlib::control::setpoint;
+
 namespace aruwsrc
 {
 namespace agitator
 {
-static inline void initializeComprisedCommand(
+ShootFastComprisedCommand17MM::ShootFastComprisedCommand17MM(
     aruwlib::Drivers *drivers,
-    const float heatLimitBuffer,
-    const bool heatLimiting,
-    aruwsrc::agitator::AgitatorRotateCommand *agitatorRotateCommand,
-    aruwlib::control::CommandScheduler *comprisedCommandScheduler,
-    bool *unjamSequenceCommencing)
+    AgitatorSubsystem *agitator17mm,
+    bool heatLimiting,
+    float agitatorRotateAngle)
+    : aruwlib::control::setpoint::MoveUnjamComprisedCommand(
+          drivers,
+          agitator17mm,
+          agitatorRotateAngle,
+          aruwlib::algorithms::PI / 2.0f,
+          40,
+          10),
+      drivers(drivers),
+      heatLimiting(heatLimiting)
 {
-    *unjamSequenceCommencing = false;
+}
+
+bool ShootFastComprisedCommand17MM::isReady()
+{
     const auto &robotData = drivers->refSerial.getRobotData();
-    if (drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
-        robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1)
-    {
-        return;
-    }
-    comprisedCommandScheduler->addCommand(agitatorRotateCommand);
+
+    return setpointSubsystem->isOnline() &&
+           !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
+             (robotData.turret.heat17ID1 + HEAT_LIMIT_BUFFER > robotData.turret.heatLimit17ID1));
 }
 
-void ShootFastComprisedCommand17MM::initialize()
+bool ShootFastComprisedCommand17MM::isFinished() const
 {
-    initializeComprisedCommand(
-        drivers,
-        HEAT_LIMIT_BUFFER,
-        heatLimiting,
-        &agitatorRotateCommand,
-        &comprisedCommandScheduler,
-        &unjamSequenceCommencing);
+    const auto &robotData = drivers->refSerial.getRobotData();
+
+    return (!unjamSequenceCommencing &&
+            !comprisedCommandScheduler.isCommandScheduled(&agitatorRotateCommand)) ||
+           (unjamSequenceCommencing &&
+            !comprisedCommandScheduler.isCommandScheduled(&agitatorUnjamCommand)) ||
+           agitatorDisconnectFault ||
+           (drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
+            (robotData.turret.heat17ID1 + HEAT_LIMIT_BUFFER > robotData.turret.heatLimit17ID1));
 }
 
-void ShootSlowComprisedCommand17MM::initialize()
+WaterwheelLoadCommand42mm::WaterwheelLoadCommand42mm(
+    aruwlib::Drivers *drivers,
+    aruwsrc::agitator::LimitSwitchAgitatorSubsystem *waterwheel)
+    : MoveUnjamComprisedCommand(
+          drivers,
+          waterwheel,
+          WATERWHEEL_42MM_CHANGE_ANGLE,
+          WATERWHEEL_42MM_MAX_UNJAM_ANGLE,
+          WATERWHEEL_42MM_ROTATE_TIME,
+          WATERWHEEL_42MM_PAUSE_AFTER_ROTATE_TIME),
+      drivers(drivers),
+      waterwheel(waterwheel)
 {
-    initializeComprisedCommand(
-        drivers,
-        HEAT_LIMIT_BUFFER,
-        heatLimiting,
-        &agitatorRotateCommand,
-        &comprisedCommandScheduler,
-        &unjamSequenceCommencing);
+}
+
+bool WaterwheelLoadCommand42mm::isReady()
+{
+    return (waterwheel->getBallsInTube() < BALLS_QUEUED_IN_TUBE);
+}
+
+bool WaterwheelLoadCommand42mm::isFinished() const
+{
+    return MoveUnjamComprisedCommand::isFinished() ||
+           (waterwheel->getBallsInTube() >= BALLS_QUEUED_IN_TUBE);
+}
+
+ShootCommand42mm::ShootCommand42mm(
+    aruwlib::Drivers *drivers,
+    aruwlib::control::setpoint::SetpointSubsystem *kicker,
+    bool heatLimiting)
+    : MoveCommand(
+          kicker,
+          KICKER_42MM_CHANGE_ANGLE,
+          KICKER_42MM_ROTATE_TIME,
+          KICKER_42MM_PAUSE_AFTER_ROTATE_TIME,
+          true),
+      drivers(drivers),
+      heatLimiting(heatLimiting)
+{
+}
+
+int ShootCommand42mm::initializeCount = 0;
+
+bool ShootCommand42mm::isReady()
+{
+    const auto &robotData = drivers->refSerial.getRobotData();
+
+    // !(heat limiting data available && apply heat limiting && heat is over limit)
+    return MoveCommand::isReady() &&
+           !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
+             (robotData.turret.heat42 + HEAT_LIMIT_BUFFER > robotData.turret.heatLimit42));
+}
+
+void ShootCommand42mm::initialize()
+{
+    MoveCommand::initialize();
+    initializeCount++;
 }
 }  // namespace agitator
+
 }  // namespace aruwsrc

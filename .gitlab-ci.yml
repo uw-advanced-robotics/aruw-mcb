@@ -20,7 +20,8 @@ default:
 
 variables:
   ARTIFACT_PATH: isolated-deploy
-  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_STRATEGY: none
+  BUILD_PATH: aruw-mcb-project/build
   DEFAULT_BUILD_ELF_FILE: build/hardware/release/aruw-mcb.elf
   DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/fast/aruw-mcb-tests.elf
   NUM_JOBS: 4
@@ -31,13 +32,17 @@ variables:
   - develop
   - schedules
 
+.default_except: &default_except
+  variables:
+    - $UPDATE_SUBMODULE
+
 .verification_only: &verification_only
   - merge_requests
   - master
   - develop
 
 .verification_except: &verification_except
-  - schedules 
+  - schedules
 
 stages:
   - Initial Verification
@@ -58,11 +63,12 @@ clang-format:
 
 Policy Checks:
   stage: Initial Verification
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
   script:
     - python3 ./scripts/check_singleton_drivers.py ./aruw-mcb-project/src/ 
     - python3 ./scripts/check_license_headers.py
-  variables:
-    GIT_SUBMODULE_STRATEGY: none
+    - ./scripts/check_lbuild_diff.sh ./aruw-mcb-project
   only: *verification_only
   except: *verification_except
 
@@ -71,6 +77,8 @@ Policy Checks:
 .mcb build:
   stage: Build all Targets
   only: *default_only
+  except: *default_except
+  needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
     - python3 $(which scons) build robot=TARGET_$ROBOT -j${NUM_JOBS} additional-ccflags=-Werror
@@ -84,21 +92,73 @@ Policy Checks:
     expire_in: 2 weeks
     reports:
       metrics: metrics.txt
+  cache:
+    key: mcb-binaries
+    untracked: true
 
 .sim build:
   stage: Build all Targets
   only: *default_only
+  except: *default_except
+  needs: ["Sim Lib Build"]
   script:
     - cd aruw-mcb-project
     - python3 $(which scons) build-sim profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
+  cache:
+    key: sim-binaries
+    untracked: true
 
 .test build:
   stage: Build all Targets
   only: *default_only
+  except: *default_except
+  needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
     - python3 $(which scons) build-tests profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
+  cache:
+    key: test-binaries
+    untracked: true
+
+# Generic build, done before other builds which then use shared cache to build faster
+MCB Lib Build:
+  stage: Initial Verification
+  only: *default_only
+  except: *default_except
+  needs: []
+  script:
+    - cd aruw-mcb-project
+    - python3 $(which scons) build compile_lib_only=mcb -j${NUM_JOBS} additional-ccflags=-Werror
+  cache:
+    untracked: true
+    key: mcb-binaries
+    paths:
+      - $BUILD_PATH
+
+Sim Lib Build:
+  extends:
+    - .sim build
+  needs: []
+  stage: Initial Verification
+  script:
+    - cd aruw-mcb-project
+    - python3 $(which scons) build compile_lib_only=sim profile=fast -j${NUM_JOBS}
+  cache:
+    paths:
+      - $BUILD_PATH
+
+Test Lib Build:
+  extends:
+    - .test build
+  needs: []
+  stage: Initial Verification
+  script:
+    - cd aruw-mcb-project
+    - python3 $(which scons) build compile_lib_only=test profile=fast -j${NUM_JOBS}
+  cache:
+    paths:
+      - $BUILD_PATH
 
 # Soldier build
 
@@ -115,8 +175,10 @@ Soldier Sim Build:
     ROBOT: SOLDIER
 
 Soldier Test Build:
-  stage: Build all Targets
+  stage: Initial Verification
+  needs: []
   only: *default_only
+  except: *default_except
   script:
     - cd aruw-mcb-project
     - python3 $(which scons) run-tests-gcov profile=fast robot=TARGET_SOLDIER -j${NUM_JOBS}
@@ -232,10 +294,9 @@ Sentinel Test Build:
 # Pages deploy
 
 pages:
+  needs: []
   image: alpine
   stage: Deploy Pages
-  variables:
-    GIT_SUBMODULE_STRATEGY: none
   before_script:
     - apk update
     - apk add py-pip python3-dev
@@ -255,3 +316,31 @@ pages:
     - develop
   except:
     - schedules
+
+Update submodule:
+  stage: Initial Verification
+  needs: []
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - apt-get update -y && apt-get install -yqqf curl openssh-client git unzip sshpass rsync --fix-missing
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_TOOLKIT" | base64 -d | ssh-add - > /dev/null
+
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+    - git config --global user.email "robomstr@uw.edu"
+    - git config --global user.name "Gitlab Runner"
+
+    - git remote rm origin
+    - git remote add origin git@gitlab.com:aruw/controls/aruw-mcb.git
+  script:
+    - ./scripts/update_aruwlib_submodule.sh ./aruw-mcb-project
+  only:
+    variables:
+      - $UPDATE_SUBMODULE

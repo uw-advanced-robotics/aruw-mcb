@@ -26,12 +26,12 @@
 #ifndef __OPEN_HOPPER_SUBSYSTEM__
 #define __OPEN_HOPPER_SUBSYSTEM__
 
-#include <aruwlib/control/command_scheduler.hpp>
-#include <aruwlib/control/subsystem.hpp>
-#include <aruwlib/motor/servo.hpp>
-#include <modm/math/filter/pid.hpp>
+#include "aruwlib/control/command_scheduler.hpp"
+#include "aruwlib/control/subsystem.hpp"
+#include "aruwlib/motor/servo.hpp"
+#include "aruwlib/util_macros.hpp"
 
-#include "util_macros.hpp"
+#include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc
 {

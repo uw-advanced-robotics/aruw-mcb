@@ -20,7 +20,7 @@
 #ifndef __FRICTION_WHEEL_ROTATE_COMMAND_HPP__
 #define __FRICTION_WHEEL_ROTATE_COMMAND_HPP__
 
-#include <aruwlib/control/command.hpp>
+#include "aruwlib/control/command.hpp"
 
 namespace aruwsrc
 {
@@ -46,7 +46,15 @@ public:
 
     const char* getName() const override { return "friction wheel rotate"; }
 
+#if defined(TARGET_SOLDIER)
+    static constexpr int16_t DEFAULT_WHEEL_RPM = 4500;
+#elif defined(TARGET_HERO)
+    static constexpr int16_t DEFAULT_WHEEL_RPM = 7000;
+#elif defined(TARGET_SENTINEL)
     static const int16_t DEFAULT_WHEEL_RPM = 5150;
+#else
+    static constexpr int16_t DEFAULT_WHEEL_RPM = 0;
+#endif
 
 private:
     FrictionWheelSubsystem* frictionWheelSubsystem;

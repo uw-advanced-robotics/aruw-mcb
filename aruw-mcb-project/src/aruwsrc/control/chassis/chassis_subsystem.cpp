@@ -23,8 +23,9 @@
 
 #include "chassis_subsystem.hpp"
 
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/communication/remote.hpp>
+#include "aruwlib/algorithms/math_user_utils.hpp"
+#include "aruwlib/communication/remote.hpp"
+#include "aruwlib/drivers.hpp"
 
 using namespace aruwlib;
 using namespace aruwlib::algorithms;
@@ -53,6 +54,7 @@ void ChassisSubsystem::refresh()
     updateMotorRpmPid(&rightFrontVelocityPid, &rightFrontMotor, *desiredWheelRPM[RF]);
     updateMotorRpmPid(&leftBackVelocityPid, &leftBackMotor, *desiredWheelRPM[LB]);
     updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, *desiredWheelRPM[RB]);
+    chassisPowerLimiter.performPowerLimiting(motors, MODM_ARRAY_SIZE(motors));
 }
 
 void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
@@ -90,6 +92,8 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
         -y - x + chassisRotateTranslated * rightBackRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
+
+    desiredRotation = r;
 }
 
 void ChassisSubsystem::updateMotorRpmPid(

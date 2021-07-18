@@ -20,18 +20,16 @@
 #ifndef TURRET_CV_COMMAND_HPP_
 #define TURRET_CV_COMMAND_HPP_
 
-#include <aruwlib/algorithms/contiguous_float.hpp>
-#include <aruwlib/architecture/timeout.hpp>
-#include <aruwlib/control/command.hpp>
+#include "aruwlib/algorithms/contiguous_float.hpp"
+#include "aruwlib/algorithms/smooth_pid.hpp"
+#include "aruwlib/architecture/timeout.hpp"
+#include "aruwlib/control/command.hpp"
 
-#include "aruwsrc/algorithms/turret_pid.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 
 #include "turret_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace turret
+namespace aruwsrc::control::turret
 {
 /**
  * A command that receives input from the vision system via the `XavierSerial` driver and aims the
@@ -40,7 +38,7 @@ namespace turret
 class TurretCVCommand : public aruwlib::control::Command
 {
 public:
-    TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem);
+    TurretCVCommand(aruwlib::Drivers *xavierSerial, TurretSubsystem *subsystem);
 
     void initialize() override;
 
@@ -73,8 +71,6 @@ private:
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    static constexpr uint32_t TIME_BETWEEN_CV_REQUESTS = 1000;
-
     aruwlib::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
@@ -82,10 +78,8 @@ private:
     aruwlib::algorithms::ContiguousFloat yawTargetAngle;
     aruwlib::algorithms::ContiguousFloat pitchTargetAngle;
 
-    aruwsrc::algorithms::TurretPid yawPid;
-    aruwsrc::algorithms::TurretPid pitchPid;
-
-    aruwlib::arch::MilliTimeout sendRequestTimer;
+    aruwlib::algorithms::SmoothPid yawPid;
+    aruwlib::algorithms::SmoothPid pitchPid;
 
     uint32_t prevTime;
 
@@ -94,8 +88,6 @@ private:
     void runPitchPositionController(float dt);
 };  // class TurretCvCommand
 
-}  // namespace turret
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::turret
 
 #endif  // TURRET_CV_COMMAND_HPP_

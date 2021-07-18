@@ -20,9 +20,9 @@
 #ifndef WIGGLE_DRIVE_COMMAND_HPP_
 #define WIGGLE_DRIVE_COMMAND_HPP_
 
-#include <aruwlib/control/command.hpp>
-
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwlib/algorithms/ramp.hpp"
+#include "aruwlib/control/command.hpp"
+#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
 
 namespace aruwlib
 {
@@ -46,7 +46,7 @@ public:
     WiggleDriveCommand(
         aruwlib::Drivers* drivers,
         ChassisSubsystem* chassis,
-        aruwsrc::turret::TurretSubsystem* turret);
+        const aruwlib::control::turret::TurretSubsystemInterface* turret);
 
     void initialize() override;
 
@@ -64,22 +64,44 @@ public:
     const char* getName() const override { return "chassis wiggle drive"; }
 
 private:
-    static constexpr float WIGGLE_PERIOD = 1600.0f;
-    static constexpr float WIGGLE_MAX_ROTATE_ANGLE = 60.0f;
-    static constexpr float WIGGLE_ROTATE_KP = -250.0f;
+    struct WiggleParams
+    {
+        float rotationSpeed;    /// Target rotation speed (in wheel RPM)
+        float turnaroundAngle;  /// Turret angle from center to change chassis rotation direction
+                                /// (in degrees)
+        float rotationSpeedIncrement;  /// Increment in RPM / 0.002s to change the rotation speed by
+                                       /// each time step
+    };
+
+    /**
+     * Use these wiggle parameters if power consumption limit is <= 45 W
+     */
+    static constexpr WiggleParams WIGGLE_PARAMS_45W_CUTOFF = {1700, 5, 5};
+    /**
+     * Use these wiggle parameters if power consumption limit is within (45, 60] W
+     */
+    static constexpr WiggleParams WIGGLE_PARAMS_60W_CUTOFF = {2300, 5, 10};
+    /**
+     * Use these wiggle parameters if power consumption limit is within (60, 80] W
+     */
+    static constexpr WiggleParams WIGGLE_PARAMS_80W_CUTOFF = {2500, 5, 12};
+    /**
+     * Use these wiggle parameters if power consumption limit is greater than 80 W
+     */
+    static constexpr WiggleParams WIGGLE_PARAMS_MAX_CUTOFF = {3000, 5, 15};
+
+    static constexpr float WIGGLE_ROTATE_KP = -300.0f;
     static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING = 0.5f;
-    static constexpr float WIGGLE_OUT_OF_CENTER_MAX_ROTATE_ERR = 10.0f;
 
     aruwlib::Drivers* drivers;
     ChassisSubsystem* chassis;
-    aruwsrc::turret::TurretSubsystem* turret;
+    const aruwlib::control::turret::TurretSubsystemInterface* turret;
 
-    uint32_t timeOffset = 0;
-    float startTimeForAngleOffset = 0.0f;
-    bool outOfCenter = false;
+    aruwlib::algorithms::Ramp rotationSpeedRamp;
 
-    // sin curve to determine angle to rotate to based on current "time"
-    float wiggleSin(float time);
+    int8_t rotationSign;
+
+    const WiggleParams& getWiggleParams() const;
 };  // class WiggleDriveCommand
 
 }  // namespace chassis
