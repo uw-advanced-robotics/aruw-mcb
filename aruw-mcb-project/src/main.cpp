@@ -25,7 +25,7 @@
 #include "aruwlib/motor/motorsim/sim_handler.hpp"
 #endif
 
-#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "aruwlib/board/board.hpp"
 
 #include "modm/architecture/interface/delay.hpp"
 
@@ -127,7 +127,7 @@ static void initializeIo(aruwlib::Drivers *drivers)
     drivers->djiMotorTerminalSerialHandler.init();
     drivers->xavierSerial.initializeCV();
 #ifdef TARGET_SOLDIER
-    drivers->imuRxHandler.init();
+    drivers->imuRxListener.init();
 #endif
 }
 

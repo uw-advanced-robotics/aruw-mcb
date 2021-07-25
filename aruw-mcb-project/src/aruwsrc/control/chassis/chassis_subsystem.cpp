@@ -24,7 +24,7 @@
 #include "chassis_subsystem.hpp"
 
 #include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/communication/remote.hpp"
+#include "aruwlib/communication/serial/remote.hpp"
 #include "aruwlib/drivers.hpp"
 
 using namespace aruwlib;

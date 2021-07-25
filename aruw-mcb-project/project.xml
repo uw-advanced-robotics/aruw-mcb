@@ -8,8 +8,15 @@
     <option name="aruwlib:project_name">aruw-mcb-project</option>
     <option name="aruwlib:modm_repo_lb">../aruwlib/modm/repo.lb</option>
     <option name="aruwlib:core:generate_driver_hpp">False</option>
+    <option name="aruwlib:dev_board">rm-dev-board-a</option>
+    <option name="aruwlib:communication:serial:terminal_serial:uart_port">Uart3</option>
+    <option name="aruwlib:communication:serial:remote:uart_port">Uart1</option>
+    <option name="aruwlib:communication:serial:ref_serial:uart_port">Uart6</option>
   </options>
   <modules>
     <module>aruwlib:core</module>
+    <module>aruwlib:communication:gpio:digital</module>
+    <module>aruwlib:communication:sensors:distance</module>
+    <module>aruwlib:display</module>
   </modules>
 </library>

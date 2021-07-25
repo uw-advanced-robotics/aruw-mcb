@@ -71,9 +71,9 @@ void TurretWorldRelativePositionCommand::initialize()
     imuInitialYaw = drivers->mpu6500.getYaw();
     yawPid.reset();
     pitchPid.reset();
-    if (useImuOnTurret && drivers->imuRxHandler.isConnected())
+    if (useImuOnTurret && drivers->imuRxListener.isConnected())
     {
-        yawTargetAngle.setValue(drivers->imuRxHandler.getYaw());
+        yawTargetAngle.setValue(drivers->imuRxListener.getYaw());
         usingImuOnTurret = true;
         yawPid.setD(YAW_D_TURRET_IMU);
     }
@@ -101,11 +101,11 @@ void TurretWorldRelativePositionCommand::runYawPositionController(float dt)
     // and do some re-initialization if its availability changes
     if (useImuOnTurret)
     {
-        bool turretImuOnline = drivers->imuRxHandler.isConnected();
+        bool turretImuOnline = drivers->imuRxListener.isConnected();
         if (!usingImuOnTurret && turretImuOnline)
         {
             // If we are not using the turret IMU and it has become available, use it
-            yawTargetAngle.setValue(drivers->imuRxHandler.getYaw());
+            yawTargetAngle.setValue(drivers->imuRxListener.getYaw());
             usingImuOnTurret = true;
             yawPid.setD(YAW_D_TURRET_IMU);
         }
@@ -126,7 +126,7 @@ void TurretWorldRelativePositionCommand::runYawPositionController(float dt)
         blinkCounter = (blinkCounter + 1) % 100;
         drivers->leds.set(aruwlib::gpio::Leds::Green, blinkCounter > 50);
 
-        float yawActual = drivers->imuRxHandler.getYaw();
+        float yawActual = drivers->imuRxListener.getYaw();
 
         // project target angle from turret imu relative to chassis relative
         turretSubsystem->setYawSetpoint(
@@ -171,7 +171,7 @@ void TurretWorldRelativePositionCommand::runYawPositionController(float dt)
     if (useImuOnTurret)
     {
         pidOutput =
-            yawPid.runController(positionControllerError, drivers->imuRxHandler.getGz(), dt);
+            yawPid.runController(positionControllerError, drivers->imuRxListener.getGz(), dt);
     }
     else
     {

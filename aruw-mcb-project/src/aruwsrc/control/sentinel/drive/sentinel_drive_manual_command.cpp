@@ -19,7 +19,7 @@
 
 #include "sentinel_drive_manual_command.hpp"
 
-#include "aruwlib/communication/remote.hpp"
+#include "aruwlib/communication/serial/remote.hpp"
 #include "aruwlib/drivers.hpp"
 
 #include "sentinel_drive_subsystem.hpp"
