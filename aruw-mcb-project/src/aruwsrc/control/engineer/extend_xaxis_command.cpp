@@ -31,7 +31,7 @@ ExtendXAxisCommand::ExtendXAxisCommand(XAxisSubsystem* subsystem)
     : Command(),
       xAxisSubsystem(subsystem)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(subsystem));
 }
 
 void ExtendXAxisCommand::initialize()

@@ -26,7 +26,7 @@ namespace aruwsrc
 {
 namespace control
 {
-void initSubsystemCommands(aruwlib::Drivers *drivers);
+void initSubsystemCommands(tap::Drivers *drivers);
 }  // namespace control
 
 }  // namespace aruwsrc

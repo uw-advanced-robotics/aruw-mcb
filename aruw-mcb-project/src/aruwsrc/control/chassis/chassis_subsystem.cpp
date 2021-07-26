@@ -28,7 +28,7 @@
 #include "aruwlib/drivers.hpp"
 
 using namespace aruwlib;
-using namespace aruwlib::algorithms;
+using namespace tap::algorithms;
 
 namespace aruwsrc
 {
@@ -98,7 +98,7 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
 
 void ChassisSubsystem::updateMotorRpmPid(
     modm::Pid<float>* pid,
-    aruwlib::motor::DjiMotor* const motor,
+    tap::motor::DjiMotor* const motor,
     float desiredRpm)
 {
     pid->update(desiredRpm - motor->getShaftRPM());
@@ -112,7 +112,7 @@ float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float k
 
     // P
     float currRotationPidP = currentAngleError * kp;
-    currRotationPidP = aruwlib::algorithms::limitVal<float>(
+    currRotationPidP = tap::algorithms::limitVal<float>(
         currRotationPidP,
         -CHASSIS_REVOLVE_PID_MAX_P,
         CHASSIS_REVOLVE_PID_MAX_P);
@@ -125,13 +125,13 @@ float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float k
 
         currentRotationPidD = -(currentErrorRotation)*CHASSIS_REVOLVE_PID_KD;
 
-        currentRotationPidD = aruwlib::algorithms::limitVal<float>(
+        currentRotationPidD = tap::algorithms::limitVal<float>(
             currentRotationPidD,
             -CHASSIS_REVOLVE_PID_MAX_D,
             CHASSIS_REVOLVE_PID_MAX_D);
     }
 
-    float wheelRotationSpeed = aruwlib::algorithms::limitVal<float>(
+    float wheelRotationSpeed = tap::algorithms::limitVal<float>(
         currRotationPidP + currentRotationPidD,
         -MAX_OUTPUT_ROTATION_PID,
         MAX_OUTPUT_ROTATION_PID);
@@ -156,7 +156,7 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
                 fabsf(chassisRotationDesiredWheelspeed) /
                     ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR,
             2.0f);
-        rTranslationalGain = aruwlib::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
+        rTranslationalGain = tap::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
 }

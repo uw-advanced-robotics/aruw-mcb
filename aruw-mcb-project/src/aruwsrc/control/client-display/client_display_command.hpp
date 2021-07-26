@@ -27,7 +27,7 @@
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
 
-namespace aruwlib::control
+namespace tap::control
 {
 class Subsystem;
 }
@@ -41,18 +41,18 @@ namespace aruwsrc::display
 {
 class ClientDisplaySubsystem;
 
-class ClientDisplayCommand : public aruwlib::control::Command,
+class ClientDisplayCommand : public tap::control::Command,
                              ::modm::pt::Protothread,
                              modm::Resumable<4>
 {
 public:
     ClientDisplayCommand(
-        aruwlib::Drivers *drivers,
+        tap::Drivers *drivers,
         ClientDisplaySubsystem *clientDisplay,
-        const aruwlib::control::Command *wiggleCommand,
-        const aruwlib::control::Command *followTurret,
-        const aruwlib::control::Command *beybladeCommand,
-        const aruwlib::control::Command *baseDriveCommand);
+        const tap::control::Command *wiggleCommand,
+        const tap::control::Command *followTurret,
+        const tap::control::Command *beybladeCommand,
+        const tap::control::Command *baseDriveCommand);
 
     const char *getName() const override { return "client display"; }
 
@@ -86,22 +86,22 @@ private:
     static constexpr uint8_t CAP_TEXT_NAME[] = {0, 0, 6};
     static constexpr uint8_t CAP_VALUE_NAME[] = {0, 0, 7};
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
     // General variables
     /// @note The maximum frequency of this timer is 10 Hz according to RM rules.
-    aruwlib::arch::MilliTimeout delayTimer{DELAY_PERIOD_BTWN_SENDS};
+    tap::arch::MilliTimeout delayTimer{DELAY_PERIOD_BTWN_SENDS};
 
     // Drive related variables
-    const aruwlib::control::Command *wiggleCommand;
-    const aruwlib::control::Command *followTurretCommand;
-    const aruwlib::control::Command *beybladeCommand;
-    const aruwlib::control::Command *baseDriveCommand;
-    const aruwlib::control::Command *currDriveCommandScheduled = nullptr;
-    const aruwlib::control::Command *newDriveCommandScheduled = nullptr;
-    aruwlib::serial::RefSerial::GraphicCharacterMessage driveCommandMsg;
-    aruwlib::serial::RefSerial::GraphicColor driveCommandColor;
-    aruwlib::arch::PeriodicMilliTimer addDriveCommandTimer{10000};
+    const tap::control::Command *wiggleCommand;
+    const tap::control::Command *followTurretCommand;
+    const tap::control::Command *beybladeCommand;
+    const tap::control::Command *baseDriveCommand;
+    const tap::control::Command *currDriveCommandScheduled = nullptr;
+    const tap::control::Command *newDriveCommandScheduled = nullptr;
+    tap::serial::RefSerial::GraphicCharacterMessage driveCommandMsg;
+    tap::serial::RefSerial::GraphicColor driveCommandColor;
+    tap::arch::PeriodicMilliTimer addDriveCommandTimer{10000};
 
     // Turret reticle variables
     static constexpr uint16_t TURRET_RETICLE_1M_WIDTH = 150;
@@ -116,13 +116,13 @@ private:
     static constexpr uint16_t TURRET_RETICLE_3MY = 400;
     static constexpr uint16_t TURRET_RETICLE_5MY = 300;
 #endif
-    aruwlib::arch::PeriodicMilliTimer sendReticleTimer{10000};
-    aruwlib::serial::RefSerial::Graphic5Message reticleMsg;
+    tap::arch::PeriodicMilliTimer sendReticleTimer{10000};
+    tap::serial::RefSerial::Graphic5Message reticleMsg;
 
     // Cap bank related variables
-    aruwlib::arch::PeriodicMilliTimer sendCapBankTimer{10000};
-    aruwlib::serial::RefSerial::GraphicCharacterMessage capStringMsg;
-    aruwlib::serial::RefSerial::Graphic1Message capPowerRemainMsg;
+    tap::arch::PeriodicMilliTimer sendCapBankTimer{10000};
+    tap::serial::RefSerial::GraphicCharacterMessage capStringMsg;
+    tap::serial::RefSerial::Graphic1Message capPowerRemainMsg;
     int capMsgAdded = 0;
     int32_t capicatance = 0;
 

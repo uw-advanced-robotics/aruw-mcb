@@ -22,18 +22,18 @@
 #include "aruwlib/control/subsystem.hpp"
 #include "aruwlib/drivers.hpp"
 
-using aruwlib::Drivers;
+using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace control
 {
 BlinkLEDCommand::BlinkLEDCommand(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     aruwsrc::control::ExampleSubsystem* subsystem)
     : drivers(drivers)
 {
-    this->addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+    this->addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(subsystem));
 }
 
 void BlinkLEDCommand::initialize()
@@ -45,7 +45,7 @@ void BlinkLEDCommand::initialize()
 void BlinkLEDCommand::execute()
 {
     refershCounter++;
-    drivers->leds.set(aruwlib::gpio::Leds::A, true);
+    drivers->leds.set(tap::gpio::Leds::A, true);
 }
 
 bool BlinkLEDCommand::isFinished() const { return completedTimer.isExpired(); }

@@ -35,10 +35,10 @@ namespace aruwsrc::control::turret
  * A command that receives input from the vision system via the `XavierSerial` driver and aims the
  * turret accordingly using a position PID controller.
  */
-class TurretCVCommand : public aruwlib::control::Command
+class TurretCVCommand : public tap::control::Command
 {
 public:
-    TurretCVCommand(aruwlib::Drivers *xavierSerial, TurretSubsystem *subsystem);
+    TurretCVCommand(tap::Drivers *xavierSerial, TurretSubsystem *subsystem);
 
     void initialize() override;
 
@@ -71,15 +71,15 @@ private:
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
 
-    aruwlib::algorithms::ContiguousFloat yawTargetAngle;
-    aruwlib::algorithms::ContiguousFloat pitchTargetAngle;
+    tap::algorithms::ContiguousFloat yawTargetAngle;
+    tap::algorithms::ContiguousFloat pitchTargetAngle;
 
-    aruwlib::algorithms::SmoothPid yawPid;
-    aruwlib::algorithms::SmoothPid pitchPid;
+    tap::algorithms::SmoothPid yawPid;
+    tap::algorithms::SmoothPid pitchPid;
 
     uint32_t prevTime;
 

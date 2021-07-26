@@ -33,7 +33,7 @@ namespace mock
 class FrictionWheelSubsystemMock : public aruwsrc::launcher::FrictionWheelSubsystem
 {
 public:
-    FrictionWheelSubsystemMock(aruwlib::Drivers *drivers);
+    FrictionWheelSubsystemMock(tap::Drivers *drivers);
     virtual ~FrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

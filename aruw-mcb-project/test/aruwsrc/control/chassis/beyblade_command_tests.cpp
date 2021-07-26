@@ -43,12 +43,12 @@
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
-using aruwlib::Drivers;
+using tap::Drivers;
 using namespace testing;
-using aruwlib::algorithms::Ramp;
+using tap::algorithms::Ramp;
 using aruwsrc::mock::ChassisSubsystemMock;
 using aruwsrc::mock::TurretSubsystemMock;
-using namespace aruwlib::serial;
+using namespace tap::serial;
 
 static constexpr float BASE_DESIRED_OUT = 3500;
 static constexpr float BASE_DESIRED_R_TRANSLATIONAL =

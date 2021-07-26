@@ -28,11 +28,11 @@
 #include "aruwsrc/mock/agitator_subsystem_mock.hpp"
 
 using namespace aruwlib;
-using namespace aruwlib::control::setpoint;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::mock;
 using namespace testing;
-using namespace aruwlib::serial;
+using namespace tap::serial;
 
 #define SETUP_TEST(ComprisedCommand, ...)               \
     Drivers drivers;                                    \

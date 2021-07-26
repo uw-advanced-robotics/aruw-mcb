@@ -21,7 +21,7 @@
 
 #include "friction_wheel_subsystem.hpp"
 
-using aruwlib::control::Subsystem;
+using tap::control::Subsystem;
 
 namespace aruwsrc
 {

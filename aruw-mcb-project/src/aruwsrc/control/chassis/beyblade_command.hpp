@@ -36,13 +36,13 @@ class ChassisSubsystem;
 /**
  * A command that automatically rotates the chassis while maintaining turret angle
  */
-class BeybladeCommand : public aruwlib::control::Command
+class BeybladeCommand : public tap::control::Command
 {
 public:
     BeybladeCommand(
-        aruwlib::Drivers* drivers,
+        tap::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const aruwlib::control::turret::TurretSubsystemInterface* turret);
+        const tap::control::turret::TurretSubsystemInterface* turret);
 
     // fractional multiplier for user input and maximum motor speed to calculate desired x and y
     // speeds
@@ -100,11 +100,11 @@ private:
     float rampTarget;
     float rotationDirection;
 
-    aruwlib::algorithms::Ramp rotateSpeedRamp;
+    tap::algorithms::Ramp rotateSpeedRamp;
 
-    aruwlib::Drivers* drivers;
+    tap::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const aruwlib::control::turret::TurretSubsystemInterface* turret;
+    const tap::control::turret::TurretSubsystemInterface* turret;
 
     float getRotationTarget() const;
 };  // class BeybladeCommand

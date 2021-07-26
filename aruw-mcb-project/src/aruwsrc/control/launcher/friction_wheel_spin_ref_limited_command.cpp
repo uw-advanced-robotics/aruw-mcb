@@ -24,7 +24,7 @@
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
-    aruwlib::Drivers *drivers,
+    tap::Drivers *drivers,
     aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels)
     : drivers(drivers),
       frictionWheels(frictionWheels)

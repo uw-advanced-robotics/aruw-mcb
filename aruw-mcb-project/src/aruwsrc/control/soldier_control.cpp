@@ -49,17 +49,17 @@
 #include "aruwlib/motor/motorsim/sim_handler.hpp"
 #endif
 
-using namespace aruwlib::control::setpoint;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
-using namespace aruwlib::control;
+using namespace tap::control;
 using namespace aruwsrc::display;
 using namespace aruwsrc::control;
-using aruwlib::DoNotUse_getDrivers;
-using aruwlib::Remote;
+using tap::DoNotUse_getDrivers;
+using tap::Remote;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -67,7 +67,7 @@ using aruwlib::Remote;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
+tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 
 namespace soldier_control
 {
@@ -106,7 +106,7 @@ AgitatorSubsystem hopperCover(
     AgitatorSubsystem::IS_HOPPER_COVER_INVERTED,
     true);
 
-FrictionWheelSubsystem frictionWheels(drivers(), aruwlib::motor::MOTOR1, aruwlib::motor::MOTOR2);
+FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -179,7 +179,7 @@ HoldCommandMapping rightMousePressed(
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 
 /* register subsystems here -------------------------------------------------*/
-void registerSoldierSubsystems(aruwlib::Drivers *drivers)
+void registerSoldierSubsystems(tap::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -203,7 +203,7 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSoldierCommands(aruwlib::Drivers *)
+void setDefaultSoldierCommands(tap::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
@@ -213,13 +213,13 @@ void setDefaultSoldierCommands(aruwlib::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSoldierCommands(aruwlib::Drivers *drivers)
+void startSoldierCommands(tap::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSoldierIoMappings(aruwlib::Drivers *drivers)
+void registerSoldierIoMappings(tap::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -235,7 +235,7 @@ void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(aruwlib::Drivers *drivers)
+void initSubsystemCommands(tap::Drivers *drivers)
 {
     soldier_control::initializeSubsystems();
     soldier_control::registerSoldierSubsystems(drivers);

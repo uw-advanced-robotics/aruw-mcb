@@ -29,23 +29,23 @@
 
 #include "chassis_subsystem.hpp"
 
-using namespace aruwlib::algorithms;
-using namespace aruwlib::sensors;
-using aruwlib::Drivers;
+using namespace tap::algorithms;
+using namespace tap::sensors;
+using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
 BeybladeCommand::BeybladeCommand(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const aruwlib::control::turret::TurretSubsystemInterface* turret)
+    const tap::control::turret::TurretSubsystemInterface* turret)
     : drivers(drivers),
       chassis(chassis),
       turret(turret)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
 }
 
 // Resets ramp
@@ -88,7 +88,7 @@ void BeybladeCommand::execute()
     float r = rotateSpeedRamp.getValue();
 
     // Rotate X and Y depending on turret angle
-    aruwlib::algorithms::rotateVector(&x, &y, -degreesToRadians(turretYawAngle));
+    tap::algorithms::rotateVector(&x, &y, -degreesToRadians(turretYawAngle));
 
     // set outputs
     chassis->setDesiredOutput(x, y, r);

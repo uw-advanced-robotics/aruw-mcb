@@ -25,13 +25,13 @@
 
 #include "error_menu.hpp"
 
-using namespace aruwlib::display;
+using namespace tap::display;
 
 namespace aruwsrc
 {
 namespace display
 {
-MainMenu::MainMenu(modm::ViewStack* stack, aruwlib::Drivers* drivers)
+MainMenu::MainMenu(modm::ViewStack* stack, tap::Drivers* drivers)
     : modm::StandardMenu(stack, MAIN_MENU_ID),
       drivers(drivers)
 {

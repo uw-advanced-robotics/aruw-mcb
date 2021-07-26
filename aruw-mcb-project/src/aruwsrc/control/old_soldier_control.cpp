@@ -39,14 +39,14 @@
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
-using namespace aruwlib::control::setpoint;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
-using namespace aruwlib::control;
+using namespace tap::control;
 using namespace aruwsrc::control;
-using aruwlib::DoNotUse_getDrivers;
-using aruwlib::Remote;
+using tap::DoNotUse_getDrivers;
+using tap::Remote;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -54,7 +54,7 @@ using aruwlib::Remote;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
+tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 
 namespace old_soldier_control
 {
@@ -77,7 +77,7 @@ AgitatorSubsystem agitator(
 
 HopperSubsystem hopperCover(
     drivers(),
-    aruwlib::gpio::Pwm::W,
+    tap::gpio::Pwm::W,
     HopperSubsystem::OLD_SOLDIER_HOPPER_OPEN_PWM,
     HopperSubsystem::OLD_SOLDIER_HOPPER_CLOSE_PWM,
     HopperSubsystem::OLD_SOLDIER_PWM_RAMP_SPEED);
@@ -129,7 +129,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerOldSoldierSubsystems(aruwlib::Drivers *drivers)
+void registerOldSoldierSubsystems(tap::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -138,20 +138,20 @@ void registerOldSoldierSubsystems(aruwlib::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultOldSoldierCommands(aruwlib::Drivers *)
+void setDefaultOldSoldierCommands(tap::Drivers *)
 {
     chassis.setDefaultCommand(&chassisDriveCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startOldSoldierCommands(aruwlib::Drivers *drivers)
+void startOldSoldierCommands(tap::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerOldSoldierIoMappings(aruwlib::Drivers *drivers)
+void registerOldSoldierIoMappings(tap::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
@@ -163,7 +163,7 @@ void registerOldSoldierIoMappings(aruwlib::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(aruwlib::Drivers *drivers)
+void initSubsystemCommands(tap::Drivers *drivers)
 {
     old_soldier_control::initializeSubsystems();
     old_soldier_control::registerOldSoldierSubsystems(drivers);

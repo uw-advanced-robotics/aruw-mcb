@@ -43,7 +43,7 @@ namespace display
 class OledDisplay : public ::modm::pt::Protothread
 {
 public:
-    explicit OledDisplay(aruwlib::Drivers *drivers);
+    explicit OledDisplay(tap::Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 
@@ -66,10 +66,10 @@ public:
     mockable void updateMenu();
 
 private:
-    aruwlib::display::OledButtonHandler::Button prevButton =
-        aruwlib::display::OledButtonHandler::NONE;
+    tap::display::OledButtonHandler::Button prevButton =
+        tap::display::OledButtonHandler::NONE;
 
-    aruwlib::display::Sh1106<
+    tap::display::Sh1106<
 #ifndef PLATFORM_HOSTED
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
@@ -82,13 +82,13 @@ private:
 
     modm::ViewStack viewStack;
 
-    aruwlib::display::OledButtonHandler buttonHandler;
+    tap::display::OledButtonHandler buttonHandler;
 
     SplashScreen splashScreen;
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
-    aruwlib::arch::PeriodicMilliTimer displayThreadTimer{100};
+    tap::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
 }  // namespace display
 }  // namespace aruwsrc

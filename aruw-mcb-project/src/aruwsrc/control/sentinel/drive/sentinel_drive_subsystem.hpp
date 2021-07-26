@@ -37,7 +37,7 @@
 
 namespace aruwsrc::control::sentinel::drive
 {
-class SentinelDriveSubsystem : public aruwlib::control::chassis::ChassisSubsystemInterface
+class SentinelDriveSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
     /// @see power_limiter.hpp for what these mean
@@ -58,12 +58,12 @@ public:
     static constexpr float SENTINEL_LENGTH = 480;
 
     SentinelDriveSubsystem(
-        aruwlib::Drivers* drivers,
-        aruwlib::gpio::Digital::InputPin leftLimitSwitch,
-        aruwlib::gpio::Digital::InputPin rightLimitSwitch,
-        aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID,
-        aruwlib::gpio::Analog::Pin currentSensorPin = CURRENT_SENSOR_PIN);
+        tap::Drivers* drivers,
+        tap::gpio::Digital::InputPin leftLimitSwitch,
+        tap::gpio::Digital::InputPin rightLimitSwitch,
+        tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
+        tap::motor::MotorId rightMotorId = RIGHT_MOTOR_ID,
+        tap::gpio::Analog::Pin currentSensorPin = CURRENT_SENSOR_PIN);
 
     void initialize() override;
 
@@ -93,10 +93,10 @@ public:
     inline int16_t getRightBackRpmActual() const override { return 0; }
 
 private:
-    static constexpr aruwlib::motor::MotorId LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
-    static constexpr aruwlib::motor::MotorId RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS2;
-    static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S;
+    static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
+    static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
+    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+    static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::Pin::S;
 
     static constexpr float PID_P = 5.0f;
     static constexpr float PID_I = 0.0f;
@@ -108,8 +108,8 @@ private:
     static constexpr float WHEEL_RADIUS = 35.0f;
     static constexpr float GEAR_RATIO = 19.0f;
 
-    aruwlib::gpio::Digital::InputPin leftLimitSwitch;
-    aruwlib::gpio::Digital::InputPin rightLimitSwitch;
+    tap::gpio::Digital::InputPin leftLimitSwitch;
+    tap::gpio::Digital::InputPin rightLimitSwitch;
 
     modm::Pid<float> velocityPidLeftWheel;
 
@@ -121,24 +121,24 @@ private:
 
     void resetOffsetFromLimitSwitch();
 
-    float distanceFromEncoder(aruwlib::motor::DjiMotor* motor);
+    float distanceFromEncoder(tap::motor::DjiMotor* motor);
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    aruwlib::mock::DjiMotorMock leftWheel;
-    aruwlib::mock::DjiMotorMock rightWheel;
+    tap::mock::DjiMotorMock leftWheel;
+    tap::mock::DjiMotorMock rightWheel;
 
 private:
 #else
-    aruwlib::motor::DjiMotor leftWheel;
-    aruwlib::motor::DjiMotor rightWheel;
+    tap::motor::DjiMotor leftWheel;
+    tap::motor::DjiMotor rightWheel;
 #endif
 
-    aruwlib::motor::DjiMotor* chassisMotors[2];
+    tap::motor::DjiMotor* chassisMotors[2];
 
-    const aruwlib::motor::M3508Constants motorConstants;
+    const tap::motor::M3508Constants motorConstants;
 
-    aruwlib::control::chassis::PowerLimiter powerLimiter;
+    tap::control::chassis::PowerLimiter powerLimiter;
 };
 
 }  // namespace aruwsrc::control::sentinel::drive

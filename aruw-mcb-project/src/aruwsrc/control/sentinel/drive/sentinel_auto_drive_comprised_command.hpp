@@ -34,11 +34,11 @@ class SentinelDriveSubsystem;
  * damage it is currently engaging and **eventually** based on which targets are being
  * engaged
  */
-class SentinelAutoDriveComprisedCommand : public aruwlib::control::ComprisedCommand
+class SentinelAutoDriveComprisedCommand : public tap::control::ComprisedCommand
 {
 public:
     SentinelAutoDriveComprisedCommand(
-        aruwlib::Drivers *drivers,
+        tap::Drivers *drivers,
         SentinelDriveSubsystem *sentinelChassis);
 
     const char *getName() const override { return "sentinel random drive"; }
@@ -49,7 +49,7 @@ public:
 
 private:
     static constexpr float RANDOM_DRIVE_DPS_THRESHOLD = 5;
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
     SentinelDriveSubsystem *sentinelChassis;
     SentinelFullTraverseCommand fullTraverse;
     SentinelRandomDriveCommand randomDrive;

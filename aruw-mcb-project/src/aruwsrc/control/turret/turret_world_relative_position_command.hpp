@@ -45,7 +45,7 @@ class TurretSubsystem;
  * desired turret angle is independent of the direction that the chassis is facing
  * or rotating. Assumes the Mpu6500 used for calculations is mounted on the chassis.
  */
-class TurretWorldRelativePositionCommand : public aruwlib::control::Command
+class TurretWorldRelativePositionCommand : public tap::control::Command
 {
 public:
     /**
@@ -53,7 +53,7 @@ public:
      * The `ChassisSubsystem` is only used for for odometry information.
      */
     TurretWorldRelativePositionCommand(
-        aruwlib::Drivers *drivers,
+        tap::Drivers *drivers,
         TurretSubsystem *subsystem,
         const chassis::ChassisSubsystem *chassis,
         bool useImuOnTurret = false);
@@ -123,21 +123,21 @@ private:
     static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 0.0f;
 #endif
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
     const chassis::ChassisSubsystem *chassisSubsystem;
 
-    aruwlib::algorithms::ContiguousFloat yawTargetAngle;
+    tap::algorithms::ContiguousFloat yawTargetAngle;
 
-    aruwlib::algorithms::ContiguousFloat currValueImuYawGimbal;
+    tap::algorithms::ContiguousFloat currValueImuYawGimbal;
 
     float imuInitialYaw;
 
     uint32_t prevTime;
 
-    aruwlib::algorithms::SmoothPid yawPid;
-    aruwlib::algorithms::SmoothPid pitchPid;
+    tap::algorithms::SmoothPid yawPid;
+    tap::algorithms::SmoothPid pitchPid;
 
     const bool useImuOnTurret;
     bool usingImuOnTurret;

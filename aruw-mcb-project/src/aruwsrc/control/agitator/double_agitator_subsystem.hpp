@@ -43,7 +43,7 @@ namespace agitator
  * value. In a nutshell, they should be identical, and honestly if they
  * aren't, then what the heck is the ME team doing).
  */
-class DoubleAgitatorSubsystem : public aruwlib::control::setpoint::SetpointSubsystem
+class DoubleAgitatorSubsystem : public tap::control::setpoint::SetpointSubsystem
 {
 public:
     /**
@@ -59,17 +59,17 @@ public:
     static constexpr uint32_t JAM_TEMPORAL_TOLERANCE = 150;
 
     DoubleAgitatorSubsystem(
-        aruwlib::Drivers *drivers,
+        tap::Drivers *drivers,
         float kp,
         float ki,
         float kd,
         float maxIAccum,
         float maxOutput,
         float agitatorGearRatio,
-        aruwlib::motor::MotorId agitator1MotorId,
-        aruwlib::can::CanBus agitator1CanBusId,
-        aruwlib::motor::MotorId agitator2MotorId,
-        aruwlib::can::CanBus agitator2CanBusId,
+        tap::motor::MotorId agitator1MotorId,
+        tap::can::CanBus agitator1CanBusId,
+        tap::motor::MotorId agitator2MotorId,
+        tap::can::CanBus agitator2CanBusId,
         bool isAgitatorInverted,
         float jamDistanceTolerance = JAM_DISTANCE_TOLERANCE,
         uint32_t jamTemporalTolerance = JAM_TEMPORAL_TOLERANCE,
@@ -152,23 +152,23 @@ private:
     /**
      * The jam detection object. @note should be checked once per refresh
      */
-    aruwlib::control::setpoint::SetpointContinuousJamChecker jamChecker;
+    tap::control::setpoint::SetpointContinuousJamChecker jamChecker;
 
     /**
      * PID controller for running postiion PID on unwrapped agitator angle (in radians).
      */
-    aruwlib::algorithms::SmoothPid agitatorPositionPid1;
-    aruwlib::algorithms::SmoothPid agitatorPositionPid2;
+    tap::algorithms::SmoothPid agitatorPositionPid1;
+    tap::algorithms::SmoothPid agitatorPositionPid2;
 
     /**
      * First of two motors driving the shaft on the double agitator subsystem
      */
-    aruwlib::motor::DjiMotor agitatorMotor1;
+    tap::motor::DjiMotor agitatorMotor1;
 
     /**
      * Second of two motors driving the shaft on the double agitator subsystem.
      */
-    aruwlib::motor::DjiMotor agitatorMotor2;
+    tap::motor::DjiMotor agitatorMotor2;
 
     /**
      * Stores whether or not the agitator has been calibrated.
@@ -210,7 +210,7 @@ private:
      */
     void agitatorRunPositionPid();
 
-    inline float getVelocity(const aruwlib::motor::DjiMotor &motor) const
+    inline float getVelocity(const tap::motor::DjiMotor &motor) const
     {
         return 6.0f * static_cast<float>(motor.getShaftRPM()) / gearRatio;
     }
@@ -218,14 +218,14 @@ private:
     /**
      * Get the raw shaft angle from one of the motors
      */
-    inline float getUncalibratedAgitatorAngle(const aruwlib::motor::DjiMotor &motor) const
+    inline float getUncalibratedAgitatorAngle(const tap::motor::DjiMotor &motor) const
     {
-        return (2.0f * aruwlib::algorithms::PI /
-                static_cast<float>(aruwlib::motor::DjiMotor::ENC_RESOLUTION)) *
+        return (2.0f * tap::algorithms::PI /
+                static_cast<float>(tap::motor::DjiMotor::ENC_RESOLUTION)) *
                motor.getEncoderUnwrapped() / gearRatio;
     }
 
-    inline float getCurrentValue(const aruwlib::motor::DjiMotor &motor, float zeroOffset) const
+    inline float getCurrentValue(const tap::motor::DjiMotor &motor, float zeroOffset) const
     {
         return getUncalibratedAgitatorAngle(motor) - zeroOffset;
     }

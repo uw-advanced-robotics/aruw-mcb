@@ -28,7 +28,7 @@ namespace engineer
 {
 class GrabberSubsystem;
 
-class SqueezeGrabberCommand : public aruwlib::control::Command
+class SqueezeGrabberCommand : public tap::control::Command
 {
 public:
     explicit SqueezeGrabberCommand(GrabberSubsystem* subsystem);

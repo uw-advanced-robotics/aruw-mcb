@@ -25,8 +25,8 @@
 #include "aruwsrc/control/engineer/manual_tow_command.hpp"
 #include "aruwsrc/mock/tow_subsystem_mock.hpp"
 
-using aruwlib::Drivers;
-using aruwlib::gpio::Digital;
+using tap::Drivers;
+using tap::gpio::Digital;
 using aruwsrc::engineer::ManualTowCommand;
 using aruwsrc::mock::TowSubsystemMock;
 

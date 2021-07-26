@@ -40,12 +40,12 @@ namespace aruwsrc::control::turret
  * Stores software necessary for interacting with two gimbals that control the pitch and
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
  */
-class TurretSubsystem : public aruwlib::control::turret::TurretSubsystemInterface
+class TurretSubsystem : public tap::control::turret::TurretSubsystemInterface
 {
 public:
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-    static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID = aruwlib::motor::MOTOR6;
-    static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR5;
+    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
+    static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 #if defined(TARGET_SOLDIER)
     static constexpr float TURRET_START_ANGLE = 90.0f;
@@ -75,7 +75,7 @@ public:
      *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
      */
-    explicit TurretSubsystem(aruwlib::Drivers* drivers, bool limitYaw = true);
+    explicit TurretSubsystem(tap::Drivers* drivers, bool limitYaw = true);
 
     inline bool yawLimited() const { return limitYaw; }
 
@@ -98,7 +98,7 @@ public:
     /**
      * @return The wrapped yaw angle of the actual yaw gimbal, in degrees
      */
-    inline const aruwlib::algorithms::ContiguousFloat& getCurrentYawValue() const override
+    inline const tap::algorithms::ContiguousFloat& getCurrentYawValue() const override
     {
         return currYawAngle;
     }
@@ -106,7 +106,7 @@ public:
     /**
      * @return The wrapped pitch angle of the actual pitch gimbal, in degrees.
      */
-    inline const aruwlib::algorithms::ContiguousFloat& getCurrentPitchValue() const override
+    inline const tap::algorithms::ContiguousFloat& getCurrentPitchValue() const override
     {
         return currPitchAngle;
     }
@@ -200,15 +200,15 @@ private:
     static constexpr float FEED_FORWARD_MAX_OUTPUT = 20000.0f;
 
     uint32_t prevUpdateCounterChassisRotateDerivative = 0;
-    aruwlib::algorithms::LinearInterpolation chassisRotateDerivativeInterpolation;
+    tap::algorithms::LinearInterpolation chassisRotateDerivativeInterpolation;
     float feedforwardChassisRotateDerivative = 0.0f;
     float feedforwardPrevChassisRotationDesired = 0.0f;
 
-    aruwlib::algorithms::ContiguousFloat currPitchAngle;
-    aruwlib::algorithms::ContiguousFloat currYawAngle;
+    tap::algorithms::ContiguousFloat currPitchAngle;
+    tap::algorithms::ContiguousFloat currYawAngle;
 
-    aruwlib::algorithms::ContiguousFloat yawTarget;
-    aruwlib::algorithms::ContiguousFloat pitchTarget;
+    tap::algorithms::ContiguousFloat yawTarget;
+    tap::algorithms::ContiguousFloat pitchTarget;
 
     bool limitYaw;
 
@@ -218,20 +218,20 @@ private:
     /**
      * @return velocity of 6020 motor, in degrees / sec
      */
-    static inline float getVelocity(const aruwlib::motor::DjiMotor& motor)
+    static inline float getVelocity(const tap::motor::DjiMotor& motor)
     {
         return 360 / 60 * motor.getShaftRPM();
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    aruwlib::mock::DjiMotorMock pitchMotor;
-    aruwlib::mock::DjiMotorMock yawMotor;
+    tap::mock::DjiMotorMock pitchMotor;
+    tap::mock::DjiMotorMock yawMotor;
 
 private:
 #else
-    aruwlib::motor::DjiMotor pitchMotor;
-    aruwlib::motor::DjiMotor yawMotor;
+    tap::motor::DjiMotor pitchMotor;
+    tap::motor::DjiMotor yawMotor;
 #endif
 
 };  // class TurretSubsystem

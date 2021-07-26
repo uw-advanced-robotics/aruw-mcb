@@ -30,7 +30,7 @@ namespace control
 {
 class OpenHopperCommand;
 
-class OpenHopperCommand : public aruwlib::control::Command
+class OpenHopperCommand : public tap::control::Command
 {
 public:
     explicit OpenHopperCommand(HopperSubsystem* subsystem);

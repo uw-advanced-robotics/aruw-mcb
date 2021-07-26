@@ -38,13 +38,13 @@ namespace aruwsrc::control::turret
  * Stores software necessary for interacting with two gimbals that control the pitch and
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
  */
-class DoublePitchTurretSubsystem : public aruwlib::control::turret::TurretSubsystemInterface
+class DoublePitchTurretSubsystem : public tap::control::turret::TurretSubsystemInterface
 {
 public:
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
-    static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID_LEFT = aruwlib::motor::MOTOR8;
-    static constexpr aruwlib::motor::MotorId PITCH_MOTOR_ID_RIGHT = aruwlib::motor::MOTOR5;
-    static constexpr aruwlib::motor::MotorId YAW_MOTOR_ID = aruwlib::motor::MOTOR6;
+    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::motor::MotorId PITCH_MOTOR_ID_LEFT = tap::motor::MOTOR8;
+    static constexpr tap::motor::MotorId PITCH_MOTOR_ID_RIGHT = tap::motor::MOTOR5;
+    static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
 
     static constexpr float TURRET_YAW_START_ANGLE = 90.0f;
     static constexpr float TURRET_YAW_MIN_ANGLE = 5.0f;
@@ -82,7 +82,7 @@ public:
     static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_LEFT = 5835;
     static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_RIGHT = 3123;
 
-    explicit DoublePitchTurretSubsystem(aruwlib::Drivers* drivers, bool limitYaw = true);
+    explicit DoublePitchTurretSubsystem(tap::Drivers* drivers, bool limitYaw = true);
 
     void initialize() override;
 
@@ -113,12 +113,12 @@ public:
     /**
      * @return The wrapped yaw angle of the actual yaw gimbal.
      */
-    const aruwlib::algorithms::ContiguousFloat& getCurrentYawValue() const override;
+    const tap::algorithms::ContiguousFloat& getCurrentYawValue() const override;
 
     /**
      * @see getCurrentYawValue.
      */
-    const aruwlib::algorithms::ContiguousFloat& getCurrentPitchValue() const override;
+    const tap::algorithms::ContiguousFloat& getCurrentPitchValue() const override;
 
     /**
      * @return `true` if both pitch and yaw gimbals are connected.
@@ -157,16 +157,16 @@ public:
     const char* getName() override { return "Sentinel Turret"; }
 
 private:
-    aruwlib::algorithms::ContiguousFloat currLeftPitchAngle;
-    aruwlib::algorithms::ContiguousFloat currRightPitchAngle;
-    aruwlib::algorithms::ContiguousFloat currYawAngle;
+    tap::algorithms::ContiguousFloat currLeftPitchAngle;
+    tap::algorithms::ContiguousFloat currRightPitchAngle;
+    tap::algorithms::ContiguousFloat currYawAngle;
 
-    aruwlib::algorithms::ContiguousFloat yawTarget;
-    aruwlib::algorithms::ContiguousFloat pitchTarget;
+    tap::algorithms::ContiguousFloat yawTarget;
+    tap::algorithms::ContiguousFloat pitchTarget;
 
-    aruwlib::algorithms::SmoothPid yawMotorPid;
-    aruwlib::algorithms::SmoothPid leftPitchPid;
-    aruwlib::algorithms::SmoothPid rightPitchPid;
+    tap::algorithms::SmoothPid yawMotorPid;
+    tap::algorithms::SmoothPid leftPitchPid;
+    tap::algorithms::SmoothPid rightPitchPid;
 
     uint32_t prevTime;
 
@@ -174,15 +174,15 @@ private:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    aruwlib::mock::DjiMotorMock pitchMotorLeft;
-    aruwlib::mock::DjiMotorMock pitchMotorRight;
-    aruwlib::mock::DjiMotorMock yawMotor;
+    tap::mock::DjiMotorMock pitchMotorLeft;
+    tap::mock::DjiMotorMock pitchMotorRight;
+    tap::mock::DjiMotorMock yawMotor;
 
 private:
 #else
-    aruwlib::motor::DjiMotor pitchMotorLeft;
-    aruwlib::motor::DjiMotor pitchMotorRight;
-    aruwlib::motor::DjiMotor yawMotor;
+    tap::motor::DjiMotor pitchMotorLeft;
+    tap::motor::DjiMotor pitchMotorRight;
+    tap::motor::DjiMotor yawMotor;
 #endif
 
     /**
@@ -203,10 +203,10 @@ private:
      * @param[out] turretAngle The wrapped angle to update.
      */
     static void updateTurretAngle(
-        const aruwlib::motor::DjiMotor& motor,
+        const tap::motor::DjiMotor& motor,
         uint16_t calibrationEncoderValue,
         float calibrationAngle,
-        aruwlib::algorithms::ContiguousFloat& turretAngle);
+        tap::algorithms::ContiguousFloat& turretAngle);
 
     /**
      * Runs the passed in motor's PID controller given the specified motor motor,
@@ -222,13 +222,13 @@ private:
      * @param[out] motor The motor to set the output on.
      */
     static void runPositionPid(
-        const aruwlib::algorithms::ContiguousFloat& currAngle,
-        const aruwlib::algorithms::ContiguousFloat& setpoint,
+        const tap::algorithms::ContiguousFloat& currAngle,
+        const tap::algorithms::ContiguousFloat& setpoint,
         const uint32_t dt,
         const float errorBtwnMotors,
         const float pitchGravityCompensation,
-        aruwlib::algorithms::SmoothPid& pidController,
-        aruwlib::motor::DjiMotor& motor);
+        tap::algorithms::SmoothPid& pidController,
+        tap::motor::DjiMotor& motor);
 
     /**
      * Attempts to set desired passed in motor output to the passed in motor. If the turret is out
@@ -238,13 +238,13 @@ private:
      * @param[in] currAngle The current motor angle, in degrees
      * @param[in] motor Reference to the motor to set.
      */
-    static void setMotorOutput(float out, aruwlib::motor::DjiMotor& motor);
+    static void setMotorOutput(float out, tap::motor::DjiMotor& motor);
 
     /**
      * @return the angular velocity of a motor, in degrees / second, of the passed in motor. 360
      *      degrees / (60 seconds / minute) * (shaftRPM in shaft rotation / minute).
      */
-    static inline int32_t getVelocity(const aruwlib::motor::DjiMotor& motor)
+    static inline int32_t getVelocity(const tap::motor::DjiMotor& motor)
     {
         return 360 / 60 * static_cast<int32_t>(motor.getShaftRPM());
     }

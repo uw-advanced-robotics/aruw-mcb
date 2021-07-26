@@ -23,15 +23,15 @@
 
 #include "sentinel_switcher_subsystem.hpp"
 
-using namespace aruwlib::control;
+using namespace tap::control;
 
 #define TURRET_OVERHEAT(currHeat, heatLimit) (currHeat + BARREL_OVERHEAT_THRESHOLD > heatLimit)
 
 namespace aruwsrc::control::sentinel::firing
 {
 SentinelRotateAgitatorCommand::SentinelRotateAgitatorCommand(
-    aruwlib::Drivers* drivers,
-    aruwlib::control::setpoint::SetpointSubsystem* agitator,
+    tap::Drivers* drivers,
+    tap::control::setpoint::SetpointSubsystem* agitator,
     SentinelSwitcherSubsystem* switcher)
     : ComprisedCommand(drivers),
       drivers(drivers),

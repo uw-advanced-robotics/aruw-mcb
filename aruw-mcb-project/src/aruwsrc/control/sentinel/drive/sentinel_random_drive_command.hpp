@@ -29,7 +29,7 @@
 
 namespace aruwsrc::control::sentinel::drive
 {
-class SentinelRandomDriveCommand : public aruwlib::control::Command
+class SentinelRandomDriveCommand : public tap::control::Command
 {
 public:
     explicit SentinelRandomDriveCommand(SentinelDriveSubsystem* subsystem);
@@ -54,7 +54,7 @@ private:
     bool chosenNewRPM = false;
 
     SentinelDriveSubsystem* subsystemSentinelDrive;
-    aruwlib::arch::MilliTimeout changeVelocityTimer;
+    tap::arch::MilliTimeout changeVelocityTimer;
 };
 
 }  // namespace aruwsrc::control::sentinel::drive

@@ -27,16 +27,16 @@
 #include "aruwsrc/control/turret/double_pitch_turret_subsystem.hpp"
 
 using namespace aruwlib;
-using namespace aruwlib::algorithms;
+using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
 {
 SentinelTurretCVCommand::SentinelTurretCVCommand(
-    aruwlib::Drivers *drivers,
-    aruwlib::control::turret::TurretSubsystemInterface *sentinelTurret,
+    tap::Drivers *drivers,
+    tap::control::turret::TurretSubsystemInterface *sentinelTurret,
     aruwsrc::agitator::AgitatorSubsystem *agitator,
     sentinel::firing::SentinelSwitcherSubsystem *switcher)
-    : aruwlib::control::ComprisedCommand(drivers),
+    : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelTurret(sentinelTurret),
       rotateAgitator(drivers, agitator, switcher),

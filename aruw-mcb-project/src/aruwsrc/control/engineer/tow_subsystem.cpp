@@ -26,12 +26,12 @@ namespace aruwsrc
 namespace engineer
 {
 TowSubsystem::TowSubsystem(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Digital::OutputPin leftTowPin,
-    aruwlib::gpio::Digital::OutputPin rightTowPin,
-    aruwlib::gpio::Digital::InputPin leftTowLimitSwitchPin,
-    aruwlib::gpio::Digital::InputPin rightTowLimitSwitchPin)
-    : aruwlib::control::Subsystem(drivers),
+    tap::Drivers *drivers,
+    tap::gpio::Digital::OutputPin leftTowPin,
+    tap::gpio::Digital::OutputPin rightTowPin,
+    tap::gpio::Digital::InputPin leftTowLimitSwitchPin,
+    tap::gpio::Digital::InputPin rightTowLimitSwitchPin)
+    : tap::control::Subsystem(drivers),
       leftClamped(false),
       rightClamped(false),
       LEFT_TOW_PIN(leftTowPin),
@@ -69,13 +69,13 @@ bool TowSubsystem::getRightLeftLimitSwitchTriggered() const
 
 void TowSubsystem::runHardwareTests()
 {
-    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
         this->setHardwareTestsComplete();
 }
 
 void TowSubsystem::onHardwareTestStart()
 {
-    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    testTime = tap::arch::clock::getTimeMicroseconds();
     this->setLeftClamped(!getLeftClamped());
     this->setRightClamped(!getRightClamped());
 }

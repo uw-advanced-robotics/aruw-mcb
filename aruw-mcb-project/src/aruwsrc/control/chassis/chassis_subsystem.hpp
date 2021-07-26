@@ -53,7 +53,7 @@ namespace chassis
  *     - In other words, 'x' is the bow/stern and 'y' is starboard/
  *       port in boat terms.
  */
-class ChassisSubsystem : public aruwlib::control::chassis::ChassisSubsystemInterface
+class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
     /**
@@ -71,7 +71,7 @@ public:
     /**
      * Pin to use for current sensing
      */
-    static constexpr aruwlib::gpio::Analog::Pin CURRENT_SENSOR_PIN = aruwlib::gpio::Analog::Pin::S;
+    static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::Pin::S;
 
     /// @see power_limiter.hpp for what these mean
     static constexpr float MAX_ENERGY_BUFFER = 60.0f;
@@ -271,15 +271,15 @@ private:
 
 public:
     // hardware constants, not specific to any particular chassis
-    static constexpr aruwlib::motor::MotorId LEFT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR2;
-    static constexpr aruwlib::motor::MotorId LEFT_BACK_MOTOR_ID = aruwlib::motor::MOTOR3;
-    static constexpr aruwlib::motor::MotorId RIGHT_FRONT_MOTOR_ID = aruwlib::motor::MOTOR1;
-    static constexpr aruwlib::motor::MotorId RIGHT_BACK_MOTOR_ID = aruwlib::motor::MOTOR4;
+    static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
+    static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+    static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+    static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
 
 #if defined(TARGET_OLD_SOLDIER)
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #else
-    static constexpr aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS2;
+    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 #endif
 
     // wheel velocity PID variables
@@ -318,7 +318,7 @@ public:
      */
     modm::Matrix<float, 4, 1> desiredWheelRPM;
 
-    aruwlib::algorithms::ExtendedKalman chassisRotationErrorKalman;
+    tap::algorithms::ExtendedKalman chassisRotationErrorKalman;
 
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
@@ -326,33 +326,33 @@ public:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    aruwlib::mock::DjiMotorMock leftFrontMotor;
-    aruwlib::mock::DjiMotorMock leftBackMotor;
-    aruwlib::mock::DjiMotorMock rightFrontMotor;
-    aruwlib::mock::DjiMotorMock rightBackMotor;
+    tap::mock::DjiMotorMock leftFrontMotor;
+    tap::mock::DjiMotorMock leftBackMotor;
+    tap::mock::DjiMotorMock rightFrontMotor;
+    tap::mock::DjiMotorMock rightBackMotor;
 
 private:
 #else
     // motors
-    aruwlib::motor::DjiMotor leftFrontMotor;
-    aruwlib::motor::DjiMotor leftBackMotor;
-    aruwlib::motor::DjiMotor rightFrontMotor;
-    aruwlib::motor::DjiMotor rightBackMotor;
+    tap::motor::DjiMotor leftFrontMotor;
+    tap::motor::DjiMotor leftBackMotor;
+    tap::motor::DjiMotor rightFrontMotor;
+    tap::motor::DjiMotor rightBackMotor;
 #endif
 
-    aruwlib::motor::DjiMotor* motors[4];
-    aruwlib::control::chassis::PowerLimiter chassisPowerLimiter;
-    const aruwlib::motor::M3508Constants motorConstants;
+    tap::motor::DjiMotor* motors[4];
+    tap::control::chassis::PowerLimiter chassisPowerLimiter;
+    const tap::motor::M3508Constants motorConstants;
 
 public:
     ChassisSubsystem(
-        aruwlib::Drivers* drivers,
-        aruwlib::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        aruwlib::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        aruwlib::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        aruwlib::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
-        aruwlib::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN)
-        : aruwlib::control::chassis::ChassisSubsystemInterface(drivers),
+        tap::Drivers* drivers,
+        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
+        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
+        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
+        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN)
+        : tap::control::chassis::ChassisSubsystemInterface(drivers),
           leftFrontVelocityPid(
               VELOCITY_PID_KP,
               VELOCITY_PID_KI,
@@ -432,7 +432,7 @@ public:
 
     inline int getNumChassisMotors() const override { return 4; }
 
-    inline const aruwlib::motor::DjiMotor* const* getChassisMotorArray() const { return motors; }
+    inline const tap::motor::DjiMotor* const* getChassisMotorArray() const { return motors; }
 
     void initialize() override;
 
@@ -518,7 +518,7 @@ private:
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,
-        aruwlib::motor::DjiMotor* const motor,
+        tap::motor::DjiMotor* const motor,
         float desiredRpm);
 
     /**
@@ -527,7 +527,7 @@ private:
     inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
     {
         static constexpr float ratio =
-            2.0f * aruwlib::algorithms::PI * CHASSIS_GEARBOX_RATIO / 60.0f;
+            2.0f * tap::algorithms::PI * CHASSIS_GEARBOX_RATIO / 60.0f;
         return mat * ratio;
     }
 };  // class ChassisSubsystem

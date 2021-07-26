@@ -31,7 +31,7 @@ namespace mock
 class OledDisplayMock : public display::OledDisplay
 {
 public:
-    explicit OledDisplayMock(aruwlib::Drivers *drivers);
+    explicit OledDisplayMock(tap::Drivers *drivers);
     virtual ~OledDisplayMock();
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(bool, updateDisplay, (), (override));

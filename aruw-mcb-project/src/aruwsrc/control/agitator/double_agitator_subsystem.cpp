@@ -19,25 +19,25 @@
 
 #include "double_agitator_subsystem.hpp"
 
-using aruwlib::algorithms::PI;
-using aruwlib::motor::DjiMotor;
+using tap::algorithms::PI;
+using tap::motor::DjiMotor;
 
 namespace aruwsrc
 {
 namespace agitator
 {
 DoubleAgitatorSubsystem::DoubleAgitatorSubsystem(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     float kp,
     float ki,
     float kd,
     float maxIAccum,
     float maxOutput,
     float agitatorGearRatio,
-    aruwlib::motor::MotorId agitator1MotorId,
-    aruwlib::can::CanBus agitator1CanBusId,
-    aruwlib::motor::MotorId agitator2MotorId,
-    aruwlib::can::CanBus agitator2CanBusId,
+    tap::motor::MotorId agitator1MotorId,
+    tap::can::CanBus agitator1CanBusId,
+    tap::motor::MotorId agitator2MotorId,
+    tap::can::CanBus agitator2CanBusId,
     bool isAgitatorInverted,
     float jamDistanceTolerance,
     uint32_t jamTemporalTolerance,
@@ -142,7 +142,7 @@ float DoubleAgitatorSubsystem::getCurrentValue() const
 
 void DoubleAgitatorSubsystem::runHardwareTests()
 {
-    if (aruwlib::algorithms::compareFloatClose(
+    if (tap::algorithms::compareFloatClose(
             this->getSetpoint(),
             this->getCurrentValue(),
             PI / 16))

@@ -21,7 +21,7 @@
 
 #include "aruwlib/drivers.hpp"
 
-using aruwlib::Drivers;
+using tap::Drivers;
 
 namespace aruwsrc
 {
@@ -37,13 +37,13 @@ bool XAxisSubsystem::isExtended() const { return extended; }
 
 void XAxisSubsystem::runHardwareTests()
 {
-    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
         this->setHardwareTestsComplete();
 }
 
 void XAxisSubsystem::onHardwareTestStart()
 {
-    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    testTime = tap::arch::clock::getTimeMicroseconds();
     this->setExtended(!isExtended());
 }
 

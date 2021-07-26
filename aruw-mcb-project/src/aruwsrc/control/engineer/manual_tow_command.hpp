@@ -32,7 +32,7 @@ namespace engineer
  * When this command is added, the tower mechanism's clamps are triggered until the command
  * is removed.
  */
-class ManualTowCommand : public aruwlib::control::Command
+class ManualTowCommand : public tap::control::Command
 {
 public:
     explicit ManualTowCommand(TowSubsystem* subsystem);

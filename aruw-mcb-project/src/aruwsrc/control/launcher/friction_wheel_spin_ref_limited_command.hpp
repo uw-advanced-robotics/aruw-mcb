@@ -34,11 +34,11 @@ namespace aruwsrc::control::launcher
 /**
  * Rotates flywheels of 17MM projectile launcher based on ref serial speed limit.
  */
-class FrictionWheelSpinRefLimitedCommand : public aruwlib::control::Command
+class FrictionWheelSpinRefLimitedCommand : public tap::control::Command
 {
 public:
     FrictionWheelSpinRefLimitedCommand(
-        aruwlib::Drivers *drivers,
+        tap::Drivers *drivers,
         aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels);
 
     void initialize() override {}
@@ -56,7 +56,7 @@ private:
     static constexpr int16_t WHEEL_RPM_18 = 5000;
     static constexpr int16_t WHEEL_RPM_30 = 7000;
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
     aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels;
 };

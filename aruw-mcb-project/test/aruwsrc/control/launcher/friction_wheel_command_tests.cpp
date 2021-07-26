@@ -27,7 +27,7 @@
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
 
 using namespace aruwsrc::launcher;
-using aruwlib::Drivers;
+using tap::Drivers;
 using aruwsrc::mock::FrictionWheelSubsystemMock;
 using namespace testing;
 

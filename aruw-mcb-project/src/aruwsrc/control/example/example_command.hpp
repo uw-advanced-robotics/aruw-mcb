@@ -35,7 +35,7 @@ namespace control
 {
 class ExampleSubsystem;
 
-class ExampleCommand : public aruwlib::control::Command
+class ExampleCommand : public tap::control::Command
 {
 public:
     ExampleCommand(ExampleSubsystem* subsystem, int speed);

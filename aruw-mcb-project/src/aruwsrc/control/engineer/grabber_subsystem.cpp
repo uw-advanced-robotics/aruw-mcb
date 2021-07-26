@@ -35,13 +35,13 @@ bool GrabberSubsystem::isSqueezed() const { return isGrabberSqueezed; }
 
 void GrabberSubsystem::runHardwareTests()
 {
-    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
         this->setHardwareTestsComplete();
 }
 
 void GrabberSubsystem::onHardwareTestStart()
 {
-    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    testTime = tap::arch::clock::getTimeMicroseconds();
     this->setSqueezed(!isGrabberSqueezed);
 }
 

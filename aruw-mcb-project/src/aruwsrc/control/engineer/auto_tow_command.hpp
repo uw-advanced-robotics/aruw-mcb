@@ -33,7 +33,7 @@ namespace engineer
  * the first time the tow subsystem's associated limit switches have been triggered.
  * The clamps are clamped until the command is ended.
  */
-class AutoTowCommand : public aruwlib::control::Command
+class AutoTowCommand : public tap::control::Command
 {
 public:
     explicit AutoTowCommand(TowSubsystem* subsystem);

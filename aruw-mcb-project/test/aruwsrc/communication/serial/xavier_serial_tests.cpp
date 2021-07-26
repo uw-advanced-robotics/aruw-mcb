@@ -29,12 +29,12 @@
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "gtest/gtest.h"
 
-using aruwlib::Drivers;
-using aruwlib::serial::DJISerial;
+using tap::Drivers;
+using tap::serial::DJISerial;
 using aruwsrc::serial::XavierSerial;
 using namespace aruwsrc::mock;
 using namespace testing;
-using namespace aruwlib::arch;
+using namespace tap::arch;
 
 static constexpr float FIXED_POINT_PRECISION = 0.01f;
 
@@ -199,8 +199,8 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
         EXPECT_CALL(cs, getLeftFrontRpmActual).WillRepeatedly(Return(lfWheelRPMToTest[i]));
         EXPECT_CALL(cs, getRightBackRpmActual).WillRepeatedly(Return(rbWheelRPMToTest[i]));
         EXPECT_CALL(cs, getRightFrontRpmActual).WillRepeatedly(Return(rfWheelRPMToTest[i]));
-        aruwlib::algorithms::ContiguousFloat pit(turretPitchValsToTest[i], -1000, 1000);
-        aruwlib::algorithms::ContiguousFloat yaw(turretYawValsToTest[i], -1000, 1000);
+        tap::algorithms::ContiguousFloat pit(turretPitchValsToTest[i], -1000, 1000);
+        tap::algorithms::ContiguousFloat yaw(turretYawValsToTest[i], -1000, 1000);
         EXPECT_CALL(ts, getCurrentPitchValue).WillRepeatedly(ReturnRef(pit));
         EXPECT_CALL(ts, getCurrentYawValue).WillRepeatedly(ReturnRef(yaw));
         EXPECT_CALL(drivers.mpu6500, getGx).WillRepeatedly(Return(gxValsToTest[i]));
@@ -214,7 +214,7 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
         EXPECT_CALL(drivers.mpu6500, getRoll).WillRepeatedly(Return(rollValsToTest[i]));
 
         auto checkExpectations =
-            [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
                 EXPECT_EQ(
                     FRAME_HEADER_LENGTH + 12 * sizeof(int16_t) + 3 * sizeof(int32_t) + CRC_LENGTH,
                     length);
@@ -306,12 +306,12 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
 
     static constexpr float TIME_BETWEEN_ROBOT_ID_SEND = 5000;
     static constexpr int ROBOT_IDS_TO_CHECK =
-        aruwlib::serial::RefSerial::BLUE_SENTINEL - aruwlib::serial::RefSerial::RED_HERO + 1;
+        tap::serial::RefSerial::BLUE_SENTINEL - tap::serial::RefSerial::RED_HERO + 1;
 
     Drivers drivers;
     XavierSerial xs(&drivers);
     XavierSerialTester xst(&xs);
-    aruwlib::serial::RefSerial::RobotData robotData;
+    tap::serial::RefSerial::RobotData robotData;
 
     setExpectationsForTxTest(&drivers, ROBOT_IDS_TO_CHECK);
     EXPECT_CALL(drivers.refSerial, getRobotData)
@@ -319,7 +319,7 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
         .WillRepeatedly(ReturnRef(robotData));
     ON_CALL(drivers.uart, write(_, _, _))
         .WillByDefault(
-            [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
                 data += FRAME_HEADER_LENGTH;
                 EXPECT_EQ(length, FRAME_HEADER_LENGTH + 1 + CRC_LENGTH);
                 EXPECT_EQ(robotData.robotId, data[0]);
@@ -328,15 +328,15 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
 
     xs.initializeCV();
 
-    aruwlib::arch::clock::setTime(0);
+    tap::arch::clock::setTime(0);
 
-    for (int i = aruwlib::serial::RefSerial::RED_HERO;
-         i <= aruwlib::serial::RefSerial::BLUE_SENTINEL;
+    for (int i = tap::serial::RefSerial::RED_HERO;
+         i <= tap::serial::RefSerial::BLUE_SENTINEL;
          i++)
     {
-        aruwlib::arch::clock::setTime(
-            aruwlib::arch::clock::getTimeMilliseconds() + TIME_BETWEEN_ROBOT_ID_SEND);
-        robotData.robotId = static_cast<aruwlib::serial::RefSerial::RobotId>(i);
+        tap::arch::clock::setTime(
+            tap::arch::clock::getTimeMilliseconds() + TIME_BETWEEN_ROBOT_ID_SEND);
+        robotData.robotId = static_cast<tap::serial::RefSerial::RobotId>(i);
         xs.sendRobotID();
     }
 }
@@ -397,7 +397,7 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
         .WillByDefault(
-            [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
                 EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
                 EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
                 return length;
@@ -450,7 +450,7 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
 {
     static constexpr uint32_t RESEND_AIM_REQUEST_TIMEOUT = 1000;
 
-    aruwlib::arch::clock::setTime(0);
+    tap::arch::clock::setTime(0);
 
     Drivers drivers;
     XavierSerial xs(&drivers);
@@ -460,7 +460,7 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
         .WillByDefault(
-            [&](aruwlib::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
                 EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
                 EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
                 return length;

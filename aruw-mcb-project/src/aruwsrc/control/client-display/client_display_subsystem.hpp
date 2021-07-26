@@ -28,10 +28,10 @@ namespace aruwsrc::display
 /**
  * A placeholder subsystem for running the client display command
  */
-class ClientDisplaySubsystem : public aruwlib::control::Subsystem
+class ClientDisplaySubsystem : public tap::control::Subsystem
 {
 public:
-    ClientDisplaySubsystem(aruwlib::Drivers* drivers) : Subsystem(drivers) {}
+    ClientDisplaySubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
     virtual ~ClientDisplaySubsystem() {}
     const char* getName() override { return "client display"; }
 };

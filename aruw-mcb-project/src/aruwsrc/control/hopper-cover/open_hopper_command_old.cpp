@@ -27,7 +27,7 @@ OpenHopperCommand::OpenHopperCommand(HopperSubsystem* subsystem)
     : Command(),
       subsystemHopper(subsystem)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(subsystem));
 }
 
 void OpenHopperCommand::initialize() { subsystemHopper->setOpen(); }

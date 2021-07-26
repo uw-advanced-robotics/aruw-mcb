@@ -30,8 +30,8 @@ class SentinelSwitcherSubsystemMock : public control::sentinel::firing::Sentinel
 {
 public:
     SentinelSwitcherSubsystemMock(
-        aruwlib::Drivers *drivers,
-        aruwlib::gpio::Pwm::Pin switcherServoPin = aruwlib::gpio::Pwm::Pin::W);
+        tap::Drivers *drivers,
+        tap::gpio::Pwm::Pin switcherServoPin = tap::gpio::Pwm::Pin::W);
     virtual ~SentinelSwitcherSubsystemMock();
 
     MOCK_METHOD(const char *, getName, (), (override));

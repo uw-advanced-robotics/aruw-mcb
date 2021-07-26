@@ -24,8 +24,8 @@
 
 #include "aruwsrc/control/engineer/tow_subsystem.hpp"
 
-using aruwlib::Drivers;
-using aruwlib::gpio::Digital;
+using tap::Drivers;
+using tap::gpio::Digital;
 using aruwsrc::engineer::TowSubsystem;
 
 static constexpr Digital::OutputPin LEFT_TOW_PIN = Digital::OutputPin::E;

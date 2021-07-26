@@ -30,10 +30,10 @@ namespace aruwsrc
 {
 namespace control
 {
-class BlinkLEDCommand : public aruwlib::control::Command
+class BlinkLEDCommand : public tap::control::Command
 {
 public:
-    BlinkLEDCommand(aruwlib::Drivers* drivers, aruwsrc::control::ExampleSubsystem* subsystem);
+    BlinkLEDCommand(tap::Drivers* drivers, aruwsrc::control::ExampleSubsystem* subsystem);
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -57,9 +57,9 @@ public:
 
     const char* getName() const override { return "blink led"; }
 
-    aruwlib::Drivers* drivers;
+    tap::Drivers* drivers;
 
-    aruwlib::arch::MilliTimeout completedTimer;
+    tap::arch::MilliTimeout completedTimer;
 
     int refershCounter = 0;
     int startCounter = 0;

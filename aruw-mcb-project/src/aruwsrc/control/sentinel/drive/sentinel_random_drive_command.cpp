@@ -29,7 +29,7 @@
 #ifndef PLATFORM_HOSTED
 using modm::platform::RandomNumberGenerator;
 #endif
-using aruwlib::control::Subsystem;
+using tap::control::Subsystem;
 
 namespace aruwsrc::control::sentinel::drive
 {

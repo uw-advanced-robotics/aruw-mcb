@@ -27,21 +27,21 @@
 
 #include "chassis_subsystem.hpp"
 
-using aruwlib::Drivers;
+using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const aruwlib::control::turret::TurretSubsystemInterface* turret)
+    const tap::control::turret::TurretSubsystemInterface* turret)
     : drivers(drivers),
       chassis(chassis),
       turret(turret)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
 }
 
 void ChassisAutorotateCommand::initialize() {}
@@ -67,23 +67,23 @@ void ChassisAutorotateCommand::execute()
     float rTranslationalGain =
         chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
 
-    float chassisXDesiredWheelspeed = aruwlib::algorithms::limitVal<float>(
+    float chassisXDesiredWheelspeed = tap::algorithms::limitVal<float>(
                                           drivers->controlOperatorInterface.getChassisXInput(),
                                           -rTranslationalGain,
                                           rTranslationalGain) *
                                       ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
-    float chassisYDesiredWheelspeed = aruwlib::algorithms::limitVal<float>(
+    float chassisYDesiredWheelspeed = tap::algorithms::limitVal<float>(
                                           drivers->controlOperatorInterface.getChassisYInput(),
                                           -rTranslationalGain,
                                           rTranslationalGain) *
                                       ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
     // Rotate X and Y depending on turret angle
-    aruwlib::algorithms::rotateVector(
+    tap::algorithms::rotateVector(
         &chassisXDesiredWheelspeed,
         &chassisYDesiredWheelspeed,
-        -aruwlib::algorithms::degreesToRadians(turret->getYawAngleFromCenter()));
+        -tap::algorithms::degreesToRadians(turret->getYawAngleFromCenter()));
 
     chassis->setDesiredOutput(
         chassisXDesiredWheelspeed,

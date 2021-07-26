@@ -21,7 +21,7 @@
 
 #include "sentinel_full_traverse_command.hpp"
 
-using namespace aruwlib::arch::clock;
+using namespace tap::arch::clock;
 
 namespace aruwsrc::control::sentinel::drive
 {
@@ -56,7 +56,7 @@ void SentinelFullTraverseCommand::execute()
         velocityTargetGenerator.setTarget(-MAX_DESIRED_TRAVERSE_SPEED);
     }
     // update chassis target velocity
-    uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     velocityTargetGenerator.update(RAMP_SPEED * static_cast<float>(currTime - prevTime));
     prevTime = currTime;
     subsystemSentinelDrive->setDesiredRpm(velocityTargetGenerator.getValue());

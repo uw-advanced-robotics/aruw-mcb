@@ -35,7 +35,7 @@ void FrictionWheelSubsystem::setDesiredRpm(float desRpm) { desiredRpmRamp.setTar
 
 void FrictionWheelSubsystem::refresh()
 {
-    uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
     prevTime = currTime;
 

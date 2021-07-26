@@ -27,9 +27,9 @@ namespace aruwsrc
 namespace control
 {
 ExampleComprisedCommand::ExampleComprisedCommand(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     ExampleSubsystem* subsystem)
-    : aruwlib::control::ComprisedCommand(drivers),
+    : tap::control::ComprisedCommand(drivers),
       exampleCommand(subsystem, 2000),
       otherExampleCommand(subsystem, 500),
       switchTimer(2000),

@@ -40,13 +40,13 @@ class ChassisSubsystem;
  * a sine wave centered around the yaw gimbal angle, while still allowing for
  * translational movement.
  */
-class WiggleDriveCommand : public aruwlib::control::Command
+class WiggleDriveCommand : public tap::control::Command
 {
 public:
     WiggleDriveCommand(
-        aruwlib::Drivers* drivers,
+        tap::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const aruwlib::control::turret::TurretSubsystemInterface* turret);
+        const tap::control::turret::TurretSubsystemInterface* turret);
 
     void initialize() override;
 
@@ -93,11 +93,11 @@ private:
     static constexpr float WIGGLE_ROTATE_KP = -300.0f;
     static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING = 0.5f;
 
-    aruwlib::Drivers* drivers;
+    tap::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const aruwlib::control::turret::TurretSubsystemInterface* turret;
+    const tap::control::turret::TurretSubsystemInterface* turret;
 
-    aruwlib::algorithms::Ramp rotationSpeedRamp;
+    tap::algorithms::Ramp rotationSpeedRamp;
 
     int8_t rotationSign;
 

@@ -45,20 +45,20 @@
 #include "aruwsrc/control/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 
-using aruwlib::Drivers;
+using tap::Drivers;
 
 /* define timers here -------------------------------------------------------*/
-aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
-aruwlib::arch::PeriodicMilliTimer sendXavierTimeout(3);
+tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-static void initializeIo(aruwlib::Drivers *drivers);
+static void initializeIo(tap::Drivers *drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-static void updateIo(aruwlib::Drivers *drivers);
+static void updateIo(tap::Drivers *drivers);
 
 int main()
 {
@@ -71,7 +71,7 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
-    aruwlib::Drivers *drivers = aruwlib::DoNotUse_getDrivers();
+    tap::Drivers *drivers = tap::DoNotUse_getDrivers();
 
     Board::initialize();
     initializeIo(drivers);
@@ -79,9 +79,9 @@ int main()
 
 #ifdef PLATFORM_HOSTED
     aruwsrc::sim::initialize_robot_sim();
-    aruwlib::motorsim::SimHandler::resetMotorSims();
+    tap::motorsim::SimHandler::resetMotorSims();
     // Blocking call, waits until Windows Simulator connects.
-    aruwlib::communication::TCPServer::MainServer()->getConnection();
+    tap::communication::TCPServer::MainServer()->getConnection();
 #endif
 
     while (1)
@@ -110,7 +110,7 @@ int main()
     return 0;
 }
 
-static void initializeIo(aruwlib::Drivers *drivers)
+static void initializeIo(tap::Drivers *drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
@@ -131,10 +131,10 @@ static void initializeIo(aruwlib::Drivers *drivers)
 #endif
 }
 
-static void updateIo(aruwlib::Drivers *drivers)
+static void updateIo(tap::Drivers *drivers)
 {
 #ifdef PLATFORM_HOSTED
-    aruwlib::motorsim::SimHandler::updateSims();
+    tap::motorsim::SimHandler::updateSims();
 #endif
 
     drivers->canRxHandler.pollCanData();

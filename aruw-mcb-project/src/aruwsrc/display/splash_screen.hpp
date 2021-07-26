@@ -34,7 +34,7 @@ namespace display
 class SplashScreen : public modm::AbstractMenu
 {
 public:
-    SplashScreen(modm::ViewStack *vs, aruwlib::Drivers *drivers);
+    SplashScreen(modm::ViewStack *vs, tap::Drivers *drivers);
 
     void draw() override;
 
@@ -50,7 +50,7 @@ private:
     static constexpr int SPLASH_SCREEN_MENU_ID = 1;
 
     bool drawn = false;
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 };
 }  // namespace display
 }  // namespace aruwsrc

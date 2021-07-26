@@ -24,11 +24,11 @@
 #include "aruwlib/communication/remote.hpp"
 #include "aruwlib/drivers.hpp"
 
-using namespace aruwlib::arch::clock;
+using namespace tap::arch::clock;
 
 namespace aruwsrc::control::turret
 {
-TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem)
+TurretCVCommand::TurretCVCommand(tap::Drivers *drivers, TurretSubsystem *subsystem)
     : drivers(drivers),
       turretSubsystem(subsystem),
       yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
@@ -54,7 +54,7 @@ TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *sub
           PITCH_Q_PROPORTIONAL_KALMAN,
           PITCH_R_PROPORTIONAL_KALMAN)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem *>(subsystem));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem *>(subsystem));
 }
 
 void TurretCVCommand::initialize()

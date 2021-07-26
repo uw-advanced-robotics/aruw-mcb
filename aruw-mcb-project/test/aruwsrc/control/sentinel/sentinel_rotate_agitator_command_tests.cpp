@@ -26,11 +26,11 @@
 #include "aruwsrc/mock/sentinel_switcher_subsystem_mock.hpp"
 
 using namespace aruwsrc::control::sentinel::firing;
-using namespace aruwlib::serial;
+using namespace tap::serial;
 using namespace aruwlib;
 using namespace testing;
 using namespace aruwsrc::mock;
-using namespace aruwlib::arch::clock;
+using namespace tap::arch::clock;
 
 #define SETUP_TEST()                                                    \
     Drivers drivers;                                                    \

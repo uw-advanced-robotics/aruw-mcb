@@ -53,8 +53,8 @@ public:
      * The pin to check for the limit switch input, needs to be set by someone who
      * knows what they're doing.
      */
-    static constexpr aruwlib::gpio::Digital::InputPin WATERWHEEL_LIMIT_PIN =
-        aruwlib::gpio::Digital::InputPin::B;
+    static constexpr tap::gpio::Digital::InputPin WATERWHEEL_LIMIT_PIN =
+        tap::gpio::Digital::InputPin::B;
 #endif
 
     /**
@@ -63,19 +63,19 @@ public:
      * @note for all debounce params see `debounce.hpp` for reference
      */
     LimitSwitchAgitatorSubsystem(
-        aruwlib::Drivers* drivers,
+        tap::Drivers* drivers,
         float kp,
         float ki,
         float kd,
         float maxIAccum,
         float maxOutput,
         float agitatorGearRatio,
-        aruwlib::motor::MotorId agitatorMotorId,
-        aruwlib::can::CanBus agitatorCanBusId,
+        tap::motor::MotorId agitatorMotorId,
+        tap::can::CanBus agitatorCanBusId,
         bool isAgitatorInverted,
         float distanceTolerance,
         uint32_t temporalTolerance,
-        aruwlib::gpio::Digital::InputPin limitSwitchPin);
+        tap::gpio::Digital::InputPin limitSwitchPin);
 
     void refresh() override;
 
@@ -90,12 +90,12 @@ private:
     /**
      * The pin that the agitator checks for limiting
      */
-    aruwlib::gpio::Digital::InputPin limitSwitchPin;
+    tap::gpio::Digital::InputPin limitSwitchPin;
 
     /**
      * A pointer to the digital class to get GPIO state from
      */
-    aruwlib::gpio::Digital* digital;
+    tap::gpio::Digital* digital;
 
     bool limitSwitchPressed;
 

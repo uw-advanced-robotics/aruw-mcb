@@ -26,14 +26,14 @@
 
 #include "sentinel_drive_subsystem.hpp"
 
-using namespace aruwlib::algorithms;
+using namespace tap::algorithms;
 
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
-    aruwlib::Drivers *drivers,
+    tap::Drivers *drivers,
     SentinelDriveSubsystem *sentinelChassis)
-    : aruwlib::control::ComprisedCommand(drivers),
+    : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelChassis(sentinelChassis),
       fullTraverse(sentinelChassis),

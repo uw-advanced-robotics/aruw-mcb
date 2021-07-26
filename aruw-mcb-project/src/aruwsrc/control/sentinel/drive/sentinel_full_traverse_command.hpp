@@ -31,7 +31,7 @@ namespace aruwsrc::control::sentinel::drive
 {
 class SentinelDriveSubsystem;
 
-class SentinelFullTraverseCommand : public aruwlib::control::Command
+class SentinelFullTraverseCommand : public tap::control::Command
 {
 public:
     explicit SentinelFullTraverseCommand(SentinelDriveSubsystem* subsystem);
@@ -60,7 +60,7 @@ private:
 
     uint32_t prevTime;
 
-    aruwlib::algorithms::Ramp velocityTargetGenerator;
+    tap::algorithms::Ramp velocityTargetGenerator;
 
     SentinelDriveSubsystem* subsystemSentinelDrive;
 };  // class SentinelFullTraverseCommand

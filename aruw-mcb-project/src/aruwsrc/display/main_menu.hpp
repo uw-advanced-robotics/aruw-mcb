@@ -34,7 +34,7 @@ namespace display
 class MainMenu : public modm::StandardMenu
 {
 public:
-    MainMenu(modm::ViewStack *stack, aruwlib::Drivers *drivers);
+    MainMenu(modm::ViewStack *stack, tap::Drivers *drivers);
 
     virtual ~MainMenu() = default;
 
@@ -46,7 +46,7 @@ public:
 private:
     static constexpr int MAIN_MENU_ID = 2;
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();

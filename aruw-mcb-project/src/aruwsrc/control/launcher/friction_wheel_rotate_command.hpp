@@ -31,7 +31,7 @@ class FrictionWheelSubsystem;
 /**
  * Command which sets a given friction wheel subsystem to a set speed.
  */
-class FrictionWheelRotateCommand : public aruwlib::control::Command
+class FrictionWheelRotateCommand : public tap::control::Command
 {
 public:
     FrictionWheelRotateCommand(FrictionWheelSubsystem* subsystem, int speed);

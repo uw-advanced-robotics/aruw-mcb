@@ -30,10 +30,10 @@ namespace aruwsrc::control::sentinel::firing
  * Controls a servo used to switch which barrel balls are fed into. Barrel ID1 is assumed
  * to be on the bottom and barrel ID2 is assumed to be the top.
  */
-class SentinelSwitcherSubsystem : public aruwlib::control::Subsystem
+class SentinelSwitcherSubsystem : public tap::control::Subsystem
 {
 public:
-    SentinelSwitcherSubsystem(aruwlib::Drivers *drivers, aruwlib::gpio::Pwm::Pin switcherServoPin);
+    SentinelSwitcherSubsystem(tap::Drivers *drivers, tap::gpio::Pwm::Pin switcherServoPin);
 
     const char *getName() override { return "sentinel switcher"; }
 
@@ -47,7 +47,7 @@ private:
     static constexpr float UPPER_PWM = 0.13f;
     static constexpr float LOWER_PWM = 0.19f;
 
-    aruwlib::motor::Servo switcherMotor;
+    tap::motor::Servo switcherMotor;
     bool useLower = true;
 };
 

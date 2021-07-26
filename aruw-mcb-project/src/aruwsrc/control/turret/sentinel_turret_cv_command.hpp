@@ -36,7 +36,7 @@ namespace aruwsrc::control::turret
  * A command that receives input from the vision system via the `XavierSerial` driver and aims the
  * turret accordingly.
  */
-class SentinelTurretCVCommand : public aruwlib::control::ComprisedCommand
+class SentinelTurretCVCommand : public tap::control::ComprisedCommand
 {
 public:
     /**
@@ -60,8 +60,8 @@ public:
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
     SentinelTurretCVCommand(
-        aruwlib::Drivers *drivers,
-        aruwlib::control::turret::TurretSubsystemInterface *DoublePitchTurretSubsystem,
+        tap::Drivers *drivers,
+        tap::control::turret::TurretSubsystemInterface *DoublePitchTurretSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
         sentinel::firing::SentinelSwitcherSubsystem *switcher);
 
@@ -80,9 +80,9 @@ public:
     inline bool isAimingAtTarget() const { return aimingAtTarget; }
 
 private:
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
-    aruwlib::control::turret::TurretSubsystemInterface *sentinelTurret;
+    tap::control::turret::TurretSubsystemInterface *sentinelTurret;
 
     sentinel::firing::SentinelRotateAgitatorCommand rotateAgitator;
 
