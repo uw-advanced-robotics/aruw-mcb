@@ -21,10 +21,10 @@
 
 #include <cstring>
 
-#include "aruwlib/architecture/endianness_wrappers.hpp"
-#include "aruwlib/control/chassis/chassis_subsystem_interface.hpp"
-#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
+#include "tap/control/turret/turret_subsystem_interface.hpp"
+#include "tap/drivers.hpp"
 
 using namespace tap::arch;
 using namespace tap::serial;

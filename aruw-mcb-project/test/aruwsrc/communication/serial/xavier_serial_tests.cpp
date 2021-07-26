@@ -19,10 +19,10 @@
 
 #include <iostream>
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/architecture/endianness_wrappers.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"

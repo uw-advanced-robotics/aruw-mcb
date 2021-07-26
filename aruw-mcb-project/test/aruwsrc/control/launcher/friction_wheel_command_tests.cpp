@@ -20,7 +20,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/launcher/friction_wheel_rotate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"

@@ -20,7 +20,7 @@
 #ifndef LIMITED_AGITATOR_SUBSYSTEM_HPP_
 #define LIMITED_AGITATOR_SUBSYSTEM_HPP_
 
-#include "aruwlib/communication/gpio/digital.hpp"
+#include "tap/communication/gpio/digital.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "modm/math/filter/debounce.hpp"

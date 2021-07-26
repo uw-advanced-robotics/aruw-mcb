@@ -20,8 +20,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwlib/algorithms/ramp.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/ramp.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"

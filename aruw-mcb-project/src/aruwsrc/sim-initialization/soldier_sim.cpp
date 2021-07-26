@@ -19,7 +19,7 @@
 
 #if defined(TARGET_SOLDIER) && defined(PLATFORM_HOSTED)
 
-#include "aruwlib/motor/motorsim/sim_handler.hpp"
+#include "tap/motor/motorsim/sim_handler.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"

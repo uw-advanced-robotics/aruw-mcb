@@ -20,7 +20,7 @@
 #ifndef SENTINEL_DRIVE_MANUAL_COMMAND_HPP_
 #define SENTINEL_DRIVE_MANUAL_COMMAND_HPP_
 
-#include "aruwlib/control/command.hpp"
+#include "tap/control/command.hpp"
 
 namespace aruwlib
 {

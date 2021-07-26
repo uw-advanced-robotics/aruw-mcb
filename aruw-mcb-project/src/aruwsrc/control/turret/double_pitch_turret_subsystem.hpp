@@ -22,14 +22,14 @@
 
 #include <modm/math/filter/pid.hpp>
 
-#include "aruwlib/algorithms/contiguous_float.hpp"
-#include "aruwlib/algorithms/linear_interpolation.hpp"
-#include "aruwlib/algorithms/smooth_pid.hpp"
-#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
+#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/linear_interpolation.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/control/turret/turret_subsystem_interface.hpp"
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwlib/mock/dji_motor_mock.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include "aruwlib/motor/dji_motor.hpp"
+#include "tap/motor/dji_motor.hpp"
 #endif
 
 namespace aruwsrc::control::turret

@@ -21,26 +21,26 @@
 /* hosted environment (simulator) includes --------------------------------- */
 #include <iostream>
 
-#include "aruwlib/communication/tcp-server/tcp_server.hpp"
-#include "aruwlib/motor/motorsim/sim_handler.hpp"
+#include "tap/communication/tcp-server/tcp_server.hpp"
+#include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
-#include "aruwlib/rm-dev-board-a/board.hpp"
+#include "tap/rm-dev-board-a/board.hpp"
 
 #include "modm/architecture/interface/delay.hpp"
 
 /* arch includes ------------------------------------------------------------*/
-#include "aruwlib/architecture/periodic_timer.hpp"
-#include "aruwlib/architecture/profiler.hpp"
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/architecture/profiler.hpp"
 
 /* communication includes ---------------------------------------------------*/
-#include "aruwlib/drivers_singleton.hpp"
+#include "tap/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
-#include "aruwlib/errors/create_errors.hpp"
+#include "tap/errors/create_errors.hpp"
 
 /* control includes ---------------------------------------------------------*/
-#include "aruwlib/architecture/clock.hpp"
+#include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/control/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"

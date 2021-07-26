@@ -19,13 +19,13 @@
 
 #if defined(TARGET_SOLDIER)
 
-#include "aruwlib/control/command_mapper.hpp"
-#include "aruwlib/control/hold_command_mapping.hpp"
-#include "aruwlib/control/hold_repeat_command_mapping.hpp"
-#include "aruwlib/control/press_command_mapping.hpp"
-#include "aruwlib/control/setpoint/commands/calibrate_command.hpp"
-#include "aruwlib/control/toggle_command_mapping.hpp"
-#include "aruwlib/drivers_singleton.hpp"
+#include "tap/control/command_mapper.hpp"
+#include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
+#include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/toggle_command_mapping.hpp"
+#include "tap/drivers_singleton.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
@@ -44,9 +44,9 @@
 #include "turret/turret_world_relative_position_command.hpp"
 
 #ifdef PLATFORM_HOSTED
-#include "aruwlib/communication/can/can.hpp"
-#include "aruwlib/motor/motorsim/motor_sim.hpp"
-#include "aruwlib/motor/motorsim/sim_handler.hpp"
+#include "tap/communication/can/can.hpp"
+#include "tap/motor/motorsim/motor_sim.hpp"
+#include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
 using namespace tap::control::setpoint;

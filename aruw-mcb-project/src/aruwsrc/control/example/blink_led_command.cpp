@@ -19,8 +19,8 @@
 
 #include "blink_led_command.hpp"
 
-#include "aruwlib/control/subsystem.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/drivers.hpp"
 
 using tap::Drivers;
 

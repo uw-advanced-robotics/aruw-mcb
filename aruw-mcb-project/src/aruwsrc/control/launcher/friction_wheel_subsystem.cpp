@@ -19,7 +19,7 @@
 
 #include "friction_wheel_subsystem.hpp"
 
-#include "aruwlib/architecture/clock.hpp"
+#include "tap/architecture/clock.hpp"
 
 namespace aruwsrc
 {

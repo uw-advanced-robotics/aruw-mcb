@@ -19,16 +19,16 @@
 
 #if defined(TARGET_HERO)
 
-#include "aruwlib/control/command_mapper.hpp"
-#include "aruwlib/control/hold_command_mapping.hpp"
-#include "aruwlib/control/hold_repeat_command_mapping.hpp"
-#include "aruwlib/control/press_command_mapping.hpp"
-#include "aruwlib/control/setpoint/commands/calibrate_command.hpp"
-#include "aruwlib/control/setpoint/commands/move_absolute_command.hpp"
-#include "aruwlib/control/setpoint/commands/move_command.hpp"
-#include "aruwlib/control/setpoint/commands/move_unjam_comprised_command.hpp"
-#include "aruwlib/control/toggle_command_mapping.hpp"
-#include "aruwlib/drivers_singleton.hpp"
+#include "tap/control/command_mapper.hpp"
+#include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
+#include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/move_absolute_command.hpp"
+#include "tap/control/setpoint/commands/move_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
+#include "tap/control/toggle_command_mapping.hpp"
+#include "tap/drivers_singleton.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/double_agitator_subsystem.hpp"

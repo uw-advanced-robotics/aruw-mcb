@@ -19,9 +19,9 @@
 
 #include "main_menu.hpp"
 
-#include "aruwlib/display/command_scheduler_menu.hpp"
-#include "aruwlib/display/hardware_test_menu.hpp"
-#include "aruwlib/display/motor_menu.hpp"
+#include "tap/display/command_scheduler_menu.hpp"
+#include "tap/display/hardware_test_menu.hpp"
+#include "tap/display/motor_menu.hpp"
 
 #include "error_menu.hpp"
 

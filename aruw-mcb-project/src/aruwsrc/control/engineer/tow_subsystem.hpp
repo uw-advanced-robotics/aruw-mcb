@@ -20,9 +20,9 @@
 #ifndef TOW_SUBSYSTEM_HPP_
 #define TOW_SUBSYSTEM_HPP_
 
-#include "aruwlib/communication/gpio/digital.hpp"
-#include "aruwlib/control/subsystem.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/communication/gpio/digital.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc
 {

@@ -19,9 +19,9 @@
 
 #if defined(TARGET_ENGINEER)
 
-#include "aruwlib/communication/gpio/digital.hpp"
-#include "aruwlib/control/command_scheduler.hpp"
-#include "aruwlib/drivers_singleton.hpp"
+#include "tap/communication/gpio/digital.hpp"
+#include "tap/control/command_scheduler.hpp"
+#include "tap/drivers_singleton.hpp"
 
 #include "aruwsrc/control/engineer/extend_xaxis_command.hpp"
 #include "aruwsrc/control/engineer/grabber_subsystem.hpp"

@@ -19,8 +19,8 @@
 
 #include "sentinel_drive_manual_command.hpp"
 
-#include "aruwlib/communication/remote.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/communication/remote.hpp"
+#include "tap/drivers.hpp"
 
 #include "sentinel_drive_subsystem.hpp"
 

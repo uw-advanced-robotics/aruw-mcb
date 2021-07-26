@@ -20,7 +20,7 @@
 #ifndef FRICTION_WHEEL_REF_SERIAL_RPM_CONTROL_COMMAND_
 #define FRICTION_WHEEL_REF_SERIAL_RPM_CONTROL_COMMAND_
 
-#include "aruwlib/control/command.hpp"
+#include "tap/control/command.hpp"
 
 #include "friction_wheel_subsystem.hpp"
 

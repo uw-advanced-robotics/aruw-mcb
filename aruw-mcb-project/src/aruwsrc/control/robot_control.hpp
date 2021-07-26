@@ -20,7 +20,7 @@
 #ifndef __ROBOT_CONTROL_HPP__
 #define __ROBOT_CONTROL_HPP__
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc
 {

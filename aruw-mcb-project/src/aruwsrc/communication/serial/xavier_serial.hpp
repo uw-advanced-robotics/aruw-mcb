@@ -20,10 +20,10 @@
 #ifndef XAVIER_SERIAL_HPP_
 #define XAVIER_SERIAL_HPP_
 
-#include "aruwlib/architecture/periodic_timer.hpp"
-#include "aruwlib/architecture/timeout.hpp"
-#include "aruwlib/communication/serial/dji_serial.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"

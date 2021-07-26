@@ -19,7 +19,7 @@
 
 #if defined(TARGET_DRONE)
 
-#include "aruwlib/drivers_singleton.hpp"
+#include "tap/drivers_singleton.hpp"
 
 using tap::DoNotUse_getDrivers;
 

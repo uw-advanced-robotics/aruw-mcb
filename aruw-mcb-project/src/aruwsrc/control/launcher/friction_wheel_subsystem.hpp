@@ -20,16 +20,16 @@
 #ifndef __FRICTION_WHEEL_SUBSYSTEM_HPP__
 #define __FRICTION_WHEEL_SUBSYSTEM_HPP__
 
-#include "aruwlib/algorithms/ramp.hpp"
-#include "aruwlib/control/subsystem.hpp"
+#include "tap/algorithms/ramp.hpp"
+#include "tap/control/subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwlib/mock/dji_motor_mock.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include "aruwlib/motor/dji_motor.hpp"
+#include "tap/motor/dji_motor.hpp"
 #endif
 
-#include "aruwlib/util_macros.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
 

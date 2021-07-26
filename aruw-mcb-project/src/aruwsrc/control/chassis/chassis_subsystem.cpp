@@ -23,9 +23,9 @@
 
 #include "chassis_subsystem.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/communication/remote.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/communication/remote.hpp"
+#include "tap/drivers.hpp"
 
 using namespace aruwlib;
 using namespace tap::algorithms;

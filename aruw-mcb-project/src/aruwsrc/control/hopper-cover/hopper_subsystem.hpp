@@ -26,10 +26,10 @@
 #ifndef __OPEN_HOPPER_SUBSYSTEM__
 #define __OPEN_HOPPER_SUBSYSTEM__
 
-#include "aruwlib/control/command_scheduler.hpp"
-#include "aruwlib/control/subsystem.hpp"
-#include "aruwlib/motor/servo.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/control/command_scheduler.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/motor/servo.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
 

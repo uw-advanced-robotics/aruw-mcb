@@ -20,9 +20,9 @@
 #ifndef SENTINEL_SWITCHER_SUBSYSTEM_HPP_
 #define SENTINEL_SWITCHER_SUBSYSTEM_HPP_
 
-#include "aruwlib/control/subsystem.hpp"
-#include "aruwlib/motor/servo.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/motor/servo.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc::control::sentinel::firing
 {

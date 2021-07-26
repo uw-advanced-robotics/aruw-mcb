@@ -20,9 +20,9 @@
 #ifndef __BLINK_LED_COMMAND_HPP__
 #define __BLINK_LED_COMMAND_HPP__
 
-#include "aruwlib/architecture/timeout.hpp"
-#include "aruwlib/control/command.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "example_subsystem.hpp"
 

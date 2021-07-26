@@ -20,8 +20,8 @@
 #ifndef CHASSIS_AUTOROTATE_COMMAND_HPP_
 #define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
-#include "aruwlib/control/command.hpp"
-#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
+#include "tap/control/command.hpp"
+#include "tap/control/turret/turret_subsystem_interface.hpp"
 
 namespace aruwlib
 {

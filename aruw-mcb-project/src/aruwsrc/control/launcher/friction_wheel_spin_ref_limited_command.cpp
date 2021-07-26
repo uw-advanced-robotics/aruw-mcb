@@ -19,7 +19,7 @@
 
 #include "friction_wheel_spin_ref_limited_command.hpp"
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::launcher
 {

@@ -19,10 +19,10 @@
 
 #include "double_pitch_turret_subsystem.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/drivers.hpp"
-#include "aruwlib/errors/create_errors.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
 using namespace tap::motor;
 using namespace tap::algorithms;

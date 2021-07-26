@@ -20,8 +20,8 @@
 #ifndef HOPPER_COMMANDS_HPP_
 #define HOPPER_COMMANDS_HPP_
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/control/setpoint/commands/move_absolute_command.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/control/setpoint/commands/move_absolute_command.hpp"
 
 using tap::control::setpoint::MoveAbsoluteCommand;
 

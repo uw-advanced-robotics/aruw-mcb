@@ -20,20 +20,20 @@
 #ifndef CHASSIS_SUBSYSTEM_HPP_
 #define CHASSIS_SUBSYSTEM_HPP_
 
-#include "aruwlib/algorithms/extended_kalman.hpp"
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/communication/gpio/analog.hpp"
-#include "aruwlib/control/chassis/chassis_subsystem_interface.hpp"
+#include "tap/algorithms/extended_kalman.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/communication/gpio/analog.hpp"
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwlib/mock/dji_motor_mock.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include "aruwlib/motor/dji_motor.hpp"
+#include "tap/motor/dji_motor.hpp"
 #endif
 
-#include "aruwlib/control/chassis/power_limiter.hpp"
-#include "aruwlib/motor/m3508_constants.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/control/chassis/power_limiter.hpp"
+#include "tap/motor/m3508_constants.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"

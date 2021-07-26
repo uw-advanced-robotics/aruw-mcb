@@ -19,10 +19,10 @@
 
 #include "turret_cv_command.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/communication/remote.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/remote.hpp"
+#include "tap/drivers.hpp"
 
 using namespace tap::arch::clock;
 

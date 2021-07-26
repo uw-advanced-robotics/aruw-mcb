@@ -20,7 +20,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/engineer/auto_tow_command.hpp"
 #include "aruwsrc/mock/tow_subsystem_mock.hpp"

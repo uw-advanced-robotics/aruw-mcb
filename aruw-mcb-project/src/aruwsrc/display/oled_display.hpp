@@ -20,11 +20,11 @@
 #ifndef OLED_DISPLAY_HPP_
 #define OLED_DISPLAY_HPP_
 
-#include "aruwlib/architecture/periodic_timer.hpp"
-#include "aruwlib/display/oled_button_handler.hpp"
-#include "aruwlib/display/sh1106.hpp"
-#include "aruwlib/rm-dev-board-a/board.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/display/oled_button_handler.hpp"
+#include "tap/display/sh1106.hpp"
+#include "tap/rm-dev-board-a/board.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"
 #include "modm/ui/menu/view_stack.hpp"

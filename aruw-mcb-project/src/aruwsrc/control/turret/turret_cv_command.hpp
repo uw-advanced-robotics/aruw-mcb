@@ -20,10 +20,10 @@
 #ifndef TURRET_CV_COMMAND_HPP_
 #define TURRET_CV_COMMAND_HPP_
 
-#include "aruwlib/algorithms/contiguous_float.hpp"
-#include "aruwlib/algorithms/smooth_pid.hpp"
-#include "aruwlib/architecture/timeout.hpp"
-#include "aruwlib/control/command.hpp"
+#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/control/command.hpp"
 
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 

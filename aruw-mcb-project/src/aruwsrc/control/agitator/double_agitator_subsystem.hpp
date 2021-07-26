@@ -20,12 +20,12 @@
 #ifndef DOUBLE_AGITATOR_SUBSYSTEM_HPP_
 #define DOUBLE_AGITATOR_SUBSYSTEM_HPP_
 
-#include "aruwlib/algorithms/smooth_pid.hpp"
-#include "aruwlib/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
-#include "aruwlib/control/setpoint/interfaces/setpoint_subsystem.hpp"
-#include "aruwlib/drivers.hpp"
-#include "aruwlib/motor/dji_motor.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
+#include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
+#include "tap/drivers.hpp"
+#include "tap/motor/dji_motor.hpp"
+#include "tap/util_macros.hpp"
 
 #include "agitator_subsystem.hpp"
 

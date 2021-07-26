@@ -20,19 +20,19 @@
 #ifndef AGITATOR_SUBSYSTEM_HPP_
 #define AGITATOR_SUBSYSTEM_HPP_
 
-#include "aruwlib/architecture/conditional_timer.hpp"
-#include "aruwlib/architecture/timeout.hpp"
-#include "aruwlib/control/subsystem.hpp"
+#include "tap/architecture/conditional_timer.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/control/subsystem.hpp"
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwlib/mock/dji_motor_mock.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include "aruwlib/motor/dji_motor.hpp"
+#include "tap/motor/dji_motor.hpp"
 #endif
 
-#include "aruwlib/algorithms/smooth_pid.hpp"
-#include "aruwlib/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
-#include "aruwlib/control/setpoint/interfaces/setpoint_subsystem.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
+#include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc
 {

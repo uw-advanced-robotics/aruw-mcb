@@ -20,11 +20,11 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "aruwlib/algorithms/contiguous_float.hpp"
-#include "aruwlib/algorithms/smooth_pid.hpp"
-#include "aruwlib/architecture/timeout.hpp"
-#include "aruwlib/control/comprised_command.hpp"
-#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
+#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/control/comprised_command.hpp"
+#include "tap/control/turret/turret_subsystem_interface.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/sentinel/firing/sentinel_rotate_agitator_command.hpp"

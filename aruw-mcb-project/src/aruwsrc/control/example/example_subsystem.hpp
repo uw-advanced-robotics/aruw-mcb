@@ -33,13 +33,13 @@
 #ifndef __SUBSYSTEM_EXAMPLE_HPP__
 #define __SUBSYSTEM_EXAMPLE_HPP__
 
-#include "aruwlib/control/command_scheduler.hpp"
-#include "aruwlib/control/subsystem.hpp"
+#include "tap/control/command_scheduler.hpp"
+#include "tap/control/subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwlib/mock/dji_motor_mock.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include "aruwlib/motor/dji_motor.hpp"
+#include "tap/motor/dji_motor.hpp"
 #endif
 
 #include "modm/math/filter/pid.hpp"

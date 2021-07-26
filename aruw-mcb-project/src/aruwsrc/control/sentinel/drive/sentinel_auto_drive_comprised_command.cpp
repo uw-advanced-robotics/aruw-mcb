@@ -21,8 +21,8 @@
 
 #include "sentinel_auto_drive_comprised_command.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 
 #include "sentinel_drive_subsystem.hpp"
 
