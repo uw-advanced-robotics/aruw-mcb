@@ -17,30 +17,27 @@
  * along with aruwlib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PWM_MOCK_HPP_
-#define PWM_MOCK_HPP_
+#include "buzzer.hpp"
 
-#include <gmock/gmock.h>
-
+#include "aruwlib/algorithms/math_user_utils.hpp"
 #include "aruwlib/communication/gpio/pwm.hpp"
 
-namespace aruwlib
-{
-namespace mock
-{
-class PwmMock : public aruwlib::gpio::Pwm
-{
-public:
-    PwmMock();
-    virtual ~PwmMock();
+#include "modm/architecture/interface/delay.hpp"
 
-    MOCK_METHOD(void, init, (), (override));
-    MOCK_METHOD(void, writeAll, (float), (override));
-    MOCK_METHOD(void, write, (float duty, aruwlib::gpio::Pwm::Pin), (override));
-    MOCK_METHOD(void, setTimerFrequency, (aruwlib::gpio::Pwm::Timer, uint32_t), (override));
-    MOCK_METHOD(void, pause, (aruwlib::gpio::Pwm::Timer), (override));
-};  // class PwmMock
-}  // namespace mock
-}  // namespace aruwlib
+namespace aruwlib::buzzer
+{
+void playNote(gpio::Pwm *pwmController, uint32_t frequency)
+{
+    if (frequency == 0)
+    {
+        silenceBuzzer(pwmController);
+    }
+    else
+    {
+        pwmController->write(0.5f, gpio::Pwm::BUZZER);
+        pwmController->setTimerFrequency(gpio::Pwm::TIMER_12, frequency);
+    }
+}
 
-#endif  //  PWM_MOCK_HPP_
+void silenceBuzzer(gpio::Pwm *pwmController) { pwmController->write(0, gpio::Pwm::BUZZER); }
+}  // namespace aruwlib::buzzer
