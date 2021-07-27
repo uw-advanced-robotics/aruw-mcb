@@ -41,11 +41,7 @@ public:
     MOCK_METHOD(float, getPitchVelocity, (), (const override));
     MOCK_METHOD(float, getYawAngleFromCenter, (), (const override));
     MOCK_METHOD(float, getPitchAngleFromCenter, (), (const override));
-    MOCK_METHOD(
-        const tap::algorithms::ContiguousFloat &,
-        getCurrentYawValue,
-        (),
-        (const override));
+    MOCK_METHOD(const tap::algorithms::ContiguousFloat &, getCurrentYawValue, (), (const override));
     MOCK_METHOD(
         const tap::algorithms::ContiguousFloat &,
         getCurrentPitchValue,

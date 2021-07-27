@@ -142,10 +142,7 @@ float DoubleAgitatorSubsystem::getCurrentValue() const
 
 void DoubleAgitatorSubsystem::runHardwareTests()
 {
-    if (tap::algorithms::compareFloatClose(
-            this->getSetpoint(),
-            this->getCurrentValue(),
-            PI / 16))
+    if (tap::algorithms::compareFloatClose(this->getSetpoint(), this->getCurrentValue(), PI / 16))
     {
         this->setHardwareTestsComplete();
     }

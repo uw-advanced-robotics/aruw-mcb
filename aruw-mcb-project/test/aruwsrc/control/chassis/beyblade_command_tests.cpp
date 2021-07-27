@@ -45,9 +45,9 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
 using tap::Drivers;
 using namespace testing;
-using tap::algorithms::Ramp;
 using aruwsrc::mock::ChassisSubsystemMock;
 using aruwsrc::mock::TurretSubsystemMock;
+using tap::algorithms::Ramp;
 using namespace tap::serial;
 
 static constexpr float BASE_DESIRED_OUT = 3500;

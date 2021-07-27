@@ -121,8 +121,7 @@ public:
     {
         turretSub = turret;
     }
-    mockable inline void attachChassis(
-        tap::control::chassis::ChassisSubsystemInterface* chassis)
+    mockable inline void attachChassis(tap::control::chassis::ChassisSubsystemInterface* chassis)
     {
         chassisSub = chassis;
     }

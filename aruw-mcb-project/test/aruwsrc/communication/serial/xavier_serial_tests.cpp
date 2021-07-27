@@ -29,9 +29,9 @@
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "gtest/gtest.h"
 
+using aruwsrc::serial::XavierSerial;
 using tap::Drivers;
 using tap::serial::DJISerial;
-using aruwsrc::serial::XavierSerial;
 using namespace aruwsrc::mock;
 using namespace testing;
 using namespace tap::arch;
@@ -318,21 +318,18 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
         .Times(ROBOT_IDS_TO_CHECK)
         .WillRepeatedly(ReturnRef(robotData));
     ON_CALL(drivers.uart, write(_, _, _))
-        .WillByDefault(
-            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
-                data += FRAME_HEADER_LENGTH;
-                EXPECT_EQ(length, FRAME_HEADER_LENGTH + 1 + CRC_LENGTH);
-                EXPECT_EQ(robotData.robotId, data[0]);
-                return length;
-            });
+        .WillByDefault([&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            data += FRAME_HEADER_LENGTH;
+            EXPECT_EQ(length, FRAME_HEADER_LENGTH + 1 + CRC_LENGTH);
+            EXPECT_EQ(robotData.robotId, data[0]);
+            return length;
+        });
 
     xs.initializeCV();
 
     tap::arch::clock::setTime(0);
 
-    for (int i = tap::serial::RefSerial::RED_HERO;
-         i <= tap::serial::RefSerial::BLUE_SENTINEL;
-         i++)
+    for (int i = tap::serial::RefSerial::RED_HERO; i <= tap::serial::RefSerial::BLUE_SENTINEL; i++)
     {
         tap::arch::clock::setTime(
             tap::arch::clock::getTimeMilliseconds() + TIME_BETWEEN_ROBOT_ID_SEND);
@@ -396,12 +393,11 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
 
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
-        .WillByDefault(
-            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
-                EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
-                EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
-                return length;
-            });
+        .WillByDefault([&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
+            EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
+            return length;
+        });
 
     xs.initializeCV();
 
@@ -459,12 +455,11 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
 
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
-        .WillByDefault(
-            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
-                EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
-                EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
-                return length;
-            });
+        .WillByDefault([&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
+            EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
+            return length;
+        });
 
     xs.initializeCV();
 

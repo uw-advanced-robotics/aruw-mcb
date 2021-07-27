@@ -27,8 +27,8 @@
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
 
 using namespace aruwsrc::launcher;
-using tap::Drivers;
 using aruwsrc::mock::FrictionWheelSubsystemMock;
+using tap::Drivers;
 using namespace testing;
 
 TEST(FrictionWheelRotateCommand, execute_zero_desired_rpm_always_zero)

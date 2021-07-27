@@ -66,8 +66,7 @@ public:
     mockable void updateMenu();
 
 private:
-    tap::display::OledButtonHandler::Button prevButton =
-        tap::display::OledButtonHandler::NONE;
+    tap::display::OledButtonHandler::Button prevButton = tap::display::OledButtonHandler::NONE;
 
     tap::display::Sh1106<
 #ifndef PLATFORM_HOSTED

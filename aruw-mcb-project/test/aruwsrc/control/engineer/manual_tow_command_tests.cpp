@@ -25,10 +25,10 @@
 #include "aruwsrc/control/engineer/manual_tow_command.hpp"
 #include "aruwsrc/mock/tow_subsystem_mock.hpp"
 
-using tap::Drivers;
-using tap::gpio::Digital;
 using aruwsrc::engineer::ManualTowCommand;
 using aruwsrc::mock::TowSubsystemMock;
+using tap::Drivers;
+using tap::gpio::Digital;
 
 static constexpr Digital::OutputPin LEFT_TOW_PIN = Digital::OutputPin::E;
 static constexpr Digital::OutputPin RIGHT_TOW_PIN = Digital::OutputPin::F;

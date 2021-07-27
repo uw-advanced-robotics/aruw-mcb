@@ -88,9 +88,7 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(tap::Drivers *drivers)
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
-GrabberSubsystemMock::GrabberSubsystemMock(
-    tap::Drivers *drivers,
-    tap::gpio::Digital::OutputPin pin)
+GrabberSubsystemMock::GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::GrabberSubsystem(drivers, pin)
 {
 }
@@ -146,9 +144,7 @@ TowSubsystemMock::~TowSubsystemMock() {}
 TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers) : TurretSubsystem(drivers) {}
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
-XAxisSubsystemMock::XAxisSubsystemMock(
-    tap::Drivers *drivers,
-    tap::gpio::Digital::OutputPin pin)
+XAxisSubsystemMock::XAxisSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::XAxisSubsystem(drivers, pin)
 {
 }

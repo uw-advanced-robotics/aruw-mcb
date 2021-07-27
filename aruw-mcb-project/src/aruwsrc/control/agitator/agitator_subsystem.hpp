@@ -67,8 +67,7 @@ public:
     // The motor that controls the hopper lid is an agitator_subsystem instance, so
     // I'm adding its constants here as well.
     static constexpr tap::motor::MotorId HOPPER_COVER_MOTOR_ID = tap::motor::MOTOR8;
-    static constexpr tap::can::CanBus HOPPER_COVER_MOTOR_CAN_BUS =
-        tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::can::CanBus HOPPER_COVER_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 
     static constexpr bool IS_HOPPER_COVER_INVERTED = false;
 
@@ -93,8 +92,7 @@ public:
     static constexpr float PID_HERO_WATERWHEEL_MAX_OUT = 16000.0f;
 
     static constexpr tap::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = tap::motor::MOTOR3;
-    static constexpr tap::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS =
-        tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr bool HERO_WATERWHEEL_INVERTED = true;
 
     // PID terms for the hero kicker
@@ -109,10 +107,8 @@ public:
     // There are two kicker motors that drive the shaft.
     static constexpr tap::motor::MotorId HERO_KICKER1_MOTOR_ID = tap::motor::MOTOR7;
     static constexpr tap::motor::MotorId HERO_KICKER2_MOTOR_ID = tap::motor::MOTOR8;
-    static constexpr tap::can::CanBus HERO_KICKER1_MOTOR_CAN_BUS =
-        tap::can::CanBus::CAN_BUS1;
-    static constexpr tap::can::CanBus HERO_KICKER2_MOTOR_CAN_BUS =
-        tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::can::CanBus HERO_KICKER1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::can::CanBus HERO_KICKER2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr bool HERO_KICKER_INVERTED = false;
 
     /**
