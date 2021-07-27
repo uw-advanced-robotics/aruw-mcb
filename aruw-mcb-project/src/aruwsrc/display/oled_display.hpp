@@ -31,7 +31,7 @@
 
 #include "splash_screen.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }

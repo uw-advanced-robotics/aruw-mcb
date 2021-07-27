@@ -22,7 +22,7 @@
 
 #include "tap/control/command.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }

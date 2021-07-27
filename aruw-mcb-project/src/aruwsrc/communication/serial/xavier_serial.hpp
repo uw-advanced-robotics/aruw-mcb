@@ -30,7 +30,7 @@
 
 class XavierSerialTester;
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 
@@ -43,7 +43,7 @@ namespace control::chassis
 {
 class ChassisSubsystemInterface;
 }
-}  // namespace aruwlib
+}  // namespace tap
 
 namespace aruwsrc
 {

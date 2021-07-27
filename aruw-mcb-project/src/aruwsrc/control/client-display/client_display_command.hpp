@@ -32,7 +32,7 @@ namespace tap::control
 class Subsystem;
 }
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }

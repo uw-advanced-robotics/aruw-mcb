@@ -26,7 +26,7 @@
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
 #include "aruwsrc/control/turret/double_pitch_turret_subsystem.hpp"
 
-using namespace aruwlib;
+using namespace tap;
 using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret

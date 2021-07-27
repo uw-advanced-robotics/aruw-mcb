@@ -27,7 +27,7 @@
 #include "tap/communication/remote.hpp"
 #include "tap/drivers.hpp"
 
-using namespace aruwlib;
+using namespace tap;
 using namespace tap::algorithms;
 
 namespace aruwsrc

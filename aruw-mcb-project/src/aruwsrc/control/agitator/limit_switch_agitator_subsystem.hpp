@@ -25,7 +25,7 @@
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "modm/math/filter/debounce.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }

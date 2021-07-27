@@ -24,7 +24,7 @@
 
 #include "friction_wheel_subsystem.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }

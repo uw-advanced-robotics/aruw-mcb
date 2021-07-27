@@ -27,7 +27,7 @@
 using namespace tap::motor;
 using namespace tap::algorithms;
 using namespace tap::control::turret;
-using namespace aruwlib;
+using namespace tap;
 
 namespace aruwsrc::control::turret
 {

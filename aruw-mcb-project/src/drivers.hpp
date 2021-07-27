@@ -70,7 +70,7 @@
 #include "aruwsrc/display/oled_display.hpp"
 #endif
 
-namespace aruwlib
+namespace tap
 {
 class Drivers
 {
@@ -159,6 +159,6 @@ public:
 #endif
 };  // class Drivers
 
-}  // namespace aruwlib
+}  // namespace tap
 
 #endif  // DRIVERS_HPP_

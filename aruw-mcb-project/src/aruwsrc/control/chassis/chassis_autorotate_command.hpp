@@ -23,7 +23,7 @@
 #include "tap/control/command.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }

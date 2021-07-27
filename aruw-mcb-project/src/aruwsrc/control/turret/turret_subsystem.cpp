@@ -30,7 +30,7 @@
 #include "tap/errors/create_errors.hpp"
 
 using namespace tap::motor;
-using namespace aruwlib;
+using namespace tap;
 
 namespace aruwsrc::control::turret
 {

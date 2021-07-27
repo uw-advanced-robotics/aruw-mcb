@@ -22,7 +22,7 @@
 
 #include "modm/ui/menu/standard_menu.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }

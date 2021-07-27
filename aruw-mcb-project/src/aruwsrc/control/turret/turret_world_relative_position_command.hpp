@@ -24,7 +24,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/command.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }

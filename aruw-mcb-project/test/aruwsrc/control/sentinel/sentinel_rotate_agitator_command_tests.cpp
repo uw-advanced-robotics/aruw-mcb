@@ -27,7 +27,7 @@
 
 using namespace aruwsrc::control::sentinel::firing;
 using namespace tap::serial;
-using namespace aruwlib;
+using namespace tap;
 using namespace testing;
 using namespace aruwsrc::mock;
 using namespace tap::arch::clock;
