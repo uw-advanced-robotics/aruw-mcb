@@ -18,7 +18,7 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 if [[ "$#" -ne 1 ]]; then
-    echo "usage: update_aruwlib_submodule.sh ./path-to-aruw-mcb-project"
+    echo "usage: update_taproot_submodule.sh ./path-to-aruw-mcb-project"
     exit 1
 fi
 
@@ -39,7 +39,7 @@ cd -
 if [[ "$(git status | grep -c "nothing to commit")" != 1 ]]; then
     echo "Files have changed..."
     git status
-    git commit -a -m "Update aruwlib submodule"
+    git commit -a -m "Update taproot submodule"
     (git push &>/dev/null) || (git push --set-upstream origin $UPDATE_SUBMODULE_BRANCH)
 
     # The description of our new MR, we want to remove the branch after the MR has

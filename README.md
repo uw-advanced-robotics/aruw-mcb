@@ -28,8 +28,8 @@ If you have any questions please contact us at robomstr@uw.edu.
 aruw-mcb is covered under the GPL-3.0-or-later with the following exceptions:
 - `/modm` and `/aruw-mcb-project/modm` are licensed under MPL 2.0 by the modm project. We _are not_
   the license holder for these files. See `/modm/LICENSE` for license information.
-- `aruw-mcb-project/src/aruwlib/algorithms/MahonyAHRS.h` and
-  `/aruw-mcb-project/src/aruwlib/algorithms/MahonyAHRS.cpp` are licensed under the GPL by SOH
+- `aruw-mcb-project/src/taproot/algorithms/MahonyAHRS.h` and
+  `/aruw-mcb-project/src/taproot/algorithms/MahonyAHRS.cpp` are licensed under the GPL by SOH
   Madgwick. The repo containing this code can be found
   [here](https://github.com/uw-advanced-robotics/MahonyAHRS).
 
