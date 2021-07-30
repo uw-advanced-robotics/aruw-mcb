@@ -16,14 +16,14 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 default:
-  image: aruw/mcb-2020-gitlab-ci:2021-03-20.1
+  image: aruw/mcb-2020-gitlab-ci:2021-06-02.1
 
 variables:
   ARTIFACT_PATH: isolated-deploy
   GIT_SUBMODULE_STRATEGY: none
   BUILD_PATH: aruw-mcb-project/build
-  DEFAULT_BUILD_ELF_FILE: build/hardware/release/aruw-mcb.elf
-  DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/fast/aruw-mcb-tests.elf
+  DEFAULT_BUILD_ELF_FILE: build/hardware/scons-release/aruw-mcb.elf
+  DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/scons-fast/aruw-mcb-tests.elf
   NUM_JOBS: 4
 
 .default_only: &default_only
@@ -50,7 +50,7 @@ stages:
   - Deploy Pages
 
 before_script:
-  - python -V # Print out python version for debugging
+  - python3 -V # Print out python version for debugging
 
 # Initial verification
 
