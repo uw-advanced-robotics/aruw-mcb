@@ -29,8 +29,8 @@ namespace aruwsrc::mock
 class HopperSubsystemMock : public control::HopperSubsystem
 {
     HopperSubsystemMock(
-        aruwlib::Drivers *drivers,
-        aruwlib::gpio::Pwm::Pin pwmPin,
+        tap::Drivers *drivers,
+        tap::gpio::Pwm::Pin pwmPin,
         float open,
         float close,
         float pwmRampSpeed);

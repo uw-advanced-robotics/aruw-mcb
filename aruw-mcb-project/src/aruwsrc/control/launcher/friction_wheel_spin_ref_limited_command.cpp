@@ -19,12 +19,12 @@
 
 #include "friction_wheel_spin_ref_limited_command.hpp"
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
-    aruwlib::Drivers *drivers,
+    tap::Drivers *drivers,
     aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels)
     : drivers(drivers),
       frictionWheels(frictionWheels)

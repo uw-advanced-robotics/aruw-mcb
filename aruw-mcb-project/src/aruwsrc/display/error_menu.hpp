@@ -22,7 +22,7 @@
 
 #include "modm/ui/menu/abstract_menu.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }
@@ -34,7 +34,7 @@ namespace display
 class ErrorMenu : public modm::AbstractMenu
 {
 public:
-    ErrorMenu(modm::ViewStack *vs, aruwlib::Drivers *drivers);
+    ErrorMenu(modm::ViewStack *vs, tap::Drivers *drivers);
 
     void draw() override;
 
@@ -49,7 +49,7 @@ public:
 private:
     static constexpr int ERROR_MENU_ID = 3;
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 };  // class ErrorMenu
 }  // namespace display
 }  // namespace aruwsrc

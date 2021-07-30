@@ -20,9 +20,9 @@
 #ifndef TOW_SUBSYSTEM_HPP_
 #define TOW_SUBSYSTEM_HPP_
 
-#include "aruwlib/communication/gpio/digital.hpp"
-#include "aruwlib/control/subsystem.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/communication/gpio/digital.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -35,15 +35,15 @@ namespace engineer
  * - Each clamp has a limit switch associated with it that when triggered indicates
  *   there is a robot in the grasp of the clamp.
  */
-class TowSubsystem : public aruwlib::control::Subsystem
+class TowSubsystem : public tap::control::Subsystem
 {
 public:
     TowSubsystem(
-        aruwlib::Drivers *drivers,
-        aruwlib::gpio::Digital::OutputPin leftTowPin,
-        aruwlib::gpio::Digital::OutputPin rightTowPin,
-        aruwlib::gpio::Digital::InputPin leftTowLimitSwitchPin,
-        aruwlib::gpio::Digital::InputPin rightTowLimitSwitchPin);
+        tap::Drivers *drivers,
+        tap::gpio::Digital::OutputPin leftTowPin,
+        tap::gpio::Digital::OutputPin rightTowPin,
+        tap::gpio::Digital::InputPin leftTowLimitSwitchPin,
+        tap::gpio::Digital::InputPin rightTowLimitSwitchPin);
 
     /**
      * @param[in] isClamped Indicates if the left clamp should be clamped or not clamped.
@@ -92,10 +92,10 @@ private:
     bool leftClamped;
     bool rightClamped;
 
-    const aruwlib::gpio::Digital::OutputPin LEFT_TOW_PIN;
-    const aruwlib::gpio::Digital::OutputPin RIGHT_TOW_PIN;
-    const aruwlib::gpio::Digital::InputPin LEFT_TOW_LIMIT_SWITCH;
-    const aruwlib::gpio::Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN;
+    const tap::gpio::Digital::OutputPin LEFT_TOW_PIN;
+    const tap::gpio::Digital::OutputPin RIGHT_TOW_PIN;
+    const tap::gpio::Digital::InputPin LEFT_TOW_LIMIT_SWITCH;
+    const tap::gpio::Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN;
 
     uint64_t testTime;
 };  // class TowSubsystem

@@ -26,9 +26,9 @@
 namespace aruwsrc::control::sentinel::firing
 {
 SentinelSwitcherSubsystem::SentinelSwitcherSubsystem(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Pwm::Pin switcherServoPin)
-    : aruwlib::control::Subsystem(drivers),
+    tap::Drivers *drivers,
+    tap::gpio::Pwm::Pin switcherServoPin)
+    : tap::control::Subsystem(drivers),
       switcherMotor(drivers, switcherServoPin, LOWER_PWM, UPPER_PWM, 0.1f)
 {
     useLowerBarrel(this->useLower);

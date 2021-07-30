@@ -19,16 +19,16 @@
 
 #if defined(TARGET_HERO)
 
-#include "aruwlib/control/command_mapper.hpp"
-#include "aruwlib/control/hold_command_mapping.hpp"
-#include "aruwlib/control/hold_repeat_command_mapping.hpp"
-#include "aruwlib/control/press_command_mapping.hpp"
-#include "aruwlib/control/setpoint/commands/calibrate_command.hpp"
-#include "aruwlib/control/setpoint/commands/move_absolute_command.hpp"
-#include "aruwlib/control/setpoint/commands/move_command.hpp"
-#include "aruwlib/control/setpoint/commands/move_unjam_comprised_command.hpp"
-#include "aruwlib/control/toggle_command_mapping.hpp"
-#include "aruwlib/drivers_singleton.hpp"
+#include "tap/control/command_mapper.hpp"
+#include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
+#include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/move_absolute_command.hpp"
+#include "tap/control/setpoint/commands/move_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
+#include "tap/control/toggle_command_mapping.hpp"
+#include "tap/drivers_singleton.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/double_agitator_subsystem.hpp"
@@ -44,25 +44,25 @@
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
-using aruwlib::DoNotUse_getDrivers;
-using namespace aruwlib::control::setpoint;
+using tap::DoNotUse_getDrivers;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::turret;
-using namespace aruwlib::control;
+using namespace tap::control;
 using namespace aruwsrc::display;
-using aruwlib::DoNotUse_getDrivers;
-using aruwlib::Remote;
-using aruwlib::control::CommandMapper;
-using aruwlib::control::RemoteMapState;
+using tap::DoNotUse_getDrivers;
+using tap::Remote;
+using tap::control::CommandMapper;
+using tap::control::RemoteMapState;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
+tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 
 namespace hero_control
 {
@@ -184,7 +184,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(aruwlib::Drivers *drivers)
+void registerHeroSubsystems(tap::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -195,7 +195,7 @@ void registerHeroSubsystems(aruwlib::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultHeroCommands(aruwlib::Drivers *)
+void setDefaultHeroCommands(tap::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
@@ -205,10 +205,10 @@ void setDefaultHeroCommands(aruwlib::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(aruwlib::Drivers *) {}
+void startHeroCommands(tap::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(aruwlib::Drivers *drivers)
+void registerHeroIoMappings(tap::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchDown);
@@ -223,7 +223,7 @@ void registerHeroIoMappings(aruwlib::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(aruwlib::Drivers *drivers)
+void initSubsystemCommands(tap::Drivers *drivers)
 {
     hero_control::initializeSubsystems();
     hero_control::registerHeroSubsystems(drivers);

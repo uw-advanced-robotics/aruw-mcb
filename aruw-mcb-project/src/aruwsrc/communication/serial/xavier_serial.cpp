@@ -21,19 +21,19 @@
 
 #include <cstring>
 
-#include "aruwlib/architecture/endianness_wrappers.hpp"
-#include "aruwlib/control/chassis/chassis_subsystem_interface.hpp"
-#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
+#include "tap/control/turret/turret_subsystem_interface.hpp"
+#include "tap/drivers.hpp"
 
-using namespace aruwlib::arch;
-using namespace aruwlib::serial;
+using namespace tap::arch;
+using namespace tap::serial;
 
 namespace aruwsrc
 {
 namespace serial
 {
-XavierSerial::XavierSerial(aruwlib::Drivers* drivers)
+XavierSerial::XavierSerial(tap::Drivers* drivers)
     : DJISerial(drivers, Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),

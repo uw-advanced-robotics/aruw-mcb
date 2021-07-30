@@ -20,8 +20,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwlib/algorithms/ramp.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/ramp.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
@@ -43,12 +43,12 @@
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
-using aruwlib::Drivers;
+using tap::Drivers;
 using namespace testing;
-using aruwlib::algorithms::Ramp;
 using aruwsrc::mock::ChassisSubsystemMock;
 using aruwsrc::mock::TurretSubsystemMock;
-using namespace aruwlib::serial;
+using tap::algorithms::Ramp;
+using namespace tap::serial;
 
 static constexpr float BASE_DESIRED_OUT = 3500;
 static constexpr float BASE_DESIRED_R_TRANSLATIONAL =

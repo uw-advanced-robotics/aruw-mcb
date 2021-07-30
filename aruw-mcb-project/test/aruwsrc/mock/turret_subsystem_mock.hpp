@@ -31,7 +31,7 @@ namespace mock
 class TurretSubsystemMock : public aruwsrc::control::turret::TurretSubsystem
 {
 public:
-    TurretSubsystemMock(aruwlib::Drivers *drivers);
+    TurretSubsystemMock(tap::Drivers *drivers);
     virtual ~TurretSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
@@ -41,13 +41,9 @@ public:
     MOCK_METHOD(float, getPitchVelocity, (), (const override));
     MOCK_METHOD(float, getYawAngleFromCenter, (), (const override));
     MOCK_METHOD(float, getPitchAngleFromCenter, (), (const override));
+    MOCK_METHOD(const tap::algorithms::ContiguousFloat &, getCurrentYawValue, (), (const override));
     MOCK_METHOD(
-        const aruwlib::algorithms::ContiguousFloat &,
-        getCurrentYawValue,
-        (),
-        (const override));
-    MOCK_METHOD(
-        const aruwlib::algorithms::ContiguousFloat &,
+        const tap::algorithms::ContiguousFloat &,
         getCurrentPitchValue,
         (),
         (const override));

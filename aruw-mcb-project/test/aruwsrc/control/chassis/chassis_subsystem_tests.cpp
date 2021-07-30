@@ -21,13 +21,13 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 
-using aruwlib::Drivers;
-using aruwlib::algorithms::PI;
 using modm::Matrix;
+using tap::Drivers;
+using tap::algorithms::PI;
 using namespace aruwsrc::chassis;
 
 static constexpr float WHEEL_VEL = 1000;

@@ -19,7 +19,7 @@
 
 #include "hopper_subsystem.hpp"
 
-#include "aruwlib/architecture/clock.hpp"
+#include "tap/architecture/clock.hpp"
 
 namespace aruwsrc
 {
@@ -37,13 +37,13 @@ float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
 
 void HopperSubsystem::runHardwareTests()
 {
-    if (aruwlib::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
         this->setHardwareTestsComplete();
 }
 
 void HopperSubsystem::onHardwareTestStart()
 {
-    testTime = aruwlib::arch::clock::getTimeMicroseconds();
+    testTime = tap::arch::clock::getTimeMicroseconds();
     this->setOpen();
 }
 

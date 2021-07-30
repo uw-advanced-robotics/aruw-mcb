@@ -31,8 +31,8 @@ namespace mock
 class XavierSerialMock : public serial::XavierSerial
 {
 public:
-    // XavierSerialMock(aruwlib::Drivers *drivers) : serial::XavierSerial(drivers) {}
-    XavierSerialMock(aruwlib::Drivers *drivers);
+    // XavierSerialMock(tap::Drivers *drivers) : serial::XavierSerial(drivers) {}
+    XavierSerialMock(tap::Drivers *drivers);
     virtual ~XavierSerialMock();
 
     MOCK_METHOD(void, initializeCV, (), (override));
@@ -42,15 +42,11 @@ public:
     MOCK_METHOD(void, stopAutoAim, (), (override));
     MOCK_METHOD(const TurretAimData &, getLastAimData, (), (const override));
     MOCK_METHOD(bool, lastAimDataValid, (), (const override));
-    MOCK_METHOD(
-        void,
-        attachTurret,
-        (aruwlib::control::turret::TurretSubsystemInterface *),
-        (override));
+    MOCK_METHOD(void, attachTurret, (tap::control::turret::TurretSubsystemInterface *), (override));
     MOCK_METHOD(
         void,
         attachChassis,
-        (aruwlib::control::chassis::ChassisSubsystemInterface *),
+        (tap::control::chassis::ChassisSubsystemInterface *),
         (override));
 };  // class XavierSerialMock
 }  // namespace mock

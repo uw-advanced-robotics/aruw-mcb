@@ -19,33 +19,33 @@
 
 #include "wiggle_drive_command.hpp"
 
-#include "aruwlib/algorithms/contiguous_float.hpp"
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/communication/remote.hpp"
-#include "aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/remote.hpp"
+#include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "tap/drivers.hpp"
 
 #include "chassis_subsystem.hpp"
 
-using namespace aruwlib::algorithms;
-using namespace aruwlib::sensors;
-using aruwlib::Drivers;
+using namespace tap::algorithms;
+using namespace tap::sensors;
+using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
 WiggleDriveCommand::WiggleDriveCommand(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const aruwlib::control::turret::TurretSubsystemInterface* turret)
+    const tap::control::turret::TurretSubsystemInterface* turret)
     : drivers(drivers),
       chassis(chassis),
       turret(turret),
       rotationSpeedRamp(0)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
 }
 
 void WiggleDriveCommand::initialize()

@@ -32,16 +32,16 @@ TEMP_DIR="tmp"
 
 cd "$LBUILD_DIR"
 
-cp -r "aruwlib" $TEMP_DIR
+cp -r "taproot" $TEMP_DIR
 
 lbuild build
 if [[ "$?" != 0 ]]; then
     exit 1
 fi
 
-if [[ ! -z "$(git diff "$TEMP_DIR" "aruwlib")" ]]; then
+if [[ ! -z "$(git diff "$TEMP_DIR" "taproot")" ]]; then
     echo "Generated lbuild is different, diff:"
-    git diff "$TEMP_DIR" "aruwlib"
+    git diff "$TEMP_DIR" "taproot"
     rm -r $TEMP_DIR
     exit 1
 else

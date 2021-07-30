@@ -19,19 +19,19 @@
 
 #include "turret_world_relative_position_command.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
-using namespace aruwlib::sensors;
+using namespace tap::sensors;
 
 namespace aruwsrc::control::turret
 {
 TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
-    aruwlib::Drivers *drivers,
+    tap::Drivers *drivers,
     TurretSubsystem *subsystem,
     const chassis::ChassisSubsystem *chassis,
     bool useImuOnTurret)
@@ -63,7 +63,7 @@ TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
           PITCH_R_PROPORTIONAL_KALMAN),
       useImuOnTurret(useImuOnTurret)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem *>(subsystem));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem *>(subsystem));
 }
 
 void TurretWorldRelativePositionCommand::initialize()
@@ -88,7 +88,7 @@ void TurretWorldRelativePositionCommand::initialize()
 void TurretWorldRelativePositionCommand::execute()
 {
     turretSubsystem->updateCurrentTurretAngles();
-    uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     float dt = currTime - prevTime;
     prevTime = currTime;
     runYawPositionController(dt);
@@ -124,7 +124,7 @@ void TurretWorldRelativePositionCommand::runYawPositionController(float dt)
     if (usingImuOnTurret)
     {
         blinkCounter = (blinkCounter + 1) % 100;
-        drivers->leds.set(aruwlib::gpio::Leds::Green, blinkCounter > 50);
+        drivers->leds.set(tap::gpio::Leds::Green, blinkCounter > 50);
 
         float yawActual = drivers->imuRxHandler.getYaw();
 
@@ -201,7 +201,7 @@ void TurretWorldRelativePositionCommand::runPitchPositionController(float dt)
     // gravity compensation
     pidOutput +=
         PITCH_GRAVITY_COMPENSATION_KP *
-        cosf(aruwlib::algorithms::degreesToRadians(turretSubsystem->getPitchAngleFromCenter()));
+        cosf(tap::algorithms::degreesToRadians(turretSubsystem->getPitchAngleFromCenter()));
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }

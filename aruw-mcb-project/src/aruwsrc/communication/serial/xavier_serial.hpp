@@ -20,17 +20,17 @@
 #ifndef XAVIER_SERIAL_HPP_
 #define XAVIER_SERIAL_HPP_
 
-#include "aruwlib/architecture/periodic_timer.hpp"
-#include "aruwlib/architecture/timeout.hpp"
-#include "aruwlib/communication/serial/dji_serial.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
 
 class XavierSerialTester;
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 
@@ -43,7 +43,7 @@ namespace control::chassis
 {
 class ChassisSubsystemInterface;
 }
-}  // namespace aruwlib
+}  // namespace tap
 
 namespace aruwsrc
 {
@@ -54,7 +54,7 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class XavierSerial : public aruwlib::serial::DJISerial, ::modm::pt::Protothread, modm::Resumable<3>
+class XavierSerial : public tap::serial::DJISerial, ::modm::pt::Protothread, modm::Resumable<3>
 {
 public:
     // AutoAim Data
@@ -81,7 +81,7 @@ public:
         CV_NUM_MESSAGE_TYPES,
     };
 
-    XavierSerial(aruwlib::Drivers* drivers);
+    XavierSerial(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(XavierSerial);
     mockable ~XavierSerial() = default;
 
@@ -117,12 +117,11 @@ public:
 
     mockable inline bool lastAimDataValid() const { return aimDataValid; }
 
-    mockable inline void attachTurret(aruwlib::control::turret::TurretSubsystemInterface* turret)
+    mockable inline void attachTurret(tap::control::turret::TurretSubsystemInterface* turret)
     {
         turretSub = turret;
     }
-    mockable inline void attachChassis(
-        aruwlib::control::chassis::ChassisSubsystemInterface* chassis)
+    mockable inline void attachChassis(tap::control::chassis::ChassisSubsystemInterface* chassis)
     {
         chassisSub = chassis;
     }
@@ -162,7 +161,7 @@ private:
         IMU_DATA_OFFSET + 3 * sizeof(int32_t) + 6 * sizeof(int16_t);
 
     /// Used for determining when to send robot id.
-    aruwlib::arch::PeriodicMilliTimer txRobotIdTimeout;
+    tap::arch::PeriodicMilliTimer txRobotIdTimeout;
 
     /// The most recent auto aim request state.
     struct
@@ -171,7 +170,7 @@ private:
         bool autoAimRequest = false;
         AutoAimRequestState currAimState = AUTO_AIM_REQUEST_COMPLETE;
         /// Timer used to reset the aim request if acknowledgement has not been sent by xavier.
-        aruwlib::arch::MilliTimeout sendAimRequestTimeout;
+        tap::arch::MilliTimeout sendAimRequestTimeout;
     } AutoAimRequest;
 
     /// The last aim data received from the xavier.
@@ -182,13 +181,13 @@ private:
 
     // CV online variables.
     /// Timer for determining if serial is offline.
-    aruwlib::arch::MilliTimeout cvOfflineTimeout;
+    tap::arch::MilliTimeout cvOfflineTimeout;
 
     /// A flag set to `true` if the timeout is not expired, and `false` otherwise.
     bool isCvOnline;
 
-    const aruwlib::control::turret::TurretSubsystemInterface* turretSub;
-    const aruwlib::control::chassis::ChassisSubsystemInterface* chassisSub;
+    const tap::control::turret::TurretSubsystemInterface* turretSub;
+    const tap::control::chassis::ChassisSubsystemInterface* chassisSub;
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim

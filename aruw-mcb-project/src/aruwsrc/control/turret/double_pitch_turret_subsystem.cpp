@@ -19,15 +19,15 @@
 
 #include "double_pitch_turret_subsystem.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/drivers.hpp"
-#include "aruwlib/errors/create_errors.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
-using namespace aruwlib::motor;
-using namespace aruwlib::algorithms;
-using namespace aruwlib::control::turret;
-using namespace aruwlib;
+using namespace tap::motor;
+using namespace tap::algorithms;
+using namespace tap::control::turret;
+using namespace tap;
 
 namespace aruwsrc::control::turret
 {
@@ -135,7 +135,7 @@ void DoublePitchTurretSubsystem::runPositionPid(
     const uint32_t dt,
     const float errorBtwnMotors,
     const float pitchGravityCompensation,
-    aruwlib::algorithms::SmoothPid& pidController,
+    tap::algorithms::SmoothPid& pidController,
     DjiMotor& motor)
 {
     const float positionControllerError = errorBtwnMotors + currAngle.difference(setpoint);
@@ -156,7 +156,7 @@ float DoublePitchTurretSubsystem::getYawAngleFromCenter() const
 
 float DoublePitchTurretSubsystem::getPitchAngleFromCenter() const
 {
-    aruwlib::algorithms::ContiguousFloat yawAngleFromCenter(
+    tap::algorithms::ContiguousFloat yawAngleFromCenter(
         currLeftPitchAngle.getValue() - TURRET_PITCH_START_ANGLE,
         -180.0f,
         180.0f);

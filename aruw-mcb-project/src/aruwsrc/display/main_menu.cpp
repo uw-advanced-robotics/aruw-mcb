@@ -19,19 +19,19 @@
 
 #include "main_menu.hpp"
 
-#include "aruwlib/display/command_scheduler_menu.hpp"
-#include "aruwlib/display/hardware_test_menu.hpp"
-#include "aruwlib/display/motor_menu.hpp"
+#include "tap/display/command_scheduler_menu.hpp"
+#include "tap/display/hardware_test_menu.hpp"
+#include "tap/display/motor_menu.hpp"
 
 #include "error_menu.hpp"
 
-using namespace aruwlib::display;
+using namespace tap::display;
 
 namespace aruwsrc
 {
 namespace display
 {
-MainMenu::MainMenu(modm::ViewStack* stack, aruwlib::Drivers* drivers)
+MainMenu::MainMenu(modm::ViewStack* stack, tap::Drivers* drivers)
     : modm::StandardMenu(stack, MAIN_MENU_ID),
       drivers(drivers)
 {

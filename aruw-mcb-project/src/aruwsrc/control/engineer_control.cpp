@@ -19,9 +19,9 @@
 
 #if defined(TARGET_ENGINEER)
 
-#include "aruwlib/communication/gpio/digital.hpp"
-#include "aruwlib/control/command_scheduler.hpp"
-#include "aruwlib/drivers_singleton.hpp"
+#include "tap/communication/gpio/digital.hpp"
+#include "tap/control/command_scheduler.hpp"
+#include "tap/drivers_singleton.hpp"
 
 #include "aruwsrc/control/engineer/extend_xaxis_command.hpp"
 #include "aruwsrc/control/engineer/grabber_subsystem.hpp"
@@ -30,9 +30,9 @@
 #include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
 
 using namespace aruwsrc::engineer;
-using namespace aruwlib::gpio;
-using aruwlib::DoNotUse_getDrivers;
-using aruwlib::control::CommandMapper;
+using namespace tap::gpio;
+using tap::DoNotUse_getDrivers;
+using tap::control::CommandMapper;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -40,7 +40,7 @@ using aruwlib::control::CommandMapper;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
+tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 
 namespace aruwsrc
 {
@@ -69,22 +69,22 @@ TowSubsystem tower(
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwlib::Drivers *drivers)
+void registerEngineerSubsystems(tap::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&grabber);
     drivers->commandScheduler.registerSubsystem(&xAxis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(aruwlib::Drivers *) {}
+void setDefaultEngineerCommands(tap::Drivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwlib::Drivers *) {}
+void startEngineerCommands(tap::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwlib::Drivers *) {}
+void registerEngineerIoMappings(tap::Drivers *) {}
 
-void initSubsystemCommands(aruwlib::Drivers *drivers)
+void initSubsystemCommands(tap::Drivers *drivers)
 {
     initializeSubsystems();
     registerEngineerSubsystems(drivers);

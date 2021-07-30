@@ -31,7 +31,7 @@ namespace mock
 class ChassisSubsystemMock : public aruwsrc::chassis::ChassisSubsystem
 {
 public:
-    ChassisSubsystemMock(aruwlib::Drivers *drivers);
+    ChassisSubsystemMock(tap::Drivers *drivers);
     virtual ~ChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

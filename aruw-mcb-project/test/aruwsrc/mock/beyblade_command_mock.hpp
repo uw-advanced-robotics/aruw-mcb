@@ -22,7 +22,7 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 
@@ -34,9 +34,9 @@ class BeybladeCommandMock : public aruwsrc::chassis::BeybladeCommand
 {
 public:
     BeybladeCommandMock(
-        aruwlib::Drivers *drivers,
+        tap::Drivers *drivers,
         chassis::ChassisSubsystem *chassis,
-        aruwlib::control::turret::TurretSubsystemInterface *turret);
+        tap::control::turret::TurretSubsystemInterface *turret);
 
     virtual ~BeybladeCommandMock();
 

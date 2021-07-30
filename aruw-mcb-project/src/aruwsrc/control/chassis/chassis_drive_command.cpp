@@ -19,23 +19,23 @@
 
 #include "chassis_drive_command.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/communication/remote.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/communication/remote.hpp"
+#include "tap/drivers.hpp"
 
 #include "chassis_subsystem.hpp"
 
-using aruwlib::Drivers;
+using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
-ChassisDriveCommand::ChassisDriveCommand(aruwlib::Drivers* drivers, ChassisSubsystem* chassis)
+ChassisDriveCommand::ChassisDriveCommand(tap::Drivers* drivers, ChassisSubsystem* chassis)
     : drivers(drivers),
       chassis(chassis)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
 }
 
 void ChassisDriveCommand::initialize() {}
@@ -49,13 +49,13 @@ void ChassisDriveCommand::execute()
     float rTranslationalGain =
         chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
 
-    float chassisXDesiredWheelspeed = aruwlib::algorithms::limitVal<float>(
+    float chassisXDesiredWheelspeed = tap::algorithms::limitVal<float>(
                                           drivers->controlOperatorInterface.getChassisXInput(),
                                           -rTranslationalGain,
                                           rTranslationalGain) *
                                       ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
-    float chassisYDesiredWheelspeed = aruwlib::algorithms::limitVal<float>(
+    float chassisYDesiredWheelspeed = tap::algorithms::limitVal<float>(
                                           drivers->controlOperatorInterface.getChassisYInput(),
                                           -rTranslationalGain,
                                           rTranslationalGain) *
