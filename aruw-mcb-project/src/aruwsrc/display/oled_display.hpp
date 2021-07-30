@@ -79,7 +79,7 @@ private:
         false>
         display;
 
-    modm::ViewStack viewStack;
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > viewStack;
 
     tap::display::OledButtonHandler buttonHandler;
 

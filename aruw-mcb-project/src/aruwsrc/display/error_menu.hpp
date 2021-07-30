@@ -20,6 +20,8 @@
 #ifndef ERROR_MENU_HPP_
 #define ERROR_MENU_HPP_
 
+#include "tap/display/dummy_allocator.hpp"
+
 #include "modm/ui/menu/abstract_menu.hpp"
 
 namespace tap
@@ -31,10 +33,12 @@ namespace aruwsrc
 {
 namespace display
 {
-class ErrorMenu : public modm::AbstractMenu
+class ErrorMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-    ErrorMenu(modm::ViewStack *vs, tap::Drivers *drivers);
+    ErrorMenu(
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        tap::Drivers *drivers);
 
     void draw() override;
 

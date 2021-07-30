@@ -20,6 +20,8 @@
 #ifndef SPLASH_SCREEN_HPP_
 #define SPLASH_SCREEN_HPP_
 
+#include "tap/display/dummy_allocator.hpp"
+
 #include "modm/ui/menu/abstract_menu.hpp"
 
 namespace tap
@@ -31,10 +33,12 @@ namespace aruwsrc
 {
 namespace display
 {
-class SplashScreen : public modm::AbstractMenu
+class SplashScreen : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-    SplashScreen(modm::ViewStack *vs, tap::Drivers *drivers);
+    SplashScreen(
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        tap::Drivers *drivers);
 
     void draw() override;
 

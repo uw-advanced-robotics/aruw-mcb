@@ -73,15 +73,8 @@
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
-        "${workspaceRoot}",
-        "./aruw-mcb-project/taproot/modm/src",
-        "./aruw-mcb-project/taproot/modm/ext/cmsis/core",
-        "./aruw-mcb-project/taproot/modm/ext/cmsis/device",
-        "./aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
         "./aruw-mcb-project/taproot/src",
-        "./aruw-mcb-project/taproot/test",
-        "./aruw-mcb-project/src",
-        "./aruw-mcb-project/test"
+        "./aruw-mcb-project/src"
     ],
     "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.default.cStandard": "c11",
