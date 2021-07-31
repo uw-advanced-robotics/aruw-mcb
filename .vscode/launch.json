@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "preLaunchTask": "Build Tests - Debug",
-            "program": "${workspaceFolder}/aruw-mcb-project/build/tests/debug/aruw-mcb-tests.elf",
+            "program": "${workspaceFolder}/aruw-mcb-project/build/tests/scons-debug/aruw-mcb-tests.elf",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -26,7 +26,7 @@
             "type": "cppdbg",
             "request": "launch",
             "preLaunchTask": "Build Sim - Debug",
-            "program": "${workspaceFolder}/aruw-mcb-project/build/sim/debug/aruw-mcb.elf",
+            "program": "${workspaceFolder}/aruw-mcb-project/build/sim/scons-debug/aruw-mcb.elf",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -48,7 +48,7 @@
             "servertype": "openocd",
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "Program - Debug",
-            "executable": "./aruw-mcb-project/build/hardware/debug/aruw-mcb.elf",
+            "executable": "./aruw-mcb-project/build/hardware/scons-debug/aruw-mcb.elf",
             "device": "STM32F427II",
             "configFiles": [
                 "./aruw-mcb-project/openocd.cfg"
