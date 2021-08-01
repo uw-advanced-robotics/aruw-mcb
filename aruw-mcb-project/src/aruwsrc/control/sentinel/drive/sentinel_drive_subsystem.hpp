@@ -47,6 +47,10 @@ public:
     static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 5;
     static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 15000;
 
+    // radius of the wheel in mm
+    static constexpr float WHEEL_RADIUS = 35.0f;
+    static constexpr float GEAR_RATIO = 19.0f;
+
     // RMUL length of the rail, in mm
     static constexpr float RAIL_LENGTH = 2130;
     // Our length of the rail, in mm
@@ -104,10 +108,6 @@ private:
     static constexpr float PID_MAX_ERROR_SUM = 0.0f;
     static constexpr float PID_MAX_OUTPUT = 10000;
 
-    // radius of the wheel in mm
-    static constexpr float WHEEL_RADIUS = 35.0f;
-    static constexpr float GEAR_RATIO = 19.0f;
-
     tap::gpio::Digital::InputPin leftLimitSwitch;
     tap::gpio::Digital::InputPin rightLimitSwitch;
 
@@ -125,8 +125,8 @@ private:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    tap::mock::DjiMotorMock leftWheel;
-    tap::mock::DjiMotorMock rightWheel;
+    testing::NiceMock<tap::mock::DjiMotorMock> leftWheel;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightWheel;
 
 private:
 #else

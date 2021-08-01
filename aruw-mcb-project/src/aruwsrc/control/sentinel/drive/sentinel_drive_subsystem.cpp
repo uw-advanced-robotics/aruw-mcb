@@ -64,6 +64,15 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
 
 void SentinelDriveSubsystem::initialize()
 {
+    if (leftLimitSwitch == rightLimitSwitch)
+    {
+        // TODO it is very annoying to add location/error type, fix this
+        RAISE_ERROR(
+            drivers,
+            "identical left/right switch pins",
+            tap::errors::Location::SUBSYSTEM,
+            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
+    }
     drivers->digital.configureInputPullMode(
         leftLimitSwitch,
         tap::gpio::Digital::InputPullMode::PullDown);
@@ -159,10 +168,11 @@ float SentinelDriveSubsystem::distanceFromEncoder(tap::motor::DjiMotor* motor)
 
 void SentinelDriveSubsystem::runHardwareTests()
 {
-    if (abs(rightWheel.getShaftRPM()) > 50.0f) this->setHardwareTestsComplete();
+    if (rightWheel.getShaftRPM() > 400.0f && leftWheel.getShaftRPM() > 400.0f)
+        this->setHardwareTestsComplete();
 }
 
-void SentinelDriveSubsystem::onHardwareTestStart() { this->setDesiredRpm(100.0f); }
+void SentinelDriveSubsystem::onHardwareTestStart() { this->setDesiredRpm(500.0f); }
 
 void SentinelDriveSubsystem::onHardwareTestComplete() { this->setDesiredRpm(0.0f); }
 
