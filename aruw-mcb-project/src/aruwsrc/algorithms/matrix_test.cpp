@@ -2,20 +2,7 @@
 
 #include "aruwlib/architecture/clock.hpp"
 
-#include "modm/math/matrix.hpp"
-
 #define EXPECT_TRUE(expr) modm_assert((expr), #expr, __line__)
-
-const int ROWS = 10;
-const int COLS = 10;
-const int TRIALS = 100;
-uint32_t timeCmsis[TRIALS], timeModm[TRIALS];
-CMSISMat<ROWS, COLS> cmsisMat1;
-CMSISMat<ROWS, COLS> cmsisMat2;
-CMSISMat<ROWS, COLS> cmsisMat3;
-modm::Matrix<float, ROWS, COLS> modmMat1;
-modm::Matrix<float, ROWS, COLS> modmMat2;
-modm::Matrix<float, ROWS, COLS> modmMat3;
 
 MatrixTest::MatrixTest() {}
 

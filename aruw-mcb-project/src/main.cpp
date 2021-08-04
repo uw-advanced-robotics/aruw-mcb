@@ -61,6 +61,8 @@ static void initializeIo(aruwlib::Drivers *drivers);
 // called as frequently.
 static void updateIo(aruwlib::Drivers *drivers);
 
+
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -77,13 +79,6 @@ int main()
     Board::initialize();
     initializeIo(drivers);
 
-    MatrixTest mtest;
-
-    mtest.multiplicationSpeedCompare();
-    mtest.additionSpeedCompare();
-    mtest.inverseSpeedCompare();
-    mtest.transposeSpeedCompare();
-
     aruwsrc::control::initSubsystemCommands(drivers);
 
 
@@ -92,6 +87,15 @@ int main()
     // Blocking call, waits until Windows Simulator connects.
     aruwlib::communication::TCPServer::MainServer()->getConnection();
 #endif
+
+    const float x[2] = {0, 0};
+    const float P[4] = {0, 0, 0, 0};
+    const float A[4] = {0, 0, 0, 0};
+    const float B[4] = {0, 0, 0, 0};
+    const float C[4] = {0, 0, 0, 0};
+    const float Q[4] = {0, 0, 0, 0};
+    const float R[4] = {0, 0, 0, 0};
+    KalmanFilter<2, 2> smallKalmanFilter(x, P, A, B, C, Q, R);
 
     while (1)
     {

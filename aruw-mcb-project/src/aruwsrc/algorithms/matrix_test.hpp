@@ -3,6 +3,7 @@
 
 #ifndef PLATFORM_HOSTED
 
+#include "modm/math/matrix.hpp"
 #include "arm_math.h"
 #include "kalman_filter.hpp"
 #include "matrix_utils.hpp"
@@ -29,6 +30,18 @@ public:
     void transposeSpeedCompare();
 
     void smallKalmanFilter();
+
+private:
+    static constexpr int ROWS = 10;
+    static constexpr int COLS = 10;
+    static constexpr int TRIALS = 100;
+    uint32_t timeCmsis[TRIALS], timeModm[TRIALS];
+    CMSISMat<ROWS, COLS> cmsisMat1;
+    CMSISMat<ROWS, COLS> cmsisMat2;
+    CMSISMat<ROWS, COLS> cmsisMat3;
+    modm::Matrix<float, ROWS, COLS> modmMat1;
+    modm::Matrix<float, ROWS, COLS> modmMat2;
+    modm::Matrix<float, ROWS, COLS> modmMat3;
 };
 
 #endif

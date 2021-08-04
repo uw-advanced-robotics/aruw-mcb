@@ -23,6 +23,20 @@ struct CMSISMat
         memcpy(&data, &initialData, MODM_ARRAY_SIZE(initialData));
         arm_mat_init_f32(&matrix, ROWS, COLS, data);
     }
+
+    /**
+     * Construct identity matrix in the current CMSISMat
+     */
+    bool constructIdentityMatrix()
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                data[i * ROWS + j] = (i == j) ? 1 : 0;
+            }
+        }
+    }
 };
 
 #endif  // MATRIX_UTILS_HPP_
