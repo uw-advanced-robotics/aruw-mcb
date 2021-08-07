@@ -48,7 +48,7 @@ if [[ "$(git status | grep -c "nothing to commit")" != 1 ]]; then
         \"id\": 20675733,
         \"source_branch\": \"$UPDATE_SUBMODULE_BRANCH\",
         \"target_branch\": \"develop\",
-        \"remove_source_branch\": true,
+        \"remove_source_branch\": false,
         \"title\": \"CI Submodule Update\"
     }"
 
