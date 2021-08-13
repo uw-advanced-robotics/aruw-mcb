@@ -22,17 +22,33 @@
 # of your repository's generated code and thus you should not use it on
 # a repository that has uncommitted changes.
 
-if [[ "$#" -ne 1 ]]; then
-    echo "usage: ./check_lbuild_diff.sh ./path/to/lbuild/dir"
+if [[ "$#" -ne 2 ]]; then
+    echo "usage: ./check_lbuild_diff.sh ./path/to/lbuild/dir ./path/to/taproot"
     exit 1
 fi
 
 LBUILD_DIR=$1
+TAPROOT_DIR=$2
 TEMP_DIR="tmp"
 
+# First ensure the taproot commit is actually
+# on develop
+cd $TAPROOT_DIR
+TAPROOT_COMMIT_SHA="$(git rev-parse HEAD)"
+SHA_ON_DEVELOP="$(git branch -r --contains $TAPROOT_COMMIT_SHA | grep develop)"
+if [[ -z $SHA_ON_DEVELOP ]]; then
+    echo "sha not valid, must be on develop"
+    exit 1
+fi
+cd -
+
+# Next ensure generated taproot changes match the taproot repo's generated
+# taproot
 cd "$LBUILD_DIR"
 
 cp -r "taproot" $TEMP_DIR
+
+rm -rf "taproot"
 
 lbuild build
 if [[ "$?" != 0 ]]; then
