@@ -33,6 +33,7 @@ git push origin --delete $UPDATE_SUBMODULE_BRANCH &>/dev/null
 git checkout -b $UPDATE_SUBMODULE_BRANCH
 
 cd $ARUW_MCB_PROJECT_PATH
+rm -rf taproot
 lbuild build >/dev/null
 cd -
 
