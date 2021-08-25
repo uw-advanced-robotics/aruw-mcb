@@ -1,20 +1,20 @@
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
- * This file is part of Taproot.
+ * This file is part of aruw-mcb.
  *
- * Taproot is free software: you can redistribute it and/or modify
+ * aruw-mcb is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Taproot is distributed in the hope that it will be useful,
+ * aruw-mcb is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "imu_rx_listener.hpp"
@@ -23,9 +23,9 @@
 
 #include "modm/architecture/interface/can.hpp"
 
-namespace tap::can
+namespace aruwsrc::can
 {
-ImuRxListener::ImuRxListener(Drivers* drivers)
+ImuRxListener::ImuRxListener(tap::Drivers* drivers)
     : drivers(drivers),
       angleGyroMessageHandler(
           drivers,
@@ -37,9 +37,9 @@ ImuRxListener::ImuRxListener(Drivers* drivers)
 }
 
 ImuRxListener::ImuRxHandler::ImuRxHandler(
-    Drivers* drivers,
+    tap::Drivers* drivers,
     uint32_t id,
-    CanBus cB,
+    tap::can::CanBus cB,
     ImuRxListener* msgHandler,
     ImuRxListenerFunc funcToCall)
     : CanRxListener(drivers, id, cB),
@@ -57,9 +57,9 @@ void ImuRxListener::ImuRxHandler::processMessage(const modm::can::Message& messa
 
 void ImuRxListener::handleAngleGyroMessage(const modm::can::Message& message)
 {
-    arch::convertFromLittleEndian(&yaw, message.data);
-    arch::convertFromLittleEndian(&rawGz, message.data + 4);
+    tap::arch::convertFromLittleEndian(&yaw, message.data);
+    tap::arch::convertFromLittleEndian(&rawGz, message.data + 4);
 
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
 }
-}  // namespace tap::can
+}  // namespace aruwsrc::can

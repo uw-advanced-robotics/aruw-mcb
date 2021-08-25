@@ -24,6 +24,7 @@
 #include "friction_wheel_subsystem_mock.hpp"
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
+#include "imu_rx_listener_mock.hpp"
 #include "oled_display_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_switcher_subsystem_mock.hpp"
@@ -96,6 +97,9 @@ GrabberSubsystemMock::~GrabberSubsystemMock() {}
 
 OledDisplayMock::OledDisplayMock(tap::Drivers *drivers) : display::OledDisplay(drivers) {}
 OledDisplayMock::~OledDisplayMock() {}
+
+ImuRxListenerMock::ImuRxListenerMock(tap::Drivers *drivers) : can::ImuRxListener(drivers) {}
+ImuRxListenerMock::~ImuRxListenerMock() {}
 
 HopperSubsystemMock::HopperSubsystemMock(
     tap::Drivers *drivers,
