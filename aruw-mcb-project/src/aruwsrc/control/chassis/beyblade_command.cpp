@@ -27,6 +27,7 @@
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
+#include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
@@ -61,37 +62,45 @@ void BeybladeCommand::initialize()
 
 void BeybladeCommand::execute()
 {
-    // Gets current turret yaw angle
-    float turretYawAngle = turret->getYawAngleFromCenter();
-
-    // Get X and Y speed inputs with translational movement
-    float x = drivers->controlOperatorInterface.getChassisXInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR *
-              TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
-    float y = drivers->controlOperatorInterface.getChassisYInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR *
-              TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
-
-    static constexpr float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
-                                               TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
-                                               ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
-    rampTarget = rotationDirection * getRotationTarget();
-    if (x > TRANSLATION_LIMIT || y > TRANSLATION_LIMIT)
+    if (turret->isOnline())
     {
-        rampTarget *= RAMP_TARGET_TRANSLATIONAL_FRAC;
+        // Gets current turret yaw angle
+        float turretYawAngle = turret->getYawAngleFromCenter();
+
+        float x = 0.0f;
+        float y = 0.0f;
+        // Note: pass in 0 as rotation since we don't want to take into consideration
+        // scaling due to rotation as this will be fairly constant and thus it isn't
+        // worth scaling here.
+        ChassisRelDrive::computeDesiredUserTranslation(drivers, chassis, 0, &x, &y);
+        x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
+        y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
+
+        static constexpr float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
+                                                   TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
+                                                   ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+
+        rampTarget = rotationDirection * getRotationTarget();
+        if (x > TRANSLATION_LIMIT || y > TRANSLATION_LIMIT)
+        {
+            rampTarget *= RAMP_TARGET_TRANSLATIONAL_FRAC;
+        }
+
+        rotateSpeedRamp.setTarget(rampTarget);
+        // Update the r speed by 1/8 of target (linear for each update)
+        rotateSpeedRamp.update(rampTarget * RAMP_UPDATE_FRAC);
+        float r = rotateSpeedRamp.getValue();
+
+        // Rotate X and Y depending on turret angle
+        tap::algorithms::rotateVector(&x, &y, -degreesToRadians(turretYawAngle));
+
+        // set outputs
+        chassis->setDesiredOutput(x, y, r);
     }
-
-    rotateSpeedRamp.setTarget(rampTarget);
-    // Update the r speed by 1/8 of target (linear for each update)
-    rotateSpeedRamp.update(rampTarget * RAMP_UPDATE_FRAC);
-    float r = rotateSpeedRamp.getValue();
-
-    // Rotate X and Y depending on turret angle
-    tap::algorithms::rotateVector(&x, &y, -degreesToRadians(turretYawAngle));
-
-    // set outputs
-    chassis->setDesiredOutput(x, y, r);
+    else
+    {
+        ChassisRelDrive::onExecute(drivers, chassis);
+    }
 }
 
 void BeybladeCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }

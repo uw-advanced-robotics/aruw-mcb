@@ -26,6 +26,7 @@
 #include "tap/communication/sensors/mpu6500/mpu6500.hpp"
 #include "tap/drivers.hpp"
 
+#include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
@@ -60,12 +61,6 @@ void WiggleDriveCommand::initialize()
 
 void WiggleDriveCommand::execute()
 {
-    float r;
-    float x = drivers->controlOperatorInterface.getChassisXInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-    float y = drivers->controlOperatorInterface.getChassisYInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
     // We only wiggle when the turret is online.
     if (turret->isOnline())
     {
@@ -91,26 +86,23 @@ void WiggleDriveCommand::execute()
 
         rotationSpeedRamp.update(wiggleParams.rotationSpeedIncrement);
 
-        r = rotationSpeedRamp.getValue();
+        float r = rotationSpeedRamp.getValue();
+
+        float x = 0.0f;
+        float y = 0.0f;
+        ChassisRelDrive::computeDesiredUserTranslation(drivers, chassis, r, &x, &y);
         x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         // Apply a rotation matrix to the user input so you drive turret
         // relative while wiggling.
         rotateVector(&x, &y, -degreesToRadians(turretYawFromCenter));
+
+        chassis->setDesiredOutput(x, y, r);
     }
     else
     {
-        r = drivers->controlOperatorInterface.getChassisRInput() *
-            ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+        ChassisRelDrive::onExecute(drivers, chassis);
     }
-
-    float rTranslationalGain = chassis->calculateRotationTranslationalGain(r) *
-                               ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
-    x = limitVal<float>(x, -rTranslationalGain, rTranslationalGain);
-    y = limitVal<float>(y, -rTranslationalGain, rTranslationalGain);
-
-    chassis->setDesiredOutput(x, y, r);
 }
 
 void WiggleDriveCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }

@@ -39,6 +39,8 @@ class ChassisSubsystem;
 class ChassisAutorotateCommand : public tap::control::Command
 {
 public:
+    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
+
     ChassisAutorotateCommand(
         tap::Drivers* drivers,
         ChassisSubsystem* chassis,
@@ -61,8 +63,6 @@ public:
     const char* getName() const override { return "chassis autorotate"; }
 
 private:
-    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
-
     tap::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
