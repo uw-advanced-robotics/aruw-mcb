@@ -99,9 +99,9 @@ TEST(XavierSerial, messageReceiveCallback_turret_aim_message_has_target)
 TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_whole_numbers)
 {
     // Pitch/yaw values should at least be correct between [0, 360]
-    for (int i = 0; i < 360; i += 10)
+    for (int i = 0; i < 360; i += 50)
     {
-        for (int j = 360; j >= 0; j -= 10)
+        for (int j = 360; j >= 0; j -= 50)
         {
             initAndRunAutoAimRxTest(i, j, false);
         }
@@ -110,9 +110,9 @@ TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_whole_numbers)
 
 TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_single_decimals)
 {
-    for (float i = 0; i < 1; i += 0.01)
+    for (float i = -0.95; i < 0.95; i += 0.2)
     {
-        for (float j = 1; j >= 0; j -= 0.01)
+        for (float j = -0.95; j >= 0.95; j -= 0.2)
         {
             initAndRunAutoAimRxTest(i, j, false);
         }
