@@ -125,6 +125,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
+    drivers->mpu6500TerminalSerialHandler.init();
     drivers->xavierSerial.initializeCV();
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
