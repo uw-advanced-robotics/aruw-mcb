@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
-#define TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
+#ifndef TURRET_WORLD_RELATIVE_CHASSIS_IMU_COMMAND_HPP_
+#define TURRET_WORLD_RELATIVE_CHASSIS_IMU_COMMAND_HPP_
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
@@ -43,37 +43,43 @@ class TurretSubsystem;
 /**
  * Turret control, with the yaw gimbal using the world relative frame, such that the
  * desired turret angle is independent of the direction that the chassis is facing
- * or rotating. Assumes the Mpu6500 used for calculations is mounted on the chassis.
+ * or rotating. Assumes the board running this subsystem is a RoboMaster type A
+ * board with an Mpu6500 and that this board is mounted statically on the chassis.
+ *
+ * Also, `useImuOnTurret` may be specified, which will dynamically attempt to use
+ * a turret mounted IMU to perform world-relative calculations. The IMU is assumed
+ * to be statically mounted on the turret base (not the turret pitch axis). The turret
+ * mounted IMU is assumed to interface with the ImuRxListener.
  */
-class TurretWorldRelativePositionCommand : public tap::control::Command
+class TurretWorldRelativeChassisImuCommand : public tap::control::Command
 {
 public:
     /**
      * This command requires the turret subsystem from a command/subsystem framework perspective.
      * The `ChassisSubsystem` is only used for for odometry information.
      */
-    TurretWorldRelativePositionCommand(
+    TurretWorldRelativeChassisImuCommand(
         tap::Drivers *drivers,
-        TurretSubsystem *subsystem,
-        const chassis::ChassisSubsystem *chassis,
-        bool useImuOnTurret = false);
+        TurretSubsystem *turretSubsystem,
+        const chassis::ChassisSubsystem *chassisSubsystem);
 
     void initialize() override;
 
-    bool isFinished() const override { return false; }
+    bool isReady() override;
+
+    bool isFinished() const override;
 
     void execute() override;
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret world relative position"; }
+    const char *getName() const override { return "turret WR chassis IMU"; }
 
 private:
 #ifdef TARGET_SOLDIER
     static constexpr float YAW_P = 3800.0f;
     static constexpr float YAW_I = 50.0f;
-    static constexpr float YAW_D_TURRET_IMU = 4300.0f;
-    static constexpr float YAW_D_CHASSIS_IMU = 180.0f;
+    static constexpr float YAW_D = 4300.0f;
     static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
     static constexpr float YAW_MAX_OUTPUT = 30000.0f;
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
@@ -94,31 +100,29 @@ private:
     static constexpr float USER_YAW_INPUT_SCALAR = 1.5f;
     static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
 
-    static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 4000.0f;
 #else
-    static constexpr float YAW_P = 2200.0f;
-    static constexpr float YAW_I = 50.0f;
-    static constexpr float YAW_D_TURRET_IMU = 10.0f;
-    static constexpr float YAW_D_CHASSIS_IMU = 60.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 50.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 10.0f;
+    static constexpr float YAW_P = 0.0f;
+    static constexpr float YAW_I = 0.0f;
+    static constexpr float YAW_D = 0.0f;
+    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
+    static constexpr float YAW_MAX_OUTPUT = 0.0f;
+    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 0.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 0.0f;
+    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 0.0f;
+    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
 
-    static constexpr float PITCH_P = 3400.0f;
+    static constexpr float PITCH_P = 0.0f;
     static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 150.0f;
+    static constexpr float PITCH_D = 0.0f;
     static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 47.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
+    static constexpr float PITCH_MAX_OUTPUT = 0.0f;
+    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 0.0f;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 0.0f;
+    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 0.0f;
+    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 0.0f;
 
-    static constexpr float USER_YAW_INPUT_SCALAR = 1.5f;
-    static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
+    static constexpr float USER_YAW_INPUT_SCALAR = 0.0f;
+    static constexpr float USER_PITCH_INPUT_SCALAR = 0.0f;
 
     static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 0.0f;
 #endif
@@ -128,31 +132,25 @@ private:
     TurretSubsystem *turretSubsystem;
     const chassis::ChassisSubsystem *chassisSubsystem;
 
-    tap::algorithms::ContiguousFloat yawTargetAngle;
-
+    // Yaw related values
+    tap::algorithms::ContiguousFloat yawSetpoint;
     tap::algorithms::ContiguousFloat currValueImuYawGimbal;
-
-    float imuInitialYaw;
+    float chassisIMUInitialYaw;
 
     uint32_t prevTime;
 
+    // Pitch/yaw PID controllers
     tap::algorithms::SmoothPid yawPid;
     tap::algorithms::SmoothPid pitchPid;
 
-    const bool useImuOnTurret;
-    bool usingImuOnTurret;
-
-    int blinkCounter = 0;
-
     void runYawPositionController(float dt);
-    void runPitchPositionController(float dt);
 
     float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
     float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
-};  // class TurretWorldRelativePositionCommand
+};  // class TurretWorldRelativeChassisImuCommand
 
 }  // namespace control::turret
 
 }  // namespace aruwsrc
 
-#endif  // TURRET_WORLD_RELATIVE_POSITION_COMMAND_HPP_
+#endif  // TURRET_WORLD_RELATIVE_CHASSIS_IMU_COMMAND_HPP_

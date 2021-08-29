@@ -75,7 +75,11 @@ public:
      *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
      */
-    explicit TurretSubsystem(tap::Drivers* drivers, bool limitYaw = true);
+    explicit TurretSubsystem(
+        tap::Drivers* drivers,
+        tap::motor::DjiMotor *pitchMotor,
+        tap::motor::DjiMotor *yawMotor,
+        bool limitYaw = true);
 
     inline bool yawLimited() const { return limitYaw; }
 
@@ -230,8 +234,8 @@ public:
 
 private:
 #else
-    tap::motor::DjiMotor pitchMotor;
-    tap::motor::DjiMotor yawMotor;
+    tap::motor::DjiMotor *pitchMotor;
+    tap::motor::DjiMotor *yawMotor;
 #endif
 
 };  // class TurretSubsystem

@@ -41,7 +41,7 @@
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_position_command.hpp"
+#include "turret/turret_world_relative_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -117,7 +117,7 @@ ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis, true);
+TurretWorldRelativeCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
 
 TurretCVCommand turretCVCommand(drivers(), &turret);
 

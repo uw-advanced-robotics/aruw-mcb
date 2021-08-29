@@ -57,8 +57,15 @@ void ImuRxListener::ImuRxHandler::processMessage(const modm::can::Message& messa
 
 void ImuRxListener::handleAngleGyroMessage(const modm::can::Message& message)
 {
-    tap::arch::convertFromLittleEndian(&yaw, message.data);
-    tap::arch::convertFromLittleEndian(&rawGz, message.data + 4);
+    uint16_t rawYaw;
+    int16_t rawPitch;
+    tap::arch::convertFromLittleEndian(&rawYaw, message.data);
+    tap::arch::convertFromLittleEndian(&rawGz, message.data + 2);
+    tap::arch::convertFromLittleEndian(&rawPitch, message.data + 4);
+    tap::arch::convertFromLittleEndian(&rawGx, message.data + 6);
+
+    yaw = static_cast<float>(rawYaw) * ANGLE_DATA_FIXED_POINT_PRECISION;
+    pitch = static_cast<float>(rawPitch) * ANGLE_DATA_FIXED_POINT_PRECISION;
 
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
 }

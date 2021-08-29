@@ -44,6 +44,12 @@ public:
 
     void init();
 
+    inline float getPitch() const { return pitch; }
+    inline float getGx() const
+    {
+        return static_cast<float>(rawGx) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+    }
+
     inline float getYaw() const { return yaw; }
     inline float getGz() const
     {
@@ -60,6 +66,7 @@ private:
     static constexpr uint32_t ANGLE_GYRO_MESSAGE_CAN_ID = 0x203;
     static constexpr tap::can::CanBus IMU_MSG_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
+    static constexpr float ANGLE_DATA_FIXED_POINT_PRECISION = 0.01f;
 
     class ImuRxHandler : public tap::can::CanRxListener
     {
@@ -81,6 +88,9 @@ private:
 
     float yaw;
     int16_t rawGz;
+
+    float pitch;
+    int16_t rawGx;
 
     ImuRxHandler angleGyroMessageHandler;
 
