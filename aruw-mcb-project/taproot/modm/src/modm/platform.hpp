@@ -183,6 +183,7 @@
 #include "platform/timer/basic_base.hpp"
 #include "platform/timer/general_purpose_base.hpp"
 #include "platform/timer/timer_12.hpp"
+#include "platform/timer/timer_3.hpp"
 #include "platform/timer/timer_8.hpp"
 #include "platform/uart/uart_1.hpp"
 #include "platform/uart/uart_2.hpp"
