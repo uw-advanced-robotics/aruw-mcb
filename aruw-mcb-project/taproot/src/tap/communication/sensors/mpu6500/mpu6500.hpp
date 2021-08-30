@@ -26,6 +26,7 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/util_macros.hpp"
 
+#include "modm/math/filter/pid.hpp"
 #include "modm/processing/protothread.hpp"
 
 namespace tap
@@ -46,7 +47,7 @@ namespace sensors
 class Mpu6500 : public ::modm::pt::Protothread
 {
 public:
-    Mpu6500(Drivers *drivers) : drivers(drivers), raw() {}
+    Mpu6500(Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(Mpu6500)
     mockable ~Mpu6500() = default;
 
@@ -54,12 +55,13 @@ public:
      * Initialize the imu and the SPI line. Uses SPI1, which is internal to the
      * type A board.
      *
-     * @note this function blocks for approximately 1 second.
+     * @note this function can block for approximately 12 seconds.
      */
     mockable void init();
 
     /**
      * Calculates the IMU's pitch, roll, and yaw angles usign the Mahony AHRS algorithm.
+     * Also runs a controller to keep the temperature constant.
      * Call at 500 hz for best performance.
      */
     mockable void calcIMUAngles();
@@ -162,6 +164,30 @@ private:
     static constexpr int DELAY_BTWN_CALC_AND_READ_REG = 1550;
 
     /**
+     * PID constants for temperature control.
+     */
+    static constexpr float TEMPERATURE_PID_P = 0.8f;
+    static constexpr float TEMPERATURE_PID_I = 0.2f;
+    static constexpr float TEMPERATURE_PID_MAX_ERR_SUM = 0.5f;
+    static constexpr float TEMPERATURE_PID_MAX_OUT = 1.0f;
+    /**
+     * PWM frequency of the timer associated with the GPIO pin that is in charge
+     * of controlling the temperature of the IMU.
+     */
+    static constexpr float HEATER_PWM_FREQUENCY = 1000.0f;
+
+    /**
+     * Normal operating temperature is ~40 degrees C, and RM manual says the optimal operating
+     * temperature is ~15-20 degrees C above the normal operating temperature
+     */
+    static constexpr float IMU_DESIRED_TEMPERATURE = 55.0f;
+
+    /**
+     * Time in ms to wait for the IMU heat to stabalize upon initialization.
+     */
+    static constexpr uint32_t MAX_WAIT_FOR_IMU_TEMPERATURE_STABALIZE = 10'000;
+
+    /**
      * Storage for the raw data we receive from the mpu6500, as well as offsets
      * that are used each time we receive data.
      */
@@ -207,13 +233,13 @@ private:
 
     uint8_t rxBuff[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE] = {0};
 
-public:
+    modm::Pid<float> imuTemperatureController;
+
     /// Compute the gyro offset values. @note this function blocks.
     void calculateGyroOffset();
 
     /// Calibrate accelerometer offset values. @note this function blocks.
     void calculateAccOffset();
-private:
 
     // Functions for interacting with hardware directly.
 
@@ -245,6 +271,11 @@ private:
      * from that point.
      */
     uint8_t spiReadRegisters(uint8_t regAddr, uint8_t *pData, uint8_t len);
+
+    /**
+     * Runs a PID controller to regulate the temperature of the IMU
+     */
+    void runTemperatureController();
 };
 
 }  // namespace sensors

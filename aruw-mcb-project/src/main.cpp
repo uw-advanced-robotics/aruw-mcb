@@ -40,7 +40,6 @@
 #include "tap/errors/create_errors.hpp"
 
 /* control includes ---------------------------------------------------------*/
-#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/control/robot_control.hpp"
@@ -49,8 +48,8 @@
 using tap::Drivers;
 
 /* define timers here -------------------------------------------------------*/
-tap::arch::PeriodicMilliTimer sendMotorTimeout(3);
-tap::arch::PeriodicMilliTimer sendXavierTimeout(10);
+tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -61,32 +60,6 @@ static void initializeIo(tap::Drivers *drivers);
 // called as frequently.
 static void updateIo(tap::Drivers *drivers);
 
-// Testing temperature controller
-static constexpr float TEMPERATURE_PID_P = 0.8f;
-static constexpr float TEMPERATURE_PID_MAX_OUT = 0.9f;
-static constexpr float HEATER_PWM_FREQUENCY = 1000.0f;
-// Normal operating temperature is ~40 degrees C, and RM manual says the optimal operating
-// temperature is ~15-20 degrees C above the normal operating temperature
-static constexpr float TEMPERATURE_DESIRED_IMU = 55.0f;
-
-void runTemperaturePController(tap::Drivers *drivers, float desiredTemperature)
-{
-    const float referenceTemperature = drivers->mpu6500.getTemp();
-
-    // Run P controller to find desired output, units PWM frequency
-    float out = TEMPERATURE_PID_P * (desiredTemperature - referenceTemperature);
-    out = tap::algorithms::limitVal(out, 0.0f, TEMPERATURE_PID_MAX_OUT);
-
-    // Debug output
-    // drivers->terminalSerial.getStream()
-    //     << out << "\t" << drivers->mpu6500.getTemp() << modm::endl;
-
-    // Set heater PWM output
-    drivers->pwm.write(out, tap::gpio::Pwm::HEATER);
-}
-
-
-bool calibrated = false;
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -111,8 +84,6 @@ int main()
     tap::communication::TCPServer::MainServer()->getConnection();
 #endif
 
-    drivers->pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER_3, HEATER_PWM_FREQUENCY);
-
     while (1)
     {
         // do this as fast as you can
@@ -120,31 +91,19 @@ int main()
 
         if (sendXavierTimeout.execute())
         {
-            // PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
-            // drivers->terminalSerial.getStream() << drivers->mpu6500.getYaw() << "\t" << (int)
-            // drivers->mpu6500.getTemp() << modm::endl;
         }
 
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
-            runTemperaturePController(drivers, TEMPERATURE_DESIRED_IMU);
-            if (!calibrated) {
-                if (drivers->mpu6500.getTemp() > 54.44) {
-                    drivers->mpu6500.calculateAccOffset();
-                    drivers->mpu6500.calculateGyroOffset();
-                }
-                calibrated = true;
-                drivers->terminalSerial.getStream() << "calibrated" << modm::endl;
-            }
-            drivers->terminalSerial.getStream() << tap::arch::clock::getTimeMilliseconds() << "\t" << drivers->mpu6500.getYaw() << modm::endl;
-            // PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
-            // PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            // PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
-            // PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-            // PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
+            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
+            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
         }
         modm::delay_us(10);
     }
@@ -166,7 +125,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    // drivers->xavierSerial.initializeCV();
+    drivers->xavierSerial.initializeCV();
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif
@@ -183,5 +142,5 @@ static void updateIo(tap::Drivers *drivers)
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    // drivers->xavierSerial.updateSerial();
+    drivers->xavierSerial.updateSerial();
 }
