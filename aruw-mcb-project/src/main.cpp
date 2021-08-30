@@ -49,7 +49,7 @@
 using tap::Drivers;
 
 /* define timers here -------------------------------------------------------*/
-tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendMotorTimeout(3);
 tap::arch::PeriodicMilliTimer sendXavierTimeout(10);
 
 // Place any sort of input/output initialization here. For example, place
@@ -62,9 +62,12 @@ static void initializeIo(tap::Drivers *drivers);
 static void updateIo(tap::Drivers *drivers);
 
 // Testing temperature controller
-static constexpr float TEMPERATURE_PID_P = 0.32f;
+static constexpr float TEMPERATURE_PID_P = 0.8f;
 static constexpr float TEMPERATURE_PID_MAX_OUT = 0.9f;
 static constexpr float HEATER_PWM_FREQUENCY = 1000.0f;
+// Normal operating temperature is ~40 degrees C, and RM manual says the optimal operating
+// temperature is ~15-20 degrees C above the normal operating temperature
+static constexpr float TEMPERATURE_DESIRED_IMU = 55.0f;
 
 void runTemperaturePController(tap::Drivers *drivers, float desiredTemperature)
 {
@@ -75,13 +78,15 @@ void runTemperaturePController(tap::Drivers *drivers, float desiredTemperature)
     out = tap::algorithms::limitVal(out, 0.0f, TEMPERATURE_PID_MAX_OUT);
 
     // Debug output
-    drivers->terminalSerial.getStream()
-        << out << "\t" << (int)drivers->mpu6500.getTemp() << modm::endl;
+    // drivers->terminalSerial.getStream()
+    //     << out << "\t" << drivers->mpu6500.getTemp() << modm::endl;
 
     // Set heater PWM output
-    drivers->pwm.write(0.1, tap::gpio::Pwm::HEATER);
+    drivers->pwm.write(out, tap::gpio::Pwm::HEATER);
 }
 
+
+bool calibrated = false;
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -125,7 +130,16 @@ int main()
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
-            runTemperaturePController(drivers, 40.0f);
+            runTemperaturePController(drivers, TEMPERATURE_DESIRED_IMU);
+            if (!calibrated) {
+                if (drivers->mpu6500.getTemp() > 54.44) {
+                    drivers->mpu6500.calculateAccOffset();
+                    drivers->mpu6500.calculateGyroOffset();
+                }
+                calibrated = true;
+                drivers->terminalSerial.getStream() << "calibrated" << modm::endl;
+            }
+            drivers->terminalSerial.getStream() << tap::arch::clock::getTimeMilliseconds() << "\t" << drivers->mpu6500.getYaw() << modm::endl;
             // PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             // PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             // PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());

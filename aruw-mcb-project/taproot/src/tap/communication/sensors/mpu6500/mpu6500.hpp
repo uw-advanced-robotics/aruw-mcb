@@ -207,11 +207,13 @@ private:
 
     uint8_t rxBuff[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE] = {0};
 
+public:
     /// Compute the gyro offset values. @note this function blocks.
     void calculateGyroOffset();
 
     /// Calibrate accelerometer offset values. @note this function blocks.
     void calculateAccOffset();
+private:
 
     // Functions for interacting with hardware directly.
 
