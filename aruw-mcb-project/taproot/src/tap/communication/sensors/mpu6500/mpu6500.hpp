@@ -142,19 +142,27 @@ public:
      */
     mockable float getTiltAngle();
 
-    /// Use for converting from gyro values we receive to more conventional degrees / second.
+    /**
+     * Use for converting from gyro values we receive to more conventional degrees / second.
+     */
     static constexpr float LSB_D_PER_S_TO_D_PER_S = 16.384f;
 
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;
 
-    /// Use to convert the raw acceleration into more conventional degrees / second^2
+    /**
+     * Use to convert the raw acceleration into more conventional degrees / second^2
+     */
     static constexpr float ACCELERATION_SENSITIVITY = 4096.0f;
 
-    /// The number of samples we take in order to determine the mpu offsets.
-    static constexpr float MPU6500_OFFSET_SAMPLES = 300;
+    /**
+     * The number of samples we take in order to determine the mpu offsets.
+     */
+    static constexpr float MPU6500_OFFSET_SAMPLES = 500;
 
-    /// The number of bytes read to read acceleration, gyro, and temperature.
+    /**
+     * The number of bytes read to read acceleration, gyro, and temperature.
+     */
     static constexpr uint8_t ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE = 14;
 
     /**
@@ -166,9 +174,10 @@ private:
     /**
      * PID constants for temperature control.
      */
-    static constexpr float TEMPERATURE_PID_P = 0.8f;
-    static constexpr float TEMPERATURE_PID_I = 0.2f;
-    static constexpr float TEMPERATURE_PID_MAX_ERR_SUM = 0.5f;
+    static constexpr float TEMPERATURE_PID_P = 1.0f;
+    static constexpr float TEMPERATURE_PID_I = 0.0f;
+    static constexpr float TEMPERATURE_PID_D = 20.0f;
+    static constexpr float TEMPERATURE_PID_MAX_ERR_SUM = 0.0f;
     static constexpr float TEMPERATURE_PID_MAX_OUT = 1.0f;
     /**
      * PWM frequency of the timer associated with the GPIO pin that is in charge
@@ -178,14 +187,19 @@ private:
 
     /**
      * Normal operating temperature is ~40 degrees C, and RM manual says the optimal operating
-     * temperature is ~15-20 degrees C above the normal operating temperature
+     * temperature is ~15-20 degrees C above the normal operating temperature of the board.
      */
-    static constexpr float IMU_DESIRED_TEMPERATURE = 55.0f;
+    static constexpr float IMU_DESIRED_TEMPERATURE = 50.0f;
 
     /**
      * Time in ms to wait for the IMU heat to stabalize upon initialization.
      */
     static constexpr uint32_t MAX_WAIT_FOR_IMU_TEMPERATURE_STABALIZE = 10'000;
+
+    /**
+     * Bit appended or removed from a register while reading/writing.
+     */
+    static constexpr uint8_t MPU6500_READ_BIT = 0x80;
 
     /**
      * Storage for the raw data we receive from the mpu6500, as well as offsets
@@ -195,22 +209,32 @@ private:
     {
         struct Vector
         {
-            int16_t x = 0;
-            int16_t y = 0;
-            int16_t z = 0;
+            float x = 0;
+            float y = 0;
+            float z = 0;
         };
 
-        /// Raw acceleration data.
+        /**
+         * Raw acceleration data.
+         */
         Vector accel;
-        /// Raw gyroscope data.
+        /**
+         * Raw gyroscope data.
+         */
         Vector gyro;
 
-        /// Raw temperature.
+        /**
+         * Raw temperature.
+         */
         uint16_t temperature = 0;
 
-        /// Acceleration offset calculated in init.
+        /**
+         * Acceleration offset calculated in init.
+         */
         Vector accelOffset;
-        /// Gyroscope offset calculated in init.
+        /**
+         * Gyroscope offset calculated in init.
+         */
         Vector gyroOffset;
     };
 
@@ -219,8 +243,8 @@ private:
     bool imuInitialized = false;
 
     tap::arch::MicroTimeout readRegistersTimeout;
-    uint8_t tx = 0;  // Byte used for reading data in the read protothread
-    uint8_t rx = 0;  // Byte used for reading data in the read protothread
+    uint8_t tx = 0;  /// Byte used for reading data in the read protothread
+    uint8_t rx = 0;  /// Byte used for reading data in the read protothread
 
     RawData raw;
 
@@ -235,18 +259,26 @@ private:
 
     modm::Pid<float> imuTemperatureController;
 
-    /// Compute the gyro offset values. @note this function blocks.
+    /**
+     * Compute the gyro offset values. @note this function blocks.
+     */
     void calculateGyroOffset();
 
-    /// Calibrate accelerometer offset values. @note this function blocks.
+    /**
+     * Calibrate accelerometer offset values. @note this function blocks.
+     */
     void calculateAccOffset();
 
     // Functions for interacting with hardware directly.
 
-    /// Pull the NSS pin low to initiate contact with the imu.
+    /**
+     * Pull the NSS pin low to initiate contact with the imu.
+     */
     void mpuNssLow();
 
-    /// Pull the NSS pin high to end contact with the imu.
+    /**
+     * Pull the NSS pin high to end contact with the imu.
+     */
     void mpuNssHigh();
 
     /**
@@ -258,7 +290,7 @@ private:
     /**
      * Write to a given register.
      */
-    uint8_t spiWriteRegister(uint8_t reg, uint8_t data);
+    void spiWriteRegister(uint8_t reg, uint8_t data);
 
     /**
      * Read from a given register.
@@ -270,10 +302,10 @@ private:
      * regAddr is the first address read, and it reads len number of addresses
      * from that point.
      */
-    uint8_t spiReadRegisters(uint8_t regAddr, uint8_t *pData, uint8_t len);
+    void spiReadRegisters(uint8_t regAddr, uint8_t *pData, uint8_t len);
 
     /**
-     * Runs a PID controller to regulate the temperature of the IMU
+     * Runs a PID controller to regulate the temperature of the IMU.
      */
     void runTemperatureController();
 };
