@@ -91,7 +91,7 @@ int main()
 
         if (sendXavierTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            // PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
         }
@@ -126,7 +126,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
     drivers->mpu6500TerminalSerialHandler.init();
-    drivers->xavierSerial.initializeCV();
+    // drivers->xavierSerial.initializeCV();
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif
@@ -143,5 +143,5 @@ static void updateIo(tap::Drivers *drivers)
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    drivers->xavierSerial.updateSerial();
+    // drivers->xavierSerial.updateSerial();
 }
