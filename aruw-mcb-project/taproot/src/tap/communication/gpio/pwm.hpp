@@ -38,33 +38,28 @@ namespace gpio
 class Pwm
 {
 public:
-    static constexpr uint32_t DEFAULT_TIMER8_FREQUENCY = 50;
+
+    static constexpr uint32_t DEFAULT_TIMER8_FREQUENCY = 2000;
+
     static constexpr uint32_t DEFAULT_TIMER12_FREQUENCY = 2000;
 
     Pwm() = default;
     DISALLOW_COPY_AND_ASSIGN(Pwm)
     mockable ~Pwm() = default;
 
-    /**
-     * PWM pins whose name corresponds to the names defined on the
-     * RoboMaster type A board.
-     */
     enum Pin
     {
-        W = 1,
+        W,
         X,
         Y,
         Z,
-        BUZZER,
+        Buzzer,
     };
 
-    /**
-     * Timer associated with the PWM pins accessible from this object
-     */
     enum Timer
     {
-        TIMER_8,   /// Associated with pins W, X, Y, and Z
-        TIMER_12,  /// Associated with buzzer
+        TIMER8,
+        TIMER12,
     };
 
     mockable void init();
@@ -97,6 +92,14 @@ public:
 
 private:
     static constexpr int BUZZER_CHANNEL = 1;
+
+    enum Ch
+    {
+        Ch1 = 1,
+        Ch2 = 2,
+        Ch3 = 3,
+        Ch4 = 4,
+    };
 
     /**
      * Overflow as calculated by the modm Timer8 object in its getPeriod function.

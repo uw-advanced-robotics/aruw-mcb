@@ -17,26 +17,12 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_CONTROLLER_MOCK_HPP_
-#define ERROR_CONTROLLER_MOCK_HPP_
+#ifndef REMOTE_SERIAL_CONSTANTS_HPP_
+#define REMOTE_SERIAL_CONSTANTS_HPP_
 
-#include <gmock/gmock.h>
-
-#include "tap/errors/error_controller.hpp"
-
-namespace tap
+namespace tap::serial::bound_ports
 {
-namespace mock
-{
-class ErrorControllerMock : public tap::errors::ErrorController
-{
-public:
-    ErrorControllerMock(tap::Drivers* drivers);
-    virtual ~ErrorControllerMock();
+    static constexpr Uart::UartPort REMOTE_SERIAL_UART_PORT = Uart::UartPort::Uart1;
+}  // namespace tap::serial
 
-    MOCK_METHOD(void, addToErrorList, (const tap::errors::SystemError& error), (override));
-};  // class ErrorControllerMock
-}  // namespace mock
-}  // namespace tap
-
-#endif  // ERROR_CONTROLLER_MOCK_HPP_
+#endif  // REMOTE_SERIAL_CONSTANTS_HPP_

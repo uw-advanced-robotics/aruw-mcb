@@ -17,26 +17,10 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_CONTROLLER_MOCK_HPP_
-#define ERROR_CONTROLLER_MOCK_HPP_
+#include "can_mock.hpp"
 
-#include <gmock/gmock.h>
-
-#include "tap/errors/error_controller.hpp"
-
-namespace tap
+namespace tap::mock
 {
-namespace mock
-{
-class ErrorControllerMock : public tap::errors::ErrorController
-{
-public:
-    ErrorControllerMock(tap::Drivers* drivers);
-    virtual ~ErrorControllerMock();
-
-    MOCK_METHOD(void, addToErrorList, (const tap::errors::SystemError& error), (override));
-};  // class ErrorControllerMock
-}  // namespace mock
-}  // namespace tap
-
-#endif  // ERROR_CONTROLLER_MOCK_HPP_
+CanMock::CanMock() {}
+CanMock::~CanMock() {}
+}  // namespace tap::mock

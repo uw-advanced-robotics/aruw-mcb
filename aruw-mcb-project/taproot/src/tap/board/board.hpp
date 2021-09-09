@@ -30,8 +30,8 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef MODM_ROBOMASTER_DEV_BOARD_A_HPP
-#define MODM_ROBOMASTER_DEV_BOARD_A_HPP
+#ifndef BOARD_HPP_
+#define BOARD_HPP_
 
 #ifndef PLATFORM_HOSTED
 #include "modm/architecture/interface/clock.hpp"
@@ -42,7 +42,6 @@ using namespace modm::platform;
 #include "modm/math/units.hpp"
 #endif
 
-/// @ingroup TODO
 namespace Board
 {
 using namespace modm::literals;
@@ -111,6 +110,7 @@ struct SystemClock
 
         Rcc::setFlashLatency<Frequency>();
         Rcc::enableSystemClock(Rcc::SystemClockSource::Pll);
+        
         Rcc::setApb1Prescaler(Rcc::Apb1Prescaler::Div2);
         Rcc::setApb2Prescaler(Rcc::Apb2Prescaler::Div1);
         Rcc::updateCoreFrequency<Frequency>();
@@ -123,11 +123,13 @@ struct SystemClock
 #ifndef PLATFORM_HOSTED
 
 // initialize a button built into mcb
+
 using Button = GpioInputB2;
 
 // initialize 9 green Leds and 1 red LED
 // leds 1-8 used for error handling codes
 // led9 used for error handling error (unrepresentable error)
+
 using LedA = GpioOutputG8;
 using LedB = GpioOutputG7;
 using LedC = GpioOutputG6;
@@ -138,55 +140,57 @@ using LedG = GpioOutputG2;
 using LedH = GpioOutputG1;
 using LedGreen = GpioOutputF14;
 using LedRed = GpioOutputE11;
-
 using LedsPort = SoftwareGpioPort<LedA, LedB, LedC, LedD, LedE, LedF, LedG, LedH, LedGreen, LedRed>;
 
 // initialize 4 24V outputs
+
 using PowerOut1 = GpioOutputH2;
 using PowerOut2 = GpioOutputH3;
 using PowerOut3 = GpioOutputH4;
 using PowerOut4 = GpioOutputH5;
-
 using PowerOuts = SoftwareGpioPort<PowerOut1, PowerOut2, PowerOut3, PowerOut4>;
 
-// initialize analog input pins
-using AnalogInPinS = GpioOutputA0;
-using AnalogInPinT = GpioOutputA1;
-using AnalogInPinU = GpioOutputA2;
-using AnalogInPinV = GpioOutputA3;
-using AnalogInPinOled = GpioOutputA6;
+// Initialize analog input pins
+        
+using AnalogInPinS = GpioA0;
+using AnalogInPinT = GpioA1;
+using AnalogInPinU = GpioA2;
+using AnalogInPinV = GpioA3;
+using AnalogInPinOledJoystick = GpioA6;
+        
+using AnalogInPins = SoftwareGpioPort<AnalogInPinS, AnalogInPinT, AnalogInPinU, AnalogInPinV, AnalogInPinOledJoystick>;
 
-using AnalogInPins =
-    SoftwareGpioPort<AnalogInPinS, AnalogInPinT, AnalogInPinU, AnalogInPinV, AnalogInPinOled>;
+// Initialize PWM pins
+        
+using PWMOutPinW = GpioI5;
+using PWMOutPinX = GpioI6;
+using PWMOutPinY = GpioI7;
+using PWMOutPinZ = GpioI2;
+using PWMOutPinBuzzer = GpioH6;
+        
+using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPinZ, PWMOutPinBuzzer>;
 
-// initialize 4 pwm output pins
-using PWMOutPinW = GpioOutputI5;
-using PWMOutPinX = GpioOutputI6;
-using PWMOutPinY = GpioOutputI7;
-using PWMOutPinZ = GpioOutputI2;
-using PWMOutPinBuzzer = GpioOutputH6;
-
-using PWMOutPins =
-    SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPinZ, PWMOutPinBuzzer>;
-
-// initialize 4 digital input pins
-using DigitalInPinA = GpioOutputI0;
-using DigitalInPinB = GpioOutputH12;
-using DigitalInPinC = GpioOutputH11;
-using DigitalInPinD = GpioOutputH10;
-
+// Initialize digital input pins
+        
+using DigitalInPinA = GpioI0;
+using DigitalInPinB = GpioH12;
+using DigitalInPinC = GpioH11;
+using DigitalInPinD = GpioH10;
+        
 using DigitalInPins = SoftwareGpioPort<DigitalInPinA, DigitalInPinB, DigitalInPinC, DigitalInPinD>;
 
-// initialize 4 digital output pins
-using DigitalOutPinE = GpioInputD15;
-using DigitalOutPinF = GpioInputD14;
-using DigitalOutPinG = GpioInputD13;
-using DigitalOutPinH = GpioInputD12;
-
-using DigitalOutPins =
-    SoftwareGpioPort<DigitalOutPinE, DigitalOutPinF, DigitalOutPinG, DigitalOutPinH>;
+// Initialize digital output pins
+        
+using DigitalOutPinE = GpioD15;
+using DigitalOutPinF = GpioD14;
+using DigitalOutPinG = GpioD13;
+using DigitalOutPinH = GpioD12;
+using DigitalOutPinLaser = GpioG13;
+        
+using DigitalOutPins = SoftwareGpioPort<DigitalOutPinE, DigitalOutPinF, DigitalOutPinG, DigitalOutPinH, DigitalOutPinLaser>;
 
 // gpio pins used for SPI communication to the onboard MPU6500 IMU
+
 using ImuSck = GpioF7;
 using ImuMiso = GpioF8;
 using ImuMosi = GpioF9;
@@ -217,4 +221,4 @@ inline void initialize()
 
 }  // namespace Board
 
-#endif  // MODM_ROBOMASTER_DEV_BOARD_A_HPP
+#endif  // BOARD_HPP_

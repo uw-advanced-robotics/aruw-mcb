@@ -19,7 +19,7 @@
 
 #include "digital.hpp"
 
-#include "tap/rm-dev-board-a/board.hpp"
+#include "tap/board/board.hpp"
 
 using namespace Board;
 
@@ -46,15 +46,12 @@ void Digital::configureInputPullMode(Digital::InputPin pin, Digital::InputPullMo
         case Digital::InputPin::A:
             DigitalInPinA::configure(mode);
             break;
-
         case Digital::InputPin::B:
             DigitalInPinB::configure(mode);
             break;
-
         case Digital::InputPin::C:
             DigitalInPinC::configure(mode);
             break;
-
         case Digital::InputPin::D:
             DigitalInPinD::configure(mode);
             break;
@@ -70,17 +67,17 @@ void Digital::set(Digital::OutputPin pin, bool isSet)
         case Digital::OutputPin::E:
             DigitalOutPinE::set(isSet);
             break;
-
         case Digital::OutputPin::F:
             DigitalOutPinF::set(isSet);
             break;
-
         case Digital::OutputPin::G:
             DigitalOutPinG::set(isSet);
             break;
-
         case Digital::OutputPin::H:
             DigitalOutPinH::set(isSet);
+            break;
+        case Digital::OutputPin::Laser:
+            DigitalOutPinLaser::set(isSet);
             break;
     }
 #endif
@@ -95,15 +92,14 @@ bool Digital::read(Digital::InputPin pin) const
     {
         case Digital::InputPin::A:
             return DigitalInPinA::read();
-
         case Digital::InputPin::B:
             return DigitalInPinB::read();
-
         case Digital::InputPin::C:
             return DigitalInPinC::read();
-
         case Digital::InputPin::D:
             return DigitalInPinD::read();
+        default:
+            return false;
     }
 #endif
 }
