@@ -21,7 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/communication/remote.hpp"
+#include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
 using namespace tap::arch::clock;

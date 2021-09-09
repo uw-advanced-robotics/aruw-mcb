@@ -25,7 +25,7 @@
 #include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
-#include "tap/rm-dev-board-a/board.hpp"
+#include "tap/board/board.hpp"
 
 #include "modm/architecture/interface/delay.hpp"
 
