@@ -26,8 +26,6 @@ variables:
   DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/scons-fast/aruw-mcb-tests.elf
   NUM_JOBS: 4
 
-.default_only: &default_only
-
 .default_except: &default_except
   variables:
     - $UPDATE_SUBMODULE
@@ -72,7 +70,6 @@ Policy Checks:
 
 .mcb build:
   stage: Build all Targets
-  only: *default_only
   except: *default_except
   needs: ["MCB Lib Build"]
   script:
@@ -94,7 +91,6 @@ Policy Checks:
 
 .sim build:
   stage: Build all Targets
-  only: *default_only
   except: *default_except
   needs: ["Sim Lib Build"]
   script:
@@ -106,7 +102,6 @@ Policy Checks:
 
 .test build:
   stage: Build all Targets
-  only: *default_only
   except: *default_except
   needs: ["Test Lib Build"]
   script:
@@ -120,7 +115,6 @@ Policy Checks:
 # Generic build, done before other builds which then use shared cache to build faster
 MCB Lib Build:
   stage: Initial Verification
-  only: *default_only
   except: *default_except
   needs: []
   script:
@@ -173,7 +167,6 @@ Soldier Sim Build:
 Soldier Test Build:
   stage: Initial Verification
   needs: []
-  only: *default_only
   except: *default_except
   script:
     - cd aruw-mcb-project
