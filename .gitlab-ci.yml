@@ -27,10 +27,6 @@ variables:
   NUM_JOBS: 4
 
 .default_only: &default_only
-  - merge_requests
-  - master
-  - develop
-  - schedules
 
 .default_except: &default_except
   variables:
