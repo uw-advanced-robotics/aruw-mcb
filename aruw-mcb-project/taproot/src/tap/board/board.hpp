@@ -167,8 +167,9 @@ using PWMOutPinX = GpioI6;
 using PWMOutPinY = GpioI7;
 using PWMOutPinZ = GpioI2;
 using PWMOutPinBuzzer = GpioH6;
+using PWMOutPinImuHeater = GpioB5;
         
-using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPinZ, PWMOutPinBuzzer>;
+using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPinZ, PWMOutPinBuzzer, PWMOutPinImuHeater>;
 
 // Initialize digital input pins
         

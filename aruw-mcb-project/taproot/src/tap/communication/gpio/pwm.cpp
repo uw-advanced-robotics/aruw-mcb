@@ -47,19 +47,27 @@ void Pwm::init()
     Timer12::start();
     Timer12::enableOutput();
 
+    Timer3::connect<PWMOutPinImuHeater::Ch2>();
+    Timer3::enable();
+    Timer3::setMode(Timer3::Mode::UpCounter);
+    timer3CalculatedOverflow = Timer3::setPeriod<Board::SystemClock>(1'000'000 / DEFAULT_TIMER3_FREQUENCY);
+    Timer3::start();
+    Timer3::enableOutput();
+
 #endif
     // Set all out pins to 0 duty
-    writeAll(0.0f);
+    writeAllZeros();
 }
 
-void Pwm::writeAll(float duty)
+void Pwm::writeAllZeros()
 {
 #ifndef PLATFORM_HOSTED
-    write(duty, Pin::W);
-    write(duty, Pin::X);
-    write(duty, Pin::Y);
-    write(duty, Pin::Z);
-    write(duty, Pin::Buzzer);
+    write(0.0f, Pin::W);
+    write(0.0f, Pin::X);
+    write(0.0f, Pin::Y);
+    write(0.0f, Pin::Z);
+    write(0.0f, Pin::Buzzer);
+    write(0.0f, Pin::ImuHeater);
 #endif
 }
 
@@ -99,6 +107,12 @@ void Pwm::write(float duty, Pin pin)
                 Timer12::OutputCompareMode::Pwm,
                 duty * timer12CalculatedOverflow);
             break;
+        case Pin::ImuHeater:
+            Timer3::configureOutputChannel(
+                Ch2,
+                Timer3::OutputCompareMode::Pwm,
+                duty * timer3CalculatedOverflow);
+            break;
         default:
             break;
     };
@@ -116,6 +130,9 @@ void Pwm::setTimerFrequency(Timer timer, uint32_t frequency)
         case TIMER12:
             Timer12::setPeriod<Board::SystemClock>(1'000'000 / frequency);
             break;
+        case TIMER3:
+            Timer3::setPeriod<Board::SystemClock>(1'000'000 / frequency);
+            break;
     }
 #endif
 }
@@ -131,6 +148,9 @@ void Pwm::pause(Timer timer)
         case TIMER12:
             Timer12::pause();
             break;
+        case TIMER3:
+            Timer3::pause();
+            break;
     }
 #endif
 }
@@ -145,6 +165,9 @@ void Pwm::start(Timer timer)
             break;
         case TIMER12:
             Timer12::start();
+            break;
+        case TIMER3:
+            Timer3::start();
             break;
     }
 #endif
