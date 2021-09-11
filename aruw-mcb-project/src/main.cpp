@@ -91,19 +91,21 @@ int main()
 
         if (sendXavierTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            // PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
         }
 
         if (sendMotorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
-            PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
-            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
-            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            drivers->bno055Interface.periodicIMUUpdate();
+            drivers->terminalSerial.getStream().printf("%.2f\n", drivers->bno055Interface.getAx());
+            // PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
+            // PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
+            // PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+            // PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
+            // PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
+            // PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
         }
         modm::delay_us(10);
     }
@@ -138,11 +140,11 @@ static void updateIo(tap::Drivers *drivers)
     tap::motorsim::SimHandler::updateSims();
 #endif
 
-    drivers->canRxHandler.pollCanData();
-    drivers->refSerial.updateSerial();
-    drivers->remote.read();
-    drivers->oledDisplay.updateDisplay();
-    drivers->mpu6500.read();
-    drivers->xavierSerial.updateSerial();
+    // drivers->canRxHandler.pollCanData();
+    // drivers->refSerial.updateSerial();
+    // drivers->remote.read();
+    // drivers->oledDisplay.updateDisplay();
+    // drivers->mpu6500.read();
+    // drivers->xavierSerial.updateSerial();
     drivers->bno055Interface.update();
 }
