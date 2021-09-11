@@ -129,6 +129,7 @@ static void initializeIo(tap::Drivers *drivers)
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif
+    drivers->bno055Interface.initialize();
 }
 
 static void updateIo(tap::Drivers *drivers)
@@ -143,4 +144,5 @@ static void updateIo(tap::Drivers *drivers)
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
     drivers->xavierSerial.updateSerial();
+    drivers->bno055Interface.update();
 }

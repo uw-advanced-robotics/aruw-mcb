@@ -23,6 +23,7 @@
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/architecture/profiler.hpp"
 #include "tap/mock/analog_mock.hpp"
+#include "tap/mock/bno055_interface_mock"
 #include "tap/mock/can_mock.hpp"
 #include "tap/mock/can_rx_handler_mock.hpp"
 #include "tap/mock/command_mapper_mock.hpp"
@@ -52,6 +53,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/gpio/leds.hpp"
 #include "tap/communication/gpio/pwm.hpp"
+#include "tap/communication/sensors/bno055/bno055_interface.hpp"
 #include "tap/communication/sensors/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/remote.hpp"
@@ -105,6 +107,7 @@ public:
           profiler(),
           djiMotorTerminalSerialHandler(this),
           schedulerTerminalHandler(this),
+          bno055Interface(),
           imuRxHandler(this)
     {
     }
@@ -131,6 +134,7 @@ public:
     arch::Profiler profiler;
     testing::NiceMock<mock::DjiMotorTerminalSerialHandlerMock> djiMotorTerminalSerialHandler;
     testing::NiceMock<mock::SchedulerTerminalHandlerMock> schedulerTerminalHandler;
+    testing::NiceMock<mock::Bno055InterfaceMock> bno055Interface;
     testing::NiceMock<aruwsrc::mock::ImuRxListenerMock> imuRxHandler;
 #else
 public:
@@ -155,6 +159,7 @@ public:
     arch::Profiler profiler;
     motor::DjiMotorTerminalSerialHandler djiMotorTerminalSerialHandler;
     control::SchedulerTerminalHandler schedulerTerminalHandler;
+    sensors::Bno055Interface bno055Interface;
     aruwsrc::can::ImuRxListener imuRxHandler;
 #endif
 };  // class Drivers
