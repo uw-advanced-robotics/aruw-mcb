@@ -38,6 +38,8 @@ void MatrixTest::smallMultiplication()
 
 void MatrixTest::smallKalmanFilter()
 {
+    static constexpr uint16_t STATES = 1;
+    static constexpr uint16_t INPUTS = 2;
     const float A[STATES * STATES] = {1};
     const float C[INPUTS * STATES] = {.5, .5};
     const float Q[STATES * STATES] = {1};
