@@ -20,7 +20,7 @@
 #ifndef __EXAMPLE_COMPRISED_COMAND_HPP__
 #define __EXAMPLE_COMPRISED_COMAND_HPP__
 
-#include <aruwlib/control/comprised_command.hpp>
+#include "tap/control/comprised_command.hpp"
 
 #include "example_command.hpp"
 #include "example_subsystem.hpp"
@@ -29,10 +29,10 @@ namespace aruwsrc
 {
 namespace control
 {
-class ExampleComprisedCommand : public aruwlib::control::ComprisedCommand
+class ExampleComprisedCommand : public tap::control::ComprisedCommand
 {
 public:
-    explicit ExampleComprisedCommand(aruwlib::Drivers* drivers, ExampleSubsystem* subsystem);
+    explicit ExampleComprisedCommand(tap::Drivers* drivers, ExampleSubsystem* subsystem);
 
     void initialize() override;
 
@@ -49,7 +49,7 @@ private:
 
     ExampleCommand otherExampleCommand;
 
-    aruwlib::arch::MilliTimeout switchTimer;
+    tap::arch::MilliTimeout switchTimer;
 
     bool switchCommand;
 };

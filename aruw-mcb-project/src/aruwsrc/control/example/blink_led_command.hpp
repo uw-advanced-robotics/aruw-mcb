@@ -20,9 +20,9 @@
 #ifndef __BLINK_LED_COMMAND_HPP__
 #define __BLINK_LED_COMMAND_HPP__
 
-#include <aruwlib/Drivers.hpp>
-#include <aruwlib/architecture/timeout.hpp>
-#include <aruwlib/control/command.hpp>
+#include "tap/architecture/timeout.hpp"
+#include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "example_subsystem.hpp"
 
@@ -30,10 +30,10 @@ namespace aruwsrc
 {
 namespace control
 {
-class BlinkLEDCommand : public aruwlib::control::Command
+class BlinkLEDCommand : public tap::control::Command
 {
 public:
-    BlinkLEDCommand(aruwlib::Drivers* drivers, aruwsrc::control::ExampleSubsystem* subsystem);
+    BlinkLEDCommand(tap::Drivers* drivers, aruwsrc::control::ExampleSubsystem* subsystem);
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -57,9 +57,9 @@ public:
 
     const char* getName() const override { return "blink led"; }
 
-    aruwlib::Drivers* drivers;
+    tap::Drivers* drivers;
 
-    aruwlib::arch::MilliTimeout completedTimer;
+    tap::arch::MilliTimeout completedTimer;
 
     int refershCounter = 0;
     int startCounter = 0;

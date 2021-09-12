@@ -19,19 +19,16 @@
 
 #include "turret_cv_command.hpp"
 
-#include <aruwlib/Drivers.hpp>
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/architecture/clock.hpp>
-#include <aruwlib/communication/remote.hpp>
-#include <aruwlib/communication/serial/xavier_serial.hpp>
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
 
-using namespace aruwlib;
-using namespace aruwlib::serial;
-namespace aruwsrc
+using namespace tap::arch::clock;
+
+namespace aruwsrc::control::turret
 {
-namespace turret
-{
-TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem)
+TurretCVCommand::TurretCVCommand(tap::Drivers *drivers, TurretSubsystem *subsystem)
     : drivers(drivers),
       turretSubsystem(subsystem),
       yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
@@ -55,50 +52,44 @@ TurretCVCommand::TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *sub
           PITCH_Q_DERIVATIVE_KALMAN,
           PITCH_R_DERIVATIVE_KALMAN,
           PITCH_Q_PROPORTIONAL_KALMAN,
-          PITCH_R_PROPORTIONAL_KALMAN),
-      sendRequestTimer(TIME_BETWEEN_CV_REQUESTS)
+          PITCH_R_PROPORTIONAL_KALMAN)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem *>(subsystem));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem *>(subsystem));
 }
 
 void TurretCVCommand::initialize()
 {
-    sendRequestTimer.restart(TIME_BETWEEN_CV_REQUESTS);
-    drivers->xavierSerial.beginTargetTracking();
+    drivers->xavierSerial.beginAutoAim();
     yawPid.reset();
     pitchPid.reset();
 }
 
 void TurretCVCommand::execute()
 {
-    XavierSerial::TurretAimData cvData;
-    if (drivers->xavierSerial.getLastAimData(&cvData))
+    if (drivers->xavierSerial.lastAimDataValid())
     {
+        const auto &cvData = drivers->xavierSerial.getLastAimData();
         if (cvData.hasTarget)
         {
-            turretSubsystem->setYawTarget(cvData.yaw);
-            turretSubsystem->setPitchTarget(cvData.pitch);
+            turretSubsystem->setYawSetpoint(cvData.yaw);
+            turretSubsystem->setPitchSetpoint(cvData.pitch);
         }
     }
-    else if (sendRequestTimer.isExpired())
-    {
-        drivers->xavierSerial.beginTargetTracking();
-    }
-    uint32_t currTime = arch::clock::getTimeMilliseconds();
+
+    uint32_t currTime = getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
     runYawPositionController(dt);
     runPitchPositionController(dt);
 }
 
-// NOLINTNEXTLINE
-void TurretCVCommand::end(bool) { drivers->xavierSerial.stopTargetTracking(); }
+void TurretCVCommand::end(bool) { drivers->xavierSerial.stopAutoAim(); }
 
 void TurretCVCommand::runYawPositionController(float dt)
 {
     // position controller based on gimbal angle
     float positionControllerError =
-        turretSubsystem->getYawAngle().difference(turretSubsystem->getYawTarget());
+        turretSubsystem->getCurrentYawValue().difference(turretSubsystem->getYawSetpoint());
     float pidOutput =
         yawPid.runController(positionControllerError, turretSubsystem->getYawVelocity(), dt);
 
@@ -109,13 +100,11 @@ void TurretCVCommand::runPitchPositionController(float dt)
 {
     // position controller based on turret pitch gimbal
     float positionControllerError =
-        turretSubsystem->getPitchAngle().difference(turretSubsystem->getPitchTarget());
+        turretSubsystem->getCurrentPitchValue().difference(turretSubsystem->getPitchSetpoint());
     float pidOutput =
         pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity(), dt);
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
 
-}  // namespace turret
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::turret

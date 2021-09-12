@@ -19,9 +19,9 @@
 
 #if defined(TARGET_DRONE)
 
-#include <aruwlib/DriversSingleton.hpp>
+#include "tap/drivers_singleton.hpp"
 
-using aruwlib::DoNotUse_getDrivers;
+using tap::DoNotUse_getDrivers;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -29,11 +29,9 @@ using aruwlib::DoNotUse_getDrivers;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
+tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 
-namespace aruwsrc
-{
-namespace control
+namespace drone_control
 {
 /* define subsystems --------------------------------------------------------*/
 
@@ -43,28 +41,28 @@ namespace control
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerDroneSubsystems(aruwlib::Drivers *) {}
+void registerDroneSubsystems(tap::Drivers *) {}
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultDroneCommands(aruwlib::Drivers *) {}
+void setDefaultDroneCommands(tap::Drivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands(aruwlib::Drivers *) {}
+void startDroneCommands(tap::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerDroneIoMappings(aruwlib::Drivers *) {}
+void registerDroneIoMappings(tap::Drivers *) {}
+}  // namespace drone_control
 
-void initSubsystemCommands(aruwlib::Drivers *drivers)
+namespace aruwsrc::control
 {
-    initializeSubsystems();
-    registerDroneSubsystems(drivers);
-    setDefaultDroneCommands(drivers);
-    startDroneCommands(drivers);
-    registerDroneIoMappings(drivers);
+void initSubsystemCommands(tap::Drivers *drivers)
+{
+    drone_control::initializeSubsystems();
+    drone_control::registerDroneSubsystems(drivers);
+    drone_control::setDefaultDroneCommands(drivers);
+    drone_control::startDroneCommands(drivers);
+    drone_control::registerDroneIoMappings(drivers);
 }
-
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control
 
 #endif

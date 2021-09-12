@@ -19,45 +19,44 @@
 
 #include "agitator_subsystem.hpp"
 
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/control/subsystem.hpp>
-#include <aruwlib/errors/create_errors.hpp>
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include <aruwlib/mock/DJIMotorMock.hpp>
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include <aruwlib/motor/dji_motor.hpp>
+#include "tap/motor/dji_motor.hpp"
 #endif
 
-#include <modm/math/filter/pid.hpp>
+#include "modm/math/filter/pid.hpp"
 
-#include "agitator_rotate_command.hpp"
-
-using namespace aruwlib::motor;
+using namespace tap::motor;
 
 namespace aruwsrc
 {
 namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     float kp,
     float ki,
     float kd,
     float maxIAccum,
     float maxOutput,
     float agitatorGearRatio,
-    aruwlib::motor::MotorId agitatorMotorId,
-    aruwlib::can::CanBus agitatorCanBusId,
-    bool isAgitatorInverted)
-    : aruwlib::control::Subsystem(drivers),
-      agitatorIsCalibrated(false),
+    tap::motor::MotorId agitatorMotorId,
+    tap::can::CanBus agitatorCanBusId,
+    bool isAgitatorInverted,
+    bool jamLogicEnabled,
+    float jammingDistance,
+    uint32_t jammingTime)
+    : tap::control::Subsystem(drivers),
       agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
-      desiredAgitatorAngle(0.0f),
-      agitatorCalibratedZeroAngle(0.0f),
-      agitatorJammedTimeout(0),
-      agitatorJammedTimeoutPeriod(0),
+      jamChecker(this, jammingDistance, jammingTime),
       gearRatio(agitatorGearRatio),
+      jamLogicEnabled(jamLogicEnabled),
       agitatorMotor(
           drivers,
           agitatorMotorId,
@@ -65,38 +64,21 @@ AgitatorSubsystem::AgitatorSubsystem(
           isAgitatorInverted,
           "agitator motor")
 {
-    agitatorJammedTimeout.stop();
 }
 
 void AgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
 
-void AgitatorSubsystem::armAgitatorUnjamTimer(uint32_t predictedRotateTime)
-{
-    if (predictedRotateTime == 0)
-    {
-        RAISE_ERROR(
-            drivers,
-            "The predicted rotate time is 0, this is physically impossible",
-            aruwlib::errors::SUBSYSTEM,
-            aruwlib::errors::SubsystemErrorType::ZERO_DESIRED_AGITATOR_ROTATE_TIME);
-    }
-    agitatorJammedTimeoutPeriod = predictedRotateTime + JAMMED_TOLERANCE_PERIOD;
-    agitatorJammedTimeout.restart(agitatorJammedTimeoutPeriod);
-}
-
-void AgitatorSubsystem::disarmAgitatorUnjamTimer() { agitatorJammedTimeout.stop(); }
-
-bool AgitatorSubsystem::isAgitatorJammed() const { return agitatorJammedTimeout.isExpired(); }
-
 void AgitatorSubsystem::refresh()
 {
-    if (agitatorIsCalibrated)
+    if (!agitatorIsCalibrated)
     {
-        agitatorRunPositionPid();
+        calibrateHere();
     }
-    else
+
+    agitatorRunPositionPid();
+    if (jamChecker.check())
     {
-        agitatorCalibrateHere();
+        subsystemJamStatus = true;
     }
 }
 
@@ -116,16 +98,16 @@ void AgitatorSubsystem::agitatorRunPositionPid()
         // dt doesn't need to be exact since we don't use an integral term and we calculate
         // the velocity ourselves, so it currently isn't used.
         agitatorPositionPid.runController(
-            desiredAgitatorAngle - getAgitatorAngle(),
-            getAgitatorVelocity(),
+            desiredAgitatorAngle - getCurrentValue(),
+            getVelocity(),
             2.0f);
         agitatorMotor.setDesiredOutput(agitatorPositionPid.getOutput());
     }
 }
 
-bool AgitatorSubsystem::agitatorCalibrateHere()
+bool AgitatorSubsystem::calibrateHere()
 {
-    if (!isAgitatorOnline())
+    if (!isOnline())
     {
         return false;
     }
@@ -135,7 +117,7 @@ bool AgitatorSubsystem::agitatorCalibrateHere()
     return true;
 }
 
-float AgitatorSubsystem::getAgitatorAngle() const
+float AgitatorSubsystem::getCurrentValue() const
 {
     if (!agitatorIsCalibrated)
     {
@@ -148,16 +130,16 @@ float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
 {
     // position is equal to the following equation:
     // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
-    return (2.0f * aruwlib::algorithms::PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
+    return (2.0f * tap::algorithms::PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
            agitatorMotor.getEncoderUnwrapped() / gearRatio;
 }
 
 void AgitatorSubsystem::runHardwareTests()
 {
-    if (aruwlib::algorithms::compareFloatClose(
-            this->getAgitatorDesiredAngle(),
-            this->getAgitatorAngle(),
-            aruwlib::algorithms::PI / 16))
+    if (tap::algorithms::compareFloatClose(
+            this->getSetpoint(),
+            this->getCurrentValue(),
+            tap::algorithms::PI / 16))
     {
         this->setHardwareTestsComplete();
     }
@@ -165,10 +147,8 @@ void AgitatorSubsystem::runHardwareTests()
 
 void AgitatorSubsystem::onHardwareTestStart()
 {
-    this->setAgitatorDesiredAngle(this->getAgitatorAngle() + aruwlib::algorithms::PI / 2);
+    this->setSetpoint(this->getCurrentValue() + tap::algorithms::PI / 2);
 }
-
-void AgitatorSubsystem::onHardwareTestComplete() {}
 
 }  // namespace agitator
 
