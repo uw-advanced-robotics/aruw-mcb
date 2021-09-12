@@ -90,3 +90,69 @@ TEST(CMSISMat, multop_simple)
     EXPECT_FLOAT_EQ(6, c.data[2]);
     EXPECT_FLOAT_EQ(8, c.data[3]);
 }
+
+TEST(CMSISMat, constructIdentityMatrix_false_if_not_square)
+{
+    CMSISMat<4, 3> a;
+    EXPECT_FALSE(a.constructIdentityMatrix());
+}
+
+#define FILL_INCR_COUNT(mat)                               \
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(mat.data); i++) \
+    {                                                      \
+        mat.data[i] = i;                                   \
+    }
+
+TEST(CMSISMat, constructIdentityMatrix_constructs_correct_identity_mat)
+{
+    CMSISMat<2, 2> a;
+
+    FILL_INCR_COUNT(a);
+
+    EXPECT_TRUE(a.constructIdentityMatrix());
+
+    EXPECT_FLOAT_EQ(1, a.data[0]);
+    EXPECT_FLOAT_EQ(0, a.data[1]);
+    EXPECT_FLOAT_EQ(0, a.data[2]);
+    EXPECT_FLOAT_EQ(1, a.data[3]);
+}
+
+TEST(CMSISMat, copyData_replaces_data)
+{
+    CMSISMat<3, 2> a;
+    float data[3 * 2] = {};
+
+    FILL_INCR_COUNT(a);
+    data[1] = 10;
+
+    a.copyData(data);
+
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(data); i++)
+    {
+        // If 1, check for "10", else check for "0"
+        EXPECT_FLOAT_EQ((i == 1 ? 10.0f : 0.0f), a.matrix.pData[i]);
+    }
+}
+
+TEST(CMSISMat, inverse_simple_test)
+{
+    CMSISMat<2, 2> a;
+    float result[2 * 2];
+
+    a.data[0] = 1;
+    a.data[1] = 2;
+    a.data[2] = 3;
+    a.data[3] = 4;
+
+    result[0] = -2;
+    result[1] = 1;
+    result[2] = 1.5;
+    result[3] = -0.5;
+
+    CMSISMat res = a.inverse();
+
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(result); i++)
+    {
+        EXPECT_FLOAT_EQ(result[i], res.data[i]);
+    }
+}

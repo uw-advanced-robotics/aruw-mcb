@@ -24,14 +24,22 @@ struct CMSISMat
 
     CMSISMat(const float (&initialData)[ROWS * COLS])
     {
-        memcpy(data, initialData, sizeof(initialData));
+        copyData(initialData);
         arm_mat_init_f32(&matrix, ROWS, COLS, data);
     }
 
     // Delete the copy constructor, create a move constructor. This will
     // Avoid us doing costly copys but will still allow move semantics.
-    CMSISMat(CMSISMat &other) = delete;
-    CMSISMat(CMSISMat &&other) = default;
+    CMSISMat(const CMSISMat &other) = delete;
+    constexpr CMSISMat(CMSISMat &&) = default;
+
+    CMSISMat &operator=(CMSISMat&) = delete;
+    constexpr CMSISMat &operator=(CMSISMat&&) = default;
+
+    inline void copyData(const float(&other)[ROWS * COLS])
+    {
+        memcpy(data, other, sizeof(data));
+    }
 
     /**
      * Construct identity matrix in the current CMSISMat
@@ -52,6 +60,13 @@ struct CMSISMat
         }
 
         return true;
+    }
+
+    inline CMSISMat<COLS, ROWS> inverse()
+    {
+        CMSISMat<COLS, ROWS> ret;
+        arm_mat_inverse_f32(&this->matrix, &ret.matrix);
+        return ret;
     }
 };
 

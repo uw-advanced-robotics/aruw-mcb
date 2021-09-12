@@ -87,21 +87,25 @@ int main()
     aruwsrc::control::initSubsystemCommands(drivers);
 
 
-#ifdef PLATFORM_HOSTED
-    aruwsrc::sim::initialize_robot_sim();
-    tap::motorsim::SimHandler::resetMotorSims();
-    // Blocking call, waits until Windows Simulator connects.
-    tap::communication::TCPServer::MainServer()->getConnection();
-#endif
+// #ifdef PLATFORM_HOSTED
+//     aruwsrc::sim::initialize_robot_sim();
+//     tap::motorsim::SimHandler::resetMotorSims();
+//     // Blocking call, waits until Windows Simulator connects.
+//     tap::communication::TCPServer::MainServer()->getConnection();
+// #endif
 
-    const float x[2] = {0, 0};
-    const float P[4] = {0, 0, 0, 0};
-    const float A[4] = {0, 0, 0, 0};
-    const float B[4] = {0, 0, 0, 0};
-    const float C[4] = {0, 0, 0, 0};
-    const float Q[4] = {0, 0, 0, 0};
-    const float R[4] = {0, 0, 0, 0};
-    KalmanFilter<2, 2> smallKalmanFilter(x, P, A, B, C, Q, R);
+    static constexpr uint16_t STATES = 1;
+    static constexpr uint16_t INPUTS = 2;
+    const float x[STATES] = {0};
+
+    const float A[STATES * STATES] = {1};
+    const float C[INPUTS * STATES] = {.5, .5};
+    const float Q[STATES * STATES] = {1};
+    const float R[INPUTS * INPUTS] = {1, 0, 0, 1};
+    const float P[STATES * STATES] = {1};
+    KalmanFilter<STATES, INPUTS> kf(A, C, Q, R, P);
+
+    kf.init(x);
 
     while (1)
     {

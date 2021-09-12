@@ -1,8 +1,10 @@
+#ifndef PLATFORM_HOSTED
+
 #include "matrix_test.hpp"
 
-#include "aruwlib/architecture/clock.hpp"
+#include "tap/architecture/clock.hpp"
 
-#ifndef PLATFORM_HOSTED
+using namespace tap::arch::clock;
 
 namespace aruwsrc::algorithms
 {
@@ -36,18 +38,12 @@ void MatrixTest::smallMultiplication()
 
 void MatrixTest::smallKalmanFilter()
 {
-    const float x[2] = {0, 0};
-    const float P[4] = {0, 0, 0, 0};
-    const float A[4] = {0, 0, 0, 0};
-    const float B[4] = {0, 0, 0, 0};
-    const float C[4] = {0, 0, 0, 0};
-    const float Q[4] = {0, 0, 0, 0};
-    const float R[4] = {0, 0, 0, 0};
-    KalmanFilter<2, 2> smallKalmanFilter(x, P, A, B, C, Q, R);
-    CMSISMat<2, 1> z;
-    z.data[0] = 1;
-    z.data[1] = 1;
-    smallKalmanFilter.performUpdate(z);
+    const float A[STATES * STATES] = {1};
+    const float C[INPUTS * STATES] = {.5, .5};
+    const float Q[STATES * STATES] = {1};
+    const float R[INPUTS * INPUTS] = {1, 0, 0, 1};
+    const float P[STATES * STATES] = {1};
+    KalmanFilter<STATES, INPUTS> kf(A, C, Q, R, P);
 }
 
 template <uint16_t ROWS, uint16_t COLS>
@@ -74,13 +70,13 @@ void MatrixTest::multiplicationSpeedCompare()
         populateMatrices<ROWS, COLS>(cmsisMat1, modmMat1);
         populateMatrices<ROWS, COLS>(cmsisMat2, modmMat2);
 
-        uint32_t startTime = aruwlib::arch::clock::getTimeMicroseconds();
+        uint32_t startTime = getTimeMicroseconds();
         arm_mat_mult_f32(&cmsisMat1.matrix, &cmsisMat2.matrix, &cmsisMat3.matrix);
-        timeCmsis[k] = aruwlib::arch::clock::getTimeMicroseconds() - startTime;
+        timeCmsis[k] = getTimeMicroseconds() - startTime;
 
-        startTime = aruwlib::arch::clock::getTimeMicroseconds();
+        startTime = getTimeMicroseconds();
         modmMat3 = modmMat1 * modmMat2;
-        timeModm[k] = aruwlib::arch::clock::getTimeMicroseconds() - startTime;
+        timeModm[k] = getTimeMicroseconds() - startTime;
     }
 }
 
@@ -91,13 +87,13 @@ void MatrixTest::additionSpeedCompare()
         populateMatrices<ROWS, COLS>(cmsisMat1, modmMat1);
         populateMatrices<ROWS, COLS>(cmsisMat2, modmMat2);
 
-        uint32_t startTime = aruwlib::arch::clock::getTimeMicroseconds();
+        uint32_t startTime = getTimeMicroseconds();
         arm_mat_add_f32(&cmsisMat1.matrix, &cmsisMat2.matrix, &cmsisMat3.matrix);
-        timeCmsis[k] = aruwlib::arch::clock::getTimeMicroseconds() - startTime;
+        timeCmsis[k] = getTimeMicroseconds() - startTime;
 
-        startTime = aruwlib::arch::clock::getTimeMicroseconds();
+        startTime = getTimeMicroseconds();
         modmMat3 = modmMat1 + modmMat2;
-        timeModm[k] = aruwlib::arch::clock::getTimeMicroseconds() - startTime;
+        timeModm[k] = getTimeMicroseconds() - startTime;
     }
 }
 
@@ -107,9 +103,9 @@ void MatrixTest::inverseSpeedCompare()
     {
         populateMatrices<ROWS, COLS>(cmsisMat1, modmMat1);
 
-        uint32_t startTime = aruwlib::arch::clock::getTimeMicroseconds();
+        uint32_t startTime = getTimeMicroseconds();
         arm_mat_inverse_f32(&cmsisMat1.matrix, &cmsisMat2.matrix);
-        timeCmsis[k] = aruwlib::arch::clock::getTimeMicroseconds() - startTime;
+        timeCmsis[k] = getTimeMicroseconds() - startTime;
     }
 }
 
@@ -119,13 +115,13 @@ void MatrixTest::transposeSpeedCompare()
     {
         populateMatrices<ROWS, COLS>(cmsisMat1, modmMat1);
 
-        uint32_t startTime = aruwlib::arch::clock::getTimeMicroseconds();
+        uint32_t startTime = getTimeMicroseconds();
         arm_mat_trans_f32(&cmsisMat1.matrix, &cmsisMat2.matrix);
-        timeCmsis[k] = aruwlib::arch::clock::getTimeMicroseconds() - startTime;
+        timeCmsis[k] = getTimeMicroseconds() - startTime;
 
-        startTime = aruwlib::arch::clock::getTimeMicroseconds();
+        startTime = getTimeMicroseconds();
         modmMat2 = modmMat1.asTransposed();
-        timeModm[k] = aruwlib::arch::clock::getTimeMicroseconds() - startTime;
+        timeModm[k] = getTimeMicroseconds() - startTime;
     }
 }
 
