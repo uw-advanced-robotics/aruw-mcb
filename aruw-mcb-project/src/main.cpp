@@ -49,6 +49,12 @@
 
 #include "aruwsrc/algorithms/kalman_filter.hpp"
 
+#include "tap/communication/serial/uart_terminal_device.hpp"
+
+tap::communication::serial::UartTerminalDevice device(tap::DoNotUse_getDrivers());
+modm::IOStream stream(device);
+
+
 using namespace aruwsrc::algorithms;
 
 using tap::Drivers;
@@ -95,13 +101,13 @@ int main()
 // #endif
 
     static constexpr uint16_t STATES = 1;
-    static constexpr uint16_t INPUTS = 2;
+    static constexpr uint16_t INPUTS = 1;
     const float x[STATES] = {0};
 
     const float A[STATES * STATES] = {1};
-    const float C[INPUTS * STATES] = {.5, .5};
+    const float C[INPUTS * STATES] = {1};
     const float Q[STATES * STATES] = {1};
-    const float R[INPUTS * INPUTS] = {1, 0, 0, 1};
+    const float R[INPUTS * INPUTS] = {1};
     const float P[STATES * STATES] = {1};
     KalmanFilter<STATES, INPUTS> kf(A, C, Q, R, P);
 
@@ -114,13 +120,17 @@ int main()
 
         if (sendXavierTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            // PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
         }
 
         if (sendMotorTimeout.execute())
         {
+            aruwsrc::algorithms::CMSISMat<1, 1> y;
+            y.data[0] = drivers->mpu6500.getGy();
+            kf.performUpdate(y);
+            stream.printf("%.2f\t%.2f\n", kf.getStateMatrix()[0], drivers->mpu6500.getGy());
             PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
             PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
@@ -148,7 +158,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    drivers->xavierSerial.initializeCV();
+    // drivers->xavierSerial.initializeCV();
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif
@@ -165,5 +175,5 @@ static void updateIo(tap::Drivers *drivers)
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    drivers->xavierSerial.updateSerial();
+    // drivers->xavierSerial.updateSerial();
 }
