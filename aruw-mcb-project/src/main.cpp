@@ -41,11 +41,10 @@
 /* control includes ---------------------------------------------------------*/
 #include <aruwlib/architecture/clock.hpp>
 
+#include "aruwlib/architecture/endianness_wrappers.hpp"
+
 #include "aruwsrc/control/robot_control.hpp"
-
-#include "aruwlib/architecture/endianness_wrappers.hpp"
-
-#include "aruwlib/architecture/endianness_wrappers.hpp"
+#include "modm/architecture/interface/can_message.hpp"
 
 using aruwlib::Drivers;
 
@@ -60,6 +59,8 @@ static void initializeIo(aruwlib::Drivers *drivers);
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
 static void updateIo(aruwlib::Drivers *drivers);
+
+static constexpr uint16_t IMU_MSG_CAN_ID = 0x203;
 
 int main()
 {
@@ -83,15 +84,19 @@ int main()
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
+            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
             float yaw = drivers->mpu6500.getYaw();
             int16_t gzRaw = drivers->mpu6500.getGz();
 
+
             if (drivers->can.isReadyToSend(aruwlib::can::CanBus::CAN_BUS1))
             {
+
                 drivers->leds.set(aruwlib::gpio::Leds::Green, i < 50);
                 i = (i + 1) % 100;
-                modm::can::Message msg(0x203, 8);
+
+                modm::can::Message msg(IMU_MSG_CAN_ID, 8);
                 msg.setExtended(false);
                 aruwlib::arch::convertToLittleEndian(yaw, msg.data);
                 aruwlib::arch::convertToLittleEndian(gzRaw, msg.data + 4);
@@ -109,6 +114,8 @@ static void initializeIo(aruwlib::Drivers *drivers)
     drivers->leds.init();
     drivers->digital.init();
     drivers->mpu6500.init();
+    drivers->terminalSerial.initialize();
+    drivers->errorController.init();
 }
 
 static void updateIo(aruwlib::Drivers *drivers)
