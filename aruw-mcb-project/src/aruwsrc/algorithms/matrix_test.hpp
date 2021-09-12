@@ -4,6 +4,7 @@
 #ifndef PLATFORM_HOSTED
 
 #include "modm/math/matrix.hpp"
+
 #include "arm_math.h"
 #include "kalman_filter.hpp"
 #include "matrix_utils.hpp"
@@ -13,6 +14,8 @@ namespace aruwlib
 class Drivers;
 }
 
+namespace aruwsrc::algorithms
+{
 /**
  * Some code that profiles the DSP module
  */
@@ -43,6 +46,8 @@ private:
     modm::Matrix<float, ROWS, COLS> modmMat2;
     modm::Matrix<float, ROWS, COLS> modmMat3;
 };
+
+}  // namespace aruwsrc::algorithms
 
 #endif
 

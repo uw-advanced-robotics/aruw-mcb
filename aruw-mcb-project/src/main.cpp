@@ -46,6 +46,10 @@
 
 #include "aruwsrc/algorithms/matrix_test.hpp"
 
+#include "aruwsrc/algorithms/kalman_filter.hpp"
+
+using namespace aruwsrc::algorithms;
+
 using aruwlib::Drivers;
 
 /* define timers here -------------------------------------------------------*/

@@ -2,6 +2,10 @@
 
 #include "aruwlib/architecture/clock.hpp"
 
+#ifndef PLATFORM_HOSTED
+
+namespace aruwsrc::algorithms
+{
 #define EXPECT_TRUE(expr) modm_assert((expr), #expr, __line__)
 
 MatrixTest::MatrixTest() {}
@@ -124,3 +128,7 @@ void MatrixTest::transposeSpeedCompare()
         timeModm[k] = aruwlib::arch::clock::getTimeMicroseconds() - startTime;
     }
 }
+
+}  // namespace aruwsrc::algorithms
+
+#endif

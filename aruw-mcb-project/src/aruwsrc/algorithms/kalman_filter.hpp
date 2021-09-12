@@ -7,6 +7,8 @@
 
 #include "matrix_utils.hpp"
 
+namespace aruwsrc::algorithms
+{
 #define SAFE_MAT_OP(mat_operation) \
     (modm_assert((mat_operation) == ARM_MATH_SIZE_MISMATCH, #mat_operation, "KalmanFilter"))
 
@@ -48,7 +50,7 @@ public:
         I.constructIdentityMatrix();
     }
 
-    void performUpdate(const CMSISMat<INPUTS, 1> &z)
+    void performUpdate(const CMSISMat<INPUTS, 1> &)
     {
         // /* Time Update (Predict) */
         // // Predict state
@@ -77,8 +79,8 @@ public:
         // CMSISMat<STATES, INPUTS> HtCPCtransposePlusRInverse;
         // SAFE_MAT_OP(arm_mat_mult_f32(&C.matrix, &P.matrix, &CP.matrix));
         // SAFE_MAT_OP(arm_mat_mult_f32(&CP.matrix, &Ctranspose.matrix, &CPCtranspose.matrix));
-        // SAFE_MAT_OP(arm_mat_mult_f32(&CPCtranspose.matrix, &R.matrix, &CPCtransposePlusR.matrix));
-        // SAFE_MAT_OP(
+        // SAFE_MAT_OP(arm_mat_mult_f32(&CPCtranspose.matrix, &R.matrix,
+        // &CPCtransposePlusR.matrix)); SAFE_MAT_OP(
         //     arm_mat_inverse_f32(&CPCtransposePlusR.matrix, &CPCtransposePlusRInverse.matrix));
         // SAFE_MAT_OP(arm_mat_mult_f32(
         //     &Ctranspose.matrix,
@@ -121,5 +123,7 @@ private:
     CMSISMat<STATES, INPUTS> K;
     CMSISMat<STATES, STATES> I;
 };
+
+}  // namespace aruwsrc::algorithms
 
 #endif  // KALMAN_FILTER_HPP_
