@@ -142,10 +142,6 @@ public:
      */
     mockable float getTiltAngle();
 
-    int16_t getGxRaw() const { return raw.gyro.x; }
-    int16_t getGyRaw() const { return raw.gyro.y; }
-    int16_t getGzRaw() const { return raw.gyro.z; }
-
     /**
      * Use for converting from gyro values we receive to more conventional degrees / second.
      */

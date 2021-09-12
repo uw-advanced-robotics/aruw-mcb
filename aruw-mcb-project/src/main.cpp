@@ -96,8 +96,7 @@ int main()
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
             float yaw = drivers->mpu6500.getYaw();
-            int16_t gzRaw = drivers->mpu6500.getGz();
-
+            int16_t gzRaw = drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
 
             if (drivers->can.isReadyToSend(aruwlib::can::CanBus::CAN_BUS1))
             {
