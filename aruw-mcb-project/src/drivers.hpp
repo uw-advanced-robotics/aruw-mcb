@@ -110,6 +110,7 @@ public:
           djiMotorTerminalSerialHandler(this),
           schedulerTerminalHandler(this),
           bno055Interface(),
+          bno055InterfaceFusion(),
           imuRxHandler(this)
     {
     }
@@ -137,6 +138,7 @@ public:
     testing::NiceMock<mock::DjiMotorTerminalSerialHandlerMock> djiMotorTerminalSerialHandler;
     testing::NiceMock<mock::SchedulerTerminalHandlerMock> schedulerTerminalHandler;
     aruwsrc::sensors::Bno055Interface bno055Interface;
+    aruwsrc::sensors::Bno055InterfaceFusion bno055InterfaceFusion;
     testing::NiceMock<aruwsrc::mock::ImuRxListenerMock> imuRxHandler;
 #else
 public:
@@ -162,6 +164,7 @@ public:
     motor::DjiMotorTerminalSerialHandler djiMotorTerminalSerialHandler;
     control::SchedulerTerminalHandler schedulerTerminalHandler;
     aruwsrc::sensors::Bno055Interface bno055Interface;
+    aruwsrc::sensors::Bno055InterfaceFusion bno055InterfaceFusion;
     aruwsrc::can::ImuRxListener imuRxHandler;
 #endif
 };  // class Drivers

@@ -1,8 +1,6 @@
 #include "bno055_interface.hpp"
-#include "tap/drivers_singleton.hpp"
-using namespace modm::literals;
 
-uint32_t t1, t2;
+using namespace modm::literals;
 
 namespace aruwsrc::sensors
 {
@@ -10,7 +8,9 @@ Bno055Interface::Bno055Interface()
     : r(),
       timer(DELAY_BTWN_CALC_AND_READ_REG),
       unusedData(),
+#ifndef PLATFORM_HOSTED
       imu(unusedData, BNO055_ADDR),
+#endif
       ready(false)
 {
 }
@@ -58,16 +58,10 @@ bool Bno055Interface::update()
         // Read acceleration/gyroscope/magnetometer data
         PT_WAIT_UNTIL(timer.execute());
 
-        t1 = tap::arch::clock::getTimeMicroseconds();
-
         PT_CALL(imu.readRegister(
             modm::bno055::Register::ACCEL_DATA_X_LSB,
             reinterpret_cast<uint8_t *>(&r),
-            1));
-
-        t2 = tap::arch::clock::getTimeMicroseconds() - t1;
-        tap::DoNotUse_getDrivers()->terminalSerial.getStream().printf("%li\n", t2);
-
+            sizeof(r)));
 
         ready = true;
     }
@@ -87,22 +81,3 @@ void Bno055Interface::periodicIMUUpdate()
     }
 }
 }  // namespace aruwsrc::sensors
-
-
-/*
-
-reset device:
-
-    while (true)
-    {
-        if (PT_CALL(imu.updateRegister(modm::bno055::Register::SYS_TRIGGER, static_cast<modm::bno055::SystemTrigger_t>(0))))
-        {
-            break;
-        }
-
-        PT_WAIT_UNTIL(timer.execute());
-        timer.restart(500'000);
-    }
-
-
-*/

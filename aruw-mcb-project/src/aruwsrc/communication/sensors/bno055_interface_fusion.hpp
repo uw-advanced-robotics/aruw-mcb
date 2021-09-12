@@ -16,10 +16,9 @@ namespace aruwsrc::sensors
  * An interface with the BNO055 that utilizes the BNO055's
  * internal 9 DOF fusion mode.
  *
- * @note This class is specifically optimized for only use
- * with a pan/tilt system (i.e. a turret with 2 degrees of
- * freedom). Thus, only yaw and roll data is available.
- * This reduces the i2c bandwidth.
+ * @note This class is specifically optimized for our system,
+ * which will only use the yaw value from the bno055 for
+ * absolute orientation to reduce drift.
  */
 class Bno055InterfaceFusion : public modm::pt::Protothread
 {
@@ -36,10 +35,8 @@ public:
 
     bool update();
 
-    inline float getYaw() const { return r.e.yaw / LSB_PER_DEGREE; }
-    inline float getRoll() const { return r.e.roll / LSB_PER_DEGREE; }
-    inline float getGYaw() const { return r.g.gYaw / LSB_PER_DEGREE; }
-    inline float getGRoll() const { return r.g.gRoll / LSB_PER_DEGREE; }
+    inline float getYaw() const { return rawYaw / LSB_PER_DEGREE; }
+    inline bool isReady() const { return ready; }
 
 private:
     /**
@@ -48,21 +45,9 @@ private:
      */
     static constexpr float LSB_PER_DEGREE = 16.0f;
 
-    static constexpr uint32_t READ_IMU_DATA_PERIOD = 5;
+    static constexpr uint32_t READ_IMU_DATA_PERIOD = 2;
 
-    struct RawData
-    {
-        modm_packed struct euler
-        {
-            int16_t yaw;
-            int16_t roll;
-        } e;
-        modm_packed struct gyro
-        {
-            int16_t gYaw;
-            int16_t gRoll;
-        } g;
-    } r;
+    uint16_t rawYaw;
 
     tap::arch::PeriodicMilliTimer timer;
 
@@ -77,6 +62,8 @@ private:
 #ifndef PLATFORM_HOSTED
     modm::Bno055<Bno055I2CMaster> imu;
 #endif
+
+    bool ready;
 };
 }  // namespace aruwsrc::sensors
 

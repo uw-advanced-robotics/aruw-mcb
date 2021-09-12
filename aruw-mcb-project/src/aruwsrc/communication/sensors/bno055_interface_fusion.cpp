@@ -5,10 +5,13 @@ using namespace modm::literals;
 namespace aruwsrc::sensors
 {
 Bno055InterfaceFusion::Bno055InterfaceFusion()
-    : r(),
+    : rawYaw(0),
       timer(READ_IMU_DATA_PERIOD),
       unusedData(),
-      imu(unusedData, BNO055_ADDR)
+#ifndef PLATFORM_HOSTED
+      imu(unusedData, BNO055_ADDR),
+#endif
+      ready(false)
 {
 }
 
@@ -26,7 +29,9 @@ bool Bno055InterfaceFusion::update()
 #ifndef PLATFORM_HOSTED
     PT_BEGIN();
 
-    timer.restart(500);
+    // Wait 100 MS between calls to ping and configure
+    // to allow the IMU to respond
+    timer.restart(100);
 
     // ping the device until it responds
     while (true)
@@ -58,13 +63,10 @@ bool Bno055InterfaceFusion::update()
 
         PT_CALL(imu.readRegister(
             modm::bno055::Register::EULER_H_LSB,
-            reinterpret_cast<uint8_t *>(&r.e),
-            sizeof(r.e)));
+            reinterpret_cast<uint8_t *>(&rawYaw),
+            sizeof(rawYaw)));
 
-        PT_CALL(imu.readRegister(
-            modm::bno055::Register::GYRO_DATA_Z_LSB,
-            reinterpret_cast<uint8_t *>(&r.g),
-            sizeof(r.g)));
+        ready = true;
     }
 
     PT_END();

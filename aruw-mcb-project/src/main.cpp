@@ -49,6 +49,9 @@ using tap::Drivers;
 
 extern uint32_t t2;
 
+tap::communication::serial::UartTerminalDevice device(tap::DoNotUse_getDrivers());
+modm::IOStream stream(device);
+
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
 tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
@@ -100,9 +103,8 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            drivers->bno055Interface.periodicIMUUpdate();
-            if (drivers->bno055Interface.isReady()) {
-                // drivers->terminalSerial.getStream().printf("%.2f\n", drivers->bno055Interface.getPitch());
+            if (drivers->bno055InterfaceFusion.isReady()) {
+                // drivers->terminalSerial.getStream().printf("%.2f\n", drivers->bno055InterfaceFusion.getYaw());
                 // drivers->terminalSerial.getStream().printf("%i\n", static_cast<int>(modm::bno055::GyrBandwidth::Hz12));
                 // drivers->terminalSerial.getStream().printf("%li\n", t2);
             }
@@ -137,7 +139,7 @@ static void initializeIo(tap::Drivers *drivers)
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif
-    drivers->bno055Interface.initialize();
+    drivers->bno055InterfaceFusion.initialize();
 }
 
 static void updateIo(tap::Drivers *drivers)
@@ -152,5 +154,5 @@ static void updateIo(tap::Drivers *drivers)
     // drivers->oledDisplay.updateDisplay();
     // drivers->mpu6500.read();
     // drivers->xavierSerial.updateSerial();
-    drivers->bno055Interface.update();
+    drivers->bno055InterfaceFusion.update();
 }
