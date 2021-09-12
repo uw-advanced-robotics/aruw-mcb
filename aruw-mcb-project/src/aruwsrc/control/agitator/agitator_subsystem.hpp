@@ -20,19 +20,19 @@
 #ifndef AGITATOR_SUBSYSTEM_HPP_
 #define AGITATOR_SUBSYSTEM_HPP_
 
-#include "aruwlib/architecture/conditional_timer.hpp"
-#include "aruwlib/architecture/timeout.hpp"
-#include "aruwlib/control/subsystem.hpp"
+#include "tap/architecture/conditional_timer.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/control/subsystem.hpp"
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwlib/mock/dji_motor_mock.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include "aruwlib/motor/dji_motor.hpp"
+#include "tap/motor/dji_motor.hpp"
 #endif
 
-#include "aruwlib/algorithms/smooth_pid.hpp"
-#include "aruwlib/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
-#include "aruwlib/control/setpoint/interfaces/setpoint_subsystem.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
+#include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -44,7 +44,7 @@ namespace agitator
  * direct support for agitator control, it is generic enough to be used in a
  * wide variety of senarios.
  */
-class AgitatorSubsystem : public aruwlib::control::setpoint::SetpointSubsystem
+class AgitatorSubsystem : public tap::control::setpoint::SetpointSubsystem
 {
 public:
 #if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
@@ -57,18 +57,17 @@ public:
     static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
     static constexpr float PID_17MM_MAX_OUT = 16000.0f;
 
-    static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
-    static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
+    static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 
     static constexpr bool isAgitatorInverted = false;
 
-    static constexpr float AGITATOR_JAMMING_DISTANCE = aruwlib::algorithms::PI / 5;
+    static constexpr float AGITATOR_JAMMING_DISTANCE = tap::algorithms::PI / 5;
 
     // The motor that controls the hopper lid is an agitator_subsystem instance, so
     // I'm adding its constants here as well.
-    static constexpr aruwlib::motor::MotorId HOPPER_COVER_MOTOR_ID = aruwlib::motor::MOTOR8;
-    static constexpr aruwlib::can::CanBus HOPPER_COVER_MOTOR_CAN_BUS =
-        aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr tap::motor::MotorId HOPPER_COVER_MOTOR_ID = tap::motor::MOTOR8;
+    static constexpr tap::can::CanBus HOPPER_COVER_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 
     static constexpr bool IS_HOPPER_COVER_INVERTED = false;
 
@@ -81,8 +80,8 @@ public:
     static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
     static constexpr float PID_17MM_MAX_OUT = 16000.0f;
 
-    static constexpr aruwlib::motor::MotorId AGITATOR_MOTOR_ID = aruwlib::motor::MOTOR7;
-    static constexpr aruwlib::can::CanBus AGITATOR_MOTOR_CAN_BUS = aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
+    static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 
 #elif defined(TARGET_HERO)
     // Hero's waterwheel constants
@@ -92,9 +91,8 @@ public:
     static constexpr float PID_HERO_WATERWHEEL_MAX_ERR_SUM = 0.0f;
     static constexpr float PID_HERO_WATERWHEEL_MAX_OUT = 16000.0f;
 
-    static constexpr aruwlib::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = aruwlib::motor::MOTOR3;
-    static constexpr aruwlib::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS =
-        aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr tap::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = tap::motor::MOTOR3;
+    static constexpr tap::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr bool HERO_WATERWHEEL_INVERTED = true;
 
     // PID terms for the hero kicker
@@ -107,12 +105,10 @@ public:
     static constexpr float PID_HERO_KICKER_MAX_OUT = 16000.0f;
 
     // There are two kicker motors that drive the shaft.
-    static constexpr aruwlib::motor::MotorId HERO_KICKER1_MOTOR_ID = aruwlib::motor::MOTOR7;
-    static constexpr aruwlib::motor::MotorId HERO_KICKER2_MOTOR_ID = aruwlib::motor::MOTOR8;
-    static constexpr aruwlib::can::CanBus HERO_KICKER1_MOTOR_CAN_BUS =
-        aruwlib::can::CanBus::CAN_BUS1;
-    static constexpr aruwlib::can::CanBus HERO_KICKER2_MOTOR_CAN_BUS =
-        aruwlib::can::CanBus::CAN_BUS1;
+    static constexpr tap::motor::MotorId HERO_KICKER1_MOTOR_ID = tap::motor::MOTOR7;
+    static constexpr tap::motor::MotorId HERO_KICKER2_MOTOR_ID = tap::motor::MOTOR8;
+    static constexpr tap::can::CanBus HERO_KICKER1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::can::CanBus HERO_KICKER2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr bool HERO_KICKER_INVERTED = false;
 
     /**
@@ -120,7 +116,7 @@ public:
      * setpoint and current angle is > `JAM_DISTANCE_TOLERANCE_WATERWHEEL` radians for >=
      * `JAM_TEMPORAL_TOLERANCE_WATERWHEEL` ms;
      */
-    static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = aruwlib::algorithms::PI / 14.0f;
+    static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = tap::algorithms::PI / 14.0f;
     static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
 #endif
 
@@ -142,15 +138,15 @@ public:
      * identifiers.
      */
     AgitatorSubsystem(
-        aruwlib::Drivers* drivers,
+        tap::Drivers* drivers,
         float kp,
         float ki,
         float kd,
         float maxIAccum,
         float maxOutput,
         float agitatorGearRatio,
-        aruwlib::motor::MotorId agitatorMotorId,
-        aruwlib::can::CanBus agitatorCanBusId,
+        tap::motor::MotorId agitatorMotorId,
+        tap::can::CanBus agitatorCanBusId,
         bool isAgitatorInverted,
         bool jamLogicEnabled = true,
         float jammingDistance = JAMMING_DISTANCE,
@@ -237,12 +233,12 @@ private:
     /**
      * PID controller for running postiion PID on unwrapped agitator angle (in radians).
      */
-    aruwlib::algorithms::SmoothPid agitatorPositionPid;
+    tap::algorithms::SmoothPid agitatorPositionPid;
 
     /**
      * The object that runs jam detection.
      */
-    aruwlib::control::setpoint::SetpointContinuousJamChecker jamChecker;
+    tap::control::setpoint::SetpointContinuousJamChecker jamChecker;
 
     /**
      * The user desired angle, measured in radians.
@@ -279,11 +275,11 @@ private:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    aruwlib::mock::DjiMotorMock agitatorMotor;
+    tap::mock::DjiMotorMock agitatorMotor;
 
 private:
 #else
-    aruwlib::motor::DjiMotor agitatorMotor;
+    tap::motor::DjiMotor agitatorMotor;
 #endif
 };  // class AgitatorSubsystem
 

@@ -19,33 +19,34 @@
 
 #include "wiggle_drive_command.hpp"
 
-#include "aruwlib/algorithms/contiguous_float.hpp"
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/communication/remote.hpp"
-#include "aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/remote.hpp"
+#include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "tap/drivers.hpp"
 
+#include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
-using namespace aruwlib::algorithms;
-using namespace aruwlib::sensors;
-using aruwlib::Drivers;
+using namespace tap::algorithms;
+using namespace tap::sensors;
+using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
 WiggleDriveCommand::WiggleDriveCommand(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const aruwlib::control::turret::TurretSubsystemInterface* turret)
+    const tap::control::turret::TurretSubsystemInterface* turret)
     : drivers(drivers),
       chassis(chassis),
       turret(turret),
       rotationSpeedRamp(0)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
 }
 
 void WiggleDriveCommand::initialize()
@@ -60,12 +61,6 @@ void WiggleDriveCommand::initialize()
 
 void WiggleDriveCommand::execute()
 {
-    float r;
-    float x = drivers->controlOperatorInterface.getChassisXInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-    float y = drivers->controlOperatorInterface.getChassisYInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
     // We only wiggle when the turret is online.
     if (turret->isOnline())
     {
@@ -91,26 +86,23 @@ void WiggleDriveCommand::execute()
 
         rotationSpeedRamp.update(wiggleParams.rotationSpeedIncrement);
 
-        r = rotationSpeedRamp.getValue();
+        float r = rotationSpeedRamp.getValue();
+
+        float x = 0.0f;
+        float y = 0.0f;
+        ChassisRelDrive::computeDesiredUserTranslation(drivers, chassis, r, &x, &y);
         x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         // Apply a rotation matrix to the user input so you drive turret
         // relative while wiggling.
         rotateVector(&x, &y, -degreesToRadians(turretYawFromCenter));
+
+        chassis->setDesiredOutput(x, y, r);
     }
     else
     {
-        r = drivers->controlOperatorInterface.getChassisRInput() *
-            ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+        ChassisRelDrive::onExecute(drivers, chassis);
     }
-
-    float rTranslationalGain = chassis->calculateRotationTranslationalGain(r) *
-                               ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
-    x = limitVal<float>(x, -rTranslationalGain, rTranslationalGain);
-    y = limitVal<float>(y, -rTranslationalGain, rTranslationalGain);
-
-    chassis->setDesiredOutput(x, y, r);
 }
 
 void WiggleDriveCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }

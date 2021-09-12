@@ -24,11 +24,11 @@ from SCons.Script import *
 # Define project settings and build paths
 PROJECT_NAME        = "aruw-mcb"
 BUILD_PATH          = "build"
-HARDWARE_MODM_PATH  = "aruwlib/modm"
-HOSTED_MODM_PATH    = "aruwlib/sim-modm/modm"
-ARUWLIB_SRC_PATH    = "aruwlib/src"
-ARUWLIB_TEST_PATH   = "aruwlib/test"
-ARUWLIB_PATH        = join(ARUWLIB_SRC_PATH, "aruwlib")
+HARDWARE_MODM_PATH  = "taproot/modm"
+HOSTED_MODM_PATH    = "taproot/sim-modm/modm"
+TAPROOT_SRC_PATH    = "taproot/src"
+TAPROOT_TEST_PATH   = "taproot/test"
+TAPROOT_PATH        = join(TAPROOT_SRC_PATH, "tap")
 LINKERSCRIPT_FILE   = join(HARDWARE_MODM_PATH, "link/linkerscript.ld")
 SRC_PATH            = "src"
 TEST_PATH           = "test"
@@ -70,8 +70,8 @@ print("Configured {0} parallel build jobs (-j{0}), {1}"
 
 
 # Building all libraries (read from sconscript files located in provided dirs)
-# Ensure that modm is first, since aruwlib depends on modm
-external_scons_libraries = [modm_path, ARUWLIB_PATH]
+# Ensure that modm is first, since Taproot depends on modm
+external_scons_libraries = [modm_path, TAPROOT_PATH]
 env.SConscript(dirs=external_scons_libraries, exports="env")
 
 # References:
@@ -88,8 +88,8 @@ env.SConscript(dirs=external_scons_libraries, exports="env")
 
 # Add source directory to build path (for including header files)
 env.AppendUnique(CPPPATH=[
-    abspath(ARUWLIB_SRC_PATH),
-    abspath(ARUWLIB_TEST_PATH),
+    abspath(TAPROOT_SRC_PATH),
+    abspath(TAPROOT_TEST_PATH),
     abspath(r"./src")
 ])
 
@@ -122,7 +122,7 @@ elif args["TARGET_ENV"] == "tests":
     env.AppendUnique(CPPFLAGS=[
         "-DPLATFORM_HOSTED",
         "-DENV_UNIT_TESTS"])
-    env.AppendUnique(CPPPATH=[abspath(ARUWLIB_TEST_PATH)])
+    env.AppendUnique(CPPPATH=[abspath(TAPROOT_TEST_PATH)])
     env.AppendUnique(CPPPATH=[abspath(TEST_PATH)])
     env.AppendUnique(CPPPATH=[
         abspath(r"aruwlib/modm/ext/cmsis/dsp"),
@@ -151,9 +151,9 @@ if "additional-ccflags" in ARGUMENTS:
     env.AppendUnique(CCFLAGS=[*ARGUMENTS["additional-ccflags"].split(",")])
 
 
-# Find aruwlib test source files if necessary
+# Find Taproot test source files if necessary
 if args["TARGET_ENV"] == "tests":
-    sources = env.FindSourceFiles(ARUWLIB_TEST_PATH)
+    sources = env.FindSourceFiles(TAPROOT_TEST_PATH)
 else:
     sources = []
 
@@ -242,12 +242,12 @@ env.SConscript(dirs=[SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
 
 if args["COMPILE_SRC"]:
     # Only add aliases when we are compiling source. When we don't add alias, the default
-    # build environment will only build the static libraries (modm and aruwlib)
+    # build environment will only build the static libraries (modm and Taproot)
     if args["TARGET_ENV"] == "hardware":
         program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)
 
         # The executable depends on the linkerscript
-        env.Depends(target=program, dependency=abspath("aruwlib/modm/link/linkerscript.ld"))
+        env.Depends(target=program, dependency=abspath("taproot/modm/link/linkerscript.ld"))
 
         # Add target environment-specific SCons aliases
         # WARNING: all aliases must be checked during argument validation

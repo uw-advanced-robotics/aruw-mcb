@@ -24,6 +24,7 @@
 #include "friction_wheel_subsystem_mock.hpp"
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
+#include "imu_rx_listener_mock.hpp"
 #include "oled_display_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_switcher_subsystem_mock.hpp"
@@ -38,15 +39,15 @@
 namespace aruwsrc::mock
 {
 AgitatorSubsystemMock::AgitatorSubsystemMock(
-    aruwlib::Drivers *drivers,
+    tap::Drivers *drivers,
     float kp,
     float ki,
     float kd,
     float maxIAccum,
     float maxOutput,
     float agitatorGearRatio,
-    aruwlib::motor::MotorId agitatorMotorId,
-    aruwlib::can::CanBus agitatorCanBusId,
+    tap::motor::MotorId agitatorMotorId,
+    tap::can::CanBus agitatorCanBusId,
     bool isAgitatorInverted)
     : AgitatorSubsystem(
           drivers,
@@ -65,43 +66,44 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
 AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 
 BeybladeCommandMock::BeybladeCommandMock(
-    aruwlib::Drivers *drivers,
+    tap::Drivers *drivers,
     chassis::ChassisSubsystem *chassis,
-    aruwlib::control::turret::TurretSubsystemInterface *turret)
+    tap::control::turret::TurretSubsystemInterface *turret)
     : BeybladeCommand(drivers, chassis, turret)
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
 
-ChassisDriveCommandMock::ChassisDriveCommandMock(aruwlib::Drivers *d, chassis::ChassisSubsystem *cs)
+ChassisDriveCommandMock::ChassisDriveCommandMock(tap::Drivers *d, chassis::ChassisSubsystem *cs)
     : chassis::ChassisDriveCommand(d, cs)
 {
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
-ChassisSubsystemMock::ChassisSubsystemMock(aruwlib::Drivers *drivers) : ChassisSubsystem(drivers) {}
+ChassisSubsystemMock::ChassisSubsystemMock(tap::Drivers *drivers) : ChassisSubsystem(drivers) {}
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
-FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwlib::Drivers *drivers)
+FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(tap::Drivers *drivers)
     : FrictionWheelSubsystem(drivers)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
-GrabberSubsystemMock::GrabberSubsystemMock(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Digital::OutputPin pin)
+GrabberSubsystemMock::GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::GrabberSubsystem(drivers, pin)
 {
 }
 GrabberSubsystemMock::~GrabberSubsystemMock() {}
 
-OledDisplayMock::OledDisplayMock(aruwlib::Drivers *drivers) : display::OledDisplay(drivers) {}
+OledDisplayMock::OledDisplayMock(tap::Drivers *drivers) : display::OledDisplay(drivers) {}
 OledDisplayMock::~OledDisplayMock() {}
 
+ImuRxListenerMock::ImuRxListenerMock(tap::Drivers *drivers) : can::ImuRxListener(drivers) {}
+ImuRxListenerMock::~ImuRxListenerMock() {}
+
 HopperSubsystemMock::HopperSubsystemMock(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Pwm::Pin pwmPin,
+    tap::Drivers *drivers,
+    tap::gpio::Pwm::Pin pwmPin,
     float open,
     float close,
     float pwmRampSpeed)
@@ -111,28 +113,28 @@ HopperSubsystemMock::HopperSubsystemMock(
 HopperSubsystemMock::~HopperSubsystemMock() {}
 
 SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Digital::InputPin leftLimitSwitch,
-    aruwlib::gpio::Digital::InputPin rightLimitSwitch)
+    tap::Drivers *drivers,
+    tap::gpio::Digital::InputPin leftLimitSwitch,
+    tap::gpio::Digital::InputPin rightLimitSwitch)
     : control::sentinel::drive::SentinelDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
 {
 }
 SentinelDriveSubsystemMock::~SentinelDriveSubsystemMock() {}
 
 SentinelSwitcherSubsystemMock::SentinelSwitcherSubsystemMock(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Pwm::Pin switcherServoPin)
+    tap::Drivers *drivers,
+    tap::gpio::Pwm::Pin switcherServoPin)
     : control::sentinel::firing::SentinelSwitcherSubsystem(drivers, switcherServoPin)
 {
 }
 SentinelSwitcherSubsystemMock::~SentinelSwitcherSubsystemMock() {}
 
 TowSubsystemMock::TowSubsystemMock(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Digital::OutputPin leftTowPin,
-    aruwlib::gpio::Digital::OutputPin rightTowPin,
-    aruwlib::gpio::Digital::InputPin leftTowLimitSwitchPin,
-    aruwlib::gpio::Digital::InputPin rightTowLimitSwitchPin)
+    tap::Drivers *drivers,
+    tap::gpio::Digital::OutputPin leftTowPin,
+    tap::gpio::Digital::OutputPin rightTowPin,
+    tap::gpio::Digital::InputPin leftTowLimitSwitchPin,
+    tap::gpio::Digital::InputPin rightTowLimitSwitchPin)
     : aruwsrc::engineer::TowSubsystem(
           drivers,
           leftTowPin,
@@ -143,17 +145,15 @@ TowSubsystemMock::TowSubsystemMock(
 }
 TowSubsystemMock::~TowSubsystemMock() {}
 
-TurretSubsystemMock::TurretSubsystemMock(aruwlib::Drivers *drivers) : TurretSubsystem(drivers) {}
+TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers) : TurretSubsystem(drivers) {}
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
-XAxisSubsystemMock::XAxisSubsystemMock(
-    aruwlib::Drivers *drivers,
-    aruwlib::gpio::Digital::OutputPin pin)
+XAxisSubsystemMock::XAxisSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::XAxisSubsystem(drivers, pin)
 {
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
-XavierSerialMock::XavierSerialMock(aruwlib::Drivers *drivers) : serial::XavierSerial(drivers) {}
+XavierSerialMock::XavierSerialMock(tap::Drivers *drivers) : serial::XavierSerial(drivers) {}
 XavierSerialMock::~XavierSerialMock() {}
 }  // namespace aruwsrc::mock

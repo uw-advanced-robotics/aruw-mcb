@@ -20,7 +20,7 @@
 #ifndef MANUAL_TOW_COMMAND_HPP_
 #define MANUAL_TOW_COMMAND_HPP_
 
-#include "aruwlib/control/command.hpp"
+#include "tap/control/command.hpp"
 
 #include "tow_subsystem.hpp"
 
@@ -32,7 +32,7 @@ namespace engineer
  * When this command is added, the tower mechanism's clamps are triggered until the command
  * is removed.
  */
-class ManualTowCommand : public aruwlib::control::Command
+class ManualTowCommand : public tap::control::Command
 {
 public:
     explicit ManualTowCommand(TowSubsystem* subsystem);

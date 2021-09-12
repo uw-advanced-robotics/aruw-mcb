@@ -19,30 +19,30 @@
 
 #include "limit_switch_agitator_subsystem.hpp"
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 
-using namespace aruwlib::algorithms;
+using namespace tap::algorithms;
 
 namespace aruwsrc
 {
 namespace agitator
 {
 LimitSwitchAgitatorSubsystem::LimitSwitchAgitatorSubsystem(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     float kp,
     float ki,
     float kd,
     float maxIAccum,
     float maxOutput,
     float agitatorGearRatio,
-    aruwlib::motor::MotorId agitatorMotorId,
-    aruwlib::can::CanBus agitatorCanBusId,
+    tap::motor::MotorId agitatorMotorId,
+    tap::can::CanBus agitatorCanBusId,
     bool isAgitatorInverted,
     float distanceTolerance,
     uint32_t temporalTolerance,
-    aruwlib::gpio::Digital::InputPin limitSwitchPin)
+    tap::gpio::Digital::InputPin limitSwitchPin)
     : Subsystem(drivers),
       AgitatorSubsystem(
           drivers,

@@ -19,7 +19,7 @@
 
 #include "extend_xaxis_command.hpp"
 
-#include "aruwlib/control/subsystem.hpp"
+#include "tap/control/subsystem.hpp"
 
 #include "xaxis_subsystem.hpp"
 
@@ -31,7 +31,7 @@ ExtendXAxisCommand::ExtendXAxisCommand(XAxisSubsystem* subsystem)
     : Command(),
       xAxisSubsystem(subsystem)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(subsystem));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(subsystem));
 }
 
 void ExtendXAxisCommand::initialize()

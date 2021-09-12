@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #if defined(TARGET_SOLDIER)
 
-#include "aruwlib/control/command_mapper.hpp"
-#include "aruwlib/control/hold_command_mapping.hpp"
-#include "aruwlib/control/hold_repeat_command_mapping.hpp"
-#include "aruwlib/control/press_command_mapping.hpp"
-#include "aruwlib/control/setpoint/commands/calibrate_command.hpp"
-#include "aruwlib/control/toggle_command_mapping.hpp"
-#include "aruwlib/drivers_singleton.hpp"
+#include "tap/control/command_mapper.hpp"
+#include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
+#include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/toggle_command_mapping.hpp"
+#include "tap/drivers_singleton.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
@@ -43,22 +44,22 @@
 #include "turret/turret_world_relative_position_command.hpp"
 
 #ifdef PLATFORM_HOSTED
-#include "aruwlib/communication/can/can.hpp"
-#include "aruwlib/motor/motorsim/motor_sim.hpp"
-#include "aruwlib/motor/motorsim/sim_handler.hpp"
+#include "tap/communication/can/can.hpp"
+#include "tap/motor/motorsim/motor_sim.hpp"
+#include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
-using namespace aruwlib::control::setpoint;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
-using namespace aruwlib::control;
+using namespace tap::control;
 using namespace aruwsrc::display;
 using namespace aruwsrc::control;
-using aruwlib::DoNotUse_getDrivers;
-using aruwlib::Remote;
+using tap::DoNotUse_getDrivers;
+using tap::Remote;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -66,7 +67,7 @@ using aruwlib::Remote;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwlib::driversFunc drivers = aruwlib::DoNotUse_getDrivers;
+tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 
 namespace soldier_control
 {
@@ -105,7 +106,7 @@ AgitatorSubsystem hopperCover(
     AgitatorSubsystem::IS_HOPPER_COVER_INVERTED,
     true);
 
-FrictionWheelSubsystem frictionWheels(drivers(), aruwlib::motor::MOTOR1, aruwlib::motor::MOTOR2);
+FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -178,7 +179,7 @@ HoldCommandMapping rightMousePressed(
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 
 /* register subsystems here -------------------------------------------------*/
-void registerSoldierSubsystems(aruwlib::Drivers *drivers)
+void registerSoldierSubsystems(tap::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -186,56 +187,6 @@ void registerSoldierSubsystems(aruwlib::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
-
-#ifdef PLATFORM_HOSTED
-    // Register the motor sims for the Agitator subsystem
-    // TODO: Create simulator for correct motor
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_ID);
-
-    // Register the motor sims for the Chassis subsystem
-    aruwlib::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
-        aruwlib::motorsim::MotorSim::MotorType::M3508;
-    aruwlib::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::LEFT_FRONT_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::LEFT_BACK_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::RIGHT_FRONT_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::RIGHT_BACK_MOTOR_ID);
-
-    // Register the motor sims for the turret subsystem
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::control::turret::TurretSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::control::turret::TurretSubsystem::PITCH_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::control::turret::TurretSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::control::turret::TurretSubsystem::YAW_MOTOR_ID);
-
-    // Register the motor sims for the Hopper Cover (There aren't any)
-    // Register the motor sims for the Friction Wheels
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
-    aruwlib::motorsim::SimHandler::registerSim(
-        aruwlib::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
-#endif  // PLATFORM_HOSTED
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -252,7 +203,7 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSoldierCommands(aruwlib::Drivers *)
+void setDefaultSoldierCommands(tap::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
@@ -262,13 +213,13 @@ void setDefaultSoldierCommands(aruwlib::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSoldierCommands(aruwlib::Drivers *drivers)
+void startSoldierCommands(tap::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSoldierIoMappings(aruwlib::Drivers *drivers)
+void registerSoldierIoMappings(tap::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -284,7 +235,7 @@ void registerSoldierIoMappings(aruwlib::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(aruwlib::Drivers *drivers)
+void initSubsystemCommands(tap::Drivers *drivers)
 {
     soldier_control::initializeSubsystems();
     soldier_control::registerSoldierSubsystems(drivers);

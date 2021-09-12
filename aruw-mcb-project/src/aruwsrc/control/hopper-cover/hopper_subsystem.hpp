@@ -26,10 +26,10 @@
 #ifndef __OPEN_HOPPER_SUBSYSTEM__
 #define __OPEN_HOPPER_SUBSYSTEM__
 
-#include "aruwlib/control/command_scheduler.hpp"
-#include "aruwlib/control/subsystem.hpp"
-#include "aruwlib/motor/servo.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/control/command_scheduler.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/motor/servo.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
 
@@ -37,7 +37,7 @@ namespace aruwsrc
 {
 namespace control
 {
-class HopperSubsystem : public aruwlib::control::Subsystem
+class HopperSubsystem : public tap::control::Subsystem
 {
 public:
 #if defined(TARGET_SOLDIER)
@@ -61,12 +61,12 @@ public:
      *                 a PWM value (between 0 and 1)
      */
     HopperSubsystem(
-        aruwlib::Drivers *drivers,
-        aruwlib::gpio::Pwm::Pin pwmPin,
+        tap::Drivers *drivers,
+        tap::gpio::Pwm::Pin pwmPin,
         float open,
         float close,
         float pwmRampSpeed)
-        : aruwlib::control::Subsystem(drivers),
+        : tap::control::Subsystem(drivers),
           hopper(drivers, pwmPin, open, close, pwmRampSpeed)
     {
         hopper.setTargetPwm(close);
@@ -93,7 +93,7 @@ public:
     const char *getName() override { return "Hopper"; }
 
 private:
-    aruwlib::motor::Servo hopper;
+    tap::motor::Servo hopper;
 
     /*
      * return the angle defined as open as a PWM value

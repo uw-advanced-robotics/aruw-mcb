@@ -20,35 +20,33 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwlib/algorithms/ramp.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/ramp.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
-#define DEFINE_EXPECTATIONS_FOR_EXECUTE(t, d, cs, baseInput, baseX, baseY, baseR) \
-    EXPECT_CALL(t, getYawAngleFromCenter()).WillOnce([&] { return yawAngle; });   \
-    EXPECT_CALL(d.controlOperatorInterface, getChassisXInput()).WillOnce([&] {    \
-        return baseInput;                                                         \
-    });                                                                           \
-    EXPECT_CALL(d.controlOperatorInterface, getChassisYInput()).WillOnce([&] {    \
-        return baseInput;                                                         \
-    });                                                                           \
-    ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
-    RefSerial::RobotData rd{};                                                    \
-    ON_CALL(d.refSerial, getRobotData).WillByDefault(ReturnRef(rd));              \
+#define DEFINE_EXPECTATIONS_FOR_EXECUTE(t, d, cs, baseInput, baseX, baseY, baseR)             \
+    ON_CALL(t, getYawAngleFromCenter()).WillByDefault(Return(yawAngle));                      \
+    ON_CALL(t, isOnline).WillByDefault(Return(true));                                         \
+    ON_CALL(d.controlOperatorInterface, getChassisXInput()).WillByDefault(Return(baseInput)); \
+    ON_CALL(d.controlOperatorInterface, getChassisYInput()).WillByDefault(Return(baseInput)); \
+    ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));             \
+    ON_CALL(cs, calculateRotationTranslationalGain).WillByDefault(Return(1));                 \
+    RefSerial::RobotData rd{};                                                                \
+    ON_CALL(d.refSerial, getRobotData).WillByDefault(ReturnRef(rd));                          \
     EXPECT_CALL(cs, setDesiredOutput(FloatEq(baseX), FloatEq(baseY), FloatEq(baseR)));
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
-using aruwlib::Drivers;
+using tap::Drivers;
 using namespace testing;
-using aruwlib::algorithms::Ramp;
 using aruwsrc::mock::ChassisSubsystemMock;
 using aruwsrc::mock::TurretSubsystemMock;
-using namespace aruwlib::serial;
+using tap::algorithms::Ramp;
+using namespace tap::serial;
 
 static constexpr float BASE_DESIRED_OUT = 3500;
 static constexpr float BASE_DESIRED_R_TRANSLATIONAL =
@@ -60,7 +58,7 @@ static constexpr float BASE_DESIRED_R_NON_TRANSLATIONAL =
 void basicFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, float baseInput)
 {
     Drivers d;
-    TurretSubsystemMock t(&d);
+    NiceMock<TurretSubsystemMock> t(&d);
     NiceMock<ChassisSubsystemMock> cs(&d);
     BeybladeCommand bc(&d, &cs, &t);
     ON_CALL(cs, getDesiredRotation).WillByDefault(Return(0));
@@ -75,7 +73,7 @@ void basicFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, f
 void basicBigFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, float baseInput)
 {
     Drivers d;
-    TurretSubsystemMock t(&d);
+    NiceMock<TurretSubsystemMock> t(&d);
     NiceMock<ChassisSubsystemMock> cs(&d);
     BeybladeCommand bc(&d, &cs, &t);
     ON_CALL(cs, getDesiredRotation).WillByDefault(Return(0));

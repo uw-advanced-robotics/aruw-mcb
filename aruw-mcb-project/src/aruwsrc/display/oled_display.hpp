@@ -20,18 +20,18 @@
 #ifndef OLED_DISPLAY_HPP_
 #define OLED_DISPLAY_HPP_
 
-#include "aruwlib/architecture/periodic_timer.hpp"
-#include "aruwlib/display/oled_button_handler.hpp"
-#include "aruwlib/display/sh1106.hpp"
-#include "aruwlib/rm-dev-board-a/board.hpp"
-#include "aruwlib/util_macros.hpp"
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/display/oled_button_handler.hpp"
+#include "tap/display/sh1106.hpp"
+#include "tap/rm-dev-board-a/board.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"
 #include "modm/ui/menu/view_stack.hpp"
 
 #include "splash_screen.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }
@@ -43,7 +43,7 @@ namespace display
 class OledDisplay : public ::modm::pt::Protothread
 {
 public:
-    explicit OledDisplay(aruwlib::Drivers *drivers);
+    explicit OledDisplay(tap::Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 
@@ -66,10 +66,9 @@ public:
     mockable void updateMenu();
 
 private:
-    aruwlib::display::OledButtonHandler::Button prevButton =
-        aruwlib::display::OledButtonHandler::NONE;
+    tap::display::OledButtonHandler::Button prevButton = tap::display::OledButtonHandler::NONE;
 
-    aruwlib::display::Sh1106<
+    tap::display::Sh1106<
 #ifndef PLATFORM_HOSTED
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
@@ -80,15 +79,15 @@ private:
         false>
         display;
 
-    modm::ViewStack viewStack;
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > viewStack;
 
-    aruwlib::display::OledButtonHandler buttonHandler;
+    tap::display::OledButtonHandler buttonHandler;
 
     SplashScreen splashScreen;
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
-    aruwlib::arch::PeriodicMilliTimer displayThreadTimer{100};
+    tap::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
 }  // namespace display
 }  // namespace aruwsrc

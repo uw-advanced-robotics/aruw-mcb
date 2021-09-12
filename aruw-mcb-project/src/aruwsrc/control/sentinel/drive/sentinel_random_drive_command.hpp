@@ -22,14 +22,14 @@
 #ifndef SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
 #define SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
 
-#include "aruwlib/architecture/timeout.hpp"
-#include "aruwlib/control/command.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/control/command.hpp"
 
 #include "sentinel_drive_subsystem.hpp"
 
 namespace aruwsrc::control::sentinel::drive
 {
-class SentinelRandomDriveCommand : public aruwlib::control::Command
+class SentinelRandomDriveCommand : public tap::control::Command
 {
 public:
     explicit SentinelRandomDriveCommand(SentinelDriveSubsystem* subsystem);
@@ -54,7 +54,7 @@ private:
     bool chosenNewRPM = false;
 
     SentinelDriveSubsystem* subsystemSentinelDrive;
-    aruwlib::arch::MilliTimeout changeVelocityTimer;
+    tap::arch::MilliTimeout changeVelocityTimer;
 };
 
 }  // namespace aruwsrc::control::sentinel::drive

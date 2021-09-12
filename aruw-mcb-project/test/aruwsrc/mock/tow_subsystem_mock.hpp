@@ -29,11 +29,11 @@ class TowSubsystemMock : public aruwsrc::engineer::TowSubsystem
 {
 public:
     TowSubsystemMock(
-        aruwlib::Drivers *drivers,
-        aruwlib::gpio::Digital::OutputPin leftTowPin,
-        aruwlib::gpio::Digital::OutputPin rightTowPin,
-        aruwlib::gpio::Digital::InputPin leftTowLimitSwitchPin,
-        aruwlib::gpio::Digital::InputPin rightTowLimitSwitchPin);
+        tap::Drivers *drivers,
+        tap::gpio::Digital::OutputPin leftTowPin,
+        tap::gpio::Digital::OutputPin rightTowPin,
+        tap::gpio::Digital::InputPin leftTowLimitSwitchPin,
+        tap::gpio::Digital::InputPin rightTowLimitSwitchPin);
     virtual ~TowSubsystemMock();
 
     MOCK_METHOD(void, setLeftClamped, (bool isClamped), (override));

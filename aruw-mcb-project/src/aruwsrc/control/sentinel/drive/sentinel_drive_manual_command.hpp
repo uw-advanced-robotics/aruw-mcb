@@ -20,9 +20,9 @@
 #ifndef SENTINEL_DRIVE_MANUAL_COMMAND_HPP_
 #define SENTINEL_DRIVE_MANUAL_COMMAND_HPP_
 
-#include "aruwlib/control/command.hpp"
+#include "tap/control/command.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }
@@ -31,10 +31,10 @@ namespace aruwsrc::control::sentinel::drive
 {
 class SentinelDriveSubsystem;
 
-class SentinelDriveManualCommand : public aruwlib::control::Command
+class SentinelDriveManualCommand : public tap::control::Command
 {
 public:
-    SentinelDriveManualCommand(aruwlib::Drivers* drivers, SentinelDriveSubsystem* subsystem);
+    SentinelDriveManualCommand(tap::Drivers* drivers, SentinelDriveSubsystem* subsystem);
 
     void initialize() override;
 
@@ -47,7 +47,7 @@ public:
     const char* getName() const override { return "sentinel drive manual"; }
 
 private:
-    aruwlib::Drivers* drivers;
+    tap::Drivers* drivers;
 
     SentinelDriveSubsystem* subsystemSentinelDrive;
 };

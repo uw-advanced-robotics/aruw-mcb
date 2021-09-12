@@ -81,8 +81,12 @@ FLASH_STORAGE(uint8_t aruwImage[]) = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   7,   7,   7,   7,   7,   7,   7,   7,   7,
     7,   7,   7,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
 
-SplashScreen::SplashScreen(modm::ViewStack* vs, aruwlib::Drivers* drivers)
-    : modm::AbstractMenu(vs, SPLASH_SCREEN_MENU_ID),
+SplashScreen::SplashScreen(
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    tap::Drivers* drivers)
+    : modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
+          vs,
+          SPLASH_SCREEN_MENU_ID),
       drivers(drivers)
 {
 }

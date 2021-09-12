@@ -20,10 +20,10 @@
 #ifndef CHASSIS_AUTOROTATE_COMMAND_HPP_
 #define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
-#include "aruwlib/control/command.hpp"
-#include "aruwlib/control/turret/turret_subsystem_interface.hpp"
+#include "tap/control/command.hpp"
+#include "tap/control/turret/turret_subsystem_interface.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }
@@ -36,13 +36,15 @@ class ChassisSubsystem;
  * A command that continuously attempts to rotate the chasis so that the turret is
  * aligned with the center of the chassis.
  */
-class ChassisAutorotateCommand : public aruwlib::control::Command
+class ChassisAutorotateCommand : public tap::control::Command
 {
 public:
+    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
+
     ChassisAutorotateCommand(
-        aruwlib::Drivers* drivers,
+        tap::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const aruwlib::control::turret::TurretSubsystemInterface* turret);
+        const tap::control::turret::TurretSubsystemInterface* turret);
 
     void initialize() override;
 
@@ -61,11 +63,9 @@ public:
     const char* getName() const override { return "chassis autorotate"; }
 
 private:
-    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -125.0f;
-
-    aruwlib::Drivers* drivers;
+    tap::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const aruwlib::control::turret::TurretSubsystemInterface* turret;
+    const tap::control::turret::TurretSubsystemInterface* turret;
 };  // class ChassisAutorotateCommand
 
 }  // namespace aruwsrc::chassis

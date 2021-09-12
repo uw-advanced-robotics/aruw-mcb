@@ -20,9 +20,16 @@
 #ifndef MAIN_MENU_HPP_
 #define MAIN_MENU_HPP_
 
+#include "tap/display/command_scheduler_menu.hpp"
+#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/hardware_test_menu.hpp"
+#include "tap/display/motor_menu.hpp"
+
 #include "modm/ui/menu/standard_menu.hpp"
 
-namespace aruwlib
+#include "error_menu.hpp"
+
+namespace tap
 {
 class Drivers;
 }
@@ -31,10 +38,12 @@ namespace aruwsrc
 {
 namespace display
 {
-class MainMenu : public modm::StandardMenu
+class MainMenu : public modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
-    MainMenu(modm::ViewStack *stack, aruwlib::Drivers *drivers);
+    MainMenu(
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *stack,
+        tap::Drivers *drivers);
 
     virtual ~MainMenu() = default;
 
@@ -46,7 +55,12 @@ public:
 private:
     static constexpr int MAIN_MENU_ID = 2;
 
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
+
+    ErrorMenu errorMenu;
+    tap::display::HardwareTestMenu hardwareTestMenu;
+    tap::display::MotorMenu motorMenu;
+    tap::display::CommandSchedulerMenu commandSchedulerMenu;
 
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();

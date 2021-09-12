@@ -19,13 +19,13 @@
 
 #include "client_display_command.hpp"
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "client_display_subsystem.hpp"
 
-using namespace aruwlib::control;
-using namespace aruwlib::serial;
-using aruwlib::Drivers;
+using namespace tap::control;
+using namespace tap::serial;
+using tap::Drivers;
 
 #define delay()                                  \
     delayTimer.restart(DELAY_PERIOD_BTWN_SENDS); \

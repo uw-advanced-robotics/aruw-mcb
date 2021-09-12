@@ -19,18 +19,18 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwlib/architecture/clock.hpp"
+#include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/control/sentinel/firing/sentinel_rotate_agitator_command.hpp"
 #include "aruwsrc/mock/agitator_subsystem_mock.hpp"
 #include "aruwsrc/mock/sentinel_switcher_subsystem_mock.hpp"
 
 using namespace aruwsrc::control::sentinel::firing;
-using namespace aruwlib::serial;
-using namespace aruwlib;
+using namespace tap::serial;
+using namespace tap;
 using namespace testing;
 using namespace aruwsrc::mock;
-using namespace aruwlib::arch::clock;
+using namespace tap::arch::clock;
 
 #define SETUP_TEST()                                                    \
     Drivers drivers;                                                    \

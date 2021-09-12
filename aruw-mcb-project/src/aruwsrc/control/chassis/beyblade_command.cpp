@@ -19,33 +19,34 @@
 
 #include "beyblade_command.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/communication/remote.hpp"
-#include "aruwlib/communication/sensors/mpu6500/mpu6500.hpp"
-#include "aruwlib/drivers.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/remote.hpp"
+#include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
+#include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
-using namespace aruwlib::algorithms;
-using namespace aruwlib::sensors;
-using aruwlib::Drivers;
+using namespace tap::algorithms;
+using namespace tap::sensors;
+using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
 BeybladeCommand::BeybladeCommand(
-    aruwlib::Drivers* drivers,
+    tap::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const aruwlib::control::turret::TurretSubsystemInterface* turret)
+    const tap::control::turret::TurretSubsystemInterface* turret)
     : drivers(drivers),
       chassis(chassis),
       turret(turret)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
 }
 
 // Resets ramp
@@ -61,37 +62,45 @@ void BeybladeCommand::initialize()
 
 void BeybladeCommand::execute()
 {
-    // Gets current turret yaw angle
-    float turretYawAngle = turret->getYawAngleFromCenter();
-
-    // Get X and Y speed inputs with translational movement
-    float x = drivers->controlOperatorInterface.getChassisXInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR *
-              TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
-    float y = drivers->controlOperatorInterface.getChassisYInput() *
-              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR *
-              TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
-
-    static constexpr float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
-                                               TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
-                                               ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
-    rampTarget = rotationDirection * getRotationTarget();
-    if (x > TRANSLATION_LIMIT || y > TRANSLATION_LIMIT)
+    if (turret->isOnline())
     {
-        rampTarget *= RAMP_TARGET_TRANSLATIONAL_FRAC;
+        // Gets current turret yaw angle
+        float turretYawAngle = turret->getYawAngleFromCenter();
+
+        float x = 0.0f;
+        float y = 0.0f;
+        // Note: pass in 0 as rotation since we don't want to take into consideration
+        // scaling due to rotation as this will be fairly constant and thus it isn't
+        // worth scaling here.
+        ChassisRelDrive::computeDesiredUserTranslation(drivers, chassis, 0, &x, &y);
+        x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
+        y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
+
+        static constexpr float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
+                                                   TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
+                                                   ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+
+        rampTarget = rotationDirection * getRotationTarget();
+        if (x > TRANSLATION_LIMIT || y > TRANSLATION_LIMIT)
+        {
+            rampTarget *= RAMP_TARGET_TRANSLATIONAL_FRAC;
+        }
+
+        rotateSpeedRamp.setTarget(rampTarget);
+        // Update the r speed by 1/8 of target (linear for each update)
+        rotateSpeedRamp.update(rampTarget * RAMP_UPDATE_FRAC);
+        float r = rotateSpeedRamp.getValue();
+
+        // Rotate X and Y depending on turret angle
+        tap::algorithms::rotateVector(&x, &y, -degreesToRadians(turretYawAngle));
+
+        // set outputs
+        chassis->setDesiredOutput(x, y, r);
     }
-
-    rotateSpeedRamp.setTarget(rampTarget);
-    // Update the r speed by 1/8 of target (linear for each update)
-    rotateSpeedRamp.update(rampTarget * RAMP_UPDATE_FRAC);
-    float r = rotateSpeedRamp.getValue();
-
-    // Rotate X and Y depending on turret angle
-    aruwlib::algorithms::rotateVector(&x, &y, -degreesToRadians(turretYawAngle));
-
-    // set outputs
-    chassis->setDesiredOutput(x, y, r);
+    else
+    {
+        ChassisRelDrive::onExecute(drivers, chassis);
+    }
 }
 
 void BeybladeCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }

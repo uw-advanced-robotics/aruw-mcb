@@ -23,8 +23,8 @@ namespace aruwsrc
 {
 namespace control
 {
-const aruwlib::motor::MotorId ExampleSubsystem::LEFT_MOTOR_ID = aruwlib::motor::MOTOR2;
-const aruwlib::motor::MotorId ExampleSubsystem::RIGHT_MOTOR_ID = aruwlib::motor::MOTOR1;
+const tap::motor::MotorId ExampleSubsystem::LEFT_MOTOR_ID = tap::motor::MOTOR2;
+const tap::motor::MotorId ExampleSubsystem::RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 
 void ExampleSubsystem::initialize()
 {
@@ -42,7 +42,7 @@ void ExampleSubsystem::refresh()
 
 void ExampleSubsystem::updateMotorRpmPid(
     modm::Pid<float>* pid,
-    aruwlib::motor::DjiMotor* motor,
+    tap::motor::DjiMotor* motor,
     float desiredRpm)
 {
     pid->update(desiredRpm - motor->getShaftRPM());

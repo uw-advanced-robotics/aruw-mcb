@@ -20,10 +20,10 @@
 #ifndef HOPPER_COMMANDS_HPP_
 #define HOPPER_COMMANDS_HPP_
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/control/setpoint/commands/move_absolute_command.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/control/setpoint/commands/move_absolute_command.hpp"
 
-using aruwlib::control::setpoint::MoveAbsoluteCommand;
+using tap::control::setpoint::MoveAbsoluteCommand;
 
 namespace aruwsrc
 {
@@ -41,10 +41,10 @@ class SoldierOpenHopperCommand : public MoveAbsoluteCommand
 {
 public:
     // 3.12 revolutions
-    static constexpr float SOLDIER_OPEN_HOPPER_TARGET_ANGLE = 3.12 * aruwlib::algorithms::PI;
+    static constexpr float SOLDIER_OPEN_HOPPER_TARGET_ANGLE = 3.12 * tap::algorithms::PI;
     // 5000 milliradians/second
     static constexpr uint32_t SOLDIER_OPEN_HOPPER_ANGULAR_SPEED =
-        5.0f * aruwlib::algorithms::PI * 1000.0f;
+        5.0f * tap::algorithms::PI * 1000.0f;
     // Allowable error in radians within which motor will consider target angle reached.
     static constexpr float SOLDIER_OPEN_HOPPER_TOLERANCE = 0.05f;
     SoldierOpenHopperCommand(agitator::AgitatorSubsystem* agitator)
@@ -80,11 +80,11 @@ public:
     static constexpr float SOLDIER_CLOSE_HOPPER_TARGET_ANGLE = 0;
     // 5000 milliradians/second
     static constexpr uint32_t SOLDIER_CLOSE_HOPPER_ANGULAR_SPEED =
-        5.0f * aruwlib::algorithms::PI * 1000.0f;
+        5.0f * tap::algorithms::PI * 1000.0f;
     // Allowable error in radians within which motor will consider target angle reached.
     static constexpr float SOLDIER_CLOSE_HOPPER_TOLERANCE = 0.05f;
 
-    SoldierCloseHopperCommand(aruwlib::control::setpoint::SetpointSubsystem* agitator)
+    SoldierCloseHopperCommand(tap::control::setpoint::SetpointSubsystem* agitator)
         : MoveAbsoluteCommand(
               agitator,
               SOLDIER_CLOSE_HOPPER_TARGET_ANGLE,
@@ -101,7 +101,7 @@ public:
          * the setpoint and the target don't match
          */
         float currAngle = setpointSubsystem->getCurrentValue();
-        return !aruwlib::algorithms::compareFloatClose(
+        return !tap::algorithms::compareFloatClose(
             currAngle,
             SOLDIER_CLOSE_HOPPER_TARGET_ANGLE,
             SOLDIER_CLOSE_HOPPER_TOLERANCE);

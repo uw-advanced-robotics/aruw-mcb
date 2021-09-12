@@ -32,15 +32,15 @@ class AgitatorSubsystemMock : public agitator::AgitatorSubsystem
 {
 public:
     AgitatorSubsystemMock(
-        aruwlib::Drivers* drivers,
+        tap::Drivers* drivers,
         float kp = 0,
         float ki = 0,
         float kd = 0,
         float maxIAccum = 0,
         float maxOutput = 0,
         float agitatorGearRatio = 0,
-        aruwlib::motor::MotorId agitatorMotorId = aruwlib::motor::MOTOR7,
-        aruwlib::can::CanBus agitatorCanBusId = aruwlib::can::CanBus::CAN_BUS1,
+        tap::motor::MotorId agitatorMotorId = tap::motor::MOTOR7,
+        tap::can::CanBus agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
         bool isAgitatorInverted = false);
     virtual ~AgitatorSubsystemMock();
 

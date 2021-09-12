@@ -19,28 +19,28 @@
 
 #include "sentinel_drive_subsystem.hpp"
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/drivers.hpp"
-#include "aruwlib/errors/create_errors.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwlib/mock/dji_motor_mock.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include "aruwlib/motor/dji_motor.hpp"
+#include "tap/motor/dji_motor.hpp"
 #endif
 
-using namespace aruwlib::gpio;
+using namespace tap::gpio;
 
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelDriveSubsystem::SentinelDriveSubsystem(
-    aruwlib::Drivers* drivers,
-    aruwlib::gpio::Digital::InputPin leftLimitSwitch,
-    aruwlib::gpio::Digital::InputPin rightLimitSwitch,
-    aruwlib::motor::MotorId leftMotorId,
-    aruwlib::motor::MotorId rightMotorId,
-    aruwlib::gpio::Analog::Pin currentSensorPin)
-    : aruwlib::control::chassis::ChassisSubsystemInterface(drivers),
+    tap::Drivers* drivers,
+    tap::gpio::Digital::InputPin leftLimitSwitch,
+    tap::gpio::Digital::InputPin rightLimitSwitch,
+    tap::motor::MotorId leftMotorId,
+    tap::motor::MotorId rightMotorId,
+    tap::gpio::Analog::Pin currentSensorPin)
+    : tap::control::chassis::ChassisSubsystemInterface(drivers),
       leftLimitSwitch(leftLimitSwitch),
       rightLimitSwitch(rightLimitSwitch),
       velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
@@ -64,12 +64,21 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
 
 void SentinelDriveSubsystem::initialize()
 {
+    if (leftLimitSwitch == rightLimitSwitch)
+    {
+        // TODO it is very annoying to add location/error type, fix this
+        RAISE_ERROR(
+            drivers,
+            "identical left/right switch pins",
+            tap::errors::Location::SUBSYSTEM,
+            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
+    }
     drivers->digital.configureInputPullMode(
         leftLimitSwitch,
-        aruwlib::gpio::Digital::InputPullMode::PullDown);
+        tap::gpio::Digital::InputPullMode::PullDown);
     drivers->digital.configureInputPullMode(
         rightLimitSwitch,
-        aruwlib::gpio::Digital::InputPullMode::PullDown);
+        tap::gpio::Digital::InputPullMode::PullDown);
     leftWheel.initialize();
     rightWheel.initialize();
 }
@@ -101,8 +110,8 @@ float SentinelDriveSubsystem::absolutePosition()
         RAISE_ERROR(
             drivers,
             "right sentinel drive motor offline",
-            aruwlib::errors::Location::SUBSYSTEM,
-            aruwlib::errors::SubsystemErrorType::MOTOR_OFFLINE);
+            tap::errors::Location::SUBSYSTEM,
+            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
         average = leftPosition;
     }
     else if (rightWheel.isMotorOnline())
@@ -110,8 +119,8 @@ float SentinelDriveSubsystem::absolutePosition()
         RAISE_ERROR(
             drivers,
             "left sentinel drive motor offline",
-            aruwlib::errors::Location::SUBSYSTEM,
-            aruwlib::errors::SubsystemErrorType::MOTOR_OFFLINE);
+            tap::errors::Location::SUBSYSTEM,
+            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
         average = rightPosition;
     }
     else
@@ -119,8 +128,8 @@ float SentinelDriveSubsystem::absolutePosition()
         RAISE_ERROR(
             drivers,
             "both sentinel drive motors offline",
-            aruwlib::errors::Location::SUBSYSTEM,
-            aruwlib::errors::SubsystemErrorType::MOTOR_OFFLINE);
+            tap::errors::Location::SUBSYSTEM,
+            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
         average = 0.0f;
     }
     return average;
@@ -150,19 +159,20 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 // with respect to the encoders
 // Equation used: Arc Length = Angle * numberOfRotations * radius
 // Here we get the radius from the getEncoderUnwrapped function
-float SentinelDriveSubsystem::distanceFromEncoder(aruwlib::motor::DjiMotor* motor)
+float SentinelDriveSubsystem::distanceFromEncoder(tap::motor::DjiMotor* motor)
 {
     float unwrappedAngle = motor->getEncoderUnwrapped();
-    float numberOfRotations = unwrappedAngle / (aruwlib::motor::DjiMotor::ENC_RESOLUTION);
-    return numberOfRotations * 2.0f * aruwlib::algorithms::PI * WHEEL_RADIUS / GEAR_RATIO;
+    float numberOfRotations = unwrappedAngle / (tap::motor::DjiMotor::ENC_RESOLUTION);
+    return numberOfRotations * 2.0f * tap::algorithms::PI * WHEEL_RADIUS / GEAR_RATIO;
 }
 
 void SentinelDriveSubsystem::runHardwareTests()
 {
-    if (abs(rightWheel.getShaftRPM()) > 50.0f) this->setHardwareTestsComplete();
+    if (rightWheel.getShaftRPM() > 400.0f && leftWheel.getShaftRPM() > 400.0f)
+        this->setHardwareTestsComplete();
 }
 
-void SentinelDriveSubsystem::onHardwareTestStart() { this->setDesiredRpm(100.0f); }
+void SentinelDriveSubsystem::onHardwareTestStart() { this->setDesiredRpm(500.0f); }
 
 void SentinelDriveSubsystem::onHardwareTestComplete() { this->setDesiredRpm(0.0f); }
 

@@ -29,9 +29,9 @@ namespace aruwsrc::mock
 class SentinelDriveSubsystemMock : public control::sentinel::drive::SentinelDriveSubsystem
 {
     SentinelDriveSubsystemMock(
-        aruwlib::Drivers *drivers,
-        aruwlib::gpio::Digital::InputPin leftLimitSwitch,
-        aruwlib::gpio::Digital::InputPin rightLimitSwitch);
+        tap::Drivers *drivers,
+        tap::gpio::Digital::InputPin leftLimitSwitch,
+        tap::gpio::Digital::InputPin rightLimitSwitch);
     virtual ~SentinelDriveSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

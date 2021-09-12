@@ -19,16 +19,16 @@
 
 #include "oled_display.hpp"
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
-using namespace aruwlib::display;
+using namespace tap::display;
 using namespace modm::literals;
 
 namespace aruwsrc
 {
 namespace display
 {
-OledDisplay::OledDisplay(aruwlib::Drivers *drivers)
+OledDisplay::OledDisplay(tap::Drivers *drivers)
     : display(),
       viewStack(&display),
       buttonHandler(drivers),

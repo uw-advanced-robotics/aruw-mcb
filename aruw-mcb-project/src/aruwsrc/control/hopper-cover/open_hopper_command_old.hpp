@@ -20,7 +20,7 @@
 #ifndef __OPEN_HOPPER_COMMAND_OLD_HPP__
 #define __OPEN_HOPPER_COMMAND_OLD_HPP__
 
-#include "aruwlib/control/command.hpp"
+#include "tap/control/command.hpp"
 
 #include "hopper_subsystem.hpp"
 
@@ -30,7 +30,7 @@ namespace control
 {
 class OpenHopperCommand;
 
-class OpenHopperCommand : public aruwlib::control::Command
+class OpenHopperCommand : public tap::control::Command
 {
 public:
     explicit OpenHopperCommand(HopperSubsystem* subsystem);

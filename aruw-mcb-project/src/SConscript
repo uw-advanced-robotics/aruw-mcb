@@ -20,7 +20,7 @@ Import("args")
 Import("sources")
 
 # Don't compile this stuff when testing
-IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/control/*_control.cpp"]
+IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/control/*_control.cpp", "aruwsrc/sim-initialization/*_sim.cpp"]
 
 ignored_files = []
 ignored_dirs = []

@@ -19,22 +19,22 @@
 
 #include "agitator_shoot_comprised_command_instances.hpp"
 
-using namespace aruwlib::control::setpoint;
+using namespace tap::control::setpoint;
 
 namespace aruwsrc
 {
 namespace agitator
 {
 ShootFastComprisedCommand17MM::ShootFastComprisedCommand17MM(
-    aruwlib::Drivers *drivers,
+    tap::Drivers *drivers,
     AgitatorSubsystem *agitator17mm,
     bool heatLimiting,
     float agitatorRotateAngle)
-    : aruwlib::control::setpoint::MoveUnjamComprisedCommand(
+    : tap::control::setpoint::MoveUnjamComprisedCommand(
           drivers,
           agitator17mm,
           agitatorRotateAngle,
-          aruwlib::algorithms::PI / 2.0f,
+          tap::algorithms::PI / 2.0f,
           40,
           10),
       drivers(drivers),
@@ -65,7 +65,7 @@ bool ShootFastComprisedCommand17MM::isFinished() const
 }
 
 WaterwheelLoadCommand42mm::WaterwheelLoadCommand42mm(
-    aruwlib::Drivers *drivers,
+    tap::Drivers *drivers,
     aruwsrc::agitator::LimitSwitchAgitatorSubsystem *waterwheel)
     : MoveUnjamComprisedCommand(
           drivers,
@@ -91,8 +91,8 @@ bool WaterwheelLoadCommand42mm::isFinished() const
 }
 
 ShootCommand42mm::ShootCommand42mm(
-    aruwlib::Drivers *drivers,
-    aruwlib::control::setpoint::SetpointSubsystem *kicker,
+    tap::Drivers *drivers,
+    tap::control::setpoint::SetpointSubsystem *kicker,
     bool heatLimiting)
     : MoveCommand(
           kicker,

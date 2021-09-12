@@ -20,13 +20,13 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwlib/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/engineer/tow_subsystem.hpp"
 
-using aruwlib::Drivers;
-using aruwlib::gpio::Digital;
 using aruwsrc::engineer::TowSubsystem;
+using tap::Drivers;
+using tap::gpio::Digital;
 
 static constexpr Digital::OutputPin LEFT_TOW_PIN = Digital::OutputPin::E;
 static constexpr Digital::OutputPin RIGHT_TOW_PIN = Digital::OutputPin::F;

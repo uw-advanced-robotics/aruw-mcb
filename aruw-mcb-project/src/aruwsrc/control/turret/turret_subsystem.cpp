@@ -23,19 +23,19 @@
 #include <cfloat>
 #include <random>
 
-#include "aruwlib/algorithms/math_user_utils.hpp"
-#include "aruwlib/architecture/clock.hpp"
-#include "aruwlib/control/command_mapper.hpp"
-#include "aruwlib/drivers.hpp"
-#include "aruwlib/errors/create_errors.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/control/command_mapper.hpp"
+#include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
-using namespace aruwlib::motor;
-using namespace aruwlib;
+using namespace tap::motor;
+using namespace tap;
 
 namespace aruwsrc::control::turret
 {
-TurretSubsystem::TurretSubsystem(aruwlib::Drivers* drivers, bool limitYaw)
-    : aruwlib::control::turret::TurretSubsystemInterface(drivers),
+TurretSubsystem::TurretSubsystem(tap::Drivers* drivers, bool limitYaw)
+    : tap::control::turret::TurretSubsystemInterface(drivers),
       currPitchAngle(0.0f, 0.0f, 360.0f),
       currYawAngle(0.0f, 0.0f, 360.0f),
       yawTarget(TURRET_START_ANGLE, 0.0f, 360.0f),
@@ -54,7 +54,7 @@ void TurretSubsystem::initialize()
 
 float TurretSubsystem::getYawAngleFromCenter() const
 {
-    aruwlib::algorithms::ContiguousFloat yawAngleFromCenter(
+    tap::algorithms::ContiguousFloat yawAngleFromCenter(
         currYawAngle.getValue() - TURRET_START_ANGLE,
         -180.0f,
         180.0f);
@@ -63,7 +63,7 @@ float TurretSubsystem::getYawAngleFromCenter() const
 
 float TurretSubsystem::getPitchAngleFromCenter() const
 {
-    aruwlib::algorithms::ContiguousFloat yawAngleFromCenter(
+    tap::algorithms::ContiguousFloat yawAngleFromCenter(
         currPitchAngle.getValue() - TURRET_START_ANGLE,
         -180.0f,
         180.0f);
@@ -115,8 +115,8 @@ void TurretSubsystem::setPitchMotorOutput(float out)
         RAISE_ERROR(
             drivers,
             "pitch motor output invalid",
-            aruwlib::errors::TURRET,
-            aruwlib::errors::TurretErrorType::INVALID_MOTOR_OUTPUT);
+            tap::errors::TURRET,
+            tap::errors::TurretErrorType::INVALID_MOTOR_OUTPUT);
         return;
     }
     if (pitchMotor.isMotorOnline())
@@ -140,8 +140,8 @@ void TurretSubsystem::setYawMotorOutput(float out)
         RAISE_ERROR(
             drivers,
             "yaw motor output invalid",
-            aruwlib::errors::TURRET,
-            aruwlib::errors::TurretErrorType::INVALID_MOTOR_OUTPUT);
+            tap::errors::TURRET,
+            tap::errors::TurretErrorType::INVALID_MOTOR_OUTPUT);
         return;
     }
     if (yawMotor.isMotorOnline())
@@ -164,7 +164,7 @@ void TurretSubsystem::setYawSetpoint(float target)
     yawTarget.setValue(target);
     if (limitYaw)
     {
-        yawTarget.setValue(aruwlib::algorithms::ContiguousFloat::limitValue(
+        yawTarget.setValue(tap::algorithms::ContiguousFloat::limitValue(
             yawTarget,
             TURRET_YAW_MIN_ANGLE,
             TURRET_YAW_MAX_ANGLE));
@@ -174,7 +174,7 @@ void TurretSubsystem::setYawSetpoint(float target)
 void TurretSubsystem::setPitchSetpoint(float target)
 {
     pitchTarget.setValue(target);
-    pitchTarget.setValue(aruwlib::algorithms::ContiguousFloat::limitValue(
+    pitchTarget.setValue(tap::algorithms::ContiguousFloat::limitValue(
         pitchTarget,
         TURRET_PITCH_MIN_ANGLE,
         TURRET_PITCH_MAX_ANGLE));
@@ -191,7 +191,7 @@ float TurretSubsystem::yawFeedForwardCalculation(float desiredChassisRotation)
     {
         chassisRotationFeedForward = 0.0f;
     }
-    return aruwlib::algorithms::limitVal<float>(
+    return tap::algorithms::limitVal<float>(
         chassisRotationFeedForward,
         -FEED_FORWARD_MAX_OUTPUT,
         FEED_FORWARD_MAX_OUTPUT);
