@@ -25,7 +25,7 @@
 #include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
-#include "tap/rm-dev-board-a/board.hpp"
+#include "tap/board/board.hpp"
 
 #include "modm/architecture/interface/delay.hpp"
 
@@ -45,18 +45,6 @@
 #include "aruwsrc/control/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 
-#include "aruwsrc/algorithms/matrix_test.hpp"
-
-#include "aruwsrc/algorithms/kalman_filter.hpp"
-
-#include "tap/communication/serial/uart_terminal_device.hpp"
-
-tap::communication::serial::UartTerminalDevice device(tap::DoNotUse_getDrivers());
-modm::IOStream stream(device);
-
-
-using namespace aruwsrc::algorithms;
-
 using tap::Drivers;
 
 /* define timers here -------------------------------------------------------*/
@@ -71,8 +59,6 @@ static void initializeIo(tap::Drivers *drivers);
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
 static void updateIo(tap::Drivers *drivers);
-
-
 
 int main()
 {
@@ -89,29 +75,14 @@ int main()
 
     Board::initialize();
     initializeIo(drivers);
-
     aruwsrc::control::initSubsystemCommands(drivers);
 
-
-// #ifdef PLATFORM_HOSTED
-//     aruwsrc::sim::initialize_robot_sim();
-//     tap::motorsim::SimHandler::resetMotorSims();
-//     // Blocking call, waits until Windows Simulator connects.
-//     tap::communication::TCPServer::MainServer()->getConnection();
-// #endif
-
-    static constexpr uint16_t STATES = 1;
-    static constexpr uint16_t INPUTS = 1;
-    const float x[STATES] = {0};
-
-    const float A[STATES * STATES] = {1};
-    const float C[INPUTS * STATES] = {1};
-    const float Q[STATES * STATES] = {1};
-    const float R[INPUTS * INPUTS] = {1};
-    const float P[STATES * STATES] = {1};
-    KalmanFilter<STATES, INPUTS> kf(A, C, Q, R, P);
-
-    kf.init(x);
+#ifdef PLATFORM_HOSTED
+    aruwsrc::sim::initialize_robot_sim();
+    tap::motorsim::SimHandler::resetMotorSims();
+    // Blocking call, waits until Windows Simulator connects.
+    tap::communication::TCPServer::MainServer()->getConnection();
+#endif
 
     while (1)
     {
@@ -120,18 +91,14 @@ int main()
 
         if (sendXavierTimeout.execute())
         {
-            // PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
         }
 
         if (sendMotorTimeout.execute())
         {
-            aruwsrc::algorithms::CMSISMat<1, 1> y;
-            y.data[0] = drivers->mpu6500.getGy();
-            kf.performUpdate(y);
-            stream.printf("%.2f\t%.2f\n", kf.getStateMatrix()[0], drivers->mpu6500.getGy());
-            PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
+            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
@@ -158,7 +125,8 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    // drivers->xavierSerial.initializeCV();
+    drivers->xavierSerial.initializeCV();
+    drivers->mpu6500TerminalSerialHandler.init();
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif
@@ -175,5 +143,5 @@ static void updateIo(tap::Drivers *drivers)
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    // drivers->xavierSerial.updateSerial();
+    drivers->xavierSerial.updateSerial();
 }
