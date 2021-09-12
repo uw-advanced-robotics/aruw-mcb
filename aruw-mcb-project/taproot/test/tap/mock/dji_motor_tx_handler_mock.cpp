@@ -17,35 +17,13 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "serial_test_class.hpp"
+#include "dji_motor_tx_handler_mock.hpp"
 
-namespace tap
+namespace tap::mock
 {
-namespace serial
-{
-SerialTestClass::SerialTestClass(Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart2),
-      messageId(0),
-      i(0)
+DjiMotorTxHandlerMock::DjiMotorTxHandlerMock(tap::Drivers *drivers)
+    : tap::motor::DjiMotorTxHandler(drivers)
 {
 }
-
-void SerialTestClass::messageReceiveCallback(const SerialMessage& completeMessage)
-{
-    messageId = completeMessage.sequenceNumber;
-}
-
-void SerialTestClass::sendMessage()
-{
-    this->txMessage.length = 1;
-    this->txMessage.headByte = 0xa5;
-    this->txMessage.sequenceNumber = i;
-    this->txMessage.type = 4;
-    this->txMessage.data[0] = 60;
-    this->send();
-    i++;
-}
-
-}  // namespace serial
-
-}  // namespace tap
+DjiMotorTxHandlerMock::~DjiMotorTxHandlerMock() {}
+}  // namespace tap::mock
