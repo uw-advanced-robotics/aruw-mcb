@@ -98,7 +98,7 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
+            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
@@ -126,6 +126,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
     drivers->xavierSerial.initializeCV();
+    drivers->mpu6500TerminalSerialHandler.init();
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif

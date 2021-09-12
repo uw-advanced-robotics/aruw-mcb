@@ -17,12 +17,26 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UART_TERMINAL_DEVICE_CONSTANTS_HPP_
-#define UART_TERMINAL_DEVICE_CONSTANTS_HPP_
+#ifndef MPU6500_TERMINAL_SERIAL_HANDLER_MOCK_HPP_
+#define MPU6500_TERMINAL_SERIAL_HANDLER_MOCK_HPP_
 
-namespace tap::serial::bound_ports
+#include <gmock/gmock.h>
+
+#include "tap/communication/sensors/mpu6500/mpu6500_terminal_serial_handler.hpp"
+
+namespace tap
 {
-    static constexpr Uart::UartPort TERMINAL_SERIAL_UART_PORT = Uart::UartPort::Uart3;
-}  // namespace tap::serial::bound_ports
+namespace mock
+{
+class Mpu6500TerminalSerialHandlerMock : public tap::sensors::Mpu6500TerminalSerialHandler
+{
+public:
+    Mpu6500TerminalSerialHandlerMock(tap::Drivers *drivers);
+    virtual ~Mpu6500TerminalSerialHandlerMock();
 
-#endif  // UART_TERMINAL_DEVICE_CONSTANTS_HPP_
+    MOCK_METHOD(void, init, (), (override));
+};  // Mpu6500TerminalSerialHandlerMock
+}  // namespace mock
+}  // namespace tap
+
+#endif  //  MPU6500_TERMINAL_SERIAL_HANDLER_MOCK_HPP_
