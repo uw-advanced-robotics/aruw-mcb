@@ -41,12 +41,18 @@ public:
     inline float getYaw() { return ahrsAlgorithm.getYaw(); }
     inline float getRoll() { return ahrsAlgorithm.getRoll(); }
     inline float getPitch() { return ahrsAlgorithm.getPitch(); }
+    /**
+     * @note: Units in deg/s
+     */
     inline float getGx() const { return r.gyroscope[0] / LSB_PER_DEGREE; };
     inline float getGy() const { return r.gyroscope[1] / LSB_PER_DEGREE; };
     inline float getGz() const { return r.gyroscope[2] / LSB_PER_DEGREE; };
-    inline float getAx() const { return r.acceleration[0]; };
-    inline float getAy() const { return r.acceleration[1]; };
-    inline float getAz() const { return r.acceleration[2]; };
+    /**
+     * @note: Units in m/s^2
+     */
+    inline float getAx() const { return r.acceleration[0] / 100.0f; };
+    inline float getAy() const { return r.acceleration[1] / 100.0f; };
+    inline float getAz() const { return r.acceleration[2] / 100.0f; };
     inline float getMx() const { return r.magnetometer[0] / LSB_PER_MICRO_T; }
     inline float getMy() const { return r.magnetometer[1] / LSB_PER_MICRO_T; }
     inline float getMz() const { return r.magnetometer[2] / LSB_PER_MICRO_T; }

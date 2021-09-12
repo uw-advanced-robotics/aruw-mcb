@@ -47,6 +47,8 @@
 
 using tap::Drivers;
 
+extern uint32_t t2;
+
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
 tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
@@ -99,7 +101,11 @@ int main()
         if (sendMotorTimeout.execute())
         {
             drivers->bno055Interface.periodicIMUUpdate();
-            drivers->terminalSerial.getStream().printf("%.2f\n", drivers->bno055Interface.getAx());
+            if (drivers->bno055Interface.isReady()) {
+                // drivers->terminalSerial.getStream().printf("%.2f\n", drivers->bno055Interface.getPitch());
+                // drivers->terminalSerial.getStream().printf("%i\n", static_cast<int>(modm::bno055::GyrBandwidth::Hz12));
+                // drivers->terminalSerial.getStream().printf("%li\n", t2);
+            }
             // PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
             // PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             // PROFILE(drivers->profiler, drivers->commandScheduler.run, ());

@@ -42,6 +42,7 @@
 #include "tap/mock/uart_mock.hpp"
 
 #include "aruwsrc/communication/sensors/bno055_interface.hpp"
+#include "aruwsrc/communication/sensors/bno055_interface_fusion.hpp"
 #include "aruwsrc/mock/imu_rx_listener_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #include "aruwsrc/mock/xavier_serial_mock.hpp"
@@ -68,6 +69,7 @@
 
 #include "aruwsrc/communication/can/imu_rx_listener.hpp"
 #include "aruwsrc/communication/sensors/bno055_interface.hpp"
+#include "aruwsrc/communication/sensors/bno055_interface_fusion.hpp"
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #endif

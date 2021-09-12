@@ -17,7 +17,7 @@ void Bno055InterfaceFusion::initialize()
 #ifndef PLATFORM_HOSTED
     Bno055I2CMaster::connect<Bno055I2CMasterScl::Scl, Bno055I2CMasterSda::Sda>(
         modm::I2cMaster::PullUps::Internal);
-    Bno055I2CMaster::initialize<Board::SystemClock, 100_kHz>();
+    Bno055I2CMaster::initialize<Board::SystemClock, 400_kHz>();
 #endif
 }
 
