@@ -21,8 +21,8 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/communication/remote.hpp"
 #include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
