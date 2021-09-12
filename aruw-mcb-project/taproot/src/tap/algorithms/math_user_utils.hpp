@@ -22,16 +22,12 @@
 
 #include <cmath>
 #include <cstring>
+#include "arm_math.h"
 
 namespace tap
 {
 namespace algorithms
 {
-/**
- * An approximation for pi.
- */
-constexpr float PI = 3.1415926535897932384626f;
-
 /**
  * Floating point conversion from degrees to radians using PI.
  */

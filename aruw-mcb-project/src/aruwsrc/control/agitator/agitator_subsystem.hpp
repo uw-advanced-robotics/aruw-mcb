@@ -62,7 +62,7 @@ public:
 
     static constexpr bool isAgitatorInverted = false;
 
-    static constexpr float AGITATOR_JAMMING_DISTANCE = tap::algorithms::PI / 5;
+    static constexpr float AGITATOR_JAMMING_DISTANCE = PI / 5;
 
     // The motor that controls the hopper lid is an agitator_subsystem instance, so
     // I'm adding its constants here as well.
@@ -116,7 +116,7 @@ public:
      * setpoint and current angle is > `JAM_DISTANCE_TOLERANCE_WATERWHEEL` radians for >=
      * `JAM_TEMPORAL_TOLERANCE_WATERWHEEL` ms;
      */
-    static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = tap::algorithms::PI / 14.0f;
+    static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = PI / 14.0f;
     static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
 #endif
 

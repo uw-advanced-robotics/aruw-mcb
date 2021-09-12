@@ -73,7 +73,7 @@ public:
     }
 
     using StateVectorArray = float[STATES];
-    const StateVectorArray &getStateMatrix() const { return xHat.data; }
+    const inline StateVectorArray &getStateMatrix() const { return xHat.data; }
 
 private:
     /**
@@ -96,7 +96,7 @@ private:
     /**
      * Transpose of C.
      */
-    CMSISMat<STATES, STATES> Ct;
+    CMSISMat<STATES, INPUTS> Ct;
 
     /**
      * Covariance matrices

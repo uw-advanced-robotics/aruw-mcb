@@ -34,7 +34,7 @@ ShootFastComprisedCommand17MM::ShootFastComprisedCommand17MM(
           drivers,
           agitator17mm,
           agitatorRotateAngle,
-          tap::algorithms::PI / 2.0f,
+          PI / 2.0f,
           40,
           10),
       drivers(drivers),

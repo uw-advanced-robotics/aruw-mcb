@@ -42,6 +42,7 @@
 #include "tap/mock/terminal_serial_mock.hpp"
 #include "tap/mock/uart_mock.hpp"
 
+#include "aruwsrc/algorithms/imu_heading_fusion.hpp"
 #include "aruwsrc/communication/sensors/bno055_interface.hpp"
 #include "aruwsrc/communication/sensors/bno055_interface_fusion.hpp"
 #include "aruwsrc/mock/imu_rx_listener_mock.hpp"
@@ -69,6 +70,7 @@
 #include "tap/motor/dji_motor_terminal_serial_handler.hpp"
 #include "tap/motor/dji_motor_tx_handler.hpp"
 
+#include "aruwsrc/algorithms/imu_heading_fusion.hpp"
 #include "aruwsrc/communication/can/imu_rx_listener.hpp"
 #include "aruwsrc/communication/sensors/bno055_interface.hpp"
 #include "aruwsrc/communication/sensors/bno055_interface_fusion.hpp"
@@ -114,7 +116,8 @@ public:
           schedulerTerminalHandler(this),
           bno055Interface(),
           bno055InterfaceFusion(),
-          imuRxHandler(this)
+          imuRxHandler(this),
+          imuHeadingFusion(this)
     {
     }
 
@@ -144,6 +147,7 @@ public:
     aruwsrc::sensors::Bno055Interface bno055Interface;
     aruwsrc::sensors::Bno055InterfaceFusion bno055InterfaceFusion;
     testing::NiceMock<aruwsrc::mock::ImuRxListenerMock> imuRxHandler;
+    aruwsrc::algorithms::ImuHeadingFusion imuHeadingFusion;
 #else
 public:
     can::Can can;
@@ -171,6 +175,7 @@ public:
     aruwsrc::sensors::Bno055Interface bno055Interface;
     aruwsrc::sensors::Bno055InterfaceFusion bno055InterfaceFusion;
     aruwsrc::can::ImuRxListener imuRxHandler;
+    aruwsrc::algorithms::ImuHeadingFusion imuHeadingFusion;
 #endif
 };  // class Drivers
 

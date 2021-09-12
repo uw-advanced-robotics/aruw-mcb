@@ -47,7 +47,7 @@ public:
         tap::Drivers* drivers,
         AgitatorSubsystem* agitator17mm,
         bool heatLimiting = true,
-        float agitatorRotateAngle = tap::algorithms::PI / 2.5f);
+        float agitatorRotateAngle = PI / 2.5f);
 
     bool isReady() override;
 
@@ -67,9 +67,9 @@ class WaterwheelLoadCommand42mm : public tap::control::setpoint::MoveUnjamCompri
 {
 public:
     // Angle the command tries to move the agitator whenever it is scheduled
-    static constexpr float WATERWHEEL_42MM_CHANGE_ANGLE = tap::algorithms::PI / 7;
+    static constexpr float WATERWHEEL_42MM_CHANGE_ANGLE = PI / 7;
     // Max angle the agitator will move while unjamming
-    static constexpr float WATERWHEEL_42MM_MAX_UNJAM_ANGLE = tap::algorithms::PI / 35;
+    static constexpr float WATERWHEEL_42MM_MAX_UNJAM_ANGLE = PI / 35;
     // Expected time for the water wheel to rotate the specified angle in ms
     static constexpr uint32_t WATERWHEEL_42MM_ROTATE_TIME = 1000;
     // How long the command should wait after reaching the target angle
@@ -103,7 +103,7 @@ class ShootCommand42mm : public tap::control::setpoint::MoveCommand
 {
 public:
     // Angle the command tries to move the agitator whenever it is scheduled
-    static constexpr float KICKER_42MM_CHANGE_ANGLE = 1.3f * tap::algorithms::PI;
+    static constexpr float KICKER_42MM_CHANGE_ANGLE = 1.3f * PI;
     // Expected time for the water wheel to rotate the specified angle in ms
     static constexpr uint32_t KICKER_42MM_ROTATE_TIME = 300;
     // How long the command should wait after reaching the target angle

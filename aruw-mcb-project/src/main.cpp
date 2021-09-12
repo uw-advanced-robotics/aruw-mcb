@@ -87,7 +87,14 @@ int main()
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
-            float yaw = drivers->mpu6500.getYaw();
+            float yaw = drivers->imuHeadingFusion.getYaw();
+
+            drivers->terminalSerial.getStream().printf(
+                "%.2f\t%.2f\t%.2f\n",
+                yaw,
+                drivers->bno055InterfaceFusion.getYaw(),
+                drivers->mpu6500.getYaw());
+
             int16_t gzRaw =
                 drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
 

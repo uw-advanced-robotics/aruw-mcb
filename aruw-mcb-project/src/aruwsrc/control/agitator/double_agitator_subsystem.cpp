@@ -19,7 +19,6 @@
 
 #include "double_agitator_subsystem.hpp"
 
-using tap::algorithms::PI;
 using tap::motor::DjiMotor;
 
 namespace aruwsrc

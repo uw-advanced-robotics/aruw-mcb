@@ -220,7 +220,7 @@ private:
      */
     inline float getUncalibratedAgitatorAngle(const tap::motor::DjiMotor &motor) const
     {
-        return (2.0f * tap::algorithms::PI /
+        return (2.0f * PI /
                 static_cast<float>(tap::motor::DjiMotor::ENC_RESOLUTION)) *
                motor.getEncoderUnwrapped() / gearRatio;
     }
