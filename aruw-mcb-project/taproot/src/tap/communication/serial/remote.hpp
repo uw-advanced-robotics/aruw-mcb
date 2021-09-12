@@ -98,7 +98,7 @@ public:
     };
 
     /**
-     * Enables and initializes `Uart::Uart1` communication.
+     * Enables and initializes `bound_ports::REMOTE_SERIAL_UART_PORT`.
      */
     mockable void initialize();
 

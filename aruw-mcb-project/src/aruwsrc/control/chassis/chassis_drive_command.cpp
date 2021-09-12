@@ -20,7 +20,7 @@
 #include "chassis_drive_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/communication/remote.hpp"
+#include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"

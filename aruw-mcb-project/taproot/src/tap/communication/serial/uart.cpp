@@ -19,7 +19,7 @@
 
 #include "uart.hpp"
 
-#include "tap/rm-dev-board-a/board.hpp"
+#include "tap/board/board.hpp"
 
 using namespace Board;
 
