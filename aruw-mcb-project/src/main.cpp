@@ -103,17 +103,12 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            if (drivers->bno055InterfaceFusion.isReady()) {
-                // drivers->terminalSerial.getStream().printf("%.2f\n", drivers->bno055InterfaceFusion.getYaw());
-                // drivers->terminalSerial.getStream().printf("%i\n", static_cast<int>(modm::bno055::GyrBandwidth::Hz12));
-                // drivers->terminalSerial.getStream().printf("%li\n", t2);
-            }
-            // PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
-            // PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
-            // PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            // PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
-            // PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-            // PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
+            PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
+            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
+            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
         }
         modm::delay_us(10);
     }
@@ -136,6 +131,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
     drivers->xavierSerial.initializeCV();
+    drivers->mpu6500TerminalSerialHandler.init();
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif
