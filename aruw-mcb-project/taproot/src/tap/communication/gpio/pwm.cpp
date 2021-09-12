@@ -49,17 +49,17 @@ void Pwm::init()
 
 #endif
     // Set all out pins to 0 duty
-    writeAll(0.0f);
+    writeAllZeros();
 }
 
-void Pwm::writeAll(float duty)
+void Pwm::writeAllZeros()
 {
 #ifndef PLATFORM_HOSTED
-    write(duty, Pin::W);
-    write(duty, Pin::X);
-    write(duty, Pin::Y);
-    write(duty, Pin::Z);
-    write(duty, Pin::Buzzer);
+    write(0.0f, Pin::W);
+    write(0.0f, Pin::X);
+    write(0.0f, Pin::Y);
+    write(0.0f, Pin::Z);
+    write(0.0f, Pin::Buzzer);
 #endif
 }
 
@@ -111,10 +111,10 @@ void Pwm::setTimerFrequency(Timer timer, uint32_t frequency)
     switch (timer)
     {
         case TIMER8:
-            Timer8::setPeriod<Board::SystemClock>(1'000'000 / frequency);
+            timer8CalculatedOverflow = Timer8::setPeriod<Board::SystemClock>(1'000'000 / frequency);
             break;
         case TIMER12:
-            Timer12::setPeriod<Board::SystemClock>(1'000'000 / frequency);
+            timer12CalculatedOverflow = Timer12::setPeriod<Board::SystemClock>(1'000'000 / frequency);
             break;
     }
 #endif

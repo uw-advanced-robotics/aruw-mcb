@@ -51,6 +51,7 @@
     <module>modm:platform:adc:1</module>
     <module>modm:platform:spi:1</module>
     <module>modm:platform:i2c:2</module>
+    <module>modm:platform:timer:3</module>
     <module>modm:platform:timer:12</module>
     <module>modm:platform:spi:5</module>
     <module>modm:platform:uart:2</module>
