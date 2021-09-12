@@ -47,11 +47,6 @@
 
 using tap::Drivers;
 
-extern uint32_t t2;
-
-tap::communication::serial::UartTerminalDevice device(tap::DoNotUse_getDrivers());
-modm::IOStream stream(device);
-
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
 tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
@@ -96,7 +91,7 @@ int main()
 
         if (sendXavierTimeout.execute())
         {
-            // PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
         }
@@ -135,7 +130,6 @@ static void initializeIo(tap::Drivers *drivers)
 #ifdef TARGET_SOLDIER
     drivers->imuRxHandler.init();
 #endif
-    drivers->bno055InterfaceFusion.initialize();
 }
 
 static void updateIo(tap::Drivers *drivers)
@@ -144,11 +138,10 @@ static void updateIo(tap::Drivers *drivers)
     tap::motorsim::SimHandler::updateSims();
 #endif
 
-    // drivers->canRxHandler.pollCanData();
-    // drivers->refSerial.updateSerial();
-    // drivers->remote.read();
-    // drivers->oledDisplay.updateDisplay();
-    // drivers->mpu6500.read();
-    // drivers->xavierSerial.updateSerial();
-    drivers->bno055InterfaceFusion.update();
+    drivers->canRxHandler.pollCanData();
+    drivers->refSerial.updateSerial();
+    drivers->remote.read();
+    drivers->oledDisplay.updateDisplay();
+    drivers->mpu6500.read();
+    drivers->xavierSerial.updateSerial();
 }
