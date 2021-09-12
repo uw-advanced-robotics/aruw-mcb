@@ -21,9 +21,9 @@
 #define OLED_DISPLAY_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
+#include "tap/board/board.hpp"
 #include "tap/display/oled_button_handler.hpp"
 #include "tap/display/sh1106.hpp"
-#include "tap/rm-dev-board-a/board.hpp"
 #include "tap/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"

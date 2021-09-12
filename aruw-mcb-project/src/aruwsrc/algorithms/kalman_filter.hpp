@@ -96,7 +96,7 @@ private:
     /**
      * Transpose of C.
      */
-    CMSISMat<STATES, STATES> Ct;
+    CMSISMat<STATES, INPUTS> Ct;
 
     /**
      * Covariance matrices
