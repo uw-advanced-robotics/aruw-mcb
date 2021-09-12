@@ -28,7 +28,7 @@
 #include "modm/platform/uart/uart_base.hpp"
 #endif
 
-#include "tap/rm-dev-board-a/board.hpp"
+#include "tap/board/board.hpp"
 #include "tap/util_macros.hpp"
 
 namespace tap
@@ -50,7 +50,7 @@ public:
         Uart1,
         Uart2,
         Uart3,
-        Uart6
+        Uart6,
     };
 
 #ifdef PLATFORM_HOSTED
@@ -69,7 +69,7 @@ public:
     mockable ~Uart() = default;
 
     /**
-     * .initializes a particular Uart with the pins particular to the RoboMaster type a board.
+     * Initializes a particular Uart with the pins particular to the board.
      *
      * @note follow covention in the functino when adding a `UartPort`.
      * @tparam port the particular port to initialize.
@@ -80,10 +80,8 @@ public:
     void init()
     {
 #ifndef PLATFORM_HOSTED
-        // TODO(kaelin): move pin definition to Board?
         if constexpr (port == UartPort::Uart1)
         {
-            // TODO(kaelin): what's the TX pin on UART1?
             modm::platform::Usart1::connect<GpioB7::Rx>();
             modm::platform::Usart1::initialize<Board::SystemClock, baudrate>(parity);
         }
