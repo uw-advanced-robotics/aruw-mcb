@@ -41,8 +41,7 @@
 
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
-
-#include "aruwlib/architecture/endianness_wrappers.hpp"
+#include "tap/architecture/endianness_wrappers.hpp"
 
 #include "aruwsrc/control/robot_control.hpp"
 #include "modm/architecture/interface/can_message.hpp"
@@ -83,32 +82,25 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
-        if (sendXavierTimeout.execute())
-        {
-            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
-            // TODO try faster baude rate so we can send more frequently (currently mcb's serial
-            // buffers are overflowing if you try and send faster than 3 ms).
-        }
-
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
             float yaw = drivers->mpu6500.getYaw();
-            int16_t gzRaw = drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+            int16_t gzRaw =
+                drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
 
-            if (drivers->can.isReadyToSend(aruwlib::can::CanBus::CAN_BUS1))
+            if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS1))
             {
-
-                drivers->leds.set(aruwlib::gpio::Leds::Green, i < 50);
+                drivers->leds.set(tap::gpio::Leds::Green, i < 50);
                 i = (i + 1) % 100;
 
                 modm::can::Message msg(IMU_MSG_CAN_ID, 8);
                 msg.setExtended(false);
-                aruwlib::arch::convertToLittleEndian(yaw, msg.data);
-                aruwlib::arch::convertToLittleEndian(gzRaw, msg.data + 4);
-                drivers->can.sendMessage(aruwlib::can::CanBus::CAN_BUS1, msg);
+                tap::arch::convertToLittleEndian(yaw, msg.data);
+                tap::arch::convertToLittleEndian(gzRaw, msg.data + 4);
+                drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, msg);
             }
         }
         modm::delay_us(10);
@@ -122,9 +114,9 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->leds.init();
     drivers->digital.init();
     drivers->mpu6500.init();
-    drivers->terminalSerial.initialize();
     drivers->errorController.init();
     drivers->mpu6500TerminalSerialHandler.init();
+    drivers->terminalSerial.initialize();
 }
 
 static void updateIo(tap::Drivers *drivers)
