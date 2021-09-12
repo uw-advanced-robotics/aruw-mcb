@@ -20,9 +20,9 @@
 #ifndef CHASSIS_DRIVE_COMMAND_HPP_
 #define CHASSIS_DRIVE_COMMAND_HPP_
 
-#include <aruwlib/control/command.hpp>
+#include "tap/control/command.hpp"
 
-namespace aruwlib
+namespace tap
 {
 class Drivers;
 }
@@ -36,10 +36,10 @@ class ChassisSubsystem;
 /**
  * A command that applies classic chassis-relative mecanum drive.
  */
-class ChassisDriveCommand : public aruwlib::control::Command
+class ChassisDriveCommand : public tap::control::Command
 {
 public:
-    ChassisDriveCommand(aruwlib::Drivers* drivers, ChassisSubsystem* chassis);
+    ChassisDriveCommand(tap::Drivers* drivers, ChassisSubsystem* chassis);
 
     void initialize() override;
 
@@ -57,7 +57,7 @@ public:
     const char* getName() const override { return "chassis drive"; }
 
 private:
-    aruwlib::Drivers* drivers;
+    tap::Drivers* drivers;
     ChassisSubsystem* chassis;
 };  // class ChassisDriveCommand
 

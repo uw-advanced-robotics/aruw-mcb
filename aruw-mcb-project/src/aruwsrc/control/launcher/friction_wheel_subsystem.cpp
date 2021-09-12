@@ -19,7 +19,7 @@
 
 #include "friction_wheel_subsystem.hpp"
 
-#include <aruwlib/architecture/clock.hpp>
+#include "tap/architecture/clock.hpp"
 
 namespace aruwsrc
 {
@@ -35,7 +35,7 @@ void FrictionWheelSubsystem::setDesiredRpm(float desRpm) { desiredRpmRamp.setTar
 
 void FrictionWheelSubsystem::refresh()
 {
-    uint32_t currTime = aruwlib::arch::clock::getTimeMilliseconds();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
     prevTime = currTime;
 

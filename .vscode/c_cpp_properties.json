@@ -3,18 +3,39 @@
         {
             "name": "Test",
             "defines": ["${default}", "ENV_UNIT_TESTS", "PLATFORM_HOSTED", "RUN_WITH_PROFILING"],
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/sim-modm/modm/src",
+                "aruw-mcb-project/taproot/test",
+                "aruw-mcb-project/test"
+            ],
             "compilerPath": "/usr/bin/g++",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "gcc-x64",
+            "browse": { "limitSymbolsToIncludedHeaders": true }
         },
         {
             "name": "Sim",
             "defines": ["${default}", "PLATFORM_HOSTED", "RUN_WITH_PROFILING"],
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/sim-modm/modm/src"
+            ],
             "compilerPath": "/usr/bin/g++",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "gcc-x64",
+            "browse": { "limitSymbolsToIncludedHeaders": true }
         },
         {
             "name": "MCB",
-            "intelliSenseMode": "gcc-arm"
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"        
+            ],
+            "compilerPath": "/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "browse": { "limitSymbolsToIncludedHeaders": true }
         }
     ],
     "version": 4

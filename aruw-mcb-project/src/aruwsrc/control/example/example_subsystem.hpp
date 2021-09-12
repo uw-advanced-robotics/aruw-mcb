@@ -33,29 +33,29 @@
 #ifndef __SUBSYSTEM_EXAMPLE_HPP__
 #define __SUBSYSTEM_EXAMPLE_HPP__
 
-#include <aruwlib/control/command_scheduler.hpp>
-#include <aruwlib/control/subsystem.hpp>
+#include "tap/control/command_scheduler.hpp"
+#include "tap/control/subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include <aruwlib/mock/DJIMotorMock.hpp>
+#include "tap/mock/dji_motor_mock.hpp"
 #else
-#include <aruwlib/motor/dji_motor.hpp>
+#include "tap/motor/dji_motor.hpp"
 #endif
 
-#include <modm/math/filter/pid.hpp>
+#include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc
 {
 namespace control
 {
-class ExampleSubsystem : public aruwlib::control::Subsystem
+class ExampleSubsystem : public tap::control::Subsystem
 {
 public:
     ExampleSubsystem(
-        aruwlib::Drivers* drivers,
-        aruwlib::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        aruwlib::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
-        : aruwlib::control::Subsystem(drivers),
+        tap::Drivers* drivers,
+        tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
+        tap::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
+        : tap::control::Subsystem(drivers),
           velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
           velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
           desiredRpm(0),
@@ -75,9 +75,9 @@ public:
     const char* getName() override { return "Example"; }
 
 private:
-    static const aruwlib::motor::MotorId LEFT_MOTOR_ID;
-    static const aruwlib::motor::MotorId RIGHT_MOTOR_ID;
-    const aruwlib::can::CanBus CAN_BUS_MOTORS = aruwlib::can::CanBus::CAN_BUS1;
+    static const tap::motor::MotorId LEFT_MOTOR_ID;
+    static const tap::motor::MotorId RIGHT_MOTOR_ID;
+    const tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
     const float PID_P = 5.0f;
     const float PID_I = 0.0f;
@@ -93,18 +93,18 @@ private:
 
     void updateMotorRpmPid(
         modm::Pid<float>* pid,
-        aruwlib::motor::DjiMotor* const motor,
+        tap::motor::DjiMotor* const motor,
         float desiredRpm);
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    aruwlib::mock::DjiMotorMock leftWheel;
-    aruwlib::mock::DjiMotorMock rightWheel;
+    tap::mock::DjiMotorMock leftWheel;
+    tap::mock::DjiMotorMock rightWheel;
 
 private:
 #else
-    aruwlib::motor::DjiMotor leftWheel;
-    aruwlib::motor::DjiMotor rightWheel;
+    tap::motor::DjiMotor leftWheel;
+    tap::motor::DjiMotor rightWheel;
 #endif
 };
 

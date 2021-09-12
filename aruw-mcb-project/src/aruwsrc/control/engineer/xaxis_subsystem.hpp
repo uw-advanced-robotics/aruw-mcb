@@ -20,10 +20,9 @@
 #ifndef XAXIS_SUBSYSTEM_HPP_
 #define XAXIS_SUBSYSTEM_HPP_
 
-#include <aruwlib/communication/gpio/digital.hpp>
-#include <aruwlib/control/subsystem.hpp>
-
-#include "util_macros.hpp"
+#include "tap/communication/gpio/digital.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -34,11 +33,11 @@ namespace engineer
  * grabber back and forward). Connect this to a digital output
  * pin. This controls a solenoid, which actuates a piston.
  */
-class XAxisSubsystem : public aruwlib::control::Subsystem
+class XAxisSubsystem : public tap::control::Subsystem
 {
 public:
-    XAxisSubsystem(aruwlib::Drivers *drivers, aruwlib::gpio::Digital::OutputPin pin)
-        : aruwlib::control::Subsystem(drivers),
+    XAxisSubsystem(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
+        : tap::control::Subsystem(drivers),
           pin(pin),
           extended(false)
     {
@@ -57,7 +56,7 @@ public:
     const char *getName() override { return "X-Axis"; }
 
 private:
-    aruwlib::gpio::Digital::OutputPin pin;
+    tap::gpio::Digital::OutputPin pin;
 
     bool extended;
 

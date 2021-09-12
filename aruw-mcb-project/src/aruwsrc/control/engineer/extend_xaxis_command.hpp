@@ -20,7 +20,7 @@
 #ifndef EXTEND_XAXIS_COMMAND_HPP_
 #define EXTEND_XAXIS_COMMAND_HPP_
 
-#include <aruwlib/control/command.hpp>
+#include "tap/control/command.hpp"
 
 namespace aruwsrc
 {
@@ -33,7 +33,7 @@ class XAxisSubsystem;
  * This sends a digital out signal to a solenoid, which actuates
  * a piston, used for collecting far bins.
  */
-class ExtendXAxisCommand : public aruwlib::control::Command
+class ExtendXAxisCommand : public tap::control::Command
 {
 public:
     explicit ExtendXAxisCommand(XAxisSubsystem* subsystem);

@@ -26,8 +26,8 @@
 #ifndef __COMMAND_EXAMPLE_HPP__
 #define __COMMAND_EXAMPLE_HPP__
 
-#include <aruwlib/Drivers.hpp>
-#include <aruwlib/control/command.hpp>
+#include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc
 {
@@ -35,7 +35,7 @@ namespace control
 {
 class ExampleSubsystem;
 
-class ExampleCommand : public aruwlib::control::Command
+class ExampleCommand : public tap::control::Command
 {
 public:
     ExampleCommand(ExampleSubsystem* subsystem, int speed);

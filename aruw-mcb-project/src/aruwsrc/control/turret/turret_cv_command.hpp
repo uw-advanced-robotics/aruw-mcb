@@ -20,27 +20,25 @@
 #ifndef TURRET_CV_COMMAND_HPP_
 #define TURRET_CV_COMMAND_HPP_
 
-#include <aruwlib/algorithms/contiguous_float.hpp>
-#include <aruwlib/architecture/timeout.hpp>
-#include <aruwlib/control/command.hpp>
+#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/timeout.hpp"
+#include "tap/control/command.hpp"
 
-#include "aruwsrc/algorithms/turret_pid.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 
 #include "turret_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace turret
+namespace aruwsrc::control::turret
 {
 /**
  * A command that receives input from the vision system via the `XavierSerial` driver and aims the
  * turret accordingly using a position PID controller.
  */
-class TurretCVCommand : public aruwlib::control::Command
+class TurretCVCommand : public tap::control::Command
 {
 public:
-    TurretCVCommand(aruwlib::Drivers *drivers, TurretSubsystem *subsystem);
+    TurretCVCommand(tap::Drivers *xavierSerial, TurretSubsystem *subsystem);
 
     void initialize() override;
 
@@ -73,19 +71,15 @@ private:
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    static constexpr uint32_t TIME_BETWEEN_CV_REQUESTS = 1000;
-
-    aruwlib::Drivers *drivers;
+    tap::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
 
-    aruwlib::algorithms::ContiguousFloat yawTargetAngle;
-    aruwlib::algorithms::ContiguousFloat pitchTargetAngle;
+    tap::algorithms::ContiguousFloat yawTargetAngle;
+    tap::algorithms::ContiguousFloat pitchTargetAngle;
 
-    aruwsrc::algorithms::TurretPid yawPid;
-    aruwsrc::algorithms::TurretPid pitchPid;
-
-    aruwlib::arch::MilliTimeout sendRequestTimer;
+    tap::algorithms::SmoothPid yawPid;
+    tap::algorithms::SmoothPid pitchPid;
 
     uint32_t prevTime;
 
@@ -94,8 +88,6 @@ private:
     void runPitchPositionController(float dt);
 };  // class TurretCvCommand
 
-}  // namespace turret
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::turret
 
 #endif  // TURRET_CV_COMMAND_HPP_

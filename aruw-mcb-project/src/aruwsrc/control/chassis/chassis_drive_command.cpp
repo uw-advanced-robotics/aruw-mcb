@@ -19,53 +19,29 @@
 
 #include "chassis_drive_command.hpp"
 
-#include <aruwlib/Drivers.hpp>
-#include <aruwlib/algorithms/math_user_utils.hpp>
-#include <aruwlib/communication/remote.hpp>
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
 
+#include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
-using aruwlib::Drivers;
+using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
-ChassisDriveCommand::ChassisDriveCommand(aruwlib::Drivers* drivers, ChassisSubsystem* chassis)
+ChassisDriveCommand::ChassisDriveCommand(tap::Drivers* drivers, ChassisSubsystem* chassis)
     : drivers(drivers),
       chassis(chassis)
 {
-    addSubsystemRequirement(dynamic_cast<aruwlib::control::Subsystem*>(chassis));
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
 }
 
 void ChassisDriveCommand::initialize() {}
 
-void ChassisDriveCommand::execute()
-{
-    float chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput() *
-                                             ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
-    // what we will multiply x and y speed by to take into account rotation
-    float rTranslationalGain =
-        chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
-
-    float chassisXDesiredWheelspeed = aruwlib::algorithms::limitVal<float>(
-                                          drivers->controlOperatorInterface.getChassisXInput(),
-                                          -rTranslationalGain,
-                                          rTranslationalGain) *
-                                      ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
-    float chassisYDesiredWheelspeed = aruwlib::algorithms::limitVal<float>(
-                                          drivers->controlOperatorInterface.getChassisYInput(),
-                                          -rTranslationalGain,
-                                          rTranslationalGain) *
-                                      ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-
-    chassis->setDesiredOutput(
-        chassisXDesiredWheelspeed,
-        chassisYDesiredWheelspeed,
-        chassisRotationDesiredWheelspeed);
-}
+void ChassisDriveCommand::execute() { ChassisRelDrive::onExecute(drivers, chassis); }
 
 void ChassisDriveCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
 

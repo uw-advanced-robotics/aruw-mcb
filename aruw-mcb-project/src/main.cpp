@@ -21,45 +21,47 @@
 /* hosted environment (simulator) includes --------------------------------- */
 #include <iostream>
 
-#include <aruwlib/communication/tcp-server/TCPServer.hpp>
-#include <aruwlib/motor/motorsim/sim_handler.hpp>
+#include "tap/communication/tcp-server/tcp_server.hpp"
+#include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
-#include <aruwlib/rm-dev-board-a/board.hpp>
-#include <modm/architecture/interface/delay.hpp>
+#include "tap/board/board.hpp"
+
+#include "modm/architecture/interface/delay.hpp"
 
 /* arch includes ------------------------------------------------------------*/
-#include <aruwlib/architecture/periodic_timer.hpp>
-#include <aruwlib/architecture/profiler.hpp>
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/architecture/profiler.hpp"
 
 /* communication includes ---------------------------------------------------*/
-#include <aruwlib/DriversSingleton.hpp>
+#include "tap/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
-#include <aruwlib/errors/create_errors.hpp>
+#include "tap/errors/create_errors.hpp"
 
 /* control includes ---------------------------------------------------------*/
-#include <aruwlib/architecture/clock.hpp>
+#include "tap/architecture/clock.hpp"
+#include "tap/architecture/endianness_wrappers.hpp"
 
 #include "aruwsrc/control/robot_control.hpp"
+#include "modm/architecture/interface/can_message.hpp"
 
-#include "aruwlib/architecture/endianness_wrappers.hpp"
-
-#include "aruwlib/architecture/endianness_wrappers.hpp"
-
-using aruwlib::Drivers;
+using tap::Drivers;
 
 /* define timers here -------------------------------------------------------*/
-aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-static void initializeIo(aruwlib::Drivers *drivers);
+static void initializeIo(tap::Drivers *drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-static void updateIo(aruwlib::Drivers *drivers);
+static void updateIo(tap::Drivers *drivers);
+
+static constexpr uint16_t IMU_MSG_CAN_ID = 0x203;
 
 int main()
 {
@@ -68,7 +70,7 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
-    aruwlib::Drivers *drivers = aruwlib::DoNotUse_getDrivers();
+    tap::Drivers *drivers = tap::DoNotUse_getDrivers();
 
     Board::initialize();
     initializeIo(drivers);
@@ -82,20 +84,23 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
+            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
+            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
             float yaw = drivers->mpu6500.getYaw();
-            int16_t gzRaw = drivers->mpu6500.getGz();
+            int16_t gzRaw =
+                drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
 
-            if (drivers->can.isReadyToSend(aruwlib::can::CanBus::CAN_BUS1))
+            if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS1))
             {
-                drivers->leds.set(aruwlib::gpio::Leds::Green, i < 50);
+                drivers->leds.set(tap::gpio::Leds::Green, i < 50);
                 i = (i + 1) % 100;
-                modm::can::Message msg(0x203, 8);
+
+                modm::can::Message msg(IMU_MSG_CAN_ID, 8);
                 msg.setExtended(false);
-                aruwlib::arch::convertToLittleEndian(yaw, msg.data);
-                aruwlib::arch::convertToLittleEndian(gzRaw, msg.data + 4);
-                drivers->can.sendMessage(aruwlib::can::CanBus::CAN_BUS1, msg);
+                tap::arch::convertToLittleEndian(yaw, msg.data);
+                tap::arch::convertToLittleEndian(gzRaw, msg.data + 4);
+                drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, msg);
             }
         }
         modm::delay_us(10);
@@ -103,15 +108,18 @@ int main()
     return 0;
 }
 
-static void initializeIo(aruwlib::Drivers *drivers)
+static void initializeIo(tap::Drivers *drivers)
 {
     drivers->can.initialize();
     drivers->leds.init();
     drivers->digital.init();
     drivers->mpu6500.init();
+    drivers->errorController.init();
+    drivers->mpu6500TerminalSerialHandler.init();
+    drivers->terminalSerial.initialize();
 }
 
-static void updateIo(aruwlib::Drivers *drivers)
+static void updateIo(tap::Drivers *drivers)
 {
     drivers->mpu6500.read();
     drivers->canRxHandler.pollCanData();
