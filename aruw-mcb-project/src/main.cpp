@@ -21,44 +21,46 @@
 /* hosted environment (simulator) includes --------------------------------- */
 #include <iostream>
 
-#include <aruwlib/communication/tcp-server/TCPServer.hpp>
-#include <aruwlib/motor/motorsim/sim_handler.hpp>
+#include "tap/communication/tcp-server/tcp_server.hpp"
+#include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
-#include <aruwlib/rm-dev-board-a/board.hpp>
-#include <modm/architecture/interface/delay.hpp>
+#include "tap/board/board.hpp"
+
+#include "modm/architecture/interface/delay.hpp"
 
 /* arch includes ------------------------------------------------------------*/
-#include <aruwlib/architecture/periodic_timer.hpp>
-#include <aruwlib/architecture/profiler.hpp>
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/architecture/profiler.hpp"
 
 /* communication includes ---------------------------------------------------*/
-#include <aruwlib/DriversSingleton.hpp>
+#include "tap/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
-#include <aruwlib/errors/create_errors.hpp>
+#include "tap/errors/create_errors.hpp"
 
 /* control includes ---------------------------------------------------------*/
-#include <aruwlib/architecture/clock.hpp>
+#include "tap/architecture/clock.hpp"
 
 #include "aruwlib/architecture/endianness_wrappers.hpp"
 
 #include "aruwsrc/control/robot_control.hpp"
 #include "modm/architecture/interface/can_message.hpp"
 
-using aruwlib::Drivers;
+using tap::Drivers;
 
 /* define timers here -------------------------------------------------------*/
-aruwlib::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-static void initializeIo(aruwlib::Drivers *drivers);
+static void initializeIo(tap::Drivers *drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-static void updateIo(aruwlib::Drivers *drivers);
+static void updateIo(tap::Drivers *drivers);
 
 static constexpr uint16_t IMU_MSG_CAN_ID = 0x203;
 
@@ -69,7 +71,7 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
-    aruwlib::Drivers *drivers = aruwlib::DoNotUse_getDrivers();
+    tap::Drivers *drivers = tap::DoNotUse_getDrivers();
 
     Board::initialize();
     initializeIo(drivers);
@@ -81,9 +83,16 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
+        if (sendXavierTimeout.execute())
+        {
+            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            // TODO try faster baude rate so we can send more frequently (currently mcb's serial
+            // buffers are overflowing if you try and send faster than 3 ms).
+        }
+
         if (sendMotorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->mpu6500.calcIMUAngles, ());
+            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
             float yaw = drivers->mpu6500.getYaw();
@@ -108,7 +117,7 @@ int main()
     return 0;
 }
 
-static void initializeIo(aruwlib::Drivers *drivers)
+static void initializeIo(tap::Drivers *drivers)
 {
     drivers->can.initialize();
     drivers->leds.init();
@@ -116,9 +125,10 @@ static void initializeIo(aruwlib::Drivers *drivers)
     drivers->mpu6500.init();
     drivers->terminalSerial.initialize();
     drivers->errorController.init();
+    drivers->mpu6500TerminalSerialHandler.init();
 }
 
-static void updateIo(aruwlib::Drivers *drivers)
+static void updateIo(tap::Drivers *drivers)
 {
     drivers->mpu6500.read();
     drivers->canRxHandler.pollCanData();

@@ -20,7 +20,7 @@
 #ifndef SQUEEZE_GRABBER_COMMAND_HPP_
 #define SQUEEZE_GRABBER_COMMAND_HPP_
 
-#include <aruwlib/control/command.hpp>
+#include "tap/control/command.hpp"
 
 namespace aruwsrc
 {
@@ -28,7 +28,7 @@ namespace engineer
 {
 class GrabberSubsystem;
 
-class SqueezeGrabberCommand : public aruwlib::control::Command
+class SqueezeGrabberCommand : public tap::control::Command
 {
 public:
     explicit SqueezeGrabberCommand(GrabberSubsystem* subsystem);

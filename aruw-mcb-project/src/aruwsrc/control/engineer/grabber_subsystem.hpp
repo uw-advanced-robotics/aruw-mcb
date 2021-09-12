@@ -20,10 +20,9 @@
 #ifndef GRABBER_SUBSYSTEM_HPP_
 #define GRABBER_SUBSYSTEM_HPP_
 
-#include <aruwlib/communication/gpio/digital.hpp>
-#include <aruwlib/control/subsystem.hpp>
-
-#include "util_macros.hpp"
+#include "tap/communication/gpio/digital.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -34,11 +33,11 @@ namespace engineer
  * The grabber will be actuated by a single solenoid that
  * controls two pneumatic pistons.
  */
-class GrabberSubsystem : public aruwlib::control::Subsystem
+class GrabberSubsystem : public tap::control::Subsystem
 {
 public:
-    GrabberSubsystem(aruwlib::Drivers *drivers, aruwlib::gpio::Digital::OutputPin pin)
-        : aruwlib::control::Subsystem(drivers),
+    GrabberSubsystem(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
+        : tap::control::Subsystem(drivers),
           pin(pin),
           isGrabberSqueezed(false)
     {
@@ -57,7 +56,7 @@ public:
     const char *getName() override { return "Grabber"; }
 
 private:
-    aruwlib::gpio::Digital::OutputPin pin;
+    tap::gpio::Digital::OutputPin pin;
 
     bool isGrabberSqueezed;
 
