@@ -66,6 +66,7 @@ bool Bno055InterfaceFusion::update()
             reinterpret_cast<uint8_t *>(&rawYaw),
             sizeof(rawYaw)));
 
+        newDataReady = true;
         ready = true;
     }
 

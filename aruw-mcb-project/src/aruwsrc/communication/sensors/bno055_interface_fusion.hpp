@@ -5,10 +5,10 @@
 #include "modm/driver/inertial/bno055.hpp"
 #endif
 
-#include "modm/processing.hpp"
-
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/board/board.hpp"
+
+#include "modm/processing.hpp"
 
 namespace aruwsrc::sensors
 {
@@ -35,8 +35,10 @@ public:
 
     bool update();
 
-    inline float getYaw() const { return rawYaw / LSB_PER_DEGREE; }
+    inline float getYaw() { return rawYaw / LSB_PER_DEGREE; }
     inline bool isReady() const { return ready; }
+    bool isNewDataReady() const { return newDataReady; }
+    void setNewDataNotReady() { newDataReady = false; }
 
 private:
     /**
@@ -64,6 +66,7 @@ private:
 #endif
 
     bool ready;
+    bool newDataReady = false;
 };
 }  // namespace aruwsrc::sensors
 

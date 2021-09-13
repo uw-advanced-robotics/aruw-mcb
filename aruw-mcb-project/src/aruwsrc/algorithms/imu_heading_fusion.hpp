@@ -2,6 +2,8 @@
 #define IMU_HEADING_FUSION_HPP_
 
 #include "kalman_filter.hpp"
+#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/linear_interpolation_contiguous.hpp"
 
 namespace tap
 {
@@ -13,36 +15,42 @@ namespace aruwsrc::algorithms
 class ImuHeadingFusion
 {
 public:
-    static constexpr uint16_t KF_STATES = 1;
-    static constexpr uint16_t KF_INPUTS = 2;
-
     ImuHeadingFusion(tap::Drivers *drivers);
 
     void initialize();
 
     void run();
 
-    float getYaw() const { return kf.getStateMatrix()[0]; }
-
-    using InputVectorArr = float[KF_INPUTS];
-    const InputVectorArr &getInputVector() const { return inputVector.data; }
+    float getYaw() const { return yawFiltered; }
 
 private:
-    static constexpr float A[KF_STATES * KF_STATES] = {1};
-    static constexpr float C[KF_INPUTS * KF_STATES] = {0.5f, 0.5f};
-    static constexpr float Q[KF_STATES * KF_STATES] = {1};
-    static constexpr float R[KF_INPUTS * KF_INPUTS] = {1, 1};
-    static constexpr float P[KF_STATES * KF_STATES] = {1};
+    /**
+     * Gyroscope z rotational velocity, in degrees/second. When the gyroscope rotational velocity is
+     * above this value, the mpu6500 is used exclusively. When the velocity is below this value,
+     * a combination of the bno055 and mpu6500 is used.
+     */
+    static constexpr float MAX_GZ_FOR_FULL_MPU_RELIANCE = 10.0f;
+
+    /**
+     * The average of the absolute mpu6500 gyroscope readings in the z axis, rounded up.
+     */
+    static constexpr float MPU6500_RESTING_MAX_GZ = 0.5f;
 
     tap::Drivers *drivers;
 
-    CMSISMat<KF_INPUTS, 1> inputVector;
-
-    KalmanFilter<KF_STATES, KF_INPUTS> kf;
-
-    bool initialized = false;
+    bool imusInitialized = false;
 
     float mpu6500YawOffset = 0.0f;
+    float bno055YawOffset = 0.0f;
+    /**
+     * @note We must invert the bno055 so its direction matches that of the mpu6500.
+     */
+    tap::algorithms::ContiguousFloat bno055InvertedPrevious;
+    tap::algorithms::LinearInterpolationContiguous bno055LinearlyInterpolated;
+    float yawFiltered = 0.0f;
+
+    void resetMpuCalibrationOffset(float bnoYaw, float mpuYaw);
+    void resetBnoCalibrationOffset(float bnoYaw, float mpuYaw);
 };
 }  // namespace aruwsrc::algorithms
 
