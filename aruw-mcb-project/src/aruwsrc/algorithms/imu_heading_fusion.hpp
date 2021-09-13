@@ -24,12 +24,15 @@ public:
 
     float getYaw() const { return kf.getStateMatrix()[0]; }
 
+    using InputVectorArr = float[KF_INPUTS];
+    const InputVectorArr &getInputVector() const { return inputVector.data; }
+
 private:
-    static constexpr float A [KF_STATES * KF_STATES] = {1};
-    static constexpr float C [KF_INPUTS * KF_STATES] = {1,1};
-    static constexpr float Q [KF_STATES * KF_STATES] = {1};
-    static constexpr float R [KF_INPUTS * KF_INPUTS] = {1,1};
-    static constexpr float P [KF_STATES * KF_STATES] = {1};
+    static constexpr float A[KF_STATES * KF_STATES] = {1};
+    static constexpr float C[KF_INPUTS * KF_STATES] = {0.5f, 0.5f};
+    static constexpr float Q[KF_STATES * KF_STATES] = {1};
+    static constexpr float R[KF_INPUTS * KF_INPUTS] = {1, 1};
+    static constexpr float P[KF_STATES * KF_STATES] = {1};
 
     tap::Drivers *drivers;
 

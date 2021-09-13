@@ -50,7 +50,6 @@ using tap::Drivers;
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
-tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -77,6 +76,8 @@ int main()
 
     int i = 0;
 
+    drivers->terminalSerial.getStream() << "hi" << modm::endl;
+
     while (1)
     {
         // do this as fast as you can
@@ -86,20 +87,14 @@ int main()
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-
-            float yaw = drivers->imuHeadingFusion.getYaw();
-
-            drivers->terminalSerial.getStream().printf(
-                "%.2f\t%.2f\t%.2f\n",
-                yaw,
-                drivers->bno055InterfaceFusion.getYaw(),
-                drivers->mpu6500.getYaw());
-
-            int16_t gzRaw =
-                drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+            PROFILE(drivers->profile, drivers->imuHeadingFusion.run, ());
 
             if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS1))
             {
+                int16_t gzRaw =
+                    drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+                float yaw = drivers->imuHeadingFusion.getYaw();
+                
                 drivers->leds.set(tap::gpio::Leds::Green, i < 50);
                 i = (i + 1) % 100;
 
@@ -120,14 +115,18 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->can.initialize();
     drivers->leds.init();
     drivers->digital.init();
+    drivers->pwm.init();
     drivers->mpu6500.init();
     drivers->errorController.init();
     drivers->mpu6500TerminalSerialHandler.init();
     drivers->terminalSerial.initialize();
+    drivers->bno055InterfaceFusion.initialize();
+    drivers->imuHeadingFusion.initialize();
 }
 
 static void updateIo(tap::Drivers *drivers)
 {
     drivers->mpu6500.read();
     drivers->canRxHandler.pollCanData();
+    drivers->bno055InterfaceFusion.update();
 }

@@ -88,8 +88,8 @@ private:
     CMSISMat<STATES, STATES> At;
 
     /**
-     * Observation matrix. How we transform the input into the form
-     * of the state matrix.
+     * Observation matrix. How we transform the state matrix into a form compatible
+     * with the observation vector
      */
     const CMSISMat<INPUTS, STATES> C;
 
