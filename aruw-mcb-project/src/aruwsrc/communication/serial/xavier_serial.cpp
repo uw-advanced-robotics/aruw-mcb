@@ -34,7 +34,7 @@ namespace aruwsrc
 namespace serial
 {
 XavierSerial::XavierSerial(tap::Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart3),
+    : DJISerial(drivers, Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),
       isCvOnline(false),

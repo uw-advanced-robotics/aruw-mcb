@@ -43,7 +43,6 @@
 #include "tap/mock/uart_mock.hpp"
 
 #include "aruwsrc/algorithms/imu_heading_fusion.hpp"
-#include "aruwsrc/communication/sensors/bno055_interface.hpp"
 #include "aruwsrc/communication/sensors/bno055_interface_fusion.hpp"
 #include "aruwsrc/mock/imu_rx_listener_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
@@ -72,7 +71,6 @@
 
 #include "aruwsrc/algorithms/imu_heading_fusion.hpp"
 #include "aruwsrc/communication/can/imu_rx_listener.hpp"
-#include "aruwsrc/communication/sensors/bno055_interface.hpp"
 #include "aruwsrc/communication/sensors/bno055_interface_fusion.hpp"
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -114,7 +112,6 @@ public:
           profiler(),
           djiMotorTerminalSerialHandler(this),
           schedulerTerminalHandler(this),
-          bno055Interface(),
           bno055InterfaceFusion(),
           imuRxHandler(this),
           imuHeadingFusion(this)
@@ -144,7 +141,6 @@ public:
     arch::Profiler profiler;
     testing::NiceMock<mock::DjiMotorTerminalSerialHandlerMock> djiMotorTerminalSerialHandler;
     testing::NiceMock<mock::SchedulerTerminalHandlerMock> schedulerTerminalHandler;
-    aruwsrc::sensors::Bno055Interface bno055Interface;
     aruwsrc::sensors::Bno055InterfaceFusion bno055InterfaceFusion;
     testing::NiceMock<aruwsrc::mock::ImuRxListenerMock> imuRxHandler;
     aruwsrc::algorithms::ImuHeadingFusion imuHeadingFusion;
@@ -172,7 +168,6 @@ public:
     arch::Profiler profiler;
     motor::DjiMotorTerminalSerialHandler djiMotorTerminalSerialHandler;
     control::SchedulerTerminalHandler schedulerTerminalHandler;
-    aruwsrc::sensors::Bno055Interface bno055Interface;
     aruwsrc::sensors::Bno055InterfaceFusion bno055InterfaceFusion;
     aruwsrc::can::ImuRxListener imuRxHandler;
     aruwsrc::algorithms::ImuHeadingFusion imuHeadingFusion;
