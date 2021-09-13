@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef BNO055_INTERFACE_HPP_
 #define BNO055_INTERFACE_HPP_
 
@@ -5,11 +24,11 @@
 #include "modm/driver/inertial/bno055.hpp"
 #endif
 
-#include "modm/processing.hpp"
-
-#include "tap/board/board.hpp"
-#include "tap/architecture/timeout.hpp"
 #include "tap/algorithms/MahonyAHRS.h"
+#include "tap/architecture/timeout.hpp"
+#include "tap/board/board.hpp"
+
+#include "modm/processing.hpp"
 
 namespace aruwsrc::sensors
 {
@@ -21,9 +40,11 @@ namespace aruwsrc::sensors
 class Bno055Interface : public modm::pt::Protothread
 {
 public:
+#ifndef PLATFORM_HOSTED
     using Bno055I2CMasterScl = GpioF1;
     using Bno055I2CMasterSda = GpioF0;
     using Bno055I2CMaster = I2cMaster2;
+#endif
 
     static constexpr uint8_t BNO055_ADDR = 0x28;
 
@@ -78,13 +99,15 @@ private:
 
     tap::arch::MicroTimeout timer;
 
+#ifndef PLATFORM_HOSTED
     modm::bno055::Data unusedData;
     modm::Bno055<Bno055I2CMaster> imu;
+#endif
 
     Mahony ahrsAlgorithm;
 
     bool ready;
 };
-}  // namespace sensors
+}  // namespace aruwsrc::sensors
 
 #endif  // BNO055_INTERFACE_HPP_

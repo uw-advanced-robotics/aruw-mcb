@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef BNO055_INTERFACE_FUSION_HPP_
 #define BNO055_INTERFACE_FUSION_HPP_
 
@@ -5,10 +24,10 @@
 #include "modm/driver/inertial/bno055.hpp"
 #endif
 
-#include "modm/processing.hpp"
-
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/board/board.hpp"
+
+#include "modm/processing.hpp"
 
 namespace aruwsrc::sensors
 {
@@ -23,9 +42,11 @@ namespace aruwsrc::sensors
 class Bno055InterfaceFusion : public modm::pt::Protothread
 {
 public:
+#ifndef PLATFORM_HOSTED
     using Bno055I2CMasterScl = GpioF1;
     using Bno055I2CMasterSda = GpioF0;
     using Bno055I2CMaster = I2cMaster2;
+#endif
 
     static constexpr uint8_t BNO055_ADDR = 0x28;
 
@@ -51,6 +72,7 @@ private:
 
     tap::arch::PeriodicMilliTimer timer;
 
+#ifndef PLATFORM_HOSTED
     /**
      * The `modm::bno055` object requires a reference to
      * a `modm::bno055::Data` object. We, however, do not
@@ -59,7 +81,6 @@ private:
      */
     modm::bno055::Data unusedData;
 
-#ifndef PLATFORM_HOSTED
     modm::Bno055<Bno055I2CMaster> imu;
 #endif
 
