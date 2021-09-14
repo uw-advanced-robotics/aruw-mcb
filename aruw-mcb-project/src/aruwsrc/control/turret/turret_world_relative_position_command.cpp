@@ -199,9 +199,8 @@ void TurretWorldRelativePositionCommand::runPitchPositionController(float dt)
         pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity(), dt);
 
     // gravity compensation
-    pidOutput +=
-        PITCH_GRAVITY_COMPENSATION_KP *
-        cosf(tap::algorithms::degreesToRadians(turretSubsystem->getPitchAngleFromCenter()));
+    pidOutput += PITCH_GRAVITY_COMPENSATION_KP *
+                 cosf(modm::toRadian(turretSubsystem->getPitchAngleFromCenter()));
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
