@@ -1,7 +1,6 @@
 #ifndef IMU_HEADING_FUSION_HPP_
 #define IMU_HEADING_FUSION_HPP_
 
-#include "kalman_filter.hpp"
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/linear_interpolation_contiguous.hpp"
 

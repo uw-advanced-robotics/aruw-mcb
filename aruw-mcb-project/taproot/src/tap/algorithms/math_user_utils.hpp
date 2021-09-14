@@ -22,7 +22,6 @@
 
 #include <cmath>
 #include <cstring>
-#include "arm_math.h"
 
 #include "modm/math/geometry/angle.hpp"
 

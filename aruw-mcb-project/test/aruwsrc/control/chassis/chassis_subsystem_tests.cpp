@@ -27,6 +27,7 @@
 
 using modm::Matrix;
 using tap::Drivers;
+
 using namespace aruwsrc::chassis;
 
 static constexpr float WHEEL_VEL = 1000;

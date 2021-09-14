@@ -23,8 +23,6 @@
 
 #include "aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
 
-#include "arm_math.h"
-
 using namespace tap::algorithms;
 
 namespace aruwsrc
