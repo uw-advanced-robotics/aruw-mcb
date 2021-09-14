@@ -76,8 +76,6 @@ int main()
 
     int i = 0;
 
-    drivers->terminalSerial.getStream() << "hi" << modm::endl;
-
     while (1)
     {
         // do this as fast as you can

@@ -92,7 +92,7 @@ void BeybladeCommand::execute()
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, -degreesToRadians(turretYawAngle));
+        tap::algorithms::rotateVector(&x, &y, -modm::toRadian(turretYawAngle));
 
         // set outputs
         chassis->setDesiredOutput(x, y, r);

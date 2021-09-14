@@ -191,15 +191,15 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_zero_desired_output_with_any_hea
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
-    cs.getVelocityWorldRelative(chassisVelocity, PI / 4.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI / 4.0f);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
-    cs.getVelocityWorldRelative(chassisVelocity, PI / 2.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI / 2.0f);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
-    cs.getVelocityWorldRelative(chassisVelocity, 3.0f * PI / 2.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, 3.0f * M_PI / 2.0f);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
@@ -219,25 +219,25 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_x_different_headings)
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI / 4.0f);
-    EXPECT_FLOAT_EQ(CHASSIS_VEL * cosf(PI / 4.0f), chassisVelocity[0][0]);
-    EXPECT_FLOAT_EQ(CHASSIS_VEL * sinf(PI / 4.0f), chassisVelocity[1][0]);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI / 4.0f);
+    EXPECT_FLOAT_EQ(CHASSIS_VEL * cosf(M_PI / 4.0f), chassisVelocity[0][0]);
+    EXPECT_FLOAT_EQ(CHASSIS_VEL * sinf(M_PI / 4.0f), chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI / 2.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI / 2.0f);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(CHASSIS_VEL, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI);
     EXPECT_FLOAT_EQ(-CHASSIS_VEL, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, 3.0f * PI / 2.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, 3.0f * M_PI / 2.0f);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(-CHASSIS_VEL, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
@@ -257,25 +257,25 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_y_different_headings)
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI / 4.0f);
-    EXPECT_FLOAT_EQ(CHASSIS_VEL * cosf(3.0f * PI / 4.0f), chassisVelocity[0][0]);
-    EXPECT_FLOAT_EQ(CHASSIS_VEL * sinf(3.0f * PI / 4.0f), chassisVelocity[1][0]);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI / 4.0f);
+    EXPECT_FLOAT_EQ(CHASSIS_VEL * cosf(3.0f * M_PI / 4.0f), chassisVelocity[0][0]);
+    EXPECT_FLOAT_EQ(CHASSIS_VEL * sinf(3.0f * M_PI / 4.0f), chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI / 2.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI / 2.0f);
     EXPECT_FLOAT_EQ(-CHASSIS_VEL, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(-CHASSIS_VEL, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, 3.0f * PI / 2.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, 3.0f * M_PI / 2.0f);
     EXPECT_FLOAT_EQ(CHASSIS_VEL, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
@@ -295,25 +295,25 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_r_different_headings)
     EXPECT_FLOAT_EQ(CHASSIS_VEL_R, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI / 4.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI / 4.0f);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(CHASSIS_VEL_R, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI / 2.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI / 2.0f);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(CHASSIS_VEL_R, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, PI);
+    cs.getVelocityWorldRelative(chassisVelocity, M_PI);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(CHASSIS_VEL_R, chassisVelocity[2][0]);
 
     chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    cs.getVelocityWorldRelative(chassisVelocity, 3.0f * PI / 2.0f);
+    cs.getVelocityWorldRelative(chassisVelocity, 3.0f * M_PI / 2.0f);
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
     EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
     EXPECT_FLOAT_EQ(CHASSIS_VEL_R, chassisVelocity[2][0]);
