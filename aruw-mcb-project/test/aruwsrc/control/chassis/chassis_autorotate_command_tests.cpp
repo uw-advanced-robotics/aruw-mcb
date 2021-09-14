@@ -98,14 +98,13 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
     ChassisAutorotateCommand& cac,
     float turretAngleFromCenter)
 {
-    ON_CALL(chassis, chassisSpeedRotationPID)
-        .WillByDefault([&](float angle, float kp)
-                       { return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, kp); });
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float kp) {
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, kp);
+    });
 
     ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(turretAngleFromCenter));
 
-    auto runTest = [&](float x, float y)
-    {
+    auto runTest = [&](float x, float y) {
         float rotatedX = x;
         float rotatedY = y;
         rotateVector(&rotatedX, &rotatedY, -modm::toRadian(turretAngleFromCenter));
