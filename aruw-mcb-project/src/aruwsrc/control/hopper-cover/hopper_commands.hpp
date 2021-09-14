@@ -41,10 +41,9 @@ class SoldierOpenHopperCommand : public MoveAbsoluteCommand
 {
 public:
     // 3.12 revolutions
-    static constexpr float SOLDIER_OPEN_HOPPER_TARGET_ANGLE = 3.12 * PI;
+    static constexpr float SOLDIER_OPEN_HOPPER_TARGET_ANGLE = 3.12 * M_PI;
     // 5000 milliradians/second
-    static constexpr uint32_t SOLDIER_OPEN_HOPPER_ANGULAR_SPEED =
-        5.0f * PI * 1000.0f;
+    static constexpr uint32_t SOLDIER_OPEN_HOPPER_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
     // Allowable error in radians within which motor will consider target angle reached.
     static constexpr float SOLDIER_OPEN_HOPPER_TOLERANCE = 0.05f;
     SoldierOpenHopperCommand(agitator::AgitatorSubsystem* agitator)
@@ -79,8 +78,7 @@ public:
     // 0 revolutions
     static constexpr float SOLDIER_CLOSE_HOPPER_TARGET_ANGLE = 0;
     // 5000 milliradians/second
-    static constexpr uint32_t SOLDIER_CLOSE_HOPPER_ANGULAR_SPEED =
-        5.0f * PI * 1000.0f;
+    static constexpr uint32_t SOLDIER_CLOSE_HOPPER_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
     // Allowable error in radians within which motor will consider target angle reached.
     static constexpr float SOLDIER_CLOSE_HOPPER_TOLERANCE = 0.05f;
 

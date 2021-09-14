@@ -163,7 +163,7 @@ float SentinelDriveSubsystem::distanceFromEncoder(tap::motor::DjiMotor* motor)
 {
     float unwrappedAngle = motor->getEncoderUnwrapped();
     float numberOfRotations = unwrappedAngle / (tap::motor::DjiMotor::ENC_RESOLUTION);
-    return numberOfRotations * 2.0f * PI * WHEEL_RADIUS / GEAR_RATIO;
+    return numberOfRotations * 2.0f * M_PI * WHEEL_RADIUS / GEAR_RATIO;
 }
 
 void SentinelDriveSubsystem::runHardwareTests()
