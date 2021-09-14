@@ -52,8 +52,8 @@ using namespace modm::literals;
 struct SystemClock
 {
     static constexpr uint32_t Frequency = 180_MHz;
-    static constexpr uint32_t Apb1 = Frequency / 2;
-    static constexpr uint32_t Apb2 = Frequency;
+    static constexpr uint32_t Apb1 = Frequency / 4;
+    static constexpr uint32_t Apb2 = Frequency / 2;
 
     static constexpr uint32_t Adc = Apb2;
 
@@ -102,17 +102,16 @@ struct SystemClock
 #ifndef PLATFORM_HOSTED
         Rcc::enableExternalCrystal();  // 8 MHz
         Rcc::PllFactors pllF = {
-            6,    // 12MHz / N=6 -> 2MHz
-            180,  // 2MHz * M=180 -> 360MHz
+            6,    // 12MHz / M=6 -> 2MHz
+            180,  // 2MHz * N=180 -> 360MHz
             2     // 360MHz / P=2 -> 180MHz = F_cpu
         };
         Rcc::enablePll(Rcc::PllSource::ExternalCrystal, pllF);
 
         Rcc::setFlashLatency<Frequency>();
         Rcc::enableSystemClock(Rcc::SystemClockSource::Pll);
-        
-        Rcc::setApb1Prescaler(Rcc::Apb1Prescaler::Div2);
-        Rcc::setApb2Prescaler(Rcc::Apb2Prescaler::Div1);
+        Rcc::setApb1Prescaler(Rcc::Apb1Prescaler::Div4);
+        Rcc::setApb2Prescaler(Rcc::Apb2Prescaler::Div2);
         Rcc::updateCoreFrequency<Frequency>();
 #endif
 
