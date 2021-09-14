@@ -19,7 +19,6 @@
 
 #include "double_agitator_subsystem.hpp"
 
-using tap::algorithms::PI;
 using tap::motor::DjiMotor;
 
 namespace aruwsrc
@@ -142,7 +141,7 @@ float DoubleAgitatorSubsystem::getCurrentValue() const
 
 void DoubleAgitatorSubsystem::runHardwareTests()
 {
-    if (tap::algorithms::compareFloatClose(this->getSetpoint(), this->getCurrentValue(), PI / 16))
+    if (tap::algorithms::compareFloatClose(this->getSetpoint(), this->getCurrentValue(), M_PI / 16))
     {
         this->setHardwareTestsComplete();
     }
@@ -150,7 +149,7 @@ void DoubleAgitatorSubsystem::runHardwareTests()
 
 void DoubleAgitatorSubsystem::onHardwareTestStart()
 {
-    this->setSetpoint(this->getCurrentValue() + PI / 2);
+    this->setSetpoint(this->getCurrentValue() + M_PI / 2);
 }
 
 }  // namespace agitator
