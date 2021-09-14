@@ -82,6 +82,13 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
+        if (sendXavierTimeout.execute())
+        {
+            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            // TODO try faster baude rate so we can send more frequently (currently mcb's serial
+            // buffers are overflowing if you try and send faster than 3 ms).
+        }
+
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
