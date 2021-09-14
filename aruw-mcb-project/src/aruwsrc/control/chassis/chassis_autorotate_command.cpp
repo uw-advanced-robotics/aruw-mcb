@@ -77,7 +77,7 @@ void ChassisAutorotateCommand::execute()
         rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            -degreesToRadians(angleFromCenter));
+            -modm::toRadian(angleFromCenter));
 
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,

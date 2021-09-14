@@ -67,15 +67,15 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
     // than the center of the chassis, we calculate the offset and than multiply however
     // much we want to rotate by
     float leftFrontRotationRatio =
-        degreesToRadians(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
     float rightFroneRotationRatio =
-        degreesToRadians(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+        modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
     float leftBackRotationRatio =
-        degreesToRadians(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+        modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
     float rightBackRotationRatio =
-        degreesToRadians(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+        modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
 
-    float chassisRotateTranslated = radiansToDegrees(r) / chassisRotationRatio;
+    float chassisRotateTranslated = modm::toDegree(r) / chassisRotationRatio;
     desiredWheelRPM[LF][0] = limitVal<float>(
         y + x + chassisRotateTranslated * leftFrontRotationRatio,
         -maxWheelSpeed,

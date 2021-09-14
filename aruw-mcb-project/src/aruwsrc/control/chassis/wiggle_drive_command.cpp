@@ -95,7 +95,7 @@ void WiggleDriveCommand::execute()
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         // Apply a rotation matrix to the user input so you drive turret
         // relative while wiggling.
-        rotateVector(&x, &y, -degreesToRadians(turretYawFromCenter));
+        rotateVector(&x, &y, -modm::toRadian(turretYawFromCenter));
 
         chassis->setDesiredOutput(x, y, r);
     }
