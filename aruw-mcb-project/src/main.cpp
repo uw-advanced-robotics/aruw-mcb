@@ -91,7 +91,7 @@ int main()
             int16_t gzRaw =
                 drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
 
-            int16_t pitchFixedPoint = drivers->mpu6500.getPitch() * 100.0f;
+            int16_t rollFixedPoint = drivers->mpu6500.getRoll() * 100.0f;
             int16_t gxRaw =
                 drivers->mpu6500.getGx() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
 
@@ -106,11 +106,11 @@ int main()
                 tap::arch::convertToLittleEndian(yawFixedPoint, msg.data);
                 tap::arch::convertToLittleEndian(gzRaw, msg.data + sizeof(yawFixedPoint));
                 tap::arch::convertToLittleEndian(
-                    pitchFixedPoint,
+                    rollFixedPoint,
                     msg.data + sizeof(yawFixedPoint) + sizeof(gzRaw));
                 tap::arch::convertToLittleEndian(
                     gxRaw,
-                    msg.data + sizeof(yawFixedPoint) + sizeof(gzRaw) + sizeof(pitchFixedPoint));
+                    msg.data + sizeof(yawFixedPoint) + sizeof(gzRaw) + sizeof(rollFixedPoint));
 
                 drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, msg);
             }
