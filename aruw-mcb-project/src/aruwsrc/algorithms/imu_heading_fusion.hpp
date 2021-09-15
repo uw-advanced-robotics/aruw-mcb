@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef IMU_HEADING_FUSION_HPP_
 #define IMU_HEADING_FUSION_HPP_
 
@@ -11,6 +30,10 @@ class Drivers;
 
 namespace aruwsrc::algorithms
 {
+/**
+ * An object whose purpose is to combine data from a BNO055 and MPU6500
+ * to improve reduce the yaw drift when stationary.
+ */
 class ImuHeadingFusion
 {
 public:
@@ -18,6 +41,10 @@ public:
 
     void initialize();
 
+    /**
+     * Function meant to be called at 500 Hz, the rate at which the mpu6500's
+     * `periodicIMUUpdate` function should be called.
+     */
     void run();
 
     float getYaw() const { return yawFiltered; }
@@ -48,8 +75,14 @@ private:
     tap::algorithms::LinearInterpolationContiguous bno055LinearlyInterpolated;
     float yawFiltered = 0.0f;
 
-    void resetMpuCalibrationOffset(float bnoYaw, float mpuYaw);
-    void resetBnoCalibrationOffset(float bnoYaw, float mpuYaw);
+    inline void resetMpuCalibrationOffset(float bnoYaw, float mpuYaw)
+    {
+        mpu6500YawOffset = -mpuYaw + bnoYaw;
+    }
+    inline void resetBnoCalibrationOffset(float bnoYaw, float mpuYaw)
+    {
+        bno055YawOffset = mpuYaw - bnoYaw;
+    }
 };
 }  // namespace aruwsrc::algorithms
 

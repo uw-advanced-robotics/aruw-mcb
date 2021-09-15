@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "imu_heading_fusion.hpp"
 
 #include "tap/algorithms/contiguous_float.hpp"
@@ -26,16 +45,6 @@ void ImuHeadingFusion::initialize()
     bno055LinearlyInterpolated.reset(0.0f, getTimeMilliseconds());
 }
 
-void ImuHeadingFusion::resetMpuCalibrationOffset(float bno055Yaw, float mpu6500Yaw)
-{
-    mpu6500YawOffset = -mpu6500Yaw + bno055Yaw;
-}
-
-void ImuHeadingFusion::resetBnoCalibrationOffset(float bno055Yaw, float mpu6500Yaw)
-{
-    bno055YawOffset = mpu6500Yaw - bno055Yaw;
-}
-
 static inline float getOffsetYawValue(float rawYaw, float calibrationOffset)
 {
     return ContiguousFloat(rawYaw + calibrationOffset, 0, 360).getValue();
@@ -61,7 +70,7 @@ void ImuHeadingFusion::run()
             }
         }
 
-        // Get bno and mpu yaw values
+        // Get BNO055 and MPU6500 yaw values
         const float bno055Yaw =
             bno055LinearlyInterpolated.getInterpolatedValue(getTimeMilliseconds());
         const float mpu6500Yaw = drivers->mpu6500.getYaw();
@@ -74,8 +83,10 @@ void ImuHeadingFusion::run()
             resetBnoCalibrationOffset(bno055Yaw, mpu6500Yaw);
         }
 
-        // Get gyroscope angular velocity, round to 0 if within the resting
-        // average
+        /*
+         * Get gyroscope angular velocity, round to 0 if within the resting
+         * average.
+         */
         float gz = fabsf(drivers->mpu6500.getGz());
         if (gz < MPU6500_RESTING_MAX_GZ)
         {
@@ -91,8 +102,10 @@ void ImuHeadingFusion::run()
         float bno055YawWithOffset = 0.0f;
         float mpu6500YawWithOffset = 0.0f;
 
-        // Reset offsets of bno or mpu if either are not being used to compute
-        // the final yaw.
+        /*
+         * Reset offsets of bno or mpu if either are not being used to compute
+         * the final yaw.
+         */
         if (compareFloatClose(mpuToBnoRatio, 0.0f, 1E-5))
         {
             // Using bno055 completely
@@ -114,6 +127,7 @@ void ImuHeadingFusion::run()
             mpu6500YawWithOffset = getOffsetYawValue(mpu6500Yaw, mpu6500YawOffset);
         }
 
+        // Compute weighted average based on mpuToBnoRatio
         yawFiltered =
             mpuToBnoRatio * mpu6500YawWithOffset + (1.0f - mpuToBnoRatio) * bno055YawWithOffset;
     }

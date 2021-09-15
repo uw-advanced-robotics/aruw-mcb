@@ -92,7 +92,7 @@ int main()
                 int16_t gzRaw =
                     drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
                 float yaw = drivers->imuHeadingFusion.getYaw();
-                
+
                 drivers->leds.set(tap::gpio::Leds::Green, i < 50);
                 i = (i + 1) % 100;
 
