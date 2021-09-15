@@ -87,9 +87,13 @@ int main()
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
-            float yaw = drivers->mpu6500.getYaw();
+            uint16_t yawFixedPoint = drivers->mpu6500.getYaw() * 100.0f;
             int16_t gzRaw =
                 drivers->mpu6500.getGz() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+
+            int16_t pitchFixedPoint = drivers->mpu6500.getPitch() * 100.0f;
+            int16_t gxRaw =
+                drivers->mpu6500.getGx() * tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
 
             if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS1))
             {
@@ -98,8 +102,16 @@ int main()
 
                 modm::can::Message msg(IMU_MSG_CAN_ID, 8);
                 msg.setExtended(false);
-                tap::arch::convertToLittleEndian(yaw, msg.data);
-                tap::arch::convertToLittleEndian(gzRaw, msg.data + 4);
+
+                tap::arch::convertToLittleEndian(yawFixedPoint, msg.data);
+                tap::arch::convertToLittleEndian(gzRaw, msg.data + sizeof(yawFixedPoint));
+                tap::arch::convertToLittleEndian(
+                    pitchFixedPoint,
+                    msg.data + sizeof(yawFixedPoint) + sizeof(gzRaw));
+                tap::arch::convertToLittleEndian(
+                    gxRaw,
+                    msg.data + sizeof(yawFixedPoint) + sizeof(gzRaw) + sizeof(pitchFixedPoint));
+
                 drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, msg);
             }
         }
