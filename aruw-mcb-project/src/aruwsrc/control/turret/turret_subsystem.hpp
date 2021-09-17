@@ -21,7 +21,7 @@
 #define TURRET_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/contiguous_float.hpp"
-#include "tap/algorithms/linear_interpolation.hpp"
+#include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -200,7 +200,7 @@ private:
     static constexpr float FEED_FORWARD_MAX_OUTPUT = 20000.0f;
 
     uint32_t prevUpdateCounterChassisRotateDerivative = 0;
-    tap::algorithms::LinearInterpolation chassisRotateDerivativeInterpolation;
+    tap::algorithms::LinearInterpolationPredictor chassisRotateDerivativeInterpolation;
     float feedforwardChassisRotateDerivative = 0.0f;
     float feedforwardPrevChassisRotationDesired = 0.0f;
 
