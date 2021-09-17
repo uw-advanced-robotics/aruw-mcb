@@ -21,7 +21,7 @@
 #define TURRET_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/contiguous_float.hpp"
-#include "tap/algorithms/linear_interpolation.hpp"
+#include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
