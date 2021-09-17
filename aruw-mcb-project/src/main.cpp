@@ -77,6 +77,8 @@ int main()
 
     int i = 0;
 
+    drivers->digital.set(tap::gpio::Digital::Laser, true);
+
     while (1)
     {
         // do this as fast as you can
