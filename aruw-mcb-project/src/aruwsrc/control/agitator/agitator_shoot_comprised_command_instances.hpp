@@ -47,7 +47,7 @@ public:
         tap::Drivers* drivers,
         AgitatorSubsystem* agitator17mm,
         bool heatLimiting = true,
-        float agitatorRotateAngle = M_PI / 2.5f);
+        float agitatorRotateAngle = 2.0f * M_PI);
 
     bool isReady() override;
 

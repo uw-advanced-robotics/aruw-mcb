@@ -35,8 +35,8 @@ ShootFastComprisedCommand17MM::ShootFastComprisedCommand17MM(
           agitator17mm,
           agitatorRotateAngle,
           M_PI / 2.0f,
-          40,
-          10),
+          1000,
+          0),
       drivers(drivers),
       heatLimiting(heatLimiting)
 {
