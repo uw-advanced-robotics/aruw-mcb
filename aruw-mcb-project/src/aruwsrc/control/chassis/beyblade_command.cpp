@@ -81,7 +81,7 @@ void BeybladeCommand::execute()
                                                    ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
         rampTarget = rotationDirection * getRotationTarget();
-        if (x > TRANSLATION_LIMIT || y > TRANSLATION_LIMIT)
+        if (fabsf(x) > TRANSLATION_LIMIT || fabsf(y) > TRANSLATION_LIMIT)
         {
             rampTarget *= RAMP_TARGET_TRANSLATIONAL_FRAC;
         }
