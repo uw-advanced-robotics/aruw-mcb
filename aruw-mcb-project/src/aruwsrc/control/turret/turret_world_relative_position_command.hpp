@@ -56,7 +56,7 @@ public:
         tap::Drivers *drivers,
         TurretSubsystem *subsystem,
         const chassis::ChassisSubsystem *chassis,
-        bool useImuOnTurret = false);
+        bool attemptToUseTurretIMU = false);
 
     void initialize() override;
 
@@ -72,12 +72,12 @@ private:
 #ifdef TARGET_SOLDIER
     static constexpr float YAW_P = 3800.0f;
     static constexpr float YAW_I = 50.0f;
-    static constexpr float YAW_D_TURRET_IMU = 4300.0f;
+    static constexpr float YAW_D_TURRET_IMU = 220.0f;
     static constexpr float YAW_D_CHASSIS_IMU = 180.0f;
     static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
     static constexpr float YAW_MAX_OUTPUT = 30000.0f;
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 10.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float YAW_R_PROPORTIONAL_KALMAN = 10.0f;
 
@@ -139,7 +139,17 @@ private:
     tap::algorithms::SmoothPid yawPid;
     tap::algorithms::SmoothPid pitchPid;
 
-    const bool useImuOnTurret;
+    /**
+     * Whether or not the command should *try* and use the IMU on the turret.
+     * If the turret IMU is offline for whatever reason, the command will instead default
+     * back to the chassis IMU.
+     */
+    const bool attemptToUseTurretIMU;
+    /**
+     * Whether or not the command is actually using the IMU on the turret. If there
+     * is a communication failure or similar, the IMU on the chassis will be used instead
+     * and this variable indicates if this is the case.
+     */
     bool usingImuOnTurret;
 
     int blinkCounter = 0;

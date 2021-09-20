@@ -50,10 +50,10 @@ public:
 #if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
     // position PID terms
     // PID terms for soldier
-    static constexpr float PID_17MM_P = 170000.0f;
+    static constexpr float PID_17MM_P = 100000.0f;
     static constexpr float PID_HOPPER_P = 100000.0f;
     static constexpr float PID_17MM_I = 0.0f;
-    static constexpr float PID_17MM_D = 80.0f;
+    static constexpr float PID_17MM_D = 50.0f;
     static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
     static constexpr float PID_17MM_MAX_OUT = 16000.0f;
 

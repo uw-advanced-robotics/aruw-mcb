@@ -34,7 +34,7 @@ TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
     tap::Drivers *drivers,
     TurretSubsystem *subsystem,
     const chassis::ChassisSubsystem *chassis,
-    bool useImuOnTurret)
+    bool attemptToUseTurretIMU)
     : drivers(drivers),
       turretSubsystem(subsystem),
       chassisSubsystem(chassis),
@@ -61,7 +61,7 @@ TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
           PITCH_R_DERIVATIVE_KALMAN,
           PITCH_Q_PROPORTIONAL_KALMAN,
           PITCH_R_PROPORTIONAL_KALMAN),
-      useImuOnTurret(useImuOnTurret)
+      attemptToUseTurretIMU(attemptToUseTurretIMU)
 {
     addSubsystemRequirement(dynamic_cast<tap::control::Subsystem *>(subsystem));
 }
@@ -71,7 +71,7 @@ void TurretWorldRelativePositionCommand::initialize()
     imuInitialYaw = drivers->mpu6500.getYaw();
     yawPid.reset();
     pitchPid.reset();
-    if (useImuOnTurret && drivers->imuRxHandler.isConnected())
+    if (attemptToUseTurretIMU && drivers->imuRxHandler.isConnected())
     {
         yawTargetAngle.setValue(drivers->imuRxHandler.getYaw());
         usingImuOnTurret = true;
@@ -99,7 +99,7 @@ void TurretWorldRelativePositionCommand::runYawPositionController(float dt)
 {
     // If we are trying to use the IMU on the turret, check to make sure it is available
     // and do some re-initialization if its availability changes
-    if (useImuOnTurret)
+    if (attemptToUseTurretIMU)
     {
         bool turretImuOnline = drivers->imuRxHandler.isConnected();
         if (!usingImuOnTurret && turretImuOnline)
@@ -168,7 +168,7 @@ void TurretWorldRelativePositionCommand::runYawPositionController(float dt)
     float positionControllerError = currValueImuYawGimbal.difference(yawTargetAngle);
     float pidOutput;
 
-    if (useImuOnTurret)
+    if (usingImuOnTurret)
     {
         pidOutput =
             yawPid.runController(positionControllerError, drivers->imuRxHandler.getGz(), dt);
