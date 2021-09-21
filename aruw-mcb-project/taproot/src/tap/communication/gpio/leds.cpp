@@ -20,6 +20,7 @@
 #include "leds.hpp"
 
 #include "tap/board/board.hpp"
+#include "tap/util_macros.hpp"
 
 using namespace Board;
 
@@ -37,7 +38,10 @@ void Leds::init()
 
 void Leds::set(Leds::LedPin pin, bool isSet)
 {
-#ifndef PLATFORM_HOSTED
+#ifdef PLATFORM_HOSTED
+    UNUSED(pin);
+    UNUSED(isSet);
+#else
     switch (pin)
     {
         case Leds::LedPin::A:

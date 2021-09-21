@@ -25,6 +25,7 @@ variables:
   DEFAULT_BUILD_ELF_FILE: build/hardware/scons-release/aruw-mcb.elf
   DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/scons-fast/aruw-mcb-tests.elf
   NUM_JOBS: 4
+  ADDITIONAL_CI_BUILD_ARGS: -j${NUM_JOBS} additional-ccflags=-Werror
 
 .default_only: &default_only
   - merge_requests
@@ -81,8 +82,8 @@ Policy Checks:
   needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) build robot=TARGET_$ROBOT -j${NUM_JOBS} additional-ccflags=-Werror
-    - python3 $(which scons) size robot=TARGET_$ROBOT -j${NUM_JOBS} additional-ccflags=-Werror > size.txt
+    - python3 $(which scons) build robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS
+    - python3 $(which scons) size robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
     - python3 ../scripts/parse_metrics.py $ROBOT
     - cp $DEFAULT_BUILD_ELF_FILE ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
   artifacts:
@@ -129,7 +130,7 @@ MCB Lib Build:
   needs: []
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) build compile_lib_only=mcb -j${NUM_JOBS} additional-ccflags=-Werror
+    - python3 $(which scons) build compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
     untracked: true
     key: mcb-binaries
