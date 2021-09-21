@@ -29,8 +29,7 @@ git fetch
 git checkout develop
 git pull
 git submodule foreach git checkout develop
-git push origin --delete $UPDATE_SUBMODULE_BRANCH &>/dev/null
-git checkout -b $UPDATE_SUBMODULE_BRANCH
+(git checkout $UPDATE_SUBMODULE_BRANCH >&/dev/null) || (git checkout -b $UPDATE_SUBMODULE_BRANCH)
 
 cd $ARUW_MCB_PROJECT_PATH
 rm -rf taproot
@@ -41,7 +40,7 @@ if [[ "$(git status | grep -c "nothing to commit")" != 1 ]]; then
     echo "Files have changed..."
     git status
     git commit -a -m "Update taproot submodule"
-    (git push &>/dev/null) || (git push --set-upstream origin $UPDATE_SUBMODULE_BRANCH)
+    (git push -f &>/dev/null) || (git push --set-upstream origin $UPDATE_SUBMODULE_BRANCH)
 
     # The description of our new MR, we want to remove the branch after the MR has
     # been closed

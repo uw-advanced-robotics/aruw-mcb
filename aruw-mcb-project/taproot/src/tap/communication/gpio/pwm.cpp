@@ -21,6 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/board/board.hpp"
+#include "tap/util_macros.hpp"
 
 using namespace Board;
 using namespace tap::algorithms;
@@ -73,7 +74,10 @@ void Pwm::writeAllZeros()
 
 void Pwm::write(float duty, Pin pin)
 {
-#ifndef PLATFORM_HOSTED
+#ifdef PLATFORM_HOSTED
+    UNUSED(duty);
+    UNUSED(pin);
+#else
     duty = limitVal<float>(duty, 0.0f, 1.0f);
     switch (pin)
     {
@@ -121,7 +125,10 @@ void Pwm::write(float duty, Pin pin)
 
 void Pwm::setTimerFrequency(Timer timer, uint32_t frequency)
 {
-#ifndef PLATFORM_HOSTED
+#ifdef PLATFORM_HOSTED
+    UNUSED(timer);
+    UNUSED(frequency);
+#else
     switch (timer)
     {
         case TIMER8:
@@ -139,7 +146,9 @@ void Pwm::setTimerFrequency(Timer timer, uint32_t frequency)
 
 void Pwm::pause(Timer timer)
 {
-#ifndef PLATFORM_HOSTED
+#ifdef PLATFORM_HOSTED
+    UNUSED(timer);
+#else
     switch (timer)
     {
         case TIMER8:
@@ -157,7 +166,9 @@ void Pwm::pause(Timer timer)
 
 void Pwm::start(Timer timer)
 {
-#ifndef PLATFORM_HOSTED
+#ifdef PLATFORM_HOSTED
+    UNUSED(timer);
+#else
     switch (timer)
     {
         case TIMER8:
