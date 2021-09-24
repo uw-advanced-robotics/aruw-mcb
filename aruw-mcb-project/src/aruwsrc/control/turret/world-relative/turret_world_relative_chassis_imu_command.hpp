@@ -143,7 +143,7 @@ private:
     tap::algorithms::SmoothPid yawPid;
     tap::algorithms::SmoothPid pitchPid;
 
-    void runYawPositionController(float dt);
+    void runYawPositionController(uint32_t dt);
 
     float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
     float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);

@@ -31,8 +31,8 @@ namespace aruwsrc::control::turret
 TurretCVCommand::TurretCVCommand(tap::Drivers *drivers, TurretSubsystem *subsystem)
     : drivers(drivers),
       turretSubsystem(subsystem),
-      yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
-      pitchTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
+      yawTargetAngle(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
+      pitchTargetAngle(TurretSubsystem::PITCH_START_ANGLE, 0.0f, 360.0f),
       yawPid(
           YAW_P,
           YAW_I,

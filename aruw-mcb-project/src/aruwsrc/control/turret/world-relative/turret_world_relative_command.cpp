@@ -19,7 +19,7 @@
 
 #include "turret_world_relative_command.hpp"
 
-#include "turret_subsystem.hpp"
+#include "../turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {

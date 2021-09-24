@@ -26,7 +26,7 @@
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
-#include "turret_pid_control_algorithms.hpp"
+#include "../algorithms/turret_pid_control_algorithms.hpp"
 
 using namespace tap::sensors;
 
@@ -39,7 +39,7 @@ TurretWorldRelativeChassisImuCommand::TurretWorldRelativeChassisImuCommand(
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       chassisSubsystem(chassisSubsystem),
-      yawSetpoint(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
+      yawSetpoint(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
       currValueImuYawGimbal(0.0f, 0.0f, 360.0f),
       chassisIMUInitialYaw(0.0f),
       yawPid(
@@ -88,7 +88,7 @@ void TurretWorldRelativeChassisImuCommand::execute()
     turretSubsystem->updateCurrentTurretAngles();
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    float dt = currTime - prevTime;
+    uint32_t dt = currTime - prevTime;
     prevTime = currTime;
     runYawPositionController(dt);
 
@@ -97,7 +97,7 @@ void TurretWorldRelativeChassisImuCommand::execute()
     runSinglePidPitchChassisFrameController(dt, pitchUserInput, pitchPid, turretSubsystem);
 }
 
-void TurretWorldRelativeChassisImuCommand::runYawPositionController(float dt)
+void TurretWorldRelativeChassisImuCommand::runYawPositionController(uint32_t dt)
 {
     yawSetpoint.shiftValue(
         USER_YAW_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretYawInput());

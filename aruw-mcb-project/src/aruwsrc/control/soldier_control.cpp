@@ -41,7 +41,7 @@
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_command.hpp"
+#include "turret/world-relative/turret_world_relative_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -72,7 +72,19 @@ tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 namespace soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers(), false);
+tap::motor::DjiMotor pitchMotor(
+    drivers(),
+    TurretSubsystem::PITCH_MOTOR_ID,
+    TurretSubsystem::CAN_BUS_MOTORS,
+    true,
+    "Pitch Turret");
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    TurretSubsystem::YAW_MOTOR_ID,
+    TurretSubsystem::CAN_BUS_MOTORS,
+    false,
+    "Yaw Turret");
+TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor);
 
 ChassisSubsystem chassis(drivers());
 

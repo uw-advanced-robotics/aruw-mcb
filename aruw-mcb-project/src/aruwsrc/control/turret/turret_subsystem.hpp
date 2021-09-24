@@ -47,12 +47,15 @@ public:
     static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
     static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
+    static constexpr float MAX_OUT_6020 = 30'000;
+
 #if defined(TARGET_SOLDIER)
-    static constexpr float TURRET_START_ANGLE = 90.0f;
-    static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
-    static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
-    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
-    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 30.0f;
+    static constexpr float YAW_START_ANGLE = 90.0f;
+    static constexpr float PITCH_START_ANGLE = 90.0f;
+    static constexpr float YAW_MIN_ANGLE = 0.0f;
+    static constexpr float YAW_MAX_ANGLE = 180.0f;
+    static constexpr float PITCH_MIN_ANGLE = 77.0f;
+    static constexpr float PITCH_MAX_ANGLE = 120.0f;
 #elif defined(TARGET_HERO)
     static constexpr float TURRET_START_ANGLE = 90.0f;
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 70.0f;
@@ -77,8 +80,8 @@ public:
      */
     explicit TurretSubsystem(
         tap::Drivers* drivers,
-        tap::motor::DjiMotor *pitchMotor,
-        tap::motor::DjiMotor *yawMotor,
+        tap::motor::DjiMotor* pitchMotor,
+        tap::motor::DjiMotor* yawMotor,
         bool limitYaw = true);
 
     inline bool yawLimited() const { return limitYaw; }
@@ -96,7 +99,7 @@ public:
      */
     inline bool isOnline() const override
     {
-        return yawMotor.isMotorOnline() && pitchMotor.isMotorOnline();
+        return yawMotor->isMotorOnline() && pitchMotor->isMotorOnline();
     }
 
     /**
@@ -165,7 +168,7 @@ public:
      *
      * @param[in] out The desired yaw output, limited to `[-30000, 30000]`.
      */
-    mockable void setYawMotorOutput(float out);
+    mockable void setYawMotorOutput(float out) override;
 
     /**
      * Attempts to set desired pitch output to the passed in value. If the turret is out of
@@ -173,14 +176,7 @@ public:
      *
      * @param[in] out The desired pitch output, limited to `[-30000, 30000]`.
      */
-    mockable void setPitchMotorOutput(float out);
-
-    /**
-     * Calculates a yaw output that uses the desired chassis rotation as a feed forward gain.
-     *
-     * @param[in] desiredChassisRotation The chassis rotation in RPM (before gearing).
-     */
-    mockable float yawFeedForwardCalculation(float desiredChassisRotation);
+    mockable void setPitchMotorOutput(float out) override;
 
     /**
      * Reads the raw pitch and yaw angles and updates the wrapped versions of
@@ -200,16 +196,11 @@ private:
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 #endif
 
-    static constexpr float FEED_FORWARD_KP = 11800.0f;
-    static constexpr float FEED_FORWARD_MAX_OUTPUT = 20000.0f;
-
-    uint32_t prevUpdateCounterChassisRotateDerivative = 0;
-    tap::algorithms::LinearInterpolation chassisRotateDerivativeInterpolation;
-    float feedforwardChassisRotateDerivative = 0.0f;
-    float feedforwardPrevChassisRotationDesired = 0.0f;
-
     tap::algorithms::ContiguousFloat currPitchAngle;
     tap::algorithms::ContiguousFloat currYawAngle;
+
+    uint16_t pitchEncoderWhenUpdated;
+    uint16_t yawEncoderWhenUpdated;
 
     tap::algorithms::ContiguousFloat yawTarget;
     tap::algorithms::ContiguousFloat pitchTarget;
@@ -222,9 +213,9 @@ private:
     /**
      * @return velocity of 6020 motor, in degrees / sec
      */
-    static inline float getVelocity(const tap::motor::DjiMotor& motor)
+    static inline float getVelocity(const tap::motor::DjiMotor* motor)
     {
-        return 360 / 60 * motor.getShaftRPM();
+        return 360 / 60 * motor->getShaftRPM();
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -234,8 +225,8 @@ public:
 
 private:
 #else
-    tap::motor::DjiMotor *pitchMotor;
-    tap::motor::DjiMotor *yawMotor;
+    tap::motor::DjiMotor* pitchMotor;
+    tap::motor::DjiMotor* yawMotor;
 #endif
 
 };  // class TurretSubsystem

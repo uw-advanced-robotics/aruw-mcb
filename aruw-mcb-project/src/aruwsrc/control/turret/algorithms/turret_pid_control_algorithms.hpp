@@ -22,15 +22,21 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 
-#include "turret_subsystem.hpp"
+#include "../turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
 void runSinglePidPitchChassisFrameController(
-    const float dt,
+    const uint32_t dt,
     const float userInput,
     tap::algorithms::SmoothPid &pid,
-    TurretSubsystem *turretSubsystem);
+    tap::control::turret::TurretSubsystemInterface *turretSubsystem);
+
+void runSinglePidYawChassisFrameController(
+    const uint32_t dt,
+    const float userInput,
+    tap::algorithms::SmoothPid &pid,
+    tap::control::turret::TurretSubsystemInterface *turretSubsystem);
 }
 
 #endif  // TURRET_PID_CONTROL_ALGORITHMS_HPP_

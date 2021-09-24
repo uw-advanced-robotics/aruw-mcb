@@ -105,7 +105,7 @@ TurretWorldRelativeTurretImuCommand::TurretWorldRelativeTurretImuCommand(
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       chassisSubsystem(chassis),
-      yawSetpoint(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),
+      yawSetpoint(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
       yawPid(
           YAW_P,
           YAW_I,
@@ -165,13 +165,13 @@ void TurretWorldRelativeTurretImuCommand::execute()
     turretSubsystem->updateCurrentTurretAngles();
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    float dt = currTime - prevTime;
+    uint32_t dt = currTime - prevTime;
     prevTime = currTime;
     runYawPositionController(dt);
     runPitchPositionController(dt);
 }
 
-void TurretWorldRelativeTurretImuCommand::runYawPositionController(float dt)
+void TurretWorldRelativeTurretImuCommand::runYawPositionController(uint32_t dt)
 {
     yawSetpoint.shiftValue(
         USER_YAW_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretYawInput());
@@ -204,21 +204,20 @@ void TurretWorldRelativeTurretImuCommand::runYawPositionController(float dt)
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 
-void TurretWorldRelativeTurretImuCommand::runPitchPositionController(float dt)
+void TurretWorldRelativeTurretImuCommand::runPitchPositionController(uint32_t dt)
 {
     const float turretBasePitchAngle = drivers->imuRxHandler.getPitch();
     const float turretBasePitchVelocity = drivers->imuRxHandler.getGx();
 
     // Project user desired setpoint that is in world relative to chassis relative
     // to limit the value
-    turretSubsystem->setPitchSetpoint(transformWorldFramePitchToChassisFrame(
-        turretBasePitchAngle,
-        pitchSetpoint +
-            USER_PITCH_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretPitchInput()));
+    turretSubsystem->setPitchSetpoint(
+        turretSubsystem->getPitchSetpoint() +
+        USER_PITCH_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretPitchInput());
 
     // project angle limited by the TurretSubsystem back to world relative
     // to use the value
-    pitchSetpoint = transformChassisFramePitchToWorldRelative(
+    const float pitchSetpoint = transformChassisFramePitchToWorldRelative(
         turretBasePitchAngle,
         turretSubsystem->getPitchSetpoint());
 

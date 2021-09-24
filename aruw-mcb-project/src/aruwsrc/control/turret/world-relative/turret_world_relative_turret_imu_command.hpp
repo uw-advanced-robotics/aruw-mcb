@@ -126,8 +126,6 @@ private:
 
     tap::algorithms::ContiguousFloat yawSetpoint;
 
-    float pitchSetpoint;
-
     uint32_t prevTime;
 
     // Pitch/yaw PID controllers
@@ -136,8 +134,8 @@ private:
 
     int imuMessageReceivedLEDBlinkCounter = 0;
 
-    void runYawPositionController(float dt);
-    void runPitchPositionController(float dt);
+    void runYawPositionController(uint32_t dt);
+    void runPitchPositionController(uint32_t dt);
 };  // class TurretWorldRelativeTurretImuCommand
 
 }  // namespace aruwsrc::control::turret

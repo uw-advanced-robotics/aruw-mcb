@@ -22,10 +22,10 @@
 namespace aruwsrc::control::turret
 {
 void runSinglePidPitchChassisFrameController(
-    const float dt,
+    const uint32_t dt,
     const float userInput,
     tap::algorithms::SmoothPid &pid,
-    TurretSubsystem *turretSubsystem)
+    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     // limit the yaw min and max angles
     turretSubsystem->setPitchSetpoint(turretSubsystem->getPitchSetpoint() + userInput);
@@ -39,4 +39,24 @@ void runSinglePidPitchChassisFrameController(
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
+
+void runSinglePidYawChassisFrameController(
+    const uint32_t dt,
+    const float userInput,
+    tap::algorithms::SmoothPid &pid,
+    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+{
+    // limit the yaw min and max angles
+    turretSubsystem->setYawSetpoint(turretSubsystem->getYawSetpoint() + userInput);
+
+    // position controller based on turret yaw gimbal
+    float positionControllerError =
+        turretSubsystem->getCurrentYawValue().difference(turretSubsystem->getYawSetpoint());
+
+    float pidOutput =
+        pid.runController(positionControllerError, turretSubsystem->getYawVelocity(), dt);
+
+    turretSubsystem->setYawMotorOutput(pidOutput);
+}
+
 }  // namespace aruwsrc::control::turret
