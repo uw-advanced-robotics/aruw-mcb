@@ -39,7 +39,7 @@
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
-#include "turret/turret_cv_command.hpp"
+#include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/world-relative/turret_world_relative_command.hpp"
 

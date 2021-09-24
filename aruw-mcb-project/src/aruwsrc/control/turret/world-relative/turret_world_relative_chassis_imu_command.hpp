@@ -45,11 +45,6 @@ class TurretSubsystem;
  * desired turret angle is independent of the direction that the chassis is facing
  * or rotating. Assumes the board running this subsystem is a RoboMaster type A
  * board with an Mpu6500 and that this board is mounted statically on the chassis.
- *
- * Also, `useImuOnTurret` may be specified, which will dynamically attempt to use
- * a turret mounted IMU to perform world-relative calculations. The IMU is assumed
- * to be statically mounted on the turret base (not the turret pitch axis). The turret
- * mounted IMU is assumed to interface with the ImuRxListener.
  */
 class TurretWorldRelativeChassisImuCommand : public tap::control::Command
 {
@@ -97,7 +92,7 @@ private:
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    static constexpr float USER_YAW_INPUT_SCALAR = 1.5f;
+    static constexpr float USER_YAW_INPUT_SCALAR = 1.0f;
     static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
 
 #else
@@ -123,8 +118,6 @@ private:
 
     static constexpr float USER_YAW_INPUT_SCALAR = 0.0f;
     static constexpr float USER_PITCH_INPUT_SCALAR = 0.0f;
-
-    static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 0.0f;
 #endif
 
     tap::Drivers *drivers;
@@ -133,9 +126,9 @@ private:
     const chassis::ChassisSubsystem *chassisSubsystem;
 
     // Yaw related values
-    tap::algorithms::ContiguousFloat yawSetpoint;
-    tap::algorithms::ContiguousFloat currValueImuYawGimbal;
-    float chassisIMUInitialYaw;
+    tap::algorithms::ContiguousFloat worldFrameYawSetpoint;
+    tap::algorithms::ContiguousFloat worldFrameYawAngle;
+    float chassisFrameInitImuYawAngle;
 
     uint32_t prevTime;
 
@@ -144,9 +137,6 @@ private:
     tap::algorithms::SmoothPid pitchPid;
 
     void runYawPositionController(uint32_t dt);
-
-    float projectChassisRelativeYawToWorldRelative(float yawAngle, float imuInitialAngle);
-    float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
 };  // class TurretWorldRelativeChassisImuCommand
 
 }  // namespace control::turret

@@ -39,12 +39,12 @@ namespace aruwsrc::control::turret
 class TurretSubsystem;
 
 /**
- * Turret control, with the yaw gimbal using the world relative frame, such that the
+ * Turret control, with the pitch and yaw gimbals using the world relative frame, such that the
  * desired turret angle is independent of the direction that the chassis is facing
- * or rotating. Assumes the board running this subsystem is a RoboMaster type A
- * board with an Mpu6500 and that this board is mounted statically on the chassis.
+ * or rotating.
  *
- * @note The turret mounted IMU is assumed to interface with the ImuRxListener.
+ * @note Assumes that an IMU mounted on the turret frame is in communication with
+ *      the MCU this code is running on via the `ImuRxListener`.
  */
 class TurretWorldRelativeTurretImuCommand : public tap::control::Command
 {
@@ -92,7 +92,7 @@ private:
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    static constexpr float USER_YAW_INPUT_SCALAR = 1.5f;
+    static constexpr float USER_YAW_INPUT_SCALAR = 1.0f;
     static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
 #else
     static constexpr float YAW_P = 0.0f;
@@ -124,7 +124,7 @@ private:
     TurretSubsystem *turretSubsystem;
     const chassis::ChassisSubsystem *chassisSubsystem;
 
-    tap::algorithms::ContiguousFloat yawSetpoint;
+    tap::algorithms::ContiguousFloat worldFrameYawSetpoint;
 
     uint32_t prevTime;
 

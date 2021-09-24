@@ -23,15 +23,31 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
+#include "../algorithms/turret_pid_control_algorithms.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-
-#include "../algorithms/turret_pid_control_algorithms.hpp"
 
 using namespace tap::sensors;
 
 namespace aruwsrc::control::turret
 {
+
+static inline float transformChassisFrameYawToWorldFrame(
+    const float initChassisFrameImuAngle,
+    const float currChassisFrameImuAngle,
+    const float angleToTransform)
+{
+    return angleToTransform + currChassisFrameImuAngle - initChassisFrameImuAngle;
+}
+
+static inline float transformWorldFrameYawToChassisFrame(
+    const float initChassisFrameImuAngle,
+    const float currChassisFrameImuAngle,
+    const float angleToTransform)
+{
+    return angleToTransform - currChassisFrameImuAngle + initChassisFrameImuAngle;
+}
+
 TurretWorldRelativeChassisImuCommand::TurretWorldRelativeChassisImuCommand(
     tap::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
@@ -39,9 +55,9 @@ TurretWorldRelativeChassisImuCommand::TurretWorldRelativeChassisImuCommand(
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       chassisSubsystem(chassisSubsystem),
-      yawSetpoint(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
-      currValueImuYawGimbal(0.0f, 0.0f, 360.0f),
-      chassisIMUInitialYaw(0.0f),
+      worldFrameYawSetpoint(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
+      worldFrameYawAngle(0.0f, 0.0f, 360.0f),
+      chassisFrameInitImuYawAngle(0.0f),
       yawPid(
           YAW_P,
           YAW_I,
@@ -71,9 +87,11 @@ void TurretWorldRelativeChassisImuCommand::initialize()
     yawPid.reset();
     pitchPid.reset();
 
-    chassisIMUInitialYaw = drivers->mpu6500.getYaw();
+    chassisFrameInitImuYawAngle = drivers->mpu6500.getYaw();
 
-    yawSetpoint.setValue(turretSubsystem->getYawSetpoint());
+    worldFrameYawSetpoint.setValue(turretSubsystem->getYawSetpoint());
+
+    prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
 bool TurretWorldRelativeChassisImuCommand::isReady() { return !isFinished(); }
@@ -81,6 +99,12 @@ bool TurretWorldRelativeChassisImuCommand::isReady() { return !isFinished(); }
 bool TurretWorldRelativeChassisImuCommand::isFinished() const
 {
     return !turretSubsystem->isOnline() || !drivers->mpu6500.isRunning();
+}
+
+void TurretWorldRelativeChassisImuCommand::end(bool)
+{
+    turretSubsystem->setYawMotorOutput(0);
+    turretSubsystem->setPitchMotorOutput(0);
 }
 
 void TurretWorldRelativeChassisImuCommand::execute()
@@ -99,56 +123,40 @@ void TurretWorldRelativeChassisImuCommand::execute()
 
 void TurretWorldRelativeChassisImuCommand::runYawPositionController(uint32_t dt)
 {
-    yawSetpoint.shiftValue(
+    worldFrameYawSetpoint.shiftValue(
         USER_YAW_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretYawInput());
 
+    const float chassisFrameImuYawAngle = drivers->mpu6500.getYaw();
+
     // project target angle in world relative to chassis relative to limit the value
-    turretSubsystem->setYawSetpoint(
-        projectWorldRelativeYawToChassisFrame(yawSetpoint.getValue(), chassisIMUInitialYaw));
+    turretSubsystem->setYawSetpoint(transformWorldFrameYawToChassisFrame(
+        chassisFrameInitImuYawAngle,
+        chassisFrameImuYawAngle,
+        worldFrameYawSetpoint.getValue()));
 
     if (turretSubsystem->yawLimited())
     {
         // project angle that is limited by the subsystem to world relative again to run the
-        // controller. Otherwise use yawSetpoint directly.
-        yawSetpoint.setValue(projectChassisRelativeYawToWorldRelative(
-            turretSubsystem->getYawSetpoint(),
-            chassisIMUInitialYaw));
+        // controller. Otherwise use worldFrameYawSetpoint directly.
+        worldFrameYawSetpoint.setValue(transformChassisFrameYawToWorldFrame(
+            chassisFrameInitImuYawAngle,
+            chassisFrameImuYawAngle,
+            turretSubsystem->getYawSetpoint()));
     }
 
-    currValueImuYawGimbal.setValue(projectChassisRelativeYawToWorldRelative(
-        turretSubsystem->getCurrentYawValue().getValue(),
-        chassisIMUInitialYaw));
+    worldFrameYawAngle.setValue(transformChassisFrameYawToWorldFrame(
+        chassisFrameInitImuYawAngle,
+        chassisFrameImuYawAngle,
+        turretSubsystem->getCurrentYawValue().getValue()));
 
     // position controller based on imu and yaw gimbal angle
-    float positionControllerError = currValueImuYawGimbal.difference(yawSetpoint);
-    float pidOutput;
-
-    pidOutput = yawPid.runController(
+    float positionControllerError = worldFrameYawAngle.difference(worldFrameYawSetpoint);
+    float pidOutput = yawPid.runController(
         positionControllerError,
         turretSubsystem->getYawVelocity() + drivers->mpu6500.getGz(),
         dt);
 
     turretSubsystem->setYawMotorOutput(pidOutput);
-}
-
-void TurretWorldRelativeChassisImuCommand::end(bool)
-{
-    turretSubsystem->setYawMotorOutput(0);
-    turretSubsystem->setPitchMotorOutput(0);
-}
-
-float TurretWorldRelativeChassisImuCommand::projectChassisRelativeYawToWorldRelative(
-    float yawAngle,
-    float imuInitialAngle)
-{
-    return yawAngle + drivers->mpu6500.getYaw() - imuInitialAngle;
-}
-
-float TurretWorldRelativeChassisImuCommand::projectWorldRelativeYawToChassisFrame(
-    float yawAngle,
-    float imuInitialAngle)
-{
-    return yawAngle - drivers->mpu6500.getYaw() + imuInitialAngle;
 }
 
 }  // namespace aruwsrc::control::turret

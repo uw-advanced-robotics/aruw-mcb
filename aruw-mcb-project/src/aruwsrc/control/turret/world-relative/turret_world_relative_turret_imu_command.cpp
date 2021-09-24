@@ -32,15 +32,16 @@ using namespace tap::algorithms;
 namespace aruwsrc::control::turret
 {
 /**
- * Transforms the specified `angleToTransform` from the chassis frame to the world frame.
+ * Transforms the specified `angleToTransform`, a yaw angle from the chassis frame to the world
+ * frame.
  *
- * @note It is expected that the user wraps the value between [0, 360) (or whatever range they
- *      require).
+ * @note It is expected that the user wraps the value returned to be between [0, 360)
+ *      (or whatever range they require).
  *
  * @param[in] turretChassisFrameCurrAngle The current chassis relative (gimbal encoder) yaw angle.
  * @param[in] turretWorldFrameCurrAngle The current world relative (turret IMU) yaw angle, captured
  *      at the same time as `turretChassisFrameCurrAngle`.
- * @param[in] angleToTransform The angle to transform.
+ * @param[in] angleToTransform The angle to transform and return.
  */
 static inline float transformChassisFrameYawToWorldFrame(
     const float turretChassisFrameCurrAngle,
@@ -51,12 +52,16 @@ static inline float transformChassisFrameYawToWorldFrame(
 }
 
 /**
- * Transforms the specified `angleToTransform` from the world frame to the chassis frame.
+ * Transforms the specified `angleToTransform`, a yaw angle, from the world frame to the chassis
+ * frame.
+ *
+ * @note It is expected that the user wraps the value returned to be between [0, 360)
+ *      (or whatever range they require).
  *
  * @param[in] turretChassisFrameCurrAngle The current chassis relative (gimbal encoder) yaw angle.
  * @param[in] turretWorldFrameCurrAngle The current world relative (turret IMU) yaw angle, captured
  *      at the same time as `turretChassisFrameCurrAngle`.
- * @param[in] angleToTransform The angle to transform.
+ * @param[in] angleToTransform The angle to transform and return.
  */
 static inline float transformWorldFrameYawToChassisFrame(
     const float turretChassisFrameCurrAngle,
@@ -66,6 +71,13 @@ static inline float transformWorldFrameYawToChassisFrame(
     return turretChassisFrameCurrAngle + (angleToTransform - turretWorldFrameCurrAngle);
 }
 
+/**
+ * Transforms the specified `angleToTransform`, a pitch angle, from the chassis frame to the world
+ * frame.
+ *
+ * @param[in] turretBaseFramePitchAngle The pitch angle of the turret base relative to the world.
+ * @param[in] angleToTransform The angle to transform and return.
+ */
 static inline float transformChassisFramePitchToWorldRelative(
     const float turretBaseFramePitchAngle,
     const float angleToTransform)
@@ -73,6 +85,13 @@ static inline float transformChassisFramePitchToWorldRelative(
     return angleToTransform + turretBaseFramePitchAngle;
 }
 
+/**
+ * Transforms the specified `angleToTransform`, a pitch angle, from the world frame to the chassis
+ * frame.
+ *
+ * @param[in] turretBaseFramePitchAngle The pitch angle of the turret base relative to the world.
+ * @param[in] angleToTransform The angle to transform and return.
+ */
 static inline float transformWorldFramePitchToChassisFrame(
     const float turretBaseFramePitchAngle,
     const float pitchAngle)
@@ -80,6 +99,10 @@ static inline float transformWorldFramePitchToChassisFrame(
     return pitchAngle - turretBaseFramePitchAngle;
 }
 
+/**
+ * @return the pitch angle relative to the world, based on `turretBaseFramePitchAngle` and the
+ *      current chassis frame pitch angle (`TurretSubsystem::getCurrentPitchValue`).
+ */
 static inline float getPitchWorldRelativeAngle(
     const float turretBaseFramePitchAngle,
     const TurretSubsystem *turret)
@@ -89,6 +112,10 @@ static inline float getPitchWorldRelativeAngle(
         turret->getCurrentPitchValue().getValue());
 }
 
+/**
+ * @return the pitch velocity relative to the world, based on `turretBaseFramePitchVelocity` and the
+ *      current chassis frame pitch velocity (`TurretSubsystem::getPitchVelocity`).
+ */
 static inline float getPitchWorldRelativeVelocity(
     const float turretBaseFramePitchVelocity,
     const TurretSubsystem *turret)
@@ -105,7 +132,7 @@ TurretWorldRelativeTurretImuCommand::TurretWorldRelativeTurretImuCommand(
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       chassisSubsystem(chassis),
-      yawSetpoint(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
+      worldFrameYawSetpoint(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
       yawPid(
           YAW_P,
           YAW_I,
@@ -144,10 +171,12 @@ void TurretWorldRelativeTurretImuCommand::initialize()
     pitchPid.reset();
 
     // Capture initial target angle in chassis frame and transform to world frame.
-    yawSetpoint.setValue(transformChassisFrameYawToWorldFrame(
+    worldFrameYawSetpoint.setValue(transformChassisFrameYawToWorldFrame(
         turretSubsystem->getCurrentYawValue().getValue(),
         drivers->imuRxHandler.getYaw(),
         turretSubsystem->getYawSetpoint()));
+
+    prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
 void TurretWorldRelativeTurretImuCommand::end(bool)
@@ -173,32 +202,32 @@ void TurretWorldRelativeTurretImuCommand::execute()
 
 void TurretWorldRelativeTurretImuCommand::runYawPositionController(uint32_t dt)
 {
-    yawSetpoint.shiftValue(
+    worldFrameYawSetpoint.shiftValue(
         USER_YAW_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretYawInput());
 
     const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
-    const float worldFrameYaw = drivers->imuRxHandler.getYaw();
+    const float worldFrameYawAngle = drivers->imuRxHandler.getYaw();
     const float worldFrameYawVelocity = drivers->imuRxHandler.getGz();
 
     // transform target angle from turret imu relative to chassis relative
     turretSubsystem->setYawSetpoint(transformWorldFrameYawToChassisFrame(
         chassisFrameYaw,
-        worldFrameYaw,
-        yawSetpoint.getValue()));
+        worldFrameYawAngle,
+        worldFrameYawSetpoint.getValue()));
 
     if (turretSubsystem->yawLimited())
     {
         // transform angle that is limited by subsystem to world relative again to run the
         // controller
-        yawSetpoint.setValue(transformChassisFrameYawToWorldFrame(
+        worldFrameYawSetpoint.setValue(transformChassisFrameYawToWorldFrame(
             chassisFrameYaw,
-            worldFrameYaw,
+            worldFrameYawAngle,
             turretSubsystem->getCurrentYawValue().getValue()));
     }
 
     // position controller based on imu and yaw gimbal angle,
-    // precisly, - (yawSetpoint - yawActual)
-    float positionControllerError = -yawSetpoint.difference(worldFrameYaw);
+    // precisly, - (worldFrameYawSetpoint - yawActual)
+    float positionControllerError = -worldFrameYawSetpoint.difference(worldFrameYawAngle);
     float pidOutput = yawPid.runController(positionControllerError, worldFrameYawVelocity, dt);
 
     turretSubsystem->setYawMotorOutput(pidOutput);

@@ -24,6 +24,8 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
+#include "../algorithms/turret_pid_control_algorithms.hpp"
+
 using namespace tap::arch::clock;
 
 namespace aruwsrc::control::turret
@@ -31,8 +33,6 @@ namespace aruwsrc::control::turret
 TurretCVCommand::TurretCVCommand(tap::Drivers *drivers, TurretSubsystem *subsystem)
     : drivers(drivers),
       turretSubsystem(subsystem),
-      yawTargetAngle(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
-      pitchTargetAngle(TurretSubsystem::PITCH_START_ANGLE, 0.0f, 360.0f),
       yawPid(
           YAW_P,
           YAW_I,
@@ -54,7 +54,7 @@ TurretCVCommand::TurretCVCommand(tap::Drivers *drivers, TurretSubsystem *subsyst
           PITCH_Q_PROPORTIONAL_KALMAN,
           PITCH_R_PROPORTIONAL_KALMAN)
 {
-    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem *>(subsystem));
+    addSubsystemRequirement(subsystem);
 }
 
 void TurretCVCommand::initialize()
@@ -79,32 +79,16 @@ void TurretCVCommand::execute()
     uint32_t currTime = getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
-    runYawPositionController(dt);
-    runPitchPositionController(dt);
+
+    runSinglePidYawChassisFrameController(dt, 0.0f, yawPid, turretSubsystem);
+    runSinglePidPitchChassisFrameController(dt, 0.0f, pitchPid, turretSubsystem);
 }
 
-void TurretCVCommand::end(bool) { drivers->xavierSerial.stopAutoAim(); }
-
-void TurretCVCommand::runYawPositionController(float dt)
+void TurretCVCommand::end(bool)
 {
-    // position controller based on gimbal angle
-    float positionControllerError =
-        turretSubsystem->getCurrentYawValue().difference(turretSubsystem->getYawSetpoint());
-    float pidOutput =
-        yawPid.runController(positionControllerError, turretSubsystem->getYawVelocity(), dt);
-
-    turretSubsystem->setYawMotorOutput(pidOutput);
-}
-
-void TurretCVCommand::runPitchPositionController(float dt)
-{
-    // position controller based on turret pitch gimbal
-    float positionControllerError =
-        turretSubsystem->getCurrentPitchValue().difference(turretSubsystem->getPitchSetpoint());
-    float pidOutput =
-        pitchPid.runController(positionControllerError, turretSubsystem->getPitchVelocity(), dt);
-
-    turretSubsystem->setPitchMotorOutput(pidOutput);
+    drivers->xavierSerial.stopAutoAim();
+    turretSubsystem->setYawMotorOutput(0);
+    turretSubsystem->setPitchMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret

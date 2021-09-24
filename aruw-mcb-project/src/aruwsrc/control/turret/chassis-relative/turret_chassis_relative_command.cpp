@@ -14,8 +14,41 @@ TurretChassisRelativeCommand::TurretChassisRelativeCommand(
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawInputScalar(yawInputScalar),
-      pitchInputScalar(pitchInputScalar)
+      pitchInputScalar(pitchInputScalar),
+      yawPid(
+          YAW_P,
+          YAW_I,
+          YAW_D,
+          YAW_MAX_ERROR_SUM,
+          YAW_MAX_OUTPUT,
+          YAW_Q_DERIVATIVE_KALMAN,
+          YAW_R_DERIVATIVE_KALMAN,
+          YAW_Q_PROPORTIONAL_KALMAN,
+          YAW_R_PROPORTIONAL_KALMAN),
+      pitchPid(
+          PITCH_P,
+          PITCH_I,
+          PITCH_D,
+          PITCH_MAX_ERROR_SUM,
+          PITCH_MAX_OUTPUT,
+          PITCH_Q_DERIVATIVE_KALMAN,
+          PITCH_R_DERIVATIVE_KALMAN,
+          PITCH_Q_PROPORTIONAL_KALMAN,
+          PITCH_R_PROPORTIONAL_KALMAN)
 {
+}
+
+void TurretChassisRelativeCommand::initialize()
+{
+    pitchPid.reset();
+    yawPid.reset();
+    prevTime = tap::arch::clock::getTimeMilliseconds();
+}
+
+void TurretChassisRelativeCommand::end(bool)
+{
+    turretSubsystem->setYawMotorOutput(0);
+    turretSubsystem->setPitchMotorOutput(0);
 }
 
 void TurretChassisRelativeCommand::execute()

@@ -21,6 +21,7 @@
 #define TURRET_WORLD_RELATIVE_COMMAND_HPP_
 
 #include "tap/control/comprised_command.hpp"
+
 #include "turret_world_relative_chassis_imu_command.hpp"
 #include "turret_world_relative_turret_imu_command.hpp"
 
@@ -39,12 +40,14 @@ namespace aruwsrc::control::turret
 class TurretSubsystem;
 
 /**
- * Turret control, with the yaw gimbal using the world relative frame, such that the
- * desired turret angle is independent of the direction that the chassis is facing
- * or rotating. Assumes the board running this subsystem is a RoboMaster type A
+ * Turret control, with the yaw and pitch gimbals using the world relative frame,
+ * such that the desired turret angle is independent of the direction that the chassis
+ * is facing or rotating. Assumes the board running this subsystem is a RoboMaster type A
  * board with an Mpu6500 and that this board is mounted statically on the chassis.
- *
- * @note The turret mounted IMU is assumed to interface with the ImuRxListener.
+ * Also assumes that there is an IMU mounted on the turret frame that interfaces
+ * with the `ImuRxListener`. If there is no such IMU, the chassis IMU will be used
+ * to run the turret controller and the pitch axis will run a controller in the chassis
+ * frame.
  */
 class TurretWorldRelativeCommand : public tap::control::ComprisedCommand
 {
@@ -68,7 +71,7 @@ public:
 
     void end(bool interrupted) override;
 
-    const char *getName() const override { return "turret WR command"; }
+    const char *getName() const override { return "turret WR"; }
 
 private:
     TurretWorldRelativeChassisImuCommand turretWRChassisImuCommand;

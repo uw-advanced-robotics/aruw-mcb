@@ -25,9 +25,8 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 
+#include "../turret_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-
-#include "turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -48,7 +47,7 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret cv"; }
+    const char *getName() const override { return "turret CV"; }
 
 private:
     static constexpr float YAW_P = 4500.0f;
@@ -75,17 +74,10 @@ private:
 
     TurretSubsystem *turretSubsystem;
 
-    tap::algorithms::ContiguousFloat yawTargetAngle;
-    tap::algorithms::ContiguousFloat pitchTargetAngle;
-
     tap::algorithms::SmoothPid yawPid;
     tap::algorithms::SmoothPid pitchPid;
 
     uint32_t prevTime;
-
-    void runYawPositionController(float dt);
-
-    void runPitchPositionController(float dt);
 };  // class TurretCvCommand
 
 }  // namespace aruwsrc::control::turret
