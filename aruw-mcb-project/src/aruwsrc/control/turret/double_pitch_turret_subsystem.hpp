@@ -155,6 +155,17 @@ public:
 
     const char* getName() override { return "Sentinel Turret"; }
 
+    /**
+     * @note This turret subsystem instance doesn't allow the user to specify the raw
+     *      yaw desired output. Instead, you should set the position via `setYawSetpoint`.
+     */
+    void setYawMotorOutput(float) override {}
+
+    /**
+     * @see `setYawMotorOutput`.
+     */
+    void setPitchMotorOutput(float) override {}
+
 private:
     tap::algorithms::ContiguousFloat currLeftPitchAngle;
     tap::algorithms::ContiguousFloat currRightPitchAngle;
