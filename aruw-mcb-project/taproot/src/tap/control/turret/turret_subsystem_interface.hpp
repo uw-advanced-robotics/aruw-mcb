@@ -90,7 +90,7 @@ public:
 
     /**
      * Sets yaw motor output. Limits the output based on the mechanical constraints
-     * of the turret. 
+     * of the turret.
      */
     virtual void setYawMotorOutput(float out) = 0;
 
