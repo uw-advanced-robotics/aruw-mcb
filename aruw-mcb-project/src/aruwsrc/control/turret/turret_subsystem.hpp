@@ -209,17 +209,14 @@ private:
     tap::algorithms::ContiguousFloat currPitchAngle;
     tap::algorithms::ContiguousFloat currYawAngle;
 
-    uint16_t pitchEncoderWhenUpdated;
-    uint16_t yawEncoderWhenUpdated;
+    uint16_t pitchEncoderWhenLastUpdated;
+    uint16_t yawEncoderWhenLastUpdated;
 
     tap::algorithms::ContiguousFloat yawTarget;
     tap::algorithms::ContiguousFloat pitchTarget;
 
     bool limitYaw;
     bool chassisFrontBackIdentical;
-
-    void updateCurrentYawAngle();
-    void updateCurrentPitchAngle();
 
     /**
      * @return velocity of 6020 motor, in degrees / sec
