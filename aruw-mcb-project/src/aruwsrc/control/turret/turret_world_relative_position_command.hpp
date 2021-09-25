@@ -70,9 +70,9 @@ public:
 
 private:
 #ifdef TARGET_SOLDIER
-    static constexpr float YAW_P = 3800.0f;
+    static constexpr float YAW_P = 4200.0f;
     static constexpr float YAW_I = 50.0f;
-    static constexpr float YAW_D_TURRET_IMU = 220.0f;
+    static constexpr float YAW_D_TURRET_IMU = 350.0f;
     static constexpr float YAW_D_CHASSIS_IMU = 180.0f;
     static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
     static constexpr float YAW_MAX_OUTPUT = 30000.0f;
