@@ -56,33 +56,48 @@ public:
     static constexpr float YAW_MAX_ANGLE = 180.0f;
     static constexpr float PITCH_MIN_ANGLE = 77.0f;
     static constexpr float PITCH_MAX_ANGLE = 120.0f;
+
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 #elif defined(TARGET_HERO)
     static constexpr float TURRET_START_ANGLE = 90.0f;
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 70.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 70.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = 65.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = 104.0f;
+
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 3000;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1418;
 #else
     static constexpr float TURRET_START_ANGLE = 90.0f;
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 90.0f;
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 30.0f;
+
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 #endif
 
     /**
      * Constructs a TurretSubsystem.
      *
-     * @param[in] drivers Pointer to a drivers singleton object
+     * @param[in] drivers Pointer to a drivers singleton object.
+     * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
+     * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
      * @param[in] limitYaw `true` if the yaw should be limited between `TURRET_YAW_MIN_ANGLE` and
      *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
+     * @param[in] chassisFrontBackIdentical `true` if the front and back of the chassis are
+     *      interchangable, indicating that `YAW_START_ANGLE` is identical to `YAW_START_ANGLE +
+     *      180` in terms of relation to the chassis.
      */
     explicit TurretSubsystem(
         tap::Drivers* drivers,
         tap::motor::DjiMotor* pitchMotor,
         tap::motor::DjiMotor* yawMotor,
-        bool limitYaw = true);
+        bool limitYaw = true,
+        bool chassisFrontBackIdentical = false);
 
     inline bool yawLimited() const { return limitYaw; }
 
@@ -103,7 +118,7 @@ public:
     }
 
     /**
-     * @return The wrapped yaw angle of the actual yaw gimbal, in degrees
+     * @return The wrapped yaw angle of the actual yaw gimbal, in degrees in the chassis frame.
      */
     inline const tap::algorithms::ContiguousFloat& getCurrentYawValue() const override
     {
@@ -111,7 +126,7 @@ public:
     }
 
     /**
-     * @return The wrapped pitch angle of the actual pitch gimbal, in degrees.
+     * @return The wrapped pitch angle of the actual pitch gimbal, in degrees in the chassis frame.
      */
     inline const tap::algorithms::ContiguousFloat& getCurrentPitchValue() const override
     {
@@ -119,22 +134,22 @@ public:
     }
 
     /**
-     * @return The yaw target as set by the user in `setYawSetpoint`.
+     * @return The yaw target as set by the user in `setYawSetpoint`, in the chassis frame.
      */
     inline float getYawSetpoint() const override { return yawTarget.getValue(); }
 
     /**
-     * @return The pitch target as set by the user in `setPitchSetpoint`.
+     * @return The pitch target as set by the user in `setPitchSetpoint`, in the chassis frame.
      */
     inline float getPitchSetpoint() const override { return pitchTarget.getValue(); }
 
     /**
-     * @return The velocity, in degrees / second, of the turret's pitch yaw
+     * @return The velocity, in degrees / second, of the turret's pitch yaw, in the chassis frame.
      */
     inline float getYawVelocity() const override { return getVelocity(yawMotor); }
 
     /**
-     * @return The velocity, in degrees / second, of the turret's pitch motor
+     * @return The velocity, in degrees / second, of the turret's pitch motor, in the chassis frame.
      */
     inline float getPitchVelocity() const override { return getVelocity(pitchMotor); }
 
@@ -151,14 +166,20 @@ public:
     void setPitchSetpoint(float target) override;
 
     /**
-     * @return An angle between [-180, 180] that is the angle difference of the yaw gimbal
-     *      from center (90 degrees), in degrees.
+     * @return When `chassisFrontBackIdentical == false`, an angle between [-180, 180] that is the
+     *      angle difference of the yaw gimbal from the initial setpoint (`YAW_START_ANGLE`), which
+     *      is assumed to be the center of the chassis, in degrees.
+     *
+     *      When `yawLimited == false && chassisFrontBackIdentical == true`, an angle between
+     *      [-90, 90] that is the angle difference of the yaw gimbal from either `YAW_START_ANGLE`,
+     *      which is assumed to be the center of the chassis, or `YAW_START_ANGLE + 180`, which
+     *      is assumed to be the back center of the chassis.
      */
     float getYawAngleFromCenter() const override;
 
     /**
      * @return An angle between [-180, 180] that is the angle difference of the pitch gimbal
-     *      from center (90 degrees), in degrees.
+     *      from `PITCH_START_ANGLE`, in degrees.
      */
     float getPitchAngleFromCenter() const override;
 
@@ -185,17 +206,6 @@ public:
     mockable void updateCurrentTurretAngles();
 
 private:
-#if defined(TARGET_SOLDIER)
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
-#elif defined(TARGET_HERO)
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 3000;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1418;
-#else
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
-#endif
-
     tap::algorithms::ContiguousFloat currPitchAngle;
     tap::algorithms::ContiguousFloat currYawAngle;
 
@@ -206,6 +216,7 @@ private:
     tap::algorithms::ContiguousFloat pitchTarget;
 
     bool limitYaw;
+    bool chassisFrontBackIdentical;
 
     void updateCurrentYawAngle();
     void updateCurrentPitchAngle();
@@ -218,17 +229,8 @@ private:
         return 360 / 60 * motor->getShaftRPM();
     }
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
-    tap::mock::DjiMotorMock pitchMotor;
-    tap::mock::DjiMotorMock yawMotor;
-
-private:
-#else
     tap::motor::DjiMotor* pitchMotor;
     tap::motor::DjiMotor* yawMotor;
-#endif
-
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret

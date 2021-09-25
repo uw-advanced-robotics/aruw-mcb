@@ -31,7 +31,6 @@ using namespace tap::sensors;
 
 namespace aruwsrc::control::turret
 {
-
 static inline float transformChassisFrameYawToWorldFrame(
     const float initChassisFrameImuAngle,
     const float currChassisFrameImuAngle,

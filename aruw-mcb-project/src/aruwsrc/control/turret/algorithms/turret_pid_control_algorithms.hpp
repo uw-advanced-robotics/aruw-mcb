@@ -37,6 +37,6 @@ void runSinglePidYawChassisFrameController(
     const float userInput,
     tap::algorithms::SmoothPid &pid,
     tap::control::turret::TurretSubsystemInterface *turretSubsystem);
-}
+}  // namespace aruwsrc::control::turret
 
 #endif  // TURRET_PID_CONTROL_ALGORITHMS_HPP_

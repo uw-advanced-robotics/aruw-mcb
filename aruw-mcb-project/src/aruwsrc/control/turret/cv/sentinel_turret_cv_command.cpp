@@ -23,10 +23,10 @@
 #include "tap/control/comprised_command.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/serial/xavier_serial.hpp"
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "../algorithms/turret_pid_control_algorithms.hpp"
 #include "../turret_subsystem.hpp"
+#include "aruwsrc/communication/serial/xavier_serial.hpp"
+#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 
 using namespace tap;
 using namespace tap::algorithms;

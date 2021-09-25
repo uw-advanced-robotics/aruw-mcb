@@ -39,13 +39,17 @@ TurretSubsystem::TurretSubsystem(
     Drivers *drivers,
     DjiMotor *pitchMotor,
     DjiMotor *yawMotor,
-    bool limitYaw)
+    bool limitYaw,
+    bool chassisFrontBackIdentical)
     : tap::control::turret::TurretSubsystemInterface(drivers),
-      currPitchAngle(0.0f, 0.0f, 360.0f),
-      currYawAngle(0.0f, 0.0f, 360.0f),
+      currPitchAngle(PITCH_START_ANGLE, 0.0f, 360.0f),
+      currYawAngle(YAW_START_ANGLE, 0.0f, 360.0f),
+      pitchEncoderWhenUpdated(PITCH_START_ENCODER_POSITION),
+      yawEncoderWhenUpdated(YAW_START_ENCODER_POSITION),
       yawTarget(YAW_START_ANGLE, 0.0f, 360.0f),
       pitchTarget(PITCH_START_ANGLE, 0.0f, 360.0f),
       limitYaw(limitYaw),
+      chassisFrontBackIdentical(chassisFrontBackIdentical),
       pitchMotor(pitchMotor),
       yawMotor(yawMotor)
 {
@@ -59,7 +63,9 @@ void TurretSubsystem::initialize()
 
 float TurretSubsystem::getYawAngleFromCenter() const
 {
-    return ContiguousFloat(currYawAngle.getValue() - YAW_START_ANGLE, -180.0f, 180.0f).getValue();
+    const float wrapAngle = (!limitYaw && chassisFrontBackIdentical) ? 90.0f : 180.0f;
+    return ContiguousFloat(currYawAngle.getValue() - YAW_START_ANGLE, -wrapAngle, wrapAngle)
+        .getValue();
 }
 
 float TurretSubsystem::getPitchAngleFromCenter() const

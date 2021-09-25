@@ -145,7 +145,10 @@ TowSubsystemMock::TowSubsystemMock(
 }
 TowSubsystemMock::~TowSubsystemMock() {}
 
-TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers) : TurretSubsystem(drivers) {}
+TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers)
+    : TurretSubsystem(drivers, nullptr, nullptr)
+{
+}
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
 XAxisSubsystemMock::XAxisSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
