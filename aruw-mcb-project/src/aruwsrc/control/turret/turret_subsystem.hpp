@@ -53,6 +53,12 @@ public:
     static constexpr float TURRET_YAW_MAX_ANGLE = TURRET_START_ANGLE + 90.0f;
     static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 13.0f;
     static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 30.0f;
+#elif defined(TARGET_OLD_SOLDIER)
+    static constexpr float TURRET_START_ANGLE = 90.0f;
+    static constexpr float TURRET_YAW_MIN_ANGLE = 10.0f;
+    static constexpr float TURRET_YAW_MAX_ANGLE = 170.0f;
+    static constexpr float TURRET_PITCH_MIN_ANGLE = TURRET_START_ANGLE - 15.0f;
+    static constexpr float TURRET_PITCH_MAX_ANGLE = TURRET_START_ANGLE + 30.0f;
 #elif defined(TARGET_HERO)
     static constexpr float TURRET_START_ANGLE = 90.0f;
     static constexpr float TURRET_YAW_MIN_ANGLE = TURRET_START_ANGLE - 70.0f;
@@ -187,6 +193,9 @@ public:
 private:
 #if defined(TARGET_SOLDIER)
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
+#elif defined(TARGET_OLD_SOLDIER)
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 4792;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 #elif defined(TARGET_HERO)
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 3000;

@@ -140,7 +140,7 @@ void registerOldSoldierSubsystems(tap::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultOldSoldierCommands(tap::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
 }
 
