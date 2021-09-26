@@ -93,7 +93,7 @@ private:
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
     static constexpr float USER_YAW_INPUT_SCALAR = 1.0f;
-    static constexpr float USER_PITCH_INPUT_SCALAR = 0.6f;
+    static constexpr float USER_PITCH_INPUT_SCALAR = 1.0f;
 
 #else
     static constexpr float YAW_P = 0.0f;
