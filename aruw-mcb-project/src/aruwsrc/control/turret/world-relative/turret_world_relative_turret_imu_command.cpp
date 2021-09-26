@@ -78,7 +78,7 @@ static inline float transformWorldFrameYawToChassisFrame(
  * @param[in] turretBaseFramePitchAngle The pitch angle of the turret base relative to the world.
  * @param[in] angleToTransform The angle to transform and return.
  */
-static inline float transformChassisFramePitchToWorldRelative(
+static inline float transformChassisFramePitchToWorldFrame(
     const float turretBaseFramePitchAngle,
     const float angleToTransform)
 {
@@ -107,7 +107,7 @@ static inline float getPitchWorldRelativeAngle(
     const float turretBaseFramePitchAngle,
     const TurretSubsystem *turret)
 {
-    return transformChassisFramePitchToWorldRelative(
+    return transformChassisFramePitchToWorldFrame(
         turretBaseFramePitchAngle,
         turret->getCurrentPitchValue().getValue());
 }
@@ -120,7 +120,7 @@ static inline float getPitchWorldRelativeVelocity(
     const float turretBaseFramePitchVelocity,
     const TurretSubsystem *turret)
 {
-    return transformChassisFramePitchToWorldRelative(
+    return transformChassisFramePitchToWorldFrame(
         turretBaseFramePitchVelocity,
         turret->getPitchVelocity());
 }
@@ -133,6 +133,7 @@ TurretWorldRelativeTurretImuCommand::TurretWorldRelativeTurretImuCommand(
       turretSubsystem(turretSubsystem),
       chassisSubsystem(chassis),
       worldFrameYawSetpoint(TurretSubsystem::YAW_START_ANGLE, 0.0f, 360.0f),
+      worldFramePitchSetpoint(TurretSubsystem::PITCH_START_ANGLE, 0.0f, 360.0f),
       yawPid(
           YAW_P,
           YAW_I,
@@ -176,6 +177,10 @@ void TurretWorldRelativeTurretImuCommand::initialize()
         drivers->imuRxHandler.getYaw(),
         turretSubsystem->getYawSetpoint()));
 
+    worldFramePitchSetpoint.setValue(transformChassisFramePitchToWorldFrame(
+        drivers->imuRxHandler.getPitch(),
+        turretSubsystem->getPitchSetpoint()));
+
     prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
@@ -210,6 +215,7 @@ void TurretWorldRelativeTurretImuCommand::runYawPositionController(uint32_t dt)
     const float worldFrameYawVelocity = drivers->imuRxHandler.getGz();
 
     // transform target angle from turret imu relative to chassis relative
+    // to keep turret/command setpoints synchronized
     turretSubsystem->setYawSetpoint(transformWorldFrameYawToChassisFrame(
         chassisFrameYaw,
         worldFrameYawAngle,
@@ -217,6 +223,7 @@ void TurretWorldRelativeTurretImuCommand::runYawPositionController(uint32_t dt)
 
     if (turretSubsystem->yawLimited())
     {
+        // TODO this is broken
         // transform angle that is limited by subsystem to world relative again to run the
         // controller
         worldFrameYawSetpoint.setValue(transformChassisFrameYawToWorldFrame(
@@ -226,7 +233,8 @@ void TurretWorldRelativeTurretImuCommand::runYawPositionController(uint32_t dt)
     }
 
     // position controller based on imu and yaw gimbal angle,
-    // precisly, - (worldFrameYawSetpoint - yawActual)
+    // precisly, - (worldFrameYawSetpoint - yawActual), or more obvious, yawActual -
+    // worldFrameYawSetpoint
     float positionControllerError = -worldFrameYawSetpoint.difference(worldFrameYawAngle);
     float pidOutput = yawPid.runController(positionControllerError, worldFrameYawVelocity, dt);
 
@@ -235,20 +243,23 @@ void TurretWorldRelativeTurretImuCommand::runYawPositionController(uint32_t dt)
 
 void TurretWorldRelativeTurretImuCommand::runPitchPositionController(uint32_t dt)
 {
+    worldFramePitchSetpoint.shiftValue(
+        USER_PITCH_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretPitchInput());
+
     const float turretBasePitchAngle = drivers->imuRxHandler.getPitch();
     const float turretBasePitchVelocity = drivers->imuRxHandler.getGx();
 
     // Project user desired setpoint that is in world relative to chassis relative
     // to limit the value
-    turretSubsystem->setPitchSetpoint(
-        turretSubsystem->getPitchSetpoint() +
-        USER_PITCH_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretPitchInput());
-
-    // project angle limited by the TurretSubsystem back to world relative
-    // to use the value
-    const float pitchSetpoint = transformChassisFramePitchToWorldRelative(
+    turretSubsystem->setPitchSetpoint(transformWorldFramePitchToChassisFrame(
         turretBasePitchAngle,
-        turretSubsystem->getPitchSetpoint());
+        worldFramePitchSetpoint.getValue()));
+
+    // Project angle limited by the TurretSubsystem back to world relative
+    // to use the value
+    worldFramePitchSetpoint.setValue(transformChassisFramePitchToWorldFrame(
+        turretBasePitchAngle,
+        turretSubsystem->getPitchSetpoint()));
 
     const float pitchWorldRelativeAngle =
         getPitchWorldRelativeAngle(turretBasePitchAngle, turretSubsystem);
@@ -256,7 +267,7 @@ void TurretWorldRelativeTurretImuCommand::runPitchPositionController(uint32_t dt
         getPitchWorldRelativeVelocity(turretBasePitchVelocity, turretSubsystem);
 
     // Compute error between pitch target and reference angle
-    float positionControllerError = pitchSetpoint - pitchWorldRelativeAngle;
+    float positionControllerError = -worldFramePitchSetpoint.difference(pitchWorldRelativeAngle);
 
     float pidOutput =
         pitchPid.runController(positionControllerError, pitchWorldRelativeVelocity, dt);

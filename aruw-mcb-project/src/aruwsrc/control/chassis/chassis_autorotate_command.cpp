@@ -38,10 +38,12 @@ namespace chassis
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     tap::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const tap::control::turret::TurretSubsystemInterface* turret)
+    const tap::control::turret::TurretSubsystemInterface* turret,
+    bool chassisFrontBackIdentical)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret)
+      turret(turret),
+      chassisFrontBackIdentical(chassisFrontBackIdentical)
 {
     addSubsystemRequirement(chassis);
 }
@@ -55,8 +57,13 @@ void ChassisAutorotateCommand::execute()
     if (turret->isOnline())
     {
         float angleFromCenter = turret->getYawAngleFromCenter();
+        float angleFromCenterForChassisAutorotate =
+            chassisFrontBackIdentical && !turret->yawLimited()
+                ? ContiguousFloat(angleFromCenter, -90.0f, 90.0f).getValue()
+                : angleFromCenter;
+
         float chassisRotationDesiredWheelspeed =
-            chassis->chassisSpeedRotationPID(angleFromCenter, CHASSIS_AUTOROTATE_PID_KP);
+            chassis->chassisSpeedRotationPID(angleFromCenterForChassisAutorotate, CHASSIS_AUTOROTATE_PID_KP);
 
         // what we will multiply x and y speed by to take into account rotation
         float rTranslationalGain =

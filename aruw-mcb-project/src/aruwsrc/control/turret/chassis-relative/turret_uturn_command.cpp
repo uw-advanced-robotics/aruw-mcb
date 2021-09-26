@@ -31,6 +31,7 @@ TurretUTurnCommand::TurretUTurnCommand(
     : turretSubsystem(turretSubsystem),
       targetOffsetToTurn(targetOffsetToTurn)
 {
+    addSubsystemRequirement(turretSubsystem);
 }
 
 }  // namespace aruwsrc::control::turret

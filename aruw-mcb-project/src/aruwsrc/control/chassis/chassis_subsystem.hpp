@@ -60,7 +60,7 @@ public:
      * Max wheel speed, measured in RPM of the encoder (rather than shaft)
      * we use this for wheel speed since this is how dji's motors measures motor speed.
      */
-    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;
+    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 5000;
 
     /**
      * The minimum desired wheel speed for chassis rotation, measured in RPM before

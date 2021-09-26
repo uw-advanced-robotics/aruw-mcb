@@ -41,6 +41,7 @@
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
+#include "turret/chassis-relative/turret_uturn_command.hpp"
 #include "turret/world-relative/turret_world_relative_command.hpp"
 
 #ifdef PLATFORM_HOSTED
@@ -84,7 +85,7 @@ tap::motor::DjiMotor yawMotor(
     TurretSubsystem::CAN_BUS_MOTORS,
     false,
     "Yaw Turret");
-TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor);
+TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 ChassisSubsystem chassis(drivers());
 
@@ -125,13 +126,15 @@ ClientDisplaySubsystem clientDisplay(drivers());
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
+ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, true);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
 TurretWorldRelativeCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
 
 TurretCVCommand turretCVCommand(drivers(), &turret);
+
+TurretUTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -189,6 +192,7 @@ HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(tap::Drivers *drivers)
@@ -242,6 +246,7 @@ void registerSoldierIoMappings(tap::Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
+    drivers->commandMapper.addMap(&zPressed);
 }
 }  // namespace soldier_control
 

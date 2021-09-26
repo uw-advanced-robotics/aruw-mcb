@@ -54,8 +54,8 @@ public:
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = 0.0f;
     static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_MIN_ANGLE = 77.0f;
-    static constexpr float PITCH_MAX_ANGLE = 120.0f;
+    static constexpr float PITCH_MIN_ANGLE = 63.0f;
+    static constexpr float PITCH_MAX_ANGLE = 125.0f;
 
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
@@ -96,10 +96,9 @@ public:
         tap::Drivers* drivers,
         tap::motor::DjiMotor* pitchMotor,
         tap::motor::DjiMotor* yawMotor,
-        bool limitYaw = true,
-        bool chassisFrontBackIdentical = false);
+        bool limitYaw = true);
 
-    inline bool yawLimited() const { return limitYaw; }
+    inline bool yawLimited() const override { return limitYaw; }
 
     void initialize() override;
 
@@ -169,11 +168,6 @@ public:
      * @return When `chassisFrontBackIdentical == false`, an angle between [-180, 180] that is the
      *      angle difference of the yaw gimbal from the initial setpoint (`YAW_START_ANGLE`), which
      *      is assumed to be the center of the chassis, in degrees.
-     *
-     *      When `yawLimited == false && chassisFrontBackIdentical == true`, an angle between
-     *      [-90, 90] that is the angle difference of the yaw gimbal from either `YAW_START_ANGLE`,
-     *      which is assumed to be the center of the chassis, or `YAW_START_ANGLE + 180`, which
-     *      is assumed to be the back center of the chassis.
      */
     float getYawAngleFromCenter() const override;
 
@@ -216,7 +210,6 @@ private:
     tap::algorithms::ContiguousFloat pitchTarget;
 
     bool limitYaw;
-    bool chassisFrontBackIdentical;
 
     /**
      * @return velocity of 6020 motor, in degrees / sec

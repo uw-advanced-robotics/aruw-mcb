@@ -40,7 +40,7 @@ namespace aruwsrc::control::turret
  *      re-scheduling it over and over will result in unexpected behavior (the
  *      turret will appear to not do anything).
  */
-class TurretUTurnCommand : tap::control::Command
+class TurretUTurnCommand : public tap::control::Command
 {
 public:
     TurretUTurnCommand(
@@ -51,7 +51,7 @@ public:
 
     bool isFinished() const override { return true; }
 
-    const char *getName() const override { return "Turret uturn command"; }
+    const char *getName() const override { return "turret U-Turn"; }
 
     void initialize() override
     {

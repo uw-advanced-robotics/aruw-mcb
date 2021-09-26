@@ -60,8 +60,11 @@ void TurretWorldRelativeCommand::initialize()
 
 void TurretWorldRelativeCommand::execute()
 {
-    // Re-initialize if no commands scheduled
-    if (comprisedCommandScheduler.getAddedCommandBitmap() == 0)
+    // Re-initialize if no commands scheduled or if the turret WR Turret IMU command
+    // is ready and isn't scheduled
+    if (comprisedCommandScheduler.getAddedCommandBitmap() == 0 ||
+        (!comprisedCommandScheduler.isCommandScheduled(&turretWRTurretImuCommand) &&
+         turretWRTurretImuCommand.isReady()))
     {
         initialize();
     }

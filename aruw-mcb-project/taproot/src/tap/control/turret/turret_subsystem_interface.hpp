@@ -98,6 +98,13 @@ public:
      * @see setYawMotorOutput
      */
     virtual void setPitchMotorOutput(float out) = 0;
+
+    /**
+     * @return `true` if the yaw should be limited between `TURRET_YAW_MIN_ANGLE` and
+     *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
+     *      ring).
+     */
+    virtual bool yawLimited() const = 0;
 };
 }  // namespace tap::control::turret
 
