@@ -38,7 +38,10 @@
 #include "turret/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
+#include "launcher/snail_friction_wheel_subsystem.hpp"
+#include "launcher/snail_spin_friction_wheels_command.hpp"
 
+using namespace aruwsrc::launcher;
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
@@ -82,6 +85,8 @@ HopperSubsystem hopperCover(
     HopperSubsystem::OLD_SOLDIER_HOPPER_CLOSE_PWM,
     HopperSubsystem::OLD_SOLDIER_PWM_RAMP_SPEED);
 
+SnailFrictionWheelSubsystem snailFrictionWheelSubsystem(drivers(), tap::gpio::Pwm::Y, tap::gpio::Pwm::Z);
+
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
@@ -96,6 +101,8 @@ CalibrateCommand agitatorCalibrateCommand(&agitator);
 ShootFastComprisedCommand17MM agitatorShootFastCommand(drivers(), &agitator);
 
 OpenHopperCommand openHopperCommand(&hopperCover);
+
+SnailSpinFrictionWheelsCommand spinFrictionWheels(&snailFrictionWheelSubsystem);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -126,6 +133,7 @@ void initializeSubsystems()
     chassis.initialize();
     agitator.initialize();
     hopperCover.initialize();
+    snailFrictionWheelSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -135,6 +143,7 @@ void registerOldSoldierSubsystems(tap::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
+    drivers->commandScheduler.registerSubsystem(&snailFrictionWheelSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -142,6 +151,7 @@ void setDefaultOldSoldierCommands(tap::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
+    snailFrictionWheelSubsystem.setDefaultCommand(&spinFrictionWheels);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
