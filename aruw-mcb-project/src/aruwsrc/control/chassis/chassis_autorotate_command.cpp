@@ -53,7 +53,7 @@ ChassisAutorotateCommand::ChassisAutorotateCommand(
 void ChassisAutorotateCommand::initialize() {}
 
 void ChassisAutorotateCommand::updateAutorotateState(
-    TurretSubsystem* turret,
+    const tap::control::turret::TurretSubsystemInterface* turret,
     const float turretAngleFromCenter)
 {
     const float turretYawSetpoint = turret->getYawSetpoint();
@@ -63,13 +63,13 @@ void ChassisAutorotateCommand::updateAutorotateState(
         if (chassisFrontBackIdentical && !turret->yawLimited())
         {
             static constexpr float YAW_BACK_ANGLE =
-                (static_cast<int>(TurretSubsystem::YAW_START_ANGLE) + 180) % 360;
+                (static_cast<int>(TurretSubsystem::TURRET_START_ANGLE) + 180) % 360;
 
             if ((abs(turretAngleFromCenter) < 90 &&
                  abs(ContiguousFloat(turretYawSetpoint - YAW_BACK_ANGLE, 0, 360).getValue()) <
                      TARGET_FORWARD_THRESHOLD) ||
                 (abs(turretAngleFromCenter) > 90 &&
-                 abs(ContiguousFloat(turretYawSetpoint - TurretSubsystem::YAW_START_ANGLE, 0, 360)
+                 abs(ContiguousFloat(turretYawSetpoint - TurretSubsystem::TURRET_START_ANGLE, 0, 360)
                          .getValue()) < TARGET_FORWARD_THRESHOLD))
             {
                 // If turret is facing forwards and the target is the start angle + 180 or...
@@ -98,15 +98,15 @@ void ChassisAutorotateCommand::execute()
 
         updateAutorotateState(turret, turretAngleFromCenter);
 
-        float angleFromCenterForChassisAutorotate =
-            chassisFrontBackIdentical && !turret->yawLimited()
-                ? ContiguousFloat(turretAngleFromCenter, -90.0f, 90.0f).getValue()
-                : turretAngleFromCenter;
-
         float chassisRotationDesiredWheelspeed = 0.0f;
 
         if (chassisAutorotating)
         {
+            float angleFromCenterForChassisAutorotate =
+                chassisFrontBackIdentical && !turret->yawLimited()
+                    ? ContiguousFloat(turretAngleFromCenter, -90.0f, 90.0f).getValue()
+                    : turretAngleFromCenter;
+
             // Apply autorotation
             chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,

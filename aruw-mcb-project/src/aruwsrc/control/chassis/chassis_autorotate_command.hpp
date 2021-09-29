@@ -39,7 +39,7 @@ class ChassisSubsystem;
 class ChassisAutorotateCommand : public tap::control::Command
 {
 public:
-    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -100.0f;
+    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -150.0f;
 
     ChassisAutorotateCommand(
         tap::Drivers* drivers,
@@ -72,7 +72,7 @@ private:
     bool chassisFrontBackIdentical;
     bool chassisAutorotating;
 
-    void updateAutorotateState(TurretSubsystem* turret, const float turretAngleFromCenter);
+    void updateAutorotateState(const tap::control::turret::TurretSubsystemInterface* turret, const float turretAngleFromCenter);
 };  // class ChassisAutorotateCommand
 
 }  // namespace aruwsrc::chassis
