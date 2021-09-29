@@ -64,22 +64,15 @@ public:
     const char* getName() const override { return "chassis autorotate"; }
 
 private:
-    static constexpr float FACING_FORWARD_THRESHOLD = 2.0f;
-
-    enum class ChassisAutorotateState
-    {
-        NORMAL,
-        UTURN_BACK,
-        UTURN_FORWARD,
-    };
+    static constexpr float TARGET_FORWARD_THRESHOLD = 5.0f;
 
     tap::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
     bool chassisFrontBackIdentical;
-    ChassisAutorotateState autorotateState;
+    bool chassisAutorotating;
 
-    void updateAutorotateState(float angleFromCenter);
+    void updateAutorotateState(TurretSubsystem* turret, const float turretAngleFromCenter);
 };  // class ChassisAutorotateCommand
 
 }  // namespace aruwsrc::chassis

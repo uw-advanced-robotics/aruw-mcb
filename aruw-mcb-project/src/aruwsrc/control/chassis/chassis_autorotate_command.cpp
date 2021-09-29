@@ -29,6 +29,7 @@
 #include "chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
+using namespace aruwsrc::control::turret;
 using tap::Drivers;
 
 namespace aruwsrc
@@ -44,51 +45,46 @@ ChassisAutorotateCommand::ChassisAutorotateCommand(
       chassis(chassis),
       turret(turret),
       chassisFrontBackIdentical(chassisFrontBackIdentical),
-      autorotateState(ChassisAutorotateState::NORMAL)
+      chassisAutorotating(true)
 {
     addSubsystemRequirement(chassis);
 }
 
 void ChassisAutorotateCommand::initialize() {}
 
-void ChassisAutorotateCommand::updateAutorotateState(float angleFromCenter)
+void ChassisAutorotateCommand::updateAutorotateState(
+    TurretSubsystem* turret,
+    const float turretAngleFromCenter)
 {
-    switch (autorotateState)
+    const float turretYawSetpoint = turret->getYawSetpoint();
+
+    if (chassisAutorotating)
     {
-        case ChassisAutorotateState::NORMAL:
-            if (chassisFrontBackIdentical && !turret->yawLimited())
-            {
-                // If the turret is pointed forward and we want to turn around completely, enter
-                // `TURNING_TO_BACK` state
-                if (abs(angleFromCenter) < FACING_FORWARD_THRESHOLD &&
-                    compareFloatClose(turret->getYawSetpoint(), 270.0f, FACING_FORWARD_THRESHOLD))
-                {
-                    autorotateState = ChassisAutorotateState::UTURN_BACK;
-                }
-                else if (
-                    abs(angleFromCenter) > 180.0f - FACING_FORWARD_THRESHOLD &&
-                    compareFloatClose(turret->getYawSetpoint(), 90.0f, FACING_FORWARD_THRESHOLD))
-                {
-                    autorotateState = ChassisAutorotateState::UTURN_FORWARD;
-                }
-            }
-            break;
+        if (chassisFrontBackIdentical && !turret->yawLimited())
+        {
+            static constexpr float YAW_BACK_ANGLE =
+                (static_cast<int>(TurretSubsystem::YAW_START_ANGLE) + 180) % 360;
 
-        case ChassisAutorotateState::UTURN_BACK:
-            if (abs(angleFromCenter) > 180.0f - FACING_FORWARD_THRESHOLD ||
-                !compareFloatClose(turret->getYawSetpoint(), 270.0f, FACING_FORWARD_THRESHOLD))
+            if ((abs(turretAngleFromCenter) < 90 &&
+                 abs(ContiguousFloat(turretYawSetpoint - YAW_BACK_ANGLE, 0, 360).getValue()) <
+                     TARGET_FORWARD_THRESHOLD) ||
+                (abs(turretAngleFromCenter) > 90 &&
+                 abs(ContiguousFloat(turretYawSetpoint - TurretSubsystem::YAW_START_ANGLE, 0, 360)
+                         .getValue()) < TARGET_FORWARD_THRESHOLD))
             {
-                autorotateState = ChassisAutorotateState::NORMAL;
+                // If turret is facing forwards and the target is the start angle + 180 or...
+                // If turret is facing backwards and target is forwards, change to UTURN
+                chassisAutorotating = false;
             }
-            break;
-
-        case ChassisAutorotateState::UTURN_FORWARD:
-            if (abs(angleFromCenter) < FACING_FORWARD_THRESHOLD ||
-                !compareFloatClose(turret->getYawSetpoint(), 90.0f, FACING_FORWARD_THRESHOLD))
-            {
-                autorotateState = ChassisAutorotateState::NORMAL;
-            }
-            break;
+        }
+    }
+    else
+    {
+        if (abs(turret->getCurrentYawValue().difference(turretYawSetpoint)) <
+            TARGET_FORWARD_THRESHOLD)
+        {
+            chassisAutorotating = true;
+        }
     }
 }
 
@@ -98,20 +94,20 @@ void ChassisAutorotateCommand::execute()
     // returns a chassis rotation speed
     if (turret->isOnline())
     {
-        float angleFromCenter = turret->getYawAngleFromCenter();
+        float turretAngleFromCenter = turret->getYawAngleFromCenter();
 
-        updateAutorotateState(angleFromCenter);
+        updateAutorotateState(turret, turretAngleFromCenter);
 
         float angleFromCenterForChassisAutorotate =
             chassisFrontBackIdentical && !turret->yawLimited()
-                ? ContiguousFloat(angleFromCenter, -90.0f, 90.0f).getValue()
-                : angleFromCenter;
+                ? ContiguousFloat(turretAngleFromCenter, -90.0f, 90.0f).getValue()
+                : turretAngleFromCenter;
 
         float chassisRotationDesiredWheelspeed = 0.0f;
 
-        // Apply autorotation when only in the normal state (not uturning)
-        if (autorotateState == ChassisAutorotateState::NORMAL)
+        if (chassisAutorotating)
         {
+            // Apply autorotation
             chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
                 CHASSIS_AUTOROTATE_PID_KP);
@@ -136,7 +132,7 @@ void ChassisAutorotateCommand::execute()
         rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            -modm::toRadian(angleFromCenter));
+            -modm::toRadian(turretAngleFromCenter));
 
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,
