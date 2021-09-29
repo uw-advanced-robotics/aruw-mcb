@@ -69,7 +69,10 @@ void ChassisAutorotateCommand::updateAutorotateState(
                  abs(ContiguousFloat(turretYawSetpoint - YAW_BACK_ANGLE, 0, 360).getValue()) <
                      TARGET_FORWARD_THRESHOLD) ||
                 (abs(turretAngleFromCenter) > 90 &&
-                 abs(ContiguousFloat(turretYawSetpoint - TurretSubsystem::TURRET_START_ANGLE, 0, 360)
+                 abs(ContiguousFloat(
+                         turretYawSetpoint - TurretSubsystem::TURRET_START_ANGLE,
+                         0,
+                         360)
                          .getValue()) < TARGET_FORWARD_THRESHOLD))
             {
                 // If turret is facing forwards and the target is the start angle + 180 or...

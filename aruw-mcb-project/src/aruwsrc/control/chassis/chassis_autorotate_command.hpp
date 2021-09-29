@@ -69,10 +69,24 @@ private:
     tap::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
+    /**
+     * If the front and back of the chassis may be treated as the same entities.
+     * This only matters if your turret can spin 360 degrees and will allow the
+     * autorotate to recenter either around the front or back of the chassis.
+     */
     bool chassisFrontBackIdentical;
+    /**
+     * `true` if the chassis is currently actually autorotating, `false` otherwise
+     * (in which case on rotation may happen). Autorotation may not happen if the
+     * user requests a user input that moves the turret from the front of the chassis
+     * to the back. If the chassis front and back are identical, then there is no
+     * reason to autorotate until the turret is done turning around.
+     */
     bool chassisAutorotating;
 
-    void updateAutorotateState(const tap::control::turret::TurretSubsystemInterface* turret, const float turretAngleFromCenter);
+    void updateAutorotateState(
+        const tap::control::turret::TurretSubsystemInterface* turret,
+        const float turretAngleFromCenter);
 };  // class ChassisAutorotateCommand
 
 }  // namespace aruwsrc::chassis
