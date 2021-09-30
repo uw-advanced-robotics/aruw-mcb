@@ -53,41 +53,23 @@ ChassisAutorotateCommand::ChassisAutorotateCommand(
 void ChassisAutorotateCommand::initialize() {}
 
 void ChassisAutorotateCommand::updateAutorotateState(
-    const tap::control::turret::TurretSubsystemInterface* turret,
-    const float turretAngleFromCenter)
+    const tap::control::turret::TurretSubsystemInterface* turret)
 {
-    const float turretYawSetpoint = turret->getYawSetpoint();
+    float turretYawActualSetpointDiff =
+        abs(turret->getCurrentYawValue().difference(turret->getYawSetpoint()));
 
-    if (chassisAutorotating)
+    if (chassisAutorotating && chassisFrontBackIdentical && !turret->yawLimited() &&
+        turretYawActualSetpointDiff > (180 - SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD))
     {
-        if (chassisFrontBackIdentical && !turret->yawLimited())
-        {
-            static constexpr float YAW_BACK_ANGLE =
-                (static_cast<int>(TurretSubsystem::TURRET_START_ANGLE) + 180) % 360;
-
-            if ((abs(turretAngleFromCenter) < 90 &&
-                 abs(ContiguousFloat(turretYawSetpoint - YAW_BACK_ANGLE, 0, 360).getValue()) <
-                     TARGET_FORWARD_THRESHOLD) ||
-                (abs(turretAngleFromCenter) > 90 &&
-                 abs(ContiguousFloat(
-                         turretYawSetpoint - TurretSubsystem::TURRET_START_ANGLE,
-                         0,
-                         360)
-                         .getValue()) < TARGET_FORWARD_THRESHOLD))
-            {
-                // If turret is facing forwards and the target is the start angle + 180 or...
-                // If turret is facing backwards and target is forwards, change to UTURN
-                chassisAutorotating = false;
-            }
-        }
+        // If turret setpoint all of a sudden turns around, don't autorotate
+        chassisAutorotating = false;
     }
-    else
+    else if (
+        !chassisAutorotating &&
+        turretYawActualSetpointDiff < SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD)
     {
-        if (abs(turret->getCurrentYawValue().difference(turretYawSetpoint)) <
-            TARGET_FORWARD_THRESHOLD)
-        {
-            chassisAutorotating = true;
-        }
+        // Once the turret setpoint/target have reached each other, start turning again
+        chassisAutorotating = true;
     }
 }
 
@@ -99,7 +81,7 @@ void ChassisAutorotateCommand::execute()
     {
         float turretAngleFromCenter = turret->getYawAngleFromCenter();
 
-        updateAutorotateState(turret, turretAngleFromCenter);
+        updateAutorotateState(turret);
 
         float chassisRotationDesiredWheelspeed = 0.0f;
 

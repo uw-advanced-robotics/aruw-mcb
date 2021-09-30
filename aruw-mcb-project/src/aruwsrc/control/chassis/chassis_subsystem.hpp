@@ -86,9 +86,9 @@ private:
      * Velocity PID gains and constants.
      */
     static constexpr float VELOCITY_PID_KP = 20.0f;
-    static constexpr float VELOCITY_PID_KI = 0.0f;
+    static constexpr float VELOCITY_PID_KI = 0.2f;
     static constexpr float VELOCITY_PID_KD = 0.0f;
-    static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
+    static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
     /**
      * This max output is measured in the c620 robomaster translated current.
      * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
