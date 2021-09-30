@@ -92,15 +92,15 @@ TEST(ChassisAutorotateCommand, execute_turret_offline_chassis_rel_driving_no_aut
     RUN_EXECUTE_TEST_TURRET_OFFLINE(drivers, chassis, cac, 0, 0, -0.75);
 }
 
-#define SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)      \
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));                                     \
-    ON_CALL(turret, yawLimited).WillByDefault(Return(isYawLimited));                           \
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float kp) {       \
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, kp);                   \
-    });                                                                                        \
-    ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(turretAngleFromCenter));       \
-    ContiguousFloat turretAngleActualContiguous(turretAngleActual, 0, 360);                    \
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(turretAngleActualContiguous)); \
+#define SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)         \
+    ON_CALL(turret, isOnline).WillByDefault(Return(true));                                        \
+    ON_CALL(turret, yawLimited).WillByDefault(Return(isYawLimited));                              \
+    ON_CALL(chassis, chassisSpeedRotationPID)                                                     \
+        .WillByDefault([&](float angle, float kp)                                                 \
+                       { return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, kp); }); \
+    ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(turretAngleFromCenter));          \
+    ContiguousFloat turretAngleActualContiguous(turretAngleActual, 0, 360);                       \
+    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(turretAngleActualContiguous));    \
     ON_CALL(turret, getYawSetpoint).WillByDefault(Return(turretAngleSetpoint));
 
 static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
@@ -118,7 +118,8 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
 
     SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)
 
-    auto runTest = [&](float x, float y) {
+    auto runTest = [&](float x, float y)
+    {
         float rotatedX = x;
         float rotatedY = y;
         rotateVector(&rotatedX, &rotatedY, -modm::toRadian(turretAngleFromCenter));
@@ -193,9 +194,11 @@ static void runExecuteAutorotateValidationTest(
     SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));
     SET_USER_INPUT(drivers, 0, 0, 0);
-    if (chassisFrontBackIdentical && !isYawLimited &&
-        abs(ContiguousFloat(turretAngleActual - turretAngleSetpoint, 0, 360).getValue()) >
-            (180 - ChassisAutorotateCommand::SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD))
+
+    if ((chassisFrontBackIdentical && !isYawLimited &&
+         abs(ContiguousFloat(turretAngleActual - turretAngleSetpoint, 0, 360).getValue()) >
+             (180 - ChassisAutorotateCommand::SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD)) ||
+        compareFloatClose(turretAngleFromCenter, 0, 1E-5))
     {
         EXPECT_CALL(chassis, setDesiredOutput(_, _, FloatEq(0.0f)));
         cac.execute();

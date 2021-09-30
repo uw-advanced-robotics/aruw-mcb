@@ -226,7 +226,7 @@ private:
      * No i, max error sum the same as `MAX_WHEEL_SPEED_SINGLE_MOTOR`, proportional
      * gain specified by user.
      */
-    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 0.0;
+    static constexpr float CHASSIS_REVOLVE_PID_MAX_P = 1.0;
     /**
      * Derivative term used in chassis PID.
      */
