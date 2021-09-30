@@ -40,6 +40,7 @@ class ChassisAutorotateCommand : public tap::control::Command
 {
 public:
     static constexpr float CHASSIS_AUTOROTATE_PID_KP = -100.0f;
+    static constexpr float SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD = 1.0f;
 
     ChassisAutorotateCommand(
         tap::Drivers* drivers,
@@ -64,9 +65,6 @@ public:
     const char* getName() const override { return "chassis autorotate"; }
 
 private:
-    static constexpr float TARGET_FORWARD_THRESHOLD = 5.0f;
-    static constexpr float SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD = 1.0f;
-
     tap::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;

@@ -57,6 +57,7 @@ public:
     MOCK_METHOD(void, updateCurrentTurretAngles, (), (override));
     MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char *, getName, (), (override));
+    MOCK_METHOD(bool, yawLimited, (), (const override));
 };  // class TurretSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc

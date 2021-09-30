@@ -79,9 +79,9 @@ void ChassisAutorotateCommand::execute()
     // returns a chassis rotation speed
     if (turret->isOnline())
     {
-        float turretAngleFromCenter = turret->getYawAngleFromCenter();
-
         updateAutorotateState(turret);
+
+        float turretAngleFromCenter = turret->getYawAngleFromCenter();
 
         float chassisRotationDesiredWheelspeed = 0.0f;
 
