@@ -145,7 +145,7 @@ _If you would like to use the terminal instead, see the section "Building and ru
 
 ### How to debug using a J-Link
 
-See the [wiki](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Software-Tools/Debugging-With-JLink) for an explanation on the difference between an ST-Link and J-Link and a step-by-step procedure on how to use the J-Link.
+See the [wiki](https://gitlab.com/aruw/controls/taproot/-/wikis/Debugging-With-JLink) for an explanation on the difference between an ST-Link and J-Link and a step-by-step procedure on how to use the J-Link.
 
 ### How to select robot type
 
@@ -154,7 +154,7 @@ With the root directory opened in VSCode, type <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+
 ### How to select an appropriate VSCode C/C++ configuration
 
 This codebase has a number of different build targets (see [this wiki
-page](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Build-Targets-Overview) for more
+page](https://gitlab.com/aruw/controls/taproot/-/wikis/Build-Targets-Overview) for more
 information). Because the build setup is different for the test, sim, and MCB environments, while
 working on a particular portion of code you may select an appropriate profile that provides optimal
 [intellisense](https://code.visualstudio.com/docs/editor/intellisense). To select a configuration,
