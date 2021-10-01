@@ -139,7 +139,7 @@ _If you would like to use the terminal instead, see the section "Building and ru
 
 1. Open the folder `aruw-mcb` in VSCode. Hit the debug tab on the left side or type <kbd>Ctrl</kbd>+<kbd>shift</kbd>+<kbd>D</kbd>.
 2. Hit the green play arrow on the left top of the screen.
-3. See [this page](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Software-Tools/Debugging-With-STLink) for more information about using the ST-Link for programming the MCB and debugging.
+3. See [this page](https://gitlab.com/aruw/controls/taproot/-/wikis/Debugging-With-STLink) for more information about using the ST-Link for programming the MCB and debugging.
 <br>
 <img src=https://gitlab.com/aruw/controls/aruw-mcb/uploads/1f62ea310a20ee76092fe18de83d14a7/image.png height="400px" />
 
