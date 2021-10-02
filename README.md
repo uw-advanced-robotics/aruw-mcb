@@ -192,7 +192,7 @@ The below commands require that your working directory is `aruw-mcb/aruw-mcb-pro
 - `scons build-tests`: Builds a program which hosts our unit tests. This executable can be run on your host computer (only supported on Linux) and prints results for each unit test run.
 - `scons program`: Builds as with `scons build` and then programs the board.
 - `scons run-tests`: Builds and runs the unit test program.
-- `scons size`: Prints statistics on program size and (satically-)allocated memory. Note that the reported available heap space is an upper bound, and this tool has no way of knowing about the real size of dynamic allocations.
+- `scons size`: Prints statistics on program size and (statically-)allocated memory. Note that the reported available heap space is an upper bound, and this tool has no way of knowing about the real size of dynamic allocations.
 
 Note that all `scons` commands have optional `profile` and `target` options; the former controls whether performance and size optimizations are applied to the output, and the latter specifies which robot to build for. The default is to build in release mode for the Soldier.
 
