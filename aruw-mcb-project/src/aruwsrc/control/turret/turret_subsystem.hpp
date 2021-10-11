@@ -77,7 +77,7 @@ public:
      */
     explicit TurretSubsystem(tap::Drivers* drivers, bool limitYaw = true);
 
-    inline bool yawLimited() const { return limitYaw; }
+    inline bool yawLimited() const override { return limitYaw; }
 
     void initialize() override;
 
