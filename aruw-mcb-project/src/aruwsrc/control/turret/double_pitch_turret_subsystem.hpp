@@ -166,6 +166,8 @@ public:
      */
     void setPitchMotorOutput(float) override {}
 
+    bool yawLimited() const override { return true; }
+
 private:
     tap::algorithms::ContiguousFloat currLeftPitchAngle;
     tap::algorithms::ContiguousFloat currRightPitchAngle;

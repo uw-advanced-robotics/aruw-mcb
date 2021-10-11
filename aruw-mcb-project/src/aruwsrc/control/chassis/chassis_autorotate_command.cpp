@@ -29,6 +29,7 @@
 #include "chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
+using namespace aruwsrc::control::turret;
 using tap::Drivers;
 
 namespace aruwsrc
@@ -38,15 +39,39 @@ namespace chassis
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     tap::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const tap::control::turret::TurretSubsystemInterface* turret)
+    const tap::control::turret::TurretSubsystemInterface* turret,
+    bool chassisFrontBackIdentical)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret)
+      turret(turret),
+      chassisFrontBackIdentical(chassisFrontBackIdentical),
+      chassisAutorotating(true)
 {
     addSubsystemRequirement(chassis);
 }
 
 void ChassisAutorotateCommand::initialize() {}
+
+void ChassisAutorotateCommand::updateAutorotateState(
+    const tap::control::turret::TurretSubsystemInterface* turret)
+{
+    float turretYawActualSetpointDiff =
+        abs(turret->getCurrentYawValue().difference(turret->getYawSetpoint()));
+
+    if (chassisAutorotating && chassisFrontBackIdentical && !turret->yawLimited() &&
+        turretYawActualSetpointDiff > (180 - SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD))
+    {
+        // If turret setpoint all of a sudden turns around, don't autorotate
+        chassisAutorotating = false;
+    }
+    else if (
+        !chassisAutorotating &&
+        turretYawActualSetpointDiff < SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD)
+    {
+        // Once the turret setpoint/target have reached each other, start turning again
+        chassisAutorotating = true;
+    }
+}
 
 void ChassisAutorotateCommand::execute()
 {
@@ -54,9 +79,24 @@ void ChassisAutorotateCommand::execute()
     // returns a chassis rotation speed
     if (turret->isOnline())
     {
-        float angleFromCenter = turret->getYawAngleFromCenter();
-        float chassisRotationDesiredWheelspeed =
-            chassis->chassisSpeedRotationPID(angleFromCenter, CHASSIS_AUTOROTATE_PID_KP);
+        updateAutorotateState(turret);
+
+        float turretAngleFromCenter = turret->getYawAngleFromCenter();
+
+        float chassisRotationDesiredWheelspeed = 0.0f;
+
+        if (chassisAutorotating)
+        {
+            float angleFromCenterForChassisAutorotate =
+                chassisFrontBackIdentical && !turret->yawLimited()
+                    ? ContiguousFloat(turretAngleFromCenter, -90.0f, 90.0f).getValue()
+                    : turretAngleFromCenter;
+
+            // Apply autorotation
+            chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
+                angleFromCenterForChassisAutorotate,
+                CHASSIS_AUTOROTATE_PID_KP);
+        }
 
         // what we will multiply x and y speed by to take into account rotation
         float rTranslationalGain =
@@ -77,7 +117,7 @@ void ChassisAutorotateCommand::execute()
         rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            -modm::toRadian(angleFromCenter));
+            -modm::toRadian(turretAngleFromCenter));
 
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,
