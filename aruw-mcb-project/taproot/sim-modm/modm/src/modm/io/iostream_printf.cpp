@@ -9,7 +9,9 @@
  */
 // ----------------------------------------------------------------------------
 
+#define _vsnprintf _vsnprintf_windows
 #include <stdio.h>
+#undef _vsnprintf
 #include <stdarg.h>
 #include <modm/architecture/interface/accessor.hpp>
 #include <cmath>

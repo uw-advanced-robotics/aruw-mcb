@@ -81,7 +81,7 @@ int main()
     aruwsrc::sim::initialize_robot_sim();
     tap::motorsim::SimHandler::resetMotorSims();
     // Blocking call, waits until Windows Simulator connects.
-    tap::communication::TCPServer::MainServer()->getConnection();
+    // tap::communication::TCPServer::MainServer()->getConnection();
 #endif
 
     while (1)

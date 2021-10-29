@@ -91,7 +91,7 @@ bool MoveCommand::isFinished() const
     return setpointSubsystem->isJammed() ||
            (fabsf(setpointSubsystem->getCurrentValue() - setpointSubsystem->getSetpoint()) <
                 agitatorSetpointTolerance &&
-            rampToTargetAngle.isTargetReached() && agitatorMinRotateTimeout.isExpired());
+            rampToTargetAngle.isTargetReached());
 }
 
 }  // namespace setpoint

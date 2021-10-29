@@ -161,6 +161,13 @@ public:
 	inline IOStream& operator << (const uint64_t& v)
 	{ writeIntegerMode(v); return *this; }
 
+	// For OSX 'int64_t' is of type 'int'. Therefore there is no
+	// function here for the default type 'long int'. As 'long int' has the same
+	// width as 'int64_t' we just use a typedef here.
+	inline IOStream& operator << (const long int& v)
+	{ writeIntegerMode(static_cast<int64_t>(v)); return *this; }
+	inline IOStream& operator << (const long unsigned int& v)
+	{ writeIntegerMode(static_cast<uint64_t>(v)); return *this; }
 	inline IOStream&
 	operator << (const float& v)
 	{ writeFloat(v); return *this; }

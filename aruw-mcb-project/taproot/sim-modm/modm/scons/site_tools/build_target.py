@@ -14,7 +14,7 @@ from os.path import join, abspath, relpath
 
 def build_target(env, sources):
 	# Building application
-	program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)
+	program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".exe", source=sources)
 	chosen_program = env.ChooseFirmware(program)
 	# Clean additional artifacts
 	env.Clean(program, join(env["BUILDPATH"], env["CONFIG_PROJECT_NAME"]+".bin"))

@@ -96,7 +96,7 @@ void DjiMotor::parseCanRxData(const modm::can::Message& message)
     using namespace tap::communication;
     std::string jsonMessage = json::makeMotorMessage(*this);
     const char* jsonCString = jsonMessage.c_str();
-    TCPServer::MainServer()->writeToClient(jsonCString, strlen(jsonCString));
+    // TCPServer::MainServer()->writeToClient(jsonCString, strlen(jsonCString));
 #endif
 }
 

@@ -120,6 +120,9 @@ elif args["TARGET_ENV"] == "tests":
         "-DENV_UNIT_TESTS"])
     env.AppendUnique(CPPPATH=[abspath(TAPROOT_TEST_PATH)])
     env.AppendUnique(CPPPATH=[abspath(TEST_PATH)])
+    env.AppendUnique(CPPPATH=["/Users/Matthew/Documents/UW/ARUW/repos/googletest/googlemock/include"])
+    env.AppendUnique(CPPPATH=["/Users/Matthew/Documents/UW/ARUW/repos/googletest/googletest/include"])
+    env.AppendUnique(LIBPATH=["/Users/Matthew/Documents/UW/ARUW/repos/googletest/build/lib"])
     env.AppendUnique(LIBS=GTEST_LIBS)
     env.AppendUnique(LIBS=HOSTED_LIBS)
 

@@ -19,8 +19,9 @@ using modm::AssertionHandler;
 using modm::Abandonment;
 using modm::AbandonmentBehavior;
 
-extern AssertionHandler __assertion_table_start __asm("__start_modm_assertion");
-extern AssertionHandler __assertion_table_end __asm("__stop_modm_assertion");
+// FIXME: Figure out how to access custom linker sections
+static AssertionHandler __assertion_table_start;
+#define __assertion_table_end __assertion_table_start
 // Since we use the default linker script on hosted, the above linker section are
 // only included if something is put into these sections. Therefore we are placing
 // an empty assertion handler here, which does not influence assertion handling.
