@@ -93,7 +93,14 @@ TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand17MM agitatorShootFastCommand(drivers(), &agitator);
+MoveUnjamRefLimitedCommand agitatorShootFastCommand(
+    drivers(),
+    &agitator,
+    M_PI / 5.0f,
+    M_PI / 2.0f,
+    10,
+    false,
+    0);
 
 OpenHopperCommand openHopperCommand(&hopperCover);
 
