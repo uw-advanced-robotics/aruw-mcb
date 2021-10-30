@@ -64,7 +64,8 @@ void ChassisImuDriveCommand::execute()
         }
         else
         {
-            angleFromDesiredRotation = rotationSetpoint.difference(drivers->mpu6500.getYaw());
+            float yaw = drivers->mpu6500.getYaw();
+            angleFromDesiredRotation = rotationSetpoint.difference(yaw);
 
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
             // angle. This way if the chassis is picked up and rotated, it won't try and spin around
@@ -77,8 +78,8 @@ void ChassisImuDriveCommand::execute()
                 rotationSetpoint.setValue(
                     tap::algorithms::ContiguousFloat::limitValue(
                         rotationSetpoint,
-                        drivers->mpu6500.getYaw() - MAX_ROTATION_ERR,
-                        drivers->mpu6500.getYaw() + MAX_ROTATION_ERR) -
+                        yaw - MAX_ROTATION_ERR,
+                        yaw + MAX_ROTATION_ERR) -
                     drivers->controlOperatorInterface.getChassisRInput() *
                         USER_INPUT_TO_ANGLE_DELTA_SCALAR);
             }
@@ -89,6 +90,9 @@ void ChassisImuDriveCommand::execute()
                     USER_INPUT_TO_ANGLE_DELTA_SCALAR);
             }
 
+            // compute error again now that user input has been updated
+            angleFromDesiredRotation = rotationSetpoint.difference(yaw);
+
             // run PID controller to attempt to attain the setpoint
             chassisRotationDesiredWheelspeed =
                 chassis->chassisSpeedRotationPID(angleFromDesiredRotation, ROTATION_PID_KP);
@@ -96,6 +100,7 @@ void ChassisImuDriveCommand::execute()
     }
     else
     {
+        imuSetpointInitialized = false;
         chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput() *
                                            ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
     }
