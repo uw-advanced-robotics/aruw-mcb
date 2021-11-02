@@ -99,7 +99,6 @@ int main()
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
