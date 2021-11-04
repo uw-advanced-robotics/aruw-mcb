@@ -29,7 +29,8 @@ git fetch
 git checkout develop
 git pull
 git submodule foreach git checkout develop
-(git checkout $UPDATE_SUBMODULE_BRANCH >&/dev/null) || (git checkout -b $UPDATE_SUBMODULE_BRANCH)
+git checkout $UPDATE_SUBMODULE_BRANCH
+git reset --hard origin/develop
 
 cd $ARUW_MCB_PROJECT_PATH
 rm -rf taproot
