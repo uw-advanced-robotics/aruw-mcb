@@ -29,7 +29,6 @@ variables:
 
 .default_only: &default_only
   - merge_requests
-  - master
   - develop
   - schedules
 
@@ -39,7 +38,6 @@ variables:
 
 .verification_only: &verification_only
   - merge_requests
-  - master
   - develop
 
 .verification_except: &verification_except
@@ -295,9 +293,9 @@ Sentinel Test Build:
 
 # Pages deploy
 
-pages:
-  needs: []
+docs:
   image: alpine
+  needs: []
   stage: Deploy Pages
   before_script:
     - apk update
@@ -316,8 +314,22 @@ pages:
       - public
   only:
     - develop
-  except:
-    - schedules
+    - merge_requests
+  environment:
+    name: "docs preview for $CI_COMMIT_REF_NAME"
+    url: "https://aruw.gitlab.io/-/controls/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public/index.html"
+
+pages:
+  image: alpine
+  needs: ["docs"]
+  dependencies: ["docs"]
+  stage: Deploy Pages
+  script: "true"
+  artifacts:
+    paths:
+      - public
+  only:
+    - develop
 
 Update submodule:
   stage: Initial Verification
