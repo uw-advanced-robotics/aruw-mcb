@@ -315,6 +315,8 @@ docs:
   only:
     - develop
     - merge_requests
+  except:
+    - schedules
   environment:
     name: "docs preview for $CI_COMMIT_REF_NAME"
     url: "https://aruw.gitlab.io/-/controls/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public/index.html"
@@ -330,6 +332,8 @@ pages:
       - public
   only:
     - develop
+  except:
+    - schedules
 
 Update submodule:
   stage: Initial Verification
