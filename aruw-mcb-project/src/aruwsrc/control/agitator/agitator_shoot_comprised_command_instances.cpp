@@ -25,43 +25,45 @@ namespace aruwsrc
 {
 namespace agitator
 {
-ShootFastComprisedCommand17MM::ShootFastComprisedCommand17MM(
+MoveUnjamRefLimitedCommand::MoveUnjamRefLimitedCommand(
     tap::Drivers *drivers,
     AgitatorSubsystem *agitator17mm,
+    float agitatorRotateAngle,
+    float maxUnjamRotateAngle,
+    uint32_t rotateTime,
     bool heatLimiting,
-    float agitatorRotateAngle)
+    float heatLimitBuffer)
     : tap::control::setpoint::MoveUnjamComprisedCommand(
           drivers,
           agitator17mm,
           agitatorRotateAngle,
-          M_PI / 2.0f,
-          1000,
+          maxUnjamRotateAngle,
+          rotateTime,
           0),
       drivers(drivers),
-      heatLimiting(heatLimiting)
+      heatLimiting(heatLimiting),
+      heatLimitBuffer(heatLimitBuffer)
 {
 }
 
-bool ShootFastComprisedCommand17MM::isReady()
+bool MoveUnjamRefLimitedCommand::isReady()
 {
     const auto &robotData = drivers->refSerial.getRobotData();
 
-    return setpointSubsystem->isOnline() &&
+    // TODO remove isOnline check when https://gitlab.com/aruw/controls/taproot/-/merge_requests/49
+    // is merged in
+    return MoveUnjamComprisedCommand::isReady() && setpointSubsystem->isOnline() &&
            !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
-             (robotData.turret.heat17ID1 + HEAT_LIMIT_BUFFER > robotData.turret.heatLimit17ID1));
+             (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));
 }
 
-bool ShootFastComprisedCommand17MM::isFinished() const
+bool MoveUnjamRefLimitedCommand::isFinished() const
 {
     const auto &robotData = drivers->refSerial.getRobotData();
 
-    return (!unjamSequenceCommencing &&
-            !comprisedCommandScheduler.isCommandScheduled(&agitatorRotateCommand)) ||
-           (unjamSequenceCommencing &&
-            !comprisedCommandScheduler.isCommandScheduled(&agitatorUnjamCommand)) ||
-           agitatorDisconnectFault ||
+    return MoveUnjamComprisedCommand::isFinished() ||
            (drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
-            (robotData.turret.heat17ID1 + HEAT_LIMIT_BUFFER > robotData.turret.heatLimit17ID1));
+            (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));
 }
 
 WaterwheelLoadCommand42mm::WaterwheelLoadCommand42mm(

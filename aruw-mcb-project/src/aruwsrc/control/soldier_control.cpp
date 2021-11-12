@@ -123,9 +123,30 @@ TurretCVCommand turretCVCommand(drivers(), &turret);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
-ShootFastComprisedCommand17MM agitatorShootFastLimited(drivers(), &agitator);
-
-ShootFastComprisedCommand17MM agitatorShootFastNotLimited(drivers(), &agitator, false);
+MoveUnjamRefLimitedCommand agitatorShootFastLimited(
+    drivers(),
+    &agitator,
+    M_PI / 5.0f,
+    M_PI / 2.0f,
+    50,
+    true,
+    10);
+MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
+    drivers(),
+    &agitator,
+    M_PI / 5.0f,
+    M_PI / 2.0f,
+    10,
+    true,
+    100);
+MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
+    drivers(),
+    &agitator,
+    M_PI / 5.0f,
+    M_PI / 2.0f,
+    0,
+    false,
+    50);
 
 SoldierOpenHopperCommand openHopperCommand(&hopperCover);
 
@@ -167,7 +188,7 @@ ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({R
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&agitatorShootFastLimited},
+    {&agitatorShootSlowLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),

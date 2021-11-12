@@ -37,7 +37,7 @@ using namespace tap::serial;
 #define SETUP_TEST(ComprisedCommand, ...)               \
     Drivers drivers;                                    \
     NiceMock<AgitatorSubsystemMock> agitator(&drivers); \
-    ComprisedCommand shootCommand(&drivers, &agitator, ##__VA_ARGS__);
+    ComprisedCommand shootCommand(&drivers, &agitator, 1, 1, 1, ##__VA_ARGS__);
 
 #define SETUP_IS_READY_EXPECTATIONS(receivingRefSerial)                          \
     EXPECT_CALL(drivers.refSerial, getRobotData).WillOnce(ReturnRef(robotData)); \
@@ -46,10 +46,10 @@ using namespace tap::serial;
 // Validation for heat limiting confirmed by whether or not the command reports it is finished
 // after initialize is called
 
-TEST(ShootFastComprisedCommand17MM, command_is_ready_if_heat_limiting_disabled)
+TEST(MoveUnjamRefLimitedCommand, command_is_ready_if_heat_limiting_disabled)
 {
     // Create shoot command with heat limiting off
-    SETUP_TEST(ShootFastComprisedCommand17MM, false);
+    SETUP_TEST(MoveUnjamRefLimitedCommand, false, 0);
     RefSerial::RobotData robotData;
     robotData.turret.heat17ID1 = 10;
     // should work when receiving ref serial
@@ -60,9 +60,9 @@ TEST(ShootFastComprisedCommand17MM, command_is_ready_if_heat_limiting_disabled)
     EXPECT_EQ(shootCommand.isReady(), true);
 }
 
-TEST(ShootFastComprisedCommand17MM, command_is_ready_if_not_receiving_ref_serial)
+TEST(MoveUnjamRefLimitedCommand, command_is_ready_if_not_receiving_ref_serial)
 {
-    SETUP_TEST(ShootFastComprisedCommand17MM, true);
+    SETUP_TEST(MoveUnjamRefLimitedCommand, true, 0);
     RefSerial::RobotData robotData;
     // Oh no! we aren't receiving ref serial data
     SETUP_IS_READY_EXPECTATIONS(false);
@@ -71,32 +71,32 @@ TEST(ShootFastComprisedCommand17MM, command_is_ready_if_not_receiving_ref_serial
 }
 
 // Command should be ready if it's just >= heat_buffer away from heat limit
-TEST(ShootFastComprisedCommand17MM, heat_limited_command_is_ready_within_limit)
+TEST(MoveUnjamRefLimitedCommand, heat_limited_command_is_ready_within_limit)
 {
-    SETUP_TEST(ShootFastComprisedCommand17MM, true);
+    SETUP_TEST(MoveUnjamRefLimitedCommand, true, 10);
     RefSerial::RobotData robotData;
     robotData.turret.heatLimit17ID1 = 200;
-    robotData.turret.heat17ID1 = 200 - ShootFastComprisedCommand17MM::HEAT_LIMIT_BUFFER;
+    robotData.turret.heat17ID1 = 200 - 10;
     SETUP_IS_READY_EXPECTATIONS(true);
     EXPECT_EQ(shootCommand.isReady(), true);
 }
 
 // Command should NOT be ready if it's heat limited and heat > heat limit - heat buffer
-TEST(ShootFastComprisedCommand17MM, heat_limited_command_isnt_ready_above_limit)
+TEST(MoveUnjamRefLimitedCommand, heat_limited_command_isnt_ready_above_limit)
 {
-    SETUP_TEST(ShootFastComprisedCommand17MM, true);
+    SETUP_TEST(MoveUnjamRefLimitedCommand, true, 10);
     RefSerial::RobotData robotData;
     robotData.turret.heatLimit17ID1 = 200;
-    robotData.turret.heat17ID1 = 200 - ShootFastComprisedCommand17MM::HEAT_LIMIT_BUFFER + 1;
+    robotData.turret.heat17ID1 = 200 - 10 + 1;
 
     SETUP_IS_READY_EXPECTATIONS(true);
     EXPECT_EQ(shootCommand.isReady(), false);
 }
 
 // Command should NOT be ready if subsystem is offline
-TEST(ShootFastComprisedCommand17MM, heat_limited_command_isnt_ready_when_subsystem_offline)
+TEST(MoveUnjamRefLimitedCommand, heat_limited_command_isnt_ready_when_subsystem_offline)
 {
-    SETUP_TEST(ShootFastComprisedCommand17MM, true);
+    SETUP_TEST(MoveUnjamRefLimitedCommand, true, 10);
     RefSerial::RobotData robotData;
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     EXPECT_CALL(agitator, isOnline).WillOnce(Return(false));

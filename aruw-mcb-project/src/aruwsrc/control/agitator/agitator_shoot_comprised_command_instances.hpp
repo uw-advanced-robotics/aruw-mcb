@@ -37,17 +37,17 @@ class AgitatorSubsystem;
  * comprised command. The constants are choosen for fast rotation speed for a soldier robot's
  * agitator.
  */
-class ShootFastComprisedCommand17MM : public tap::control::setpoint::MoveUnjamComprisedCommand
+class MoveUnjamRefLimitedCommand : public tap::control::setpoint::MoveUnjamComprisedCommand
 {
 public:
-    /// Buffer from max heat limit in which limiting occurs (3 bullet buffer)
-    static constexpr uint16_t HEAT_LIMIT_BUFFER = 40;
-
-    ShootFastComprisedCommand17MM(
+    MoveUnjamRefLimitedCommand(
         tap::Drivers* drivers,
         AgitatorSubsystem* agitator17mm,
-        bool heatLimiting = true,
-        float agitatorRotateAngle = 2.0f * M_PI);
+        float agitatorRotateAngle,
+        float maxUnjamRotateAngle,
+        uint32_t rotateTime,
+        bool heatLimiting,
+        float heatLimitBuffer);
 
     bool isReady() override;
 
@@ -57,6 +57,7 @@ private:
     tap::Drivers* drivers;
 
     const bool heatLimiting;
+    const float heatLimitBuffer;
 };  // class ShootFastComprisedCommand
 
 /**
