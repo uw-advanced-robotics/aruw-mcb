@@ -40,7 +40,7 @@
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
-#include "turret/turret_cv_command.hpp"
+#include "turret/chassis-relative/turret_uturn_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/turret_world_relative_position_command.hpp"
 
@@ -107,6 +107,8 @@ BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis, true);
 
 TurretCVCommand turretCVCommand(drivers(), &turret);
+
+TurretUTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -183,6 +185,7 @@ HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
@@ -235,6 +238,7 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
+    drivers->commandMapper.addMap(&zPressed);
 }
 }  // namespace soldier_control
 
