@@ -67,7 +67,7 @@
 #include "tap/motor/dji_motor_terminal_serial_handler.hpp"
 #include "tap/motor/dji_motor_tx_handler.hpp"
 
-#include "aruwsrc/communication/can/imu_rx_listener.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #endif
@@ -108,7 +108,7 @@ public:
           profiler(),
           djiMotorTerminalSerialHandler(this),
           schedulerTerminalHandler(this),
-          imuRxHandler(this)
+          turretMCBCanComm(this)
     {
     }
 
@@ -135,7 +135,7 @@ public:
     arch::Profiler profiler;
     testing::NiceMock<mock::DjiMotorTerminalSerialHandlerMock> djiMotorTerminalSerialHandler;
     testing::NiceMock<mock::SchedulerTerminalHandlerMock> schedulerTerminalHandler;
-    testing::NiceMock<aruwsrc::mock::ImuRxListenerMock> imuRxHandler;
+    testing::NiceMock<aruwsrc::mock::ImuRxListenerMock> turretMCBCanComm;
 #else
 public:
     can::Can can;
@@ -160,7 +160,7 @@ public:
     arch::Profiler profiler;
     motor::DjiMotorTerminalSerialHandler djiMotorTerminalSerialHandler;
     control::SchedulerTerminalHandler schedulerTerminalHandler;
-    aruwsrc::can::ImuRxListener imuRxHandler;
+    aruwsrc::can::TurretMCBCanComm turretMCBCanComm;
 #endif
 };  // class Drivers
 

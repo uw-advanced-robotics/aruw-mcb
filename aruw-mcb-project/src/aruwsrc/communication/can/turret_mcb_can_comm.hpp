@@ -17,10 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef IMU_RX_LISTENER_HPP_
-#define IMU_RX_LISTENER_HPP_
+#ifndef TURRET_MCB_CAN_COMM_
+#define TURRET_MCB_CAN_COMM_
 
-#include "tap/architecture/timeout.hpp"
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/mpu6500/mpu6500.hpp"
 
@@ -36,30 +36,43 @@ class Drivers;
 
 namespace aruwsrc::can
 {
-class ImuRxListener
+class TurretMCBCanComm
 {
 public:
-    ImuRxListener(tap::Drivers* drivers);
-    DISALLOW_COPY_AND_ASSIGN(ImuRxListener);
+    TurretMCBCanComm(tap::Drivers* drivers);
+    DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
 
-    void init();
+    mockable void init();
 
-    inline float getYaw() const { return yaw; }
-    inline float getGz() const
+    mockable inline float getPitch() const { return pitch; }
+    mockable inline float getGx() const
+    {
+        return static_cast<float>(rawGx) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+    }
+
+    mockable inline float getYaw() const { return yaw; }
+    mockable inline float getGz() const
     {
         return static_cast<float>(rawGz) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
-    inline float isConnected() const
+    mockable inline float isConnected() const
     {
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
     }
 
-private:
-    using ImuRxListenerFunc = void (ImuRxListener::*)(const modm::can::Message& message);
+    void setOpenHopperCover(bool isOpen) { openHopperCover = isOpen; }
 
-    static constexpr uint32_t ANGLE_GYRO_MESSAGE_CAN_ID = 0x203;
+    void sendData();
+
+private:
+    using ImuRxListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
+
+    static constexpr uint32_t ANGLE_GYRO_RX_CAN_ID = 0x203;
+    static constexpr uint32_t TURRET_MCB_TX_CAN_ID = 0x204;
     static constexpr tap::can::CanBus IMU_MSG_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
+    static constexpr float ANGLE_DATA_FIXED_POINT_PRECISION = 0.01f;
+    static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 
     class ImuRxHandler : public tap::can::CanRxListener
     {
@@ -68,12 +81,12 @@ private:
             tap::Drivers* drivers,
             uint32_t id,
             tap::can::CanBus cB,
-            ImuRxListener* msgHandler,
+            TurretMCBCanComm* msgHandler,
             ImuRxListenerFunc funcToCall);
         void processMessage(const modm::can::Message& message) override;
 
     private:
-        ImuRxListener* msgHandler;
+        TurretMCBCanComm* msgHandler;
         ImuRxListenerFunc funcToCall;
     };
 
@@ -82,12 +95,19 @@ private:
     float yaw;
     int16_t rawGz;
 
+    float pitch;
+    int16_t rawGx;
+
     ImuRxHandler angleGyroMessageHandler;
 
     tap::arch::MilliTimeout imuConnectedTimeout;
+
+    bool openHopperCover;
+
+    tap::arch::PeriodicMilliTimer sendMcbDataTimer;
 
     void handleAngleGyroMessage(const modm::can::Message& message);
 };
 }  // namespace aruwsrc::can
 
-#endif  // IMU_RX_LISTENER_HPP_
+#endif  // TURRET_MCB_CAN_COMM_

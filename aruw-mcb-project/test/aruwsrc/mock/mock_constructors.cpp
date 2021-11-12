@@ -98,7 +98,7 @@ GrabberSubsystemMock::~GrabberSubsystemMock() {}
 OledDisplayMock::OledDisplayMock(tap::Drivers *drivers) : display::OledDisplay(drivers) {}
 OledDisplayMock::~OledDisplayMock() {}
 
-ImuRxListenerMock::ImuRxListenerMock(tap::Drivers *drivers) : can::ImuRxListener(drivers) {}
+ImuRxListenerMock::ImuRxListenerMock(tap::Drivers *drivers) : can::TurretMCBCanComm(drivers) {}
 ImuRxListenerMock::~ImuRxListenerMock() {}
 
 HopperSubsystemMock::HopperSubsystemMock(

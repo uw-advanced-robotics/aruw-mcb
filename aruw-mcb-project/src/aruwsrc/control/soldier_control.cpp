@@ -35,7 +35,8 @@
 #include "chassis/chassis_subsystem.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
-#include "hopper-cover/hopper_commands.hpp"
+#include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
+#include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
@@ -91,24 +92,11 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
     AgitatorSubsystem::JAMMING_TIME);
 
-// TODO: validate and tune these constexpr parameters for hopper lid motor
-// also find out what kind of motor hopper lid uses lol
-AgitatorSubsystem hopperCover(
-    drivers(),
-    AgitatorSubsystem::PID_HOPPER_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HOPPER_COVER_MOTOR_ID,
-    AgitatorSubsystem::HOPPER_COVER_MOTOR_CAN_BUS,
-    AgitatorSubsystem::IS_HOPPER_COVER_INVERTED,
-    true);
-
 FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
 
 ClientDisplaySubsystem clientDisplay(drivers());
+
+TurretMCBHopperSubsystem hopperCover(drivers());
 
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
@@ -148,10 +136,6 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     false,
     50);
 
-SoldierOpenHopperCommand openHopperCommand(&hopperCover);
-
-SoldierCloseHopperCommand closeHopperCommand(&hopperCover);
-
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels);
 
 FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
@@ -163,6 +147,8 @@ ClientDisplayCommand clientDisplayCommand(
     &chassisAutorotateCommand,
     nullptr,
     &chassisDriveCommand);
+
+OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -230,7 +216,6 @@ void setDefaultSoldierCommands(tap::Drivers *)
     turret.setDefaultCommand(&turretWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
-    hopperCover.setDefaultCommand(&closeHopperCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

@@ -22,15 +22,22 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/communication/can/imu_rx_listener.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 namespace aruwsrc::mock
 {
-class ImuRxListenerMock : public can::ImuRxListener
+class ImuRxListenerMock : public can::TurretMCBCanComm
 {
 public:
     ImuRxListenerMock(tap::Drivers *drivers);
     ~ImuRxListenerMock();
+
+    MOCK_METHOD(void, init, (), (override));
+    MOCK_METHOD(float, getPitch, (), (const override));
+    MOCK_METHOD(float, getGx, (), (const override));
+    MOCK_METHOD(float, getYaw, (), (const override));
+    MOCK_METHOD(float, getGz, (), (const override));
+    MOCK_METHOD(float, isConnected, (), (const override));
 };
 }  // namespace aruwsrc::mock
 
