@@ -20,21 +20,25 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/comprised_command.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "aruwsrc/control/sentinel/firing/sentinel_rotate_agitator_command.hpp"
-#include "aruwsrc/control/sentinel/firing/sentinel_switcher_subsystem.hpp"
+#include "aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
+
+namespace aruwsrc::agitator
+{
+class AgitatorSubsystem;
+}
 
 namespace aruwsrc::control::turret
 {
 /**
  * A command that receives input from the vision system via the `XavierSerial` driver and aims the
- * turret accordingly.
+ * turret accordingly. In addition to aiming, this command is responsible for determining when to
+ * fire and scheduling an agitator rotate command accordingly. Finally, when a target is not
+ * acquired, this command scans the turret back and forth.
  */
 class SentinelTurretCVCommand : public tap::control::ComprisedCommand
 {
@@ -61,30 +65,53 @@ public:
 
     SentinelTurretCVCommand(
         tap::Drivers *drivers,
-        tap::control::turret::TurretSubsystemInterface *DoublePitchTurretSubsystem,
-        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
-        sentinel::firing::SentinelSwitcherSubsystem *switcher);
+        tap::control::turret::TurretSubsystemInterface *sentinelTurret,
+        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem);
 
-    bool isReady() override { return sentinelTurret->isOnline(); }
+    bool isReady() override;
+
+    bool isFinished() const override;
 
     void initialize() override;
-
-    bool isFinished() const override { return false; }
 
     void execute() override;
 
     void end(bool) override;
 
-    const char *getName() const override { return "sentinel turret cv"; }
+    const char *getName() const override { return "sentinel turret CV"; }
 
     inline bool isAimingAtTarget() const { return aimingAtTarget; }
 
 private:
+    static constexpr float YAW_P = 4000.0f;
+    static constexpr float YAW_I = 0.0f;
+    static constexpr float YAW_D = 130.0f;
+    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
+    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
+    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 10.0f;
+    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
+
+    static constexpr float PITCH_P = 3000.0f;
+    static constexpr float PITCH_I = 0.0f;
+    static constexpr float PITCH_D = 120.0f;
+    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PITCH_MAX_OUTPUT = 15000.0f;
+    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 10.0f;
+    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 0.0f;
+
+    static constexpr float BOUNDS_TOLERANCE = 1.0f;
+
+    static constexpr float AGITATOR_ROTATE_ANGLE = M_2_PI;
+
     tap::Drivers *drivers;
 
     tap::control::turret::TurretSubsystemInterface *sentinelTurret;
 
-    sentinel::firing::SentinelRotateAgitatorCommand rotateAgitator;
+    aruwsrc::agitator::ShootFastComprisedCommand17MM rotateAgitator;
 
     bool pitchScanningUp;
     bool yawScanningRight;
@@ -96,6 +123,11 @@ private:
      * CV no longer is tracking a target.
      */
     int lostTargetCounter;
+
+    tap::algorithms::SmoothPid yawPid;
+    tap::algorithms::SmoothPid pitchPid;
+
+    uint32_t prevTime = 0;
 
     void scanForTarget();
 

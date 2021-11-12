@@ -42,7 +42,7 @@
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_position_command.hpp"
+#include "turret/world-relative/turret_world_relative_command.hpp"
 
 using tap::DoNotUse_getDrivers;
 using namespace tap::control::setpoint;
@@ -67,8 +67,6 @@ tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 namespace hero_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers());
-
 ChassisSubsystem chassis(drivers());
 
 // Hero has two agitators, one waterWheel and then a kicker
@@ -113,10 +111,6 @@ ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 CalibrateCommand calibrateDoubleAgitator(&kickerSubsystem);
 
-ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
-WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
-
 WaterwheelLoadCommand42mm waterwheelLoadCommand(drivers(), &waterWheelAgitator);
 
 ShootCommand42mm kickerShootHeatLimitedCommand(drivers(), &kickerSubsystem, true);
@@ -131,8 +125,8 @@ ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
     nullptr,
-    &chassisAutorotateCommand,
-    &wiggleDriveCommand,
+    nullptr,
+    nullptr,
     &chassisDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
@@ -141,20 +135,12 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&wiggleDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping rightSwitchUp(
     drivers(),
     {&kickerShootHeatLimitedCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-ToggleCommandMapping rToggled(drivers(), {&chassisDriveCommand}, RemoteMapState({Remote::Key::R}));
-
-ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
-
 HoldCommandMapping leftMousePressed(
     drivers(),
     {&kickerShootHeatLimitedCommand},
@@ -173,20 +159,17 @@ HoldCommandMapping leftSwitchUp(
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    turret.initialize();
     chassis.initialize();
     waterWheelAgitator.initialize();
     kickerSubsystem.initialize();
     frictionWheels.initialize();
     clientDisplay.initialize();
     drivers()->xavierSerial.attachChassis(&chassis);
-    drivers()->xavierSerial.attachTurret(&turret);
 }
 
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(tap::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&waterWheelAgitator);
     drivers->commandScheduler.registerSubsystem(&kickerSubsystem);
@@ -197,8 +180,7 @@ void registerHeroSubsystems(tap::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands(tap::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretWorldRelativeCommand);
+    chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     waterWheelAgitator.setDefaultCommand(&waterwheelLoadCommand);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
@@ -211,10 +193,7 @@ void startHeroCommands(tap::Drivers *) {}
 void registerHeroIoMappings(tap::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rToggled);
-    drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchUp);

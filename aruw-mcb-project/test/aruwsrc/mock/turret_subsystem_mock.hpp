@@ -49,7 +49,6 @@ public:
         (const override));
     MOCK_METHOD(void, setYawMotorOutput, (float out), (override));
     MOCK_METHOD(void, setPitchMotorOutput, (float out), (override));
-    MOCK_METHOD(float, yawFeedForwardCalculation, (float desiredChassisRotation), (override));
     MOCK_METHOD(void, setYawSetpoint, (float target), (override));
     MOCK_METHOD(void, setPitchSetpoint, (float target), (override));
     MOCK_METHOD(float, getYawSetpoint, (), (const override));

@@ -35,9 +35,9 @@
 #include "chassis/wiggle_drive_command.hpp"
 #include "hopper-cover/hopper_subsystem.hpp"
 #include "hopper-cover/open_hopper_command_old.hpp"
-#include "turret/turret_cv_command.hpp"
+#include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_position_command.hpp"
+#include "turret/world-relative/turret_world_relative_command.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
@@ -59,7 +59,19 @@ tap::driversFunc drivers = tap::DoNotUse_getDrivers;
 namespace old_soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers());
+tap::motor::DjiMotor pitchMotor(
+    drivers(),
+    TurretSubsystem::PITCH_MOTOR_ID,
+    TurretSubsystem::CAN_BUS_MOTORS,
+    true,
+    "Pitch Turret");
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    TurretSubsystem::YAW_MOTOR_ID,
+    TurretSubsystem::CAN_BUS_MOTORS,
+    false,
+    "Yaw Turret");
+TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor);
 
 ChassisSubsystem chassis(drivers());
 
@@ -89,7 +101,7 @@ ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
 
 WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
+TurretWorldRelativeChassisImuCommand turretWorldRelativeCommand(drivers(), &turret);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -147,7 +159,7 @@ void registerOldSoldierSubsystems(tap::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultOldSoldierCommands(tap::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
 }
 
