@@ -40,9 +40,10 @@
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
-#include "turret/chassis-relative/turret_uturn_command.hpp"
+#include "turret/chassis-relative/turret_quick_turn_command.hpp"
+#include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_position_command.hpp"
+#include "turret/world-relative/turret_world_relative_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -72,7 +73,19 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 namespace soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers(), false);
+tap::motor::DjiMotor pitchMotor(
+    drivers(),
+    TurretSubsystem::PITCH_MOTOR_ID,
+    TurretSubsystem::CAN_BUS_MOTORS,
+    true,
+    "Pitch Turret");
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    TurretSubsystem::YAW_MOTOR_ID,
+    TurretSubsystem::CAN_BUS_MOTORS,
+    false,
+    "Yaw Turret");
+TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 ChassisSubsystem chassis(drivers());
 
@@ -100,15 +113,15 @@ TurretMCBHopperSubsystem hopperCover(drivers());
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
+ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, true);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis, true);
+TurretWorldRelativeCommand turretWorldRelativeCommand(drivers(), &turret);
 
 TurretCVCommand turretCVCommand(drivers(), &turret);
 
-TurretUTurnCommand turretUTurnCommand(&turret, 180.0f);
+TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -173,7 +186,7 @@ HoldCommandMapping leftSwitchUp(
 // Keyboard/Mouse related mappings
 ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
+PressCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
     {&agitatorShootSlowLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
