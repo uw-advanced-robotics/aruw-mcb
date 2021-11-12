@@ -23,11 +23,11 @@
 #include "tap/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwsrc/mock/imu_rx_listener_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
+#include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/xavier_serial_mock.hpp"
 #else
-#include "aruwsrc/communication/can/imu_rx_listener.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #endif
@@ -41,17 +41,17 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), xavierSerial(this), oledDisplay(this), imuRxHandler(this) {}
+    Drivers() : tap::Drivers(), xavierSerial(this), oledDisplay(this), turretMCBCanComm(this) {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::XavierSerialMock> xavierSerial;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
-    testing::NiceMock<mock::ImuRxListenerMock> imuRxHandler;
+    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanComm;
 #else
 public:
     serial::XavierSerial xavierSerial;
     display::OledDisplay oledDisplay;
-    can::ImuRxListener imuRxHandler;
+    can::TurretMCBCanComm turretMCBCanComm;
 #endif
 };  // class aruwsrc::Drivers
 }  // namespace aruwsrc
