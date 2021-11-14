@@ -35,82 +35,61 @@ aruw-mcb is covered under the GPL-3.0-or-later with the following exceptions:
 
 ## New user guide
 
-The recommended way to develop is with our pre-built development Docker container.
+### Setting up a development environment
 
-1. [Install Docker Desktop](https://docs.docker.com/get-docker/). The macOS and Linux instructions will work
-   as-is. If you are on Windows, there are two options:
-     - If you are on Windows 10 version 2004 or later ([how do I know?](https://support.microsoft.com/en-us/help/13443/windows-which-version-am-i-running)),
-       the relevant guide is [here](https://docs.docker.com/docker-for-windows/install-windows-home/).
-       Make sure you click "Enable WSL 2 Features" in the Docker installer.
-     - If you cannot update to Windows 10 version 2004 (recommended) but are running Windows 10 Pro
-       (not Home), you can follow [this guide](https://docs.docker.com/docker-for-windows/install/)
-       to use the Hyper-V backend instead.
-2. [Install Visual Studio Code](https://code.visualstudio.com/).
-3. [Install git](https://git-scm.com/).
-4. Open Visual Studio Code.
-5. On the left of the editor, click the "extensions" icon (lools like stacked squares). Search for
-   "Remote - Containers" and press "Install".
+If you want the easiest setup experience and **_do not_ require deploying code to hardware**,
+consider developing within the provided [Docker container](https://gitlab.com/aruw/controls/taproot/-/wikis/Docker-Container-Setup).
 
-   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/082462149c27caeba5aad30f5a504285/image.png" width="500px">
-6. Copy this URL onto your clipboard: `https://gitlab.com/aruw/controls/aruw-mcb.git`
-7. Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and search for "Remote-Containers: Clone
-   repository in container volume...". Press enter.
+Otherwise, follow the guide appropriate for your operating system.
+- Linux
+  - Debian: https://gitlab.com/aruw/controls/taproot/-/wikis/Debian-Linux-Setup
+  - Fedora: https://gitlab.com/aruw/controls/taproot/-/wikis/Fedora-Linux-Setup
+  - Other: follow one of the above guides, substituting your distribution's package names in place
+    of Debian or Fedora packages.
+- macOS: https://gitlab.com/aruw/controls/taproot/-/wikis/macOS-Setup
+- Windows: https://gitlab.com/aruw/controls/taproot/-/wikis/Windows-Setup
 
-   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/b68f8856c603e9790277a465099840eb/image.png" width="500px">
-8. Paste the URL you copied previously. DO NOT select the "GitHub" shortcut. Press enter.
+Finally, install `pipenv` and set up the build tools:
 
-   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/015fef7572f62c15b0497b59dba53201/image.png" width="500px">
-9. Select "Create a unique volume".
+```
+pip3 install pipenv
+cd aruw-mcb-project/
+pipenv install
+```
 
-   <img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/1c662da207f1345ddaf0738a64caee4d/unique_volume.png" width="500px">
-10. Wait for vscode to initialize. This may take minutes, since it is downloading all the required
-   tools in the form of a multi-gigabyte compressed file system image.<br>
-    - **Note:** During this time, if you are having trouble with your git credentials, you can
-      specify or update them through a Windows GUI. If you're on windows open the
-      **Credential Manager** app and go to **Windows Credentials**. Then correct your git
-      credentials stored under `git:https://gitlab.com` before trying to clone again.
+### Getting started with this repo
 
-11. Open a terminal, navigate to `aruw-mcb`, and type `./scripts/git-pre-commit-format install`.
+_Make sure you have followed the above setup instructions._
 
-Now that you have the environment, let's test it out! Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>,
-type "Focus Next Terminal", and press <kbd>Enter</kbd>. In this terminal, type
-`cd aruw-mcb-project && scons run-tests` and press <kbd>Enter</kbd>. After building our
-code, it should run the tests and print a message indicating that all tests passed.
+Run the following to clone this repository:
 
-### Optional: prevent Docker Desktop from running on startup
+```
+git clone --recursive https://gitlab.com/aruw/controls/aruw-mcb.git
+```
 
-By default, Docker will likely be configured to run on startup. Your mileage may vary, but this may
-be frustrating. If so, you can disable it! Open the Docker Desktop settings, which on Windows can be
-accessed via the Docker icon in the system tray:
+If you use the Docker container, or have already cloned the repository yourself, you should instead
+run:
 
-<img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/851f134487d0743bb857c67c4adbbc43/image.png" width="250px">
+```
+git submodule update --init --recursive
+```
 
+Now, `cd` into the project directory, activate the virtualenv, and run some builds:
 
-The "General" tab has a checkbox for disabling auto-start.
+```
+cd aruw-mcb/aruw-mcb-project
+pipenv shell
+# Build for hardware
+scons build
+# Run automated tests
+scons run-tests
+```
 
-<img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/3f62cd700d1f47632df92d3c96accffd/image.png" width="500px">
+### Returning to the development environment
 
+**You will need to run `pipenv shell` from this directory _every time_ you open a new terminal,
+before using `scons` or `lbuild`.**
 
-In the future, if you attempt to load the repository within the dev container and haven't manually
-started Docker, you will get the following error:
-
-<img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/7e0672866e62f550c9f91b44d021e40b/image.png" width="500px">
-
-
-In this case, you can launch Docker manually and hit "Retry". On Windows, Docker Desktop can be
-started by searching for "docker" in the Start menu.
-
-<img src="https://gitlab.com/aruw/controls/aruw-mcb/uploads/00f31defc4d7855b40777816a4962f12/image.png" width="300px">
-
-**We also recommend you _stop_ Docker when you're done! This can be done on Windows via the same
-icon in the system tray. This will help preserve battery life and RAM.**
-
-## Non-containerized setup (NOT RECOMMENDED; see above)
-
-See the [wiki](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/home) for information about how
-to set up your system manually on a Windows or Ubuntu Linux machine. This should only be necessary
-if you are unable to use the Docker container provided above and is not recommended because of the
-complexity of setting up the environment correctly and because not all features are supported.
 
 ## Workflow guide
 
@@ -161,6 +140,12 @@ working on a particular portion of code you may select an appropriate profile th
 in VSCode, type <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, then type "C/C++:Select a Configuration"
 and hit enter. A dropdown menu will appear where you may choose either the "Test", "Sim", or "MCB"
 configuration.
+
+### Upgrading Taproot
+
+The Taproot project recommends that user projects occasionally upgrade the version of
+Taproot that they depend on. The guide for doing so is
+[here](https://gitlab.com/aruw/controls/taproot/-/wikis/Upgrading-a-Taproot-project). 
 
 ## Working with modm
 
