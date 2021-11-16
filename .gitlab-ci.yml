@@ -29,7 +29,6 @@ variables:
 
 .default_only: &default_only
   - merge_requests
-  - master
   - develop
   - schedules
 
@@ -39,31 +38,32 @@ variables:
 
 .verification_only: &verification_only
   - merge_requests
-  - master
   - develop
 
 .verification_except: &verification_except
   - schedules
 
 stages:
-  - Initial Verification
-  - Build all Targets
+  - Quality
+  - Build Libraries
+  - Tests
+  - Build
   - Deploy Pages
 
 before_script:
   - python3 -V # Print out python version for debugging
 
-# Initial verification
+# Quality
 
-clang-format:
-  stage: Initial Verification
+"Clang Format":
+  stage: Quality
   script:
     - python3 /run-clang-format.py --clang-format-executable clang-format-10 -r aruw-mcb-project/src/ aruw-mcb-project/test/
   only: *verification_only
   except: *verification_except
 
-Policy Checks:
-  stage: Initial Verification
+"Policy Checks":
+  stage: Quality
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
@@ -75,15 +75,15 @@ Policy Checks:
 
 # Hidden jobs to be extended for each robot
 
-.mcb build:
-  stage: Build all Targets
+.mcb_build:
+  stage: Build
   only: *default_only
   except: *default_except
   needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) build robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS
-    - python3 $(which scons) size robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
+    - scons build robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS
+    - scons size robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
     - python3 ../scripts/parse_metrics.py $ROBOT
     - cp $DEFAULT_BUILD_ELF_FILE ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
   artifacts:
@@ -97,92 +97,93 @@ Policy Checks:
     key: mcb-binaries
     untracked: true
 
-.sim build:
-  stage: Build all Targets
+.sim_build:
+  stage: Build
   only: *default_only
   except: *default_except
   needs: ["Sim Lib Build"]
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) build-sim profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
+    - scons build-sim profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
   cache:
     key: sim-binaries
     untracked: true
 
-.test build:
-  stage: Build all Targets
+.test_build:
+  stage: Tests
   only: *default_only
   except: *default_except
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) build-tests profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
+    - scons build-tests profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
   cache:
     key: test-binaries
     untracked: true
 
 # Generic build, done before other builds which then use shared cache to build faster
-MCB Lib Build:
-  stage: Initial Verification
+
+"MCB Lib Build":
+  stage: Build Libraries
   only: *default_only
   except: *default_except
   needs: []
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) build compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
+    - scons build compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
     untracked: true
     key: mcb-binaries
     paths:
       - $BUILD_PATH
 
-Sim Lib Build:
-  extends:
-    - .sim build
+"Sim Lib Build":
+  stage: Build Libraries
+  only: *default_only
+  except: *default_except
   needs: []
-  stage: Initial Verification
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) build compile_lib_only=sim profile=fast -j${NUM_JOBS}
+    - scons build compile_lib_only=sim profile=fast -j${NUM_JOBS}
   cache:
     paths:
       - $BUILD_PATH
 
-Test Lib Build:
-  extends:
-    - .test build
+"Test Lib Build":
+  stage: Build Libraries
+  only: *default_only
+  except: *default_except
   needs: []
-  stage: Initial Verification
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) build compile_lib_only=test profile=fast -j${NUM_JOBS}
+    - scons build compile_lib_only=test profile=fast -j${NUM_JOBS}
   cache:
     paths:
       - $BUILD_PATH
 
 # Soldier build
 
-Soldier MCB Build:
+"Soldier: MCB Build":
   extends:
-    - .mcb build
+    - .mcb_build
   variables:
     ROBOT: SOLDIER
 
-Soldier Sim Build:
+"Soldier: Sim Build":
   extends:
-    - .sim build
+    - .sim_build
   variables:
     ROBOT: SOLDIER
 
-Soldier Test Build:
-  stage: Initial Verification
+"Soldier: Test Build":
+  stage: Tests
   needs: []
   only: *default_only
   except: *default_except
   script:
     - cd aruw-mcb-project
-    - python3 $(which scons) run-tests-gcov profile=fast robot=TARGET_SOLDIER -j${NUM_JOBS}
+    - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
@@ -195,109 +196,109 @@ Soldier Test Build:
 
 # Drone build
 
-Drone MCB Build:
+"Drone: MCB Build":
   extends:
-    - .mcb build
+    - .mcb_build
   variables:
     ROBOT: DRONE
 
-Drone Sim Build:
+"Drone: Sim Build":
   extends:
-    - .sim build
+    - .sim_build
   variables:
     ROBOT: DRONE
 
-Drone Test Build:
+"Drone: Test Build":
   extends:
-    - .test build
+    - .test_build
   variables:
     ROBOT: DRONE
 
 # Engineer build
 
-Engineer MCB Build:
+"Engineer: MCB Build":
   extends:
-    - .mcb build
+    - .mcb_build
   variables:
     ROBOT: ENGINEER
 
-Engineer Sim Build:
+"Engineer: Sim Build":
   extends:
-    - .sim build
+    - .sim_build
   variables:
     ROBOT: ENGINEER
 
-Engineer Test Build:
+"Engineer: Test Build":
   extends:
-    - .test build
+    - .test_build
   variables:
     ROBOT: ENGINEER
 
 # Hero build
 
-Hero MCB Build:
+"Hero: MCB Build":
   extends:
-    - .mcb build
+    - .mcb_build
   variables:
     ROBOT: HERO
 
-Hero Sim Build:
+"Hero: Sim Build":
   extends:
-    - .sim build
+    - .sim_build
   variables:
     ROBOT: HERO
 
-Hero Test Build:
+"Hero: Test Build":
   extends:
-    - .test build
+    - .test_build
   variables:
     ROBOT: HERO
 
 # Old Soldier build
 
-Old Soldier MCB Build:
+"Old Soldier: MCB Build":
   extends:
-    - .mcb build
+    - .mcb_build
   variables:
     ROBOT: OLD_SOLDIER
 
-Old Soldier Sim Build:
+"Old Soldier: Sim Build":
   extends:
-    - .sim build
+    - .sim_build
   variables:
     ROBOT: OLD_SOLDIER
 
-Old Soldier Test Build:
+"Old Soldier: Test Build":
   extends:
-    - .test build
+    - .test_build
   variables:
     ROBOT: OLD_SOLDIER
 
 # Sentinel build
 
-Sentinel MCB Build:
+"Sentinel: MCB Build":
   extends:
-    - .mcb build
+    - .mcb_build
   variables:
     ROBOT: SENTINEL
 
-Sentinel Sim Build:
+"Sentinel: Sim Build":
   extends:
-    - .sim build
+    - .sim_build
   variables:
     ROBOT: SENTINEL
 
-Sentinel Test Build:
+"Sentinel: Test Build":
   extends:
-    - .test build
+    - .test_build
   variables:
     ROBOT: SENTINEL
 
 # Pages deploy
 
-pages:
-  needs: []
+"Generate Docs":
   image: alpine
+  needs: []
   stage: Deploy Pages
   before_script:
     - apk update
@@ -316,11 +317,31 @@ pages:
       - public
   only:
     - develop
+    - merge_requests
+  except:
+    - schedules
+  environment:
+    name: "docs preview"
+    url: "https://aruw.gitlab.io/-/controls/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public/index.html"
+
+pages:
+  image: alpine
+  needs: ["Generate Docs"]
+  dependencies: ["Generate Docs"]
+  stage: Deploy Pages
+  before_script:
+    - "true"
+  script: "true"
+  artifacts:
+    paths:
+      - public
+  only:
+    - develop
   except:
     - schedules
 
-Update submodule:
-  stage: Initial Verification
+"Update Submodule":
+  stage: Quality
   needs: []
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
