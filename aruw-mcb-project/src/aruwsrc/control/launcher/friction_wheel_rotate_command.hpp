@@ -51,7 +51,7 @@ public:
 #elif defined(TARGET_HERO)
     static constexpr int16_t DEFAULT_WHEEL_RPM = 7000;
 #elif defined(TARGET_SENTINEL)
-    static const int16_t DEFAULT_WHEEL_RPM = 5150;
+    static const int16_t DEFAULT_WHEEL_RPM = 7200;
 #else
     static constexpr int16_t DEFAULT_WHEEL_RPM = 0;
 #endif

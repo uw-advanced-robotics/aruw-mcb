@@ -22,11 +22,11 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/comprised_command.hpp"
 
-#include "../algorithms/turret_pid_chassis_rel.hpp"
+#include "../algorithms/chassis_frame_turret_controller.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
 
@@ -39,7 +39,14 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelTurret(sentinelTurret),
-      rotateAgitator(drivers, agitator, true, AGITATOR_ROTATE_ANGLE),
+      rotateAgitator(
+          drivers,
+          agitator,
+          AGITATOR_ROTATE_ANGLE,
+          AGITATOR_MAX_UNJAM_ANGLE,
+          AGITATOR_ROTATE_TIME,
+          true,
+          10),
       aimingAtTarget(false),
       lostTargetCounter(0),
       yawPid(
@@ -70,8 +77,6 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
 }
 
 bool SentinelTurretCVCommand::isReady() { return sentinelTurret->isOnline(); }
-
-bool SentinelTurretCVCommand::isFinished() const { return !sentinelTurret->isOnline(); }
 
 void SentinelTurretCVCommand::initialize()
 {
@@ -118,22 +123,29 @@ void SentinelTurretCVCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    chassis_rel::runSinglePidYawChassisFrameController(
-        dt,
-        sentinelTurret->getYawSetpoint(),
-        yawPid,
-        sentinelTurret);
-    chassis_rel::runSinglePidPitchChassisFrameController(
+    // updates the turret pitch setpoint based on CV input, runs the PID controller, and sets
+    // the turret subsystem's desired pitch output
+    ChassisFrameTurretController::runPitchPidController(
         dt,
         sentinelTurret->getPitchSetpoint(),
         TurretSubsystem::TURRET_CG_X,
         TurretSubsystem::TURRET_CG_Z,
         TurretSubsystem::GRAVITY_COMPENSATION_SCALAR,
-        pitchPid,
+        &pitchPid,
+        sentinelTurret);
+
+    // updates the turret yaw setpoint based on CV input, runs the PID controller, and sets
+    // the turret subsystem's desired yaw output
+    ChassisFrameTurretController::runYawPidController(
+        dt,
+        sentinelTurret->getYawSetpoint(),
+        &yawPid,
         sentinelTurret);
 
     comprisedCommandScheduler.run();
 }
+
+bool SentinelTurretCVCommand::isFinished() const { return !sentinelTurret->isOnline(); }
 
 void SentinelTurretCVCommand::end(bool interrupted)
 {
