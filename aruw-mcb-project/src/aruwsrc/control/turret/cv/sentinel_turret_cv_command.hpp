@@ -93,25 +93,27 @@ private:
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
 
-    static constexpr float PITCH_P = 3000.0f;
+    static constexpr float PITCH_P = 3400.0f;
     static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 120.0f;
+    static constexpr float PITCH_D = 100.0f;
     static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 15000.0f;
+    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
     static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 10.0f;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 0.0f;
 
     static constexpr float BOUNDS_TOLERANCE = 1.0f;
 
-    static constexpr float AGITATOR_ROTATE_ANGLE = M_2_PI;
+    static constexpr float AGITATOR_ROTATE_ANGLE = M_PI / 5.0f;
+    static constexpr float AGITATOR_MAX_UNJAM_ANGLE = M_PI / 2.0f;
+    static constexpr uint32_t AGITATOR_ROTATE_TIME = 50;
 
     tap::Drivers *drivers;
 
     tap::control::turret::TurretSubsystemInterface *sentinelTurret;
 
-    aruwsrc::agitator::ShootFastComprisedCommand17MM rotateAgitator;
+    aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitator;
 
     bool pitchScanningUp;
     bool yawScanningRight;

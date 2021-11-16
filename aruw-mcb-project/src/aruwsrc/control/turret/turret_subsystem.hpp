@@ -97,11 +97,11 @@ public:
     static constexpr float YAW_MIN_ANGLE = 5.0f;
     static constexpr float YAW_MAX_ANGLE = 175.0f;
     static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float PITCH_MIN_ANGLE = 45.0f;
-    static constexpr float PITCH_MAX_ANGLE = 90.1f;
+    static constexpr float PITCH_MIN_ANGLE = 15.0f;
+    static constexpr float PITCH_MAX_ANGLE = 100.0f;
 
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 7000;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 3166;
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 2801;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4150;
 
     static constexpr float TURRET_CG_X = 0;
     static constexpr float TURRET_CG_Z = 0;

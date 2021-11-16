@@ -40,7 +40,14 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelTurret(sentinelTurret),
-      rotateAgitator(drivers, agitator, true, AGITATOR_ROTATE_ANGLE),
+      rotateAgitator(
+          drivers,
+          agitator,
+          AGITATOR_ROTATE_ANGLE,
+          AGITATOR_MAX_UNJAM_ANGLE,
+          AGITATOR_ROTATE_TIME,
+          true,
+          10),
       aimingAtTarget(false),
       lostTargetCounter(0),
       yawPid(
