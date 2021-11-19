@@ -5,7 +5,7 @@
             "defines": ["${default}", "ENV_UNIT_TESTS", "PLATFORM_HOSTED", "RUN_WITH_PROFILING"],
             "includePath": [
                 "${default}",
-                "aruw-mcb-project/taproot/sim-modm/modm/src",
+                "aruw-mcb-project/taproot/sim-modm/hosted-linux/modm/src",
                 "aruw-mcb-project/taproot/test",
                 "aruw-mcb-project/test"
             ],
@@ -18,7 +18,7 @@
             "defines": ["${default}", "PLATFORM_HOSTED", "RUN_WITH_PROFILING"],
             "includePath": [
                 "${default}",
-                "aruw-mcb-project/taproot/sim-modm/modm/src"
+                "aruw-mcb-project/taproot/sim-modm/hosted-linux/modm/src"
             ],
             "compilerPath": "g++",
             "intelliSenseMode": "gcc-x64",
