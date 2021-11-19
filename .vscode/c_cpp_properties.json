@@ -32,7 +32,8 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"        
             ],
             "intelliSenseMode": "gcc-arm",
-            "browse": { "limitSymbolsToIncludedHeaders": true }
+            "browse": { "limitSymbolsToIncludedHeaders": true },
+            "compilerPath": "arm-none-eabi-g++"
         }
     ],
     "version": 4
