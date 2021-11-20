@@ -9,6 +9,7 @@
                 "aruw-mcb-project/taproot/test",
                 "aruw-mcb-project/test"
             ],
+            "compilerPath": "g++",
             "intelliSenseMode": "gcc-x64",
             "browse": { "limitSymbolsToIncludedHeaders": true }
         },
@@ -19,6 +20,7 @@
                 "${default}",
                 "aruw-mcb-project/taproot/sim-modm/hosted-linux/modm/src"
             ],
+            "compilerPath": "g++",
             "intelliSenseMode": "gcc-x64",
             "browse": { "limitSymbolsToIncludedHeaders": true }
         },
@@ -31,6 +33,7 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"        
             ],
+            "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "browse": { "limitSymbolsToIncludedHeaders": true }
         }
