@@ -84,22 +84,22 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
     if (drivers->commandScheduler.isCommandScheduled(wiggleCommand))
     {
         newDriveCommandScheduled = wiggleCommand;
-        driveCommandColor = RefSerial::YELLOW;
+        driveCommandColor = RefSerial::Tx::GraphicColor::YELLOW;
     }
     else if (drivers->commandScheduler.isCommandScheduled(followTurretCommand))
     {
         newDriveCommandScheduled = followTurretCommand;
-        driveCommandColor = RefSerial::ORANGE;
+        driveCommandColor = RefSerial::Tx::GraphicColor::ORANGE;
     }
     else if (drivers->commandScheduler.isCommandScheduled(beybladeCommand))
     {
         newDriveCommandScheduled = beybladeCommand;
-        driveCommandColor = RefSerial::PURPLISH_RED;
+        driveCommandColor = RefSerial::Tx::GraphicColor::PURPLISH_RED;
     }
     else if (drivers->commandScheduler.isCommandScheduled(baseDriveCommand))
     {
         newDriveCommandScheduled = baseDriveCommand;
-        driveCommandColor = RefSerial::GREEN;
+        driveCommandColor = RefSerial::Tx::GraphicColor::GREEN;
     }
 
     if (addDriveCommandTimer.execute())
@@ -108,7 +108,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
         drivers->refSerial.configGraphicGenerics(
             &driveCommandMsg.graphicData,
             DRIVE_TEXT_NAME,
-            RefSerial::ADD_GRAPHIC,
+            RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
             DRIVE_COMMAND_GRAPHIC_LAYER,
             driveCommandColor);
 
@@ -133,7 +133,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
         drivers->refSerial.configGraphicGenerics(
             &driveCommandMsg.graphicData,
             DRIVE_TEXT_NAME,
-            RefSerial::ADD_GRAPHIC_MODIFY,
+            RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY,
             DRIVE_COMMAND_GRAPHIC_LAYER,
             driveCommandColor);
 
@@ -164,10 +164,11 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateCapBankMsg()
 
         delay();
 
-        capPowerRemainMsg.graphicData.operation = RefSerial::ADD_GRAPHIC;
+        capPowerRemainMsg.graphicData.operation = RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC;
         drivers->refSerial.updateInteger(capicatance++, &capPowerRemainMsg.graphicData);
         drivers->refSerial.sendGraphic(&capPowerRemainMsg);
-        capPowerRemainMsg.graphicData.operation = RefSerial::ADD_GRAPHIC_MODIFY;
+        capPowerRemainMsg.graphicData.operation =
+            RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
     }
     else
     {
@@ -196,9 +197,9 @@ void ClientDisplayCommand::initCapBankMsg()
     drivers->refSerial.configGraphicGenerics(
         &capStringMsg.graphicData,
         CAP_TEXT_NAME,
-        RefSerial::ADD_GRAPHIC,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         CAP_BANK_LAYER_1,
-        RefSerial::YELLOW);
+        RefSerial::Tx::GraphicColor::YELLOW);
 
     drivers->refSerial.configCharacterMsg(
         FONT_SIZE,
@@ -213,9 +214,9 @@ void ClientDisplayCommand::initCapBankMsg()
     drivers->refSerial.configGraphicGenerics(
         &capPowerRemainMsg.graphicData,
         CAP_VALUE_NAME,
-        RefSerial::ADD_GRAPHIC_MODIFY,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY,
         CAP_BANK_LAYER_2,
-        RefSerial::YELLOW);
+        RefSerial::Tx::GraphicColor::YELLOW);
 
     drivers->refSerial.configInteger(
         FONT_SIZE + 10,  // Slightly larger than other text
@@ -231,7 +232,7 @@ void ClientDisplayCommand::initDriveCommandMsg()
     drivers->refSerial.configGraphicGenerics(
         &driveCommandMsg.graphicData,
         DRIVE_TEXT_NAME,
-        RefSerial::ADD_GRAPHIC,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         DRIVE_COMMAND_GRAPHIC_LAYER,
         driveCommandColor);
 
@@ -250,37 +251,37 @@ void ClientDisplayCommand::initTurretReticleMsg()
     drivers->refSerial.configGraphicGenerics(
         &reticleMsg.graphicData[0],
         RETICLE_LINE1_NAME,
-        RefSerial::ADD_GRAPHIC,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         RETICLE_GRAPHIC_LAYER,
-        RefSerial::YELLOW);
+        RefSerial::Tx::GraphicColor::YELLOW);
 
     drivers->refSerial.configGraphicGenerics(
         &reticleMsg.graphicData[1],
         RETICLE_LINE2_NAME,
-        RefSerial::ADD_GRAPHIC,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         RETICLE_GRAPHIC_LAYER,
-        RefSerial::YELLOW);
+        RefSerial::Tx::GraphicColor::YELLOW);
 
     drivers->refSerial.configGraphicGenerics(
         &reticleMsg.graphicData[2],
         RETICLE_LINE3_NAME,
-        RefSerial::ADD_GRAPHIC,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         RETICLE_GRAPHIC_LAYER,
-        RefSerial::YELLOW);
+        RefSerial::Tx::GraphicColor::YELLOW);
 
     drivers->refSerial.configGraphicGenerics(
         &reticleMsg.graphicData[3],
         RETICLE_LINE4_NAME,
-        RefSerial::ADD_GRAPHIC,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         RETICLE_GRAPHIC_LAYER,
-        RefSerial::YELLOW);
+        RefSerial::Tx::GraphicColor::YELLOW);
 
     drivers->refSerial.configGraphicGenerics(
         &reticleMsg.graphicData[4],
         RETICLE_CIRCLE_NAME,
-        RefSerial::ADD_GRAPHIC,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         RETICLE_GRAPHIC_LAYER,
-        RefSerial::YELLOW);
+        RefSerial::Tx::GraphicColor::YELLOW);
 
     drivers->refSerial.configLine(
         LINE_THICKNESS,

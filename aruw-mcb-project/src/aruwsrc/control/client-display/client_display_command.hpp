@@ -99,8 +99,8 @@ private:
     const tap::control::Command *baseDriveCommand;
     const tap::control::Command *currDriveCommandScheduled = nullptr;
     const tap::control::Command *newDriveCommandScheduled = nullptr;
-    tap::serial::RefSerial::GraphicCharacterMessage driveCommandMsg;
-    tap::serial::RefSerial::GraphicColor driveCommandColor;
+    tap::serial::RefSerial::Tx::GraphicCharacterMessage driveCommandMsg;
+    tap::serial::RefSerial::Tx::GraphicColor driveCommandColor;
     tap::arch::PeriodicMilliTimer addDriveCommandTimer{10000};
 
     // Turret reticle variables
@@ -117,12 +117,12 @@ private:
     static constexpr uint16_t TURRET_RETICLE_5MY = 300;
 #endif
     tap::arch::PeriodicMilliTimer sendReticleTimer{10000};
-    tap::serial::RefSerial::Graphic5Message reticleMsg;
+    tap::serial::RefSerial::Tx::Graphic5Message reticleMsg;
 
     // Cap bank related variables
     tap::arch::PeriodicMilliTimer sendCapBankTimer{10000};
-    tap::serial::RefSerial::GraphicCharacterMessage capStringMsg;
-    tap::serial::RefSerial::Graphic1Message capPowerRemainMsg;
+    tap::serial::RefSerial::Tx::GraphicCharacterMessage capStringMsg;
+    tap::serial::RefSerial::Tx::Graphic1Message capPowerRemainMsg;
     int capMsgAdded = 0;
     int32_t capicatance = 0;
 
