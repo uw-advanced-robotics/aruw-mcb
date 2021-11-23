@@ -98,6 +98,13 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
+            bool in = drivers->digital.read(tap::gpio::Digital::InputPin::Button);
+            drivers->leds.set(tap::gpio::Leds::LedPin::A, in);
+
+            if (!in) {
+                drivers->mpu6500.requestCalibration();
+            }
+
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
