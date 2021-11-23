@@ -112,11 +112,7 @@ void TurretSubsystem::setPitchMotorOutput(float out)
 {
     if (out > INT32_MAX || out < INT32_MIN)
     {
-        RAISE_ERROR(
-            drivers,
-            "pitch motor output invalid",
-            tap::errors::TURRET,
-            tap::errors::TurretErrorType::INVALID_MOTOR_OUTPUT);
+        RAISE_ERROR(drivers, "pitch motor output invalid");
         return;
     }
     if (pitchMotor.isMotorOnline())
@@ -137,11 +133,7 @@ void TurretSubsystem::setYawMotorOutput(float out)
 {
     if (out > INT32_MAX || out < INT32_MIN)
     {
-        RAISE_ERROR(
-            drivers,
-            "yaw motor output invalid",
-            tap::errors::TURRET,
-            tap::errors::TurretErrorType::INVALID_MOTOR_OUTPUT);
+        RAISE_ERROR(drivers, "yaw motor output invalid");
         return;
     }
     if (yawMotor.isMotorOnline())
