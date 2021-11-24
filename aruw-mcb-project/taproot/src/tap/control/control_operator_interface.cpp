@@ -23,7 +23,6 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
-using namespace tap;
 using namespace tap::algorithms;
 
 namespace tap
