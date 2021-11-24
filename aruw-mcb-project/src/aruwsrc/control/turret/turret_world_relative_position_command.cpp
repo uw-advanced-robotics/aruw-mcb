@@ -21,17 +21,17 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 using namespace tap::sensors;
 
 namespace aruwsrc::control::turret
 {
 TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
-    tap::Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     TurretSubsystem *subsystem,
     const chassis::ChassisSubsystem *chassis,
     bool attemptToUseTurretIMU)

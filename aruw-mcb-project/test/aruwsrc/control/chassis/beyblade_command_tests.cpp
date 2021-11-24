@@ -21,10 +21,10 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/ramp.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
@@ -41,7 +41,6 @@
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
-using tap::Drivers;
 using namespace testing;
 using aruwsrc::mock::ChassisSubsystemMock;
 using aruwsrc::mock::TurretSubsystemMock;
@@ -57,7 +56,7 @@ static constexpr float BASE_DESIRED_R_NON_TRANSLATIONAL =
 
 void basicFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, float baseInput)
 {
-    Drivers d;
+    aruwsrc::Drivers d;
     NiceMock<TurretSubsystemMock> t(&d);
     NiceMock<ChassisSubsystemMock> cs(&d);
     BeybladeCommand bc(&d, &cs, &t);
@@ -72,7 +71,7 @@ void basicFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, f
 
 void basicBigFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, float baseInput)
 {
-    Drivers d;
+    aruwsrc::Drivers d;
     NiceMock<TurretSubsystemMock> t(&d);
     NiceMock<ChassisSubsystemMock> cs(&d);
     BeybladeCommand bc(&d, &cs, &t);

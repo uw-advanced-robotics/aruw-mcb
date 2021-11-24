@@ -22,7 +22,8 @@
 
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #include "limit_switch_agitator_subsystem.hpp"
 
@@ -41,7 +42,7 @@ class MoveUnjamRefLimitedCommand : public tap::control::setpoint::MoveUnjamCompr
 {
 public:
     MoveUnjamRefLimitedCommand(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         AgitatorSubsystem* agitator17mm,
         float agitatorRotateAngle,
         float maxUnjamRotateAngle,
@@ -54,7 +55,7 @@ public:
     bool isFinished() const override;
 
 private:
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
 
     const bool heatLimiting;
     const float heatLimitBuffer;
@@ -82,7 +83,7 @@ public:
     static constexpr int BALLS_QUEUED_IN_TUBE = 3;
 
     WaterwheelLoadCommand42mm(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         aruwsrc::agitator::LimitSwitchAgitatorSubsystem* waterwheel);
 
     bool isReady() override;
@@ -91,7 +92,7 @@ public:
 
 private:
     // Store instance of drivers to be able to access digital
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
 
     // Store pointer to limited agitator subsystem with derived class type
     aruwsrc::agitator::LimitSwitchAgitatorSubsystem* waterwheel;
@@ -114,7 +115,7 @@ public:
     static constexpr uint16_t HEAT_LIMIT_BUFFER = 100;
 
     ShootCommand42mm(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         tap::control::setpoint::SetpointSubsystem* kicker,
         bool heatLimiting = true);
 
@@ -127,7 +128,7 @@ public:
     static void resetInitializeCount() { initializeCount = 0; }
 
 private:
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
 
     const bool heatLimiting;
 

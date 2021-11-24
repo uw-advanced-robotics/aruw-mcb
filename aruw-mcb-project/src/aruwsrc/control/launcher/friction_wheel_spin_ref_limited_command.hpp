@@ -24,7 +24,7 @@
 
 #include "friction_wheel_subsystem.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -38,7 +38,7 @@ class FrictionWheelSpinRefLimitedCommand : public tap::control::Command
 {
 public:
     FrictionWheelSpinRefLimitedCommand(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels);
 
     void initialize() override {}
@@ -56,7 +56,7 @@ private:
     static constexpr int16_t WHEEL_RPM_18 = 5000;
     static constexpr int16_t WHEEL_RPM_30 = 7000;
 
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 
     aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels;
 };

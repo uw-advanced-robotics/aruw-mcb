@@ -20,20 +20,18 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/control/launcher/friction_wheel_rotate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
 
 using namespace aruwsrc::launcher;
 using aruwsrc::mock::FrictionWheelSubsystemMock;
-using tap::Drivers;
 using namespace testing;
 
 TEST(FrictionWheelRotateCommand, execute_zero_desired_rpm_always_zero)
 {
-    Drivers d;
+    aruwsrc::Drivers d;
     FrictionWheelSubsystemMock fs(&d);
     FrictionWheelRotateCommand fc(&fs, 0);
     EXPECT_CALL(fs, setDesiredRpm(0));
@@ -43,7 +41,7 @@ TEST(FrictionWheelRotateCommand, execute_zero_desired_rpm_always_zero)
 
 TEST(FrictionWheelRotateCommand, execute_positive_rpm_always_positive)
 {
-    Drivers d;
+    aruwsrc::Drivers d;
     FrictionWheelSubsystemMock fs(&d);
     FrictionWheelRotateCommand fc(&fs, 10000);
     EXPECT_CALL(fs, setDesiredRpm(10000));
@@ -53,7 +51,7 @@ TEST(FrictionWheelRotateCommand, execute_positive_rpm_always_positive)
 
 TEST(FrictionWheelRotateCommand, execute_negative_rpm_always_negative)
 {
-    Drivers d;
+    aruwsrc::Drivers d;
     FrictionWheelSubsystemMock fs(&d);
     FrictionWheelRotateCommand fc(&fs, -10000);
     EXPECT_CALL(fs, setDesiredRpm(-10000));
@@ -63,7 +61,7 @@ TEST(FrictionWheelRotateCommand, execute_negative_rpm_always_negative)
 
 TEST(FrictionWheelRotateCommand, end_resets_desired_rpm_to_zero)
 {
-    Drivers d;
+    aruwsrc::Drivers d;
     FrictionWheelSubsystemMock fs(&d);
     FrictionWheelRotateCommand fc(&fs, 10000);
     InSequence s;
@@ -80,7 +78,7 @@ TEST(FrictionWheelRotateCommand, end_resets_desired_rpm_to_zero)
 
 TEST(FrictionWheelRotateCommand, isFinished_always_false)
 {
-    Drivers d;
+    aruwsrc::Drivers d;
     FrictionWheelSubsystemMock fs(&d);
     FrictionWheelRotateCommand fc(&fs, 10000);
     const int EXECUTE_TIMES = 100;

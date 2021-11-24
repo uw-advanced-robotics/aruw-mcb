@@ -24,7 +24,7 @@
 
 #include "modm/ui/menu/abstract_menu.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -38,7 +38,7 @@ class SplashScreen : public modm::AbstractMenu<tap::display::DummyAllocator<modm
 public:
     SplashScreen(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        tap::Drivers *drivers);
+        aruwsrc::Drivers *drivers);
 
     void draw() override;
 
@@ -54,7 +54,7 @@ private:
     static constexpr int SPLASH_SCREEN_MENU_ID = 1;
 
     bool drawn = false;
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 };
 }  // namespace display
 }  // namespace aruwsrc

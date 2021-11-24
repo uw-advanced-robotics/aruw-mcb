@@ -22,13 +22,14 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/serial/remote.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch::clock;
 
 namespace aruwsrc::control::turret
 {
-TurretCVCommand::TurretCVCommand(tap::Drivers *drivers, TurretSubsystem *subsystem)
+TurretCVCommand::TurretCVCommand(aruwsrc::Drivers *drivers, TurretSubsystem *subsystem)
     : drivers(drivers),
       turretSubsystem(subsystem),
       yawTargetAngle(TurretSubsystem::TURRET_START_ANGLE, 0.0f, 360.0f),

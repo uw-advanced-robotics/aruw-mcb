@@ -21,18 +21,17 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/comprised_command.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
 #include "aruwsrc/control/turret/double_pitch_turret_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
-using namespace tap;
 using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
 {
 SentinelTurretCVCommand::SentinelTurretCVCommand(
-    tap::Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     tap::control::turret::TurretSubsystemInterface *sentinelTurret,
     aruwsrc::agitator::AgitatorSubsystem *agitator,
     sentinel::firing::SentinelSwitcherSubsystem *switcher)

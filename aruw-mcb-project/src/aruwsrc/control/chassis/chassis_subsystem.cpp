@@ -25,15 +25,85 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
-#include "tap/drivers.hpp"
 
-using namespace tap;
+#include "aruwsrc/drivers.hpp"
+
 using namespace tap::algorithms;
 
 namespace aruwsrc
 {
 namespace chassis
 {
+ChassisSubsystem::ChassisSubsystem(
+    aruwsrc::Drivers* drivers,
+    tap::motor::MotorId leftFrontMotorId,
+    tap::motor::MotorId leftBackMotorId,
+    tap::motor::MotorId rightFrontMotorId,
+    tap::motor::MotorId rightBackMotorId,
+    tap::gpio::Analog::Pin currentPin)
+    : tap::control::chassis::ChassisSubsystemInterface(drivers),
+      leftFrontVelocityPid(
+          VELOCITY_PID_KP,
+          VELOCITY_PID_KI,
+          VELOCITY_PID_KD,
+          VELOCITY_PID_MAX_ERROR_SUM,
+          VELOCITY_PID_MAX_OUTPUT),
+      leftBackVelocityPid(
+          VELOCITY_PID_KP,
+          VELOCITY_PID_KI,
+          VELOCITY_PID_KD,
+          VELOCITY_PID_MAX_ERROR_SUM,
+          VELOCITY_PID_MAX_OUTPUT),
+      rightFrontVelocityPid(
+          VELOCITY_PID_KP,
+          VELOCITY_PID_KI,
+          VELOCITY_PID_KD,
+          VELOCITY_PID_MAX_ERROR_SUM,
+          VELOCITY_PID_MAX_OUTPUT),
+      rightBackVelocityPid(
+          VELOCITY_PID_KP,
+          VELOCITY_PID_KI,
+          VELOCITY_PID_KD,
+          VELOCITY_PID_MAX_ERROR_SUM,
+          VELOCITY_PID_MAX_OUTPUT),
+      chassisRotationErrorKalman(1.0f, 0.0f),
+      leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
+      leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
+      rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
+      rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor"),
+      chassisPowerLimiter(
+          drivers,
+          currentPin,
+          MAX_ENERGY_BUFFER,
+          ENERGY_BUFFER_LIMIT_THRESHOLD,
+          ENERGY_BUFFER_CRIT_THRESHOLD,
+          POWER_CONSUMPTION_THRESHOLD,
+          CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
+          motorConstants)
+{
+    constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
+                            ? 1
+                            : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+    wheelVelToChassisVelMat[0][0] = 1;
+    wheelVelToChassisVelMat[0][1] = -1;
+    wheelVelToChassisVelMat[0][2] = 1;
+    wheelVelToChassisVelMat[0][3] = -1;
+    wheelVelToChassisVelMat[1][0] = 1;
+    wheelVelToChassisVelMat[1][1] = 1;
+    wheelVelToChassisVelMat[1][2] = -1;
+    wheelVelToChassisVelMat[1][3] = -1;
+    wheelVelToChassisVelMat[2][0] = 1.0 / A;
+    wheelVelToChassisVelMat[2][1] = 1.0 / A;
+    wheelVelToChassisVelMat[2][2] = 1.0 / A;
+    wheelVelToChassisVelMat[2][3] = 1.0 / A;
+    wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
+
+    motors[LF] = &leftFrontMotor;
+    motors[RF] = &rightFrontMotor;
+    motors[LB] = &leftBackMotor;
+    motors[RB] = &rightBackMotor;
+}
+
 void ChassisSubsystem::initialize()
 {
     // All of these DjiMotors are registered on CAN_BUS2

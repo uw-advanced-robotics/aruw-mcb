@@ -31,7 +31,7 @@
 
 #include "splash_screen.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -43,7 +43,7 @@ namespace display
 class OledDisplay : public ::modm::pt::Protothread
 {
 public:
-    explicit OledDisplay(tap::Drivers *drivers);
+    explicit OledDisplay(aruwsrc::Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 
@@ -85,7 +85,7 @@ private:
 
     SplashScreen splashScreen;
 
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 
     tap::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay

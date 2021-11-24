@@ -26,6 +26,11 @@
 
 namespace aruwsrc
 {
+class Drivers;
+}
+
+namespace aruwsrc
+{
 namespace engineer
 {
 /**
@@ -36,12 +41,7 @@ namespace engineer
 class GrabberSubsystem : public tap::control::Subsystem
 {
 public:
-    GrabberSubsystem(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
-        : tap::control::Subsystem(drivers),
-          pin(pin),
-          isGrabberSqueezed(false)
-    {
-    }
+    GrabberSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
 
     mockable void setSqueezed(bool isGrabberSqueezed);
 

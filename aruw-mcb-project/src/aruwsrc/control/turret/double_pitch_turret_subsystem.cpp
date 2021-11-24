@@ -21,17 +21,18 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 using namespace tap::motor;
 using namespace tap::algorithms;
 using namespace tap::control::turret;
-using namespace tap;
+using namespace tap::arch::clock;
 
 namespace aruwsrc::control::turret
 {
-DoublePitchTurretSubsystem::DoublePitchTurretSubsystem(Drivers* drivers, bool limitYaw)
+DoublePitchTurretSubsystem::DoublePitchTurretSubsystem(aruwsrc::Drivers* drivers, bool limitYaw)
     : TurretSubsystemInterface(drivers),
       currLeftPitchAngle(0.0f, 0.0f, 360.0f),
       currRightPitchAngle(0.0f, 0.0f, 360.0f),
@@ -87,7 +88,7 @@ void DoublePitchTurretSubsystem::refresh()
 {
     updateCurrentTurretAngles();
 
-    uint32_t currTime = arch::clock::getTimeMilliseconds();
+    uint32_t currTime = getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 

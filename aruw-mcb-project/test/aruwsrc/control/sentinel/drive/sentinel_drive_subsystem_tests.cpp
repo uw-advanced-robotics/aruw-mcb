@@ -19,12 +19,10 @@
 
 #include <gtest/gtest.h>
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 using namespace aruwsrc::control::sentinel::drive;
-using namespace tap;
 using namespace tap::gpio;
 using namespace testing;
 
@@ -50,7 +48,7 @@ static constexpr float calculatePosition(int encTicks)
 
 TEST(SentinelDriveSubsystem, initialize_initializes_both_motors_and_configs_pins)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     EXPECT_CALL(sentinelDrive.leftWheel, initialize);
@@ -63,7 +61,7 @@ TEST(SentinelDriveSubsystem, initialize_initializes_both_motors_and_configs_pins
 
 TEST(SentinelDriveSubsystem, initialize_with_same_input_pins_raises_error)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, LEFT_LIMIT_SWITCH);
 
     EXPECT_CALL(drivers.errorController, addToErrorList);
@@ -73,7 +71,7 @@ TEST(SentinelDriveSubsystem, initialize_with_same_input_pins_raises_error)
 
 TEST(SentinelDriveSubsystem, absolutePosition_returns_0_when_motors_offline)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     EXPECT_CALL(drivers.errorController, addToErrorList);
@@ -86,7 +84,7 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_0_when_motors_offline)
 TEST(SentinelDriveSubsystem, absolutePosition_returns_right_pos_when_left_not_connected)
 {
     static constexpr int ENC_TICKS = 1000;
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     EXPECT_CALL(drivers.errorController, addToErrorList);
@@ -100,7 +98,7 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_right_pos_when_left_not_co
 TEST(SentinelDriveSubsystem, absolutePosition_returns_left_pos_when_right_not_connected)
 {
     static constexpr int ENC_TICKS = 1000;
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     EXPECT_CALL(drivers.errorController, addToErrorList);
@@ -113,7 +111,7 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_left_pos_when_right_not_co
 
 TEST(SentinelDriveSubsystem, absolutePosition_returns_wheel_avg_when_both_connected)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(true));
@@ -134,7 +132,7 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_wheel_avg_when_both_connec
 
 TEST(SentinelDriveSubsystem, desired_output_reasonable_for_various_setpoints)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(true));
@@ -173,7 +171,7 @@ TEST(SentinelDriveSubsystem, desired_output_reasonable_for_various_setpoints)
 
 TEST(SentinelDriveSubsystem, runHardwareTests_sets_complete_if_shaftRPM_large)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     // large negative, tests not complete

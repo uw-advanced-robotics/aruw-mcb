@@ -21,12 +21,14 @@
 
 #include <aruwsrc/control/agitator/agitator_subsystem.hpp>
 
+#include "aruwsrc/drivers.hpp"
+
 #include "sentinel_switcher_subsystem.hpp"
 
 namespace aruwsrc::control::sentinel::firing
 {
 SentinelSwitcherSubsystem::SentinelSwitcherSubsystem(
-    tap::Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     tap::gpio::Pwm::Pin switcherServoPin)
     : tap::control::Subsystem(drivers),
       switcherMotor(drivers, switcherServoPin, LOWER_PWM, UPPER_PWM, 0.1f)

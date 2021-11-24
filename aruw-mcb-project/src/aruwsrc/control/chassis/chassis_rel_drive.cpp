@@ -19,7 +19,7 @@
 
 #include "chassis_rel_drive.hpp"
 
-#include "tap/drivers.hpp"
+#include "aruwsrc/drivers.hpp"
 
 #include "chassis_subsystem.hpp"
 
@@ -28,7 +28,7 @@ using namespace tap::algorithms;
 namespace aruwsrc::chassis
 {
 void ChassisRelDrive::computeDesiredUserTranslation(
-    tap::Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     ChassisSubsystem *chassis,
     float chassisRotation,
     float *chassisXDesiredWheelspeed,
@@ -57,7 +57,7 @@ void ChassisRelDrive::computeDesiredUserTranslation(
                                  ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 }
 
-void ChassisRelDrive::onExecute(tap::Drivers *drivers, ChassisSubsystem *chassis)
+void ChassisRelDrive::onExecute(aruwsrc::Drivers *drivers, ChassisSubsystem *chassis)
 {
     float chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput() *
                                              ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;

@@ -26,7 +26,7 @@ namespace aruwsrc
 namespace agitator
 {
 MoveUnjamRefLimitedCommand::MoveUnjamRefLimitedCommand(
-    tap::Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     AgitatorSubsystem *agitator17mm,
     float agitatorRotateAngle,
     float maxUnjamRotateAngle,
@@ -67,7 +67,7 @@ bool MoveUnjamRefLimitedCommand::isFinished() const
 }
 
 WaterwheelLoadCommand42mm::WaterwheelLoadCommand42mm(
-    tap::Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     aruwsrc::agitator::LimitSwitchAgitatorSubsystem *waterwheel)
     : MoveUnjamComprisedCommand(
           drivers,
@@ -93,7 +93,7 @@ bool WaterwheelLoadCommand42mm::isFinished() const
 }
 
 ShootCommand42mm::ShootCommand42mm(
-    tap::Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     tap::control::setpoint::SetpointSubsystem *kicker,
     bool heatLimiting)
     : MoveCommand(

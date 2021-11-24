@@ -19,14 +19,19 @@
 
 #include "xaxis_subsystem.hpp"
 
-#include "tap/drivers.hpp"
-
-using tap::Drivers;
+#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc
 {
 namespace engineer
 {
+XAxisSubsystem::XAxisSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
+    : tap::control::Subsystem(drivers),
+      pin(pin),
+      extended(false)
+{
+}
+
 void XAxisSubsystem::setExtended(bool isExtended)
 {
     drivers->digital.set(pin, extended);

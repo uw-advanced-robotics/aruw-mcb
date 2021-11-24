@@ -31,6 +31,11 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
+namespace aruwsrc
+{
+class Drivers;
+}
+
 namespace aruwsrc::control::turret
 {
 /**
@@ -81,7 +86,7 @@ public:
     static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_LEFT = 5835;
     static constexpr uint16_t PITCH_90DEG_ENCODER_POSITION_RIGHT = 3123;
 
-    explicit DoublePitchTurretSubsystem(tap::Drivers* drivers, bool limitYaw = true);
+    explicit DoublePitchTurretSubsystem(aruwsrc::Drivers* drivers, bool limitYaw = true);
 
     void initialize() override;
 

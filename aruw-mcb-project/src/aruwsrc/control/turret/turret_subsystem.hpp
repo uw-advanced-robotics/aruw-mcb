@@ -34,6 +34,11 @@
 
 #include "modm/math/filter/pid.hpp"
 
+namespace aruwsrc
+{
+class Drivers;
+}
+
 namespace aruwsrc::control::turret
 {
 /**
@@ -75,7 +80,7 @@ public:
      *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
      */
-    explicit TurretSubsystem(tap::Drivers* drivers, bool limitYaw = true);
+    explicit TurretSubsystem(aruwsrc::Drivers* drivers, bool limitYaw = true);
 
     inline bool yawLimited() const override { return limitYaw; }
 

@@ -20,16 +20,15 @@
 #include "blink_led_command.hpp"
 
 #include "tap/control/subsystem.hpp"
-#include "tap/drivers.hpp"
 
-using tap::Drivers;
+#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc
 {
 namespace control
 {
 BlinkLEDCommand::BlinkLEDCommand(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     aruwsrc::control::ExampleSubsystem* subsystem)
     : drivers(drivers)
 {

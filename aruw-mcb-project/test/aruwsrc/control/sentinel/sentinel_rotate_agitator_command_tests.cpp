@@ -22,18 +22,19 @@
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/control/sentinel/firing/sentinel_rotate_agitator_command.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/agitator_subsystem_mock.hpp"
 #include "aruwsrc/mock/sentinel_switcher_subsystem_mock.hpp"
 
 using namespace aruwsrc::control::sentinel::firing;
 using namespace tap::serial;
-using namespace tap;
 using namespace testing;
 using namespace aruwsrc::mock;
 using namespace tap::arch::clock;
+using namespace tap;
 
 #define SETUP_TEST()                                                    \
-    Drivers drivers;                                                    \
+    aruwsrc::Drivers drivers;                                           \
     NiceMock<AgitatorSubsystemMock> agitator(&drivers);                 \
     NiceMock<SentinelSwitcherSubsystemMock> switcher(&drivers);         \
     SentinelRotateAgitatorCommand srac(&drivers, &agitator, &switcher); \
@@ -54,7 +55,7 @@ static void setHeatAndHeatLimit(
 
 TEST(SentinelRotateAgitatorCommand, isReady_returns_false_if_heat_limit_both_barrels_reached)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     NiceMock<AgitatorSubsystemMock> agitator(&drivers);
     NiceMock<SentinelSwitcherSubsystemMock> switcher(&drivers);
     SentinelRotateAgitatorCommand srac(&drivers, &agitator, &switcher);
@@ -87,7 +88,7 @@ TEST(
 
 TEST(SentinelRotateAgitatorCommand, isReady_returns_true_if_ref_serial_offline)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     NiceMock<AgitatorSubsystemMock> agitator(&drivers);
     NiceMock<SentinelSwitcherSubsystemMock> switcher(&drivers);
     SentinelRotateAgitatorCommand srac(&drivers, &agitator, &switcher);
@@ -98,7 +99,7 @@ TEST(SentinelRotateAgitatorCommand, isReady_returns_true_if_ref_serial_offline)
 
 TEST(SentinelRotateAgitatorCommand, addCommand_to_scheduler_works_when_subsystems_scheduled)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     control::CommandScheduler scheduler(&drivers, true);
     NiceMock<AgitatorSubsystemMock> turret(&drivers);
     NiceMock<SentinelSwitcherSubsystemMock> switcher(&drivers);

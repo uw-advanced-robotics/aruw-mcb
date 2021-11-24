@@ -20,14 +20,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/control/engineer/manual_tow_command.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/tow_subsystem_mock.hpp"
 
 using aruwsrc::engineer::ManualTowCommand;
 using aruwsrc::mock::TowSubsystemMock;
-using tap::Drivers;
 using tap::gpio::Digital;
 
 static constexpr Digital::OutputPin LEFT_TOW_PIN = Digital::OutputPin::E;
@@ -37,7 +35,7 @@ static constexpr Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN = Digital::InputPi
 
 TEST(ManualTowCommand, isFinished_always_returns_false)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -51,7 +49,7 @@ TEST(ManualTowCommand, isFinished_always_returns_false)
 
 TEST(ManualTowCommand, initialize_sets_left_and_right_clamped_true)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -67,7 +65,7 @@ TEST(ManualTowCommand, initialize_sets_left_and_right_clamped_true)
 
 TEST(ManualTowCommand, end_sets_left_and_right_clamped_false)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,

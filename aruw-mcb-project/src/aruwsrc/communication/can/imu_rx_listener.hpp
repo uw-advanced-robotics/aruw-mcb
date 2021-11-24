@@ -29,7 +29,7 @@ namespace modm::can
 class Message;
 }
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -39,7 +39,7 @@ namespace aruwsrc::can
 class ImuRxListener
 {
 public:
-    ImuRxListener(tap::Drivers* drivers);
+    ImuRxListener(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(ImuRxListener);
 
     void init();
@@ -65,7 +65,7 @@ private:
     {
     public:
         ImuRxHandler(
-            tap::Drivers* drivers,
+            aruwsrc::Drivers* drivers,
             uint32_t id,
             tap::can::CanBus cB,
             ImuRxListener* msgHandler,
@@ -77,7 +77,7 @@ private:
         ImuRxListenerFunc funcToCall;
     };
 
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
 
     float yaw;
     int16_t rawGz;

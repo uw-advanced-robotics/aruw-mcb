@@ -24,6 +24,11 @@
 #include "tap/control/comprised_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 
+namespace aruwsrc
+{
+class Drivers;
+}
+
 namespace aruwsrc::agitator
 {
 class AgitatorSubsystem;
@@ -41,7 +46,7 @@ class SentinelRotateAgitatorCommand : public tap::control::ComprisedCommand
 {
 public:
     SentinelRotateAgitatorCommand(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         tap::control::setpoint::SetpointSubsystem* agitator,
         SentinelSwitcherSubsystem* switcher);
 
@@ -65,7 +70,7 @@ private:
     static constexpr uint32_t AGITATOR_ROTATE_TIME = 54;
     static constexpr uint32_t AGITATOR_WAIT_AFTER_ROTATE_TIME = 0;
 
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
     tap::control::setpoint::SetpointSubsystem* agitator;
     SentinelSwitcherSubsystem* switcher;
 

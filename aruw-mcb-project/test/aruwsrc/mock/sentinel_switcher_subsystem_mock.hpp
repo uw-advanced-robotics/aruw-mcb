@@ -30,7 +30,7 @@ class SentinelSwitcherSubsystemMock : public control::sentinel::firing::Sentinel
 {
 public:
     SentinelSwitcherSubsystemMock(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         tap::gpio::Pwm::Pin switcherServoPin = tap::gpio::Pwm::Pin::W);
     virtual ~SentinelSwitcherSubsystemMock();
 

@@ -19,13 +19,12 @@
 
 #include "client_display_command.hpp"
 
-#include "tap/drivers.hpp"
+#include "aruwsrc/drivers.hpp"
 
 #include "client_display_subsystem.hpp"
 
 using namespace tap::control;
 using namespace tap::serial;
-using tap::Drivers;
 
 #define delay()                                  \
     delayTimer.restart(DELAY_PERIOD_BTWN_SENDS); \
@@ -34,7 +33,7 @@ using tap::Drivers;
 namespace aruwsrc::display
 {
 ClientDisplayCommand::ClientDisplayCommand(
-    Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     ClientDisplaySubsystem *clientDisplay,
     const Command *wiggleCommand,
     const Command *followTurretCommand,

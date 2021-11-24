@@ -26,6 +26,11 @@
 
 namespace aruwsrc
 {
+class Drivers;
+}
+
+namespace aruwsrc
+{
 namespace engineer
 {
 /**
@@ -36,12 +41,7 @@ namespace engineer
 class XAxisSubsystem : public tap::control::Subsystem
 {
 public:
-    XAxisSubsystem(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
-        : tap::control::Subsystem(drivers),
-          pin(pin),
-          extended(false)
-    {
-    }
+    XAxisSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
 
     mockable void setExtended(bool isExtended);
 

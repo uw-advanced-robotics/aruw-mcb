@@ -32,7 +32,7 @@ namespace tap::control
 class Subsystem;
 }
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -47,7 +47,7 @@ class ClientDisplayCommand : public tap::control::Command,
 {
 public:
     ClientDisplayCommand(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         ClientDisplaySubsystem *clientDisplay,
         const tap::control::Command *wiggleCommand,
         const tap::control::Command *followTurret,
@@ -86,7 +86,7 @@ private:
     static constexpr uint8_t CAP_TEXT_NAME[] = {0, 0, 6};
     static constexpr uint8_t CAP_VALUE_NAME[] = {0, 0, 7};
 
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 
     // General variables
     /// @note The maximum frequency of this timer is 10 Hz according to RM rules.

@@ -35,6 +35,11 @@
 
 #include "modm/math/filter/pid.hpp"
 
+namespace aruwsrc
+{
+class Drivers;
+}
+
 namespace aruwsrc::control::sentinel::drive
 {
 class SentinelDriveSubsystem : public tap::control::chassis::ChassisSubsystemInterface
@@ -62,7 +67,7 @@ public:
     static constexpr float SENTINEL_LENGTH = 480;
 
     SentinelDriveSubsystem(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         tap::gpio::Digital::InputPin leftLimitSwitch,
         tap::gpio::Digital::InputPin rightLimitSwitch,
         tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,

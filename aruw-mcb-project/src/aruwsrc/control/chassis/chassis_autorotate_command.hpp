@@ -23,7 +23,7 @@
 #include "tap/control/command.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -43,7 +43,7 @@ public:
     static constexpr float SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD = 1.0f;
 
     ChassisAutorotateCommand(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
         const tap::control::turret::TurretSubsystemInterface* turret,
         bool chassisFrontBackIdentical = false);
@@ -65,7 +65,7 @@ public:
     const char* getName() const override { return "chassis autorotate"; }
 
 private:
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
     /**

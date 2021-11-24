@@ -29,7 +29,7 @@
 
 #include "error_menu.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -43,7 +43,7 @@ class MainMenu : public modm::StandardMenu<tap::display::DummyAllocator<modm::IA
 public:
     MainMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *stack,
-        tap::Drivers *drivers);
+        aruwsrc::Drivers *drivers);
 
     virtual ~MainMenu() = default;
 
@@ -55,7 +55,7 @@ public:
 private:
     static constexpr int MAIN_MENU_ID = 2;
 
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;

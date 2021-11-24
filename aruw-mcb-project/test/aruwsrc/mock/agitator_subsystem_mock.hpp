@@ -32,7 +32,7 @@ class AgitatorSubsystemMock : public agitator::AgitatorSubsystem
 {
 public:
     AgitatorSubsystemMock(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         float kp = 0,
         float ki = 0,
         float kd = 0,

@@ -30,10 +30,13 @@
 
 class XavierSerialTester;
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
+}
 
+namespace tap
+{
 namespace control::turret
 {
 class TurretSubsystemInterface;
@@ -81,7 +84,7 @@ public:
         CV_NUM_MESSAGE_TYPES,
     };
 
-    XavierSerial(tap::Drivers* drivers);
+    XavierSerial(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(XavierSerial);
     mockable ~XavierSerial() = default;
 
