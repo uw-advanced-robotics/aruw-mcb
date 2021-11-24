@@ -35,7 +35,7 @@
     ON_CALL(d.controlOperatorInterface, getChassisYInput()).WillByDefault(Return(baseInput)); \
     ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));             \
     ON_CALL(cs, calculateRotationTranslationalGain).WillByDefault(Return(1));                 \
-    RefSerial::RobotData rd{};                                                                \
+    RefSerial::Rx::RobotData rd{};                                                            \
     ON_CALL(d.refSerial, getRobotData).WillByDefault(ReturnRef(rd));                          \
     EXPECT_CALL(cs, setDesiredOutput(FloatEq(baseX), FloatEq(baseY), FloatEq(baseR)));
 

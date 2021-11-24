@@ -305,12 +305,13 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
 
     static constexpr float TIME_BETWEEN_ROBOT_ID_SEND = 5000;
     static constexpr int ROBOT_IDS_TO_CHECK =
-        tap::serial::RefSerial::BLUE_SENTINEL - tap::serial::RefSerial::RED_HERO + 1;
+        static_cast<int>(tap::serial::RefSerial::RobotId::BLUE_SENTINEL) -
+        static_cast<int>(tap::serial::RefSerial::RobotId::RED_HERO) + 1;
 
     aruwsrc::Drivers drivers;
     XavierSerial xs(&drivers);
     XavierSerialTester xst(&xs);
-    tap::serial::RefSerial::RobotData robotData;
+    tap::serial::RefSerial::Rx::RobotData robotData;
 
     setExpectationsForTxTest(&drivers, ROBOT_IDS_TO_CHECK);
     EXPECT_CALL(drivers.refSerial, getRobotData)
@@ -320,7 +321,7 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
         .WillByDefault([&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
             data += FRAME_HEADER_LENGTH;
             EXPECT_EQ(length, FRAME_HEADER_LENGTH + 1 + CRC_LENGTH);
-            EXPECT_EQ(robotData.robotId, data[0]);
+            EXPECT_EQ(static_cast<uint8_t>(robotData.robotId), data[0]);
             return length;
         });
 
@@ -328,7 +329,9 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
 
     tap::arch::clock::setTime(0);
 
-    for (int i = tap::serial::RefSerial::RED_HERO; i <= tap::serial::RefSerial::BLUE_SENTINEL; i++)
+    for (int i = static_cast<int>(tap::serial::RefSerial::RobotId::RED_HERO);
+         i <= static_cast<int>(tap::serial::RefSerial::RobotId::BLUE_SENTINEL);
+         i++)
     {
         tap::arch::clock::setTime(
             tap::arch::clock::getTimeMilliseconds() + TIME_BETWEEN_ROBOT_ID_SEND);
