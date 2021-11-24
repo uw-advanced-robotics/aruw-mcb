@@ -128,7 +128,7 @@ public:
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<aruwsrc::mock::XavierSerialMock> xavierSerial;
     testing::NiceMock<mock::CommandMapperMock> commandMapper;
-    mock::ErrorControllerMock errorController;
+    testing::StrictMock<mock::ErrorControllerMock> errorController;
     testing::NiceMock<mock::TerminalSerialMock> terminalSerial;
     testing::NiceMock<mock::DjiMotorTxHandlerMock> djiMotorTxHandler;
     testing::NiceMock<aruwsrc::mock::OledDisplayMock> oledDisplay;
