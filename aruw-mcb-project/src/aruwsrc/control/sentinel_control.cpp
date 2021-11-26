@@ -26,10 +26,10 @@
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/control/turret/commands/turret_setpoint_command.hpp"
-#include "tap/drivers_singleton.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
@@ -49,7 +49,6 @@ using namespace tap::gpio;
 using namespace aruwsrc::control;
 using namespace tap::control;
 using namespace tap::motor;
-using tap::DoNotUse_getDrivers;
 using tap::Remote;
 
 /*
@@ -58,7 +57,7 @@ using tap::Remote;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-tap::driversFunc drivers = tap::DoNotUse_getDrivers;
+aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace sentinel_control
 {
@@ -160,7 +159,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerSentinelSubsystems(tap::Drivers *drivers)
+void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&sentinelDrive);
@@ -171,7 +170,7 @@ void registerSentinelSubsystems(tap::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentinelCommands(tap::Drivers *)
+void setDefaultSentinelCommands(aruwsrc::Drivers *)
 {
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     upperFrictionWheels.setDefaultCommand(&spinUpperFrictionWheels);
@@ -180,13 +179,13 @@ void setDefaultSentinelCommands(tap::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentinelCommands(tap::Drivers *drivers)
+void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSentinelIoMappings(tap::Drivers *drivers)
+void registerSentinelIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -197,7 +196,7 @@ void registerSentinelIoMappings(tap::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(tap::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
     sentinel_control::initializeSubsystems();
     sentinel_control::registerSentinelSubsystems(drivers);

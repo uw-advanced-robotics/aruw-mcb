@@ -38,7 +38,7 @@ class SentinelAutoDriveComprisedCommand : public tap::control::ComprisedCommand
 {
 public:
     SentinelAutoDriveComprisedCommand(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         SentinelDriveSubsystem *sentinelChassis);
 
     const char *getName() const override { return "sentinel random drive"; }
@@ -49,7 +49,7 @@ public:
 
 private:
     static constexpr float RANDOM_DRIVE_DPS_THRESHOLD = 5;
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
     SentinelDriveSubsystem *sentinelChassis;
     SentinelFullTraverseCommand fullTraverse;
     SentinelRandomDriveCommand randomDrive;

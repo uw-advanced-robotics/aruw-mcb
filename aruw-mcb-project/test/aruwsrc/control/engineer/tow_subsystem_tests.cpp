@@ -20,12 +20,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/control/engineer/tow_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 using aruwsrc::engineer::TowSubsystem;
-using tap::Drivers;
 using tap::gpio::Digital;
 
 static constexpr Digital::OutputPin LEFT_TOW_PIN = Digital::OutputPin::E;
@@ -37,7 +35,7 @@ static constexpr Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN = Digital::InputPi
 
 TEST(TowSubsystem, getLeftClamped_default_returns_false)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -50,7 +48,7 @@ TEST(TowSubsystem, getLeftClamped_default_returns_false)
 
 TEST(TowSubsystem, getRightClamped_default_returns_false)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -65,7 +63,7 @@ TEST(TowSubsystem, getRightClamped_default_returns_false)
 
 TEST(TowSubsystem, getLeftLimitSwitchTriggered_returns_false_when_digital_pin_low)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -81,7 +79,7 @@ TEST(TowSubsystem, getLeftLimitSwitchTriggered_returns_false_when_digital_pin_lo
 
 TEST(TowSubsystem, getLeftLimitSwitchTriggered_returns_true_when_digital_pin_high)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -97,7 +95,7 @@ TEST(TowSubsystem, getLeftLimitSwitchTriggered_returns_true_when_digital_pin_hig
 
 TEST(TowSubsystem, getRightLimitSwitchTriggered_returns_false_when_digital_pin_low)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -113,7 +111,7 @@ TEST(TowSubsystem, getRightLimitSwitchTriggered_returns_false_when_digital_pin_l
 
 TEST(TowSubsystem, getRightLimitSwitchTriggered_returns_true_when_digital_pin_high)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -131,7 +129,7 @@ TEST(TowSubsystem, getRightLimitSwitchTriggered_returns_true_when_digital_pin_hi
 
 TEST(TowSubsystem, setLeftClamped_false_results_in_getLeftClamped_returning_false)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -146,7 +144,7 @@ TEST(TowSubsystem, setLeftClamped_false_results_in_getLeftClamped_returning_fals
 
 TEST(TowSubsystem, setLeftClamped_true_results_in_getLeftClamped_returning_true)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -161,7 +159,7 @@ TEST(TowSubsystem, setLeftClamped_true_results_in_getLeftClamped_returning_true)
 
 TEST(TowSubsystem, setRightClamped_false_results_in_getRightClamped_returning_false)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -176,7 +174,7 @@ TEST(TowSubsystem, setRightClamped_false_results_in_getRightClamped_returning_fa
 
 TEST(TowSubsystem, setRightClamped_true_results_in_getRightClamped_returning_true)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystem ts(
         &drivers,
         LEFT_TOW_PIN,

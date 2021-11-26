@@ -26,6 +26,11 @@
 
 namespace aruwsrc
 {
+class Drivers;
+}
+
+namespace aruwsrc
+{
 namespace engineer
 {
 /**
@@ -39,7 +44,7 @@ class TowSubsystem : public tap::control::Subsystem
 {
 public:
     TowSubsystem(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         tap::gpio::Digital::OutputPin leftTowPin,
         tap::gpio::Digital::OutputPin rightTowPin,
         tap::gpio::Digital::InputPin leftTowLimitSwitchPin,

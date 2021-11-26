@@ -22,7 +22,7 @@
 
 #include "tap/control/command.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -34,7 +34,7 @@ class SentinelDriveSubsystem;
 class SentinelDriveManualCommand : public tap::control::Command
 {
 public:
-    SentinelDriveManualCommand(tap::Drivers* drivers, SentinelDriveSubsystem* subsystem);
+    SentinelDriveManualCommand(aruwsrc::Drivers* drivers, SentinelDriveSubsystem* subsystem);
 
     void initialize() override;
 
@@ -47,7 +47,7 @@ public:
     const char* getName() const override { return "sentinel drive manual"; }
 
 private:
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
 
     SentinelDriveSubsystem* subsystemSentinelDrive;
 };

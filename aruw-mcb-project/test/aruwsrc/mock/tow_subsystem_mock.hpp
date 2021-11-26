@@ -29,7 +29,7 @@ class TowSubsystemMock : public aruwsrc::engineer::TowSubsystem
 {
 public:
     TowSubsystemMock(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         tap::gpio::Digital::OutputPin leftTowPin,
         tap::gpio::Digital::OutputPin rightTowPin,
         tap::gpio::Digital::InputPin leftTowLimitSwitchPin,

@@ -60,7 +60,7 @@ public:
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
     SentinelTurretCVCommand(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         tap::control::turret::TurretSubsystemInterface *DoublePitchTurretSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
         sentinel::firing::SentinelSwitcherSubsystem *switcher);
@@ -80,7 +80,7 @@ public:
     inline bool isAimingAtTarget() const { return aimingAtTarget; }
 
 private:
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 
     tap::control::turret::TurretSubsystemInterface *sentinelTurret;
 

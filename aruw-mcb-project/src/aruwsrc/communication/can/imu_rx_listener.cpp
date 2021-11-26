@@ -21,11 +21,12 @@
 
 #include "tap/architecture/endianness_wrappers.hpp"
 
+#include "aruwsrc/drivers.hpp"
 #include "modm/architecture/interface/can.hpp"
 
 namespace aruwsrc::can
 {
-ImuRxListener::ImuRxListener(tap::Drivers* drivers)
+ImuRxListener::ImuRxListener(aruwsrc::Drivers* drivers)
     : drivers(drivers),
       angleGyroMessageHandler(
           drivers,
@@ -37,7 +38,7 @@ ImuRxListener::ImuRxListener(tap::Drivers* drivers)
 }
 
 ImuRxListener::ImuRxHandler::ImuRxHandler(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     uint32_t id,
     tap::can::CanBus cB,
     ImuRxListener* msgHandler,

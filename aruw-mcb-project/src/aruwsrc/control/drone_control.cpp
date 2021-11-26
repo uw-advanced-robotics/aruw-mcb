@@ -19,9 +19,7 @@
 
 #if defined(TARGET_DRONE)
 
-#include "tap/drivers_singleton.hpp"
-
-using tap::DoNotUse_getDrivers;
+#include "aruwsrc/drivers_singleton.hpp"
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -29,7 +27,7 @@ using tap::DoNotUse_getDrivers;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-tap::driversFunc drivers = tap::DoNotUse_getDrivers;
+aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace drone_control
 {
@@ -41,21 +39,21 @@ namespace drone_control
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerDroneSubsystems(tap::Drivers *) {}
+void registerDroneSubsystems(aruwsrc::Drivers *) {}
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultDroneCommands(tap::Drivers *) {}
+void setDefaultDroneCommands(aruwsrc::Drivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands(tap::Drivers *) {}
+void startDroneCommands(aruwsrc::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerDroneIoMappings(tap::Drivers *) {}
+void registerDroneIoMappings(aruwsrc::Drivers *) {}
 }  // namespace drone_control
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(tap::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
     drone_control::initializeSubsystems();
     drone_control::registerDroneSubsystems(drivers);

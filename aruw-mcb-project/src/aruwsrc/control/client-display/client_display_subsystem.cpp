@@ -17,18 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ROBOT_CONTROL_HPP__
-#define __ROBOT_CONTROL_HPP__
+#include "client_display_subsystem.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc
+namespace aruwsrc::display
 {
-namespace control
-{
-void initSubsystemCommands(aruwsrc::Drivers *drivers);
-}  // namespace control
-
-}  // namespace aruwsrc
-
-#endif
+ClientDisplaySubsystem::ClientDisplaySubsystem(aruwsrc::Drivers* drivers) : Subsystem(drivers) {}
+}  // namespace aruwsrc::display

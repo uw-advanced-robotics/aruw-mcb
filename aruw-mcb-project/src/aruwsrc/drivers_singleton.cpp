@@ -17,18 +17,25 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ROBOT_CONTROL_HPP__
-#define __ROBOT_CONTROL_HPP__
+#ifndef ENV_UNIT_TESTS
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 
 namespace aruwsrc
 {
-namespace control
+/**
+ * Class that allows one to construct a Drivers instance because of frienship
+ * with the Drivers class.
+ */
+class DriversSingleton
 {
-void initSubsystemCommands(aruwsrc::Drivers *drivers);
-}  // namespace control
+public:
+    static aruwsrc::Drivers drivers;
+};  // class DriversSingleton
 
+aruwsrc::Drivers DriversSingleton::drivers;
+
+aruwsrc::Drivers *DoNotUse_getDrivers() { return &DriversSingleton::drivers; }
 }  // namespace aruwsrc
 
 #endif

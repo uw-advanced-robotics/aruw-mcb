@@ -36,6 +36,11 @@
 
 namespace aruwsrc
 {
+class Drivers;
+}
+
+namespace aruwsrc
+{
 namespace agitator
 {
 /**
@@ -138,7 +143,7 @@ public:
      * identifiers.
      */
     AgitatorSubsystem(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         float kp,
         float ki,
         float kd,

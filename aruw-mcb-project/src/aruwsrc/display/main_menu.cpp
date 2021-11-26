@@ -19,6 +19,8 @@
 
 #include "main_menu.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 using namespace tap::display;
 
 namespace aruwsrc
@@ -27,7 +29,7 @@ namespace display
 {
 MainMenu::MainMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* stack,
-    tap::Drivers* drivers)
+    aruwsrc::Drivers* drivers)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, MAIN_MENU_ID),
       drivers(drivers),
       errorMenu(stack, drivers),

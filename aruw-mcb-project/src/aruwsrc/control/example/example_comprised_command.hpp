@@ -32,7 +32,7 @@ namespace control
 class ExampleComprisedCommand : public tap::control::ComprisedCommand
 {
 public:
-    explicit ExampleComprisedCommand(tap::Drivers* drivers, ExampleSubsystem* subsystem);
+    explicit ExampleComprisedCommand(aruwsrc::Drivers* drivers, ExampleSubsystem* subsystem);
 
     void initialize() override;
 

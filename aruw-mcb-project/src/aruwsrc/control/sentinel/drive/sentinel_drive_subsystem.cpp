@@ -20,8 +20,9 @@
 #include "sentinel_drive_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -34,7 +35,7 @@ using namespace tap::gpio;
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelDriveSubsystem::SentinelDriveSubsystem(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     tap::gpio::Digital::InputPin leftLimitSwitch,
     tap::gpio::Digital::InputPin rightLimitSwitch,
     tap::motor::MotorId leftMotorId,

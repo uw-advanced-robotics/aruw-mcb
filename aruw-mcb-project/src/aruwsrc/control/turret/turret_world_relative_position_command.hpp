@@ -24,7 +24,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/command.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -53,7 +53,7 @@ public:
      * The `ChassisSubsystem` is only used for for odometry information.
      */
     TurretWorldRelativePositionCommand(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         TurretSubsystem *subsystem,
         const chassis::ChassisSubsystem *chassis,
         bool attemptToUseTurretIMU = false);
@@ -123,7 +123,7 @@ private:
     static constexpr float PITCH_GRAVITY_COMPENSATION_KP = 0.0f;
 #endif
 
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
     const chassis::ChassisSubsystem *chassisSubsystem;

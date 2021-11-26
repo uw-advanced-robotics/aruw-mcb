@@ -29,7 +29,7 @@ namespace aruwsrc::mock
 class ImuRxListenerMock : public can::ImuRxListener
 {
 public:
-    ImuRxListenerMock(tap::Drivers *drivers);
+    ImuRxListenerMock(aruwsrc::Drivers *drivers);
     ~ImuRxListenerMock();
 };
 }  // namespace aruwsrc::mock

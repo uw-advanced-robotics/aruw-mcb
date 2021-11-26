@@ -23,9 +23,10 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
 #include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
-#include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/util_macros.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #include "agitator_subsystem.hpp"
 
@@ -59,7 +60,7 @@ public:
     static constexpr uint32_t JAM_TEMPORAL_TOLERANCE = 150;
 
     DoubleAgitatorSubsystem(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         float kp,
         float ki,
         float kd,

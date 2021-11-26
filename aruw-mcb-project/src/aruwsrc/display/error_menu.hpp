@@ -24,7 +24,7 @@
 
 #include "modm/ui/menu/abstract_menu.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -38,7 +38,7 @@ class ErrorMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::I
 public:
     ErrorMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        tap::Drivers *drivers);
+        aruwsrc::Drivers *drivers);
 
     void draw() override;
 
@@ -53,7 +53,7 @@ public:
 private:
     static constexpr int ERROR_MENU_ID = 3;
 
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 };  // class ErrorMenu
 }  // namespace display
 }  // namespace aruwsrc

@@ -29,6 +29,11 @@
 
 #include "turret_subsystem.hpp"
 
+namespace aruwsrc
+{
+class Drivers;
+}
+
 namespace aruwsrc::control::turret
 {
 /**
@@ -38,7 +43,7 @@ namespace aruwsrc::control::turret
 class TurretCVCommand : public tap::control::Command
 {
 public:
-    TurretCVCommand(tap::Drivers *xavierSerial, TurretSubsystem *subsystem);
+    TurretCVCommand(aruwsrc::Drivers *xavierSerial, TurretSubsystem *subsystem);
 
     void initialize() override;
 
@@ -71,7 +76,7 @@ private:
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
 

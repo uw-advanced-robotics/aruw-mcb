@@ -24,7 +24,7 @@
 #include "tap/control/command.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -44,7 +44,7 @@ class WiggleDriveCommand : public tap::control::Command
 {
 public:
     WiggleDriveCommand(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
         const tap::control::turret::TurretSubsystemInterface* turret);
 
@@ -93,7 +93,7 @@ private:
     static constexpr float WIGGLE_ROTATE_KP = -300.0f;
     static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING = 0.5f;
 
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
 

@@ -28,7 +28,7 @@ namespace aruwsrc::mock
 {
 class XAxisSubsystemMock : public engineer::XAxisSubsystem
 {
-    XAxisSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
+    XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
     virtual ~XAxisSubsystemMock();
 
     MOCK_METHOD(void, setExtended, (bool), (override));

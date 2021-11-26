@@ -23,6 +23,11 @@
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
+namespace aruwsrc
+{
+class Drivers;
+}
+
 namespace aruwsrc::display
 {
 /**
@@ -31,7 +36,7 @@ namespace aruwsrc::display
 class ClientDisplaySubsystem : public tap::control::Subsystem
 {
 public:
-    ClientDisplaySubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
+    ClientDisplaySubsystem(aruwsrc::Drivers* drivers);
     virtual ~ClientDisplaySubsystem() {}
     const char* getName() override { return "client display"; }
 };

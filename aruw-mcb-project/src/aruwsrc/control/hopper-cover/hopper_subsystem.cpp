@@ -21,10 +21,24 @@
 
 #include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 namespace aruwsrc
 {
 namespace control
 {
+HopperSubsystem::HopperSubsystem(
+    aruwsrc::Drivers *drivers,
+    tap::gpio::Pwm::Pin pwmPin,
+    float open,
+    float close,
+    float pwmRampSpeed)
+    : tap::control::Subsystem(drivers),
+      hopper(drivers, pwmPin, open, close, pwmRampSpeed)
+{
+    hopper.setTargetPwm(close);
+}
+
 void HopperSubsystem::setOpen() { hopper.setTargetPwm(hopper.getMaxPWM()); }
 
 void HopperSubsystem::setClose() { hopper.setTargetPwm(hopper.getMinPWM()); }

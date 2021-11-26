@@ -22,7 +22,8 @@
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #include "example_subsystem.hpp"
 
@@ -33,7 +34,7 @@ namespace control
 class BlinkLEDCommand : public tap::control::Command
 {
 public:
-    BlinkLEDCommand(tap::Drivers* drivers, aruwsrc::control::ExampleSubsystem* subsystem);
+    BlinkLEDCommand(aruwsrc::Drivers* drivers, aruwsrc::control::ExampleSubsystem* subsystem);
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -57,7 +58,7 @@ public:
 
     const char* getName() const override { return "blink led"; }
 
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
 
     tap::arch::MilliTimeout completedTimer;
 

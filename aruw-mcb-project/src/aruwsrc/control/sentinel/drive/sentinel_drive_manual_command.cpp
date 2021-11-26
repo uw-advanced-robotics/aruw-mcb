@@ -20,17 +20,17 @@
 #include "sentinel_drive_manual_command.hpp"
 
 #include "tap/communication/serial/remote.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #include "sentinel_drive_subsystem.hpp"
 
-using tap::Drivers;
 using tap::control::Subsystem;
 
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelDriveManualCommand::SentinelDriveManualCommand(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     SentinelDriveSubsystem* subsystem)
     : Command(),
       drivers(drivers),

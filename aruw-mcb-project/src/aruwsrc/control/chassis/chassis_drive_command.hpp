@@ -22,7 +22,7 @@
 
 #include "tap/control/command.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -39,7 +39,7 @@ class ChassisSubsystem;
 class ChassisDriveCommand : public tap::control::Command
 {
 public:
-    ChassisDriveCommand(tap::Drivers* drivers, ChassisSubsystem* chassis);
+    ChassisDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsystem* chassis);
 
     void initialize() override;
 
@@ -57,7 +57,7 @@ public:
     const char* getName() const override { return "chassis drive"; }
 
 private:
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
 };  // class ChassisDriveCommand
 

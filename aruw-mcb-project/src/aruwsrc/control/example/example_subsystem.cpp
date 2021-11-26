@@ -19,12 +19,27 @@
 
 #include "example_subsystem.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 namespace aruwsrc
 {
 namespace control
 {
 const tap::motor::MotorId ExampleSubsystem::LEFT_MOTOR_ID = tap::motor::MOTOR2;
 const tap::motor::MotorId ExampleSubsystem::RIGHT_MOTOR_ID = tap::motor::MOTOR1;
+
+ExampleSubsystem::ExampleSubsystem(
+    aruwsrc::Drivers* drivers,
+    tap::motor::MotorId leftMotorId,
+    tap::motor::MotorId rightMotorId)
+    : tap::control::Subsystem(drivers),
+      velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+      velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+      desiredRpm(0),
+      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
+      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right example motor")
+{
+}
 
 void ExampleSubsystem::initialize()
 {

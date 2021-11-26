@@ -20,7 +20,7 @@
 #ifndef CHASSIS_REL_DRIVE_HPP_
 #define CHASSIS_REL_DRIVE_HPP_
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -38,13 +38,13 @@ class ChassisRelDrive
 {
 public:
     static void computeDesiredUserTranslation(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         ChassisSubsystem *chassis,
         float chassisRotation,
         float *chassisXDesiredWheelspeed,
         float *chassisYDesiredWheelspeed);
 
-    static void onExecute(tap::Drivers *drivers, ChassisSubsystem *chassis);
+    static void onExecute(aruwsrc::Drivers *drivers, ChassisSubsystem *chassis);
 };
 }  // namespace aruwsrc::chassis
 

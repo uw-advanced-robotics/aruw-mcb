@@ -21,18 +21,17 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
-
-using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
-ChassisDriveCommand::ChassisDriveCommand(tap::Drivers* drivers, ChassisSubsystem* chassis)
+ChassisDriveCommand::ChassisDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsystem* chassis)
     : drivers(drivers),
       chassis(chassis)
 {
