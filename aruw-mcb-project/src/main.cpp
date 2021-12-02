@@ -101,6 +101,9 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+#ifdef TARGET_SOLDIER
+            PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
+#endif
         }
         modm::delay_us(10);
     }
@@ -125,7 +128,7 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->xavierSerial.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
 #ifdef TARGET_SOLDIER
-    drivers->imuRxHandler.init();
+    drivers->turretMCBCanComm.init();
 #endif
 }
 

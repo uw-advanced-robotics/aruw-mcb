@@ -111,8 +111,7 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
     bool isYawLimited)
 {
     const float turretAngleFromCenter =
-        ContiguousFloat(turretAngleActual - TurretSubsystem::TURRET_START_ANGLE, -180, 180)
-            .getValue();
+        ContiguousFloat(turretAngleActual - TurretSubsystem::YAW_START_ANGLE, -180, 180).getValue();
 
     SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)
 
@@ -185,8 +184,7 @@ static void runExecuteAutorotateValidationTest(
     bool chassisFrontBackIdentical)
 {
     const float turretAngleFromCenter =
-        ContiguousFloat(turretAngleActual - TurretSubsystem::TURRET_START_ANGLE, -180, 180)
-            .getValue();
+        ContiguousFloat(turretAngleActual - TurretSubsystem::YAW_START_ANGLE, -180, 180).getValue();
 
     SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));

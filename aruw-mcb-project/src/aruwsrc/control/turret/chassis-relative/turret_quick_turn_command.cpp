@@ -17,21 +17,28 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef IMU_RX_LISTENER_MOCK_HPP_
-#define IMU_RX_LISTENER_MOCK_HPP_
+#include "turret_quick_turn_command.hpp"
 
-#include <gmock/gmock.h>
+#include "aruwsrc/drivers.hpp"
 
-#include "aruwsrc/communication/can/imu_rx_listener.hpp"
+#include "turret_chassis_relative_command.hpp"
 
-namespace aruwsrc::mock
+namespace aruwsrc::control::turret
 {
-class ImuRxListenerMock : public can::ImuRxListener
+TurretQuickTurnCommand::TurretQuickTurnCommand(
+    tap::control::turret::TurretSubsystemInterface *turretSubsystem,
+    const float targetOffsetToTurn)
+    : turretSubsystem(turretSubsystem),
+      targetOffsetToTurn(targetOffsetToTurn)
 {
-public:
-    ImuRxListenerMock(aruwsrc::Drivers *drivers);
-    ~ImuRxListenerMock();
-};
-}  // namespace aruwsrc::mock
+    addSubsystemRequirement(turretSubsystem);
+}
 
-#endif  // IMU_RX_LISTENER_MOCK_HPP_
+bool TurretQuickTurnCommand::isReady() { return turretSubsystem->isOnline(); }
+
+void TurretQuickTurnCommand::initialize()
+{
+    turretSubsystem->setYawSetpoint(
+        turretSubsystem->getCurrentYawValue().getValue() + targetOffsetToTurn);
+}
+}  // namespace aruwsrc::control::turret

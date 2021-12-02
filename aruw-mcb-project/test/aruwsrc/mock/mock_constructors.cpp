@@ -24,11 +24,11 @@
 #include "friction_wheel_subsystem_mock.hpp"
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
-#include "imu_rx_listener_mock.hpp"
 #include "oled_display_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_switcher_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
+#include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
 #include "xavier_serial_mock.hpp"
@@ -100,8 +100,11 @@ GrabberSubsystemMock::~GrabberSubsystemMock() {}
 OledDisplayMock::OledDisplayMock(aruwsrc::Drivers *drivers) : display::OledDisplay(drivers) {}
 OledDisplayMock::~OledDisplayMock() {}
 
-ImuRxListenerMock::ImuRxListenerMock(aruwsrc::Drivers *drivers) : can::ImuRxListener(drivers) {}
-ImuRxListenerMock::~ImuRxListenerMock() {}
+TurretMCBCanCommMock::TurretMCBCanCommMock(aruwsrc::Drivers *drivers)
+    : can::TurretMCBCanComm(drivers)
+{
+}
+TurretMCBCanCommMock::~TurretMCBCanCommMock() {}
 
 HopperSubsystemMock::HopperSubsystemMock(
     aruwsrc::Drivers *drivers,
@@ -147,7 +150,10 @@ TowSubsystemMock::TowSubsystemMock(
 }
 TowSubsystemMock::~TowSubsystemMock() {}
 
-TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers) : TurretSubsystem(drivers) {}
+TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers)
+    : TurretSubsystem(drivers, nullptr, nullptr)
+{
+}
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
 XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
