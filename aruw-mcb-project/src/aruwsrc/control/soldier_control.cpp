@@ -157,9 +157,9 @@ FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
     nullptr,
+    &chassisAutorotateCommand,
+    &beybladeCommand,
     &chassisDriveCommand);
 
 OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
