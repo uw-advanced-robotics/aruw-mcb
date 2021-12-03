@@ -21,11 +21,15 @@
 
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::control::launcher
+namespace aruwsrc
+{
+namespace control
+{
+namespace launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     tap::Drivers *drivers,
-    aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels)
+    aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheels)
     : drivers(drivers),
       frictionWheels(frictionWheels)
 {
@@ -54,4 +58,8 @@ void FrictionWheelSpinRefLimitedCommand::execute()
     frictionWheels->setDesiredRpm(desiredSpeed);
 }
 
-}  // namespace aruwsrc::control::launcher
+}  // namespace launcher
+
+}  // namespace control
+
+}  // namespace aruwsrc

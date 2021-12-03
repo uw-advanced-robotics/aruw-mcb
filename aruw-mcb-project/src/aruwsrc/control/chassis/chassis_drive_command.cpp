@@ -30,6 +30,8 @@ using tap::Drivers;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 ChassisDriveCommand::ChassisDriveCommand(tap::Drivers* drivers, ChassisSubsystem* chassis)
@@ -48,5 +50,7 @@ void ChassisDriveCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f
 bool ChassisDriveCommand::isFinished() const { return false; }
 
 }  // namespace chassis
+
+}  // namespace control
 
 }  // namespace aruwsrc

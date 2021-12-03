@@ -23,6 +23,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace launcher
 {
 void FrictionWheelSubsystem::initialize()
@@ -55,5 +57,7 @@ void FrictionWheelSubsystem::onHardwareTestStart() { this->setDesiredRpm(5000.0f
 void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredRpm(0.0f); }
 
 }  // namespace launcher
+
+}  // namespace control
 
 }  // namespace aruwsrc

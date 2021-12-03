@@ -29,7 +29,11 @@
 
 #include "turret_subsystem.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 /**
  * A command that receives input from the vision system via the `XavierSerial` driver and aims the
@@ -88,6 +92,10 @@ private:
     void runPitchPositionController(float dt);
 };  // class TurretCvCommand
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // TURRET_CV_COMMAND_HPP_

@@ -24,7 +24,13 @@
 #include "tap/motor/servo.hpp"
 #include "tap/util_macros.hpp"
 
-namespace aruwsrc::control::sentinel::firing
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace firing
 {
 /**
  * Controls a servo used to switch which barrel balls are fed into. Barrel ID1 is assumed
@@ -51,6 +57,12 @@ private:
     bool useLower = true;
 };
 
-}  // namespace aruwsrc::control::sentinel::firing
+}  // namespace firing
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

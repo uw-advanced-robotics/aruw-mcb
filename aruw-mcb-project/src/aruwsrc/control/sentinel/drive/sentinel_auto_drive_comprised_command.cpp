@@ -28,7 +28,13 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     tap::Drivers *drivers,
@@ -80,6 +86,12 @@ void SentinelAutoDriveComprisedCommand::end(bool interrupted)
 
 bool SentinelAutoDriveComprisedCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

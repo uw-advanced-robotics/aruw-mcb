@@ -26,6 +26,8 @@
 
 namespace tap
 {
+namespace communication
+{
 namespace gpio
 {
 /**
@@ -80,6 +82,8 @@ public:
 };  // class Leds
 
 }  // namespace gpio
+
+}  // namespace communication
 
 }  // namespace tap
 

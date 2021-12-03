@@ -24,6 +24,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace launcher
 {
 class FrictionWheelSubsystem;
@@ -63,6 +65,8 @@ private:
 };
 
 }  // namespace launcher
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

@@ -28,6 +28,8 @@
 
 namespace aruwsrc
 {
+namespace control 
+{
 namespace agitator
 {
 class AgitatorSubsystem;
@@ -83,7 +85,7 @@ public:
 
     WaterwheelLoadCommand42mm(
         tap::Drivers* drivers,
-        aruwsrc::agitator::LimitSwitchAgitatorSubsystem* waterwheel);
+        aruwsrc::control::agitator::LimitSwitchAgitatorSubsystem* waterwheel);
 
     bool isReady() override;
 
@@ -94,7 +96,7 @@ private:
     tap::Drivers* drivers;
 
     // Store pointer to limited agitator subsystem with derived class type
-    aruwsrc::agitator::LimitSwitchAgitatorSubsystem* waterwheel;
+    aruwsrc::control::agitator::LimitSwitchAgitatorSubsystem* waterwheel;
 };  // class Waterwheel42mmLoadCommand
 
 /**
@@ -135,6 +137,8 @@ private:
 };
 
 }  // namespace agitator
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

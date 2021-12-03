@@ -26,6 +26,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 /**
@@ -100,6 +102,9 @@ private:
     uint64_t testTime;
 };  // class TowSubsystem
 }  // namespace engineer
+
+}  // namespace control
+
 }  // namespace aruwsrc
 
 #endif  // TOW_SUBSYSTEM_HPP_

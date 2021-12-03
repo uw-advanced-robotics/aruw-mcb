@@ -25,6 +25,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 SqueezeGrabberCommand::SqueezeGrabberCommand(GrabberSubsystem* subsystem)
@@ -42,5 +44,7 @@ void SqueezeGrabberCommand::end(bool) { grabber->setSqueezed(false); }
 
 bool SqueezeGrabberCommand::isFinished() const { return false; }
 }  // namespace engineer
+
+}  // namespace control
 
 }  // namespace aruwsrc

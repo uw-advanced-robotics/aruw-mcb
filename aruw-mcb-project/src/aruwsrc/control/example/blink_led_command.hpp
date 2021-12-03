@@ -30,10 +30,12 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace example
+{
 class BlinkLEDCommand : public tap::control::Command
 {
 public:
-    BlinkLEDCommand(tap::Drivers* drivers, aruwsrc::control::ExampleSubsystem* subsystem);
+    BlinkLEDCommand(tap::Drivers* drivers, aruwsrc::control::example::ExampleSubsystem* subsystem);
 
     /**
      * The initial subroutine of a command.  Called once when the command is
@@ -64,6 +66,8 @@ public:
     int refershCounter = 0;
     int startCounter = 0;
 };
+
+}  //namespace example
 
 }  // namespace control
 

@@ -23,6 +23,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 void GrabberSubsystem::setSqueezed(bool isGrabberSqueezed)
@@ -48,5 +50,7 @@ void GrabberSubsystem::onHardwareTestStart()
 void GrabberSubsystem::onHardwareTestComplete() { this->setSqueezed(!isGrabberSqueezed); }
 
 }  // namespace engineer
+
+}  // namespace control
 
 }  // namespace aruwsrc

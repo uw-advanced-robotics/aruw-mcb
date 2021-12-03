@@ -20,9 +20,13 @@
 #if defined(PLATFORM_HOSTED) && !defined(ROBOT_SIM_HPP_)
 #define ROBOT_SIM_HPP_
 
-namespace aruwsrc::sim
+namespace aruwsrc
+{
+namespace sim
 {
 void initialize_robot_sim();
-}
+}  // namespace sim
+
+}  // namespace aruwsrc
 
 #endif  // ROBOT_SIM_HPP_

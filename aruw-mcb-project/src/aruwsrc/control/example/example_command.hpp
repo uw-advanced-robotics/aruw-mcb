@@ -33,6 +33,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace example
+{
 class ExampleSubsystem;
 
 class ExampleCommand : public tap::control::Command
@@ -77,6 +79,8 @@ private:
 
     int speed;
 };
+
+}  //namespace example
 
 }  // namespace control
 

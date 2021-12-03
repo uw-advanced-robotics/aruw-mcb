@@ -48,6 +48,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace example
+{
 class ExampleSubsystem : public tap::control::Subsystem
 {
 public:
@@ -107,6 +109,8 @@ private:
     tap::motor::DjiMotor rightWheel;
 #endif
 };
+
+}  //namespace example
 
 }  // namespace control
 

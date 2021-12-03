@@ -35,6 +35,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace launcher
 {
 /**
@@ -119,6 +121,8 @@ private:
 };
 
 }  // namespace launcher
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

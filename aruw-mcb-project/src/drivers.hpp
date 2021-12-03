@@ -138,20 +138,20 @@ public:
     testing::NiceMock<aruwsrc::mock::ImuRxListenerMock> imuRxHandler;
 #else
 public:
-    can::Can can;
-    can::CanRxHandler canRxHandler;
-    gpio::Analog analog;
-    gpio::Digital digital;
-    gpio::Leds leds;
-    gpio::Pwm pwm;
+    tap::communication::can::Can can;
+    tap::communication::can::CanRxHandler canRxHandler;
+    tap::communication::gpio::Analog analog;
+    tap::communication::gpio::Digital digital;
+    tap::communication::gpio::Leds leds;
+    tap::communication::gpio::Pwm pwm;
     Remote remote;
-    sensors::Mpu6500 mpu6500;
-    sensors::Mpu6500TerminalSerialHandler mpu6500TerminalSerialHandler;
-    serial::Uart uart;
-    serial::RefSerial refSerial;
+    tap::communication::sensors::mpu6500::Mpu6500 mpu6500;
+    tap::communication::sensors::mpu6500::Mpu6500TerminalSerialHandler mpu6500TerminalSerialHandler;
+    tap::communication::serial::Uart uart;
+    tap::communication::serial::RefSerial refSerial;
     control::CommandScheduler commandScheduler;
     control::ControlOperatorInterface controlOperatorInterface;
-    aruwsrc::serial::XavierSerial xavierSerial;
+    aruwsrc::communication::serial::XavierSerial xavierSerial;
     control::CommandMapper commandMapper;
     errors::ErrorController errorController;
     communication::serial::TerminalSerial terminalSerial;
@@ -160,7 +160,7 @@ public:
     arch::Profiler profiler;
     motor::DjiMotorTerminalSerialHandler djiMotorTerminalSerialHandler;
     control::SchedulerTerminalHandler schedulerTerminalHandler;
-    aruwsrc::can::ImuRxListener imuRxHandler;
+    aruwsrc::communication::can::ImuRxListener imuRxHandler;
 #endif
 };  // class Drivers
 

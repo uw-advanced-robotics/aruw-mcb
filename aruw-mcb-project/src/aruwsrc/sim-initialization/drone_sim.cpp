@@ -21,9 +21,13 @@
 
 #include "robot_sim.hpp"
 
-namespace aruwsrc::sim
+namespace aruwsrc
+{
+namespace sim
 {
 void initialize_robot_sim() {}
-}  // namespace aruwsrc::sim
+}  // namespace aruwsrc
+
+}  // namespace sim
 
 #endif

@@ -36,6 +36,8 @@
 
 namespace aruwsrc
 {
+namespace control 
+{
 namespace agitator
 {
 /**
@@ -284,6 +286,8 @@ private:
 };  // class AgitatorSubsystem
 
 }  // namespace agitator
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

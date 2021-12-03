@@ -21,6 +21,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 ManualTowCommand::ManualTowCommand(TowSubsystem* subsystem) : towSubsystem(subsystem)
@@ -40,4 +42,7 @@ void ManualTowCommand::end(bool)
     towSubsystem->setRightClamped(false);
 }
 }  // namespace engineer
+
+}  // namespace control
+
 }  // namespace aruwsrc

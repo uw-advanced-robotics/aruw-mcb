@@ -23,7 +23,13 @@
 
 using namespace tap::arch::clock;
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 SentinelFullTraverseCommand::SentinelFullTraverseCommand(SentinelDriveSubsystem* subsystem)
     : prevTime(0),
@@ -65,6 +71,12 @@ void SentinelFullTraverseCommand::execute()
 void SentinelFullTraverseCommand::end(bool) { subsystemSentinelDrive->setDesiredRpm(0.0f); }
 
 bool SentinelFullTraverseCommand::isFinished() const { return false; }
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

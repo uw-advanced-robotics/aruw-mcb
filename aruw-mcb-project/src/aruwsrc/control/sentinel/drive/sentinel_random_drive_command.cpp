@@ -31,7 +31,13 @@ using modm::platform::RandomNumberGenerator;
 #endif
 using tap::control::Subsystem;
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 SentinelRandomDriveCommand::SentinelRandomDriveCommand(SentinelDriveSubsystem* subsystem)
     : subsystemSentinelDrive(subsystem),
@@ -87,6 +93,12 @@ void SentinelRandomDriveCommand::end(bool) { subsystemSentinelDrive->setDesiredR
 
 bool SentinelRandomDriveCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

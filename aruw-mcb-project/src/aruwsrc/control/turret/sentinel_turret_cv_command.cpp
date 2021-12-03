@@ -29,12 +29,16 @@
 using namespace tap;
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 SentinelTurretCVCommand::SentinelTurretCVCommand(
     tap::Drivers *drivers,
     tap::control::turret::TurretSubsystemInterface *sentinelTurret,
-    aruwsrc::agitator::AgitatorSubsystem *agitator,
+    aruwsrc::control::agitator::AgitatorSubsystem *agitator,
     sentinel::firing::SentinelSwitcherSubsystem *switcher)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
@@ -157,4 +161,8 @@ void SentinelTurretCVCommand::scanForTarget()
         yawSetpoint + (yawScanningRight ? SCAN_DELTA_ANGLE_YAW : -SCAN_DELTA_ANGLE_YAW));
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc

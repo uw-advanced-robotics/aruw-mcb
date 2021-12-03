@@ -28,9 +28,11 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace example
+{
 BlinkLEDCommand::BlinkLEDCommand(
     tap::Drivers* drivers,
-    aruwsrc::control::ExampleSubsystem* subsystem)
+    aruwsrc::control::example::ExampleSubsystem* subsystem)
     : drivers(drivers)
 {
     this->addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(subsystem));
@@ -49,6 +51,8 @@ void BlinkLEDCommand::execute()
 }
 
 bool BlinkLEDCommand::isFinished() const { return completedTimer.isExpired(); }
+}  //namespace example
+
 }  // namespace control
 
 }  // namespace aruwsrc

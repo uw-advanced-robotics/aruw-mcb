@@ -29,6 +29,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace example
+{
 class ExampleComprisedCommand : public tap::control::ComprisedCommand
 {
 public:
@@ -53,6 +55,8 @@ private:
 
     bool switchCommand;
 };
+
+}  //namespace example
 
 }  // namespace control
 

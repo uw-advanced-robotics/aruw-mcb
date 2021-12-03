@@ -36,6 +36,8 @@ using namespace tap::motor;
 
 namespace aruwsrc
 {
+namespace control 
+{
 namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
@@ -148,5 +150,7 @@ void AgitatorSubsystem::onHardwareTestStart()
 }
 
 }  // namespace agitator
+
+}  // namespace control
 
 }  // namespace aruwsrc

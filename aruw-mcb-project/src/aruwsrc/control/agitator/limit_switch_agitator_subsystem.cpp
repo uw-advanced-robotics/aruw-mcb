@@ -27,6 +27,8 @@ using namespace tap::algorithms;
 
 namespace aruwsrc
 {
+namespace control 
+{
 namespace agitator
 {
 LimitSwitchAgitatorSubsystem::LimitSwitchAgitatorSubsystem(
@@ -86,5 +88,7 @@ void LimitSwitchAgitatorSubsystem::refresh()
 }
 
 }  // namespace agitator
+
+}  // namespace control
 
 }  // namespace aruwsrc

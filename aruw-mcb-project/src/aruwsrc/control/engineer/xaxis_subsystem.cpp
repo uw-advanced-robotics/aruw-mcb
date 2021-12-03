@@ -25,6 +25,8 @@ using tap::Drivers;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 void XAxisSubsystem::setExtended(bool isExtended)
@@ -50,5 +52,7 @@ void XAxisSubsystem::onHardwareTestStart()
 void XAxisSubsystem::onHardwareTestComplete() { this->setExtended(!isExtended()); }
 
 }  // namespace engineer
+
+}  // namespace control
 
 }  // namespace aruwsrc

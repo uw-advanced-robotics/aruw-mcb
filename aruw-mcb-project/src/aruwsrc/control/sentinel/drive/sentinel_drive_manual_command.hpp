@@ -27,7 +27,13 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 class SentinelDriveSubsystem;
 
@@ -52,6 +58,12 @@ private:
     SentinelDriveSubsystem* subsystemSentinelDrive;
 };
 
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

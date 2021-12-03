@@ -23,6 +23,8 @@ using namespace tap::control::setpoint;
 
 namespace aruwsrc
 {
+namespace control 
+{
 namespace agitator
 {
 MoveUnjamRefLimitedCommand::MoveUnjamRefLimitedCommand(
@@ -68,7 +70,7 @@ bool MoveUnjamRefLimitedCommand::isFinished() const
 
 WaterwheelLoadCommand42mm::WaterwheelLoadCommand42mm(
     tap::Drivers *drivers,
-    aruwsrc::agitator::LimitSwitchAgitatorSubsystem *waterwheel)
+    aruwsrc::control::agitator::LimitSwitchAgitatorSubsystem *waterwheel)
     : MoveUnjamComprisedCommand(
           drivers,
           waterwheel,
@@ -125,5 +127,7 @@ void ShootCommand42mm::initialize()
     initializeCount++;
 }
 }  // namespace agitator
+
+}  // namespace control
 
 }  // namespace aruwsrc

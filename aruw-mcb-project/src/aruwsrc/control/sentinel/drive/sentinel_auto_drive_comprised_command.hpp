@@ -26,7 +26,13 @@
 #include "sentinel_full_traverse_command.hpp"
 #include "sentinel_random_drive_command.hpp"
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 class SentinelDriveSubsystem;
 /**
@@ -55,7 +61,13 @@ private:
     SentinelRandomDriveCommand randomDrive;
     bool evadeMode;
 };
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_
 #endif

@@ -36,6 +36,8 @@ using tap::Drivers;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 BeybladeCommand::BeybladeCommand(
@@ -129,5 +131,7 @@ float BeybladeCommand::getRotationTarget() const
     }
 }
 }  // namespace chassis
+
+}  // namespace control
 
 }  // namespace aruwsrc

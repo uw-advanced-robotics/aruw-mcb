@@ -25,6 +25,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 ExtendXAxisCommand::ExtendXAxisCommand(XAxisSubsystem* subsystem)
@@ -45,5 +47,7 @@ void ExtendXAxisCommand::end(bool) { xAxisSubsystem->setExtended(false); }
 
 bool ExtendXAxisCommand::isFinished() const { return false; }
 }  // namespace engineer
+
+}  // namespace control
 
 }  // namespace aruwsrc

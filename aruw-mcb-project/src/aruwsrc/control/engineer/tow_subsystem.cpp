@@ -23,6 +23,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 TowSubsystem::TowSubsystem(
@@ -87,4 +89,7 @@ void TowSubsystem::onHardwareTestComplete()
 }
 
 }  // namespace engineer
+
+}  // namespace control
+
 }  // namespace aruwsrc

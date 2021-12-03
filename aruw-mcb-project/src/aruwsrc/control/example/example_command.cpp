@@ -27,6 +27,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace example
+{
 ExampleCommand::ExampleCommand(ExampleSubsystem* subsystem, int speed)
     : subsystemExample(subsystem),
       speed(speed)
@@ -48,6 +50,8 @@ void ExampleCommand::end(bool interrupted)
 }
 
 bool ExampleCommand::isFinished(void) const { return false; }
+}  //namespace example
+
 }  // namespace control
 
 }  // namespace aruwsrc

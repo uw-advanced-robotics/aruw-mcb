@@ -26,6 +26,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 /**
@@ -51,6 +53,9 @@ private:
     TowSubsystem* towSubsystem;
 };  // class ManualTowCommand
 }  // namespace engineer
+
+}  // namespace control
+
 }  // namespace aruwsrc
 
 #endif  // end of manual_tow_command.hpp

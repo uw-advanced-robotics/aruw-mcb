@@ -26,7 +26,11 @@
 
 using namespace tap::arch::clock;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 TurretCVCommand::TurretCVCommand(tap::Drivers *drivers, TurretSubsystem *subsystem)
     : drivers(drivers),
@@ -107,4 +111,8 @@ void TurretCVCommand::runPitchPositionController(float dt)
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc

@@ -29,6 +29,8 @@ class Drivers;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 class ChassisSubsystem;
@@ -62,6 +64,8 @@ private:
 };  // class ChassisDriveCommand
 
 }  // namespace chassis
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

@@ -20,9 +20,21 @@
 #ifndef REF_SERIAL_CONSTANTS_HPP_
 #define REF_SERIAL_CONSTANTS_HPP_
 
-namespace tap::serial::bound_ports
+namespace tap
+{
+namespace communication
+{
+namespace serial
+{
+namespace bound_ports
 {
     static constexpr Uart::UartPort REF_SERIAL_UART_PORT = Uart::UartPort::Uart6;
-}  // namespace tap::serial::bound_ports
+}  // namespace bound_ports
+
+}  // namespace serial
+
+}  // namespace communication
+
+}  // namespace tap
 
 #endif  // REF_SERIAL_CONSTANTS_HPP_

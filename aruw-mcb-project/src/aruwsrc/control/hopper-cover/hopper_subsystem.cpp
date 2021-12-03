@@ -25,6 +25,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace hoppercover
+{
 void HopperSubsystem::setOpen() { hopper.setTargetPwm(hopper.getMaxPWM()); }
 
 void HopperSubsystem::setClose() { hopper.setTargetPwm(hopper.getMinPWM()); }
@@ -48,6 +50,8 @@ void HopperSubsystem::onHardwareTestStart()
 }
 
 void HopperSubsystem::onHardwareTestComplete() { this->setClose(); }
+
+}  // namespace hoppercover
 
 }  // namespace control
 

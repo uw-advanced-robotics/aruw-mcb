@@ -33,6 +33,8 @@
 
 namespace tap
 {
+namespace communication
+{
 namespace serial
 {
 /**
@@ -165,6 +167,8 @@ public:
 };
 
 }  // namespace serial
+
+}  // namespace communication
 
 }  // namespace tap
 

@@ -45,6 +45,8 @@
 
 namespace tap
 {
+namespace communication
+{
 namespace serial
 {
 DJISerial::DJISerial(Drivers *drivers, Uart::UartPort port, bool isRxCRCEnforcementEnabled)
@@ -275,5 +277,7 @@ void DJISerial::updateSerial()
 }
 
 }  // namespace serial
+
+}  // namespace communication
 
 }  // namespace tap

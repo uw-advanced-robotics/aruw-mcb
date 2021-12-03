@@ -30,6 +30,8 @@
 
 namespace tap
 {
+namespace communication
+{
 namespace gpio
 {
 /**
@@ -118,6 +120,7 @@ public:
 
 }  // namespace gpio
 
-}  // namespace tap
+}  // namespace communication
 
+}  // namespace tap
 #endif  // DIGITAL_HPP_

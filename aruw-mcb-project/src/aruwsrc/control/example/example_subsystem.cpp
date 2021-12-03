@@ -23,6 +23,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace example
+{
 const tap::motor::MotorId ExampleSubsystem::LEFT_MOTOR_ID = tap::motor::MOTOR2;
 const tap::motor::MotorId ExampleSubsystem::RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 
@@ -53,6 +55,8 @@ void ExampleSubsystem::runHardwareTests()
 {
     // TODO
 }
+
+}  //namespace example
 
 }  // namespace control
 

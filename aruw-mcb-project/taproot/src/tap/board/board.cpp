@@ -23,12 +23,12 @@
 #ifndef PLATFORM_HOSTED
 modm_extern_c void modm_abandon(const modm::AssertionInfo &)
 {
-    Board::LedsPort::setOutput();
+    tap::board::LedsPort::setOutput();
     for (int times = 10; times >= 0; times--)
     {
-        Board::LedsPort::toggle();
+        tap::board::LedsPort::toggle();
         modm::delay_ms(100);
-        Board::LedsPort::toggle();
+        tap::board::LedsPort::toggle();
         modm::delay_ms(100);
     }
 }

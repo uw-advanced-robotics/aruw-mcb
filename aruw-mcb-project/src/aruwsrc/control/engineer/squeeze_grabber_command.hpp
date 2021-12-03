@@ -24,6 +24,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 class GrabberSubsystem;
@@ -48,6 +50,8 @@ private:
 };  // class SqueezeGrabberCommand
 
 }  // namespace engineer
+
+}  // namespace control
 
 }  // namespace aruwsrc
 #endif  // SQUEEZE_GRABBER_COMMAND_HPP_

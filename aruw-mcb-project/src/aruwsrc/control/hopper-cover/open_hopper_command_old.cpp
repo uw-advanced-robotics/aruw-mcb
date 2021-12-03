@@ -23,6 +23,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace hoppercover
+{
 OpenHopperCommand::OpenHopperCommand(HopperSubsystem* subsystem)
     : Command(),
       subsystemHopper(subsystem)
@@ -39,6 +41,8 @@ void OpenHopperCommand::execute() {}
 void OpenHopperCommand::end(bool) { subsystemHopper->setClose(); }
 
 bool OpenHopperCommand::isFinished() const { return false; }
+
+}  // namespace hoppercover
 
 }  // namespace control
 

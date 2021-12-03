@@ -23,7 +23,11 @@
 
 #include "modm/architecture/interface/can.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc
+{
+namespace communication
+{
+namespace can
 {
 ImuRxListener::ImuRxListener(tap::Drivers* drivers)
     : drivers(drivers),
@@ -39,7 +43,7 @@ ImuRxListener::ImuRxListener(tap::Drivers* drivers)
 ImuRxListener::ImuRxHandler::ImuRxHandler(
     tap::Drivers* drivers,
     uint32_t id,
-    tap::can::CanBus cB,
+    tap::communication::can::CanBus cB,
     ImuRxListener* msgHandler,
     ImuRxListenerFunc funcToCall)
     : CanRxListener(drivers, id, cB),
@@ -62,4 +66,8 @@ void ImuRxListener::handleAngleGyroMessage(const modm::can::Message& message)
 
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
 }
-}  // namespace aruwsrc::can
+}  // namespace can
+
+}  // namespace communication
+
+}  // namespace aruwsrc

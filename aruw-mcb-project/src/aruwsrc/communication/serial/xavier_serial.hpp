@@ -47,6 +47,8 @@ class ChassisSubsystemInterface;
 
 namespace aruwsrc
 {
+namespace communication
+{
 namespace serial
 {
 /**
@@ -54,7 +56,7 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class XavierSerial : public tap::serial::DJISerial, ::modm::pt::Protothread, modm::Resumable<3>
+class XavierSerial : public tap::communication::serial::DJISerial, ::modm::pt::Protothread, modm::Resumable<3>
 {
 public:
     // AutoAim Data
@@ -216,6 +218,9 @@ public:
     modm::ResumableResult<bool> sendAutoAimRequest();
 };
 }  // namespace serial
+
+}  // namespace communication
+
 }  // namespace aruwsrc
 
 #endif  // XAVIER_SERIAL_HPP_

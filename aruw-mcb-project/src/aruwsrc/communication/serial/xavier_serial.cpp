@@ -31,10 +31,12 @@ using namespace tap::serial;
 
 namespace aruwsrc
 {
+namespace communication
+{
 namespace serial
 {
 XavierSerial::XavierSerial(tap::Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart2),
+    : DJISerial(drivers, tap::communication::serial::Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),
       isCvOnline(false),
@@ -236,4 +238,7 @@ modm::ResumableResult<bool> XavierSerial::sendRobotID()
     RF_END();
 }
 }  // namespace serial
+
+}  // namespace communication
+
 }  // namespace aruwsrc

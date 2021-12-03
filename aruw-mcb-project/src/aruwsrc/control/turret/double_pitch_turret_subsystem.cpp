@@ -29,7 +29,11 @@ using namespace tap::algorithms;
 using namespace tap::control::turret;
 using namespace tap;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 DoublePitchTurretSubsystem::DoublePitchTurretSubsystem(Drivers* drivers, bool limitYaw)
     : TurretSubsystemInterface(drivers),
@@ -201,4 +205,8 @@ void DoublePitchTurretSubsystem::setPitchSetpoint(float target)
         ContiguousFloat::limitValue(pitchTarget, TURRET_PITCH_MIN_ANGLE, TURRET_PITCH_MAX_ANGLE));
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc

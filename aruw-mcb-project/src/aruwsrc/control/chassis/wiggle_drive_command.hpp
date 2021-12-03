@@ -31,6 +31,8 @@ class Drivers;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 class ChassisSubsystem;
@@ -105,6 +107,8 @@ private:
 };  // class WiggleDriveCommand
 
 }  // namespace chassis
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

@@ -27,7 +27,13 @@
 using tap::Drivers;
 using tap::control::Subsystem;
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 SentinelDriveManualCommand::SentinelDriveManualCommand(
     tap::Drivers* drivers,
@@ -50,4 +56,10 @@ void SentinelDriveManualCommand::execute()
 void SentinelDriveManualCommand::end(bool) { subsystemSentinelDrive->setDesiredRpm(0); }
 
 bool SentinelDriveManualCommand::isFinished() const { return false; }
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc

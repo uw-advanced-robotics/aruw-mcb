@@ -22,9 +22,11 @@
 #include "tap/board/board.hpp"
 #include "tap/util_macros.hpp"
 
-using namespace Board;
+using namespace tap::board;
 
 namespace tap
+{
+namespace communication
 {
 namespace serial
 {
@@ -192,5 +194,7 @@ void Uart::flushWriteBuffer(UartPort port)
 }
 
 }  // namespace serial
+
+}  // namespace communication
 
 }  // namespace tap

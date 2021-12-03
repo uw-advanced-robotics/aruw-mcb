@@ -28,6 +28,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace hoppercover
+{
 class OpenHopperCommand;
 
 class OpenHopperCommand : public tap::control::Command
@@ -48,6 +50,8 @@ public:
 private:
     HopperSubsystem* subsystemHopper;
 };
+
+}  // namespace hoppercover
 
 }  // namespace control
 

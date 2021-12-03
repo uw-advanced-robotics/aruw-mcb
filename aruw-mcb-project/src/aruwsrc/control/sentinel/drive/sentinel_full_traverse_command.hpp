@@ -27,7 +27,13 @@
 
 #include "sentinel_drive_subsystem.hpp"
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 class SentinelDriveSubsystem;
 
@@ -65,7 +71,13 @@ private:
     SentinelDriveSubsystem* subsystemSentinelDrive;
 };  // class SentinelFullTraverseCommand
 
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // SENTINEL_FULL_TRAVERSE_COMMAND_HPP_
 #endif

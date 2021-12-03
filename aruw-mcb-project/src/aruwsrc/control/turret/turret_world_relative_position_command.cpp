@@ -28,7 +28,11 @@
 
 using namespace tap::sensors;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 TurretWorldRelativePositionCommand::TurretWorldRelativePositionCommand(
     tap::Drivers *drivers,
@@ -225,4 +229,8 @@ float TurretWorldRelativePositionCommand::projectWorldRelativeYawToChassisFrame(
     return yawAngle - drivers->mpu6500.getYaw() + imuInitialAngle;
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc

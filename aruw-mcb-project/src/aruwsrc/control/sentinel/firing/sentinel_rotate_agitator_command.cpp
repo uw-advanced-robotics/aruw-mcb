@@ -27,7 +27,13 @@ using namespace tap::control;
 
 #define TURRET_OVERHEAT(currHeat, heatLimit) (currHeat + BARREL_OVERHEAT_THRESHOLD > heatLimit)
 
-namespace aruwsrc::control::sentinel::firing
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace firing
 {
 SentinelRotateAgitatorCommand::SentinelRotateAgitatorCommand(
     tap::Drivers* drivers,
@@ -105,4 +111,10 @@ bool SentinelRotateAgitatorCommand::isFinished() const
     return !switchingBarrel && rotateAgitator.isFinished();
 }
 
-}  // namespace aruwsrc::control::sentinel::firing
+}  // namespace firing
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc

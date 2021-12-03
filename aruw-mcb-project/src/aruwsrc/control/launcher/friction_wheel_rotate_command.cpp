@@ -25,6 +25,8 @@ using tap::control::Subsystem;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace launcher
 {
 FrictionWheelRotateCommand::FrictionWheelRotateCommand(FrictionWheelSubsystem* subsystem, int speed)
@@ -42,5 +44,7 @@ void FrictionWheelRotateCommand::end(bool) { frictionWheelSubsystem->setDesiredR
 
 bool FrictionWheelRotateCommand::isFinished() const { return false; }
 }  // namespace launcher
+
+}  // namespace control
 
 }  // namespace aruwsrc

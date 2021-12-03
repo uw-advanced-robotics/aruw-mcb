@@ -26,6 +26,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace example
+{
 ExampleComprisedCommand::ExampleComprisedCommand(tap::Drivers* drivers, ExampleSubsystem* subsystem)
     : tap::control::ComprisedCommand(drivers),
       exampleCommand(subsystem, 2000),
@@ -65,6 +67,8 @@ void ExampleComprisedCommand::end(bool interrupted)
 {
     comprisedCommandScheduler.removeCommand(dynamic_cast<Command*>(&exampleCommand), interrupted);
 }
+
+}  //namespace example
 
 }  // namespace control
 

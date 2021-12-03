@@ -31,12 +31,18 @@ class Drivers;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 class ChassisSubsystem;
 }
 
-namespace control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 class TurretSubsystem;
 
@@ -161,7 +167,9 @@ private:
     float projectWorldRelativeYawToChassisFrame(float yawAngle, float imuInitialAngle);
 };  // class TurretWorldRelativePositionCommand
 
-}  // namespace control::turret
+}  // namespace turret
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

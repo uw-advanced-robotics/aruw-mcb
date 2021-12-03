@@ -26,6 +26,8 @@
 
 namespace tap
 {
+namespace communication
+{
 namespace gpio
 {
 /**
@@ -124,6 +126,8 @@ private:
 };  // class Pwm
 
 }  // namespace gpio
+
+}  // namespace communication
 
 }  // namespace tap
 

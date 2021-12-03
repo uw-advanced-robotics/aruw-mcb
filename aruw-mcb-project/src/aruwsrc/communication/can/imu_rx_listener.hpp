@@ -34,7 +34,11 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::can
+namespace aruwsrc
+{
+namespace communication
+{
+namespace can
 {
 class ImuRxListener
 {
@@ -47,7 +51,7 @@ public:
     inline float getYaw() const { return yaw; }
     inline float getGz() const
     {
-        return static_cast<float>(rawGz) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return static_cast<float>(rawGz) / tap::communication::sensors::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
     inline float isConnected() const
     {
@@ -58,16 +62,16 @@ private:
     using ImuRxListenerFunc = void (ImuRxListener::*)(const modm::can::Message& message);
 
     static constexpr uint32_t ANGLE_GYRO_MESSAGE_CAN_ID = 0x203;
-    static constexpr tap::can::CanBus IMU_MSG_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::communication::can::CanBus IMU_MSG_CAN_BUS = tap::communication::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
 
-    class ImuRxHandler : public tap::can::CanRxListener
+    class ImuRxHandler : public tap::communication::can::CanRxListener
     {
     public:
         ImuRxHandler(
             tap::Drivers* drivers,
             uint32_t id,
-            tap::can::CanBus cB,
+            tap::communication::can::CanBus cB,
             ImuRxListener* msgHandler,
             ImuRxListenerFunc funcToCall);
         void processMessage(const modm::can::Message& message) override;
@@ -88,6 +92,10 @@ private:
 
     void handleAngleGyroMessage(const modm::can::Message& message);
 };
-}  // namespace aruwsrc::can
+}  // namespace can
+
+}  // namespace communication
+
+}  // namespace aruwsrc
 
 #endif  // IMU_RX_LISTENER_HPP_

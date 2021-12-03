@@ -32,6 +32,8 @@ using namespace tap::algorithms;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 void ChassisSubsystem::initialize()
@@ -201,5 +203,7 @@ void ChassisSubsystem::getVelocityWorldRelative(
 void ChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
 
 }  // namespace chassis
+
+}  // namespace control
 
 }  // namespace aruwsrc

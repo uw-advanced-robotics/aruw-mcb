@@ -42,7 +42,9 @@ using namespace modm::platform;
 #include "modm/math/units.hpp"
 #endif
 
-namespace Board
+namespace tap
+{
+namespace board
 {
 using namespace modm::literals;
 
@@ -219,6 +221,8 @@ inline void initialize()
 #endif
 }
 
-}  // namespace Board
+}  // namespace board
+
+}  // tap
 
 #endif  // BOARD_HPP_

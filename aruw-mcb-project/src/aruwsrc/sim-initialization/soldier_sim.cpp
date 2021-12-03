@@ -28,7 +28,9 @@
 
 #include "robot_sim.hpp"
 
-namespace aruwsrc::sim
+namespace aruwsrc
+{
+namespace sim
 {
 void initialize_robot_sim()
 {
@@ -36,28 +38,28 @@ void initialize_robot_sim()
     // TODO: Create simulator for correct motor
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_ID);
+        aruwsrc::control::agitator::AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
+        aruwsrc::control::agitator::AgitatorSubsystem::AGITATOR_MOTOR_ID);
 
     // Register the motor sims for the Chassis subsystem
     tap::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
         tap::motorsim::MotorSim::MotorType::M3508;
     tap::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::LEFT_FRONT_MOTOR_ID);
+        aruwsrc::control::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::control::chassis::ChassisSubsystem::LEFT_FRONT_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::LEFT_BACK_MOTOR_ID);
+        aruwsrc::control::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::control::chassis::ChassisSubsystem::LEFT_BACK_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::RIGHT_FRONT_MOTOR_ID);
+        aruwsrc::control::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::control::chassis::ChassisSubsystem::RIGHT_FRONT_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::RIGHT_BACK_MOTOR_ID);
+        aruwsrc::control::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::control::chassis::ChassisSubsystem::RIGHT_BACK_MOTOR_ID);
 
     // Register the motor sims for the turret subsystem
     tap::motorsim::SimHandler::registerSim(
@@ -73,13 +75,15 @@ void initialize_robot_sim()
     // Register the motor sims for the Friction Wheels
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
+        aruwsrc::control::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::control::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
+        aruwsrc::control::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::control::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
 }
-}  // namespace aruwsrc::sim
+}  // namespace sim
+
+}  // namespace aruwsrc
 
 #endif

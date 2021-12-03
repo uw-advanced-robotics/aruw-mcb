@@ -23,10 +23,12 @@
 #include "tap/board/board.hpp"
 #include "tap/util_macros.hpp"
 
-using namespace Board;
+using namespace tap::board;
 using namespace tap::algorithms;
 
 namespace tap
+{
+namespace communication
 {
 namespace gpio
 {
@@ -37,21 +39,21 @@ void Pwm::init()
     Timer8::connect<PWMOutPinW::Ch1, PWMOutPinX::Ch2, PWMOutPinY::Ch3, PWMOutPinZ::Ch4>();
     Timer8::enable();
     Timer8::setMode(Timer8::Mode::UpCounter);
-    timer8CalculatedOverflow = Timer8::setPeriod<Board::SystemClock>(1'000'000 / DEFAULT_TIMER8_FREQUENCY);
+    timer8CalculatedOverflow = Timer8::setPeriod<tap::board::SystemClock>(1'000'000 / DEFAULT_TIMER8_FREQUENCY);
     Timer8::start();
     Timer8::enableOutput();
 
     Timer12::connect<PWMOutPinBuzzer::Ch1>();
     Timer12::enable();
     Timer12::setMode(Timer12::Mode::UpCounter);
-    timer12CalculatedOverflow = Timer12::setPeriod<Board::SystemClock>(1'000'000 / DEFAULT_TIMER12_FREQUENCY);
+    timer12CalculatedOverflow = Timer12::setPeriod<tap::board::SystemClock>(1'000'000 / DEFAULT_TIMER12_FREQUENCY);
     Timer12::start();
     Timer12::enableOutput();
 
     Timer3::connect<PWMOutPinImuHeater::Ch2>();
     Timer3::enable();
     Timer3::setMode(Timer3::Mode::UpCounter);
-    timer3CalculatedOverflow = Timer3::setPeriod<Board::SystemClock>(1'000'000 / DEFAULT_TIMER3_FREQUENCY);
+    timer3CalculatedOverflow = Timer3::setPeriod<tap::board::SystemClock>(1'000'000 / DEFAULT_TIMER3_FREQUENCY);
     Timer3::start();
     Timer3::enableOutput();
 
@@ -132,13 +134,13 @@ void Pwm::setTimerFrequency(Timer timer, uint32_t frequency)
     switch (timer)
     {
         case TIMER8:
-            timer8CalculatedOverflow = Timer8::setPeriod<Board::SystemClock>(1'000'000 / frequency);
+            timer8CalculatedOverflow = Timer8::setPeriod<tap::board::SystemClock>(1'000'000 / frequency);
             break;
         case TIMER12:
-            timer12CalculatedOverflow = Timer12::setPeriod<Board::SystemClock>(1'000'000 / frequency);
+            timer12CalculatedOverflow = Timer12::setPeriod<tap::board::SystemClock>(1'000'000 / frequency);
             break;
         case TIMER3:
-            timer3CalculatedOverflow = Timer3::setPeriod<Board::SystemClock>(1'000'000 / frequency);
+            timer3CalculatedOverflow = Timer3::setPeriod<tap::board::SystemClock>(1'000'000 / frequency);
             break;
     }
 #endif
@@ -184,5 +186,7 @@ void Pwm::start(Timer timer)
 #endif
 }
 }  // namespace gpio
+
+}  // namespace communication
 
 }  // namespace tap

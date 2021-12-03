@@ -28,7 +28,11 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::chassis
+namespace aruwsrc
+{
+namespace control
+{
+namespace chassis
 {
 class ChassisSubsystem;
 
@@ -86,6 +90,10 @@ private:
     void updateAutorotateState(const tap::control::turret::TurretSubsystemInterface* turret);
 };  // class ChassisAutorotateCommand
 
-}  // namespace aruwsrc::chassis
+}  // namespace chassis
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // CHASSIS_AUTOROTATE_COMMAND_HPP_

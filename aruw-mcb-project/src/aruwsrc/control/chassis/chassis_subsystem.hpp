@@ -40,6 +40,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 /**
@@ -532,6 +534,8 @@ private:
 };  // class ChassisSubsystem
 
 }  // namespace chassis
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

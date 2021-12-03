@@ -26,6 +26,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 /**
@@ -66,6 +68,7 @@ private:
 
 }  // namespace engineer
 
-}  // namespace aruwsrc
+}  // namespace control
 
+}  // namespace aruwsrc
 #endif  // GRABBER_SUBSYSTEM_HPP_

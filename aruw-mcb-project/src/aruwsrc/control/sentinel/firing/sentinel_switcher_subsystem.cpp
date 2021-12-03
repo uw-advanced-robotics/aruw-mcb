@@ -23,7 +23,13 @@
 
 #include "sentinel_switcher_subsystem.hpp"
 
-namespace aruwsrc::control::sentinel::firing
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace firing
 {
 SentinelSwitcherSubsystem::SentinelSwitcherSubsystem(
     tap::Drivers *drivers,
@@ -43,4 +49,10 @@ void SentinelSwitcherSubsystem::useLowerBarrel(bool useLower)
 }
 
 bool SentinelSwitcherSubsystem::isLowerUsed() const { return useLower; }
-}  // namespace aruwsrc::control::sentinel::firing
+}  // namespace firing
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc

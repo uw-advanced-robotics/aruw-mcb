@@ -37,7 +37,11 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::display
+namespace aruwsrc
+{
+namespace control
+{
+namespace clientdisplay
 {
 class ClientDisplaySubsystem;
 
@@ -138,6 +142,10 @@ private:
     void initCapBankMsg();
     modm::ResumableResult<bool> updateCapBankMsg();
 };
-}  // namespace aruwsrc::display
+}  // namespace client-display
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // CLIENT_DISPLAY_COMMAND_HPP_

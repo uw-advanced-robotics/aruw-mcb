@@ -24,12 +24,18 @@
 #include "tap/control/comprised_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::agitator
 {
 class AgitatorSubsystem;
 }
 
-namespace aruwsrc::control::sentinel::firing
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace firing
 {
 class SentinelSwitcherSubsystem;
 
@@ -76,6 +82,12 @@ private:
     bool switchingBarrel = false;
 };
 
-}  // namespace aruwsrc::control::sentinel::firing
+}  // namespace firing
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // SENTINEL_AGITATOR_SYSTEM_COMPRISED_COMMAND_HPP_

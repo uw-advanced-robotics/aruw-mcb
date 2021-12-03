@@ -32,7 +32,11 @@
 using namespace tap::motor;
 using namespace tap;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 TurretSubsystem::TurretSubsystem(tap::Drivers* drivers, bool limitYaw)
     : tap::control::turret::TurretSubsystemInterface(drivers),
@@ -203,4 +207,8 @@ void TurretSubsystem::onHardwareTestStart()
     yawMotor.setDesiredOutput(0);
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc

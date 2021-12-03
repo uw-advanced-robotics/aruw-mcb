@@ -34,6 +34,8 @@ using tap::Drivers;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
@@ -135,5 +137,7 @@ void ChassisAutorotateCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f,
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 
 }  // namespace chassis
+
+}  // namespace control
 
 }  // namespace aruwsrc

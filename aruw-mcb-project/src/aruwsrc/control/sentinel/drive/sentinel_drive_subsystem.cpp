@@ -31,7 +31,13 @@
 
 using namespace tap::gpio;
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 SentinelDriveSubsystem::SentinelDriveSubsystem(
     tap::Drivers* drivers,
@@ -176,4 +182,10 @@ void SentinelDriveSubsystem::onHardwareTestStart() { this->setDesiredRpm(500.0f)
 
 void SentinelDriveSubsystem::onHardwareTestComplete() { this->setDesiredRpm(0.0f); }
 
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc

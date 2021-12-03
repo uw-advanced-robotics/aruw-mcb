@@ -22,9 +22,11 @@
 #include "tap/board/board.hpp"
 #include "tap/util_macros.hpp"
 
-using namespace Board;
+using namespace tap::board;
 
 namespace tap
+{
+namespace communication
 {
 namespace gpio
 {
@@ -70,5 +72,7 @@ uint16_t Analog::read(Pin pin) const
 #endif
 }
 }  // namespace gpio
+
+}  // namespace communication
 
 }  // namespace tap

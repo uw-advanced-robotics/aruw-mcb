@@ -29,7 +29,11 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::chassis
+namespace aruwsrc
+{
+namespace control
+{
+namespace chassis
 {
 class ChassisSubsystem;
 
@@ -109,6 +113,10 @@ private:
     float getRotationTarget() const;
 };  // class BeybladeCommand
 
-}  // namespace aruwsrc::chassis
+}  // namespace chassis
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // BEYBLADE_COMMAND_HPP_

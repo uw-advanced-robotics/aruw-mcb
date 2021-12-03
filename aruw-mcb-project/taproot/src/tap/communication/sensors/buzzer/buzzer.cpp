@@ -24,9 +24,15 @@
 
 #include "modm/architecture/interface/delay.hpp"
 
-namespace tap::buzzer
+namespace tap
 {
-void playNote(gpio::Pwm *pwmController, uint32_t frequency)
+namespace communication
+{
+namespace sensors
+{
+namespace buzzers
+{
+void playNote(tap::communication::gpio::Pwm *pwmController, uint32_t frequency)
 {
     if (frequency == 0)
     {
@@ -34,10 +40,16 @@ void playNote(gpio::Pwm *pwmController, uint32_t frequency)
     }
     else
     {
-        pwmController->write(0.5f, gpio::Pwm::Buzzer);
-        pwmController->setTimerFrequency(gpio::Pwm::TIMER12, frequency);
+        pwmController->write(0.5f, tap::communication::gpio::Pwm::Buzzer);
+        pwmController->setTimerFrequency(tap::communication::gpio::Pwm::TIMER12, frequency);
     }
 }
 
-void silenceBuzzer(gpio::Pwm *pwmController) { pwmController->write(0, gpio::Pwm::Buzzer); }
-}  // namespace tap::buzzer
+void silenceBuzzer(gpio::Pwm *pwmController) { pwmController->write(0, tap::communication::gpio::Pwm::Buzzer); }
+}  // namespace buzzer
+
+}  // namespace sensors
+
+} // communication
+
+} // tap

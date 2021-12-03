@@ -30,7 +30,11 @@
 #include "aruwsrc/control/sentinel/firing/sentinel_rotate_agitator_command.hpp"
 #include "aruwsrc/control/sentinel/firing/sentinel_switcher_subsystem.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 /**
  * A command that receives input from the vision system via the `XavierSerial` driver and aims the
@@ -62,7 +66,7 @@ public:
     SentinelTurretCVCommand(
         tap::Drivers *drivers,
         tap::control::turret::TurretSubsystemInterface *DoublePitchTurretSubsystem,
-        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
+        aruwsrc::control::agitator::AgitatorSubsystem *agitatorSubsystem,
         sentinel::firing::SentinelSwitcherSubsystem *switcher);
 
     bool isReady() override { return sentinelTurret->isOnline(); }
@@ -110,6 +114,10 @@ private:
         bool *axisScanningUp);
 };  // class SentinelTurretCVCommand
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // SENTINEL_TURRET_CV_COMMAND_HPP_

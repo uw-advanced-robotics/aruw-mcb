@@ -34,7 +34,11 @@
 
 #include "modm/math/filter/pid.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 /**
  * Stores software necessary for interacting with two gimbals that control the pitch and
@@ -43,7 +47,7 @@ namespace aruwsrc::control::turret
 class TurretSubsystem : public tap::control::turret::TurretSubsystemInterface
 {
 public:
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::communication::can::CanBus CAN_BUS_MOTORS = tap::communication::can::CanBus::CAN_BUS1;
     static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
     static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
@@ -236,6 +240,10 @@ private:
 
 };  // class TurretSubsystem
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // TURRET_SUBSYSTEM_HPP_

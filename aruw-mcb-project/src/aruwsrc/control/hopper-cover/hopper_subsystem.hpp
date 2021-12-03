@@ -37,6 +37,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace hoppercover
+{
 class HopperSubsystem : public tap::control::Subsystem
 {
 public:
@@ -62,7 +64,7 @@ public:
      */
     HopperSubsystem(
         tap::Drivers *drivers,
-        tap::gpio::Pwm::Pin pwmPin,
+        tap::communication::gpio::Pwm::Pin pwmPin,
         float open,
         float close,
         float pwmRampSpeed)
@@ -107,6 +109,8 @@ private:
 
     uint64_t testTime;
 };
+
+}  // namespace hoppercover
 
 }  // namespace control
 

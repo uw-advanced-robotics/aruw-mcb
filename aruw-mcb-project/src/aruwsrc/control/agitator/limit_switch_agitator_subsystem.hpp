@@ -32,6 +32,8 @@ class Drivers;
 
 namespace aruwsrc
 {
+namespace control 
+{
 namespace agitator
 {
 /**
@@ -105,6 +107,8 @@ private:
 };
 
 }  // namespace agitator
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

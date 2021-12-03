@@ -24,6 +24,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 class XAxisSubsystem;
@@ -53,6 +55,8 @@ private:
 };  // class ExtendXAxisCommand
 
 }  // namespace engineer
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

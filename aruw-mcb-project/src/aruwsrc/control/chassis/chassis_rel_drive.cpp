@@ -25,7 +25,11 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::chassis
+namespace aruwsrc
+{
+namespace control
+{
+namespace chassis
 {
 void ChassisRelDrive::computeDesiredUserTranslation(
     tap::Drivers *drivers,
@@ -77,4 +81,8 @@ void ChassisRelDrive::onExecute(tap::Drivers *drivers, ChassisSubsystem *chassis
         chassisYDesiredWheelspeed,
         chassisRotationDesiredWheelspeed);
 }
-}  // namespace aruwsrc::chassis
+}  // namespace chassis
+
+}  // namespace control
+
+}  // namespace aruwsrc

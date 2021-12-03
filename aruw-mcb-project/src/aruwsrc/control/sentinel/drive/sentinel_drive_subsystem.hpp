@@ -35,7 +35,13 @@
 
 #include "modm/math/filter/pid.hpp"
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 class SentinelDriveSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
@@ -141,6 +147,12 @@ private:
     tap::control::chassis::PowerLimiter powerLimiter;
 };
 
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

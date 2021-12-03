@@ -40,8 +40,8 @@
 #include "turret/turret_world_relative_position_command.hpp"
 
 using namespace tap::control::setpoint;
-using namespace aruwsrc::agitator;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control;
@@ -168,7 +168,9 @@ void registerOldSoldierIoMappings(tap::Drivers *drivers)
 }
 }  // namespace old_soldier_control
 
-namespace aruwsrc::control
+namespace aruwsrc
+{
+namespace control
 {
 void initSubsystemCommands(tap::Drivers *drivers)
 {
@@ -178,6 +180,8 @@ void initSubsystemCommands(tap::Drivers *drivers)
     old_soldier_control::startOldSoldierCommands(drivers);
     old_soldier_control::registerOldSoldierIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

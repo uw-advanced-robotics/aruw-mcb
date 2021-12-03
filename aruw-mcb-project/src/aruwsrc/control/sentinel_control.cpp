@@ -41,8 +41,8 @@
 #include "turret/sentinel_turret_cv_command.hpp"
 
 using namespace tap::control::setpoint;
-using namespace aruwsrc::agitator;
-using namespace aruwsrc::launcher;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::control::sentinel::firing;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
@@ -195,7 +195,9 @@ void registerSentinelIoMappings(tap::Drivers *drivers)
 }
 }  // namespace sentinel_control
 
-namespace aruwsrc::control
+namespace aruwsrc
+{
+namespace control
 {
 void initSubsystemCommands(tap::Drivers *drivers)
 {
@@ -204,7 +206,9 @@ void initSubsystemCommands(tap::Drivers *drivers)
     sentinel_control::setDefaultSentinelCommands(drivers);
     sentinel_control::startSentinelCommands(drivers);
     sentinel_control::registerSentinelIoMappings(drivers);
+}  // namespace control
+
 }  // namespace aruwsrc
-}  // namespace aruwsrc::control
+
 
 #endif

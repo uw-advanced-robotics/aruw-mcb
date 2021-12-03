@@ -27,7 +27,13 @@
 
 #include "sentinel_drive_subsystem.hpp"
 
-namespace aruwsrc::control::sentinel::drive
+namespace aruwsrc
+{
+namespace control
+{
+namespace sentinel
+{
+namespace drive
 {
 class SentinelRandomDriveCommand : public tap::control::Command
 {
@@ -57,7 +63,13 @@ private:
     tap::arch::MilliTimeout changeVelocityTimer;
 };
 
-}  // namespace aruwsrc::control::sentinel::drive
+}  // namespace drive
+
+}  // namespace sentinel
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
 

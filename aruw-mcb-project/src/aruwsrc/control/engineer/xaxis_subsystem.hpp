@@ -26,6 +26,8 @@
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace engineer
 {
 /**
@@ -64,6 +66,8 @@ private:
 };  // class XAxisSubsystem
 
 }  // namespace engineer
+
+}  // namespace control
 
 }  // namespace aruwsrc
 

@@ -29,7 +29,11 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::launcher
+namespace aruwsrc
+{
+namespace control
+{
+namespace launcher
 {
 /**
  * Rotates flywheels of 17MM projectile launcher based on ref serial speed limit.
@@ -39,7 +43,7 @@ class FrictionWheelSpinRefLimitedCommand : public tap::control::Command
 public:
     FrictionWheelSpinRefLimitedCommand(
         tap::Drivers *drivers,
-        aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels);
+        aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheels);
 
     void initialize() override {}
 
@@ -58,8 +62,12 @@ private:
 
     tap::Drivers *drivers;
 
-    aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels;
+    aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheels;
 };
-}  // namespace aruwsrc::control::launcher
+}  // namespace launcher
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // FRICTION_WHEEL_REF_SERIAL_RPM_CONTROL_COMMAND_

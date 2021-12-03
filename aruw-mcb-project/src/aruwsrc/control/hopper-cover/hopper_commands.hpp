@@ -29,6 +29,8 @@ namespace aruwsrc
 {
 namespace control
 {
+namespace hoppercover
+{
 /**
  * For opening and closing the hopper lid currently we use overly large
  * target angles for both opening and closing, this way (assuming no
@@ -105,6 +107,8 @@ public:
             SOLDIER_CLOSE_HOPPER_TOLERANCE);
     }
 };  // class SoldierCloseHopperCommand
+
+}  // namespace hoppercover
 
 }  // namespace control
 

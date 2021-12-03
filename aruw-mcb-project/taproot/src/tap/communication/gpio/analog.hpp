@@ -30,6 +30,8 @@
 
 namespace tap
 {
+namespace communication
+{
 namespace gpio
 {
 /**
@@ -65,6 +67,7 @@ public:
 };  // class Analog
 }  // namespace gpio
 
-}  // namespace tap
+}  // namespace communication
 
+}  // namespace tap
 #endif  // ANALOG_HPP_

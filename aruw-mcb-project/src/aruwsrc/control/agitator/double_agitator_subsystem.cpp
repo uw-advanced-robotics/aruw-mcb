@@ -23,6 +23,8 @@ using tap::motor::DjiMotor;
 
 namespace aruwsrc
 {
+namespace control 
+{
 namespace agitator
 {
 DoubleAgitatorSubsystem::DoubleAgitatorSubsystem(
@@ -153,5 +155,7 @@ void DoubleAgitatorSubsystem::onHardwareTestStart()
 }
 
 }  // namespace agitator
+
+}  // namespace control
 
 }  // namespace aruwsrc

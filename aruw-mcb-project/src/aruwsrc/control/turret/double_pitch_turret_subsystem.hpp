@@ -31,7 +31,11 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-namespace aruwsrc::control::turret
+namespace aruwsrc
+{
+namespace control
+{
+namespace turret
 {
 /**
  * Stores software necessary for interacting with two gimbals that control the pitch and
@@ -262,6 +266,10 @@ private:
     }
 };  // class DoublePitchTurretSubsystem
 
-}  // namespace aruwsrc::control::turret
+}  // namespace turret
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // SENTINEL_TURRET_SUBSYSTEM_HPP_

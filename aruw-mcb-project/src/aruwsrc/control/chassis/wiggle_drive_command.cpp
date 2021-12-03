@@ -35,6 +35,8 @@ using tap::Drivers;
 
 namespace aruwsrc
 {
+namespace control
+{
 namespace chassis
 {
 WiggleDriveCommand::WiggleDriveCommand(
@@ -133,5 +135,7 @@ const WiggleDriveCommand::WiggleParams& WiggleDriveCommand::getWiggleParams() co
 }
 
 }  // namespace chassis
+
+}  // namespace control
 
 }  // namespace aruwsrc

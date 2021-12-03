@@ -24,14 +24,18 @@
 #include "client_display_subsystem.hpp"
 
 using namespace tap::control;
-using namespace tap::serial;
+using namespace tap::communication::serial;
 using tap::Drivers;
 
 #define delay()                                  \
     delayTimer.restart(DELAY_PERIOD_BTWN_SENDS); \
     RF_WAIT_UNTIL(delayTimer.execute());
 
-namespace aruwsrc::display
+namespace aruwsrc
+{
+namespace control
+{
+namespace clientdisplay
 {
 ClientDisplayCommand::ClientDisplayCommand(
     Drivers *drivers,
@@ -324,4 +328,8 @@ void ClientDisplayCommand::initTurretReticleMsg()
     // Computes crcs which won't be changing in the future
     drivers->refSerial.sendGraphic(&reticleMsg, true, false);
 }
-}  // namespace aruwsrc::display
+}  // namespace clientdisplay
+
+}  // namespace control
+
+}  // namespace aruwsrc

@@ -46,9 +46,9 @@
 
 using tap::DoNotUse_getDrivers;
 using namespace tap::control::setpoint;
-using namespace aruwsrc::agitator;
-using namespace aruwsrc::chassis;
-using namespace aruwsrc::launcher;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::chassis;
+using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::display;
@@ -221,7 +221,9 @@ void registerHeroIoMappings(tap::Drivers *drivers)
 }
 }  // namespace hero_control
 
-namespace aruwsrc::control
+namespace aruwsrc
+{
+namespace control
 {
 void initSubsystemCommands(tap::Drivers *drivers)
 {
@@ -231,6 +233,8 @@ void initSubsystemCommands(tap::Drivers *drivers)
     hero_control::startHeroCommands(drivers);
     hero_control::registerHeroIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

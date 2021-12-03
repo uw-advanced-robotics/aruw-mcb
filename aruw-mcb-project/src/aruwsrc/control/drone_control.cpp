@@ -53,7 +53,9 @@ void startDroneCommands(tap::Drivers *) {}
 void registerDroneIoMappings(tap::Drivers *) {}
 }  // namespace drone_control
 
-namespace aruwsrc::control
+namespace aruwsrc
+{
+namespace control
 {
 void initSubsystemCommands(tap::Drivers *drivers)
 {
@@ -63,6 +65,8 @@ void initSubsystemCommands(tap::Drivers *drivers)
     drone_control::startDroneCommands(drivers);
     drone_control::registerDroneIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif

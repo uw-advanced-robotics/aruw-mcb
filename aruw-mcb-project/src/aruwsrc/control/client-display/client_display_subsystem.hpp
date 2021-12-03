@@ -23,7 +23,11 @@
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
-namespace aruwsrc::display
+namespace aruwsrc
+{
+namespace control
+{
+namespace clientdisplay
 {
 /**
  * A placeholder subsystem for running the client display command
@@ -35,6 +39,10 @@ public:
     virtual ~ClientDisplaySubsystem() {}
     const char* getName() override { return "client display"; }
 };
-}  // namespace aruwsrc::display
+}  // namespace clientdisplay
+
+}  // namespace control
+
+}  // namespace aruwsrc
 
 #endif  // CLIENT_DISPLAY_HPP_
