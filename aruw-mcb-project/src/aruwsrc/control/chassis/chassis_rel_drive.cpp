@@ -28,9 +28,6 @@ using namespace tap::algorithms;
 namespace aruwsrc::chassis
 {
 
-float xout;
-float yout;
-
 void ChassisRelDrive::computeDesiredUserTranslation(
     tap::Drivers *drivers,
     ChassisSubsystem *chassis,
@@ -48,17 +45,14 @@ void ChassisRelDrive::computeDesiredUserTranslation(
     float rTranslationalGain = chassis->calculateRotationTranslationalGain(chassisRotation) *
                                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
-    xout = drivers->controlOperatorInterface.getChassisXInput();
-    yout = drivers->controlOperatorInterface.getChassisYInput();
-
     *chassisXDesiredWheelspeed = limitVal(
-                                     xout,
+                                     drivers->controlOperatorInterface.getChassisXInput(),
                                      -rTranslationalGain,
                                      rTranslationalGain) *
                                  ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
 
     *chassisYDesiredWheelspeed = limitVal(
-                                     yout,
+                                     drivers->controlOperatorInterface.getChassisYInput(),
                                      -rTranslationalGain,
                                      rTranslationalGain) *
                                  ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
