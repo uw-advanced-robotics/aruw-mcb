@@ -73,6 +73,8 @@ public:
 
     void setOpenHopperCover(bool isOpen) { openHopperCover = isOpen; }
 
+    bool isOpen() { return openHopperCover; }
+
     void sendData();
 
 private:

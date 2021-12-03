@@ -48,6 +48,8 @@ public:
 
     mockable void setClose() { drivers->turretMCBCanComm.setOpenHopperCover(false); }
 
+    mockable bool isOpen() { drivers->turretMCBCanComm.isOpen(); }
+
     void refresh() override {}
 
     void runHardwareTests() override {}
