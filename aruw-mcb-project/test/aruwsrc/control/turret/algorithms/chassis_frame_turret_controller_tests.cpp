@@ -101,6 +101,29 @@ TEST(ChassisFrameTurretController, runPitchPidController__pid_out_negative_when_
     RUN_SINGLE_PID_PITCH_0_CG();
 }
 
+TEST(
+    ChassisFrameTurretController,
+    runPitchPidController__pid_out_correct_sign_based_on_turret_bounds)
+{
+    SETUP_PITCH_TEST();
+
+    // Validate turret rotates in "in bounds" direction based on min and max angles
+
+    // should rotate from 20 degrees to 340 degrees, output should be > 0
+    setpoint = 340;
+    currentPitchAngle.setValue(20);
+    EXPECT_CALL(turretSubsystem, setPitchSetpoint(setpoint));
+    RUN_SINGLE_PID_PITCH_0_CG();
+    EXPECT_LT(0, pid.getOutput());
+
+    // should rotate from 340 degrees through 0 degrees to 20 degrees, output should be < 0
+    setpoint = 20;
+    currentPitchAngle.setValue(340);
+    EXPECT_CALL(turretSubsystem, setPitchSetpoint(setpoint));
+    RUN_SINGLE_PID_PITCH_0_CG();
+    EXPECT_GT(0, pid.getOutput());
+}
+
 #define RUN_SINGLE_PID_YAW_0_CG() \
     ChassisFrameTurretController::runYawPidController(1, setpoint, &pid, &turretSubsystem);
 
@@ -118,7 +141,7 @@ TEST(ChassisFrameTurretController, runYawPidController__pid_out_0_when_setpoints
 {
     SETUP_YAW_TEST();
 
-    // Validate pitch setpoint set and pid output is reasonable
+    // Validate yaw setpoint set and pid output is reasonable
     EXPECT_CALL(turretSubsystem, setYawSetpoint(0));
     EXPECT_CALL(turretSubsystem, setYawSetpoint(90));
     EXPECT_CALL(turretSubsystem, setYawSetpoint(150));
@@ -142,7 +165,7 @@ TEST(ChassisFrameTurretController, runYawPidController__pid_out_positive_if_setp
 {
     SETUP_YAW_TEST();
 
-    // setpoint > pitch angle, output should be positive
+    // setpoint > yaw angle, output should be positive
     setpoint = 30;
     currentYawAngle.setValue(20);
     EXPECT_CALL(turretSubsystem, setYawSetpoint(setpoint));
@@ -154,10 +177,33 @@ TEST(ChassisFrameTurretController, runYawPidController__pid_out_negative_if_setp
 {
     SETUP_YAW_TEST();
 
-    // setpoint < pitch angle, output should be < 0
+    // setpoint < yaw angle, output should be < 0
     setpoint = 30;
     currentYawAngle.setValue(40);
     EXPECT_CALL(turretSubsystem, setYawSetpoint(setpoint));
     EXPECT_CALL(turretSubsystem, setYawMotorOutput(Lt(0)));
     RUN_SINGLE_PID_YAW_0_CG();
+}
+
+TEST(
+    ChassisFrameTurretController,
+    runYawPidController__pid_out_correct_sign_based_on_turret_bounds)
+{
+    SETUP_YAW_TEST();
+
+    // Validate turret rotates in "in bounds" direction based on min and max angles
+
+    // should rotate from 20 degrees to 340 degrees, output should be > 0
+    setpoint = 340;
+    currentYawAngle.setValue(20);
+    EXPECT_CALL(turretSubsystem, setYawSetpoint(setpoint));
+    RUN_SINGLE_PID_YAW_0_CG();
+    EXPECT_LT(0, pid.getOutput());
+
+    // should rotate from 340 degrees through 0 degrees to 20 degrees, output should be < 0
+    setpoint = 20;
+    currentYawAngle.setValue(340);
+    EXPECT_CALL(turretSubsystem, setYawSetpoint(setpoint));
+    RUN_SINGLE_PID_YAW_0_CG();
+    EXPECT_GT(0, pid.getOutput());
 }
