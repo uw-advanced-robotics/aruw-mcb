@@ -22,7 +22,8 @@
 #include "sentinel_auto_drive_comprised_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #include "sentinel_drive_subsystem.hpp"
 
@@ -31,7 +32,7 @@ using namespace tap::algorithms;
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
-    tap::Drivers *drivers,
+    aruwsrc::Drivers *drivers,
     SentinelDriveSubsystem *sentinelChassis)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),

@@ -21,17 +21,16 @@
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/command_scheduler.hpp"
-#include "tap/drivers_singleton.hpp"
 
 #include "aruwsrc/control/engineer/extend_xaxis_command.hpp"
 #include "aruwsrc/control/engineer/grabber_subsystem.hpp"
 #include "aruwsrc/control/engineer/squeeze_grabber_command.hpp"
 #include "aruwsrc/control/engineer/tow_subsystem.hpp"
 #include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 
 using namespace aruwsrc::engineer;
 using namespace tap::gpio;
-using tap::DoNotUse_getDrivers;
 using tap::control::CommandMapper;
 
 /*
@@ -40,7 +39,7 @@ using tap::control::CommandMapper;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-tap::driversFunc drivers = tap::DoNotUse_getDrivers;
+aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace aruwsrc
 {
@@ -69,22 +68,22 @@ TowSubsystem tower(
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(tap::Drivers *drivers)
+void registerEngineerSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&grabber);
     drivers->commandScheduler.registerSubsystem(&xAxis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(tap::Drivers *) {}
+void setDefaultEngineerCommands(aruwsrc::Drivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(tap::Drivers *) {}
+void startEngineerCommands(aruwsrc::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(tap::Drivers *) {}
+void registerEngineerIoMappings(aruwsrc::Drivers *) {}
 
-void initSubsystemCommands(tap::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
     initializeSubsystems();
     registerEngineerSubsystems(drivers);

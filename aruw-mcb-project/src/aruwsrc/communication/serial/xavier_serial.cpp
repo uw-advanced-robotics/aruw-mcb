@@ -24,7 +24,8 @@
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch;
 using namespace tap::serial;
@@ -33,7 +34,7 @@ namespace aruwsrc
 {
 namespace serial
 {
-XavierSerial::XavierSerial(tap::Drivers* drivers)
+XavierSerial::XavierSerial(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),

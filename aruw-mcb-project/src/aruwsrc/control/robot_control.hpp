@@ -20,13 +20,13 @@
 #ifndef __ROBOT_CONTROL_HPP__
 #define __ROBOT_CONTROL_HPP__
 
-#include "tap/drivers.hpp"
+#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc
 {
 namespace control
 {
-void initSubsystemCommands(tap::Drivers *drivers);
+void initSubsystemCommands(aruwsrc::Drivers *drivers);
 }  // namespace control
 
 }  // namespace aruwsrc

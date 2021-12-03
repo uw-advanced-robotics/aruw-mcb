@@ -25,7 +25,7 @@ namespace display
 {
 ErrorMenu::ErrorMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    tap::Drivers *drivers)
+    aruwsrc::Drivers *drivers)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, ERROR_MENU_ID),
       drivers(drivers)
 {

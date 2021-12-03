@@ -24,6 +24,11 @@
 #include "tap/motor/servo.hpp"
 #include "tap/util_macros.hpp"
 
+namespace aruwsrc
+{
+class Drivers;
+}
+
 namespace aruwsrc::control::sentinel::firing
 {
 /**
@@ -33,7 +38,7 @@ namespace aruwsrc::control::sentinel::firing
 class SentinelSwitcherSubsystem : public tap::control::Subsystem
 {
 public:
-    SentinelSwitcherSubsystem(tap::Drivers *drivers, tap::gpio::Pwm::Pin switcherServoPin);
+    SentinelSwitcherSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Pwm::Pin switcherServoPin);
 
     const char *getName() override { return "sentinel switcher"; }
 

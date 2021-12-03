@@ -27,7 +27,8 @@
 #define __COMMAND_EXAMPLE_HPP__
 
 #include "tap/control/command.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc
 {

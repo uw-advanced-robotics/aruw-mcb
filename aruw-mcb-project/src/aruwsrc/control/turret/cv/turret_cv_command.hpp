@@ -25,9 +25,13 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 
+#include "../turret_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 
-#include "turret_subsystem.hpp"
+namespace aruwsrc
+{
+class Drivers;
+}
 
 namespace aruwsrc::control::turret
 {
@@ -38,54 +42,49 @@ namespace aruwsrc::control::turret
 class TurretCVCommand : public tap::control::Command
 {
 public:
-    TurretCVCommand(tap::Drivers *xavierSerial, TurretSubsystem *subsystem);
+    TurretCVCommand(aruwsrc::Drivers *xavierSerial, TurretSubsystem *subsystem);
 
     void initialize() override;
 
-    bool isFinished() const override { return false; }
+    bool isReady() override;
 
     void execute() override;
 
+    bool isFinished() const override;
+
     void end(bool) override;
 
-    const char *getName() const override { return "turret cv"; }
+    const char *getName() const override { return "turret CV"; }
 
 private:
-    static constexpr float YAW_P = 4500.0f;
+    static constexpr float YAW_P = 4000.0f;
     static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 140.0f;
+    static constexpr float YAW_D = 190.0f;
     static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
     static constexpr float YAW_MAX_OUTPUT = 32000.0f;
     static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 30.0f;
     static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
 
-    static constexpr float PITCH_P = 3500.0f;
+    static constexpr float PITCH_P = 4000.0f;
     static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 80.0f;
+    static constexpr float PITCH_D = 130.0f;
     static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
     static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 10.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 
-    tap::Drivers *drivers;
+    aruwsrc::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
-
-    tap::algorithms::ContiguousFloat yawTargetAngle;
-    tap::algorithms::ContiguousFloat pitchTargetAngle;
 
     tap::algorithms::SmoothPid yawPid;
     tap::algorithms::SmoothPid pitchPid;
 
     uint32_t prevTime;
-
-    void runYawPositionController(float dt);
-
-    void runPitchPositionController(float dt);
 };  // class TurretCvCommand
 
 }  // namespace aruwsrc::control::turret

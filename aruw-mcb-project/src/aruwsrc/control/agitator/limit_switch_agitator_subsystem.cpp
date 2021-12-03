@@ -19,9 +19,8 @@
 
 #include "limit_switch_agitator_subsystem.hpp"
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
+#include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
 
@@ -30,7 +29,7 @@ namespace aruwsrc
 namespace agitator
 {
 LimitSwitchAgitatorSubsystem::LimitSwitchAgitatorSubsystem(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     float kp,
     float ki,
     float kd,

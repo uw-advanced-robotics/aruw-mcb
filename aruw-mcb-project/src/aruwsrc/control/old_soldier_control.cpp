@@ -25,19 +25,19 @@
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/drivers_singleton.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
 #include "chassis/wiggle_drive_command.hpp"
 #include "hopper-cover/hopper_subsystem.hpp"
 #include "hopper-cover/open_hopper_command_old.hpp"
-#include "turret/turret_cv_command.hpp"
+#include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_position_command.hpp"
+#include "turret/world-relative/turret_world_relative_command.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
@@ -45,7 +45,6 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control;
-using tap::DoNotUse_getDrivers;
 using tap::Remote;
 
 /*
@@ -54,12 +53,24 @@ using tap::Remote;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-tap::driversFunc drivers = tap::DoNotUse_getDrivers;
+aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace old_soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers());
+tap::motor::DjiMotor pitchMotor(
+    drivers(),
+    TurretSubsystem::PITCH_MOTOR_ID,
+    TurretSubsystem::CAN_BUS_MOTORS,
+    true,
+    "Pitch Turret");
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    TurretSubsystem::YAW_MOTOR_ID,
+    TurretSubsystem::CAN_BUS_MOTORS,
+    false,
+    "Yaw Turret");
+TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor);
 
 ChassisSubsystem chassis(drivers());
 
@@ -89,7 +100,7 @@ ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
 
 WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
+TurretWorldRelativeChassisImuCommand turretWorldRelativeCommand(drivers(), &turret);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -136,7 +147,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerOldSoldierSubsystems(tap::Drivers *drivers)
+void registerOldSoldierSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -145,20 +156,20 @@ void registerOldSoldierSubsystems(tap::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultOldSoldierCommands(tap::Drivers *)
+void setDefaultOldSoldierCommands(aruwsrc::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretWorldRelativeCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startOldSoldierCommands(tap::Drivers *drivers)
+void startOldSoldierCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerOldSoldierIoMappings(tap::Drivers *drivers)
+void registerOldSoldierIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
@@ -170,7 +181,7 @@ void registerOldSoldierIoMappings(tap::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(tap::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
     old_soldier_control::initializeSubsystems();
     old_soldier_control::registerOldSoldierSubsystems(drivers);

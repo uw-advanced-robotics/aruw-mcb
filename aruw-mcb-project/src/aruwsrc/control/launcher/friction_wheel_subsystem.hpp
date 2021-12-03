@@ -35,6 +35,11 @@
 
 namespace aruwsrc
 {
+class Drivers;
+}
+
+namespace aruwsrc
+{
 namespace launcher
 {
 /**
@@ -52,17 +57,9 @@ public:
      * unless otherwise specified on CAN bus 1.
      */
     FrictionWheelSubsystem(
-        tap::Drivers *drivers,
+        aruwsrc::Drivers *drivers,
         tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        tap::motor::MotorId rightMotorId = RIGHT_MOTOR_ID)
-        : tap::control::Subsystem(drivers),
-          velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-          velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-          desiredRpmRamp(0),
-          leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
-          rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right example motor")
-    {
-    }
+        tap::motor::MotorId rightMotorId = RIGHT_MOTOR_ID);
 
     void initialize() override;
 
@@ -93,9 +90,9 @@ private:
 #endif
 
     static constexpr float PID_P = 20.0f;
-    static constexpr float PID_I = 0.0f;
+    static constexpr float PID_I = 0.2f;
     static constexpr float PID_D = 0.0f;
-    static constexpr float PID_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PID_MAX_ERROR_SUM = 5'000.0f;
     static constexpr float PID_MAX_OUTPUT = 16000.0f;
 
     modm::Pid<float> velocityPidLeftWheel;

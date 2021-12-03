@@ -28,11 +28,11 @@
 #include "tap/control/setpoint/commands/move_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/drivers_singleton.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/double_agitator_subsystem.hpp"
 #include "agitator/limit_switch_agitator_subsystem.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
@@ -42,9 +42,8 @@
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/turret_world_relative_position_command.hpp"
+#include "turret/world-relative/turret_world_relative_command.hpp"
 
-using tap::DoNotUse_getDrivers;
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
@@ -52,23 +51,21 @@ using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::display;
-using tap::DoNotUse_getDrivers;
 using tap::Remote;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
+
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-tap::driversFunc drivers = tap::DoNotUse_getDrivers;
+aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace hero_control
 {
 /* define subsystems --------------------------------------------------------*/
-TurretSubsystem turret(drivers());
-
 ChassisSubsystem chassis(drivers());
 
 // Hero has two agitators, one waterWheel and then a kicker
@@ -113,10 +110,6 @@ ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 CalibrateCommand calibrateDoubleAgitator(&kickerSubsystem);
 
-ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret);
-WiggleDriveCommand wiggleDriveCommand(drivers(), &chassis, &turret);
-TurretWorldRelativePositionCommand turretWorldRelativeCommand(drivers(), &turret, &chassis);
-
 WaterwheelLoadCommand42mm waterwheelLoadCommand(drivers(), &waterWheelAgitator);
 
 ShootCommand42mm kickerShootHeatLimitedCommand(drivers(), &kickerSubsystem, true);
@@ -131,8 +124,8 @@ ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
     nullptr,
-    &chassisAutorotateCommand,
-    &wiggleDriveCommand,
+    nullptr,
+    nullptr,
     &chassisDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
@@ -141,20 +134,12 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&wiggleDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping rightSwitchUp(
     drivers(),
     {&kickerShootHeatLimitedCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-ToggleCommandMapping rToggled(drivers(), {&chassisDriveCommand}, RemoteMapState({Remote::Key::R}));
-
-ToggleCommandMapping fToggled(drivers(), {&wiggleDriveCommand}, RemoteMapState({Remote::Key::F}));
-
 HoldCommandMapping leftMousePressed(
     drivers(),
     {&kickerShootHeatLimitedCommand},
@@ -173,20 +158,17 @@ HoldCommandMapping leftSwitchUp(
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    turret.initialize();
     chassis.initialize();
     waterWheelAgitator.initialize();
     kickerSubsystem.initialize();
     frictionWheels.initialize();
     clientDisplay.initialize();
     drivers()->xavierSerial.attachChassis(&chassis);
-    drivers()->xavierSerial.attachTurret(&turret);
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(tap::Drivers *drivers)
+void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&waterWheelAgitator);
     drivers->commandScheduler.registerSubsystem(&kickerSubsystem);
@@ -195,26 +177,22 @@ void registerHeroSubsystems(tap::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultHeroCommands(tap::Drivers *)
+void setDefaultHeroCommands(aruwsrc::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretWorldRelativeCommand);
+    chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     waterWheelAgitator.setDefaultCommand(&waterwheelLoadCommand);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(tap::Drivers *) {}
+void startHeroCommands(aruwsrc::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(tap::Drivers *drivers)
+void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rToggled);
-    drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchUp);
@@ -223,7 +201,7 @@ void registerHeroIoMappings(tap::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(tap::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
     hero_control::initializeSubsystems();
     hero_control::registerHeroSubsystems(drivers);

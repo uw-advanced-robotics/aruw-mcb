@@ -19,7 +19,7 @@
 
 #include "sentinel_rotate_agitator_command.hpp"
 
-#include "tap/drivers.hpp"
+#include "aruwsrc/drivers.hpp"
 
 #include "sentinel_switcher_subsystem.hpp"
 
@@ -30,7 +30,7 @@ using namespace tap::control;
 namespace aruwsrc::control::sentinel::firing
 {
 SentinelRotateAgitatorCommand::SentinelRotateAgitatorCommand(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     tap::control::setpoint::SetpointSubsystem* agitator,
     SentinelSwitcherSubsystem* switcher)
     : ComprisedCommand(drivers),

@@ -20,14 +20,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/control/engineer/auto_tow_command.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/tow_subsystem_mock.hpp"
 
 using aruwsrc::engineer::AutoTowCommand;
 using aruwsrc::mock::TowSubsystemMock;
-using tap::Drivers;
 using tap::gpio::Digital;
 
 static constexpr Digital::OutputPin LEFT_TOW_PIN = Digital::OutputPin::E;
@@ -37,7 +35,7 @@ static constexpr Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN = Digital::InputPi
 
 TEST(AutoTowCommand, execute_dont_trigger_auto_tow_when_neither_switches_enabled)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -57,7 +55,7 @@ TEST(AutoTowCommand, execute_dont_trigger_auto_tow_when_neither_switches_enabled
 
 TEST(AutoTowCommand, execute_trigger_left_clamp_when_left_switch_enabled)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -77,7 +75,7 @@ TEST(AutoTowCommand, execute_trigger_left_clamp_when_left_switch_enabled)
 
 TEST(AutoTowCommand, execute_trigger_right_clamp_when_right_switch_enabled)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -97,7 +95,7 @@ TEST(AutoTowCommand, execute_trigger_right_clamp_when_right_switch_enabled)
 
 TEST(AutoTowCommand, execute_trigger_both_clamps_when_both_switches_enabled)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -117,7 +115,7 @@ TEST(AutoTowCommand, execute_trigger_both_clamps_when_both_switches_enabled)
 
 TEST(AutoTowCommand, execute_dont_trigger_both_clamps_when_both_clamps_already_enabled)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -135,7 +133,7 @@ TEST(AutoTowCommand, execute_dont_trigger_both_clamps_when_both_clamps_already_e
 
 TEST(AutoTowCommand, end_always_sets_both_clamps_open)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,
@@ -152,7 +150,7 @@ TEST(AutoTowCommand, end_always_sets_both_clamps_open)
 
 TEST(AutoTowCommand, isFinished_always_returns_false)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TowSubsystemMock ts(
         &drivers,
         LEFT_TOW_PIN,

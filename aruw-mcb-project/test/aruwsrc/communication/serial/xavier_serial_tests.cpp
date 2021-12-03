@@ -22,15 +22,14 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/serial/xavier_serial.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "gtest/gtest.h"
 
 using aruwsrc::serial::XavierSerial;
-using tap::Drivers;
 using tap::serial::DJISerial;
 using namespace aruwsrc::mock;
 using namespace testing;
@@ -59,7 +58,7 @@ private:
 
 static void initAndRunAutoAimRxTest(float pitchDesired, float yawDesired, bool hasTarget)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     XavierSerial serial(&drivers);
     DJISerial::SerialMessage message;
     message.headByte = 0xA5;
@@ -121,7 +120,7 @@ TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_single_decimals)
 
 TEST(XavierSerial, messageReceiveCallback_tracking_request_ackn)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     XavierSerial serial(&drivers);
     XavierSerialTester serialTester(&serial);
     DJISerial::SerialMessage message;
@@ -156,7 +155,7 @@ TEST(XavierSerial, messageReceiveCallback_tracking_request_ackn)
 static constexpr int FRAME_HEADER_LENGTH = 7;
 static constexpr int CRC_LENGTH = 2;
 
-static void setExpectationsForTxTest(Drivers *drivers, int expectedNumMessagesSent)
+static void setExpectationsForTxTest(aruwsrc::Drivers *drivers, int expectedNumMessagesSent)
 {
     EXPECT_CALL(drivers->uart, write(_, _, _)).Times(expectedNumMessagesSent);
     EXPECT_CALL(drivers->uart, isWriteFinished(_))
@@ -168,7 +167,7 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
 {
     clock::setTime(0);
 
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     TurretSubsystemMock ts(&drivers);
     ChassisSubsystemMock cs(&drivers);
     XavierSerial xs(&drivers);
@@ -306,12 +305,13 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
 
     static constexpr float TIME_BETWEEN_ROBOT_ID_SEND = 5000;
     static constexpr int ROBOT_IDS_TO_CHECK =
-        tap::serial::RefSerial::BLUE_SENTINEL - tap::serial::RefSerial::RED_HERO + 1;
+        static_cast<int>(tap::serial::RefSerial::RobotId::BLUE_SENTINEL) -
+        static_cast<int>(tap::serial::RefSerial::RobotId::RED_HERO) + 1;
 
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     XavierSerial xs(&drivers);
     XavierSerialTester xst(&xs);
-    tap::serial::RefSerial::RobotData robotData;
+    tap::serial::RefSerial::Rx::RobotData robotData;
 
     setExpectationsForTxTest(&drivers, ROBOT_IDS_TO_CHECK);
     EXPECT_CALL(drivers.refSerial, getRobotData)
@@ -321,7 +321,7 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
         .WillByDefault([&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
             data += FRAME_HEADER_LENGTH;
             EXPECT_EQ(length, FRAME_HEADER_LENGTH + 1 + CRC_LENGTH);
-            EXPECT_EQ(robotData.robotId, data[0]);
+            EXPECT_EQ(static_cast<uint8_t>(robotData.robotId), data[0]);
             return length;
         });
 
@@ -329,7 +329,9 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
 
     tap::arch::clock::setTime(0);
 
-    for (int i = tap::serial::RefSerial::RED_HERO; i <= tap::serial::RefSerial::BLUE_SENTINEL; i++)
+    for (int i = static_cast<int>(tap::serial::RefSerial::RobotId::RED_HERO);
+         i <= static_cast<int>(tap::serial::RefSerial::RobotId::BLUE_SENTINEL);
+         i++)
     {
         tap::arch::clock::setTime(
             tap::arch::clock::getTimeMilliseconds() + TIME_BETWEEN_ROBOT_ID_SEND);
@@ -340,7 +342,7 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
 
 TEST(XavierSerial, beginAutoAim_starts_aim_request)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     XavierSerial xs(&drivers);
     XavierSerialTester xst(&xs);
 
@@ -363,7 +365,7 @@ TEST(XavierSerial, beginAutoAim_starts_aim_request)
 
 TEST(XavierSerial, stopAutoAim_stops_auto_aim_req)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     XavierSerial xs(&drivers);
     XavierSerialTester xst(&xs);
 
@@ -386,7 +388,7 @@ TEST(XavierSerial, stopAutoAim_stops_auto_aim_req)
 
 TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     XavierSerial xs(&drivers);
     XavierSerialTester xst(&xs);
     bool autoAimRequest = true;
@@ -448,7 +450,7 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
 
     tap::arch::clock::setTime(0);
 
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     XavierSerial xs(&drivers);
     XavierSerialTester xst(&xs);
     bool autoAimRequest = true;

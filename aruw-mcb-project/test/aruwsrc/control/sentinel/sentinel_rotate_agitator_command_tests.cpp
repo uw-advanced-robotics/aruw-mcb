@@ -22,25 +22,26 @@
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/control/sentinel/firing/sentinel_rotate_agitator_command.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/agitator_subsystem_mock.hpp"
 #include "aruwsrc/mock/sentinel_switcher_subsystem_mock.hpp"
 
 using namespace aruwsrc::control::sentinel::firing;
 using namespace tap::serial;
-using namespace tap;
 using namespace testing;
 using namespace aruwsrc::mock;
 using namespace tap::arch::clock;
+using namespace tap;
 
 #define SETUP_TEST()                                                    \
-    Drivers drivers;                                                    \
+    aruwsrc::Drivers drivers;                                           \
     NiceMock<AgitatorSubsystemMock> agitator(&drivers);                 \
     NiceMock<SentinelSwitcherSubsystemMock> switcher(&drivers);         \
     SentinelRotateAgitatorCommand srac(&drivers, &agitator, &switcher); \
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData()).WillRepeatedly(Return(true));
 
 static void setHeatAndHeatLimit(
-    RefSerial::RobotData &robotData,
+    RefSerial::Rx::RobotData &robotData,
     float heat17ID1,
     float heat17ID2,
     float heatLimit17ID1,
@@ -54,13 +55,13 @@ static void setHeatAndHeatLimit(
 
 TEST(SentinelRotateAgitatorCommand, isReady_returns_false_if_heat_limit_both_barrels_reached)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     NiceMock<AgitatorSubsystemMock> agitator(&drivers);
     NiceMock<SentinelSwitcherSubsystemMock> switcher(&drivers);
     SentinelRotateAgitatorCommand srac(&drivers, &agitator, &switcher);
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData()).WillRepeatedly(Return(true));
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillOnce(ReturnRef(robotData));
 
     setHeatAndHeatLimit(robotData, 100, 90, 95, 95);
@@ -74,7 +75,7 @@ TEST(
 {
     SETUP_TEST();
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     EXPECT_CALL(drivers.refSerial, getRobotData()).Times(3).WillRepeatedly(ReturnRef(robotData));
 
     setHeatAndHeatLimit(robotData, 50, 100, 100, 140);
@@ -87,7 +88,7 @@ TEST(
 
 TEST(SentinelRotateAgitatorCommand, isReady_returns_true_if_ref_serial_offline)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     NiceMock<AgitatorSubsystemMock> agitator(&drivers);
     NiceMock<SentinelSwitcherSubsystemMock> switcher(&drivers);
     SentinelRotateAgitatorCommand srac(&drivers, &agitator, &switcher);
@@ -98,13 +99,13 @@ TEST(SentinelRotateAgitatorCommand, isReady_returns_true_if_ref_serial_offline)
 
 TEST(SentinelRotateAgitatorCommand, addCommand_to_scheduler_works_when_subsystems_scheduled)
 {
-    Drivers drivers;
+    aruwsrc::Drivers drivers;
     control::CommandScheduler scheduler(&drivers, true);
     NiceMock<AgitatorSubsystemMock> turret(&drivers);
     NiceMock<SentinelSwitcherSubsystemMock> switcher(&drivers);
     SentinelRotateAgitatorCommand srac(&drivers, &turret, &switcher);
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     setHeatAndHeatLimit(robotData, 0, 0, 100, 100);
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillRepeatedly(ReturnRef(robotData));
 
@@ -125,7 +126,7 @@ TEST(SentinelRotateAgitatorCommand, initialize_when_not_overheated_starts_rotati
 {
     SETUP_TEST();
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     setHeatAndHeatLimit(robotData, 0, 0, 100, 100);
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillRepeatedly(ReturnRef(robotData));
 
@@ -141,7 +142,7 @@ TEST(SentinelRotateAgitatorCommand, initialize_when_overheated_switches_from_low
 {
     SETUP_TEST();
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     setHeatAndHeatLimit(robotData, 100, 0, 100, 100);
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillRepeatedly(ReturnRef(robotData));
 
@@ -154,7 +155,7 @@ TEST(SentinelRotateAgitatorCommand, initialize_when_overheated_switches_from_upp
 {
     SETUP_TEST();
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     setHeatAndHeatLimit(robotData, 0, 100, 100, 100);
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillRepeatedly(ReturnRef(robotData));
 
@@ -168,7 +169,7 @@ TEST(SentinelRotateAgitatorCommand, initialize_when_overheated_waits_before_rota
     setTime(0);
     SETUP_TEST();
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     setHeatAndHeatLimit(robotData, 0, 100, 100, 100);
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillRepeatedly(ReturnRef(robotData));
 
@@ -193,7 +194,7 @@ TEST(
 {
     SETUP_TEST();
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     setHeatAndHeatLimit(robotData, 0, 0, 100, 100);
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillRepeatedly(ReturnRef(robotData));
 
@@ -207,7 +208,7 @@ TEST(
 {
     SETUP_TEST();
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     setHeatAndHeatLimit(robotData, 100, 100, 100, 100);
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillRepeatedly(ReturnRef(robotData));
 
@@ -222,7 +223,7 @@ TEST(
     setTime(0);
     SETUP_TEST();
 
-    RefSerial::RobotData robotData;
+    RefSerial::Rx::RobotData robotData;
     setHeatAndHeatLimit(robotData, 0, 0, 100, 100);
     EXPECT_CALL(drivers.refSerial, getRobotData()).WillRepeatedly(ReturnRef(robotData));
 

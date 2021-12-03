@@ -21,23 +21,22 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
-using tap::Drivers;
 
 namespace aruwsrc
 {
 namespace chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
     const tap::control::turret::TurretSubsystemInterface* turret,
     bool chassisFrontBackIdentical)

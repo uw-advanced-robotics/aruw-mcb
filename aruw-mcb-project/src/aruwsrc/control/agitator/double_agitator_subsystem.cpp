@@ -26,7 +26,7 @@ namespace aruwsrc
 namespace agitator
 {
 DoubleAgitatorSubsystem::DoubleAgitatorSubsystem(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     float kp,
     float ki,
     float kd,

@@ -19,13 +19,11 @@
 
 #include <gtest/gtest.h>
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
-using namespace tap;
 using namespace aruwsrc::mock;
 using namespace aruwsrc::chassis;
 using namespace testing;
@@ -36,7 +34,7 @@ static constexpr float MAX_WHEEL_SPEED = ChassisSubsystem::MAX_WHEEL_SPEED_SINGL
 static constexpr float AUTOROTATE_KP = ChassisAutorotateCommand::CHASSIS_AUTOROTATE_PID_KP;
 
 #define DEFAULT_SETUP_TEST(chassisFrontBackIdentical) \
-    Drivers drivers;                                  \
+    aruwsrc::Drivers drivers;                         \
     NiceMock<ChassisSubsystemMock> chassis(&drivers); \
     NiceMock<TurretSubsystemMock> turret(&drivers);   \
     ChassisAutorotateCommand cac(&drivers, &chassis, &turret, chassisFrontBackIdentical);
@@ -104,7 +102,7 @@ TEST(ChassisAutorotateCommand, execute_turret_offline_chassis_rel_driving_no_aut
     ON_CALL(turret, getYawSetpoint).WillByDefault(Return(turretAngleSetpoint));
 
 static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
-    Drivers& drivers,
+    aruwsrc::Drivers& drivers,
     ChassisSubsystemMock& chassis,
     TurretSubsystemMock& turret,
     ChassisAutorotateCommand& cac,
@@ -113,8 +111,7 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
     bool isYawLimited)
 {
     const float turretAngleFromCenter =
-        ContiguousFloat(turretAngleActual - TurretSubsystem::TURRET_START_ANGLE, -180, 180)
-            .getValue();
+        ContiguousFloat(turretAngleActual - TurretSubsystem::YAW_START_ANGLE, -180, 180).getValue();
 
     SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)
 
@@ -177,7 +174,7 @@ EXECUTE_USER_INPUT_TEST(neg270, -270, neg270, -270, true)
 EXECUTE_USER_INPUT_TEST(0, 0, 180, 180, false)
 
 static void runExecuteAutorotateValidationTest(
-    Drivers& drivers,
+    aruwsrc::Drivers& drivers,
     ChassisSubsystemMock& chassis,
     TurretSubsystemMock& turret,
     ChassisAutorotateCommand& cac,
@@ -187,8 +184,7 @@ static void runExecuteAutorotateValidationTest(
     bool chassisFrontBackIdentical)
 {
     const float turretAngleFromCenter =
-        ContiguousFloat(turretAngleActual - TurretSubsystem::TURRET_START_ANGLE, -180, 180)
-            .getValue();
+        ContiguousFloat(turretAngleActual - TurretSubsystem::YAW_START_ANGLE, -180, 180).getValue();
 
     SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));

@@ -25,7 +25,7 @@
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "modm/math/filter/debounce.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -63,7 +63,7 @@ public:
      * @note for all debounce params see `debounce.hpp` for reference
      */
     LimitSwitchAgitatorSubsystem(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         float kp,
         float ki,
         float kd,

@@ -34,7 +34,7 @@
 #include "tap/architecture/profiler.hpp"
 
 /* communication includes ---------------------------------------------------*/
-#include "tap/drivers_singleton.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"
@@ -45,20 +45,18 @@
 #include "aruwsrc/control/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 
-using tap::Drivers;
-
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
 tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-static void initializeIo(tap::Drivers *drivers);
+static void initializeIo(aruwsrc::Drivers *drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-static void updateIo(tap::Drivers *drivers);
+static void updateIo(aruwsrc::Drivers *drivers);
 
 int main()
 {
@@ -71,7 +69,7 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
-    tap::Drivers *drivers = tap::DoNotUse_getDrivers();
+    aruwsrc::Drivers *drivers = aruwsrc::DoNotUse_getDrivers();
 
     Board::initialize();
     initializeIo(drivers);
@@ -99,18 +97,20 @@ int main()
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->errorController.updateLedDisplay, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+#ifdef TARGET_SOLDIER
+            PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
+#endif
         }
         modm::delay_us(10);
     }
     return 0;
 }
 
-static void initializeIo(tap::Drivers *drivers)
+static void initializeIo(aruwsrc::Drivers *drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
@@ -128,11 +128,11 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->xavierSerial.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
 #ifdef TARGET_SOLDIER
-    drivers->imuRxHandler.init();
+    drivers->turretMCBCanComm.init();
 #endif
 }
 
-static void updateIo(tap::Drivers *drivers)
+static void updateIo(aruwsrc::Drivers *drivers)
 {
 #ifdef PLATFORM_HOSTED
     tap::motorsim::SimHandler::updateSims();

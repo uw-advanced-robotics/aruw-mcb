@@ -26,7 +26,9 @@ namespace aruwsrc
 {
 namespace control
 {
-ExampleComprisedCommand::ExampleComprisedCommand(tap::Drivers* drivers, ExampleSubsystem* subsystem)
+ExampleComprisedCommand::ExampleComprisedCommand(
+    aruwsrc::Drivers* drivers,
+    ExampleSubsystem* subsystem)
     : tap::control::ComprisedCommand(drivers),
       exampleCommand(subsystem, 2000),
       otherExampleCommand(subsystem, 500),

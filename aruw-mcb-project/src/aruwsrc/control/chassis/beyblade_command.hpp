@@ -24,7 +24,7 @@
 #include "tap/control/command.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -40,7 +40,7 @@ class BeybladeCommand : public tap::control::Command
 {
 public:
     BeybladeCommand(
-        tap::Drivers* drivers,
+        aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
         const tap::control::turret::TurretSubsystemInterface* turret);
 
@@ -102,7 +102,7 @@ private:
 
     tap::algorithms::Ramp rotateSpeedRamp;
 
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
 

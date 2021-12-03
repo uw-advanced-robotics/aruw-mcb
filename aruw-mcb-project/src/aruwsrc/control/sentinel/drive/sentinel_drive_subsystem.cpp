@@ -20,8 +20,9 @@
 #include "sentinel_drive_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -34,7 +35,7 @@ using namespace tap::gpio;
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelDriveSubsystem::SentinelDriveSubsystem(
-    tap::Drivers* drivers,
+    aruwsrc::Drivers* drivers,
     tap::gpio::Digital::InputPin leftLimitSwitch,
     tap::gpio::Digital::InputPin rightLimitSwitch,
     tap::motor::MotorId leftMotorId,
@@ -66,12 +67,7 @@ void SentinelDriveSubsystem::initialize()
 {
     if (leftLimitSwitch == rightLimitSwitch)
     {
-        // TODO it is very annoying to add location/error type, fix this
-        RAISE_ERROR(
-            drivers,
-            "identical left/right switch pins",
-            tap::errors::Location::SUBSYSTEM,
-            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
+        RAISE_ERROR(drivers, "identical left/right switch pins");
     }
     drivers->digital.configureInputPullMode(
         leftLimitSwitch,
@@ -107,29 +103,17 @@ float SentinelDriveSubsystem::absolutePosition()
     }
     else if (leftWheel.isMotorOnline())
     {
-        RAISE_ERROR(
-            drivers,
-            "right sentinel drive motor offline",
-            tap::errors::Location::SUBSYSTEM,
-            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
+        RAISE_ERROR(drivers, "right sentinel drive motor offline");
         average = leftPosition;
     }
     else if (rightWheel.isMotorOnline())
     {
-        RAISE_ERROR(
-            drivers,
-            "left sentinel drive motor offline",
-            tap::errors::Location::SUBSYSTEM,
-            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
+        RAISE_ERROR(drivers, "left sentinel drive motor offline");
         average = rightPosition;
     }
     else
     {
-        RAISE_ERROR(
-            drivers,
-            "both sentinel drive motors offline",
-            tap::errors::Location::SUBSYSTEM,
-            tap::errors::SubsystemErrorType::MOTOR_OFFLINE);
+        RAISE_ERROR(drivers, "both sentinel drive motors offline");
         average = 0.0f;
     }
     return average;

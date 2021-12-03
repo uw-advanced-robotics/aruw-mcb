@@ -21,10 +21,25 @@
 
 #include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 namespace aruwsrc
 {
 namespace launcher
 {
+FrictionWheelSubsystem::FrictionWheelSubsystem(
+    aruwsrc::Drivers *drivers,
+    tap::motor::MotorId leftMotorId,
+    tap::motor::MotorId rightMotorId)
+    : tap::control::Subsystem(drivers),
+      velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+      velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
+      desiredRpmRamp(0),
+      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
+      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right example motor")
+{
+}
+
 void FrictionWheelSubsystem::initialize()
 {
     leftWheel.initialize();
