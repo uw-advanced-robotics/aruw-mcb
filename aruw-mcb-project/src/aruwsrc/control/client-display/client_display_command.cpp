@@ -38,13 +38,15 @@ ClientDisplayCommand::ClientDisplayCommand(
     const Command *wiggleCommand,
     const Command *followTurretCommand,
     const Command *beybladeCommand,
-    const Command *baseDriveCommand)
+    const Command *baseDriveCommand,
+    const aruwsrc::control::OpenTurretMCBHopperCoverCommand *openTurretHopperCoverCommand)
     : Command(),
       drivers(drivers),
       wiggleCommand(wiggleCommand),
       followTurretCommand(followTurretCommand),
       beybladeCommand(beybladeCommand),
       baseDriveCommand(baseDriveCommand),
+      openTurretHopperCoverCommand(openTurretHopperCoverCommand),
       driveCommandMsg()
 {
     addSubsystemRequirement(clientDisplay);
@@ -189,6 +191,34 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateTurretReticleMsg()
         delay();
     }
     RF_END();
+}
+
+modm::ResumableResult<bool> ClientDisplayCommand::updateHopperOpenMsg()
+{
+    RF_BEGIN(4);
+    delay();
+
+    bool curr_open = openTurretHopperCoverCommand->isOpen();
+
+    // Redraw completely every timer
+    if (sendHopperOpenTimer.execute())
+    {
+        drivers->refSerial.sendGraphic(&hopperOpenIndicatorMsg, false, true);
+    }
+    else    // Between timers modify drawing
+    {
+        if (!prev_open && curr_open) {  // closed prev, open now, change to green
+
+        } else if (prev_open && !curr_open) {   // open prev, closed now, change to red
+
+        }   // change nothing otherwise, maintain color
+    }
+    RF_END();
+}
+
+void ClientDisplayCommand::initHopperOpenMsg()
+{
+    
 }
 
 void ClientDisplayCommand::initCapBankMsg()

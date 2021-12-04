@@ -23,6 +23,7 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/command.hpp"
+#include "aruwsrc/control/hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
@@ -52,7 +53,8 @@ public:
         const tap::control::Command *wiggleCommand,
         const tap::control::Command *followTurret,
         const tap::control::Command *beybladeCommand,
-        const tap::control::Command *baseDriveCommand);
+        const tap::control::Command *baseDriveCommand,
+        const aruwsrc::control::OpenTurretMCBHopperCoverCommand *openTurretHopperCoverCommand);
 
     const char *getName() const override { return "client display"; }
 
@@ -126,6 +128,13 @@ private:
     int capMsgAdded = 0;
     int32_t capicatance = 0;
 
+    // Hopper cover related variables
+    const aruwsrc::control::OpenTurretMCBHopperCoverCommand *openTurretHopperCoverCommand;
+    tap::arch::PeriodicMilliTimer sendHopperOpenTimer{10000};
+    tap::serial::RefSerial::Tx::Graphic1Message hopperOpenIndicatorMsg;
+    tap::serial::RefSerial::Tx::GraphicCharacterMessage hopperCoverMsg;
+    bool prev_open = false;
+
     modm::ResumableResult<bool> initializeNonblocking();
     bool run();
 
@@ -137,6 +146,9 @@ private:
 
     void initCapBankMsg();
     modm::ResumableResult<bool> updateCapBankMsg();
+
+    void initHopperOpenMsg();
+    modm::ResumableResult<bool> updateHopperOpenMsg();
 };
 }  // namespace aruwsrc::display
 
