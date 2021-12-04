@@ -45,33 +45,19 @@ float ControlOperatorInterface::getChassisXInput()
         drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S),
         CHASSIS_X_KEY_INPUT_FILTER_ALPHA);
 
-    // float finalX = limitVal<float>(
-    //     chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered,
-    //     -1.0f,
-    //     1.0f);
-
-    float finalX = chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered;
+    float finalX = limitVal<float>(
+        chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered,
+        -1.0f,
+        1.0f);
 
     if (drivers->remote.keyPressed(Remote::Key::CTRL)) {
-        finalX = CROUCH_SCALAR * finalX;
+        finalX = CTRL_SCALAR * finalX;
     } 
     if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
-        finalX = WALK_SCALAR * finalX;
+        finalX = SHIFT_SCALAR * finalX;
     }
 
-    // if (drivers->remote.keyPressed(Remote::Key::CTRL)) {
-    //     chassisXKeyInputFiltered = CROUCH_SCALAR * chassisXKeyInputFiltered;
-    // } 
-    // if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
-    //     chassisXKeyInputFiltered = WALK_SCALAR * chassisXKeyInputFiltered;
-    // }
-
-    // return limitVal<float>(
-    //     chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered,
-    //     -1.0f,
-    //     1.0f);
-
-    return limitVal<float>(finalX, -1.0f, 1.0f);
+    return finalX;
 }
 
 float ControlOperatorInterface::getChassisYInput()
@@ -97,10 +83,10 @@ float ControlOperatorInterface::getChassisYInput()
         1.0f);
 
     if (drivers->remote.keyPressed(Remote::Key::CTRL)) {
-        finalY = CROUCH_SCALAR * finalY;
+        finalY = CTRL_SCALAR * finalY;
     } 
     if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
-        finalY = WALK_SCALAR * finalY;
+        finalY = SHIFT_SCALAR * finalY;
     }
 
     return finalY;
