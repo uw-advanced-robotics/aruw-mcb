@@ -218,7 +218,26 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateHopperOpenMsg()
 
 void ClientDisplayCommand::initHopperOpenMsg()
 {
+    drivers->refSerial.configGraphicGenerics(
+        &hopperOpenIndicatorMsg.graphicData,
+        HOPPER_CIRCLE1_NAME,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
+        HOPPER_LAYER_1,
+        RefSerial::Tx::GraphicColor::GREEN);
+
+    drivers->refSerial.configGraphicGenerics(
+        &hopperCloseIndicatorMsg.graphicData,
+        HOPPER_CIRCLE2_NAME,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
+        HOPPER_LAYER_1,
+        RefSerial::Tx::GraphicColor::PURPLISH_RED);
     
+    drivers->refSerial.configGraphicGenerics(
+        &hopperCoverMsg.graphicData,
+        HOPPER_TEXT_NAME,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
+        HOPPER_LAYER_2,
+        RefSerial::Tx::GraphicColor::YELLOW);
 }
 
 void ClientDisplayCommand::initCapBankMsg()
