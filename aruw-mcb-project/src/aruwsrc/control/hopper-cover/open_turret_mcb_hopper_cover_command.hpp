@@ -40,6 +40,8 @@ public:
 
     void end(bool) override { hopper->setClose(); }
 
+    bool isOpen() const { hopper->isOpen(); }
+
     bool isFinished() const override { return false; }
 
     const char* getName() const override { return "open hopper"; }

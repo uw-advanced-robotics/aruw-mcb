@@ -44,11 +44,11 @@ public:
     {
     }
 
-    mockable void setOpen() { drivers->turretMCBCanComm.setOpenHopperCover(true); }
+    inline mockable void setOpen() { drivers->turretMCBCanComm.setOpenHopperCover(true); }
 
-    mockable void setClose() { drivers->turretMCBCanComm.setOpenHopperCover(false); }
+    inline mockable void setClose() { drivers->turretMCBCanComm.setOpenHopperCover(false); }
 
-    mockable bool isOpen() { drivers->turretMCBCanComm.isOpen(); }
+    inline mockable bool isOpen() { drivers->turretMCBCanComm.isOpen(); }
 
     void refresh() override {}
 
