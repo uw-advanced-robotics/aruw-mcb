@@ -45,10 +45,33 @@ float ControlOperatorInterface::getChassisXInput()
         drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S),
         CHASSIS_X_KEY_INPUT_FILTER_ALPHA);
 
-    return limitVal<float>(
-        chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered,
-        -1.0f,
-        1.0f);
+    // float finalX = limitVal<float>(
+    //     chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered,
+    //     -1.0f,
+    //     1.0f);
+
+    float finalX = chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered;
+
+    if (drivers->remote.keyPressed(Remote::Key::CTRL)) {
+        finalX = CROUCH_SCALAR * finalX;
+    } 
+    if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
+        finalX = WALK_SCALAR * finalX;
+    }
+
+    // if (drivers->remote.keyPressed(Remote::Key::CTRL)) {
+    //     chassisXKeyInputFiltered = CROUCH_SCALAR * chassisXKeyInputFiltered;
+    // } 
+    // if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
+    //     chassisXKeyInputFiltered = WALK_SCALAR * chassisXKeyInputFiltered;
+    // }
+
+    // return limitVal<float>(
+    //     chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered,
+    //     -1.0f,
+    //     1.0f);
+
+    return limitVal<float>(finalX, -1.0f, 1.0f);
 }
 
 float ControlOperatorInterface::getChassisYInput()
@@ -68,10 +91,19 @@ float ControlOperatorInterface::getChassisYInput()
         drivers->remote.keyPressed(Remote::Key::D) - drivers->remote.keyPressed(Remote::Key::A),
         CHASSIS_Y_KEY_INPUT_FILTER_ALPHA);
 
-    return limitVal<float>(
+    float finalY = limitVal<float>(
         chassisYInput.getInterpolatedValue(currTime) + chassisYKeyInputFiltered,
         -1.0f,
         1.0f);
+
+    if (drivers->remote.keyPressed(Remote::Key::CTRL)) {
+        finalY = CROUCH_SCALAR * finalY;
+    } 
+    if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
+        finalY = WALK_SCALAR * finalY;
+    }
+
+    return finalY;
 }
 
 float ControlOperatorInterface::getChassisRInput()
@@ -120,8 +152,9 @@ float ControlOperatorInterface::getTurretPitchInput()
 float ControlOperatorInterface::getSentinelSpeedInput()
 {
     return drivers->remote.getChannel(tap::Remote::Channel::LEFT_HORIZONTAL) *
-           USER_STICK_SENTINEL_DRIVE_SCALAR;
+        USER_STICK_SENTINEL_DRIVE_SCALAR;
 }
 }  // namespace control
 
 }  // namespace tap
+
