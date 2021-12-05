@@ -29,12 +29,18 @@ namespace launcher
 class FrictionWheelSubsystem;
 
 /**
- * Command which sets a given friction wheel subsystem to a set speed.
+ * Command which sets a given friction wheel subsystem to a set projectile
+ * launch speed (in m/s).
  */
 class FrictionWheelRotateCommand : public tap::control::Command
 {
 public:
-    FrictionWheelRotateCommand(FrictionWheelSubsystem* subsystem, int speed);
+    /**
+     * @param[in] frictionWheels The friction wheel subsystem that this command "owns".
+     * @param[in] launchSpeed The desired launch speed of the projectiles coming out of the friction
+     *      wheels, in m/s.
+     */
+    FrictionWheelRotateCommand(FrictionWheelSubsystem* frictionWheels, float launchSpeed);
 
     void initialize() override;
 
@@ -46,20 +52,10 @@ public:
 
     const char* getName() const override { return "friction wheel rotate"; }
 
-#if defined(TARGET_SOLDIER)
-    static constexpr int16_t DEFAULT_WHEEL_RPM = 4500;
-#elif defined(TARGET_HERO)
-    static constexpr int16_t DEFAULT_WHEEL_RPM = 7000;
-#elif defined(TARGET_SENTINEL)
-    static const int16_t DEFAULT_WHEEL_RPM = 7200;
-#else
-    static constexpr int16_t DEFAULT_WHEEL_RPM = 0;
-#endif
-
 private:
     FrictionWheelSubsystem* frictionWheelSubsystem;
 
-    int speed;
+    float launchSpeed;
 };
 
 }  // namespace launcher

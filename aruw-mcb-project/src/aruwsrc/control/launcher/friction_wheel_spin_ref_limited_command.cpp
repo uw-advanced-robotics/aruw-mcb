@@ -25,9 +25,11 @@ namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     aruwsrc::Drivers *drivers,
-    aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels)
+    aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels,
+    float defaultLaunchSpeed)
     : drivers(drivers),
-      frictionWheels(frictionWheels)
+      frictionWheels(frictionWheels),
+      defaultLaunchSpeed(defaultLaunchSpeed)
 {
     modm_assert(drivers != nullptr, "FrictionWheelSpinRefLimitedCommand", "nullptr exception");
     addSubsystemRequirement(frictionWheels);
@@ -36,22 +38,14 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
     const uint16_t maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
-
-    uint16_t desiredSpeed;
-    if (!drivers->refSerial.getRefSerialReceivingData() || maxBarrelSpeed <= 15)
+    if (!drivers->refSerial.getRefSerialReceivingData())
     {
-        desiredSpeed = WHEEL_RPM_15;
-    }
-    else if (maxBarrelSpeed <= 18)
-    {
-        desiredSpeed = WHEEL_RPM_18;
+        frictionWheels->setDesiredLaunchSpeed(defaultLaunchSpeed);
     }
     else
     {
-        desiredSpeed = WHEEL_RPM_30;
+        frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);
     }
-
-    frictionWheels->setDesiredRpm(desiredSpeed);
 }
 
 }  // namespace aruwsrc::control::launcher

@@ -150,7 +150,7 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     false,
     50);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels);
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels, 15.0f);
 
 FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
 

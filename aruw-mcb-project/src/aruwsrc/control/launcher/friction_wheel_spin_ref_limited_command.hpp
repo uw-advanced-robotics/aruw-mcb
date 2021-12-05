@@ -32,33 +32,42 @@ class Drivers;
 namespace aruwsrc::control::launcher
 {
 /**
- * Rotates flywheels of 17MM projectile launcher based on ref serial speed limit.
+ * Commands some associated friction wheel subsystem to rotate such that the subsystem launches
+ * projectiles at some desired speed. The launch speed is limited by the max friction wheel speed
+ * that we receive from the referee system.
  */
 class FrictionWheelSpinRefLimitedCommand : public tap::control::Command
 {
 public:
+    /**
+     * @param[in] drivers A pointer to the global drivers object.
+     * @param[in] frictionWheels The friction wheel subsystem that this command
+     *      "owns".
+     * @param[in] defaultLaunchSpeed A launch speed in m/s that the command
+     *      will request the subsystem to spin at if the referee system is not
+     *      connected.
+     */
     FrictionWheelSpinRefLimitedCommand(
         aruwsrc::Drivers *drivers,
-        aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels);
+        aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels,
+        float defaultLaunchSpeed);
 
     void initialize() override {}
 
     void execute() override;
 
-    void end(bool) override { frictionWheels->setDesiredRpm(0); }
+    void end(bool) override { frictionWheels->setDesiredLaunchSpeed(0); }
 
     bool isFinished() const override { return false; }
 
     const char *getName() const override { return "ref serial friction wheel rotate"; }
 
 private:
-    static constexpr int16_t WHEEL_RPM_15 = 4500;
-    static constexpr int16_t WHEEL_RPM_18 = 5000;
-    static constexpr int16_t WHEEL_RPM_30 = 7000;
-
     aruwsrc::Drivers *drivers;
 
     aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels;
+
+    const float defaultLaunchSpeed;
 };
 }  // namespace aruwsrc::control::launcher
 

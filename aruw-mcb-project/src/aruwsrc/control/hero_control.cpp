@@ -40,6 +40,7 @@
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
+#include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/world-relative/turret_world_relative_command.hpp"
@@ -51,6 +52,7 @@ using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::display;
+using namespace aruwsrc::control::launcher;
 using tap::Remote;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
@@ -115,9 +117,7 @@ WaterwheelLoadCommand42mm waterwheelLoadCommand(drivers(), &waterWheelAgitator);
 ShootCommand42mm kickerShootHeatLimitedCommand(drivers(), &kickerSubsystem, true);
 ShootCommand42mm kickerShootUnlimitedCommand(drivers(), &kickerSubsystem, false);
 
-FrictionWheelRotateCommand spinFrictionWheels(
-    &frictionWheels,
-    FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels, 10);
 FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
 
 ClientDisplayCommand clientDisplayCommand(

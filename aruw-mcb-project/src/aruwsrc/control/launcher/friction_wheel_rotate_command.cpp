@@ -27,18 +27,23 @@ namespace aruwsrc
 {
 namespace launcher
 {
-FrictionWheelRotateCommand::FrictionWheelRotateCommand(FrictionWheelSubsystem* subsystem, int speed)
-    : frictionWheelSubsystem(subsystem),
-      speed(speed)
+FrictionWheelRotateCommand::FrictionWheelRotateCommand(
+    FrictionWheelSubsystem* frictionWheels,
+    float launchSpeed)
+    : frictionWheelSubsystem(frictionWheels),
+      launchSpeed(launchSpeed)
 {
-    addSubsystemRequirement(subsystem);
+    addSubsystemRequirement(frictionWheels);
 }
 
 void FrictionWheelRotateCommand::initialize() {}
 
-void FrictionWheelRotateCommand::execute() { frictionWheelSubsystem->setDesiredRpm(speed); }
+void FrictionWheelRotateCommand::execute()
+{
+    frictionWheelSubsystem->setDesiredLaunchSpeed(launchSpeed);
+}
 
-void FrictionWheelRotateCommand::end(bool) { frictionWheelSubsystem->setDesiredRpm(0); }
+void FrictionWheelRotateCommand::end(bool) { frictionWheelSubsystem->setDesiredLaunchSpeed(0); }
 
 bool FrictionWheelRotateCommand::isFinished() const { return false; }
 }  // namespace launcher
