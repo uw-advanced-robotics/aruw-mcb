@@ -31,7 +31,6 @@ using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
 static constexpr float MAX_WHEEL_SPEED = ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-static constexpr float AUTOROTATE_KP = ChassisAutorotateCommand::CHASSIS_AUTOROTATE_PID_KP;
 
 #define DEFAULT_SETUP_TEST(chassisFrontBackIdentical) \
     aruwsrc::Drivers drivers;                         \
@@ -93,8 +92,8 @@ TEST(ChassisAutorotateCommand, execute_turret_offline_chassis_rel_driving_no_aut
 #define SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)      \
     ON_CALL(turret, isOnline).WillByDefault(Return(true));                                     \
     ON_CALL(turret, yawLimited).WillByDefault(Return(isYawLimited));                           \
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float kp) {       \
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, kp);                   \
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle) {                 \
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle);                       \
     });                                                                                        \
     ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(turretAngleFromCenter));       \
     ContiguousFloat turretAngleActualContiguous(turretAngleActual, 0, 360);                    \
