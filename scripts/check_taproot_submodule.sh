@@ -55,6 +55,8 @@ if [[ "$?" != 0 ]]; then
     exit 1
 fi
 
+git diff "$TEMP_DIR" "taproot"
+
 if [[ ! -z "$(git diff "$TEMP_DIR" "taproot")" ]]; then
     echo "Generated lbuild is different, diff:"
     git diff "$TEMP_DIR" "taproot"
