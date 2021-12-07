@@ -87,9 +87,8 @@ private:
     static constexpr uint8_t DRIVE_TEXT_NAME[] = {0, 0, 5};
     static constexpr uint8_t CAP_TEXT_NAME[] = {0, 0, 6};
     static constexpr uint8_t CAP_VALUE_NAME[] = {0, 0, 7};
-    static constexpr uint8_t HOPPER_CIRCLE1_NAME[] = {0, 0, 8};
-    static constexpr uint8_t HOPPER_CIRCLE2_NAME[] = {0, 0, 9};
-    static constexpr uint8_t HOPPER_TEXT_NAME[] = {0, 0, 10};
+    static constexpr uint8_t HOPPER_CIRCLE_NAME[] = {0, 0, 8};
+    static constexpr uint8_t HOPPER_TEXT_NAME[] = {0, 0, 9};
     static constexpr uint8_t HOPPER_LAYER_1 = 5;
     static constexpr uint8_t HOPPER_LAYER_2 = 6;
 
@@ -137,9 +136,7 @@ private:
     const aruwsrc::control::OpenTurretMCBHopperCoverCommand *openTurretHopperCoverCommand;
     tap::arch::PeriodicMilliTimer sendHopperOpenTimer{10000};
     tap::serial::RefSerial::Tx::Graphic1Message hopperOpenIndicatorMsg;
-    tap::serial::RefSerial::Tx::Graphic1Message hopperCloseIndicatorMsg;
     tap::serial::RefSerial::Tx::GraphicCharacterMessage hopperCoverMsg;
-    bool prev_open = false;
 
     modm::ResumableResult<bool> initializeNonblocking();
     bool run();

@@ -63,6 +63,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(updateDriveCommandMsg());
         // PT_CALL(updateCapBankMsg());
         PT_CALL(updateTurretReticleMsg());
+        PT_CALL(updateHopperOpenMsg());
         PT_YIELD();
     }
     PT_END();
@@ -75,6 +76,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
     initDriveCommandMsg();
     initTurretReticleMsg();
     initCapBankMsg();
+    initHopperOpenMsg();
     RF_END();
 }
 
@@ -203,15 +205,50 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateHopperOpenMsg()
     // Redraw completely every timer
     if (sendHopperOpenTimer.execute())
     {
-        drivers->refSerial.sendGraphic(&hopperOpenIndicatorMsg, false, true);
+        drivers->refSerial.sendGraphic(&hopperCoverMsg, true, true);
+        drivers->refSerial.sendGraphic(&hopperOpenIndicatorMsg, true, true);
     }
     else    // Between timers modify drawing
     {
         if (!prev_open && curr_open) {  // closed prev, open now, change to green
+            drivers->refSerial.configGraphicGenerics(
+                &hopperOpenIndicatorMsg.graphicData,
+                HOPPER_CIRCLE_NAME,
+                RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY,
+                HOPPER_LAYER_1,
+                RefSerial::Tx::GraphicColor::GREEN);
+
+            drivers->refSerial.configCircle(
+                LINE_THICKNESS,
+                SCREEN_WIDTH/2 - 20,
+                SCREEN_HEIGHT - 500,
+                10,
+                &hopperOpenIndicatorMsg.graphicData);
+            
+            drivers->refSerial.sendGraphic(&hopperCoverMsg, true, true);
+            drivers->refSerial.sendGraphic(&hopperOpenIndicatorMsg, true, true);
 
         } else if (prev_open && !curr_open) {   // open prev, closed now, change to red
+            drivers->refSerial.configGraphicGenerics(
+                &hopperOpenIndicatorMsg.graphicData,
+                HOPPER_CIRCLE_NAME,
+                RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY,
+                HOPPER_LAYER_1,
+                RefSerial::Tx::GraphicColor::PURPLISH_RED);
 
-        }   // change nothing otherwise, maintain color
+            drivers->refSerial.configCircle(
+                LINE_THICKNESS,
+                SCREEN_WIDTH/2 - 20,
+                SCREEN_HEIGHT - 500,
+                10,
+                &hopperOpenIndicatorMsg.graphicData);
+            
+            drivers->refSerial.sendGraphic(&hopperCoverMsg, true, true);
+            drivers->refSerial.sendGraphic(&hopperOpenIndicatorMsg, true, true);
+        } else {  // change nothing otherwise, maintain color
+            drivers->refSerial.sendGraphic(&hopperCoverMsg, false, true);
+            drivers->refSerial.sendGraphic(&hopperOpenIndicatorMsg, false, true);
+        }
     }
     RF_END();
 }
@@ -220,24 +257,34 @@ void ClientDisplayCommand::initHopperOpenMsg()
 {
     drivers->refSerial.configGraphicGenerics(
         &hopperOpenIndicatorMsg.graphicData,
-        HOPPER_CIRCLE1_NAME,
+        HOPPER_CIRCLE_NAME,
         RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         HOPPER_LAYER_1,
         RefSerial::Tx::GraphicColor::GREEN);
 
-    drivers->refSerial.configGraphicGenerics(
-        &hopperCloseIndicatorMsg.graphicData,
-        HOPPER_CIRCLE2_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        HOPPER_LAYER_1,
-        RefSerial::Tx::GraphicColor::PURPLISH_RED);
-    
     drivers->refSerial.configGraphicGenerics(
         &hopperCoverMsg.graphicData,
         HOPPER_TEXT_NAME,
         RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         HOPPER_LAYER_2,
         RefSerial::Tx::GraphicColor::YELLOW);
+
+    // SHOULD ADJUST AS NEEDED
+    drivers->refSerial.configCharacterMsg(
+        FONT_SIZE,
+        200,
+        FONT_THICKNESS,
+        SCREEN_WIDTH/2 - 100,
+        SCREEN_HEIGHT - 500,
+        "Hopper Status: ",
+        &hopperCoverMsg);
+    
+    drivers->refSerial.configCircle(
+        LINE_THICKNESS,
+        SCREEN_WIDTH/2 - 20,
+        SCREEN_HEIGHT - 500,
+        10,
+        &hopperOpenIndicatorMsg.graphicData);
 }
 
 void ClientDisplayCommand::initCapBankMsg()
