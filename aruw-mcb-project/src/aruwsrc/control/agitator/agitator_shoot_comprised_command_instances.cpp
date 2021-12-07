@@ -27,19 +27,30 @@ namespace agitator
 {
 MoveUnjamRefLimitedCommand::MoveUnjamRefLimitedCommand(
     aruwsrc::Drivers *drivers,
-    AgitatorSubsystem *agitator17mm,
-    float agitatorRotateAngle,
-    float maxUnjamRotateAngle,
-    uint32_t rotateTime,
+    SetpointSubsystem *setpointSubsystem,
+    float moveDisplacement,
+    uint32_t moveTime,
+    uint32_t pauseAfterMoveTime,
+    bool setToTargetOnEnd,
+    float setpointTolerance,
+    float unjamDisplacement,
+    float unjamThreshold,
+    uint32_t maxUnjamWaitTime,
+    uint_fast16_t unjamCycleCount,
     bool heatLimiting,
     float heatLimitBuffer)
     : tap::control::setpoint::MoveUnjamComprisedCommand(
           drivers,
-          agitator17mm,
-          agitatorRotateAngle,
-          maxUnjamRotateAngle,
-          rotateTime,
-          0),
+          setpointSubsystem,
+          moveDisplacement,
+          moveTime,
+          pauseAfterMoveTime,
+          setToTargetOnEnd,
+          setpointTolerance,
+          unjamDisplacement,
+          unjamThreshold,
+          maxUnjamWaitTime,
+          unjamCycleCount),
       drivers(drivers),
       heatLimiting(heatLimiting),
       heatLimitBuffer(heatLimitBuffer)
@@ -73,9 +84,14 @@ WaterwheelLoadCommand42mm::WaterwheelLoadCommand42mm(
           drivers,
           waterwheel,
           WATERWHEEL_42MM_CHANGE_ANGLE,
-          WATERWHEEL_42MM_MAX_UNJAM_ANGLE,
           WATERWHEEL_42MM_ROTATE_TIME,
-          WATERWHEEL_42MM_PAUSE_AFTER_ROTATE_TIME),
+          WATERWHEEL_42MM_PAUSE_AFTER_ROTATE_TIME,
+          true,
+          0.1f, /** @TODO: tune these */
+          WATERWHEEL_42MM_MAX_UNJAM_ANGLE,
+          WATERWHEEL_42MM_UNJAM_THRESHOLD,
+          WATERWHEEL_42MM_UNJAM_TIME,
+          WATERWHEEL_42MM_UNJAM_CYCLES),
       drivers(drivers),
       waterwheel(waterwheel)
 {
@@ -101,7 +117,8 @@ ShootCommand42mm::ShootCommand42mm(
           KICKER_42MM_CHANGE_ANGLE,
           KICKER_42MM_ROTATE_TIME,
           KICKER_42MM_PAUSE_AFTER_ROTATE_TIME,
-          true),
+          true,
+          KICKER_42MM_SETPOINT_TOLERANCE),
       drivers(drivers),
       heatLimiting(heatLimiting)
 {

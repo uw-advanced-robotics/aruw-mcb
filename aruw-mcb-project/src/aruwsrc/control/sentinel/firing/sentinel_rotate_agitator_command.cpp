@@ -41,9 +41,14 @@ SentinelRotateAgitatorCommand::SentinelRotateAgitatorCommand(
           drivers,
           agitator,
           AGITATOR_ROTATE_ANGLE,
-          AGITATOR_ROTATE_MAX_UNJAM_ANGLE,
           AGITATOR_ROTATE_TIME,
-          AGITATOR_WAIT_AFTER_ROTATE_TIME)
+          AGITATOR_WAIT_AFTER_ROTATE_TIME,
+          true,
+          AGITATOR_SETPOINT_TOLERANCE,
+          AGITATOR_UNJAM_DISPLACEMENT,
+          AGITATOR_UNJAM_THRESHOLD,
+          AGITATOR_UNJAM_WAIT_TIME,
+          AGITATOR_UNJAM_CYCLES)
 {
     addSubsystemRequirement(agitator);
     addSubsystemRequirement(switcher);
