@@ -250,6 +250,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateHopperOpenMsg()
             drivers->refSerial.sendGraphic(&hopperOpenIndicatorMsg, false, true);
         }
     }
+    prev_open = curr_open;
     RF_END();
 }
 
@@ -260,7 +261,7 @@ void ClientDisplayCommand::initHopperOpenMsg()
         HOPPER_CIRCLE_NAME,
         RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
         HOPPER_LAYER_1,
-        RefSerial::Tx::GraphicColor::GREEN);
+        RefSerial::Tx::GraphicColor::PURPLISH_RED);
 
     drivers->refSerial.configGraphicGenerics(
         &hopperCoverMsg.graphicData,
