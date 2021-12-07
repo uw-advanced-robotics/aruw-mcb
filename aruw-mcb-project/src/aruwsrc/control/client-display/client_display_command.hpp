@@ -137,6 +137,7 @@ private:
     tap::arch::PeriodicMilliTimer sendHopperOpenTimer{10000};
     tap::serial::RefSerial::Tx::Graphic1Message hopperOpenIndicatorMsg;
     tap::serial::RefSerial::Tx::GraphicCharacterMessage hopperCoverMsg;
+    bool prev_open = false;
 
     modm::ResumableResult<bool> initializeNonblocking();
     bool run();
