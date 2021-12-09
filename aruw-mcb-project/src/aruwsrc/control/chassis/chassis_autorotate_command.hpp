@@ -39,7 +39,6 @@ class ChassisSubsystem;
 class ChassisAutorotateCommand : public tap::control::Command
 {
 public:
-    static constexpr float CHASSIS_AUTOROTATE_PID_KP = -100.0f;
     static constexpr float SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD = 1.0f;
 
     ChassisAutorotateCommand(

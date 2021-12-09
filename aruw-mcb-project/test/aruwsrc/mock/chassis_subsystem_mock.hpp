@@ -35,14 +35,10 @@ public:
     virtual ~ChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, setDesiredOutput, (float x, float y, float z), (override));
-    MOCK_METHOD(float, chassisSpeedRotationPID, (float currentAngleError, float kp), (override));
+    MOCK_METHOD(void, setDesiredOutput, (float, float, float), (override));
+    MOCK_METHOD(float, chassisSpeedRotationPID, (float), (override));
     MOCK_METHOD(void, refresh, (), (override));
-    MOCK_METHOD(
-        float,
-        calculateRotationTranslationalGain,
-        (float chassisRotationDesiredWheelspeed),
-        ());
+    MOCK_METHOD(float, calculateRotationTranslationalGain, (float), ());
     MOCK_METHOD(int16_t, getLeftFrontRpmActual, (), (const override));
     MOCK_METHOD(int16_t, getLeftBackRpmActual, (), (const override));
     MOCK_METHOD(int16_t, getRightFrontRpmActual, (), (const override));

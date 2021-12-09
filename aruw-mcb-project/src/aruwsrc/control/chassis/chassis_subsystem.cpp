@@ -66,7 +66,13 @@ ChassisSubsystem::ChassisSubsystem(
           VELOCITY_PID_KD,
           VELOCITY_PID_MAX_ERROR_SUM,
           VELOCITY_PID_MAX_OUTPUT),
-      chassisRotationErrorKalman(1.0f, 0.0f),
+      chassisRotatePidParameters(
+          AUTOROTATION_PID_KP,
+          AUTOROTATION_PID_KI,
+          AUTOROTATION_PID_KD,
+          AUTOROTATION_PID_MAX_ERROR_SUM,
+          AUTOROTATION_PID_MAX_OUTPUT),
+      chassisRotationPid(chassisRotatePidParameters),
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
@@ -175,38 +181,12 @@ void ChassisSubsystem::updateMotorRpmPid(
     motor->setDesiredOutput(pid->getValue());
 }
 
-float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float kp)
+float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError)
 {
-    float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.getLastFiltered();
-    float currentFilteredAngleError = chassisRotationErrorKalman.filterData(currentAngleError);
-
-    // P
-    float currRotationPidP = currentAngleError * kp;
-    currRotationPidP = tap::algorithms::limitVal<float>(
-        currRotationPidP,
-        -CHASSIS_REVOLVE_PID_MAX_P,
-        CHASSIS_REVOLVE_PID_MAX_P);
-
-    // D
-    float currentRotationPidD = 0.0f;
-    if (abs(currentFilteredAngleError) > MIN_ERROR_ROTATION_D)
-    {
-        float currentErrorRotation = currentFilteredAngleError - currentFilteredAngleErrorPrevious;
-
-        currentRotationPidD = -(currentErrorRotation)*CHASSIS_REVOLVE_PID_KD;
-
-        currentRotationPidD = tap::algorithms::limitVal<float>(
-            currentRotationPidD,
-            -CHASSIS_REVOLVE_PID_MAX_D,
-            CHASSIS_REVOLVE_PID_MAX_D);
-    }
-
-    float wheelRotationSpeed = tap::algorithms::limitVal<float>(
-        currRotationPidP + currentRotationPidD,
-        -MAX_OUTPUT_ROTATION_PID,
-        MAX_OUTPUT_ROTATION_PID);
-
-    return wheelRotationSpeed;
+    currentAngleError =
+        limitVal(currentAngleError, -AUTOROTATE_MAX_ANGLE_ERROR, AUTOROTATE_MAX_ANGLE_ERROR);
+    chassisRotationPid.update(currentAngleError);
+    return chassisRotationPid.getValue();
 }
 
 float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
