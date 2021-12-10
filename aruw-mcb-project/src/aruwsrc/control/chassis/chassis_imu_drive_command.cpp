@@ -20,14 +20,15 @@
 #include "chassis_imu_drive_command.hpp"
 
 #include "tap/algorithms/contiguous_float.hpp"
-#include "tap/drivers.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
 namespace aruwsrc::chassis
 {
-ChassisImuDriveCommand::ChassisImuDriveCommand(tap::Drivers* drivers, ChassisSubsystem* chassis)
+ChassisImuDriveCommand::ChassisImuDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsystem* chassis)
     : tap::control::Command(),
       drivers(drivers),
       chassis(chassis),
@@ -95,7 +96,7 @@ void ChassisImuDriveCommand::execute()
 
             // run PID controller to attempt to attain the setpoint
             chassisRotationDesiredWheelspeed =
-                chassis->chassisSpeedRotationPID(angleFromDesiredRotation, ROTATION_PID_KP);
+                chassis->chassisSpeedRotationPID(-angleFromDesiredRotation);
         }
     }
     else
@@ -130,32 +131,3 @@ void ChassisImuDriveCommand::end(bool) { chassis->setDesiredOutput(0, 0, 0); }
 
 bool ChassisImuDriveCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::chassis
-
-
-
-// aruwlib::algorithms::ExtendedKalman imuGyroKalman(1.0f, 0.0f);
-
-// float filteredGyroRotation;
-// float chassisDesiredRotationSpeed;
-// float error;
-// float chassisRotationDesiredWheelspeed;
-
-// const float MAX_CHASSIS_ROTATION_VELOCITY = 10.0f;
-
-// void ChassisDriveCommand::execute()
-// {
-//     // rotation in degrees per second
-//     filteredGyroRotation = imuGyroKalman.filterData(aruwlib::algorithms::degreesToRadians(
-//         aruwlib::sensors::Mpu6500::getGz() / aruwlib::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S));
-//     chassisDesiredRotationSpeed = -ChassisSubsystem::getChassisR() * MAX_CHASSIS_ROTATION_VELOCITY;
-//     error = chassisDesiredRotationSpeed - filteredGyroRotation;
-
-//     if (aruwlib::Remote::getSwitch(aruwlib::Remote::Switch::LEFT_SWITCH) == aruwlib::Remote::SwitchState::UP)
-//     {
-//         chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(error, -700.0f);
-//     }
-//     else
-//     {
-//         chassisRotationDesiredWheelspeed = ChassisSubsystem::getChassisR()
-//             * ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-//     }

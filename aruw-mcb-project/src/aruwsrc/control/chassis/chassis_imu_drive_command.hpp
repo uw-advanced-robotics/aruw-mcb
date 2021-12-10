@@ -23,7 +23,7 @@
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/control/command.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -42,10 +42,9 @@ class ChassisImuDriveCommand : public tap::control::Command
 {
 public:
     static constexpr float USER_INPUT_TO_ANGLE_DELTA_SCALAR = 1.0f;
-    static constexpr float ROTATION_PID_KP = 160.0f;
     static constexpr float MAX_ROTATION_ERR = 30.0f;
 
-    ChassisImuDriveCommand(tap::Drivers* drivers, ChassisSubsystem* chassis);
+    ChassisImuDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsystem* chassis);
 
     void initialize() override;
 
@@ -58,7 +57,7 @@ public:
     const char* getName() const override { return "chassis imu drive"; }
 
 private:
-    tap::Drivers* drivers;
+    aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     tap::algorithms::ContiguousFloat rotationSetpoint;
     bool imuSetpointInitialized = false;
