@@ -92,7 +92,7 @@ private:
      */
     static constexpr float VELOCITY_PID_KP = 22.0f;
     static constexpr float VELOCITY_PID_KI = 0.2f;
-    static constexpr float VELOCITY_PID_KD = 2.0f;
+    static constexpr float VELOCITY_PID_KD = 0.0f;
     static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
     /**
      * This max output is measured in the c620 robomaster translated current.
@@ -103,15 +103,14 @@ private:
     static constexpr float VELOCITY_PID_MAX_OUTPUT = 16000.0f;
 
     /**
-     * Rotation PID: A PID controller for chassis autorotation. The PID parameters for the
+     * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
      * controller are listed below.
      */
-    static constexpr float AUTOROTATION_PID_KP = 140.0f;
-    static constexpr float AUTOROTATION_PID_KI = 0.0f;
-    static constexpr float AUTOROTATION_PID_KD = 2000.0f;
-    static constexpr float AUTOROTATION_PID_MAX_ERROR_SUM = 0.0f;
-    static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 6000.0f;
-    static constexpr float AUTOROTATE_MAX_ANGLE_ERROR = 10.0f;
+    static constexpr float AUTOROTATION_PID_KP = 210.0f;
+    static constexpr float AUTOROTATION_PID_KD = 4500.0f;
+    static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
+    static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
+    static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
 
     // mechanical chassis constants, all in m
     /**
@@ -147,15 +146,14 @@ private:
     static constexpr float VELOCITY_PID_MAX_OUTPUT = 16000.0f;
 
     /**
-     * Rotation PID: A PID controller for chassis autorotation. The PID parameters for the
+     * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
      * controller are listed below.
      */
-    static constexpr float AUTOROTATION_PID_KP = 140.0f;
-    static constexpr float AUTOROTATION_PID_KI = 0.0f;
-    static constexpr float AUTOROTATION_PID_KD = 2000.0f;
-    static constexpr float AUTOROTATION_PID_MAX_ERROR_SUM = 0.0f;
-    static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 6000.0f;
-    static constexpr float AUTOROTATE_MAX_ANGLE_ERROR = 10.0f;
+    static constexpr float AUTOROTATION_PID_KP = 210.0f;
+    static constexpr float AUTOROTATION_PID_KD = 4500.0f;
+    static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
+    static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
+    static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
 
     // mechanical chassis constants
     /**
@@ -191,15 +189,14 @@ private:
     static constexpr float VELOCITY_PID_MAX_OUTPUT = 0.0f;
 
     /**
-     * Rotation PID: A PID controller for chassis autorotation. The PID parameters for the
+     * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
      * controller are listed below.
      */
-    static constexpr float AUTOROTATION_PID_KP = 140.0f;
-    static constexpr float AUTOROTATION_PID_KI = 0.0f;
-    static constexpr float AUTOROTATION_PID_KD = 2000.0f;
-    static constexpr float AUTOROTATION_PID_MAX_ERROR_SUM = 0.0f;
-    static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 6000.0f;
-    static constexpr float AUTOROTATE_MAX_ANGLE_ERROR = 10.0f;
+    static constexpr float AUTOROTATION_PID_KP = 210.0f;
+    static constexpr float AUTOROTATION_PID_KD = 4500.0f;
+    static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
+    static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
+    static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
 
     // mechanical chassis constants
     /**
@@ -275,8 +272,7 @@ public:
      */
     modm::Matrix<float, 4, 1> desiredWheelRPM;
 
-    modm::Pid<float>::Parameter chassisRotatePidParameters;
-    modm::Pid<float> chassisRotationPid;
+    tap::algorithms::ExtendedKalman chassisRotationErrorKalman;
 
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 

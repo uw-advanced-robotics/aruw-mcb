@@ -66,13 +66,7 @@ ChassisSubsystem::ChassisSubsystem(
           VELOCITY_PID_KD,
           VELOCITY_PID_MAX_ERROR_SUM,
           VELOCITY_PID_MAX_OUTPUT),
-      chassisRotatePidParameters(
-          AUTOROTATION_PID_KP,
-          AUTOROTATION_PID_KI,
-          AUTOROTATION_PID_KD,
-          AUTOROTATION_PID_MAX_ERROR_SUM,
-          AUTOROTATION_PID_MAX_OUTPUT),
-      chassisRotationPid(chassisRotatePidParameters),
+      chassisRotationErrorKalman(1.0f, 1.0f),
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
@@ -183,10 +177,26 @@ void ChassisSubsystem::updateMotorRpmPid(
 
 float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError)
 {
-    currentAngleError =
-        limitVal(currentAngleError, -AUTOROTATE_MAX_ANGLE_ERROR, AUTOROTATE_MAX_ANGLE_ERROR);
-    chassisRotationPid.update(currentAngleError);
-    return chassisRotationPid.getValue();
+    float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.getLastFiltered();
+    float currentFilteredAngleError = chassisRotationErrorKalman.filterData(currentAngleError);
+
+    // P
+    float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
+    currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
+
+    // D
+    float currentRotationPidD =
+        (currentFilteredAngleError - currentFilteredAngleErrorPrevious) * AUTOROTATION_PID_KD;
+
+    currentRotationPidD =
+        limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
+
+    float wheelRotationSpeed = limitVal(
+        currRotationPidP + currentRotationPidD,
+        -AUTOROTATION_PID_MAX_OUTPUT,
+        AUTOROTATION_PID_MAX_OUTPUT);
+
+    return wheelRotationSpeed;
 }
 
 float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
