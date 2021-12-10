@@ -64,11 +64,16 @@ public:
     /**
      * Use this rotation speed if power consumption limit is <= 80 W and > 60 W
      */
-    static constexpr float ROTATION_TARGET_80W_CUTOFF = 4000.0f;
+    static constexpr float ROTATION_TARGET_80W_CUTOFF = 5500.0f;
     /**
-     * Use this rotation speed if power consumption limit is > 80 W
+     * Use this rotation speed if power consumption limit is <= 100 W and > 80 W
      */
-    static constexpr float ROTATION_TARGET_MAX_CUTOFF = 4500.0f;
+    static constexpr float ROTATION_TARGET_100W_CUTOFF = 6000.0f;
+    /**
+     * Use this rotation speed if power consumption limit is > 100 W
+     */
+    static constexpr float ROTATION_TARGET_MAX_CUTOFF = 7500.0f;
+
     /**
      * The fraction to cut rotation speed while moving and beyblading
      */
