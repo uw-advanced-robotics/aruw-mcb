@@ -21,13 +21,12 @@
 
 #include <gtest/gtest.h>
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 
 using namespace aruwsrc::chassis;
-using namespace tap;
+using namespace aruwsrc;
 using namespace testing;
 
 #define SETUP_TEST_OBJECTS()                                         \
@@ -124,8 +123,8 @@ TEST(
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
     });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float kp) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r, kp);
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
     });
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
@@ -157,8 +156,8 @@ TEST(
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
     });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float kp) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r, kp);
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
     });
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
@@ -188,8 +187,8 @@ TEST(ChassisImuDriveCommand, execute__if_imu_err_very_large_imu_setpoint_updated
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
     });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float kp) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r, kp);
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
     });
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
@@ -219,8 +218,8 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
     });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float kp) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r, kp);
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
     });
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
