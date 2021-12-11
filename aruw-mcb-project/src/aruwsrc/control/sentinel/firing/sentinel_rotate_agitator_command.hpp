@@ -66,7 +66,8 @@ private:
     static constexpr uint32_t SWITCH_BARREL_TIMEOUT = 100;
     static constexpr uint16_t BARREL_OVERHEAT_THRESHOLD = 30;
     static constexpr float AGITATOR_ROTATE_ANGLE = 3 * M_PI / 10;
-    static constexpr uint32_t AGITATOR_ROTATE_TIME = 54; // @TODO This seems unreasonably low to me (Tenzin)
+    static constexpr uint32_t AGITATOR_ROTATE_TIME =
+        54;  // @TODO This seems unreasonably low to me (Tenzin)
     static constexpr uint32_t AGITATOR_WAIT_AFTER_ROTATE_TIME = 0;
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = M_PI / 50;
     static constexpr float AGITATOR_UNJAM_DISPLACEMENT = M_PI / 4;

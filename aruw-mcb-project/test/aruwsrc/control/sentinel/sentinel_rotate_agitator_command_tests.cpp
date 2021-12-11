@@ -231,12 +231,16 @@ TEST(
     ON_CALL(agitator, isOnline).WillByDefault(Return(true));
     ON_CALL(agitator, isJammed).WillByDefault(Return(false));
     float AGITATOR_ROTATE_ANGLE = 3 * M_PI / 10;
-    EXPECT_CALL(agitator, getCurrentValue).WillOnce(Return(10)).WillOnce(Return(10)).WillRepeatedly(Return(10 + AGITATOR_ROTATE_ANGLE));
+    EXPECT_CALL(agitator, getCurrentValue)
+        .WillOnce(Return(10))
+        .WillOnce(Return(10))
+        .WillRepeatedly(Return(10 + AGITATOR_ROTATE_ANGLE));
     ON_CALL(agitator, getSetpoint).WillByDefault(Return(10));
 
     EXPECT_TRUE(srac.isReady());
     srac.initialize();
-    for (int i = 1; i <= 1000; i++) {
+    for (int i = 1; i <= 1000; i++)
+    {
         setTime(i);
         srac.execute();
     }
