@@ -80,14 +80,14 @@ void ChassisImuDriveCommand::execute()
                     tap::algorithms::ContiguousFloat::limitValue(
                         rotationSetpoint,
                         yaw - MAX_ROTATION_ERR,
-                        yaw + MAX_ROTATION_ERR) -
+                        yaw + MAX_ROTATION_ERR) +
                     drivers->controlOperatorInterface.getChassisRInput() *
                         USER_INPUT_TO_ANGLE_DELTA_SCALAR);
             }
             else
             {
                 rotationSetpoint.shiftValue(
-                    -drivers->controlOperatorInterface.getChassisRInput() *
+                    drivers->controlOperatorInterface.getChassisRInput() *
                     USER_INPUT_TO_ANGLE_DELTA_SCALAR);
             }
 
@@ -96,7 +96,7 @@ void ChassisImuDriveCommand::execute()
 
             // run PID controller to attempt to attain the setpoint
             chassisRotationDesiredWheelspeed =
-                chassis->chassisSpeedRotationPID(-angleFromDesiredRotation);
+                chassis->chassisSpeedRotationPID(angleFromDesiredRotation);
         }
     }
     else

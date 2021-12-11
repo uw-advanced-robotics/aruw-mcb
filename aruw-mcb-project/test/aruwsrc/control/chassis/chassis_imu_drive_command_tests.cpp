@@ -187,9 +187,7 @@ TEST(ChassisImuDriveCommand, execute__if_imu_err_very_large_imu_setpoint_updated
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
     });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
-    });
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) { return r; });
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
     ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
@@ -199,7 +197,6 @@ TEST(ChassisImuDriveCommand, execute__if_imu_err_very_large_imu_setpoint_updated
 
     // very large imu yaw difference
     imuYaw = 90;
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Ne(0)));
     chassisImuDriveCommand.execute();
 
     // setpoint is now 90 - ChassisImuDriveCommand::MAX_ROTATION_ERR
