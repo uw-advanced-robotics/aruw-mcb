@@ -124,7 +124,7 @@ public:
     // How long the command should wait after reaching the target angle
     static constexpr uint32_t KICKER_42MM_PAUSE_AFTER_ROTATE_TIME = 0;
     // Error within which kicker will be considered to have reached target displacement
-    static constexpr uint32_t KICKER_42MM_SETPOINT_TOLERANCE = 0.1f;
+    static constexpr float KICKER_42MM_SETPOINT_TOLERANCE = 0.1f;
 
     // Buffer from max heat limit in which limiting occurs, for hero 100 is one shot.
     static constexpr uint16_t HEAT_LIMIT_BUFFER = 100;

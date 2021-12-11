@@ -68,7 +68,7 @@ private:
     static constexpr float AGITATOR_ROTATE_ANGLE = 3 * M_PI / 10;
     static constexpr uint32_t AGITATOR_ROTATE_TIME = 54; // @TODO This seems unreasonably low to me (Tenzin)
     static constexpr uint32_t AGITATOR_WAIT_AFTER_ROTATE_TIME = 0;
-    static constexpr uint32_t AGITATOR_SETPOINT_TOLERANCE = M_PI / 50;
+    static constexpr float AGITATOR_SETPOINT_TOLERANCE = M_PI / 50;
     static constexpr float AGITATOR_UNJAM_DISPLACEMENT = M_PI / 4;
     static constexpr float AGITATOR_UNJAM_THRESHOLD = 3 * AGITATOR_UNJAM_DISPLACEMENT / 4;
     static constexpr uint32_t AGITATOR_UNJAM_WAIT_TIME = 100;
