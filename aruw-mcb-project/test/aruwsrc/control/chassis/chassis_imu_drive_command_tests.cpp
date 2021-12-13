@@ -77,16 +77,19 @@ TEST(ChassisImuDriveCommand, execute__normal_rotation_translation_when_imu_not_c
 
     for (auto triplet : desiredOutputValuesToTest)
     {
-        userX = triplet[0];
-        userY = triplet[1];
-        userR = triplet[2];
         EXPECT_CALL(
             chassis,
             setDesiredOutput(
                 ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR * triplet[0],
                 ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR * triplet[1],
                 ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR * triplet[2]));
+    }
 
+    for (auto triplet : desiredOutputValuesToTest)
+    {
+        userX = triplet[0];
+        userY = triplet[1];
+        userR = triplet[2];
         chassisImuDriveCommand.execute();
     }
 }
@@ -100,80 +103,115 @@ TEST(
     float userX = 0, userY = 0, userR = 0;
     setupUserInput(drivers, &userX, &userY, &userR);
 
-    EXPECT_CALL(drivers.mpu6500, initialized)
-        .Times(3)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    bool initialized = false;
+
+    ON_CALL(drivers.mpu6500, initialized).WillByDefault([&]() { return initialized; });
 
     EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0));
+
     userR = 0.5;  // user R input ignored since initializing.
 
     chassisImuDriveCommand.initialize();  // imu not initialized
-    chassisImuDriveCommand.execute();     // imu now initialized
+
+    initialized = true;
+    chassisImuDriveCommand.execute();  // imu now initialized
 }
 
-TEST(
-    ChassisImuDriveCommand,
-    execute__imu_setpoint_used_for_rotation_compensation_if_initialize_called_with_mpu6500_initialized)
+static void setupDefaultChassisBehavior(mock::ChassisSubsystemMock &chassis)
 {
-    SETUP_TEST_OBJECTS();
-
-    float userX = 0, userY = 0, userR = 0;
-    setupUserInput(drivers, &userX, &userY, &userR);
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
     });
     ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
     });
-    float imuYaw = 0;
-    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
-    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
-
-    // imu yaw initially 0
-    chassisImuDriveCommand.initialize();
-    // no rotation
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0));
-    chassisImuDriveCommand.execute();
-    // imu now indicates chassis is more clockwise than it should be
-    imuYaw = 350;
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Ne(0)));
-    chassisImuDriveCommand.execute();
-    // imu now indicates chassis is more counterclockwise than it should be
-    imuYaw = 10;
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Ne(0)));
-    chassisImuDriveCommand.execute();
 }
 
-TEST(
-    ChassisImuDriveCommand,
-    execute__imu_setpoint_updates_based_on_user_input_if_initialize_called_with_mpu6500_initialized)
+static void setupDefaultImuBehavior(aruwsrc::Drivers &drivers, float *imuYaw)
+{
+    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(imuYaw));
+    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
+}
+
+TEST(ChassisImuDriveCommand, execute__imu_setpoint_target_setpoint_same_0_rotation_output)
 {
     SETUP_TEST_OBJECTS();
 
     float userX = 0, userY = 0, userR = 0;
-    setupUserInput(drivers, &userX, &userY, &userR);
-    ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
-        return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
-    });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
-    });
     float imuYaw = 0;
-    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
-    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
+
+    setupUserInput(drivers, &userX, &userY, &userR);
+    setupDefaultChassisBehavior(chassis);
+    setupDefaultImuBehavior(drivers, &imuYaw);
+
+    EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0));
 
     // imu yaw initially 0
     chassisImuDriveCommand.initialize();
+
     // no rotation
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0));
     chassisImuDriveCommand.execute();
-    // rotate chassis clockwise
-    userR = 0.5;
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Ne(0)));
+}
+
+TEST(ChassisImuDriveCommand, execute__target_gt_actual_negative_rotation_output)
+{
+    SETUP_TEST_OBJECTS();
+
+    float userX = 0, userY = 0, userR = 0;
+    float imuYaw = 0;
+
+    setupUserInput(drivers, &userX, &userY, &userR);
+    setupDefaultChassisBehavior(chassis);
+    setupDefaultImuBehavior(drivers, &imuYaw);
+
+    // imu yaw initially 0
+    chassisImuDriveCommand.initialize();
+
+    userR = 1.0f;  // user rotation positive, setpoint will be gt current imu yaw.
+
+    // since chassis rotation backward, expect desired output to be less than 0
+    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Lt(0)));
     chassisImuDriveCommand.execute();
-    // rotate chassis counterclockwise
-    userR = -1;
+}
+
+TEST(ChassisImuDriveCommand, execute__target_lt_actual_positive_rotation_output)
+{
+    SETUP_TEST_OBJECTS();
+
+    float userX = 0, userY = 0, userR = 0;
+    float imuYaw = 0;
+
+    setupUserInput(drivers, &userX, &userY, &userR);
+    setupDefaultChassisBehavior(chassis);
+    setupDefaultImuBehavior(drivers, &imuYaw);
+
+    // imu yaw initially 0
+    chassisImuDriveCommand.initialize();
+
+    userR = -1.0f;  // user rotation negative, setpoint will be gt current imu yaw.
+
+    // since chassis rotation backward, expect desired output to be less than 0
+    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Gt(0)));
+    chassisImuDriveCommand.execute();
+}
+
+TEST(ChassisImuDriveCommand, execute__imu_yaw_changes_nonzero_rotation_output)
+{
+    SETUP_TEST_OBJECTS();
+
+    float userX = 0, userY = 0, userR = 0;
+    float imuYaw = 0;
+
+    setupUserInput(drivers, &userX, &userY, &userR);
+    setupDefaultChassisBehavior(chassis);
+    setupDefaultImuBehavior(drivers, &imuYaw);
+
+    // imu yaw initially 0
+    chassisImuDriveCommand.initialize();
+
+    // update imu yaw to be nonzero, now output expected to be nonzero
+    imuYaw = 20;
+
     EXPECT_CALL(chassis, setDesiredOutput(0, 0, Ne(0)));
     chassisImuDriveCommand.execute();
 }
@@ -187,7 +225,9 @@ TEST(ChassisImuDriveCommand, execute__if_imu_err_very_large_imu_setpoint_updated
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
     });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) { return r; });
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
+    });
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
     ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
@@ -202,8 +242,16 @@ TEST(ChassisImuDriveCommand, execute__if_imu_err_very_large_imu_setpoint_updated
     // setpoint is now 90 - ChassisImuDriveCommand::MAX_ROTATION_ERR
     // so if imuYaw is set to this, rotation output should be 0
     imuYaw = 90 - ChassisImuDriveCommand::MAX_ROTATION_ERR;
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0));
-    chassisImuDriveCommand.execute();
+    float rotation = INFINITY;
+    ON_CALL(chassis, setDesiredOutput).WillByDefault([&](float, float, float r) { rotation = r; });
+
+    for (int i = 0; i < 100; i++)
+    {
+        chassisImuDriveCommand.execute();
+    }
+
+    // output will settle to 0
+    EXPECT_NEAR(0.0f, rotation, 1E-5);
 }
 
 TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_on_desired_heading)
