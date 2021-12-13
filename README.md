@@ -14,6 +14,7 @@ Software we use:
 - the gcc compiler
 - openocd to deploy and debug
 - VSCode, an editor
+- [Taproot](https://gitlab.com/aruw/controls/taproot), a RoboMaster controls framework
 
 __In addition to this readme, check out 
 [our GitLab wiki](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/home) and
