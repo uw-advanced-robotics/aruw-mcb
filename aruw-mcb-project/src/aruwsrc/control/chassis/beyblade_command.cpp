@@ -75,9 +75,13 @@ void BeybladeCommand::execute()
         x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
 
-        static constexpr float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
-                                                   TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
-                                                   ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+        const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+
+        const float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
+                                        TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
+                                        MAX_WHEEL_SPEED;
 
         rampTarget = rotationDirection * getRotationTarget();
         if (fabsf(x) > TRANSLATION_LIMIT || fabsf(y) > TRANSLATION_LIMIT)
