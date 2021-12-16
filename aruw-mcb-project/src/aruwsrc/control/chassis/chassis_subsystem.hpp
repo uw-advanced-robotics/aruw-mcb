@@ -81,7 +81,7 @@ public:
     /// @see power_limiter.hpp for what these mean
     static constexpr float MAX_ENERGY_BUFFER = 60.0f;
     static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 40.0f;
-    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 5;
+    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 0;
     static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
     static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
