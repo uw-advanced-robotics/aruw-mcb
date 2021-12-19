@@ -25,8 +25,6 @@
 
 #include "aruwsrc/drivers.hpp"
 
-#include "limit_switch_agitator_subsystem.hpp"
-
 namespace aruwsrc
 {
 namespace agitator
@@ -60,80 +58,6 @@ private:
     const bool heatLimiting;
     const float heatLimitBuffer;
 };  // class ShootFastComprisedCommand
-
-/**
- * Command that rotates the associated waterwheel if there are less than some number
- * of balls in the tube between the waterwheel and the firing mechanism.
- */
-class WaterwheelLoadCommand42mm : public tap::control::setpoint::MoveUnjamComprisedCommand
-{
-public:
-    // Angle the command tries to move the agitator whenever it is scheduled
-    static constexpr float WATERWHEEL_42MM_CHANGE_ANGLE = M_PI / 7;
-    // Max angle the agitator will move while unjamming
-    static constexpr float WATERWHEEL_42MM_MAX_UNJAM_ANGLE = M_PI / 35;
-    // Expected time for the water wheel to rotate the specified angle in ms
-    static constexpr uint32_t WATERWHEEL_42MM_ROTATE_TIME = 1000;
-    // How long the command should wait after reaching the target angle
-    static constexpr uint32_t WATERWHEEL_42MM_PAUSE_AFTER_ROTATE_TIME = 10;
-
-    // Buffer from max heat limit in which limiting occurs, for hero 100 is one shot.
-    static constexpr float HEAT_LIMIT_BUFFER = 100;
-
-    static constexpr int BALLS_QUEUED_IN_TUBE = 3;
-
-    WaterwheelLoadCommand42mm(
-        aruwsrc::Drivers* drivers,
-        aruwsrc::agitator::LimitSwitchAgitatorSubsystem* waterwheel);
-
-    bool isReady() override;
-
-    bool isFinished() const override;
-
-private:
-    // Store instance of drivers to be able to access digital
-    aruwsrc::Drivers* drivers;
-
-    // Store pointer to limited agitator subsystem with derived class type
-    aruwsrc::agitator::LimitSwitchAgitatorSubsystem* waterwheel;
-};  // class Waterwheel42mmLoadCommand
-
-/**
- * This command rotates the kicker subsystem, no jamming required so just uses a MoveCommand
- */
-class ShootCommand42mm : public tap::control::setpoint::MoveCommand
-{
-public:
-    // Angle the command tries to move the agitator whenever it is scheduled
-    static constexpr float KICKER_42MM_CHANGE_ANGLE = 1.3f * M_PI;
-    // Expected time for the water wheel to rotate the specified angle in ms
-    static constexpr uint32_t KICKER_42MM_ROTATE_TIME = 300;
-    // How long the command should wait after reaching the target angle
-    static constexpr uint32_t KICKER_42MM_PAUSE_AFTER_ROTATE_TIME = 0;
-
-    // Buffer from max heat limit in which limiting occurs, for hero 100 is one shot.
-    static constexpr uint16_t HEAT_LIMIT_BUFFER = 100;
-
-    ShootCommand42mm(
-        aruwsrc::Drivers* drivers,
-        tap::control::setpoint::SetpointSubsystem* kicker,
-        bool heatLimiting = true);
-
-    // Override for heat limiting logic
-    bool isReady() override;
-
-    void initialize() override;
-
-    static int getInitializeCount() { return initializeCount; }
-    static void resetInitializeCount() { initializeCount = 0; }
-
-private:
-    aruwsrc::Drivers* drivers;
-
-    const bool heatLimiting;
-
-    static int initializeCount;
-};
 
 }  // namespace agitator
 

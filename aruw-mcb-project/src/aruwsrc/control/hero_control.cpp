@@ -30,8 +30,9 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/agitator_shoot_comprised_command_instances.hpp"
-#include "agitator/double_agitator_subsystem.hpp"
-#include "agitator/limit_switch_agitator_subsystem.hpp"
+#include "agitator/kicker_agitator_subsystem.hpp"
+#include "agitator/rotate_kicker_command.hpp"
+#include "agitator/rotate_waterwheel_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
@@ -69,7 +70,7 @@ namespace hero_control
 ChassisSubsystem chassis(drivers());
 
 // Hero has two agitators, one waterWheel and then a kicker
-LimitSwitchAgitatorSubsystem waterWheelAgitator(
+AgitatorSubsystem waterWheelAgitator(
     drivers(),
     AgitatorSubsystem::PID_HERO_WATERWHEEL_P,
     AgitatorSubsystem::PID_HERO_WATERWHEEL_I,
@@ -81,10 +82,9 @@ LimitSwitchAgitatorSubsystem waterWheelAgitator(
     AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_CAN_BUS,
     AgitatorSubsystem::HERO_WATERWHEEL_INVERTED,
     AgitatorSubsystem::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
-    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
-    LimitSwitchAgitatorSubsystem::WATERWHEEL_LIMIT_PIN);
+    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL);
 
-DoubleAgitatorSubsystem kickerSubsystem(
+KickerAgitatorSubsystem kickerSubsystem(
     drivers(),
     AgitatorSubsystem::PID_HERO_KICKER_P,
     AgitatorSubsystem::PID_HERO_KICKER_I,
@@ -92,14 +92,9 @@ DoubleAgitatorSubsystem kickerSubsystem(
     AgitatorSubsystem::PID_HERO_KICKER_MAX_ERR_SUM,
     AgitatorSubsystem::PID_HERO_KICKER_MAX_OUT,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HERO_KICKER1_MOTOR_ID,
-    AgitatorSubsystem::HERO_KICKER1_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_KICKER2_MOTOR_ID,
-    AgitatorSubsystem::HERO_KICKER2_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_KICKER_INVERTED,
-    DoubleAgitatorSubsystem::JAM_DISTANCE_TOLERANCE,
-    DoubleAgitatorSubsystem::JAM_TEMPORAL_TOLERANCE,
-    false);
+    AgitatorSubsystem::HERO_KICKER_MOTOR_ID,
+    AgitatorSubsystem::HERO_KICKER_MOTOR_CAN_BUS,
+    AgitatorSubsystem::HERO_KICKER_INVERTED);
 
 FrictionWheelSubsystem frictionWheels(drivers());
 
@@ -110,10 +105,10 @@ ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 CalibrateCommand calibrateDoubleAgitator(&kickerSubsystem);
 
-WaterwheelLoadCommand42mm waterwheelLoadCommand(drivers(), &waterWheelAgitator);
+RotateWaterwheelCommand rotateWaterwheel(drivers(), &waterWheelAgitator, &kickerSubsystem);
 
-ShootCommand42mm kickerShootHeatLimitedCommand(drivers(), &kickerSubsystem, true);
-ShootCommand42mm kickerShootUnlimitedCommand(drivers(), &kickerSubsystem, false);
+RotateKickerCommand kickerShootHeatLimitedCommand(drivers(), &kickerSubsystem, true);
+RotateKickerCommand kickerShootUnlimitedCommand(drivers(), &kickerSubsystem, false);
 
 FrictionWheelRotateCommand spinFrictionWheels(
     &frictionWheels,
@@ -181,7 +176,7 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
 {
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    waterWheelAgitator.setDefaultCommand(&waterwheelLoadCommand);
+    waterWheelAgitator.setDefaultCommand(&rotateWaterwheel);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
