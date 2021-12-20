@@ -55,9 +55,13 @@ if [[ "$?" != 0 ]]; then
     exit 1
 fi
 
-if [[ ! -z "$(git diff "$TEMP_DIR" "taproot")" ]]; then
+# Remove all project.xml.log files that were generated when running lbuild build
+shopt -s globstar  # enable globstar, double astrisk (https://askubuntu.com/questions/1010707/how-to-enable-the-double-star-globstar-operator)
+rm -f ./**/project.xml.log
+
+if [[ ! -z "$(git diff --no-index "$TEMP_DIR" "taproot")" ]]; then
     echo "Generated lbuild is different, diff:"
-    git diff "$TEMP_DIR" "taproot"
+    git diff --no-index "$TEMP_DIR" "taproot"
     rm -r $TEMP_DIR
     exit 1
 else

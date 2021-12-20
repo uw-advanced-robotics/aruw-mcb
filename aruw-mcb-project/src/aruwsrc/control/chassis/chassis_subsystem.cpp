@@ -66,7 +66,7 @@ ChassisSubsystem::ChassisSubsystem(
           VELOCITY_PID_KD,
           VELOCITY_PID_MAX_ERROR_SUM,
           VELOCITY_PID_MAX_OUTPUT),
-      chassisRotationErrorKalman(1.0f, 0.0f),
+      chassisRotationErrorKalman(1.0f, 1.0f),
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
@@ -175,36 +175,26 @@ void ChassisSubsystem::updateMotorRpmPid(
     motor->setDesiredOutput(pid->getValue());
 }
 
-float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float kp)
+float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError)
 {
     float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.getLastFiltered();
     float currentFilteredAngleError = chassisRotationErrorKalman.filterData(currentAngleError);
 
     // P
-    float currRotationPidP = currentAngleError * kp;
-    currRotationPidP = tap::algorithms::limitVal<float>(
-        currRotationPidP,
-        -CHASSIS_REVOLVE_PID_MAX_P,
-        CHASSIS_REVOLVE_PID_MAX_P);
+    float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
+    currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
 
     // D
-    float currentRotationPidD = 0.0f;
-    if (abs(currentFilteredAngleError) > MIN_ERROR_ROTATION_D)
-    {
-        float currentErrorRotation = currentFilteredAngleError - currentFilteredAngleErrorPrevious;
+    float currentRotationPidD =
+        (currentFilteredAngleError - currentFilteredAngleErrorPrevious) * AUTOROTATION_PID_KD;
 
-        currentRotationPidD = -(currentErrorRotation)*CHASSIS_REVOLVE_PID_KD;
+    currentRotationPidD =
+        limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
 
-        currentRotationPidD = tap::algorithms::limitVal<float>(
-            currentRotationPidD,
-            -CHASSIS_REVOLVE_PID_MAX_D,
-            CHASSIS_REVOLVE_PID_MAX_D);
-    }
-
-    float wheelRotationSpeed = tap::algorithms::limitVal<float>(
+    float wheelRotationSpeed = limitVal(
         currRotationPidP + currentRotationPidD,
-        -MAX_OUTPUT_ROTATION_PID,
-        MAX_OUTPUT_ROTATION_PID);
+        -AUTOROTATION_PID_MAX_OUTPUT,
+        AUTOROTATION_PID_MAX_OUTPUT);
 
     return wheelRotationSpeed;
 }

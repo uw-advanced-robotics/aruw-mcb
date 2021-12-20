@@ -122,6 +122,10 @@ float BeybladeCommand::getRotationTarget() const
     {
         return ROTATION_TARGET_80W_CUTOFF;
     }
+    else if (powerConsumptionLimit <= 100)
+    {
+        return ROTATION_TARGET_100W_CUTOFF;
+    }
     else
     {
         return ROTATION_TARGET_MAX_CUTOFF;
