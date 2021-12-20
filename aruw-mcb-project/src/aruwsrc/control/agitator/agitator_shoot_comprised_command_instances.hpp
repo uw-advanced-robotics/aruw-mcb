@@ -63,7 +63,11 @@ public:
 private:
     aruwsrc::Drivers* drivers;
 
+    // If `true` heat limiting is enabled, off otherwise
     const bool heatLimiting;
+    // If current_barrel_heat + heatLimitBuffer > barrel_heat_limit then command
+    // will not be scheduled. (How close to heat limit barrel can get before command
+    // will stop scheduling)
     const float heatLimitBuffer;
 };  // class ShootFastComprisedCommand
 
