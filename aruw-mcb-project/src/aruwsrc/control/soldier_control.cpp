@@ -129,26 +129,44 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
     50,
+    0,
+    true,
+    M_PI / 16.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    130,
+    2,
     true,
     10);
 MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
     10,
+    0,
+    true,
+    M_PI / 16.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    130,
+    2,
     true,
     100);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
+    50,
     0,
+    true,
+    M_PI / 16.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    130,
+    2,
     false,
-    50);
+    10);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels);
 
