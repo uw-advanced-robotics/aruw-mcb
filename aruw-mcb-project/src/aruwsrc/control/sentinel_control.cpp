@@ -106,8 +106,14 @@ aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
     50,
+    0,
+    true,
+    M_PI / 16.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    130,
+    2,
     true,
     10);
 

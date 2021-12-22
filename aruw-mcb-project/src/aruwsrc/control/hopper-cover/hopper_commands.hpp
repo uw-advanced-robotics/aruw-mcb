@@ -28,7 +28,7 @@ namespace aruwsrc
 // forward declaration
 namespace agitator
 {
-    class AgitatorSubsystem;
+class AgitatorSubsystem;
 }
 namespace control
 {
