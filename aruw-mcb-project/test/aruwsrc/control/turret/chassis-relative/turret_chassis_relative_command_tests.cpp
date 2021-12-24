@@ -124,12 +124,10 @@ TEST(TurretChassisRelativeCommand, execute__output_nonzero_when_error_nonzero)
             0,
             TurretSubsystem::GRAVITY_COMPENSATION_SCALAR))));
     EXPECT_CALL(turret, setYawMotorOutput(Lt(0)));
-    EXPECT_CALL(turret, setPitchSetpoint(Gt(90))).WillRepeatedly([&](float setpoint) {
-        pitchSetpoint = setpoint;
-    });
-    EXPECT_CALL(turret, setYawSetpoint(Lt(90))).WillRepeatedly([&](float setpoint) {
-        yawSetpoint = setpoint;
-    });
+    EXPECT_CALL(turret, setPitchSetpoint(Gt(90)))
+        .WillRepeatedly([&](float setpoint) { pitchSetpoint = setpoint; });
+    EXPECT_CALL(turret, setYawSetpoint(Lt(90)))
+        .WillRepeatedly([&](float setpoint) { yawSetpoint = setpoint; });
 
     turretCR.initialize();
     turretCR.execute();

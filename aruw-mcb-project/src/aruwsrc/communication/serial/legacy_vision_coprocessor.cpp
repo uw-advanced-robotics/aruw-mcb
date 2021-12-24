@@ -75,7 +75,9 @@ void LegacyVisionCoprocessor::messageReceiveCallback(const SerialMessage& comple
     }
 }
 
-bool LegacyVisionCoprocessor::decodeToTurretAimData(const SerialMessage& message, TurretAimData* aimData)
+bool LegacyVisionCoprocessor::decodeToTurretAimData(
+    const SerialMessage& message,
+    TurretAimData* aimData)
 {
     if (message.length != AIM_DATA_MESSAGE_SIZE)
     {

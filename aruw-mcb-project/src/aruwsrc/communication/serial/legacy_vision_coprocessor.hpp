@@ -58,7 +58,9 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class LegacyVisionCoprocessor : public tap::serial::DJISerial, ::modm::pt::Protothread, modm::Resumable<3>
+class LegacyVisionCoprocessor : public tap::serial::DJISerial,
+                                ::modm::pt::Protothread,
+                                modm::Resumable<3>
 {
 public:
     // AutoAim Data

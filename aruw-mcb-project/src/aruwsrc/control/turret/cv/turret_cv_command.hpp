@@ -36,8 +36,8 @@ class Drivers;
 namespace aruwsrc::control::turret
 {
 /**
- * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and aims the
- * turret accordingly using a position PID controller.
+ * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
+ * aims the turret accordingly using a position PID controller.
  */
 class TurretCVCommand : public tap::control::Command
 {
