@@ -155,8 +155,8 @@ void initializeSubsystems()
     sentinelDrive.initialize();
     frictionWheels.initialize();
     turretSubsystem.initialize();
-    drivers()->xavierSerial.attachChassis(&sentinelDrive);
-    drivers()->xavierSerial.attachTurret(&turretSubsystem);
+    drivers()->legacyVisionCoprocessor.attachChassis(&sentinelDrive);
+    drivers()->legacyVisionCoprocessor.attachTurret(&turretSubsystem);
 }
 
 /* register subsystems here -------------------------------------------------*/

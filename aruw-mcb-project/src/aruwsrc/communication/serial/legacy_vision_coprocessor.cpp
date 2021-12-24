@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "xavier_serial.hpp"
+#include "legacy_vision_coprocessor.hpp"
 
 #include <cstring>
 
@@ -34,7 +34,7 @@ namespace aruwsrc
 {
 namespace serial
 {
-XavierSerial::XavierSerial(aruwsrc::Drivers* drivers)
+LegacyVisionCoprocessor::LegacyVisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),
@@ -44,14 +44,14 @@ XavierSerial::XavierSerial(aruwsrc::Drivers* drivers)
 {
 }
 
-void XavierSerial::initializeCV()
+void LegacyVisionCoprocessor::initializeCV()
 {
     txRobotIdTimeout.restart(TIME_BETWEEN_ROBOT_ID_SEND_MS);
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
     initialize();
 }
 
-void XavierSerial::messageReceiveCallback(const SerialMessage& completeMessage)
+void LegacyVisionCoprocessor::messageReceiveCallback(const SerialMessage& completeMessage)
 {
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
     switch (completeMessage.type)
@@ -75,7 +75,7 @@ void XavierSerial::messageReceiveCallback(const SerialMessage& completeMessage)
     }
 }
 
-bool XavierSerial::decodeToTurretAimData(const SerialMessage& message, TurretAimData* aimData)
+bool LegacyVisionCoprocessor::decodeToTurretAimData(const SerialMessage& message, TurretAimData* aimData)
 {
     if (message.length != AIM_DATA_MESSAGE_SIZE)
     {
@@ -94,7 +94,7 @@ bool XavierSerial::decodeToTurretAimData(const SerialMessage& message, TurretAim
     return true;
 }
 
-bool XavierSerial::sendMessage()
+bool LegacyVisionCoprocessor::sendMessage()
 {
     PT_BEGIN();
     while (true)
@@ -108,7 +108,7 @@ bool XavierSerial::sendMessage()
     PT_END();
 }
 
-modm::ResumableResult<bool> XavierSerial::sendRobotMeasurements()
+modm::ResumableResult<bool> LegacyVisionCoprocessor::sendRobotMeasurements()
 {
     RF_BEGIN(0);
 
@@ -178,19 +178,19 @@ modm::ResumableResult<bool> XavierSerial::sendRobotMeasurements()
     RF_END();
 }
 
-void XavierSerial::beginAutoAim()
+void LegacyVisionCoprocessor::beginAutoAim()
 {
     AutoAimRequest.autoAimRequest = true;
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-void XavierSerial::stopAutoAim()
+void LegacyVisionCoprocessor::stopAutoAim()
 {
     AutoAimRequest.autoAimRequest = false;
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
+modm::ResumableResult<bool> LegacyVisionCoprocessor::sendAutoAimRequest()
 {
     RF_BEGIN(1);
     // If there is an auto aim request queued or if the request aim
@@ -221,7 +221,7 @@ modm::ResumableResult<bool> XavierSerial::sendAutoAimRequest()
     RF_END();
 }
 
-modm::ResumableResult<bool> XavierSerial::sendRobotID()
+modm::ResumableResult<bool> LegacyVisionCoprocessor::sendRobotID()
 {
     RF_BEGIN(2);
     if (txRobotIdTimeout.execute())

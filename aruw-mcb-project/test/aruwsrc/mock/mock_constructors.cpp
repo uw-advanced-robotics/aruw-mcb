@@ -31,7 +31,7 @@
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
-#include "xavier_serial_mock.hpp"
+#include "legacy_vision_coprocessor_mock.hpp"
 
 // A file for listing all mock constructors and destructors since doing
 // so in a source file allows for faster compilation than defining constructors
@@ -162,6 +162,6 @@ XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Dig
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
-XavierSerialMock::XavierSerialMock(aruwsrc::Drivers *drivers) : serial::XavierSerial(drivers) {}
-XavierSerialMock::~XavierSerialMock() {}
+LegacyVisionCoprocessorMock::LegacyVisionCoprocessorMock(aruwsrc::Drivers *drivers) : serial::LegacyVisionCoprocessor(drivers) {}
+LegacyVisionCoprocessorMock::~LegacyVisionCoprocessorMock() {}
 }  // namespace aruwsrc::mock
