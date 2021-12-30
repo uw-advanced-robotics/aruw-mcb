@@ -32,7 +32,6 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
-#include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
@@ -119,9 +118,19 @@ CalibrateCommand agitatorCalibrateCommand(&agitator);
 SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels, 30.0f);
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    30.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM1);
 
-FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
+FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    0.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM1);
 
 SentinelTurretCVCommand turretCVCommand(drivers(), &turretSubsystem, &agitator);
 

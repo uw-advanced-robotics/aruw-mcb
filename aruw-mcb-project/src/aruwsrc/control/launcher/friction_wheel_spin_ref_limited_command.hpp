@@ -32,13 +32,24 @@ class Drivers;
 namespace aruwsrc::control::launcher
 {
 /**
- * Commands some associated friction wheel subsystem to rotate such that the subsystem launches
- * projectiles at some desired speed. The launch speed is limited by the max friction wheel speed
- * that we receive from the referee system.
+ * Commands some associated friction wheel subsystem to spin such that the subsystem launches
+ * projectiles at the maximum speed allowed by the referee system. The command will rotate at
+ * a default speed specified in the constructor if the referee system is offline.
  */
 class FrictionWheelSpinRefLimitedCommand : public tap::control::Command
 {
 public:
+    /**
+     * An enum that represents the 3 different barrel types, either the 1st or 2nd 17mm barrels or
+     * the 42mm barrel.
+     */
+    enum class Barrel
+    {
+        BARREL_17MM1,
+        BARREL_17MM2,
+        BARREL_42MM,
+    };
+
     /**
      * @param[in] drivers A pointer to the global drivers object.
      * @param[in] frictionWheels The friction wheel subsystem that this command
@@ -46,11 +57,17 @@ public:
      * @param[in] defaultLaunchSpeed A launch speed in m/s that the command
      *      will request the subsystem to spin at if the referee system is not
      *      connected.
+     * @param[in] alwaysUseDefaultLaunchSpeed If true, uses `defaultLaunchSpeed`
+     *      independent of the state of the referee system.
+     * @param[in] barrel The barrel whose associated barrel speed limit will be used
+     *      to determine the projectile launch speed.
      */
     FrictionWheelSpinRefLimitedCommand(
         aruwsrc::Drivers *drivers,
         aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels,
-        float defaultLaunchSpeed);
+        float defaultLaunchSpeed,
+        bool alwaysUseDefaultLaunchSpeed,
+        Barrel barrel);
 
     void initialize() override {}
 
@@ -68,6 +85,10 @@ private:
     aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels;
 
     const float defaultLaunchSpeed;
+
+    const bool alwaysUseDefaultLaunchSpeed;
+
+    const Barrel barrel;
 };
 }  // namespace aruwsrc::control::launcher
 

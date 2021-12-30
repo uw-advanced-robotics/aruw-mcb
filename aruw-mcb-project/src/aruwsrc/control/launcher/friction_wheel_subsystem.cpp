@@ -79,15 +79,8 @@ void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSp
 
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
-    if (launchSpeed <= LAUNCH_SPEED_MIN_CUTOFF)
-    {
-        return 0.0f;
-    }
-    else
-    {
-        launchSpeed = std::max(launchSpeed, LAUNCH_SPEED_MAX);
-        return launchSpeedLinearInterpolator.interpolate(launchSpeed);
-    }
+    launchSpeed = limitVal(launchSpeed, 0.0f, LAUNCH_SPEED_MAX);
+    return launchSpeedLinearInterpolator.interpolate(launchSpeed);
 }
 
 }  // namespace aruwsrc::launcher

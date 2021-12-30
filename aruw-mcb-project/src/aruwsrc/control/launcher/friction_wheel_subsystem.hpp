@@ -67,6 +67,8 @@ public:
     /**
      * Set the projectile launch speed - at what speed the pellets
      * will come out of the physical friction wheel launcher.
+     * Speed is limited to a range of values defined by constants of
+     * this subsystem.
      *
      * @param[in] speed The launch speed in m/s.
      */
@@ -97,22 +99,20 @@ private:
      * linear interpolation is used.
      */
 #ifdef TARGET_HERO
-    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[3] = {
+    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+        {0.0f, 0.0f},
         {10, 6000.0f},
-        { 16,
+        { 16.0f,
           7000.0f }};
 #else
-    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[3] = {
-        {15, 4480.95f},
-        {18, 5000.0f},
-        {30, 7195.2f}};
+    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+        {0.0f, 0.0f},
+        {15.0f, 4480.95f},
+        {18.0f, 5000.0f},
+        {30.0f, 7195.2f}};
 #endif
 
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
-
-    /** The launch speed cutoff at which any requested launch speed below this value
-     *  will be rounded down to 0 m/s launch speed. */
-    static constexpr float LAUNCH_SPEED_MIN_CUTOFF = 1.0f;
 
     static constexpr float PID_P = 20.0f;
     static constexpr float PID_I = 0.2f;

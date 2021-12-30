@@ -40,7 +40,6 @@
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "launcher/friction_wheel_rotate_command.hpp"
-#include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/world-relative/turret_world_relative_command.hpp"
@@ -117,8 +116,19 @@ WaterwheelLoadCommand42mm waterwheelLoadCommand(drivers(), &waterWheelAgitator);
 ShootCommand42mm kickerShootHeatLimitedCommand(drivers(), &kickerSubsystem, true);
 ShootCommand42mm kickerShootUnlimitedCommand(drivers(), &kickerSubsystem, false);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels, 10);
-FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    10.0f,
+    false,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
+
+FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    0.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
