@@ -54,9 +54,6 @@ public:
     /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
     static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
 
-    /** The maximum launch speed, in m/s, that a command may ask for. */
-    static constexpr float LAUNCH_SPEED_MAX = 40.0f;
-
     /**
      * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
      * linear interpolation is used.
@@ -65,14 +62,12 @@ public:
     static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
         {0.0f, 0.0f},
         {10, 6000.0f},
-        { 16.0f,
-          7000.0f }};
+        {16.0f, 7000.0f},
+        { 20.0f,
+          9000.0f }};
 #else
-    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-        {0.0f, 0.0f},
-        {15.0f, 4480.95f},
-        {18.0f, 5000.0f},
-        {30.0f, 7195.2f}};
+    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] =
+        {{0.0f, 0.0f}, {15.0f, 4480.95f}, {18.0f, 5000.0f}, {30.0f, 7195.2f}, {40.0f, 9000.0f}};
 #endif
 
     /**

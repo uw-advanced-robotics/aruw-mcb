@@ -79,7 +79,6 @@ void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSp
 
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
-    launchSpeed = limitVal(launchSpeed, 0.0f, LAUNCH_SPEED_MAX);
     return launchSpeedLinearInterpolator.interpolate(launchSpeed);
 }
 

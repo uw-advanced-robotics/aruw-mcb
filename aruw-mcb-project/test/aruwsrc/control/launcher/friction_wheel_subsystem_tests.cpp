@@ -85,6 +85,33 @@ TEST(FrictionWheelSubsystem, refresh__negative_output_when_desired_speed_0_shaft
     frictionWheels.refresh();
 }
 
+TEST(FrictionWheelSubsystem, refresh_updates_desiredRpmRamp_when_target_not_reached)
+{
+    SETUP_TEST();
+
+    frictionWheels.setDesiredLaunchSpeed(
+        FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+            [MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]
+                .first);
+
+    uint32_t time = 0;
+    tap::arch::clock::setTime(time);
+    float prevRpmTarget = frictionWheels.desiredRpmRamp.getValue();
+
+    for (int i = 0; i < 1000; i++)
+    {
+        time += 10;
+        tap::arch::clock::setTime(time);
+        frictionWheels.refresh();
+
+        if (!frictionWheels.desiredRpmRamp.isTargetReached())
+        {
+            EXPECT_NE(prevRpmTarget, frictionWheels.desiredRpmRamp.getValue());
+            prevRpmTarget = frictionWheels.desiredRpmRamp.getValue();
+        }
+    }
+}
+
 TEST(
     FrictionWheelSubsystem,
     setDesiredLaunchSpeed__setting_to_values_in_LUT_updates_rpm_ramp_correctly)
@@ -126,26 +153,25 @@ TEST(
     }
 }
 
-TEST(FrictionWheelSubsystem, refresh_updates_desiredRpmRamp_when_target_not_reached)
+TEST(FrictionWheelSubsystem, setDesiredLaunchSpeed__negative_launch_speed_0_desired_rpm)
 {
     SETUP_TEST();
 
-    frictionWheels.setDesiredLaunchSpeed(FrictionWheelSubsystem::LAUNCH_SPEED_MAX);
+    frictionWheels.setDesiredLaunchSpeed(-100);
 
-    uint32_t time = 0;
-    tap::arch::clock::setTime(time);
-    float prevRpmTarget = frictionWheels.desiredRpmRamp.getValue();
+    EXPECT_EQ(0, frictionWheels.desiredRpmRamp.getTarget());
+}
 
-    for (int i = 0; i < 1000; i++)
-    {
-        time += 10;
-        tap::arch::clock::setTime(time);
-        frictionWheels.refresh();
+TEST(
+    FrictionWheelSubsystem,
+    setDesiredLaunchSpeed__speed_above_max_speed_set_launch_speed_to_max_rpm)
+{
+    SETUP_TEST();
 
-        if (!frictionWheels.desiredRpmRamp.isTargetReached())
-        {
-            EXPECT_NE(prevRpmTarget, frictionWheels.desiredRpmRamp.getValue());
-            prevRpmTarget = frictionWheels.desiredRpmRamp.getValue();
-        }
-    }
+    const auto& tuple = FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+        [MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1];
+
+    frictionWheels.setDesiredLaunchSpeed(tuple.first + 10);
+
+    EXPECT_EQ(tuple.second, frictionWheels.desiredRpmRamp.getTarget());
 }
