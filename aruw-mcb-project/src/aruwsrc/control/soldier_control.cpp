@@ -55,7 +55,6 @@ using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
-using namespace aruwsrc::launcher;
 using namespace tap::control;
 using namespace aruwsrc::display;
 using namespace aruwsrc::control;

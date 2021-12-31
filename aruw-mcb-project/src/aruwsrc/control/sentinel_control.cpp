@@ -43,7 +43,6 @@
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::sentinel::firing;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;

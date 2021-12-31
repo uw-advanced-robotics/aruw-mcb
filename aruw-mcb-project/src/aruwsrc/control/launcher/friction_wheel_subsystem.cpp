@@ -26,7 +26,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::launcher
+namespace aruwsrc::control::launcher
 {
 FrictionWheelSubsystem::FrictionWheelSubsystem(
     aruwsrc::Drivers *drivers,
@@ -83,4 +83,4 @@ float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) c
     return launchSpeedLinearInterpolator.interpolate(launchSpeed);
 }
 
-}  // namespace aruwsrc::launcher
+}  // namespace aruwsrc::control::launcher

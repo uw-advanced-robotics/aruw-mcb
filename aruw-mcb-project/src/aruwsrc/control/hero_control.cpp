@@ -47,7 +47,6 @@
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
-using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::display;

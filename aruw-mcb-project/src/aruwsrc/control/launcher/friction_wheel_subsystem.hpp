@@ -22,8 +22,7 @@
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/subsystem.hpp"
-
-#include "modm/math/interpolation/linear.hpp"
+#include "tap/util_macros.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -31,16 +30,15 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-#include "tap/util_macros.hpp"
-
 #include "modm/math/filter/pid.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc
 {
 class Drivers;
 }
 
-namespace aruwsrc::launcher
+namespace aruwsrc::control::launcher
 {
 /**
  * A subsystem which regulates the speed of a two wheel shooter system using velocity PID
@@ -53,41 +51,6 @@ public:
     static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
-    /**
-     * Creates a new friction wheel subsystem with DJI motor1 and motor2
-     * unless otherwise specified on CAN bus 1.
-     */
-    FrictionWheelSubsystem(
-        aruwsrc::Drivers *drivers,
-        tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        tap::motor::MotorId rightMotorId = RIGHT_MOTOR_ID);
-
-    void initialize() override;
-
-    /**
-     * Set the projectile launch speed - at what speed the pellets
-     * will come out of the physical friction wheel launcher.
-     * Speed is limited to a range of values defined by constants of
-     * this subsystem.
-     *
-     * @param[in] speed The launch speed in m/s.
-     */
-    mockable void setDesiredLaunchSpeed(float speed);
-
-    /**
-     * Updates flywheel RPM ramp by elapsed time and sends motor output.
-     */
-    void refresh() override;
-
-    void runHardwareTests() override;
-
-    void onHardwareTestStart() override;
-
-    void onHardwareTestComplete() override;
-
-    const char *getName() override { return "Friction wheels"; }
-
-private:
     /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
     static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
 
@@ -112,6 +75,43 @@ private:
         {30.0f, 7195.2f}};
 #endif
 
+    /**
+     * Creates a new friction wheel subsystem with DJI motor1 and motor2
+     * unless otherwise specified on CAN bus 1.
+     */
+    FrictionWheelSubsystem(
+        aruwsrc::Drivers *drivers,
+        tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
+        tap::motor::MotorId rightMotorId = RIGHT_MOTOR_ID);
+
+    void initialize() override;
+
+    /**
+     * Set the projectile launch speed - at what speed the pellets
+     * will come out of the physical friction wheel launcher.
+     * Speed is limited to a range of values defined by constants of
+     * this subsystem.
+     *
+     * @param[in] speed The launch speed in m/s.
+     */
+    mockable void setDesiredLaunchSpeed(float speed);
+
+    mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
+
+    /**
+     * Updates flywheel RPM ramp by elapsed time and sends motor output.
+     */
+    void refresh() override;
+
+    void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    void onHardwareTestComplete() override;
+
+    const char *getName() override { return "Friction wheels"; }
+
+private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
     static constexpr float PID_P = 20.0f;
@@ -125,17 +125,20 @@ private:
     modm::Pid<float> velocityPidRightWheel;
 
     float desiredLaunchSpeed;
-    tap::algorithms::Ramp desiredRpmRamp;
 
     uint32_t prevTime = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    tap::mock::DjiMotorMock leftWheel;
-    tap::mock::DjiMotorMock rightWheel;
+    tap::algorithms::Ramp desiredRpmRamp;
+
+    testing::NiceMock<tap::mock::DjiMotorMock> leftWheel;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightWheel;
 
 private:
 #else
+    tap::algorithms::Ramp desiredRpmRamp;
+
     tap::motor::DjiMotor leftWheel;
     tap::motor::DjiMotor rightWheel;
 #endif
@@ -149,6 +152,6 @@ private:
     float launchSpeedToFrictionWheelRpm(float launchSpeed) const;
 };
 
-}  // namespace aruwsrc::launcher
+}  // namespace aruwsrc::control::launcher
 
 #endif  // FRICTION_WHEEL_SUBSYSTEM_HPP_

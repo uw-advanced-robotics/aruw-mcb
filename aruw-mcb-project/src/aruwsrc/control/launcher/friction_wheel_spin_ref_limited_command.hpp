@@ -55,16 +55,16 @@ public:
      * @param[in] frictionWheels The friction wheel subsystem that this command
      *      "owns".
      * @param[in] defaultLaunchSpeed A launch speed in m/s that the command
-     *      will request the subsystem to spin at if the referee system is not
-     *      connected.
+     *      will request the subsystem to launch projectiles at if the referee
+     *      system is not connected.
      * @param[in] alwaysUseDefaultLaunchSpeed If true, uses `defaultLaunchSpeed`
      *      independent of the state of the referee system.
-     * @param[in] barrel The barrel whose associated barrel speed limit will be used
-     *      to determine the projectile launch speed.
+     * @param[in] barrel The barrel whose associated referee system barrel speed
+     *      limit will be used to determine the projectile launch speed.
      */
     FrictionWheelSpinRefLimitedCommand(
         aruwsrc::Drivers *drivers,
-        aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels,
+        FrictionWheelSubsystem *frictionWheels,
         float defaultLaunchSpeed,
         bool alwaysUseDefaultLaunchSpeed,
         Barrel barrel);
@@ -77,12 +77,12 @@ public:
 
     bool isFinished() const override { return false; }
 
-    const char *getName() const override { return "ref serial friction wheel rotate"; }
+    const char *getName() const override { return "friction wheel spin ref limited"; }
 
 private:
     aruwsrc::Drivers *drivers;
 
-    aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels;
+    FrictionWheelSubsystem *frictionWheels;
 
     const float defaultLaunchSpeed;
 
