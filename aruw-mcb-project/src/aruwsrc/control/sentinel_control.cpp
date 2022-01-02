@@ -122,14 +122,14 @@ FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     &frictionWheels,
     30.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM1);
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM1);
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 SentinelTurretCVCommand turretCVCommand(drivers(), &turretSubsystem, &agitator);
 

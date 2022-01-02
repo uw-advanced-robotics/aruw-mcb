@@ -33,8 +33,11 @@ namespace aruwsrc::control::launcher
 {
 /**
  * Commands some associated friction wheel subsystem to spin such that the subsystem launches
- * projectiles at the maximum speed allowed by the referee system. The command will rotate at
- * a default speed specified in the constructor if the referee system is offline.
+ * projectiles at either the maximum speed allowed by the referee system or a default
+ * speed specified in the constructor.
+ *
+ * The command will rotate at the default speed if the referee system is offline or if the
+ * `alwaysUseDefaultSpeed` flag is set to true in the constructor.
  */
 class FrictionWheelSpinRefLimitedCommand : public tap::control::Command
 {
@@ -45,8 +48,8 @@ public:
      */
     enum class Barrel
     {
-        BARREL_17MM1,
-        BARREL_17MM2,
+        BARREL_17MM_1,
+        BARREL_17MM_2,
         BARREL_42MM,
     };
 

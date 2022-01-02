@@ -51,10 +51,10 @@ void FrictionWheelSpinRefLimitedCommand::execute()
 
         switch (barrel)
         {
-            case Barrel::BARREL_17MM1:
+            case Barrel::BARREL_17MM_1:
                 maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
                 break;
-            case Barrel::BARREL_17MM2:
+            case Barrel::BARREL_17MM_2:
                 maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
                 break;
             case Barrel::BARREL_42MM:

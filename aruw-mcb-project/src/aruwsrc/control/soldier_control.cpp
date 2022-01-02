@@ -153,14 +153,14 @@ FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     &frictionWheels,
     15.0f,
     false,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM1);
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM1);
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
