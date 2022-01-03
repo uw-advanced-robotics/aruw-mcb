@@ -46,7 +46,6 @@
 #include "turret/world-relative/turret_world_relative_command.hpp"
 
 using namespace tap::control::setpoint;
-using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::turret;
@@ -103,8 +102,6 @@ ClientDisplaySubsystem clientDisplay(drivers());
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-CalibrateCommand calibrateDoubleAgitator(&kickerSubsystem);
-
 RotateWaterwheelCommand rotateWaterwheel(drivers(), &waterWheelAgitator, &kickerSubsystem);
 
 RotateKickerCommand kickerShootHeatLimitedCommand(drivers(), &kickerSubsystem, true);
@@ -129,33 +126,13 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping rightSwitchUp(
-    drivers(),
-    {&kickerShootHeatLimitedCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-HoldCommandMapping leftMousePressed(
-    drivers(),
-    {&kickerShootHeatLimitedCommand},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT));
-
-HoldRepeatCommandMapping rightMousePressed(
-    drivers(),
-    {&kickerShootUnlimitedCommand},
-    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&calibrateDoubleAgitator},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
     chassis.initialize();
-    waterWheelAgitator.initialize();
-    kickerSubsystem.initialize();
     frictionWheels.initialize();
     clientDisplay.initialize();
     drivers()->xavierSerial.attachChassis(&chassis);
@@ -165,8 +142,6 @@ void initializeSubsystems()
 void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
-    drivers->commandScheduler.registerSubsystem(&waterWheelAgitator);
-    drivers->commandScheduler.registerSubsystem(&kickerSubsystem);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
@@ -187,10 +162,6 @@ void startHeroCommands(aruwsrc::Drivers *) {}
 void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressed);
-    drivers->commandMapper.addMap(&rightMousePressed);
-    drivers->commandMapper.addMap(&leftSwitchUp);
 }
 }  // namespace hero_control
 

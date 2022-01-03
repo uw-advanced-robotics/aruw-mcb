@@ -17,17 +17,17 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AGITATOR_SHOOT_COMPRISED_COMMAND_INSTANCES_HPP_
-#define AGITATOR_SHOOT_COMPRISED_COMMAND_INSTANCES_HPP_
+#ifndef MOVE_UNJAM_REF_LIMITED_COMMAND_HPP_
+#define MOVE_UNJAM_REF_LIMITED_COMMAND_HPP_
 
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
-#include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
-
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc
 {
-namespace agitator
+class Drivers;
+}
+
+namespace aruwsrc::agitator
 {
 class AgitatorSubsystem;
 
@@ -59,8 +59,6 @@ private:
     const float heatLimitBuffer;
 };  // class ShootFastComprisedCommand
 
-}  // namespace agitator
+}  // namespace aruwsrc::agitator
 
-}  // namespace aruwsrc
-
-#endif  // AGITATOR_SHOOT_COMPRISED_COMMAND_INSTANCES_HPP_
+#endif  // MOVE_UNJAM_REF_LIMITED_COMMAND_HPP_
