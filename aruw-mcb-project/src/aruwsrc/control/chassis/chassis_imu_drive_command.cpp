@@ -39,21 +39,17 @@ ChassisImuDriveCommand::ChassisImuDriveCommand(aruwsrc::Drivers* drivers, Chassi
 
 void ChassisImuDriveCommand::initialize()
 {
-    if (drivers->mpu6500.initialized())
+    imuSetpointInitialized = drivers->mpu6500.initialized();
+
+    if (imuSetpointInitialized)
     {
-        rotationSetpoint.setValue(drivers->mpu6500.getYaw());
-        imuSetpointInitialized = true;
-    }
-    else
-    {
-        imuSetpointInitialized = false;
+        const float yaw = drivers->mpu6500.getYaw();
+        rotationSetpoint.setValue(yaw);
     }
 }
 
 void ChassisImuDriveCommand::execute()
 {
-    float chassisXDesiredWheelspeed = 0.0f;
-    float chassisYDesiredWheelspeed = 0.0f;
     float chassisRotationDesiredWheelspeed = 0.0f;
     float angleFromDesiredRotation = 0.0f;
 
@@ -65,7 +61,7 @@ void ChassisImuDriveCommand::execute()
         }
         else
         {
-            float yaw = drivers->mpu6500.getYaw();
+            const float yaw = drivers->mpu6500.getYaw();
             angleFromDesiredRotation = rotationSetpoint.difference(yaw);
 
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
@@ -105,6 +101,9 @@ void ChassisImuDriveCommand::execute()
         chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput() *
                                            ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
     }
+
+    float chassisXDesiredWheelspeed = 0.0f;
+    float chassisYDesiredWheelspeed = 0.0f;
 
     ChassisRelDrive::computeDesiredUserTranslation(
         drivers,

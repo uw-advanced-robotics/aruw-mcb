@@ -33,10 +33,14 @@ namespace aruwsrc::chassis
 class ChassisSubsystem;
 
 /**
- * A command that applies classic chassis-relative mecanum drive, using the chassis
- * mounted IMU such that the chassis drives straight. Similar to the normal chassis
- * drive command but the user commands some direction relative to the chassis yaw that
- * they want to drive.
+ * A command that allows the user to control the translation and rotation of the chassis.
+ * User translational input is relative to the chassis in a manner similar to
+ * `chassis_rel_drive.hpp`. The user specifies some rotation via the control operator interface (see
+ * the function `getChassisRInput`). The chassis mounted IMU is used as feedback for a position
+ * controller so that the user specified chassis rotation is absolute. This means the chassis will
+ * attempt to maintain a particular world relative chassis rotation angle.
+ *
+ * @note It is assumed that the onboard `mpu6500` is attached to the chassis.
  */
 class ChassisImuDriveCommand : public tap::control::Command
 {
