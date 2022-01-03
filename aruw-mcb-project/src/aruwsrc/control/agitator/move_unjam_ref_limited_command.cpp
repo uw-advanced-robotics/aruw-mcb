@@ -17,7 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "agitator_shoot_comprised_command_instances.hpp"
+#include "move_unjam_ref_limited_command.hpp"
+
+#include "aruwsrc/drivers.hpp"
+
+#include "agitator_subsystem.hpp"
 
 using namespace tap::control::setpoint;
 
@@ -66,64 +70,6 @@ bool MoveUnjamRefLimitedCommand::isFinished() const
             (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));
 }
 
-WaterwheelLoadCommand42mm::WaterwheelLoadCommand42mm(
-    aruwsrc::Drivers *drivers,
-    aruwsrc::agitator::LimitSwitchAgitatorSubsystem *waterwheel)
-    : MoveUnjamComprisedCommand(
-          drivers,
-          waterwheel,
-          WATERWHEEL_42MM_CHANGE_ANGLE,
-          WATERWHEEL_42MM_MAX_UNJAM_ANGLE,
-          WATERWHEEL_42MM_ROTATE_TIME,
-          WATERWHEEL_42MM_PAUSE_AFTER_ROTATE_TIME),
-      drivers(drivers),
-      waterwheel(waterwheel)
-{
-}
-
-bool WaterwheelLoadCommand42mm::isReady()
-{
-    return (waterwheel->getBallsInTube() < BALLS_QUEUED_IN_TUBE);
-}
-
-bool WaterwheelLoadCommand42mm::isFinished() const
-{
-    return MoveUnjamComprisedCommand::isFinished() ||
-           (waterwheel->getBallsInTube() >= BALLS_QUEUED_IN_TUBE);
-}
-
-ShootCommand42mm::ShootCommand42mm(
-    aruwsrc::Drivers *drivers,
-    tap::control::setpoint::SetpointSubsystem *kicker,
-    bool heatLimiting)
-    : MoveCommand(
-          kicker,
-          KICKER_42MM_CHANGE_ANGLE,
-          KICKER_42MM_ROTATE_TIME,
-          KICKER_42MM_PAUSE_AFTER_ROTATE_TIME,
-          true),
-      drivers(drivers),
-      heatLimiting(heatLimiting)
-{
-}
-
-int ShootCommand42mm::initializeCount = 0;
-
-bool ShootCommand42mm::isReady()
-{
-    const auto &robotData = drivers->refSerial.getRobotData();
-
-    // !(heat limiting data available && apply heat limiting && heat is over limit)
-    return MoveCommand::isReady() &&
-           !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
-             (robotData.turret.heat42 + HEAT_LIMIT_BUFFER > robotData.turret.heatLimit42));
-}
-
-void ShootCommand42mm::initialize()
-{
-    MoveCommand::initialize();
-    initializeCount++;
-}
 }  // namespace agitator
 
 }  // namespace aruwsrc
