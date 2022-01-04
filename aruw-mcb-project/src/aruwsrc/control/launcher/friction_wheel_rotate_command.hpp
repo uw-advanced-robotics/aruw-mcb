@@ -21,6 +21,7 @@
 #define __FRICTION_WHEEL_ROTATE_COMMAND_HPP__
 
 #include "tap/control/command.hpp"
+
 #include "aruwsrc/util_macros.hpp"
 
 namespace aruwsrc

@@ -32,8 +32,8 @@
 #endif
 
 #include "tap/util_macros.hpp"
-#include "aruwsrc/util_macros.hpp"
 
+#include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc

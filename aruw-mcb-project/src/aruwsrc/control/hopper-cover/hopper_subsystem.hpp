@@ -31,8 +31,8 @@
 #include "tap/motor/servo.hpp"
 #include "tap/util_macros.hpp"
 
-#include "modm/math/filter/pid.hpp"
 #include "aruwsrc/util_macros.hpp"
+#include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc
 {
