@@ -81,9 +81,6 @@
     "C_Cpp.default.forcedInclude": [
         "aruw-mcb-project/robot-type/robot_type.hpp"
     ],
-    "C_Cpp.default.defines": [
-        "ALL_SOLDIERS=defined(TARGET_SOLDIER_2021)||defined(TARGET_SOLDIER_2022)"
-    ],
     "[markdown]": {
         "editor.wordWrap": "off",
         "editor.quickSuggestions": false,

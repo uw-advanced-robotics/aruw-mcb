@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if ALL_SOLDIERS
+#include "aruwsrc/util_macros.hpp"
+
+#ifdef ALL_SOLDIERS
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"

@@ -32,6 +32,7 @@
 #endif
 
 #include "tap/util_macros.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
 
@@ -55,7 +56,7 @@ public:
 
     static constexpr float MAX_OUT_6020 = 30'000;
 
-#if ALL_SOLDIERS
+#if defined(ALL_SOLDIERS)
     static constexpr float YAW_START_ANGLE = 90.0f;
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = 0.0f;

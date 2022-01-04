@@ -23,6 +23,7 @@
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/command.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -81,7 +82,7 @@ public:
     const char *getName() const override { return "turret WR chassis IMU"; }
 
 private:
-#if ALL_SOLDIERS
+#if defined(ALL_SOLDIERS)
     static constexpr float YAW_P = 3500.0f;
     static constexpr float YAW_I = 0.0f;
     static constexpr float YAW_D = 190.0f;

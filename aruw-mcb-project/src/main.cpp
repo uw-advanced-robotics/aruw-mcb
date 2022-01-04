@@ -41,6 +41,7 @@
 
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 #include "aruwsrc/control/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
@@ -101,7 +102,7 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#if ALL_SOLDIERS
+#ifdef ALL_SOLDIERS
             PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
 #endif
         }
@@ -127,7 +128,7 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->djiMotorTerminalSerialHandler.init();
     drivers->xavierSerial.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
-#if ALL_SOLDIERS
+#ifdef ALL_SOLDIERS
     drivers->turretMCBCanComm.init();
 #endif
 }

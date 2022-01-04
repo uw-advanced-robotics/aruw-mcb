@@ -35,6 +35,7 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
 
@@ -86,7 +87,7 @@ public:
     static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
 private:
-#if ALL_SOLDIERS
+#if defined(ALL_SOLDIERS)
     /**
      * Velocity PID gains and constants.
      */

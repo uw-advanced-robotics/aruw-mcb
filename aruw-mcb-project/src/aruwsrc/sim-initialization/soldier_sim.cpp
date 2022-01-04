@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if (ALL_SOLDIERS) && defined(PLATFORM_HOSTED)
+#include "aruwsrc/util_macros.hpp"
+
+#if defined(ALL_SOLDIERS) && defined(PLATFORM_HOSTED)
 
 #include "tap/motor/motorsim/sim_handler.hpp"
 

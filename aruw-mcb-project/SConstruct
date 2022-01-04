@@ -154,8 +154,6 @@ else:  # hardware target env
 
 # Append little endian flag to all
 env.AppendUnique(CPPFLAGS=["-DLITTLE_ENDIAN"])
-# Append "ALL_SOLDIERS" flag to all
-env.AppendUnique(CPPFLAGS=["-D ALL_SOLDIERS=defined(TARGET_SOLDIER_2021)||defined(TARGET_SOLDIER_2022)"])
 
 # Add any additional flags the user chooses specify
 if "additional-ccflags" in ARGUMENTS:

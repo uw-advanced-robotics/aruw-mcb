@@ -21,6 +21,7 @@
 #define __FRICTION_WHEEL_ROTATE_COMMAND_HPP__
 
 #include "tap/control/command.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -46,7 +47,7 @@ public:
 
     const char* getName() const override { return "friction wheel rotate"; }
 
-#if ALL_SOLDIERS
+#if defined(ALL_SOLDIERS)
     static constexpr int16_t DEFAULT_WHEEL_RPM = 4500;
 #elif defined(TARGET_HERO)
     static constexpr int16_t DEFAULT_WHEEL_RPM = 7000;

@@ -32,6 +32,7 @@
 #include "tap/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -45,7 +46,7 @@ namespace control
 class HopperSubsystem : public tap::control::Subsystem
 {
 public:
-#if ALL_SOLDIERS
+#if defined(ALL_SOLDIERS)
     static constexpr float SOLDIER_HOPPER_OPEN_PWM = 0.21f;
     static constexpr float SOLDIER_HOPPER_CLOSE_PWM = 0.11f;
     static constexpr float SOLDIER_PWM_RAMP_SPEED = 0.001f;

@@ -33,6 +33,7 @@
 #include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
 #include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
 #include "tap/util_macros.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 namespace aruwsrc
 {
@@ -52,7 +53,7 @@ namespace agitator
 class AgitatorSubsystem : public tap::control::setpoint::SetpointSubsystem
 {
 public:
-#if ALL_SOLDIERS
+#if defined(ALL_SOLDIERS)
     // position PID terms
     // PID terms for soldier
     static constexpr float PID_17MM_P = 100000.0f;
