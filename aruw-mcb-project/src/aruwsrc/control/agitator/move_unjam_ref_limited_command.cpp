@@ -23,8 +23,6 @@
 
 #include "agitator_subsystem.hpp"
 
-#include "agitator_subsystem.hpp"
-
 using namespace tap::control::setpoint;
 
 namespace aruwsrc

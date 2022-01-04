@@ -105,11 +105,8 @@ public:
     static constexpr float PID_HERO_KICKER_I = 0.0f;
     static constexpr float PID_HERO_KICKER_D = 10.0f;
     static constexpr float PID_HERO_KICKER_MAX_ERR_SUM = 0.0f;
-    // max out added by Tenzin since it wasn't here. This should
-    // also be changed by someone who know's what they're doing!
     static constexpr float PID_HERO_KICKER_MAX_OUT = 16000.0f;
 
-    // There are two kicker motors that drive the shaft.
     static constexpr tap::motor::MotorId HERO_KICKER_MOTOR_ID = tap::motor::MOTOR7;
     static constexpr tap::can::CanBus HERO_KICKER_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr bool HERO_KICKER_INVERTED = false;
