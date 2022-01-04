@@ -194,7 +194,7 @@ before_script:
       cobertura: cobertura.xml
     expire_in: 2 weeks
 
-# Soldier 2022 Build
+# Soldier 2021 Build
 
 "Soldier 2021: MCB Build":
   extends:
