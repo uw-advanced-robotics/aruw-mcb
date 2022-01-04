@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SOLDIER)
+#include "aruwsrc/util_macros.hpp"
+
+#ifdef ALL_SOLDIERS
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -83,7 +85,11 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     TurretSubsystem::YAW_MOTOR_ID,
     TurretSubsystem::CAN_BUS_MOTORS,
+#ifdef TARGET_SOLDIER_2021
     false,
+#else
+    true,
+#endif
     "Yaw Turret");
 TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 

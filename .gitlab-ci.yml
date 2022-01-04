@@ -162,28 +162,28 @@ before_script:
     paths:
       - $BUILD_PATH
 
-# Soldier build
+# Soldier 2022 build
 
-"Soldier: MCB Build":
+"Soldier 2022: MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SOLDIER
+    ROBOT: SOLDIER_2022
 
-"Soldier: Sim Build":
+"Soldier 2022: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SOLDIER
+    ROBOT: SOLDIER_2022
 
-"Soldier: Test Build":
+"Soldier 2022: Test Build":
   stage: Tests
   needs: []
   only: *default_only
   except: *default_except
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER -j${NUM_JOBS}
+    - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER_2022 -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
@@ -193,6 +193,26 @@ before_script:
     reports:
       cobertura: cobertura.xml
     expire_in: 2 weeks
+
+# Soldier 2021 Build
+
+"Soldier 2021: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: SOLDIER_2021
+
+"Soldier 2021: Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: SOLDIER_2021
+
+"Soldier 2021: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: SOLDIER_2021
 
 # Drone build
 
@@ -253,26 +273,6 @@ before_script:
     - .test_build
   variables:
     ROBOT: HERO
-
-# Old Soldier build
-
-"Old Soldier: MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: OLD_SOLDIER
-
-"Old Soldier: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: OLD_SOLDIER
-
-"Old Soldier: Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: OLD_SOLDIER
 
 # Sentinel build
 
