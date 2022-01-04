@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SOLDIER)
+#include "aruwsrc/util_macros.hpp"
+
+#if defined(ALL_SOLDIERS)
 
 #include <gtest/gtest.h>
 
