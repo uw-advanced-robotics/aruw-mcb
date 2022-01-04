@@ -86,7 +86,7 @@ public:
     static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
 private:
-#if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
+#if ALL_SOLDIERS
     /**
      * Velocity PID gains and constants.
      */
@@ -230,11 +230,7 @@ public:
     static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
     static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
 
-#if defined(TARGET_OLD_SOLDIER)
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-#else
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
-#endif
 
     // wheel velocity PID variables
     modm::Pid<float> leftFrontVelocityPid;

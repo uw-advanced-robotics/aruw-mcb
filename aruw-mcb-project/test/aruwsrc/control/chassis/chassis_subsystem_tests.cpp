@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SOLDIER)
+#if ALL_SOLDIERS
 
 #include <gtest/gtest.h>
 

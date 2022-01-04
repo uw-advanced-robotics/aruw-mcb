@@ -52,7 +52,7 @@ namespace agitator
 class AgitatorSubsystem : public tap::control::setpoint::SetpointSubsystem
 {
 public:
-#if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
+#if ALL_SOLDIERS
     // position PID terms
     // PID terms for soldier
     static constexpr float PID_17MM_P = 100000.0f;

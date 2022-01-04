@@ -61,7 +61,7 @@ public:
     void end(bool) override;
 
 private:
-#if defined(TARGET_SOLDIER)
+#if ALL_SOLDIERS
     static constexpr float YAW_P = 4000.0f;
     static constexpr float YAW_I = 0.0f;
     static constexpr float YAW_D = 190.0f;
