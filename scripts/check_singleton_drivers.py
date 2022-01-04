@@ -17,7 +17,6 @@ files_to_whitelist = [
     'aruwsrc/drivers_singleton.cpp',
     'aruwsrc/drivers_singleton.hpp',
     'aruwsrc/control/engineer_control.cpp',
-    'aruwsrc/control/old_soldier_control.cpp',
     'aruwsrc/control/sentinel_control.cpp',
     'aruwsrc/control/soldier_control.cpp',
     'aruwsrc/control/drone_control.cpp',
