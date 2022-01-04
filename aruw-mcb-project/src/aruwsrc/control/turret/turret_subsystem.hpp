@@ -67,7 +67,7 @@ public:
 #ifdef TARGET_SOLDIER_2021
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
 #else
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 990;
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 1100;
 #endif
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 
