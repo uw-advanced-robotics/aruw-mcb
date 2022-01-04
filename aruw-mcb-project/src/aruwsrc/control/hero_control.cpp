@@ -29,9 +29,6 @@
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
-#include "agitator/agitator_shoot_comprised_command_instances.hpp"
-#include "agitator/double_agitator_subsystem.hpp"
-#include "agitator/limit_switch_agitator_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
@@ -45,7 +42,6 @@
 #include "turret/world-relative/turret_world_relative_command.hpp"
 
 using namespace tap::control::setpoint;
-using namespace aruwsrc::agitator;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
@@ -68,52 +64,12 @@ namespace hero_control
 /* define subsystems --------------------------------------------------------*/
 ChassisSubsystem chassis(drivers());
 
-// Hero has two agitators, one waterWheel and then a kicker
-LimitSwitchAgitatorSubsystem waterWheelAgitator(
-    drivers(),
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_P,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_I,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_D,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_ID,
-    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_WATERWHEEL_INVERTED,
-    AgitatorSubsystem::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
-    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
-    LimitSwitchAgitatorSubsystem::WATERWHEEL_LIMIT_PIN);
-
-DoubleAgitatorSubsystem kickerSubsystem(
-    drivers(),
-    AgitatorSubsystem::PID_HERO_KICKER_P,
-    AgitatorSubsystem::PID_HERO_KICKER_I,
-    AgitatorSubsystem::PID_HERO_KICKER_D,
-    AgitatorSubsystem::PID_HERO_KICKER_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_HERO_KICKER_MAX_OUT,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HERO_KICKER1_MOTOR_ID,
-    AgitatorSubsystem::HERO_KICKER1_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_KICKER2_MOTOR_ID,
-    AgitatorSubsystem::HERO_KICKER2_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_KICKER_INVERTED,
-    DoubleAgitatorSubsystem::JAM_DISTANCE_TOLERANCE,
-    DoubleAgitatorSubsystem::JAM_TEMPORAL_TOLERANCE,
-    false);
-
 FrictionWheelSubsystem frictionWheels(drivers());
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
-
-CalibrateCommand calibrateDoubleAgitator(&kickerSubsystem);
-
-WaterwheelLoadCommand42mm waterwheelLoadCommand(drivers(), &waterWheelAgitator);
-
-ShootCommand42mm kickerShootHeatLimitedCommand(drivers(), &kickerSubsystem, true);
-ShootCommand42mm kickerShootUnlimitedCommand(drivers(), &kickerSubsystem, false);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -143,33 +99,13 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping rightSwitchUp(
-    drivers(),
-    {&kickerShootHeatLimitedCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-HoldCommandMapping leftMousePressed(
-    drivers(),
-    {&kickerShootHeatLimitedCommand},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT));
-
-HoldRepeatCommandMapping rightMousePressed(
-    drivers(),
-    {&kickerShootUnlimitedCommand},
-    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&calibrateDoubleAgitator},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
     chassis.initialize();
-    waterWheelAgitator.initialize();
-    kickerSubsystem.initialize();
     frictionWheels.initialize();
     clientDisplay.initialize();
     drivers()->xavierSerial.attachChassis(&chassis);
@@ -179,8 +115,6 @@ void initializeSubsystems()
 void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
-    drivers->commandScheduler.registerSubsystem(&waterWheelAgitator);
-    drivers->commandScheduler.registerSubsystem(&kickerSubsystem);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
@@ -190,7 +124,6 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
 {
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    waterWheelAgitator.setDefaultCommand(&waterwheelLoadCommand);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
@@ -201,10 +134,6 @@ void startHeroCommands(aruwsrc::Drivers *) {}
 void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressed);
-    drivers->commandMapper.addMap(&rightMousePressed);
-    drivers->commandMapper.addMap(&leftSwitchUp);
 }
 }  // namespace hero_control
 

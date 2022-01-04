@@ -28,8 +28,8 @@
 #include "tap/control/turret/commands/turret_setpoint_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
