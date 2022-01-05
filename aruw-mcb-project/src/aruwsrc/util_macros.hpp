@@ -17,13 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_OLD_SOLDIER) && defined(PLATFORM_HOSTED)
+#ifndef ARUWSRC_UTIL_MACROS_HPP_
+#define ARUWSRC_UTIL_MACROS_HPP_
 
-#include "robot_sim.hpp"
-
-namespace aruwsrc::sim
-{
-void initialize_robot_sim() {}
-}  // namespace aruwsrc::sim
-
+/**
+ * Define a helper macro that makes it easier to specify at compile time something that should be
+ * true for all soldiers.
+ */
+#if defined(TARGET_SOLDIER_2021) || defined(TARGET_SOLDIER_2022)
+#define ALL_SOLDIERS
 #endif
+
+#endif  // ARUWSRC_UTIL_MACROS_HPP_

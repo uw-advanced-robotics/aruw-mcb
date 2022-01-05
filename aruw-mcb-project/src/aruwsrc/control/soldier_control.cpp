@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SOLDIER)
+#include "aruwsrc/util_macros.hpp"
+
+#ifdef ALL_SOLDIERS
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -26,8 +28,8 @@
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
-#include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
@@ -83,7 +85,11 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     TurretSubsystem::YAW_MOTOR_ID,
     TurretSubsystem::CAN_BUS_MOTORS,
+#ifdef TARGET_SOLDIER_2021
     false,
+#else
+    true,
+#endif
     "Yaw Turret");
 TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 

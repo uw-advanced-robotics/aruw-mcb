@@ -14,6 +14,7 @@ Software we use:
 - the gcc compiler
 - openocd to deploy and debug
 - VSCode, an editor
+- [Taproot](https://gitlab.com/aruw/controls/taproot), a RoboMaster controls framework
 
 __In addition to this readme, check out 
 [our GitLab wiki](https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/home) and
@@ -192,5 +193,5 @@ Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [pro
         - "run-sim": build all code for the simulated environment, for the current host platform, and execute the simulator locally.
     "TARGET_<ROBOT_TYPE>" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.
         - <ROBOT_TYPE> must be one of the following:
-            - SOLDIER, OLD_SOLDIER, DRONE, ENGINEER, SENTINEL, HERO
+            - SOLDIER_2021, SOLDIER_2022, DRONE, ENGINEER, SENTINEL, HERO
 ```

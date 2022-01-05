@@ -33,6 +33,7 @@
 
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc
@@ -55,7 +56,7 @@ public:
 
     static constexpr float MAX_OUT_6020 = 30'000;
 
-#if defined(TARGET_SOLDIER)
+#if defined(ALL_SOLDIERS)
     static constexpr float YAW_START_ANGLE = 90.0f;
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = 0.0f;
@@ -63,7 +64,11 @@ public:
     static constexpr float PITCH_MIN_ANGLE = 63.0f;
     static constexpr float PITCH_MAX_ANGLE = 125.0f;
 
+#ifdef TARGET_SOLDIER_2021
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
+#else
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 1100;
+#endif
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 
     static constexpr float TURRET_CG_X = 12;
@@ -79,20 +84,6 @@ public:
 
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 3000;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1418;
-
-    static constexpr float TURRET_CG_X = 0;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-#elif defined(TARGET_OLD_SOLDIER)
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = 0.0f;
-    static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_MIN_ANGLE = 63.0f;
-    static constexpr float PITCH_MAX_ANGLE = 125.0f;
-
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 4866;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
 
     static constexpr float TURRET_CG_X = 0;
     static constexpr float TURRET_CG_Z = 0;

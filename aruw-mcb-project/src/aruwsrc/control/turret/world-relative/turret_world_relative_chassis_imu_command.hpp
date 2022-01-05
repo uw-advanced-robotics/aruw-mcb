@@ -24,6 +24,8 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/util_macros.hpp"
+
 namespace aruwsrc
 {
 class Drivers;
@@ -81,7 +83,7 @@ public:
     const char *getName() const override { return "turret WR chassis IMU"; }
 
 private:
-#if defined(TARGET_SOLDIER)
+#if defined(ALL_SOLDIERS)
     static constexpr float YAW_P = 3500.0f;
     static constexpr float YAW_I = 0.0f;
     static constexpr float YAW_D = 190.0f;
@@ -99,26 +101,6 @@ private:
     static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
     static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
     static constexpr float PITCH_R_DERIVATIVE_KALMAN = 10.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-#elif defined(TARGET_OLD_SOLDIER)
-    static constexpr float YAW_P = 2200.0f;
-    static constexpr float YAW_I = 50.0f;
-    static constexpr float YAW_D = 60.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 1000.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 50.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 10.0f;
-
-    static constexpr float PITCH_P = 3400.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 150.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.5f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 47.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 #else
