@@ -29,14 +29,15 @@ namespace aruwsrc
 {
 namespace mock
 {
-class FrictionWheelSubsystemMock : public aruwsrc::launcher::FrictionWheelSubsystem
+class FrictionWheelSubsystemMock : public aruwsrc::control::launcher::FrictionWheelSubsystem
 {
 public:
     FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers);
     virtual ~FrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, setDesiredRpm, (float val), (override));
+    MOCK_METHOD(void, setDesiredLaunchSpeed, (float), (override));
+    MOCK_METHOD(float, getDesiredLaunchSpeed, (), (const override));
 };  // class FrictionWheelSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc
