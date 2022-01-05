@@ -25,9 +25,15 @@ namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     aruwsrc::Drivers *drivers,
-    aruwsrc::launcher::FrictionWheelSubsystem *frictionWheels)
+    FrictionWheelSubsystem *frictionWheels,
+    float defaultLaunchSpeed,
+    bool alwaysUseDefaultLaunchSpeed,
+    Barrel barrel)
     : drivers(drivers),
-      frictionWheels(frictionWheels)
+      frictionWheels(frictionWheels),
+      defaultLaunchSpeed(defaultLaunchSpeed),
+      alwaysUseDefaultLaunchSpeed(alwaysUseDefaultLaunchSpeed),
+      barrel(barrel)
 {
     modm_assert(drivers != nullptr, "FrictionWheelSpinRefLimitedCommand", "nullptr exception");
     addSubsystemRequirement(frictionWheels);
@@ -35,23 +41,29 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
 
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
-    const uint16_t maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
-
-    uint16_t desiredSpeed;
-    if (!drivers->refSerial.getRefSerialReceivingData() || maxBarrelSpeed <= 15)
+    if (alwaysUseDefaultLaunchSpeed || !drivers->refSerial.getRefSerialReceivingData())
     {
-        desiredSpeed = WHEEL_RPM_15;
-    }
-    else if (maxBarrelSpeed <= 18)
-    {
-        desiredSpeed = WHEEL_RPM_18;
+        frictionWheels->setDesiredLaunchSpeed(defaultLaunchSpeed);
     }
     else
     {
-        desiredSpeed = WHEEL_RPM_30;
-    }
+        uint16_t maxBarrelSpeed = 0;
 
-    frictionWheels->setDesiredRpm(desiredSpeed);
+        switch (barrel)
+        {
+            case Barrel::BARREL_17MM_1:
+                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
+                break;
+            case Barrel::BARREL_17MM_2:
+                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
+                break;
+            case Barrel::BARREL_42MM:
+                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
+                break;
+        }
+
+        frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);
+    }
 }
 
 }  // namespace aruwsrc::control::launcher

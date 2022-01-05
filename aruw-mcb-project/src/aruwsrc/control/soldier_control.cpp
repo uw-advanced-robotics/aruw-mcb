@@ -39,7 +39,6 @@
 #include "client-display/client_display_subsystem.hpp"
 #include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
-#include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/chassis-relative/turret_quick_turn_command.hpp"
@@ -58,7 +57,6 @@ using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
-using namespace aruwsrc::launcher;
 using namespace tap::control;
 using namespace aruwsrc::display;
 using namespace aruwsrc::control;
@@ -156,9 +154,19 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     false,
     50);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels);
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    15.0f,
+    false,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
+FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    0.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
