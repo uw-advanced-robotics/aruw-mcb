@@ -48,7 +48,7 @@
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
-tap::arch::PeriodicMilliTimer sendXavierTimeout(3);
+tap::arch::PeriodicMilliTimer sendVisionCoprocessorTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -88,9 +88,9 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
-        if (sendXavierTimeout.execute())
+        if (sendVisionCoprocessorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->xavierSerial.sendMessage, ());
+            PROFILE(drivers->profiler, drivers->legacyVisionCoprocessor.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
         }
@@ -126,7 +126,7 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    drivers->xavierSerial.initializeCV();
+    drivers->legacyVisionCoprocessor.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
 #ifdef ALL_SOLDIERS
     drivers->turretMCBCanComm.init();
@@ -144,5 +144,5 @@ static void updateIo(aruwsrc::Drivers *drivers)
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    drivers->xavierSerial.updateSerial();
+    drivers->legacyVisionCoprocessor.updateSerial();
 }

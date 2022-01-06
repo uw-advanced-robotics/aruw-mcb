@@ -61,16 +61,16 @@ bool TurretCVCommand::isReady() { return turretSubsystem->isOnline(); }
 
 void TurretCVCommand::initialize()
 {
-    drivers->xavierSerial.beginAutoAim();
+    drivers->legacyVisionCoprocessor.beginAutoAim();
     yawPid.reset();
     pitchPid.reset();
 }
 
 void TurretCVCommand::execute()
 {
-    if (drivers->xavierSerial.lastAimDataValid())
+    if (drivers->legacyVisionCoprocessor.lastAimDataValid())
     {
-        const auto &cvData = drivers->xavierSerial.getLastAimData();
+        const auto &cvData = drivers->legacyVisionCoprocessor.getLastAimData();
         if (cvData.hasTarget)
         {
             turretSubsystem->setYawSetpoint(cvData.yaw);
@@ -106,7 +106,7 @@ bool TurretCVCommand::isFinished() const { return !turretSubsystem->isOnline(); 
 
 void TurretCVCommand::end(bool)
 {
-    drivers->xavierSerial.stopAutoAim();
+    drivers->legacyVisionCoprocessor.stopAutoAim();
     turretSubsystem->setYawMotorOutput(0);
     turretSubsystem->setPitchMotorOutput(0);
 }

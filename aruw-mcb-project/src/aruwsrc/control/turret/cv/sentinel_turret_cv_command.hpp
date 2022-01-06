@@ -35,9 +35,9 @@ class AgitatorSubsystem;
 namespace aruwsrc::control::turret
 {
 /**
- * A command that receives input from the vision system via the `XavierSerial` driver and aims the
- * turret accordingly. In addition to aiming, this command is responsible for determining when to
- * fire and scheduling an agitator rotate command accordingly. Finally, when a target is not
+ * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
+ * aims the turret accordingly. In addition to aiming, this command is responsible for determining
+ * when to fire and scheduling an agitator rotate command accordingly. Finally, when a target is not
  * acquired, this command scans the turret back and forth.
  */
 class SentinelTurretCVCommand : public tap::control::ComprisedCommand

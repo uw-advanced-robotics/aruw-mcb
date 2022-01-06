@@ -23,13 +23,13 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
 
-#include "aruwsrc/communication/serial/xavier_serial.hpp"
+#include "aruwsrc/communication/serial/legacy_vision_coprocessor.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "gtest/gtest.h"
 
-using aruwsrc::serial::XavierSerial;
+using aruwsrc::serial::LegacyVisionCoprocessor;
 using tap::serial::DJISerial;
 using namespace aruwsrc::mock;
 using namespace testing;
@@ -37,13 +37,13 @@ using namespace tap::arch;
 
 static constexpr float FIXED_POINT_PRECISION = 0.01f;
 
-// class for accessing internals of XavierSerial class for testing purposes
-class XavierSerialTester
+// class for accessing internals of LegacyVisionCoprocessor class for testing purposes
+class LegacyVisionCoprocessorTester
 {
 public:
-    XavierSerialTester(XavierSerial *serial) : serial(serial) {}
+    LegacyVisionCoprocessorTester(LegacyVisionCoprocessor *serial) : serial(serial) {}
 
-    XavierSerial::AutoAimRequestState *getCurrAimState()
+    LegacyVisionCoprocessor::AutoAimRequestState *getCurrAimState()
     {
         return &serial->AutoAimRequest.currAimState;
     }
@@ -51,7 +51,7 @@ public:
     bool *getCurrAimRequest() { return &serial->AutoAimRequest.autoAimRequest; }
 
 private:
-    XavierSerial *serial;
+    LegacyVisionCoprocessor *serial;
 };
 
 // RX tests
@@ -59,7 +59,7 @@ private:
 static void initAndRunAutoAimRxTest(float pitchDesired, float yawDesired, bool hasTarget)
 {
     aruwsrc::Drivers drivers;
-    XavierSerial serial(&drivers);
+    LegacyVisionCoprocessor serial(&drivers);
     DJISerial::SerialMessage message;
     message.headByte = 0xA5;
     message.type = 0;
@@ -78,24 +78,24 @@ static void initAndRunAutoAimRxTest(float pitchDesired, float yawDesired, bool h
     serial.messageReceiveCallback(message);
 
     EXPECT_TRUE(serial.lastAimDataValid());
-    const XavierSerial::TurretAimData &aimData = serial.getLastAimData();
+    const LegacyVisionCoprocessor::TurretAimData &aimData = serial.getLastAimData();
     EXPECT_EQ(hasTarget, aimData.hasTarget);
     EXPECT_NEAR(pitchDesired, aimData.pitch, FIXED_POINT_PRECISION);
     EXPECT_NEAR(yawDesired, aimData.yaw, FIXED_POINT_PRECISION);
     EXPECT_EQ(1234, message.messageTimestamp);
 }
 
-TEST(XavierSerial, messageReceiveCallback_turret_aim_message_zeros)
+TEST(LegacyVisionCoprocessor, messageReceiveCallback_turret_aim_message_zeros)
 {
     initAndRunAutoAimRxTest(0.0f, 0.0f, false);
 }
 
-TEST(XavierSerial, messageReceiveCallback_turret_aim_message_has_target)
+TEST(LegacyVisionCoprocessor, messageReceiveCallback_turret_aim_message_has_target)
 {
     initAndRunAutoAimRxTest(0, 0, true);
 }
 
-TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_whole_numbers)
+TEST(LegacyVisionCoprocessor, messageReceiveCallback_turret_aim_messages_whole_numbers)
 {
     // Pitch/yaw values should at least be correct between [0, 360]
     for (int i = 0; i < 360; i += 50)
@@ -107,7 +107,7 @@ TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_whole_numbers)
     }
 }
 
-TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_single_decimals)
+TEST(LegacyVisionCoprocessor, messageReceiveCallback_turret_aim_messages_single_decimals)
 {
     for (float i = -0.95; i < 0.95; i += 0.2)
     {
@@ -118,11 +118,11 @@ TEST(XavierSerial, messageReceiveCallback_turret_aim_messages_single_decimals)
     }
 }
 
-TEST(XavierSerial, messageReceiveCallback_tracking_request_ackn)
+TEST(LegacyVisionCoprocessor, messageReceiveCallback_tracking_request_ackn)
 {
     aruwsrc::Drivers drivers;
-    XavierSerial serial(&drivers);
-    XavierSerialTester serialTester(&serial);
+    LegacyVisionCoprocessor serial(&drivers);
+    LegacyVisionCoprocessorTester serialTester(&serial);
     DJISerial::SerialMessage message;
     message.headByte = 0xA5;
     message.type = 0;
@@ -132,22 +132,22 @@ TEST(XavierSerial, messageReceiveCallback_tracking_request_ackn)
     serial.messageReceiveCallback(message);
 
     // Request that started complete is always complete
-    EXPECT_EQ(XavierSerial::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
+    EXPECT_EQ(LegacyVisionCoprocessor::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
 
     // Send wrong message type, curr aim state won't change
-    *serialTester.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_SENT;
+    *serialTester.getCurrAimState() = LegacyVisionCoprocessor::AUTO_AIM_REQUEST_SENT;
     message.type = 2;
     serial.messageReceiveCallback(message);
-    EXPECT_EQ(XavierSerial::AUTO_AIM_REQUEST_SENT, *serialTester.getCurrAimState());
+    EXPECT_EQ(LegacyVisionCoprocessor::AUTO_AIM_REQUEST_SENT, *serialTester.getCurrAimState());
 
     // Send correct message type, curr aim state will change to complete
     message.type = 0;
     serial.messageReceiveCallback(message);
-    EXPECT_EQ(XavierSerial::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
+    EXPECT_EQ(LegacyVisionCoprocessor::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
 
     // Send correct message type, but we are already in the acknowledged, so nothing happens
     serial.messageReceiveCallback(message);
-    EXPECT_EQ(XavierSerial::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
+    EXPECT_EQ(LegacyVisionCoprocessor::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
 }
 
 // TX tests
@@ -163,17 +163,17 @@ static void setExpectationsForTxTest(aruwsrc::Drivers *drivers, int expectedNumM
         .WillRepeatedly(testing::Return(true));
 }
 
-TEST(XavierSerial, sendMessage_validate_robot_data)
+TEST(LegacyVisionCoprocessor, sendMessage_validate_robot_data)
 {
     clock::setTime(0);
 
     aruwsrc::Drivers drivers;
     TurretSubsystemMock ts(&drivers);
     ChassisSubsystemMock cs(&drivers);
-    XavierSerial xs(&drivers);
+    LegacyVisionCoprocessor xs(&drivers);
     xs.attachChassis(&cs);
     xs.attachTurret(&ts);
-    XavierSerialTester xst(&xs);
+    LegacyVisionCoprocessorTester xst(&xs);
 
     static constexpr int16_t rfWheelRPMToTest[] = {0, -16000, -12345, 231, 12331, 14098, 16000};
     static constexpr int16_t lfWheelRPMToTest[] = {0, -16000, -14889, -1, 3123, 12000, 16000};
@@ -299,7 +299,7 @@ TEST(XavierSerial, sendMessage_validate_robot_data)
     }
 }
 
-TEST(XavierSerial, sendMessage_validate_robot_ID)
+TEST(LegacyVisionCoprocessor, sendMessage_validate_robot_ID)
 {
     clock::setTime(0);
 
@@ -309,8 +309,8 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
         static_cast<int>(tap::serial::RefSerial::RobotId::RED_HERO) + 1;
 
     aruwsrc::Drivers drivers;
-    XavierSerial xs(&drivers);
-    XavierSerialTester xst(&xs);
+    LegacyVisionCoprocessor xs(&drivers);
+    LegacyVisionCoprocessorTester xst(&xs);
     tap::serial::RefSerial::Rx::RobotData robotData;
 
     setExpectationsForTxTest(&drivers, ROBOT_IDS_TO_CHECK);
@@ -340,57 +340,57 @@ TEST(XavierSerial, sendMessage_validate_robot_ID)
     }
 }
 
-TEST(XavierSerial, beginAutoAim_starts_aim_request)
+TEST(LegacyVisionCoprocessor, beginAutoAim_starts_aim_request)
 {
     aruwsrc::Drivers drivers;
-    XavierSerial xs(&drivers);
-    XavierSerialTester xst(&xs);
+    LegacyVisionCoprocessor xs(&drivers);
+    LegacyVisionCoprocessorTester xst(&xs);
 
     xs.beginAutoAim();
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_QUEUED);
     EXPECT_EQ(true, *xst.getCurrAimRequest());
 
-    *xst.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_QUEUED;
+    *xst.getCurrAimState() = LegacyVisionCoprocessor::AUTO_AIM_REQUEST_QUEUED;
     *xst.getCurrAimRequest() = false;
     xs.beginAutoAim();
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_QUEUED);
     EXPECT_EQ(true, *xst.getCurrAimRequest());
 
-    *xst.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_SENT;
+    *xst.getCurrAimState() = LegacyVisionCoprocessor::AUTO_AIM_REQUEST_SENT;
     *xst.getCurrAimRequest() = false;
     xs.beginAutoAim();
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_QUEUED);
     EXPECT_EQ(true, *xst.getCurrAimRequest());
 }
 
-TEST(XavierSerial, stopAutoAim_stops_auto_aim_req)
+TEST(LegacyVisionCoprocessor, stopAutoAim_stops_auto_aim_req)
 {
     aruwsrc::Drivers drivers;
-    XavierSerial xs(&drivers);
-    XavierSerialTester xst(&xs);
+    LegacyVisionCoprocessor xs(&drivers);
+    LegacyVisionCoprocessorTester xst(&xs);
 
     xs.stopAutoAim();
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_QUEUED);
     EXPECT_EQ(false, *xst.getCurrAimRequest());
 
-    *xst.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_QUEUED;
+    *xst.getCurrAimState() = LegacyVisionCoprocessor::AUTO_AIM_REQUEST_QUEUED;
     *xst.getCurrAimRequest() = true;
     xs.stopAutoAim();
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_QUEUED);
     EXPECT_EQ(false, *xst.getCurrAimRequest());
 
-    *xst.getCurrAimState() = XavierSerial::AUTO_AIM_REQUEST_SENT;
+    *xst.getCurrAimState() = LegacyVisionCoprocessor::AUTO_AIM_REQUEST_SENT;
     *xst.getCurrAimRequest() = true;
     xs.stopAutoAim();
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_QUEUED);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_QUEUED);
     EXPECT_EQ(false, *xst.getCurrAimRequest());
 }
 
-TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
+TEST(LegacyVisionCoprocessor, sendMessage_validate_begin_target_tracking_request)
 {
     aruwsrc::Drivers drivers;
-    XavierSerial xs(&drivers);
-    XavierSerialTester xst(&xs);
+    LegacyVisionCoprocessor xs(&drivers);
+    LegacyVisionCoprocessorTester xst(&xs);
     bool autoAimRequest = true;
 
     setExpectationsForTxTest(&drivers, 2);
@@ -412,7 +412,7 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     xs.sendAutoAimRequest();
 
     // We shall now be waiting for a reply from the Xavier
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_SENT);
 
     // Send a malformed message from the Xavier
     DJISerial::SerialMessage message;
@@ -424,14 +424,14 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     xs.messageReceiveCallback(message);
 
     // Bad message so the request state should not be complete
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_SENT);
 
     // Send a message from the Xavier that isn't malformed
     message.length = 5;
     xs.messageReceiveCallback(message);
 
     // The request was acknowledged, so the request state should be complete
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_COMPLETE);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_COMPLETE);
 
     // Queue another message to stop auto aiming
     xs.stopAutoAim();
@@ -441,18 +441,18 @@ TEST(XavierSerial, sendMessage_validate_begin_target_tracking_request)
     xs.sendAutoAimRequest();
 
     // We don't wait for a reply, only send the request once
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_COMPLETE);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_COMPLETE);
 }
 
-TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
+TEST(LegacyVisionCoprocessor, sendMessage_resend_if_msg_not_acknowledged)
 {
     static constexpr uint32_t RESEND_AIM_REQUEST_TIMEOUT = 1000;
 
     tap::arch::clock::setTime(0);
 
     aruwsrc::Drivers drivers;
-    XavierSerial xs(&drivers);
-    XavierSerialTester xst(&xs);
+    LegacyVisionCoprocessor xs(&drivers);
+    LegacyVisionCoprocessorTester xst(&xs);
     bool autoAimRequest = true;
 
     setExpectationsForTxTest(&drivers, 2);
@@ -472,7 +472,7 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
     xs.sendAutoAimRequest();
 
     // We shall now be waiting for a reply from the Xavier
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_SENT);
 
     // Set the time s.t. the resend timer times out and resend message
     clock::setTime(RESEND_AIM_REQUEST_TIMEOUT);
@@ -480,5 +480,5 @@ TEST(XavierSerial, sendMessage_resend_if_msg_not_acknowledged)
     xs.sendAutoAimRequest();
     xs.sendAutoAimRequest();
 
-    EXPECT_EQ(*xst.getCurrAimState(), XavierSerial::AUTO_AIM_REQUEST_SENT);
+    EXPECT_EQ(*xst.getCurrAimState(), LegacyVisionCoprocessor::AUTO_AIM_REQUEST_SENT);
 }
