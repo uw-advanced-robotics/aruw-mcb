@@ -70,8 +70,9 @@ TEST(TowSubsystem, getLeftLimitSwitchTriggered_returns_false_when_digital_pin_lo
         RIGHT_TOW_PIN,
         LEFT_TOW_LIMIT_SWITCH_PIN,
         RIGHT_TOW_LIMIT_SWITCH_PIN);
-    EXPECT_CALL(drivers.digital, read(LEFT_TOW_LIMIT_SWITCH_PIN))
-        .WillOnce([](Digital::InputPin) { return false; });
+    EXPECT_CALL(drivers.digital, read(LEFT_TOW_LIMIT_SWITCH_PIN)).WillOnce([](Digital::InputPin) {
+        return false;
+    });
 
     EXPECT_FALSE(ts.getLeftLimitSwitchTriggered());
 }
@@ -85,8 +86,9 @@ TEST(TowSubsystem, getLeftLimitSwitchTriggered_returns_true_when_digital_pin_hig
         RIGHT_TOW_PIN,
         LEFT_TOW_LIMIT_SWITCH_PIN,
         RIGHT_TOW_LIMIT_SWITCH_PIN);
-    EXPECT_CALL(drivers.digital, read(LEFT_TOW_LIMIT_SWITCH_PIN))
-        .WillOnce([](Digital::InputPin) { return true; });
+    EXPECT_CALL(drivers.digital, read(LEFT_TOW_LIMIT_SWITCH_PIN)).WillOnce([](Digital::InputPin) {
+        return true;
+    });
 
     EXPECT_TRUE(ts.getLeftLimitSwitchTriggered());
 }
@@ -100,8 +102,9 @@ TEST(TowSubsystem, getRightLimitSwitchTriggered_returns_false_when_digital_pin_l
         RIGHT_TOW_PIN,
         LEFT_TOW_LIMIT_SWITCH_PIN,
         RIGHT_TOW_LIMIT_SWITCH_PIN);
-    EXPECT_CALL(drivers.digital, read(RIGHT_TOW_LIMIT_SWITCH_PIN))
-        .WillOnce([](Digital::InputPin) { return false; });
+    EXPECT_CALL(drivers.digital, read(RIGHT_TOW_LIMIT_SWITCH_PIN)).WillOnce([](Digital::InputPin) {
+        return false;
+    });
 
     EXPECT_FALSE(ts.getRightLeftLimitSwitchTriggered());
 }
@@ -115,8 +118,9 @@ TEST(TowSubsystem, getRightLimitSwitchTriggered_returns_true_when_digital_pin_hi
         RIGHT_TOW_PIN,
         LEFT_TOW_LIMIT_SWITCH_PIN,
         RIGHT_TOW_LIMIT_SWITCH_PIN);
-    EXPECT_CALL(drivers.digital, read(RIGHT_TOW_LIMIT_SWITCH_PIN))
-        .WillOnce([](Digital::InputPin) { return true; });
+    EXPECT_CALL(drivers.digital, read(RIGHT_TOW_LIMIT_SWITCH_PIN)).WillOnce([](Digital::InputPin) {
+        return true;
+    });
 
     EXPECT_TRUE(ts.getRightLeftLimitSwitchTriggered());
 }

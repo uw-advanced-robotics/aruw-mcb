@@ -213,85 +213,84 @@ TEST(LegacyVisionCoprocessor, sendMessage_validate_robot_data)
         EXPECT_CALL(drivers.mpu6500, getRoll).WillRepeatedly(Return(rollValsToTest[i]));
 
         auto checkExpectations =
-            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
-        {
-            EXPECT_EQ(
-                FRAME_HEADER_LENGTH + 12 * sizeof(int16_t) + 3 * sizeof(int32_t) + CRC_LENGTH,
-                length);
+            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+                EXPECT_EQ(
+                    FRAME_HEADER_LENGTH + 12 * sizeof(int16_t) + 3 * sizeof(int32_t) + CRC_LENGTH,
+                    length);
 
-            data += FRAME_HEADER_LENGTH;
+                data += FRAME_HEADER_LENGTH;
 
-            // Chassis data
-            int16_t lf, lb, rf, rb, ax, ay, az, pit, roll;
-            uint16_t turretPit, turretYaw, yaw;
-            int32_t gx, gy, gz;
-            convertFromLittleEndian(&rf, data);
-            convertFromLittleEndian(&lf, data + sizeof(int16_t));
-            convertFromLittleEndian(&lb, data + 2 * sizeof(int16_t));
-            convertFromLittleEndian(&rb, data + 3 * sizeof(int16_t));
-            convertFromLittleEndian(&turretPit, data + 4 * sizeof(int16_t));
-            convertFromLittleEndian(&turretYaw, data + 5 * sizeof(int16_t));
-            convertFromLittleEndian(&gx, data + 6 * sizeof(int16_t));
-            convertFromLittleEndian(&gy, data + 6 * sizeof(int16_t) + sizeof(int32_t));
-            convertFromLittleEndian(&gz, data + 6 * sizeof(int16_t) + 2 * sizeof(int32_t));
-            convertFromLittleEndian(&ax, data + 6 * sizeof(int16_t) + 3 * sizeof(int32_t));
-            convertFromLittleEndian(&ay, data + 7 * sizeof(int16_t) + 3 * sizeof(int32_t));
-            convertFromLittleEndian(&az, data + 8 * sizeof(int16_t) + 3 * sizeof(int32_t));
-            convertFromLittleEndian(&yaw, data + 9 * sizeof(int16_t) + 3 * sizeof(int32_t));
-            convertFromLittleEndian(&pit, data + 10 * sizeof(int16_t) + 3 * sizeof(int32_t));
-            convertFromLittleEndian(&roll, data + 11 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                // Chassis data
+                int16_t lf, lb, rf, rb, ax, ay, az, pit, roll;
+                uint16_t turretPit, turretYaw, yaw;
+                int32_t gx, gy, gz;
+                convertFromLittleEndian(&rf, data);
+                convertFromLittleEndian(&lf, data + sizeof(int16_t));
+                convertFromLittleEndian(&lb, data + 2 * sizeof(int16_t));
+                convertFromLittleEndian(&rb, data + 3 * sizeof(int16_t));
+                convertFromLittleEndian(&turretPit, data + 4 * sizeof(int16_t));
+                convertFromLittleEndian(&turretYaw, data + 5 * sizeof(int16_t));
+                convertFromLittleEndian(&gx, data + 6 * sizeof(int16_t));
+                convertFromLittleEndian(&gy, data + 6 * sizeof(int16_t) + sizeof(int32_t));
+                convertFromLittleEndian(&gz, data + 6 * sizeof(int16_t) + 2 * sizeof(int32_t));
+                convertFromLittleEndian(&ax, data + 6 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&ay, data + 7 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&az, data + 8 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&yaw, data + 9 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&pit, data + 10 * sizeof(int16_t) + 3 * sizeof(int32_t));
+                convertFromLittleEndian(&roll, data + 11 * sizeof(int16_t) + 3 * sizeof(int32_t));
 
-            EXPECT_EQ(lfWheelRPMToTest[i], lf);
-            EXPECT_EQ(lbWheelRPMToTest[i], lb);
-            EXPECT_EQ(rfWheelRPMToTest[i], rf);
-            EXPECT_EQ(rbWheelRPMToTest[i], rb);
-            EXPECT_NEAR(
-                turretPitchValsToTest[i],
-                static_cast<float>(turretPit) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                turretYawValsToTest[i],
-                static_cast<float>(turretYaw) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                gxValsToTest[i],
-                static_cast<float>(gx) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                gyValsToTest[i],
-                static_cast<float>(gy) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                gzValsToTest[i],
-                static_cast<float>(gz) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                axValsToTest[i],
-                static_cast<float>(ax) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                ayValsToTest[i],
-                static_cast<float>(ay) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                azValsToTest[i],
-                static_cast<float>(az) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                yawValsToTest[i],
-                static_cast<float>(yaw) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                pitValsToTest[i],
-                static_cast<float>(pit) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
-            EXPECT_NEAR(
-                rollValsToTest[i],
-                static_cast<float>(roll) * FIXED_POINT_PRECISION,
-                FIXED_POINT_PRECISION);
+                EXPECT_EQ(lfWheelRPMToTest[i], lf);
+                EXPECT_EQ(lbWheelRPMToTest[i], lb);
+                EXPECT_EQ(rfWheelRPMToTest[i], rf);
+                EXPECT_EQ(rbWheelRPMToTest[i], rb);
+                EXPECT_NEAR(
+                    turretPitchValsToTest[i],
+                    static_cast<float>(turretPit) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    turretYawValsToTest[i],
+                    static_cast<float>(turretYaw) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    gxValsToTest[i],
+                    static_cast<float>(gx) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    gyValsToTest[i],
+                    static_cast<float>(gy) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    gzValsToTest[i],
+                    static_cast<float>(gz) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    axValsToTest[i],
+                    static_cast<float>(ax) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    ayValsToTest[i],
+                    static_cast<float>(ay) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    azValsToTest[i],
+                    static_cast<float>(az) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    yawValsToTest[i],
+                    static_cast<float>(yaw) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    pitValsToTest[i],
+                    static_cast<float>(pit) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
+                EXPECT_NEAR(
+                    rollValsToTest[i],
+                    static_cast<float>(roll) * FIXED_POINT_PRECISION,
+                    FIXED_POINT_PRECISION);
 
-            return length;
-        };
+                return length;
+            };
 
         ON_CALL(drivers.uart, write(_, _, _)).WillByDefault(checkExpectations);
         xs.sendRobotMeasurements();
@@ -319,14 +318,12 @@ TEST(LegacyVisionCoprocessor, sendMessage_validate_robot_ID)
         .Times(ROBOT_IDS_TO_CHECK)
         .WillRepeatedly(ReturnRef(robotData));
     ON_CALL(drivers.uart, write(_, _, _))
-        .WillByDefault(
-            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
-            {
-                data += FRAME_HEADER_LENGTH;
-                EXPECT_EQ(length, FRAME_HEADER_LENGTH + 1 + CRC_LENGTH);
-                EXPECT_EQ(static_cast<uint8_t>(robotData.robotId), data[0]);
-                return length;
-            });
+        .WillByDefault([&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            data += FRAME_HEADER_LENGTH;
+            EXPECT_EQ(length, FRAME_HEADER_LENGTH + 1 + CRC_LENGTH);
+            EXPECT_EQ(static_cast<uint8_t>(robotData.robotId), data[0]);
+            return length;
+        });
 
     xs.initializeCV();
 
@@ -398,13 +395,11 @@ TEST(LegacyVisionCoprocessor, sendMessage_validate_begin_target_tracking_request
 
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
-        .WillByDefault(
-            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
-            {
-                EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
-                EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
-                return length;
-            });
+        .WillByDefault([&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
+            EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
+            return length;
+        });
 
     xs.initializeCV();
 
@@ -462,13 +457,11 @@ TEST(LegacyVisionCoprocessor, sendMessage_resend_if_msg_not_acknowledged)
 
     setExpectationsForTxTest(&drivers, 2);
     ON_CALL(drivers.uart, write(_, _, _))
-        .WillByDefault(
-            [&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
-            {
-                EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
-                EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
-                return length;
-            });
+        .WillByDefault([&](tap::serial::Uart::UartPort, const uint8_t *data, std::size_t length) {
+            EXPECT_EQ(FRAME_HEADER_LENGTH + 1 + CRC_LENGTH, length);
+            EXPECT_EQ(autoAimRequest, data[FRAME_HEADER_LENGTH]);
+            return length;
+        });
 
     xs.initializeCV();
 
