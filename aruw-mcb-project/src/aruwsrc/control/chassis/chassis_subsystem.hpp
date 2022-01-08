@@ -164,15 +164,15 @@ private:
     /**
      * Distance from center of the two front wheels.
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.517f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
     /**
      * Distance from center of the front and rear wheels.
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.600f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
     /**
      * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
      */
-    static constexpr float GIMBAL_X_OFFSET = 0.175f;
+    static constexpr float GIMBAL_X_OFFSET = 0.0f;
     /**
      * @see `GIMBAL_X_OFFSET`.
      */
