@@ -75,6 +75,7 @@ public:
     enum TxMessageTypes
     {
         CV_MESSAGE_ODOMETRY_DATA = 1,
+        CV_MESSAGE_TYPE_AUTO_AIM_REQUEST,
         CV_NUM_MESSAGE_TYPES,
     };
 
@@ -156,7 +157,7 @@ private:
     static constexpr uint8_t AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 9 * sizeof(uint32_t) + sizeof(uint8_t);
     /// Size of entire message
     static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 10 * sizeof(uint32_t) + sizeof(uint8_t);
-    
+
     // TX message constants for encoding odometry data. These are zero indexed byte offsets.
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_X_POSITION_OFFSET = 0;
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(uint32_t);
@@ -210,9 +211,9 @@ private:
 public:
 #endif
 
-    modm::ResumableResult<bool> sendOdometryData();
+    bool sendOdometryData();
 
-    modm::ResumableResult<bool> sendAutoAimRequest();
+    bool sendAutoAimRequest();
 };
 }  // namespace serial
 }  // namespace aruwsrc

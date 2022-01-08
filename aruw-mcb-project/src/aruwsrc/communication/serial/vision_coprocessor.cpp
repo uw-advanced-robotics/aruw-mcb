@@ -119,7 +119,7 @@ bool VisionCoprocessor::sendMessage()
     }
 }
 
-modm::ResumableResult<bool> VisionCoprocessor::sendOdometryData()
+bool VisionCoprocessor::sendOdometryData()
 {
     // TODO: add odometry data
     convertToLittleEndian(
@@ -133,23 +133,22 @@ modm::ResumableResult<bool> VisionCoprocessor::sendOdometryData()
     send();
 }
 
-void LegacyVisionCoprocessor::beginAutoAim()
+void VisionCoprocessor::beginAutoAim()
 {
     AutoAimRequest.autoAimRequest = true;
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-void LegacyVisionCoprocessor::stopAutoAim()
+void VisionCoprocessor::stopAutoAim()
 {
     AutoAimRequest.autoAimRequest = false;
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-modm::ResumableResult<bool> LegacyVisionCoprocessor::sendAutoAimRequest()
+bool VisionCoprocessor::sendAutoAimRequest()
 {
-    RF_BEGIN(1);
     // If there is an auto aim request queued or if the request aim
-    // timeout is expired (we haven't recceived a auto aim message),
+    // timeout is expired (we haven't received a auto aim message),
     // send an auto aim request message.
     if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
         (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT &&
@@ -171,9 +170,7 @@ modm::ResumableResult<bool> LegacyVisionCoprocessor::sendAutoAimRequest()
                 AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
             }
         }
-        RF_YIELD();
     }
-    RF_END();
 }
 
 }  // namespace serial
