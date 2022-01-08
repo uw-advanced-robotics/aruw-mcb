@@ -30,7 +30,7 @@ using namespace testing;
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-static constexpr float MAX_WHEEL_SPEED = ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+static constexpr float TEST_WHEEL_SPEED = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
 
 #define DEFAULT_SETUP_TEST(chassisFrontBackIdentical) \
     aruwsrc::Drivers drivers;                         \
@@ -43,14 +43,19 @@ static constexpr float MAX_WHEEL_SPEED = ChassisSubsystem::MAX_WHEEL_SPEED_SINGL
     ON_CALL(drivers.controlOperatorInterface, getChassisYInput).WillByDefault(Return(y)); \
     ON_CALL(drivers.controlOperatorInterface, getChassisRInput).WillByDefault(Return(r));
 
+#define SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers)                                        \
+    tap::serial::RefSerialData::Rx::RobotData robotData;                                \
+    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+
 #define RUN_EXECUTE_TEST_TURRET_OFFLINE(drivers, chassis, cac, x, y, r)            \
     SET_USER_INPUT(drivers, x, y, r);                                              \
     EXPECT_CALL(                                                                   \
         chassis,                                                                   \
         setDesiredOutput(                                                          \
-            FloatEq(x* MAX_WHEEL_SPEED),                                           \
-            FloatEq(y* MAX_WHEEL_SPEED),                                           \
-            FloatEq(r* MAX_WHEEL_SPEED)));                                         \
+            FloatEq(x* TEST_WHEEL_SPEED),                                          \
+            FloatEq(y* TEST_WHEEL_SPEED),                                          \
+            FloatEq(r* TEST_WHEEL_SPEED)));                                        \
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1)); \
     cac.execute();
 
@@ -80,6 +85,8 @@ TEST(ChassisAutorotateCommand, isFinished_returns_false)
 TEST(ChassisAutorotateCommand, execute_turret_offline_chassis_rel_driving_no_autorotate)
 {
     DEFAULT_SETUP_TEST(false);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers);
 
     ON_CALL(turret, isOnline).WillByDefault(Return(false));
 
@@ -121,8 +128,8 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
         EXPECT_CALL(
             chassis,
             setDesiredOutput(
-                FloatEq(rotatedX * MAX_WHEEL_SPEED),
-                FloatEq(rotatedY * MAX_WHEEL_SPEED),
+                FloatEq(rotatedX * TEST_WHEEL_SPEED),
+                FloatEq(rotatedY * TEST_WHEEL_SPEED),
                 _));
         SET_USER_INPUT(drivers, x, y, 0);
         ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));
@@ -149,6 +156,7 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
         execute_turret_online_turret_rel_driving_actual_##turretAngleActualStr##_deg_setpoint_##turretAngleSetpointStr##_deg) \
     {                                                                                                                         \
         DEFAULT_SETUP_TEST(false);                                                                                            \
+        SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers);                                                                             \
         runExecuteTestSuiteTurretOnlineAtTurretAngle(                                                                         \
             drivers,                                                                                                          \
             chassis,                                                                                                          \
@@ -216,6 +224,7 @@ static void runExecuteAutorotateValidationTest(
         execute_autorotate_validation_turret_actual_##turretAngleActualStr##_deg_setpoint_##turretAngleSetpointStr##_deg_yawLimited_##yawLimited##_chassisFrontBackIdentical_##chassisFrontBackIdentical) \
     {                                                                                                                                                                                                     \
         DEFAULT_SETUP_TEST(chassisFrontBackIdentical);                                                                                                                                                    \
+        SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers);                                                                                                                                                         \
         runExecuteAutorotateValidationTest(                                                                                                                                                               \
             drivers,                                                                                                                                                                                      \
             chassis,                                                                                                                                                                                      \

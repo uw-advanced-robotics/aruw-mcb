@@ -47,7 +47,7 @@ using aruwsrc::mock::TurretSubsystemMock;
 using tap::algorithms::Ramp;
 using namespace tap::serial;
 
-static constexpr float BASE_DESIRED_OUT = ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR / 2;
+static constexpr float BASE_DESIRED_OUT = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR / 2;
 static constexpr float BASE_DESIRED_R_TRANSLATIONAL =
     BeybladeCommand::ROTATION_TARGET_45W_CUTOFF * BeybladeCommand::RAMP_TARGET_TRANSLATIONAL_FRAC *
     BeybladeCommand::RAMP_UPDATE_FRAC;
