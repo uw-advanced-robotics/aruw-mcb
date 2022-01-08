@@ -33,10 +33,17 @@ static constexpr float WHEEL_VEL = 1000;
 static constexpr float CHASSIS_VEL = 0.41887906;
 static constexpr float CHASSIS_VEL_R = 0.15330973;
 
+#define SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers)                                                 \
+    tap::serial::RefSerialData::Rx::RobotData robotData;                                         \
+    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(testing::Return(false)); \
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(testing::ReturnRef(robotData));
+
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_zero_desired_output)
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(0, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -50,6 +57,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_output_desired)
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
 
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
+
     cs.setDesiredOutput(WHEEL_VEL, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
     EXPECT_FLOAT_EQ(CHASSIS_VEL, chassisVelocity[0][0]);
@@ -61,6 +70,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_y_output_desired)
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(0, WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -74,6 +85,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_r_output_desired)
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
 
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
+
     cs.setDesiredOutput(0, 0, WHEEL_VEL);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
@@ -85,6 +98,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_and_y_output_desired)
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(WHEEL_VEL, WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -98,6 +113,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_y_and_r_output_desire
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
 
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
+
     cs.setDesiredOutput(WHEEL_VEL, WHEEL_VEL, WHEEL_VEL);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
     EXPECT_FLOAT_EQ(CHASSIS_VEL, chassisVelocity[0][0]);
@@ -109,6 +126,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_output_desir
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(-WHEEL_VEL, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -122,6 +141,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_y_output_desir
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
 
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
+
     cs.setDesiredOutput(0, -WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
     EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
@@ -133,6 +154,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_r_output_desir
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(0, 0, -WHEEL_VEL);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -146,6 +169,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_and_y_output
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
 
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
+
     cs.setDesiredOutput(-WHEEL_VEL, -WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
     EXPECT_FLOAT_EQ(-CHASSIS_VEL, chassisVelocity[0][0]);
@@ -158,6 +183,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_and_positive
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
 
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
+
     cs.setDesiredOutput(-WHEEL_VEL, WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
     EXPECT_FLOAT_EQ(-CHASSIS_VEL, chassisVelocity[0][0]);
@@ -169,6 +196,8 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_positive_x_and_negative
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(WHEEL_VEL, -WHEEL_VEL, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -184,6 +213,8 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_zero_desired_output_with_any_hea
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(0, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -209,6 +240,8 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_x_different_headings)
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(WHEEL_VEL, 0, 0);
 
@@ -248,6 +281,8 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_y_different_headings)
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
 
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
+
     cs.setDesiredOutput(0, WHEEL_VEL, 0);
 
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
@@ -285,6 +320,8 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_r_different_headings)
 {
     aruwsrc::Drivers d;
     ChassisSubsystem cs(&d);
+
+    SET_DEFAULT_REF_SERIAL_BEHAVIOR(d);
 
     cs.setDesiredOutput(0, 0, WHEEL_VEL);
 
