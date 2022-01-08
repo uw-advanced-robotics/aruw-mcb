@@ -141,8 +141,8 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 
 // Returns the distance covered by the sentinel wheel on the rail
 // with respect to the encoders
-// Equation used: Arc Length = Angle * numberOfRotations * radius
-// Here we get the radius from the getEncoderUnwrapped function
+// Equation used: Arc Length = Angle * radius
+// Here we get the shaft angle from the getEncoderUnwrapped function
 float SentinelDriveSubsystem::distanceFromEncoder(tap::motor::DjiMotor* motor)
 {
     float unwrappedAngle = motor->getEncoderUnwrapped();
