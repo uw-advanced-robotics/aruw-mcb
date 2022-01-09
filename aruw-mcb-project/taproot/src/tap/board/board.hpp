@@ -176,8 +176,9 @@ using DigitalInPinA = GpioI0;
 using DigitalInPinB = GpioH12;
 using DigitalInPinC = GpioH11;
 using DigitalInPinD = GpioH10;
+using DigitalInPinButton = GpioB2;
         
-using DigitalInPins = SoftwareGpioPort<DigitalInPinA, DigitalInPinB, DigitalInPinC, DigitalInPinD>;
+using DigitalInPins = SoftwareGpioPort<DigitalInPinA, DigitalInPinB, DigitalInPinC, DigitalInPinD, DigitalInPinButton>;
 
 // Initialize digital output pins
         
