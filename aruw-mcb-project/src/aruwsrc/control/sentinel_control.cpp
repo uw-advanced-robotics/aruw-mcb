@@ -28,10 +28,10 @@
 #include "tap/control/turret/commands/turret_setpoint_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "launcher/friction_wheel_rotate_command.hpp"
+#include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
@@ -43,7 +43,6 @@
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::sentinel::firing;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
@@ -51,6 +50,7 @@ using namespace aruwsrc::control;
 using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::launcher;
 using tap::Remote;
 
 /*
@@ -123,11 +123,19 @@ CalibrateCommand agitatorCalibrateCommand(&agitator);
 SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
-FrictionWheelRotateCommand spinFrictionWheels(
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+    drivers(),
     &frictionWheels,
-    FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
+    30.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
+FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    0.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 SentinelTurretCVCommand turretCVCommand(drivers(), &turretSubsystem, &agitator);
 
@@ -161,8 +169,8 @@ void initializeSubsystems()
     sentinelDrive.initialize();
     frictionWheels.initialize();
     turretSubsystem.initialize();
-    drivers()->xavierSerial.attachChassis(&sentinelDrive);
-    drivers()->xavierSerial.attachTurret(&turretSubsystem);
+    drivers()->legacyVisionCoprocessor.attachChassis(&sentinelDrive);
+    drivers()->legacyVisionCoprocessor.attachTurret(&turretSubsystem);
 }
 
 /* register subsystems here -------------------------------------------------*/

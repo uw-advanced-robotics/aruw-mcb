@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SOLDIER)
+#include "aruwsrc/util_macros.hpp"
+
+#ifdef ALL_SOLDIERS
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -26,8 +28,8 @@
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
-#include "agitator/agitator_shoot_comprised_command_instances.hpp"
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
@@ -37,7 +39,6 @@
 #include "client-display/client_display_subsystem.hpp"
 #include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
-#include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/chassis-relative/turret_quick_turn_command.hpp"
@@ -56,7 +57,6 @@ using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
-using namespace aruwsrc::launcher;
 using namespace tap::control;
 using namespace aruwsrc::display;
 using namespace aruwsrc::control;
@@ -83,7 +83,11 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     TurretSubsystem::YAW_MOTOR_ID,
     TurretSubsystem::CAN_BUS_MOTORS,
+#ifdef TARGET_SOLDIER_2021
     false,
+#else
+    true,
+#endif
     "Yaw Turret");
 TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
@@ -168,9 +172,19 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     false,
     10);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels);
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    15.0f,
+    false,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
+FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    0.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
@@ -238,8 +252,8 @@ void initializeSubsystems()
     frictionWheels.initialize();
     hopperCover.initialize();
     clientDisplay.initialize();
-    drivers()->xavierSerial.attachChassis(&chassis);
-    drivers()->xavierSerial.attachTurret(&turret);
+    drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
+    drivers()->legacyVisionCoprocessor.attachTurret(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

@@ -25,7 +25,7 @@
 #include "tap/control/comprised_command.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
-#include "aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
+#include "aruwsrc/control/agitator/move_unjam_ref_limited_command.hpp"
 
 namespace aruwsrc::agitator
 {
@@ -35,9 +35,9 @@ class AgitatorSubsystem;
 namespace aruwsrc::control::turret
 {
 /**
- * A command that receives input from the vision system via the `XavierSerial` driver and aims the
- * turret accordingly. In addition to aiming, this command is responsible for determining when to
- * fire and scheduling an agitator rotate command accordingly. Finally, when a target is not
+ * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
+ * aims the turret accordingly. In addition to aiming, this command is responsible for determining
+ * when to fire and scheduling an agitator rotate command accordingly. Finally, when a target is not
  * acquired, this command scans the turret back and forth.
  */
 class SentinelTurretCVCommand : public tap::control::ComprisedCommand

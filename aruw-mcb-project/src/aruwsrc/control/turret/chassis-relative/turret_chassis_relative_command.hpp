@@ -24,6 +24,8 @@
 #include "tap/control/command.hpp"
 #include "tap/control/turret/turret_subsystem_interface.hpp"
 
+#include "aruwsrc/util_macros.hpp"
+
 namespace aruwsrc
 {
 class Drivers;
@@ -61,7 +63,7 @@ public:
     void end(bool) override;
 
 private:
-#if defined(TARGET_SOLDIER)
+#if defined(ALL_SOLDIERS)
     static constexpr float YAW_P = 4000.0f;
     static constexpr float YAW_I = 0.0f;
     static constexpr float YAW_D = 190.0f;

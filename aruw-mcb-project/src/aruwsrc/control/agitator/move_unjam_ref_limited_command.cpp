@@ -17,7 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "agitator_shoot_comprised_command_instances.hpp"
+#include "move_unjam_ref_limited_command.hpp"
+
+#include "aruwsrc/drivers.hpp"
+
+#include "agitator_subsystem.hpp"
 
 using namespace tap::control::setpoint;
 

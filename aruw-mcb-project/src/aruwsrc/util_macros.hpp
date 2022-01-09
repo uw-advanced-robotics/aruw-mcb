@@ -17,30 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "friction_wheel_rotate_command.hpp"
+#ifndef ARUWSRC_UTIL_MACROS_HPP_
+#define ARUWSRC_UTIL_MACROS_HPP_
 
-#include "friction_wheel_subsystem.hpp"
+/**
+ * Define a helper macro that makes it easier to specify at compile time something that should be
+ * true for all soldiers.
+ */
+#if defined(TARGET_SOLDIER_2021) || defined(TARGET_SOLDIER_2022)
+#define ALL_SOLDIERS
+#endif
 
-using tap::control::Subsystem;
-
-namespace aruwsrc
-{
-namespace launcher
-{
-FrictionWheelRotateCommand::FrictionWheelRotateCommand(FrictionWheelSubsystem* subsystem, int speed)
-    : frictionWheelSubsystem(subsystem),
-      speed(speed)
-{
-    addSubsystemRequirement(subsystem);
-}
-
-void FrictionWheelRotateCommand::initialize() {}
-
-void FrictionWheelRotateCommand::execute() { frictionWheelSubsystem->setDesiredRpm(speed); }
-
-void FrictionWheelRotateCommand::end(bool) { frictionWheelSubsystem->setDesiredRpm(0); }
-
-bool FrictionWheelRotateCommand::isFinished() const { return false; }
-}  // namespace launcher
-
-}  // namespace aruwsrc
+#endif  // ARUWSRC_UTIL_MACROS_HPP_

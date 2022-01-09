@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SOLDIER) && defined(PLATFORM_HOSTED)
+#include "aruwsrc/util_macros.hpp"
+
+#if defined(ALL_SOLDIERS) && defined(PLATFORM_HOSTED)
 
 #include "tap/motor/motorsim/sim_handler.hpp"
 
@@ -73,12 +75,12 @@ void initialize_robot_sim()
     // Register the motor sims for the Friction Wheels
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
+        aruwsrc::control::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::control::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
+        aruwsrc::control::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
+        aruwsrc::control::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
 }
 }  // namespace aruwsrc::sim
 

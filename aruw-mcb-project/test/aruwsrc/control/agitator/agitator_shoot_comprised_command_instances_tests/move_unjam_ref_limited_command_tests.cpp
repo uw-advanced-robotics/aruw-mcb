@@ -24,7 +24,8 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/agitator/agitator_shoot_comprised_command_instances.hpp"
+#include "aruwsrc/control/agitator/move_unjam_ref_limited_command.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/agitator_subsystem_mock.hpp"
 
 using namespace tap::control::setpoint;
@@ -33,7 +34,7 @@ using namespace aruwsrc::mock;
 using namespace testing;
 using namespace tap::serial;
 
-#define SETUP_TEST(ComprisedCommand, ...)               \
+#define SETUP_TEST(...)                                 \
     aruwsrc::Drivers drivers;                           \
     NiceMock<AgitatorSubsystemMock> agitator(&drivers); \
     ComprisedCommand shootCommand(&drivers, &agitator, 1, 1, 1, true, 1, 1, 1, 1, 1, ##__VA_ARGS__);
@@ -48,7 +49,7 @@ using namespace tap::serial;
 TEST(MoveUnjamRefLimitedCommand, command_is_ready_if_heat_limiting_disabled)
 {
     // Create shoot command with heat limiting off
-    SETUP_TEST(MoveUnjamRefLimitedCommand, false, 0);
+    SETUP_TEST(false, 0);
     RefSerial::Rx::RobotData robotData;
     robotData.turret.heat17ID1 = 10;
     // should work when receiving ref serial
@@ -61,7 +62,7 @@ TEST(MoveUnjamRefLimitedCommand, command_is_ready_if_heat_limiting_disabled)
 
 TEST(MoveUnjamRefLimitedCommand, command_is_ready_if_not_receiving_ref_serial)
 {
-    SETUP_TEST(MoveUnjamRefLimitedCommand, true, 0);
+    SETUP_TEST(true, 0);
     RefSerial::Rx::RobotData robotData;
     // Oh no! we aren't receiving ref serial data
     SETUP_IS_READY_EXPECTATIONS(false);
@@ -72,7 +73,7 @@ TEST(MoveUnjamRefLimitedCommand, command_is_ready_if_not_receiving_ref_serial)
 // Command should be ready if it's just >= heat_buffer away from heat limit
 TEST(MoveUnjamRefLimitedCommand, heat_limited_command_is_ready_within_limit)
 {
-    SETUP_TEST(MoveUnjamRefLimitedCommand, true, 10);
+    SETUP_TEST(true, 10);
     RefSerial::Rx::RobotData robotData;
     robotData.turret.heatLimit17ID1 = 200;
     robotData.turret.heat17ID1 = 200 - 10;
@@ -83,7 +84,7 @@ TEST(MoveUnjamRefLimitedCommand, heat_limited_command_is_ready_within_limit)
 // Command should NOT be ready if it's heat limited and heat > heat limit - heat buffer
 TEST(MoveUnjamRefLimitedCommand, heat_limited_command_isnt_ready_above_limit)
 {
-    SETUP_TEST(MoveUnjamRefLimitedCommand, true, 10);
+    SETUP_TEST(true, 10);
     RefSerial::Rx::RobotData robotData;
     robotData.turret.heatLimit17ID1 = 200;
     robotData.turret.heat17ID1 = 200 - 10 + 1;
@@ -95,7 +96,7 @@ TEST(MoveUnjamRefLimitedCommand, heat_limited_command_isnt_ready_above_limit)
 // Command should NOT be ready if subsystem is offline
 TEST(MoveUnjamRefLimitedCommand, heat_limited_command_isnt_ready_when_subsystem_offline)
 {
-    SETUP_TEST(MoveUnjamRefLimitedCommand, true, 10);
+    SETUP_TEST(true, 10);
     RefSerial::Rx::RobotData robotData;
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     EXPECT_CALL(agitator, isOnline).WillOnce(Return(false));

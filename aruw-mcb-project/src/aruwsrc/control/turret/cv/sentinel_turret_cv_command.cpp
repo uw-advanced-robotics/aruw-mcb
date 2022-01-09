@@ -24,7 +24,7 @@
 
 #include "../algorithms/chassis_frame_turret_controller.hpp"
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/communication/serial/xavier_serial.hpp"
+#include "aruwsrc/communication/serial/legacy_vision_coprocessor.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -86,7 +86,7 @@ bool SentinelTurretCVCommand::isReady() { return sentinelTurret->isOnline(); }
 
 void SentinelTurretCVCommand::initialize()
 {
-    drivers->xavierSerial.beginAutoAim();
+    drivers->legacyVisionCoprocessor.beginAutoAim();
     pitchScanningUp = false;
     yawScanningRight = false;
     lostTargetCounter = 0;
@@ -95,9 +95,9 @@ void SentinelTurretCVCommand::initialize()
 
 void SentinelTurretCVCommand::execute()
 {
-    if (drivers->xavierSerial.lastAimDataValid())
+    if (drivers->legacyVisionCoprocessor.lastAimDataValid())
     {
-        const auto &cvData = drivers->xavierSerial.getLastAimData();
+        const auto &cvData = drivers->legacyVisionCoprocessor.getLastAimData();
         if (cvData.hasTarget)
         {
             aimingAtTarget = true;
@@ -155,7 +155,7 @@ bool SentinelTurretCVCommand::isFinished() const { return !sentinelTurret->isOnl
 
 void SentinelTurretCVCommand::end(bool interrupted)
 {
-    drivers->xavierSerial.stopAutoAim();
+    drivers->legacyVisionCoprocessor.stopAutoAim();
     comprisedCommandScheduler.removeCommand(&rotateAgitator, interrupted);
     sentinelTurret->setPitchMotorOutput(0);
     sentinelTurret->setYawMotorOutput(0);
