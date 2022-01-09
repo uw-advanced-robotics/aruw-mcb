@@ -41,6 +41,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const Command *baseDriveCommand)
     : Command(),
       drivers(drivers),
+      bubbleDrawer(drivers, &hopperOpenBubble),
       wiggleCommand(wiggleCommand),
       followTurretCommand(followTurretCommand),
       beybladeCommand(beybladeCommand),
@@ -50,17 +51,21 @@ ClientDisplayCommand::ClientDisplayCommand(
     addSubsystemRequirement(clientDisplay);
 }
 
-void ClientDisplayCommand::execute() { run(); }
+void ClientDisplayCommand::initialize() { initializeBubbles(); }
 
+void ClientDisplayCommand::execute() { run(); }
+bool tf = false;
 bool ClientDisplayCommand::run()
 {
     PT_BEGIN();
     PT_CALL(initializeNonblocking());
     while (true)
     {
-        PT_CALL(updateDriveCommandMsg());
+        bubbleDrawer.setBubbleFilled(tf);
+        PT_CALL(bubbleDrawer.draw());
+        // PT_CALL(updateDriveCommandMsg());
         // PT_CALL(updateCapBankMsg());
-        PT_CALL(updateTurretReticleMsg());
+        // PT_CALL(updateTurretReticleMsg());
         PT_YIELD();
     }
     PT_END();
@@ -70,9 +75,10 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
 {
     RF_BEGIN(0);
     RF_WAIT_WHILE(drivers->refSerial.getRobotData().robotId == RefSerial::RobotId::INVALID);
-    initDriveCommandMsg();
-    initTurretReticleMsg();
-    initCapBankMsg();
+    RF_CALL(bubbleDrawer.initialize());
+    // initDriveCommandMsg();
+    // initTurretReticleMsg();
+    // initCapBankMsg();
     RF_END();
 }
 
@@ -324,4 +330,22 @@ void ClientDisplayCommand::initTurretReticleMsg()
     // Computes crcs which won't be changing in the future
     drivers->refSerial.sendGraphic(&reticleMsg, true, false);
 }
+
+void ClientDisplayCommand::initializeBubbles()
+{
+    // Configure hopper cover bubble
+    tap::serial::RefSerial::configGraphicGenerics(
+        &hopperOpenBubble.graphicData,
+        HOPPER_OPEN_NAME,
+        tap::serial::RefSerial::Tx::ADD_GRAPHIC,
+        HOPPER_OPEN_LAYER,
+        HOPPER_OPEN_COLOR);
+    tap::serial::RefSerial::configCircle(
+        BUBBLE_WIDTH,
+        HOPPER_OPEN_BUBBLE_CENTER_X,
+        HOPPER_OPEN_BUBBLE_CENTER_Y,
+        BUBBLE_RADIUS,
+        &hopperOpenBubble.graphicData);
+}
+
 }  // namespace aruwsrc::display

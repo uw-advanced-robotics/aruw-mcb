@@ -22,6 +22,7 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
+#include "tap/communication/serial/ref_serial_ui_wrappers/bubble_drawer.hpp"
 #include "tap/control/command.hpp"
 
 #include "modm/processing/protothread.hpp"
@@ -56,7 +57,7 @@ public:
 
     const char *getName() const override { return "client display"; }
 
-    void initialize() override {}
+    void initialize() override;
 
     void execute() override;
 
@@ -86,7 +87,21 @@ private:
     static constexpr uint8_t CAP_TEXT_NAME[] = {0, 0, 6};
     static constexpr uint8_t CAP_VALUE_NAME[] = {0, 0, 7};
 
+    static constexpr uint8_t HOPPER_OPEN_NAME[] = {0, 0, 8};
+
+    static constexpr uint16_t BUBBLE_WIDTH = 10;
+    static constexpr uint16_t BUBBLE_RADIUS = 10;
+    static constexpr uint16_t HOPPER_OPEN_BUBBLE_CENTER_X = 1000;
+    static constexpr uint16_t HOPPER_OPEN_BUBBLE_CENTER_Y = 500;
+    static constexpr uint8_t HOPPER_OPEN_LAYER = 0;
+    static constexpr tap::serial::RefSerial::Tx::GraphicColor HOPPER_OPEN_COLOR =
+        tap::serial::RefSerial::Tx::GraphicColor::RED_AND_BLUE;
+
     aruwsrc::Drivers *drivers;
+
+    tap::serial::RefSerial::Tx::Graphic1Message hopperOpenBubble;
+
+    tap::communication::serial::BubbleDrawer bubbleDrawer;
 
     // General variables
     /// @note The maximum frequency of this timer is 10 Hz according to RM rules.
@@ -137,6 +152,9 @@ private:
 
     void initCapBankMsg();
     modm::ResumableResult<bool> updateCapBankMsg();
+
+
+    void initializeBubbles();
 };
 }  // namespace aruwsrc::display
 
