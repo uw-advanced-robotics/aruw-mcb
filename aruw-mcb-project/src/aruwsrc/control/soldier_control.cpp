@@ -234,8 +234,8 @@ void initializeSubsystems()
     frictionWheels.initialize();
     hopperCover.initialize();
     clientDisplay.initialize();
-    drivers()->xavierSerial.attachChassis(&chassis);
-    drivers()->xavierSerial.attachTurret(&turret);
+    drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
+    drivers()->legacyVisionCoprocessor.attachTurret(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

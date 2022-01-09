@@ -17,22 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef XAVIER_SERIAL_MOCK_HPP_
-#define XAVIER_SERIAL_MOCK_HPP_
+#ifndef LEGACY_VISION_COPROCESSOR_MOCK_HPP_
+#define LEGACY_VISION_COPROCESSOR_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/communication/serial/xavier_serial.hpp"
+#include "aruwsrc/communication/serial/legacy_vision_coprocessor.hpp"
 
 namespace aruwsrc
 {
 namespace mock
 {
-class XavierSerialMock : public serial::XavierSerial
+class LegacyVisionCoprocessorMock : public serial::LegacyVisionCoprocessor
 {
 public:
-    XavierSerialMock(aruwsrc::Drivers *drivers);
-    virtual ~XavierSerialMock();
+    LegacyVisionCoprocessorMock(aruwsrc::Drivers *drivers);
+    virtual ~LegacyVisionCoprocessorMock();
 
     MOCK_METHOD(void, initializeCV, (), (override));
     MOCK_METHOD(void, messageReceiveCallback, (const SerialMessage &), (override));
@@ -47,8 +47,8 @@ public:
         attachChassis,
         (tap::control::chassis::ChassisSubsystemInterface *),
         (override));
-};  // class XavierSerialMock
+};  // class LegacyVisionCoprocessorMock
 }  // namespace mock
 }  // namespace aruwsrc
 
-#endif  // XAVIER_SERIAL_MOCK_HPP_
+#endif  // LEGACY_VISION_COPROCESSOR_MOCK_HPP_

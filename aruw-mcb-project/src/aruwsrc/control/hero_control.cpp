@@ -108,7 +108,7 @@ void initializeSubsystems()
     chassis.initialize();
     frictionWheels.initialize();
     clientDisplay.initialize();
-    drivers()->xavierSerial.attachChassis(&chassis);
+    drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
 }
 
 /* register subsystems here -------------------------------------------------*/

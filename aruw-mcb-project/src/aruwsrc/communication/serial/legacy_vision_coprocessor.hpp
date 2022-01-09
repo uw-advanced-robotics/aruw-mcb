@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef XAVIER_SERIAL_HPP_
-#define XAVIER_SERIAL_HPP_
+#ifndef LEGACY_VISION_COPROCESSOR_HPP_
+#define LEGACY_VISION_COPROCESSOR_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/architecture/timeout.hpp"
@@ -28,7 +28,7 @@
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
 
-class XavierSerialTester;
+class LegacyVisionCoprocessorTester;
 
 namespace aruwsrc
 {
@@ -53,11 +53,14 @@ namespace aruwsrc
 namespace serial
 {
 /**
- * A class used to communicate with our Xaviers.
+ * A class used to communicate with our vision coprocessors. Targets the "legacy" vision system
+ * (2019-2021).
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class XavierSerial : public tap::serial::DJISerial, ::modm::pt::Protothread, modm::Resumable<3>
+class LegacyVisionCoprocessor : public tap::serial::DJISerial,
+                                ::modm::pt::Protothread,
+                                modm::Resumable<3>
 {
 public:
     // AutoAim Data
@@ -84,9 +87,9 @@ public:
         CV_NUM_MESSAGE_TYPES,
     };
 
-    XavierSerial(aruwsrc::Drivers* drivers);
-    DISALLOW_COPY_AND_ASSIGN(XavierSerial);
-    mockable ~XavierSerial() = default;
+    LegacyVisionCoprocessor(aruwsrc::Drivers* drivers);
+    DISALLOW_COPY_AND_ASSIGN(LegacyVisionCoprocessor);
+    mockable ~LegacyVisionCoprocessor() = default;
 
     /**
      * Call this before using the serial line, initializes the uart line
@@ -130,7 +133,7 @@ public:
     }
 
 private:
-    friend class ::XavierSerialTester;
+    friend class ::LegacyVisionCoprocessorTester;
 
     enum RxMessageTypes
     {
@@ -221,4 +224,4 @@ public:
 }  // namespace serial
 }  // namespace aruwsrc
 
-#endif  // XAVIER_SERIAL_HPP_
+#endif  // LEGACY_VISION_COPROCESSOR_HPP_
