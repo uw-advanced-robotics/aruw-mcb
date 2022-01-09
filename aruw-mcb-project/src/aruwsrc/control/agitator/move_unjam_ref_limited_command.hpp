@@ -32,19 +32,35 @@ namespace aruwsrc::agitator
 class AgitatorSubsystem;
 
 /**
- * A class that extends the shoot comprised command and defines the system parameters of the
- * comprised command. The constants are choosen for fast rotation speed for a soldier robot's
- * agitator.
+ * A command that will attempt to rotate an agitator a set amount and unjam if it
+ * encounters a jam. This command has the option to be heat limited (in-game "heat")
  */
 class MoveUnjamRefLimitedCommand : public tap::control::setpoint::MoveUnjamComprisedCommand
 {
 public:
+    /**
+     * @note: All parameters except for `heatLimiting` and `heatLimitBuffer` are
+     * passed directly to the `tap::control::setpoint::MoveUnjamComprisedCommand`
+     * constructor, so see that class for what those parameters do.
+     * 
+     * @param[in] heatLimiting if `true` this command will only schedule when the
+     *      heat of 17mm barrel 1 is below the buffer.
+     * @param[in] heatLimitBuffer If current_barrel_heat + heatLimitBuffer > barrel_heat_limit 
+     *      then command will not be scheduled. i.e.: How close you can get to the
+     *      heat limit before the command won't be scheduled.
+     */
     MoveUnjamRefLimitedCommand(
         aruwsrc::Drivers* drivers,
-        AgitatorSubsystem* agitator17mm,
-        float agitatorRotateAngle,
-        float maxUnjamRotateAngle,
-        uint32_t rotateTime,
+        tap::control::setpoint::SetpointSubsystem* setpointSubsystem,
+        float moveDisplacement,
+        uint32_t moveTime,
+        uint32_t pauseAfterMoveTime,
+        bool setToTargetOnEnd,
+        float setpointTolerance,
+        float unjamDisplacement,
+        float unjamThreshold,
+        uint32_t maxUnjamWaitTime,
+        uint_fast16_t unjamCycleCount,
         bool heatLimiting,
         float heatLimitBuffer);
 
@@ -55,7 +71,12 @@ public:
 private:
     aruwsrc::Drivers* drivers;
 
+    // If `true` heat limiting is enabled, disabled otherwise
     const bool heatLimiting;
+    // If current_barrel_heat + heatLimitBuffer > barrel_heat_limit then command
+    // will not be scheduled. (How close to heat limit barrel can get before command
+    // will stop scheduling). Should be _at least_ the heat value of a single launched
+    // projectile if you don't want to overheat from the next shot.
     const float heatLimitBuffer;
 };  // class ShootFastComprisedCommand
 

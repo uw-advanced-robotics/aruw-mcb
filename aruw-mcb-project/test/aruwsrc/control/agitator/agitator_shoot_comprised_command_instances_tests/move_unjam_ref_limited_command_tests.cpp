@@ -37,7 +37,7 @@ using namespace tap::serial;
 #define SETUP_TEST(...)                                 \
     aruwsrc::Drivers drivers;                           \
     NiceMock<AgitatorSubsystemMock> agitator(&drivers); \
-    ComprisedCommand shootCommand(&drivers, &agitator, 1, 1, 1, true, 1, 1, 1, 1, 1, ##__VA_ARGS__);
+    MoveUnjamRefLimitedCommand shootCommand(&drivers, &agitator, 1, 1, 1, true, 1, 1, 1, 1, 1, ##__VA_ARGS__);
 
 #define SETUP_IS_READY_EXPECTATIONS(receivingRefSerial)                          \
     EXPECT_CALL(drivers.refSerial, getRobotData).WillOnce(ReturnRef(robotData)); \
