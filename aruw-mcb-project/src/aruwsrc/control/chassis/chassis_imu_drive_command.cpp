@@ -98,8 +98,11 @@ void ChassisImuDriveCommand::execute()
     else
     {
         imuSetpointInitialized = false;
-        chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput() *
-                                           ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+        const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+        chassisRotationDesiredWheelspeed =
+            drivers->controlOperatorInterface.getChassisRInput() * MAX_WHEEL_SPEED;
     }
 
     float chassisXDesiredWheelspeed = 0.0f;

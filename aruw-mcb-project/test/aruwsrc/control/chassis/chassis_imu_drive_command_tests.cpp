@@ -29,9 +29,12 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc;
 using namespace testing;
 
-#define SETUP_TEST_OBJECTS()                                         \
-    Drivers drivers;                                                 \
-    NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis(&drivers); \
+#define SETUP_TEST_OBJECTS()                                                            \
+    Drivers drivers;                                                                    \
+    tap::serial::RefSerial::Rx::RobotData robotData;                                    \
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));       \
+    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
+    NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis(&drivers);                    \
     ChassisImuDriveCommand chassisImuDriveCommand(&drivers, &chassis);
 
 TEST(ChassisImuDriveCommand, end__sets_des_out_0)
@@ -80,9 +83,9 @@ TEST(ChassisImuDriveCommand, execute__normal_rotation_translation_when_imu_not_c
         EXPECT_CALL(
             chassis,
             setDesiredOutput(
-                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR * triplet[0],
-                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR * triplet[1],
-                ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR * triplet[2]));
+                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[0],
+                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[1],
+                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[2]));
     }
 
     for (auto triplet : desiredOutputValuesToTest)
@@ -278,8 +281,8 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     imuYaw = 10;
     userX = 1.0f;
     userY = 1.0f;
-    float xExpected = ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
-    float yExpected = ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+    float xExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    float yExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
     tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(10));
 
     EXPECT_CALL(chassis, setDesiredOutput(FloatEq(xExpected), FloatEq(yExpected), _));
