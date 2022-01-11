@@ -68,6 +68,8 @@ FrictionWheelSubsystem frictionWheels(drivers());
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
+TurretSubsystem turret(drivers(), DjiMotor, DoubleDjiMotor);
+
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
@@ -93,6 +95,12 @@ ClientDisplayCommand clientDisplayCommand(
     nullptr,
     &chassisDriveCommand);
 
+TurretWorldRelativeCommand turretWorldRelativeCommand(drivers(), &turret);
+
+TurretCVCommand turretCVCommand(drivers(), &turret);
+
+TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
+
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
@@ -100,7 +108,18 @@ HoldCommandMapping rightSwitchDown(
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&chassisDriveCommand, &turretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
 // Keyboard/Mouse related mappings
+HoldCommandMapping rightMousePressed(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+
+PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -109,6 +128,7 @@ void initializeSubsystems()
     frictionWheels.initialize();
     clientDisplay.initialize();
     drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
+    turret.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -117,6 +137,7 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandSchedule.registerSubsystem(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
