@@ -2,7 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Tests",
+            "name": "SConstruct: Build-tests",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/aruw-mcb-project",
+            "module": "pipenv",
+            "args": ["run", "scons", "build-tests", "profile=debug"],
+            "justMyCode": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "ARUW-MCB: Tests",
             "type": "cppdbg",
             "request": "launch",
             "preLaunchTask": "Build Tests - Debug",
@@ -22,7 +32,7 @@
             ]
         },
         {
-            "name": "Debug Sim",
+            "name": "ARUW-MCB: Sim",
             "type": "cppdbg",
             "request": "launch",
             "preLaunchTask": "Build Sim - Debug",
@@ -42,7 +52,7 @@
             ]
         },
         {
-            "name": "Debug MCB",
+            "name": "ARUW-MCB: Hardware",
             "type": "cortex-debug",
             "request": "launch",
             "servertype": "openocd",
