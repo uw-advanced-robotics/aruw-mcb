@@ -81,32 +81,38 @@ bool VisionCoprocessor::decodeToTurretAimData(
         return false;
     }
 
-    uint32_t xPos, yPos, zPos, xVel, yVel, zVel, xAcc, yAcc, zAcc, timestamp;
-    uint8_t hasTarget;
-    convertFromLittleEndian(&xPos, message.data + AIM_DATA_MESSAGE_X_POSITION_OFFSET);
-    convertFromLittleEndian(&yPos, message.data + AIM_DATA_MESSAGE_Y_POSITION_OFFSET);
-    convertFromLittleEndian(&zPos, message.data + AIM_DATA_MESSAGE_Z_POSITION_OFFSET);
-    convertFromLittleEndian(&xVel, message.data + AIM_DATA_MESSAGE_X_VELOCITY_OFFSET);
-    convertFromLittleEndian(&yVel, message.data + AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET);
-    convertFromLittleEndian(&zVel, message.data + AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET);
-    convertFromLittleEndian(&xAcc, message.data + AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET);
-    convertFromLittleEndian(&yAcc, message.data + AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET);
-    convertFromLittleEndian(&zAcc, message.data + AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET);
-    convertFromLittleEndian(&timestamp, message.data + AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET);
+    uint32_t xPos = *(message.data + AIM_DATA_MESSAGE_X_POSITION_OFFSET);
+    uint32_t yPos = *(message.data + AIM_DATA_MESSAGE_Y_POSITION_OFFSET);
+    uint32_t zPos = *(message.data + AIM_DATA_MESSAGE_Z_POSITION_OFFSET);
+    uint32_t xVel = *(message.data + AIM_DATA_MESSAGE_X_VELOCITY_OFFSET);
+    uint32_t yVel = *(message.data + AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET);
+    uint32_t zVel = *(message.data + AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET);
+    uint32_t xAcc = *(message.data + AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET);
+    uint32_t yAcc = *(message.data + AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET);
+    uint32_t zAcc = *(message.data + AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET);
+    uint32_t timestamp = *(message.data + AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET);
 
-    aimData->xPos = *reinterpret_cast<float *>(xPos);
-    aimData->yPos = *reinterpret_cast<float *>(yPos);
-    aimData->zPos = *reinterpret_cast<float *>(zPos);
-    aimData->xVel = *reinterpret_cast<float *>(xVel);
-    aimData->yVel = *reinterpret_cast<float *>(yVel);
-    aimData->zVel = *reinterpret_cast<float *>(zVel);
-    aimData->xAcc = *reinterpret_cast<float *>(xAcc);
-    aimData->yAcc = *reinterpret_cast<float *>(yAcc);
-    aimData->zAcc = *reinterpret_cast<float *>(zAcc);
-    aimData->timestamp = *reinterpret_cast<float *>(timestamp);
+    aimData->xPos = reinterpretIntAsFloat(xPos);
+    aimData->yPos = reinterpretIntAsFloat(yPos);
+    aimData->zPos = reinterpretIntAsFloat(zPos);
+    aimData->xVel = reinterpretIntAsFloat(xVel);
+    aimData->yVel = reinterpretIntAsFloat(yVel);
+    aimData->zVel = reinterpretIntAsFloat(zVel);
+    aimData->xAcc = reinterpretIntAsFloat(xAcc);
+    aimData->yAcc = reinterpretIntAsFloat(yAcc);
+    aimData->zAcc = reinterpretIntAsFloat(zAcc);
+    aimData->timestamp = reinterpretIntAsFloat(timestamp);
     aimData->hasTarget = message.data[AIM_DATA_MESSAGE_HAS_TARGET_OFFSET];
 
     return true;
+}
+
+float VisionCoprocessor::reinterpretIntAsFloat(uint32_t value)
+{
+    static_assert(sizeof(float) == sizeof(uint32_t));
+    float result;
+    memcpy(&result, &value, sizeof(uint32_t));
+    return result;
 }
 
 bool VisionCoprocessor::sendMessage()
@@ -119,7 +125,7 @@ bool VisionCoprocessor::sendMessage()
     }
 }
 
-bool VisionCoprocessor::sendOdometryData()
+void VisionCoprocessor::sendOdometryData()
 {
     // TODO: add odometry data
     convertToLittleEndian(
@@ -145,7 +151,7 @@ void VisionCoprocessor::stopAutoAim()
     AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
 }
 
-bool VisionCoprocessor::sendAutoAimRequest()
+void VisionCoprocessor::sendAutoAimRequest()
 {
     // If there is an auto aim request queued or if the request aim
     // timeout is expired (we haven't received a auto aim message),

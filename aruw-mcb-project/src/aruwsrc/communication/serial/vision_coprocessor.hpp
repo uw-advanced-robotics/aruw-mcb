@@ -27,6 +27,8 @@
 
 #include "modm/processing/resumable.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 class VisionCoprocessorTester;
 
 namespace aruwsrc
@@ -44,9 +46,7 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class VisionCoprocessor : public tap::serial::DJISerial,
-                                ::modm::pt::Protothread,
-                                modm::Resumable<3>
+class VisionCoprocessor : public tap::serial::DJISerial
 {
 public:
     // AutoAim Data
@@ -161,7 +161,7 @@ private:
     // TX message constants for encoding odometry data. These are zero indexed byte offsets.
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_X_POSITION_OFFSET = 0;
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(uint32_t);
-    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_X_POSITION_OFFSET = 2 * sizeof(uint32_t);
+    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_Z_POSITION_OFFSET = 2 * sizeof(uint32_t);
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TURRET_PITCH_OFFSET = 3 * sizeof(uint32_t);
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TURRET_YAW_OFFSET = 4 * sizeof(uint32_t);
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 5 * sizeof(uint32_t);
@@ -193,7 +193,7 @@ private:
     /// A flag set to `true` if the timeout is not expired, and `false` otherwise.
     bool isCvOnline;
 
-    const aruwsrc::can::TurretMCBCanComm* turretMCBCanComm;
+    const can::TurretMCBCanComm* turretMCBCanComm;
 
     /**
      * TODO: update this specification
@@ -207,13 +207,21 @@ private:
      */
     static bool decodeToTurretAimData(const SerialMessage& message, TurretAimData* aimData);
 
+    /**
+     * Reinterprets an int as a float.
+     *
+     * @param[in] value the int to reinterpret.
+     * @return the value reinterpreted as a float.
+     */
+    static float reinterpretIntAsFloat(uint32_t value);
+
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
 
-    bool sendOdometryData();
+    void sendOdometryData();
 
-    bool sendAutoAimRequest();
+    void sendAutoAimRequest();
 };
 }  // namespace serial
 }  // namespace aruwsrc
