@@ -73,7 +73,7 @@ static void initAndRunAutoAimRxTest(
     DJISerial::SerialMessage message;
     message.headByte = 0xA5;
     message.type = 0;
-    message.length = 10 * sizeof(uint32_t) + sizeof(uint8_t);
+    message.length = serial.AIM_DATA_MESSAGE_SIZE;
 
     message.data[serial.AIM_DATA_MESSAGE_X_POSITION_OFFSET] = reinterpretFloatAsInt(xPosDesired);
     message.data[serial.AIM_DATA_MESSAGE_Y_POSITION_OFFSET] = reinterpretFloatAsInt(yPosDesired);
@@ -84,7 +84,7 @@ static void initAndRunAutoAimRxTest(
     message.data[serial.AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET] = reinterpretFloatAsInt(xAccDesired);
     message.data[serial.AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET] = reinterpretFloatAsInt(yAccDesired);
     message.data[serial.AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET] = reinterpretFloatAsInt(zAccDesired);
-    message.data[serial.AIM_DATA_MESSAGE_SIZE] = static_cast<uint8_t>(hasTarget);
+    message.data[serial.AIM_DATA_MESSAGE_HAS_TARGET_OFFSET] = static_cast<uint8_t>(hasTarget);
     message.messageTimestamp = 1234;
 
     serial.messageReceiveCallback(message);
