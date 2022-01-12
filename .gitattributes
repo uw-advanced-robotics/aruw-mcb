@@ -38,6 +38,7 @@
 
 # Executables
 *.exe   binary
+*.elf   binary
 *.out   binary
 *.app   binary
 
