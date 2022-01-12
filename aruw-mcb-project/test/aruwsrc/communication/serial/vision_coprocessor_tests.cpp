@@ -47,6 +47,13 @@ private:
     VisionCoprocessor *serial;
 };
 
+static int reinterpretFloatAsInt(float value) {
+    static_assert(sizeof(float) == sizeof(uint32_t));
+    uint32_t result;
+    memcpy(&result, &value, sizeof(uint32_t));
+    return result;
+}
+
 // RX tests
 
 static void initAndRunAutoAimRxTest(
@@ -68,16 +75,16 @@ static void initAndRunAutoAimRxTest(
     message.type = 0;
     message.length = 10 * sizeof(uint32_t) + sizeof(uint8_t);
 
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&xPosDesired), message.data);
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&yPosDesired), message.data);
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&zPosDesired), message.data);
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&xVelDesired), message.data);
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&yVelDesired), message.data);
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&zVelDesired), message.data);
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&xAccDesired), message.data);
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&yAccDesired), message.data);
-    convertToLittleEndian(*reinterpret_cast<uint32_t *>(&zAccDesired), message.data);
-    message.data[8 * sizeof(uint32_t) + sizeof(uint8_t)] = static_cast<uint8_t>(hasTarget);
+    message.data[serial.AIM_DATA_MESSAGE_X_POSITION_OFFSET] = reinterpretFloatAsInt(xPosDesired);
+    message.data[serial.AIM_DATA_MESSAGE_Y_POSITION_OFFSET] = reinterpretFloatAsInt(yPosDesired);
+    message.data[serial.AIM_DATA_MESSAGE_Z_POSITION_OFFSET] = reinterpretFloatAsInt(zPosDesired);
+    message.data[serial.AIM_DATA_MESSAGE_X_VELOCITY_OFFSET] = reinterpretFloatAsInt(xVelDesired);
+    message.data[serial.AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET] = reinterpretFloatAsInt(yVelDesired);
+    message.data[serial.AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET] = reinterpretFloatAsInt(zVelDesired);
+    message.data[serial.AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET] = reinterpretFloatAsInt(xAccDesired);
+    message.data[serial.AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET] = reinterpretFloatAsInt(yAccDesired);
+    message.data[serial.AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET] = reinterpretFloatAsInt(zAccDesired);
+    message.data[serial.AIM_DATA_MESSAGE_SIZE] = static_cast<uint8_t>(hasTarget);
     message.messageTimestamp = 1234;
 
     serial.messageReceiveCallback(message);
@@ -86,14 +93,14 @@ static void initAndRunAutoAimRxTest(
     const VisionCoprocessor::TurretAimData &aimData = serial.getLastAimData();
     EXPECT_EQ(hasTarget, aimData.hasTarget);
     EXPECT_EQ(xPosDesired, aimData.xPos);
-    EXPECT_EQ(xPosDesired, aimData.yPos);
-    EXPECT_EQ(xPosDesired, aimData.zPos);
-    EXPECT_EQ(xPosDesired, aimData.xVel);
-    EXPECT_EQ(xPosDesired, aimData.yVel);
-    EXPECT_EQ(xPosDesired, aimData.zVel);
-    EXPECT_EQ(xPosDesired, aimData.xAcc);
-    EXPECT_EQ(xPosDesired, aimData.yAcc);
-    EXPECT_EQ(xPosDesired, aimData.zAcc);
+    EXPECT_EQ(yPosDesired, aimData.yPos);
+    EXPECT_EQ(zPosDesired, aimData.zPos);
+    EXPECT_EQ(xVelDesired, aimData.xVel);
+    EXPECT_EQ(yVelDesired, aimData.yVel);
+    EXPECT_EQ(zVelDesired, aimData.zVel);
+    EXPECT_EQ(xAccDesired, aimData.xAcc);
+    EXPECT_EQ(yAccDesired, aimData.yAcc);
+    EXPECT_EQ(zAccDesired, aimData.zAcc);
     EXPECT_EQ(1234, message.messageTimestamp);
 }
 

@@ -49,6 +49,32 @@ namespace serial
 class VisionCoprocessor : public tap::serial::DJISerial
 {
 public:
+    // RX message constants for decoding an aim data message. These are zero indexed byte offsets.
+    /// Offset for x position
+    static constexpr uint8_t AIM_DATA_MESSAGE_X_POSITION_OFFSET = 0;
+    /// Offset for y position
+    static constexpr uint8_t AIM_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(uint32_t);
+    /// Offset for z position
+    static constexpr uint8_t AIM_DATA_MESSAGE_Z_POSITION_OFFSET = 2 * sizeof(uint32_t);
+    /// Offset for x velocity
+    static constexpr uint8_t AIM_DATA_MESSAGE_X_VELOCITY_OFFSET = 3 * sizeof(uint32_t);
+    /// Offset for y velocity
+    static constexpr uint8_t AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET = 4 * sizeof(uint32_t);
+    /// Offset for z velocity
+    static constexpr uint8_t AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET = 5 * sizeof(uint32_t);
+    /// Offset for x acceleration
+    static constexpr uint8_t AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET = 6 * sizeof(uint32_t);
+    /// Offset for y acceleration
+    static constexpr uint8_t AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET = 7 * sizeof(uint32_t);
+    /// Offset for z acceleration
+    static constexpr uint8_t AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET = 8 * sizeof(uint32_t);
+    /// Offset for whether or not cv has data
+    static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET_OFFSET = 8 * sizeof(uint32_t) + sizeof(uint8_t);
+    /// Offset for timestamp in microseconds
+    static constexpr uint8_t AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 9 * sizeof(uint32_t) + sizeof(uint8_t);
+    /// Size of entire message
+    static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 10 * sizeof(uint32_t) + sizeof(uint8_t);
+
     // AutoAim Data
     struct TurretAimData
     {
@@ -131,32 +157,6 @@ private:
     static constexpr int16_t AUTO_AIM_REQUEST_SEND_PERIOD_MS = 1000;
     /// Precision of the floating point data sent to the Xavier.
     static constexpr float FIXED_POINT_PRECISION = 0.01f;
-
-    // RX message constants for decoding an aim data message. These are zero indexed byte offsets.
-    /// Offset for x position
-    static constexpr uint8_t AIM_DATA_MESSAGE_X_POSITION_OFFSET = 0;
-    /// Offset for y position
-    static constexpr uint8_t AIM_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(uint32_t);
-    /// Offset for z position
-    static constexpr uint8_t AIM_DATA_MESSAGE_Z_POSITION_OFFSET = 2 * sizeof(uint32_t);
-    /// Offset for x velocity
-    static constexpr uint8_t AIM_DATA_MESSAGE_X_VELOCITY_OFFSET = 3 * sizeof(uint32_t);
-    /// Offset for y velocity
-    static constexpr uint8_t AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET = 4 * sizeof(uint32_t);
-    /// Offset for z velocity
-    static constexpr uint8_t AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET = 5 * sizeof(uint32_t);
-    /// Offset for x acceleration
-    static constexpr uint8_t AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET = 6 * sizeof(uint32_t);
-    /// Offset for y acceleration
-    static constexpr uint8_t AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET = 7 * sizeof(uint32_t);
-    /// Offset for z acceleration
-    static constexpr uint8_t AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET = 8 * sizeof(uint32_t);
-    /// Offset for whether or not cv has data
-    static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET_OFFSET = 8 * sizeof(uint32_t) + sizeof(uint8_t);
-    /// Offset for timestamp in microseconds
-    static constexpr uint8_t AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 9 * sizeof(uint32_t) + sizeof(uint8_t);
-    /// Size of entire message
-    static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 10 * sizeof(uint32_t) + sizeof(uint8_t);
 
     // TX message constants for encoding odometry data. These are zero indexed byte offsets.
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_X_POSITION_OFFSET = 0;
