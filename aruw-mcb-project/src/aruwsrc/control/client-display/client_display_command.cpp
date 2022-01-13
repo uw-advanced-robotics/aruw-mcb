@@ -46,10 +46,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const FrictionWheelSubsystem *frictionWheelSubsystem,
     AgitatorSubsystem *agitatorSubsystem,
     const aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
-    const Command *wiggleCommand,
-    const Command *followTurretCommand,
-    const Command *beybladeCommand,
-    const Command *baseDriveCommand)
+    const std::vector<const Command *> &driveCommands)
     : Command(),
       drivers(drivers),
       hopperSubsystem(hopperSubsystem),
@@ -70,12 +67,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           BooleanDrawer(drivers, &bubbleGraphics[4]),
       },
 #endif
-      driveCommands{
-          wiggleCommand,
-          followTurretCommand,
-          beybladeCommand,
-          baseDriveCommand,
-      },
+      driveCommands{driveCommands},
       turretSubsystem(turretSubsystem)
 {
     addSubsystemRequirement(clientDisplay);
@@ -124,7 +116,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
 {
     RF_BEGIN(0);
 
-    RF_WAIT_WHILE(drivers->refSerial.getRobotData().robotId == RefSerial::RobotId::INVALID);
+    RF_WAIT_UNTIL(drivers->refSerial.getRefSerialReceivingData());
 
     for (bubbleIndex = 0; bubbleIndex < NUM_BUBBLES; bubbleIndex++)
     {
@@ -158,7 +150,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
     prevDriveCommandIndex = currDriveCommandIndex;
 
     // Check if updating is necessary
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(driveCommands); i++)
+    for (size_t i = 0; i < driveCommands.size(); i++)
     {
         if (drivers->commandScheduler.isCommandScheduled(driveCommands[i]))
         {
@@ -174,7 +166,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
             DRIVE_COMMAND_NAME,
             Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY,
             DRIVE_COMMAND_GRAPHIC_LAYER,
-            driveCommandColor);
+            static_cast<Tx::GraphicColor>(currDriveCommandIndex));
 
         drivers->refSerial.configCharacterMsg(
             DRIVE_COMMAND_CHAR_SIZE,
@@ -206,6 +198,14 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateVehicleOrientation()
     if (chassisOrientationVectorsPrev[0] != chassisOrientationVectorsRotated[0] ||
         chassisOrientationVectorsPrev[1] != chassisOrientationVectorsRotated[1])
     {
+        RefSerial::configRectangle(
+            CHASSIS_LINE_WIDTH,
+            chassisOrientationVectors[0].x,
+            chassisOrientationVectors[0].y,
+            chassisOrientationVectors[1].x,
+            chassisOrientationVectors[1].y,
+            &chassisOrientationGraphics.graphicData[0]);
+
         drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
         delay();
 
@@ -288,6 +288,10 @@ void ClientDisplayCommand::initializeReticle()
     uint8_t currLineName[3];
     memcpy(currLineName, RETICLE_LINES_START_NAME, sizeof(currLineName));
 
+    // Add reticle markers
+    uint16_t maxReticleY = 0;
+    uint16_t minReticleY = UINT16_MAX;
+
     for (size_t i = 0; i < NUM_RETICLE_COORDINATES; i++)
     {
         size_t reticleMsgIndex = i / MODM_ARRAY_SIZE(reticleMsg[0].graphicData);
@@ -311,14 +315,41 @@ void ClientDisplayCommand::initializeReticle()
 
         uint16_t y = std::get<1>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]);
 
-        drivers->refSerial.configLine(
+        RefSerial::configLine(
             RETICLE_THICKNESS,
             startX,
             y,
             endX,
             y,
             &reticleMsg[reticleMsgIndex].graphicData[graphicDataIndex]);
+
+        if (y > maxReticleY)
+        {
+            maxReticleY = y;
+        }
+        if (y < minReticleY)
+        {
+            minReticleY = y;
+        }
     }
+
+    // Add horizontal reticle line to connect reticle markers
+    RefSerial::configGraphicGenerics(
+        &reticleMsg[NUM_RETICLE_COORDINATES / MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]
+             .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)],
+        currLineName,
+        Tx::AddGraphicOperation::ADD_GRAPHIC,
+        RETICLE_GRAPHIC_LAYER,
+        RETICLE_HORIZONTAL_COLOR);
+
+    RefSerial::configLine(
+        RETICLE_THICKNESS,
+        SCREEN_WIDTH / 2 + RETICLE_CENTER_X_OFFSET,
+        minReticleY,
+        SCREEN_WIDTH / 2 + RETICLE_CENTER_X_OFFSET,
+        maxReticleY,
+        &reticleMsg[NUM_RETICLE_COORDINATES / MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]
+             .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]);
 }
 
 void ClientDisplayCommand::initializeDriveCommand()
@@ -345,11 +376,14 @@ void ClientDisplayCommand::initializeDriveCommand()
 
 void ClientDisplayCommand::initializeVehicleOrientation()
 {
-    chassisOrientationVectors[0].setX(CENTER_CHASSIS_X - CHASSIS_WIDTH / 2);
-    chassisOrientationVectors[0].setY(CENTER_CHASSIS_Y - CHASSIS_HEIGHT / 2);
+    chassisOrientationVectors[0].setX(-CHASSIS_WIDTH / 2);
+    chassisOrientationVectors[0].setY(-CHASSIS_HEIGHT / 2);
 
-    chassisOrientationVectors[1].setX(CENTER_CHASSIS_X + CHASSIS_WIDTH / 2);
-    chassisOrientationVectors[1].setY(CENTER_CHASSIS_Y + CHASSIS_HEIGHT / 2);
+    chassisOrientationVectors[1].setX(CHASSIS_WIDTH / 2);
+    chassisOrientationVectors[1].setY(CHASSIS_HEIGHT / 2);
+
+    chassisOrientationVectorsPrev[0] = chassisOrientationVectors[0];
+    chassisOrientationVectorsPrev[1] = chassisOrientationVectors[1];
 
     uint8_t chassisOrientationName[3];
     memcpy(chassisOrientationName, CHASSIS_ORIENTATION_START_NAME, sizeof(chassisOrientationName));
@@ -363,10 +397,10 @@ void ClientDisplayCommand::initializeVehicleOrientation()
 
     RefSerial::configRectangle(
         CHASSIS_LINE_WIDTH,
-        chassisOrientationVectors[0].x,
-        chassisOrientationVectors[0].y,
-        chassisOrientationVectors[1].x,
-        chassisOrientationVectors[1].y,
+        chassisOrientationVectors[0].x + CHASSIS_CENTER_X,
+        chassisOrientationVectors[0].y + CHASSIS_CENTER_Y,
+        chassisOrientationVectors[1].x + CHASSIS_CENTER_X,
+        chassisOrientationVectors[1].y + CHASSIS_CENTER_Y,
         &chassisOrientationGraphics.graphicData[0]);
 
     RefSerial::configGraphicGenerics(
@@ -378,10 +412,10 @@ void ClientDisplayCommand::initializeVehicleOrientation()
 
     RefSerial::configLine(
         CHASSIS_BARREL_LINE_WIDTH,
-        CENTER_CHASSIS_X,
-        CENTER_CHASSIS_Y,
-        CENTER_CHASSIS_X,
-        CENTER_CHASSIS_Y + CHASSIS_BARREL_LENGTH,
+        CHASSIS_CENTER_X,
+        CHASSIS_CENTER_Y,
+        CHASSIS_CENTER_X,
+        CHASSIS_CENTER_Y + CHASSIS_BARREL_LENGTH,
         &chassisOrientationGraphics.graphicData[1]);
 }
 

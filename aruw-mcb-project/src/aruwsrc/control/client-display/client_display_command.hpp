@@ -21,6 +21,7 @@
 #define CLIENT_DISPLAY_COMMAND_HPP_
 
 #include <tuple>
+#include <vector>
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
@@ -30,10 +31,10 @@
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
-#include "modm/processing/protothread.hpp"
-#include "modm/processing/resumable.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "modm/math/geometry/vector.hpp"
+#include "modm/processing/protothread.hpp"
+#include "modm/processing/resumable.hpp"
 
 namespace tap::control
 {
@@ -62,10 +63,7 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheelSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
         const aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
-        const tap::control::Command *wiggleCommand,
-        const tap::control::Command *followTurret,
-        const tap::control::Command *beybladeCommand,
-        const tap::control::Command *baseDriveCommand);
+        const std::vector<const tap::control::Command *> &driveCommands);
 
     const char *getName() const override { return "client display"; }
 
@@ -137,12 +135,6 @@ private:
     static constexpr uint16_t DRIVE_COMMAND_CHAR_SIZE = 30;
     static constexpr uint16_t DRIVE_COMMAND_CHAR_LENGTH = 5;
     static constexpr uint16_t DRIVE_COMMAND_CHAR_LINE_WIDTH = 4;
-    static constexpr Tx::GraphicColor DRIVE_GRAPHIC_COLORS[] = {
-        Tx::GraphicColor::YELLOW,
-        Tx::GraphicColor::ORANGE,
-        Tx::GraphicColor::PURPLISH_RED,
-        Tx::GraphicColor::GREEN,
-    };
 
     // reticle related constants
 
@@ -172,14 +164,15 @@ private:
         };
     static constexpr size_t NUM_RETICLE_COORDINATES =
         MODM_ARRAY_SIZE(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES);
+    static constexpr Tx::GraphicColor RETICLE_HORIZONTAL_COLOR = Tx::GraphicColor::BLACK;
 
     // vehicle orientation constants
 
     static constexpr uint8_t CHASSIS_ORIENTATION_LAYER = 4;
     static constexpr uint8_t CHASSIS_ORIENTATION_START_NAME[] = {3, 0, 0};
 
-    static constexpr uint16_t CENTER_CHASSIS_X = 500;
-    static constexpr uint16_t CENTER_CHASSIS_Y = 500;
+    static constexpr uint16_t CHASSIS_CENTER_X = 500;
+    static constexpr uint16_t CHASSIS_CENTER_Y = 500;
     static constexpr uint16_t CHASSIS_WIDTH = 100;
     static constexpr uint16_t CHASSIS_HEIGHT = 100;
     static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_COLOR = Tx::GraphicColor::BLACK;
@@ -227,37 +220,49 @@ private:
     /** The object that will do the actual drawing of the hopper open bubble. */
     tap::communication::serial::ref_serial_ui_wrapeprs::BooleanDrawer bubbleDrawers[NUM_BUBBLES];
 
-    /** Use this index when iterating through the bubbleDrawers in protothreads */
+    /** Use this index when iterating through the bubbleDrawers in protothreads. */
     int bubbleIndex = 0;
 
     /**
      * Graphics associated with the the bubble graphics that do not change (labels and circles
-     * around the bubbles)
+     * around the bubbles).
      */
     Tx::Graphic1Message bubbleStaticGraphics[NUM_BUBBLES];
     Tx::GraphicCharacterMessage bubbleStaticLabelGraphics[NUM_BUBBLES];
 
     // drive command related variables
 
-    const tap::control::Command *driveCommands[4];
+    /**
+     * List of commands that will be checked for in the scheduler when determining which drive
+     * command is being run.
+     */
+    std::vector<const tap::control::Command *> driveCommands;
+
+    /** Graphic that will send the name of the current drive command. */
     Tx::GraphicCharacterMessage driveCommandMsg;
+
+    /** Index in `driveCommands` that is currently being displayed. */
     int currDriveCommandIndex = -1;
     int prevDriveCommandIndex = -1;
-    Tx::GraphicColor driveCommandColor = Tx::GraphicColor::WHITE;
 
     // turret reticle variables
 
-    Tx::Graphic5Message reticleMsg[NUM_RETICLE_COORDINATES / 5 + 1];
+    /**
+     * Array of `Graphic5Message`s that will be used to send all of the reticle related graphics.
+     * This includes all of the reticle markers from `TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES`
+     * plus a verticle line to connect the reticle markers.
+     */
+    Tx::Graphic5Message reticleMsg[(NUM_RETICLE_COORDINATES + 1) / 5 + 1];
+
+    /** Index used when iterating through the reticleMsg in protothreads. */
     size_t reticleIndex = 0;
 
     // vehicle orientation variables
 
     const aruwsrc::control::turret::TurretSubsystem *turretSubsystem;
-    modm::Vector2u chassisOrientationVectors[2];
-    modm::Vector2u chassisOrientationVectorsRotated[2];
-    modm::Vector2u chassisOrientationVectorsPrev[2];
-    
-    uint16_t prevRectCoords[4];
+    modm::Vector2i chassisOrientationVectors[2];
+    modm::Vector2i chassisOrientationVectorsRotated[2];
+    modm::Vector2i chassisOrientationVectorsPrev[2];
     Tx::Graphic2Message chassisOrientationGraphics;
 
     // private functions
@@ -268,7 +273,7 @@ private:
 
     modm::ResumableResult<bool> updateDriveCommandMsg();
     modm::ResumableResult<bool> updateVehicleOrientation();
-    
+
     void initializeBubbles();
     void initializeReticle();
     void initializeDriveCommand();
