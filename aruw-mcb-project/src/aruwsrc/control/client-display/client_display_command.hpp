@@ -32,6 +32,9 @@
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "modm/math/geometry/vector.hpp"
+
 namespace tap::control
 {
 class Subsystem;
@@ -58,6 +61,7 @@ public:
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheelSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
+        const aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
         const tap::control::Command *wiggleCommand,
         const tap::control::Command *followTurret,
         const tap::control::Command *beybladeCommand,
@@ -169,6 +173,21 @@ private:
     static constexpr size_t NUM_RETICLE_COORDINATES =
         MODM_ARRAY_SIZE(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES);
 
+    // vehicle orientation constants
+
+    static constexpr uint8_t CHASSIS_ORIENTATION_LAYER = 4;
+    static constexpr uint8_t CHASSIS_ORIENTATION_START_NAME[] = {3, 0, 0};
+
+    static constexpr uint16_t CENTER_CHASSIS_X = 500;
+    static constexpr uint16_t CENTER_CHASSIS_Y = 500;
+    static constexpr uint16_t CHASSIS_WIDTH = 100;
+    static constexpr uint16_t CHASSIS_HEIGHT = 100;
+    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_COLOR = Tx::GraphicColor::BLACK;
+    static constexpr Tx::GraphicColor CHASSIS_BARREL_COLOR = Tx::GraphicColor::BLACK;
+    static constexpr uint16_t CHASSIS_LINE_WIDTH = 5;
+    static constexpr uint16_t CHASSIS_BARREL_LINE_WIDTH = 10;
+    static constexpr uint16_t CHASSIS_BARREL_LENGTH = 100;
+
     // general variables
 
     aruwsrc::Drivers *drivers;
@@ -231,6 +250,16 @@ private:
     Tx::Graphic5Message reticleMsg[NUM_RETICLE_COORDINATES / 5 + 1];
     size_t reticleIndex = 0;
 
+    // vehicle orientation variables
+
+    const aruwsrc::control::turret::TurretSubsystem *turretSubsystem;
+    modm::Vector2u chassisOrientationVectors[2];
+    modm::Vector2u chassisOrientationVectorsRotated[2];
+    modm::Vector2u chassisOrientationVectorsPrev[2];
+    
+    uint16_t prevRectCoords[4];
+    Tx::Graphic2Message chassisOrientationGraphics;
+
     // private functions
 
     bool run();
@@ -238,9 +267,12 @@ private:
     modm::ResumableResult<bool> initializeNonblocking();
 
     modm::ResumableResult<bool> updateDriveCommandMsg();
+    modm::ResumableResult<bool> updateVehicleOrientation();
+    
     void initializeBubbles();
     void initializeReticle();
     void initializeDriveCommand();
+    void initializeVehicleOrientation();
 };
 }  // namespace aruwsrc::display
 

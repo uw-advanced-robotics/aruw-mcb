@@ -45,6 +45,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const TurretMCBHopperSubsystem *hopperSubsystem,
     const FrictionWheelSubsystem *frictionWheelSubsystem,
     AgitatorSubsystem *agitatorSubsystem,
+    const aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
     const Command *wiggleCommand,
     const Command *followTurretCommand,
     const Command *beybladeCommand,
@@ -74,7 +75,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           followTurretCommand,
           beybladeCommand,
           baseDriveCommand,
-      }
+      },
+      turretSubsystem(turretSubsystem)
 {
     addSubsystemRequirement(clientDisplay);
     bubbleDrawers[AGITATOR_STATUS_HEALTHY].setBoolFalseColor(Tx::GraphicColor::PURPLISH_RED);
@@ -86,6 +88,7 @@ void ClientDisplayCommand::initialize()
     initializeBubbles();
     initializeReticle();
     initializeDriveCommand();
+    initializeVehicleOrientation();
 }
 
 void ClientDisplayCommand::execute() { run(); }
@@ -142,6 +145,9 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
     drivers->refSerial.sendGraphic(&driveCommandMsg);
     delay();
 
+    drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
+    chassisOrientationGraphics.graphicData->operation = Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
+
     RF_END();
 }
 
@@ -185,6 +191,31 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
     }
 
     // No delay necessary since didn't send anything
+    RF_END();
+}
+
+modm::ResumableResult<bool> ClientDisplayCommand::updateVehicleOrientation()
+{
+    RF_BEGIN(2)
+
+    chassisOrientationVectorsRotated[0].rotate(
+        modm::toRadian(turretSubsystem->getYawAngleFromCenter()));
+    chassisOrientationVectorsRotated[1].rotate(
+        modm::toRadian(turretSubsystem->getYawAngleFromCenter()));
+
+    if (chassisOrientationVectorsPrev[0] != chassisOrientationVectorsRotated[0] ||
+        chassisOrientationVectorsPrev[1] != chassisOrientationVectorsRotated[1])
+    {
+        drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
+        delay();
+
+        chassisOrientationVectorsPrev[0] = chassisOrientationVectorsRotated[0];
+        chassisOrientationVectorsPrev[1] = chassisOrientationVectorsRotated[1];
+    }
+
+    chassisOrientationVectorsRotated[0] = chassisOrientationVectors[0];
+    chassisOrientationVectorsRotated[1] = chassisOrientationVectors[1];
+
     RF_END();
 }
 
@@ -310,6 +341,48 @@ void ClientDisplayCommand::initializeDriveCommand()
 
     currDriveCommandIndex = -1;
     prevDriveCommandIndex = -1;
+}
+
+void ClientDisplayCommand::initializeVehicleOrientation()
+{
+    chassisOrientationVectors[0].setX(CENTER_CHASSIS_X - CHASSIS_WIDTH / 2);
+    chassisOrientationVectors[0].setY(CENTER_CHASSIS_Y - CHASSIS_HEIGHT / 2);
+
+    chassisOrientationVectors[1].setX(CENTER_CHASSIS_X + CHASSIS_WIDTH / 2);
+    chassisOrientationVectors[1].setY(CENTER_CHASSIS_Y + CHASSIS_HEIGHT / 2);
+
+    uint8_t chassisOrientationName[3];
+    memcpy(chassisOrientationName, CHASSIS_ORIENTATION_START_NAME, sizeof(chassisOrientationName));
+
+    RefSerial::configGraphicGenerics(
+        &chassisOrientationGraphics.graphicData[0],
+        chassisOrientationName,
+        Tx::AddGraphicOperation::ADD_GRAPHIC,
+        CHASSIS_ORIENTATION_LAYER,
+        CHASSIS_ORIENTATION_COLOR);
+
+    RefSerial::configRectangle(
+        CHASSIS_LINE_WIDTH,
+        chassisOrientationVectors[0].x,
+        chassisOrientationVectors[0].y,
+        chassisOrientationVectors[1].x,
+        chassisOrientationVectors[1].y,
+        &chassisOrientationGraphics.graphicData[0]);
+
+    RefSerial::configGraphicGenerics(
+        &chassisOrientationGraphics.graphicData[1],
+        chassisOrientationName,
+        Tx::AddGraphicOperation::ADD_GRAPHIC,
+        CHASSIS_ORIENTATION_LAYER,
+        CHASSIS_BARREL_COLOR);
+
+    RefSerial::configLine(
+        CHASSIS_BARREL_LINE_WIDTH,
+        CENTER_CHASSIS_X,
+        CENTER_CHASSIS_Y,
+        CENTER_CHASSIS_X,
+        CENTER_CHASSIS_Y + CHASSIS_BARREL_LENGTH,
+        &chassisOrientationGraphics.graphicData[1]);
 }
 
 }  // namespace aruwsrc::display
