@@ -173,6 +173,7 @@ ClientDisplayCommand clientDisplayCommand(
     &clientDisplay,
     &hopperCover,
     &frictionWheels,
+    &agitator,
     &beybladeCommand,
     &chassisAutorotateCommand,
     nullptr,
