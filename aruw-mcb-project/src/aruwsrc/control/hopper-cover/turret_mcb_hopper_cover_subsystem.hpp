@@ -44,9 +44,9 @@ public:
     {
     }
 
-    mockable void setOpen() { drivers->turretMCBCanComm.setOpenHopperCover(true); }
+    mockable void setOpen() { hopperOpen=true; drivers->turretMCBCanComm.setOpenHopperCover(true); }
 
-    mockable void setClose() { drivers->turretMCBCanComm.setOpenHopperCover(false); }
+    mockable void setClose() { hopperOpen=false; drivers->turretMCBCanComm.setOpenHopperCover(false); }
 
     void refresh() override {}
 
@@ -58,8 +58,12 @@ public:
 
     const char *getName() override { return "turret MCB hopper"; }
 
+    bool getIsHopperOpen() const { return hopperOpen; }
+
 private:
     aruwsrc::Drivers *drivers;
+
+    bool hopperOpen = false;
 };
 
 }  // namespace aruwsrc::control

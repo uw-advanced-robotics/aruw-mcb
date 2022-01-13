@@ -19,12 +19,17 @@
 
 #include "client_display_command.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 #include "client_display_subsystem.hpp"
 
 using namespace tap::control;
 using namespace tap::serial;
+using namespace tap::algorithms;
+using namespace tap::communication::serial;
+using namespace aruwsrc::control;
 
 #define delay()                                  \
     delayTimer.restart(DELAY_PERIOD_BTWN_SENDS); \
@@ -35,13 +40,21 @@ namespace aruwsrc::display
 ClientDisplayCommand::ClientDisplayCommand(
     aruwsrc::Drivers *drivers,
     ClientDisplaySubsystem *clientDisplay,
+    const TurretMCBHopperSubsystem *hopperSubsystem,
+    const aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheelSubsystem,
     const Command *wiggleCommand,
     const Command *followTurretCommand,
     const Command *beybladeCommand,
     const Command *baseDriveCommand)
     : Command(),
       drivers(drivers),
-      bubbleDrawer(drivers, &hopperOpenBubble),
+      hopperSubsystem(hopperSubsystem),
+      frictionWheelSubsystem(frictionWheelSubsystem),
+      bubbleDrawers({
+          BubbleDrawer(drivers, &bubbleGraphics[0]),
+          BubbleDrawer(drivers, &bubbleGraphics[1]),
+          BubbleDrawer(drivers, &bubbleGraphics[2]),
+      }),
       wiggleCommand(wiggleCommand),
       followTurretCommand(followTurretCommand),
       beybladeCommand(beybladeCommand),
@@ -51,21 +64,37 @@ ClientDisplayCommand::ClientDisplayCommand(
     addSubsystemRequirement(clientDisplay);
 }
 
-void ClientDisplayCommand::initialize() { initializeBubbles(); }
+void ClientDisplayCommand::initialize()
+{
+    restart();  // restart protothread
+    initializeBubbles();
+    initializeReticle();
+    initializeDriveCommand();
+}
 
 void ClientDisplayCommand::execute() { run(); }
-bool tf = false;
+
 bool ClientDisplayCommand::run()
 {
     PT_BEGIN();
+
     PT_CALL(initializeNonblocking());
+
     while (true)
     {
-        bubbleDrawer.setBubbleFilled(tf);
-        PT_CALL(bubbleDrawer.draw());
-        // PT_CALL(updateDriveCommandMsg());
-        // PT_CALL(updateCapBankMsg());
-        // PT_CALL(updateTurretReticleMsg());
+        bubbleDrawers[HOPPER_OPEN].setBubbleFilled(!hopperSubsystem->getIsHopperOpen());
+        bubbleDrawers[FRICTION_WHEELS_ON].setBubbleFilled(
+            !compareFloatClose(0.0f, frictionWheelSubsystem->getDesiredLaunchSpeed(), 1E-5));
+        bubbleDrawers[CV_ENABLED].setBubbleFilled(
+            drivers->legacyVisionCoprocessor.lastAimDataValid());
+
+        for (bubbleIndex = 0; bubbleIndex < NUM_BUBBLES; bubbleIndex++)
+        {
+            PT_CALL(bubbleDrawers[bubbleIndex].draw());
+        }
+
+        PT_CALL(updateDriveCommandMsg());
+
         PT_YIELD();
     }
     PT_END();
@@ -74,11 +103,24 @@ bool ClientDisplayCommand::run()
 modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
 {
     RF_BEGIN(0);
+
     RF_WAIT_WHILE(drivers->refSerial.getRobotData().robotId == RefSerial::RobotId::INVALID);
-    RF_CALL(bubbleDrawer.initialize());
-    // initDriveCommandMsg();
-    // initTurretReticleMsg();
-    // initCapBankMsg();
+
+    for (bubbleIndex = 0; bubbleIndex < NUM_BUBBLES; bubbleIndex++)
+    {
+        RF_CALL(bubbleDrawers[bubbleIndex].initialize());
+        drivers->refSerial.sendGraphic(&bubbleStaticGraphics[bubbleIndex]);
+        delay();
+        drivers->refSerial.sendGraphic(&bubbleStaticLabelGraphics[bubbleIndex]);
+        delay();
+    }
+
+    delay();
+    drivers->refSerial.sendGraphic(&reticleMsg);
+    delay();
+    drivers->refSerial.sendGraphic(&driveCommandMsg);
+    delay();
+
     RF_END();
 }
 
@@ -107,30 +149,8 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
         driveCommandColor = RefSerial::Tx::GraphicColor::GREEN;
     }
 
-    if (addDriveCommandTimer.execute())
-    {
-        // Add the graphic
-        drivers->refSerial.configGraphicGenerics(
-            &driveCommandMsg.graphicData,
-            DRIVE_TEXT_NAME,
-            RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-            DRIVE_COMMAND_GRAPHIC_LAYER,
-            driveCommandColor);
-
-        drivers->refSerial.configCharacterMsg(
-            FONT_SIZE,
-            400,
-            LINE_THICKNESS,
-            SCREEN_MARGIN,
-            TEXT_TOP_ROW_Y,
-            "",
-            &driveCommandMsg);
-
-        drivers->refSerial.sendGraphic(&driveCommandMsg);
-        delay();
-    }
-    else if ((newDriveCommandScheduled != currDriveCommandScheduled &&
-              newDriveCommandScheduled != nullptr))
+    if ((newDriveCommandScheduled != currDriveCommandScheduled &&
+         newDriveCommandScheduled != nullptr))
     {
         currDriveCommandScheduled = newDriveCommandScheduled;
 
@@ -232,26 +252,75 @@ void ClientDisplayCommand::initCapBankMsg()
         &capPowerRemainMsg.graphicData);
 }
 
-void ClientDisplayCommand::initDriveCommandMsg()
-{
-    drivers->refSerial.configGraphicGenerics(
-        &driveCommandMsg.graphicData,
-        DRIVE_TEXT_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        DRIVE_COMMAND_GRAPHIC_LAYER,
-        driveCommandColor);
+void ClientDisplayCommand::initDriveCommandMsg() {}
 
-    drivers->refSerial.configCharacterMsg(
-        FONT_SIZE,
-        400,
-        LINE_THICKNESS,
-        SCREEN_MARGIN,
-        TEXT_TOP_ROW_Y,
-        "",
-        &driveCommandMsg);
+void ClientDisplayCommand::initTurretReticleMsg() { drivers->refSerial.sendGraphic(&reticleMsg); }
+
+void ClientDisplayCommand::initializeBubbles()
+{
+    uint8_t bubbleName[3];
+    memcpy(bubbleName, BUBBLE_LIST_START_NAME, sizeof(bubbleName));
+    uint16_t bubbleListCurrY = BUBBLE_LIST_START_Y;
+
+    // Configure hopper cover bubble
+    for (bubbleIndex = 0; bubbleIndex < NUM_BUBBLES; bubbleIndex++)
+    {
+        RefSerial::configGraphicGenerics(
+            &bubbleGraphics[bubbleIndex].graphicData,
+            bubbleName,
+            RefSerial::Tx::ADD_GRAPHIC,
+            BUBBLE_LIST_LAYER,
+            BUBBLE_FILLED_COLOR);
+
+        RefSerial::configCircle(
+            BUBBLE_WIDTH,
+            BUBBLE_LIST_CENTER_X,
+            bubbleListCurrY,
+            BUBBLE_RADIUS,
+            &bubbleGraphics[bubbleIndex].graphicData);
+
+        bubbleName[2]++;
+
+        RefSerial::configGraphicGenerics(
+            &bubbleStaticGraphics[bubbleIndex].graphicData,
+            bubbleName,
+            RefSerial::Tx::ADD_GRAPHIC,
+            BUBBLE_STATIC_LIST_LAYER,
+            BUBBLE_OUTLINE_COLOR);
+
+        RefSerial::configCircle(
+            BUBBLE_OUTLINE_WIDTH,
+            BUBBLE_LIST_CENTER_X,
+            bubbleListCurrY,
+            BUBBLE_OUTLINE_RADIUS,
+            &bubbleStaticGraphics[bubbleIndex].graphicData);
+
+        bubbleName[2]++;
+
+        RefSerial::configGraphicGenerics(
+            &bubbleStaticLabelGraphics[bubbleIndex].graphicData,
+            bubbleName,
+            RefSerial::Tx::ADD_GRAPHIC,
+            BUBBLE_STATIC_LIST_LAYER,
+            BUBBLE_LABEL_COLOR);
+
+        RefSerial::configCharacterMsg(
+            BUBBLE_LABEL_CHAR_WIDTH,
+            BUBBLE_LABEL_CHAR_LENGTH,
+            BUBBLE_LABEL_CHAR_LINE_WIDTH,
+            BUBBLE_LIST_CENTER_X - strlen(BUBBLE_LABELS[bubbleIndex]) * BUBBLE_LABEL_CHAR_WIDTH -
+                BUBBLE_OUTLINE_RADIUS - BUBBLE_OUTLINE_WIDTH / 2,
+            bubbleListCurrY + BUBBLE_LABEL_CHAR_WIDTH / 2,
+            BUBBLE_LABELS[bubbleIndex],
+            &bubbleStaticLabelGraphics[bubbleIndex]);
+
+        bubbleName[2]++;
+
+        bubbleListCurrY += BUBBLE_LIST_DIST_BTWN_BULLETS;
+    }
 }
 
-void ClientDisplayCommand::initTurretReticleMsg()
+void ClientDisplayCommand::initializeReticle()
 {
     drivers->refSerial.configGraphicGenerics(
         &reticleMsg.graphicData[0],
@@ -289,7 +358,7 @@ void ClientDisplayCommand::initTurretReticleMsg()
         RefSerial::Tx::GraphicColor::YELLOW);
 
     drivers->refSerial.configLine(
-        LINE_THICKNESS,
+        RETICLE_THICKNESS,
         SCREEN_WIDTH / 2 - TURRET_RETICLE_1M_WIDTH / 2,
         TURRET_RETICLE_1MY,
         SCREEN_WIDTH / 2 + TURRET_RETICLE_1M_WIDTH / 2,
@@ -297,7 +366,7 @@ void ClientDisplayCommand::initTurretReticleMsg()
         &reticleMsg.graphicData[0]);
 
     drivers->refSerial.configLine(
-        LINE_THICKNESS,
+        RETICLE_THICKNESS,
         SCREEN_WIDTH / 2 - TURRET_RETICLE_3M_WIDTH / 2,
         TURRET_RETICLE_3MY,
         SCREEN_WIDTH / 2 + TURRET_RETICLE_3M_WIDTH / 2,
@@ -305,7 +374,7 @@ void ClientDisplayCommand::initTurretReticleMsg()
         &reticleMsg.graphicData[1]);
 
     drivers->refSerial.configLine(
-        LINE_THICKNESS,
+        RETICLE_THICKNESS,
         SCREEN_WIDTH / 2 - TURRET_RETICLE_5M_WIDTH / 2,
         TURRET_RETICLE_5MY,
         SCREEN_WIDTH / 2 + TURRET_RETICLE_5M_WIDTH / 2,
@@ -313,7 +382,7 @@ void ClientDisplayCommand::initTurretReticleMsg()
         &reticleMsg.graphicData[2]);
 
     drivers->refSerial.configLine(
-        LINE_THICKNESS,
+        RETICLE_THICKNESS,
         SCREEN_WIDTH / 2,
         TURRET_RETICLE_1MY,
         SCREEN_WIDTH / 2,
@@ -321,31 +390,30 @@ void ClientDisplayCommand::initTurretReticleMsg()
         &reticleMsg.graphicData[3]);
 
     drivers->refSerial.configCircle(
-        LINE_THICKNESS,
+        RETICLE_THICKNESS,
         SCREEN_WIDTH / 2,
         TURRET_RETICLE_1MY,
         5,
         &reticleMsg.graphicData[4]);
-
-    // Computes crcs which won't be changing in the future
-    drivers->refSerial.sendGraphic(&reticleMsg, true, false);
 }
 
-void ClientDisplayCommand::initializeBubbles()
+void ClientDisplayCommand::initializeDriveCommand()
 {
-    // Configure hopper cover bubble
-    tap::serial::RefSerial::configGraphicGenerics(
-        &hopperOpenBubble.graphicData,
-        HOPPER_OPEN_NAME,
-        tap::serial::RefSerial::Tx::ADD_GRAPHIC,
-        HOPPER_OPEN_LAYER,
-        HOPPER_OPEN_COLOR);
-    tap::serial::RefSerial::configCircle(
-        BUBBLE_WIDTH,
-        HOPPER_OPEN_BUBBLE_CENTER_X,
-        HOPPER_OPEN_BUBBLE_CENTER_Y,
-        BUBBLE_RADIUS,
-        &hopperOpenBubble.graphicData);
+    drivers->refSerial.configGraphicGenerics(
+        &driveCommandMsg.graphicData,
+        DRIVE_TEXT_NAME,
+        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
+        DRIVE_COMMAND_GRAPHIC_LAYER,
+        driveCommandColor);
+
+    drivers->refSerial.configCharacterMsg(
+        FONT_SIZE,
+        400,
+        LINE_THICKNESS,
+        SCREEN_MARGIN,
+        TEXT_TOP_ROW_Y,
+        "",
+        &driveCommandMsg);
 }
 
 }  // namespace aruwsrc::display

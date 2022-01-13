@@ -171,6 +171,8 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
+    &hopperCover,
+    &frictionWheels,
     &beybladeCommand,
     &chassisAutorotateCommand,
     nullptr,
@@ -251,6 +253,7 @@ void setDefaultSoldierCommands(aruwsrc::Drivers *)
 void startSoldierCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/

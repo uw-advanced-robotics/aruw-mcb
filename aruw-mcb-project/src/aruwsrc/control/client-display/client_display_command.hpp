@@ -25,9 +25,10 @@
 #include "tap/communication/serial/ref_serial_ui_wrappers/bubble_drawer.hpp"
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
-
 namespace tap::control
 {
 class Subsystem;
@@ -50,6 +51,8 @@ public:
     ClientDisplayCommand(
         aruwsrc::Drivers *drivers,
         ClientDisplaySubsystem *clientDisplay,
+        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
+        const aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheelSubsystem,
         const tap::control::Command *wiggleCommand,
         const tap::control::Command *followTurret,
         const tap::control::Command *beybladeCommand,
@@ -71,6 +74,7 @@ private:
     static constexpr uint16_t FONT_SIZE = 30;
     static constexpr uint16_t FONT_THICKNESS = 4;
     static constexpr uint16_t LINE_THICKNESS = 4;
+    static constexpr uint16_t RETICLE_THICKNESS = 1;
     static constexpr uint16_t TEXT_TOP_ROW_Y = 850;
     static constexpr uint16_t SCREEN_MARGIN = 100;
     static constexpr uint8_t DRIVE_COMMAND_GRAPHIC_LAYER = 1;
@@ -87,21 +91,71 @@ private:
     static constexpr uint8_t CAP_TEXT_NAME[] = {0, 0, 6};
     static constexpr uint8_t CAP_VALUE_NAME[] = {0, 0, 7};
 
-    static constexpr uint8_t HOPPER_OPEN_NAME[] = {0, 0, 8};
+    static constexpr uint16_t BUBBLE_LIST_CENTER_X = 300;
+    static constexpr uint16_t BUBBLE_LIST_START_Y = 600;
+    static constexpr uint16_t BUBBLE_LIST_DIST_BTWN_BULLETS = 50;
+    static constexpr uint8_t BUBBLE_LIST_START_NAME[] = {1, 0, 0};
 
-    static constexpr uint16_t BUBBLE_WIDTH = 10;
-    static constexpr uint16_t BUBBLE_RADIUS = 10;
-    static constexpr uint16_t HOPPER_OPEN_BUBBLE_CENTER_X = 1000;
-    static constexpr uint16_t HOPPER_OPEN_BUBBLE_CENTER_Y = 500;
-    static constexpr uint8_t HOPPER_OPEN_LAYER = 0;
-    static constexpr tap::serial::RefSerial::Tx::GraphicColor HOPPER_OPEN_COLOR =
-        tap::serial::RefSerial::Tx::GraphicColor::RED_AND_BLUE;
+    static constexpr uint16_t BUBBLE_LIST_LAYER = 0;
+    static constexpr tap::serial::RefSerial::Tx::GraphicColor BUBBLE_FILLED_COLOR =
+        tap::serial::RefSerial::Tx::GraphicColor::GREEN;
+    static constexpr uint16_t BUBBLE_WIDTH = 17;
+    static constexpr uint16_t BUBBLE_RADIUS = 9;
+
+    static constexpr uint8_t BUBBLE_STATIC_LIST_LAYER = 1;
+    static constexpr tap::serial::RefSerial::Tx::GraphicColor BUBBLE_OUTLINE_COLOR =
+        tap::serial::RefSerial::Tx::GraphicColor::BLACK;
+    static constexpr uint16_t BUBBLE_OUTLINE_WIDTH = 5;
+    static constexpr uint16_t BUBBLE_OUTLINE_RADIUS = 20;
+
+    static constexpr tap::serial::RefSerial::Tx::GraphicColor BUBBLE_LABEL_COLOR =
+        tap::serial::RefSerial::Tx::GraphicColor::YELLOW;
+    static constexpr uint16_t BUBBLE_LABEL_CHAR_WIDTH = 15;
+    static constexpr uint16_t BUBBLE_LABEL_CHAR_LENGTH = 3;
+    static constexpr uint16_t BUBBLE_LABEL_CHAR_LINE_WIDTH = 2;
 
     aruwsrc::Drivers *drivers;
 
-    tap::serial::RefSerial::Tx::Graphic1Message hopperOpenBubble;
+    /**
+     * Hopper subsystem that provides information about whether or not the cover is open or closed.
+     */
+    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
 
-    tap::communication::serial::BubbleDrawer bubbleDrawer;
+    /**
+     * Friction wheel subsystem that provides info about if they are on/off.
+     */
+    const aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheelSubsystem;
+
+    static constexpr const char *BUBBLE_LABELS[3] = {
+        "HOPP",
+        "FRIC",
+        "CV  ",
+    };
+
+    enum BubbleIndex
+    {
+        HOPPER_OPEN = 0,
+        FRICTION_WHEELS_ON,
+        CV_ENABLED,
+        NUM_BUBBLES,
+    };
+
+    /**
+     * Graphic message that will represent a dot on the screen that will be present or not,
+     * depending on whether or not the hopper is open or closed.
+     */
+    tap::serial::RefSerial::Tx::Graphic1Message bubbleGraphics[NUM_BUBBLES];
+    /** The object that will do the actual drawing of the hopper open bubble. */
+    tap::communication::serial::BubbleDrawer bubbleDrawers[NUM_BUBBLES];
+    /** Use this index when iterating through the bubbleDrawers in protothreads */
+    int bubbleIndex = 0;
+
+    /**
+     * Graphics associated with the the bubble graphics that do not change (labels and circles
+     * around the bubbles)
+     */
+    tap::serial::RefSerial::Tx::Graphic1Message bubbleStaticGraphics[NUM_BUBBLES];
+    tap::serial::RefSerial::Tx::GraphicCharacterMessage bubbleStaticLabelGraphics[NUM_BUBBLES];
 
     // General variables
     /// @note The maximum frequency of this timer is 10 Hz according to RM rules.
@@ -116,7 +170,6 @@ private:
     const tap::control::Command *newDriveCommandScheduled = nullptr;
     tap::serial::RefSerial::Tx::GraphicCharacterMessage driveCommandMsg;
     tap::serial::RefSerial::Tx::GraphicColor driveCommandColor;
-    tap::arch::PeriodicMilliTimer addDriveCommandTimer{10000};
 
     // Turret reticle variables
     static constexpr uint16_t TURRET_RETICLE_1M_WIDTH = 150;
@@ -153,8 +206,11 @@ private:
     void initCapBankMsg();
     modm::ResumableResult<bool> updateCapBankMsg();
 
-
     void initializeBubbles();
+
+    void initializeReticle();
+
+    void initializeDriveCommand();
 };
 }  // namespace aruwsrc::display
 

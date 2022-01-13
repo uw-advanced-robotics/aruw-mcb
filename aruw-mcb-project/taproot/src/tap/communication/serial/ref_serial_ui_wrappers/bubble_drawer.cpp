@@ -59,6 +59,7 @@ modm::ResumableResult<bool> BubbleDrawer::draw()
     updateBubbleColor();
     if (colorChanged)
     {
+        // resend graphic if color changed
         drivers->refSerial.sendGraphic(bubble);
         colorChanged = false;
         delay();
