@@ -17,16 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "aruwsrc/control/safe_disconnect.hpp"
+
 #include "tap/control/command_scheduler.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
-class RemoteSafeDisconnectFunction : public tap::control::SafeDisconnectFunction
+RemoteSafeDisconnectFunction::RemoteSafeDisconnectFunction(aruwsrc::Drivers *drivers)
 {
-public:
-    RemoteSafeDisconnectFunction(aruwsrc::Drivers *drivers) { this->drivers = drivers; };
-    virtual bool operator()() { return !drivers->remote.isConnected(); }
-
-private:
-    aruwsrc::Drivers *drivers;
-};
+    this->drivers = drivers;
+}
+bool RemoteSafeDisconnectFunction::operator()() { return !drivers->remote.isConnected(); }
