@@ -29,6 +29,7 @@
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
@@ -40,7 +41,6 @@
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/world-relative/turret_world_relative_command.hpp"
-#include "aruwsrc/control/safe_disconnect.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::chassis;
@@ -145,7 +145,8 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.setSafeDisconnectFunction(&hero_control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &hero_control::remoteSafeDisconnectFunction);
     hero_control::initializeSubsystems();
     hero_control::registerHeroSubsystems(drivers);
     hero_control::setDefaultHeroCommands(drivers);

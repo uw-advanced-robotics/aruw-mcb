@@ -30,6 +30,7 @@
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
@@ -45,7 +46,6 @@
 #include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/world-relative/turret_world_relative_command.hpp"
-#include "aruwsrc/control/safe_disconnect.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -277,7 +277,8 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.setSafeDisconnectFunction(&soldier_control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &soldier_control::remoteSafeDisconnectFunction);
     soldier_control::initializeSubsystems();
     soldier_control::registerSoldierSubsystems(drivers);
     soldier_control::setDefaultSoldierCommands(drivers);

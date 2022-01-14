@@ -27,8 +27,8 @@
 #include "aruwsrc/control/engineer/squeeze_grabber_command.hpp"
 #include "aruwsrc/control/engineer/tow_subsystem.hpp"
 #include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
-#include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 
 using namespace aruwsrc::engineer;
 using namespace tap::gpio;

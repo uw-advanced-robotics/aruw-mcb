@@ -18,6 +18,7 @@
  */
 
 #include "tap/control/command_scheduler.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 class RemoteSafeDisconnectFunction : public tap::control::SafeDisconnectFunction
