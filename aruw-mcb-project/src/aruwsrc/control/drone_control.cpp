@@ -20,6 +20,7 @@
 #if defined(TARGET_DRONE)
 
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -34,6 +35,9 @@ namespace drone_control
 /* define subsystems --------------------------------------------------------*/
 
 /* define commands ----------------------------------------------------------*/
+
+// Safe disconnect function
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems() {}
@@ -55,6 +59,7 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(&drone_control::remoteSafeDisconnectFunction);
     drone_control::initializeSubsystems();
     drone_control::registerDroneSubsystems(drivers);
     drone_control::setDefaultDroneCommands(drivers);

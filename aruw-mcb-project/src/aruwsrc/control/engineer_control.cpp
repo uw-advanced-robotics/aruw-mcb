@@ -28,6 +28,7 @@
 #include "aruwsrc/control/engineer/tow_subsystem.hpp"
 #include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 
 using namespace aruwsrc::engineer;
 using namespace tap::gpio;
@@ -64,6 +65,9 @@ TowSubsystem tower(
 
 /* define commands ----------------------------------------------------------*/
 
+// Safe disconnect function
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems() {}
 
@@ -85,6 +89,7 @@ void registerEngineerIoMappings(aruwsrc::Drivers *) {}
 
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(&remoteSafeDisconnectFunction);
     initializeSubsystems();
     registerEngineerSubsystems(drivers);
     setDefaultEngineerCommands(drivers);

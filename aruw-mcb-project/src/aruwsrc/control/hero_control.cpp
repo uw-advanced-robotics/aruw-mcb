@@ -40,6 +40,7 @@
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/world-relative/turret_world_relative_command.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::chassis;
@@ -102,6 +103,9 @@ HoldCommandMapping rightSwitchDown(
 
 // Keyboard/Mouse related mappings
 
+// Safe disconnect function
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -141,6 +145,7 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(&hero_control::remoteSafeDisconnectFunction);
     hero_control::initializeSubsystems();
     hero_control::registerHeroSubsystems(drivers);
     hero_control::setDefaultHeroCommands(drivers);

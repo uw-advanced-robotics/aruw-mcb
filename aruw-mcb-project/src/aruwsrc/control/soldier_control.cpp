@@ -45,6 +45,7 @@
 #include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/world-relative/turret_world_relative_command.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -214,6 +215,9 @@ HoldCommandMapping rightMousePressed(
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 
+// Safe disconnect function
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
 {
@@ -273,6 +277,7 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(&soldier_control::remoteSafeDisconnectFunction);
     soldier_control::initializeSubsystems();
     soldier_control::registerSoldierSubsystems(drivers);
     soldier_control::setDefaultSoldierCommands(drivers);
