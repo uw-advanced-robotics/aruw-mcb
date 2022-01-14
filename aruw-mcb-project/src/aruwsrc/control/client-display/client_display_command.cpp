@@ -107,6 +107,8 @@ bool ClientDisplayCommand::run()
 
         PT_CALL(updateDriveCommandMsg());
 
+        PT_CALL(updateVehicleOrientation());
+
         PT_YIELD();
     }
     PT_END();
@@ -138,7 +140,10 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
     delay();
 
     drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
-    chassisOrientationGraphics.graphicData->operation = Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
+    chassisOrientationGraphics.graphicData[0].operation =
+        Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
+    chassisOrientationGraphics.graphicData[1].operation =
+        Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
 
     RF_END();
 }
@@ -190,31 +195,24 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateVehicleOrientation()
 {
     RF_BEGIN(2)
 
-    chassisOrientationVectorsRotated[0].rotate(
-        modm::toRadian(turretSubsystem->getYawAngleFromCenter()));
-    chassisOrientationVectorsRotated[1].rotate(
-        modm::toRadian(turretSubsystem->getYawAngleFromCenter()));
+    chassisOrientationRotated.rotate(modm::toRadian(-turretSubsystem->getYawAngleFromCenter()));
 
-    if (chassisOrientationVectorsPrev[0] != chassisOrientationVectorsRotated[0] ||
-        chassisOrientationVectorsPrev[1] != chassisOrientationVectorsRotated[1])
+    if (chassisOrientationRotated != chassisOrientationPrev)
     {
-        RefSerial::configRectangle(
+        RefSerial::configLine(
             CHASSIS_LINE_WIDTH,
-            chassisOrientationVectors[0].x,
-            chassisOrientationVectors[0].y,
-            chassisOrientationVectors[1].x,
-            chassisOrientationVectors[1].y,
+            CHASSIS_CENTER_X + chassisOrientationRotated.x,
+            CHASSIS_CENTER_Y + chassisOrientationRotated.y,
+            CHASSIS_CENTER_X - chassisOrientationRotated.x,
+            CHASSIS_CENTER_Y - chassisOrientationRotated.y,
             &chassisOrientationGraphics.graphicData[0]);
-
         drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
         delay();
 
-        chassisOrientationVectorsPrev[0] = chassisOrientationVectorsRotated[0];
-        chassisOrientationVectorsPrev[1] = chassisOrientationVectorsRotated[1];
+        chassisOrientationPrev = chassisOrientationRotated;
     }
 
-    chassisOrientationVectorsRotated[0] = chassisOrientationVectors[0];
-    chassisOrientationVectorsRotated[1] = chassisOrientationVectors[1];
+    chassisOrientationRotated = chassisOrientation;
 
     RF_END();
 }
@@ -306,12 +304,12 @@ void ClientDisplayCommand::initializeReticle()
 
         currLineName[2]++;
 
-        uint16_t reticleXCenter = SCREEN_WIDTH / 2 + RETICLE_CENTER_X_OFFSET;
+        uint16_t reticleXCenter = static_cast<int>(SCREEN_WIDTH / 2) + RETICLE_CENTER_X_OFFSET;
 
         uint16_t startX =
             reticleXCenter - std::get<0>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]);
         uint16_t endX =
-            reticleXCenter - std::get<0>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]);
+            reticleXCenter + std::get<0>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]);
 
         uint16_t y = std::get<1>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]);
 
@@ -376,14 +374,9 @@ void ClientDisplayCommand::initializeDriveCommand()
 
 void ClientDisplayCommand::initializeVehicleOrientation()
 {
-    chassisOrientationVectors[0].setX(-CHASSIS_WIDTH / 2);
-    chassisOrientationVectors[0].setY(-CHASSIS_HEIGHT / 2);
-
-    chassisOrientationVectors[1].setX(CHASSIS_WIDTH / 2);
-    chassisOrientationVectors[1].setY(CHASSIS_HEIGHT / 2);
-
-    chassisOrientationVectorsPrev[0] = chassisOrientationVectors[0];
-    chassisOrientationVectorsPrev[1] = chassisOrientationVectors[1];
+    chassisOrientation.set(0, CHASSIS_HEIGHT / 2);
+    chassisOrientationPrev = chassisOrientation;
+    chassisOrientationRotated = chassisOrientation;
 
     uint8_t chassisOrientationName[3];
     memcpy(chassisOrientationName, CHASSIS_ORIENTATION_START_NAME, sizeof(chassisOrientationName));
@@ -395,13 +388,15 @@ void ClientDisplayCommand::initializeVehicleOrientation()
         CHASSIS_ORIENTATION_LAYER,
         CHASSIS_ORIENTATION_COLOR);
 
-    RefSerial::configRectangle(
+    RefSerial::configLine(
         CHASSIS_LINE_WIDTH,
-        chassisOrientationVectors[0].x + CHASSIS_CENTER_X,
-        chassisOrientationVectors[0].y + CHASSIS_CENTER_Y,
-        chassisOrientationVectors[1].x + CHASSIS_CENTER_X,
-        chassisOrientationVectors[1].y + CHASSIS_CENTER_Y,
+        CHASSIS_CENTER_X + chassisOrientation.x,
+        CHASSIS_CENTER_Y + chassisOrientation.y,
+        CHASSIS_CENTER_X - chassisOrientation.x,
+        CHASSIS_CENTER_Y - chassisOrientation.y,
         &chassisOrientationGraphics.graphicData[0]);
+
+    chassisOrientationName[2]++;
 
     RefSerial::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[1],

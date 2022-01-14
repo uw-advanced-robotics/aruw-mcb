@@ -32,7 +32,7 @@
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-#include "modm/math/geometry/vector.hpp"
+#include "modm/math/geometry/polygon_2d.hpp"
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
 
@@ -140,46 +140,45 @@ private:
 
     static constexpr uint8_t RETICLE_GRAPHIC_LAYER = 3;
     static constexpr uint8_t RETICLE_LINES_START_NAME[] = {2, 0, 0};
-    static constexpr uint16_t RETICLE_THICKNESS = 2;
+    static constexpr uint16_t RETICLE_THICKNESS = 1;
 
-    static constexpr uint16_t RETICLE_CENTER_X_OFFSET = 100;
+    static constexpr int RETICLE_CENTER_X_OFFSET = 0;
 
     static constexpr std::tuple<float, float, Tx::GraphicColor>
         TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[]{
-            std::tuple<float, float, Tx::GraphicColor>(50, 340, Tx::GraphicColor::WHITE),
-            std::tuple<float, float, Tx::GraphicColor>(50, 330, Tx::GraphicColor::WHITE),
-            std::tuple<float, float, Tx::GraphicColor>(50, 320, Tx::GraphicColor::WHITE),
-            std::tuple<float, float, Tx::GraphicColor>(50, 310, Tx::GraphicColor::WHITE),
-            std::tuple<float, float, Tx::GraphicColor>(50, 300, Tx::GraphicColor::WHITE),
-            std::tuple<float, float, Tx::GraphicColor>(30, 290, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(30, 280, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(30, 270, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(30, 260, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(30, 250, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(20, 240, Tx::GraphicColor::RED_AND_BLUE),
-            std::tuple<float, float, Tx::GraphicColor>(20, 230, Tx::GraphicColor::RED_AND_BLUE),
-            std::tuple<float, float, Tx::GraphicColor>(20, 220, Tx::GraphicColor::RED_AND_BLUE),
-            std::tuple<float, float, Tx::GraphicColor>(20, 210, Tx::GraphicColor::RED_AND_BLUE),
-            std::tuple<float, float, Tx::GraphicColor>(20, 200, Tx::GraphicColor::RED_AND_BLUE),
+            std::tuple<float, float, Tx::GraphicColor>(50, 540, Tx::GraphicColor::YELLOW),  // 1 meter
+            std::tuple<float, float, Tx::GraphicColor>(50, 530, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(50, 520, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(50, 510, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(70, 500, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(15, 440, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(15, 430, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(15, 420, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(15, 410, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(60, 400, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(10, 340, Tx::GraphicColor::RED_AND_BLUE),
+            std::tuple<float, float, Tx::GraphicColor>(10, 330, Tx::GraphicColor::RED_AND_BLUE),
+            std::tuple<float, float, Tx::GraphicColor>(10, 320, Tx::GraphicColor::RED_AND_BLUE),
+            std::tuple<float, float, Tx::GraphicColor>(10, 310, Tx::GraphicColor::RED_AND_BLUE),
+            std::tuple<float, float, Tx::GraphicColor>(50, 300, Tx::GraphicColor::RED_AND_BLUE),
         };
     static constexpr size_t NUM_RETICLE_COORDINATES =
         MODM_ARRAY_SIZE(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES);
-    static constexpr Tx::GraphicColor RETICLE_HORIZONTAL_COLOR = Tx::GraphicColor::BLACK;
+    static constexpr Tx::GraphicColor RETICLE_HORIZONTAL_COLOR = Tx::GraphicColor::YELLOW;
 
     // vehicle orientation constants
 
     static constexpr uint8_t CHASSIS_ORIENTATION_LAYER = 4;
     static constexpr uint8_t CHASSIS_ORIENTATION_START_NAME[] = {3, 0, 0};
 
-    static constexpr uint16_t CHASSIS_CENTER_X = 500;
-    static constexpr uint16_t CHASSIS_CENTER_Y = 500;
-    static constexpr uint16_t CHASSIS_WIDTH = 100;
-    static constexpr uint16_t CHASSIS_HEIGHT = 100;
-    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_COLOR = Tx::GraphicColor::BLACK;
-    static constexpr Tx::GraphicColor CHASSIS_BARREL_COLOR = Tx::GraphicColor::BLACK;
-    static constexpr uint16_t CHASSIS_LINE_WIDTH = 5;
+    static constexpr uint16_t CHASSIS_CENTER_X = 1200;
+    static constexpr uint16_t CHASSIS_CENTER_Y = 150;
+    static constexpr uint16_t CHASSIS_HEIGHT = 140;
+    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_COLOR = Tx::GraphicColor::YELLOW;
+    static constexpr Tx::GraphicColor CHASSIS_BARREL_COLOR = Tx::GraphicColor::WHITE;
+    static constexpr uint16_t CHASSIS_LINE_WIDTH = 100;
     static constexpr uint16_t CHASSIS_BARREL_LINE_WIDTH = 10;
-    static constexpr uint16_t CHASSIS_BARREL_LENGTH = 100;
+    static constexpr uint16_t CHASSIS_BARREL_LENGTH = 130;
 
     // general variables
 
@@ -260,9 +259,9 @@ private:
     // vehicle orientation variables
 
     const aruwsrc::control::turret::TurretSubsystem *turretSubsystem;
-    modm::Vector2i chassisOrientationVectors[2];
-    modm::Vector2i chassisOrientationVectorsRotated[2];
-    modm::Vector2i chassisOrientationVectorsPrev[2];
+    modm::Vector2i chassisOrientation;
+    modm::Vector2i chassisOrientationRotated;
+    modm::Vector2i chassisOrientationPrev;
     Tx::Graphic2Message chassisOrientationGraphics;
 
     // private functions
