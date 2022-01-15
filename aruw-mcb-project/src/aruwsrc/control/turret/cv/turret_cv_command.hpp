@@ -97,6 +97,26 @@ private:
     static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
+#else
+    static constexpr float YAW_P = 2500.0f;
+    static constexpr float YAW_I = 0.0f;
+    static constexpr float YAW_D = 150.0f;
+    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
+    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
+    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float YAW_R_DERIVATIVE_KALMAN = 40.0f;
+    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
+
+    static constexpr float PITCH_P = 4000.0f;
+    static constexpr float PITCH_I = 0.0f;
+    static constexpr float PITCH_D = 130.0f;
+    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
+    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
 #endif
     aruwsrc::Drivers *drivers;
 
