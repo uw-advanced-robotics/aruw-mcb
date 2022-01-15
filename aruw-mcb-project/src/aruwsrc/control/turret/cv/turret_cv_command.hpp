@@ -117,6 +117,8 @@ private:
     static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
     static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
+    // practice
+
 #endif
     aruwsrc::Drivers *drivers;
 
