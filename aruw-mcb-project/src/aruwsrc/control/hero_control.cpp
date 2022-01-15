@@ -112,8 +112,6 @@ ClientDisplayCommand clientDisplayCommand(
     nullptr,
     &chassisDriveCommand);
 
-TurretChassisRelativeCommand turretChassisRelativeCommand(drivers(), &turret);
-
 TurretWorldRelativeCommand turretWorldRelativeCommand(drivers(), &turret);
 
 TurretCVCommand turretCVCommand(drivers(), &turret);
@@ -165,7 +163,7 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
-    turret.setDefaultCommand(&turretChassisRelativeCommand);
+    turret.setDefaultCommand(&turretWorldRelativeCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
