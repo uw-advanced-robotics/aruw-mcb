@@ -136,6 +136,8 @@ public:
     /**
      * The jamming constants. Agitator is considered jammed if difference between setpoint
      * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
+     *
+     * This should be positive or else weird behavior can occur
      */
     static constexpr float JAMMING_DISTANCE = 1.0f;
     static constexpr uint32_t JAMMING_TIME = 250;
@@ -181,6 +183,12 @@ public:
      *      radians is returned.
      */
     mockable float getCurrentValue() const override;
+
+    /**
+     * @return the setpoint tolerance. Returns the maximum distance in radians at which jam
+     *      condition will never be triggered.
+     */
+    float getSetpointTolerance() const override;
 
     /**
      * Attempts to calibrate the agitator at the current position, such that
