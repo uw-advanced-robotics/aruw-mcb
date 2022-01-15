@@ -24,8 +24,8 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/control/turret/turret_subsystem_interface.hpp"
 
+#include "aruwsrc/control/turret/turret_subsystem_interface.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc
