@@ -269,8 +269,8 @@ public:
         static constexpr uint32_t MAX_TRANSMIT_SPEED_BYTES_PER_S = 1280;
 
         /**
-         * Get the max wait time after which you can send more data to the client. Sending faster than
-         * this time may cause dropped packets.
+         * Get the max wait time after which you can send more data to the client. Sending faster
+         * than this time may cause dropped packets.
          */
         template <typename T>
         static constexpr uint32_t getWaitTimeAfterGraphicSendMs(T *)
