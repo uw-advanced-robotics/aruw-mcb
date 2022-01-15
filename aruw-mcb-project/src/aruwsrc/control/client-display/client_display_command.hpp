@@ -52,7 +52,7 @@ class ClientDisplaySubsystem;
 
 class ClientDisplayCommand : public tap::control::Command,
                              ::modm::pt::Protothread,
-                             modm::Resumable<3>,
+                             modm::Resumable<5>,
                              tap::serial::RefSerialData
 {
 public:
@@ -85,7 +85,7 @@ private:
     // HUD indicator related constants
 
     static constexpr uint16_t HUD_INDICATOR_LIST_LAYER = 0;
-    static constexpr uint8_t HUD_INDICATOR_LIST_START_NAME[] = {1, 0, 0};
+    static constexpr uint8_t HUD_INDICATOR_LIST_START_NAME[] = {0, 0, 0};
     static constexpr uint16_t HUD_INDICATOR_LIST_CENTER_X = 300;
     static constexpr uint16_t HUD_INDICATOR_LIST_START_Y = 600;
     static constexpr uint16_t HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
@@ -104,19 +104,21 @@ private:
     static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_LENGTH = 3;
     static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 2;
 
-    static constexpr const char *HUD_INDICATOR_LABELS[] =
-    { "HOPP      ",
-      "FRIC      ",
-      "CV        ",
-      "AGI STATUS",
+    static constexpr const char *HUD_INDICATOR_LABELS[] = {
+        "SYS CALIB ",
+        "HOPP      ",
+        "FRIC      ",
+        "CV        ",
+        "AGI STATUS",
 #if defined(TARGET_HERO)
-      "BALL RDY  ",
+        "BALL RDY  ",
 #endif
     };
 
     enum HudIndicatorIndex
     {
-        HOPPER_OPEN = 0,
+        SYSTEMS_CALIBRATING = 0,
+        HOPPER_OPEN,
         FRICTION_WHEELS_ON,
         CV_AIM_DATA_VALID,
         AGITATOR_STATUS_HEALTHY,
@@ -128,7 +130,7 @@ private:
 
     // drive command related constants
 
-    static constexpr uint8_t DRIVE_COMMAND_NAME[] = {0, 0, 1};
+    static constexpr uint8_t DRIVE_COMMAND_NAME[] = {1, 0, 0};
     static constexpr uint16_t DRIVE_COMMAND_GRAPHIC_LAYER = 2;
     static constexpr uint16_t DRIVE_COMMAND_START_X = 100;
     static constexpr uint16_t DRIVE_COMMAND_START_Y = 850;
@@ -166,7 +168,7 @@ private:
         MODM_ARRAY_SIZE(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES);
     static constexpr Tx::GraphicColor RETICLE_HORIZONTAL_COLOR = Tx::GraphicColor::YELLOW;
 
-    // vehicle orientation constants
+    // chassis orientation constants
 
     static constexpr uint8_t CHASSIS_ORIENTATION_LAYER = 4;
     static constexpr uint8_t CHASSIS_ORIENTATION_START_NAME[] = {3, 0, 0};
@@ -179,6 +181,18 @@ private:
     static constexpr uint16_t CHASSIS_LINE_WIDTH = 100;
     static constexpr uint16_t CHASSIS_BARREL_LINE_WIDTH = 10;
     static constexpr uint16_t CHASSIS_BARREL_LENGTH = 130;
+
+    // turret angles constants
+
+    static constexpr uint8_t TURRET_ANGLES_LAYER = 5;
+    static constexpr uint8_t TURRET_ANGLES_START_NAME[] = {4, 0, 0};
+
+    static constexpr uint16_t TURRET_ANGLES_FONT_SIZE = 10;
+    static constexpr uint16_t TURRET_ANGLES_DECIMAL_PRECISION = 1;
+    static constexpr uint16_t TURRET_ANGLES_WIDTH = 2;
+    static constexpr uint16_t TURRET_ANGLES_START_X = 1000;
+    static constexpr uint16_t TURRET_ANGLES_START_Y = 600;
+    static constexpr Tx::GraphicColor TURRET_ANGLES_COLOR = Tx::GraphicColor::ORANGE;
 
     // general variables
 
@@ -257,7 +271,7 @@ private:
     /** Index used when iterating through the reticleMsg in protothreads. */
     size_t reticleIndex = 0;
 
-    // vehicle orientation variables
+    // chassis orientation variables
 
     const aruwsrc::control::turret::TurretSubsystem *turretSubsystem;
     modm::Vector2i chassisOrientation;
@@ -265,20 +279,31 @@ private:
     modm::Vector2i chassisOrientationPrev;
     Tx::Graphic2Message chassisOrientationGraphics;
 
+    // turret pitch/yaw angles
+
+    Tx::Graphic2Message turretAnglesGraphics;
+    Tx::GraphicCharacterMessage turretAnglesLabelGraphics;
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+    float prevYaw = 0.0f;
+    float prevPitch = 0.0f;
+
     // private functions
 
     bool run();
 
     modm::ResumableResult<bool> initializeNonblocking();
 
-    void updateHudIndicators();
+    modm::ResumableResult<bool> updateHudIndicators();
     modm::ResumableResult<bool> updateDriveCommandMsg();
-    modm::ResumableResult<bool> updateVehicleOrientation();
+    modm::ResumableResult<bool> updateChassisOrientation();
+    modm::ResumableResult<bool> updateTurretAngles();
 
     void initializeHudIndicators();
     void initializeReticle();
     void initializeDriveCommand();
-    void initializeVehicleOrientation();
+    void initializeChassisOrientation();
+    void initializeTurretAngles();
 };
 }  // namespace aruwsrc::display
 

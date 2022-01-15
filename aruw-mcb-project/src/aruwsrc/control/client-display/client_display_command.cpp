@@ -59,6 +59,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           BooleanDrawer(drivers, &hudIndicatorGraphics[2]),
           BooleanDrawer(drivers, &hudIndicatorGraphics[3]),
           BooleanDrawer(drivers, &hudIndicatorGraphics[4]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[5]),
       },
 #else
       hudIndicatorDrawers{
@@ -66,6 +67,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           BooleanDrawer(drivers, &hudIndicatorGraphics[1]),
           BooleanDrawer(drivers, &hudIndicatorGraphics[2]),
           BooleanDrawer(drivers, &hudIndicatorGraphics[3]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[4]),
       },
 #endif
       driveCommands{driveCommands},
@@ -81,7 +83,7 @@ void ClientDisplayCommand::initialize()
     initializeHudIndicators();
     initializeReticle();
     initializeDriveCommand();
-    initializeVehicleOrientation();
+    initializeChassisOrientation();
 }
 
 void ClientDisplayCommand::execute() { run(); }
@@ -94,16 +96,13 @@ bool ClientDisplayCommand::run()
 
     while (true)
     {
-        updateHudIndicators();
-
-        for (hudIndicatorIndex = 0; hudIndicatorIndex < NUM_HUD_INDICATORS; hudIndicatorIndex++)
-        {
-            PT_CALL(hudIndicatorDrawers[hudIndicatorIndex].draw());
-        }
+        PT_CALL(updateHudIndicators());
 
         PT_CALL(updateDriveCommandMsg());
 
-        PT_CALL(updateVehicleOrientation());
+        PT_CALL(updateChassisOrientation());
+
+        PT_CALL(updateTurretAngles());
 
         PT_YIELD();
     }
@@ -136,17 +135,57 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
     delay(&driveCommandMsg);
 
     drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
-    chassisOrientationGraphics.graphicData[0].operation =
-        Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
-    chassisOrientationGraphics.graphicData[1].operation =
-        Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
+    delay(&chassisOrientationGraphics);
+    chassisOrientationGraphics.graphicData[0].operation = Tx::ADD_GRAPHIC_MODIFY;
+    chassisOrientationGraphics.graphicData[1].operation = Tx::ADD_GRAPHIC_MODIFY;
+
+    drivers->refSerial.sendGraphic(&turretAnglesGraphics);
+    delay(&turretAnglesGraphics);
+    turretAnglesGraphics.graphicData[0].operation = Tx::ADD_GRAPHIC_MODIFY;
+    turretAnglesGraphics.graphicData[1].operation = Tx::ADD_GRAPHIC_MODIFY;
+
+    drivers->refSerial.sendGraphic(&turretAnglesLabelGraphics);
+    delay(&turretAnglesLabelGraphics);
+
+    RF_END();
+}
+
+modm::ResumableResult<bool> ClientDisplayCommand::updateHudIndicators()
+{
+    RF_BEGIN(1);
+
+    if (hopperSubsystem != nullptr)
+    {
+        hudIndicatorDrawers[HOPPER_OPEN].setDrawerColor(!hopperSubsystem->getIsHopperOpen());
+    }
+
+    if (frictionWheelSubsystem != nullptr)
+    {
+        hudIndicatorDrawers[FRICTION_WHEELS_ON].setDrawerColor(
+            !compareFloatClose(0.0f, frictionWheelSubsystem->getDesiredLaunchSpeed(), 1E-5));
+    }
+
+    hudIndicatorDrawers[CV_AIM_DATA_VALID].setDrawerColor(
+        drivers->legacyVisionCoprocessor.lastAimDataValid());
+
+    if (agitatorSubsystem != nullptr)
+    {
+        hudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setDrawerColor(!agitatorSubsystem->isJammed());
+    }
+
+    // TODO add hero fire ready and systems calibrating when available
+
+    for (hudIndicatorIndex = 0; hudIndicatorIndex < NUM_HUD_INDICATORS; hudIndicatorIndex++)
+    {
+        RF_CALL(hudIndicatorDrawers[hudIndicatorIndex].draw());
+    }
 
     RF_END();
 }
 
 modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
 {
-    RF_BEGIN(1);
+    RF_BEGIN(2);
 
     prevDriveCommandIndex = currDriveCommandIndex;
 
@@ -165,7 +204,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
         drivers->refSerial.configGraphicGenerics(
             &driveCommandMsg.graphicData,
             DRIVE_COMMAND_NAME,
-            Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY,
+            Tx::ADD_GRAPHIC_MODIFY,
             DRIVE_COMMAND_GRAPHIC_LAYER,
             static_cast<Tx::GraphicColor>(currDriveCommandIndex));
 
@@ -187,9 +226,9 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
     RF_END();
 }
 
-modm::ResumableResult<bool> ClientDisplayCommand::updateVehicleOrientation()
+modm::ResumableResult<bool> ClientDisplayCommand::updateChassisOrientation()
 {
-    RF_BEGIN(2)
+    RF_BEGIN(3)
 
     chassisOrientationRotated.rotate(modm::toRadian(
         turretSubsystem != nullptr ? -turretSubsystem->getYawAngleFromCenter() : 0.0f));
@@ -214,26 +253,36 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateVehicleOrientation()
     RF_END();
 }
 
-void ClientDisplayCommand::updateHudIndicators()
+modm::ResumableResult<bool> ClientDisplayCommand::updateTurretAngles()
 {
-    if (hopperSubsystem != nullptr)
+    RF_BEGIN(4);
+
+    if (turretSubsystem != nullptr)
     {
-        hudIndicatorDrawers[HOPPER_OPEN].setDrawerColor(!hopperSubsystem->getIsHopperOpen());
+        yaw = turretSubsystem->getCurrentYawValue().getValue();
+        pitch = turretSubsystem->getCurrentPitchValue().getValue();
+
+        if (!compareFloatClose(
+                prevYaw,
+                yaw,
+                1.0f / modm::pow(10, TURRET_ANGLES_DECIMAL_PRECISION)) ||
+            !compareFloatClose(
+                prevPitch,
+                pitch,
+                1.0f / modm::pow(10.0f, TURRET_ANGLES_DECIMAL_PRECISION)))
+        {
+            turretAnglesGraphics.graphicData[0].value = 1000.0f * yaw;
+            turretAnglesGraphics.graphicData[1].value = 1000.0f * pitch;
+
+            drivers->refSerial.sendGraphic(&turretAnglesGraphics);
+            delay(&turretAnglesGraphics);
+
+            prevYaw = yaw;
+            prevPitch = pitch;
+        }
     }
 
-    if (frictionWheelSubsystem != nullptr)
-    {
-        hudIndicatorDrawers[FRICTION_WHEELS_ON].setDrawerColor(
-            !compareFloatClose(0.0f, frictionWheelSubsystem->getDesiredLaunchSpeed(), 1E-5));
-    }
-
-    hudIndicatorDrawers[CV_AIM_DATA_VALID].setDrawerColor(
-        drivers->legacyVisionCoprocessor.lastAimDataValid());
-
-    if (agitatorSubsystem != nullptr)
-    {
-        hudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setDrawerColor(!agitatorSubsystem->isJammed());
-    }
+    RF_END();
 }
 
 void ClientDisplayCommand::initializeHudIndicators()
@@ -318,7 +367,7 @@ void ClientDisplayCommand::initializeReticle()
         RefSerial::configGraphicGenerics(
             &reticleMsg[reticleMsgIndex].graphicData[graphicDataIndex],
             currLineName,
-            Tx::AddGraphicOperation::ADD_GRAPHIC,
+            Tx::ADD_GRAPHIC,
             RETICLE_GRAPHIC_LAYER,
             std::get<2>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]));
 
@@ -356,7 +405,7 @@ void ClientDisplayCommand::initializeReticle()
         &reticleMsg[NUM_RETICLE_COORDINATES / MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]
              .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)],
         currLineName,
-        Tx::AddGraphicOperation::ADD_GRAPHIC,
+        Tx::ADD_GRAPHIC,
         RETICLE_GRAPHIC_LAYER,
         RETICLE_HORIZONTAL_COLOR);
 
@@ -375,7 +424,7 @@ void ClientDisplayCommand::initializeDriveCommand()
     drivers->refSerial.configGraphicGenerics(
         &driveCommandMsg.graphicData,
         DRIVE_COMMAND_NAME,
-        Tx::AddGraphicOperation::ADD_GRAPHIC,
+        Tx::ADD_GRAPHIC,
         DRIVE_COMMAND_GRAPHIC_LAYER,
         Tx::GraphicColor::WHITE);
 
@@ -392,7 +441,7 @@ void ClientDisplayCommand::initializeDriveCommand()
     prevDriveCommandIndex = -1;
 }
 
-void ClientDisplayCommand::initializeVehicleOrientation()
+void ClientDisplayCommand::initializeChassisOrientation()
 {
     chassisOrientation.set(0, CHASSIS_HEIGHT / 2);
     chassisOrientationPrev = chassisOrientation;
@@ -404,7 +453,7 @@ void ClientDisplayCommand::initializeVehicleOrientation()
     RefSerial::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[0],
         chassisOrientationName,
-        Tx::AddGraphicOperation::ADD_GRAPHIC,
+        Tx::ADD_GRAPHIC,
         CHASSIS_ORIENTATION_LAYER,
         CHASSIS_ORIENTATION_COLOR);
 
@@ -421,7 +470,7 @@ void ClientDisplayCommand::initializeVehicleOrientation()
     RefSerial::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[1],
         chassisOrientationName,
-        Tx::AddGraphicOperation::ADD_GRAPHIC,
+        Tx::ADD_GRAPHIC,
         CHASSIS_ORIENTATION_LAYER,
         CHASSIS_BARREL_COLOR);
 
@@ -432,6 +481,68 @@ void ClientDisplayCommand::initializeVehicleOrientation()
         CHASSIS_CENTER_X,
         CHASSIS_CENTER_Y + CHASSIS_BARREL_LENGTH,
         &chassisOrientationGraphics.graphicData[1]);
+}
+
+void ClientDisplayCommand::initializeTurretAngles()
+{
+    if (turretSubsystem != nullptr)
+    {
+        uint8_t turretAnglesName[3];
+        memcpy(turretAnglesName, TURRET_ANGLES_START_NAME, sizeof(turretAnglesName));
+
+        RefSerial::configGraphicGenerics(
+            &turretAnglesGraphics.graphicData[0],
+            turretAnglesName,
+            Tx::ADD_GRAPHIC,
+            TURRET_ANGLES_LAYER,
+            TURRET_ANGLES_COLOR);
+
+        RefSerial::configFloatingNumber(
+            TURRET_ANGLES_FONT_SIZE,
+            TURRET_ANGLES_DECIMAL_PRECISION,
+            TURRET_ANGLES_WIDTH,
+            TURRET_ANGLES_START_X,
+            TURRET_ANGLES_START_Y,
+            0,
+            &turretAnglesGraphics.graphicData[0]);
+
+        turretAnglesName[0]++;
+
+        RefSerial::configGraphicGenerics(
+            &turretAnglesGraphics.graphicData[0],
+            turretAnglesName,
+            Tx::ADD_GRAPHIC,
+            TURRET_ANGLES_LAYER,
+            TURRET_ANGLES_COLOR);
+
+        RefSerial::configFloatingNumber(
+            TURRET_ANGLES_FONT_SIZE,
+            TURRET_ANGLES_DECIMAL_PRECISION,
+            TURRET_ANGLES_WIDTH,
+            TURRET_ANGLES_START_X,
+            TURRET_ANGLES_START_Y + TURRET_ANGLES_FONT_SIZE,
+            0,
+            &turretAnglesGraphics.graphicData[1]);
+
+        RefSerial::configGraphicGenerics(
+            &turretAnglesLabelGraphics.graphicData,
+            turretAnglesName,
+            Tx::ADD_GRAPHIC,
+            TURRET_ANGLES_LAYER,
+            TURRET_ANGLES_COLOR);
+
+        RefSerial::configCharacterMsg(
+            TURRET_ANGLES_FONT_SIZE,
+            1,  // TODO check this
+            TURRET_ANGLES_WIDTH,
+            TURRET_ANGLES_START_X - strlen("PITCH") * TURRET_ANGLES_FONT_SIZE,
+            TURRET_ANGLES_START_Y,
+            "PITCH\nYAW  ",
+            &turretAnglesLabelGraphics);
+
+        prevYaw = 0.0f;
+        prevPitch = 0.0f;
+    }
 }
 
 }  // namespace aruwsrc::display
