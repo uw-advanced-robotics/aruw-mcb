@@ -24,8 +24,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
-// using namespace tap;
-// using namespace tap::algorithms;
+using namespace tap;
 
 namespace aruwsrc
 {
@@ -34,47 +33,47 @@ namespace control
 float ControlOperatorInterface::getChassisXInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t currTime = arch::clock::getTimeMilliseconds();
 
     if (prevUpdateCounterX != updateCounter)
     {
         chassisXInput.update(
-            drivers->remote.getChannel(tap::Remote::Channel::LEFT_VERTICAL),
+            drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL),
             currTime);
         prevUpdateCounterX = updateCounter;
     }
 
-    int16_t input = drivers->remote.keyPressed(tap::Remote::Key::W) -
-                    drivers->remote.keyPressed(tap::Remote::Key::S);
+    int16_t input = drivers->remote.keyPressed(Remote::Key::W) -
+                    drivers->remote.keyPressed(Remote::Key::S);
 
     // Note for readability: chassisXKeyInputFiltered = The most recently filtered value computed by
     // this function (which we update below)
     if (abs(chassisXKeyInputFiltered) < CHASSIS_X_KEY_INPUT_FILTER_CHANGE_THRESHOLD ||
         abs(input) <= abs(chassisXKeyInputFiltered))
     {
-        chassisXKeyInputFiltered = tap::algorithms::lowPassFilter(
+        chassisXKeyInputFiltered = algorithms::lowPassFilter(
             chassisXKeyInputFiltered,
             input,
             CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX);
     }
     else
     {
-        chassisXKeyInputFiltered = tap::algorithms::lowPassFilter(
+        chassisXKeyInputFiltered = algorithms::lowPassFilter(
             chassisXKeyInputFiltered,
             input,
             abs(chassisXKeyInputFiltered / input) * CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX);
     }
 
-    float finalX = tap::algorithms::limitVal<float>(
+    float finalX = algorithms::limitVal<float>(
         chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered,
         -1.0f,
         1.0f);
 
-    if (drivers->remote.keyPressed(tap::Remote::Key::CTRL))
+    if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
         finalX *= CTRL_SCALAR;
     }
-    if (drivers->remote.keyPressed(tap::Remote::Key::SHIFT))
+    if (drivers->remote.keyPressed(Remote::Key::SHIFT))
     {
         finalX *= SHIFT_SCALAR;
     }
@@ -85,46 +84,46 @@ float ControlOperatorInterface::getChassisXInput()
 float ControlOperatorInterface::getChassisYInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t currTime = arch::clock::getTimeMilliseconds();
     if (prevUpdateCounterY != updateCounter)
     {
         chassisYInput.update(
-            drivers->remote.getChannel(tap::Remote::Channel::LEFT_HORIZONTAL),
+            drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
             currTime);
         prevUpdateCounterY = updateCounter;
     }
 
-    int16_t input = drivers->remote.keyPressed(tap::Remote::Key::D) -
-                    drivers->remote.keyPressed(tap::Remote::Key::A);
+    int16_t input = drivers->remote.keyPressed(Remote::Key::D) -
+                    drivers->remote.keyPressed(Remote::Key::A);
 
     // Note for readability: chassisYKeyInputFiltered = The most recently filtered value computed by
     // this function (which we update below)
     if (abs(chassisYKeyInputFiltered) < CHASSIS_Y_KEY_INPUT_FILTER_CHANGE_THRESHOLD ||
         abs(input) <= abs(chassisYKeyInputFiltered))
     {
-        chassisYKeyInputFiltered = tap::algorithms::lowPassFilter(
+        chassisYKeyInputFiltered = algorithms::lowPassFilter(
             chassisYKeyInputFiltered,
             input,
             CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX);
     }
     else
     {
-        chassisYKeyInputFiltered = tap::algorithms::lowPassFilter(
+        chassisYKeyInputFiltered = algorithms::lowPassFilter(
             chassisYKeyInputFiltered,
             input,
             abs(chassisYKeyInputFiltered / input) * CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX);
     }
 
-    float finalY = tap::algorithms::limitVal<float>(
+    float finalY = algorithms::limitVal<float>(
         chassisYInput.getInterpolatedValue(currTime) + chassisYKeyInputFiltered,
         -1.0f,
         1.0f);
 
-    if (drivers->remote.keyPressed(tap::Remote::Key::CTRL))
+    if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
         finalY *= CTRL_SCALAR;
     }
-    if (drivers->remote.keyPressed(tap::Remote::Key::SHIFT))
+    if (drivers->remote.keyPressed(Remote::Key::SHIFT))
     {
         finalY *= SHIFT_SCALAR;
     }
@@ -134,23 +133,23 @@ float ControlOperatorInterface::getChassisYInput()
 
 float ControlOperatorInterface::getChassisRInput()
 {
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t currTime = arch::clock::getTimeMilliseconds();
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     if (prevUpdateCounterR != updateCounter)
     {
         chassisRInput.update(
-            drivers->remote.getChannel(tap::Remote::Channel::RIGHT_HORIZONTAL),
+            drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
             currTime);
         prevUpdateCounterR = updateCounter;
     }
 
-    chassisRKeyInputFiltered = tap::algorithms::lowPassFilter(
+    chassisRKeyInputFiltered = algorithms::lowPassFilter(
         chassisRKeyInputFiltered,
-        drivers->remote.keyPressed(tap::Remote::Key::Q) -
-            drivers->remote.keyPressed(tap::Remote::Key::E),
+        drivers->remote.keyPressed(Remote::Key::Q) -
+            drivers->remote.keyPressed(Remote::Key::E),
         CHASSIS_R_KEY_INPUT_FILTER_ALPHA);
 
-    return tap::algorithms::limitVal<float>(
+    return algorithms::limitVal<float>(
         chassisRInput.getInterpolatedValue(currTime) + chassisRKeyInputFiltered,
         -1.0f,
         1.0f);
@@ -158,8 +157,8 @@ float ControlOperatorInterface::getChassisRInput()
 
 float ControlOperatorInterface::getTurretYawInput()
 {
-    return -drivers->remote.getChannel(tap::Remote::Channel::RIGHT_HORIZONTAL) +
-           static_cast<float>(tap::algorithms::limitVal<int16_t>(
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) +
+           static_cast<float>(algorithms::limitVal<int16_t>(
                -drivers->remote.getMouseX(),
                -USER_MOUSE_YAW_MAX,
                USER_MOUSE_YAW_MAX)) *
@@ -168,8 +167,8 @@ float ControlOperatorInterface::getTurretYawInput()
 
 float ControlOperatorInterface::getTurretPitchInput()
 {
-    return drivers->remote.getChannel(tap::Remote::Channel::RIGHT_VERTICAL) +
-           static_cast<float>(tap::algorithms::limitVal<int16_t>(
+    return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
+           static_cast<float>(algorithms::limitVal<int16_t>(
                -drivers->remote.getMouseY(),
                -USER_MOUSE_PITCH_MAX,
                USER_MOUSE_PITCH_MAX)) *
@@ -178,7 +177,7 @@ float ControlOperatorInterface::getTurretPitchInput()
 
 float ControlOperatorInterface::getSentinelSpeedInput()
 {
-    return drivers->remote.getChannel(tap::Remote::Channel::LEFT_HORIZONTAL) *
+    return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) *
            USER_STICK_SENTINEL_DRIVE_SCALAR;
 }
 }  // namespace control

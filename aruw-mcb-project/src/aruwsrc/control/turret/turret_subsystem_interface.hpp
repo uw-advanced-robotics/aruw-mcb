@@ -1,20 +1,20 @@
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
- * This file is part of Taproot.
+ * This file is part of aruw-mcb.
  *
- * Taproot is free software: you can redistribute it and/or modify
+ * aruw-mcb is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Taproot is distributed in the hope that it will be useful,
+ * aruw-mcb is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef TURRET_SUBSYSTEM_INTERFACE_
@@ -23,15 +23,15 @@
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/control/subsystem.hpp"
 
-namespace tap::control::turret
+namespace aruwsrc::control::turret
 {
 /**
  * Interface for a generic turret motor with a pitch and yaw motor.
  */
-class TurretSubsystemInterface : public Subsystem
+class TurretSubsystemInterface : public tap::control::Subsystem
 {
 public:
-    explicit TurretSubsystemInterface(Drivers *drivers) : Subsystem(drivers) {}
+    explicit TurretSubsystemInterface(Drivers *drivers) : tap::control::Subsystem(drivers) {}
 
     /**
      * @return the desired yaw value value of whatever is being controlled.
