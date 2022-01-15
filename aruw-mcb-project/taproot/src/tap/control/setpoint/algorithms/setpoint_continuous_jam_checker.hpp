@@ -83,6 +83,22 @@ public:
         return jamTimeout.execute(!withinTolerance);
     }
 
+    /**
+     * @return the setpoint distance tolerance of the jam checker
+     */
+    inline float getSetpointTolerance() const
+    {
+        return distanceTolerance;
+    }
+
+    /**
+     * @return the temporal tolerance of the jam checker
+     */
+    inline uint32_t getTemporalTolerance() const
+    {
+        return jamTimeout.getTimeout();
+    }
+
 private:
     SetpointSubsystem* setpointSubsystem;
     tap::arch::ConditionalMilliTimer jamTimeout;
