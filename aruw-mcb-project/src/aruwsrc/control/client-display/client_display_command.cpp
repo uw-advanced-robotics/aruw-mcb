@@ -33,8 +33,8 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 
-#define delay()                                  \
-    delayTimer.restart(DELAY_PERIOD_BTWN_SENDS); \
+#define delay(graphic)                                  \
+    delayTimer.restart(RefSerialData::Tx::getWaitTimeAfterGraphicSendMs(graphic)); \
     RF_WAIT_UNTIL(delayTimer.execute());
 
 namespace aruwsrc::display
@@ -125,19 +125,19 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
         RF_CALL(bubbleDrawers[bubbleIndex].initialize());
 
         drivers->refSerial.sendGraphic(&bubbleStaticGraphics[bubbleIndex]);
-        delay();
+        delay(&bubbleStaticGraphics[bubbleIndex]);
         drivers->refSerial.sendGraphic(&bubbleStaticLabelGraphics[bubbleIndex]);
-        delay();
+        delay(&bubbleStaticLabelGraphics[bubbleIndex]);
     }
 
     for (reticleIndex = 0; reticleIndex < MODM_ARRAY_SIZE(reticleMsg); reticleIndex++)
     {
         drivers->refSerial.sendGraphic(&reticleMsg[reticleIndex]);
-        delay();
+        delay(&reticleMsg[reticleIndex]);
     }
 
     drivers->refSerial.sendGraphic(&driveCommandMsg);
-    delay();
+    delay(&driveCommandMsg);
 
     drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
     chassisOrientationGraphics.graphicData[0].operation =
@@ -184,7 +184,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
 
         drivers->refSerial.sendGraphic(&driveCommandMsg);
 
-        delay();
+        delay(&driveCommandMsg);
     }
 
     // No delay necessary since didn't send anything
@@ -207,7 +207,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateVehicleOrientation()
             CHASSIS_CENTER_Y - chassisOrientationRotated.y,
             &chassisOrientationGraphics.graphicData[0]);
         drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
-        delay();
+        delay(&chassisOrientationGraphics);
 
         chassisOrientationPrev = chassisOrientationRotated;
     }

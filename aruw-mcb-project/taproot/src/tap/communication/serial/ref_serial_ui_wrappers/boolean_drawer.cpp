@@ -23,18 +23,17 @@
 
 using namespace tap::serial;
 
-const uint32_t GRAPHIC_SEND_PERIOD = 110;
-
-#define delay()                                \
-    delayTimeout.restart(GRAPHIC_SEND_PERIOD); \
+#define delay()                                                                          \
+    delayTimeout.restart(                                                                \
+        RefSerialData::Tx::getWaitTimeAfterGraphicSendMs(graphic)); \
     RF_WAIT_UNTIL(delayTimeout.execute());
 
 namespace tap::communication::serial::ref_serial_ui_wrapeprs
 {
 BooleanDrawer::BooleanDrawer(
     tap::Drivers *drivers,
-    tap::serial::RefSerial::Tx::Graphic1Message *graphic,
-    tap::serial::RefSerial::Tx::GraphicColor boolFalseColor)
+    RefSerial::Tx::Graphic1Message *graphic,
+    RefSerial::Tx::GraphicColor boolFalseColor)
     : drivers(drivers),
       graphic(graphic),
       boolFalseColor(boolFalseColor)
@@ -78,7 +77,7 @@ void BooleanDrawer::updateColor()
 {
     uint32_t prevColor = graphic->graphicData.color;
     tap::serial::RefSerial::Tx::GraphicColor color;
-    color = filledWithInitialColor ? savedColor : tap::serial::RefSerial::Tx::GraphicColor::WHITE;
+    color = filledWithInitialColor ? savedColor : boolFalseColor;
     graphic->graphicData.color = static_cast<uint32_t>(color) & 0b1111;
     colorChanged = prevColor != graphic->graphicData.color;
 }
