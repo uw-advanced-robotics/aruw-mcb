@@ -33,7 +33,7 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 
-#define delay(graphic)                                  \
+#define delay(graphic)                                                             \
     delayTimer.restart(RefSerialData::Tx::getWaitTimeAfterGraphicSendMs(graphic)); \
     RF_WAIT_UNTIL(delayTimer.execute());
 
@@ -52,32 +52,33 @@ ClientDisplayCommand::ClientDisplayCommand(
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
-      bubbleDrawers{
-          BooleanDrawer(drivers, &bubbleGraphics[0]),
-          BooleanDrawer(drivers, &bubbleGraphics[1]),
-          BooleanDrawer(drivers, &bubbleGraphics[2]),
-          BooleanDrawer(drivers, &bubbleGraphics[3]),
-      },
 #if defined(TARGET_HERO)
-      bubbleDrawers{
-          BooleanDrawer(drivers, &bubbleGraphics[0]),
-          BooleanDrawer(drivers, &bubbleGraphics[1]),
-          BooleanDrawer(drivers, &bubbleGraphics[2]),
-          BooleanDrawer(drivers, &bubbleGraphics[3]),
-          BooleanDrawer(drivers, &bubbleGraphics[4]),
+      hudIndicatorDrawers{
+          BooleanDrawer(drivers, &hudIndicatorGraphics[0]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[1]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[2]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[3]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[4]),
+      },
+#else
+      hudIndicatorDrawers{
+          BooleanDrawer(drivers, &hudIndicatorGraphics[0]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[1]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[2]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[3]),
       },
 #endif
       driveCommands{driveCommands},
       turretSubsystem(turretSubsystem)
 {
     addSubsystemRequirement(clientDisplay);
-    bubbleDrawers[AGITATOR_STATUS_HEALTHY].setBoolFalseColor(Tx::GraphicColor::PURPLISH_RED);
+    hudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setBoolFalseColor(Tx::GraphicColor::PURPLISH_RED);
 }
 
 void ClientDisplayCommand::initialize()
 {
     restart();  // restart protothread
-    initializeBubbles();
+    initializeHudIndicators();
     initializeReticle();
     initializeDriveCommand();
     initializeVehicleOrientation();
@@ -93,16 +94,11 @@ bool ClientDisplayCommand::run()
 
     while (true)
     {
-        bubbleDrawers[HOPPER_OPEN].setDrawerColor(!hopperSubsystem->getIsHopperOpen());
-        bubbleDrawers[FRICTION_WHEELS_ON].setDrawerColor(
-            !compareFloatClose(0.0f, frictionWheelSubsystem->getDesiredLaunchSpeed(), 1E-5));
-        bubbleDrawers[CV_AIM_DATA_VALID].setDrawerColor(
-            drivers->legacyVisionCoprocessor.lastAimDataValid());
-        bubbleDrawers[AGITATOR_STATUS_HEALTHY].setDrawerColor(!agitatorSubsystem->isJammed());
+        updateHudIndicators();
 
-        for (bubbleIndex = 0; bubbleIndex < NUM_BUBBLES; bubbleIndex++)
+        for (hudIndicatorIndex = 0; hudIndicatorIndex < NUM_HUD_INDICATORS; hudIndicatorIndex++)
         {
-            PT_CALL(bubbleDrawers[bubbleIndex].draw());
+            PT_CALL(hudIndicatorDrawers[hudIndicatorIndex].draw());
         }
 
         PT_CALL(updateDriveCommandMsg());
@@ -120,14 +116,14 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
 
     RF_WAIT_UNTIL(drivers->refSerial.getRefSerialReceivingData());
 
-    for (bubbleIndex = 0; bubbleIndex < NUM_BUBBLES; bubbleIndex++)
+    for (hudIndicatorIndex = 0; hudIndicatorIndex < NUM_HUD_INDICATORS; hudIndicatorIndex++)
     {
-        RF_CALL(bubbleDrawers[bubbleIndex].initialize());
+        RF_CALL(hudIndicatorDrawers[hudIndicatorIndex].initialize());
 
-        drivers->refSerial.sendGraphic(&bubbleStaticGraphics[bubbleIndex]);
-        delay(&bubbleStaticGraphics[bubbleIndex]);
-        drivers->refSerial.sendGraphic(&bubbleStaticLabelGraphics[bubbleIndex]);
-        delay(&bubbleStaticLabelGraphics[bubbleIndex]);
+        drivers->refSerial.sendGraphic(&hudIndicatorStaticGraphics[hudIndicatorIndex]);
+        delay(&hudIndicatorStaticGraphics[hudIndicatorIndex]);
+        drivers->refSerial.sendGraphic(&hudIndicatorStaticLabelGraphics[hudIndicatorIndex]);
+        delay(&hudIndicatorStaticLabelGraphics[hudIndicatorIndex]);
     }
 
     for (reticleIndex = 0; reticleIndex < MODM_ARRAY_SIZE(reticleMsg); reticleIndex++)
@@ -195,7 +191,8 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateVehicleOrientation()
 {
     RF_BEGIN(2)
 
-    chassisOrientationRotated.rotate(modm::toRadian(-turretSubsystem->getYawAngleFromCenter()));
+    chassisOrientationRotated.rotate(modm::toRadian(
+        turretSubsystem != nullptr ? -turretSubsystem->getYawAngleFromCenter() : 0.0f));
 
     if (chassisOrientationRotated != chassisOrientationPrev)
     {
@@ -217,67 +214,90 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateVehicleOrientation()
     RF_END();
 }
 
-void ClientDisplayCommand::initializeBubbles()
+void ClientDisplayCommand::updateHudIndicators()
 {
-    uint8_t bubbleName[3];
-    memcpy(bubbleName, BUBBLE_LIST_START_NAME, sizeof(bubbleName));
-    uint16_t bubbleListCurrY = BUBBLE_LIST_START_Y;
+    if (hopperSubsystem != nullptr)
+    {
+        hudIndicatorDrawers[HOPPER_OPEN].setDrawerColor(!hopperSubsystem->getIsHopperOpen());
+    }
 
-    // Configure hopper cover bubble
-    for (bubbleIndex = 0; bubbleIndex < NUM_BUBBLES; bubbleIndex++)
+    if (frictionWheelSubsystem != nullptr)
+    {
+        hudIndicatorDrawers[FRICTION_WHEELS_ON].setDrawerColor(
+            !compareFloatClose(0.0f, frictionWheelSubsystem->getDesiredLaunchSpeed(), 1E-5));
+    }
+
+    hudIndicatorDrawers[CV_AIM_DATA_VALID].setDrawerColor(
+        drivers->legacyVisionCoprocessor.lastAimDataValid());
+
+    if (agitatorSubsystem != nullptr)
+    {
+        hudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setDrawerColor(!agitatorSubsystem->isJammed());
+    }
+}
+
+void ClientDisplayCommand::initializeHudIndicators()
+{
+    uint8_t hudIndicatorName[3];
+    memcpy(hudIndicatorName, HUD_INDICATOR_LIST_START_NAME, sizeof(hudIndicatorName));
+    uint16_t hudIndicatorListCurrY = HUD_INDICATOR_LIST_START_Y;
+
+    // Configure hopper cover hud indicator
+    for (hudIndicatorIndex = 0; hudIndicatorIndex < NUM_HUD_INDICATORS; hudIndicatorIndex++)
     {
         RefSerial::configGraphicGenerics(
-            &bubbleGraphics[bubbleIndex].graphicData,
-            bubbleName,
+            &hudIndicatorGraphics[hudIndicatorIndex].graphicData,
+            hudIndicatorName,
             Tx::ADD_GRAPHIC,
-            BUBBLE_LIST_LAYER,
-            BUBBLE_FILLED_COLOR);
+            HUD_INDICATOR_LIST_LAYER,
+            HUD_INDICATOR_FILLED_COLOR);
 
         RefSerial::configCircle(
-            BUBBLE_WIDTH,
-            BUBBLE_LIST_CENTER_X,
-            bubbleListCurrY,
-            BUBBLE_RADIUS,
-            &bubbleGraphics[bubbleIndex].graphicData);
+            HUD_INDICATOR_WIDTH,
+            HUD_INDICATOR_LIST_CENTER_X,
+            hudIndicatorListCurrY,
+            HUD_INDICATOR_RADIUS,
+            &hudIndicatorGraphics[hudIndicatorIndex].graphicData);
 
-        bubbleName[2]++;
+        hudIndicatorName[2]++;
 
         RefSerial::configGraphicGenerics(
-            &bubbleStaticGraphics[bubbleIndex].graphicData,
-            bubbleName,
+            &hudIndicatorStaticGraphics[hudIndicatorIndex].graphicData,
+            hudIndicatorName,
             Tx::ADD_GRAPHIC,
-            BUBBLE_STATIC_LIST_LAYER,
-            BUBBLE_OUTLINE_COLOR);
+            HUD_INDICATOR_STATIC_LIST_LAYER,
+            HUD_INDICATOR_OUTLINE_COLOR);
 
         RefSerial::configCircle(
-            BUBBLE_OUTLINE_WIDTH,
-            BUBBLE_LIST_CENTER_X,
-            bubbleListCurrY,
-            BUBBLE_OUTLINE_RADIUS,
-            &bubbleStaticGraphics[bubbleIndex].graphicData);
+            HUD_INDICATOR_OUTLINE_WIDTH,
+            HUD_INDICATOR_LIST_CENTER_X,
+            hudIndicatorListCurrY,
+            HUD_INDICATOR_OUTLINE_RADIUS,
+            &hudIndicatorStaticGraphics[hudIndicatorIndex].graphicData);
 
-        bubbleName[2]++;
+        hudIndicatorName[2]++;
 
         RefSerial::configGraphicGenerics(
-            &bubbleStaticLabelGraphics[bubbleIndex].graphicData,
-            bubbleName,
+            &hudIndicatorStaticLabelGraphics[hudIndicatorIndex].graphicData,
+            hudIndicatorName,
             Tx::ADD_GRAPHIC,
-            BUBBLE_STATIC_LIST_LAYER,
-            BUBBLE_LABEL_COLOR);
+            HUD_INDICATOR_STATIC_LIST_LAYER,
+            HUD_INDICATOR_LABEL_COLOR);
 
         RefSerial::configCharacterMsg(
-            BUBBLE_LABEL_CHAR_SIZE,
-            BUBBLE_LABEL_CHAR_LENGTH,
-            BUBBLE_LABEL_CHAR_LINE_WIDTH,
-            BUBBLE_LIST_CENTER_X - strlen(BUBBLE_LABELS[bubbleIndex]) * BUBBLE_LABEL_CHAR_SIZE -
-                BUBBLE_OUTLINE_RADIUS - BUBBLE_OUTLINE_WIDTH / 2,
-            bubbleListCurrY + BUBBLE_LABEL_CHAR_SIZE / 2,
-            BUBBLE_LABELS[bubbleIndex],
-            &bubbleStaticLabelGraphics[bubbleIndex]);
+            HUD_INDICATOR_LABEL_CHAR_SIZE,
+            HUD_INDICATOR_LABEL_CHAR_LENGTH,
+            HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH,
+            HUD_INDICATOR_LIST_CENTER_X -
+                strlen(HUD_INDICATOR_LABELS[hudIndicatorIndex]) * HUD_INDICATOR_LABEL_CHAR_SIZE -
+                HUD_INDICATOR_OUTLINE_RADIUS - HUD_INDICATOR_OUTLINE_WIDTH / 2,
+            hudIndicatorListCurrY + HUD_INDICATOR_LABEL_CHAR_SIZE / 2,
+            HUD_INDICATOR_LABELS[hudIndicatorIndex],
+            &hudIndicatorStaticLabelGraphics[hudIndicatorIndex]);
 
-        bubbleName[2]++;
+        hudIndicatorName[2]++;
 
-        bubbleListCurrY += BUBBLE_LIST_DIST_BTWN_BULLETS;
+        hudIndicatorListCurrY += HUD_INDICATOR_LIST_DIST_BTWN_BULLETS;
     }
 }
 

@@ -89,9 +89,10 @@ ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
     nullptr,
+    &frictionWheels,
     nullptr,
     nullptr,
-    &chassisDriveCommand);
+    {&chassisDriveCommand});
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings

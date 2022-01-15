@@ -82,29 +82,29 @@ private:
     static constexpr uint16_t SCREEN_HEIGHT = 1080;
     static constexpr int32_t DELAY_PERIOD_BTWN_SENDS = 110;
 
-    // bubble indicator related constants
+    // HUD indicator related constants
 
-    static constexpr uint16_t BUBBLE_LIST_LAYER = 0;
-    static constexpr uint8_t BUBBLE_LIST_START_NAME[] = {1, 0, 0};
-    static constexpr uint16_t BUBBLE_LIST_CENTER_X = 300;
-    static constexpr uint16_t BUBBLE_LIST_START_Y = 600;
-    static constexpr uint16_t BUBBLE_LIST_DIST_BTWN_BULLETS = 50;
+    static constexpr uint16_t HUD_INDICATOR_LIST_LAYER = 0;
+    static constexpr uint8_t HUD_INDICATOR_LIST_START_NAME[] = {1, 0, 0};
+    static constexpr uint16_t HUD_INDICATOR_LIST_CENTER_X = 300;
+    static constexpr uint16_t HUD_INDICATOR_LIST_START_Y = 600;
+    static constexpr uint16_t HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
 
-    static constexpr Tx::GraphicColor BUBBLE_FILLED_COLOR = Tx::GraphicColor::GREEN;
-    static constexpr uint16_t BUBBLE_WIDTH = 17;
-    static constexpr uint16_t BUBBLE_RADIUS = 9;
+    static constexpr Tx::GraphicColor HUD_INDICATOR_FILLED_COLOR = Tx::GraphicColor::GREEN;
+    static constexpr uint16_t HUD_INDICATOR_WIDTH = 17;
+    static constexpr uint16_t HUD_INDICATOR_RADIUS = 9;
 
-    static constexpr uint8_t BUBBLE_STATIC_LIST_LAYER = 1;
-    static constexpr Tx::GraphicColor BUBBLE_OUTLINE_COLOR = Tx::GraphicColor::BLACK;
-    static constexpr uint16_t BUBBLE_OUTLINE_WIDTH = 5;
-    static constexpr uint16_t BUBBLE_OUTLINE_RADIUS = 20;
+    static constexpr uint8_t HUD_INDICATOR_STATIC_LIST_LAYER = 1;
+    static constexpr Tx::GraphicColor HUD_INDICATOR_OUTLINE_COLOR = Tx::GraphicColor::BLACK;
+    static constexpr uint16_t HUD_INDICATOR_OUTLINE_WIDTH = 5;
+    static constexpr uint16_t HUD_INDICATOR_OUTLINE_RADIUS = 20;
 
-    static constexpr Tx::GraphicColor BUBBLE_LABEL_COLOR = Tx::GraphicColor::YELLOW;
-    static constexpr uint16_t BUBBLE_LABEL_CHAR_SIZE = 15;
-    static constexpr uint16_t BUBBLE_LABEL_CHAR_LENGTH = 3;
-    static constexpr uint16_t BUBBLE_LABEL_CHAR_LINE_WIDTH = 2;
+    static constexpr Tx::GraphicColor HUD_INDICATOR_LABEL_COLOR = Tx::GraphicColor::YELLOW;
+    static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_SIZE = 15;
+    static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_LENGTH = 3;
+    static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 2;
 
-    static constexpr const char *BUBBLE_LABELS[] =
+    static constexpr const char *HUD_INDICATOR_LABELS[] =
     { "HOPP      ",
       "FRIC      ",
       "CV        ",
@@ -114,7 +114,7 @@ private:
 #endif
     };
 
-    enum BubbleIndex
+    enum HudIndicatorIndex
     {
         HOPPER_OPEN = 0,
         FRICTION_WHEELS_ON,
@@ -123,7 +123,7 @@ private:
 #if defined(TARGET_HERO)
         BALL_READY_FOR_LAUNCHING,
 #endif
-        NUM_BUBBLES,
+        NUM_HUD_INDICATORS,
     };
 
     // drive command related constants
@@ -146,7 +146,7 @@ private:
 
     static constexpr std::tuple<float, float, Tx::GraphicColor>
         TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[]{
-            std::tuple<float, float, Tx::GraphicColor>(50, 540, Tx::GraphicColor::YELLOW),  // 1 meter
+            std::tuple<float, float, Tx::GraphicColor>(50, 540, Tx::GraphicColor::YELLOW),
             std::tuple<float, float, Tx::GraphicColor>(50, 530, Tx::GraphicColor::YELLOW),
             std::tuple<float, float, Tx::GraphicColor>(50, 520, Tx::GraphicColor::YELLOW),
             std::tuple<float, float, Tx::GraphicColor>(50, 510, Tx::GraphicColor::YELLOW),
@@ -191,7 +191,7 @@ private:
      */
     tap::arch::MilliTimeout delayTimer{DELAY_PERIOD_BTWN_SENDS};
 
-    // bubble indicator related variables
+    // HUD indicator related variables
 
     /**
      * Hopper subsystem that provides information about whether or not the cover is open or closed.
@@ -214,20 +214,21 @@ private:
      * Graphic message that will represent a dot on the screen that will be present or not,
      * depending on whether or not the hopper is open or closed.
      */
-    Tx::Graphic1Message bubbleGraphics[NUM_BUBBLES];
+    Tx::Graphic1Message hudIndicatorGraphics[NUM_HUD_INDICATORS];
 
-    /** The object that will do the actual drawing of the hopper open bubble. */
-    tap::communication::serial::ref_serial_ui_wrapeprs::BooleanDrawer bubbleDrawers[NUM_BUBBLES];
+    /** The object that will do the actual drawing of the hopper open indicator. */
+    tap::communication::serial::ref_serial_ui_wrapeprs::BooleanDrawer
+        hudIndicatorDrawers[NUM_HUD_INDICATORS];
 
-    /** Use this index when iterating through the bubbleDrawers in protothreads. */
-    int bubbleIndex = 0;
+    /** Use this index when iterating through the hudIndicatorDrawers in protothreads. */
+    int hudIndicatorIndex = 0;
 
     /**
-     * Graphics associated with the the bubble graphics that do not change (labels and circles
-     * around the bubbles).
+     * Graphics associated with the the hud indicator graphics that do not change (labels and
+     * circles around the indicators).
      */
-    Tx::Graphic1Message bubbleStaticGraphics[NUM_BUBBLES];
-    Tx::GraphicCharacterMessage bubbleStaticLabelGraphics[NUM_BUBBLES];
+    Tx::Graphic1Message hudIndicatorStaticGraphics[NUM_HUD_INDICATORS];
+    Tx::GraphicCharacterMessage hudIndicatorStaticLabelGraphics[NUM_HUD_INDICATORS];
 
     // drive command related variables
 
@@ -270,10 +271,11 @@ private:
 
     modm::ResumableResult<bool> initializeNonblocking();
 
+    void updateHudIndicators();
     modm::ResumableResult<bool> updateDriveCommandMsg();
     modm::ResumableResult<bool> updateVehicleOrientation();
 
-    void initializeBubbles();
+    void initializeHudIndicators();
     void initializeReticle();
     void initializeDriveCommand();
     void initializeVehicleOrientation();
