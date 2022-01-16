@@ -24,22 +24,32 @@
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
+#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc;
 using namespace testing;
 
-#define SETUP_TEST_OBJECTS()                                                            \
+#define SETUP_TEST_OBJECTS_NO_TURRET()                                                  \
     Drivers drivers;                                                                    \
     tap::serial::RefSerial::Rx::RobotData robotData;                                    \
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));       \
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
     NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis(&drivers);                    \
-    ChassisImuDriveCommand chassisImuDriveCommand(&drivers, &chassis);
+    ChassisImuDriveCommand chassisImuDriveCommand(&drivers, &chassis, nullptr);
+
+#define SETUP_TEST_OBJECTS_TURRET()                                                     \
+    Drivers drivers;                                                                    \
+    tap::serial::RefSerial::Rx::RobotData robotData;                                    \
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));       \
+    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
+    NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers);                      \
+    NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis(&drivers);                    \
+    ChassisImuDriveCommand chassisImuDriveCommand(&drivers, &chassis, &turret);
 
 TEST(ChassisImuDriveCommand, end__sets_des_out_0)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0)).Times(2);
 
@@ -49,7 +59,7 @@ TEST(ChassisImuDriveCommand, end__sets_des_out_0)
 
 TEST(ChassisImuDriveCommand, isFinished__returns_false)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     EXPECT_FALSE(chassisImuDriveCommand.isFinished());
 }
@@ -63,7 +73,7 @@ static void setupUserInput(Drivers &drivers, float *userX, float *userY, float *
 
 TEST(ChassisImuDriveCommand, execute__normal_rotation_translation_when_imu_not_connected)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     float userX = 0, userY = 0, userR = 0;
 
@@ -101,7 +111,7 @@ TEST(
     ChassisImuDriveCommand,
     execute__imu_setpoint_initialized_if_initialize_called_with_mpu6500_not_initialized)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     float userX = 0, userY = 0, userR = 0;
     setupUserInput(drivers, &userX, &userY, &userR);
@@ -138,7 +148,7 @@ static void setupDefaultImuBehavior(aruwsrc::Drivers &drivers, float *imuYaw)
 
 TEST(ChassisImuDriveCommand, execute__imu_setpoint_target_setpoint_same_0_rotation_output)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     float userX = 0, userY = 0, userR = 0;
     float imuYaw = 0;
@@ -158,7 +168,7 @@ TEST(ChassisImuDriveCommand, execute__imu_setpoint_target_setpoint_same_0_rotati
 
 TEST(ChassisImuDriveCommand, execute__target_gt_actual_negative_rotation_output)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     float userX = 0, userY = 0, userR = 0;
     float imuYaw = 0;
@@ -179,7 +189,7 @@ TEST(ChassisImuDriveCommand, execute__target_gt_actual_negative_rotation_output)
 
 TEST(ChassisImuDriveCommand, execute__target_lt_actual_positive_rotation_output)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     float userX = 0, userY = 0, userR = 0;
     float imuYaw = 0;
@@ -200,7 +210,7 @@ TEST(ChassisImuDriveCommand, execute__target_lt_actual_positive_rotation_output)
 
 TEST(ChassisImuDriveCommand, execute__imu_yaw_changes_nonzero_rotation_output)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     float userX = 0, userY = 0, userR = 0;
     float imuYaw = 0;
@@ -221,19 +231,13 @@ TEST(ChassisImuDriveCommand, execute__imu_yaw_changes_nonzero_rotation_output)
 
 TEST(ChassisImuDriveCommand, execute__if_imu_err_very_large_imu_setpoint_updated)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     float userX = 0, userY = 0, userR = 0;
     setupUserInput(drivers, &userX, &userY, &userR);
-    ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
-        return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
-    });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
-    });
+    setupDefaultChassisBehavior(chassis);
     float imuYaw = 0;
-    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
-    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
+    setupDefaultImuBehavior(drivers, &imuYaw);
 
     // imu yaw initially 0
     chassisImuDriveCommand.initialize();
@@ -259,16 +263,11 @@ TEST(ChassisImuDriveCommand, execute__if_imu_err_very_large_imu_setpoint_updated
 
 TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_on_desired_heading)
 {
-    SETUP_TEST_OBJECTS();
+    SETUP_TEST_OBJECTS_NO_TURRET();
 
     float userX = 0, userY = 0, userR = 0;
     setupUserInput(drivers, &userX, &userY, &userR);
-    ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
-        return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
-    });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
-    });
+    setupDefaultChassisBehavior(chassis);
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
     ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
@@ -284,6 +283,32 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     float xExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
     float yExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
     tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(10));
+
+    EXPECT_CALL(chassis, setDesiredOutput(FloatEq(xExpected), FloatEq(yExpected), _));
+    chassisImuDriveCommand.execute();
+}
+
+TEST(ChassisImuDriveCommand, execute__turret_relative_when_turret_not_nullptr)
+{
+    SETUP_TEST_OBJECTS_TURRET();
+
+    float userX = 0, userY = 0, userR = 0;
+    setupUserInput(drivers, &userX, &userY, &userR);
+    setupDefaultChassisBehavior(chassis);
+    float imuYaw = 0;
+    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
+    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
+
+    chassisImuDriveCommand.initialize();
+
+    ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(45));
+    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+
+    userX = 1.0f;
+    userY = 0.0f;
+    float xExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    float yExpected = 0.0f;
+    tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(-45.0f));
 
     EXPECT_CALL(chassis, setDesiredOutput(FloatEq(xExpected), FloatEq(yExpected), _));
     chassisImuDriveCommand.execute();

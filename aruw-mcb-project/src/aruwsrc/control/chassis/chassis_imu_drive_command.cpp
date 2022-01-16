@@ -28,10 +28,14 @@
 
 namespace aruwsrc::chassis
 {
-ChassisImuDriveCommand::ChassisImuDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsystem* chassis)
+ChassisImuDriveCommand::ChassisImuDriveCommand(
+    aruwsrc::Drivers* drivers,
+    ChassisSubsystem* chassis,
+    tap::control::turret::TurretSubsystemInterface* turret)
     : tap::control::Command(),
       drivers(drivers),
       chassis(chassis),
+      turret(turret),
       rotationSetpoint(0, 0, 360)
 {
     addSubsystemRequirement(chassis);
@@ -115,13 +119,25 @@ void ChassisImuDriveCommand::execute()
         &chassisXDesiredWheelspeed,
         &chassisYDesiredWheelspeed);
 
-    // rotate X and Y depending on IMU angle so you are driving relative to the rotation you want to
-    // drive rather than the actual rotation to avoid rotation error windeup that will result in not
-    // driving straight in the long run
-    tap::algorithms::rotateVector(
-        &chassisXDesiredWheelspeed,
-        &chassisYDesiredWheelspeed,
-        modm::toRadian(angleFromDesiredRotation));
+    if (turret != nullptr && turret->isOnline())
+    {
+        // rotate X and Y based on turret angle from center so translational motion is relative
+        // to the turret
+        tap::algorithms::rotateVector(
+            &chassisXDesiredWheelspeed,
+            &chassisYDesiredWheelspeed,
+            modm::toRadian(-turret->getYawAngleFromCenter()));
+    }
+    else
+    {
+        // rotate X and Y depending on IMU angle so you are driving relative to the rotation you
+        // want (the `rotationSetpoint`) to drive rather than the actual rotation to avoid rotation
+        // error windeup that causes the chassis to not drive straight in the long run
+        tap::algorithms::rotateVector(
+            &chassisXDesiredWheelspeed,
+            &chassisYDesiredWheelspeed,
+            modm::toRadian(angleFromDesiredRotation));
+    }
 
     chassis->setDesiredOutput(
         chassisXDesiredWheelspeed,
