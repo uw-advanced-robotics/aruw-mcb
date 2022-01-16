@@ -86,8 +86,8 @@ private:
 
     static constexpr uint16_t HUD_INDICATOR_LIST_LAYER = 0;
     static constexpr uint8_t HUD_INDICATOR_LIST_START_NAME[] = {0, 0, 0};
-    static constexpr uint16_t HUD_INDICATOR_LIST_CENTER_X = 300;
-    static constexpr uint16_t HUD_INDICATOR_LIST_START_Y = 600;
+    static constexpr uint16_t HUD_INDICATOR_LIST_CENTER_X = 280;
+    static constexpr uint16_t HUD_INDICATOR_LIST_START_Y = 570;
     static constexpr uint16_t HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
 
     static constexpr Tx::GraphicColor HUD_INDICATOR_FILLED_COLOR = Tx::GraphicColor::GREEN;
@@ -99,17 +99,16 @@ private:
     static constexpr uint16_t HUD_INDICATOR_OUTLINE_WIDTH = 5;
     static constexpr uint16_t HUD_INDICATOR_OUTLINE_RADIUS = 20;
 
-    static constexpr Tx::GraphicColor HUD_INDICATOR_LABEL_COLOR = Tx::GraphicColor::YELLOW;
+    static constexpr Tx::GraphicColor HUD_INDICATOR_LABEL_COLOR = Tx::GraphicColor::ORANGE;
     static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_SIZE = 15;
-    static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_LENGTH = 3;
-    static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 2;
+    static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 3;
 
     static constexpr const char *HUD_INDICATOR_LABELS[] = {
         "SYS CALIB ",
-        "HOPP      ",
-        "FRIC      ",
-        "CV        ",
-        "AGI STATUS",
+        "HOPP ",
+        "FRIC ",
+        "CV ",
+        "AGI ",
 #if defined(TARGET_HERO)
         "BALL RDY  ",
 #endif
@@ -117,7 +116,7 @@ private:
 
     enum HudIndicatorIndex
     {
-        SYSTEMS_CALIBRATING = 0,
+        SYSTEMS_NOT_CALIBRATING = 0,
         HOPPER_OPEN,
         FRICTION_WHEELS_ON,
         CV_AIM_DATA_VALID,
@@ -135,7 +134,6 @@ private:
     static constexpr uint16_t DRIVE_COMMAND_START_X = 100;
     static constexpr uint16_t DRIVE_COMMAND_START_Y = 850;
     static constexpr uint16_t DRIVE_COMMAND_CHAR_SIZE = 30;
-    static constexpr uint16_t DRIVE_COMMAND_CHAR_LENGTH = 5;
     static constexpr uint16_t DRIVE_COMMAND_CHAR_LINE_WIDTH = 4;
 
     // reticle related constants
@@ -144,25 +142,25 @@ private:
     static constexpr uint8_t RETICLE_LINES_START_NAME[] = {2, 0, 0};
     static constexpr uint16_t RETICLE_THICKNESS = 1;
 
-    static constexpr int RETICLE_CENTER_X_OFFSET = 0;
+    static constexpr int RETICLE_CENTER_X_OFFSET = -5;
 
     static constexpr std::tuple<float, float, Tx::GraphicColor>
         TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[]{
-            std::tuple<float, float, Tx::GraphicColor>(50, 540, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(50, 530, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(50, 520, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(50, 510, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(70, 500, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(15, 440, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(15, 430, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(15, 420, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(15, 410, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(60, 400, Tx::GraphicColor::YELLOW),
-            std::tuple<float, float, Tx::GraphicColor>(10, 340, Tx::GraphicColor::RED_AND_BLUE),
-            std::tuple<float, float, Tx::GraphicColor>(10, 330, Tx::GraphicColor::RED_AND_BLUE),
-            std::tuple<float, float, Tx::GraphicColor>(10, 320, Tx::GraphicColor::RED_AND_BLUE),
-            std::tuple<float, float, Tx::GraphicColor>(10, 310, Tx::GraphicColor::RED_AND_BLUE),
-            std::tuple<float, float, Tx::GraphicColor>(50, 300, Tx::GraphicColor::RED_AND_BLUE),
+            std::tuple<float, float, Tx::GraphicColor>(50, 435, Tx::GraphicColor::YELLOW),  // 1 m
+            std::tuple<float, float, Tx::GraphicColor>(50, 430, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(70, 425, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(50, 420, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(50, 415, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(40, 410, Tx::GraphicColor::ORANGE),  // 3 m
+            std::tuple<float, float, Tx::GraphicColor>(40, 405, Tx::GraphicColor::ORANGE),
+            std::tuple<float, float, Tx::GraphicColor>(60, 400, Tx::GraphicColor::ORANGE),
+            std::tuple<float, float, Tx::GraphicColor>(40, 395, Tx::GraphicColor::ORANGE),
+            std::tuple<float, float, Tx::GraphicColor>(40, 390, Tx::GraphicColor::ORANGE),
+            std::tuple<float, float, Tx::GraphicColor>(10, 370, Tx::GraphicColor::YELLOW),  // 5 m
+            std::tuple<float, float, Tx::GraphicColor>(10, 365, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(30, 360, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(10, 355, Tx::GraphicColor::YELLOW),
+            std::tuple<float, float, Tx::GraphicColor>(10, 350, Tx::GraphicColor::YELLOW),
         };
     static constexpr size_t NUM_RETICLE_COORDINATES =
         MODM_ARRAY_SIZE(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES);
@@ -173,25 +171,28 @@ private:
     static constexpr uint8_t CHASSIS_ORIENTATION_LAYER = 4;
     static constexpr uint8_t CHASSIS_ORIENTATION_START_NAME[] = {3, 0, 0};
 
-    static constexpr uint16_t CHASSIS_CENTER_X = 1200;
-    static constexpr uint16_t CHASSIS_CENTER_Y = 150;
-    static constexpr uint16_t CHASSIS_HEIGHT = 140;
+    static constexpr uint16_t CHASSIS_CENTER_X = 1300;
+    static constexpr uint16_t CHASSIS_CENTER_Y = 100;
+    static constexpr uint16_t CHASSIS_HEIGHT = 100;
     static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_COLOR = Tx::GraphicColor::YELLOW;
     static constexpr Tx::GraphicColor CHASSIS_BARREL_COLOR = Tx::GraphicColor::WHITE;
-    static constexpr uint16_t CHASSIS_LINE_WIDTH = 100;
+    static constexpr uint16_t CHASSIS_LINE_WIDTH = 70;
     static constexpr uint16_t CHASSIS_BARREL_LINE_WIDTH = 10;
-    static constexpr uint16_t CHASSIS_BARREL_LENGTH = 130;
+    static constexpr uint16_t CHASSIS_BARREL_LENGTH = 90;
 
     // turret angles constants
 
     static constexpr uint8_t TURRET_ANGLES_LAYER = 5;
     static constexpr uint8_t TURRET_ANGLES_START_NAME[] = {4, 0, 0};
 
+    static constexpr uint32_t TURRET_ANGLES_SEND_DATA_PERIOD = 250;
     static constexpr uint16_t TURRET_ANGLES_FONT_SIZE = 10;
-    static constexpr uint16_t TURRET_ANGLES_DECIMAL_PRECISION = 1;
+    static constexpr uint16_t TURRET_ANGLES_DECIMAL_POINTS = 2;
+    static constexpr int TURRET_ANGLES_DECIMAL_PRECISION =
+        modm::pow(10, TURRET_ANGLES_DECIMAL_POINTS);
     static constexpr uint16_t TURRET_ANGLES_WIDTH = 2;
-    static constexpr uint16_t TURRET_ANGLES_START_X = 1000;
-    static constexpr uint16_t TURRET_ANGLES_START_Y = 600;
+    static constexpr uint16_t TURRET_ANGLES_START_X = 1430;
+    static constexpr uint16_t TURRET_ANGLES_START_Y = 460;
     static constexpr Tx::GraphicColor TURRET_ANGLES_COLOR = Tx::GraphicColor::ORANGE;
 
     // general variables
@@ -281,18 +282,25 @@ private:
 
     // turret pitch/yaw angles
 
-    Tx::Graphic2Message turretAnglesGraphics;
+    Tx::GraphicCharacterMessage turretAnglesGraphics;
     Tx::GraphicCharacterMessage turretAnglesLabelGraphics;
     float yaw = 0.0f;
     float pitch = 0.0f;
     float prevYaw = 0.0f;
     float prevPitch = 0.0f;
+    char pitchYawBuffer[5 + 5 + 2 + 1];
+    int bytesWritten = 0;
+    tap::arch::PeriodicMilliTimer sendTurretDataTimer{TURRET_ANGLES_SEND_DATA_PERIOD};
 
     // private functions
 
     bool run();
 
-    modm::ResumableResult<bool> initializeNonblocking();
+    /**
+     * Sends all graphics for the first time. Then, next time a graphic needs to be changed you only
+     * have to modify it, which results in less latency on the client UI side.
+     */
+    modm::ResumableResult<bool> sendInitialGraphics();
 
     modm::ResumableResult<bool> updateHudIndicators();
     modm::ResumableResult<bool> updateDriveCommandMsg();

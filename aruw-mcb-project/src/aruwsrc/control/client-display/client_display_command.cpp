@@ -35,7 +35,7 @@ using namespace aruwsrc::agitator;
 
 #define delay(graphic)                                                             \
     delayTimer.restart(RefSerialData::Tx::getWaitTimeAfterGraphicSendMs(graphic)); \
-    RF_WAIT_UNTIL(delayTimer.execute());
+    RF_WAIT_UNTIL(delayTimer.isExpired() || delayTimer.isStopped());
 
 namespace aruwsrc::display
 {
@@ -75,6 +75,7 @@ ClientDisplayCommand::ClientDisplayCommand(
 {
     addSubsystemRequirement(clientDisplay);
     hudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setBoolFalseColor(Tx::GraphicColor::PURPLISH_RED);
+    hudIndicatorDrawers[SYSTEMS_NOT_CALIBRATING].setBoolFalseColor(Tx::GraphicColor::YELLOW);
 }
 
 void ClientDisplayCommand::initialize()
@@ -84,6 +85,7 @@ void ClientDisplayCommand::initialize()
     initializeReticle();
     initializeDriveCommand();
     initializeChassisOrientation();
+    initializeTurretAngles();
 }
 
 void ClientDisplayCommand::execute() { run(); }
@@ -92,7 +94,7 @@ bool ClientDisplayCommand::run()
 {
     PT_BEGIN();
 
-    PT_CALL(initializeNonblocking());
+    PT_CALL(sendInitialGraphics());
 
     while (true)
     {
@@ -109,7 +111,7 @@ bool ClientDisplayCommand::run()
     PT_END();
 }
 
-modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
+modm::ResumableResult<bool> ClientDisplayCommand::sendInitialGraphics()
 {
     RF_BEGIN(0);
 
@@ -141,8 +143,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
 
     drivers->refSerial.sendGraphic(&turretAnglesGraphics);
     delay(&turretAnglesGraphics);
-    turretAnglesGraphics.graphicData[0].operation = Tx::ADD_GRAPHIC_MODIFY;
-    turretAnglesGraphics.graphicData[1].operation = Tx::ADD_GRAPHIC_MODIFY;
+    turretAnglesGraphics.graphicData.operation = Tx::ADD_GRAPHIC_MODIFY;
 
     drivers->refSerial.sendGraphic(&turretAnglesLabelGraphics);
     delay(&turretAnglesLabelGraphics);
@@ -174,6 +175,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateHudIndicators()
     }
 
     // TODO add hero fire ready and systems calibrating when available
+    hudIndicatorDrawers[SYSTEMS_NOT_CALIBRATING].setDrawerColor(true);
 
     for (hudIndicatorIndex = 0; hudIndicatorIndex < NUM_HUD_INDICATORS; hudIndicatorIndex++)
     {
@@ -210,7 +212,6 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
 
         drivers->refSerial.configCharacterMsg(
             DRIVE_COMMAND_CHAR_SIZE,
-            DRIVE_COMMAND_CHAR_LENGTH,
             DRIVE_COMMAND_CHAR_LINE_WIDTH,
             DRIVE_COMMAND_START_X,
             DRIVE_COMMAND_START_Y,
@@ -259,20 +260,27 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateTurretAngles()
 
     if (turretSubsystem != nullptr)
     {
-        yaw = turretSubsystem->getCurrentYawValue().getValue();
+        yaw = drivers->turretMCBCanComm.getYaw();
+#if defined(TARGET_HERO)
         pitch = turretSubsystem->getCurrentPitchValue().getValue();
+#else
+        pitch = drivers->turretMCBCanComm.getPitch();
+#endif
 
-        if (!compareFloatClose(
-                prevYaw,
-                yaw,
-                1.0f / modm::pow(10, TURRET_ANGLES_DECIMAL_PRECISION)) ||
-            !compareFloatClose(
-                prevPitch,
-                pitch,
-                1.0f / modm::pow(10.0f, TURRET_ANGLES_DECIMAL_PRECISION)))
+        if (sendTurretDataTimer.execute() &&
+            (!compareFloatClose(prevYaw, yaw, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION) ||
+             !compareFloatClose(prevPitch, pitch, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION)))
         {
-            turretAnglesGraphics.graphicData[0].value = 1000.0f * yaw;
-            turretAnglesGraphics.graphicData[1].value = 1000.0f * pitch;
+            bytesWritten = sprintf(
+                turretAnglesGraphics.msg,
+                "%i.%i\n\n%i.%i",
+                static_cast<int>(yaw),
+                abs(static_cast<int>(yaw * TURRET_ANGLES_DECIMAL_PRECISION) %
+                    TURRET_ANGLES_DECIMAL_PRECISION),
+                static_cast<int>(pitch),
+                abs(static_cast<int>(pitch * TURRET_ANGLES_DECIMAL_PRECISION) %
+                    TURRET_ANGLES_DECIMAL_PRECISION));
+            turretAnglesGraphics.graphicData.endAngle = bytesWritten;
 
             drivers->refSerial.sendGraphic(&turretAnglesGraphics);
             delay(&turretAnglesGraphics);
@@ -335,7 +343,6 @@ void ClientDisplayCommand::initializeHudIndicators()
 
         RefSerial::configCharacterMsg(
             HUD_INDICATOR_LABEL_CHAR_SIZE,
-            HUD_INDICATOR_LABEL_CHAR_LENGTH,
             HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH,
             HUD_INDICATOR_LIST_CENTER_X -
                 strlen(HUD_INDICATOR_LABELS[hudIndicatorIndex]) * HUD_INDICATOR_LABEL_CHAR_SIZE -
@@ -430,7 +437,6 @@ void ClientDisplayCommand::initializeDriveCommand()
 
     drivers->refSerial.configCharacterMsg(
         DRIVE_COMMAND_CHAR_SIZE,
-        DRIVE_COMMAND_CHAR_LENGTH,
         DRIVE_COMMAND_CHAR_LINE_WIDTH,
         DRIVE_COMMAND_START_X,
         DRIVE_COMMAND_START_Y,
@@ -491,38 +497,21 @@ void ClientDisplayCommand::initializeTurretAngles()
         memcpy(turretAnglesName, TURRET_ANGLES_START_NAME, sizeof(turretAnglesName));
 
         RefSerial::configGraphicGenerics(
-            &turretAnglesGraphics.graphicData[0],
+            &turretAnglesGraphics.graphicData,
             turretAnglesName,
             Tx::ADD_GRAPHIC,
             TURRET_ANGLES_LAYER,
             TURRET_ANGLES_COLOR);
 
-        RefSerial::configFloatingNumber(
+        RefSerial::configCharacterMsg(
             TURRET_ANGLES_FONT_SIZE,
-            TURRET_ANGLES_DECIMAL_PRECISION,
             TURRET_ANGLES_WIDTH,
             TURRET_ANGLES_START_X,
             TURRET_ANGLES_START_Y,
-            0,
-            &turretAnglesGraphics.graphicData[0]);
+            "0\n\n0",
+            &turretAnglesGraphics);
 
-        turretAnglesName[0]++;
-
-        RefSerial::configGraphicGenerics(
-            &turretAnglesGraphics.graphicData[0],
-            turretAnglesName,
-            Tx::ADD_GRAPHIC,
-            TURRET_ANGLES_LAYER,
-            TURRET_ANGLES_COLOR);
-
-        RefSerial::configFloatingNumber(
-            TURRET_ANGLES_FONT_SIZE,
-            TURRET_ANGLES_DECIMAL_PRECISION,
-            TURRET_ANGLES_WIDTH,
-            TURRET_ANGLES_START_X,
-            TURRET_ANGLES_START_Y + TURRET_ANGLES_FONT_SIZE,
-            0,
-            &turretAnglesGraphics.graphicData[1]);
+        turretAnglesName[2]++;
 
         RefSerial::configGraphicGenerics(
             &turretAnglesLabelGraphics.graphicData,
@@ -533,11 +522,10 @@ void ClientDisplayCommand::initializeTurretAngles()
 
         RefSerial::configCharacterMsg(
             TURRET_ANGLES_FONT_SIZE,
-            1,  // TODO check this
             TURRET_ANGLES_WIDTH,
-            TURRET_ANGLES_START_X - strlen("PITCH") * TURRET_ANGLES_FONT_SIZE,
+            TURRET_ANGLES_START_X - strlen("PITCH: ") * TURRET_ANGLES_FONT_SIZE,
             TURRET_ANGLES_START_Y,
-            "PITCH\nYAW  ",
+            "  YAW:\n\nPITCH:",
             &turretAnglesLabelGraphics);
 
         prevYaw = 0.0f;

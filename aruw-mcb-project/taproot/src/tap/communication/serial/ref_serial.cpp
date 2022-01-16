@@ -465,7 +465,7 @@ void RefSerial::configFloatingNumber(
     sharedData->lineWidth = width;
     sharedData->startX = startX;
     sharedData->startY = startY;
-    sharedData->value = static_cast<int32_t>(1000 * value);
+    sharedData->value = 1000 * value;
 }
 
 void RefSerial::configInteger(
@@ -478,16 +478,15 @@ void RefSerial::configInteger(
 {
     sharedData->type = static_cast<uint8_t>(Tx::GraphicType::INTEGER);
     sharedData->startAngle = fontSize;
+    sharedData->endAngle = 0;
     sharedData->lineWidth = width;
     sharedData->startX = startX;
     sharedData->startY = startY;
-    // Do this janky stuff to get an int in a bitfield
     sharedData->value = value;
 }
 
 void RefSerial::configCharacterMsg(
     uint16_t fontSize,
-    uint16_t charLen,
     uint16_t width,
     uint16_t startX,
     uint16_t startY,
@@ -496,7 +495,7 @@ void RefSerial::configCharacterMsg(
 {
     sharedData->graphicData.type = static_cast<uint8_t>(Tx::GraphicType::CHARACTER);
     sharedData->graphicData.startAngle = fontSize;
-    sharedData->graphicData.endAngle = charLen;
+    sharedData->graphicData.endAngle = strlen(dataToPrint);
     sharedData->graphicData.lineWidth = width;
     sharedData->graphicData.startX = startX;
     sharedData->graphicData.startY = startY;
