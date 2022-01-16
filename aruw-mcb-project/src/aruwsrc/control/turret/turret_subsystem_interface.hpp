@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/control/subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::turret
 {

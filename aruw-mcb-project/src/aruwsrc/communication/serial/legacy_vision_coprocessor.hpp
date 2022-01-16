@@ -46,8 +46,6 @@ class TurretSubsystemInterface;
 }
 }  // namespace control
 
-namespace aruwsrc
-{
 namespace serial
 {
 /**
