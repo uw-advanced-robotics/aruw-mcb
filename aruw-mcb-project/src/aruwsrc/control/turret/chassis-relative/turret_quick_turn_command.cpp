@@ -26,7 +26,7 @@
 namespace aruwsrc::control::turret
 {
 TurretQuickTurnCommand::TurretQuickTurnCommand(
-    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem,
+    TurretSubsystemInterface *turretSubsystem,
     const float targetOffsetToTurn)
     : turretSubsystem(turretSubsystem),
       targetOffsetToTurn(targetOffsetToTurn)

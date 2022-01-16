@@ -36,7 +36,7 @@ class TurretSetpointCommand : public tap::control::Command
 public:
     TurretSetpointCommand(
         aruwsrc::Drivers *drivers,
-        aruwsrc::control::turret::TurretSubsystemInterface *turret,
+        TurretSubsystemInterface *turret,
         const float yawInputScalar,
         const float pitchInputScalar);
 
@@ -55,7 +55,7 @@ public:
 private:
     aruwsrc::Drivers *drivers;
 
-    aruwsrc::control::turret::TurretSubsystemInterface *turret;
+    TurretSubsystemInterface *turret;
 
     const float yawInputScalar;
     const float pitchInputScalar;

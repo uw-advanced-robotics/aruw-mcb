@@ -62,7 +62,7 @@ public:
         const float chassisFrameInitImuYawAngle,
         tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
         tap::algorithms::SmoothPid *yawPid,
-        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
+        TurretSubsystemInterface *turretSubsystem);
 
     /**
      * Updates the `worldFrameYawSetpoint` and runs a world frame cascade PID controller using the
@@ -93,7 +93,7 @@ public:
         tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
         tap::algorithms::SmoothPid *yawPositionPid,
         tap::algorithms::SmoothPid *yawVelocityPid,
-        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
+        TurretSubsystemInterface *turretSubsystem);
 };
 }  // namespace aruwsrc::control::turret
 

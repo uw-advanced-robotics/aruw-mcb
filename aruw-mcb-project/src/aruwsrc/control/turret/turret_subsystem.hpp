@@ -48,7 +48,7 @@ namespace aruwsrc::control::turret
  * Stores software necessary for interacting with two gimbals that control the pitch and
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
  */
-class TurretSubsystem : public aruwsrc::control::turret::TurretSubsystemInterface
+class TurretSubsystem : public TurretSubsystemInterface
 {
 public:
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;

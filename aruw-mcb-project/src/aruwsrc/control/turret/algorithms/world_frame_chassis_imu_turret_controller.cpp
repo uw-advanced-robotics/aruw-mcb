@@ -86,7 +86,7 @@ static inline void updateYawWorldFrameSetpoint(
     const float chassisFrameInitImuYawAngle,
     const float chassisFrameImuYawAngle,
     tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
+    TurretSubsystemInterface *turretSubsystem)
 {
     worldFrameYawSetpoint->setValue(desiredSetpoint);
 
@@ -114,7 +114,7 @@ void WorldFrameChassisImuTurretController::runYawPidController(
     const float chassisFrameInitImuYawAngle,
     tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
     tap::algorithms::SmoothPid *yawPid,
-    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
+    TurretSubsystemInterface *turretSubsystem)
 {
     const float chassisFrameImuYawAngle = drivers.mpu6500.getYaw();
 
@@ -148,7 +148,7 @@ void WorldFrameChassisImuTurretController::runYawCascadePidController(
     tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
     tap::algorithms::SmoothPid *yawPositionPid,
     tap::algorithms::SmoothPid *yawVelocityPid,
-    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
+    TurretSubsystemInterface *turretSubsystem)
 {
     const float chassisFrameImuYawAngle = drivers.mpu6500.getYaw();
     const float worldFrameYawVelocity = turretSubsystem->getYawVelocity() + drivers.mpu6500.getGz();

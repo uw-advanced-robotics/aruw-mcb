@@ -27,7 +27,7 @@ namespace aruwsrc::control::turret
 {
 TurretChassisRelativeCommand::TurretChassisRelativeCommand(
     aruwsrc::Drivers *drivers,
-    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
+    TurretSubsystemInterface *turretSubsystem)
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawPid(

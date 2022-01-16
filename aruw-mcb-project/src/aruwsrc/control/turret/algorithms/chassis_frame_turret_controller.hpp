@@ -55,7 +55,7 @@ public:
         const float turretCGZ,
         const float gravityCompensationMotorOutputMax,
         tap::algorithms::SmoothPid *pid,
-        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
+        TurretSubsystemInterface *turretSubsystem);
 
     /**
      * Runs a chassis frame cascade PID controller to control the pitch axis
@@ -84,7 +84,7 @@ public:
         const float gravityCompensationMotorOutputMax,
         tap::algorithms::SmoothPid *positionPid,
         tap::algorithms::SmoothPid *velocityPid,
-        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
+        TurretSubsystemInterface *turretSubsystem);
 
     /**
      * Runs a chassis frame position PID controller to control the yaw axis
@@ -102,7 +102,7 @@ public:
         const uint32_t dt,
         const float desiredSetpoint,
         tap::algorithms::SmoothPid *pid,
-        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
+        TurretSubsystemInterface *turretSubsystem);
 
     /**
      * Runs a chassis frame cascade PID controller to control the yaw axis
@@ -124,7 +124,7 @@ public:
         const float desiredSetpoint,
         tap::algorithms::SmoothPid *positionPid,
         tap::algorithms::SmoothPid *velocityPid,
-        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
+        TurretSubsystemInterface *turretSubsystem);
 };
 }  // namespace aruwsrc::control::turret
 
