@@ -41,7 +41,11 @@ public:
     MOCK_METHOD(void, stopAutoAim, (), (override));
     MOCK_METHOD(const TurretAimData &, getLastAimData, (), (const override));
     MOCK_METHOD(bool, lastAimDataValid, (), (const override));
-    MOCK_METHOD(void, attachTurret, (aruwsrc::control::turret::TurretSubsystemInterface *), (override));
+    MOCK_METHOD(
+        void,
+        attachTurret,
+        (aruwsrc::control::turret::TurretSubsystemInterface *),
+        (override));
     MOCK_METHOD(
         void,
         attachChassis,
