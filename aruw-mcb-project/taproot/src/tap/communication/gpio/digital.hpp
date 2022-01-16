@@ -56,6 +56,7 @@ public:
         B,
         C,
         D,
+        Button,
     };
 
     /**
