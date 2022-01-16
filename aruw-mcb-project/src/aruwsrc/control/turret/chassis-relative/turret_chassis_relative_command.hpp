@@ -48,7 +48,7 @@ class TurretChassisRelativeCommand : public tap::control::Command
 public:
     TurretChassisRelativeCommand(
         aruwsrc::Drivers *drivers,
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem);
+        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
 
     bool isReady() override;
 
@@ -133,7 +133,7 @@ private:
     static constexpr float USER_PITCH_INPUT_SCALAR = 1.0f;
 
     aruwsrc::Drivers *drivers;
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem;
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem;
 
     uint32_t prevTime = 0;
 

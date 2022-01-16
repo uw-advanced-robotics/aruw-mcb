@@ -50,7 +50,7 @@ public:
      *      will be updated to when this command is run.
      */
     TurretQuickTurnCommand(
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem,
+        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem,
         const float targetOffsetToTurn);
 
     bool isReady() override;
@@ -66,7 +66,7 @@ public:
     void end(bool) override {}
 
 private:
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem;
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem;
     const float targetOffsetToTurn;
 };
 }  // namespace aruwsrc::control::turret

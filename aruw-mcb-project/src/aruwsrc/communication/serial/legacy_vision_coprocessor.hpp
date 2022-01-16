@@ -33,20 +33,18 @@ class LegacyVisionCoprocessorTester;
 namespace aruwsrc
 {
 class Drivers;
-}
 
-namespace tap
+namespace control
 {
-namespace control::turret
-{
-class TurretSubsystemInterface;
-}
-
-namespace control::chassis
+namespace chassis
 {
 class ChassisSubsystemInterface;
 }
-}  // namespace tap
+namespace turret
+{
+class TurretSubsystemInterface;
+}
+}
 
 namespace aruwsrc
 {
@@ -123,7 +121,7 @@ public:
 
     mockable inline bool lastAimDataValid() const { return aimDataValid; }
 
-    mockable inline void attachTurret(tap::control::turret::TurretSubsystemInterface* turret)
+    mockable inline void attachTurret(control::turret::TurretSubsystemInterface* turret)
     {
         turretSub = turret;
     }
@@ -192,7 +190,7 @@ private:
     /// A flag set to `true` if the timeout is not expired, and `false` otherwise.
     bool isCvOnline;
 
-    const tap::control::turret::TurretSubsystemInterface* turretSub;
+    const aruwsrc::control::turret::TurretSubsystemInterface* turretSub;
     const tap::control::chassis::ChassisSubsystemInterface* chassisSub;
 
     /**

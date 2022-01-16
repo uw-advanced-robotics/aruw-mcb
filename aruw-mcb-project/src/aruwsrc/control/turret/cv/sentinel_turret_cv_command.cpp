@@ -34,7 +34,7 @@ namespace aruwsrc::control::turret
 {
 SentinelTurretCVCommand::SentinelTurretCVCommand(
     aruwsrc::Drivers *drivers,
-    tap::control::turret::TurretSubsystemInterface *sentinelTurret,
+    aruwsrc::control::turret::TurretSubsystemInterface *sentinelTurret,
     aruwsrc::agitator::AgitatorSubsystem *agitator)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),

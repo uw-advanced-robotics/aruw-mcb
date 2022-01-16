@@ -65,7 +65,7 @@ public:
 
     SentinelTurretCVCommand(
         aruwsrc::Drivers *drivers,
-        tap::control::turret::TurretSubsystemInterface *sentinelTurret,
+        aruwsrc::control::turret::TurretSubsystemInterface *sentinelTurret,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem);
 
     bool isReady() override;
@@ -111,7 +111,7 @@ private:
 
     aruwsrc::Drivers *drivers;
 
-    tap::control::turret::TurretSubsystemInterface *sentinelTurret;
+    aruwsrc::control::turret::TurretSubsystemInterface *sentinelTurret;
 
     aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitator;
 

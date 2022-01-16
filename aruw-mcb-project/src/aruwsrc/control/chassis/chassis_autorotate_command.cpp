@@ -38,7 +38,7 @@ namespace chassis
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const tap::control::turret::TurretSubsystemInterface* turret,
+    const aruwsrc::control::turret::TurretSubsystemInterface* turret,
     bool chassisFrontBackIdentical)
     : drivers(drivers),
       chassis(chassis),
@@ -52,7 +52,7 @@ ChassisAutorotateCommand::ChassisAutorotateCommand(
 void ChassisAutorotateCommand::initialize() {}
 
 void ChassisAutorotateCommand::updateAutorotateState(
-    const tap::control::turret::TurretSubsystemInterface* turret)
+    const aruwsrc::control::turret::TurretSubsystemInterface* turret)
 {
     float turretYawActualSetpointDiff =
         abs(turret->getCurrentYawValue().difference(turret->getYawSetpoint()));

@@ -61,7 +61,7 @@ public:
         const float desiredSetpoint,
         tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
         tap::algorithms::SmoothPid *yawPid,
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem);
+        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
 
     /**
      * Updates the `worldFrameYawSetpoint` based on the desiredSetpoint and runs a cascade
@@ -88,7 +88,7 @@ public:
         tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
         tap::algorithms::SmoothPid *yawPositionPid,
         tap::algorithms::SmoothPid *yawVelocityPid,
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem);
+        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
 
     /**
      * Updates the `worldFramePitchSetpoint` based on the desiredSetpoint and runs a position
@@ -126,7 +126,7 @@ public:
         const float gravityCompensationMotorOutputMax,
         tap::algorithms::ContiguousFloat *worldFramePitchSetpoint,
         tap::algorithms::SmoothPid *pitchPid,
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem);
+        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
 
     /**
      * Updates the `worldFramePitchSetpoint` based on the desiredSetpoint and runs a cascade
@@ -163,7 +163,7 @@ public:
         tap::algorithms::ContiguousFloat *worldFramePitchSetpoint,
         tap::algorithms::SmoothPid *pitchPositionPid,
         tap::algorithms::SmoothPid *pitchVelocityPid,
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem);
+        aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem);
 
     /**
      * Transforms the specified `angleToTransform`, a yaw/pitch angle from the chassis frame to the

@@ -40,7 +40,7 @@ TurretSubsystem::TurretSubsystem(
     MotorInterface *pitchMotor,
     MotorInterface *yawMotor,
     bool limitYaw)
-    : tap::control::turret::TurretSubsystemInterface(drivers),
+    : aruwsrc::control::turret::TurretSubsystemInterface(drivers),
       currPitchAngle(PITCH_START_ANGLE, 0.0f, 360.0f),
       currYawAngle(YAW_START_ANGLE, 0.0f, 360.0f),
       pitchEncoderWhenLastUpdated(PITCH_START_ENCODER_POSITION),

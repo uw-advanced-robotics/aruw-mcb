@@ -45,7 +45,7 @@ public:
     ChassisAutorotateCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const tap::control::turret::TurretSubsystemInterface* turret,
+        const aruwsrc::control::turret::TurretSubsystemInterface* turret,
         bool chassisFrontBackIdentical = false);
 
     void initialize() override;
@@ -67,7 +67,7 @@ public:
 private:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const tap::control::turret::TurretSubsystemInterface* turret;
+    const aruwsrc::control::turret::TurretSubsystemInterface* turret;
     /**
      * If the front and back of the chassis may be treated as the same entities.
      * This only matters if your turret can spin 360 degrees and will allow the

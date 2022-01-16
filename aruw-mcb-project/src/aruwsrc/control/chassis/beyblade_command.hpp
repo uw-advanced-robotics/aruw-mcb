@@ -43,7 +43,7 @@ public:
     BeybladeCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const tap::control::turret::TurretSubsystemInterface* turret);
+        const aruwsrc::control::turret::TurretSubsystemInterface* turret);
 
     // fractional multiplier for user input and maximum motor speed to calculate desired x and y
     // speeds
@@ -110,7 +110,7 @@ private:
 
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const tap::control::turret::TurretSubsystemInterface* turret;
+    const aruwsrc::control::turret::TurretSubsystemInterface* turret;
 
     float getRotationTarget() const;
 };  // class BeybladeCommand

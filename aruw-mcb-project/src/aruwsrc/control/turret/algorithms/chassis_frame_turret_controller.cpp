@@ -32,7 +32,7 @@ void ChassisFrameTurretController::runPitchPidController(
     const float turretCGZ,
     const float gravityCompensationMotorOutputMax,
     tap::algorithms::SmoothPid *pid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     // limit the yaw min and max angles
     turretSubsystem->setPitchSetpoint(desiredSetpoint);
@@ -61,7 +61,7 @@ void ChassisFrameTurretController::runPitchCascadePidController(
     const float gravityCompensationMotorOutputMax,
     tap::algorithms::SmoothPid *positionPid,
     tap::algorithms::SmoothPid *velocityPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     // limit the yaw min and max angles
     turretSubsystem->setPitchSetpoint(desiredSetpoint);
@@ -92,7 +92,7 @@ void ChassisFrameTurretController::runYawPidController(
     const uint32_t dt,
     const float desiredSetpoint,
     tap::algorithms::SmoothPid *pid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     // limit the yaw min and max angles
     turretSubsystem->setYawSetpoint(desiredSetpoint);
@@ -112,7 +112,7 @@ void ChassisFrameTurretController::runYawCascadePidController(
     const float desiredSetpoint,
     tap::algorithms::SmoothPid *positionPid,
     tap::algorithms::SmoothPid *velocityPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     // limit the yaw min and max angles
     turretSubsystem->setYawSetpoint(desiredSetpoint);

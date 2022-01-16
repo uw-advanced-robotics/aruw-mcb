@@ -47,7 +47,7 @@ public:
     WiggleDriveCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const tap::control::turret::TurretSubsystemInterface* turret);
+        const aruwsrc::control::turret::TurretSubsystemInterface* turret);
 
     void initialize() override;
 
@@ -96,7 +96,7 @@ private:
 
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const tap::control::turret::TurretSubsystemInterface* turret;
+    const aruwsrc::control::turret::TurretSubsystemInterface* turret;
 
     tap::algorithms::Ramp rotationSpeedRamp;
 

@@ -48,7 +48,7 @@ static inline void updateYawWorldFrameSetpoint(
     const float chassisFrameYaw,
     const float worldFrameYawAngle,
     tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     worldFrameYawSetpoint->setValue(desiredSetpoint);
 
@@ -78,7 +78,7 @@ void WorldFrameTurretImuTurretController::runYawPidController(
     const float desiredSetpoint,
     tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
     tap::algorithms::SmoothPid *yawPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
     const float worldFrameYawAngle = drivers.turretMCBCanComm.getYaw();
@@ -107,7 +107,7 @@ void WorldFrameTurretImuTurretController::runYawCascadePidController(
     tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
     tap::algorithms::SmoothPid *yawPositionPid,
     tap::algorithms::SmoothPid *yawVelocityPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
     const float worldFrameYawAngle = drivers.turretMCBCanComm.getYaw();
@@ -156,7 +156,7 @@ static inline void updatePitchWorldFrameSetpoint(
     const float desiredSetpoint,
     const float worldFramePitchAngle,
     tap::algorithms::ContiguousFloat *worldFramePitchSetpoint,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     worldFramePitchSetpoint->setValue(desiredSetpoint);
 
@@ -168,7 +168,7 @@ static inline void updatePitchWorldFrameSetpoint(
             worldFramePitchAngle,
             worldFramePitchSetpoint->getValue()));
 
-    // Project angle limited by the tap::control::turret::TurretSubsystemInterface back to world
+    // Project angle limited by the aruwsrc::control::turret::TurretSubsystemInterface back to world
     // relative to use the value
     worldFramePitchSetpoint->setValue(
         WorldFrameTurretImuTurretController::transformChassisFrameToWorldFrame(
@@ -186,7 +186,7 @@ void WorldFrameTurretImuTurretController::runPitchPidController(
     const float gravityCompensationMotorOutputMax,
     tap::algorithms::ContiguousFloat *worldFramePitchSetpoint,
     tap::algorithms::SmoothPid *pitchPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     const float turretWorldFramePitchAngle = drivers.turretMCBCanComm.getPitch();
     const float turretWorldFramePitchVelocity = drivers.turretMCBCanComm.getPitchVelocity();
@@ -223,7 +223,7 @@ void WorldFrameTurretImuTurretController::runPitchCascadePidController(
     tap::algorithms::ContiguousFloat *worldFramePitchSetpoint,
     tap::algorithms::SmoothPid *pitchPositionPid,
     tap::algorithms::SmoothPid *pitchVelocityPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    aruwsrc::control::turret::TurretSubsystemInterface *turretSubsystem)
 {
     const float worldFramePitchAngle = drivers.turretMCBCanComm.getPitch();
     const float worldFramePitchVelocity = drivers.turretMCBCanComm.getPitchVelocity();

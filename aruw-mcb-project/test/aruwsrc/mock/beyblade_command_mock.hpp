@@ -35,7 +35,7 @@ public:
     BeybladeCommandMock(
         aruwsrc::Drivers *drivers,
         chassis::ChassisSubsystem *chassis,
-        tap::control::turret::TurretSubsystemInterface *turret);
+        aruwsrc::control::turret::TurretSubsystemInterface *turret);
 
     virtual ~BeybladeCommandMock();
 
