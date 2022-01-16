@@ -45,9 +45,26 @@ class ChassisSubsystem;
 class ChassisImuDriveCommand : public tap::control::Command
 {
 public:
+    /**
+     * The value to scale the rotation as specified by `controlOperatorInterface.getChassisRInput()`
+     * by.
+     */
     static constexpr float USER_INPUT_TO_ANGLE_DELTA_SCALAR = 1.0f;
+    /**
+     * Maximum error between the actual IMU angle and target angle specified by the user. We cap the
+     * rotation error to avoid issues that occur if the robot is picked up, turned around, and
+     * placed back. Without limiting the rotation error, the error will be very large and the robot
+     * will spin around in an attempt to reach the original setpoint. Instead, the error will only
+     * be `MAX_ROTATION_ERR`.
+     */
     static constexpr float MAX_ROTATION_ERR = 30.0f;
 
+    /**
+     * Constructs a ChassisImuDriveCommand that will control `chassis`.
+     *
+     * @param[in] drivers A pointer to the global drivers object.
+     * @param[in] chassis A `ChassisSubsystem` that this command will control.
+     */
     ChassisImuDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsystem* chassis);
 
     void initialize() override;
