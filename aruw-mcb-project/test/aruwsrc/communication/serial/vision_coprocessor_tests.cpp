@@ -75,15 +75,15 @@ static void initAndRunAutoAimRxTest(
     message.type = 0;
     message.length = serial.AIM_DATA_MESSAGE_SIZE;
 
-    message.data[serial.AIM_DATA_MESSAGE_X_POSITION_OFFSET] = reinterpretFloatAsInt(xPosDesired);
-    message.data[serial.AIM_DATA_MESSAGE_Y_POSITION_OFFSET] = reinterpretFloatAsInt(yPosDesired);
-    message.data[serial.AIM_DATA_MESSAGE_Z_POSITION_OFFSET] = reinterpretFloatAsInt(zPosDesired);
-    message.data[serial.AIM_DATA_MESSAGE_X_VELOCITY_OFFSET] = reinterpretFloatAsInt(xVelDesired);
-    message.data[serial.AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET] = reinterpretFloatAsInt(yVelDesired);
-    message.data[serial.AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET] = reinterpretFloatAsInt(zVelDesired);
-    message.data[serial.AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET] = reinterpretFloatAsInt(xAccDesired);
-    message.data[serial.AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET] = reinterpretFloatAsInt(yAccDesired);
-    message.data[serial.AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET] = reinterpretFloatAsInt(zAccDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_X_POSITION_OFFSET]) = reinterpretFloatAsInt(xPosDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_Y_POSITION_OFFSET]) = reinterpretFloatAsInt(yPosDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_Z_POSITION_OFFSET]) = reinterpretFloatAsInt(zPosDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_X_VELOCITY_OFFSET]) = reinterpretFloatAsInt(xVelDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET]) = reinterpretFloatAsInt(yVelDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET]) = reinterpretFloatAsInt(zVelDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET]) = reinterpretFloatAsInt(xAccDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET]) = reinterpretFloatAsInt(yAccDesired);
+    *reinterpret_cast<uint32_t *>(message.data[serial.AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET]) = reinterpretFloatAsInt(zAccDesired);
     message.data[serial.AIM_DATA_MESSAGE_HAS_TARGET_OFFSET] = static_cast<uint8_t>(hasTarget);
     message.messageTimestamp = 1234;
 
@@ -112,6 +112,13 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_zeros)
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_has_target)
 {
     initAndRunAutoAimRxTest(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, true);
+}
+
+TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_endian_symmetric)
+{
+    uint32_t bytes = 0x42488424;
+    float symmetric = *reinterpret_cast<float *>(&bytes);
+    initAndRunAutoAimRxTest(symmetric, symmetric, symmetric, symmetric, symmetric, symmetric, symmetric, symmetric, symmetric, false);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
