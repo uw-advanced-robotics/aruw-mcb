@@ -44,7 +44,7 @@ namespace turret
 {
 class TurretSubsystemInterface;
 }
-}
+}  // namespace control
 
 namespace aruwsrc
 {

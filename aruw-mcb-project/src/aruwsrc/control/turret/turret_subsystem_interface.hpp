@@ -103,6 +103,6 @@ public:
      */
     virtual bool yawLimited() const = 0;
 };
-}  // namespace tap::control::turret
+}  // namespace aruwsrc::control::turret
 
 #endif  // TURRET_SUBSYSTEM_INTERFACE_

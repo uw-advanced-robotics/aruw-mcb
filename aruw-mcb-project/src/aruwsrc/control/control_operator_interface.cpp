@@ -37,14 +37,12 @@ float ControlOperatorInterface::getChassisXInput()
 
     if (prevUpdateCounterX != updateCounter)
     {
-        chassisXInput.update(
-            drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL),
-            currTime);
+        chassisXInput.update(drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL), currTime);
         prevUpdateCounterX = updateCounter;
     }
 
-    int16_t input = drivers->remote.keyPressed(Remote::Key::W) -
-                    drivers->remote.keyPressed(Remote::Key::S);
+    int16_t input =
+        drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
 
     // Note for readability: chassisXKeyInputFiltered = The most recently filtered value computed by
     // this function (which we update below)
@@ -93,8 +91,8 @@ float ControlOperatorInterface::getChassisYInput()
         prevUpdateCounterY = updateCounter;
     }
 
-    int16_t input = drivers->remote.keyPressed(Remote::Key::D) -
-                    drivers->remote.keyPressed(Remote::Key::A);
+    int16_t input =
+        drivers->remote.keyPressed(Remote::Key::D) - drivers->remote.keyPressed(Remote::Key::A);
 
     // Note for readability: chassisYKeyInputFiltered = The most recently filtered value computed by
     // this function (which we update below)
@@ -145,8 +143,7 @@ float ControlOperatorInterface::getChassisRInput()
 
     chassisRKeyInputFiltered = algorithms::lowPassFilter(
         chassisRKeyInputFiltered,
-        drivers->remote.keyPressed(Remote::Key::Q) -
-            drivers->remote.keyPressed(Remote::Key::E),
+        drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E),
         CHASSIS_R_KEY_INPUT_FILTER_ALPHA);
 
     return algorithms::limitVal<float>(
