@@ -25,7 +25,6 @@
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/control/turret/commands/turret_setpoint_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
@@ -38,6 +37,7 @@
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "sentinel/firing/sentinel_rotate_agitator_command.hpp"
 #include "turret/chassis-relative/turret_chassis_relative_command.hpp"
+#include "turret/chassis-relative/turret_setpoint_command.hpp"
 #include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
 

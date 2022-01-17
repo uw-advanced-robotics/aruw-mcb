@@ -22,7 +22,7 @@
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
-#include "tap/control/turret/turret_subsystem_interface.hpp"
+#include "tap/control/turret_subsystem_interface.hpp"
 
 namespace aruwsrc
 {

@@ -1,32 +1,33 @@
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
- * This file is part of Taproot.
+ * This file is part of aruw-mcb.
  *
- * Taproot is free software: you can redistribute it and/or modify
+ * aruw-mcb is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Taproot is distributed in the hope that it will be useful,
+ * aruw-mcb is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "control_operator_interface.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/drivers.hpp"
 
-using namespace tap;
+#include "aruwsrc/drivers.hpp"
+
 using namespace tap::algorithms;
+using tap::Remote;
 
-namespace tap
+namespace aruwsrc
 {
 namespace control
 {
@@ -49,14 +50,12 @@ float ControlOperatorInterface::getChassisXInput()
     if (abs(chassisXKeyInputFiltered) < CHASSIS_X_KEY_INPUT_FILTER_CHANGE_THRESHOLD ||
         abs(input) <= abs(chassisXKeyInputFiltered))
     {
-        chassisXKeyInputFiltered = algorithms::lowPassFilter(
-            chassisXKeyInputFiltered,
-            input,
-            CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX);
+        chassisXKeyInputFiltered =
+            lowPassFilter(chassisXKeyInputFiltered, input, CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX);
     }
     else
     {
-        chassisXKeyInputFiltered = algorithms::lowPassFilter(
+        chassisXKeyInputFiltered = lowPassFilter(
             chassisXKeyInputFiltered,
             input,
             abs(chassisXKeyInputFiltered / input) * CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX);
@@ -99,14 +98,12 @@ float ControlOperatorInterface::getChassisYInput()
     if (abs(chassisYKeyInputFiltered) < CHASSIS_Y_KEY_INPUT_FILTER_CHANGE_THRESHOLD ||
         abs(input) <= abs(chassisYKeyInputFiltered))
     {
-        chassisYKeyInputFiltered = algorithms::lowPassFilter(
-            chassisYKeyInputFiltered,
-            input,
-            CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX);
+        chassisYKeyInputFiltered =
+            lowPassFilter(chassisYKeyInputFiltered, input, CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX);
     }
     else
     {
-        chassisYKeyInputFiltered = algorithms::lowPassFilter(
+        chassisYKeyInputFiltered = lowPassFilter(
             chassisYKeyInputFiltered,
             input,
             abs(chassisYKeyInputFiltered / input) * CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX);
@@ -141,7 +138,7 @@ float ControlOperatorInterface::getChassisRInput()
         prevUpdateCounterR = updateCounter;
     }
 
-    chassisRKeyInputFiltered = algorithms::lowPassFilter(
+    chassisRKeyInputFiltered = lowPassFilter(
         chassisRKeyInputFiltered,
         drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E),
         CHASSIS_R_KEY_INPUT_FILTER_ALPHA);
@@ -174,9 +171,9 @@ float ControlOperatorInterface::getTurretPitchInput()
 
 float ControlOperatorInterface::getSentinelSpeedInput()
 {
-    return drivers->remote.getChannel(tap::Remote::Channel::LEFT_HORIZONTAL) *
+    return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) *
            USER_STICK_SENTINEL_DRIVE_SCALAR;
 }
 }  // namespace control
 
-}  // namespace tap
+}  // namespace aruwsrc

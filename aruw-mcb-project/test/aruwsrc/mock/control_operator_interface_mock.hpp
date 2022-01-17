@@ -1,20 +1,20 @@
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
- * This file is part of Taproot.
+ * This file is part of aruw-mcb.
  *
- * Taproot is free software: you can redistribute it and/or modify
+ * aruw-mcb is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Taproot is distributed in the hope that it will be useful,
+ * aruw-mcb is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef CONTROL_OPERATOR_INTERFACE_MOCK_HPP_
@@ -23,17 +23,18 @@
 #include <gmock/gmock.h>
 
 #include "tap/control/command.hpp"
-#include "tap/control/control_operator_interface.hpp"
 #include "tap/control/subsystem.hpp"
 
-namespace tap
+#include "aruwsrc/control/control_operator_interface.hpp"
+
+namespace aruwsrc
 {
 namespace mock
 {
-class ControlOperatorInterfaceMock : public tap::control::ControlOperatorInterface
+class ControlOperatorInterfaceMock : public aruwsrc::control::ControlOperatorInterface
 {
 public:
-    ControlOperatorInterfaceMock(tap::Drivers *drivers);
+    ControlOperatorInterfaceMock(aruwsrc::Drivers *drivers);
     virtual ~ControlOperatorInterfaceMock();
 
     MOCK_METHOD(float, getChassisXInput, (), (override));
@@ -44,6 +45,6 @@ public:
     MOCK_METHOD(float, getSentinelSpeedInput, (), (override));
 };  // class ControlOperatorInterfaceMock
 }  // namespace mock
-}  // namespace tap
+}  // namespace aruwsrc
 
 #endif  // CONTROL_OPERATOR_INTERFACE_MOCK_HPP_
