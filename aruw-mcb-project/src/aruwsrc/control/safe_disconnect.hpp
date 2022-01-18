@@ -26,6 +26,8 @@
  * when the remote is disconnected. Ends running of all current Commands and
  * disallows new Commands from being added.
  */
+namespace aruwsrc::control
+{
 class RemoteSafeDisconnectFunction : public tap::control::SafeDisconnectFunction
 {
 public:
@@ -35,3 +37,4 @@ public:
 private:
     aruwsrc::Drivers *drivers;
 };
+}  // namespace aruwsrc::control

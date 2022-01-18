@@ -23,8 +23,11 @@
 
 #include "aruwsrc/drivers.hpp"
 
+namespace aruwsrc::control
+{
 RemoteSafeDisconnectFunction::RemoteSafeDisconnectFunction(aruwsrc::Drivers *drivers)
 {
     this->drivers = drivers;
 }
 bool RemoteSafeDisconnectFunction::operator()() { return !drivers->remote.isConnected(); }
+}  // namespace aruwsrc::control
