@@ -34,6 +34,7 @@
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
+#include "chassis/chassis_imu_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
@@ -115,6 +116,8 @@ ClientDisplaySubsystem clientDisplay(drivers());
 TurretMCBHopperSubsystem hopperCover(drivers());
 
 /* define commands ----------------------------------------------------------*/
+ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
+
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, true);
@@ -142,9 +145,9 @@ MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     &agitator,
     M_PI / 5.0f,
     M_PI / 2.0f,
-    10,
+    100,
     true,
-    100);
+    10);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     drivers(),
     &agitator,
@@ -175,7 +178,7 @@ ClientDisplayCommand clientDisplayCommand(
     &frictionWheels,
     &agitator,
     &turret,
-    {&beybladeCommand, &chassisAutorotateCommand, &chassisDriveCommand});
+    {&beybladeCommand, &chassisAutorotateCommand, &chassisDriveCommand, &chassisImuDriveCommand});
 
 OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 
@@ -215,6 +218,18 @@ HoldCommandMapping rightMousePressed(
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 PressCommandMapping bPressed(drivers(), {&clientDisplayCommand}, RemoteMapState({Remote::Key::B}));
+PressCommandMapping qPressed(
+    drivers(),
+    {&chassisImuDriveCommand},
+    RemoteMapState({Remote::Key::Q}));
+PressCommandMapping ePressed(
+    drivers(),
+    {&chassisImuDriveCommand},
+    RemoteMapState({Remote::Key::E}));
+PressCommandMapping xPressed(
+    drivers(),
+    {&chassisAutorotateCommand},
+    RemoteMapState({Remote::Key::X}));
 
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
@@ -269,6 +284,9 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bPressed);
+    drivers->commandMapper.addMap(&qPressed);
+    drivers->commandMapper.addMap(&ePressed);
+    drivers->commandMapper.addMap(&xPressed);
 }
 }  // namespace soldier_control
 

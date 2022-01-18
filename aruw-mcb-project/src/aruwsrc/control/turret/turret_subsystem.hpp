@@ -22,7 +22,7 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
-#include "tap/control/turret/turret_subsystem_interface.hpp"
+#include "tap/control/turret_subsystem_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
