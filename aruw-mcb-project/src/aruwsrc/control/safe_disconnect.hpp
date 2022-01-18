@@ -21,6 +21,11 @@
 
 #include "aruwsrc/drivers.hpp"
 
+/**
+ * Defines the condition for a robot to be "safely disconnected" to be
+ * when the remote is disconnected. Ends running of all current Commands and
+ * disallows new Commands from being added.
+ */
 class RemoteSafeDisconnectFunction : public tap::control::SafeDisconnectFunction
 {
 public:
