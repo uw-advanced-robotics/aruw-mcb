@@ -69,7 +69,7 @@ public:
 
     static constexpr bool isAgitatorInverted = false;
 
-    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 5;
+    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
 
     // The motor that controls the hopper lid is an agitator_subsystem instance, so
     // I'm adding its constants here as well.
@@ -137,9 +137,11 @@ public:
      * The jamming constants. Agitator is considered jammed if difference between setpoint
      * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
      *
+     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
+     * 
      * This should be positive or else weird behavior can occur
      */
-    static constexpr float JAMMING_DISTANCE = 1.0f;
+    static constexpr float JAMMING_DISTANCE = M_PI / 20.0f;
     static constexpr uint32_t JAMMING_TIME = 250;
 
     /**

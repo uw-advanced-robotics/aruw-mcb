@@ -136,10 +136,10 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     50,
     0,
     true,
-    M_PI / 16.0f,
+    M_PI / 20.0f,
     M_PI / 2.0f,
     M_PI / 4.0f,
-    130,
+    200,
     2,
     true,
     10);
@@ -153,7 +153,7 @@ MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     M_PI / 16.0f,
     M_PI / 2.0f,
     M_PI / 4.0f,
-    130,
+    200,
     2,
     true,
     100);
@@ -167,7 +167,7 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     M_PI / 16.0f,
     M_PI / 2.0f,
     M_PI / 4.0f,
-    130,
+    200,
     2,
     false,
     10);
