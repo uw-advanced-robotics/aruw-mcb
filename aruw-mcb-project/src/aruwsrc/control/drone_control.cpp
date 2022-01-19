@@ -37,7 +37,7 @@ namespace drone_control
 /* define commands ----------------------------------------------------------*/
 
 // Safe disconnect function
-RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems() {}

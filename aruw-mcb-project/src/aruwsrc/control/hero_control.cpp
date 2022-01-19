@@ -104,7 +104,7 @@ HoldCommandMapping rightSwitchDown(
 // Keyboard/Mouse related mappings
 
 // Safe disconnect function
-RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
