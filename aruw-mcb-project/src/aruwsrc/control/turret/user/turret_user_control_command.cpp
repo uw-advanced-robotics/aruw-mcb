@@ -17,19 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "turret_cv_command.hpp"
+#include "turret_user_control_command.hpp"
 
-#include "tap/architecture/clock.hpp"
-
-#include "../turret_controller_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
-using namespace tap::arch::clock;
-
 namespace aruwsrc::control::turret
 {
-TurretCVCommand::TurretCVCommand(
+TurretUserControlCommand::TurretUserControlCommand(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
     TurretYawControllerInterface *yawController,
@@ -42,53 +37,40 @@ TurretCVCommand::TurretCVCommand(
     addSubsystemRequirement(turretSubsystem);
 }
 
-bool TurretCVCommand::isReady() { return turretSubsystem->isOnline(); }
+bool TurretUserControlCommand::isReady() { return !isFinished(); }
 
-void TurretCVCommand::initialize()
+void TurretUserControlCommand::initialize()
 {
-    drivers->legacyVisionCoprocessor.beginAutoAim();
-    pitchController->initialize();
     yawController->initialize();
+    pitchController->initialize();
 }
 
-void TurretCVCommand::execute()
+void TurretUserControlCommand::execute()
 {
-    float pitchSetpoint = pitchController->getSetpoint();
-    float yawSetpoint = yawController->getSetpoint();
-
-    if (drivers->legacyVisionCoprocessor.lastAimDataValid())
-    {
-        const auto &cvData = drivers->legacyVisionCoprocessor.getLastAimData();
-        if (cvData.hasTarget)
-        {
-            pitchSetpoint = cvData.pitch;
-            yawSetpoint = cvData.yaw;
-        }
-    }
-
-    uint32_t currTime = getTimeMilliseconds();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    // updates the turret pitch setpoint based on CV input, runs the PID controller, and sets
-    // the turret subsystem's desired pitch output
+    const float pitchSetpoint =
+        pitchController->getSetpoint() +
+        USER_PITCH_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretPitchInput();
     pitchController->runController(dt, pitchSetpoint);
 
-    // updates the turret yaw setpoint based on CV input, runs the PID controller, and sets
-    // the turret subsystem's desired yaw output
+    const float yawSetpoint =
+        yawController->getSetpoint() +
+        USER_YAW_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretYawInput();
     yawController->runController(dt, yawSetpoint);
 }
 
-bool TurretCVCommand::isFinished() const
+bool TurretUserControlCommand::isFinished() const
 {
     return yawController->isFinished() || pitchController->isFinished();
 }
 
-void TurretCVCommand::end(bool)
+void TurretUserControlCommand::end(bool)
 {
-    drivers->legacyVisionCoprocessor.stopAutoAim();
-    turretSubsystem->setYawMotorOutput(0);
     turretSubsystem->setPitchMotorOutput(0);
+    turretSubsystem->setYawMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret

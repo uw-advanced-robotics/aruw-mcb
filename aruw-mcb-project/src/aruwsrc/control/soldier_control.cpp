@@ -43,10 +43,14 @@
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
-#include "turret/chassis-relative/turret_quick_turn_command.hpp"
+#include "turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/cv/turret_cv_command.hpp"
+#include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/world-relative/turret_world_relative_command.hpp"
+#include "turret/user/turret_quick_turn_command.hpp"
+#include "turret/user/turret_user_world_relative_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -125,9 +129,105 @@ ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, 
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativeCommand turretWorldRelativeCommand(drivers(), &turret);
+// Turret controllers
+ChassisFramePitchTurretController chassisFramePitchTurretController(
+    &turret,
+    chassis_rel::PITCH_P,
+    chassis_rel::PITCH_I,
+    chassis_rel::PITCH_D,
+    chassis_rel::PITCH_MAX_ERROR_SUM,
+    chassis_rel::PITCH_MAX_OUTPUT,
+    chassis_rel::PITCH_Q_DERIVATIVE_KALMAN,
+    chassis_rel::PITCH_R_DERIVATIVE_KALMAN,
+    chassis_rel::PITCH_Q_PROPORTIONAL_KALMAN,
+    chassis_rel::PITCH_R_PROPORTIONAL_KALMAN);
 
-TurretCVCommand turretCVCommand(drivers(), &turret);
+ChassisFrameYawTurretController chassisFrameYawTurretController(
+    &turret,
+    chassis_rel::YAW_P,
+    chassis_rel::YAW_I,
+    chassis_rel::YAW_D,
+    chassis_rel::YAW_MAX_ERROR_SUM,
+    chassis_rel::YAW_MAX_OUTPUT,
+    chassis_rel::YAW_Q_DERIVATIVE_KALMAN,
+    chassis_rel::YAW_R_DERIVATIVE_KALMAN,
+    chassis_rel::YAW_Q_PROPORTIONAL_KALMAN,
+    chassis_rel::YAW_R_PROPORTIONAL_KALMAN);
+
+WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
+    drivers(),
+    &turret,
+    world_rel_chassis_imu::YAW_P,
+    world_rel_chassis_imu::YAW_I,
+    world_rel_chassis_imu::YAW_D,
+    world_rel_chassis_imu::YAW_MAX_ERROR_SUM,
+    world_rel_chassis_imu::YAW_MAX_OUTPUT,
+    world_rel_chassis_imu::YAW_Q_DERIVATIVE_KALMAN,
+    world_rel_chassis_imu::YAW_R_DERIVATIVE_KALMAN,
+    world_rel_chassis_imu::YAW_Q_PROPORTIONAL_KALMAN,
+    world_rel_chassis_imu::YAW_R_PROPORTIONAL_KALMAN);
+
+WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::PITCH_POS_P,
+    world_rel_turret_imu::PITCH_POS_I,
+    world_rel_turret_imu::PITCH_POS_D,
+    world_rel_turret_imu::PITCH_POS_MAX_ERROR_SUM,
+    world_rel_turret_imu::PITCH_POS_MAX_OUTPUT,
+    world_rel_turret_imu::PITCH_POS_Q_DERIVATIVE_KALMAN,
+    world_rel_turret_imu::PITCH_POS_R_DERIVATIVE_KALMAN,
+    world_rel_turret_imu::PITCH_POS_Q_PROPORTIONAL_KALMAN,
+    world_rel_turret_imu::PITCH_POS_R_PROPORTIONAL_KALMAN,
+    world_rel_turret_imu::PITCH_POS_DEADZONE,
+    world_rel_turret_imu::PITCH_VEL_P,
+    world_rel_turret_imu::PITCH_VEL_I,
+    world_rel_turret_imu::PITCH_VEL_D,
+    world_rel_turret_imu::PITCH_VEL_MAX_ERROR_SUM,
+    world_rel_turret_imu::PITCH_VEL_MAX_OUTPUT,
+    world_rel_turret_imu::PITCH_VEL_Q_DERIVATIVE_KALMAN,
+    world_rel_turret_imu::PITCH_VEL_R_DERIVATIVE_KALMAN,
+    world_rel_turret_imu::PITCH_VEL_Q_PROPORTIONAL_KALMAN,
+    world_rel_turret_imu::PITCH_VEL_R_PROPORTIONAL_KALMAN,
+    world_rel_turret_imu::PITCH_VEL_DEADZONE);
+
+WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::YAW_POS_P,
+    world_rel_turret_imu::YAW_POS_I,
+    world_rel_turret_imu::YAW_POS_D,
+    world_rel_turret_imu::YAW_POS_MAX_ERROR_SUM,
+    world_rel_turret_imu::YAW_POS_MAX_OUTPUT,
+    world_rel_turret_imu::YAW_POS_Q_DERIVATIVE_KALMAN,
+    world_rel_turret_imu::YAW_POS_R_DERIVATIVE_KALMAN,
+    world_rel_turret_imu::YAW_POS_Q_PROPORTIONAL_KALMAN,
+    world_rel_turret_imu::YAW_POS_R_PROPORTIONAL_KALMAN,
+    world_rel_turret_imu::YAW_POS_DEADZONE,
+    world_rel_turret_imu::YAW_VEL_P,
+    world_rel_turret_imu::YAW_VEL_I,
+    world_rel_turret_imu::YAW_VEL_D,
+    world_rel_turret_imu::YAW_VEL_MAX_ERROR_SUM,
+    world_rel_turret_imu::YAW_VEL_MAX_OUTPUT,
+    world_rel_turret_imu::YAW_VEL_Q_DERIVATIVE_KALMAN,
+    world_rel_turret_imu::YAW_VEL_R_DERIVATIVE_KALMAN,
+    world_rel_turret_imu::YAW_VEL_Q_PROPORTIONAL_KALMAN,
+    world_rel_turret_imu::YAW_VEL_R_PROPORTIONAL_KALMAN,
+    world_rel_turret_imu::YAW_VEL_DEADZONE);
+
+TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
+    drivers(),
+    &turret,
+    &worldFrameYawChassisImuController,
+    &chassisFramePitchTurretController,
+    &worldFrameYawTurretImuController,
+    &worldFramePitchTurretImuController);
+
+TurretCVCommand turretCVCommand(
+    drivers(),
+    &turret,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
 
 TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
@@ -261,7 +361,7 @@ void initializeSubsystems()
 void setDefaultSoldierCommands(aruwsrc::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretWorldRelativeCommand);
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }

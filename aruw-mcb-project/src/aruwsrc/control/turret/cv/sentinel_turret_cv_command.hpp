@@ -20,10 +20,8 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/comprised_command.hpp"
-#include "tap/control/turret_subsystem_interface.hpp"
 
 #include "aruwsrc/control/agitator/move_unjam_ref_limited_command.hpp"
 
@@ -34,6 +32,10 @@ class AgitatorSubsystem;
 
 namespace aruwsrc::control::turret
 {
+class TurretYawControllerInterface;
+class TurretPitchControllerInterface;
+class TurretSubsystem;
+
 /**
  * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
  * aims the turret accordingly. In addition to aiming, this command is responsible for determining
@@ -65,8 +67,10 @@ public:
 
     SentinelTurretCVCommand(
         aruwsrc::Drivers *drivers,
-        tap::control::turret::TurretSubsystemInterface *sentinelTurret,
-        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem);
+        TurretSubsystem *turretSubsystem,
+        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
+        TurretYawControllerInterface *yawController,
+        TurretPitchControllerInterface *pitchController);
 
     bool isReady() override;
 
@@ -83,26 +87,6 @@ public:
     inline bool isAimingAtTarget() const { return aimingAtTarget; }
 
 private:
-    static constexpr float YAW_P = 4000.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 130.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 10.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 3400.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 100.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 0.0f;
-
     static constexpr float BOUNDS_TOLERANCE = 1.0f;
 
     static constexpr float AGITATOR_ROTATE_ANGLE = M_PI / 5.0f;
@@ -111,7 +95,7 @@ private:
 
     aruwsrc::Drivers *drivers;
 
-    tap::control::turret::TurretSubsystemInterface *sentinelTurret;
+    TurretSubsystem *turretSubsystem;
 
     aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitator;
 
@@ -126,8 +110,8 @@ private:
      */
     int lostTargetCounter;
 
-    tap::algorithms::SmoothPid yawPid;
-    tap::algorithms::SmoothPid pitchPid;
+    TurretYawControllerInterface *yawController;
+    TurretPitchControllerInterface *pitchController;
 
     uint32_t prevTime = 0;
 

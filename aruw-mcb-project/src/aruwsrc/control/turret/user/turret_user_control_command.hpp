@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_CV_COMMAND_HPP_
-#define TURRET_CV_COMMAND_HPP_
+#ifndef TURRET_USER_CONTROL_COMMAND_HPP_
+#define TURRET_USER_CONTROL_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -31,24 +31,20 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
-
-/**
- * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
- * aims the turret accordingly using a position PID controller.
- */
-class TurretCVCommand : public tap::control::Command
+class TurretUserControlCommand : public tap::control::Command
 {
 public:
-    TurretCVCommand(
-        aruwsrc::Drivers *legacyVisionCoprocessor,
-        TurretSubsystem *subsystem,
+    TurretUserControlCommand(
+        aruwsrc::Drivers *drivers,
+        TurretSubsystem *turretSubsystem,
         TurretYawControllerInterface *yawController,
         TurretPitchControllerInterface *pitchController);
 
-    void initialize() override;
-
     bool isReady() override;
+
+    const char *getName() const override { return "Turret User command"; }
+
+    void initialize() override;
 
     void execute() override;
 
@@ -56,19 +52,22 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret CV"; }
-
 private:
-    aruwsrc::Drivers *drivers;
+    /**
+     * Scales how much user input from `ControlOperatorInterface` change the setpoint
+     * of this command. Basically: mouse sensitivity
+     */
+    static constexpr float USER_YAW_INPUT_SCALAR = 1.0f;
+    static constexpr float USER_PITCH_INPUT_SCALAR = 1.0f;
 
+    aruwsrc::Drivers *drivers;
     TurretSubsystem *turretSubsystem;
+
+    uint32_t prevTime = 0;
 
     TurretYawControllerInterface *yawController;
     TurretPitchControllerInterface *pitchController;
-
-    uint32_t prevTime;
-};  // class TurretCvCommand
-
+};
 }  // namespace aruwsrc::control::turret
 
-#endif  // TURRET_CV_COMMAND_HPP_
+#endif  // TURRET_USER_CONTROL_COMMAND_HPP_

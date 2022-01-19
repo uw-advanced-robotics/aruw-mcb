@@ -24,7 +24,10 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/control/turret_subsystem_interface.hpp"
+
+#include "../turret_subsystem.hpp"
+
+#include "turret_controller_interface.hpp"
 
 namespace aruwsrc
 {
@@ -33,67 +36,43 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-class WorldFrameChassisImuTurretController
+class TurretSubsystem;
+
+class WorldFrameYawChassisImuTurretController : public TurretYawControllerInterface
 {
 public:
-    /**
-     * Updates the `worldFrameYawSetpoint` and runs a world frame position PID controller using the
-     * onboard IMU, which is mounted on the chassis.
-     *
-     * @param[in] drivers Reference to a drivers singleton object.
-     * @param[in] dt The time difference between the last time this function was called and the
-     *      current time, in milliseconds.
-     * @param[in] desiredSetpoint The new desired yaw angle in degrees in the world frame that the
-     *      controller will be using.
-     * @param[in] chassisFrameInitImuYawAngle The initial yaw IMU angle in degrees in the chassis
-     * frame that is defined when the controller is started (in the initialization stage of the
-     *      controller).
-     * @param[out] worldFrameYawSetpoint World frame yaw setpoint in degrees that is updated each
-     *      time the controller is run.
-     * @param[out] yawPid The yaw position PID controller to be used to control the turret.
-     * @param[out] turretSubsystem The turret subsystem that the controller is controlling. The yaw
-     *      setpoint and desired output is updated by the controller.
-     */
-    static void runYawPidController(
-        aruwsrc::Drivers &drivers,
-        const uint32_t dt,
-        const float desiredSetpoint,
-        const float chassisFrameInitImuYawAngle,
-        tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-        tap::algorithms::SmoothPid *yawPid,
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem);
+    WorldFrameYawChassisImuTurretController(
+        aruwsrc::Drivers *drivers,
+        TurretSubsystem *turretSubsystem,
+        float kp,
+        float ki,
+        float kd,
+        float maxICumulative,
+        float maxOutput,
+        float tQDerivativeKalman,
+        float tRDerivativeKalman,
+        float tQProportionalKalman,
+        float tRProportionalKalman,
+        float errDeadzone = 0.0f);
 
-    /**
-     * Updates the `worldFrameYawSetpoint` and runs a world frame cascade PID controller using the
-     * onboard IMU, which is mounted on the chassis.
-     *
-     * @param[in] drivers Reference to a drivers singleton object.
-     * @param[in] dt The time difference between the last time this function was called and the
-     *      current time, in milliseconds.
-     * @param[in] desiredSetpoint The new desired yaw angle in degrees in the world frame that the
-     *      controller will be using.
-     * @param[in] chassisFrameInitImuYawAngle The initial yaw IMU angle in the chassis frame in
-     *      degrees that is defined when the controller is started (in the initialization stage of
-     *      the controller).
-     * @param[out] worldFrameYawSetpoint Yaw setpoint in the world frame in degrees that is updated
-     *      each time the controller is run.
-     * @param[out] yawPositionPid The yaw position PID controller whose output is fed into the
-     *      velocity PID controller.
-     * @param[out] yawVelocityPid The yaw velocity PID controller that takes input from the position
-     *      PID controller and then is used to control the turret.
-     * @param[out] turretSubsystem The turret subsystem that the controller is controlling. The yaw
-     *      setpoint and desired output is updated by the controller.
-     */
-    static void runYawCascadePidController(
-        aruwsrc::Drivers &drivers,
-        const uint32_t dt,
-        const float desiredSetpoint,
-        const float chassisFrameInitImuYawAngle,
-        tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-        tap::algorithms::SmoothPid *yawPositionPid,
-        tap::algorithms::SmoothPid *yawVelocityPid,
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem);
+    void initialize() override;
+
+    void runController(const uint32_t dt, const float desiredSetpoint) override;
+
+    float getSetpoint() const override;
+
+    bool isFinished() const override;
+
+private:
+    aruwsrc::Drivers *drivers;
+
+    tap::algorithms::SmoothPid pid;
+
+    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+
+    float chassisFrameInitImuYawAngle = 0.0f;
 };
+
 }  // namespace aruwsrc::control::turret
 
 #endif  // WORLD_FRAME_CHASSIS_IMU_TURRET_CONTROLLER_HPP_

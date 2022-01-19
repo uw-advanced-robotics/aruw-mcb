@@ -36,10 +36,11 @@
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "sentinel/firing/sentinel_rotate_agitator_command.hpp"
-#include "turret/chassis-relative/turret_chassis_relative_command.hpp"
-#include "turret/chassis-relative/turret_setpoint_command.hpp"
+#include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/cv/sentinel_turret_cv_command.hpp"
+#include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
+#include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
@@ -131,9 +132,43 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-SentinelTurretCVCommand turretCVCommand(drivers(), &turretSubsystem, &agitator);
+// turret controllers
+ChassisFramePitchTurretController chassisFramePitchTurretController(
+    &turretSubsystem,
+    chassis_rel::PITCH_P,
+    chassis_rel::PITCH_I,
+    chassis_rel::PITCH_D,
+    chassis_rel::PITCH_MAX_ERROR_SUM,
+    chassis_rel::PITCH_MAX_OUTPUT,
+    chassis_rel::PITCH_Q_DERIVATIVE_KALMAN,
+    chassis_rel::PITCH_R_DERIVATIVE_KALMAN,
+    chassis_rel::PITCH_Q_PROPORTIONAL_KALMAN,
+    chassis_rel::PITCH_R_PROPORTIONAL_KALMAN);
 
-TurretChassisRelativeCommand turretManual(drivers(), &turretSubsystem);
+ChassisFrameYawTurretController chassisFrameYawTurretController(
+    &turretSubsystem,
+    chassis_rel::YAW_P,
+    chassis_rel::YAW_I,
+    chassis_rel::YAW_D,
+    chassis_rel::YAW_MAX_ERROR_SUM,
+    chassis_rel::YAW_MAX_OUTPUT,
+    chassis_rel::YAW_Q_DERIVATIVE_KALMAN,
+    chassis_rel::YAW_R_DERIVATIVE_KALMAN,
+    chassis_rel::YAW_Q_PROPORTIONAL_KALMAN,
+    chassis_rel::YAW_R_PROPORTIONAL_KALMAN);
+
+SentinelTurretCVCommand turretCVCommand(
+    drivers(),
+    &turretSubsystem,
+    &agitator,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
+
+TurretUserControlCommand turretManual(
+    drivers(),
+    &turretSubsystem,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 

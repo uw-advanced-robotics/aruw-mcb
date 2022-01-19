@@ -17,22 +17,18 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_WORLD_RELATIVE_COMMAND_HPP_
-#define TURRET_WORLD_RELATIVE_COMMAND_HPP_
+#ifndef TURRET_USER_WORLD_RELATIVE_COMMAND_HPP_
+#define TURRET_USER_WORLD_RELATIVE_COMMAND_HPP_
 
 #include "tap/control/comprised_command.hpp"
 
-#include "turret_world_relative_chassis_imu_command.hpp"
-#include "turret_world_relative_turret_imu_command.hpp"
+#include "../algorithms/turret_controller_interface.hpp"
+
+#include "turret_user_control_command.hpp"
 
 namespace aruwsrc
 {
 class Drivers;
-}
-
-namespace aruwsrc::chassis
-{
-class ChassisSubsystem;
 }
 
 namespace aruwsrc::control::turret
@@ -49,13 +45,19 @@ class TurretSubsystem;
  * to run the turret controller and the pitch axis will run a controller in the chassis
  * frame.
  */
-class TurretWorldRelativeCommand : public tap::control::ComprisedCommand
+class TurretUserWorldRelativeCommand : public tap::control::ComprisedCommand
 {
 public:
     /**
      * This command requires the turret subsystem from a command/subsystem framework perspective.
      */
-    TurretWorldRelativeCommand(aruwsrc::Drivers *drivers, TurretSubsystem *turretSubsystem);
+    TurretUserWorldRelativeCommand(
+        aruwsrc::Drivers *drivers,
+        TurretSubsystem *turretSubsystem,
+        TurretYawControllerInterface *chassisImuYawController,
+        TurretPitchControllerInterface *chassisImuPitchController,
+        TurretYawControllerInterface *turretImuYawController,
+        TurretPitchControllerInterface *turretImuPitchController);
 
     bool isReady() override;
 
@@ -70,10 +72,10 @@ public:
     const char *getName() const override { return "turret WR"; }
 
 private:
-    TurretWorldRelativeChassisImuCommand turretWRChassisImuCommand;
-    TurretWorldRelativeTurretImuCommand turretWRTurretImuCommand;
-};  // class TurretWorldRelativeCommand
+    TurretUserControlCommand turretWRChassisImuCommand;
+    TurretUserControlCommand turretWRTurretImuCommand;
+};  // class TurretUserWorldRelativeCommand
 
 }  // namespace aruwsrc::control::turret
 
-#endif  // TURRET_WORLD_RELATIVE_COMMAND_HPP_
+#endif  // TURRET_USER_WORLD_RELATIVE_COMMAND_HPP_

@@ -107,22 +107,53 @@ static inline void updateYawWorldFrameSetpoint(
     }
 }
 
-void WorldFrameChassisImuTurretController::runYawPidController(
-    aruwsrc::Drivers &drivers,
-    const uint32_t dt,
-    const float desiredSetpoint,
-    const float chassisFrameInitImuYawAngle,
-    tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-    tap::algorithms::SmoothPid *yawPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController(
+    aruwsrc::Drivers *drivers,
+    TurretSubsystem *turretSubsystem,
+    float kp,
+    float ki,
+    float kd,
+    float maxICumulative,
+    float maxOutput,
+    float tQDerivativeKalman,
+    float tRDerivativeKalman,
+    float tQProportionalKalman,
+    float tRProportionalKalman,
+    float errDeadzone)
+    : TurretYawControllerInterface(turretSubsystem),
+      drivers(drivers),
+      pid(kp,
+          ki,
+          kd,
+          maxICumulative,
+          maxOutput,
+          tQDerivativeKalman,
+          tRDerivativeKalman,
+          tQProportionalKalman,
+          tRProportionalKalman,
+          errDeadzone),
+      worldFrameSetpoint(0, 0, 360)
 {
-    const float chassisFrameImuYawAngle = drivers.mpu6500.getYaw();
+}
+
+void WorldFrameYawChassisImuTurretController::initialize()
+{
+    pid.reset();
+    chassisFrameInitImuYawAngle = drivers->mpu6500.getYaw();
+    worldFrameSetpoint.setValue(turretSubsystem->getYawSetpoint());
+}
+
+void WorldFrameYawChassisImuTurretController::runController(
+    const uint32_t dt,
+    const float desiredSetpoint)
+{
+    const float chassisFrameImuYawAngle = drivers->mpu6500.getYaw();
 
     updateYawWorldFrameSetpoint(
         desiredSetpoint,
         chassisFrameInitImuYawAngle,
         chassisFrameImuYawAngle,
-        worldFrameYawSetpoint,
+        &worldFrameSetpoint,
         turretSubsystem);
 
     float worldFrameYawAngle = transformChassisFrameYawToWorldFrame(
@@ -131,48 +162,23 @@ void WorldFrameChassisImuTurretController::runYawPidController(
         turretSubsystem->getCurrentYawValue().getValue());
 
     // position controller based on imu and yaw gimbal angle
-    float positionControllerError = -worldFrameYawSetpoint->difference(worldFrameYawAngle);
-    float pidOutput = yawPid->runController(
+    float positionControllerError = -worldFrameSetpoint.difference(worldFrameYawAngle);
+    float pidOutput = pid.runController(
         positionControllerError,
-        turretSubsystem->getYawVelocity() + drivers.mpu6500.getGz(),
+        turretSubsystem->getYawVelocity() + drivers->mpu6500.getGz(),
         dt);
 
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 
-void WorldFrameChassisImuTurretController::runYawCascadePidController(
-    aruwsrc::Drivers &drivers,
-    const uint32_t dt,
-    const float desiredSetpoint,
-    const float chassisFrameInitImuYawAngle,
-    tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-    tap::algorithms::SmoothPid *yawPositionPid,
-    tap::algorithms::SmoothPid *yawVelocityPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+float WorldFrameYawChassisImuTurretController::getSetpoint() const
 {
-    const float chassisFrameImuYawAngle = drivers.mpu6500.getYaw();
-    const float worldFrameYawVelocity = turretSubsystem->getYawVelocity() + drivers.mpu6500.getGz();
-
-    updateYawWorldFrameSetpoint(
-        desiredSetpoint,
-        chassisFrameInitImuYawAngle,
-        chassisFrameImuYawAngle,
-        worldFrameYawSetpoint,
-        turretSubsystem);
-
-    float worldFrameYawAngle = transformChassisFrameYawToWorldFrame(
-        chassisFrameInitImuYawAngle,
-        chassisFrameImuYawAngle,
-        turretSubsystem->getCurrentYawValue().getValue());
-
-    // position controller based on imu and yaw gimbal angle
-    float positionControllerError = -worldFrameYawSetpoint->difference(worldFrameYawAngle);
-    float positionPidOut =
-        yawPositionPid->runController(positionControllerError, worldFrameYawVelocity, dt);
-
-    float velocityControllerError = positionPidOut - worldFrameYawVelocity;
-    float velocityPidOut = yawVelocityPid->runControllerDerivateError(velocityControllerError, dt);
-
-    turretSubsystem->setYawMotorOutput(velocityPidOut);
+    return worldFrameSetpoint.getValue();
 }
+
+bool WorldFrameYawChassisImuTurretController::isFinished() const
+{
+    return !turretSubsystem->isOnline() || !drivers->mpu6500.isRunning();
+}
+
 }  // namespace aruwsrc::control::turret

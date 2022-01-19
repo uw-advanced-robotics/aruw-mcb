@@ -23,7 +23,7 @@
 
 using namespace aruwsrc::control::turret;
 
-TEST(TurretGravityCompensation, computeGravitationalForceOffset__zero_cg_offsets_return_0)
+TEST(TurretGravityCompensation, computeGravitationalForceOffset_zero_cg_offsets_return_0)
 {
     EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(0, 0, 0, 0));
     EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(0, 0, 0, 100));
@@ -33,7 +33,7 @@ TEST(TurretGravityCompensation, computeGravitationalForceOffset__zero_cg_offsets
 
 TEST(
     TurretGravityCompensation,
-    computeGravitationalForceOffset__zero_gravityCompensationMax_returns_0)
+    computeGravitationalForceOffset_zero_gravityCompensationMax_returns_0)
 {
     EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(10, 0, 0, 0));
     EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(10, 10, 0, 0));
@@ -42,7 +42,7 @@ TEST(
 
 TEST(
     TurretGravityCompensation,
-    computeGravitationalForceOffset__0deg_cg_offset_returns_offset_as_function_of_pitch_offset)
+    computeGravitationalForceOffset_0deg_cg_offset_returns_offset_as_function_of_pitch_offset)
 {
     std::vector<float> anglesToTest{0, 45, 90, 135, 180, -135, -90, -45};
 
@@ -55,7 +55,7 @@ TEST(
     }
 }
 
-TEST(TurretGravityCompensation, computeGravitationalForceOffset__45deg_cg_offset)
+TEST(TurretGravityCompensation, computeGravitationalForceOffset_45deg_cg_offset)
 {
     EXPECT_NEAR(
         100 * cos(modm::toRadian(45)),
@@ -63,12 +63,12 @@ TEST(TurretGravityCompensation, computeGravitationalForceOffset__45deg_cg_offset
         1E-3);
 }
 
-TEST(TurretGravityCompensation, computeGravitationalForceOffset__90deg_cg_offset)
+TEST(TurretGravityCompensation, computeGravitationalForceOffset_90deg_cg_offset)
 {
     EXPECT_NEAR(0, computeGravitationalForceOffset(0, 10, 0, 100), 1E-3);
 }
 
-TEST(TurretGravityCompensation, computeGravitationalForceOffset__135deg_cg_offset)
+TEST(TurretGravityCompensation, computeGravitationalForceOffset_135deg_cg_offset)
 {
     EXPECT_NEAR(
         100 * cos(modm::toRadian(135)),
@@ -76,7 +76,7 @@ TEST(TurretGravityCompensation, computeGravitationalForceOffset__135deg_cg_offse
         1E-3);
 }
 
-TEST(TurretGravityCompensation, computeGravitationalForceOffset__180deg_cg_offset)
+TEST(TurretGravityCompensation, computeGravitationalForceOffset_180deg_cg_offset)
 {
     EXPECT_NEAR(
         100 * cos(modm::toRadian(180)),
@@ -84,7 +84,7 @@ TEST(TurretGravityCompensation, computeGravitationalForceOffset__180deg_cg_offse
         1E-3);
 }
 
-TEST(TurretGravityCompensation, computeGravitationalForceOffset__225deg_cg_offset)
+TEST(TurretGravityCompensation, computeGravitationalForceOffset_225deg_cg_offset)
 {
     EXPECT_NEAR(
         100 * cos(modm::toRadian(225)),
@@ -92,7 +92,7 @@ TEST(TurretGravityCompensation, computeGravitationalForceOffset__225deg_cg_offse
         1E-3);
 }
 
-TEST(TurretGravityCompensation, computeGravitationalForceOffset__270deg_cg_offset)
+TEST(TurretGravityCompensation, computeGravitationalForceOffset_270deg_cg_offset)
 {
     EXPECT_NEAR(
         100 * cos(modm::toRadian(270)),
@@ -100,7 +100,7 @@ TEST(TurretGravityCompensation, computeGravitationalForceOffset__270deg_cg_offse
         1E-3);
 }
 
-TEST(TurretGravityCompensation, computeGravitationalForceOffset__315deg_cg_offset)
+TEST(TurretGravityCompensation, computeGravitationalForceOffset_315deg_cg_offset)
 {
     EXPECT_NEAR(
         100 * cos(modm::toRadian(315)),
