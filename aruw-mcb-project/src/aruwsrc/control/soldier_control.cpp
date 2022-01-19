@@ -30,6 +30,7 @@
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
@@ -229,6 +230,9 @@ PressCommandMapping xPressed(
     {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
 
+// Safe disconnect function
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
 {
@@ -291,6 +295,8 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &soldier_control::remoteSafeDisconnectFunction);
     soldier_control::initializeSubsystems();
     soldier_control::registerSoldierSubsystems(drivers);
     soldier_control::setDefaultSoldierCommands(drivers);
