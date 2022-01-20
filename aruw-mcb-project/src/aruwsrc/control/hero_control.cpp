@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO)
+//#if defined(TARGET_HERO)
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -29,6 +29,8 @@
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
+#include "agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
@@ -47,6 +49,7 @@ using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::display;
+using namespace aruwsrc::agitator;
 using tap::Remote;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
@@ -68,6 +71,36 @@ FrictionWheelSubsystem frictionWheels(drivers());
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
+AgitatorSubsystem kickerAgitator(
+    drivers(),
+    AgitatorSubsystem::PID_HERO_KICKER_P,
+    AgitatorSubsystem::PID_HERO_KICKER_I,
+    AgitatorSubsystem::PID_HERO_KICKER_D,
+    AgitatorSubsystem::PID_HERO_KICKER_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_HERO_KICKER_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem::HERO_KICKER_MOTOR_ID,
+    AgitatorSubsystem::HERO_KICKER_MOTOR_CAN_BUS,
+    AgitatorSubsystem::HERO_KICKER_INVERTED,
+    true,
+    0,
+    0);
+
+AgitatorSubsystem waterwheelAgitator(
+    drivers(),
+    AgitatorSubsystem::PID_HERO_WATERWHEEL_P,
+    AgitatorSubsystem::PID_HERO_WATERWHEEL_I,
+    AgitatorSubsystem::PID_HERO_WATERWHEEL_D,
+    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_ERR_SUM,
+    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_OUT,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508,
+    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_ID,
+    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_CAN_BUS,
+    AgitatorSubsystem::HERO_WATERWHEEL_INVERTED,
+    true,
+    AgitatorSubsystem::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
+    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL);
+
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
@@ -84,14 +117,38 @@ ClientDisplayCommand clientDisplayCommand(
     nullptr,
     &chassisDriveCommand);
 
+HeroAgitatorCommand heroAgitatorCommand(
+    drivers(),
+    &kickerAgitator,
+    &waterwheelAgitator,
+    M_PI / 2.0,
+    50,
+    M_PI / 2.0,
+    M_PI / 10.0,
+    20,
+    M_PI,
+    M_PI / 4.0,
+    100,
+    M_PI / 2.0,
+    true,
+    100);
+
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&heroAgitatorCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
+PressCommandMapping leftMousePressed(
+    drivers(),
+    {&heroAgitatorCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -140,4 +197,4 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }
 }  // namespace aruwsrc::control
 
-#endif
+//#endif
