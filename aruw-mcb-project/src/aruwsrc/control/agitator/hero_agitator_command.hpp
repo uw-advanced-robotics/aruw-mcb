@@ -20,9 +20,9 @@
 #ifndef HERO_AGITATOR_COMMAND_HPP_
 #define HERO_AGITATOR_COMMAND_HPP_
 
-#include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/comprised_command.hpp"
 #include "tap/control/setpoint/commands/move_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 
 using tap::gpio::Digital;
 
