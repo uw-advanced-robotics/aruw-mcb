@@ -25,16 +25,15 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
-#include "tap/communication/serial/ref_serial_ui_wrappers/boolean_hud_indicator.hpp"
+#include "tap/communication/serial/ref_serial_ui_wrappers/state_hud_indicator.hpp"
 #include "tap/control/command.hpp"
-
-#include "modm/math/utils/misc.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "modm/math/geometry/polygon_2d.hpp"
+#include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
 
@@ -54,7 +53,7 @@ class ClientDisplaySubsystem;
 
 class ClientDisplayCommand : public tap::control::Command,
                              ::modm::pt::Protothread,
-                             modm::Resumable<5>,
+                             modm::Resumable<6>,
                              tap::serial::RefSerialData
 {
 public:
@@ -84,39 +83,39 @@ private:
     static constexpr uint16_t SCREEN_HEIGHT = 1080;
     static constexpr int32_t DELAY_PERIOD_BTWN_SENDS = 110;
 
-    // HUD indicator related constants
+    // Boolean HUD indicator related constants
 
-    static constexpr uint16_t HUD_INDICATOR_LIST_LAYER = 0;
-    static constexpr uint8_t HUD_INDICATOR_LIST_START_NAME[] = {0, 0, 0};
-    static constexpr uint16_t HUD_INDICATOR_LIST_CENTER_X = 280;
-    static constexpr uint16_t HUD_INDICATOR_LIST_START_Y = 570;
-    static constexpr uint16_t HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_LAYER = 0;
+    static constexpr uint8_t BOOLEAN_HUD_INDICATOR_LIST_START_NAME[] = {0, 0, 0};
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_CENTER_X = 280;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_START_Y = 570;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
 
-    static constexpr Tx::GraphicColor HUD_INDICATOR_FILLED_COLOR = Tx::GraphicColor::GREEN;
-    static constexpr uint16_t HUD_INDICATOR_WIDTH = 17;
-    static constexpr uint16_t HUD_INDICATOR_RADIUS = 9;
+    static constexpr Tx::GraphicColor BOOLEAN_HUD_INDICATOR_FILLED_COLOR = Tx::GraphicColor::GREEN;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_WIDTH = 17;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_RADIUS = 9;
 
-    static constexpr uint8_t HUD_INDICATOR_STATIC_LIST_LAYER = 1;
-    static constexpr Tx::GraphicColor HUD_INDICATOR_OUTLINE_COLOR = Tx::GraphicColor::BLACK;
-    static constexpr uint16_t HUD_INDICATOR_OUTLINE_WIDTH = 5;
-    static constexpr uint16_t HUD_INDICATOR_OUTLINE_RADIUS = 20;
+    static constexpr uint8_t BOOLEAN_HUD_INDICATOR_STATIC_LIST_LAYER = 1;
+    static constexpr Tx::GraphicColor BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR = Tx::GraphicColor::BLACK;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH = 5;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS = 20;
 
-    static constexpr Tx::GraphicColor HUD_INDICATOR_LABEL_COLOR = Tx::GraphicColor::ORANGE;
-    static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_SIZE = 15;
-    static constexpr uint16_t HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 3;
+    static constexpr Tx::GraphicColor BOOLEAN_HUD_INDICATOR_LABEL_COLOR = Tx::GraphicColor::ORANGE;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE = 15;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 3;
 
-    static constexpr const char *HUD_INDICATOR_LABELS[] = {
-        "SYS CALIB ",
-        "HOPP ",
-        "FRIC ",
-        "CV ",
-        "AGI ",
+    static constexpr const char *BOOLEAN_HUD_INDICATOR_LABELS[] =
+    { "SYS CALIB ",
+      "HOPP ",
+      "FRIC ",
+      "CV ",
+      "AGI ",
 #if defined(TARGET_HERO)
-        "BALL RDY  ",
+      "BALL RDY  ",
 #endif
     };
 
-    enum HudIndicatorIndex
+    enum BooleanHUDIndicatorIndex
     {
         SYSTEMS_CALIBRATING = 0,
         HOPPER_OPEN,
@@ -126,7 +125,49 @@ private:
 #if defined(TARGET_HERO)
         BALL_READY_FOR_LAUNCHING,
 #endif
-        NUM_HUD_INDICATORS,
+        NUM_BOOLEAN_HUD_INDICATORS,
+    };
+
+    // position HUD indicator related constants
+
+    static constexpr uint8_t POSITION_HUD_INDICATOR_LAYER = 0;
+    static constexpr uint8_t POSITION_HUD_INDICATOR_START_NAME[] = {5, 0, 0};
+    static constexpr uint16_t POSITION_HUD_INDICATOR_START_X = 500;
+    static constexpr uint16_t POSITION_HUD_INDICATOR_START_Y = 500;
+
+    static constexpr Tx::GraphicColor POSITION_HUD_INDICATOR_TITLE_COLOR = Tx::GraphicColor::GREEN;
+    static constexpr Tx::GraphicColor POSITION_HUD_INDICATOR_LABELS_COLOR =
+        Tx::GraphicColor::ORANGE;
+    static constexpr Tx::GraphicColor POSITION_HUD_INDICATOR_SELECTOR_BOX_COLOR =
+        Tx::GraphicColor::PINK;
+
+    static constexpr uint16_t POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH = 2;
+
+    static constexpr uint16_t POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE = 10;
+    static constexpr uint16_t POSITION_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 2;
+    static constexpr uint8_t POSITION_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS =
+        POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE;
+
+    static constexpr const char *POSITION_HUD_INDICATOR_TITLES[] = {
+        "CHAS",
+        "SHOT",
+        "FIRE",
+    };
+
+    static constexpr const char *POSITION_HUD_INDICATOR_LABELS[] = {
+        "FLLW\nBEYB\nMANR",
+        "REDY\nLOAD\nFOFF",
+        "SNGL\nBRST\nFULL",
+    };
+
+    static constexpr uint8_t POSITION_HUD_INDICATOR_TITLE_WIDTH = 4;
+
+    enum PositionHUDIndicatorIndex
+    {
+        CHASSIS_STATE = 0,
+        FLYWHEEL_AND_HOPPER_STATE,
+        SHOOTER_STATE,
+        NUM_POSITION_HUD_INDICATORS,
     };
 
     // drive command related constants
@@ -208,7 +249,7 @@ private:
      */
     tap::arch::MilliTimeout delayTimer{DELAY_PERIOD_BTWN_SENDS};
 
-    // HUD indicator related variables
+    // Boolean HUD indicator related variables
 
     /**
      * Hopper subsystem that provides information about whether or not the cover is open or closed.
@@ -231,21 +272,32 @@ private:
      * Graphic message that will represent a dot on the screen that will be present or not,
      * depending on whether or not the hopper is open or closed.
      */
-    Tx::Graphic1Message hudIndicatorGraphics[NUM_HUD_INDICATORS];
+    Tx::Graphic1Message booleanHudIndicatorGraphics[NUM_BOOLEAN_HUD_INDICATORS];
 
     /** The object that will do the actual drawing of the hopper open indicator. */
     tap::communication::serial::ref_serial_ui_wrapeprs::BooleanHUDIndicator
-        hudIndicatorDrawers[NUM_HUD_INDICATORS];
+        booleanHudIndicatorDrawers[NUM_BOOLEAN_HUD_INDICATORS];
 
-    /** Use this index when iterating through the hudIndicatorDrawers in protothreads. */
-    int hudIndicatorIndex = 0;
+    /** Use this index when iterating through the  booleanHudIndicatorDrawers in protothreads. */
+    int booleanHudIndicatorIndex = 0;
 
     /**
      * Graphics associated with the the hud indicator graphics that do not change (labels and
      * circles around the indicators).
      */
-    Tx::Graphic1Message hudIndicatorStaticGraphics[NUM_HUD_INDICATORS];
-    Tx::GraphicCharacterMessage hudIndicatorStaticLabelGraphics[NUM_HUD_INDICATORS];
+    Tx::Graphic1Message booleanHudIndicatorStaticGrahpics[NUM_BOOLEAN_HUD_INDICATORS];
+    Tx::GraphicCharacterMessage booleanHudIndicatorStaticLabelGraphics[NUM_BOOLEAN_HUD_INDICATORS];
+
+    // position selection HUD indicator related variables
+
+    Tx::Graphic1Message positionSelectionHudIndicatorGraphics[NUM_POSITION_HUD_INDICATORS];
+
+    Tx::GraphicCharacterMessage positionSelectionHudLabelGraphics[NUM_POSITION_HUD_INDICATORS + 1];
+
+    tap::communication::serial::ref_serial_ui_wrapeprs::StateHUDIndicator<uint16_t>
+        positionSelectionHudIndicatorDrawers[NUM_POSITION_HUD_INDICATORS];
+
+    int positionSelectionHudIndicatorIndex = 0;
 
     // drive command related variables
 
@@ -303,17 +355,20 @@ private:
      * have to modify it, which results in less latency on the client UI side.
      */
     modm::ResumableResult<bool> sendInitialGraphics();
-
-    modm::ResumableResult<bool> updateHudIndicators();
+    modm::ResumableResult<bool> updateBooleanHudIndicators();
+    modm::ResumableResult<bool> updatePositionSelectorHudIndicators();
     modm::ResumableResult<bool> updateDriveCommandMsg();
     modm::ResumableResult<bool> updateChassisOrientation();
     modm::ResumableResult<bool> updateTurretAngles();
 
-    void initializeHudIndicators();
+    void initializeBooleanHudIndicators();
+    void initializePositionHudIndicators();
     void initializeReticle();
     void initializeDriveCommand();
     void initializeChassisOrientation();
     void initializeTurretAngles();
+
+    void updatePositionSelectionHudIndicatorState();
 };
 }  // namespace aruwsrc::display
 
