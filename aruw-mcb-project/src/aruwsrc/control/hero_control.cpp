@@ -29,6 +29,7 @@
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
@@ -103,6 +104,9 @@ HoldCommandMapping rightSwitchDown(
 
 // Keyboard/Mouse related mappings
 
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -142,6 +146,8 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &hero_control::remoteSafeDisconnectFunction);
     hero_control::initializeSubsystems();
     hero_control::registerHeroSubsystems(drivers);
     hero_control::setDefaultHeroCommands(drivers);
