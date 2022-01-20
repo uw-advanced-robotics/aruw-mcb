@@ -53,27 +53,27 @@ public:
     /// Offset for x position
     static constexpr uint8_t AIM_DATA_MESSAGE_X_POSITION_OFFSET = 0;
     /// Offset for y position
-    static constexpr uint8_t AIM_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(uint32_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(float);
     /// Offset for z position
-    static constexpr uint8_t AIM_DATA_MESSAGE_Z_POSITION_OFFSET = 2 * sizeof(uint32_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_Z_POSITION_OFFSET = 2 * sizeof(float);
     /// Offset for x velocity
-    static constexpr uint8_t AIM_DATA_MESSAGE_X_VELOCITY_OFFSET = 3 * sizeof(uint32_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_X_VELOCITY_OFFSET = 3 * sizeof(float);
     /// Offset for y velocity
-    static constexpr uint8_t AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET = 4 * sizeof(uint32_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET = 4 * sizeof(float);
     /// Offset for z velocity
-    static constexpr uint8_t AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET = 5 * sizeof(uint32_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET = 5 * sizeof(float);
     /// Offset for x acceleration
-    static constexpr uint8_t AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET = 6 * sizeof(uint32_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET = 6 * sizeof(float);
     /// Offset for y acceleration
-    static constexpr uint8_t AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET = 7 * sizeof(uint32_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET = 7 * sizeof(float);
     /// Offset for z acceleration
-    static constexpr uint8_t AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET = 8 * sizeof(uint32_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET = 8 * sizeof(float);
     /// Offset for whether or not cv has data
-    static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET_OFFSET = 8 * sizeof(uint32_t) + sizeof(uint8_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_HAS_TARGET_OFFSET = 9 * sizeof(float);
     /// Offset for timestamp in microseconds
-    static constexpr uint8_t AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 9 * sizeof(uint32_t) + sizeof(uint8_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 9 * sizeof(float) + sizeof(uint8_t);
     /// Size of entire message
-    static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 10 * sizeof(uint32_t) + sizeof(uint8_t);
+    static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 10 * sizeof(float) + sizeof(uint8_t);
 
     // AutoAim Data
     struct TurretAimData
@@ -160,12 +160,12 @@ private:
 
     // TX message constants for encoding odometry data. These are zero indexed byte offsets.
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_X_POSITION_OFFSET = 0;
-    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(uint32_t);
-    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_Z_POSITION_OFFSET = 2 * sizeof(uint32_t);
-    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TURRET_PITCH_OFFSET = 3 * sizeof(uint32_t);
-    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TURRET_YAW_OFFSET = 4 * sizeof(uint32_t);
-    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 5 * sizeof(uint32_t);
-    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_SIZE = 6 * sizeof(uint32_t);
+    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(float);
+    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_Z_POSITION_OFFSET = 2 * sizeof(float);
+    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TURRET_PITCH_OFFSET = 3 * sizeof(float);
+    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TURRET_YAW_OFFSET = 4 * sizeof(float);
+    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 5 * sizeof(float);
+    static constexpr uint8_t ODOMETRY_DATA_MESSAGE_SIZE = 5 * sizeof(float) + sizeof(uint32_t);
 
     /// Used for determining when to send robot id.
     tap::arch::PeriodicMilliTimer txRobotIdTimeout;

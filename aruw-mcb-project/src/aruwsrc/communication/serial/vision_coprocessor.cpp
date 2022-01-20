@@ -80,29 +80,18 @@ bool VisionCoprocessor::decodeToTurretAimData(
     {
         return false;
     }
-
-    uint32_t xPos = *(message.data + AIM_DATA_MESSAGE_X_POSITION_OFFSET);
-    uint32_t yPos = *(message.data + AIM_DATA_MESSAGE_Y_POSITION_OFFSET);
-    uint32_t zPos = *(message.data + AIM_DATA_MESSAGE_Z_POSITION_OFFSET);
-    uint32_t xVel = *(message.data + AIM_DATA_MESSAGE_X_VELOCITY_OFFSET);
-    uint32_t yVel = *(message.data + AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET);
-    uint32_t zVel = *(message.data + AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET);
-    uint32_t xAcc = *(message.data + AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET);
-    uint32_t yAcc = *(message.data + AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET);
-    uint32_t zAcc = *(message.data + AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET);
-    uint32_t timestamp = *(message.data + AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET);
-
-    aimData->xPos = reinterpretIntAsFloat(xPos);
-    aimData->yPos = reinterpretIntAsFloat(yPos);
-    aimData->zPos = reinterpretIntAsFloat(zPos);
-    aimData->xVel = reinterpretIntAsFloat(xVel);
-    aimData->yVel = reinterpretIntAsFloat(yVel);
-    aimData->zVel = reinterpretIntAsFloat(zVel);
-    aimData->xAcc = reinterpretIntAsFloat(xAcc);
-    aimData->yAcc = reinterpretIntAsFloat(yAcc);
-    aimData->zAcc = reinterpretIntAsFloat(zAcc);
-    aimData->timestamp = reinterpretIntAsFloat(timestamp);
-    aimData->hasTarget = message.data[AIM_DATA_MESSAGE_HAS_TARGET_OFFSET];
+    
+    convertFromLittleEndian(&aimData->xPos, &message.data[AIM_DATA_MESSAGE_X_POSITION_OFFSET]);
+    convertFromLittleEndian(&aimData->yPos, &message.data[AIM_DATA_MESSAGE_Y_POSITION_OFFSET]);
+    convertFromLittleEndian(&aimData->zPos, &message.data[AIM_DATA_MESSAGE_Z_POSITION_OFFSET]);
+    convertFromLittleEndian(&aimData->xVel, &message.data[AIM_DATA_MESSAGE_X_VELOCITY_OFFSET]);
+    convertFromLittleEndian(&aimData->yVel, &message.data[AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET]);
+    convertFromLittleEndian(&aimData->zVel, &message.data[AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET]);
+    convertFromLittleEndian(&aimData->xAcc, &message.data[AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET]);
+    convertFromLittleEndian(&aimData->yAcc, &message.data[AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET]);
+    convertFromLittleEndian(&aimData->zAcc, &message.data[AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET]);
+    convertFromLittleEndian(&aimData->timestamp, &message.data[AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET]);
+    convertFromLittleEndian(&aimData->hasTarget, &message.data[AIM_DATA_MESSAGE_HAS_TARGET_OFFSET]);
 
     return true;
 }
