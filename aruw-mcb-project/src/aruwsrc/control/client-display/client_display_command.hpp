@@ -28,6 +28,8 @@
 #include "tap/communication/serial/ref_serial_ui_wrappers/boolean_hud_indicator.hpp"
 #include "tap/control/command.hpp"
 
+#include "modm/math/utils/misc.hpp"
+
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
