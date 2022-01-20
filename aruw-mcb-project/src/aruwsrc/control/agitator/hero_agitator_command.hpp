@@ -86,10 +86,10 @@ private:
         FINISHED
     };
 
+    aruwsrc::Drivers* drivers;
     AgitatorSubsystem* kickerAgitator;
     AgitatorSubsystem* waterwheelAgitator;
     HeroAgitatorState currState;
-    aruwsrc::Drivers* drivers;
     bool heatLimiting;
     float heatLimitBuffer;
     float startingHeat;

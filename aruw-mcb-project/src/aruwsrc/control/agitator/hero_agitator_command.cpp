@@ -170,6 +170,8 @@ void HeroAgitatorCommand::execute()
                 currState = FINISHED;
             }
             break;
+        case FINISHED:
+            break;
     }
     if (currState != FINISHED)
     {
