@@ -39,6 +39,16 @@ using namespace aruwsrc::agitator;
 
 namespace aruwsrc::display
 {
+template <
+    tap::serial::RefSerial::Tx::GraphicColor ON_COLOR,
+    tap::serial::RefSerial::Tx::GraphicColor OFF_COLOR>
+static void updateGraphicColor(
+    bool indicatorStatus,
+    tap::serial::RefSerialData::Tx::Graphic1Message *graphic)
+{
+    graphic->graphicData.color = static_cast<uint32_t>(indicatorStatus ? ON_COLOR : OFF_COLOR) & 0xf;
+}
+
 ClientDisplayCommand::ClientDisplayCommand(
     aruwsrc::Drivers *drivers,
     ClientDisplaySubsystem *clientDisplay,
@@ -54,28 +64,41 @@ ClientDisplayCommand::ClientDisplayCommand(
       agitatorSubsystem(agitatorSubsystem),
 #if defined(TARGET_HERO)
       hudIndicatorDrawers{
-          BooleanDrawer(drivers, &hudIndicatorGraphics[0]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[1]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[2]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[3]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[4]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[5]),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[0], updateGraphicColor<Tx::GraphicColor::YELLOW, Tx::GraphicColor::GREEN>),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[1], updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[2], updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[3], updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[4], updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+          BooleanDrawer(drivers, &hudIndicatorGraphics[5], updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
       },
 #else
       hudIndicatorDrawers{
-          BooleanDrawer(drivers, &hudIndicatorGraphics[0]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[1]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[2]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[3]),
-          BooleanDrawer(drivers, &hudIndicatorGraphics[4]),
+          BooleanHUDIndicator(
+              drivers,
+              &hudIndicatorGraphics[SYSTEMS_CALIBRATING],
+              updateGraphicColor<Tx::GraphicColor::YELLOW, Tx::GraphicColor::GREEN>),
+          BooleanHUDIndicator(
+              drivers,
+              &hudIndicatorGraphics[HOPPER_OPEN],
+              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+          BooleanHUDIndicator(
+              drivers,
+              &hudIndicatorGraphics[FRICTION_WHEELS_ON],
+              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+          BooleanHUDIndicator(
+              drivers,
+              &hudIndicatorGraphics[CV_AIM_DATA_VALID],
+              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+          BooleanHUDIndicator(
+              drivers,
+              &hudIndicatorGraphics[AGITATOR_STATUS_HEALTHY],
+              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
       },
 #endif
       driveCommands{driveCommands},
       turretSubsystem(turretSubsystem)
 {
     addSubsystemRequirement(clientDisplay);
-    hudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setBoolFalseColor(Tx::GraphicColor::PURPLISH_RED);
-    hudIndicatorDrawers[SYSTEMS_NOT_CALIBRATING].setBoolFalseColor(Tx::GraphicColor::YELLOW);
 }
 
 void ClientDisplayCommand::initialize()
@@ -157,25 +180,25 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateHudIndicators()
 
     if (hopperSubsystem != nullptr)
     {
-        hudIndicatorDrawers[HOPPER_OPEN].setDrawerColor(!hopperSubsystem->getIsHopperOpen());
+        hudIndicatorDrawers[HOPPER_OPEN].setIndicatorState(!hopperSubsystem->getIsHopperOpen());
     }
 
     if (frictionWheelSubsystem != nullptr)
     {
-        hudIndicatorDrawers[FRICTION_WHEELS_ON].setDrawerColor(
+        hudIndicatorDrawers[FRICTION_WHEELS_ON].setIndicatorState(
             !compareFloatClose(0.0f, frictionWheelSubsystem->getDesiredLaunchSpeed(), 1E-5));
     }
 
-    hudIndicatorDrawers[CV_AIM_DATA_VALID].setDrawerColor(
+    hudIndicatorDrawers[CV_AIM_DATA_VALID].setIndicatorState(
         drivers->legacyVisionCoprocessor.lastAimDataValid());
 
     if (agitatorSubsystem != nullptr)
     {
-        hudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setDrawerColor(!agitatorSubsystem->isJammed());
+        hudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(!agitatorSubsystem->isJammed());
     }
 
     // TODO add hero fire ready and systems calibrating when available
-    hudIndicatorDrawers[SYSTEMS_NOT_CALIBRATING].setDrawerColor(true);
+    hudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(true);
 
     for (hudIndicatorIndex = 0; hudIndicatorIndex < NUM_HUD_INDICATORS; hudIndicatorIndex++)
     {

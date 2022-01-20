@@ -478,7 +478,6 @@ void RefSerial::configInteger(
 {
     sharedData->type = static_cast<uint8_t>(Tx::GraphicType::INTEGER);
     sharedData->startAngle = fontSize;
-    sharedData->endAngle = 0;
     sharedData->lineWidth = width;
     sharedData->startX = startX;
     sharedData->startY = startY;

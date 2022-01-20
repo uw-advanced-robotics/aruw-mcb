@@ -25,7 +25,7 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
-#include "tap/communication/serial/ref_serial_ui_wrappers/boolean_drawer.hpp"
+#include "tap/communication/serial/ref_serial_ui_wrappers/boolean_hud_indicator.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
@@ -116,7 +116,7 @@ private:
 
     enum HudIndicatorIndex
     {
-        SYSTEMS_NOT_CALIBRATING = 0,
+        SYSTEMS_CALIBRATING = 0,
         HOPPER_OPEN,
         FRICTION_WHEELS_ON,
         CV_AIM_DATA_VALID,
@@ -232,7 +232,7 @@ private:
     Tx::Graphic1Message hudIndicatorGraphics[NUM_HUD_INDICATORS];
 
     /** The object that will do the actual drawing of the hopper open indicator. */
-    tap::communication::serial::ref_serial_ui_wrapeprs::BooleanDrawer
+    tap::communication::serial::ref_serial_ui_wrapeprs::BooleanHUDIndicator
         hudIndicatorDrawers[NUM_HUD_INDICATORS];
 
     /** Use this index when iterating through the hudIndicatorDrawers in protothreads. */
