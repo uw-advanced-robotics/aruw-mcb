@@ -82,7 +82,7 @@ AgitatorSubsystem kickerAgitator(
     AgitatorSubsystem::HERO_KICKER_MOTOR_ID,
     AgitatorSubsystem::HERO_KICKER_MOTOR_CAN_BUS,
     AgitatorSubsystem::HERO_KICKER_INVERTED,
-    true,
+    false,
     0,
     0);
 
@@ -122,10 +122,10 @@ HeroAgitatorCommand heroAgitatorCommand(
     &kickerAgitator,
     &waterwheelAgitator,
     M_PI / 2.0,
-    50,
+    75,
     M_PI / 2.0,
     M_PI / 10.0,
-    20,
+    30,
     M_PI,
     M_PI / 4.0,
     100,
@@ -156,6 +156,8 @@ void initializeSubsystems()
     chassis.initialize();
     frictionWheels.initialize();
     clientDisplay.initialize();
+    kickerAgitator.initialize();
+    waterwheelAgitator.initialize();
     drivers()->xavierSerial.attachChassis(&chassis);
 }
 
@@ -165,6 +167,8 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandScheduler.registerSubsystem(&kickerAgitator);
+    drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

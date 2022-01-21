@@ -57,7 +57,7 @@ public:
         uint32_t slowRotateTime,
         float waterwheelMaxUnjamAngle,
         bool heatLimiting,
-        float heatLimitBuffer);
+        uint16_t heatLimitBuffer);
 
     bool isReady() override;
 
@@ -91,12 +91,14 @@ private:
     AgitatorSubsystem* waterwheelAgitator;
     HeroAgitatorState currState;
     bool heatLimiting;
-    float heatLimitBuffer;
-    float startingHeat;
+    uint16_t heatLimitBuffer;
+    uint16_t startingHeat;
 
     const tap::gpio::Digital::InputPin LIMIT_SWITCH_PIN = Digital::InputPin::A;
 
     void beginLoading();
+
+    void beginLoadingSlow();
 };  // class HeroAgitatorCommand
 
 }  // namespace aruwsrc::agitator

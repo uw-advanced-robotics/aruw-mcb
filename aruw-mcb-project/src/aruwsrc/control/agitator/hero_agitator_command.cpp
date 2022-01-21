@@ -46,7 +46,7 @@ HeroAgitatorCommand::HeroAgitatorCommand(
     uint32_t slowRotateTime,
     float waterwheelMaxUnjamAngle,
     bool heatLimiting,
-    float heatLimitBuffer)
+    uint16_t heatLimitBuffer)
     : tap::control::ComprisedCommand(drivers),
       kickerFireCommand(kickerAgitator, kickerShootAngleChange, kickerShootRotateTime, 0, false),
       kickerFastLoadCommand(kickerAgitator, kickerLoadFastRotateAngle, fastRotateTime, 0, false),
@@ -71,6 +71,10 @@ HeroAgitatorCommand::HeroAgitatorCommand(
       heatLimiting(heatLimiting),
       heatLimitBuffer(heatLimitBuffer)
 {
+    this->comprisedCommandScheduler.registerSubsystem(kickerAgitator);
+    this->comprisedCommandScheduler.registerSubsystem(waterwheelAgitator);
+    this->addSubsystemRequirement(dynamic_cast<AgitatorSubsystem*>(kickerAgitator));
+    this->addSubsystemRequirement(dynamic_cast<AgitatorSubsystem*>(waterwheelAgitator));
 }
 
 bool HeroAgitatorCommand::isReady()
@@ -86,12 +90,12 @@ bool HeroAgitatorCommand::isFinished() const { return currState == FINISHED; }
 
 void HeroAgitatorCommand::initialize()
 {
-    if (drivers->digital.read(LIMIT_SWITCH_PIN))
+    if (!drivers->digital.read(LIMIT_SWITCH_PIN))
     {
         currState = SHOOTING;
         const auto& robotData = drivers->refSerial.getRobotData();
         startingHeat = robotData.turret.heat42;
-        this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&kickerFireCommand));
+        this->comprisedCommandScheduler.addCommand(&kickerFireCommand);
     }
     else
     {
@@ -104,21 +108,11 @@ void HeroAgitatorCommand::end(bool interrupted)
     startingHeat = 0;
     currState = SHOOTING;
 
-    this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&kickerFireCommand),
-        interrupted);
-    this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&kickerFastLoadCommand),
-        interrupted);
-    this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&waterwheelFastLoadCommand),
-        interrupted);
-    this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&kickerSlowLoadCommand),
-        interrupted);
-    this->comprisedCommandScheduler.removeCommand(
-        dynamic_cast<Command*>(&waterwheelSlowLoadCommand),
-        interrupted);
+    this->comprisedCommandScheduler.removeCommand(&kickerFireCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&kickerFastLoadCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&waterwheelFastLoadCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&kickerSlowLoadCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&waterwheelSlowLoadCommand, interrupted);
 }
 
 void HeroAgitatorCommand::execute()
@@ -141,18 +135,16 @@ void HeroAgitatorCommand::execute()
             }
             else if (kickerFastLoadCommand.isFinished() && waterwheelFastLoadCommand.isFinished())
             {
-                currState = LOAD_SLOW;
-                this->comprisedCommandScheduler.addCommand(
-                    dynamic_cast<Command*>(&kickerSlowLoadCommand));
-                this->comprisedCommandScheduler.addCommand(
-                    dynamic_cast<Command*>(&waterwheelSlowLoadCommand));
+                beginLoadingSlow();
             }
             break;
         case LOAD_SLOW:
-            if (drivers->digital.read(LIMIT_SWITCH_PIN) ||
-                (kickerFastLoadCommand.isFinished() && waterwheelFastLoadCommand.isFinished()))
+            if (drivers->digital.read(LIMIT_SWITCH_PIN))
             {
                 currState = FINISHED;
+            } else if (kickerFastLoadCommand.isFinished() && waterwheelFastLoadCommand.isFinished())
+            {
+                beginLoadingSlow();
             }
             break;
         case FINISHED:
@@ -167,8 +159,15 @@ void HeroAgitatorCommand::execute()
 void HeroAgitatorCommand::beginLoading()
 {
     currState = LOAD_FAST;
-    this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&kickerFastLoadCommand));
-    this->comprisedCommandScheduler.addCommand(dynamic_cast<Command*>(&waterwheelFastLoadCommand));
+    this->comprisedCommandScheduler.addCommand(&kickerFastLoadCommand);
+    this->comprisedCommandScheduler.addCommand(&waterwheelFastLoadCommand);
+}
+
+void HeroAgitatorCommand::beginLoadingSlow()
+{
+    currState = LOAD_SLOW;
+    this->comprisedCommandScheduler.addCommand(&kickerSlowLoadCommand);
+    this->comprisedCommandScheduler.addCommand(&waterwheelSlowLoadCommand);
 }
 
 }  // namespace agitator

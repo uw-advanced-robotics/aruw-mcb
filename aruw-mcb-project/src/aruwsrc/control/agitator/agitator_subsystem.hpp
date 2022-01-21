@@ -100,7 +100,7 @@ public:
 
     static constexpr tap::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = tap::motor::MOTOR4;
     static constexpr tap::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-    static constexpr bool HERO_WATERWHEEL_INVERTED = true;
+    static constexpr bool HERO_WATERWHEEL_INVERTED = false;
 
     // PID terms for the hero kicker
     static constexpr float PID_HERO_KICKER_P = 50000.0f;
