@@ -35,8 +35,9 @@ USAGE = "usage: /usr/bin/python3 check_license_headers.py [--update] \n\
 options:\n\
     --update Adds licenses to files that don't have a license header (optional)"
 LICENSED_SOURCE_FILE_EXTENSIONS = ['.cpp', '.hpp', '.h']
+DATE_PATTERN = '20[0-9][0-9]'
 LICENSE_HEADER_PATTERN = '/*\n\
- \* Copyright \(c\) 20[0-9][0-9]-20[0-9][0-9] Advanced Robotics at the University of Washington <robomstr@uw\.edu>\n\
+ \* Copyright \(c\) ' + DATE_PATTERN + '(-' + DATE_PATTERN + ')? Advanced Robotics at the University of Washington <robomstr@uw\.edu>\n\
  \*\n\
  \* This file is part of aruw-mcb\.\n\
  \*\n\
@@ -71,8 +72,15 @@ def is_licensed_source_file(path, ignored_files):
 
 def file_has_valid_license_header(file):
     with open(file, 'r') as file_to_check:
-        if re.search(LICENSE_HEADER_PATTERN, file_to_check.read()) is None:
+        header = re.search(LICENSE_HEADER_PATTERN, file_to_check.read())
+        if header is None:
             return False
+        years = re.findall(DATE_PATTERN, header.group(0))
+        if len(years) == 2:
+            start_year = int(years[0])
+            end_year = int(years[1])
+            if start_year > end_year:
+                return False
     return True
 
 def add_license_to_file(file):
@@ -92,7 +100,7 @@ for file in files_to_search:
     if is_licensed_source_file(file, FILES_TO_IGNORE):
         if not file_has_valid_license_header(file):
             result = True
-            print("{0} does not contain a license header".format(file))
+            print("{0} does not contain a valid license header".format(file))
             if update_files:
                 add_license_to_file(file)
 
