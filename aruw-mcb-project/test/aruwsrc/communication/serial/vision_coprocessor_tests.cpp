@@ -36,23 +36,9 @@ class VisionCoprocessorTester
 public:
     VisionCoprocessorTester(VisionCoprocessor *serial) : serial(serial) {}
 
-    VisionCoprocessor::AutoAimRequestState *getCurrAimState()
-    {
-        return &serial->AutoAimRequest.currAimState;
-    }
-
-    bool *getCurrAimRequest() { return &serial->AutoAimRequest.autoAimRequest; }
-
 private:
     VisionCoprocessor *serial;
 };
-
-static int reinterpretFloatAsInt(float value) {
-    static_assert(sizeof(float) == sizeof(uint32_t));
-    uint32_t result;
-    memcpy(&result, &value, sizeof(uint32_t));
-    return result;
-}
 
 // RX tests
 
@@ -136,36 +122,4 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
         123456789.0f, 123456789.0f, 123456789.0f,
         123456789.0f, 123456789.0f, 123456789.0f,
         false);
-}
-
-TEST(VisionCoprocessor, messageReceiveCallback_tracking_request_ackn)
-{
-    aruwsrc::Drivers drivers;
-    VisionCoprocessor serial(&drivers);
-    VisionCoprocessorTester serialTester(&serial);
-    DJISerial::SerialMessage message;
-    message.headByte = 0xA5;
-    message.type = 0;
-    message.length = 5;
-    memset(message.data, 0, 5);
-
-    serial.messageReceiveCallback(message);
-
-    // Request that started complete is always complete
-    EXPECT_EQ(VisionCoprocessor::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
-
-    // Send wrong message type, curr aim state won't change
-    *serialTester.getCurrAimState() = VisionCoprocessor::AUTO_AIM_REQUEST_SENT;
-    message.type = 2;
-    serial.messageReceiveCallback(message);
-    EXPECT_EQ(VisionCoprocessor::AUTO_AIM_REQUEST_SENT, *serialTester.getCurrAimState());
-
-    // Send correct message type, curr aim state will change to complete
-    message.type = 0;
-    serial.messageReceiveCallback(message);
-    EXPECT_EQ(VisionCoprocessor::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
-
-    // Send correct message type, but we are already in the acknowledged, so nothing happens
-    serial.messageReceiveCallback(message);
-    EXPECT_EQ(VisionCoprocessor::AUTO_AIM_REQUEST_COMPLETE, *serialTester.getCurrAimState());
 }

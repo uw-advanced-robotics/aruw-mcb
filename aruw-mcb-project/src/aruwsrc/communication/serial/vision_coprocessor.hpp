@@ -75,7 +75,7 @@ public:
     /// Size of entire message
     static constexpr uint8_t AIM_DATA_MESSAGE_SIZE = 10 * sizeof(float) + sizeof(uint8_t);
 
-    // AutoAim Data
+    // AutoAim data to receive from Jetson.
     struct TurretAimData
     {
         float xPos;         /// x position of the target.
@@ -91,17 +91,9 @@ public:
         uint32_t timestamp;  /// A timestamp in microseconds.
     };
 
-    enum AutoAimRequestState
-    {
-        AUTO_AIM_REQUEST_COMPLETE = 0,  /// Resting state for sending auto aim request
-        AUTO_AIM_REQUEST_QUEUED,  /// Message has been queued but not yet sent requesting auto-aim
-        AUTO_AIM_REQUEST_SENT,    /// Message has been sent and a reply is being waited for
-    };
-
     enum TxMessageTypes
     {
         CV_MESSAGE_ODOMETRY_DATA = 1,
-        CV_MESSAGE_TYPE_AUTO_AIM_REQUEST,
         CV_NUM_MESSAGE_TYPES,
     };
 
@@ -110,32 +102,14 @@ public:
     mockable ~VisionCoprocessor() = default;
 
     /**
-     * Call this before using the serial line, initializes the uart line
-     * and the callback
-     */
-    mockable void initializeCV();
-
-    /**
      * Handles the types of messages defined above in the RX message handlers section.
      */
     void messageReceiveCallback(const SerialMessage& completeMessage) override;
 
     /**
      * Cycles through and sends the messages that must be sent to the xavier.
-     * @note Uses protothread logic
-     * @return `false` if the protothread is done (should never happen), or `true` otherwise.
      */
-    mockable bool sendMessage();
-
-    /**
-     * Start Requesting Xavier to Track Target.
-     */
-    mockable void beginAutoAim();
-
-    /**
-     * Stop Requesting Xavier to Track Target.
-     */
-    mockable void stopAutoAim();
+    mockable void sendMessage();
 
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
@@ -149,15 +123,6 @@ private:
         CV_MESSAGE_TYPE_TURRET_AIM = 0,
     };
 
-    /// Time in ms since last CV aim data was received before deciding CV is offline.
-    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 5000;
-    /// Time between each robot id send to CV in milliseconds.
-    static constexpr int16_t TIME_BETWEEN_ROBOT_ID_SEND_MS = 5000;
-    /// Time between auto aim requests (which are resent until aim data is sent from the xavier)
-    static constexpr int16_t AUTO_AIM_REQUEST_SEND_PERIOD_MS = 1000;
-    /// Precision of the floating point data sent to the Xavier.
-    static constexpr float FIXED_POINT_PRECISION = 0.01f;
-
     // TX message constants for encoding odometry data. These are zero indexed byte offsets.
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_X_POSITION_OFFSET = 0;
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_Y_POSITION_OFFSET = sizeof(float);
@@ -167,31 +132,11 @@ private:
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET = 5 * sizeof(float);
     static constexpr uint8_t ODOMETRY_DATA_MESSAGE_SIZE = 5 * sizeof(float) + sizeof(uint32_t);
 
-    /// Used for determining when to send robot id.
-    tap::arch::PeriodicMilliTimer txRobotIdTimeout;
-
-    /// The most recent auto aim request state.
-    struct
-    {
-        /// `false` if request to stop auto aiming, `true` if request to start auto aiming.
-        bool autoAimRequest = false;
-        AutoAimRequestState currAimState = AUTO_AIM_REQUEST_COMPLETE;
-        /// Timer used to reset the aim request if acknowledgement has not been sent by xavier.
-        tap::arch::MilliTimeout sendAimRequestTimeout;
-    } AutoAimRequest;
-
     /// The last aim data received from the xavier.
     TurretAimData lastAimData;
 
     /// Whether or not aim data is up to date.
     bool aimDataValid;
-
-    // CV online variables.
-    /// Timer for determining if serial is offline.
-    tap::arch::MilliTimeout cvOfflineTimeout;
-
-    /// A flag set to `true` if the timeout is not expired, and `false` otherwise.
-    bool isCvOnline;
 
     const can::TurretMCBCanComm* turretMCBCanComm;
 
@@ -207,21 +152,11 @@ private:
      */
     static bool decodeToTurretAimData(const SerialMessage& message, TurretAimData* aimData);
 
-    /**
-     * Reinterprets an int as a float.
-     *
-     * @param[in] value the int to reinterpret.
-     * @return the value reinterpreted as a float.
-     */
-    static float reinterpretIntAsFloat(uint32_t value);
-
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
 
     void sendOdometryData();
-
-    void sendAutoAimRequest();
 };
 }  // namespace serial
 }  // namespace aruwsrc

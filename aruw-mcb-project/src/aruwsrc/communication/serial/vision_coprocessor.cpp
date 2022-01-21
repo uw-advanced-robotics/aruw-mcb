@@ -35,21 +35,12 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, Uart::UartPort::Uart2),
       lastAimData(),
       aimDataValid(false),
-      isCvOnline(false),
       turretMCBCanComm(&drivers->turretMCBCanComm)
 {
 }
 
-void VisionCoprocessor::initializeCV()
-{
-    txRobotIdTimeout.restart(TIME_BETWEEN_ROBOT_ID_SEND_MS);
-    cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-    initialize();
-}
-
 void VisionCoprocessor::messageReceiveCallback(const SerialMessage& completeMessage)
 {
-    cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
     switch (completeMessage.type)
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
@@ -58,12 +49,6 @@ void VisionCoprocessor::messageReceiveCallback(const SerialMessage& completeMess
             if (decodeToTurretAimData(completeMessage, &lastAimData))
             {
                 aimDataValid = true;
-
-                if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT)
-                {
-                    AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
-                    AutoAimRequest.sendAimRequestTimeout.stop();
-                }
             }
             return;
         }
@@ -96,22 +81,9 @@ bool VisionCoprocessor::decodeToTurretAimData(
     return true;
 }
 
-float VisionCoprocessor::reinterpretIntAsFloat(uint32_t value)
+void VisionCoprocessor::sendMessage()
 {
-    static_assert(sizeof(float) == sizeof(uint32_t));
-    float result;
-    memcpy(&result, &value, sizeof(uint32_t));
-    return result;
-}
-
-bool VisionCoprocessor::sendMessage()
-{
-    while (true)
-    {
-        isCvOnline = !cvOfflineTimeout.isExpired();
-        aimDataValid &= isCvOnline;
-        sendOdometryData();
-    }
+    sendOdometryData();
 }
 
 void VisionCoprocessor::sendOdometryData()
@@ -126,46 +98,6 @@ void VisionCoprocessor::sendOdometryData()
     txMessage.type = CV_MESSAGE_ODOMETRY_DATA;
     txMessage.length = ODOMETRY_DATA_MESSAGE_SIZE;
     send();
-}
-
-void VisionCoprocessor::beginAutoAim()
-{
-    AutoAimRequest.autoAimRequest = true;
-    AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
-}
-
-void VisionCoprocessor::stopAutoAim()
-{
-    AutoAimRequest.autoAimRequest = false;
-    AutoAimRequest.currAimState = AUTO_AIM_REQUEST_QUEUED;
-}
-
-void VisionCoprocessor::sendAutoAimRequest()
-{
-    // If there is an auto aim request queued or if the request aim
-    // timeout is expired (we haven't received a auto aim message),
-    // send an auto aim request message.
-    if (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_QUEUED ||
-        (AutoAimRequest.currAimState == AUTO_AIM_REQUEST_SENT &&
-         AutoAimRequest.sendAimRequestTimeout.isExpired()))
-    {
-        txMessage.data[0] = AutoAimRequest.autoAimRequest;
-        txMessage.length = 1;
-        txMessage.type = CV_MESSAGE_TYPE_AUTO_AIM_REQUEST;
-
-        if (send())
-        {
-            if (AutoAimRequest.autoAimRequest)
-            {
-                AutoAimRequest.currAimState = AUTO_AIM_REQUEST_SENT;
-                AutoAimRequest.sendAimRequestTimeout.restart(AUTO_AIM_REQUEST_SEND_PERIOD_MS);
-            }
-            else
-            {
-                AutoAimRequest.currAimState = AUTO_AIM_REQUEST_COMPLETE;
-            }
-        }
-    }
 }
 
 }  // namespace serial
