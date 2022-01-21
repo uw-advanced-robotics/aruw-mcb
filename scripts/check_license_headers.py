@@ -18,6 +18,7 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import re
 import sys
 
 SCRIPT_DIR = os.path.dirname(__file__)
@@ -34,24 +35,24 @@ USAGE = "usage: /usr/bin/python3 check_license_headers.py [--update] \n\
 options:\n\
     --update Adds licenses to files that don't have a license header (optional)"
 LICENSED_SOURCE_FILE_EXTENSIONS = ['.cpp', '.hpp', '.h']
-LICENSE_HEADER = '/*\n\
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>\n\
- *\n\
- * This file is part of aruw-mcb.\n\
- *\n\
- * aruw-mcb is free software: you can redistribute it and/or modify\n\
- * it under the terms of the GNU General Public License as published by\n\
- * the Free Software Foundation, either version 3 of the License, or\n\
- * (at your option) any later version.\n\
- *\n\
- * aruw-mcb is distributed in the hope that it will be useful,\n\
- * but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n\
- * GNU General Public License for more details.\n\
- *\n\
- * You should have received a copy of the GNU General Public License\n\
- * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.\n\
- */\n'
+LICENSE_HEADER_PATTERN = '/*\n\
+ \* Copyright \(c\) 20[0-9][0-9]-20[0-9][0-9] Advanced Robotics at the University of Washington <robomstr@uw\.edu>\n\
+ \*\n\
+ \* This file is part of aruw-mcb\.\n\
+ \*\n\
+ \* aruw-mcb is free software: you can redistribute it and/or modify\n\
+ \* it under the terms of the GNU General Public License as published by\n\
+ \* the Free Software Foundation, either version 3 of the License, or\n\
+ \* \(at your option\) any later version\.\n\
+ \*\n\
+ \* aruw-mcb is distributed in the hope that it will be useful,\n\
+ \* but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
+ \* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\.  See the\n\
+ \* GNU General Public License for more details\.\n\
+ \*\n\
+ \* You should have received a copy of the GNU General Public License\n\
+ \* along with aruw-mcb\.  If not, see <https://www\.gnu\.org/licenses/>\.\n\
+ \*/\n'
 
 if len(sys.argv) not in [ 1, 2 ]:
     print(USAGE)
@@ -70,7 +71,7 @@ def is_licensed_source_file(path, ignored_files):
 
 def file_has_valid_license_header(file):
     with open(file, 'r') as file_to_check:
-        if LICENSE_HEADER not in file_to_check.read():
+        if re.search(LICENSE_HEADER_PATTERN, file_to_check.read()) is None:
             return False
     return True
 
