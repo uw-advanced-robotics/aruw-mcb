@@ -20,13 +20,9 @@
 #ifndef VISION_COPROCESSOR_HPP_
 #define VISION_COPROCESSOR_HPP_
 
-#include "tap/architecture/periodic_timer.hpp"
-#include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
-#include "tap/util_macros.hpp"
 
 #include "aruwsrc/drivers.hpp"
-#include "modm/processing/resumable.hpp"
 
 class VisionCoprocessorTester;
 

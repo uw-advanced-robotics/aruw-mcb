@@ -18,8 +18,6 @@
  */
 #include "vision_coprocessor.hpp"
 
-#include <cstring>
-
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch;
