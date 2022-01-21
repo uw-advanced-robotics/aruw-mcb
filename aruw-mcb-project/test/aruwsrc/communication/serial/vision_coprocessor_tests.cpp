@@ -19,8 +19,6 @@
 
 #include <iostream>
 
-#include "tap/architecture/endianness_wrappers.hpp"
-
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "gtest/gtest.h"
@@ -28,7 +26,6 @@
 using aruwsrc::serial::VisionCoprocessor;
 using tap::serial::DJISerial;
 using namespace tap::arch;
-
 
 // class for accessing internals of VisionCoprocessor class for testing purposes
 class VisionCoprocessorTester
@@ -59,35 +56,37 @@ static void initAndRunAutoAimRxTest(
     DJISerial::SerialMessage message;
     message.headByte = 0xA5;
     message.type = 0;
-    message.length = serial.AIM_DATA_MESSAGE_SIZE;
-
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_X_POSITION_OFFSET], &xPosDesired, sizeof(uint32_t));
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_Y_POSITION_OFFSET], &yPosDesired, sizeof(uint32_t));
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_Z_POSITION_OFFSET], &zPosDesired, sizeof(uint32_t));
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_X_VELOCITY_OFFSET], &xVelDesired, sizeof(uint32_t));
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET], &yVelDesired, sizeof(uint32_t));
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET], &zVelDesired, sizeof(uint32_t));
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET], &xAccDesired, sizeof(uint32_t));
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET], &yAccDesired, sizeof(uint32_t));
-    memcpy(&message.data[serial.AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET], &zAccDesired, sizeof(uint32_t));
-    message.data[serial.AIM_DATA_MESSAGE_HAS_TARGET_OFFSET] = static_cast<uint8_t>(hasTarget);
-    message.messageTimestamp = 1234;
+    // TODO: redo memcpy
+    message.length = 10 * sizeof(float) + sizeof(uint8_t);
+    aruwsrc::serial::VisionCoprocessor::TurretAimData testData;
+    testData.xPos = xPosDesired;
+    testData.yPos = yPosDesired;
+    testData.zPos = zPosDesired;
+    testData.xVel = xVelDesired;
+    testData.yVel = yVelDesired;
+    testData.zVel = zVelDesired;
+    testData.xAcc = xAccDesired;
+    testData.yAcc = yAccDesired;
+    testData.zAcc = zAccDesired;
+    testData.hasTarget = hasTarget;
+    testData.timestamp = 1234;
+    memcpy(&message.data, &testData, sizeof(testData));
 
     serial.messageReceiveCallback(message);
 
     EXPECT_TRUE(serial.lastAimDataValid());
-    const VisionCoprocessor::TurretAimData &aimData = serial.getLastAimData();
-    EXPECT_FLOAT_EQ(hasTarget, aimData.hasTarget);
-    EXPECT_FLOAT_EQ(xPosDesired, aimData.xPos);
-    EXPECT_FLOAT_EQ(yPosDesired, aimData.yPos);
-    EXPECT_FLOAT_EQ(zPosDesired, aimData.zPos);
-    EXPECT_FLOAT_EQ(xVelDesired, aimData.xVel);
-    EXPECT_FLOAT_EQ(yVelDesired, aimData.yVel);
-    EXPECT_FLOAT_EQ(zVelDesired, aimData.zVel);
-    EXPECT_FLOAT_EQ(xAccDesired, aimData.xAcc);
-    EXPECT_FLOAT_EQ(yAccDesired, aimData.yAcc);
-    EXPECT_FLOAT_EQ(zAccDesired, aimData.zAcc);
-    EXPECT_EQ(1234, message.messageTimestamp);
+    const VisionCoprocessor::TurretAimData &callbackData = serial.getLastAimData();
+    EXPECT_EQ(hasTarget, callbackData.hasTarget);
+    EXPECT_EQ(xPosDesired, callbackData.xPos);
+    EXPECT_EQ(yPosDesired, callbackData.yPos);
+    EXPECT_EQ(zPosDesired, callbackData.zPos);
+    EXPECT_EQ(xVelDesired, callbackData.xVel);
+    EXPECT_EQ(yVelDesired, callbackData.yVel);
+    EXPECT_EQ(zVelDesired, callbackData.zVel);
+    EXPECT_EQ(xAccDesired, callbackData.xAcc);
+    EXPECT_EQ(yAccDesired, callbackData.yAcc);
+    EXPECT_EQ(zAccDesired, callbackData.zAcc);
+    EXPECT_EQ(1234, callbackData.timestamp);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_zeros)
@@ -112,14 +111,30 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
 {
-    initAndRunAutoAimRxTest(-0.45f, -0.35f, -0.25f, -0.15f, -0.05f, 0.05f, 0.15f, 0.25f, 0.35f, false);
+    initAndRunAutoAimRxTest(
+        -0.45f,
+        -0.35f,
+        -0.25f,
+        -0.15f,
+        -0.05f,
+        0.05f,
+        0.15f,
+        0.25f,
+        0.35f,
+        false);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
 {
     initAndRunAutoAimRxTest(
-        123456789.0f, 123456789.0f, 123456789.0f,
-        123456789.0f, 123456789.0f, 123456789.0f,
-        123456789.0f, 123456789.0f, 123456789.0f,
+        123456789.0f,
+        123456789.0f,
+        123456789.0f,
+        123456789.0f,
+        123456789.0f,
+        123456789.0f,
+        123456789.0f,
+        123456789.0f,
+        123456789.0f,
         false);
 }

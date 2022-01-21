@@ -20,8 +20,6 @@
 
 #include <cstring>
 
-#include "tap/architecture/endianness_wrappers.hpp"
-
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch;
@@ -45,7 +43,6 @@ void VisionCoprocessor::messageReceiveCallback(const SerialMessage& completeMess
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
         {
-
             if (decodeToTurretAimData(completeMessage, &lastAimData))
             {
                 aimDataValid = true;
@@ -57,46 +54,31 @@ void VisionCoprocessor::messageReceiveCallback(const SerialMessage& completeMess
     }
 }
 
-bool VisionCoprocessor::decodeToTurretAimData(
-    const SerialMessage& message,
-    TurretAimData* aimData)
+bool VisionCoprocessor::decodeToTurretAimData(const SerialMessage& message, TurretAimData* aimData)
 {
-    if (message.length != AIM_DATA_MESSAGE_SIZE)
+    if (message.length != sizeof(*aimData))
     {
         return false;
     }
-    
-    convertFromLittleEndian(&aimData->xPos, &message.data[AIM_DATA_MESSAGE_X_POSITION_OFFSET]);
-    convertFromLittleEndian(&aimData->yPos, &message.data[AIM_DATA_MESSAGE_Y_POSITION_OFFSET]);
-    convertFromLittleEndian(&aimData->zPos, &message.data[AIM_DATA_MESSAGE_Z_POSITION_OFFSET]);
-    convertFromLittleEndian(&aimData->xVel, &message.data[AIM_DATA_MESSAGE_X_VELOCITY_OFFSET]);
-    convertFromLittleEndian(&aimData->yVel, &message.data[AIM_DATA_MESSAGE_Y_VELOCITY_OFFSET]);
-    convertFromLittleEndian(&aimData->zVel, &message.data[AIM_DATA_MESSAGE_Z_VELOCITY_OFFSET]);
-    convertFromLittleEndian(&aimData->xAcc, &message.data[AIM_DATA_MESSAGE_X_ACCELERATION_OFFSET]);
-    convertFromLittleEndian(&aimData->yAcc, &message.data[AIM_DATA_MESSAGE_Y_ACCELERATION_OFFSET]);
-    convertFromLittleEndian(&aimData->zAcc, &message.data[AIM_DATA_MESSAGE_Z_ACCELERATION_OFFSET]);
-    convertFromLittleEndian(&aimData->timestamp, &message.data[AIM_DATA_MESSAGE_TIMESTAMP_MICROS_OFFSET]);
-    convertFromLittleEndian(&aimData->hasTarget, &message.data[AIM_DATA_MESSAGE_HAS_TARGET_OFFSET]);
-
+    memcpy(aimData, &message.data, sizeof(*aimData));
     return true;
 }
 
-void VisionCoprocessor::sendMessage()
-{
-    sendOdometryData();
-}
+void VisionCoprocessor::sendMessage() { sendOdometryData(); }
 
 void VisionCoprocessor::sendOdometryData()
 {
     // TODO: add odometry data
-    convertToLittleEndian(
-        static_cast<int32_t>(turretMCBCanComm->getYaw()),
-        txMessage.data + ODOMETRY_DATA_MESSAGE_TURRET_YAW_OFFSET);
-    convertToLittleEndian(
-        static_cast<int32_t>(turretMCBCanComm->getPitch()),
-        txMessage.data + ODOMETRY_DATA_MESSAGE_TURRET_PITCH_OFFSET);
+    OdometryData odometryData;
+    odometryData.chassisX = 0.0f;
+    odometryData.chassisY = 0.0f;
+    odometryData.chassisZ = 0.0f;
+    odometryData.turretPitch = turretMCBCanComm->getPitch();
+    odometryData.turretYaw = turretMCBCanComm->getYaw();
+    odometryData.timestamp = tap::arch::clock::getTimeMicroseconds();
+    memcpy(&txMessage.data, &odometryData, sizeof(odometryData));
     txMessage.type = CV_MESSAGE_ODOMETRY_DATA;
-    txMessage.length = ODOMETRY_DATA_MESSAGE_SIZE;
+    txMessage.length = sizeof(odometryData);
     send();
 }
 
