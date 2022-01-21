@@ -182,6 +182,8 @@ void startHeroCommands(aruwsrc::Drivers *) {}
 void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftMousePressed);
 }
 }  // namespace hero_control
 

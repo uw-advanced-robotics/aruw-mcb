@@ -174,12 +174,12 @@ private:
     /**
      * Time in ms to wait for the IMU heat to stabalize upon initialization.
      */
-    static constexpr uint32_t MAX_WAIT_FOR_IMU_TEMPERATURE_STABALIZE = 10'000;
+    static constexpr uint32_t MAX_WAIT_FOR_IMU_TEMPERATURE_STABALIZE = 1; //10'000;
 
     /**
      * Time in ms to wait after IMU heat has reached stable point upon initialization.
      */
-    static constexpr uint32_t WAIT_TIME_AFTER_CALIBRATION = 10'000;
+    static constexpr uint32_t WAIT_TIME_AFTER_CALIBRATION = 1; //10'000;
 
     /**
      * Bit appended or removed from a register while reading/writing.
