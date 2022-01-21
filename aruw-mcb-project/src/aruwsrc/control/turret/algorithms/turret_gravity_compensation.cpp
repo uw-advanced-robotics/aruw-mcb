@@ -25,7 +25,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::algorithms
 {
 float computeGravitationalForceOffset(
     const float cgX,

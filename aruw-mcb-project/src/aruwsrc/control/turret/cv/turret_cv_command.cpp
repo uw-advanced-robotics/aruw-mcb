@@ -27,13 +27,13 @@
 
 using namespace tap::arch::clock;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::cv
 {
 TurretCVCommand::TurretCVCommand(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
-    TurretYawControllerInterface *yawController,
-    TurretPitchControllerInterface *pitchController)
+    algorithms::TurretYawControllerInterface *yawController,
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController)
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
@@ -42,7 +42,7 @@ TurretCVCommand::TurretCVCommand(
     addSubsystemRequirement(turretSubsystem);
 }
 
-bool TurretCVCommand::isReady() { return turretSubsystem->isOnline(); }
+bool TurretCVCommand::isReady() { return !isFinished(); }
 
 void TurretCVCommand::initialize()
 {
@@ -81,7 +81,7 @@ void TurretCVCommand::execute()
 
 bool TurretCVCommand::isFinished() const
 {
-    return yawController->isFinished() || pitchController->isFinished();
+    return !pitchController->isOnline() || !yawController->isOnline();
 }
 
 void TurretCVCommand::end(bool)

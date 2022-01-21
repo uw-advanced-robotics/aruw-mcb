@@ -24,7 +24,7 @@
 
 #include "turret_gravity_compensation.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::algorithms
 {
 /**
  * Transforms the specified `angleToTransform`, a yaw/pitch angle from the chassis frame to the
@@ -116,50 +116,12 @@ static inline void updateYawWorldFrameSetpoint(
 WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadePidTurretController(
     const aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
-    float posKp,
-    float posKi,
-    float posKd,
-    float posMaxICumulative,
-    float posMaxOutput,
-    float posTQDerivativeKalman,
-    float posTRDerivativeKalman,
-    float posTQProportionalKalman,
-    float posTRProportionalKalman,
-    float posErrDeadzone,
-    float velKp,
-    float velKi,
-    float velKd,
-    float velMaxICumulative,
-    float velMaxOutput,
-    float velTQDerivativeKalman,
-    float velTRDerivativeKalman,
-    float velTQProportionalKalman,
-    float velTRProportionalKalman,
-    float velErrDeadzone)
+    const tap::algorithms::SmoothPidConfig &posPidConfig,
+    const tap::algorithms::SmoothPidConfig &velPidConfig)
     : TurretYawControllerInterface(turretSubsystem),
       drivers(drivers),
-      positionPid(
-          posKp,
-          posKi,
-          posKd,
-          posMaxICumulative,
-          posMaxOutput,
-          posTQDerivativeKalman,
-          posTRDerivativeKalman,
-          posTQProportionalKalman,
-          posTRProportionalKalman,
-          posErrDeadzone),
-      velocityPid(
-          velKp,
-          velKi,
-          velKd,
-          velMaxICumulative,
-          velMaxOutput,
-          velTQDerivativeKalman,
-          velTRDerivativeKalman,
-          velTQProportionalKalman,
-          velTRProportionalKalman,
-          velErrDeadzone),
+      positionPid(posPidConfig),
+      velocityPid(velPidConfig),
       worldFrameSetpoint(0, 0, 360)
 {
 }
@@ -209,9 +171,9 @@ float WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
     return worldFrameSetpoint.getValue();
 }
 
-bool WorldFrameYawTurretImuCascadePidTurretController::isFinished() const
+bool WorldFrameYawTurretImuCascadePidTurretController::isOnline() const
 {
-    return !turretSubsystem->isOnline() || !drivers->turretMCBCanComm.isConnected();
+    return turretSubsystem->isOnline() && drivers->turretMCBCanComm.isConnected();
 }
 
 /**
@@ -259,50 +221,12 @@ WorldFramePitchTurretImuCascadePidTurretController::
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
-        float posKp,
-        float posKi,
-        float posKd,
-        float posMaxICumulative,
-        float posMaxOutput,
-        float posTQDerivativeKalman,
-        float posTRDerivativeKalman,
-        float posTQProportionalKalman,
-        float posTRProportionalKalman,
-        float posErrDeadzone,
-        float velKp,
-        float velKi,
-        float velKd,
-        float velMaxICumulative,
-        float velMaxOutput,
-        float velTQDerivativeKalman,
-        float velTRDerivativeKalman,
-        float velTQProportionalKalman,
-        float velTRProportionalKalman,
-        float velErrDeadzone)
+        const tap::algorithms::SmoothPidConfig &posPidConfig,
+        const tap::algorithms::SmoothPidConfig &velPidConfig)
     : TurretPitchControllerInterface(turretSubsystem),
       drivers(drivers),
-      positionPid(
-          posKp,
-          posKi,
-          posKd,
-          posMaxICumulative,
-          posMaxOutput,
-          posTQDerivativeKalman,
-          posTRDerivativeKalman,
-          posTQProportionalKalman,
-          posTRProportionalKalman,
-          posErrDeadzone),
-      velocityPid(
-          velKp,
-          velKi,
-          velKd,
-          velMaxICumulative,
-          velMaxOutput,
-          velTQDerivativeKalman,
-          velTRDerivativeKalman,
-          velTQProportionalKalman,
-          velTRProportionalKalman,
-          velErrDeadzone),
+      positionPid(posPidConfig),
+      velocityPid(velPidConfig),
       worldFrameSetpoint(0, 0, 360)
 {
 }
@@ -353,8 +277,8 @@ float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const
     return worldFrameSetpoint.getValue();
 }
 
-bool WorldFramePitchTurretImuCascadePidTurretController::isFinished() const
+bool WorldFramePitchTurretImuCascadePidTurretController::isOnline() const
 {
-    return !turretSubsystem->isOnline() || !drivers->turretMCBCanComm.isConnected();
+    return turretSubsystem->isOnline() && drivers->turretMCBCanComm.isConnected();
 }
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms

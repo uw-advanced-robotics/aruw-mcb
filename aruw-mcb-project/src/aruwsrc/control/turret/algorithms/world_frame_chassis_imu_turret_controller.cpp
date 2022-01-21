@@ -21,7 +21,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::algorithms
 {
 /**
  * Transforms the passed in turret yaw angle in the chassis frame to the world frame.
@@ -110,28 +110,10 @@ static inline void updateYawWorldFrameSetpoint(
 WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
-    float kp,
-    float ki,
-    float kd,
-    float maxICumulative,
-    float maxOutput,
-    float tQDerivativeKalman,
-    float tRDerivativeKalman,
-    float tQProportionalKalman,
-    float tRProportionalKalman,
-    float errDeadzone)
+    const tap::algorithms::SmoothPidConfig &pidConfig)
     : TurretYawControllerInterface(turretSubsystem),
       drivers(drivers),
-      pid(kp,
-          ki,
-          kd,
-          maxICumulative,
-          maxOutput,
-          tQDerivativeKalman,
-          tRDerivativeKalman,
-          tQProportionalKalman,
-          tRProportionalKalman,
-          errDeadzone),
+      pid(pidConfig),
       worldFrameSetpoint(0, 0, 360)
 {
 }
@@ -176,9 +158,9 @@ float WorldFrameYawChassisImuTurretController::getSetpoint() const
     return worldFrameSetpoint.getValue();
 }
 
-bool WorldFrameYawChassisImuTurretController::isFinished() const
+bool WorldFrameYawChassisImuTurretController::isOnline() const
 {
-    return !turretSubsystem->isOnline() || !drivers->mpu6500.isRunning();
+    return turretSubsystem->isOnline() && drivers->mpu6500.isRunning();
 }
 
 }  // namespace aruwsrc::control::turret

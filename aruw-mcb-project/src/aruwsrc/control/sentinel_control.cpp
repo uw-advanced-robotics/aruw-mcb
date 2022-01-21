@@ -133,38 +133,22 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 // turret controllers
-ChassisFramePitchTurretController chassisFramePitchTurretController(
+algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     &turretSubsystem,
-    chassis_rel::PITCH_P,
-    chassis_rel::PITCH_I,
-    chassis_rel::PITCH_D,
-    chassis_rel::PITCH_MAX_ERROR_SUM,
-    chassis_rel::PITCH_MAX_OUTPUT,
-    chassis_rel::PITCH_Q_DERIVATIVE_KALMAN,
-    chassis_rel::PITCH_R_DERIVATIVE_KALMAN,
-    chassis_rel::PITCH_Q_PROPORTIONAL_KALMAN,
-    chassis_rel::PITCH_R_PROPORTIONAL_KALMAN);
+    chassis_rel::PITCH_PID_CONFIG);
 
-ChassisFrameYawTurretController chassisFrameYawTurretController(
+algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     &turretSubsystem,
-    chassis_rel::YAW_P,
-    chassis_rel::YAW_I,
-    chassis_rel::YAW_D,
-    chassis_rel::YAW_MAX_ERROR_SUM,
-    chassis_rel::YAW_MAX_OUTPUT,
-    chassis_rel::YAW_Q_DERIVATIVE_KALMAN,
-    chassis_rel::YAW_R_DERIVATIVE_KALMAN,
-    chassis_rel::YAW_Q_PROPORTIONAL_KALMAN,
-    chassis_rel::YAW_R_PROPORTIONAL_KALMAN);
+    chassis_rel::YAW_PID_CONFIG);
 
-SentinelTurretCVCommand turretCVCommand(
+cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
     &turretSubsystem,
     &agitator,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController);
 
-TurretUserControlCommand turretManual(
+user::TurretUserControlCommand turretManual(
     drivers(),
     &turretSubsystem,
     &chassisFrameYawTurretController,

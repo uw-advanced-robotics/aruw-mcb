@@ -28,7 +28,7 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::user
 {
 /**
  * A command that performs a "u-turn" operation of the turret. Commands

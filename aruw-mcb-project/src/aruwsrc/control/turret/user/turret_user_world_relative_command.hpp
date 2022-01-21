@@ -31,9 +31,12 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
-{
+namespace aruwsrc::control::turret{
 class TurretSubsystem;
+}
+
+namespace aruwsrc::control::turret::user
+{
 
 /**
  * Turret control, with the yaw and pitch gimbals using the world relative frame,
@@ -54,10 +57,10 @@ public:
     TurretUserWorldRelativeCommand(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
-        TurretYawControllerInterface *chassisImuYawController,
-        TurretPitchControllerInterface *chassisImuPitchController,
-        TurretYawControllerInterface *turretImuYawController,
-        TurretPitchControllerInterface *turretImuPitchController);
+        algorithms::TurretYawControllerInterface *chassisImuYawController,
+        algorithms::TurretPitchControllerInterface *chassisImuPitchController,
+        algorithms::TurretYawControllerInterface *turretImuYawController,
+        algorithms::TurretPitchControllerInterface *turretImuPitchController);
 
     bool isReady() override;
 

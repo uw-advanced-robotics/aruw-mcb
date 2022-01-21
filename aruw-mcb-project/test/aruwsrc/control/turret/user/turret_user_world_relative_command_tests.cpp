@@ -27,6 +27,8 @@
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::user;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc;
 using namespace aruwsrc::mock;
 using namespace testing;
@@ -34,57 +36,24 @@ using namespace testing;
 #define SETUP_TEST()                                                                       \
     Drivers drivers;                                                                       \
     NiceMock<TurretSubsystemMock> turret(&drivers);                                        \
-    ChassisFramePitchTurretController                                                      \
-        chassisFramePitchTurretController(&turret, 1, 0, 0, 0, 1, 1, 0, 1, 0);             \
-    WorldFrameYawChassisImuTurretController                                                \
-        worldFrameYawChassisImuController(&drivers, &turret, 1, 0, 0, 0, 1, 1, 0, 1, 0);   \
+    ChassisFramePitchTurretController chassisFramePitchTurretController(                   \
+        &turret,                                                                           \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
+    WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(             \
+        &drivers,                                                                          \
+        &turret,                                                                           \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
     WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController( \
         &drivers,                                                                          \
         &turret,                                                                           \
-        1,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        0);                                                                                \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},                                                    \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
                                                                                            \
     WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(     \
         &drivers,                                                                          \
         &turret,                                                                           \
-        1,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        1,                                                                                 \
-        0,                                                                                 \
-        0);                                                                                \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},                                                    \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
     TurretUserWorldRelativeCommand turretCmd(                                              \
         &drivers,                                                                          \
         &turret,                                                                           \

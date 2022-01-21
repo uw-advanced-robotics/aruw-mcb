@@ -25,7 +25,7 @@
 
 #include "modm/math/geometry/angle.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::algorithms
 {
 /**
  * @param[in] cgX The center of gravity relative to the center of the turret's pitch pivot point

@@ -26,31 +26,13 @@
 
 using namespace tap::control::turret;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::algorithms
 {
 ChassisFrameYawTurretController::ChassisFrameYawTurretController(
     TurretSubsystem *turretSubsystem,
-    float kp,
-    float ki,
-    float kd,
-    float maxICumulative,
-    float maxOutput,
-    float tQDerivativeKalman,
-    float tRDerivativeKalman,
-    float tQProportionalKalman,
-    float tRProportionalKalman,
-    float errDeadzone)
+    const tap::algorithms::SmoothPidConfig &pidConfig)
     : TurretYawControllerInterface(turretSubsystem),
-      pid(kp,
-          ki,
-          kd,
-          maxICumulative,
-          maxOutput,
-          tQDerivativeKalman,
-          tRDerivativeKalman,
-          tQProportionalKalman,
-          tRProportionalKalman,
-          errDeadzone)
+      pid(pidConfig)
 {
 }
 
@@ -76,31 +58,13 @@ float ChassisFrameYawTurretController::getSetpoint() const
     return turretSubsystem->getYawSetpoint();
 }
 
-bool ChassisFrameYawTurretController::isFinished() const { return !turretSubsystem->isOnline(); }
+bool ChassisFrameYawTurretController::isOnline() const { return turretSubsystem->isOnline(); }
 
 ChassisFramePitchTurretController::ChassisFramePitchTurretController(
     TurretSubsystem *turretSubsystem,
-    float kp,
-    float ki,
-    float kd,
-    float maxICumulative,
-    float maxOutput,
-    float tQDerivativeKalman,
-    float tRDerivativeKalman,
-    float tQProportionalKalman,
-    float tRProportionalKalman,
-    float errDeadzone)
+    const tap::algorithms::SmoothPidConfig &pidConfig)
     : TurretPitchControllerInterface(turretSubsystem),
-      pid(kp,
-          ki,
-          kd,
-          maxICumulative,
-          maxOutput,
-          tQDerivativeKalman,
-          tRDerivativeKalman,
-          tQProportionalKalman,
-          tRProportionalKalman,
-          errDeadzone)
+      pid(pidConfig)
 {
 }
 
@@ -134,6 +98,6 @@ float ChassisFramePitchTurretController::getSetpoint() const
     return turretSubsystem->getPitchSetpoint();
 }
 
-bool ChassisFramePitchTurretController::isFinished() const { return !turretSubsystem->isOnline(); }
+bool ChassisFramePitchTurretController::isOnline() const { return turretSubsystem->isOnline(); }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms

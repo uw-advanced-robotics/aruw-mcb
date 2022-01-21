@@ -29,14 +29,14 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::cv
 {
 SentinelTurretCVCommand::SentinelTurretCVCommand(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
     aruwsrc::agitator::AgitatorSubsystem *agitator,
-    TurretYawControllerInterface *yawController,
-    TurretPitchControllerInterface *pitchController)
+    algorithms::TurretYawControllerInterface *yawController,
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       turretSubsystem(turretSubsystem),
@@ -119,7 +119,7 @@ void SentinelTurretCVCommand::execute()
 
 bool SentinelTurretCVCommand::isFinished() const
 {
-    return pitchController->isFinished() || yawController->isFinished();
+    return !pitchController->isOnline() || !yawController->isOnline();
 }
 
 void SentinelTurretCVCommand::end(bool interrupted)

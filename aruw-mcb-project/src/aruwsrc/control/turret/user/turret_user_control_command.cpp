@@ -22,13 +22,13 @@
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::user
 {
 TurretUserControlCommand::TurretUserControlCommand(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
-    TurretYawControllerInterface *yawController,
-    TurretPitchControllerInterface *pitchController)
+    algorithms::TurretYawControllerInterface *yawController,
+    algorithms::TurretPitchControllerInterface *pitchController)
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
@@ -64,7 +64,7 @@ void TurretUserControlCommand::execute()
 
 bool TurretUserControlCommand::isFinished() const
 {
-    return yawController->isFinished() || pitchController->isFinished();
+    return !pitchController->isOnline() || !yawController->isOnline();
 }
 
 void TurretUserControlCommand::end(bool)

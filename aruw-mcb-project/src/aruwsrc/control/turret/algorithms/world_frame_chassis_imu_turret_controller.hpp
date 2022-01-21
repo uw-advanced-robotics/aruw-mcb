@@ -34,26 +34,23 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
-{
-class TurretSubsystem;
 
-class WorldFrameYawChassisImuTurretController : public TurretYawControllerInterface
+namespace aruwsrc::control::turret{
+class TurretSubsystem;
+}
+
+namespace aruwsrc::control::turret::algorithms
+{
+/**
+ * Implements TurretControllerInterface interface, see parent class comment for details.
+ */
+class WorldFrameYawChassisImuTurretController final : public TurretYawControllerInterface
 {
 public:
     WorldFrameYawChassisImuTurretController(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
-        float kp,
-        float ki,
-        float kd,
-        float maxICumulative,
-        float maxOutput,
-        float tQDerivativeKalman,
-        float tRDerivativeKalman,
-        float tQProportionalKalman,
-        float tRProportionalKalman,
-        float errDeadzone = 0.0f);
+        const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() override;
 
@@ -61,7 +58,7 @@ public:
 
     float getSetpoint() const override;
 
-    bool isFinished() const override;
+    bool isOnline() const override;
 
 private:
     aruwsrc::Drivers *drivers;

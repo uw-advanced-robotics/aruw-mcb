@@ -29,22 +29,21 @@
 namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
+}
 
-class ChassisFrameYawTurretController : public TurretYawControllerInterface
+namespace aruwsrc::control::turret::algorithms
+{
+/**
+ *
+ *
+ * Implements TurretControllerInterface interface, see parent class comment for details.
+ */
+class ChassisFrameYawTurretController final : public TurretYawControllerInterface
 {
 public:
     ChassisFrameYawTurretController(
         TurretSubsystem *turretSubsystem,
-        float kp,
-        float ki,
-        float kd,
-        float maxICumulative,
-        float maxOutput,
-        float tQDerivativeKalman,
-        float tRDerivativeKalman,
-        float tQProportionalKalman,
-        float tRProportionalKalman,
-        float errDeadzone = 0.0f);
+        const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() override;
 
@@ -52,27 +51,21 @@ public:
 
     float getSetpoint() const override;
 
-    bool isFinished() const override;
+    bool isOnline() const override;
 
 private:
     tap::algorithms::SmoothPid pid;
 };
 
-class ChassisFramePitchTurretController : public TurretPitchControllerInterface
+/**
+ * Implements TurretControllerInterface interface, see parent class comment for details.
+ */
+class ChassisFramePitchTurretController final : public TurretPitchControllerInterface
 {
 public:
     ChassisFramePitchTurretController(
         TurretSubsystem *turretSubsystem,
-        float kp,
-        float ki,
-        float kd,
-        float maxICumulative,
-        float maxOutput,
-        float tQDerivativeKalman,
-        float tRDerivativeKalman,
-        float tQProportionalKalman,
-        float tRProportionalKalman,
-        float errDeadzone = 0.0f);
+        const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() override;
 
@@ -80,12 +73,12 @@ public:
 
     float getSetpoint() const override;
 
-    bool isFinished() const override;
+    bool isOnline() const override;
 
 private:
     tap::algorithms::SmoothPid pid;
 };
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // CHASSIS_FRAME_TURRET_CONTROLLER_HPP_

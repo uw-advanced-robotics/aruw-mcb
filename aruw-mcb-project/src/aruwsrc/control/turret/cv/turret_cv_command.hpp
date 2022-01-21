@@ -29,9 +29,12 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
-{
+namespace aruwsrc::control::turret{
 class TurretSubsystem;
+}
+
+namespace aruwsrc::control::turret::cv
+{
 
 /**
  * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
@@ -43,8 +46,8 @@ public:
     TurretCVCommand(
         aruwsrc::Drivers *legacyVisionCoprocessor,
         TurretSubsystem *subsystem,
-        TurretYawControllerInterface *yawController,
-        TurretPitchControllerInterface *pitchController);
+        algorithms::TurretYawControllerInterface *yawController,
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController);
 
     void initialize() override;
 
@@ -63,8 +66,8 @@ private:
 
     TurretSubsystem *turretSubsystem;
 
-    TurretYawControllerInterface *yawController;
-    TurretPitchControllerInterface *pitchController;
+    algorithms::TurretYawControllerInterface *yawController;
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController;
 
     uint32_t prevTime;
 };  // class TurretCvCommand

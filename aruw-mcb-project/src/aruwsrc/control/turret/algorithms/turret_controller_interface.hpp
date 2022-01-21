@@ -23,21 +23,60 @@
 namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
+}
 
+namespace aruwsrc::control::turret::algorithms
+{
+/**
+ * An interface describing the functionality of a turret controller. When implementing this class,
+ * the user is responsible for designing a controller that will set the desired output of some
+ * turret subsystem. Instances of this interface are designed to be used in a command. Using this
+ * interface allows you to easily interchange which turret controller is being used for a particular
+ * robot.
+ *
+ * @note All units of setpoints mentioned below are in degrees, the same units that the
+ * `TurretSubsystem` uses.
+ */
 class TurretControllerInterface
 {
 public:
+    /**
+     * @param[in] turretSubsystem A `turretSubsystem` object accessible for children objects to use.
+     */
     TurretControllerInterface(TurretSubsystem *turretSubsystem) : turretSubsystem(turretSubsystem)
     {
     }
 
+    /**
+     * Initializes the controller, resetting any controllers and configuring any variables that need
+     * to be set initially. Expected to be called once before the turret controller's
+     * `runController` function is called.
+     */
     virtual void initialize() = 0;
 
+    /**
+     * Main controller update loop. Expected that the controller is initialized and that this
+     * function is only called when `isOnline` is `false`. Call periodically.
+     *
+     * @param[in] dt The time difference in milliseconds between previous and current call of
+     * `runController`.
+     * @param[in] desiredSetpoint The controller's desired setpoint in whatever frame the controller
+     * is operating. Units degrees.
+     */
     virtual void runController(const uint32_t dt, const float desiredSetpoint) = 0;
 
+    /**
+     * @return The controller's setpoint, units degrees. **Does not** have to be in the same
+     * reference frame as the TurretSubsystem's `get<yaw|pitch>Setpoint` functions.
+     */
     virtual float getSetpoint() const = 0;
 
-    virtual bool isFinished() const = 0;
+    /**
+     * @return `false` if the turret controller should not be running, whether this is because the
+     * turret is offline or some sensor the turret controller is using is invalid. Otherwise return
+     * `true`.
+     */
+    virtual bool isOnline() const = 0;
 
 protected:
     TurretSubsystem *turretSubsystem;
@@ -60,6 +99,6 @@ public:
     {
     }
 };
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // TURRET_CONTROLLER_INTERFACE_HPP_

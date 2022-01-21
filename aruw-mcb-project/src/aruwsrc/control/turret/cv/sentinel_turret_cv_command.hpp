@@ -32,10 +32,16 @@ class AgitatorSubsystem;
 
 namespace aruwsrc::control::turret
 {
+class TurretSubsystem;
+namespace algorithms
+{
 class TurretYawControllerInterface;
 class TurretPitchControllerInterface;
-class TurretSubsystem;
+}  // namespace cv
+}  // namespace aruwsrc::control::turret
 
+namespace aruwsrc::control::turret::cv
+{
 /**
  * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
  * aims the turret accordingly. In addition to aiming, this command is responsible for determining
@@ -69,8 +75,8 @@ public:
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
-        TurretYawControllerInterface *yawController,
-        TurretPitchControllerInterface *pitchController);
+        algorithms::TurretYawControllerInterface *yawController,
+        algorithms::TurretPitchControllerInterface *pitchController);
 
     bool isReady() override;
 
@@ -110,8 +116,8 @@ private:
      */
     int lostTargetCounter;
 
-    TurretYawControllerInterface *yawController;
-    TurretPitchControllerInterface *pitchController;
+    algorithms::TurretYawControllerInterface *yawController;
+    algorithms::TurretPitchControllerInterface *pitchController;
 
     uint32_t prevTime = 0;
 
@@ -128,6 +134,6 @@ private:
         bool *axisScanningUp);
 };  // class SentinelTurretCVCommand
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::cv
 
 #endif  // SENTINEL_TURRET_CV_COMMAND_HPP_

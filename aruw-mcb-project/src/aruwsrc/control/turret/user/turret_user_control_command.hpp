@@ -29,7 +29,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::user
 {
 class TurretUserControlCommand : public tap::control::Command
 {
@@ -37,8 +37,8 @@ public:
     TurretUserControlCommand(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
-        TurretYawControllerInterface *yawController,
-        TurretPitchControllerInterface *pitchController);
+        algorithms::TurretYawControllerInterface *yawController,
+        algorithms::TurretPitchControllerInterface *pitchController);
 
     bool isReady() override;
 
@@ -65,8 +65,8 @@ private:
 
     uint32_t prevTime = 0;
 
-    TurretYawControllerInterface *yawController;
-    TurretPitchControllerInterface *pitchController;
+    algorithms::TurretYawControllerInterface *yawController;
+    algorithms::TurretPitchControllerInterface *pitchController;
 };
 }  // namespace aruwsrc::control::turret
 

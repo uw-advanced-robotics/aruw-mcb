@@ -27,14 +27,16 @@
 
 using namespace aruwsrc;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::user;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
 #define SETUP_TEST()                                                                       \
     Drivers drivers;                                                                       \
     NiceMock<TurretSubsystemMock> turret(&drivers);                                        \
-    ChassisFramePitchTurretController pitchController(&turret, 1, 0, 0, 0, 1, 1, 0, 1, 0); \
-    ChassisFrameYawTurretController yawController(&turret, 1, 0, 0, 0, 1, 1, 0, 1, 0);     \
+    ChassisFramePitchTurretController pitchController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}); \
+    ChassisFrameYawTurretController yawController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});     \
     TurretUserControlCommand turretCmd(&drivers, &turret, &yawController, &pitchController);
 
 TEST(TurretUserControlCommand, isReady_return_true_when_turret_online)

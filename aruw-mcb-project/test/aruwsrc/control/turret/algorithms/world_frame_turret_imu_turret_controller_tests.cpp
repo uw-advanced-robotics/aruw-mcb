@@ -27,6 +27,7 @@
 using namespace aruwsrc;
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
@@ -36,26 +37,8 @@ using namespace testing;
     WorldFrameYawTurretImuCascadePidTurretController turretController(                      \
         &drivers,                                                                           \
         &turretSubsystem,                                                                   \
-        1,                                                                                  \
-        0,                                                                                  \
-        0,                                                                                  \
-        0,                                                                                  \
-        1,                                                                                  \
-        1,                                                                                  \
-        0,                                                                                  \
-        1,                                                                                  \
-        0,                                                                                  \
-        0,                                                                                  \
-        1,                                                                                  \
-        0,                                                                                  \
-        0,                                                                                  \
-        0,                                                                                  \
-        1,                                                                                  \
-        1,                                                                                  \
-        0,                                                                                  \
-        1,                                                                                  \
-        0,                                                                                  \
-        0);                                                                                 \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},                                                     \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                    \
     float turretSetpoint = 0;                                                               \
     ContiguousFloat worldFrameYawSetpoint(0, 0, 360);                                       \
     ContiguousFloat currentYawValue(0, 0, 360);                                             \
@@ -195,26 +178,8 @@ TEST(
     WorldFramePitchTurretImuCascadePidTurretController turretController(                        \
         &drivers,                                                                               \
         &turretSubsystem,                                                                       \
-        1,                                                                                      \
-        0,                                                                                      \
-        0,                                                                                      \
-        0,                                                                                      \
-        1,                                                                                      \
-        1,                                                                                      \
-        0,                                                                                      \
-        1,                                                                                      \
-        0,                                                                                      \
-        0,                                                                                      \
-        1,                                                                                      \
-        0,                                                                                      \
-        0,                                                                                      \
-        0,                                                                                      \
-        1,                                                                                      \
-        1,                                                                                      \
-        0,                                                                                      \
-        1,                                                                                      \
-        0,                                                                                      \
-        0);                                                                                     \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},                                                         \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                        \
     float turretSetpoint = 0;                                                                   \
     ContiguousFloat worldFramePitchSetpoint(0, 0, 360);                                         \
     ContiguousFloat currentPitchValue(0, 0, 360);                                               \

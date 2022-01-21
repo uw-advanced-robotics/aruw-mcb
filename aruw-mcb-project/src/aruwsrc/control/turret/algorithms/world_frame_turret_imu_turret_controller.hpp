@@ -34,36 +34,23 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
-{
+namespace aruwsrc::control::turret{
 class TurretSubsystem;
+}
 
-class WorldFrameYawTurretImuCascadePidTurretController : public TurretYawControllerInterface
+namespace aruwsrc::control::turret::algorithms
+{
+/**
+ * Implements TurretControllerInterface interface, see parent class comment for details.
+ */
+class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawControllerInterface
 {
 public:
     WorldFrameYawTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
-        float posKp,
-        float posKi,
-        float posKd,
-        float posMaxICumulative,
-        float posMaxOutput,
-        float posTQDerivativeKalman,
-        float posTRDerivativeKalman,
-        float posTQProportionalKalman,
-        float posTRProportionalKalman,
-        float posErrDeadzone,
-        float velKp,
-        float velKi,
-        float velKd,
-        float velMaxICumulative,
-        float velMaxOutput,
-        float velTQDerivativeKalman,
-        float velTRDerivativeKalman,
-        float velTQProportionalKalman,
-        float velTRProportionalKalman,
-        float velErrDeadzone);
+        const tap::algorithms::SmoothPidConfig &posPidConfig,
+        const tap::algorithms::SmoothPidConfig &velPidConfig);
 
     void initialize() override;
 
@@ -71,7 +58,7 @@ public:
 
     float getSetpoint() const override;
 
-    bool isFinished() const override;
+    bool isOnline() const override;
 
 private:
     const aruwsrc::Drivers *drivers;
@@ -82,32 +69,17 @@ private:
     tap::algorithms::ContiguousFloat worldFrameSetpoint;
 };
 
-class WorldFramePitchTurretImuCascadePidTurretController : public TurretPitchControllerInterface
+/**
+ * Implements TurretControllerInterface interface, see parent class comment for details.
+ */
+class WorldFramePitchTurretImuCascadePidTurretController final : public TurretPitchControllerInterface
 {
 public:
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
-        float posKp,
-        float posKi,
-        float posKd,
-        float posMaxICumulative,
-        float posMaxOutput,
-        float posTQDerivativeKalman,
-        float posTRDerivativeKalman,
-        float posTQProportionalKalman,
-        float posTRProportionalKalman,
-        float posErrDeadzone,
-        float velKp,
-        float velKi,
-        float velKd,
-        float velMaxICumulative,
-        float velMaxOutput,
-        float velTQDerivativeKalman,
-        float velTRDerivativeKalman,
-        float velTQProportionalKalman,
-        float velTRProportionalKalman,
-        float velErrDeadzone);
+        const tap::algorithms::SmoothPidConfig &posPidConfig,
+        const tap::algorithms::SmoothPidConfig &velPidConfig);
 
     void initialize() override;
 
@@ -115,7 +87,7 @@ public:
 
     float getSetpoint() const override;
 
-    bool isFinished() const override;
+    bool isOnline() const override;
 
 private:
     const aruwsrc::Drivers *drivers;

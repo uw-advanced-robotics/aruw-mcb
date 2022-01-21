@@ -21,7 +21,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::user
 {
 TurretQuickTurnCommand::TurretQuickTurnCommand(
     tap::control::turret::TurretSubsystemInterface *turretSubsystem,

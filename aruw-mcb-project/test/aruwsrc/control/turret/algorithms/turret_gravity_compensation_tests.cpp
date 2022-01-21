@@ -21,7 +21,7 @@
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 
-using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
 
 TEST(TurretGravityCompensation, computeGravitationalForceOffset_zero_cg_offsets_return_0)
 {

@@ -25,6 +25,7 @@
 
 using namespace aruwsrc::mock;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::user;
 using namespace testing;
 using aruwsrc::Drivers;
 

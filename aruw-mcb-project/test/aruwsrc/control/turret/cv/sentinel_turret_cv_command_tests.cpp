@@ -27,6 +27,8 @@
 
 using namespace aruwsrc;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::cv;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
@@ -34,8 +36,8 @@ using namespace testing;
     Drivers drivers;                                                                       \
     NiceMock<TurretSubsystemMock> turret(&drivers);                                        \
     AgitatorSubsystemMock agitator(&drivers);                                              \
-    ChassisFramePitchTurretController pitchController(&turret, 1, 0, 0, 0, 1, 1, 0, 1, 0); \
-    ChassisFrameYawTurretController yawController(&turret, 1, 0, 0, 0, 1, 1, 0, 1, 0);     \
+    ChassisFramePitchTurretController pitchController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}); \
+    ChassisFrameYawTurretController yawController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});     \
     SentinelTurretCVCommand turretCR(                                                      \
         &drivers,                                                                          \
         &turret,                                                                           \

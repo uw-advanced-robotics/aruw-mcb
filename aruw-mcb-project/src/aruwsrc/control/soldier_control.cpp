@@ -130,92 +130,32 @@ ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
 // Turret controllers
-ChassisFramePitchTurretController chassisFramePitchTurretController(
+algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     &turret,
-    chassis_rel::PITCH_P,
-    chassis_rel::PITCH_I,
-    chassis_rel::PITCH_D,
-    chassis_rel::PITCH_MAX_ERROR_SUM,
-    chassis_rel::PITCH_MAX_OUTPUT,
-    chassis_rel::PITCH_Q_DERIVATIVE_KALMAN,
-    chassis_rel::PITCH_R_DERIVATIVE_KALMAN,
-    chassis_rel::PITCH_Q_PROPORTIONAL_KALMAN,
-    chassis_rel::PITCH_R_PROPORTIONAL_KALMAN);
+    chassis_rel::PITCH_PID_CONFIG);
 
-ChassisFrameYawTurretController chassisFrameYawTurretController(
+algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     &turret,
-    chassis_rel::YAW_P,
-    chassis_rel::YAW_I,
-    chassis_rel::YAW_D,
-    chassis_rel::YAW_MAX_ERROR_SUM,
-    chassis_rel::YAW_MAX_OUTPUT,
-    chassis_rel::YAW_Q_DERIVATIVE_KALMAN,
-    chassis_rel::YAW_R_DERIVATIVE_KALMAN,
-    chassis_rel::YAW_Q_PROPORTIONAL_KALMAN,
-    chassis_rel::YAW_R_PROPORTIONAL_KALMAN);
+    chassis_rel::YAW_PID_CONFIG);
 
-WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
+algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
     drivers(),
     &turret,
-    world_rel_chassis_imu::YAW_P,
-    world_rel_chassis_imu::YAW_I,
-    world_rel_chassis_imu::YAW_D,
-    world_rel_chassis_imu::YAW_MAX_ERROR_SUM,
-    world_rel_chassis_imu::YAW_MAX_OUTPUT,
-    world_rel_chassis_imu::YAW_Q_DERIVATIVE_KALMAN,
-    world_rel_chassis_imu::YAW_R_DERIVATIVE_KALMAN,
-    world_rel_chassis_imu::YAW_Q_PROPORTIONAL_KALMAN,
-    world_rel_chassis_imu::YAW_R_PROPORTIONAL_KALMAN);
+    world_rel_chassis_imu::YAW_PID_CONFIG);
 
-WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
     drivers(),
     &turret,
-    world_rel_turret_imu::PITCH_POS_P,
-    world_rel_turret_imu::PITCH_POS_I,
-    world_rel_turret_imu::PITCH_POS_D,
-    world_rel_turret_imu::PITCH_POS_MAX_ERROR_SUM,
-    world_rel_turret_imu::PITCH_POS_MAX_OUTPUT,
-    world_rel_turret_imu::PITCH_POS_Q_DERIVATIVE_KALMAN,
-    world_rel_turret_imu::PITCH_POS_R_DERIVATIVE_KALMAN,
-    world_rel_turret_imu::PITCH_POS_Q_PROPORTIONAL_KALMAN,
-    world_rel_turret_imu::PITCH_POS_R_PROPORTIONAL_KALMAN,
-    world_rel_turret_imu::PITCH_POS_DEADZONE,
-    world_rel_turret_imu::PITCH_VEL_P,
-    world_rel_turret_imu::PITCH_VEL_I,
-    world_rel_turret_imu::PITCH_VEL_D,
-    world_rel_turret_imu::PITCH_VEL_MAX_ERROR_SUM,
-    world_rel_turret_imu::PITCH_VEL_MAX_OUTPUT,
-    world_rel_turret_imu::PITCH_VEL_Q_DERIVATIVE_KALMAN,
-    world_rel_turret_imu::PITCH_VEL_R_DERIVATIVE_KALMAN,
-    world_rel_turret_imu::PITCH_VEL_Q_PROPORTIONAL_KALMAN,
-    world_rel_turret_imu::PITCH_VEL_R_PROPORTIONAL_KALMAN,
-    world_rel_turret_imu::PITCH_VEL_DEADZONE);
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG,
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
     drivers(),
     &turret,
-    world_rel_turret_imu::YAW_POS_P,
-    world_rel_turret_imu::YAW_POS_I,
-    world_rel_turret_imu::YAW_POS_D,
-    world_rel_turret_imu::YAW_POS_MAX_ERROR_SUM,
-    world_rel_turret_imu::YAW_POS_MAX_OUTPUT,
-    world_rel_turret_imu::YAW_POS_Q_DERIVATIVE_KALMAN,
-    world_rel_turret_imu::YAW_POS_R_DERIVATIVE_KALMAN,
-    world_rel_turret_imu::YAW_POS_Q_PROPORTIONAL_KALMAN,
-    world_rel_turret_imu::YAW_POS_R_PROPORTIONAL_KALMAN,
-    world_rel_turret_imu::YAW_POS_DEADZONE,
-    world_rel_turret_imu::YAW_VEL_P,
-    world_rel_turret_imu::YAW_VEL_I,
-    world_rel_turret_imu::YAW_VEL_D,
-    world_rel_turret_imu::YAW_VEL_MAX_ERROR_SUM,
-    world_rel_turret_imu::YAW_VEL_MAX_OUTPUT,
-    world_rel_turret_imu::YAW_VEL_Q_DERIVATIVE_KALMAN,
-    world_rel_turret_imu::YAW_VEL_R_DERIVATIVE_KALMAN,
-    world_rel_turret_imu::YAW_VEL_Q_PROPORTIONAL_KALMAN,
-    world_rel_turret_imu::YAW_VEL_R_PROPORTIONAL_KALMAN,
-    world_rel_turret_imu::YAW_VEL_DEADZONE);
+    world_rel_turret_imu::YAW_POS_PID_CONFIG,
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG);
 
-TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
+user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     &turret,
     &worldFrameYawChassisImuController,
@@ -223,13 +163,13 @@ TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController);
 
-TurretCVCommand turretCVCommand(
+cv::TurretCVCommand turretCVCommand(
     drivers(),
     &turret,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController);
 
-TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 

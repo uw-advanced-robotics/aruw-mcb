@@ -27,14 +27,16 @@
 using namespace aruwsrc;
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
 #define SETUP_PITCH_TEST()                                                                      \
     aruwsrc::Drivers drivers;                                                                   \
     NiceMock<TurretSubsystemMock> turretSubsystem(&drivers);                                    \
-    ChassisFramePitchTurretController                                                           \
-        turretController(&turretSubsystem, 1, 0, 0, 0, 1, 1, 0, 1, 0);                          \
+    ChassisFramePitchTurretController turretController(                                         \
+        &turretSubsystem,                                                                       \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                        \
     float setpoint = 0;                                                                         \
     ContiguousFloat currentPitchAngle(0, 0, 360);                                               \
     ON_CALL(turretSubsystem, getPitchSetpoint).WillByDefault(ReturnPointee(&setpoint));         \
@@ -120,15 +122,17 @@ TEST(ChassisFrameTurretController, runPitchPidController_pid_out_negative_when_s
     turretController.runController(1, setpoint);
 }
 
-#define SETUP_YAW_TEST()                                                                           \
-    aruwsrc::Drivers drivers;                                                                      \
-    NiceMock<TurretSubsystemMock> turretSubsystem(&drivers);                                       \
-    ChassisFrameYawTurretController turretController(&turretSubsystem, 1, 0, 0, 0, 1, 1, 0, 1, 0); \
-    float setpoint = 0;                                                                            \
-    ContiguousFloat currentYawAngle(0, 0, 360);                                                    \
-    tap::algorithms::SmoothPid pid(1, 0, 0, 0, 1, 1, 0, 1, 0);                                     \
-    ON_CALL(turretSubsystem, getYawSetpoint).WillByDefault(ReturnPointee(&setpoint));              \
-    ON_CALL(turretSubsystem, getCurrentYawValue).WillByDefault(ReturnRef(currentYawAngle));        \
+#define SETUP_YAW_TEST()                                                                    \
+    aruwsrc::Drivers drivers;                                                               \
+    NiceMock<TurretSubsystemMock> turretSubsystem(&drivers);                                \
+    ChassisFrameYawTurretController turretController(                                       \
+        &turretSubsystem,                                                                   \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                    \
+    float setpoint = 0;                                                                     \
+    ContiguousFloat currentYawAngle(0, 0, 360);                                             \
+    tap::algorithms::SmoothPid pid(1, 0, 0, 0, 1, 1, 0, 1, 0);                              \
+    ON_CALL(turretSubsystem, getYawSetpoint).WillByDefault(ReturnPointee(&setpoint));       \
+    ON_CALL(turretSubsystem, getCurrentYawValue).WillByDefault(ReturnRef(currentYawAngle)); \
     ON_CALL(turretSubsystem, getYawVelocity).WillByDefault(Return(0));
 
 TEST(ChassisFrameTurretController, runYawPidController_pid_out_0_when_setpoints_match_p_controller)
