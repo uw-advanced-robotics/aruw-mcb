@@ -179,7 +179,10 @@ ClientDisplayCommand clientDisplayCommand(
     &frictionWheels,
     &agitator,
     &turret,
-    {&beybladeCommand, &chassisAutorotateCommand, &chassisDriveCommand, &chassisImuDriveCommand});
+    &beybladeCommand,
+    &chassisAutorotateCommand,
+    &chassisImuDriveCommand,
+    &chassisDriveCommand);
 
 OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 

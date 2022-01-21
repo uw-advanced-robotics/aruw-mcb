@@ -29,6 +29,10 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -64,7 +68,10 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheelSubsystem,
         aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
         const aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
-        const std::vector<const tap::control::Command *> &driveCommands);
+        const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
+        const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd);
 
     const char *getName() const override { return "client display"; }
 
@@ -88,7 +95,7 @@ private:
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_LAYER = 0;
     static constexpr uint8_t BOOLEAN_HUD_INDICATOR_LIST_START_NAME[] = {0, 0, 0};
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_CENTER_X = 280;
-    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_START_Y = 570;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_START_Y = 775;
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
 
     static constexpr Tx::GraphicColor BOOLEAN_HUD_INDICATOR_FILLED_COLOR = Tx::GraphicColor::GREEN;
@@ -106,10 +113,8 @@ private:
 
     static constexpr const char *BOOLEAN_HUD_INDICATOR_LABELS[] =
     { "SYS CALIB ",
-      "HOPP ",
-      "FRIC ",
-      "CV ",
       "AGI ",
+      "CV ",
 #if defined(TARGET_HERO)
       "BALL RDY  ",
 #endif
@@ -118,10 +123,8 @@ private:
     enum BooleanHUDIndicatorIndex
     {
         SYSTEMS_CALIBRATING = 0,
-        HOPPER_OPEN,
-        FRICTION_WHEELS_ON,
-        CV_AIM_DATA_VALID,
         AGITATOR_STATUS_HEALTHY,
+        CV_AIM_DATA_VALID,
 #if defined(TARGET_HERO)
         BALL_READY_FOR_LAUNCHING,
 #endif
@@ -132,8 +135,6 @@ private:
 
     static constexpr uint8_t POSITION_HUD_INDICATOR_LAYER = 0;
     static constexpr uint8_t POSITION_HUD_INDICATOR_START_NAME[] = {5, 0, 0};
-    static constexpr uint16_t POSITION_HUD_INDICATOR_START_X = 500;
-    static constexpr uint16_t POSITION_HUD_INDICATOR_START_Y = 500;
 
     static constexpr Tx::GraphicColor POSITION_HUD_INDICATOR_TITLE_COLOR = Tx::GraphicColor::GREEN;
     static constexpr Tx::GraphicColor POSITION_HUD_INDICATOR_LABELS_COLOR =
@@ -143,10 +144,15 @@ private:
 
     static constexpr uint16_t POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH = 2;
 
-    static constexpr uint16_t POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE = 10;
-    static constexpr uint16_t POSITION_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 2;
+    static constexpr uint16_t POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE = 14;
+    static constexpr uint16_t POSITION_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 3;
     static constexpr uint8_t POSITION_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS =
-        POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE;
+        2 * POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE;
+
+    static constexpr uint16_t POSITION_HUD_INDICATOR_START_X = 350;
+    static constexpr uint16_t POSITION_HUD_INDICATOR_TITLE_START_Y = 775;
+    static constexpr uint16_t POSITION_HUD_INDICATOR_LABELS_START_Y =
+        POSITION_HUD_INDICATOR_TITLE_START_Y - 2 * POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE;
 
     static constexpr const char *POSITION_HUD_INDICATOR_TITLES[] = {
         "CHAS",
@@ -155,7 +161,7 @@ private:
     };
 
     static constexpr const char *POSITION_HUD_INDICATOR_LABELS[] = {
-        "FLLW\nBEYB\nMANR",
+        "BEYB\nFLLW\nMIMU\nMNOR",
         "REDY\nLOAD\nFOFF",
         "SNGL\nBRST\nFULL",
     };
