@@ -31,13 +31,13 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret{
+namespace aruwsrc::control::turret
+{
 class TurretSubsystem;
 }
 
 namespace aruwsrc::control::turret::user
 {
-
 /**
  * Turret control, with the yaw and pitch gimbals using the world relative frame,
  * such that the desired turret angle is independent of the direction that the chassis
@@ -79,6 +79,6 @@ private:
     TurretUserControlCommand turretWRTurretImuCommand;
 };  // class TurretUserWorldRelativeCommand
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user
 
 #endif  // TURRET_USER_WORLD_RELATIVE_COMMAND_HPP_

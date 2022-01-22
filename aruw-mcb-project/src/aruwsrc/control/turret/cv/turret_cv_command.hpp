@@ -29,13 +29,13 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret{
+namespace aruwsrc::control::turret
+{
 class TurretSubsystem;
 }
 
 namespace aruwsrc::control::turret::cv
 {
-
 /**
  * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
  * aims the turret accordingly using a position PID controller.
@@ -80,6 +80,6 @@ private:
     uint32_t prevTime;
 };  // class TurretCvCommand
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::cv
 
 #endif  // TURRET_CV_COMMAND_HPP_

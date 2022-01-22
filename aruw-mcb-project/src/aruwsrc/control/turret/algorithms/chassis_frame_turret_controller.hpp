@@ -34,7 +34,8 @@ class TurretSubsystem;
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * Controller that runs a single position PID controller in the chassis frame to control the turret yaw.
+ * Controller that runs a single position PID controller in the chassis frame to control the turret
+ * yaw.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
@@ -69,7 +70,8 @@ private:
 };
 
 /**
- * Controller that runs a single position PID controller in the chassis frame to control the turret pitch.
+ * Controller that runs a single position PID controller in the chassis frame to control the turret
+ * pitch.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */

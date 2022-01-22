@@ -163,4 +163,4 @@ bool WorldFrameYawChassisImuTurretController::isOnline() const
     return turretSubsystem->isOnline() && drivers->mpu6500.isRunning();
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms

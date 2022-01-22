@@ -39,4 +39,4 @@ void TurretQuickTurnCommand::initialize()
     turretSubsystem->setYawSetpoint(
         turretSubsystem->getCurrentYawValue().getValue() + targetOffsetToTurn);
 }
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user

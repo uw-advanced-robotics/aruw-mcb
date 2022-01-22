@@ -91,4 +91,4 @@ void TurretCVCommand::end(bool)
     turretSubsystem->setPitchMotorOutput(0);
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::cv

@@ -44,8 +44,8 @@ namespace aruwsrc::control::turret::algorithms
 /**
  * World frame turret yaw controller. Requires that the development board type A is mounted rigidly
  * to the chassis and is properly initialized. Runs a single position PID controller to control the
- * turret yaw. Feedback from the mpu6500 and the turret yaw encoder used to determine the world frame
- * turret angle.
+ * turret yaw. Feedback from the mpu6500 and the turret yaw encoder used to determine the world
+ * frame turret angle.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */

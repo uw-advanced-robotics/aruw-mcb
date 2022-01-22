@@ -32,17 +32,17 @@ using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
-#define SETUP_TEST()                                                                       \
-    Drivers drivers;                                                                       \
-    NiceMock<TurretSubsystemMock> turret(&drivers);                                        \
-    AgitatorSubsystemMock agitator(&drivers);                                              \
+#define SETUP_TEST()                                                                            \
+    Drivers drivers;                                                                            \
+    NiceMock<TurretSubsystemMock> turret(&drivers);                                             \
+    AgitatorSubsystemMock agitator(&drivers);                                                   \
     ChassisFramePitchTurretController pitchController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}); \
     ChassisFrameYawTurretController yawController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});     \
-    SentinelTurretCVCommand turretCR(                                                      \
-        &drivers,                                                                          \
-        &turret,                                                                           \
-        &agitator,                                                                         \
-        &yawController,                                                                    \
+    SentinelTurretCVCommand turretCR(                                                           \
+        &drivers,                                                                               \
+        &turret,                                                                                \
+        &agitator,                                                                              \
+        &yawController,                                                                         \
         &pitchController);
 
 TEST(SentinelTurretCVCommand, isReady_return_true_when_turret_online)

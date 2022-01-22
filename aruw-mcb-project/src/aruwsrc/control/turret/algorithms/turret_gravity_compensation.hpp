@@ -50,6 +50,6 @@ float computeGravitationalForceOffset(
     const float cgZ,
     const float pitchAngleFromCenter,
     const float gravityCompensatorMax);
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // GRAVITY_COMPENSATION_HPP_

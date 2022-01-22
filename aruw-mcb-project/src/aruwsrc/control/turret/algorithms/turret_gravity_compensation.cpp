@@ -56,4 +56,4 @@ float computeGravitationalForceOffset(
 
     return gravityCompensatorMax * cosf(turretCGPolarTheta + modm::toRadian(pitchAngleFromCenter));
 }
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms

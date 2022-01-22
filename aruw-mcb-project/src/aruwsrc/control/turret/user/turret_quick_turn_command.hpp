@@ -68,6 +68,6 @@ private:
     tap::control::turret::TurretSubsystemInterface *turretSubsystem;
     const float targetOffsetToTurn;
 };
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user
 
 #endif  // TURRET_QUICK_TURN_COMMAND_HPP_

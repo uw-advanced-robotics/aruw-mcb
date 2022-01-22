@@ -29,8 +29,10 @@ using namespace testing;
     aruwsrc::Drivers drivers;                                               \
     tap::algorithms::ContiguousFloat worldFrameYawSetpoint(0, 0, 360);      \
     testing::NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers); \
-    WorldFrameYawChassisImuTurretController                                 \
-        turretController(&drivers, &turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});
+    WorldFrameYawChassisImuTurretController turretController(               \
+        &drivers,                                                           \
+        &turret,                                                            \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});
 
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::turret::algorithms;

@@ -45,7 +45,8 @@ public:
      * axis of the turret.
      * @param[in] pitchController Pointer to a pitch controller that will be used to control the
      * pitch axis of the turret.
-     * @param[in] userYawInputScalar Value to scale the user input from `ControlOperatorInterface` by. Basically mouse sensitivity.
+     * @param[in] userYawInputScalar Value to scale the user input from `ControlOperatorInterface`
+     * by. Basically mouse sensitivity.
      * @param[in] userPitchInputScalar See userYawInputScalar.
      */
     TurretUserControlCommand(

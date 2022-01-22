@@ -91,4 +91,4 @@ void TurretUserWorldRelativeCommand::end(bool interrupted)
     comprisedCommandScheduler.removeCommand(&turretWRChassisImuCommand, interrupted);
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user
