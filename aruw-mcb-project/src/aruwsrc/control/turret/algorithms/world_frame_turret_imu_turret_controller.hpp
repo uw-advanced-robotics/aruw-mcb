@@ -40,10 +40,13 @@ class TurretSubsystem;
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * World frame turret yaw controller. Requires that a development board be mounted rigidily on the
- * turret and connected via the `TurretMCBCanComm` class. Runs a cascade PID controller (position
- * PID output feeds into velocity PID controller, velocity PID controller is desired motor output)
- * to control the turret yaw.
+ * World frame turret yaw controller. Requires that a development board be mounted rigidly on the
+ * turret and connected via the `TurretMCBCanComm` class. The development board's IMU is used to
+ * determine the turret's world frame coordinates directly, making this controller better than the
+ * `WorldFrameChassisImuTurretController`.
+ *
+ * Runs a cascade PID controller (position PID output feeds into velocity PID controller, velocity
+ * PID controller is desired motor output) to control the turret yaw.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
@@ -62,17 +65,17 @@ public:
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 
-    void initialize() override;
+    void initialize() final;
 
     /**
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) override;
+    void runController(const uint32_t dt, const float desiredSetpoint) final;
 
-    float getSetpoint() const override;
+    float getSetpoint() const final;
 
-    bool isOnline() const override;
+    bool isOnline() const final;
 
 private:
     const aruwsrc::Drivers *drivers;
@@ -84,10 +87,13 @@ private:
 };
 
 /**
- * World frame turret pitch controller. Requires that a development board be mounted rigidily on the
- * turret and connected via the `TurretMCBCanComm` class. Runs a cascade PID controller (position
- * PID output feeds into velocity PID controller, velocity PID controller is desired motor output)
- * to control the turret pitch.
+ * World frame turret pitch controller. Requires that a development board be mounted rigidly on the
+ * turret and connected via the `TurretMCBCanComm` class. The development board's IMU is used to
+ * determine the turret's world frame coordinates directly, making this controller better than the
+ * `WorldFrameChassisImuTurretController`.
+ *
+ * Runs a cascade PID controller (position PID output feeds into velocity PID controller, velocity
+ * PID controller is desired motor output) to control the turret pitch.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
@@ -107,17 +113,17 @@ public:
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 
-    void initialize() override;
+    void initialize() final;
 
     /**
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The pitch desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) override;
+    void runController(const uint32_t dt, const float desiredSetpoint) final;
 
-    float getSetpoint() const override;
+    float getSetpoint() const final;
 
-    bool isOnline() const override;
+    bool isOnline() const final;
 
 private:
     const aruwsrc::Drivers *drivers;

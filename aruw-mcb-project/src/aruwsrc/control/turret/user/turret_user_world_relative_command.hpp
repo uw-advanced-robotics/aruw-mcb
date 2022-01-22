@@ -47,12 +47,24 @@ namespace aruwsrc::control::turret::user
  * with the `TurretMCBCanComm`. If there is no such IMU, the chassis IMU will be used
  * to run the turret controller and the pitch axis will run a controller in the chassis
  * frame.
+ *
+ * Takes in user input from the `ControlOperatorInterface` to control the pitch and yaw
+ * axis of some turret.
  */
 class TurretUserWorldRelativeCommand : public tap::control::ComprisedCommand
 {
 public:
     /**
      * This command requires the turret subsystem from a command/subsystem framework perspective.
+     *
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the turret to control.
+     * @param[in] chassisImuYawController World frame turret controller that uses the chassis IMU.
+     * @param[in] chassisImuPitchController Turret controller that is used when the turret IMU is in
+     * use.
+     * @param[in] turretImuYawController World frame turret controller that uses the turret IMU.
+     * @param[in] turretImuPitchController Turret controller that is used when the turret IMU is in
+     * use. Doesn't strictly have to be world relative.
      */
     TurretUserWorldRelativeCommand(
         aruwsrc::Drivers *drivers,

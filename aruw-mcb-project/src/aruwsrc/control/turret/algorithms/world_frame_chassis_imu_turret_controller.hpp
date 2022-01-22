@@ -62,20 +62,20 @@ public:
         TurretSubsystem *turretSubsystem,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
-    void initialize() override;
+    void initialize() final;
 
     /**
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) override;
+    void runController(const uint32_t dt, const float desiredSetpoint) final;
 
     /**
      * @return The yaw setpoint, in the world frame.
      */
-    float getSetpoint() const override;
+    float getSetpoint() const final;
 
-    bool isOnline() const override;
+    bool isOnline() const final;
 
 private:
     aruwsrc::Drivers *drivers;

@@ -52,17 +52,25 @@ class SentinelTurretCVCommand : public tap::control::ComprisedCommand
 {
 public:
     /**
-     * Pitch/yaw error margins within which the auto aim deems it acceptable
+     * Yaw error margin within which the auto aim deems it acceptable
      * to fire the launcher, in degrees.
      */
     static constexpr float YAW_FIRE_ERROR_MARGIN = 2.0f;
+    /**
+     * Pitch error margins within which the auto aim deems it acceptable
+     * to fire the launcher, in degrees.
+     */
     static constexpr float PITCH_FIRE_ERROR_MARGIN = 2.0f;
 
     /**
-     * Pitch/yaw angle increments that the turret will change by each call
+     * Yaw angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in degrees.
      */
     static constexpr float SCAN_DELTA_ANGLE_YAW = 0.1f;
+    /**
+     * Pitch angle increments that the turret will change by each call
+     * to refresh when the turret is scanning for a target, in degrees.
+     */
     static constexpr float SCAN_DELTA_ANGLE_PITCH = 0.1f;
 
     /**

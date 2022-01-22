@@ -27,8 +27,8 @@
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * Transforms the specified `angleToTransform`, a yaw/pitch angle from the chassis frame to the
- * world frame.
+ * Transforms the specified `angleToTransform`, a yaw/pitch angle (in degrees) from the chassis
+ * frame to the world frame.
  *
  * @note It is expected that the user wraps the value returned to be between [0, 360)
  *      (or whatever range they require).
@@ -48,8 +48,8 @@ static inline float transformChassisFrameToWorldFrame(
 }
 
 /**
- * Transforms the specified `angleToTransform`, a yaw or pitch angle, from the world frame to
- * the chassis frame.
+ * Transforms the specified `angleToTransform`, a yaw or pitch angle (in degrees), from the world
+ * frame to the chassis frame.
  *
  * @note It is expected that the user wraps the value returned to be between [0, 360)
  *      (or whatever range they require).
