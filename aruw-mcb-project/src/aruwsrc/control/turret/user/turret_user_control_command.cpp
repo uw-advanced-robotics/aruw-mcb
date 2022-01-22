@@ -28,11 +28,15 @@ TurretUserControlCommand::TurretUserControlCommand(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
-    algorithms::TurretPitchControllerInterface *pitchController)
+    algorithms::TurretPitchControllerInterface *pitchController,
+    float userYawInputScalar,
+    float userPitchInputScalar)
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
-      pitchController(pitchController)
+      pitchController(pitchController),
+      userYawInputScalar(userYawInputScalar),
+      userPitchInputScalar(userPitchInputScalar)
 {
     addSubsystemRequirement(turretSubsystem);
 }
@@ -53,12 +57,12 @@ void TurretUserControlCommand::execute()
 
     const float pitchSetpoint =
         pitchController->getSetpoint() +
-        USER_PITCH_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretPitchInput();
+        userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
     pitchController->runController(dt, pitchSetpoint);
 
     const float yawSetpoint =
         yawController->getSetpoint() +
-        USER_YAW_INPUT_SCALAR * drivers->controlOperatorInterface.getTurretYawInput();
+        userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
     yawController->runController(dt, yawSetpoint);
 }
 
@@ -73,4 +77,4 @@ void TurretUserControlCommand::end(bool)
     turretSubsystem->setYawMotorOutput(0);
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user

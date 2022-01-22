@@ -41,7 +41,7 @@ class TurretControllerInterface
 {
 public:
     /**
-     * @param[in] turretSubsystem A `turretSubsystem` object accessible for children objects to use.
+     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
      */
     TurretControllerInterface(TurretSubsystem *turretSubsystem) : turretSubsystem(turretSubsystem)
     {

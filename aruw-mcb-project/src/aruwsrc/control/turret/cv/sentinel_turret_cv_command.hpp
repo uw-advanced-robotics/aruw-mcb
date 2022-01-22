@@ -37,7 +37,7 @@ namespace algorithms
 {
 class TurretYawControllerInterface;
 class TurretPitchControllerInterface;
-}  // namespace cv
+}  // namespace algorithms
 }  // namespace aruwsrc::control::turret
 
 namespace aruwsrc::control::turret::cv
@@ -71,6 +71,16 @@ public:
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
+    /**
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the sentinel turret to control.
+     * @param[in] agitatorSubsystem Pointer to agitator on the sentinel's turret, controlled by this
+     * command to automatically launch projectiles when a target has been acquired.
+     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * axis of the turret.
+     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
+     * pitch axis of the turret.
+     */
     SentinelTurretCVCommand(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,

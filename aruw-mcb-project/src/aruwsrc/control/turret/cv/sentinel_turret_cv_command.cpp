@@ -36,7 +36,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     TurretSubsystem *turretSubsystem,
     aruwsrc::agitator::AgitatorSubsystem *agitator,
     algorithms::TurretYawControllerInterface *yawController,
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController)
+    algorithms::TurretPitchControllerInterface *pitchController)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       turretSubsystem(turretSubsystem),
@@ -72,15 +72,22 @@ void SentinelTurretCVCommand::initialize()
 
 void SentinelTurretCVCommand::execute()
 {
+    // check validity of aim data
     if (drivers->legacyVisionCoprocessor.lastAimDataValid())
     {
+        // aim data valid, get aim data
         const auto &cvData = drivers->legacyVisionCoprocessor.getLastAimData();
         if (cvData.hasTarget)
         {
+            // a target has been acquired, set target setpoints of turret
+            // in the old system, we could not have a target and still have valid aim data
             aimingAtTarget = true;
             turretSubsystem->setYawSetpoint(cvData.yaw);
             turretSubsystem->setPitchSetpoint(cvData.pitch);
 
+            // we have a target and we are close to the target setpoint (the turret is pointing at
+            // the target), so rotate agitator to launch a projectile if not already in process of
+            // launching
             if (fabs(turretSubsystem->getCurrentYawValue().difference(cvData.yaw)) <=
                     YAW_FIRE_ERROR_MARGIN &&
                 fabs(turretSubsystem->getCurrentPitchValue().difference(cvData.pitch)) <=
@@ -94,11 +101,13 @@ void SentinelTurretCVCommand::execute()
         }
         else
         {
+            // no target acquired, scan
             scanForTarget();
         }
     }
     else
     {
+        // no valid aim data, scan
         scanForTarget();
     }
 
@@ -114,6 +123,7 @@ void SentinelTurretCVCommand::execute()
     // the turret subsystem's desired yaw output
     yawController->runController(dt, turretSubsystem->getYawSetpoint());
 
+    // run comprised command scheduler (which will run the agitator rotate command when necessary)
     comprisedCommandScheduler.run();
 }
 
@@ -189,4 +199,4 @@ void SentinelTurretCVCommand::scanForTarget()
         yawSetpoint + (yawScanningRight ? SCAN_DELTA_ANGLE_YAW : -SCAN_DELTA_ANGLE_YAW));
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::cv

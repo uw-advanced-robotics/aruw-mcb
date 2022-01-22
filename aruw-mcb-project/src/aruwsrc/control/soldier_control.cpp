@@ -153,7 +153,7 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     drivers(),
     &turret,
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
-    world_rel_turret_imu::PITCH_POS_PID_CONFIG);
+    world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),

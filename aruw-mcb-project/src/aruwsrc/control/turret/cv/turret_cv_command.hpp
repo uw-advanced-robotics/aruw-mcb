@@ -43,11 +43,19 @@ namespace aruwsrc::control::turret::cv
 class TurretCVCommand : public tap::control::Command
 {
 public:
+    /**
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the turret to control.
+     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * axis of the turret.
+     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
+     * pitch axis of the turret.
+     */
     TurretCVCommand(
-        aruwsrc::Drivers *legacyVisionCoprocessor,
-        TurretSubsystem *subsystem,
+        aruwsrc::Drivers *drivers,
+        TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController);
+        algorithms::TurretPitchControllerInterface *pitchController);
 
     void initialize() override;
 
@@ -67,7 +75,7 @@ private:
     TurretSubsystem *turretSubsystem;
 
     algorithms::TurretYawControllerInterface *yawController;
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController;
+    algorithms::TurretPitchControllerInterface *pitchController;
 
     uint32_t prevTime;
 };  // class TurretCvCommand

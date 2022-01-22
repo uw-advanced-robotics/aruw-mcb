@@ -33,7 +33,7 @@ TurretCVCommand::TurretCVCommand(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController)
+    algorithms::TurretPitchControllerInterface *pitchController)
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),

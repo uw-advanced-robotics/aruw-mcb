@@ -34,21 +34,32 @@ class TurretSubsystem;
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- *
+ * Controller that runs a single position PID controller in the chassis frame to control the turret yaw.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
 class ChassisFrameYawTurretController final : public TurretYawControllerInterface
 {
 public:
+    /**
+     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] pidConfig PID configuration struct for the controller.
+     */
     ChassisFrameYawTurretController(
         TurretSubsystem *turretSubsystem,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() override;
 
+    /**
+     * @see TurretControllerInterface for more details.
+     * @param[in] desiredSetpoint The yaw desired setpoint in the chassis frame.
+     */
     void runController(const uint32_t dt, const float desiredSetpoint) override;
 
+    /**
+     * @return The yaw setpoint, in the chassis frame.
+     */
     float getSetpoint() const override;
 
     bool isOnline() const override;
@@ -58,19 +69,32 @@ private:
 };
 
 /**
+ * Controller that runs a single position PID controller in the chassis frame to control the turret pitch.
+ *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
 class ChassisFramePitchTurretController final : public TurretPitchControllerInterface
 {
 public:
+    /**
+     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] pidConfig PID configuration struct for the controller.
+     */
     ChassisFramePitchTurretController(
         TurretSubsystem *turretSubsystem,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() override;
 
+    /**
+     * @see TurretControllerInterface for more details.
+     * @param[in] desiredSetpoint The pitch desired setpoint in the chassis frame.
+     */
     void runController(const uint32_t dt, const float desiredSetpoint) override;
 
+    /**
+     * @return The pitch setpoint, in the chassis frame.
+     */
     float getSetpoint() const override;
 
     bool isOnline() const override;

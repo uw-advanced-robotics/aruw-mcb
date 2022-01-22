@@ -31,18 +31,34 @@ class Drivers;
 
 namespace aruwsrc::control::turret::user
 {
+/**
+ * Command that takes user input from the `ControlOperatorInterface` to control the pitch and yaw
+ * axis of some turret using some passed in yaw and pitch controller upon construction.
+ */
 class TurretUserControlCommand : public tap::control::Command
 {
 public:
+    /**
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the sentinel turret to control.
+     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * axis of the turret.
+     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
+     * pitch axis of the turret.
+     * @param[in] userYawInputScalar Value to scale the user input from `ControlOperatorInterface` by. Basically mouse sensitivity.
+     * @param[in] userPitchInputScalar See userYawInputScalar.
+     */
     TurretUserControlCommand(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController);
+        algorithms::TurretPitchControllerInterface *pitchController,
+        float userYawInputScalar = 1.0f,
+        float userPitchInputScalar = 1.0f);
 
     bool isReady() override;
 
-    const char *getName() const override { return "Turret User command"; }
+    const char *getName() const override { return "User turret control"; }
 
     void initialize() override;
 
@@ -53,13 +69,6 @@ public:
     void end(bool) override;
 
 private:
-    /**
-     * Scales how much user input from `ControlOperatorInterface` change the setpoint
-     * of this command. Basically: mouse sensitivity
-     */
-    static constexpr float USER_YAW_INPUT_SCALAR = 1.0f;
-    static constexpr float USER_PITCH_INPUT_SCALAR = 1.0f;
-
     aruwsrc::Drivers *drivers;
     TurretSubsystem *turretSubsystem;
 
@@ -67,7 +76,10 @@ private:
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
+
+    const float userYawInputScalar;
+    const float userPitchInputScalar;
 };
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user
 
 #endif  // TURRET_USER_CONTROL_COMMAND_HPP_

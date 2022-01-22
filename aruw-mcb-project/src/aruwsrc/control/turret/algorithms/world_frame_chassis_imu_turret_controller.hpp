@@ -34,19 +34,29 @@ namespace aruwsrc
 class Drivers;
 }
 
-
-namespace aruwsrc::control::turret{
+namespace aruwsrc::control::turret
+{
 class TurretSubsystem;
 }
 
 namespace aruwsrc::control::turret::algorithms
 {
 /**
+ * World frame turret yaw controller. Requires that the development board type A is mounted rigidly
+ * to the chassis and is properly initialized. Runs a single position PID controller to control the
+ * turret yaw. Feedback from the mpu6500 and the turret yaw encoder used to determine the world frame
+ * turret angle.
+ *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
 class WorldFrameYawChassisImuTurretController final : public TurretYawControllerInterface
 {
 public:
+    /**
+     * @param[in] drivers A drivers object that will be queried for IMU information.
+     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] pidConfig PID configuration struct for the controller.
+     */
     WorldFrameYawChassisImuTurretController(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
@@ -54,8 +64,15 @@ public:
 
     void initialize() override;
 
+    /**
+     * @see TurretControllerInterface for more details.
+     * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
+     */
     void runController(const uint32_t dt, const float desiredSetpoint) override;
 
+    /**
+     * @return The yaw setpoint, in the world frame.
+     */
     float getSetpoint() const override;
 
     bool isOnline() const override;
@@ -70,6 +87,6 @@ private:
     float chassisFrameInitImuYawAngle = 0.0f;
 };
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // WORLD_FRAME_CHASSIS_IMU_TURRET_CONTROLLER_HPP_
