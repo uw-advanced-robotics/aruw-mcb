@@ -165,6 +165,50 @@ private:
     static constexpr float PITCH_VEL_Q_PROPORTIONAL_KALMAN = 1.0f;
     static constexpr float PITCH_VEL_R_PROPORTIONAL_KALMAN = 2.0f;
     static constexpr float PITCH_VEL_DEADZONE = 0.0f;
+#else
+    static constexpr float YAW_POS_P = 500.0f;
+    static constexpr float YAW_POS_I = 0.0f;
+    static constexpr float YAW_POS_D = 45.0f;
+    static constexpr float YAW_POS_MAX_ERROR_SUM = 0.0f;
+    static constexpr float YAW_POS_MAX_OUTPUT = 2000.0f;
+    static constexpr float YAW_POS_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float YAW_POS_R_DERIVATIVE_KALMAN = 40.0f;
+    static constexpr float YAW_POS_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float YAW_POS_R_PROPORTIONAL_KALMAN = 0.0f;
+    static constexpr float YAW_POS_DEADZONE = 0.0f;
+
+    static constexpr float YAW_VEL_P = 35.0f;
+    static constexpr float YAW_VEL_I = 0.0f;
+    static constexpr float YAW_VEL_D = 20.0f;
+    static constexpr float YAW_VEL_MAX_ERROR_SUM = 0.0f;
+    static constexpr float YAW_VEL_MAX_OUTPUT = 30000.0f;
+    static constexpr float YAW_VEL_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float YAW_VEL_R_DERIVATIVE_KALMAN = 40.0f;
+    static constexpr float YAW_VEL_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float YAW_VEL_R_PROPORTIONAL_KALMAN = 0.0f;
+    static constexpr float YAW_VEL_DEADZONE = 0.0f;
+
+    static constexpr float PITCH_POS_P = 4000.0f;
+    static constexpr float PITCH_POS_I = 0.0f;
+    static constexpr float PITCH_POS_D = 130.0f;
+    static constexpr float PITCH_POS_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PITCH_POS_MAX_OUTPUT = 3000.0f;
+    static constexpr float PITCH_POS_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float PITCH_POS_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float PITCH_POS_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float PITCH_POS_R_PROPORTIONAL_KALMAN = 2.0f;
+    static constexpr float PITCH_POS_DEADZONE = 0.0f;
+
+    static constexpr float PITCH_VEL_P = 4000.0f;
+    static constexpr float PITCH_VEL_I = 0.0f;
+    static constexpr float PITCH_VEL_D = 130.0f;
+    static constexpr float PITCH_VEL_MAX_ERROR_SUM = 0.0f;
+    static constexpr float PITCH_VEL_MAX_OUTPUT = 30000.0f;
+    static constexpr float PITCH_VEL_Q_DERIVATIVE_KALMAN = 1.0f;
+    static constexpr float PITCH_VEL_R_DERIVATIVE_KALMAN = 20.0f;
+    static constexpr float PITCH_VEL_Q_PROPORTIONAL_KALMAN = 1.0f;
+    static constexpr float PITCH_VEL_R_PROPORTIONAL_KALMAN = 2.0f;
+    static constexpr float PITCH_VEL_DEADZONE = 0.0f;
 #endif
     /**
      * Scales how much user input from `ControlOperatorInterface` change the setpoint
