@@ -24,7 +24,8 @@
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * Transforms the passed in turret yaw angle in the chassis frame to the world frame (units degrees).
+ * Transforms the passed in turret yaw angle in the chassis frame to the world frame (units
+ * degrees).
  *
  * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
  *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
@@ -44,7 +45,8 @@ static inline float transformChassisFrameYawToWorldFrame(
 }
 
 /**
- * Transforms the passed in turret yaw angle in the world frame to the chassis frame (units degrees).
+ * Transforms the passed in turret yaw angle in the world frame to the chassis frame (units
+ * degrees).
  *
  * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
  *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
