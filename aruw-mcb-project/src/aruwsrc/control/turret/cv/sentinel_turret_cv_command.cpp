@@ -20,9 +20,8 @@
 #include "sentinel_turret_cv_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/control/comprised_command.hpp"
 
-#include "../algorithms/chassis_frame_turret_controller.hpp"
+#include "../algorithms/turret_controller_interface.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/communication/serial/legacy_vision_coprocessor.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
@@ -30,15 +29,17 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::cv
 {
 SentinelTurretCVCommand::SentinelTurretCVCommand(
     aruwsrc::Drivers *drivers,
-    tap::control::turret::TurretSubsystemInterface *sentinelTurret,
-    aruwsrc::agitator::AgitatorSubsystem *agitator)
+    TurretSubsystem *turretSubsystem,
+    aruwsrc::agitator::AgitatorSubsystem *agitator,
+    algorithms::TurretYawControllerInterface *yawController,
+    algorithms::TurretPitchControllerInterface *pitchController)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
-      sentinelTurret(sentinelTurret),
+      turretSubsystem(turretSubsystem),
       rotateAgitator(
           drivers,
           agitator,
@@ -49,34 +50,16 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           10),
       aimingAtTarget(false),
       lostTargetCounter(0),
-      yawPid(
-          YAW_P,
-          YAW_I,
-          YAW_D,
-          YAW_MAX_ERROR_SUM,
-          YAW_MAX_OUTPUT,
-          YAW_Q_DERIVATIVE_KALMAN,
-          YAW_R_DERIVATIVE_KALMAN,
-          YAW_Q_PROPORTIONAL_KALMAN,
-          YAW_R_PROPORTIONAL_KALMAN),
-      pitchPid(
-          PITCH_P,
-          PITCH_I,
-          PITCH_D,
-          PITCH_MAX_ERROR_SUM,
-          PITCH_MAX_OUTPUT,
-          PITCH_Q_DERIVATIVE_KALMAN,
-          PITCH_R_DERIVATIVE_KALMAN,
-          PITCH_Q_PROPORTIONAL_KALMAN,
-          PITCH_R_PROPORTIONAL_KALMAN)
+      yawController(yawController),
+      pitchController(pitchController)
 {
     addSubsystemRequirement(agitator);
-    addSubsystemRequirement(sentinelTurret);
+    addSubsystemRequirement(turretSubsystem);
     comprisedCommandScheduler.registerSubsystem(agitator);
-    comprisedCommandScheduler.registerSubsystem(sentinelTurret);
+    comprisedCommandScheduler.registerSubsystem(turretSubsystem);
 }
 
-bool SentinelTurretCVCommand::isReady() { return sentinelTurret->isOnline(); }
+bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
 
 void SentinelTurretCVCommand::initialize()
 {
@@ -89,18 +72,25 @@ void SentinelTurretCVCommand::initialize()
 
 void SentinelTurretCVCommand::execute()
 {
+    // check validity of aim data
     if (drivers->legacyVisionCoprocessor.lastAimDataValid())
     {
+        // aim data valid, get aim data
         const auto &cvData = drivers->legacyVisionCoprocessor.getLastAimData();
         if (cvData.hasTarget)
         {
+            // a target has been acquired, set target setpoints of turret
+            // in the old system, we could not have a target and still have valid aim data
             aimingAtTarget = true;
-            sentinelTurret->setYawSetpoint(cvData.yaw);
-            sentinelTurret->setPitchSetpoint(cvData.pitch);
+            turretSubsystem->setYawSetpoint(cvData.yaw);
+            turretSubsystem->setPitchSetpoint(cvData.pitch);
 
-            if (fabs(sentinelTurret->getCurrentYawValue().difference(cvData.yaw)) <=
+            // we have a target and we are close to the target setpoint (the turret is pointing at
+            // the target), so rotate agitator to launch a projectile if not already in process of
+            // launching
+            if (fabs(turretSubsystem->getCurrentYawValue().difference(cvData.yaw)) <=
                     YAW_FIRE_ERROR_MARGIN &&
-                fabs(sentinelTurret->getCurrentPitchValue().difference(cvData.pitch)) <=
+                fabs(turretSubsystem->getCurrentPitchValue().difference(cvData.pitch)) <=
                     PITCH_FIRE_ERROR_MARGIN)
             {
                 if (!comprisedCommandScheduler.isCommandScheduled(&rotateAgitator))
@@ -111,11 +101,13 @@ void SentinelTurretCVCommand::execute()
         }
         else
         {
+            // no target acquired, scan
             scanForTarget();
         }
     }
     else
     {
+        // no valid aim data, scan
         scanForTarget();
     }
 
@@ -125,34 +117,27 @@ void SentinelTurretCVCommand::execute()
 
     // updates the turret pitch setpoint based on CV input, runs the PID controller, and sets
     // the turret subsystem's desired pitch output
-    ChassisFrameTurretController::runPitchPidController(
-        dt,
-        sentinelTurret->getPitchSetpoint(),
-        TurretSubsystem::TURRET_CG_X,
-        TurretSubsystem::TURRET_CG_Z,
-        TurretSubsystem::GRAVITY_COMPENSATION_SCALAR,
-        &pitchPid,
-        sentinelTurret);
+    pitchController->runController(dt, turretSubsystem->getPitchSetpoint());
 
     // updates the turret yaw setpoint based on CV input, runs the PID controller, and sets
     // the turret subsystem's desired yaw output
-    ChassisFrameTurretController::runYawPidController(
-        dt,
-        sentinelTurret->getYawSetpoint(),
-        &yawPid,
-        sentinelTurret);
+    yawController->runController(dt, turretSubsystem->getYawSetpoint());
 
+    // run comprised command scheduler (which will run the agitator rotate command when necessary)
     comprisedCommandScheduler.run();
 }
 
-bool SentinelTurretCVCommand::isFinished() const { return !sentinelTurret->isOnline(); }
+bool SentinelTurretCVCommand::isFinished() const
+{
+    return !pitchController->isOnline() || !yawController->isOnline();
+}
 
 void SentinelTurretCVCommand::end(bool interrupted)
 {
     drivers->legacyVisionCoprocessor.stopAutoAim();
     comprisedCommandScheduler.removeCommand(&rotateAgitator, interrupted);
-    sentinelTurret->setPitchMotorOutput(0);
-    sentinelTurret->setYawMotorOutput(0);
+    turretSubsystem->setPitchMotorOutput(0);
+    turretSubsystem->setYawMotorOutput(0);
 }
 
 void SentinelTurretCVCommand::updateScanningUp(
@@ -191,7 +176,7 @@ void SentinelTurretCVCommand::scanForTarget()
         }
     }
 
-    const float pitchSetpoint = sentinelTurret->getPitchSetpoint();
+    const float pitchSetpoint = turretSubsystem->getPitchSetpoint();
 
     updateScanningUp(
         pitchSetpoint,
@@ -199,10 +184,10 @@ void SentinelTurretCVCommand::scanForTarget()
         TurretSubsystem::PITCH_MAX_ANGLE,
         &pitchScanningUp);
 
-    sentinelTurret->setPitchSetpoint(
+    turretSubsystem->setPitchSetpoint(
         pitchSetpoint + (pitchScanningUp ? SCAN_DELTA_ANGLE_PITCH : -SCAN_DELTA_ANGLE_PITCH));
 
-    const float yawSetpoint = sentinelTurret->getYawSetpoint();
+    const float yawSetpoint = turretSubsystem->getYawSetpoint();
 
     updateScanningUp(
         yawSetpoint,
@@ -210,8 +195,8 @@ void SentinelTurretCVCommand::scanForTarget()
         TurretSubsystem::YAW_MAX_ANGLE,
         &yawScanningRight);
 
-    sentinelTurret->setYawSetpoint(
+    turretSubsystem->setYawSetpoint(
         yawSetpoint + (yawScanningRight ? SCAN_DELTA_ANGLE_YAW : -SCAN_DELTA_ANGLE_YAW));
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::cv

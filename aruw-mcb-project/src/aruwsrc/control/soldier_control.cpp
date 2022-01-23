@@ -43,10 +43,14 @@
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
-#include "turret/chassis-relative/turret_quick_turn_command.hpp"
+#include "turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/cv/turret_cv_command.hpp"
+#include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/world-relative/turret_world_relative_command.hpp"
+#include "turret/user/turret_quick_turn_command.hpp"
+#include "turret/user/turret_user_world_relative_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -125,11 +129,48 @@ ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, 
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativeCommand turretWorldRelativeCommand(drivers(), &turret);
+// Turret controllers
+algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+    &turret,
+    chassis_rel::PITCH_PID_CONFIG);
 
-TurretCVCommand turretCVCommand(drivers(), &turret);
+algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+    &turret,
+    chassis_rel::YAW_PID_CONFIG);
 
-TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
+algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
+    drivers(),
+    &turret,
+    world_rel_chassis_imu::YAW_PID_CONFIG);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG,
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::YAW_POS_PID_CONFIG,
+    world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+// turret commands
+user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
+    drivers(),
+    &turret,
+    &worldFrameYawChassisImuController,
+    &chassisFramePitchTurretController,
+    &worldFrameYawTurretImuController,
+    &worldFramePitchTurretImuController);
+
+cv::TurretCVCommand turretCVCommand(
+    drivers(),
+    &turret,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
+
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -261,7 +302,7 @@ void initializeSubsystems()
 void setDefaultSoldierCommands(aruwsrc::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretWorldRelativeCommand);
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_CV_COMMAND_HPP_
-#define TURRET_CV_COMMAND_HPP_
+#ifndef TURRET_USER_CONTROL_COMMAND_HPP_
+#define TURRET_USER_CONTROL_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -29,40 +29,39 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
-{
-class TurretSubsystem;
-}
-
-namespace aruwsrc::control::turret::cv
+namespace aruwsrc::control::turret::user
 {
 /**
- * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
- * aims the turret accordingly using a position PID controller.
- *
- * This command, unlike the `SentinelTurretCVCommand`, is not responsible for firing projectiles
- * when the auto aim system determines it should fire.
+ * Command that takes user input from the `ControlOperatorInterface` to control the pitch and yaw
+ * axis of some turret using some passed in yaw and pitch controller upon construction.
  */
-class TurretCVCommand : public tap::control::Command
+class TurretUserControlCommand : public tap::control::Command
 {
 public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
-     * @param[in] turretSubsystem Pointer to the turret to control.
+     * @param[in] turretSubsystem Pointer to the sentinel turret to control.
      * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
      * axis of the turret.
      * @param[in] pitchController Pointer to a pitch controller that will be used to control the
      * pitch axis of the turret.
+     * @param[in] userYawInputScalar Value to scale the user input from `ControlOperatorInterface`
+     * by. Basically mouse sensitivity.
+     * @param[in] userPitchInputScalar See userYawInputScalar.
      */
-    TurretCVCommand(
+    TurretUserControlCommand(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController);
-
-    void initialize() override;
+        algorithms::TurretPitchControllerInterface *pitchController,
+        float userYawInputScalar = 1.0f,
+        float userPitchInputScalar = 1.0f);
 
     bool isReady() override;
+
+    const char *getName() const override { return "User turret control"; }
+
+    void initialize() override;
 
     void execute() override;
 
@@ -70,19 +69,18 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret CV"; }
-
 private:
     aruwsrc::Drivers *drivers;
-
     TurretSubsystem *turretSubsystem;
+
+    uint32_t prevTime = 0;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
-    uint32_t prevTime;
-};  // class TurretCvCommand
+    const float userYawInputScalar;
+    const float userPitchInputScalar;
+};
+}  // namespace aruwsrc::control::turret::user
 
-}  // namespace aruwsrc::control::turret::cv
-
-#endif  // TURRET_CV_COMMAND_HPP_
+#endif  // TURRET_USER_CONTROL_COMMAND_HPP_

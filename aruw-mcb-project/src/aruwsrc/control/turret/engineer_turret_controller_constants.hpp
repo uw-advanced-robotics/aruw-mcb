@@ -17,36 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "turret_setpoint_command.hpp"
+#ifndef ENGINEER_TURRET_CONTROLLER_CONSTANTS_HPP_
+#define ENGINEER_TURRET_CONTROLLER_CONSTANTS_HPP_
 
-#include "aruwsrc/drivers.hpp"
-
-using namespace tap::control::turret;
+#include "tap/algorithms/smooth_pid.hpp"
 
 namespace aruwsrc::control::turret
 {
-TurretSetpointCommand::TurretSetpointCommand(
-    aruwsrc::Drivers *drivers,
-    tap::control::turret::TurretSubsystemInterface *turret,
-    const float yawInputScalar,
-    const float pitchInputScalar)
-    : drivers(drivers),
-      turret(turret),
-      yawInputScalar(yawInputScalar),
-      pitchInputScalar(pitchInputScalar)
-{
-    addSubsystemRequirement(turret);
-}
-
-void TurretSetpointCommand::execute()
-{
-    turret->setPitchSetpoint(
-        turret->getPitchSetpoint() +
-        pitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput());
-
-    turret->setYawSetpoint(
-        turret->getYawSetpoint() +
-        yawInputScalar * drivers->controlOperatorInterface.getTurretYawInput());
-}
-
 }  // namespace aruwsrc::control::turret
+
+#endif  // ENGINEER_TURRET_CONTROLLER_CONSTANTS_HPP_
