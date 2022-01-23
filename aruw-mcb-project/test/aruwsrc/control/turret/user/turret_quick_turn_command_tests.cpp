@@ -19,16 +19,17 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/turret/chassis-relative/turret_quick_turn_command.hpp"
+#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::mock;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::user;
 using namespace testing;
 using aruwsrc::Drivers;
 
-TEST(TurretQuickTurnCommand, isReady__return_true_when_turret_online)
+TEST(TurretQuickTurnCommand, isReady_return_true_when_turret_online)
 {
     Drivers drivers;
     TurretSubsystemMock turret(&drivers);
@@ -40,7 +41,7 @@ TEST(TurretQuickTurnCommand, isReady__return_true_when_turret_online)
     EXPECT_TRUE(turretUturnCommand.isReady());
 }
 
-TEST(TurretQuickTurnCommand, initialize__sets_turret_setpoint_based_on_specified_setpoint_offset)
+TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_setpoint_offset)
 {
     Drivers drivers;
     TurretSubsystemMock turret(&drivers);
@@ -77,7 +78,7 @@ TEST(TurretQuickTurnCommand, successfully_registers_with_scheduler)
     EXPECT_TRUE(commandScheduler.isCommandScheduled(&turretUturnCommand));
 }
 
-TEST(TurretUturnCOmmand, isFinished__always_return_true)
+TEST(TurretUturnCOmmand, isFinished_always_return_true)
 {
     Drivers drivers;
     tap::control::CommandScheduler commandScheduler(&drivers, true);
