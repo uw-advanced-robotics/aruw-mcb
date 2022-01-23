@@ -377,6 +377,8 @@ public:
     inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
     inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
 
+    virtual inline bool areAllMotorsOnline() const override;
+
     void onHardwareTestStart() override;
 
     /**
