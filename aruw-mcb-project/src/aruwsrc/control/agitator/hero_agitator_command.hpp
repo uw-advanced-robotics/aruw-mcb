@@ -47,14 +47,11 @@ public:
         aruwsrc::Drivers* drivers,
         AgitatorSubsystem* kickerAgitator,
         AgitatorSubsystem* waterwheelAgitator,
-        float kickerShootAngleChange,
+        float kickerShootRotateAngle,
         float kickerShootRotateTime,
-        float kickerLoadFastRotateAngle,
-        float waterwheelFastRotateAngle,
-        uint32_t fastRotateTime,
-        float kickerSlowLoadRotateAngle,
-        float waterwheelSlowLoadRotateAngle,
-        uint32_t slowRotateTime,
+        float kickerLoadRotateAngle,
+        float waterwheelLoadRotateAngle,
+        uint32_t loadRotateTime,
         float waterwheelMaxUnjamAngle,
         bool heatLimiting,
         uint16_t heatLimitBuffer);
@@ -73,16 +70,13 @@ public:
 
 private:
     tap::control::setpoint::MoveCommand kickerFireCommand;
-    tap::control::setpoint::MoveCommand kickerFastLoadCommand;
-    tap::control::setpoint::MoveUnjamComprisedCommand waterwheelFastLoadCommand;
-    tap::control::setpoint::MoveCommand kickerSlowLoadCommand;
-    tap::control::setpoint::MoveUnjamComprisedCommand waterwheelSlowLoadCommand;
+    tap::control::setpoint::MoveCommand kickerLoadCommand;
+    tap::control::setpoint::MoveUnjamComprisedCommand waterwheelLoadCommand;
 
     enum HeroAgitatorState
     {
         SHOOTING,
-        LOAD_FAST,
-        LOAD_SLOW,
+        LOAD,
         FINISHED
     };
 
@@ -97,8 +91,6 @@ private:
     const tap::gpio::Digital::InputPin LIMIT_SWITCH_PIN = Digital::InputPin::A;
 
     void beginLoading();
-
-    void beginLoadingSlow();
 };  // class HeroAgitatorCommand
 
 }  // namespace aruwsrc::agitator
