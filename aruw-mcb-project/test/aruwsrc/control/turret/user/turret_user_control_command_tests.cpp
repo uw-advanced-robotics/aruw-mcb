@@ -19,58 +19,76 @@
 
 #include <gtest/gtest.h>
 
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
-#include "aruwsrc/control/turret/chassis-relative/turret_chassis_relative_command.hpp"
+#include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::user;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
-TEST(TurretChassisRelativeCommand, isReady__return_true_when_turret_online)
+#define SETUP_TEST()                                                                            \
+    Drivers drivers;                                                                            \
+    NiceMock<TurretSubsystemMock> turret(&drivers);                                             \
+    ChassisFramePitchTurretController pitchController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}); \
+    ChassisFrameYawTurretController yawController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});     \
+    TurretUserControlCommand turretCmd(&drivers, &turret, &yawController, &pitchController);
+
+TEST(TurretUserControlCommand, isReady_return_true_when_turret_online)
 {
-    Drivers drivers;
-    TurretSubsystemMock turret(&drivers);
-    TurretChassisRelativeCommand turretCR(&drivers, &turret);
+    SETUP_TEST();
 
-    EXPECT_CALL(turret, isOnline).WillOnce(Return(true)).WillOnce(Return(false));
+    ON_CALL(turret, isOnline).WillByDefault(Return(true));
 
-    EXPECT_TRUE(turretCR.isReady());
-    EXPECT_FALSE(turretCR.isReady());
+    EXPECT_TRUE(turretCmd.isReady());
 }
 
-TEST(TurretChassisRelativeCommand, isFinished__return_true_when_turret_offline)
+TEST(TurretUserControlCommand, isReady_return_false_when_turret_offline)
 {
-    Drivers drivers;
-    TurretSubsystemMock turret(&drivers);
-    TurretChassisRelativeCommand turretCR(&drivers, &turret);
+    SETUP_TEST();
 
-    EXPECT_CALL(turret, isOnline).WillOnce(Return(false)).WillOnce(Return(true));
+    ON_CALL(turret, isOnline).WillByDefault(Return(false));
 
-    EXPECT_TRUE(turretCR.isFinished());
-    EXPECT_FALSE(turretCR.isFinished());
+    EXPECT_FALSE(turretCmd.isReady());
 }
 
-TEST(TurretChassisRelativeCommand, end__sets_motor_out_to_0)
+TEST(TurretUserControlCommand, isFinished_return_true_when_turret_offline)
 {
-    Drivers drivers;
-    TurretSubsystemMock turret(&drivers);
-    TurretChassisRelativeCommand turretCR(&drivers, &turret);
+    SETUP_TEST();
+
+    ON_CALL(turret, isOnline).WillByDefault(Return(false));
+
+    EXPECT_TRUE(turretCmd.isFinished());
+}
+
+TEST(TurretUserControlCommand, isFinished_return_false_when_turret_online)
+{
+    SETUP_TEST();
+
+    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+
+    EXPECT_FALSE(turretCmd.isFinished());
+}
+
+TEST(TurretUserControlCommand, end_sets_motor_out_to_0)
+{
+    SETUP_TEST();
 
     EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(2);
     EXPECT_CALL(turret, setYawMotorOutput(0)).Times(2);
 
-    turretCR.end(true);
-    turretCR.end(false);
+    turretCmd.end(true);
+    turretCmd.end(false);
 }
 
-TEST(TurretChassisRelativeCommand, execute__output_0_when_error_0)
+TEST(TurretUserControlCommand, execute_output_0_when_error_0)
 {
-    Drivers drivers;
-    NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretChassisRelativeCommand turretCR(&drivers, &turret);
+    SETUP_TEST();
 
     tap::algorithms::ContiguousFloat yawActual(90, 0, 360);
     tap::algorithms::ContiguousFloat pitchActual(90, 0, 360);
@@ -85,7 +103,7 @@ TEST(TurretChassisRelativeCommand, execute__output_0_when_error_0)
 
     EXPECT_CALL(
         turret,
-        setPitchMotorOutput(FloatEq(aruwsrc::control::turret::computeGravitationalForceOffset(
+        setPitchMotorOutput(FloatEq(computeGravitationalForceOffset(
             TurretSubsystem::TURRET_CG_X,
             TurretSubsystem::TURRET_CG_Z,
             0,
@@ -94,15 +112,13 @@ TEST(TurretChassisRelativeCommand, execute__output_0_when_error_0)
     EXPECT_CALL(turret, setPitchSetpoint(90));
     EXPECT_CALL(turret, setYawSetpoint(90));
 
-    turretCR.initialize();
-    turretCR.execute();
+    turretCmd.initialize();
+    turretCmd.execute();
 }
 
-TEST(TurretChassisRelativeCommand, execute__output_nonzero_when_error_nonzero)
+TEST(TurretUserControlCommand, execute_output_nonzero_when_error_nonzero)
 {
-    Drivers drivers;
-    NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretChassisRelativeCommand turretCR(&drivers, &turret);
+    SETUP_TEST();
 
     float pitchSetpoint = 90, yawSetpoint = 90;
     tap::algorithms::ContiguousFloat yawActual(90, 0, 360);
@@ -118,7 +134,7 @@ TEST(TurretChassisRelativeCommand, execute__output_nonzero_when_error_nonzero)
 
     EXPECT_CALL(
         turret,
-        setPitchMotorOutput(Gt(aruwsrc::control::turret::computeGravitationalForceOffset(
+        setPitchMotorOutput(Gt(computeGravitationalForceOffset(
             TurretSubsystem::TURRET_CG_X,
             TurretSubsystem::TURRET_CG_Z,
             0,
@@ -131,6 +147,6 @@ TEST(TurretChassisRelativeCommand, execute__output_nonzero_when_error_nonzero)
         yawSetpoint = setpoint;
     });
 
-    turretCR.initialize();
-    turretCR.execute();
+    turretCmd.initialize();
+    turretCmd.execute();
 }

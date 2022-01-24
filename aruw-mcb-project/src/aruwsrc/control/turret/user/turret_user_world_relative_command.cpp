@@ -17,30 +17,43 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "turret_world_relative_command.hpp"
+#include "turret_user_world_relative_command.hpp"
 
+#include "../turret_controller_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::user
 {
-TurretWorldRelativeCommand::TurretWorldRelativeCommand(
+TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
     aruwsrc::Drivers *drivers,
-    TurretSubsystem *turretSubsystem)
+    TurretSubsystem *turretSubsystem,
+    algorithms::TurretYawControllerInterface *chassisImuYawController,
+    algorithms::TurretPitchControllerInterface *chassisImuPitchController,
+    algorithms::TurretYawControllerInterface *turretImuYawController,
+    algorithms::TurretPitchControllerInterface *turretImuPitchController)
     : tap::control::ComprisedCommand(drivers),
-      turretWRChassisImuCommand(drivers, turretSubsystem),
-      turretWRTurretImuCommand(drivers, turretSubsystem)
+      turretWRChassisImuCommand(
+          drivers,
+          turretSubsystem,
+          chassisImuYawController,
+          chassisImuPitchController),
+      turretWRTurretImuCommand(
+          drivers,
+          turretSubsystem,
+          turretImuYawController,
+          turretImuPitchController)
 {
     comprisedCommandScheduler.registerSubsystem(turretSubsystem);
     addSubsystemRequirement(turretSubsystem);
 }
 
-bool TurretWorldRelativeCommand::isReady()
+bool TurretUserWorldRelativeCommand::isReady()
 {
     return turretWRChassisImuCommand.isReady() || turretWRTurretImuCommand.isReady();
 }
 
-void TurretWorldRelativeCommand::initialize()
+void TurretUserWorldRelativeCommand::initialize()
 {
     // Try and use turret IMU, otherwise default to chassis IMU.
     if (turretWRTurretImuCommand.isReady())
@@ -53,7 +66,7 @@ void TurretWorldRelativeCommand::initialize()
     }
 }
 
-void TurretWorldRelativeCommand::execute()
+void TurretUserWorldRelativeCommand::execute()
 {
     // Re-initialize if no commands scheduled or if the turret WR Turret IMU command
     // is ready and isn't scheduled
@@ -67,15 +80,15 @@ void TurretWorldRelativeCommand::execute()
     comprisedCommandScheduler.run();
 }
 
-bool TurretWorldRelativeCommand::isFinished() const
+bool TurretUserWorldRelativeCommand::isFinished() const
 {
     return turretWRChassisImuCommand.isFinished() && turretWRTurretImuCommand.isFinished();
 }
 
-void TurretWorldRelativeCommand::end(bool interrupted)
+void TurretUserWorldRelativeCommand::end(bool interrupted)
 {
     comprisedCommandScheduler.removeCommand(&turretWRTurretImuCommand, interrupted);
     comprisedCommandScheduler.removeCommand(&turretWRChassisImuCommand, interrupted);
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user

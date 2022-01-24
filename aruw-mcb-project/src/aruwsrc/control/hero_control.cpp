@@ -40,7 +40,6 @@
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/world-relative/turret_world_relative_command.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::chassis;

@@ -17,28 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "turret_quick_turn_command.hpp"
+#ifndef TURRET_CONTROLLER_CONSTANTS_HPP_
+#define TURRET_CONTROLLER_CONSTANTS_HPP_
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 
-#include "turret_chassis_relative_command.hpp"
+#if defined(ALL_SOLDIERS)
+#include "soldier_turret_controller_constants.hpp"
+#elif defined(TARGET_HERO)
+#include "hero_turret_controller_constants.hpp"
+#elif defined(TARGET_SENTINEL)
+#include "sentinel_turret_controller_constants.hpp"
+#elif defined(TARGET_DRONE)
+#include "drone_turret_controller_constants.hpp"
+#elif defined(TARGET_ENGINEER)
+#include "engineer_turret_controller_constants.hpp"
+#endif
 
-namespace aruwsrc::control::turret
-{
-TurretQuickTurnCommand::TurretQuickTurnCommand(
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem,
-    const float targetOffsetToTurn)
-    : turretSubsystem(turretSubsystem),
-      targetOffsetToTurn(targetOffsetToTurn)
-{
-    addSubsystemRequirement(turretSubsystem);
-}
-
-bool TurretQuickTurnCommand::isReady() { return turretSubsystem->isOnline(); }
-
-void TurretQuickTurnCommand::initialize()
-{
-    turretSubsystem->setYawSetpoint(
-        turretSubsystem->getCurrentYawValue().getValue() + targetOffsetToTurn);
-}
-}  // namespace aruwsrc::control::turret
+#endif  // TURRET_CONTROLLER_CONSTANTS_HPP_
