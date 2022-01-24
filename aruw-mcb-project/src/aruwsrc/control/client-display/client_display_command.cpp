@@ -20,6 +20,7 @@
 #include "client_display_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -75,49 +76,32 @@ ClientDisplayCommand::ClientDisplayCommand(
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
-#if defined(TARGET_HERO)
-      booleanHudIndicatorDrawers{
-          BooleanDrawer(
-              drivers,
-              &booleanHudIndicatorGraphics[0],
-              updateGraphicColor<Tx::GraphicColor::YELLOW, Tx::GraphicColor::GREEN>),
-          BooleanDrawer(
-              drivers,
-              &booleanHudIndicatorGraphics[1],
-              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
-          BooleanDrawer(
-              drivers,
-              &booleanHudIndicatorGraphics[2],
-              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
-          BooleanDrawer(
-              drivers,
-              &booleanHudIndicatorGraphics[3],
-              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
-          BooleanDrawer(
-              drivers,
-              &booleanHudIndicatorGraphics[4],
-              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
-          BooleanDrawer(
-              drivers,
-              &booleanHudIndicatorGraphics[5],
-              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
-      },
-#else
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               drivers,
               &booleanHudIndicatorGraphics[SYSTEMS_CALIBRATING],
-              updateGraphicColor<Tx::GraphicColor::YELLOW, Tx::GraphicColor::GREEN>),
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING])>),
           BooleanHUDIndicator(
               drivers,
               &booleanHudIndicatorGraphics[CV_AIM_DATA_VALID],
-              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID])>),
           BooleanHUDIndicator(
               drivers,
               &booleanHudIndicatorGraphics[AGITATOR_STATUS_HEALTHY],
-              updateGraphicColor<Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE>),
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY])>),
       },
-#endif
+      driveCommands{
+          chassisBeybladeCmd,
+          chassisAutorotateCmd,
+          chassisImuDriveCommand,
+          chassisDriveCmd,
+      },
       positionSelectionHudIndicatorDrawers{
           StateHUDIndicator<uint16_t>(
               drivers,
@@ -131,12 +115,6 @@ ClientDisplayCommand::ClientDisplayCommand(
               drivers,
               &positionSelectionHudIndicatorGraphics[SHOOTER_STATE],
               updateGraphicYLocation)},
-      driveCommands{
-          chassisBeybladeCmd,
-          chassisAutorotateCmd,
-          chassisImuDriveCommand,
-          chassisDriveCmd,
-      },
       turretSubsystem(turretSubsystem)
 {
     addSubsystemRequirement(clientDisplay);
@@ -144,11 +122,11 @@ ClientDisplayCommand::ClientDisplayCommand(
 
 void ClientDisplayCommand::initialize()
 {
+    resetListNameGenerator();
     restart();  // restart protothread
     initializeBooleanHudIndicators();
     initializePositionHudIndicators();
     initializeReticle();
-    // initializeDriveCommand();
     initializeChassisOrientation();
     initializeTurretAngles();
 }
@@ -164,15 +142,9 @@ bool ClientDisplayCommand::run()
     while (true)
     {
         PT_CALL(updateBooleanHudIndicators());
-
         PT_CALL(updatePositionSelectorHudIndicators());
-
-        // PT_CALL(updateDriveCommandMsg());
-
         PT_CALL(updateChassisOrientation());
-
         PT_CALL(updateTurretAngles());
-
         PT_YIELD();
     }
     PT_END();
@@ -198,7 +170,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::sendInitialGraphics()
     }
 
     for (positionSelectionHudIndicatorIndex = 0;
-         positionSelectionHudIndicatorIndex < NUM_POSITION_HUD_INDICATORS;
+         positionSelectionHudIndicatorIndex < NUM_MATRIX_HUD_INDICATORS;
          positionSelectionHudIndicatorIndex++)
     {
         RF_CALL(
@@ -209,17 +181,14 @@ modm::ResumableResult<bool> ClientDisplayCommand::sendInitialGraphics()
         delay(&positionSelectionHudLabelGraphics[positionSelectionHudIndicatorIndex]);
     }
 
-    drivers->refSerial.sendGraphic(&positionSelectionHudLabelGraphics[NUM_POSITION_HUD_INDICATORS]);
-    delay(&positionSelectionHudLabelGraphics[NUM_POSITION_HUD_INDICATORS]);
+    drivers->refSerial.sendGraphic(&positionSelectionHudLabelGraphics[NUM_MATRIX_HUD_INDICATORS]);
+    delay(&positionSelectionHudLabelGraphics[NUM_MATRIX_HUD_INDICATORS]);
 
     for (reticleIndex = 0; reticleIndex < MODM_ARRAY_SIZE(reticleMsg); reticleIndex++)
     {
         drivers->refSerial.sendGraphic(&reticleMsg[reticleIndex]);
         delay(&reticleMsg[reticleIndex]);
     }
-
-    drivers->refSerial.sendGraphic(&driveCommandMsg);
-    delay(&driveCommandMsg);
 
     drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
     delay(&chassisOrientationGraphics);
@@ -268,7 +237,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updatePositionSelectorHudIndic
     updatePositionSelectionHudIndicatorState();
 
     for (positionSelectionHudIndicatorIndex = 0;
-         positionSelectionHudIndicatorIndex < NUM_POSITION_HUD_INDICATORS;
+         positionSelectionHudIndicatorIndex < NUM_MATRIX_HUD_INDICATORS;
          positionSelectionHudIndicatorIndex++)
     {
         RF_CALL(positionSelectionHudIndicatorDrawers[positionSelectionHudIndicatorIndex].draw());
@@ -276,8 +245,6 @@ modm::ResumableResult<bool> ClientDisplayCommand::updatePositionSelectorHudIndic
 
     RF_END();
 }
-
-int hopperIndex = 0;
 
 void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
 {
@@ -290,9 +257,9 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
         }
     }
     positionSelectionHudIndicatorDrawers[CHASSIS_STATE].setIndicatorState(
-        POSITION_HUD_INDICATOR_LABELS_START_Y -
-        1.5f * currDriveCommandIndex * POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE -
-        POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE - POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
+        MATRIX_HUD_INDICATOR_LABELS_START_Y -
+        CHARACTER_LINE_SPACING * currDriveCommandIndex * MATRIX_HUD_INDICATOR_CHAR_SIZE -
+        MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
 
     // update flywheel and hopper state
     bool flywheelsOff =
@@ -300,7 +267,7 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
         compareFloatClose(0.0f, frictionWheelSubsystem->getDesiredLaunchSpeed(), 1E-5);
     bool hopperOpen = hopperSubsystem != nullptr && hopperSubsystem->getIsHopperOpen();
 
-    hopperIndex = 0;
+    int hopperIndex = 0;
     if (!flywheelsOff && hopperOpen)
     {
         hopperIndex = 1;
@@ -310,56 +277,14 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
         hopperIndex = 2;
     }
     positionSelectionHudIndicatorDrawers[FLYWHEEL_AND_HOPPER_STATE].setIndicatorState(
-        POSITION_HUD_INDICATOR_LABELS_START_Y -
-        1.5f * hopperIndex * POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE -
-        POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE - POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
-}
-
-modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
-{
-    RF_BEGIN(3);
-
-    prevDriveCommandIndex = currDriveCommandIndex;
-
-    // Check if updating is necessary
-    for (size_t i = 0; i < driveCommands.size(); i++)
-    {
-        if (drivers->commandScheduler.isCommandScheduled(driveCommands[i]))
-        {
-            currDriveCommandIndex = i;
-        }
-    }
-
-    if (currDriveCommandIndex != prevDriveCommandIndex && currDriveCommandIndex != -1)
-    {
-        // Modify the graphic
-        drivers->refSerial.configGraphicGenerics(
-            &driveCommandMsg.graphicData,
-            DRIVE_COMMAND_NAME,
-            Tx::ADD_GRAPHIC_MODIFY,
-            DRIVE_COMMAND_GRAPHIC_LAYER,
-            static_cast<Tx::GraphicColor>(currDriveCommandIndex));
-
-        drivers->refSerial.configCharacterMsg(
-            DRIVE_COMMAND_CHAR_SIZE,
-            DRIVE_COMMAND_CHAR_LINE_WIDTH,
-            DRIVE_COMMAND_START_X,
-            DRIVE_COMMAND_START_Y,
-            driveCommands[currDriveCommandIndex]->getName(),
-            &driveCommandMsg);
-
-        drivers->refSerial.sendGraphic(&driveCommandMsg);
-
-        delay(&driveCommandMsg);
-    }
-
-    // No delay necessary since didn't send anything
-    RF_END();
+        MATRIX_HUD_INDICATOR_LABELS_START_Y -
+        CHARACTER_LINE_SPACING * hopperIndex * MATRIX_HUD_INDICATOR_CHAR_SIZE -
+        MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
 }
 
 modm::ResumableResult<bool> ClientDisplayCommand::updateChassisOrientation()
 {
-    RF_BEGIN(4);
+    RF_BEGIN(3);
 
     chassisOrientationRotated.rotate(modm::toRadian(
         turretSubsystem != nullptr ? -turretSubsystem->getYawAngleFromCenter() : 0.0f));
@@ -386,7 +311,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateChassisOrientation()
 
 modm::ResumableResult<bool> ClientDisplayCommand::updateTurretAngles()
 {
-    RF_BEGIN(5);
+    RF_BEGIN(4);
 
     if (turretSubsystem != nullptr)
     {
@@ -425,22 +350,20 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateTurretAngles()
 
 void ClientDisplayCommand::initializeBooleanHudIndicators()
 {
-    uint8_t booleanHudIndicatorName[3];
-    memcpy(
-        booleanHudIndicatorName,
-        BOOLEAN_HUD_INDICATOR_LIST_START_NAME,
-        sizeof(booleanHudIndicatorName));
+    uint8_t booleanHudIndicatorName[3] = {};
     uint16_t hudIndicatorListCurrY = BOOLEAN_HUD_INDICATOR_LIST_START_Y;
 
     // Configure hopper cover hud indicator
     for (int i = 0; i < NUM_BOOLEAN_HUD_INDICATORS; i++)
     {
+        getUnusedListName(booleanHudIndicatorName);
+
         RefSerial::configGraphicGenerics(
             &booleanHudIndicatorGraphics[i].graphicData,
             booleanHudIndicatorName,
             Tx::ADD_GRAPHIC,
-            BOOLEAN_HUD_INDICATOR_LIST_LAYER,
-            BOOLEAN_HUD_INDICATOR_FILLED_COLOR);
+            DEFAULT_GRAPHIC_LAYER,
+            std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]));
 
         RefSerial::configCircle(
             BOOLEAN_HUD_INDICATOR_WIDTH,
@@ -449,13 +372,13 @@ void ClientDisplayCommand::initializeBooleanHudIndicators()
             BOOLEAN_HUD_INDICATOR_RADIUS,
             &booleanHudIndicatorGraphics[i].graphicData);
 
-        booleanHudIndicatorName[2]++;
+        getUnusedListName(booleanHudIndicatorName);
 
         RefSerial::configGraphicGenerics(
             &booleanHudIndicatorStaticGrahpics[i].graphicData,
             booleanHudIndicatorName,
             Tx::ADD_GRAPHIC,
-            BOOLEAN_HUD_INDICATOR_STATIC_LIST_LAYER,
+            DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
 
         RefSerial::configCircle(
@@ -465,110 +388,106 @@ void ClientDisplayCommand::initializeBooleanHudIndicators()
             BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
             &booleanHudIndicatorStaticGrahpics[i].graphicData);
 
-        booleanHudIndicatorName[2]++;
+        getUnusedListName(booleanHudIndicatorName);
 
         RefSerial::configGraphicGenerics(
             &booleanHudIndicatorStaticLabelGraphics[i].graphicData,
             booleanHudIndicatorName,
             Tx::ADD_GRAPHIC,
-            BOOLEAN_HUD_INDICATOR_STATIC_LIST_LAYER,
+            DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
+
+        const char *indicatorLabel = std::get<0>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]);
 
         RefSerial::configCharacterMsg(
             BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE,
             BOOLEAN_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH,
             BOOLEAN_HUD_INDICATOR_LIST_CENTER_X -
-                strlen(BOOLEAN_HUD_INDICATOR_LABELS[i]) * BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE -
+                strlen(indicatorLabel) * BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE -
                 BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS - BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH / 2,
             hudIndicatorListCurrY + BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE / 2,
-            BOOLEAN_HUD_INDICATOR_LABELS[i],
+            indicatorLabel,
             &booleanHudIndicatorStaticLabelGraphics[i]);
-
-        booleanHudIndicatorName[2]++;
 
         hudIndicatorListCurrY -= BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS;
     }
 }
 void ClientDisplayCommand::initializePositionHudIndicators()
 {
-    uint8_t positionHudIndicatorName[3];
-    memcpy(
-        positionHudIndicatorName,
-        POSITION_HUD_INDICATOR_START_NAME,
-        sizeof(positionHudIndicatorName));
+    uint8_t matrixHudIndicatorName[3];
+    getUnusedListName(matrixHudIndicatorName);
 
-    uint16_t hudIndicatorListCurrX = POSITION_HUD_INDICATOR_START_X;
+    uint16_t hudIndicatorListCurrX = MATRIX_HUD_INDICATOR_START_X;
 
     // Configure hopper cover hud indicator
-    for (int i = 0; i < NUM_POSITION_HUD_INDICATORS; i++)
+    for (int i = 0; i < NUM_MATRIX_HUD_INDICATORS; i++)
     {
         // configure rectangle
 
         RefSerial::configGraphicGenerics(
             &positionSelectionHudIndicatorGraphics[i].graphicData,
-            positionHudIndicatorName,
+            matrixHudIndicatorName,
             Tx::ADD_GRAPHIC,
-            POSITION_HUD_INDICATOR_LAYER,
-            POSITION_HUD_INDICATOR_SELECTOR_BOX_COLOR);
+            DEFAULT_GRAPHIC_LAYER,
+            MATRIX_HUD_INDICATOR_SELECTOR_BOX_COLOR);
 
-        positionHudIndicatorName[2]++;
+        getUnusedListName(matrixHudIndicatorName);
 
         RefSerial::configRectangle(
-            POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH,
-            hudIndicatorListCurrX - 2 * POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1,
-            POSITION_HUD_INDICATOR_LABELS_START_Y - POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE -
-                POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1,
+            MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH,
+            hudIndicatorListCurrX - 2 * MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1,
+            MATRIX_HUD_INDICATOR_LABELS_START_Y - MATRIX_HUD_INDICATOR_CHAR_SIZE -
+                MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1,
             hudIndicatorListCurrX +
-                POSITION_HUD_INDICATOR_TITLE_WIDTH * POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE +
-                POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH + 1,
-            POSITION_HUD_INDICATOR_LABELS_START_Y + POSITION_HUD_INDICATOR_SELECTOR_BOX_WIDTH + 1,
+                MATRIX_HUD_INDICATOR_TITLE_WIDTH * MATRIX_HUD_INDICATOR_CHAR_SIZE +
+                MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH + 1,
+            MATRIX_HUD_INDICATOR_LABELS_START_Y + MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH + 1,
             &positionSelectionHudIndicatorGraphics[i].graphicData);
 
         // configure labels
 
         RefSerial::configGraphicGenerics(
             &positionSelectionHudLabelGraphics[i].graphicData,
-            positionHudIndicatorName,
+            matrixHudIndicatorName,
             Tx::ADD_GRAPHIC,
-            POSITION_HUD_INDICATOR_LAYER,
-            POSITION_HUD_INDICATOR_LABELS_COLOR);
+            DEFAULT_GRAPHIC_LAYER,
+            MATRIX_HUD_INDICATOR_LABELS_COLOR);
 
-        positionHudIndicatorName[2]++;
+        getUnusedListName(matrixHudIndicatorName);
 
         RefSerial::configCharacterMsg(
-            POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE,
-            POSITION_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH,
+            MATRIX_HUD_INDICATOR_CHAR_SIZE,
+            MATRIX_HUD_INDICATOR_CHAR_LINE_WIDTH,
             hudIndicatorListCurrX,
-            POSITION_HUD_INDICATOR_LABELS_START_Y,
-            POSITION_HUD_INDICATOR_LABELS[i],
+            MATRIX_HUD_INDICATOR_LABELS_START_Y,
+            MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[i][1],
             &positionSelectionHudLabelGraphics[i]);
 
-        hudIndicatorListCurrX +=
-            POSITION_HUD_INDICATOR_TITLE_WIDTH * POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE +
-            POSITION_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS;
+        hudIndicatorListCurrX += MATRIX_HUD_INDICATOR_TITLE_WIDTH * MATRIX_HUD_INDICATOR_CHAR_SIZE +
+                                 MATRIX_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS;
     }
 
     // title
 
     RefSerial::configGraphicGenerics(
-        &positionSelectionHudLabelGraphics[NUM_POSITION_HUD_INDICATORS].graphicData,
-        positionHudIndicatorName,
+        &positionSelectionHudLabelGraphics[NUM_MATRIX_HUD_INDICATORS].graphicData,
+        matrixHudIndicatorName,
         Tx::ADD_GRAPHIC,
-        POSITION_HUD_INDICATOR_LAYER,
-        POSITION_HUD_INDICATOR_TITLE_COLOR);
+        DEFAULT_GRAPHIC_LAYER,
+        MATRIX_HUD_INDICATOR_TITLE_COLOR);
 
     char positionHudGraphicTitles[30];
     char *currHudGraphicTitlePos = positionHudGraphicTitles;
 
     const int spacesBetweenCols =
-        POSITION_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS / POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE;
+        MATRIX_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS / MATRIX_HUD_INDICATOR_CHAR_SIZE;
 
-    for (int i = 0; i < NUM_POSITION_HUD_INDICATORS; i++)
+    for (int i = 0; i < NUM_MATRIX_HUD_INDICATORS; i++)
     {
-        strcpy(currHudGraphicTitlePos, POSITION_HUD_INDICATOR_TITLES[i]);
-        currHudGraphicTitlePos += POSITION_HUD_INDICATOR_TITLE_WIDTH;
+        strcpy(currHudGraphicTitlePos, MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[i][0]);
+        currHudGraphicTitlePos += MATRIX_HUD_INDICATOR_TITLE_WIDTH;
 
-        if (i != NUM_POSITION_HUD_INDICATORS - 1)
+        if (i != NUM_MATRIX_HUD_INDICATORS - 1)
         {
             for (int j = 0; j < spacesBetweenCols; j++)
             {
@@ -579,18 +498,18 @@ void ClientDisplayCommand::initializePositionHudIndicators()
     }
 
     RefSerial::configCharacterMsg(
-        POSITION_HUD_INDICATOR_LABEL_CHAR_SIZE,
-        POSITION_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH,
-        POSITION_HUD_INDICATOR_START_X,
-        POSITION_HUD_INDICATOR_TITLE_START_Y,
+        MATRIX_HUD_INDICATOR_CHAR_SIZE,
+        MATRIX_HUD_INDICATOR_CHAR_LINE_WIDTH,
+        MATRIX_HUD_INDICATOR_START_X,
+        MATRIX_HUD_INDICATOR_TITLE_START_Y,
         positionHudGraphicTitles,
-        &positionSelectionHudLabelGraphics[NUM_POSITION_HUD_INDICATORS]);
+        &positionSelectionHudLabelGraphics[NUM_MATRIX_HUD_INDICATORS]);
 }
 
 void ClientDisplayCommand::initializeReticle()
 {
     uint8_t currLineName[3];
-    memcpy(currLineName, RETICLE_LINES_START_NAME, sizeof(currLineName));
+    getUnusedListName(currLineName);
 
     // Add reticle markers
     uint16_t maxReticleY = 0;
@@ -605,10 +524,10 @@ void ClientDisplayCommand::initializeReticle()
             &reticleMsg[reticleMsgIndex].graphicData[graphicDataIndex],
             currLineName,
             Tx::ADD_GRAPHIC,
-            RETICLE_GRAPHIC_LAYER,
+            DEFAULT_GRAPHIC_LAYER,
             std::get<2>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]));
 
-        currLineName[2]++;
+        getUnusedListName(currLineName);
 
         uint16_t reticleXCenter = static_cast<int>(SCREEN_WIDTH / 2) + RETICLE_CENTER_X_OFFSET;
 
@@ -643,8 +562,8 @@ void ClientDisplayCommand::initializeReticle()
              .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)],
         currLineName,
         Tx::ADD_GRAPHIC,
-        RETICLE_GRAPHIC_LAYER,
-        RETICLE_HORIZONTAL_COLOR);
+        DEFAULT_GRAPHIC_LAYER,
+        RETICLE_VERTICAL_COLOR);
 
     RefSerial::configLine(
         RETICLE_THICKNESS,
@@ -656,27 +575,6 @@ void ClientDisplayCommand::initializeReticle()
              .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]);
 }
 
-void ClientDisplayCommand::initializeDriveCommand()
-{
-    drivers->refSerial.configGraphicGenerics(
-        &driveCommandMsg.graphicData,
-        DRIVE_COMMAND_NAME,
-        Tx::ADD_GRAPHIC,
-        DRIVE_COMMAND_GRAPHIC_LAYER,
-        Tx::GraphicColor::WHITE);
-
-    drivers->refSerial.configCharacterMsg(
-        DRIVE_COMMAND_CHAR_SIZE,
-        DRIVE_COMMAND_CHAR_LINE_WIDTH,
-        DRIVE_COMMAND_START_X,
-        DRIVE_COMMAND_START_Y,
-        "",
-        &driveCommandMsg);
-
-    currDriveCommandIndex = -1;
-    prevDriveCommandIndex = -1;
-}
-
 void ClientDisplayCommand::initializeChassisOrientation()
 {
     chassisOrientation.set(0, CHASSIS_HEIGHT / 2);
@@ -684,13 +582,13 @@ void ClientDisplayCommand::initializeChassisOrientation()
     chassisOrientationRotated = chassisOrientation;
 
     uint8_t chassisOrientationName[3];
-    memcpy(chassisOrientationName, CHASSIS_ORIENTATION_START_NAME, sizeof(chassisOrientationName));
+    getUnusedListName(chassisOrientationName);
 
     RefSerial::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[0],
         chassisOrientationName,
         Tx::ADD_GRAPHIC,
-        CHASSIS_ORIENTATION_LAYER,
+        DEFAULT_GRAPHIC_LAYER,
         CHASSIS_ORIENTATION_COLOR);
 
     RefSerial::configLine(
@@ -701,13 +599,13 @@ void ClientDisplayCommand::initializeChassisOrientation()
         CHASSIS_CENTER_Y - chassisOrientation.y,
         &chassisOrientationGraphics.graphicData[0]);
 
-    chassisOrientationName[2]++;
+    getUnusedListName(chassisOrientationName);
 
     RefSerial::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[1],
         chassisOrientationName,
         Tx::ADD_GRAPHIC,
-        CHASSIS_ORIENTATION_LAYER,
+        DEFAULT_GRAPHIC_LAYER,
         CHASSIS_BARREL_COLOR);
 
     RefSerial::configLine(
@@ -724,13 +622,13 @@ void ClientDisplayCommand::initializeTurretAngles()
     if (turretSubsystem != nullptr)
     {
         uint8_t turretAnglesName[3];
-        memcpy(turretAnglesName, TURRET_ANGLES_START_NAME, sizeof(turretAnglesName));
+        getUnusedListName(turretAnglesName);
 
         RefSerial::configGraphicGenerics(
             &turretAnglesGraphics.graphicData,
             turretAnglesName,
             Tx::ADD_GRAPHIC,
-            TURRET_ANGLES_LAYER,
+            DEFAULT_GRAPHIC_LAYER,
             TURRET_ANGLES_COLOR);
 
         RefSerial::configCharacterMsg(
@@ -747,7 +645,7 @@ void ClientDisplayCommand::initializeTurretAngles()
             &turretAnglesLabelGraphics.graphicData,
             turretAnglesName,
             Tx::ADD_GRAPHIC,
-            TURRET_ANGLES_LAYER,
+            DEFAULT_GRAPHIC_LAYER,
             TURRET_ANGLES_COLOR);
 
         RefSerial::configCharacterMsg(
@@ -760,6 +658,23 @@ void ClientDisplayCommand::initializeTurretAngles()
 
         prevYaw = 0.0f;
         prevPitch = 0.0f;
+    }
+}
+
+void ClientDisplayCommand::resetListNameGenerator() { currListName = 0; }
+
+void ClientDisplayCommand::getUnusedListName(uint8_t listName[3])
+{
+    if (currListName > 0xffffff)
+    {
+        RAISE_ERROR(drivers, "all graphic names used");
+    }
+    else
+    {
+        listName[0] = static_cast<uint8_t>((currListName >> 16) & 0xff);
+        listName[1] = static_cast<uint8_t>((currListName >> 8) & 0xff);
+        listName[2] = static_cast<uint8_t>(currListName & 0xff);
+        currListName++;
     }
 }
 
