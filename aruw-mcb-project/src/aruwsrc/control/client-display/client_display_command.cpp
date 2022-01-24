@@ -85,16 +85,16 @@ ClientDisplayCommand::ClientDisplayCommand(
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING])>),
           BooleanHUDIndicator(
               drivers,
-              &booleanHudIndicatorGraphics[CV_AIM_DATA_VALID],
-              updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID])>),
-          BooleanHUDIndicator(
-              drivers,
               &booleanHudIndicatorGraphics[AGITATOR_STATUS_HEALTHY],
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY])>),
+          BooleanHUDIndicator(
+              drivers,
+              &booleanHudIndicatorGraphics[CV_AIM_DATA_VALID],
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID])>),
       },
       driveCommands{
           chassisBeybladeCmd,
@@ -215,7 +215,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateBooleanHudIndicators()
     if (agitatorSubsystem != nullptr)
     {
         booleanHudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(
-            !agitatorSubsystem->isJammed());
+            agitatorSubsystem->isOnline() && !agitatorSubsystem->isJammed());
     }
 
     // TODO add hero fire ready and systems calibrating when available
@@ -292,7 +292,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateChassisOrientation()
     if (chassisOrientationRotated != chassisOrientationPrev)
     {
         RefSerial::configLine(
-            CHASSIS_LINE_WIDTH,
+            CHASSIS_WIDTH,
             CHASSIS_CENTER_X + chassisOrientationRotated.x,
             CHASSIS_CENTER_Y + chassisOrientationRotated.y,
             CHASSIS_CENTER_X - chassisOrientationRotated.x,
@@ -592,7 +592,7 @@ void ClientDisplayCommand::initializeChassisOrientation()
         CHASSIS_ORIENTATION_COLOR);
 
     RefSerial::configLine(
-        CHASSIS_LINE_WIDTH,
+        CHASSIS_WIDTH,
         CHASSIS_CENTER_X + chassisOrientation.x,
         CHASSIS_CENTER_Y + chassisOrientation.y,
         CHASSIS_CENTER_X - chassisOrientation.x,
@@ -609,7 +609,7 @@ void ClientDisplayCommand::initializeChassisOrientation()
         CHASSIS_BARREL_COLOR);
 
     RefSerial::configLine(
-        CHASSIS_BARREL_LINE_WIDTH,
+        CHASSIS_BARREL_WIDTH,
         CHASSIS_CENTER_X,
         CHASSIS_CENTER_Y,
         CHASSIS_CENTER_X,
@@ -632,8 +632,8 @@ void ClientDisplayCommand::initializeTurretAngles()
             TURRET_ANGLES_COLOR);
 
         RefSerial::configCharacterMsg(
-            TURRET_ANGLES_FONT_SIZE,
-            TURRET_ANGLES_WIDTH,
+            TURRET_ANGLES_CHAR_SIZE,
+            TURRET_ANGLES_CHAR_WIDTH,
             TURRET_ANGLES_START_X,
             TURRET_ANGLES_START_Y,
             "0\n\n0",
@@ -649,9 +649,9 @@ void ClientDisplayCommand::initializeTurretAngles()
             TURRET_ANGLES_COLOR);
 
         RefSerial::configCharacterMsg(
-            TURRET_ANGLES_FONT_SIZE,
-            TURRET_ANGLES_WIDTH,
-            TURRET_ANGLES_START_X - strlen("PITCH: ") * TURRET_ANGLES_FONT_SIZE,
+            TURRET_ANGLES_CHAR_SIZE,
+            TURRET_ANGLES_CHAR_WIDTH,
+            TURRET_ANGLES_START_X - strlen("PITCH: ") * TURRET_ANGLES_CHAR_SIZE,
             TURRET_ANGLES_START_Y,
             "  YAW:\n\nPITCH:",
             &turretAnglesLabelGraphics);

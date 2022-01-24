@@ -285,25 +285,42 @@ private:
 
     /** TODO finish constants */
 
+    /** The X location of the center of the animated chassis on the screen, in pixels. */
     static constexpr uint16_t CHASSIS_CENTER_X = 1300;
+    /** The Y location of the center of the animated chassis on the screen, in pixels. */
     static constexpr uint16_t CHASSIS_CENTER_Y = 100;
+    /** The length of the animated chassis, in pixels. */
     static constexpr uint16_t CHASSIS_HEIGHT = 100;
+    /** The width of the animated chassis, in pixels. */
+    static constexpr uint16_t CHASSIS_WIDTH = 70;
+    /** The color of the animated chassis. */
     static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_COLOR = Tx::GraphicColor::YELLOW;
+    /** The color of the animated turret barrel in the chassis orientation graphic. */
     static constexpr Tx::GraphicColor CHASSIS_BARREL_COLOR = Tx::GraphicColor::WHITE;
-    static constexpr uint16_t CHASSIS_LINE_WIDTH = 70;
-    static constexpr uint16_t CHASSIS_BARREL_LINE_WIDTH = 10;
+    /** The width of the animated turret barrel, in pixels. */
+    static constexpr uint16_t CHASSIS_BARREL_WIDTH = 10;
+    /** The length of the animated turret barrel, in pixels. */
     static constexpr uint16_t CHASSIS_BARREL_LENGTH = 90;
 
     // turret angles constants
 
+    /** Minimum period between sending turret angles permitted. */
     static constexpr uint32_t TURRET_ANGLES_SEND_DATA_PERIOD = 250;
-    static constexpr uint16_t TURRET_ANGLES_FONT_SIZE = 10;
+    /** Font size of the turret angles. */
+    static constexpr uint16_t TURRET_ANGLES_CHAR_SIZE = 10;
+    /** Number of decimal points that the displayed turret angle data will have.. */
     static constexpr uint16_t TURRET_ANGLES_DECIMAL_POINTS = 2;
     static constexpr int TURRET_ANGLES_DECIMAL_PRECISION =
         modm::pow(10, TURRET_ANGLES_DECIMAL_POINTS);
-    static constexpr uint16_t TURRET_ANGLES_WIDTH = 2;
+    /** The character line width of the turret angles text. */
+    static constexpr uint16_t TURRET_ANGLES_CHAR_WIDTH = 2;
+    /** Starting X coordinate of the turret angles mssage, in pixels. Location where turret floating
+     * point angles will be displayed at. The labels associated with the numbers will be to the left
+     * of this. */
     static constexpr uint16_t TURRET_ANGLES_START_X = 1430;
+    /** Starting Y coordinate of the turret angles message, in pixels. */
     static constexpr uint16_t TURRET_ANGLES_START_Y = 460;
+    /** Color of the turret angles message. */
     static constexpr Tx::GraphicColor TURRET_ANGLES_COLOR = Tx::GraphicColor::ORANGE;
 
     // general variables
@@ -316,6 +333,11 @@ private:
      * @note The maximum frequency of this timer is 10 Hz according to RM rules.
      */
     tap::arch::MilliTimeout delayTimer;
+
+    /**
+     * Used to determine the current name of the graphic, queried by `getUnusedListName`
+     */
+    uint32_t currListName = 0;
 
     // Boolean HUD indicator related variables
 
@@ -430,7 +452,6 @@ private:
 
     void updatePositionSelectionHudIndicatorState();
 
-    uint32_t currListName = 0;
     /**
      * Resets the list name generator so the next time it is queried via `getUnusedListName`, the
      * function returns {0, 0, 0}.
