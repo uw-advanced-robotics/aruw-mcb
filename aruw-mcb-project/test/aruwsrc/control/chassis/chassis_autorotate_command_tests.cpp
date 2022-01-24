@@ -128,8 +128,8 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
         EXPECT_CALL(
             chassis,
             setDesiredOutput(
-                FloatEq(rotatedX * TEST_WHEEL_SPEED),
-                FloatEq(rotatedY * TEST_WHEEL_SPEED),
+                FloatNear(rotatedX * TEST_WHEEL_SPEED, 1E-3),
+                FloatNear(rotatedY * TEST_WHEEL_SPEED, 1E-3),
                 _));
         SET_USER_INPUT(drivers, x, y, 0);
         ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));
