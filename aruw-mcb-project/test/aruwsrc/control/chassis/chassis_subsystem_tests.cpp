@@ -47,9 +47,9 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_zero_desired_output)
 
     cs.setDesiredOutput(0, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
+    EXPECT_NEAR(0, chassisVelocity[0][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[1][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[2][0], 1E-3);
 }
 
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_output_desired)
@@ -117,9 +117,9 @@ TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_x_y_and_r_output_desire
 
     cs.setDesiredOutput(WHEEL_VEL, WHEEL_VEL, WHEEL_VEL);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
-    EXPECT_FLOAT_EQ(CHASSIS_VEL, chassisVelocity[0][0]);
-    EXPECT_FLOAT_EQ(CHASSIS_VEL, chassisVelocity[1][0]);
-    EXPECT_FLOAT_EQ(CHASSIS_VEL_R, chassisVelocity[2][0]);
+    EXPECT_NEAR(CHASSIS_VEL, chassisVelocity[0][0], 1E-3);
+    EXPECT_NEAR(CHASSIS_VEL, chassisVelocity[1][0], 1E-3);
+    EXPECT_NEAR(CHASSIS_VEL_R, chassisVelocity[2][0], 1E-3);
 }
 
 TEST(ChassisSubsystem, getDesiredVelocityChassisRelative_negative_x_output_desired)
@@ -219,21 +219,21 @@ TEST(ChassisSubsystem, getVelocityWorldRelative_zero_desired_output_with_any_hea
     cs.setDesiredOutput(0, 0, 0);
     Matrix<float, 3, 1> chassisVelocity = cs.getDesiredVelocityChassisRelative();
     cs.getVelocityWorldRelative(chassisVelocity, 0);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
+    EXPECT_NEAR(0, chassisVelocity[0][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[1][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[2][0], 1E-3);
     cs.getVelocityWorldRelative(chassisVelocity, M_PI / 4.0f);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
+    EXPECT_NEAR(0, chassisVelocity[0][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[1][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[2][0], 1E-3);
     cs.getVelocityWorldRelative(chassisVelocity, M_PI / 2.0f);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
+    EXPECT_NEAR(0, chassisVelocity[0][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[1][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[2][0], 1E-3);
     cs.getVelocityWorldRelative(chassisVelocity, 3.0f * M_PI / 2.0f);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[0][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[1][0]);
-    EXPECT_FLOAT_EQ(0, chassisVelocity[2][0]);
+    EXPECT_NEAR(0, chassisVelocity[0][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[1][0], 1E-3);
+    EXPECT_NEAR(0, chassisVelocity[2][0], 1E-3);
 }
 
 TEST(ChassisSubsystem, getVelocityWorldRelative_x_different_headings)

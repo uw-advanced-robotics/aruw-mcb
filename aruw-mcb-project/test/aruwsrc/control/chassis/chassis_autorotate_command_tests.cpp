@@ -53,9 +53,9 @@ static constexpr float TEST_WHEEL_SPEED = ChassisSubsystem::MIN_WHEEL_SPEED_SING
     EXPECT_CALL(                                                                   \
         chassis,                                                                   \
         setDesiredOutput(                                                          \
-            FloatEq(x* TEST_WHEEL_SPEED),                                          \
-            FloatEq(y* TEST_WHEEL_SPEED),                                          \
-            FloatEq(r* TEST_WHEEL_SPEED)));                                        \
+            FloatNear(x* TEST_WHEEL_SPEED, 1E-3),                                          \
+            FloatNear(y* TEST_WHEEL_SPEED, 1E-3),                                          \
+            FloatNear(r* TEST_WHEEL_SPEED, 1E-3)));                                        \
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1)); \
     cac.execute();
 
@@ -202,7 +202,7 @@ static void runExecuteAutorotateValidationTest(
              (180 - ChassisAutorotateCommand::SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD)) ||
         compareFloatClose(turretAngleFromCenter, 0, 1E-5))
     {
-        EXPECT_CALL(chassis, setDesiredOutput(_, _, FloatEq(0.0f)));
+        EXPECT_CALL(chassis, setDesiredOutput(_, _, FloatNear(0.0f, 1E-3)));
         cac.execute();
     }
     else

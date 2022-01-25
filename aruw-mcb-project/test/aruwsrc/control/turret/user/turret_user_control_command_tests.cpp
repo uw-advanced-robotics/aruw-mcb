@@ -103,11 +103,11 @@ TEST(TurretUserControlCommand, execute_output_0_when_error_0)
 
     EXPECT_CALL(
         turret,
-        setPitchMotorOutput(FloatEq(computeGravitationalForceOffset(
+        setPitchMotorOutput(FloatNear(computeGravitationalForceOffset(
             TurretSubsystem::TURRET_CG_X,
             TurretSubsystem::TURRET_CG_Z,
             0,
-            TurretSubsystem::GRAVITY_COMPENSATION_SCALAR))));
+            TurretSubsystem::GRAVITY_COMPENSATION_SCALAR), 1E-3)));
     EXPECT_CALL(turret, setYawMotorOutput(0));
     EXPECT_CALL(turret, setPitchSetpoint(90));
     EXPECT_CALL(turret, setYawSetpoint(90));

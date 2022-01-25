@@ -37,7 +37,7 @@
     ON_CALL(cs, calculateRotationTranslationalGain).WillByDefault(Return(1));                 \
     RefSerial::Rx::RobotData rd{};                                                            \
     ON_CALL(d.refSerial, getRobotData).WillByDefault(ReturnRef(rd));                          \
-    EXPECT_CALL(cs, setDesiredOutput(FloatEq(baseX), FloatEq(baseY), FloatEq(baseR)));
+    EXPECT_CALL(cs, setDesiredOutput(FloatNear(baseX, 1E-3), FloatNear(baseY, 1E-3), FloatNear(baseR, 1E-3)));
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
