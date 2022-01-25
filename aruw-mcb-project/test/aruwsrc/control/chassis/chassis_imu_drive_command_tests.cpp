@@ -26,6 +26,7 @@
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
+using namespace tap::sensors;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc;
 using namespace testing;
@@ -77,7 +78,8 @@ TEST(ChassisImuDriveCommand, execute__normal_rotation_translation_when_imu_not_c
 
     float userX = 0, userY = 0, userR = 0;
 
-    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(false));
+    ON_CALL(drivers.mpu6500, getImuState)
+        .WillByDefault(Return(Mpu6500::ImuState::IMU_NOT_CONNECTED));
     setupUserInput(drivers, &userX, &userY, &userR);
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
@@ -116,9 +118,9 @@ TEST(
     float userX = 0, userY = 0, userR = 0;
     setupUserInput(drivers, &userX, &userY, &userR);
 
-    bool initialized = false;
+    Mpu6500::ImuState imuState = Mpu6500::ImuState::IMU_NOT_CONNECTED;
 
-    ON_CALL(drivers.mpu6500, initialized).WillByDefault([&]() { return initialized; });
+    ON_CALL(drivers.mpu6500, getImuState).WillByDefault([&]() { return imuState; });
 
     EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0));
 
@@ -126,7 +128,7 @@ TEST(
 
     chassisImuDriveCommand.initialize();  // imu not initialized
 
-    initialized = true;
+    imuState = Mpu6500::ImuState::IMU_CALIBRATED;
     chassisImuDriveCommand.execute();  // imu now initialized
 }
 
@@ -143,7 +145,7 @@ static void setupDefaultChassisBehavior(mock::ChassisSubsystemMock &chassis)
 static void setupDefaultImuBehavior(aruwsrc::Drivers &drivers, float *imuYaw)
 {
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(imuYaw));
-    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
+    ON_CALL(drivers.mpu6500, getImuState).WillByDefault(Return(Mpu6500::ImuState::IMU_CALIBRATED));
 }
 
 TEST(ChassisImuDriveCommand, execute__imu_setpoint_target_setpoint_same_0_rotation_output)
@@ -270,7 +272,7 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     setupDefaultChassisBehavior(chassis);
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
-    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
+    ON_CALL(drivers.mpu6500, getImuState).WillByDefault(Return(Mpu6500::ImuState::IMU_CALIBRATED));
 
     // imu yaw initially 0
     chassisImuDriveCommand.initialize();
@@ -297,7 +299,7 @@ TEST(ChassisImuDriveCommand, execute__turret_relative_when_turret_not_nullptr)
     setupDefaultChassisBehavior(chassis);
     float imuYaw = 0;
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
-    ON_CALL(drivers.mpu6500, initialized).WillByDefault(Return(true));
+    ON_CALL(drivers.mpu6500, getImuState).WillByDefault(Return(Mpu6500::ImuState::IMU_CALIBRATED));
 
     chassisImuDriveCommand.initialize();
 

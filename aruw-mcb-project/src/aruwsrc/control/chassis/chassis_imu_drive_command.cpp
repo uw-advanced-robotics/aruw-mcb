@@ -26,6 +26,8 @@
 #include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
+using namespace tap::sensors;
+
 namespace aruwsrc::chassis
 {
 ChassisImuDriveCommand::ChassisImuDriveCommand(
@@ -43,7 +45,9 @@ ChassisImuDriveCommand::ChassisImuDriveCommand(
 
 void ChassisImuDriveCommand::initialize()
 {
-    imuSetpointInitialized = drivers->mpu6500.initialized();
+    imuSetpointInitialized =
+        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED ||
+        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_NOT_CALIBRATED;
 
     if (imuSetpointInitialized)
     {
@@ -57,7 +61,8 @@ void ChassisImuDriveCommand::execute()
     float chassisRotationDesiredWheelspeed = 0.0f;
     float angleFromDesiredRotation = 0.0f;
 
-    if (drivers->mpu6500.initialized())
+    if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED ||
+        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_NOT_CALIBRATED)
     {
         if (!imuSetpointInitialized)
         {

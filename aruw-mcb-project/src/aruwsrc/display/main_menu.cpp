@@ -32,6 +32,7 @@ MainMenu::MainMenu(
     aruwsrc::Drivers* drivers)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, MAIN_MENU_ID),
       drivers(drivers),
+      imuCalibrateMenu(stack, drivers),
       errorMenu(stack, drivers),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers),
@@ -41,6 +42,11 @@ MainMenu::MainMenu(
 
 void MainMenu::initialize()
 {
+    addEntry(
+        ImuCalibrateMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addImuCalibrateMenuCallback));
     addEntry(
         ErrorMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
@@ -68,6 +74,12 @@ void MainMenu::initialize()
             &MainMenu::addCommandSchedulerCallback));
 
     setTitle("Main Menu");
+}
+
+void MainMenu::addImuCalibrateMenuCallback()
+{
+    ImuCalibrateMenu* icm = new (&imuCalibrateMenu) ImuCalibrateMenu(getViewStack(), drivers);
+    getViewStack()->push(icm);
 }
 
 void MainMenu::addErrorMenuCallback()
