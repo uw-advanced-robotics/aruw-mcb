@@ -85,15 +85,6 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
-ClientDisplayCommand clientDisplayCommand(
-    drivers(),
-    &clientDisplay,
-    nullptr,
-    &frictionWheels,
-    nullptr,
-    nullptr,
-    {&chassisDriveCommand});
-
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
@@ -128,7 +119,6 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
 {
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

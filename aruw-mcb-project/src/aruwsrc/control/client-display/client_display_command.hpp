@@ -70,15 +70,25 @@ public:
     /**
      * Construct a ClientDisplayCommand.
      *
-     * @param[in] drivers
-     * @param[in] clientDisplay
-     * @param[in] hopperSubsystem
-     * @param[in] frictionWheelSubsystem
-     * @param[in] agitatorSubsystem
-     * @param[in] turretSubsystem
-     * @param[in] chassisBeybladeCmd
-     * @param[in] chassisAutorotateCmd
-     * @param[in] chassisImuDriveCommand
+     * @param[in] drivers Global drivers instance.
+     * @param[in] clientDisplay The client display subsystem associated with the command.
+     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. May not be
+     * nullptr.
+     * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
+     * are on or off. May not be nullptr.
+     * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed. May not
+     * be nullptr.
+     * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
+     * turret and to print turret angles (if turret chassis relative angles are being printed). Must
+     * not be nullptr.
+     * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
+     * never be selected as the current chassis command.
+     * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
+     * will never be selected as the current chassis command.
+     * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
+     * will never be selected as the current chassis command.
+     * @param[in] chassisDriveCmd May be nullptr. If nullptr the chassis drive command will never be
+     * selected as the current chassis command.
      */
     ClientDisplayCommand(
         aruwsrc::Drivers *drivers,
@@ -290,7 +300,7 @@ private:
     /** The Y location of the center of the animated chassis on the screen, in pixels. */
     static constexpr uint16_t CHASSIS_CENTER_Y = 100;
     /** The length of the animated chassis, in pixels. */
-    static constexpr uint16_t CHASSIS_HEIGHT = 100;
+    static constexpr uint16_t CHASSIS_LENGTH = 100;
     /** The width of the animated chassis, in pixels. */
     static constexpr uint16_t CHASSIS_WIDTH = 70;
     /** The color of the animated chassis. */
@@ -389,14 +399,25 @@ private:
     /** Index in `driveCommands` that is currently being displayed. */
     int currDriveCommandIndex = -1;
 
-    Tx::Graphic1Message positionSelectionHudIndicatorGraphics[NUM_MATRIX_HUD_INDICATORS];
+    /** Array of graphic messages to be used by the `matrixHudIndicatorDrawers`. */
+    Tx::Graphic1Message matrixHudIndicatorGraphics[NUM_MATRIX_HUD_INDICATORS];
 
-    Tx::GraphicCharacterMessage positionSelectionHudLabelGraphics[NUM_MATRIX_HUD_INDICATORS + 1];
+    /**
+     * Array of character graphic messages. Indices `[0, NUM_MATRIX_HUD_INDICATORS)` contain
+     * individual label columns not indlucing the title (i.e.
+     * `MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[:][1]`). index `NUM_MATRIX_HUD_INDICATORS` contains
+     * the titles. The titles are separate character message from the labels because their color is
+     * different.
+     */
+    Tx::GraphicCharacterMessage matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS + 1];
 
+    /** Array of `StateHUDIndicator`s used to update the position of the box that will be circling
+     * one of the labels in `MATRIX_HUD_INDICATOR_TITLES_AND_LABELS`. */
     tap::communication::serial::ref_serial_ui_wrapeprs::StateHUDIndicator<uint16_t>
-        positionSelectionHudIndicatorDrawers[NUM_MATRIX_HUD_INDICATORS];
+        matrixHudIndicatorDrawers[NUM_MATRIX_HUD_INDICATORS];
 
-    int positionSelectionHudIndicatorIndex = 0;
+    /** Index used when iterating through `matrixHudIndicatorDrawers` in a protothread. */
+    int matrixHudIndicatorIndex = 0;
 
     // turret reticle variables
 
@@ -413,21 +434,43 @@ private:
     // chassis orientation variables
 
     const aruwsrc::control::turret::TurretSubsystem *turretSubsystem;
+    /**
+     * Vector with origin `(0, 0)`. The turret is considered to be pointing up in the y axis. This
+     * vector can be rotated around the origin by some amount to represent the rotation of the
+     * chassis orientation.
+     */
     modm::Vector2i chassisOrientation;
-    modm::Vector2i chassisOrientationRotated;
+    /** Previous chassis orientation. Should be a local variable but cannot since it is in a
+     * protothread. */
     modm::Vector2i chassisOrientationPrev;
+    /**
+     * 2 graphics that represent chassis orientation. First graphic is the line representing the
+     * turret and the second graphic is a thick line that represents the chassis and is rotated some
+     * amount to represent chassis orientation.
+     */
     Tx::Graphic2Message chassisOrientationGraphics;
 
     // turret pitch/yaw angles
 
+    /** Character graphic containing turret pitch/yaw angles. */
     Tx::GraphicCharacterMessage turretAnglesGraphics;
+    /** Character graphic containing labeles "pitch" and "yaw", situated next to
+     * turretAnglesGraphics. */
     Tx::GraphicCharacterMessage turretAnglesLabelGraphics;
+    /** Local variable but is in a protothread, so must be not local, current turret yaw value, in
+     * degrees. */
     float yaw = 0.0f;
+    /** Local variable but is in a protothread, so must be not local, current turret pitch angle
+     * value, in degrees. */
     float pitch = 0.0f;
+    /** Previous turret yaw value used to determine if yaw turret angle has changed. */
     float prevYaw = 0.0f;
+    /** Previous turret pitch value used to determine if pitch turret angle has changed. */
     float prevPitch = 0.0f;
-    char pitchYawBuffer[5 + 5 + 2 + 1];
+    /** Local variable but is in a protothread, so must be not local...number of bytes written when
+     * writing the angle data graphic. */
     int bytesWritten = 0;
+    /** Periodic timer used to regulate how often the turret angles will update. */
     tap::arch::PeriodicMilliTimer sendTurretDataTimer{TURRET_ANGLES_SEND_DATA_PERIOD};
 
     // private functions
