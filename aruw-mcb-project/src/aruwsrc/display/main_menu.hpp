@@ -28,6 +28,7 @@
 #include "modm/ui/menu/standard_menu.hpp"
 
 #include "error_menu.hpp"
+#include "imu_calibrate_menu.hpp"
 
 namespace aruwsrc
 {
@@ -57,11 +58,13 @@ private:
 
     aruwsrc::Drivers *drivers;
 
+    ImuCalibrateMenu imuCalibrateMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
     tap::display::MotorMenu motorMenu;
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
 
+    void addImuCalibrateMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
     void addMotorMenuCallback();
