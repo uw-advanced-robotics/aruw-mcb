@@ -36,19 +36,21 @@ namespace aruwsrc::agitator
 class AgitatorSubsystem;
 
 /**
- * A command that launches a projectile for the Hero firing subsystem.
- * First the kicker and waterwheel are rotated to fire a single shot,
- * then the kicker and waterwheel are rotated to load the next ball.
+ * A command that launches a projectile and loads a new ball into the kicker.
  */
 class HeroAgitatorCommand : public tap::control::ComprisedCommand
 {
 public:
+    /**
+     * Constructs a HeroAgitatorCommand with the given agitator motors, shooting
+     * rotation and time, loading rotation and time, and heat limiting params.
+     */
     HeroAgitatorCommand(
         aruwsrc::Drivers* drivers,
         AgitatorSubsystem* kickerAgitator,
         AgitatorSubsystem* waterwheelAgitator,
         float kickerShootRotateAngle,
-        float kickerShootRotateTime,
+        uint32_t kickerShootRotateTime,
         float kickerLoadRotateAngle,
         float waterwheelLoadRotateAngle,
         uint32_t loadRotateTime,
@@ -56,16 +58,41 @@ public:
         bool heatLimiting,
         uint16_t heatLimitBuffer);
 
+    /**
+     * @return Whether the agitator subsystems are online and heat is below
+     * the heat limit buffer, indicating that the command is ready.
+     */
     bool isReady() override;
 
+    /**
+     * @return Whether the command has finished running.
+     */
     bool isFinished() const override;
 
+    /**
+     * Initializes the command. Spins the kicker to shoot the ball if the
+     * limit switch is triggered. Spins the agitator and kicker to load a ball
+     * otherwise.
+     */
     void initialize() override;
 
+    /**
+     * Schedules commands to load a ball if the kicker has finished shooting a
+     * ball or if the load commands have finished but the limit switch isn't pressed.
+     * Enters the finished state if the limit switch is pressed.
+     */
     void execute() override;
 
+    /**
+     * Removes all commands from scheduler, resets command to initial state.
+     *
+     * @param interrupted Whether the command was ended due to an interruption.
+     */
     void end(bool interrupted) override;
 
+    /**
+     * @return Name of command
+     */
     const char* getName() const override { return "hero agitator shoot"; }
 
 private:
@@ -90,6 +117,10 @@ private:
 
     const tap::gpio::Digital::InputPin LIMIT_SWITCH_PIN = Digital::InputPin::A;
 
+    /**
+     * Enters the loading state and schedules commands to rotate the kicker
+     * and agitator.
+     */
     void beginLoading();
 };  // class HeroAgitatorCommand
 

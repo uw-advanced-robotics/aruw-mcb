@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//#if defined(TARGET_HERO)
+#if defined(TARGET_HERO)
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -200,4 +200,4 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }
 }  // namespace aruwsrc::control
 
-//#endif
+#endif

@@ -37,22 +37,22 @@ HeroAgitatorCommand::HeroAgitatorCommand(
     AgitatorSubsystem* kickerAgitator,
     AgitatorSubsystem* waterwheelAgitator,
     float kickerShootRotateAngle,
-    float kickerShootRotateTime,
+    uint32_t kickerShootRotateTime,
     float kickerLoadRotateAngle,
     float waterwheelLoadRotateAngle,
-    uint32_t fastRotateTime,
+    uint32_t loadRotateTime,
     float waterwheelMaxUnjamAngle,
     bool heatLimiting,
     uint16_t heatLimitBuffer)
     : tap::control::ComprisedCommand(drivers),
       kickerFireCommand(kickerAgitator, kickerShootRotateAngle, kickerShootRotateTime, 0, false),
-      kickerLoadCommand(kickerAgitator, kickerLoadRotateAngle, fastRotateTime, 0, false),
+      kickerLoadCommand(kickerAgitator, kickerLoadRotateAngle, loadRotateTime, 0, false),
       waterwheelLoadCommand(
           drivers,
           waterwheelAgitator,
           waterwheelLoadRotateAngle,
           waterwheelMaxUnjamAngle,
-          fastRotateTime,
+          loadRotateTime,
           0),
       drivers(drivers),
       kickerAgitator(kickerAgitator),
@@ -62,8 +62,8 @@ HeroAgitatorCommand::HeroAgitatorCommand(
 {
     this->comprisedCommandScheduler.registerSubsystem(kickerAgitator);
     this->comprisedCommandScheduler.registerSubsystem(waterwheelAgitator);
-    this->addSubsystemRequirement(dynamic_cast<AgitatorSubsystem*>(kickerAgitator));
-    this->addSubsystemRequirement(dynamic_cast<AgitatorSubsystem*>(waterwheelAgitator));
+    this->addSubsystemRequirement(kickerAgitator);
+    this->addSubsystemRequirement(waterwheelAgitator);
 }
 
 bool HeroAgitatorCommand::isReady()
