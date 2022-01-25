@@ -149,13 +149,16 @@ TEST(ControlOperatorInterface, getChassisInput_min_key_user_input_limited)
     setTime(1);
     EXPECT_NEAR(
         -ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX,
-        runChassisXInputTest(drivers, operatorInterface, 0, false, true), 1E-3);
+        runChassisXInputTest(drivers, operatorInterface, 0, false, true),
+        1E-3);
     EXPECT_NEAR(
         -ControlOperatorInterface::CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX,
-        runChassisYInputTest(drivers, operatorInterface, 0, false, true), 1E-3);
+        runChassisYInputTest(drivers, operatorInterface, 0, false, true),
+        1E-3);
     EXPECT_NEAR(
         -ControlOperatorInterface::CHASSIS_R_KEY_INPUT_FILTER_ALPHA,
-        runChassisRInputTest(drivers, operatorInterface, 0, false, true), 1E-3);
+        runChassisRInputTest(drivers, operatorInterface, 0, false, true),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getChassisInput_max_key_user_input_limited)
@@ -164,13 +167,16 @@ TEST(ControlOperatorInterface, getChassisInput_max_key_user_input_limited)
     setTime(1);
     EXPECT_NEAR(
         ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX,
-        runChassisXInputTest(drivers, operatorInterface, 0, true, false), 1E-3);
+        runChassisXInputTest(drivers, operatorInterface, 0, true, false),
+        1E-3);
     EXPECT_NEAR(
         ControlOperatorInterface::CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX,
-        runChassisYInputTest(drivers, operatorInterface, 0, true, false), 1E-3);
+        runChassisYInputTest(drivers, operatorInterface, 0, true, false),
+        1E-3);
     EXPECT_NEAR(
         ControlOperatorInterface::CHASSIS_R_KEY_INPUT_FILTER_ALPHA,
-        runChassisRInputTest(drivers, operatorInterface, 0, true, false), 1E-3);
+        runChassisRInputTest(drivers, operatorInterface, 0, true, false),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getChassisInput_min_and_max_keys_cancel)
@@ -188,13 +194,16 @@ TEST(ControlOperatorInterface, getChassisInput_min_remote_limited)
     setTime(1);
     EXPECT_NEAR(
         -1,
-        runChassisXInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false), 1E-3);
+        runChassisXInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false),
+        1E-3);
     EXPECT_NEAR(
         -1,
-        runChassisYInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false), 1E-3);
+        runChassisYInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false),
+        1E-3);
     EXPECT_NEAR(
         -1,
-        runChassisRInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false), 1E-3);
+        runChassisRInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getChassisInput_max_remote_limited)
@@ -204,13 +213,16 @@ TEST(ControlOperatorInterface, getChassisInput_max_remote_limited)
 
     EXPECT_NEAR(
         1,
-        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false), 1E-3);
+        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false),
+        1E-3);
     EXPECT_NEAR(
         1,
-        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false), 1E-3);
+        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false),
+        1E-3);
     EXPECT_NEAR(
         1,
-        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false), 1E-3);
+        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getChassisInput_half_min_remote_half_min_output)
@@ -219,13 +231,16 @@ TEST(ControlOperatorInterface, getChassisInput_half_min_remote_half_min_output)
     setTime(1);
     EXPECT_NEAR(
         -0.5f,
-        runChassisXInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false), 1E-3);
+        runChassisXInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false),
+        1E-3);
     EXPECT_NEAR(
         -0.5f,
-        runChassisYInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false), 1E-3);
+        runChassisYInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false),
+        1E-3);
     EXPECT_NEAR(
         -0.5f,
-        runChassisRInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false), 1E-3);
+        runChassisRInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getChassisInput_half_max_remote_half_max_output)
@@ -234,13 +249,16 @@ TEST(ControlOperatorInterface, getChassisInput_half_max_remote_half_max_output)
     setTime(1);
     EXPECT_NEAR(
         0.5f,
-        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false), 1E-3);
+        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false),
+        1E-3);
     EXPECT_NEAR(
         0.5f,
-        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false), 1E-3);
+        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false),
+        1E-3);
     EXPECT_NEAR(
         0.5f,
-        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false), 1E-3);
+        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getChassisInput_max_remote_and_min_key_pressed_cancels)
@@ -249,13 +267,16 @@ TEST(ControlOperatorInterface, getChassisInput_max_remote_and_min_key_pressed_ca
     setTime(1);
     EXPECT_NEAR(
         -ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX + MAX_REMOTE,
-        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE, false, true), 1E-3);
+        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE, false, true),
+        1E-3);
     EXPECT_NEAR(
         -ControlOperatorInterface::CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX + MAX_REMOTE,
-        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE, false, true), 1E-3);
+        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE, false, true),
+        1E-3);
     EXPECT_NEAR(
         -ControlOperatorInterface::CHASSIS_R_KEY_INPUT_FILTER_ALPHA + MAX_REMOTE,
-        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE, false, true), 1E-3);
+        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE, false, true),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getChassisInput_half_max_remote_and_max_and_min_key_pressed_cancels)
@@ -264,13 +285,16 @@ TEST(ControlOperatorInterface, getChassisInput_half_max_remote_and_max_and_min_k
     setTime(1);
     EXPECT_NEAR(
         0.5f,
-        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true), 1E-3);
+        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true),
+        1E-3);
     EXPECT_NEAR(
         0.5f,
-        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true), 1E-3);
+        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true),
+        1E-3);
     EXPECT_NEAR(
         0.5f,
-        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true), 1E-3);
+        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getChassisInput_shift)
@@ -279,10 +303,12 @@ TEST(ControlOperatorInterface, getChassisInput_shift)
     setTime(1);
     EXPECT_NEAR(
         1.0f * ControlOperatorInterface::SHIFT_SCALAR,
-        runChassisXInputTest(drivers, operatorInterface, 1.0f, true, false, true), 1E-3);  // walk forward
+        runChassisXInputTest(drivers, operatorInterface, 1.0f, true, false, true),
+        1E-3);  // walk forward
     EXPECT_NEAR(
         1.0f * ControlOperatorInterface::SHIFT_SCALAR,
-        runChassisYInputTest(drivers, operatorInterface, 1.0f, true, false, true), 1E-3);  // walk left
+        runChassisYInputTest(drivers, operatorInterface, 1.0f, true, false, true),
+        1E-3);  // walk left
 }
 
 TEST(ControlOperatorInterface, getChassisInput_ctrl)
@@ -291,25 +317,13 @@ TEST(ControlOperatorInterface, getChassisInput_ctrl)
     setTime(1);
     EXPECT_NEAR(
         1.0f * ControlOperatorInterface::CTRL_SCALAR,
-        runChassisXInputTest(
-            drivers,
-            operatorInterface,
-            1.0f,
-            true,
-            false,
-            false,
-            true), 1E-3);  // crouch forward
+        runChassisXInputTest(drivers, operatorInterface, 1.0f, true, false, false, true),
+        1E-3);  // crouch forward
     EXPECT_NEAR(
         1.0f * ControlOperatorInterface::CTRL_SCALAR,
-        runChassisYInputTest(
-            drivers,
-            operatorInterface,
-            1.0f,
-            true,
-            false,
-            false,
-            true), 1E-3);  // crouch
-                     // left
+        runChassisYInputTest(drivers, operatorInterface, 1.0f, true, false, false, true),
+        1E-3);  // crouch
+                // left
 }
 
 // Note: Remote input inverted for yaw control.
@@ -357,14 +371,16 @@ TEST(ControlOperatorInterface, getTurretInput_min_mouse_limited)
             drivers,
             operatorInterface,
             0,
-            -ControlOperatorInterface::USER_MOUSE_YAW_MAX - 100), 1E-3);
+            -ControlOperatorInterface::USER_MOUSE_YAW_MAX - 100),
+        1E-3);
     EXPECT_NEAR(
         1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
             0,
-            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX - 100), 1E-3);
+            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX - 100),
+        1E-3);
 
     EXPECT_NEAR(
         1,
@@ -372,14 +388,16 @@ TEST(ControlOperatorInterface, getTurretInput_min_mouse_limited)
             drivers,
             operatorInterface,
             0,
-            -ControlOperatorInterface::USER_MOUSE_YAW_MAX), 1E-3);
+            -ControlOperatorInterface::USER_MOUSE_YAW_MAX),
+        1E-3);
     EXPECT_NEAR(
         1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
             0,
-            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX), 1E-3);
+            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getTurretInput_max_mouse_limited)
@@ -394,14 +412,16 @@ TEST(ControlOperatorInterface, getTurretInput_max_mouse_limited)
             drivers,
             operatorInterface,
             0,
-            ControlOperatorInterface::USER_MOUSE_YAW_MAX + 100), 1E-3);
+            ControlOperatorInterface::USER_MOUSE_YAW_MAX + 100),
+        1E-3);
     EXPECT_NEAR(
         -1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
             0,
-            ControlOperatorInterface::USER_MOUSE_PITCH_MAX + 100), 1E-3);
+            ControlOperatorInterface::USER_MOUSE_PITCH_MAX + 100),
+        1E-3);
 
     EXPECT_NEAR(
         -1,
@@ -409,14 +429,16 @@ TEST(ControlOperatorInterface, getTurretInput_max_mouse_limited)
             drivers,
             operatorInterface,
             0,
-            ControlOperatorInterface::USER_MOUSE_YAW_MAX), 1E-3);
+            ControlOperatorInterface::USER_MOUSE_YAW_MAX),
+        1E-3);
     EXPECT_NEAR(
         -1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
             0,
-            ControlOperatorInterface::USER_MOUSE_PITCH_MAX), 1E-3);
+            ControlOperatorInterface::USER_MOUSE_PITCH_MAX),
+        1E-3);
 }
 
 TEST(
@@ -430,7 +452,8 @@ TEST(
     {
         EXPECT_NEAR(
             static_cast<float>(i) / ControlOperatorInterface::USER_MOUSE_YAW_MAX,
-            runTurretYawInputTest(drivers, operatorInterface, 0, -i), 1E-3);
+            runTurretYawInputTest(drivers, operatorInterface, 0, -i),
+            1E-3);
     }
     for (int16_t i = -ControlOperatorInterface::USER_MOUSE_PITCH_MAX;
          i < ControlOperatorInterface::USER_MOUSE_PITCH_MAX;
@@ -438,7 +461,8 @@ TEST(
     {
         EXPECT_NEAR(
             -static_cast<float>(i) / ControlOperatorInterface::USER_MOUSE_PITCH_MAX,
-            runTurretPitchInputTest(drivers, operatorInterface, 0, i), 1E-3);
+            runTurretPitchInputTest(drivers, operatorInterface, 0, i),
+            1E-3);
     }
 }
 
@@ -451,14 +475,16 @@ TEST(ControlOperatorInterface, getTurretInput_mouse_and_remote_mappings_additive
             drivers,
             operatorInterface,
             MAX_REMOTE / 2.0f,
-            ControlOperatorInterface::USER_MOUSE_YAW_MAX / 2.0f), 1E-3);
+            ControlOperatorInterface::USER_MOUSE_YAW_MAX / 2.0f),
+        1E-3);
     EXPECT_NEAR(
         1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
             MAX_REMOTE / 2.0f,
-            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX / 2.0f), 1E-3);
+            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX / 2.0f),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getSentinelSpeedInput_zeros)
@@ -472,7 +498,8 @@ TEST(ControlOperatorInterface, getSentinelSpeedInput_min_remote)
     INIT_TEST
     EXPECT_NEAR(
         -MAX_REMOTE * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR,
-        runSentinelChassisInputTest(drivers, operatorInterface, -MAX_REMOTE), 1E-3);
+        runSentinelChassisInputTest(drivers, operatorInterface, -MAX_REMOTE),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getSentinelSpeedInput_max_remote)
@@ -480,7 +507,8 @@ TEST(ControlOperatorInterface, getSentinelSpeedInput_max_remote)
     INIT_TEST
     EXPECT_NEAR(
         MAX_REMOTE * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR,
-        runSentinelChassisInputTest(drivers, operatorInterface, MAX_REMOTE), 1E-3);
+        runSentinelChassisInputTest(drivers, operatorInterface, MAX_REMOTE),
+        1E-3);
 }
 
 TEST(ControlOperatorInterface, getSentinelSpeedInput_complete_remote_range_valid)
@@ -490,6 +518,7 @@ TEST(ControlOperatorInterface, getSentinelSpeedInput_complete_remote_range_valid
     {
         EXPECT_NEAR(
             i * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR,
-            runSentinelChassisInputTest(drivers, operatorInterface, i), 1E-3);
+            runSentinelChassisInputTest(drivers, operatorInterface, i),
+            1E-3);
     }
 }

@@ -53,9 +53,9 @@ static constexpr float TEST_WHEEL_SPEED = ChassisSubsystem::MIN_WHEEL_SPEED_SING
     EXPECT_CALL(                                                                   \
         chassis,                                                                   \
         setDesiredOutput(                                                          \
-            FloatNear(x* TEST_WHEEL_SPEED, 1E-3),                                          \
-            FloatNear(y* TEST_WHEEL_SPEED, 1E-3),                                          \
-            FloatNear(r* TEST_WHEEL_SPEED, 1E-3)));                                        \
+            FloatNear(x* TEST_WHEEL_SPEED, 1E-3),                                  \
+            FloatNear(y* TEST_WHEEL_SPEED, 1E-3),                                  \
+            FloatNear(r* TEST_WHEEL_SPEED, 1E-3)));                                \
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1)); \
     cac.execute();
 
