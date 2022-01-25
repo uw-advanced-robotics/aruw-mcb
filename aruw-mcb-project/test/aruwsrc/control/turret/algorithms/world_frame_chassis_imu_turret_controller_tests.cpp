@@ -52,7 +52,7 @@ TEST(WorldFrameChassisImuTurretController, runYawPidController_setpoint_actual_i
     ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(0));
 
-    EXPECT_CALL(turret, setYawMotorOutput(FloatEq(0)));
+    EXPECT_CALL(turret, setYawMotorOutput(FloatNear(0, 1E-3)));
 
     turretController.runController(1, yawSetpoint);
 }
@@ -115,7 +115,7 @@ TEST(
     ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(90));
 
-    EXPECT_CALL(turret, setYawMotorOutput(FloatEq(0)));
+    EXPECT_CALL(turret, setYawMotorOutput(FloatNear(0, 1E-3)));
 
     turretController.runController(1, yawSetpoint);
 }

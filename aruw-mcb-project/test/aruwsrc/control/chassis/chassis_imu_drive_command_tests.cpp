@@ -286,7 +286,9 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     float yExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
     tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(10));
 
-    EXPECT_CALL(chassis, setDesiredOutput(FloatEq(xExpected), FloatEq(yExpected), _));
+    EXPECT_CALL(
+        chassis,
+        setDesiredOutput(FloatNear(xExpected, 1E-3), FloatNear(yExpected, 1E-3), _));
     chassisImuDriveCommand.execute();
 }
 
@@ -312,6 +314,8 @@ TEST(ChassisImuDriveCommand, execute__turret_relative_when_turret_not_nullptr)
     float yExpected = 0.0f;
     tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(-45.0f));
 
-    EXPECT_CALL(chassis, setDesiredOutput(FloatEq(xExpected), FloatEq(yExpected), _));
+    EXPECT_CALL(
+        chassis,
+        setDesiredOutput(FloatNear(xExpected, 1E-3), FloatNear(yExpected, 1E-3), _));
     chassisImuDriveCommand.execute();
 }

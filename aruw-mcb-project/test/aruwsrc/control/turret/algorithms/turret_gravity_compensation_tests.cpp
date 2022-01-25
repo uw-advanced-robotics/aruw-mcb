@@ -25,19 +25,19 @@ using namespace aruwsrc::control::turret::algorithms;
 
 TEST(TurretGravityCompensation, computeGravitationalForceOffset_zero_cg_offsets_return_0)
 {
-    EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(0, 0, 0, 0));
-    EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(0, 0, 0, 100));
-    EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(0, 0, 10, 100));
-    EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(0, 0, 30, 100));
+    EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 0, 0), 1E-3);
+    EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 0, 100), 1E-3);
+    EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 10, 100), 1E-3);
+    EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 30, 100), 1E-3);
 }
 
 TEST(
     TurretGravityCompensation,
     computeGravitationalForceOffset_zero_gravityCompensationMax_returns_0)
 {
-    EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(10, 0, 0, 0));
-    EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(10, 10, 0, 0));
-    EXPECT_FLOAT_EQ(0, computeGravitationalForceOffset(10, 10, 10, 0));
+    EXPECT_NEAR(0, computeGravitationalForceOffset(10, 0, 0, 0), 1E-3);
+    EXPECT_NEAR(0, computeGravitationalForceOffset(10, 10, 0, 0), 1E-3);
+    EXPECT_NEAR(0, computeGravitationalForceOffset(10, 10, 10, 0), 1E-3);
 }
 
 TEST(
