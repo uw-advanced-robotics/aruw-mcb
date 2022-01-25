@@ -241,7 +241,8 @@ HoldCommandMapping rightSwitchDown(
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&agitatorShootFastLimited},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
@@ -261,7 +262,8 @@ PressCommandMapping leftMousePressedShiftNotPressed(
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
     {&agitatorShootFastNotLimited},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}));
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
+    true);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
