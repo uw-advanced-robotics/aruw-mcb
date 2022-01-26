@@ -23,7 +23,7 @@
 
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
-#include "tap/control/turret/turret_subsystem_interface.hpp"
+#include "tap/control/turret_subsystem_interface.hpp"
 
 #include "aruwsrc/drivers.hpp"
 

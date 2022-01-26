@@ -22,7 +22,7 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
-#include "tap/control/turret/turret_subsystem_interface.hpp"
+#include "tap/control/turret_subsystem_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -87,12 +87,12 @@ public:
     static constexpr float PITCH_MIN_ANGLE = 65.0f;
     static constexpr float PITCH_MAX_ANGLE = 125.0f;
 
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 7745;
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 570;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 7025;
 
     static constexpr float TURRET_CG_X = 1;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 2000.0f;
+    static constexpr float TURRET_CG_Z = -0.2;
+    static constexpr float GRAVITY_COMPENSATION_SCALAR = 3500.0f;
 #elif defined(TARGET_SENTINEL)
     static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
     static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;

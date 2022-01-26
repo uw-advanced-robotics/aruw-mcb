@@ -20,13 +20,9 @@
 #ifndef TURRET_CV_COMMAND_HPP_
 #define TURRET_CV_COMMAND_HPP_
 
-#include "tap/algorithms/contiguous_float.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
-#include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 
-#include "../turret_subsystem.hpp"
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "../algorithms/turret_controller_interface.hpp"
 
 namespace aruwsrc
 {
@@ -35,14 +31,34 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
+class TurretSubsystem;
+}
+
+namespace aruwsrc::control::turret::cv
+{
 /**
  * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
  * aims the turret accordingly using a position PID controller.
+ *
+ * This command, unlike the `SentinelTurretCVCommand`, is not responsible for firing projectiles
+ * when the auto aim system determines it should fire.
  */
 class TurretCVCommand : public tap::control::Command
 {
 public:
-    TurretCVCommand(aruwsrc::Drivers *legacyVisionCoprocessor, TurretSubsystem *subsystem);
+    /**
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the turret to control.
+     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * axis of the turret.
+     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
+     * pitch axis of the turret.
+     */
+    TurretCVCommand(
+        aruwsrc::Drivers *drivers,
+        TurretSubsystem *turretSubsystem,
+        algorithms::TurretYawControllerInterface *yawController,
+        algorithms::TurretPitchControllerInterface *pitchController);
 
     void initialize() override;
 
@@ -57,77 +73,16 @@ public:
     const char *getName() const override { return "turret CV"; }
 
 private:
-#if defined(ALL_SOLDIERS)
-    static constexpr float YAW_P = 4000.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 190.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 32000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 30.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 4000.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 130.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 10.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-#elif defined(TARGET_HERO)
-    static constexpr float YAW_P = 2500.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 150.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 40.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 4000.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 130.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-#else
-    static constexpr float YAW_P = 2500.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 150.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 40.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 4000.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 130.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-#endif
     aruwsrc::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
 
-    tap::algorithms::SmoothPid yawPid;
-    tap::algorithms::SmoothPid pitchPid;
+    algorithms::TurretYawControllerInterface *yawController;
+    algorithms::TurretPitchControllerInterface *pitchController;
 
     uint32_t prevTime;
 };  // class TurretCvCommand
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::cv
 
 #endif  // TURRET_CV_COMMAND_HPP_

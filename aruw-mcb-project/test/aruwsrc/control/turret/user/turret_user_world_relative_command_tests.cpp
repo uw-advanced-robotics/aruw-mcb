@@ -19,20 +19,52 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/turret/world-relative/turret_world_relative_command.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::user;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc;
 using namespace aruwsrc::mock;
 using namespace testing;
 
-TEST(TurretWorldRelativeCommand, isReady__true_if_turret_online)
+#define SETUP_TEST()                                                                       \
+    Drivers drivers;                                                                       \
+    NiceMock<TurretSubsystemMock> turret(&drivers);                                        \
+    ChassisFramePitchTurretController chassisFramePitchTurretController(                   \
+        &turret,                                                                           \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
+    WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(             \
+        &drivers,                                                                          \
+        &turret,                                                                           \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
+    WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController( \
+        &drivers,                                                                          \
+        &turret,                                                                           \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},                                                    \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
+                                                                                           \
+    WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(     \
+        &drivers,                                                                          \
+        &turret,                                                                           \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},                                                    \
+        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
+    TurretUserWorldRelativeCommand turretCmd(                                              \
+        &drivers,                                                                          \
+        &turret,                                                                           \
+        &worldFrameYawChassisImuController,                                                \
+        &chassisFramePitchTurretController,                                                \
+        &worldFrameYawTurretImuController,                                                 \
+        &worldFramePitchTurretImuController);
+
+TEST(TurretUserWorldRelativeCommand, isReady_true_if_turret_online)
 {
-    Drivers drivers;
-    NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretWorldRelativeCommand turretCmd(&drivers, &turret);
+    SETUP_TEST();
 
     ON_CALL(turret, isOnline).WillByDefault(Return(true));
     EXPECT_TRUE(turretCmd.isReady());
@@ -41,11 +73,9 @@ TEST(TurretWorldRelativeCommand, isReady__true_if_turret_online)
     EXPECT_FALSE(turretCmd.isReady());
 }
 
-TEST(TurretWorldRelativeCommand, isFinished__true_if_turret_offline)
+TEST(TurretUserWorldRelativeCommand, isFinished_true_if_turret_offline)
 {
-    Drivers drivers;
-    NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretWorldRelativeCommand turretCmd(&drivers, &turret);
+    SETUP_TEST();
 
     ON_CALL(turret, isOnline).WillByDefault(Return(true));
     EXPECT_FALSE(turretCmd.isFinished());
@@ -54,11 +84,9 @@ TEST(TurretWorldRelativeCommand, isFinished__true_if_turret_offline)
     EXPECT_TRUE(turretCmd.isFinished());
 }
 
-TEST(TurretWorldRelativeCommand, execute__runs_turret_wr_turret_imu_cmd_when_turret_imu_online)
+TEST(TurretUserWorldRelativeCommand, execute_runs_turret_wr_turret_imu_cmd_when_turret_imu_online)
 {
-    Drivers drivers;
-    NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretWorldRelativeCommand turretCmd(&drivers, &turret);
+    SETUP_TEST();
 
     tap::algorithms::ContiguousFloat currentYawValue(0, 0, 360);
     tap::algorithms::ContiguousFloat currentPitchValue(0, 0, 360);
@@ -75,11 +103,9 @@ TEST(TurretWorldRelativeCommand, execute__runs_turret_wr_turret_imu_cmd_when_tur
     turretCmd.execute();
 }
 
-TEST(TurretWorldRelativeCommand, execute__runs_turret_wr_chassis_imu_cmd_when_turret_imu_offline)
+TEST(TurretUserWorldRelativeCommand, execute_runs_turret_wr_chassis_imu_cmd_when_turret_imu_offline)
 {
-    Drivers drivers;
-    NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretWorldRelativeCommand turretCmd(&drivers, &turret);
+    SETUP_TEST();
 
     tap::algorithms::ContiguousFloat currentYawValue(0, 0, 360);
     tap::algorithms::ContiguousFloat currentPitchValue(0, 0, 360);
@@ -96,11 +122,9 @@ TEST(TurretWorldRelativeCommand, execute__runs_turret_wr_chassis_imu_cmd_when_tu
     turretCmd.execute();
 }
 
-TEST(TurretWorldRelativeCommand, end__doesnt_set_des_out_when_no_cmds_scheduled)
+TEST(TurretUserWorldRelativeCommand, end_doesnt_set_des_out_when_no_cmds_scheduled)
 {
-    Drivers drivers;
-    NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretWorldRelativeCommand turretCmd(&drivers, &turret);
+    SETUP_TEST();
 
     ON_CALL(turret, isOnline).WillByDefault(Return(true));
 
@@ -110,11 +134,11 @@ TEST(TurretWorldRelativeCommand, end__doesnt_set_des_out_when_no_cmds_scheduled)
     turretCmd.end(true);
 }
 
-TEST(TurretWorldRelativeCommand, end__set_des_out_0_when_either_turret_command_initially_scheduled)
+TEST(
+    TurretUserWorldRelativeCommand,
+    end_set_des_out_0_when_either_turret_command_initially_scheduled)
 {
-    Drivers drivers;
-    NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretWorldRelativeCommand turretCmd(&drivers, &turret);
+    SETUP_TEST();
 
     tap::algorithms::ContiguousFloat currentYawValue(0, 0, 360);
     tap::algorithms::ContiguousFloat currentPitchValue(0, 0, 360);
