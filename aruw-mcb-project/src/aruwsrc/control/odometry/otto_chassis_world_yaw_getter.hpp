@@ -17,31 +17,33 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OTTO_CHASSIS_ORIENTATION_GETTER_HPP_
-#define OTTO_CHASSIS_ORIENTATION_GETTER_HPP_
+#ifndef OTTO_CHASSIS_WORLD_YAW_GETTER_HPP_
+#define OTTO_CHASSIS_WORLD_YAW_GETTER_HPP_
 
-#include "tap/control/odometry/chassis_orientation_getter_interface.hpp"
+#include "tap/control/odometry/chassis_world_yaw_getter_interface.hpp"
 
 // Forward declarations
 namespace aruwsrc
 {
 class Drivers;
 }
-namespace tap::control::turret
+namespace aruwsrc::control::turret
 {
-class TurretSubsystemInterface;
+class TurretSubsystem;
 }
 
 namespace aruwsrc::control::odometry
 {
 /**
- * Otto specific ChassisOrientationGetter
+ * @brief Otto specific ChassisWorldYawGetterInterface
  * 
  * Returns the orientation of the chassis based on subtracting the turret
  * yaw in chassis-frame from the turret IMU's yaw in global frame.
+ * 
+ * @see tap::control::odometry::ChassisWorldYawGetterInterface
  */
-class OttoChassisOrientationGetter
-    : public tap::control::odometry::ChassisOrientationGetterInterface
+class OttoChassisWorldYawGetter
+    : public tap::control::odometry::ChassisWorldYawGetterInterface
 {
 public:
     /**
@@ -50,25 +52,28 @@ public:
      * @param[in] turret a pointer to the turret used for getting world frame axes. Used to get
      *      yaw angle of chassis relative to turret.
      */
-    OttoChassisOrientationGetter(
+    OttoChassisWorldYawGetter(
         aruwsrc::Drivers* drivers,
-        tap::control::turret::TurretSubsystemInterface* turret);
+        aruwsrc::control::turret::TurretSubsystem* turret);
 
     /**
-     * Get the current chassis orientation in radians. Will
-     * @param[out] output chassis angle in turret-world frame, sweeps from positive x-axis
+     * Get the current chassis yaw in radians.
+     * 
+     * @param[out] yaw chassis yaw in turret-world frame, sweeps from positive x-axis
      *      of field to positive x-axis of chassis. i.e.: rotation around z-axis, positive
      *      z-axis is upwards.
+     *      Normalized to the range (-pi, pi).
+     * 
      * @return `true` if valid chassis orientation was available. i.e: true if and only if
      *      turret->isOnline() && drivers->turretMCBCanComm.isConnected()
      */
-    bool getChassisOrientation(float* output) final;
+    bool getChassisWorldYaw(float* yaw) final;
 
 private:
     aruwsrc::Drivers* drivers;
-    tap::control::turret::TurretSubsystemInterface* turret;
+    aruwsrc::control::turret::TurretSubsystem* turret;
 };
 
 }  // namespace aruwsrc::control::odometry
 
-#endif  // OTTO_CHASSIS_ORIENTATION_GETTER_HPP_
+#endif  // OTTO_CHASSIS_WORLD_YAW_GETTER_HPP_

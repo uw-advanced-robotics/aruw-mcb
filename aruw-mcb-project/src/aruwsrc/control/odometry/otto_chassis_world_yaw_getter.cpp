@@ -17,24 +17,23 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_chassis_orientation_getter.hpp"
+#include "otto_chassis_world_yaw_getter.hpp"
 
-#include "tap/control/turret/turret_subsystem_interface.hpp"
-
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::control::odometry
 {
-OttoChassisOrientationGetter::OttoChassisOrientationGetter(
+OttoChassisWorldYawGetter::OttoChassisWorldYawGetter(
     aruwsrc::Drivers* drivers,
-    tap::control::turret::TurretSubsystemInterface* turret)
+    aruwsrc::control::turret::TurretSubsystem* turret)
     : drivers(drivers),
       turret(turret)
 {
 }
 
-bool OttoChassisOrientationGetter::getChassisOrientation(float* output)
+bool OttoChassisWorldYawGetter::getChassisWorldYaw(float* output)
 {
     // We need both turret IMU data and turret yaw data to generate odometry which is
     // meaningful for the vision system.
@@ -56,9 +55,10 @@ bool OttoChassisOrientationGetter::getChassisOrientation(float* output)
         // in interface. For now we'll use magic number of 90 degrees and hope it gets specified
         // soon. It also doesn't specify which direction positive yaw sweeps.
         // Contiguous float for yaw is guaranteed to be normalized.
-        float turretChassisYawRadians = modm::toRadian(turret->getCurrentYawValue().getValue() - 90.0f);
+        float turretChassisYawRadians =
+            modm::toRadian(turret->getYawAngleFromCenter());
 
-        *output = turretWorldYawRadians - turretChassisYawRadians;
+        *output = modm::Angle::normalize(turretWorldYawRadians - turretChassisYawRadians);
         return true;
     }
 }
