@@ -17,45 +17,52 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odometry_subsystem.hpp"
+#include "odometry_2d_subsystem.hpp"
 
 #include <cmath>
 
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/drivers.hpp"
 
+#include "modm/math/geometry/angle.hpp"
+
 #include "chassis_displacement_getter_interface.hpp"
-#include "chassis_orientation_getter_interface.hpp"
+#include "chassis_world_yaw_getter_interface.hpp"
 
 namespace tap::control::odometry
 {
-OdometrySubsystem::OdometrySubsystem(
+Odometry2DSubsystem::Odometry2DSubsystem(
     tap::Drivers* drivers,
-    ChassisOrientationGetterInterface* chassisOrientationGetter,
+    ChassisWorldYawGetterInterface* chassisYawGetter,
     ChassisDisplacementGetterInterface* chassisDisplacementGetter)
     : Subsystem(drivers),
-      drivers(drivers),
-      chassisOrientationGetter(chassisOrientationGetter),
-      chassisDisplacementGetter(chassisDisplacementGetter)
+      chassisYawGetter(chassisYawGetter),
+      chassisDisplacementGetter(chassisDisplacementGetter),
+      location(0.0f, 0.0f, 0.0f)
 {
 }
 
-void OdometrySubsystem::refresh()
+void Odometry2DSubsystem::refresh()
 {
-    float dxChassisRelative;
-    float dyChassisRelative;
-    float chassisAngle;
-    bool validDisplacementAvailable =
-        chassisDisplacementGetter->getChassisDisplacement(&dxChassisRelative, &dyChassisRelative);
-    bool validOrientationAvailable = chassisOrientationGetter->getChassisOrientation(&chassisAngle);
+    float dxChassisRelative = 0.0f;
+    float dyChassisRelative = 0.0f;
+    float dzChassisRelative = 0.0f;
+    float chassisAngle = 0.0f;
+
+    bool validDisplacementAvailable = chassisDisplacementGetter->getChassisDisplacement(
+        &dxChassisRelative,
+        &dyChassisRelative,
+        &dzChassisRelative);
+    bool validOrientationAvailable = chassisYawGetter->getChassisWorldYaw(&chassisAngle);
 
     // Only execute logic if velocity and orientation were available
     if (validDisplacementAvailable && validOrientationAvailable)
     {
-        const float sinTheta = sinf(chassisAngle);
-        const float cosTheta = cosf(chassisAngle);
-        odometryFrame.x += dxChassisRelative * cosTheta - dyChassisRelative * sinTheta;
-        odometryFrame.y += dxChassisRelative * sinTheta + dyChassisRelative * cosTheta;
+        // Spec for `Location2D` seems to suggest it should only use normalized angles.
+        // chassisYawGetter is specified to return normalized angles
+        float worldRelativeOrientation = chassisAngle;
+        location.setOrientation(worldRelativeOrientation);
+        location.move(modm::Vector2f(dxChassisRelative, dyChassisRelative));
     }
 }
 
