@@ -87,13 +87,17 @@ public:
      * movement to 0).
      * @param[in] yawController A chassis relative yaw controller used to lock the turret.
      * @param[in] pitchController A chassis relative pitch controller used to lock the turret.
+     * @param[in] turretImuOnPitch `true` if the turret IMU is mounted on the pitch axis of the
+     * turret. In this case the pitch controller doesn't have to reach the horizontal setpoint
+     * before calibration is performed.
      */
     ImuCalibrateCommand(
         aruwsrc::Drivers *drivers,
         turret::TurretSubsystem *turret,
         chassis::ChassisSubsystem *chassis,
         turret::algorithms::ChassisFrameYawTurretController *yawController,
-        turret::algorithms::ChassisFramePitchTurretController *pitchController);
+        turret::algorithms::ChassisFramePitchTurretController *pitchController,
+        bool turretImuOnPitch);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -153,6 +157,8 @@ private:
      * Timeout used to determine if we should give up on calibration.
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
+
+    bool turretImuOnPitch;
 };
 }  // namespace aruwsrc::control::imu
 
