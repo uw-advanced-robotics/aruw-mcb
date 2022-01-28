@@ -101,6 +101,11 @@ public:
     inline int16_t getRightFrontRpmActual() const override { return rightWheel.getShaftRPM(); }
     inline int16_t getRightBackRpmActual() const override { return 0; }
 
+    inline bool areAllMotorsOnline() const override
+    {
+        return leftWheel.isMotorOnline() && rightWheel.isMotorOnline();
+    }
+
 private:
     static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
     static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
