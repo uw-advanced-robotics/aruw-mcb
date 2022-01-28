@@ -27,11 +27,13 @@
 #include "aruwsrc/mock/legacy_vision_coprocessor_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
+#include "tap/mock/mpu6500_terminal_serial_handler_mock.hpp"
 #else
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/legacy_vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
+#include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 #endif
 
 namespace aruwsrc
@@ -48,7 +50,8 @@ public:
           controlOperatorInterface(this),
           legacyVisionCoprocessor(this),
           oledDisplay(this),
-          turretMCBCanComm(this)
+          turretMCBCanComm(this),
+          mpu6500TerminalSerialHandler(this, &this->mpu6500)
     {
     }
 
@@ -63,6 +66,7 @@ public:
     serial::LegacyVisionCoprocessor legacyVisionCoprocessor;
     display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanComm;
+    tap::sensors::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
 #endif
 };  // class aruwsrc::Drivers
 }  // namespace aruwsrc

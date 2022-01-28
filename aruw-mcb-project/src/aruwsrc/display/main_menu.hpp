@@ -29,6 +29,7 @@
 #include "modm/ui/menu/standard_menu.hpp"
 
 #include "error_menu.hpp"
+#include "tap/communication/sensors/imu/imu_menu.hpp"
 #include "imu_calibrate_menu.hpp"
 
 namespace aruwsrc
@@ -65,6 +66,7 @@ private:
     tap::display::MotorMenu motorMenu;
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
     tap::display::RefSerialMenu refSerialMenu;
+    tap::sensors::imu::ImuMenu imuMenu;
 
     void addImuCalibrateMenuCallback();
     void addErrorMenuCallback();
@@ -73,6 +75,7 @@ private:
     void addPropertyTableCallback();
     void addCommandSchedulerCallback();
     void addRefSerialMenuCallback();
+    void addImuMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc
