@@ -85,11 +85,6 @@ public:
 
     inline bool isStopped() { return timer.isStopped(); }
 
-    /**
-     * @return the timeout period that this conditional timer uses
-     */
-    inline uint32_t getTimeout() const { return timeout; }
-
 private:
     Timeout timer;
     uint32_t timeout;
