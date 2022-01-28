@@ -22,7 +22,7 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
-#include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 
 namespace modm::can
 {

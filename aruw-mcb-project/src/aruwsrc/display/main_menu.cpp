@@ -37,7 +37,8 @@ MainMenu::MainMenu(
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers),
       commandSchedulerMenu(stack, drivers),
-      refSerialMenu(stack, drivers)
+      refSerialMenu(stack, drivers),
+      imuMenu(stack, &drivers->mpu6500)
 {
 }
 
@@ -58,6 +59,11 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
             this,
             &MainMenu::addRefSerialMenuCallback));
+    addEntry(
+        tap::sensors::imu::ImuMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addImuMenuCallback));
     addEntry(
         CommandSchedulerMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
@@ -113,6 +119,13 @@ void MainMenu::addRefSerialMenuCallback()
 {
     RefSerialMenu* rsm = new (&refSerialMenu) RefSerialMenu(getViewStack(), drivers);
     getViewStack()->push(rsm);
+}
+
+void MainMenu::addImuMenuCallback()
+{
+    tap::sensors::imu::ImuMenu* imc =
+        new (&imuMenu) tap::sensors::imu::ImuMenu(getViewStack(), &drivers->mpu6500);
+    getViewStack()->push(imc);
 }
 }  // namespace display
 
