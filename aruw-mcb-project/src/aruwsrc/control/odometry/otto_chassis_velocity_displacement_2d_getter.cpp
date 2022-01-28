@@ -17,26 +17,31 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_chassis_velocity_displacement_getter.hpp"
+#include "otto_chassis_velocity_displacement_2d_getter.hpp"
 
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "modm/math/matrix.hpp"
 
 namespace aruwsrc::control::odometry
 {
-OttoChassisVelocityDisplacementGetter::OttoChassisVelocityDisplacementGetter(
+OttoChassisVelocityDisplacement2DGetter::OttoChassisVelocityDisplacement2DGetter(
     aruwsrc::chassis::ChassisSubsystem* chassis)
     : chassis(chassis)
 {
 }
 
-bool OttoChassisVelocityDisplacementGetter::getChassisDisplacement(float* x, float* y)
+bool OttoChassisVelocityDisplacement2DGetter::getChassisDisplacement(float* x, float* y, float* z)
 {
-    if (!chassis->areAllMotorsOnline()) {
+    // 2D displacement getter, so z-component defaults to 0.
+    *z = 0;
+    if (!chassis->areAllMotorsOnline())
+    {
         *x = 0;
         *y = 0;
         return false;
-    } else {
+    }
+    else
+    {
         modm::Matrix<float, 3, 1> chassisVelocity = chassis->getActualVelocityChassisRelative();
         *x = chassisVelocity[0][0];
         // Negate chassis y velocity component as the chassis velocity uses a coordinate frame

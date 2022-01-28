@@ -36,14 +36,13 @@ namespace aruwsrc::control::odometry
 {
 /**
  * @brief Otto specific ChassisWorldYawGetterInterface
- * 
+ *
  * Returns the orientation of the chassis based on subtracting the turret
  * yaw in chassis-frame from the turret IMU's yaw in global frame.
- * 
+ *
  * @see tap::control::odometry::ChassisWorldYawGetterInterface
  */
-class OttoChassisWorldYawGetter
-    : public tap::control::odometry::ChassisWorldYawGetterInterface
+class OttoChassisWorldYawGetter : public tap::control::odometry::ChassisWorldYawGetterInterface
 {
 public:
     /**
@@ -58,12 +57,12 @@ public:
 
     /**
      * Get the current chassis yaw in radians.
-     * 
+     *
      * @param[out] yaw chassis yaw in turret-world frame, sweeps from positive x-axis
      *      of field to positive x-axis of chassis. i.e.: rotation around z-axis, positive
      *      z-axis is upwards.
      *      Normalized to the range (-pi, pi).
-     * 
+     *
      * @return `true` if valid chassis orientation was available. i.e: true if and only if
      *      turret->isOnline() && drivers->turretMCBCanComm.isConnected()
      */

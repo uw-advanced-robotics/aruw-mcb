@@ -258,12 +258,6 @@ void ChassisSubsystem::getVelocityWorldRelative(
     chassisRelativeVelocity = transform * chassisRelativeVelocity;
 }
 
-inline bool ChassisSubsystem::areAllMotorsOnline() const
-{
-    return leftFrontMotor.isMotorOnline() && rightFrontMotor.isMotorOnline() &&
-           leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
-}
-
 void ChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
 
 }  // namespace chassis

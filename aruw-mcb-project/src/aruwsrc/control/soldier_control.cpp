@@ -40,7 +40,7 @@
 #include "launcher/friction_wheel_rotate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
-#include "odometry/otto_velocity_odometry_subsystem.hpp"
+#include "odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "turret/chassis-relative/turret_quick_turn_command.hpp"
 #include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
@@ -91,7 +91,7 @@ TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 ChassisSubsystem chassis(drivers());
 
-OttoVelocityOdometrySubsystem odometrySubsystem(drivers(), &turret, &chassis);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 
 AgitatorSubsystem agitator(
     drivers(),

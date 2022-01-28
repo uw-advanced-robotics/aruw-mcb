@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OTTO_CHASSIS_VELOCITY_GETTER_HPP_
-#define OTTO_CHASSIS_VELOCITY_GETTER_HPP_
+#ifndef OTTO_CHASSIS_VELOCITY_DISPLACEMENT_2D_GETTER_HPP_
+#define OTTO_CHASSIS_VELOCITY_DISPLACEMENT_2D_GETTER_HPP_
 
 #include "tap/control/odometry/chassis_displacement_getter_interface.hpp"
 
@@ -31,27 +31,33 @@ class ChassisSubsystem;
 namespace aruwsrc::control::odometry
 {
 /**
- * @brief Class that gets chassis displacement by integrating chassis velocity.
+ * @brief Class that gets 2D chassis displacement by integrating chassis velocity.
  *
  * For use in the Otto system. See parent class for more details.
+ *
+ * This class dumbs things down to only two dimensions for use with the 2D odometry
+ * system.
  */
-class OttoChassisVelocityDisplacementGetter
+class OttoChassisVelocityDisplacement2DGetter
     : public tap::control::odometry::ChassisDisplacementGetterInterface
 {
 public:
     /**
      * @param[in] pointer to an aruwsrc ChassisSubsystem. Used to get chassis relative velocity
      */
-    OttoChassisVelocityDisplacementGetter(aruwsrc::chassis::ChassisSubsystem* chassis);
+    OttoChassisVelocityDisplacement2DGetter(aruwsrc::chassis::ChassisSubsystem* chassis);
 
     /**
      * Get chassis displacement in chassis frame. Positive x, y, z, is chassis forward, left, and up
      * respectively.
+     *
      * @param[out] x destination for x velocity, 0 if valid data unavailable
      * @param[out] y destination for y velocity, 0 if valid data unavailable
+     * @param[out] z always 0 as this is a 2d displacement getter
+     *
      * @return `true` if valid chassis velocity was available. `false` otherwise.
      */
-    bool getChassisDisplacement(float* x, float* y) final;
+    bool getChassisDisplacement(float* x, float* y, float* z) final;
 
 private:
     aruwsrc::chassis::ChassisSubsystem* chassis;
@@ -59,4 +65,4 @@ private:
 
 }  // namespace aruwsrc::control::odometry
 
-#endif  // OTTO_CHASSIS_VELOCITY_GETTER_HPP_
+#endif  // OTTO_CHASSIS_VELOCITY_DISPLACEMENT_2D_GETTER_HPP_

@@ -55,8 +55,7 @@ bool OttoChassisWorldYawGetter::getChassisWorldYaw(float* output)
         // in interface. For now we'll use magic number of 90 degrees and hope it gets specified
         // soon. It also doesn't specify which direction positive yaw sweeps.
         // Contiguous float for yaw is guaranteed to be normalized.
-        float turretChassisYawRadians =
-            modm::toRadian(turret->getYawAngleFromCenter());
+        float turretChassisYawRadians = modm::toRadian(turret->getYawAngleFromCenter());
 
         *output = modm::Angle::normalize(turretWorldYawRadians - turretChassisYawRadians);
         return true;
