@@ -20,6 +20,8 @@
 #ifndef OTTO_CHASSIS_VELOCITY_DISPLACEMENT_2D_GETTER_HPP_
 #define OTTO_CHASSIS_VELOCITY_DISPLACEMENT_2D_GETTER_HPP_
 
+#include <cstdint>
+
 #include "tap/control/odometry/chassis_displacement_getter_interface.hpp"
 
 // Forward declarations
@@ -48,10 +50,11 @@ public:
     OttoChassisVelocityDisplacement2DGetter(aruwsrc::chassis::ChassisSubsystem* chassis);
 
     /**
-     * Get chassis displacement in chassis frame. Positive x, y, z, is chassis forward, left, and up
-     * respectively.
+     * Get chassis displacement in chassis frame in meters. Positive x, y, z, is chassis forward,
+     * left, and up respectively. Returns false and 0 for x, y, and z the first time it is called to
+     * avoid a large initial displacement due to startup times.
      *
-     * @param[out] x destination for x velocity, 0 if valid data unavailable
+     * @param[out] x destination for x displacement, 0 if valid data unavailable
      * @param[out] y destination for y velocity, 0 if valid data unavailable
      * @param[out] z always 0 as this is a 2d displacement getter
      *
@@ -61,6 +64,7 @@ public:
 
 private:
     aruwsrc::chassis::ChassisSubsystem* chassis;
+    uint32_t prevTime = 0;
 };
 
 }  // namespace aruwsrc::control::odometry

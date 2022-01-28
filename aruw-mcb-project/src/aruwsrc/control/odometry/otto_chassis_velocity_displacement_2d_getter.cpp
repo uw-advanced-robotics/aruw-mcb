@@ -19,6 +19,8 @@
 
 #include "otto_chassis_velocity_displacement_2d_getter.hpp"
 
+#include "tap/architecture/clock.hpp"
+
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "modm/math/matrix.hpp"
 
@@ -33,20 +35,28 @@ OttoChassisVelocityDisplacement2DGetter::OttoChassisVelocityDisplacement2DGetter
 bool OttoChassisVelocityDisplacement2DGetter::getChassisDisplacement(float* x, float* y, float* z)
 {
     // 2D displacement getter, so z-component defaults to 0.
-    *z = 0;
-    if (!chassis->areAllMotorsOnline())
+    *z = 0.0f;
+
+    if (!chassis->areAllMotorsOnline() || prevTime == 0)
     {
+        // First time being called or some motors offline. Either way
+        // update prevTime and return false with all 0's.
+        prevTime = tap::arch::clock::getTimeMilliseconds();
         *x = 0;
         *y = 0;
         return false;
     }
     else
     {
+        uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+        uint32_t dt = currTime - prevTime;
+        prevTime = currTime;
+
         modm::Matrix<float, 3, 1> chassisVelocity = chassis->getActualVelocityChassisRelative();
-        *x = chassisVelocity[0][0];
+        *x = chassisVelocity[0][0] * dt / 1000.0f;
         // Negate chassis y velocity component as the chassis velocity uses a coordinate frame
         // where positive y is to the right instead of the left.
-        *y = -chassisVelocity[1][0];
+        *y = -chassisVelocity[1][0] * dt / 1000.0f;
         return true;
     }
 }
