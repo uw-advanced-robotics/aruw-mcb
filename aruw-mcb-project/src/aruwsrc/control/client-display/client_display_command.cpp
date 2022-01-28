@@ -44,12 +44,8 @@ namespace aruwsrc::display
  * Updates the color of a graphic to be either `ON_COLOR` if `indicatorStatus == true` or
  * `OFF_COLOR` if `indicatorStatus == false`.
  */
-template <
-    tap::serial::RefSerial::Tx::GraphicColor ON_COLOR,
-    tap::serial::RefSerial::Tx::GraphicColor OFF_COLOR>
-static void updateGraphicColor(
-    bool indicatorStatus,
-    tap::serial::RefSerialData::Tx::Graphic1Message *graphic)
+template <RefSerial::Tx::GraphicColor ON_COLOR, RefSerial::Tx::GraphicColor OFF_COLOR>
+static void updateGraphicColor(bool indicatorStatus, RefSerialData::Tx::Graphic1Message *graphic)
 {
     graphic->graphicData.color =
         static_cast<uint32_t>(indicatorStatus ? ON_COLOR : OFF_COLOR) & 0xf;
@@ -61,9 +57,7 @@ static void updateGraphicColor(
  * @note By convention expected that `endY > startY`. If this is not true, this function does
  * nothing.
  */
-static void updateGraphicYLocation(
-    uint16_t location,
-    tap::serial::RefSerialData::Tx::Graphic1Message *graphic)
+static void updateGraphicYLocation(uint16_t location, RefSerialData::Tx::Graphic1Message *graphic)
 {
     if (graphic->graphicData.endY < graphic->graphicData.startY)
     {
@@ -78,19 +72,25 @@ static void updateGraphicYLocation(
 ClientDisplayCommand::ClientDisplayCommand(
     aruwsrc::Drivers *drivers,
     ClientDisplaySubsystem *clientDisplay,
-    const TurretMCBHopperSubsystem *hopperSubsystem,
-    const FrictionWheelSubsystem *frictionWheelSubsystem,
-    AgitatorSubsystem *agitatorSubsystem,
-    const aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
+#if defined(ALL_SOLDIERS)
+    const TurretMCBHopperSubsystem &hopperSubsystem,
+#endif
+    const FrictionWheelSubsystem &frictionWheelSubsystem,
+    AgitatorSubsystem &agitatorSubsystem,
+    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
+    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
     const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd)
     : Command(),
       drivers(drivers),
+#if defined(ALL_SOLDIERS)
       hopperSubsystem(hopperSubsystem),
+#endif
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
+      imuCalibrateCommand(imuCalibrateCommand),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               drivers,
@@ -132,12 +132,7 @@ ClientDisplayCommand::ClientDisplayCommand(
               updateGraphicYLocation)},
       turretSubsystem(turretSubsystem)
 {
-    modm_assert(
-        drivers != nullptr && clientDisplay != nullptr && hopperSubsystem != nullptr &&
-            frictionWheelSubsystem != nullptr && agitatorSubsystem != nullptr &&
-            turretSubsystem != nullptr,
-        "ClientDisplayCommand",
-        "some arguments not allowed to be nullptr are nullptr");
+    modm_assert(drivers != nullptr, "ClientDisplayCommand", "drivers nullptr");
     addSubsystemRequirement(clientDisplay);
 }
 
@@ -239,10 +234,10 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateBooleanHudIndicators()
 
     // update agitator state
     booleanHudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(
-        agitatorSubsystem->isOnline() && !agitatorSubsystem->isJammed());
+        agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed());
 
-    // TODO add hero fire ready and systems calibrating when available
-    booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(true);
+    booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
+        drivers->commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndex = 0; booleanHudIndicatorIndex < NUM_BOOLEAN_HUD_INDICATORS;
@@ -287,28 +282,29 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
 
     // update flywheel and hopper state
     bool flywheelsOff =
-        compareFloatClose(0.0f, frictionWheelSubsystem->getDesiredLaunchSpeed(), 1E-5);
-    bool hopperOpen = hopperSubsystem->getIsHopperOpen();
+        compareFloatClose(0.0f, frictionWheelSubsystem.getDesiredLaunchSpeed(), 1E-5);
 
-    int hopperIndex;
-    if (!flywheelsOff && !hopperOpen)
+    ShooterState shooterState =
+        flywheelsOff ? ShooterState::FLYWHEELS_OFF : ShooterState::READY_TO_FIRE;
+
+    if (shooterState == ShooterState::READY_TO_FIRE)
     {
-        // if flywheels on and hopper closed index 0
-        hopperIndex = 0;
+#if defined(ALL_SOLDIERS)
+        if (hopperSubsystem.getIsHopperOpen())
+        {
+            shooterState = ShooterState::LOADING;
+        }
+#else
+        // if (drivers->turretMCBCanComm.limitSwitchDepressed())
+        // {
+        //  shooterState = ShooterState::LOADING
+        // }
+#endif
     }
-    if (!flywheelsOff && hopperOpen)
-    {
-        // if flywheels on and hopper open index 1
-        hopperIndex = 1;
-    }
-    else if (flywheelsOff)
-    {
-        // if flywheels off index 2
-        hopperIndex = 2;
-    }
+
     matrixHudIndicatorDrawers[FLYWHEEL_AND_HOPPER_STATE].setIndicatorState(
         MATRIX_HUD_INDICATOR_LABELS_START_Y -
-        CHARACTER_LINE_SPACING * hopperIndex * MATRIX_HUD_INDICATOR_CHAR_SIZE -
+        CHARACTER_LINE_SPACING * static_cast<int>(shooterState) * MATRIX_HUD_INDICATOR_CHAR_SIZE -
         MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
 
     // TODO update firing state
@@ -321,7 +317,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateChassisOrientation()
     // update chassisOrientation if turret is online, otherwise don't rotate
     // chassis
     chassisOrientation.rotate(modm::toRadian(
-        (turretSubsystem->isOnline()) ? -turretSubsystem->getYawAngleFromCenter() : 0.0f));
+        (turretSubsystem.isOnline()) ? -turretSubsystem.getYawAngleFromCenter() : 0.0f));
 
     // if chassis orientation has changed, send new graphic with updated orientation
     if (chassisOrientation != chassisOrientationPrev)
@@ -354,7 +350,7 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateTurretAngles()
 
     yaw = drivers->turretMCBCanComm.isConnected() ? drivers->turretMCBCanComm.getYaw() : 0.0f;
 #if defined(TARGET_HERO)
-    pitch = turretSubsystem->getCurrentPitchValue().getValue();
+    pitch = turretSubsystem.getCurrentPitchValue().getValue();
 #else
     pitch = drivers->turretMCBCanComm.isConnected() ? drivers->turretMCBCanComm.getPitch() : 0.0f;
 #endif

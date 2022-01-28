@@ -27,11 +27,11 @@ namespace aruwsrc::control::turret
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 0.0f,
+    .kp = 12.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 7000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -40,15 +40,15 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
+    .kp = 280.0f,
+    .ki = 10.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 30000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.0f,
+    .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
 };
 }  // namespace world_rel_turret_imu
@@ -56,13 +56,13 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 namespace world_rel_chassis_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 0.0f,
+    .kp = 2500.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 150.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 30000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -72,28 +72,28 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 0.0f,
+    .kp = 2500.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 150.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 30000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 0.0f,
+    .kp = 4000.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 130.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 30000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.0f,
+    .tRProportionalKalman = 2.0f,
     .errDeadzone = 0.0f,
 };
 }  // namespace chassis_rel

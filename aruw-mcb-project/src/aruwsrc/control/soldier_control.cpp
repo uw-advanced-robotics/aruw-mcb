@@ -31,6 +31,7 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
@@ -41,6 +42,7 @@
 #include "client-display/client_display_subsystem.hpp"
 #include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
+#include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -213,19 +215,27 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
+OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
+
+imu::ImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    &turret,
+    &chassis,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
+
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
-    &hopperCover,
-    &frictionWheels,
-    &agitator,
-    &turret,
+    hopperCover,
+    frictionWheels,
+    agitator,
+    turret,
+    imuCalibrateCommand,
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand,
     &chassisDriveCommand);
-
-OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -236,7 +246,8 @@ HoldCommandMapping rightSwitchDown(
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&agitatorShootFastLimited},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
@@ -256,13 +267,21 @@ PressCommandMapping leftMousePressedShiftNotPressed(
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
     {&agitatorShootFastNotLimited},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}));
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
+    true);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
-PressCommandMapping bPressed(drivers(), {&clientDisplayCommand}, RemoteMapState({Remote::Key::B}));
+PressCommandMapping bNotCtrlPressed(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState({Remote::Key::B}, {Remote::Key::CTRL}));
+PressCommandMapping bCtrlPressed(
+    drivers(),
+    {&clientDisplayCommand},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 PressCommandMapping qPressed(
     drivers(),
     {&chassisImuDriveCommand},
@@ -316,6 +335,7 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -331,7 +351,8 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bPressed);
+    drivers->commandMapper.addMap(&bNotCtrlPressed);
+    drivers->commandMapper.addMap(&bCtrlPressed);
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
@@ -351,5 +372,7 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
     soldier_control::registerSoldierIoMappings(drivers);
 }
 }  // namespace aruwsrc::control
+
+imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &soldier_control::imuCalibrateCommand; }
 
 #endif

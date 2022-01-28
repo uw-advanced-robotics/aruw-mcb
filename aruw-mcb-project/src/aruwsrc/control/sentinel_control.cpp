@@ -166,11 +166,13 @@ HoldCommandMapping rightSwitchDown(
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAgitatorManual},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
     {&sentinelDriveManual, &turretManual},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+    true);
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&sentinelDriveManual2},

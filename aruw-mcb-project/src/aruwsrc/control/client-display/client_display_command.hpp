@@ -34,6 +34,7 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "modm/math/geometry/polygon_2d.hpp"
@@ -72,15 +73,12 @@ public:
      *
      * @param[in] drivers Global drivers instance.
      * @param[in] clientDisplay The client display subsystem associated with the command.
-     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. May not be
-     * nullptr.
+     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed.
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
-     * are on or off. May not be nullptr.
-     * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed. May not
-     * be nullptr.
+     * are on or off.
+     * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
      * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
-     * turret and to print turret angles (if turret chassis relative angles are being printed). Must
-     * not be nullptr.
+     * turret and to print turret angles (if turret chassis relative angles are being printed).
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
      * never be selected as the current chassis command.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
@@ -93,10 +91,13 @@ public:
     ClientDisplayCommand(
         aruwsrc::Drivers *drivers,
         ClientDisplaySubsystem *clientDisplay,
-        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
-        const aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheelSubsystem,
-        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
-        const aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
+#if defined(ALL_SOLDIERS)
+        const aruwsrc::control::TurretMCBHopperSubsystem &hopperSubsystem,
+#endif
+        const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+        aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+        const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
+        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
@@ -255,6 +256,21 @@ private:
         {"FIRE", "SNGL\nBRST\nFULL"},
     };
 
+    /** Enum representing different states that the shooting mechanism can be in. Corresponds to
+     * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[1]. */
+    enum class ShooterState
+    {
+        /** The launcher is ready to fire. Any hoppers are sealed, the flywheels are on, and if
+         * there is some sensor indicating a ball is ready to be launched the sensor indicates the
+         * ball is ready. */
+        READY_TO_FIRE = 0,
+        /** The launcher is not necessarily ready to fire. This could be because the hopper is open
+           or there there are no balls ready to be launched. */
+        LOADING,
+        /** The flywheels are off, indicating the shooter is not ready to fire. */
+        FLYWHEELS_OFF,
+    };
+
     // reticle related constants
 
     /** Line thickness of the reticle, in pixels. */
@@ -351,22 +367,29 @@ private:
 
     // Boolean HUD indicator related variables
 
+#if defined(ALL_SOLDIERS)
     /**
      * Hopper subsystem that provides information about whether or not the cover is open or closed.
      */
-    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
+    const aruwsrc::control::TurretMCBHopperSubsystem &hopperSubsystem;
+#endif
 
     /**
      * Friction wheel subsystem that provides info about if they are on/off.
      */
-    const aruwsrc::control::launcher::FrictionWheelSubsystem *frictionWheelSubsystem;
+    const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem;
 
     /**
      * Agitator that provides info about if it is jammed or offline.
      *
      * Should be `const` but `isJammed` is not `const`.
      */
-    aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem;
+    aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem;
+
+    /**
+     * ImuCalbirateCommand that provides information about if the IMUs are being calibrated.
+     */
+    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
 
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,
@@ -433,7 +456,7 @@ private:
 
     // chassis orientation variables
 
-    const aruwsrc::control::turret::TurretSubsystem *turretSubsystem;
+    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
     /**
      * Vector with origin `(0, 0)`. The turret is considered to be pointing up in the y axis. This
      * vector can be rotated around the origin by some amount to represent the rotation of the
