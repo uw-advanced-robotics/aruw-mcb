@@ -169,7 +169,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &turret,
     &chassis,
     &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
+    &chassisFramePitchTurretController,
+    false);
 
 // Placeholder for Nalu's stuff
 aruwsrc::agitator::AgitatorSubsystem waterwheelAgitator(

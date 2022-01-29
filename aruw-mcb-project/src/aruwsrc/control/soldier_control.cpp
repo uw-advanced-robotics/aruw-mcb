@@ -222,7 +222,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &turret,
     &chassis,
     &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
+    &chassisFramePitchTurretController,
+    true);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),

@@ -31,13 +31,15 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     turret::TurretSubsystem *turret,
     chassis::ChassisSubsystem *chassis,
     turret::algorithms::ChassisFrameYawTurretController *yawController,
-    turret::algorithms::ChassisFramePitchTurretController *pitchController)
+    turret::algorithms::ChassisFramePitchTurretController *pitchController,
+    bool turretImuOnPitch)
     : tap::control::Command(),
       drivers(drivers),
       turret(turret),
       chassis(chassis),
       yawController(yawController),
-      pitchController(pitchController)
+      pitchController(pitchController),
+      turretImuOnPitch(turretImuOnPitch)
 {
     addSubsystemRequirement(turret);
     addSubsystemRequirement(chassis);
@@ -54,17 +56,21 @@ void ImuCalibrateCommand::initialize()
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
+    pitchController->initialize();
+    yawController->initialize();
 }
 
-static inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret)
+static inline bool turretReachedCenterAndNotMoving(
+    turret::TurretSubsystem *turret,
+    bool ignorePitch)
 {
     return compareFloatClose(
                0.0f,
                turret->getYawVelocity(),
                ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           compareFloatClose(0.0f, turret->getPitchVelocity(), 1e-2) &&
            compareFloatClose(0.0f, turret->getYawAngleFromCenter(), 1) &&
-           compareFloatClose(0.0f, turret->getPitchAngleFromCenter(), 1);
+           (ignorePitch || (compareFloatClose(0.0f, turret->getPitchVelocity(), 1e-2) &&
+                            compareFloatClose(0.0f, turret->getPitchAngleFromCenter(), 1)));
 }
 
 void ImuCalibrateCommand::execute()
@@ -88,7 +94,8 @@ void ImuCalibrateCommand::execute()
             break;
 
         case CalibrationState::LOCKING_TURRET:
-            if (calibrationTimer.isExpired() && turretReachedCenterAndNotMoving(turret))
+            if (calibrationTimer.isExpired() &&
+                turretReachedCenterAndNotMoving(turret, !turretImuOnPitch))
             {
                 // enter calibration phase
                 calibrationTimer.stop();
@@ -120,7 +127,11 @@ void ImuCalibrateCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    pitchController->runController(dt, turret->getPitchSetpoint());
+    // don't run pitch controller when turret IMU not on pitch (as there is no need)
+    if (turretImuOnPitch)
+    {
+        pitchController->runController(dt, turret->getPitchSetpoint());
+    }
     yawController->runController(dt, turret->getYawSetpoint());
 }
 
