@@ -30,7 +30,6 @@ namespace serial
 VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, Uart::UartPort::Uart2),
       lastAimData(),
-      aimDataValid(false),
       turretMCBCanComm(&drivers->turretMCBCanComm)
 {
 }
@@ -41,10 +40,7 @@ void VisionCoprocessor::messageReceiveCallback(const SerialMessage& completeMess
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
         {
-            if (decodeToTurretAimData(completeMessage, &lastAimData))
-            {
-                aimDataValid = true;
-            }
+            decodeToTurretAimData(completeMessage, &lastAimData);
             return;
         }
         default:
