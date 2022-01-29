@@ -74,7 +74,6 @@ static void initAndRunAutoAimRxTest(
 
     serial.messageReceiveCallback(message);
 
-    EXPECT_TRUE(serial.lastAimDataValid());
     const VisionCoprocessor::TurretAimData &callbackData = serial.getLastAimData();
     EXPECT_EQ(hasTarget, callbackData.hasTarget);
     EXPECT_EQ(xPosDesired, callbackData.xPos);

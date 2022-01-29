@@ -24,8 +24,6 @@
 
 #include "aruwsrc/drivers.hpp"
 
-class VisionCoprocessorTester;
-
 namespace aruwsrc
 {
 class Drivers;
@@ -93,11 +91,9 @@ public:
 
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
-    mockable inline bool lastAimDataValid() const { return aimDataValid; }
+    mockable inline bool lastAimDataValid() const { return lastAimData.hasTarget; }
 
 private:
-    friend class ::VisionCoprocessorTester;
-
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 0,
@@ -105,9 +101,6 @@ private:
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData;
-
-    /// Whether or not aim data is up to date.
-    bool aimDataValid;
 
     const can::TurretMCBCanComm* turretMCBCanComm;
 
