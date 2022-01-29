@@ -17,27 +17,27 @@
 // ----------------------------------------------------------------------------
 
 #include "../device.hpp"
-#include "uart_3.hpp"
+#include "uart_7.hpp"
 #include <modm/architecture/interface/atomic_lock.hpp>
 #include <modm/architecture/driver/atomic/queue.hpp>
 
 namespace
 {
-	static modm::atomic::Queue<uint8_t, 1024> rxBuffer;
-	static modm::atomic::Queue<uint8_t, 1024> txBuffer;
+	static modm::atomic::Queue<uint8_t, 512> rxBuffer;
+	static modm::atomic::Queue<uint8_t, 512> txBuffer;
 }
 namespace modm::platform
 {
 
 void
-Usart3::writeBlocking(uint8_t data)
+Uart7::writeBlocking(uint8_t data)
 {
-	while(!UsartHal3::isTransmitRegisterEmpty());
-	UsartHal3::write(data);
+	while(!UartHal7::isTransmitRegisterEmpty());
+	UartHal7::write(data);
 }
 
 void
-Usart3::writeBlocking(const uint8_t *data, std::size_t length)
+Uart7::writeBlocking(const uint8_t *data, std::size_t length)
 {
 	while (length-- != 0) {
 		writeBlocking(*data++);
@@ -45,29 +45,29 @@ Usart3::writeBlocking(const uint8_t *data, std::size_t length)
 }
 
 void
-Usart3::flushWriteBuffer()
+Uart7::flushWriteBuffer()
 {
 	while(!isWriteFinished());
 }
 
 bool
-Usart3::write(uint8_t data)
+Uart7::write(uint8_t data)
 {
-	if(txBuffer.isEmpty() && UsartHal3::isTransmitRegisterEmpty()) {
-		UsartHal3::write(data);
+	if(txBuffer.isEmpty() && UartHal7::isTransmitRegisterEmpty()) {
+		UartHal7::write(data);
 	} else {
 		if (!txBuffer.push(data))
 			return false;
 		// Disable interrupts while enabling the transmit interrupt
 		atomic::Lock lock;
 		// Transmit Data Register Empty Interrupt Enable
-		UsartHal3::enableInterrupt(Interrupt::TxEmpty);
+		UartHal7::enableInterrupt(Interrupt::TxEmpty);
 	}
 	return true;
 }
 
 std::size_t
-Usart3::write(const uint8_t *data, std::size_t length)
+Uart7::write(const uint8_t *data, std::size_t length)
 {
 	uint32_t i = 0;
 	for (; i < length; ++i)
@@ -80,23 +80,23 @@ Usart3::write(const uint8_t *data, std::size_t length)
 }
 
 bool
-Usart3::isWriteFinished()
+Uart7::isWriteFinished()
 {
-	return txBuffer.isEmpty() && UsartHal3::isTransmitRegisterEmpty();
+	return txBuffer.isEmpty() && UartHal7::isTransmitRegisterEmpty();
 }
 
 std::size_t
-Usart3::transmitBufferSize()
+Uart7::transmitBufferSize()
 {
 	return txBuffer.getSize();
 }
 
 std::size_t
-Usart3::discardTransmitBuffer()
+Uart7::discardTransmitBuffer()
 {
 	std::size_t count = 0;
 	// disable interrupt since buffer will be cleared
-	UsartHal3::disableInterrupt(UsartHal3::Interrupt::TxEmpty);
+	UartHal7::disableInterrupt(UartHal7::Interrupt::TxEmpty);
 	while(!txBuffer.isEmpty()) {
 		++count;
 		txBuffer.pop();
@@ -105,7 +105,7 @@ Usart3::discardTransmitBuffer()
 }
 
 bool
-Usart3::read(uint8_t &data)
+Uart7::read(uint8_t &data)
 {
 	if (rxBuffer.isEmpty()) {
 		return false;
@@ -117,7 +117,7 @@ Usart3::read(uint8_t &data)
 }
 
 std::size_t
-Usart3::read(uint8_t *data, std::size_t length)
+Uart7::read(uint8_t *data, std::size_t length)
 {
 	uint32_t i = 0;
 	for (; i < length; ++i)
@@ -133,13 +133,13 @@ Usart3::read(uint8_t *data, std::size_t length)
 }
 
 std::size_t
-Usart3::receiveBufferSize()
+Uart7::receiveBufferSize()
 {
 	return rxBuffer.getSize();
 }
 
 std::size_t
-Usart3::discardReceiveBuffer()
+Uart7::discardReceiveBuffer()
 {
 	std::size_t count = 0;
 	while(!rxBuffer.isEmpty()) {
@@ -150,46 +150,46 @@ Usart3::discardReceiveBuffer()
 }
 
 bool
-Usart3::hasError()
+Uart7::hasError()
 {
-	return UsartHal3::getInterruptFlags().any(
-		UsartHal3::InterruptFlag::ParityError |
+	return UartHal7::getInterruptFlags().any(
+		UartHal7::InterruptFlag::ParityError |
 #ifdef USART_ISR_NE
-		UsartHal3::InterruptFlag::NoiseError |
+		UartHal7::InterruptFlag::NoiseError |
 #endif
-		UsartHal3::InterruptFlag::OverrunError | UsartHal3::InterruptFlag::FramingError);
+		UartHal7::InterruptFlag::OverrunError | UartHal7::InterruptFlag::FramingError);
 }
 void
-Usart3::clearError()
+Uart7::clearError()
 {
-	return UsartHal3::acknowledgeInterruptFlags(
-		UsartHal3::InterruptFlag::ParityError |
+	return UartHal7::acknowledgeInterruptFlags(
+		UartHal7::InterruptFlag::ParityError |
 #ifdef USART_ISR_NE
-		UsartHal3::InterruptFlag::NoiseError |
+		UartHal7::InterruptFlag::NoiseError |
 #endif
-		UsartHal3::InterruptFlag::OverrunError | UsartHal3::InterruptFlag::FramingError);
+		UartHal7::InterruptFlag::OverrunError | UartHal7::InterruptFlag::FramingError);
 }
 
 }	// namespace modm::platform
 
-MODM_ISR(USART3)
+MODM_ISR(UART7)
 {
 	using namespace modm::platform;
-	if (UsartHal3::isReceiveRegisterNotEmpty()) {
+	if (UartHal7::isReceiveRegisterNotEmpty()) {
 		// TODO: save the errors
 		uint8_t data;
-		UsartHal3::read(data);
+		UartHal7::read(data);
 		rxBuffer.push(data);
 	}
-	if (UsartHal3::isTransmitRegisterEmpty()) {
+	if (UartHal7::isTransmitRegisterEmpty()) {
 		if (txBuffer.isEmpty()) {
 			// transmission finished, disable TxEmpty interrupt
-			UsartHal3::disableInterrupt(UsartHal3::Interrupt::TxEmpty);
+			UartHal7::disableInterrupt(UartHal7::Interrupt::TxEmpty);
 		}
 		else {
-			UsartHal3::write(txBuffer.get());
+			UartHal7::write(txBuffer.get());
 			txBuffer.pop();
 		}
 	}
-	UsartHal3::acknowledgeInterruptFlags(UsartHal3::InterruptFlag::OverrunError);
+	UartHal7::acknowledgeInterruptFlags(UartHal7::InterruptFlag::OverrunError);
 }
