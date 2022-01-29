@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "turret_gravity_compensation.hpp"
+
 #include <iostream>
 
 #include "tap/algorithms/math_user_utils.hpp"
-
-#include "turret_gravity_compensation.hpp"
 
 using namespace tap::algorithms;
 
