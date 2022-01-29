@@ -80,7 +80,7 @@ private:
 
     static constexpr uint32_t ANGLE_GYRO_RX_CAN_ID = 0x1fd;
     static constexpr uint32_t TURRET_MCB_TX_CAN_ID = 0x1fe;
-    static constexpr uint32_t SECOND_RX_CAN_ID = 0x1fc;
+    static constexpr uint32_t TURRET_STATUS_RX_CAN_ID = 0x1fc;
     static constexpr tap::can::CanBus IMU_MSG_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
@@ -102,10 +102,10 @@ private:
         CanCommListenerFunc funcToCall;
     };
 
-    class Msg2Handler : public tap::can::CanRxListener
+    class TurretStatusRxHandler : public tap::can::CanRxListener
     {
     public:
-        Msg2Handler(
+        TurretStatusRxHandler(
             aruwsrc::Drivers* drivers,
             uint32_t id,
             tap::can::CanBus cB,
@@ -128,7 +128,7 @@ private:
 
     ImuRxHandler angleGyroMessageHandler;
 
-    ImuRxHandler secondMessageHandler;
+    ImuRxHandler turretStatusRxHandler;
 
     tap::arch::MilliTimeout imuConnectedTimeout;
 
@@ -138,11 +138,11 @@ private:
 
     int imuMessageReceivedLEDBlinkCounter = 0;
 
-    void handleAngleGyroMessage(const modm::can::Message& message);
-
     bool limitSwitchDepressed;
 
-    void handleMessage2(const modm::can::Message& message);
+    void handleAngleGyroMessage(const modm::can::Message& message);
+
+    void handleTurretMessage(const modm::can::Message& message);
 };
 }  // namespace aruwsrc::can
 
