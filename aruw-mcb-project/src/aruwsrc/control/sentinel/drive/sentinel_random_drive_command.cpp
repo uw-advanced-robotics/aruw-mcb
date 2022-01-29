@@ -70,6 +70,13 @@ void SentinelRandomDriveCommand::execute()
         }
     }
 
+    
+    float curRpm = subsystemSentinelDrive->getRpm();
+    if ((curRpm < 0 && currentRPM < 0) || (curRpm > 0 && currentRpm > 0))
+    {
+        currentRPM = - currentRPM
+    }
+
     // reverse direction if close to the end of the rail
     float curPos = subsystemSentinelDrive->absolutePosition();
     if ((currentRPM < 0 && curPos < TURNAROUND_BUFFER) ||
@@ -80,6 +87,7 @@ void SentinelRandomDriveCommand::execute()
         currentRPM = -currentRPM;
     }
 
+    
     subsystemSentinelDrive->setDesiredRpm(currentRPM);
 }
 

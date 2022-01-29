@@ -84,6 +84,8 @@ void SentinelDriveSubsystem::initialize()
 
 void SentinelDriveSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
 
+float SentinelDriveSubsystem::getRpm() {return desiredRpm; }
+
 void SentinelDriveSubsystem::refresh()
 {
     velocityPidLeftWheel.update(desiredRpm - leftWheel.getShaftRPM());

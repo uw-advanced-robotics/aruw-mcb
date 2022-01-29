@@ -85,6 +85,8 @@ public:
 
     mockable void setDesiredRpm(float desRpm);
 
+    float getRpm ();
+
     void refresh() override;
 
     void runHardwareTests() override;
