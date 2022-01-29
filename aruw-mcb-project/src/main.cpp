@@ -90,7 +90,7 @@ int main()
 
         if (sendVisionCoprocessorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->legacyVisionCoprocessor.sendMessage, ());
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
         }
@@ -126,7 +126,7 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    drivers->legacyVisionCoprocessor.initializeCV();
+    drivers->visionCoprocessor.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
 #ifdef ALL_SOLDIERS
     drivers->turretMCBCanComm.init();
@@ -144,5 +144,5 @@ static void updateIo(aruwsrc::Drivers *drivers)
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    drivers->legacyVisionCoprocessor.updateSerial();
+    drivers->visionCoprocessor.updateSerial();
 }

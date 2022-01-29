@@ -28,7 +28,7 @@ namespace aruwsrc
 namespace serial
 {
 VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
-    : DJISerial(drivers, Uart::UartPort::Uart2),
+    : DJISerial(drivers, Uart::UartPort::Uart3),
       lastAimData(),
       turretMCBCanComm(&drivers->turretMCBCanComm)
 {
