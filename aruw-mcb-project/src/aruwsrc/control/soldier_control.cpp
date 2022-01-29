@@ -150,13 +150,13 @@ MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     10,
     0,
     true,
-    M_PI / 16.0f,
+    M_PI / 20.0f,
     M_PI / 2.0f,
     M_PI / 4.0f,
     200,
     2,
     true,
-    100);
+    10);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     drivers(),
     &agitator,
