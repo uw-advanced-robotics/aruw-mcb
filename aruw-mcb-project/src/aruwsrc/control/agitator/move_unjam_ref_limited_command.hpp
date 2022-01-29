@@ -42,10 +42,10 @@ public:
      * @note: All parameters except for `heatLimiting` and `heatLimitBuffer` are
      * passed directly to the `tap::control::setpoint::MoveUnjamComprisedCommand`
      * constructor, so see that class for what those parameters do.
-     * 
+     *
      * @param[in] heatLimiting if `true` this command will only schedule when the
      *      heat of 17mm barrel 1 is below the buffer.
-     * @param[in] heatLimitBuffer If current_barrel_heat + heatLimitBuffer > barrel_heat_limit 
+     * @param[in] heatLimitBuffer If current_barrel_heat + heatLimitBuffer > barrel_heat_limit
      *      then command will not be scheduled. i.e.: How close you can get to the
      *      heat limit before the command won't be scheduled.
      */

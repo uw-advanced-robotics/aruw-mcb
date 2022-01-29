@@ -104,9 +104,9 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
     AgitatorSubsystem::isAgitatorInverted,
-    true,
     AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
-    AgitatorSubsystem::JAMMING_TIME);
+    AgitatorSubsystem::JAMMING_TIME,
+    true);
 
 FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
 

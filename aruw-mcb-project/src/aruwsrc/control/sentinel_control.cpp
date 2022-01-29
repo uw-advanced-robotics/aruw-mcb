@@ -78,9 +78,9 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
     false,
-    true,
     M_PI / 10,
-    150);
+    150,
+    true);
 
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
