@@ -68,6 +68,8 @@ void SentinelTurretCVCommand::initialize()
     yawScanningRight = false;
     lostTargetCounter = 0;
     prevTime = tap::arch::clock::getTimeMilliseconds();
+    yawController->initialize();
+    pitchController->initialize();
 }
 
 void SentinelTurretCVCommand::execute()

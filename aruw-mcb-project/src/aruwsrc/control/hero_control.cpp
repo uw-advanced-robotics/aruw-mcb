@@ -177,7 +177,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &turret,
     &chassis,
     &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
+    &chassisFramePitchTurretController,
+    false);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
