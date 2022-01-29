@@ -26,6 +26,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
 
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
@@ -42,44 +43,48 @@ ChassisSubsystem::ChassisSubsystem(
     tap::motor::MotorId rightBackMotorId,
     tap::gpio::Analog::Pin currentPin)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
-      leftFrontVelocityPid(
-          VELOCITY_PID_KP,
-          VELOCITY_PID_KI,
-          VELOCITY_PID_KD,
-          VELOCITY_PID_MAX_ERROR_SUM,
-          VELOCITY_PID_MAX_OUTPUT),
-      leftBackVelocityPid(
-          VELOCITY_PID_KP,
-          VELOCITY_PID_KI,
-          VELOCITY_PID_KD,
-          VELOCITY_PID_MAX_ERROR_SUM,
-          VELOCITY_PID_MAX_OUTPUT),
-      rightFrontVelocityPid(
-          VELOCITY_PID_KP,
-          VELOCITY_PID_KI,
-          VELOCITY_PID_KD,
-          VELOCITY_PID_MAX_ERROR_SUM,
-          VELOCITY_PID_MAX_OUTPUT),
-      rightBackVelocityPid(
-          VELOCITY_PID_KP,
-          VELOCITY_PID_KI,
-          VELOCITY_PID_KD,
-          VELOCITY_PID_MAX_ERROR_SUM,
-          VELOCITY_PID_MAX_OUTPUT),
-      chassisRotationErrorKalman(1.0f, 1.0f),
+      velocityPid{
+          modm::Pid<float>(
+              VELOCITY_PID_KP,
+              VELOCITY_PID_KI,
+              VELOCITY_PID_KD,
+              VELOCITY_PID_MAX_ERROR_SUM,
+              VELOCITY_PID_MAX_OUTPUT),
+          modm::Pid<float>(
+              VELOCITY_PID_KP,
+              VELOCITY_PID_KI,
+              VELOCITY_PID_KD,
+              VELOCITY_PID_MAX_ERROR_SUM,
+              VELOCITY_PID_MAX_OUTPUT),
+          modm::Pid<float>(
+              VELOCITY_PID_KP,
+              VELOCITY_PID_KI,
+              VELOCITY_PID_KD,
+              VELOCITY_PID_MAX_ERROR_SUM,
+              VELOCITY_PID_MAX_OUTPUT),
+          modm::Pid<float>(
+              VELOCITY_PID_KP,
+              VELOCITY_PID_KI,
+              VELOCITY_PID_KD,
+              VELOCITY_PID_MAX_ERROR_SUM,
+              VELOCITY_PID_MAX_OUTPUT)},
+      chassisRotationErrorKalman(1.0f, 5.0f),
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
       rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor"),
+      currentSensor(
+          {&drivers->analog,
+           currentPin,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
       chassisPowerLimiter(
           drivers,
-          currentPin,
-          MAX_ENERGY_BUFFER,
+          &currentSensor,
+          STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
-          ENERGY_BUFFER_CRIT_THRESHOLD,
-          POWER_CONSUMPTION_THRESHOLD,
-          CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
-          motorConstants)
+          ENERGY_BUFFER_CRIT_THRESHOLD)
 {
     constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
                             ? 1
@@ -115,16 +120,68 @@ void ChassisSubsystem::initialize()
 
 void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
-    mecanumDriveCalculate(x, y, r, MAX_WHEEL_SPEED_SINGLE_MOTOR);
+    mecanumDriveCalculate(
+        x,
+        y,
+        r,
+        ChassisSubsystem::getMaxUserWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
 void ChassisSubsystem::refresh()
 {
-    updateMotorRpmPid(&leftFrontVelocityPid, &leftFrontMotor, *desiredWheelRPM[LF]);
-    updateMotorRpmPid(&rightFrontVelocityPid, &rightFrontMotor, *desiredWheelRPM[RF]);
-    updateMotorRpmPid(&leftBackVelocityPid, &leftBackMotor, *desiredWheelRPM[LB]);
-    updateMotorRpmPid(&rightBackVelocityPid, &rightBackMotor, *desiredWheelRPM[RB]);
-    chassisPowerLimiter.performPowerLimiting(motors, MODM_ARRAY_SIZE(motors));
+    updateMotorRpmPid(&velocityPid[LF], &leftFrontMotor, *desiredWheelRPM[LF]);
+    updateMotorRpmPid(&velocityPid[RF], &rightFrontMotor, *desiredWheelRPM[RF]);
+    updateMotorRpmPid(&velocityPid[LB], &leftBackMotor, *desiredWheelRPM[LB]);
+    updateMotorRpmPid(&velocityPid[RB], &rightBackMotor, *desiredWheelRPM[RB]);
+
+    limitChassisPower();
+}
+
+void ChassisSubsystem::limitChassisPower()
+{
+    static constexpr size_t NUM_MOTORS = MODM_ARRAY_SIZE(velocityPid);
+
+    // use power limiting object to compute initial power limiting fraction
+    currentSensor.update();
+    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+
+    // short circuit if power limiting doesn't need to be applied
+    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
+    {
+        return;
+    }
+
+    // total velocity error for all wheels
+    float totalError = 0.0f;
+    for (size_t i = 0; i < NUM_MOTORS; i++)
+    {
+        totalError += abs(velocityPid[i].getLastError());
+    }
+
+    bool totalErrorZero = compareFloatClose(0.0f, totalError, 1E-3);
+
+    // compute modified power limiting fraction based on velocity PID error
+    // motors with greater error should be allocated a larger fraction of the powerLimitFrac
+    for (size_t i = 0; i < NUM_MOTORS; i++)
+    {
+        // Compared to the other wheels, fraction of how much velocity PID error there is for a
+        // single motor. Some value between [0, 1]. The sume of all computed velocityErrorFrac
+        // values for all motors is 1.
+        float velocityErrorFrac = totalErrorZero
+                                      ? (1.0f / NUM_MOTORS)
+                                      : (abs(velocityPid[i].getLastError()) / totalError);
+        // Instead of just multiplying the desired output by powerLimitFrac, scale powerLimitFrac
+        // based on the current velocity error. In this way, if the velocity error is large, the
+        // motor requires more current to be directed to it than other motors. Without this
+        // compensation, a total of NUM_MOTORS * powerLimitFrac fractional limiting is divided
+        // evenly among NUM_MOTORS motors. Instead, divide this limiting based on the
+        // velocityErrorFrac for each motor.
+        float modifiedPowerLimitFrac =
+            limitVal(NUM_MOTORS * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
+        motors[i]->setDesiredOutput(motors[i]->getOutputDesired() * modifiedPowerLimitFrac);
+    }
 }
 
 void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
@@ -138,7 +195,7 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
     // much we want to rotate by
     float leftFrontRotationRatio =
         modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-    float rightFroneRotationRatio =
+    float rightFrontRotationRatio =
         modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
     float leftBackRotationRatio =
         modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
@@ -151,7 +208,7 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
         -maxWheelSpeed,
         maxWheelSpeed);
     desiredWheelRPM[RF][0] = limitVal<float>(
-        y - x + chassisRotateTranslated * rightFroneRotationRatio,
+        y - x + chassisRotateTranslated * rightFrontRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
     desiredWheelRPM[LB][0] = limitVal<float>(

@@ -78,7 +78,7 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_0_when_motors_offline)
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(false));
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(false));
 
-    EXPECT_FLOAT_EQ(0.0f, sentinelDrive.absolutePosition());
+    EXPECT_NEAR(0.0f, sentinelDrive.absolutePosition(), 1E-3);
 }
 
 TEST(SentinelDriveSubsystem, absolutePosition_returns_right_pos_when_left_not_connected)
@@ -92,7 +92,7 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_right_pos_when_left_not_co
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(true));
     ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped).WillByDefault(Return(ENC_TICKS));
 
-    EXPECT_FLOAT_EQ(calculatePosition(ENC_TICKS), sentinelDrive.absolutePosition());
+    EXPECT_NEAR(calculatePosition(ENC_TICKS), sentinelDrive.absolutePosition(), 1E-3);
 }
 
 TEST(SentinelDriveSubsystem, absolutePosition_returns_left_pos_when_right_not_connected)
@@ -106,7 +106,7 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_left_pos_when_right_not_co
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(true));
     ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped).WillByDefault(Return(ENC_TICKS));
 
-    EXPECT_FLOAT_EQ(calculatePosition(ENC_TICKS), sentinelDrive.absolutePosition());
+    EXPECT_NEAR(calculatePosition(ENC_TICKS), sentinelDrive.absolutePosition(), 1E-3);
 }
 
 TEST(SentinelDriveSubsystem, absolutePosition_returns_wheel_avg_when_both_connected)
@@ -119,15 +119,15 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_wheel_avg_when_both_connec
 
     ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped).WillByDefault(Return(2000));
     ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped).WillByDefault(Return(100));
-    EXPECT_FLOAT_EQ(calculatePosition((2000 + 100) / 2), sentinelDrive.absolutePosition());
+    EXPECT_NEAR(calculatePosition((2000 + 100) / 2), sentinelDrive.absolutePosition(), 1E-3);
 
     ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped).WillByDefault(Return(2000));
     ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped).WillByDefault(Return(-2000));
-    EXPECT_FLOAT_EQ(calculatePosition(0), sentinelDrive.absolutePosition());
+    EXPECT_NEAR(calculatePosition(0), sentinelDrive.absolutePosition(), 1E-3);
 
     ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped).WillByDefault(Return(20000));
     ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped).WillByDefault(Return(20000));
-    EXPECT_FLOAT_EQ(calculatePosition(20000), sentinelDrive.absolutePosition());
+    EXPECT_NEAR(calculatePosition(20000), sentinelDrive.absolutePosition(), 1E-3);
 }
 
 TEST(SentinelDriveSubsystem, desired_output_reasonable_for_various_setpoints)

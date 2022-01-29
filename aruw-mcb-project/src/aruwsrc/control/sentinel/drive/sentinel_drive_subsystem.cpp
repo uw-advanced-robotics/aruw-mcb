@@ -22,8 +22,8 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/errors/create_errors.hpp"
 
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/drivers.hpp"
-
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
 #else
@@ -49,15 +49,18 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       desiredRpm(0),
       leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
       rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
+      currentSensor(
+          {&drivers->analog,
+           currentSensorPin,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
       powerLimiter(
           drivers,
-          currentSensorPin,
-          MAX_ENERGY_BUFFER,
+          &currentSensor,
+          STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
-          ENERGY_BUFFER_CRIT_THRESHOLD,
-          POWER_CONSUMPTION_THRESHOLD,
-          CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING,
-          motorConstants)
+          ENERGY_BUFFER_CRIT_THRESHOLD)
 {
     chassisMotors[0] = &leftWheel;
     chassisMotors[1] = &rightWheel;
@@ -87,7 +90,18 @@ void SentinelDriveSubsystem::refresh()
     leftWheel.setDesiredOutput(velocityPidLeftWheel.getValue());
     velocityPidRightWheel.update(desiredRpm - rightWheel.getShaftRPM());
     rightWheel.setDesiredOutput(velocityPidRightWheel.getValue());
-    powerLimiter.performPowerLimiting(chassisMotors, MODM_ARRAY_SIZE(chassisMotors));
+    currentSensor.update();
+    float powerLimitFrac = powerLimiter.getPowerLimitRatio();
+
+    if (tap::algorithms::compareFloatClose(1.0f, powerLimitFrac, 1E-5))
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(chassisMotors); i++)
+    {
+        chassisMotors[i]->setDesiredOutput(chassisMotors[i]->getOutputDesired() * powerLimitFrac);
+    }
     // constantly poll the limit switches, resetting offset if needed
     resetOffsetFromLimitSwitch();
 }
