@@ -79,6 +79,7 @@ bool HeroAgitatorCommand::isFinished() const { return currState == FINISHED; }
 
 void HeroAgitatorCommand::initialize()
 {
+    // Limit switch is active low, so need to negate the reading.
     if (!drivers->digital.read(LIMIT_SWITCH_PIN))
     {
         currState = SHOOTING;
@@ -90,16 +91,6 @@ void HeroAgitatorCommand::initialize()
     {
         beginLoading();
     }
-}
-
-void HeroAgitatorCommand::end(bool interrupted)
-{
-    startingHeat = 0;
-    currState = SHOOTING;
-
-    this->comprisedCommandScheduler.removeCommand(&kickerFireCommand, interrupted);
-    this->comprisedCommandScheduler.removeCommand(&kickerLoadCommand, interrupted);
-    this->comprisedCommandScheduler.removeCommand(&waterwheelLoadCommand, interrupted);
 }
 
 void HeroAgitatorCommand::execute()
@@ -132,6 +123,16 @@ void HeroAgitatorCommand::execute()
     {
         this->comprisedCommandScheduler.run();
     }
+}
+
+void HeroAgitatorCommand::end(bool interrupted)
+{
+    startingHeat = 0;
+    currState = SHOOTING;
+
+    this->comprisedCommandScheduler.removeCommand(&kickerFireCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&kickerLoadCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&waterwheelLoadCommand, interrupted);
 }
 
 void HeroAgitatorCommand::beginLoading()
