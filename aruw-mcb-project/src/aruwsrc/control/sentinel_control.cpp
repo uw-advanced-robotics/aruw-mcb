@@ -36,7 +36,6 @@
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
-#include "sentinel/firing/sentinel_rotate_agitator_command.hpp"
 #include "turret/chassis-relative/turret_chassis_relative_command.hpp"
 #include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/turret_subsystem.hpp"
