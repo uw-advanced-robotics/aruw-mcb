@@ -41,15 +41,13 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::agitator::constants
-{
-    #include "aruwsrc/control/agitator/constants/robot_agitator_constants.hpp"
-}
-
 namespace aruwsrc
 {
 namespace agitator
 {
+namespace constants{
+    #include "aruwsrc/control/agitator/constants/robot_agitator_constants.hpp"
+}
 
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor
