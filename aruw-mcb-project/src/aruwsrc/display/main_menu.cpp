@@ -60,7 +60,7 @@ void MainMenu::initialize()
             this,
             &MainMenu::addRefSerialMenuCallback));
     addEntry(
-        tap::sensors::imu::ImuMenu::getMenuName(),
+        imuMenu.getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
             this,
             &MainMenu::addImuMenuCallback));
