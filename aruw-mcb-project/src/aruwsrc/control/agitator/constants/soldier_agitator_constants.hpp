@@ -1,0 +1,44 @@
+/*
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#include "modm/math/geometry/angle.hpp"
+
+#if defined (ALL_SOLDIERS)
+// position PID terms
+    // PID terms for soldier
+    static constexpr float PID_17MM_P = 100000.0f;
+    static constexpr float PID_HOPPER_P = 100000.0f;
+    static constexpr float PID_17MM_I = 0.0f;
+    static constexpr float PID_17MM_D = 50.0f;
+    static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
+    static constexpr float PID_17MM_MAX_OUT = 16000.0f;
+
+    static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
+    static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+
+    static constexpr bool isAgitatorInverted = false;
+
+    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 5;
+
+    // The motor that controls the hopper lid is an agitator_subsystem instance, so
+    // I'm adding its constants here as well.
+    static constexpr tap::motor::MotorId HOPPER_COVER_MOTOR_ID = tap::motor::MOTOR8;
+    static constexpr tap::can::CanBus HOPPER_COVER_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+
+    static constexpr bool IS_HOPPER_COVER_INVERTED = false;
+#endif

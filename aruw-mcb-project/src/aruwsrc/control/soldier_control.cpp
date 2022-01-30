@@ -28,6 +28,7 @@
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
+#include "agitator/constants/robot_agitator_constants.hpp"
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -103,17 +104,18 @@ ChassisSubsystem chassis(drivers());
 
 AgitatorSubsystem agitator(
     drivers(),
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
+
+    aruwsrc::agitator::constants::PID_17MM_P,
+    aruwsrc::agitator::constants::PID_17MM_I,
+    aruwsrc::agitator::constants::PID_17MM_D,
+    aruwsrc::agitator::constants::PID_17MM_MAX_ERR_SUM,
+    aruwsrc::agitator::constants::PID_17MM_MAX_OUT,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted,
+    aruwsrc::agitator::constants::AGITATOR_MOTOR_ID,
+    aruwsrc::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
+    aruwsrc::agitator::constants::isAgitatorInverted,
     true,
-    AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
+    aruwsrc::agitator::constants::AGITATOR_JAMMING_DISTANCE,
     AgitatorSubsystem::JAMMING_TIME);
 
 FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
