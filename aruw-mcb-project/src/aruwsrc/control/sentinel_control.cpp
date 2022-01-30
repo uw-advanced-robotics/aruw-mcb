@@ -25,7 +25,6 @@
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/control/turret/commands/turret_setpoint_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
@@ -38,7 +37,9 @@
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/chassis-relative/turret_chassis_relative_command.hpp"
 #include "turret/cv/sentinel_turret_cv_command.hpp"
+#include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
+#include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
@@ -136,9 +137,28 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-SentinelTurretCVCommand turretCVCommand(drivers(), &turretSubsystem, &agitator);
+// turret controllers
+algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+    &turretSubsystem,
+    chassis_rel::PITCH_PID_CONFIG);
 
-TurretChassisRelativeCommand turretManual(drivers(), &turretSubsystem);
+algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+    &turretSubsystem,
+    chassis_rel::YAW_PID_CONFIG);
+
+// turret commands
+cv::SentinelTurretCVCommand turretCVCommand(
+    drivers(),
+    &turretSubsystem,
+    &agitator,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
+
+user::TurretUserControlCommand turretManual(
+    drivers(),
+    &turretSubsystem,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
@@ -151,11 +171,13 @@ HoldCommandMapping rightSwitchDown(
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAgitatorManual},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
     {&sentinelDriveManual, &turretManual},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+    true);
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&sentinelDriveManual2},

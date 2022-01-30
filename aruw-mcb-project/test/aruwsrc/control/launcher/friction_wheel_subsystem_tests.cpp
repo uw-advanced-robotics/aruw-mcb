@@ -34,14 +34,14 @@ TEST(FrictionWheelSubsystem, onHardwareTestStart__sets_desired_speed_nonzero)
 {
     SETUP_TEST();
     frictionWheels.onHardwareTestStart();
-    EXPECT_FLOAT_EQ(15.0f, frictionWheels.getDesiredLaunchSpeed());
+    EXPECT_NEAR(15.0f, frictionWheels.getDesiredLaunchSpeed(), 1E-3);
 }
 
 TEST(FrictionWheelSubsystem, onHardwareTestComplete__sets_desired_speed_zero)
 {
     SETUP_TEST();
     frictionWheels.onHardwareTestComplete();
-    EXPECT_FLOAT_EQ(0.0f, frictionWheels.getDesiredLaunchSpeed());
+    EXPECT_NEAR(0.0f, frictionWheels.getDesiredLaunchSpeed(), 1E-3);
 }
 
 TEST(FrictionWheelSubsystem, refresh__0_output_when_desired_speed_0_shaft_rpm_0)

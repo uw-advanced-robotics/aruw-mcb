@@ -24,10 +24,12 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/display/hardware_test_menu.hpp"
 #include "tap/display/motor_menu.hpp"
+#include "tap/display/ref_serial_menu.hpp"
 
 #include "modm/ui/menu/standard_menu.hpp"
 
 #include "error_menu.hpp"
+#include "imu_calibrate_menu.hpp"
 
 namespace aruwsrc
 {
@@ -57,16 +59,20 @@ private:
 
     aruwsrc::Drivers *drivers;
 
+    ImuCalibrateMenu imuCalibrateMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
     tap::display::MotorMenu motorMenu;
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
+    tap::display::RefSerialMenu refSerialMenu;
 
+    void addImuCalibrateMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
     void addMotorMenuCallback();
     void addPropertyTableCallback();
     void addCommandSchedulerCallback();
+    void addRefSerialMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

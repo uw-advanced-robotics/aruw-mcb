@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/agitator_subsystem_mock.hpp"
@@ -26,38 +27,57 @@
 
 using namespace aruwsrc;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::cv;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
-TEST(TurretCVCommand, isReady__return_true_when_turret_online)
-{
-    Drivers drivers;
-    TurretSubsystemMock turret(&drivers);
-    TurretCVCommand turretCR(&drivers, &turret);
+#define SETUP_TEST()                                                                            \
+    Drivers drivers;                                                                            \
+    NiceMock<TurretSubsystemMock> turret(&drivers);                                             \
+    ChassisFramePitchTurretController pitchController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}); \
+    ChassisFrameYawTurretController yawController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});     \
+    TurretCVCommand turretCR(&drivers, &turret, &yawController, &pitchController);
 
-    EXPECT_CALL(turret, isOnline).WillOnce(Return(true)).WillOnce(Return(false));
+TEST(TurretCVCommand, isReady_return_true_when_turret_online)
+{
+    SETUP_TEST();
+
+    ON_CALL(turret, isOnline).WillByDefault(Return(true));
 
     EXPECT_TRUE(turretCR.isReady());
+}
+
+TEST(TurretCVCommand, isReady_return_false_when_turret_offline)
+{
+    SETUP_TEST();
+
+    ON_CALL(turret, isOnline).WillByDefault(Return(false));
+
     EXPECT_FALSE(turretCR.isReady());
 }
 
-TEST(TurretCVCommand, isFinished__return_true_when_turret_offline)
+TEST(TurretCVCommand, isFinished_return_true_when_turret_offline)
 {
-    Drivers drivers;
-    TurretSubsystemMock turret(&drivers);
-    TurretCVCommand turretCR(&drivers, &turret);
+    SETUP_TEST();
 
-    EXPECT_CALL(turret, isOnline).WillOnce(Return(false)).WillOnce(Return(true));
+    ON_CALL(turret, isOnline).WillByDefault(Return(false));
 
     EXPECT_TRUE(turretCR.isFinished());
+}
+
+TEST(TurretCVCommand, isFinished_return_false_when_turret_online)
+{
+    SETUP_TEST();
+
+    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+
     EXPECT_FALSE(turretCR.isFinished());
 }
 
-TEST(TurretCVCommand, end__sets_motor_out_to_0)
+TEST(TurretCVCommand, end_sets_motor_out_to_0)
 {
-    Drivers drivers;
-    TurretSubsystemMock turret(&drivers);
-    TurretCVCommand turretCR(&drivers, &turret);
+    SETUP_TEST();
 
     EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(2);
     EXPECT_CALL(turret, setYawMotorOutput(0)).Times(2);

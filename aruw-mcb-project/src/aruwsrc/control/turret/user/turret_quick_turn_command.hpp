@@ -21,14 +21,14 @@
 #define TURRET_QUICK_TURN_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
-#include "tap/control/turret/turret_subsystem_interface.hpp"
+#include "tap/control/turret_subsystem_interface.hpp"
 
 namespace tap
 {
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::user
 {
 /**
  * A command that performs a "u-turn" operation of the turret. Commands
@@ -68,6 +68,6 @@ private:
     tap::control::turret::TurretSubsystemInterface *turretSubsystem;
     const float targetOffsetToTurn;
 };
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user
 
 #endif  // TURRET_QUICK_TURN_COMMAND_HPP_

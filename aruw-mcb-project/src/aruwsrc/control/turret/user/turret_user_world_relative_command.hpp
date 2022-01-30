@@ -17,28 +17,27 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_WORLD_RELATIVE_COMMAND_HPP_
-#define TURRET_WORLD_RELATIVE_COMMAND_HPP_
+#ifndef TURRET_USER_WORLD_RELATIVE_COMMAND_HPP_
+#define TURRET_USER_WORLD_RELATIVE_COMMAND_HPP_
 
 #include "tap/control/comprised_command.hpp"
 
-#include "turret_world_relative_chassis_imu_command.hpp"
-#include "turret_world_relative_turret_imu_command.hpp"
+#include "../algorithms/turret_controller_interface.hpp"
+
+#include "turret_user_control_command.hpp"
 
 namespace aruwsrc
 {
 class Drivers;
 }
 
-namespace aruwsrc::chassis
-{
-class ChassisSubsystem;
-}
-
 namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
+}
 
+namespace aruwsrc::control::turret::user
+{
 /**
  * Turret control, with the yaw and pitch gimbals using the world relative frame,
  * such that the desired turret angle is independent of the direction that the chassis
@@ -48,14 +47,32 @@ class TurretSubsystem;
  * with the `TurretMCBCanComm`. If there is no such IMU, the chassis IMU will be used
  * to run the turret controller and the pitch axis will run a controller in the chassis
  * frame.
+ *
+ * Takes in user input from the `ControlOperatorInterface` to control the pitch and yaw
+ * axis of some turret.
  */
-class TurretWorldRelativeCommand : public tap::control::ComprisedCommand
+class TurretUserWorldRelativeCommand : public tap::control::ComprisedCommand
 {
 public:
     /**
      * This command requires the turret subsystem from a command/subsystem framework perspective.
+     *
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the turret to control.
+     * @param[in] chassisImuYawController World frame turret controller that uses the chassis IMU.
+     * @param[in] chassisImuPitchController Turret controller that is used when the turret IMU is in
+     * use.
+     * @param[in] turretImuYawController World frame turret controller that uses the turret IMU.
+     * @param[in] turretImuPitchController Turret controller that is used when the turret IMU is in
+     * use. Doesn't strictly have to be world relative.
      */
-    TurretWorldRelativeCommand(aruwsrc::Drivers *drivers, TurretSubsystem *turretSubsystem);
+    TurretUserWorldRelativeCommand(
+        aruwsrc::Drivers *drivers,
+        TurretSubsystem *turretSubsystem,
+        algorithms::TurretYawControllerInterface *chassisImuYawController,
+        algorithms::TurretPitchControllerInterface *chassisImuPitchController,
+        algorithms::TurretYawControllerInterface *turretImuYawController,
+        algorithms::TurretPitchControllerInterface *turretImuPitchController);
 
     bool isReady() override;
 
@@ -70,10 +87,10 @@ public:
     const char *getName() const override { return "turret WR"; }
 
 private:
-    TurretWorldRelativeChassisImuCommand turretWRChassisImuCommand;
-    TurretWorldRelativeTurretImuCommand turretWRTurretImuCommand;
-};  // class TurretWorldRelativeCommand
+    TurretUserControlCommand turretWRChassisImuCommand;
+    TurretUserControlCommand turretWRTurretImuCommand;
+};  // class TurretUserWorldRelativeCommand
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::user
 
-#endif  // TURRET_WORLD_RELATIVE_COMMAND_HPP_
+#endif  // TURRET_USER_WORLD_RELATIVE_COMMAND_HPP_
