@@ -53,7 +53,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           AGITATOR_UNJAM_WAIT_TIME,
           AGITATOR_UNJAM_CYCLE_COUNT,
           true,
-          10),
+          20),
       aimingAtTarget(false),
       lostTargetCounter(0),
       yawController(yawController),

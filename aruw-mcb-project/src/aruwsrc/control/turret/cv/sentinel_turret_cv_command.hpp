@@ -114,9 +114,8 @@ private:
     static constexpr float BOUNDS_TOLERANCE = 1.0f;
 
     static constexpr float AGITATOR_ROTATE_ANGLE = M_PI / 5.0f;
-    static constexpr uint32_t AGITATOR_ROTATE_TIME =
-        50;  // @TODO this also seems extremely low to me.
-    static constexpr uint32_t AGITATOR_PAUSE_AFTER_MOVE_TIME = 5;
+    static constexpr uint32_t AGITATOR_ROTATE_TIME = 50;
+    static constexpr uint32_t AGITATOR_PAUSE_AFTER_MOVE_TIME = 0;
     static constexpr float AGITATOR_SETPOINT_TOLERANCE = 0.05f;
     static constexpr float AGITATOR_UNJAM_DISPLACEMENT = M_PI / 2.0f;
     static constexpr float AGITATOR_UNJAM_THRESHOLD = 3.0f * AGITATOR_UNJAM_DISPLACEMENT / 4.0f;
