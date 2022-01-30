@@ -35,7 +35,7 @@
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
-#include "turret/chassis-relative/turret_chassis_relative_command.hpp"
+#include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
@@ -43,7 +43,6 @@
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::control::sentinel::firing;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
 using namespace aruwsrc::control;

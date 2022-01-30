@@ -207,7 +207,7 @@ public:
      * @return the setpoint tolerance. Returns the maximum distance in radians at which jam
      *      condition will never be triggered.
      */
-    float getSetpointTolerance() const override;
+    float getJamSetpointTolerance() const override;
 
     /**
      * Attempts to calibrate the agitator at the current position, such that

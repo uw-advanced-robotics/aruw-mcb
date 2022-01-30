@@ -127,7 +127,7 @@ float AgitatorSubsystem::getCurrentValue() const
     return getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
 }
 
-float AgitatorSubsystem::getSetpointTolerance() const { return jamChecker.getSetpointTolerance(); }
+float AgitatorSubsystem::getJamSetpointTolerance() const { return jamChecker.getSetpointTolerance(); }
 
 float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
 {
