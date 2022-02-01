@@ -115,6 +115,7 @@ bool AgitatorSubsystem::calibrateHere()
     agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
     agitatorIsCalibrated = true;
     desiredAgitatorAngle = 0.0f;
+    clearJam();
     return true;
 }
 
