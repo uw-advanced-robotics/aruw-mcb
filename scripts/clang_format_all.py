@@ -22,14 +22,14 @@ import subprocess
 import shutil
 import os
 
-FILE_EXTENSIONS_TO_FORMAT = [".c", ".cc", ".cpp", ".h", ".hh", ".hpp"]
+FILE_EXTENSIONS_TO_FORMAT = ['.c', '.cc', '.cpp', '.h', '.hh', '.hpp']
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Run clang-format on a list of specified directories.')
     parser.add_argument('-e', '--exe', type=str,
                         help='a clang-format executable (can be in your PATH) to use when running clang-format')
     parser.add_argument('-d', '--dirs', type=str, nargs='+', required=True,
-                        help='a ilst of directories that will be formatted, relative to the current working directory')
+                        help='a list of directories that will be formatted, relative to the current working directory')
     args = parser.parse_args()
 
     clang_fmt = args.exe
@@ -37,11 +37,11 @@ def parse_args():
 
     if clang_fmt == None:
         # find default clang-format exe if not passed in
-        clang_fmt = shutil.which("clang-format")
+        clang_fmt = shutil.which('clang-format')
 
-    # check passed in clang-format exe
+    # check passed in clang-format or clang-format found when running `which`
     if shutil.which(clang_fmt) is None:
-        raise ValueError(f"clang-format-exe argument invalid, cannot find {clang_fmt}!")
+        raise ValueError(f'clang-format executable argument (--exe) invalid, cannot find {clang_fmt}!')
 
     return clang_fmt, clang_fmt_dirs
 
