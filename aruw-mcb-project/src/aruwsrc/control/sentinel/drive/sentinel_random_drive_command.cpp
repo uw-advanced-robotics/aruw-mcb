@@ -43,20 +43,28 @@ SentinelRandomDriveCommand::SentinelRandomDriveCommand(SentinelDriveSubsystem* s
 #endif
 }
 
-void SentinelRandomDriveCommand::initialize() { chosenNewRPM = false; }
+void SentinelRandomDriveCommand::initialize() { 
+    chosenNewRPM = false
+    oldPos = subsystemSentinelDrive->absolutePosition(); 
+    prevEvade = true;
+}
 
 void SentinelRandomDriveCommand::execute()
 {
-    if (this->changeVelocityTimer.isExpired() || !chosenNewRPM)
+
+    if (this->changeVelocityTimer.isExpired() || !chosenNewRPM) 
     {
 #ifdef PLATFORM_HOSTED
         chosenNewRPM = true;
 #else
         chosenNewRPM = RandomNumberGenerator::isReady();
 #endif
-        if (chosenNewRPM)
+        newPos = subsystemSentinelDrive->absolutePosition();
+        if (chosenNewRPM && (abs(oldPos - newPos) >= 200.0 || prevEvade)) 
         {
+            prevEvade = false;
             this->changeVelocityTimer.restart(CHANGE_TIME_INTERVAL);
+            oldPos = subsystemSentinelDrive->absolutePosition();
 #ifdef PLATFORM_HOSTED
             currentRPM = MIN_RPM + (MAX_RPM - MIN_RPM) / 2;
 #else
@@ -66,16 +74,18 @@ void SentinelRandomDriveCommand::execute()
             {
                 currentRPM *= -1.0f;
             }
+
+            float sentinelRPM = subsystemSentinelDrive->getRpm();
+            if ((sentinelRPM < 0 && currentRPM < 0) || (sentinelRPM > 0 && currentRpm > 0))
+            {
+                currentRPM = - currentRPM
+            }
 #endif
+        } else {
+            this->changeVelocityTimer.restart(CHANGE_TIME_INTERVAL);
         }
     }
 
-    
-    float curRpm = subsystemSentinelDrive->getRpm();
-    if ((curRpm < 0 && currentRPM < 0) || (curRpm > 0 && currentRpm > 0))
-    {
-        currentRPM = - currentRPM
-    }
 
     // reverse direction if close to the end of the rail
     float curPos = subsystemSentinelDrive->absolutePosition();

@@ -52,6 +52,9 @@ private:
 
     float currentRPM = 0;
     bool chosenNewRPM = false;
+    float newPos = 0;
+    float oldPos = 0;
+    bool prevEvade = true;
 
     SentinelDriveSubsystem* subsystemSentinelDrive;
     tap::arch::MilliTimeout changeVelocityTimer;
