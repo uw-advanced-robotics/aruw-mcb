@@ -31,7 +31,7 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
-#include "agitator/move_unjam_ref_limited_multi_shot_command.hpp"
+#include "agitator/multi_shot_handler.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -202,7 +202,7 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     2,
     true,
     10);
-MoveUnjamRefLimitedMultiShotCommand agitatorMultiShotCommand(
+MoveUnjamRefLimitedCommand agitatorMultiShotCommand(
     drivers(),
     &agitator,
     M_PI / 5.0f,
@@ -215,8 +215,9 @@ MoveUnjamRefLimitedMultiShotCommand agitatorMultiShotCommand(
     200,
     2,
     true,
-    10,
-    3);
+    10);
+extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
+MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     drivers(),
     &agitator,
@@ -292,10 +293,10 @@ HoldCommandMapping leftSwitchUp(
 // Keyboard/Mouse related mappings
 ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-HoldCommandMapping leftMousePressedShiftNotPressed(
+HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
     {&agitatorMultiShotCommand},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}), false, 1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
     {&agitatorShootFastNotLimited},
@@ -345,15 +346,15 @@ PressCommandMapping xPressed(
     RemoteMapState({Remote::Key::X}));
 
 CycleStateCommandMapping<
-    MoveUnjamRefLimitedMultiShotCommand::ShooterState,
-    MoveUnjamRefLimitedMultiShotCommand::NUM_SHOOTER_STATES,
-    MoveUnjamRefLimitedMultiShotCommand>
+    MultiShotHandler::ShooterState,
+    MultiShotHandler::NUM_SHOOTER_STATES,
+    MultiShotHandler>
     vTogglePressed(
         drivers(),
         RemoteMapState({Remote::Key::V}),
-        MoveUnjamRefLimitedMultiShotCommand::SINGLE,
-        &agitatorMultiShotCommand,
-        &MoveUnjamRefLimitedMultiShotCommand::setShooterState);
+        MultiShotHandler::SINGLE,
+        &multiShotHandler,
+        &MultiShotHandler::setShooterState);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
