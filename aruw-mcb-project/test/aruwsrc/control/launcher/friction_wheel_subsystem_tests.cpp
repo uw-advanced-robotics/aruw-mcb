@@ -53,8 +53,13 @@ TEST(FrictionWheelSubsystem, refresh__0_output_when_desired_speed_0_shaft_rpm_0)
     ON_CALL(frictionWheels.rightWheel, getShaftRPM()).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(0)).Times(2);
 
+    tap::arch::clock::setTime(0);
+    frictionWheels.initialize();
+
+    tap::arch::clock::setTime(1);
     frictionWheels.refresh();
 
+    tap::arch::clock::setTime(2);
     frictionWheels.setDesiredLaunchSpeed(0);
     frictionWheels.refresh();
 }
@@ -70,6 +75,10 @@ TEST(FrictionWheelSubsystem, refresh__positive_output_when_desired_speed_10_shaf
 
     frictionWheels.setDesiredLaunchSpeed(10);
 
+    tap::arch::clock::setTime(0);
+    frictionWheels.initialize();
+
+    tap::arch::clock::setTime(1);
     frictionWheels.refresh();
 }
 
@@ -82,6 +91,10 @@ TEST(FrictionWheelSubsystem, refresh__negative_output_when_desired_speed_0_shaft
     ON_CALL(frictionWheels.rightWheel, getShaftRPM()).WillByDefault(Return(1000));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(Lt(0)));
 
+    tap::arch::clock::setTime(0);
+    frictionWheels.initialize();
+
+    tap::arch::clock::setTime(1);
     frictionWheels.refresh();
 }
 
