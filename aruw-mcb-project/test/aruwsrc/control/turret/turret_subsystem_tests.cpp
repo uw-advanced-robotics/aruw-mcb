@@ -69,7 +69,7 @@ TEST(TurretSubsystem, setYawSetpoint__limited_to_min_max_when_limitYaw_false)
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
         turret.setYawSetpoint(inputAngle);
-        EXPECT_FLOAT_EQ(expectedAngle, turret.getYawSetpoint());
+        EXPECT_NEAR(expectedAngle, turret.getYawSetpoint(), 1E-3);
     }
 }
 
@@ -92,7 +92,7 @@ TEST(TurretSubsystem, setYawSetpoint__not_limited_when_limitYaw_true)
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
         turret.setYawSetpoint(inputAngle);
-        EXPECT_FLOAT_EQ(expectedAngle, turret.getYawSetpoint());
+        EXPECT_NEAR(expectedAngle, turret.getYawSetpoint(), 1E-3);
     }
 }
 
@@ -113,7 +113,7 @@ TEST(TurretSubsystem, setPitchSetpoint__limited_to_min_max)
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
         turret.setPitchSetpoint(inputAngle);
-        EXPECT_FLOAT_EQ(expectedAngle, turret.getPitchSetpoint());
+        EXPECT_NEAR(expectedAngle, turret.getPitchSetpoint(), 1E-3);
     }
 }
 
@@ -128,7 +128,7 @@ TEST(TurretSubsystem, getCurrentYawValue__returns_default_when_yaw_motor_offline
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(TurretSubsystem::YAW_START_ANGLE, turret.getCurrentYawValue().getValue());
+    EXPECT_NEAR(TurretSubsystem::YAW_START_ANGLE, turret.getCurrentYawValue().getValue(), 1E-3);
 }
 
 TEST(TurretSubsystem, getCurrentYawValue__returns_values_based_on_enc_position_if_yaw_motor_online)
@@ -153,7 +153,7 @@ TEST(TurretSubsystem, getCurrentYawValue__returns_values_based_on_enc_position_i
     {
         setEncoderWrapped(yawMotor, encoder % DjiMotor::ENC_RESOLUTION);
         turret.refresh();
-        EXPECT_FLOAT_EQ(0.0f, turret.getCurrentYawValue().difference(angle));
+        EXPECT_NEAR(0.0f, turret.getCurrentYawValue().difference(angle), 1E-3);
     }
 }
 
@@ -168,7 +168,7 @@ TEST(TurretSubsystem, getCurrentPitchValue__returns_default_when_pitch_motor_off
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(TurretSubsystem::PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue());
+    EXPECT_NEAR(TurretSubsystem::PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue(), 1E-3);
 }
 
 TEST(
@@ -195,7 +195,7 @@ TEST(
     {
         setEncoderWrapped(pitchMotor, encoder % DjiMotor::ENC_RESOLUTION);
         turret.refresh();
-        EXPECT_FLOAT_EQ(0, turret.getCurrentPitchValue().difference(angle));
+        EXPECT_NEAR(0, turret.getCurrentPitchValue().difference(angle), 1E-3);
     }
 }
 
@@ -264,7 +264,7 @@ TEST(TurretSubsystem, getPitchAngleFromCenter__return_0_when_motors_offline)
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(0, turret.getPitchAngleFromCenter());
+    EXPECT_NEAR(0, turret.getPitchAngleFromCenter(), 1E-3);
 }
 
 TEST(TurretSubsystem, getPitchAngleFromCenter__valid_encoder_angles)
@@ -288,7 +288,7 @@ TEST(TurretSubsystem, getPitchAngleFromCenter__valid_encoder_angles)
     {
         setEncoderWrapped(pitchMotor, encoder % DjiMotor::ENC_RESOLUTION);
         turret.refresh();
-        EXPECT_FLOAT_EQ(angle, turret.getPitchAngleFromCenter());
+        EXPECT_NEAR(angle, turret.getPitchAngleFromCenter(), 1E-3);
     }
 }
 
@@ -302,7 +302,7 @@ TEST(TurretSubsystem, getYawAngleFromCenter__return_0_when_motors_offline)
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(0, turret.getYawAngleFromCenter());
+    EXPECT_NEAR(0, turret.getYawAngleFromCenter(), 1E-3);
 }
 
 TEST(TurretSubsystem, getYawAngleFromCenter)
@@ -326,7 +326,7 @@ TEST(TurretSubsystem, getYawAngleFromCenter)
     {
         setEncoderWrapped(yawMotor, encoder % DjiMotor::ENC_RESOLUTION);
         turret.refresh();
-        EXPECT_FLOAT_EQ(angle, turret.getYawAngleFromCenter());
+        EXPECT_NEAR(angle, turret.getYawAngleFromCenter(), 1E-3);
     }
 }
 
@@ -599,6 +599,6 @@ TEST(TurretSubsystem, refresh_sets_actual_angle_back_to_start_when_offline)
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(TurretSubsystem::YAW_START_ANGLE, turret.getCurrentYawValue().getValue());
-    EXPECT_FLOAT_EQ(TurretSubsystem::PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue());
+    EXPECT_NEAR(TurretSubsystem::YAW_START_ANGLE, turret.getCurrentYawValue().getValue(), 1E-3);
+    EXPECT_NEAR(TurretSubsystem::PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue(), 1E-3);
 }

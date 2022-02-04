@@ -73,6 +73,8 @@ public:
 
     void setOpenHopperCover(bool isOpen) { openHopperCover = isOpen; }
 
+    mockable void sendImuCalibrationRequest() { calibrateImu = true; }
+
     void sendData();
 
 private:
@@ -133,6 +135,8 @@ private:
     tap::arch::MilliTimeout imuConnectedTimeout;
 
     bool openHopperCover;
+
+    bool calibrateImu;
 
     tap::arch::PeriodicMilliTimer sendMcbDataTimer;
 

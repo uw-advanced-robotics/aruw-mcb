@@ -25,7 +25,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::algorithms
 {
 float computeGravitationalForceOffset(
     const float cgX,
@@ -56,4 +56,4 @@ float computeGravitationalForceOffset(
 
     return gravityCompensatorMax * cosf(turretCGPolarTheta + modm::toRadian(pitchAngleFromCenter));
 }
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::algorithms

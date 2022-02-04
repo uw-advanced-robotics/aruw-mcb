@@ -41,20 +41,29 @@ TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
           this,
           &TurretMCBCanComm::handleTurretMessage),
       openHopperCover(false),
+      calibrateImu(false),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
 }
 
-void TurretMCBCanComm::init() { angleGyroMessageHandler.attachSelfToRxHandler(); turretStatusRxHandler.attachSelfToRxHandler(); }
+void TurretMCBCanComm::init()
+{
+    angleGyroMessageHandler.attachSelfToRxHandler();
+    turretStatusRxHandler.attachSelfToRxHandler();
+}
 
 void TurretMCBCanComm::sendData()
 {
     if (sendMcbDataTimer.execute())
     {
-        modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 8);
+        modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 1);
         txMsg.setExtended(false);
-        txMsg.data[0] = static_cast<uint8_t>(openHopperCover);
+        txMsg.data[0] = (static_cast<uint8_t>(openHopperCover) & 0b1) |
+                        ((static_cast<uint8_t>(calibrateImu) & 0b1) << 1);
         drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, txMsg);
+
+        // set this calibrate flag to false so the calibrate command is only sent once
+        calibrateImu = false;
     }
 }
 
@@ -102,7 +111,7 @@ TurretMCBCanComm::TurretStatusRxHandler::TurretStatusRxHandler(
     CanCommListenerFunc funcToCall)
     : CanRxListener(drivers, id, cB),
       msgHandler(msgHandler),
-      funcToCall(funcToCall) 
+      funcToCall(funcToCall)
 {
 }
 
