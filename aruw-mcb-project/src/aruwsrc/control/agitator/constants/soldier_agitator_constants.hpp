@@ -18,7 +18,9 @@
  */
 #include "modm/math/geometry/angle.hpp"
 
-#if defined (ALL_SOLDIERS)
+// Do not include this file directly, use agitator_consants.hpp
+
+namespace aruwsrc::control::agitator::constants{
 // position PID terms
     // PID terms for soldier
     static constexpr float PID_17MM_P = 100000.0f;
@@ -34,11 +36,4 @@
     static constexpr bool isAgitatorInverted = false;
 
     static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 5;
-
-    // The motor that controls the hopper lid is an agitator_subsystem instance, so
-    // I'm adding its constants here as well.
-    static constexpr tap::motor::MotorId HOPPER_COVER_MOTOR_ID = tap::motor::MOTOR8;
-    static constexpr tap::can::CanBus HOPPER_COVER_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-
-    static constexpr bool IS_HOPPER_COVER_INVERTED = false;
-#endif
+}

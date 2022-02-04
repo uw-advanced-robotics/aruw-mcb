@@ -16,7 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#if defined(TARGET_SENTINEL)
+#include "tap/motor/dji_motor.hpp"
+
+// Do not include this file directly, use agitator_consants.hpp
+
+namespace aruwsrc::control::agitator::constants{
     // position PID terms
     // PID terms for sentinel
     static constexpr float PID_17MM_P = 120000.0f;
@@ -27,4 +31,4 @@
 
     static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
     static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-#endif
+}

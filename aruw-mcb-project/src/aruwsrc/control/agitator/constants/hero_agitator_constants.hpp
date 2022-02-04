@@ -16,7 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#if defined (TARGET_HERO)
+#include "tap/motor/dji_motor.hpp"
+
+// Do not include this file directly, use agitator_consants.hpp
+
+namespace aruwsrc::control::agitator::constants{
     // Hero's waterwheel constants
     static constexpr float PID_HERO_WATERWHEEL_P = 100000.0f;
     static constexpr float PID_HERO_WATERWHEEL_I = 0.0f;
@@ -51,4 +55,4 @@
      */
     static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = M_PI / 14.0f;
     static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
-#endif
+}

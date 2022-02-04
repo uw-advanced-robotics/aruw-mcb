@@ -35,6 +35,7 @@
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
+#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 
 namespace aruwsrc
 {
@@ -45,9 +46,6 @@ namespace aruwsrc
 {
 namespace agitator
 {
-namespace constants{
-    #include "aruwsrc/control/agitator/constants/robot_agitator_constants.hpp"
-}
 
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor
