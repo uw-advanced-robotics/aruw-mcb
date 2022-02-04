@@ -16,6 +16,7 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import sys
 import platform
 
 from os.path import join, abspath
@@ -81,6 +82,37 @@ env["CONFIG_PROJECT_NAME"] = PROJECT_NAME
 env["CONFIG_ARTIFACT_PATH"] = join(env["CONFIG_BUILD_BASE"], "artifact")
 env["CONFIG_PROFILE"] = args["BUILD_PROFILE"]
 
+if sys.platform == "win32":
+    # Workaround for "The command line is too long" error from Windows' libc when executing a long
+    # command.
+    # Adapted from: https://github.com/SCons/scons/wiki/LongCmdLinesOnWin32
+
+    import subprocess
+    def win32_spawn_via_popen(_sh, _escape, cmd, args, env):
+        # Blind argument concatenation is generally dangerous but args seem to already come in
+        # escaped+quoted.
+        # "args" is intended to be the target's argv, and thus the first entry is the program name
+        # itself. We strip this and replace it with the explicit target command before passing it to
+        # Popen. Windows will internally compute an appropriate argv.
+        concatenated_args = " ".join(args[1:])
+        command_with_args = cmd + " " + concatenated_args
+
+        # Provided shell and escape function are ignored. It is not clear under what cases scons
+        # uses the features of a host shell so it's unused for simplicity.
+
+        proc = subprocess.Popen(
+            command_with_args,
+            stdin = None,
+            stdout = None,
+            stderr = None,
+            shell = False,
+            env = env
+        )
+        _stdout, _stderr = proc.communicate()
+        status_code = proc.wait()
+        return status_code
+
+    env['SPAWN'] = win32_spawn_via_popen
 
 print("Configured {0} parallel build jobs (-j{0}), {1}"
     .format(GetOption("num_jobs"), args["ROBOT_TYPE"]))
@@ -151,9 +183,6 @@ else:  # hardware target env
     env["LINKFLAGS"].remove("-Tmodm/link/linkerscript.ld")
     env.AppendUnique(LINKFLAGS=["-T" + LINKERSCRIPT_FILE])
 
-
-# Append little endian flag to all
-env.AppendUnique(CPPFLAGS=["-DLITTLE_ENDIAN"])
 
 # Add any additional flags the user chooses specify
 if "additional-ccflags" in ARGUMENTS:

@@ -37,7 +37,9 @@
     ON_CALL(cs, calculateRotationTranslationalGain).WillByDefault(Return(1));                 \
     RefSerial::Rx::RobotData rd{};                                                            \
     ON_CALL(d.refSerial, getRobotData).WillByDefault(ReturnRef(rd));                          \
-    EXPECT_CALL(cs, setDesiredOutput(FloatEq(baseX), FloatEq(baseY), FloatEq(baseR)));
+    EXPECT_CALL(                                                                              \
+        cs,                                                                                   \
+        setDesiredOutput(FloatNear(baseX, 1E-3), FloatNear(baseY, 1E-3), FloatNear(baseR, 1E-3)));
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
@@ -47,7 +49,7 @@ using aruwsrc::mock::TurretSubsystemMock;
 using tap::algorithms::Ramp;
 using namespace tap::serial;
 
-static constexpr float BASE_DESIRED_OUT = ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR / 2;
+static constexpr float BASE_DESIRED_OUT = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR / 2;
 static constexpr float BASE_DESIRED_R_TRANSLATIONAL =
     BeybladeCommand::ROTATION_TARGET_45W_CUTOFF * BeybladeCommand::RAMP_TARGET_TRANSLATIONAL_FRAC *
     BeybladeCommand::RAMP_UPDATE_FRAC;

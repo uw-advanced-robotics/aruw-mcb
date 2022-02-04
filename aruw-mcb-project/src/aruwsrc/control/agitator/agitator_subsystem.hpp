@@ -92,9 +92,9 @@ public:
 
 #elif defined(TARGET_HERO)
     // Hero's waterwheel constants
-    static constexpr float PID_HERO_WATERWHEEL_P = 100000.0f;
+    static constexpr float PID_HERO_WATERWHEEL_P = 150'000.0f;
     static constexpr float PID_HERO_WATERWHEEL_I = 0.0f;
-    static constexpr float PID_HERO_WATERWHEEL_D = 10.0f;
+    static constexpr float PID_HERO_WATERWHEEL_D = 50.0f;
     static constexpr float PID_HERO_WATERWHEEL_MAX_ERR_SUM = 0.0f;
     static constexpr float PID_HERO_WATERWHEEL_MAX_OUT = 16000.0f;
 
@@ -103,9 +103,9 @@ public:
     static constexpr bool HERO_WATERWHEEL_INVERTED = false;
 
     // PID terms for the hero kicker
-    static constexpr float PID_HERO_KICKER_P = 50000.0f;
+    static constexpr float PID_HERO_KICKER_P = 100'000.0f;
     static constexpr float PID_HERO_KICKER_I = 0.0f;
-    static constexpr float PID_HERO_KICKER_D = 10.0f;
+    static constexpr float PID_HERO_KICKER_D = 50.0f;
     static constexpr float PID_HERO_KICKER_MAX_ERR_SUM = 0.0f;
     // max out added by Tenzin since it wasn't here. This should
     // also be changed by someone who know's what they're doing!

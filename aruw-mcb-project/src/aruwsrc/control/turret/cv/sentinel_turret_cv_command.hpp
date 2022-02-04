@@ -20,10 +20,8 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/comprised_command.hpp"
-#include "tap/control/turret/turret_subsystem_interface.hpp"
 
 #include "aruwsrc/control/agitator/move_unjam_ref_limited_command.hpp"
 
@@ -34,27 +32,45 @@ class AgitatorSubsystem;
 
 namespace aruwsrc::control::turret
 {
+class TurretSubsystem;
+namespace algorithms
+{
+class TurretYawControllerInterface;
+class TurretPitchControllerInterface;
+}  // namespace algorithms
+}  // namespace aruwsrc::control::turret
+
+namespace aruwsrc::control::turret::cv
+{
 /**
- * A command that receives input from the vision system via the `XavierSerial` driver and aims the
- * turret accordingly. In addition to aiming, this command is responsible for determining when to
- * fire and scheduling an agitator rotate command accordingly. Finally, when a target is not
+ * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
+ * aims the turret accordingly. In addition to aiming, this command is responsible for determining
+ * when to fire and scheduling an agitator rotate command accordingly. Finally, when a target is not
  * acquired, this command scans the turret back and forth.
  */
 class SentinelTurretCVCommand : public tap::control::ComprisedCommand
 {
 public:
     /**
-     * Pitch/yaw error margins within which the auto aim deems it acceptable
+     * Yaw error margin within which the auto aim deems it acceptable
      * to fire the launcher, in degrees.
      */
     static constexpr float YAW_FIRE_ERROR_MARGIN = 2.0f;
+    /**
+     * Pitch error margins within which the auto aim deems it acceptable
+     * to fire the launcher, in degrees.
+     */
     static constexpr float PITCH_FIRE_ERROR_MARGIN = 2.0f;
 
     /**
-     * Pitch/yaw angle increments that the turret will change by each call
+     * Yaw angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in degrees.
      */
     static constexpr float SCAN_DELTA_ANGLE_YAW = 0.1f;
+    /**
+     * Pitch angle increments that the turret will change by each call
+     * to refresh when the turret is scanning for a target, in degrees.
+     */
     static constexpr float SCAN_DELTA_ANGLE_PITCH = 0.1f;
 
     /**
@@ -63,10 +79,22 @@ public:
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
+    /**
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the sentinel turret to control.
+     * @param[in] agitatorSubsystem Pointer to agitator on the sentinel's turret, controlled by this
+     * command to automatically launch projectiles when a target has been acquired.
+     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * axis of the turret.
+     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
+     * pitch axis of the turret.
+     */
     SentinelTurretCVCommand(
         aruwsrc::Drivers *drivers,
-        tap::control::turret::TurretSubsystemInterface *sentinelTurret,
-        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem);
+        TurretSubsystem *turretSubsystem,
+        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem,
+        algorithms::TurretYawControllerInterface *yawController,
+        algorithms::TurretPitchControllerInterface *pitchController);
 
     bool isReady() override;
 
@@ -83,26 +111,6 @@ public:
     inline bool isAimingAtTarget() const { return aimingAtTarget; }
 
 private:
-    static constexpr float YAW_P = 4000.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 130.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 10.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 3400.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 100.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 0.0f;
-
     static constexpr float BOUNDS_TOLERANCE = 1.0f;
 
     static constexpr float AGITATOR_ROTATE_ANGLE = M_PI / 5.0f;
@@ -111,7 +119,7 @@ private:
 
     aruwsrc::Drivers *drivers;
 
-    tap::control::turret::TurretSubsystemInterface *sentinelTurret;
+    TurretSubsystem *turretSubsystem;
 
     aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitator;
 
@@ -126,8 +134,8 @@ private:
      */
     int lostTargetCounter;
 
-    tap::algorithms::SmoothPid yawPid;
-    tap::algorithms::SmoothPid pitchPid;
+    algorithms::TurretYawControllerInterface *yawController;
+    algorithms::TurretPitchControllerInterface *pitchController;
 
     uint32_t prevTime = 0;
 
@@ -144,6 +152,6 @@ private:
         bool *axisScanningUp);
 };  // class SentinelTurretCVCommand
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::cv
 
 #endif  // SENTINEL_TURRET_CV_COMMAND_HPP_

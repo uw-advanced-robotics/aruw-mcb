@@ -37,6 +37,7 @@ public:
     MOCK_METHOD(float, getPitchVelocity, (), (const override));
     MOCK_METHOD(float, getYaw, (), (const override));
     MOCK_METHOD(float, getYawVelocity, (), (const override));
+    MOCK_METHOD(bool, getLimitSwitchDepressed, (), (const override));
     MOCK_METHOD(float, isConnected, (), (const override));
 };
 }  // namespace aruwsrc::mock

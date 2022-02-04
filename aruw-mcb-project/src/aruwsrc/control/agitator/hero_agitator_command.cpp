@@ -80,7 +80,7 @@ bool HeroAgitatorCommand::isFinished() const { return currState == FINISHED; }
 void HeroAgitatorCommand::initialize()
 {
     // Limit switch is active low, so need to negate the reading.
-    if (!drivers->digital.read(LIMIT_SWITCH_PIN))
+    if (drivers->turretMCBCanComm.getLimitSwitchDepressed())
     {
         currState = SHOOTING;
         const auto& robotData = drivers->refSerial.getRobotData();
@@ -99,7 +99,7 @@ void HeroAgitatorCommand::execute()
     switch (currState)
     {
         case SHOOTING:
-            if ((!drivers->refSerial.getRefSerialReceivingData() &&
+            if ((drivers->refSerial.getRefSerialReceivingData() &&
                  startingHeat < robotData.turret.heat42) ||
                 kickerFireCommand.isFinished())
             {
@@ -107,7 +107,7 @@ void HeroAgitatorCommand::execute()
             }
             break;
         case LOAD:
-            if (!drivers->digital.read(LIMIT_SWITCH_PIN))
+            if (drivers->turretMCBCanComm.getLimitSwitchDepressed())
             {
                 currState = FINISHED;
             }
@@ -127,9 +127,6 @@ void HeroAgitatorCommand::execute()
 
 void HeroAgitatorCommand::end(bool interrupted)
 {
-    startingHeat = 0;
-    currState = SHOOTING;
-
     this->comprisedCommandScheduler.removeCommand(&kickerFireCommand, interrupted);
     this->comprisedCommandScheduler.removeCommand(&kickerLoadCommand, interrupted);
     this->comprisedCommandScheduler.removeCommand(&waterwheelLoadCommand, interrupted);

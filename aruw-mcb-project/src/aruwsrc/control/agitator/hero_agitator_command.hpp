@@ -115,8 +115,6 @@ private:
     uint16_t heatLimitBuffer;
     uint16_t startingHeat;
 
-    const tap::gpio::Digital::InputPin LIMIT_SWITCH_PIN = Digital::InputPin::A;
-
     /**
      * Enters the loading state and schedules commands to rotate the kicker
      * and agitator.

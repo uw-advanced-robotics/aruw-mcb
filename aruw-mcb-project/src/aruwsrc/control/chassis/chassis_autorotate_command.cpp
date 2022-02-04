@@ -100,17 +100,21 @@ void ChassisAutorotateCommand::execute()
         float rTranslationalGain =
             chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
 
+        const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+
         float chassisXDesiredWheelspeed = limitVal(
                                               drivers->controlOperatorInterface.getChassisXInput(),
                                               -rTranslationalGain,
                                               rTranslationalGain) *
-                                          ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+                                          MAX_WHEEL_SPEED;
 
         float chassisYDesiredWheelspeed = limitVal(
                                               drivers->controlOperatorInterface.getChassisYInput(),
                                               -rTranslationalGain,
                                               rTranslationalGain) *
-                                          ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR;
+                                          MAX_WHEEL_SPEED;
         // Rotate X and Y depending on turret angle
         rotateVector(
             &chassisXDesiredWheelspeed,
