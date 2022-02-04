@@ -68,24 +68,7 @@ FrictionWheelSubsystem frictionWheels(drivers());
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
-tap::motor::DjiMotor pitchMotor(
-    drivers(),
-    TurretSubsystem::PITCH_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
-    true,
-    "Pitch Turret");
-tap::motor::DoubleDjiMotor yawMotor(
-    drivers(),
-    TurretSubsystem::YAW_BACK_MOTOR_ID,
-    TurretSubsystem::YAW_FRONT_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
-    TurretSubsystem::CAN_BUS_MOTORS,
-    true,
-    true,
-    "Yaw Back Turret",
-    "Yaw Front Turret");
-TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
-
+TurretSubsystem turret(drivers(), DjiMotor, DoubleDjiMotor);
 
 /* define commands ----------------------------------------------------------*/
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
@@ -144,8 +127,8 @@ void initializeSubsystems()
     chassis.initialize();
     frictionWheels.initialize();
     clientDisplay.initialize();
-    turret.initialize();
     drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
+    turret.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -163,7 +146,6 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
-    turret.setDefaultCommand(&turretWorldRelativeCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -173,9 +155,6 @@ void startHeroCommands(aruwsrc::Drivers *) {}
 void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&rightMousePressed);
-    drivers->commandMapper.addMap(&zPressed);
 }
 }  // namespace hero_control
 
