@@ -34,6 +34,11 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
 {
 }
 
+void VisionCoprocessor::initializeCV()
+{
+    initialize();
+}
+
 void VisionCoprocessor::messageReceiveCallback(const SerialMessage& completeMessage)
 {
     switch (completeMessage.type)

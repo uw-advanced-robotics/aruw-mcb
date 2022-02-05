@@ -82,6 +82,12 @@ public:
     VisionCoprocessor(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor() = default;
+    
+    /**
+     * Call this before using the serial line, initializes the uart line
+     * and the callback
+     */
+    mockable void initializeCV();
 
     /**
      * Handles the types of messages defined above in the RX message handlers section.
