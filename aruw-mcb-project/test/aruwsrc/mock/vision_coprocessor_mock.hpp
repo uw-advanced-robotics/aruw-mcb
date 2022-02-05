@@ -42,4 +42,4 @@ public:
 }  // namespace mock
 }  // namespace aruwsrc
 
-#endif  // LEGACY_VISION_COPROCESSOR_MOCK_HPP_
+#endif  // VISION_COPROCESSOR_MOCK_HPP_

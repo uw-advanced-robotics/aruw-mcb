@@ -22,11 +22,14 @@
 
 #include "tap/communication/serial/dji_serial.hpp"
 
-#include "aruwsrc/drivers.hpp"
-
 namespace aruwsrc
 {
 class Drivers;
+}
+
+namespace aruwsrc::can
+{
+class TurretMCBCanComm;
 }
 
 namespace aruwsrc
@@ -82,7 +85,7 @@ public:
     VisionCoprocessor(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor() = default;
-    
+
     /**
      * Call this before using the serial line, initializes the uart line
      * and the callback
@@ -110,7 +113,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData;
 
-    const can::TurretMCBCanComm* turretMCBCanComm;
+    const aruwsrc::can::TurretMCBCanComm* turretMCBCanComm;
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
