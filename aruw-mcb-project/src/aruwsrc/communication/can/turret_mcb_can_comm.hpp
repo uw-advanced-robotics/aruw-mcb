@@ -66,6 +66,8 @@ public:
         return static_cast<float>(rawYawVelocity) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
 
+    mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
+
     mockable inline float isConnected() const
     {
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
