@@ -88,4 +88,5 @@
             100
         ]
     },
+    "git.autoRepositoryDetection": false,
 }

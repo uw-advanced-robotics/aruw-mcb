@@ -112,9 +112,9 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
     AgitatorSubsystem::isAgitatorInverted,
-    true,
     AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
-    AgitatorSubsystem::JAMMING_TIME);
+    AgitatorSubsystem::JAMMING_TIME,
+    true);
 
 FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
 
@@ -180,26 +180,44 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
     50,
+    0,
+    true,
+    M_PI / 20.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    200,
+    2,
     true,
     10);
 MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
     100,
+    0,
+    true,
+    M_PI / 20.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    200,
+    2,
     true,
     10);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
+    50,
     0,
+    true,
+    M_PI / 16.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    200,
+    2,
     false,
-    50);
+    10);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
