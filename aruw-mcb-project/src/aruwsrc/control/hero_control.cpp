@@ -170,14 +170,9 @@ HeroAgitatorCommand heroAgitatorCommand(
     drivers(),
     &kickerAgitator,
     &waterwheelAgitator,
-    M_PI / 2.0,
-    75,
-    M_PI / 2.0,
-    M_PI / 7.0,
-    200,
-    M_PI / 14.0,
-    true,
-    100);
+    &frictionWheels,
+    HeroAgitatorCommand::
+        Config(M_PI / 2.0, 75, M_PI / 2.0, M_PI / 7.0, 200, M_PI / 14.0, true, 100));
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(

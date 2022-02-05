@@ -24,6 +24,8 @@
 #include "tap/control/setpoint/commands/move_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+
 using tap::gpio::Digital;
 
 namespace aruwsrc
@@ -42,21 +44,39 @@ class HeroAgitatorCommand : public tap::control::ComprisedCommand
 {
 public:
     /**
-     * Constructs a HeroAgitatorCommand with the given agitator motors, shooting
-     * rotation and time, loading rotation and time, and heat limiting params.
+     * Agitator rotation configuration parameters for this command.
+     */
+    struct Config
+    {
+        /** Amount to rotate the kicker when shooting a projectile (radians). */
+        float kickerShootRotateAngle;
+        /** Time it takes to rotate the kicker when shooting a projectile (ms). */
+        uint32_t kickerShootRotateTime;
+        /** Amount to rotate the kicker when loading a projectile (radians). */
+        float kickerLoadRotateAngle;
+        /** Amount to rotate the waterwheel when loading a projectile (radians). */
+        float waterwheelLoadRotateAngle;
+        /** Time it takes to rotate the waterwheel and kicker when loading a projectile (ms). */
+        uint32_t loadRotateTime;
+        /** Max unjam angle of the waterwheel if jamming happens */
+        float waterwheelMaxUnjamAngle;
+        /** Whether or not the command should heat limit. */
+        bool heatLimiting;
+        /** Minimum difference between the current heat and max 42mm heat required for this command
+         * to shoot a projectile when heat limiting enabled. */
+        uint16_t heatLimitBuffer;
+    };
+
+    /**
+     * Constructs a HeroAgitatorCommand with the given agitator motors, flywheels, and
+     * agitator rotation configuration params.
      */
     HeroAgitatorCommand(
         aruwsrc::Drivers* drivers,
         AgitatorSubsystem* kickerAgitator,
         AgitatorSubsystem* waterwheelAgitator,
-        float kickerShootRotateAngle,
-        uint32_t kickerShootRotateTime,
-        float kickerLoadRotateAngle,
-        float waterwheelLoadRotateAngle,
-        uint32_t loadRotateTime,
-        float waterwheelMaxUnjamAngle,
-        bool heatLimiting,
-        uint16_t heatLimitBuffer);
+        const aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheels,
+        const Config& config);
 
     /**
      * @return Whether the agitator subsystems are online and heat is below
@@ -110,6 +130,7 @@ private:
     aruwsrc::Drivers* drivers;
     AgitatorSubsystem* kickerAgitator;
     AgitatorSubsystem* waterwheelAgitator;
+    const aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheels;
     HeroAgitatorState currState;
     bool heatLimiting;
     uint16_t heatLimitBuffer;
