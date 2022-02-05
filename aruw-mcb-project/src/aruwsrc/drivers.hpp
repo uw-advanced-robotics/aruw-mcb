@@ -24,6 +24,7 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #else
@@ -53,7 +54,7 @@ public:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
-    testing::NiceMock<mock::LegacyVisionCoprocessorMock> legacyVisionCoprocessor;
+    testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanComm;
 #else
