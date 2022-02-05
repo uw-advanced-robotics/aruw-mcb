@@ -20,29 +20,30 @@
 
 // Do not include this file directly, use agitator_consants.hpp
 
-namespace aruwsrc::control::agitator::constants{
-    // position PID terms
-    // PID terms for soldier
-    static constexpr float PID_17MM_P = 300'000.0f;
-    static constexpr float PID_HOPPER_P = 100000.0f;
-    static constexpr float PID_17MM_I = 0.0f;
-    static constexpr float PID_17MM_D = 50.0f;
-    static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
-    static constexpr float PID_17MM_MAX_OUT = 16000.0f;
+namespace aruwsrc::control::agitator::constants
+{
+// position PID terms
+// PID terms for soldier
+static constexpr float PID_17MM_P = 300'000.0f;
+static constexpr float PID_HOPPER_P = 100000.0f;
+static constexpr float PID_17MM_I = 0.0f;
+static constexpr float PID_17MM_D = 50.0f;
+static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
+static constexpr float PID_17MM_MAX_OUT = 16000.0f;
 
-    static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
-    static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
+static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 
-    static constexpr bool isAgitatorInverted = false;
+static constexpr bool isAgitatorInverted = false;
 
-    /**
-     * The jamming constants. Agitator is considered jammed if difference between setpoint
-     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
-     *
-     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
-     *
-     * This should be positive or else weird behavior can occur
-     */
-    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
-    static constexpr uint32_t JAMMING_TIME = 250;
-}
+/**
+ * The jamming constants. Agitator is considered jammed if difference between setpoint
+ * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
+ *
+ * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
+ *
+ * This should be positive or else weird behavior can occur
+ */
+static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
+static constexpr uint32_t JAMMING_TIME = 250;
+}  // namespace aruwsrc::control::agitator::constants

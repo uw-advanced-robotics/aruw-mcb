@@ -19,11 +19,11 @@
 #ifndef AGITATOR_CONSTANTS_HPP_
 #define AGITATOR_CONSTANTS_HPP_
 
-#if defined (ALL_SOLDIERS)
+#if defined(ALL_SOLDIERS)
 #include "soldier_agitator_constants.hpp"
-#elif defined (TARGET_SENTINEL)
+#elif defined(TARGET_SENTINEL)
 #include "sentinel_agitator_constants.hpp"
-#elif defined (TARGET_HERO)
+#elif defined(TARGET_HERO)
 #include "hero_agitator_constants.hpp"
 #endif
 #endif
