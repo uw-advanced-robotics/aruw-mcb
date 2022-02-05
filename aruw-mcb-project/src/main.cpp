@@ -48,7 +48,6 @@
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
-tap::arch::PeriodicMilliTimer sendVisionCoprocessorTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -88,13 +87,6 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
-        if (sendVisionCoprocessorTimeout.execute())
-        {
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-            // TODO try faster baude rate so we can send more frequently (currently mcb's serial
-            // buffers are overflowing if you try and send faster than 3 ms).
-        }
-
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
@@ -105,6 +97,7 @@ int main()
 #if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
             PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
 #endif
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
         }
         modm::delay_us(10);
     }
