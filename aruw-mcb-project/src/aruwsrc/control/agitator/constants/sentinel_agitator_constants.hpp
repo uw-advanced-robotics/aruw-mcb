@@ -23,7 +23,7 @@
 namespace aruwsrc::control::agitator::constants{
     // position PID terms
     // PID terms for sentinel
-    static constexpr float PID_17MM_P = 120000.0f;
+    static constexpr float PID_17MM_P = 300'000.0f;
     static constexpr float PID_17MM_I = 0.0f;
     static constexpr float PID_17MM_D = 50.0f;
     static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;

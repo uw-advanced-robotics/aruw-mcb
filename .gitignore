@@ -3,6 +3,7 @@
 aruw-mcb-project/build
 aruw-mcb-project/Pipfile.lock
 project.xml.log
+**/.DS_Store
 
 .vscode/.cortex-debug.peripherals.state.json
 .vscode/.cortex-debug.registers.state.json

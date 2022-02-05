@@ -21,7 +21,7 @@
 // Do not include this file directly, use agitator_consants.hpp
 
 namespace aruwsrc::control::agitator::constants{
-    // Hero's waterwheel constants
+     // Hero's waterwheel constants
     static constexpr float PID_HERO_WATERWHEEL_P = 100000.0f;
     static constexpr float PID_HERO_WATERWHEEL_I = 0.0f;
     static constexpr float PID_HERO_WATERWHEEL_D = 10.0f;
