@@ -27,16 +27,6 @@ using aruwsrc::serial::VisionCoprocessor;
 using tap::serial::DJISerial;
 using namespace tap::arch;
 
-// class for accessing internals of VisionCoprocessor class for testing purposes
-class VisionCoprocessorTester
-{
-public:
-    VisionCoprocessorTester(VisionCoprocessor *serial) : serial(serial) {}
-
-private:
-    VisionCoprocessor *serial;
-};
-
 // RX tests
 
 static void initAndRunAutoAimRxTest(
@@ -56,7 +46,6 @@ static void initAndRunAutoAimRxTest(
     DJISerial::SerialMessage message;
     message.headByte = 0xA5;
     message.type = 0;
-    // TODO: redo memcpy
     message.length = 10 * sizeof(float) + sizeof(uint8_t);
     aruwsrc::serial::VisionCoprocessor::TurretAimData testData;
     testData.xPos = xPosDesired;

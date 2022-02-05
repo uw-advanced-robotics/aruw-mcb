@@ -42,7 +42,9 @@ namespace serial
 class VisionCoprocessor : public tap::serial::DJISerial
 {
 public:
-    // AutoAim data to receive from Jetson.
+    /**
+     * AutoAim data to receive from Jetson.
+     */
     struct TurretAimData
     {
         float xPos;          /// x position of the target.
@@ -58,7 +60,9 @@ public:
         uint32_t timestamp;  /// Timestamp in microseconds.
     } modm_packed;
 
-    // Odometry data to send to Jetson.
+    /**
+     * Odometry data to send to Jetson.
+     */
     struct OdometryData
     {
         float chassisX;      /// x position of the chassis.
@@ -91,8 +95,6 @@ public:
 
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
-    mockable inline bool lastAimDataValid() const { return lastAimData.hasTarget; }
-
 private:
     enum RxMessageTypes
     {
@@ -105,7 +107,6 @@ private:
     const can::TurretMCBCanComm* turretMCBCanComm;
 
     /**
-     * TODO: update this specification
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information, and updates the `lastAimData`.
      *
