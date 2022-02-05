@@ -75,7 +75,7 @@ AgitatorSubsystem agitator(
     aruwsrc::control::agitator::constants::PID_17MM_D,
     aruwsrc::control::agitator::constants::PID_17MM_MAX_ERR_SUM,
     aruwsrc::control::agitator::constants::PID_17MM_MAX_OUT,
-    aruwsrc::control::agitator::constants::AGITATOR_GEAR_RATIO_M2006,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
     aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
     false,
