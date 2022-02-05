@@ -65,8 +65,6 @@ bool MoveUnjamRefLimitedCommand::isReady()
 {
     const auto &robotData = drivers->refSerial.getRobotData();
 
-    // TODO remove isOnline check when https://gitlab.com/aruw/controls/taproot/-/merge_requests/49
-    // is merged in
     return MoveUnjamComprisedCommand::isReady() && setpointSubsystem->isOnline() &&
            !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
              (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));
