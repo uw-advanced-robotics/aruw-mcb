@@ -8,12 +8,27 @@
     <option name="taproot:project_name">aruw-mcb-project</option>
     <option name="taproot:modm_repo_lb">../taproot/modm/repo.lb</option>
     <option name="taproot:dev_board">rm-dev-board-a</option>
-    <option name="taproot:communication:serial:terminal_serial:uart_port">Uart2</option>
+    <option name="taproot:communication:serial:terminal_serial:uart_port">Uart7</option>
     <option name="taproot:communication:serial:ref_serial:uart_port">Uart6</option>
+    <option name="taproot:communication:serial:uart_port_3.baud_rate">1000000</option>
     <option name="taproot:board:digital_in_pins">A,B,C,D,Button</option>
     <option name="taproot:board:digital_out_pins">E,F,G,H,Laser</option>
     <option name="taproot:board:analog_in_pins">S,T,U,V,OledJoystick</option>
     <option name="taproot:board:pwm_pins">W,X,Y,Z,Buzzer,ImuHeater</option>
+    <option name="taproot:modm-project.xml:modm_hal_options">
+        modm:platform:uart:1:buffer.rx 256
+        modm:platform:uart:1:buffer.tx 256
+        modm:platform:uart:2:buffer.rx 512
+        modm:platform:uart:2:buffer.tx 512
+        modm:platform:uart:3:buffer.tx 1024
+        modm:platform:uart:3:buffer.rx 1024
+        modm:platform:uart:6:buffer.rx 256
+        modm:platform:uart:6:buffer.tx 256
+        modm:platform:uart:7:buffer.tx 512
+        modm:platform:uart:7:buffer.rx 512
+        modm:platform:uart:8:buffer.tx 256
+        modm:platform:uart:8:buffer.rx 256
+    </option>
   </options>
   <modules>
     <module>taproot:core</module>

@@ -17,12 +17,15 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UART_TERMINAL_DEVICE_CONSTANTS_HPP_
-#define UART_TERMINAL_DEVICE_CONSTANTS_HPP_
+#include "setpoint_subsystem_mock.hpp"
 
-namespace tap::serial::bound_ports
+namespace tap::mock
 {
-    static constexpr Uart::UartPort TERMINAL_SERIAL_UART_PORT = Uart::UartPort::Uart7;
-}  // namespace tap::serial::bound_ports
-
-#endif  // UART_TERMINAL_DEVICE_CONSTANTS_HPP_
+SetpointSubsystemMock::SetpointSubsystemMock(Drivers *drivers) : Subsystem(drivers)
+{
+    // Default to simulating an online and unjammed setpointSubsystem
+    ON_CALL(*this, isOnline).WillByDefault(testing::Return(true));
+    ON_CALL(*this, isJammed).WillByDefault(testing::Return(false));
+}
+SetpointSubsystemMock::~SetpointSubsystemMock() {}
+}  // namespace tap::mock
