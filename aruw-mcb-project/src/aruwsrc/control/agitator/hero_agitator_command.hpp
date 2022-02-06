@@ -52,15 +52,30 @@ public:
         float kickerShootRotateAngle;
         /** Time it takes to rotate the kicker when shooting a projectile (ms). */
         uint32_t kickerShootRotateTime;
+        /** Tolerance within which kicker is considered to have "reached setpoint" when shooting
+         * (radians) @see MoveCommand */
+        float kickerShootSetpointTolerance;
         /** Amount to rotate the kicker when loading a projectile (radians). */
         float kickerLoadRotateAngle;
+        /** Tolerance within which kicker is considered to have "reached setpoint" when loading
+         * (radians) @see MoveCommand */
+        float kickerLoadSetpointTolerance;
         /** Amount to rotate the waterwheel when loading a projectile (radians). */
         float waterwheelLoadRotateAngle;
+        /** Tolerance within which waterwheel is considered to have reached setpoint when loading
+         * (radians). @see MoveCommand */
+        float waterwheelLoadSetpointTolerance;
         /** Time it takes to rotate the waterwheel and kicker when loading a projectile (ms). */
         uint32_t loadRotateTime;
-        /** Max unjam angle of the waterwheel if jamming happens */
-        float waterwheelMaxUnjamAngle;
-        /** Whether or not the command should heat limit. */
+        /** Unjam displacement of the waterwheel if jamming happens (radians). @see UnjamCommand */
+        float waterwheelUnjamDisplacement;
+        /** Unjam displacement that must be reached both forwards and backwards for waterwheel to be
+         * considered unjammed (radians). @see UnjamCommand */
+        float waterwheelUnjamThreshold;
+        /** Max time that waterwheel will attempt to unjam in one direction before switching and
+         * trying the other direction (ms). @see UnjamCommand */
+        uint32_t waterwheelUnjamMaxWaitTime;
+        /** Whether or not the command should limit heat. */
         bool heatLimiting;
         /** Minimum difference between the current heat and max 42mm heat required for this command
          * to shoot a projectile when heat limiting enabled. */
