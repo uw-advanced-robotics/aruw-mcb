@@ -66,7 +66,7 @@ public:
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = 0.0f;
     static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_MIN_ANGLE = 63.0f;
+    static constexpr float PITCH_MIN_ANGLE = 55.0f;
     static constexpr float PITCH_MAX_ANGLE = 125.0f;
 
 #ifdef TARGET_SOLDIER_2021
@@ -74,7 +74,7 @@ public:
 #else
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 1100;
 #endif
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;  // TODO update
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
 
     static constexpr float TURRET_CG_X = 12;
     static constexpr float TURRET_CG_Z = 23;
@@ -92,7 +92,7 @@ public:
     static constexpr float PITCH_MAX_ANGLE = 125.0f;
 
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 570;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 7025;  // TODO update
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1154;
 
     static constexpr float TURRET_CG_X = 1;
     static constexpr float TURRET_CG_Z = -0.2;
