@@ -47,10 +47,15 @@ using tap::arch::clock::setTime;
 static HeroAgitatorCommand::Config DEFAULT_HERO_AGITATOR_CMD_CONFIG{
     .kickerShootRotateAngle = M_PI_2,
     .kickerShootRotateTime = 10,
+    .kickerShootSetpointTolerance = M_PI,
     .kickerLoadRotateAngle = M_PI,
-    .waterwheelLoadRotateAngle = 3 * M_PI / 2,
+    .kickerLoadSetpointTolerance = M_PI / 32,
+    .waterwheelLoadRotateAngle = M_PI_4,
+    .waterwheelLoadSetpointTolerance = M_PI / 32,
     .loadRotateTime = 20,
-    .waterwheelMaxUnjamAngle = M_PI_4,
+    .waterwheelUnjamDisplacement = M_PI_4,
+    .waterwheelUnjamThreshold = M_PI / 14,
+    .waterwheelUnjamMaxWaitTime = 20,
     .heatLimiting = false,
     .heatLimitBuffer = 100,
 };
