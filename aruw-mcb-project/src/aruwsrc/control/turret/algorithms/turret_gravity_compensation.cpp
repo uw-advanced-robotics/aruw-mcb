@@ -18,8 +18,6 @@
  */
 #include "turret_gravity_compensation.hpp"
 
-#include <iostream>
-
 #include "tap/algorithms/math_user_utils.hpp"
 
 using namespace tap::algorithms;
