@@ -50,9 +50,9 @@ AgitatorSubsystem::AgitatorSubsystem(
     tap::motor::MotorId agitatorMotorId,
     tap::can::CanBus agitatorCanBusId,
     bool isAgitatorInverted,
-    bool jamLogicEnabled,
     float jammingDistance,
-    uint32_t jammingTime)
+    uint32_t jammingTime,
+    bool jamLogicEnabled)
     : tap::control::Subsystem(drivers),
       agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
       jamChecker(this, jammingDistance, jammingTime),
@@ -115,6 +115,7 @@ bool AgitatorSubsystem::calibrateHere()
     agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
     agitatorIsCalibrated = true;
     desiredAgitatorAngle = 0.0f;
+    clearJam();
     return true;
 }
 
@@ -125,6 +126,11 @@ float AgitatorSubsystem::getCurrentValue() const
         return 0.0f;
     }
     return getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
+}
+
+float AgitatorSubsystem::getJamSetpointTolerance() const
+{
+    return jamChecker.getJamSetpointTolerance();
 }
 
 float AgitatorSubsystem::getUncalibratedAgitatorAngle() const

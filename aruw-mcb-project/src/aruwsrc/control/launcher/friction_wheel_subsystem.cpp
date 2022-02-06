@@ -48,6 +48,7 @@ void FrictionWheelSubsystem::initialize()
 {
     leftWheel.initialize();
     rightWheel.initialize();
+    prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
 void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
@@ -59,6 +60,10 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 void FrictionWheelSubsystem::refresh()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    if (currTime == prevTime)
+    {
+        return;
+    }
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
     prevTime = currTime;
 
