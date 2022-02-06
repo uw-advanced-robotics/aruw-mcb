@@ -38,10 +38,8 @@ void TurretMCBMenu::draw()
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
-    display << "Receiving Turret IMU data " << drivers->turretMCBCanComm.isConnected()
-            << modm::endl;
-    display << "Limit switch depressed" << drivers->turretMCBCanComm.getLimitSwitchDepressed()
-            << modm::endl;
+    display << "Receiving Turret IMU data " << drivers->turretMCBCanComm.isConnected() << modm::endl
+            << "Limit switch depressed" << drivers->turretMCBCanComm.getLimitSwitchDepressed() << modm::endl;
     display.printf(
         "Yaw: %.2f\nYaw Velocity: %.2f\nPitch: %.2f\nPitch Velocity: %.2f",
         drivers->turretMCBCanComm.getYaw(),
