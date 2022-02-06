@@ -166,13 +166,27 @@ ClientDisplayCommand clientDisplayCommand(
     nullptr,
     &chassisDriveCommand);
 
+static constexpr HeroAgitatorCommand::Config heroAgitatorCommandConfig = {
+    .kickerShootRotateAngle = M_PI / 2.0,
+    .kickerShootRotateTime = 75,
+    .kickerShootSetpointTolerance = M_PI / 16.0f,
+    .kickerLoadRotateAngle = M_PI / 2.0,
+    .kickerLoadSetpointTolerance = M_PI / 16.0f,
+    .waterwheelLoadRotateAngle = M_PI / 7.0,
+    .waterwheelLoadSetpointTolerance = M_PI / 16.0f,
+    .loadRotateTime = 200,
+    .waterwheelUnjamDisplacement = M_PI / 14.0,
+    .waterwheelUnjamThreshold = M_PI / 20.0,
+    .waterwheelUnjamMaxWaitTime = 130,
+    .heatLimiting = true,
+    .heatLimitBuffer = 100};
+
 HeroAgitatorCommand heroAgitatorCommand(
     drivers(),
     &kickerAgitator,
     &waterwheelAgitator,
     &frictionWheels,
-    HeroAgitatorCommand::
-        Config(M_PI / 2.0, 75, M_PI / 2.0, M_PI / 7.0, 200, M_PI / 14.0, true, 100));
+    heroAgitatorCommandConfig);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
