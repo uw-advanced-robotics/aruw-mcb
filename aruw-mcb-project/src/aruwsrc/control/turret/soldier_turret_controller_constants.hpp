@@ -66,19 +66,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-#if defined(TARGET_SOLDIER_2021)
-    .kp = 280.0f,
-    .ki = 8.0f,
-    .kd = 0.0f,
-    .maxICumulative = 8000.0f,
-    .maxOutput = 30000.0f,
-#elif defined(TARGET_SOLDIER_2022)
     .kp = 330.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 30000.0f,
-#endif
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
