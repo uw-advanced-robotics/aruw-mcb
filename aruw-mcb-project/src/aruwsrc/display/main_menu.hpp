@@ -24,6 +24,7 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/display/hardware_test_menu.hpp"
 #include "tap/display/motor_menu.hpp"
+#include "turret_mcb_menu.hpp"
 #include "tap/display/ref_serial_menu.hpp"
 
 #include "modm/ui/menu/standard_menu.hpp"
@@ -62,9 +63,10 @@ private:
     ImuCalibrateMenu imuCalibrateMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
-    tap::display::MotorMenu motorMenu;
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
+    tap::display::MotorMenu motorMenu;
     tap::display::RefSerialMenu refSerialMenu;
+    TurretMCBMenu turretStatusMenu;
 
     void addImuCalibrateMenuCallback();
     void addErrorMenuCallback();
@@ -73,6 +75,7 @@ private:
     void addPropertyTableCallback();
     void addCommandSchedulerCallback();
     void addRefSerialMenuCallback();
+    void addTurretMCBMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

@@ -28,16 +28,17 @@ namespace aruwsrc
 namespace display
 {
 MainMenu::MainMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* stack,
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>>* stack,
     aruwsrc::Drivers* drivers)
-    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, MAIN_MENU_ID),
+    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
       errorMenu(stack, drivers),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers),
       commandSchedulerMenu(stack, drivers),
-      refSerialMenu(stack, drivers)
+      refSerialMenu(stack, drivers),
+      turretStatusMenu(stack, drivers)
 {
 }
 
@@ -45,29 +46,34 @@ void MainMenu::initialize()
 {
     addEntry(
         ImuCalibrateMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addImuCalibrateMenuCallback));
     addEntry(
         MotorMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addMotorMenuCallback));
     addEntry(
         RefSerialMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addRefSerialMenuCallback));
     addEntry(
         CommandSchedulerMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addCommandSchedulerCallback));
     addEntry(
         HardwareTestMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addHardwareTestMenuCallback));
+    addEntry(
+        TurretMCBMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addTurretMCBMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -113,6 +119,12 @@ void MainMenu::addRefSerialMenuCallback()
 {
     RefSerialMenu* rsm = new (&refSerialMenu) RefSerialMenu(getViewStack(), drivers);
     getViewStack()->push(rsm);
+}
+
+void MainMenu::addTurretMCBMenuCallback()
+{
+    TurretMCBMenu* tsm = new (&turretStatusMenu) TurretMCBMenu(getViewStack(), drivers);
+    getViewStack()->push(tsm);
 }
 }  // namespace display
 
