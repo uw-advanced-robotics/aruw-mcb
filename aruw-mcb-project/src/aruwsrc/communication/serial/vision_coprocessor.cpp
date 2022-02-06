@@ -36,11 +36,13 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
 
 void VisionCoprocessor::initializeCV()
 {
+    cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
     initialize();
 }
 
 void VisionCoprocessor::messageReceiveCallback(const SerialMessage& completeMessage)
 {
+    cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
     switch (completeMessage.type)
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
@@ -64,6 +66,8 @@ bool VisionCoprocessor::decodeToTurretAimData(const SerialMessage& message, Turr
 }
 
 void VisionCoprocessor::sendMessage() { sendOdometryData(); }
+
+bool VisionCoprocessor::isCvOnline() { return !cvOfflineTimeout.isExpired(); }
 
 void VisionCoprocessor::sendOdometryData()
 {

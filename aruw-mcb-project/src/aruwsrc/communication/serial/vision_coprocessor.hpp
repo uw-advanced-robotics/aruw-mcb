@@ -20,6 +20,7 @@
 #ifndef VISION_COPROCESSOR_HPP_
 #define VISION_COPROCESSOR_HPP_
 
+#include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
 namespace aruwsrc
@@ -102,6 +103,11 @@ public:
      */
     mockable void sendMessage();
 
+    /**
+     * is CV online
+     */
+    mockable bool isCvOnline();
+
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
 private:
@@ -110,8 +116,15 @@ private:
         CV_MESSAGE_TYPE_TURRET_AIM = 0,
     };
 
+    /// Time in ms since last CV aim data was received before deciding CV is offline.
+    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
+
     /// The last aim data received from the xavier.
     TurretAimData lastAimData;
+
+    // CV online variables.
+    /// Timer for determining if serial is offline.
+    tap::arch::MilliTimeout cvOfflineTimeout;
 
     const aruwsrc::can::TurretMCBCanComm* turretMCBCanComm;
 
