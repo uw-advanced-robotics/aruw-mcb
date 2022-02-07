@@ -46,6 +46,10 @@ namespace aruwsrc::control::turret
 /**
  * Stores software necessary for interacting with two gimbals that control the pitch and
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
+ *
+ * All angles computed using a right hand coordinate system. In other words, yaw is a value from
+ * 0-360 rotated counterclockwise when looking at the turret from above. Pitch is a value from 0-360
+ * rotated counterclockwise when looking at the turret from the right side of the turret.
  */
 class TurretSubsystem : public tap::control::turret::TurretSubsystemInterface
 {
@@ -62,7 +66,7 @@ public:
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = 0.0f;
     static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_MIN_ANGLE = 63.0f;
+    static constexpr float PITCH_MIN_ANGLE = 55.0f;
     static constexpr float PITCH_MAX_ANGLE = 125.0f;
 
 #ifdef TARGET_SOLDIER_2021
@@ -70,7 +74,7 @@ public:
 #else
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 1100;
 #endif
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
 
     static constexpr float TURRET_CG_X = 12;
     static constexpr float TURRET_CG_Z = 23;
@@ -88,7 +92,7 @@ public:
     static constexpr float PITCH_MAX_ANGLE = 125.0f;
 
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 570;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 7025;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1154;
 
     static constexpr float TURRET_CG_X = 1;
     static constexpr float TURRET_CG_Z = -0.2;
@@ -105,7 +109,7 @@ public:
     static constexpr float PITCH_MAX_ANGLE = 100.0f;
 
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 2801;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4150;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
 
     static constexpr float TURRET_CG_X = 0;
     static constexpr float TURRET_CG_Z = 0;

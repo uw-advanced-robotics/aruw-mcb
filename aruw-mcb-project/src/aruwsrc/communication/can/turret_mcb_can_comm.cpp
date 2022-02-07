@@ -73,7 +73,7 @@ void TurretMCBCanComm::handleAngleGyroMessage(const modm::can::Message& message)
     imuMessageReceivedLEDBlinkCounter = (imuMessageReceivedLEDBlinkCounter + 1) % 100;
     drivers->leds.set(tap::gpio::Leds::Green, imuMessageReceivedLEDBlinkCounter > 50);
 
-    uint16_t rawYaw;
+    int16_t rawYaw;
     int16_t rawPitch;
     tap::arch::convertFromLittleEndian(&rawYaw, message.data);
     tap::arch::convertFromLittleEndian(&rawYawVelocity, message.data + 2);
