@@ -96,9 +96,9 @@ AgitatorSubsystem kickerAgitator(
     AgitatorSubsystem::HERO_KICKER_MOTOR_ID,
     AgitatorSubsystem::HERO_KICKER_MOTOR_CAN_BUS,
     AgitatorSubsystem::HERO_KICKER_INVERTED,
-    false,
     0,
-    0);
+    0,
+    false);
 
 AgitatorSubsystem waterwheelAgitator(
     drivers(),
@@ -111,9 +111,9 @@ AgitatorSubsystem waterwheelAgitator(
     AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_ID,
     AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_CAN_BUS,
     AgitatorSubsystem::HERO_WATERWHEEL_INVERTED,
-    true,
     AgitatorSubsystem::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
-    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL);
+    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
+    false);
 
 tap::motor::DjiMotor pitchMotor(
     drivers(),
@@ -179,7 +179,8 @@ static constexpr HeroAgitatorCommand::Config heroAgitatorCommandConfig = {
     .waterwheelUnjamThreshold = M_PI / 20.0,
     .waterwheelUnjamMaxWaitTime = 130,
     .heatLimiting = true,
-    .heatLimitBuffer = 100};
+    .heatLimitBuffer = 100,
+};
 
 HeroAgitatorCommand heroAgitatorCommand(
     drivers(),
