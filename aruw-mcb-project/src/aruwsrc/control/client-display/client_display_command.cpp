@@ -97,19 +97,22 @@ ClientDisplayCommand::ClientDisplayCommand(
               &booleanHudIndicatorGraphics[SYSTEMS_CALIBRATING],
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING])>, 0),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING])>,
+              0),
           BooleanHUDIndicator(
               drivers,
               &booleanHudIndicatorGraphics[AGITATOR_STATUS_HEALTHY],
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY])>, 0),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY])>,
+              0),
           BooleanHUDIndicator(
               drivers,
               &booleanHudIndicatorGraphics[CV_AIM_DATA_VALID],
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID])>, 0),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID])>,
+              0),
       },
       driveCommands{
           chassisBeybladeCmd,
@@ -121,15 +124,18 @@ ClientDisplayCommand::ClientDisplayCommand(
           StateHUDIndicator<uint16_t>(
               drivers,
               &matrixHudIndicatorGraphics[CHASSIS_STATE],
-              updateGraphicYLocation, false),
+              updateGraphicYLocation,
+              false),
           StateHUDIndicator<uint16_t>(
               drivers,
               &matrixHudIndicatorGraphics[FLYWHEEL_AND_HOPPER_STATE],
-              updateGraphicYLocation, false),
+              updateGraphicYLocation,
+              false),
           StateHUDIndicator<uint16_t>(
               drivers,
               &matrixHudIndicatorGraphics[SHOOTER_STATE],
-              updateGraphicYLocation, false)},
+              updateGraphicYLocation,
+              false)},
       turretSubsystem(turretSubsystem)
 {
     modm_assert(drivers != nullptr, "ClientDisplayCommand", "drivers nullptr");
@@ -295,10 +301,10 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
             shooterState = ShooterState::LOADING;
         }
 #else
-        // if (drivers->turretMCBCanComm.limitSwitchDepressed())
-        // {
-        //  shooterState = ShooterState::LOADING
-        // }
+        if (drivers->turretMCBCanComm.getLimitSwitchDepressed())
+        {
+            shooterState = ShooterState::LOADING
+        }
 #endif
     }
 
@@ -306,8 +312,6 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
         MATRIX_HUD_INDICATOR_LABELS_START_Y -
         CHARACTER_LINE_SPACING * static_cast<int>(shooterState) * MATRIX_HUD_INDICATOR_CHAR_SIZE -
         MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
-
-    // TODO update firing state
 }
 
 modm::ResumableResult<bool> ClientDisplayCommand::updateChassisOrientation()
