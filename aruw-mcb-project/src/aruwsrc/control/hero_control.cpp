@@ -86,7 +86,7 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     TurretSubsystem::PITCH_MOTOR_ID,
     TurretSubsystem::CAN_BUS_MOTORS,
-    true,
+    false,
     "Pitch Turret");
 tap::motor::DoubleDjiMotor yawMotor(
     drivers(),

@@ -27,7 +27,6 @@
 #include "legacy_vision_coprocessor_mock.hpp"
 #include "oled_display_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
-#include "sentinel_switcher_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
@@ -48,7 +47,10 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,
     tap::can::CanBus agitatorCanBusId,
-    bool isAgitatorInverted)
+    bool isAgitatorInverted,
+    float jammingDistance,
+    uint32_t jammingTime,
+    bool jamLogicEnabled)
     : AgitatorSubsystem(
           drivers,
           kp,
@@ -59,7 +61,10 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
           agitatorGearRatio,
           agitatorMotorId,
           agitatorCanBusId,
-          isAgitatorInverted)
+          isAgitatorInverted,
+          jammingDistance,
+          jammingTime,
+          jamLogicEnabled)
 {
     ON_CALL(*this, isOnline).WillByDefault(testing::Return(true));
 }
@@ -125,14 +130,6 @@ SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
 {
 }
 SentinelDriveSubsystemMock::~SentinelDriveSubsystemMock() {}
-
-SentinelSwitcherSubsystemMock::SentinelSwitcherSubsystemMock(
-    aruwsrc::Drivers *drivers,
-    tap::gpio::Pwm::Pin switcherServoPin)
-    : control::sentinel::firing::SentinelSwitcherSubsystem(drivers, switcherServoPin)
-{
-}
-SentinelSwitcherSubsystemMock::~SentinelSwitcherSubsystemMock() {}
 
 TowSubsystemMock::TowSubsystemMock(
     aruwsrc::Drivers *drivers,

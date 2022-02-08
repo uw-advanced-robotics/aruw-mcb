@@ -34,13 +34,23 @@ TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
           IMU_MSG_CAN_BUS,
           this,
           &TurretMCBCanComm::handleAngleGyroMessage),
+      turretStatusRxHandler(
+          drivers,
+          TURRET_STATUS_RX_CAN_ID,
+          IMU_MSG_CAN_BUS,
+          this,
+          &TurretMCBCanComm::handleTurretMessage),
       openHopperCover(false),
       calibrateImu(false),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
 }
 
-void TurretMCBCanComm::init() { angleGyroMessageHandler.attachSelfToRxHandler(); }
+void TurretMCBCanComm::init()
+{
+    angleGyroMessageHandler.attachSelfToRxHandler();
+    turretStatusRxHandler.attachSelfToRxHandler();
+}
 
 void TurretMCBCanComm::sendData()
 {
@@ -63,7 +73,7 @@ void TurretMCBCanComm::handleAngleGyroMessage(const modm::can::Message& message)
     imuMessageReceivedLEDBlinkCounter = (imuMessageReceivedLEDBlinkCounter + 1) % 100;
     drivers->leds.set(tap::gpio::Leds::Green, imuMessageReceivedLEDBlinkCounter > 50);
 
-    uint16_t rawYaw;
+    int16_t rawYaw;
     int16_t rawPitch;
     tap::arch::convertFromLittleEndian(&rawYaw, message.data);
     tap::arch::convertFromLittleEndian(&rawYawVelocity, message.data + 2);
@@ -76,12 +86,29 @@ void TurretMCBCanComm::handleAngleGyroMessage(const modm::can::Message& message)
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
 }
 
+void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
+{
+    limitSwitchDepressed = message.data[0] & 0b1;
+}
+
 TurretMCBCanComm::ImuRxHandler::ImuRxHandler(
     aruwsrc::Drivers* drivers,
     uint32_t id,
     tap::can::CanBus cB,
     TurretMCBCanComm* msgHandler,
-    ImuRxListenerFunc funcToCall)
+    CanCommListenerFunc funcToCall)
+    : CanRxListener(drivers, id, cB),
+      msgHandler(msgHandler),
+      funcToCall(funcToCall)
+{
+}
+
+TurretMCBCanComm::TurretStatusRxHandler::TurretStatusRxHandler(
+    aruwsrc::Drivers* drivers,
+    uint32_t id,
+    tap::can::CanBus cB,
+    TurretMCBCanComm* msgHandler,
+    CanCommListenerFunc funcToCall)
     : CanRxListener(drivers, id, cB),
       msgHandler(msgHandler),
       funcToCall(funcToCall)
@@ -89,6 +116,11 @@ TurretMCBCanComm::ImuRxHandler::ImuRxHandler(
 }
 
 void TurretMCBCanComm::ImuRxHandler::processMessage(const modm::can::Message& message)
+{
+    (msgHandler->*funcToCall)(message);
+}
+
+void TurretMCBCanComm::TurretStatusRxHandler::processMessage(const modm::can::Message& message)
 {
     (msgHandler->*funcToCall)(message);
 }

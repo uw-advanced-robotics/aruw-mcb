@@ -66,6 +66,8 @@ public:
         return static_cast<float>(rawYawVelocity) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
 
+    mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
+
     mockable inline float isConnected() const
     {
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
@@ -78,10 +80,11 @@ public:
     void sendData();
 
 private:
-    using ImuRxListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
+    using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
 
     static constexpr uint32_t ANGLE_GYRO_RX_CAN_ID = 0x1fd;
     static constexpr uint32_t TURRET_MCB_TX_CAN_ID = 0x1fe;
+    static constexpr uint32_t TURRET_STATUS_RX_CAN_ID = 0x1fc;
     static constexpr tap::can::CanBus IMU_MSG_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
@@ -95,12 +98,28 @@ private:
             uint32_t id,
             tap::can::CanBus cB,
             TurretMCBCanComm* msgHandler,
-            ImuRxListenerFunc funcToCall);
+            CanCommListenerFunc funcToCall);
         void processMessage(const modm::can::Message& message) override;
 
     private:
         TurretMCBCanComm* msgHandler;
-        ImuRxListenerFunc funcToCall;
+        CanCommListenerFunc funcToCall;
+    };
+
+    class TurretStatusRxHandler : public tap::can::CanRxListener
+    {
+    public:
+        TurretStatusRxHandler(
+            aruwsrc::Drivers* drivers,
+            uint32_t id,
+            tap::can::CanBus cB,
+            TurretMCBCanComm* msgHandler,
+            CanCommListenerFunc funcToCall);
+        void processMessage(const modm::can::Message& message) override;
+
+    private:
+        TurretMCBCanComm* msgHandler;
+        CanCommListenerFunc funcToCall;
     };
 
     aruwsrc::Drivers* drivers;
@@ -113,6 +132,8 @@ private:
 
     ImuRxHandler angleGyroMessageHandler;
 
+    ImuRxHandler turretStatusRxHandler;
+
     tap::arch::MilliTimeout imuConnectedTimeout;
 
     bool openHopperCover;
@@ -123,7 +144,11 @@ private:
 
     int imuMessageReceivedLEDBlinkCounter = 0;
 
+    bool limitSwitchDepressed;
+
     void handleAngleGyroMessage(const modm::can::Message& message);
+
+    void handleTurretMessage(const modm::can::Message& message);
 };
 }  // namespace aruwsrc::can
 

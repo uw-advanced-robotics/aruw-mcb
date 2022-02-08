@@ -17,31 +17,14 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#ifndef IMU_HEATER_CONSTANTS_HPP_
+#define IMU_HEATER_CONSTANTS_HPP_
 
-#include "clock.hpp"
+#include "tap/communication/gpio/pwm.hpp"
 
-namespace tap
+namespace tap::sensors::bound_ports
 {
-namespace arch
-{
-namespace clock
-{
-/**
- * Global static variable storing time for testing. It's value is returned from the `getTime*()`
- * functions and is set by `setTime()`. Note this is a static global variable accessible
- * from _any_ test, so you must assume that `getTimeMilliseconds()` value is undefined until
- * you set it.
- */
-uint32_t currTimeMilliseconds = 0;
+    static constexpr tap::gpio::Pwm::Timer IMU_HEATER_TIMER = tap::gpio::Pwm::Timer::TIMER3;
+}  // tap::sensors
 
-void setTime(uint32_t timeMilliseconds) { currTimeMilliseconds = timeMilliseconds; }
-
-uint32_t getTimeMilliseconds() { return currTimeMilliseconds; }
-
-uint32_t getTimeMicroseconds() { return currTimeMilliseconds * 1000; }
-}  // namespace clock
-}  // namespace arch
-}  // namespace tap
-
-#endif
+#endif  // IMU_HEATER_CONSTANTS_HPP_

@@ -39,9 +39,12 @@ public:
         float maxIAccum = 0,
         float maxOutput = 0,
         float agitatorGearRatio = 0,
-        tap::motor::MotorId agitatorMotorId = tap::motor::MOTOR7,
+        tap::motor::MotorId agitatorMotorId = tap::motor::MOTOR1,
         tap::can::CanBus agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
-        bool isAgitatorInverted = false);
+        bool isAgitatorInverted = false,
+        float jammingDistance = 0,
+        uint32_t jammingTime = 0,
+        bool jamLogicEnabled = false);
     virtual ~AgitatorSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
