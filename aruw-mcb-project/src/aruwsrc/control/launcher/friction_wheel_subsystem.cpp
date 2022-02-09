@@ -33,6 +33,7 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId)
     : tap::control::Subsystem(drivers),
+      drivers(drivers),
       launchSpeedLinearInterpolator(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
@@ -55,6 +56,7 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 {
     desiredLaunchSpeed = speed;
     desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
+    drivers->turretMCBCanComm.setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
 }
 
 void FrictionWheelSubsystem::refresh()
