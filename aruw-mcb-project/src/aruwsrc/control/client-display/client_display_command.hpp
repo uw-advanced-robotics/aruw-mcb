@@ -25,7 +25,7 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
-#include "tap/communication/serial/ref_serial_ui_wrappers/state_hud_indicator.hpp"
+#include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
@@ -398,7 +398,7 @@ private:
     Tx::Graphic1Message booleanHudIndicatorGraphics[NUM_BOOLEAN_HUD_INDICATORS];
 
     /** The object that will do the actual drawing of the hopper open indicator. */
-    tap::communication::serial::ref_serial_ui_wrapeprs::BooleanHUDIndicator
+    tap::communication::referee::BooleanHUDIndicator
         booleanHudIndicatorDrawers[NUM_BOOLEAN_HUD_INDICATORS];
 
     /** Use this index when iterating through the  booleanHudIndicatorDrawers in protothreads. */
@@ -436,7 +436,7 @@ private:
 
     /** Array of `StateHUDIndicator`s used to update the position of the box that will be circling
      * one of the labels in `MATRIX_HUD_INDICATOR_TITLES_AND_LABELS`. */
-    tap::communication::serial::ref_serial_ui_wrapeprs::StateHUDIndicator<uint16_t>
+    tap::communication::referee::StateHUDIndicator<uint16_t>
         matrixHudIndicatorDrawers[NUM_MATRIX_HUD_INDICATORS];
 
     /** Index used when iterating through `matrixHudIndicatorDrawers` in a protothread. */

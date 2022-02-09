@@ -29,7 +29,7 @@
 using namespace tap::control;
 using namespace tap::serial;
 using namespace tap::algorithms;
-using namespace tap::communication::serial::ref_serial_ui_wrapeprs;
+using namespace tap::communication::referee;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
