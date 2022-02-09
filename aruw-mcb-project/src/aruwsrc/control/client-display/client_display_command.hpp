@@ -173,7 +173,7 @@ private:
         SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
-        /** Indicates something about CV aim data TODO */
+        /** Indicates that the vision system is online and a target has been acquired. */
         CV_AIM_DATA_VALID,
         NUM_BOOLEAN_HUD_INDICATORS,
     };
@@ -183,9 +183,9 @@ private:
      * an enum value above.
      */
     static constexpr BooleanHUDIndicatorTuple BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[]{
-        BooleanHUDIndicatorTuple("SYS CALIB ", Tx::GraphicColor::YELLOW, Tx::GraphicColor::GREEN),
-        BooleanHUDIndicatorTuple("AGI ", Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE),
-        BooleanHUDIndicatorTuple("CV ", Tx::GraphicColor::GREEN, Tx::GraphicColor::RED_AND_BLUE),
+        BooleanHUDIndicatorTuple("SYS CALIB ", Tx::GraphicColor::PURPLISH_RED, Tx::GraphicColor::GREEN),
+        BooleanHUDIndicatorTuple("AGI ", Tx::GraphicColor::GREEN, Tx::GraphicColor::PURPLISH_RED),
+        BooleanHUDIndicatorTuple("CV ", Tx::GraphicColor::GREEN, Tx::GraphicColor::PURPLISH_RED),
     };
 
     // matrix HUD indicator related constants
