@@ -45,7 +45,7 @@ static void initAndRunAutoAimRxTest(
     VisionCoprocessor serial(&drivers);
     DJISerial::SerialMessage message;
     message.headByte = 0xA5;
-    message.type = 0;
+    message.type = 2;
     message.length = 10 * sizeof(float) + sizeof(uint8_t);
     aruwsrc::serial::VisionCoprocessor::TurretAimData testData;
     testData.xPos = xPosDesired;
