@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -80,7 +80,7 @@ void VisionCoprocessor::sendOdometryData()
     odometryData.turretYaw = turretMCBCanComm->getYaw();
     odometryData.timestamp = tap::arch::clock::getTimeMicroseconds();
     memcpy(&txMessage.data, &odometryData, sizeof(odometryData));
-    txMessage.type = CV_MESSAGE_ODOMETRY_DATA;
+    txMessage.type = CV_MESSAGE_TYPE_ODOMETRY_DATA;
     txMessage.length = sizeof(odometryData);
     send();
 }

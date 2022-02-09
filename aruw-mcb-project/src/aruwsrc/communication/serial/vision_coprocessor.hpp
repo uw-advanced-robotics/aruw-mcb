@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -77,12 +77,6 @@ public:
         uint32_t timestamp;  /// Timestamp in microseconds.
     } modm_packed;
 
-    enum TxMessageTypes
-    {
-        CV_MESSAGE_ODOMETRY_DATA = 1,
-        CV_NUM_MESSAGE_TYPES,
-    };
-
     VisionCoprocessor(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor() = default;
@@ -111,9 +105,14 @@ public:
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
 private:
+    enum TxMessageTypes
+    {
+        CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
+    };
+
     enum RxMessageTypes
     {
-        CV_MESSAGE_TYPE_TURRET_AIM = 0,
+        CV_MESSAGE_TYPE_TURRET_AIM = 2,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
