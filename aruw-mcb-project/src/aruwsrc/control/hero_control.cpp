@@ -42,8 +42,6 @@
 #include "chassis/wiggle_drive_command.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
-#include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
-#include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
@@ -133,8 +131,6 @@ tap::motor::DoubleDjiMotor yawMotor(
     "Yaw Front Turret");
 TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
-TurretMCBHopperSubsystem hopperCover(drivers());
-
 /* define commands ----------------------------------------------------------*/
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
 
@@ -218,8 +214,6 @@ cv::TurretCVCommand turretCVCommand(
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
-OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
-
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     &turret,
@@ -243,7 +237,7 @@ ClientDisplayCommand clientDisplayCommand(
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
     drivers(),
-    {&openHopperCommand, &stopFrictionWheels},
+    {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
@@ -266,7 +260,6 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -306,7 +299,6 @@ void initializeSubsystems()
     kickerAgitator.initialize();
     waterwheelAgitator.initialize();
     turret.initialize();
-    hopperCover.initialize();
     drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
     drivers()->legacyVisionCoprocessor.attachTurret(&turret);
 }
@@ -320,7 +312,6 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&kickerAgitator);
     drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&hopperCover);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -346,7 +337,6 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&rToggled);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
