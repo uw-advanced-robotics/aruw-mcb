@@ -40,7 +40,8 @@ cd -
 if [[ "$(git status | grep -c "nothing to commit")" != 1 ]]; then
     echo "Files have changed..."
     git status
-    git commit -a -m "Update taproot submodule"
+    git add --all
+    git commit -m "Update taproot submodule"
     (git push -f &>/dev/null) || (git push --set-upstream origin $UPDATE_SUBMODULE_BRANCH)
 
     # The description of our new MR, we want to remove the branch after the MR has
