@@ -159,6 +159,12 @@ XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Dig
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
+VisionCoprocessorMock::VisionCoprocessorMock(aruwsrc::Drivers *drivers)
+    : serial::VisionCoprocessor(drivers)
+{
+}
+VisionCoprocessorMock::~VisionCoprocessorMock() {}
+
 LegacyVisionCoprocessorMock::LegacyVisionCoprocessorMock(aruwsrc::Drivers *drivers)
     : serial::LegacyVisionCoprocessor(drivers)
 {
