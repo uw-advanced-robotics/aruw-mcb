@@ -87,7 +87,7 @@ void ChassisFramePitchTurretController::runController(
     pidOutput += computeGravitationalForceOffset(
         TurretSubsystem::TURRET_CG_X,
         TurretSubsystem::TURRET_CG_Z,
-        turretSubsystem->getPitchAngleFromCenter(),
+        -turretSubsystem->getPitchAngleFromCenter(),
         TurretSubsystem::GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(pidOutput);

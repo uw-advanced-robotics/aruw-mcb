@@ -343,14 +343,14 @@ TEST(ControlOperatorInterface, getTurretInput_min_remote_input_limited)
 {
     INIT_TEST
     EXPECT_NEAR(1, runTurretYawInputTest(drivers, operatorInterface, -1, 0), 1E-3);
-    EXPECT_NEAR(-1, runTurretPitchInputTest(drivers, operatorInterface, -1, 0), 1E-3);
+    EXPECT_NEAR(1, runTurretPitchInputTest(drivers, operatorInterface, -1, 0), 1E-3);
 }
 
 TEST(ControlOperatorInterface, getTurretInput_max_remote_input_limited)
 {
     INIT_TEST
     EXPECT_NEAR(-1, runTurretYawInputTest(drivers, operatorInterface, 1, 0), 1E-3);
-    EXPECT_NEAR(1, runTurretPitchInputTest(drivers, operatorInterface, 1, 0), 1E-3);
+    EXPECT_NEAR(-1, runTurretPitchInputTest(drivers, operatorInterface, 1, 0), 1E-3);
 }
 
 TEST(ControlOperatorInterface, getTurretInput_range_of_remote_input_directly_maps_to_output)
@@ -359,7 +359,7 @@ TEST(ControlOperatorInterface, getTurretInput_range_of_remote_input_directly_map
     for (float i = -1; i < 1; i += 0.1f)
     {
         EXPECT_NEAR(-i, runTurretYawInputTest(drivers, operatorInterface, i, 0), 1E-3);
-        EXPECT_NEAR(i, runTurretPitchInputTest(drivers, operatorInterface, i, 0), 1E-3);
+        EXPECT_NEAR(-i, runTurretPitchInputTest(drivers, operatorInterface, i, 0), 1E-3);
     }
 }
 
@@ -367,7 +367,7 @@ TEST(ControlOperatorInterface, getTurretInput_min_mouse_limited)
 {
     INIT_TEST
     EXPECT_NEAR(1, runTurretYawInputTest(drivers, operatorInterface, 0, INT16_MIN + 1), 1E-3);
-    EXPECT_NEAR(1, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MIN + 1), 1E-3);
+    EXPECT_NEAR(-1, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MIN + 1), 1E-3);
 
     EXPECT_NEAR(
         1,
@@ -378,7 +378,7 @@ TEST(ControlOperatorInterface, getTurretInput_min_mouse_limited)
             -ControlOperatorInterface::USER_MOUSE_YAW_MAX - 100),
         1E-3);
     EXPECT_NEAR(
-        1,
+        -1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
@@ -395,7 +395,7 @@ TEST(ControlOperatorInterface, getTurretInput_min_mouse_limited)
             -ControlOperatorInterface::USER_MOUSE_YAW_MAX),
         1E-3);
     EXPECT_NEAR(
-        1,
+        -1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
@@ -408,7 +408,7 @@ TEST(ControlOperatorInterface, getTurretInput_max_mouse_limited)
 {
     INIT_TEST
     EXPECT_NEAR(-1, runTurretYawInputTest(drivers, operatorInterface, 0, INT16_MAX), 1E-3);
-    EXPECT_NEAR(-1, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MAX), 1E-3);
+    EXPECT_NEAR(1, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MAX), 1E-3);
 
     EXPECT_NEAR(
         -1,
@@ -419,7 +419,7 @@ TEST(ControlOperatorInterface, getTurretInput_max_mouse_limited)
             ControlOperatorInterface::USER_MOUSE_YAW_MAX + 100),
         1E-3);
     EXPECT_NEAR(
-        -1,
+        1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
@@ -436,7 +436,7 @@ TEST(ControlOperatorInterface, getTurretInput_max_mouse_limited)
             ControlOperatorInterface::USER_MOUSE_YAW_MAX),
         1E-3);
     EXPECT_NEAR(
-        -1,
+        1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,
@@ -488,7 +488,7 @@ TEST(
          i += 10)
     {
         EXPECT_NEAR(
-            -static_cast<float>(i) / ControlOperatorInterface::USER_MOUSE_PITCH_MAX,
+            static_cast<float>(i) / ControlOperatorInterface::USER_MOUSE_PITCH_MAX,
             runTurretPitchInputTest(drivers, operatorInterface, 0, i),
             1E-3);
     }
@@ -506,7 +506,7 @@ TEST(ControlOperatorInterface, getTurretInput_mouse_and_remote_mappings_additive
             ControlOperatorInterface::USER_MOUSE_YAW_MAX / 2.0f),
         1E-3);
     EXPECT_NEAR(
-        1,
+        -1,
         runTurretPitchInputTest(
             drivers,
             operatorInterface,

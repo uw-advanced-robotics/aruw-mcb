@@ -107,13 +107,15 @@ public:
     const char *getName() override { return "Friction wheels"; }
 
 private:
-    modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
-
     static constexpr float PID_P = 20.0f;
     static constexpr float PID_I = 0.2f;
     static constexpr float PID_D = 0.0f;
     static constexpr float PID_MAX_ERROR_SUM = 5'000.0f;
     static constexpr float PID_MAX_OUTPUT = 16000.0f;
+
+    aruwsrc::Drivers *drivers;
+
+    modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
     modm::Pid<float> velocityPidLeftWheel;
 

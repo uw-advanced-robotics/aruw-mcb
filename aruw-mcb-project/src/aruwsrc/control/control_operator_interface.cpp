@@ -167,7 +167,7 @@ float ControlOperatorInterface::getTurretPitchInput()
 {
     float turretPitch = drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
            static_cast<float>(limitVal<int16_t>(
-               -drivers->remote.getMouseY(),
+               drivers->remote.getMouseY(),
                -USER_MOUSE_PITCH_MAX,
                USER_MOUSE_PITCH_MAX)) *
                USER_MOUSE_PITCH_SCALAR;
