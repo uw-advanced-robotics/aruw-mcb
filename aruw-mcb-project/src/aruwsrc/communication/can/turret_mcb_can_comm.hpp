@@ -23,6 +23,7 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "modm/architecture/interface/register.hpp"
 
 namespace modm::can
 {
@@ -45,6 +46,14 @@ namespace aruwsrc::can
 class TurretMCBCanComm
 {
 public:
+    enum class TxCommandMsgBitmask : uint8_t
+    {
+        OPEN_HOPPER = modm::Bit0,
+        RECALIBRATE_IMU = modm::Bit1,
+        TURN_LASER_ON = modm::Bit2,
+    };
+    MODM_FLAGS8(TxCommandMsgBitmask);
+
     TurretMCBCanComm(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
 
@@ -66,16 +75,29 @@ public:
         return static_cast<float>(rawYawVelocity) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
 
+    mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
+
     mockable inline float isConnected() const
     {
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
     }
 
-    void setOpenHopperCover(bool isOpen) { openHopperCover = isOpen; }
+    mockable inline void setOpenHopperCover(bool isOpen)
+    {
+        txCommandMsgBitmask.update(TxCommandMsgBitmask::OPEN_HOPPER, isOpen);
+    }
 
-    mockable void sendImuCalibrationRequest() { calibrateImu = true; }
+    mockable inline void setLaserStatus(bool isOn)
+    {
+        txCommandMsgBitmask.update(TxCommandMsgBitmask::TURN_LASER_ON, isOn);
+    }
 
-    void sendData();
+    mockable inline void sendImuCalibrationRequest()
+    {
+        txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
+    }
+
+    mockable void sendData();
 
 private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
@@ -134,9 +156,7 @@ private:
 
     tap::arch::MilliTimeout imuConnectedTimeout;
 
-    bool openHopperCover;
-
-    bool calibrateImu;
+    TxCommandMsgBitmask_t txCommandMsgBitmask;
 
     tap::arch::PeriodicMilliTimer sendMcbDataTimer;
 

@@ -40,8 +40,7 @@ TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
           IMU_MSG_CAN_BUS,
           this,
           &TurretMCBCanComm::handleTurretMessage),
-      openHopperCover(false),
-      calibrateImu(false),
+        txCommandMsgBitmask(),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
 }
@@ -58,12 +57,11 @@ void TurretMCBCanComm::sendData()
     {
         modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 1);
         txMsg.setExtended(false);
-        txMsg.data[0] = (static_cast<uint8_t>(openHopperCover) & 0b1) |
-                        ((static_cast<uint8_t>(calibrateImu) & 0b1) << 1);
+        txMsg.data[0] = txCommandMsgBitmask.value;
         drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, txMsg);
 
         // set this calibrate flag to false so the calibrate command is only sent once
-        calibrateImu = false;
+        txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU);
     }
 }
 
@@ -73,7 +71,7 @@ void TurretMCBCanComm::handleAngleGyroMessage(const modm::can::Message& message)
     imuMessageReceivedLEDBlinkCounter = (imuMessageReceivedLEDBlinkCounter + 1) % 100;
     drivers->leds.set(tap::gpio::Leds::Green, imuMessageReceivedLEDBlinkCounter > 50);
 
-    uint16_t rawYaw;
+    int16_t rawYaw;
     int16_t rawPitch;
     tap::arch::convertFromLittleEndian(&rawYaw, message.data);
     tap::arch::convertFromLittleEndian(&rawYawVelocity, message.data + 2);
