@@ -66,8 +66,8 @@ public:
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = 0.0f;
     static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_MIN_ANGLE = 55.0f;
-    static constexpr float PITCH_MAX_ANGLE = 125.0f;
+    static constexpr float PITCH_MIN_ANGLE = 65.0f;
+    static constexpr float PITCH_MAX_ANGLE = 117.0f;
 
 #ifdef TARGET_SOLDIER_2021
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
@@ -88,8 +88,8 @@ public:
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = YAW_START_ANGLE - 70.0f;
     static constexpr float YAW_MAX_ANGLE = YAW_START_ANGLE + 70.0f;
-    static constexpr float PITCH_MIN_ANGLE = 65.0f;
-    static constexpr float PITCH_MAX_ANGLE = 125.0f;
+    static constexpr float PITCH_MIN_ANGLE = 48.0f;
+    static constexpr float PITCH_MAX_ANGLE = 116.0f;
 
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 570;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1154;
@@ -105,8 +105,8 @@ public:
     static constexpr float YAW_MIN_ANGLE = 5.0f;
     static constexpr float YAW_MAX_ANGLE = 175.0f;
     static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float PITCH_MIN_ANGLE = 15.0f;
-    static constexpr float PITCH_MAX_ANGLE = 100.0f;
+    static constexpr float PITCH_MIN_ANGLE = 80.0f;
+    static constexpr float PITCH_MAX_ANGLE = 165.0f;
 
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 2801;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
