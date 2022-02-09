@@ -102,17 +102,16 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
     TurretMCBCanComm dut(&drivers);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
-        .WillByDefault([&](tap::can::CanRxListener* const listener)
-                       { drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener); });
+        .WillByDefault([&](tap::can::CanRxListener* const listener) {
+            drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
+        });
 
     modm::can::Message limitSwitchMsg(0x1fc, 1, {1}, false);
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
-        .WillByDefault(
-            [&](tap::can::CanBus, modm::can::Message* message)
-            {
-                *message = limitSwitchMsg;
-                return true;
-            });
+        .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
+            *message = limitSwitchMsg;
+            return true;
+        });
 
     dut.init();
 
@@ -129,8 +128,9 @@ TEST(TurretMCBCanComm, receive_turret_data)
     TurretMCBCanComm dut(&drivers);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
-        .WillByDefault([&](tap::can::CanRxListener* const listener)
-                       { drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener); });
+        .WillByDefault([&](tap::can::CanRxListener* const listener) {
+            drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
+        });
 
     modm::can::Message turretDataMsg(0x1fd, 8, 0, false);
     tap::arch::convertToLittleEndian(0x1234, turretDataMsg.data);
@@ -138,12 +138,10 @@ TEST(TurretMCBCanComm, receive_turret_data)
     tap::arch::convertToLittleEndian(0x4321, turretDataMsg.data + 4);
     tap::arch::convertToLittleEndian(0x8765, turretDataMsg.data + 6);
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
-        .WillByDefault(
-            [&](tap::can::CanBus, modm::can::Message* message)
-            {
-                *message = turretDataMsg;
-                return true;
-            });
+        .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
+            *message = turretDataMsg;
+            return true;
+        });
 
     dut.init();
 

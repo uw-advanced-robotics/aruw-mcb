@@ -235,8 +235,8 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateBooleanHudIndicators()
 
     // update CV aim data state
     booleanHudIndicatorDrawers[CV_AIM_DATA_VALID].setIndicatorState(
-        drivers->legacyVisionCoprocessor.lastAimDataValid() &&
-        drivers->legacyVisionCoprocessor.getLastAimData().hasTarget);
+        drivers->visionCoprocessor.isCvOnline() &&
+        drivers->visionCoprocessor.getLastAimData().hasTarget);
 
     // update agitator state
     booleanHudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(
@@ -300,10 +300,10 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
         {
             shooterState = ShooterState::LOADING;
         }
-#else
+#elif defined(TARGET_HERO)
         if (drivers->turretMCBCanComm.getLimitSwitchDepressed())
         {
-            shooterState = ShooterState::LOADING
+            shooterState = ShooterState::LOADING;
         }
 #endif
     }
