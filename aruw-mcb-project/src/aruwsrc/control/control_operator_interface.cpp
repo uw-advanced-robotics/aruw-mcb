@@ -151,22 +151,30 @@ float ControlOperatorInterface::getChassisRInput()
 
 float ControlOperatorInterface::getTurretYawInput()
 {
-    return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) +
+    float turretYaw = -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) +
            static_cast<float>(limitVal<int16_t>(
                -drivers->remote.getMouseX(),
                -USER_MOUSE_YAW_MAX,
                USER_MOUSE_YAW_MAX)) *
                USER_MOUSE_YAW_SCALAR;
+    if (drivers->remote.keyPressed(Remote::Key::G)) {
+        turretYaw *= FINE_TUNE_MODIFIER;
+    }
+    return turretYaw;
 }
 
 float ControlOperatorInterface::getTurretPitchInput()
 {
-    return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
+    float turretPitch = drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
            static_cast<float>(limitVal<int16_t>(
                -drivers->remote.getMouseY(),
                -USER_MOUSE_PITCH_MAX,
                USER_MOUSE_PITCH_MAX)) *
                USER_MOUSE_PITCH_SCALAR;
+    if (drivers->remote.keyPressed(Remote::Key::G)) {
+        turretPitch *= FINE_TUNE_MODIFIER;
+    }
+    return turretPitch;
 }
 
 float ControlOperatorInterface::getSentinelSpeedInput()

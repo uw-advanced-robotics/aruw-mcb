@@ -103,11 +103,13 @@ static float runTurretYawInputTest(
     Drivers &drivers,
     ControlOperatorInterface &operatorInterface,
     float remoteInput,
-    int16_t mouseInput)
+    int16_t mouseInput,
+    bool fineTune = false)
 {
     EXPECT_CALL(drivers.remote, getMouseX).WillOnce(Return(mouseInput));
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_HORIZONTAL))
         .WillOnce(Return(remoteInput));
+    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::G)).WillOnce(Return(fineTune));
     return operatorInterface.getTurretYawInput();
 }
 
@@ -115,11 +117,13 @@ static float runTurretPitchInputTest(
     Drivers &drivers,
     ControlOperatorInterface &operatorInterface,
     float remoteInput,
-    int16_t mouseInput)
+    int16_t mouseInput,
+    bool fineTune = false)
 {
     EXPECT_CALL(drivers.remote, getMouseY).WillOnce(Return(mouseInput));
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_VERTICAL))
         .WillOnce(Return(remoteInput));
+    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::G)).WillOnce(Return(fineTune));
     return operatorInterface.getTurretPitchInput();
 }
 
@@ -438,6 +442,30 @@ TEST(ControlOperatorInterface, getTurretInput_max_mouse_limited)
             operatorInterface,
             0,
             ControlOperatorInterface::USER_MOUSE_PITCH_MAX),
+        1E-3);
+}
+
+TEST(ControlOperatorInterface, getTurretInput_fine_tune)
+{
+    INIT_TEST
+    EXPECT_NEAR(-1 * ControlOperatorInterface::FINE_TUNE_MODIFIER, runTurretYawInputTest(drivers, operatorInterface, 0, INT16_MAX, true), 1E-3);
+    EXPECT_NEAR(-1 * ControlOperatorInterface::FINE_TUNE_MODIFIER, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MAX, true), 1E-3);
+
+    EXPECT_NEAR(
+        1 * ControlOperatorInterface::FINE_TUNE_MODIFIER,
+        runTurretYawInputTest(
+            drivers,
+            operatorInterface,
+            0,
+            -ControlOperatorInterface::USER_MOUSE_YAW_MAX, true),
+        1E-3);
+    EXPECT_NEAR(
+        1 * ControlOperatorInterface::FINE_TUNE_MODIFIER,
+        runTurretPitchInputTest(
+            drivers,
+            operatorInterface,
+            0,
+            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX, true),
         1E-3);
 }
 
