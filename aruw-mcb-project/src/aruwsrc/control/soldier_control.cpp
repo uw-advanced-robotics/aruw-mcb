@@ -46,7 +46,6 @@
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "odometry/otto_velocity_odometry_2d_subsystem.hpp"
-#include "turret/chassis-relative/turret_quick_turn_command.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"

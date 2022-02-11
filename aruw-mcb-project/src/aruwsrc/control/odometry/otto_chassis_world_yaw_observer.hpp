@@ -17,10 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OTTO_CHASSIS_WORLD_YAW_GETTER_HPP_
-#define OTTO_CHASSIS_WORLD_YAW_GETTER_HPP_
+#ifndef OTTO_CHASSIS_WORLD_YAW_OBSERVER_HPP_
+#define OTTO_CHASSIS_WORLD_YAW_OBSERVER_HPP_
 
-#include "tap/control/odometry/chassis_world_yaw_getter_interface.hpp"
+#include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 
 // Forward declarations
 namespace aruwsrc
@@ -35,14 +35,15 @@ class TurretSubsystem;
 namespace aruwsrc::control::odometry
 {
 /**
- * @brief Otto specific ChassisWorldYawGetterInterface
+ * @brief Otto specific ChassisWorldYawObserverInterface implementation
  *
  * Returns the orientation of the chassis based on subtracting the turret
  * yaw in chassis-frame from the turret IMU's yaw in global frame.
  *
- * @see tap::control::odometry::ChassisWorldYawGetterInterface
+ * @see tap::algorithms::odometry::ChassisWorldYawObserverInterface
  */
-class OttoChassisWorldYawGetter : public tap::control::odometry::ChassisWorldYawGetterInterface
+class OttoChassisWorldYawObserver
+    : public tap::algorithms::odometry::ChassisWorldYawObserverInterface
 {
 public:
     /**
@@ -51,7 +52,7 @@ public:
      * @param[in] turret a pointer to the turret used for getting world frame axes. Used to get
      *      yaw angle of chassis relative to turret.
      */
-    OttoChassisWorldYawGetter(
+    OttoChassisWorldYawObserver(
         aruwsrc::Drivers* drivers,
         aruwsrc::control::turret::TurretSubsystem* turret);
 
@@ -66,7 +67,7 @@ public:
      * @return `true` if valid chassis orientation was available. i.e: true if and only if
      *      turret->isOnline() && drivers->turretMCBCanComm.isConnected()
      */
-    bool getChassisWorldYaw(float* yaw) final;
+    bool getChassisWorldYaw(float* yaw) const final;
 
 private:
     aruwsrc::Drivers* drivers;
@@ -75,4 +76,4 @@ private:
 
 }  // namespace aruwsrc::control::odometry
 
-#endif  // OTTO_CHASSIS_WORLD_YAW_GETTER_HPP_
+#endif  // OTTO_CHASSIS_WORLD_YAW_OBSERVER_HPP_

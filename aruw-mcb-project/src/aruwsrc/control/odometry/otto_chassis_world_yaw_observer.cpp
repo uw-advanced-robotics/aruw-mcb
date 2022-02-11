@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_chassis_world_yaw_getter.hpp"
+#include "otto_chassis_world_yaw_observer.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -25,7 +25,7 @@
 
 namespace aruwsrc::control::odometry
 {
-OttoChassisWorldYawGetter::OttoChassisWorldYawGetter(
+OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
     aruwsrc::Drivers* drivers,
     aruwsrc::control::turret::TurretSubsystem* turret)
     : drivers(drivers),
@@ -33,7 +33,7 @@ OttoChassisWorldYawGetter::OttoChassisWorldYawGetter(
 {
 }
 
-bool OttoChassisWorldYawGetter::getChassisWorldYaw(float* output)
+bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     // We need both turret IMU data and turret yaw data to generate odometry which is
     // meaningful for the vision system.

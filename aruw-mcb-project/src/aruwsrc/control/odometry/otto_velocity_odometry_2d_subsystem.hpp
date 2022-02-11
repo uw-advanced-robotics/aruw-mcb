@@ -20,10 +20,10 @@
 #ifndef OTTO_VELOCITY_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define OTTO_VELOCITY_ODOMETRY_2D_SUBSYSTEM_HPP_
 
-#include "tap/control/odometry/odometry_2d_subsystem.hpp"
+#include "tap/algorithms/odometry/odometry_2d_subsystem.hpp"
 
-#include "otto_chassis_velocity_displacement_2d_getter.hpp"
-#include "otto_chassis_world_yaw_getter.hpp"
+#include "otto_chassis_velocity_displacement_2d_observer.hpp"
+#include "otto_chassis_world_yaw_observer.hpp"
 
 // Forward declarations
 namespace aruwsrc
@@ -51,14 +51,14 @@ namespace aruwsrc::control::odometry
  *
  * User is responsible for registering this subsystem with the command scheduler.
  *
- * A shallow inheritance of the tap::control::odometry::Odometry2DSubsystem which just
+ * A shallow inheritance of the tap::algorithms::odometry::Odometry2DSubsystem which just
  * simplifies the construction of the Otto chassis velocity and orientation getters.
  *
- * @see tap::control::odometry::VelocityOdometrySubsystem
+ * @see tap::algorithms::odometry::VelocityOdometrySubsystem
  * @see OttoChassisOrientationGetter
  * @see OttoChassisVelocityGetter
  */
-class OttoVelocityOdometry2DSubsystem final : public tap::control::odometry::Odometry2DSubsystem
+class OttoVelocityOdometry2DSubsystem final : public tap::algorithms::odometry::Odometry2DSubsystem
 {
 public:
     /**
@@ -73,8 +73,8 @@ public:
 
 private:
     tap::Drivers* drivers;
-    OttoChassisWorldYawGetter orientationGetter;
-    OttoChassisVelocityDisplacement2DGetter displacementGetter;
+    OttoChassisWorldYawObserver orientationGetter;
+    OttoChassisVelocityDisplacement2DObserver displacementGetter;
 };
 
 }  // namespace aruwsrc::control::odometry
