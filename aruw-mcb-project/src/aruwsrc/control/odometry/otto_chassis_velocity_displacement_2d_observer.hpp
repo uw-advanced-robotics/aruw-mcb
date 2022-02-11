@@ -24,8 +24,8 @@
 
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 
-#include "modm/math/geometry/vector.hpp"
 #include "modm/math/geometry/location_2d.hpp"
+#include "modm/math/geometry/vector.hpp"
 
 // Forward declarations
 namespace aruwsrc::chassis
@@ -42,7 +42,7 @@ namespace aruwsrc::control::odometry
  *
  * This class dumbs things down to only two dimensions for use with the 2D odometry
  * system.
- * 
+ *
  * Update should be called frequently for best results.
  */
 class OttoChassisVelocityDisplacement2DObserver
@@ -62,7 +62,7 @@ public:
     /**
      * Get absolute chassis displacement in chassis frame in meters since some arbitrary point
      * in time.
-     * 
+     *
      * @see ChassisDisplacementObserverInterface for more details
      *
      * @param[out] displacement
