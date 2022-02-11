@@ -34,7 +34,7 @@ using namespace testing;
         &drivers,                                                          \
         &frictionWheels,                                                   \
         __VA_ARGS__);                                                      \
-    tap::serial::RefSerialData::Rx::RobotData robotData{};                 \
+    tap::communication::serial::RefSerialData::Rx::RobotData robotData{};  \
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
 
 #define TEST_EXECUTE(name) TEST(FrictionWheelSpinRefLimitedCommand, execute__##name)

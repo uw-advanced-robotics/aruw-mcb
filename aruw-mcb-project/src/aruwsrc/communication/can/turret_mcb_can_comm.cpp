@@ -40,7 +40,7 @@ TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
           IMU_MSG_CAN_BUS,
           this,
           &TurretMCBCanComm::handleTurretMessage),
-        txCommandMsgBitmask(),
+      txCommandMsgBitmask(),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
 }

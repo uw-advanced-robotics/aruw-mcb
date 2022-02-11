@@ -20,9 +20,9 @@
 #ifndef UART_TERMINAL_DEVICE_CONSTANTS_HPP_
 #define UART_TERMINAL_DEVICE_CONSTANTS_HPP_
 
-namespace tap::serial::bound_ports
+namespace tap::communication::serial::bound_ports
 {
     static constexpr Uart::UartPort TERMINAL_SERIAL_UART_PORT = Uart::UartPort::Uart7;
-}  // namespace tap::serial::bound_ports
+}  // namespace tap::communication::serial::bound_ports
 
 #endif  // UART_TERMINAL_DEVICE_CONSTANTS_HPP_

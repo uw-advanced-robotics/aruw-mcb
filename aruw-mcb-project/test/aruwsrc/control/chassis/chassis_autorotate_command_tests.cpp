@@ -44,7 +44,7 @@ static constexpr float TEST_WHEEL_SPEED = ChassisSubsystem::MIN_WHEEL_SPEED_SING
     ON_CALL(drivers.controlOperatorInterface, getChassisRInput).WillByDefault(Return(r));
 
 #define SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers)                                        \
-    tap::serial::RefSerialData::Rx::RobotData robotData;                                \
+    tap::communication::serial::RefSerialData::Rx::RobotData robotData;                 \
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
 

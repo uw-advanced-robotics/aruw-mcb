@@ -24,7 +24,7 @@
 #include "gtest/gtest.h"
 
 using aruwsrc::serial::VisionCoprocessor;
-using tap::serial::DJISerial;
+using tap::communication::serial::DJISerial;
 using namespace tap::arch;
 
 // RX tests
@@ -43,10 +43,10 @@ static void initAndRunAutoAimRxTest(
 {
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
-    DJISerial::SerialMessage message;
-    message.headByte = 0xA5;
-    message.type = 2;
-    message.length = 10 * sizeof(float) + sizeof(uint8_t);
+    DJISerial::ReceivedSerialMessage message;
+    message.header.headByte = 0xA5;
+    message.messageType = 2;
+    message.header.dataLength = 10 * sizeof(float) + sizeof(uint8_t);
     aruwsrc::serial::VisionCoprocessor::TurretAimData testData;
     testData.xPos = xPosDesired;
     testData.yPos = yPosDesired;
