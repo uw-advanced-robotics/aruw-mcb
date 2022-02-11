@@ -30,13 +30,15 @@ namespace serial
 VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_PORT),
       lastAimData(),
-      turretMCBCanComm(&drivers->turretMCBCanComm)
+      turretMCBCanComm(&drivers->turretMCBCanComm),
+      odometryInterface(nullptr)
 {
 }
 
 void VisionCoprocessor::initializeCV()
 {
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
+    drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 1'000'000>();
     initialize();
 }
 
@@ -75,6 +77,13 @@ void VisionCoprocessor::sendOdometryData()
 {
     DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
 
+    modm::Location2D<float> location = modm::Location2D<float>();
+
+    if (odometryInterface != nullptr)
+    {
+        location = odometryInterface->getCurrentLocation2D();
+    }
+
     odometryMessage.header.headByte = 0xa5;
     odometryMessage.header.dataLength = sizeof(OdometryData);
     odometryMessage.header.seq = 0;
@@ -93,7 +102,7 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->turretYaw = turretMCBCanComm->getYaw();
     odometryData->timestamp = tap::arch::clock::getTimeMicroseconds();
 
-    odometryMessage.CRC16 = tap::algorithms::calculateCRC8(
+    odometryMessage.CRC16 = tap::algorithms::calculateCRC16(
         reinterpret_cast<uint8_t*>(&odometryMessage),
         sizeof(odometryMessage) - 2);
 

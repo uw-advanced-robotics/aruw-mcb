@@ -54,7 +54,7 @@ void DJISerial::initialize()
             drivers->uart.init<Uart::UartPort::Uart1, 115200>();
             break;
         case Uart::UartPort::Uart2:
-            drivers->uart.init<Uart::UartPort::Uart2, 115200>();
+            drivers->uart.init<Uart::UartPort::Uart2, 1000000>();
             break;
         case Uart::UartPort::Uart3:
             drivers->uart.init<Uart::UartPort::Uart3, 1000000>();
