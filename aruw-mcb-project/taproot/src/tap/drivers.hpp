@@ -129,9 +129,9 @@ public:
     gpio::Leds leds;
     gpio::Pwm pwm;
     sensors::Mpu6500 mpu6500;
-    serial::RefSerial refSerial;
-    Remote remote;
-    serial::Uart uart;
+    communication::serial::RefSerial refSerial;
+    communication::serial::Remote remote;
+    communication::serial::Uart uart;
     communication::serial::TerminalSerial terminalSerial;
     control::CommandMapper commandMapper;
     control::SchedulerTerminalHandler schedulerTerminalHandler;

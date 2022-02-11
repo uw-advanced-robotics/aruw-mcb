@@ -35,7 +35,7 @@ public:
     virtual ~VisionCoprocessorMock();
 
     MOCK_METHOD(void, initializeCV, (), (override));
-    MOCK_METHOD(void, messageReceiveCallback, (const SerialMessage &), (override));
+    MOCK_METHOD(void, messageReceiveCallback, (const ReceivedSerialMessage &), (override));
     MOCK_METHOD(void, sendMessage, (), (override));
     MOCK_METHOD(const TurretAimData &, getLastAimData, (), (const override));
 };  // class VisionCoprocessorMock

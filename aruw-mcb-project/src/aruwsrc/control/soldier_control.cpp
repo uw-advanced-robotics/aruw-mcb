@@ -49,7 +49,6 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
@@ -70,7 +69,7 @@ using namespace aruwsrc::control::odometry;
 using namespace tap::control;
 using namespace aruwsrc::display;
 using namespace aruwsrc::control;
-using tap::Remote;
+using namespace tap::communication::serial;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -170,12 +169,6 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController);
 
-cv::TurretCVCommand turretCVCommand(
-    drivers(),
-    &turret,
-    &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
-
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
@@ -272,7 +265,7 @@ HoldCommandMapping leftSwitchDown(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
+    {&chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
@@ -287,10 +280,6 @@ HoldRepeatCommandMapping leftMousePressedShiftPressed(
     {&agitatorShootFastNotLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
-HoldCommandMapping rightMousePressed(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 PressCommandMapping bPressed(drivers(), {&imuCalibrateCommand}, RemoteMapState({Remote::Key::B}));
 PressCommandMapping qPressed(
@@ -331,8 +320,6 @@ void initializeSubsystems()
     frictionWheels.initialize();
     hopperCover.initialize();
     clientDisplay.initialize();
-    drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
-    drivers()->legacyVisionCoprocessor.attachTurret(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -362,7 +349,6 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
-    drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bPressed);
     drivers->commandMapper.addMap(&qPressed);
