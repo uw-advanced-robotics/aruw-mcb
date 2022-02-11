@@ -25,7 +25,7 @@
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
-using tap::Remote;
+using namespace tap::communication::serial;
 
 namespace aruwsrc
 {

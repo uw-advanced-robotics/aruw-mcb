@@ -24,7 +24,7 @@
 #include "client_display_subsystem.hpp"
 
 using namespace tap::control;
-using namespace tap::serial;
+using namespace tap::communication::serial;
 
 #define delay()                                  \
     delayTimer.restart(DELAY_PERIOD_BTWN_SENDS); \

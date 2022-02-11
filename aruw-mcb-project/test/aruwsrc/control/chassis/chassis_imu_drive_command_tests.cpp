@@ -33,7 +33,7 @@ using namespace testing;
 
 #define SETUP_TEST_OBJECTS_NO_TURRET()                                                  \
     Drivers drivers;                                                                    \
-    tap::serial::RefSerial::Rx::RobotData robotData;                                    \
+    tap::communication::serial::RefSerial::Rx::RobotData robotData;                     \
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));       \
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
     NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis(&drivers);                    \
@@ -41,7 +41,7 @@ using namespace testing;
 
 #define SETUP_TEST_OBJECTS_TURRET()                                                     \
     Drivers drivers;                                                                    \
-    tap::serial::RefSerial::Rx::RobotData robotData;                                    \
+    tap::communication::serial::RefSerial::Rx::RobotData robotData;                     \
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));       \
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
     NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers);                      \

@@ -36,7 +36,6 @@
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_user_control_command.hpp"
@@ -50,7 +49,7 @@ using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::launcher;
-using tap::Remote;
+using namespace tap::communication::serial;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -146,12 +145,6 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands
-cv::SentinelTurretCVCommand turretCVCommand(
-    drivers(),
-    &turretSubsystem,
-    &agitator,
-    &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
 
 user::TurretUserControlCommand turretManual(
     drivers(),
@@ -189,8 +182,6 @@ void initializeSubsystems()
     sentinelDrive.initialize();
     frictionWheels.initialize();
     turretSubsystem.initialize();
-    drivers()->legacyVisionCoprocessor.attachChassis(&sentinelDrive);
-    drivers()->legacyVisionCoprocessor.attachTurret(&turretSubsystem);
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -207,7 +198,6 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *)
 {
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    turretSubsystem.setDefaultCommand(&turretCVCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

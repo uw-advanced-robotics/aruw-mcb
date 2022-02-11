@@ -35,7 +35,7 @@
 
 using aruwsrc::Drivers;
 using aruwsrc::control::ControlOperatorInterface;
-using tap::Remote;
+using namespace tap::communication::serial;
 using namespace testing;
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
