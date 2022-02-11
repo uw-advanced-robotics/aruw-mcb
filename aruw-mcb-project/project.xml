@@ -10,6 +10,7 @@
     <option name="taproot:dev_board">rm-dev-board-a</option>
     <option name="taproot:communication:serial:terminal_serial:uart_port">Uart7</option>
     <option name="taproot:communication:serial:ref_serial:uart_port">Uart6</option>
+    <option name="taproot:communication:serial:uart_port_2.baud_rate">1000000</option>
     <option name="taproot:communication:serial:uart_port_3.baud_rate">1000000</option>
     <option name="taproot:board:digital_in_pins">A,B,C,D,Button</option>
     <option name="taproot:board:digital_out_pins">E,F,G,H,Laser</option>

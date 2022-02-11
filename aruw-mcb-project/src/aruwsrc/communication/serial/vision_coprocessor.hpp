@@ -20,6 +20,7 @@
 #ifndef VISION_COPROCESSOR_HPP_
 #define VISION_COPROCESSOR_HPP_
 
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
@@ -110,6 +111,12 @@ public:
 
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
+    inline void attachOdometryInterface(
+        tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
+    {
+        this->odometryInterface = odometryInterface;
+    }
+
 private:
     enum TxMessageTypes
     {
@@ -132,6 +139,8 @@ private:
     tap::arch::MilliTimeout cvOfflineTimeout;
 
     const aruwsrc::can::TurretMCBCanComm* turretMCBCanComm;
+
+    tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
