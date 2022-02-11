@@ -17,31 +17,24 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#ifndef CURRENT_SENSOR_INTERFACE_HPP_
+#define CURRENT_SENSOR_INTERFACE_HPP_
 
-#include "clock.hpp"
+#include "tap/communication/sensors/sensor_interface.hpp"
 
-namespace tap
-{
-namespace arch
-{
-namespace clock
+namespace tap::communication::sensors::current
 {
 /**
- * Global static variable storing time for testing. It's value is returned from the `getTime*()`
- * functions and is set by `setTime()`. Note this is a static global variable accessible
- * from _any_ test, so you must assume that `getTimeMilliseconds()` value is undefined until
- * you set it.
+ * Interface for a generic current sensor.
  */
-uint32_t currTimeMilliseconds = 0;
+class CurrentSensorInterface : public tap::communication::sensors::SensorInterface
+{
+public:
+    /**
+     * @return The current read by the current sensor, in milliamps.
+     */
+    virtual float getCurrentMa() const = 0;
+};
+}  // namespace tap::communication::sensors::current
 
-void setTime(uint32_t timeMilliseconds) { currTimeMilliseconds = timeMilliseconds; }
-
-uint32_t getTimeMilliseconds() { return currTimeMilliseconds; }
-
-uint32_t getTimeMicroseconds() { return currTimeMilliseconds * 1000; }
-}  // namespace clock
-}  // namespace arch
-}  // namespace tap
-
-#endif
+#endif  // CURRENT_SENSOR_INTERFACE_HPP_

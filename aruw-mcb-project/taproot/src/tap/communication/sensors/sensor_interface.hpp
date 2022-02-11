@@ -17,31 +17,25 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#ifndef SENSOR_INTERFACE_HPP_
+#define SENSOR_INTERFACE_HPP_
 
-#include "clock.hpp"
-
-namespace tap
-{
-namespace arch
-{
-namespace clock
+namespace tap::communication::sensors
 {
 /**
- * Global static variable storing time for testing. It's value is returned from the `getTime*()`
- * functions and is set by `setTime()`. Note this is a static global variable accessible
- * from _any_ test, so you must assume that `getTimeMilliseconds()` value is undefined until
- * you set it.
+ * Interface for generic sensor that requires a periodic update.
+ *
+ * This interface may be used in conjunction with a sensor scheduler (see #132).
  */
-uint32_t currTimeMilliseconds = 0;
+class SensorInterface
+{
+public:
+    /**
+     * Function that one implements that reads data from the sensor and performs any filtering as
+     * required.
+     */
+    virtual void update() = 0;
+};
+}  // namespace tap::communication::sensors
 
-void setTime(uint32_t timeMilliseconds) { currTimeMilliseconds = timeMilliseconds; }
-
-uint32_t getTimeMilliseconds() { return currTimeMilliseconds; }
-
-uint32_t getTimeMicroseconds() { return currTimeMilliseconds * 1000; }
-}  // namespace clock
-}  // namespace arch
-}  // namespace tap
-
-#endif
+#endif  // SENSOR_INTERFACE_HPP_

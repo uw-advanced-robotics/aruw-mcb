@@ -17,13 +17,14 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "control_operator_interface_mock.hpp"
+#ifndef IMU_HEATER_CONSTANTS_HPP_
+#define IMU_HEATER_CONSTANTS_HPP_
 
-namespace tap::mock
+#include "tap/communication/gpio/pwm.hpp"
+
+namespace tap::sensors::bound_ports
 {
-ControlOperatorInterfaceMock::ControlOperatorInterfaceMock(tap::Drivers *drivers)
-    : tap::control::ControlOperatorInterface(drivers)
-{
-}
-ControlOperatorInterfaceMock::~ControlOperatorInterfaceMock() {}
-}  // namespace tap::mock
+    static constexpr tap::gpio::Pwm::Timer IMU_HEATER_TIMER = tap::gpio::Pwm::Timer::TIMER3;
+}  // tap::sensors
+
+#endif  // IMU_HEATER_CONSTANTS_HPP_

@@ -17,31 +17,26 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "analog_current_sensor.hpp"
 
-#include "clock.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 
-namespace tap
+using namespace tap::algorithms;
+
+namespace tap::communication::sensors::current
 {
-namespace arch
+AnalogCurrentSensor::AnalogCurrentSensor(const Config &config) : config(config) {}
+
+float AnalogCurrentSensor::getCurrentMa() const { return prevCurrent; }
+
+void AnalogCurrentSensor::update()
 {
-namespace clock
-{
-/**
- * Global static variable storing time for testing. It's value is returned from the `getTime*()`
- * functions and is set by `setTime()`. Note this is a static global variable accessible
- * from _any_ test, so you must assume that `getTimeMilliseconds()` value is undefined until
- * you set it.
- */
-uint32_t currTimeMilliseconds = 0;
+    prevCurrent = lowPassFilter(
+        prevCurrent,
+        abs(static_cast<float>(config.analogDriver->read(config.analogSensorPin)) -
+            config.currentSensorZeroMv) *
+            config.currentSensorMaPerMv,
+        config.currentSensorLowPassAlpha);
+}
 
-void setTime(uint32_t timeMilliseconds) { currTimeMilliseconds = timeMilliseconds; }
-
-uint32_t getTimeMilliseconds() { return currTimeMilliseconds; }
-
-uint32_t getTimeMicroseconds() { return currTimeMilliseconds * 1000; }
-}  // namespace clock
-}  // namespace arch
-}  // namespace tap
-
-#endif
+}  // namespace tap::communication::sensors::current
