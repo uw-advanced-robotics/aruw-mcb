@@ -19,13 +19,18 @@
 
 #include <iostream>
 
+#include "tap/algorithms/crc.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/architecture/endianness_wrappers.hpp"
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "gtest/gtest.h"
 
 using aruwsrc::serial::VisionCoprocessor;
-using tap::serial::DJISerial;
+using tap::communication::serial::DJISerial;
 using namespace tap::arch;
+using namespace tap::algorithms;
 
 // RX tests
 
@@ -43,10 +48,10 @@ static void initAndRunAutoAimRxTest(
 {
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
-    DJISerial::SerialMessage message;
-    message.headByte = 0xA5;
-    message.type = 2;
-    message.length = 10 * sizeof(float) + sizeof(uint8_t);
+    DJISerial::ReceivedSerialMessage message;
+    message.header.headByte = 0xA5;
+    message.messageType = 2;
+    message.header.dataLength = 10 * sizeof(float) + sizeof(uint8_t);
     aruwsrc::serial::VisionCoprocessor::TurretAimData testData;
     testData.xPos = xPosDesired;
     testData.yPos = yPosDesired;
@@ -125,4 +130,52 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
         123456789.0f,
         123456789.0f,
         false);
+}
+
+TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
+{
+    clock::setTime(1);
+
+    aruwsrc::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+
+    static constexpr int HEADER_LEN = 7;
+    static constexpr int DATA_LEN = 24;
+    static constexpr int CRC16_LEN = 2;
+    static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
+
+    EXPECT_CALL(drivers.uart, write(testing::_, testing::_, MSG_LEN))
+        .WillOnce([&](tap::communication::serial::Uart::UartPort,
+                      const uint8_t *data,
+                      std::size_t length) {
+            DJISerial::SerialMessage<DATA_LEN> msg;
+            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+
+            EXPECT_EQ(0xa5, msg.header.headByte);
+            EXPECT_EQ(DATA_LEN, msg.header.dataLength);
+            EXPECT_EQ(calculateCRC8(data, 4), msg.header.CRC8);
+            EXPECT_EQ(1, msg.messageType);
+            EXPECT_EQ(calculateCRC16(data, sizeof(msg) - 2), msg.CRC16);
+
+            float cx, cy, cz, pitch, yaw;
+            uint32_t time;
+
+            convertFromLittleEndian(&cx, msg.data);
+            convertFromLittleEndian(&cy, msg.data + 4);
+            convertFromLittleEndian(&cz, msg.data + 8);
+            convertFromLittleEndian(&pitch, msg.data + 12);
+            convertFromLittleEndian(&yaw, msg.data + 16);
+            convertFromLittleEndian(&time, msg.data + 20);
+
+            EXPECT_EQ(0, cx);
+            EXPECT_EQ(0, cy);
+            EXPECT_EQ(0, cz);
+            EXPECT_EQ(0, pitch);
+            EXPECT_EQ(0, yaw);
+            EXPECT_EQ(1000, time);
+
+            return length;
+        });
+
+    serial.sendOdometryData();
 }

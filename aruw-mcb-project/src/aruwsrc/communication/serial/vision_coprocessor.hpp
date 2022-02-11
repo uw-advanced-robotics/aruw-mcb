@@ -20,6 +20,7 @@
 #ifndef VISION_COPROCESSOR_HPP_
 #define VISION_COPROCESSOR_HPP_
 
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
@@ -43,9 +44,15 @@ namespace serial
  *
  * @note use the static function in Drivers to interact with this class.
  */
-class VisionCoprocessor : public tap::serial::DJISerial
+class VisionCoprocessor : public tap::communication::serial::DJISerial
 {
 public:
+    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
+        tap::communication::serial::Uart::UartPort::Uart2;
+
+    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_PORT =
+        tap::communication::serial::Uart::UartPort::Uart3;
+
     /**
      * AutoAim data to receive from Jetson.
      */
@@ -90,7 +97,7 @@ public:
     /**
      * Handles the types of messages defined above in the RX message handlers section.
      */
-    void messageReceiveCallback(const SerialMessage& completeMessage) override;
+    void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
 
     /**
      * Cycles through and sends the messages that must be sent to the xavier.
@@ -103,6 +110,12 @@ public:
     mockable bool isCvOnline();
 
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
+
+    inline void attachOdometryInterface(
+        tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
+    {
+        this->odometryInterface = odometryInterface;
+    }
 
 private:
     enum TxMessageTypes
@@ -127,6 +140,8 @@ private:
 
     const aruwsrc::can::TurretMCBCanComm* turretMCBCanComm;
 
+    tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
+
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information, and updates the `lastAimData`.
@@ -136,7 +151,7 @@ private:
      * @return `false` if the message length doesn't match `sizeof(*aimData)`, `true`
      *      otherwise.
      */
-    static bool decodeToTurretAimData(const SerialMessage& message, TurretAimData* aimData);
+    static bool decodeToTurretAimData(const ReceivedSerialMessage& message, TurretAimData* aimData);
 
 #ifdef ENV_UNIT_TESTS
 public:

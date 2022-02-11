@@ -32,7 +32,7 @@ using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::mock;
 using namespace testing;
-using namespace tap::serial;
+using namespace tap::communication::serial;
 
 #define SETUP_TEST(...)                                 \
     aruwsrc::Drivers drivers;                           \

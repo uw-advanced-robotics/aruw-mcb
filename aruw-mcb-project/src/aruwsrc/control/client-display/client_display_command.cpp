@@ -27,7 +27,8 @@
 #include "client_display_subsystem.hpp"
 
 using namespace tap::control;
-using namespace tap::serial;
+
+using namespace tap::communication::serial;
 using namespace tap::algorithms;
 using namespace tap::communication::referee;
 using namespace aruwsrc::control;

@@ -65,7 +65,7 @@ class ClientDisplaySubsystem;
 class ClientDisplayCommand : public tap::control::Command,
                              ::modm::pt::Protothread,
                              modm::Resumable<5>,
-                             tap::serial::RefSerialData
+                             tap::communication::serial::RefSerialData
 {
 public:
     /**
