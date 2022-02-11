@@ -31,6 +31,7 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
@@ -169,6 +170,18 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController);
 
+cv::TurretCVCommand turretCVCommand(
+    drivers(),
+    &turret,
+    &worldFrameYawTurretImuController,
+    &worldFramePitchTurretImuController,
+    odometrySubsystem,
+    chassis,
+    frictionWheels,
+    1,
+    1,
+    14.5f);
+
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
@@ -265,7 +278,7 @@ HoldCommandMapping leftSwitchDown(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&chassisDriveCommand},
+    {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
@@ -280,6 +293,10 @@ HoldRepeatCommandMapping leftMousePressedShiftPressed(
     {&agitatorShootFastNotLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
+HoldCommandMapping rightMousePressed(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 PressCommandMapping bPressed(drivers(), {&imuCalibrateCommand}, RemoteMapState({Remote::Key::B}));
 PressCommandMapping qPressed(
@@ -336,6 +353,7 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -349,6 +367,7 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bPressed);
     drivers->commandMapper.addMap(&qPressed);

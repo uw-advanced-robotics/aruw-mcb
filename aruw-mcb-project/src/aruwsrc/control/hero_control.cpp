@@ -33,6 +33,7 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
@@ -45,6 +46,7 @@
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
+#include "odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
@@ -58,6 +60,7 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
+using namespace aruwsrc::control::odometry;
 using namespace aruwsrc::display;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::launcher;
@@ -129,6 +132,8 @@ tap::motor::DoubleDjiMotor yawMotor(
     "Yaw Back Turret",
     "Yaw Front Turret");
 TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 
 /* define commands ----------------------------------------------------------*/
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
@@ -213,6 +218,18 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawTurretImuController,
     &chassisFramePitchTurretController);
 
+cv::TurretCVCommand turretCVCommand(
+    drivers(),
+    &turret,
+    &worldFrameYawTurretImuController,
+    &chassisFramePitchTurretController,
+    odometrySubsystem,
+    chassis,
+    frictionWheels,
+    1,
+    1,
+    9.5f);
+
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
@@ -233,22 +250,24 @@ HoldRepeatCommandMapping rightSwitchUp(
     {&heroAgitatorCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
-
-// Keyboard/Mouse related mappings
-PressCommandMapping leftMousePressed(
-    drivers(),
-    {&heroAgitatorCommand},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT));
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&chassisDriveCommand},
+    {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
+PressCommandMapping leftMousePressed(
+    drivers(),
+    {&heroAgitatorCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT));
+HoldCommandMapping rightMousePressed(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 PressCommandMapping bPressed(drivers(), {&imuCalibrateCommand}, RemoteMapState({Remote::Key::B}));
@@ -273,6 +292,7 @@ void initializeSubsystems()
 {
     chassis.initialize();
     frictionWheels.initialize();
+    odometrySubsystem.initialize();
     clientDisplay.initialize();
     kickerAgitator.initialize();
     waterwheelAgitator.initialize();
@@ -284,6 +304,7 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&kickerAgitator);
     drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
@@ -300,7 +321,10 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(aruwsrc::Drivers *) {}
+void startHeroCommands(aruwsrc::Drivers *drivers)
+{
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerHeroIoMappings(aruwsrc::Drivers *drivers)
@@ -308,6 +332,7 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftMousePressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&fToggled);
