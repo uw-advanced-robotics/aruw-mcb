@@ -23,6 +23,7 @@
 #include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -35,6 +36,7 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
 
@@ -65,7 +67,33 @@ public:
      * Max wheel speed, measured in RPM of the encoder (rather than shaft)
      * we use this for wheel speed since this is how dji's motors measures motor speed.
      */
-    static const int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;
+    static constexpr int MIN_WHEEL_SPEED_SINGLE_MOTOR = 4000;
+    static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 8000;
+    static constexpr int MIN_CHASSIS_POWER = 40;
+    static constexpr int MAX_CHASSIS_POWER = 120;
+    static constexpr int WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE =
+        (MAX_WHEEL_SPEED_SINGLE_MOTOR - MIN_WHEEL_SPEED_SINGLE_MOTOR) /
+        (MAX_CHASSIS_POWER - MIN_CHASSIS_POWER);
+    static_assert(WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE >= 0);
+
+    static inline float getMaxUserWheelSpeed(bool refSerialOnline, int chassisPower)
+    {
+        if (refSerialOnline)
+        {
+            float desWheelSpeed = WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE *
+                                      static_cast<float>(chassisPower - MIN_CHASSIS_POWER) +
+                                  MIN_WHEEL_SPEED_SINGLE_MOTOR;
+
+            return tap::algorithms::limitVal(
+                desWheelSpeed,
+                static_cast<float>(MIN_WHEEL_SPEED_SINGLE_MOTOR),
+                static_cast<float>(MAX_WHEEL_SPEED_SINGLE_MOTOR));
+        }
+        else
+        {
+            return MIN_WHEEL_SPEED_SINGLE_MOTOR;
+        }
+    }
 
     /**
      * The minimum desired wheel speed for chassis rotation, measured in RPM before
@@ -79,14 +107,14 @@ public:
     static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::Pin::S;
 
     /// @see power_limiter.hpp for what these mean
-    static constexpr float MAX_ENERGY_BUFFER = 60.0f;
-    static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 40.0f;
-    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 0;
+    static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
+    static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
+    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
     static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
     static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
 private:
-#if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
+#if defined(ALL_SOLDIERS)
     /**
      * Velocity PID gains and constants.
      */
@@ -106,8 +134,8 @@ private:
      * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
      * controller are listed below.
      */
-    static constexpr float AUTOROTATION_PID_KP = 210.0f;
-    static constexpr float AUTOROTATION_PID_KD = 4500.0f;
+    static constexpr float AUTOROTATION_PID_KP = 180.0f;
+    static constexpr float AUTOROTATION_PID_KD = 4000.0f;
     static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
     static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
     static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
@@ -163,15 +191,15 @@ private:
     /**
      * Distance from center of the two front wheels.
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.517f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
     /**
      * Distance from center of the front and rear wheels.
      */
-    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.600f;
+    static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
     /**
      * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
      */
-    static constexpr float GIMBAL_X_OFFSET = 0.175f;
+    static constexpr float GIMBAL_X_OFFSET = 0.0f;
     /**
      * @see `GIMBAL_X_OFFSET`.
      */
@@ -230,17 +258,10 @@ public:
     static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
     static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
 
-#if defined(TARGET_OLD_SOLDIER)
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-#else
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
-#endif
 
     // wheel velocity PID variables
-    modm::Pid<float> leftFrontVelocityPid;
-    modm::Pid<float> leftBackVelocityPid;
-    modm::Pid<float> rightFrontVelocityPid;
-    modm::Pid<float> rightBackVelocityPid;
+    modm::Pid<float> velocityPid[4];
 
     /**
      * Used to index into the desiredWheelRPM matrix.
@@ -295,8 +316,8 @@ private:
 #endif
 
     tap::motor::DjiMotor* motors[4];
+    tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
-    const tap::motor::M3508Constants motorConstants;
 
 public:
     ChassisSubsystem(
@@ -401,6 +422,8 @@ private:
         modm::Pid<float>* pid,
         tap::motor::DjiMotor* const motor,
         float desiredRpm);
+
+    void limitChassisPower();
 
     /**
      * Converts the velocity matrix from raw RPM to wheel velocity in m/s.

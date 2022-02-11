@@ -19,24 +19,29 @@
 
 #include "friction_wheel_subsystem.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc
-{
-namespace launcher
+using namespace tap::algorithms;
+
+namespace aruwsrc::control::launcher
 {
 FrictionWheelSubsystem::FrictionWheelSubsystem(
     aruwsrc::Drivers *drivers,
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId)
     : tap::control::Subsystem(drivers),
+      drivers(drivers),
+      launchSpeedLinearInterpolator(
+          LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+          MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
       velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       desiredRpmRamp(0),
-      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left example motor"),
-      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right example motor")
+      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "Left flywheel"),
+      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "Right flywheel")
 {
 }
 
@@ -44,13 +49,23 @@ void FrictionWheelSubsystem::initialize()
 {
     leftWheel.initialize();
     rightWheel.initialize();
+    prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
-void FrictionWheelSubsystem::setDesiredRpm(float desRpm) { desiredRpmRamp.setTarget(desRpm); }
+void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
+{
+    desiredLaunchSpeed = speed;
+    desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
+    drivers->turretMCBCanComm.setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
+}
 
 void FrictionWheelSubsystem::refresh()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    if (currTime == prevTime)
+    {
+        return;
+    }
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
     prevTime = currTime;
 
@@ -65,10 +80,13 @@ void FrictionWheelSubsystem::runHardwareTests()
     if (abs(rightWheel.getShaftRPM()) > 4000.0f) this->setHardwareTestsComplete();
 }
 
-void FrictionWheelSubsystem::onHardwareTestStart() { this->setDesiredRpm(5000.0f); }
+void FrictionWheelSubsystem::onHardwareTestStart() { this->setDesiredLaunchSpeed(15); }
 
-void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredRpm(0.0f); }
+void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSpeed(0); }
 
-}  // namespace launcher
+float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
+{
+    return launchSpeedLinearInterpolator.interpolate(launchSpeed);
+}
 
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::launcher

@@ -17,11 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __FRICTION_WHEEL_SUBSYSTEM_HPP__
-#define __FRICTION_WHEEL_SUBSYSTEM_HPP__
+#ifndef FRICTION_WHEEL_SUBSYSTEM_HPP_
+#define FRICTION_WHEEL_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/subsystem.hpp"
+#include "tap/util_macros.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -29,21 +30,19 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-#include "tap/util_macros.hpp"
-
 #include "modm/math/filter/pid.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc
 {
 class Drivers;
 }
 
-namespace aruwsrc
-{
-namespace launcher
+namespace aruwsrc::control::launcher
 {
 /**
- * A subsystem which regulates the speed of a two wheel shooter system.
+ * A subsystem which regulates the speed of a two wheel shooter system using velocity PID
+ * controllers. Allows the user to specify the desired launch speed of the shooter.
  */
 class FrictionWheelSubsystem : public tap::control::Subsystem
 {
@@ -51,6 +50,25 @@ public:
     static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
     static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+
+    /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
+    static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
+
+    /**
+     * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
+     * linear interpolation is used.
+     */
+#ifdef TARGET_HERO
+    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+        {0.0f, 0.0f},
+        {10, 3900.0f},
+        {16.0f, 6700.0f},
+        { 20.0f,
+          8500.0f }};
+#else
+    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] =
+        {{0.0f, 0.0f}, {15.0f, 4300.0f}, {18.0f, 4800.0f}, {30.0f, 7500.2f}, {32.0f, 8300.0f}};
+#endif
 
     /**
      * Creates a new friction wheel subsystem with DJI motor1 and motor2
@@ -64,9 +82,16 @@ public:
     void initialize() override;
 
     /**
-     * Sets target flywheel RPM.
+     * Set the projectile launch speed - at what speed the pellets
+     * will come out of the physical friction wheel launcher.
+     * Speed is limited to a range of values defined by constants of
+     * this subsystem.
+     *
+     * @param[in] speed The launch speed in m/s.
      */
-    mockable void setDesiredRpm(float desRpm);
+    mockable void setDesiredLaunchSpeed(float speed);
+
+    mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
@@ -79,44 +104,51 @@ public:
 
     void onHardwareTestComplete() override;
 
-    const char *getName() override { return "Friction Wheel"; }
+    const char *getName() override { return "Friction wheels"; }
 
 private:
-    // speed of ramp when you set a new desired ramp speed [rpm / ms]
-#ifdef TARGET_SENTINEL
-    static constexpr float FRICTION_WHEEL_RAMP_SPEED = 0.5f;
-#else
-    static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
-#endif
-
     static constexpr float PID_P = 20.0f;
     static constexpr float PID_I = 0.2f;
     static constexpr float PID_D = 0.0f;
     static constexpr float PID_MAX_ERROR_SUM = 5'000.0f;
     static constexpr float PID_MAX_OUTPUT = 16000.0f;
 
+    aruwsrc::Drivers *drivers;
+
+    modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
+
     modm::Pid<float> velocityPidLeftWheel;
 
     modm::Pid<float> velocityPidRightWheel;
 
-    tap::algorithms::Ramp desiredRpmRamp;
+    float desiredLaunchSpeed;
 
     uint32_t prevTime = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    tap::mock::DjiMotorMock leftWheel;
-    tap::mock::DjiMotorMock rightWheel;
+    tap::algorithms::Ramp desiredRpmRamp;
+
+    testing::NiceMock<tap::mock::DjiMotorMock> leftWheel;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightWheel;
 
 private:
 #else
+    tap::algorithms::Ramp desiredRpmRamp;
+
     tap::motor::DjiMotor leftWheel;
     tap::motor::DjiMotor rightWheel;
 #endif
+
+    /**
+     * @param[in] launchSpeed Some launch speed in m/s. The speed will be
+     *      capped between [0, LAUNCH_SPEED_MAX] m/s. If the speed is <= LAUNCH_SPEED_MIN_CUTOFF
+     *      m/s, the speed will be rounded down to 0.
+     * @return A friction wheel RPM that the given `launchSpeed` maps to.
+     */
+    float launchSpeedToFrictionWheelRpm(float launchSpeed) const;
 };
 
-}  // namespace launcher
+}  // namespace aruwsrc::control::launcher
 
-}  // namespace aruwsrc
-
-#endif
+#endif  // FRICTION_WHEEL_SUBSYSTEM_HPP_

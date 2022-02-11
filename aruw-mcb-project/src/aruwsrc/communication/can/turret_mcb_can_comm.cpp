@@ -34,21 +34,34 @@ TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
           IMU_MSG_CAN_BUS,
           this,
           &TurretMCBCanComm::handleAngleGyroMessage),
-      openHopperCover(false),
+      turretStatusRxHandler(
+          drivers,
+          TURRET_STATUS_RX_CAN_ID,
+          IMU_MSG_CAN_BUS,
+          this,
+          &TurretMCBCanComm::handleTurretMessage),
+        txCommandMsgBitmask(),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
 }
 
-void TurretMCBCanComm::init() { angleGyroMessageHandler.attachSelfToRxHandler(); }
+void TurretMCBCanComm::init()
+{
+    angleGyroMessageHandler.attachSelfToRxHandler();
+    turretStatusRxHandler.attachSelfToRxHandler();
+}
 
 void TurretMCBCanComm::sendData()
 {
     if (sendMcbDataTimer.execute())
     {
-        modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 8);
+        modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 1);
         txMsg.setExtended(false);
-        txMsg.data[0] = static_cast<uint8_t>(openHopperCover);
+        txMsg.data[0] = txCommandMsgBitmask.value;
         drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, txMsg);
+
+        // set this calibrate flag to false so the calibrate command is only sent once
+        txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU);
     }
 }
 
@@ -58,7 +71,7 @@ void TurretMCBCanComm::handleAngleGyroMessage(const modm::can::Message& message)
     imuMessageReceivedLEDBlinkCounter = (imuMessageReceivedLEDBlinkCounter + 1) % 100;
     drivers->leds.set(tap::gpio::Leds::Green, imuMessageReceivedLEDBlinkCounter > 50);
 
-    uint16_t rawYaw;
+    int16_t rawYaw;
     int16_t rawPitch;
     tap::arch::convertFromLittleEndian(&rawYaw, message.data);
     tap::arch::convertFromLittleEndian(&rawYawVelocity, message.data + 2);
@@ -71,12 +84,29 @@ void TurretMCBCanComm::handleAngleGyroMessage(const modm::can::Message& message)
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
 }
 
+void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
+{
+    limitSwitchDepressed = message.data[0] & 0b1;
+}
+
 TurretMCBCanComm::ImuRxHandler::ImuRxHandler(
     aruwsrc::Drivers* drivers,
     uint32_t id,
     tap::can::CanBus cB,
     TurretMCBCanComm* msgHandler,
-    ImuRxListenerFunc funcToCall)
+    CanCommListenerFunc funcToCall)
+    : CanRxListener(drivers, id, cB),
+      msgHandler(msgHandler),
+      funcToCall(funcToCall)
+{
+}
+
+TurretMCBCanComm::TurretStatusRxHandler::TurretStatusRxHandler(
+    aruwsrc::Drivers* drivers,
+    uint32_t id,
+    tap::can::CanBus cB,
+    TurretMCBCanComm* msgHandler,
+    CanCommListenerFunc funcToCall)
     : CanRxListener(drivers, id, cB),
       msgHandler(msgHandler),
       funcToCall(funcToCall)
@@ -84,6 +114,11 @@ TurretMCBCanComm::ImuRxHandler::ImuRxHandler(
 }
 
 void TurretMCBCanComm::ImuRxHandler::processMessage(const modm::can::Message& message)
+{
+    (msgHandler->*funcToCall)(message);
+}
+
+void TurretMCBCanComm::TurretStatusRxHandler::processMessage(const modm::can::Message& message)
 {
     (msgHandler->*funcToCall)(message);
 }

@@ -25,32 +25,31 @@
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/control/turret/commands/turret_setpoint_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "launcher/friction_wheel_rotate_command.hpp"
+#include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
-#include "sentinel/firing/sentinel_rotate_agitator_command.hpp"
-#include "turret/chassis-relative/turret_chassis_relative_command.hpp"
+#include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/cv/sentinel_turret_cv_command.hpp"
+#include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
+#include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::launcher;
-using namespace aruwsrc::control::sentinel::firing;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
 using namespace aruwsrc::control;
 using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::launcher;
 using tap::Remote;
 
 /*
@@ -78,9 +77,9 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
     false,
-    true,
     M_PI / 10,
-    150);
+    150,
+    true);
 
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
@@ -91,7 +90,7 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     tap::motor::MOTOR5,
     TurretSubsystem::CAN_BUS_MOTORS,
-    true,
+    false,
     "Pitch Turret");
 tap::motor::DjiMotor yawMotor(
     drivers(),
@@ -106,8 +105,14 @@ aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
     50,
+    0,
+    true,
+    M_PI / 16.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    130,
+    2,
     true,
     10);
 
@@ -117,15 +122,42 @@ CalibrateCommand agitatorCalibrateCommand(&agitator);
 SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
-FrictionWheelRotateCommand spinFrictionWheels(
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+    drivers(),
     &frictionWheels,
-    FrictionWheelRotateCommand::DEFAULT_WHEEL_RPM);
+    30.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
+FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    0.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-SentinelTurretCVCommand turretCVCommand(drivers(), &turretSubsystem, &agitator);
+// turret controllers
+algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+    &turretSubsystem,
+    chassis_rel::PITCH_PID_CONFIG);
 
-TurretChassisRelativeCommand turretManual(drivers(), &turretSubsystem);
+algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+    &turretSubsystem,
+    chassis_rel::YAW_PID_CONFIG);
+
+// turret commands
+cv::SentinelTurretCVCommand turretCVCommand(
+    drivers(),
+    &turretSubsystem,
+    &agitator,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
+
+user::TurretUserControlCommand turretManual(
+    drivers(),
+    &turretSubsystem,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
@@ -138,11 +170,13 @@ HoldCommandMapping rightSwitchDown(
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAgitatorManual},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
     {&sentinelDriveManual, &turretManual},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+    true);
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&sentinelDriveManual2},
@@ -155,8 +189,8 @@ void initializeSubsystems()
     sentinelDrive.initialize();
     frictionWheels.initialize();
     turretSubsystem.initialize();
-    drivers()->xavierSerial.attachChassis(&sentinelDrive);
-    drivers()->xavierSerial.attachTurret(&turretSubsystem);
+    drivers()->legacyVisionCoprocessor.attachChassis(&sentinelDrive);
+    drivers()->legacyVisionCoprocessor.attachTurret(&turretSubsystem);
 }
 
 /* register subsystems here -------------------------------------------------*/

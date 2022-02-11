@@ -34,6 +34,8 @@
 #include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/util_macros.hpp"
+
 namespace aruwsrc
 {
 class Drivers;
@@ -52,10 +54,10 @@ namespace agitator
 class AgitatorSubsystem : public tap::control::setpoint::SetpointSubsystem
 {
 public:
-#if defined(TARGET_SOLDIER) || defined(TARGET_OLD_SOLDIER)
+#if defined(ALL_SOLDIERS)
     // position PID terms
     // PID terms for soldier
-    static constexpr float PID_17MM_P = 100000.0f;
+    static constexpr float PID_17MM_P = 300'000.0f;
     static constexpr float PID_HOPPER_P = 100000.0f;
     static constexpr float PID_17MM_I = 0.0f;
     static constexpr float PID_17MM_D = 50.0f;
@@ -67,7 +69,16 @@ public:
 
     static constexpr bool isAgitatorInverted = false;
 
-    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 5;
+    /**
+     * The jamming constants. Agitator is considered jammed if difference between setpoint
+     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
+     *
+     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
+     *
+     * This should be positive or else weird behavior can occur
+     */
+    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
+    static constexpr uint32_t JAMMING_TIME = 250;
 
     // The motor that controls the hopper lid is an agitator_subsystem instance, so
     // I'm adding its constants here as well.
@@ -79,7 +90,7 @@ public:
 #elif defined(TARGET_SENTINEL)
     // position PID terms
     // PID terms for sentinel
-    static constexpr float PID_17MM_P = 120000.0f;
+    static constexpr float PID_17MM_P = 300'000.0f;
     static constexpr float PID_17MM_I = 0.0f;
     static constexpr float PID_17MM_D = 50.0f;
     static constexpr float PID_17MM_MAX_ERR_SUM = 0.0f;
@@ -90,30 +101,27 @@ public:
 
 #elif defined(TARGET_HERO)
     // Hero's waterwheel constants
-    static constexpr float PID_HERO_WATERWHEEL_P = 100000.0f;
+    static constexpr float PID_HERO_WATERWHEEL_P = 150'000.0f;
     static constexpr float PID_HERO_WATERWHEEL_I = 0.0f;
-    static constexpr float PID_HERO_WATERWHEEL_D = 10.0f;
+    static constexpr float PID_HERO_WATERWHEEL_D = 50.0f;
     static constexpr float PID_HERO_WATERWHEEL_MAX_ERR_SUM = 0.0f;
     static constexpr float PID_HERO_WATERWHEEL_MAX_OUT = 16000.0f;
 
-    static constexpr tap::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = tap::motor::MOTOR3;
+    static constexpr tap::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = tap::motor::MOTOR4;
     static constexpr tap::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-    static constexpr bool HERO_WATERWHEEL_INVERTED = true;
+    static constexpr bool HERO_WATERWHEEL_INVERTED = false;
 
     // PID terms for the hero kicker
-    static constexpr float PID_HERO_KICKER_P = 50000.0f;
+    static constexpr float PID_HERO_KICKER_P = 100'000.0f;
     static constexpr float PID_HERO_KICKER_I = 0.0f;
-    static constexpr float PID_HERO_KICKER_D = 10.0f;
+    static constexpr float PID_HERO_KICKER_D = 50.0f;
     static constexpr float PID_HERO_KICKER_MAX_ERR_SUM = 0.0f;
     // max out added by Tenzin since it wasn't here. This should
     // also be changed by someone who know's what they're doing!
     static constexpr float PID_HERO_KICKER_MAX_OUT = 16000.0f;
 
-    // There are two kicker motors that drive the shaft.
-    static constexpr tap::motor::MotorId HERO_KICKER1_MOTOR_ID = tap::motor::MOTOR7;
-    static constexpr tap::motor::MotorId HERO_KICKER2_MOTOR_ID = tap::motor::MOTOR8;
-    static constexpr tap::can::CanBus HERO_KICKER1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-    static constexpr tap::can::CanBus HERO_KICKER2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+    static constexpr tap::motor::MotorId HERO_KICKER_MOTOR_ID = tap::motor::MOTOR8;
+    static constexpr tap::can::CanBus HERO_KICKER_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr bool HERO_KICKER_INVERTED = false;
 
     /**
@@ -132,15 +140,27 @@ public:
     static constexpr float AGITATOR_GEAR_RATIO_GM3508 = 19.0f;
 
     /**
-     * The jamming constants. Agitator is considered jammed if difference between setpoint
-     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
-     */
-    static constexpr float JAMMING_DISTANCE = 1.0f;
-    static constexpr uint32_t JAMMING_TIME = 250;
-
-    /**
      * Construct an agitator with the passed in PID parameters, gear ratio, and motor-specific
      * identifiers.
+     *
+     * Jam parameters are not used if jam logic is disabled.
+     *
+     * @param[in] drivers pointer to aruwsrc drivers struct
+     * @param[in] kp PID kp constant
+     * @param[in] ki PID ki constant
+     * @param[in] kd PID kd constant
+     * @param[in] maxIAccum limit on integral value in PID
+     * @param[in] maxOutput max output of PID
+     * @param[in] agitatorGearRatio the gear ratio of this motor
+     * @param[in] agitatorMotorId the motor ID for this motor
+     * @param[in] isAgitatorInverted if `true` positive rotation is clockwise when
+     *      looking at the motor shaft opposite the motor. Counterclockwise if false
+     * @param[in] jammingDistance jamming timer counts down when distance between
+     *      setpoint and current angle is > `jammingDistance` and resets timer when
+     *      distance is <= `jammingDistance`.
+     * @param[in] jammingTime how long the jamming timer is. Once this timer finishes
+     *      the subsystem is considered jammed
+     * @param[in] jamLogicEnabled whether or not to enable jam detection
      */
     AgitatorSubsystem(
         aruwsrc::Drivers* drivers,
@@ -153,9 +173,9 @@ public:
         tap::motor::MotorId agitatorMotorId,
         tap::can::CanBus agitatorCanBusId,
         bool isAgitatorInverted,
-        bool jamLogicEnabled = true,
-        float jammingDistance = JAMMING_DISTANCE,
-        uint32_t jammingTime = JAMMING_TIME);
+        float jammingDistance,
+        uint32_t jammingTime,
+        bool jamLogicEnabled);
 
     void initialize() override;
 
@@ -179,6 +199,12 @@ public:
      *      radians is returned.
      */
     mockable float getCurrentValue() const override;
+
+    /**
+     * @return the setpoint tolerance. Returns the maximum distance in radians at which jam
+     *      condition will never be triggered.
+     */
+    float getJamSetpointTolerance() const override;
 
     /**
      * Attempts to calibrate the agitator at the current position, such that

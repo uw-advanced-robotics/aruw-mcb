@@ -23,6 +23,7 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "modm/architecture/interface/register.hpp"
 
 namespace modm::can
 {
@@ -45,6 +46,14 @@ namespace aruwsrc::can
 class TurretMCBCanComm
 {
 public:
+    enum class TxCommandMsgBitmask : uint8_t
+    {
+        OPEN_HOPPER = modm::Bit0,
+        RECALIBRATE_IMU = modm::Bit1,
+        TURN_LASER_ON = modm::Bit2,
+    };
+    MODM_FLAGS8(TxCommandMsgBitmask);
+
     TurretMCBCanComm(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
 
@@ -66,20 +75,36 @@ public:
         return static_cast<float>(rawYawVelocity) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
 
+    mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
+
     mockable inline float isConnected() const
     {
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
     }
 
-    void setOpenHopperCover(bool isOpen) { openHopperCover = isOpen; }
+    mockable inline void setOpenHopperCover(bool isOpen)
+    {
+        txCommandMsgBitmask.update(TxCommandMsgBitmask::OPEN_HOPPER, isOpen);
+    }
 
-    void sendData();
+    mockable inline void setLaserStatus(bool isOn)
+    {
+        txCommandMsgBitmask.update(TxCommandMsgBitmask::TURN_LASER_ON, isOn);
+    }
+
+    mockable inline void sendImuCalibrationRequest()
+    {
+        txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
+    }
+
+    mockable void sendData();
 
 private:
-    using ImuRxListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
+    using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
 
     static constexpr uint32_t ANGLE_GYRO_RX_CAN_ID = 0x1fd;
     static constexpr uint32_t TURRET_MCB_TX_CAN_ID = 0x1fe;
+    static constexpr uint32_t TURRET_STATUS_RX_CAN_ID = 0x1fc;
     static constexpr tap::can::CanBus IMU_MSG_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
@@ -93,12 +118,28 @@ private:
             uint32_t id,
             tap::can::CanBus cB,
             TurretMCBCanComm* msgHandler,
-            ImuRxListenerFunc funcToCall);
+            CanCommListenerFunc funcToCall);
         void processMessage(const modm::can::Message& message) override;
 
     private:
         TurretMCBCanComm* msgHandler;
-        ImuRxListenerFunc funcToCall;
+        CanCommListenerFunc funcToCall;
+    };
+
+    class TurretStatusRxHandler : public tap::can::CanRxListener
+    {
+    public:
+        TurretStatusRxHandler(
+            aruwsrc::Drivers* drivers,
+            uint32_t id,
+            tap::can::CanBus cB,
+            TurretMCBCanComm* msgHandler,
+            CanCommListenerFunc funcToCall);
+        void processMessage(const modm::can::Message& message) override;
+
+    private:
+        TurretMCBCanComm* msgHandler;
+        CanCommListenerFunc funcToCall;
     };
 
     aruwsrc::Drivers* drivers;
@@ -111,15 +152,21 @@ private:
 
     ImuRxHandler angleGyroMessageHandler;
 
+    ImuRxHandler turretStatusRxHandler;
+
     tap::arch::MilliTimeout imuConnectedTimeout;
 
-    bool openHopperCover;
+    TxCommandMsgBitmask_t txCommandMsgBitmask;
 
     tap::arch::PeriodicMilliTimer sendMcbDataTimer;
 
     int imuMessageReceivedLEDBlinkCounter = 0;
 
+    bool limitSwitchDepressed;
+
     void handleAngleGyroMessage(const modm::can::Message& message);
+
+    void handleTurretMessage(const modm::can::Message& message);
 };
 }  // namespace aruwsrc::can
 

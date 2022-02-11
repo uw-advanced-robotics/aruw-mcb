@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SOLDIER)
+#include "aruwsrc/util_macros.hpp"
+
+#ifdef ALL_SOLDIERS
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -28,23 +30,31 @@
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
+#include "chassis/chassis_imu_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
-#include "launcher/friction_wheel_rotate_command.hpp"
+#include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "turret/chassis-relative/turret_quick_turn_command.hpp"
+#include "turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/cv/turret_cv_command.hpp"
+#include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
-#include "turret/world-relative/turret_world_relative_command.hpp"
+#include "turret/user/turret_quick_turn_command.hpp"
+#include "turret/user/turret_user_world_relative_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -57,7 +67,6 @@ using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
-using namespace aruwsrc::launcher;
 using namespace aruwsrc::control::odometry;
 using namespace tap::control;
 using namespace aruwsrc::display;
@@ -79,13 +88,17 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     TurretSubsystem::PITCH_MOTOR_ID,
     TurretSubsystem::CAN_BUS_MOTORS,
-    true,
+    false,
     "Pitch Turret");
 tap::motor::DjiMotor yawMotor(
     drivers(),
     TurretSubsystem::YAW_MOTOR_ID,
     TurretSubsystem::CAN_BUS_MOTORS,
+#ifdef TARGET_SOLDIER_2021
     false,
+#else
+    true,
+#endif
     "Yaw Turret");
 TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
@@ -104,9 +117,9 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_MOTOR_ID,
     AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
     AgitatorSubsystem::isAgitatorInverted,
-    true,
     AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
-    AgitatorSubsystem::JAMMING_TIME);
+    AgitatorSubsystem::JAMMING_TIME,
+    true);
 
 FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
 
@@ -115,17 +128,56 @@ ClientDisplaySubsystem clientDisplay(drivers());
 TurretMCBHopperSubsystem hopperCover(drivers());
 
 /* define commands ----------------------------------------------------------*/
+ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
+
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, true);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
-TurretWorldRelativeCommand turretWorldRelativeCommand(drivers(), &turret);
+// Turret controllers
+algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+    &turret,
+    chassis_rel::PITCH_PID_CONFIG);
 
-TurretCVCommand turretCVCommand(drivers(), &turret);
+algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+    &turret,
+    chassis_rel::YAW_PID_CONFIG);
 
-TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
+algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
+    drivers(),
+    &turret,
+    world_rel_chassis_imu::YAW_PID_CONFIG);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG,
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::YAW_POS_PID_CONFIG,
+    world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+// turret commands
+user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
+    drivers(),
+    &turret,
+    &worldFrameYawChassisImuController,
+    &chassisFramePitchTurretController,
+    &worldFrameYawTurretImuController,
+    &worldFramePitchTurretImuController);
+
+cv::TurretCVCommand turretCVCommand(
+    drivers(),
+    &turret,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController);
+
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -133,40 +185,76 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
     50,
+    0,
+    true,
+    M_PI / 20.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    200,
+    2,
     true,
     10);
 MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
-    10,
+    100,
+    0,
     true,
-    100);
+    M_PI / 20.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    200,
+    2,
+    true,
+    10);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    M_PI / 2.0f,
+    50,
     0,
+    true,
+    M_PI / 16.0f,
+    M_PI / 2.0f,
+    M_PI / 4.0f,
+    200,
+    2,
     false,
-    50);
+    10);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(drivers(), &frictionWheels);
+FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    15.0f,
+    false,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-FrictionWheelRotateCommand stopFrictionWheels(&frictionWheels, 0);
+FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    0.0f,
+    true,
+    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    nullptr,
+    &chassisImuDriveCommand,
     &chassisDriveCommand);
 
 OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
+
+imu::ImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    &turret,
+    &chassis,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController,
+    true);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -177,7 +265,8 @@ HoldCommandMapping rightSwitchDown(
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&agitatorShootFastLimited},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
@@ -197,12 +286,29 @@ PressCommandMapping leftMousePressedShiftNotPressed(
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
     {&agitatorShootFastNotLimited},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}));
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
+    true);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
+PressCommandMapping bPressed(drivers(), {&imuCalibrateCommand}, RemoteMapState({Remote::Key::B}));
+PressCommandMapping qPressed(
+    drivers(),
+    {&chassisImuDriveCommand},
+    RemoteMapState({Remote::Key::Q}));
+PressCommandMapping ePressed(
+    drivers(),
+    {&chassisImuDriveCommand},
+    RemoteMapState({Remote::Key::E}));
+PressCommandMapping xPressed(
+    drivers(),
+    {&chassisAutorotateCommand},
+    RemoteMapState({Remote::Key::X}));
+
+// Safe disconnect function
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
@@ -226,15 +332,15 @@ void initializeSubsystems()
     frictionWheels.initialize();
     hopperCover.initialize();
     clientDisplay.initialize();
-    drivers()->xavierSerial.attachChassis(&chassis);
-    drivers()->xavierSerial.attachTurret(&turret);
+    drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
+    drivers()->legacyVisionCoprocessor.attachTurret(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSoldierCommands(aruwsrc::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretWorldRelativeCommand);
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
@@ -243,6 +349,7 @@ void setDefaultSoldierCommands(aruwsrc::Drivers *)
 void startSoldierCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -258,6 +365,10 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
+    drivers->commandMapper.addMap(&bPressed);
+    drivers->commandMapper.addMap(&qPressed);
+    drivers->commandMapper.addMap(&ePressed);
+    drivers->commandMapper.addMap(&xPressed);
 }
 }  // namespace soldier_control
 
@@ -265,6 +376,8 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &soldier_control::remoteSafeDisconnectFunction);
     soldier_control::initializeSubsystems();
     soldier_control::registerSoldierSubsystems(drivers);
     soldier_control::setDefaultSoldierCommands(drivers);
@@ -272,5 +385,7 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
     soldier_control::registerSoldierIoMappings(drivers);
 }
 }  // namespace aruwsrc::control
+
+imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &soldier_control::imuCalibrateCommand; }
 
 #endif

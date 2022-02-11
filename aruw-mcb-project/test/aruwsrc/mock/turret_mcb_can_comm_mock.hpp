@@ -37,7 +37,12 @@ public:
     MOCK_METHOD(float, getPitchVelocity, (), (const override));
     MOCK_METHOD(float, getYaw, (), (const override));
     MOCK_METHOD(float, getYawVelocity, (), (const override));
+    MOCK_METHOD(bool, getLimitSwitchDepressed, (), (const override));
     MOCK_METHOD(float, isConnected, (), (const override));
+    MOCK_METHOD(void, setOpenHopperCover, (bool), (override));
+    MOCK_METHOD(void, setLaserStatus, (bool), (override));
+    MOCK_METHOD(void, sendImuCalibrationRequest, (), (override));
+    MOCK_METHOD(void, sendData, (), (override));
 };
 }  // namespace aruwsrc::mock
 

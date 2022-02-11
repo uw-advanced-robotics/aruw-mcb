@@ -32,42 +32,50 @@ MainMenu::MainMenu(
     aruwsrc::Drivers* drivers)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, MAIN_MENU_ID),
       drivers(drivers),
+      imuCalibrateMenu(stack, drivers),
       errorMenu(stack, drivers),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers),
-      commandSchedulerMenu(stack, drivers)
+      commandSchedulerMenu(stack, drivers),
+      refSerialMenu(stack, drivers)
 {
 }
 
 void MainMenu::initialize()
 {
     addEntry(
-        ErrorMenu::getMenuName(),
+        ImuCalibrateMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
             this,
-            &MainMenu::addErrorMenuCallback));
-    addEntry(
-        HardwareTestMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
-            this,
-            &MainMenu::addHardwareTestMenuCallback));
+            &MainMenu::addImuCalibrateMenuCallback));
     addEntry(
         MotorMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
             this,
             &MainMenu::addMotorMenuCallback));
     addEntry(
-        "Property Table Menu",
+        RefSerialMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
             this,
-            &MainMenu::addPropertyTableCallback));
+            &MainMenu::addRefSerialMenuCallback));
     addEntry(
         CommandSchedulerMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
             this,
             &MainMenu::addCommandSchedulerCallback));
+    addEntry(
+        HardwareTestMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+            this,
+            &MainMenu::addHardwareTestMenuCallback));
 
     setTitle("Main Menu");
+}
+
+void MainMenu::addImuCalibrateMenuCallback()
+{
+    ImuCalibrateMenu* icm = new (&imuCalibrateMenu) ImuCalibrateMenu(getViewStack(), drivers);
+    getViewStack()->push(icm);
 }
 
 void MainMenu::addErrorMenuCallback()
@@ -96,7 +104,15 @@ void MainMenu::addPropertyTableCallback()
 
 void MainMenu::addCommandSchedulerCallback()
 {
-    getViewStack()->push(new CommandSchedulerMenu(getViewStack(), drivers));
+    CommandSchedulerMenu* csm =
+        new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers);
+    getViewStack()->push(csm);
+}
+
+void MainMenu::addRefSerialMenuCallback()
+{
+    RefSerialMenu* rsm = new (&refSerialMenu) RefSerialMenu(getViewStack(), drivers);
+    getViewStack()->push(rsm);
 }
 }  // namespace display
 

@@ -29,6 +29,7 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
+#include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
@@ -46,9 +47,9 @@ class SentinelDriveSubsystem : public tap::control::chassis::ChassisSubsystemInt
 {
 public:
     /// @see power_limiter.hpp for what these mean
-    static constexpr float MAX_ENERGY_BUFFER = 200.0f;
+    static constexpr float STARTING_ENERGY_BUFFER = 200.0f;
     static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 100.0f;
-    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 0;
+    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10;
     static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 5;
     static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 15000;
 
@@ -146,7 +147,7 @@ private:
 
     tap::motor::DjiMotor* chassisMotors[2];
 
-    const tap::motor::M3508Constants motorConstants;
+    tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
 
     tap::control::chassis::PowerLimiter powerLimiter;
 };
