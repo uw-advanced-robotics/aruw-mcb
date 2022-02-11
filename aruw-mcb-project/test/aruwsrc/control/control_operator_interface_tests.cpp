@@ -449,15 +449,15 @@ TEST(ControlOperatorInterface, getTurretInput_fine_tune)
 {
     INIT_TEST
     EXPECT_NEAR(-1 * ControlOperatorInterface::FINE_TUNE_MODIFIER, runTurretYawInputTest(drivers, operatorInterface, 0, INT16_MAX, true), 1E-3);
-    EXPECT_NEAR(-1 * ControlOperatorInterface::FINE_TUNE_MODIFIER, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MAX, true), 1E-3);
+    EXPECT_NEAR(1 * ControlOperatorInterface::FINE_TUNE_MODIFIER, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MAX, true), 1E-3);
 
     EXPECT_NEAR(
-        1 * ControlOperatorInterface::FINE_TUNE_MODIFIER,
+        -1 * ControlOperatorInterface::FINE_TUNE_MODIFIER,
         runTurretYawInputTest(
             drivers,
             operatorInterface,
             0,
-            -ControlOperatorInterface::USER_MOUSE_YAW_MAX, true),
+            ControlOperatorInterface::USER_MOUSE_YAW_MAX, true),
         1E-3);
     EXPECT_NEAR(
         1 * ControlOperatorInterface::FINE_TUNE_MODIFIER,
@@ -465,7 +465,7 @@ TEST(ControlOperatorInterface, getTurretInput_fine_tune)
             drivers,
             operatorInterface,
             0,
-            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX, true),
+            ControlOperatorInterface::USER_MOUSE_PITCH_MAX, true),
         1E-3);
 }
 
