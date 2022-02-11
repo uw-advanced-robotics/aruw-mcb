@@ -27,7 +27,7 @@
 using namespace aruwsrc;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::mock;
-using namespace tap::serial;
+using namespace tap::communication::serial;
 using namespace testing;
 
 using tap::arch::clock::setTime;

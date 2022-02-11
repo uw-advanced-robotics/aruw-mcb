@@ -34,7 +34,7 @@ static constexpr float CHASSIS_VEL = 0.41887906;
 static constexpr float CHASSIS_VEL_R = 0.15330973;
 
 #define SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers)                                                 \
-    tap::serial::RefSerialData::Rx::RobotData robotData;                                         \
+    tap::communication::serial::RefSerialData::Rx::RobotData robotData;                          \
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(testing::Return(false)); \
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(testing::ReturnRef(robotData));
 
