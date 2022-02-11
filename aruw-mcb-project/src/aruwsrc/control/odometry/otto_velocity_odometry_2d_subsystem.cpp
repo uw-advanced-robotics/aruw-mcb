@@ -29,10 +29,17 @@ OttoVelocityOdometry2DSubsystem::OttoVelocityOdometry2DSubsystem(
     aruwsrc::Drivers* drivers,
     aruwsrc::control::turret::TurretSubsystem* turret,
     aruwsrc::chassis::ChassisSubsystem* chassis)
-    : Odometry2DSubsystem(drivers, &orientationGetter, &displacementGetter),
-      orientationGetter(drivers, turret),
-      displacementGetter(chassis)
+    : Subsystem(drivers),
+      odometryTracker(&orientationObserver, &displacementObserver),
+      orientationObserver(drivers, turret),
+      displacementObserver(chassis)
 {
+}
+
+void OttoVelocityOdometry2DSubsystem::refresh()
+{
+    displacementObserver.update();
+    odometryTracker.update();
 }
 
 }  // namespace aruwsrc::control::odometry

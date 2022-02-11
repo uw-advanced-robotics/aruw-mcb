@@ -20,7 +20,11 @@
 #ifndef OTTO_VELOCITY_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define OTTO_VELOCITY_ODOMETRY_2D_SUBSYSTEM_HPP_
 
-#include "tap/algorithms/odometry/odometry_2d_subsystem.hpp"
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
+#include "tap/control/subsystem.hpp"
+
+#include "modm/math/geometry/location_2d.hpp"
 
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 #include "otto_chassis_world_yaw_observer.hpp"
@@ -58,7 +62,8 @@ namespace aruwsrc::control::odometry
  * @see OttoChassisOrientationGetter
  * @see OttoChassisVelocityGetter
  */
-class OttoVelocityOdometry2DSubsystem final : public tap::algorithms::odometry::Odometry2DSubsystem
+class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
+                                              public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     /**
@@ -71,10 +76,17 @@ public:
         aruwsrc::control::turret::TurretSubsystem* turret,
         aruwsrc::chassis::ChassisSubsystem* chassis);
 
+    void refresh() override;
+
+    modm::Location2D<float> getCurrentLocation2D() const override
+    {
+        return odometryTracker.getCurrentLocation2D();
+    }
+
 private:
-    tap::Drivers* drivers;
-    OttoChassisWorldYawObserver orientationGetter;
-    OttoChassisVelocityDisplacement2DObserver displacementGetter;
+    tap::algorithms::odometry::Odometry2DTracker odometryTracker;
+    OttoChassisWorldYawObserver orientationObserver;
+    OttoChassisVelocityDisplacement2DObserver displacementObserver;
 };
 
 }  // namespace aruwsrc::control::odometry
