@@ -45,6 +45,7 @@
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
+#include "odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
@@ -64,6 +65,7 @@ using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::odometry;
 using namespace tap::control;
 using namespace aruwsrc::display;
 using namespace aruwsrc::control;
@@ -99,6 +101,8 @@ tap::motor::DjiMotor yawMotor(
 TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 ChassisSubsystem chassis(drivers());
+
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 
 AgitatorSubsystem agitator(
     drivers(),
@@ -300,6 +304,7 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -310,6 +315,7 @@ void initializeSubsystems()
 {
     turret.initialize();
     chassis.initialize();
+    odometrySubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
     hopperCover.initialize();
