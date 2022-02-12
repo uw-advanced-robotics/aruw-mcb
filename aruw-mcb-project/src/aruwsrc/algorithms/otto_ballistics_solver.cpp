@@ -24,6 +24,7 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -36,11 +37,13 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const Drivers &drivers,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const chassis::ChassisSubsystem &chassisSubsystem,
+    const control::turret::TurretSubsystem &turretSubsystem,
     const control::launcher::FrictionWheelSubsystem &frictionWheels,
     const float defaultLaunchSpeed)
     : drivers(drivers),
       odometryInterface(odometryInterface),
       chassisSubsystem(chassisSubsystem),
+      turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed)
 {
@@ -59,11 +62,12 @@ bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawA
     const Vector2f robotPosition = odometryInterface.getCurrentLocation2D().getPosition();
 
     Matrix<float, 3, 1> chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    const float worldRelativeOrientation = drivers.turretMCBCanComm.getYaw();
+    // chassis subsystem uses Z-down (Y-right) convention, while vision contract expects X-up (Y-left)
+    chassisVelocity[1][0] *= -1;
+    const float worldRelativeOrientation = drivers.turretMCBCanComm.getYaw() - this->turretSubsystem.getYawAngleFromCenter();
     chassisSubsystem.getVelocityWorldRelative(chassisVelocity, toRadian(worldRelativeOrientation));
 
     // target state, frame whose axis is at the turret center and z is up
-    // assume z position/velocity of the chassis is 0 since we don't measure it
     // assume acceleration of the chassis is 0 since we don't measure it
     ballistics::MeasuredKinematicState targetState = {
         .position = {aimData.xPos - robotPosition.x, aimData.yPos - robotPosition.y, aimData.zPos},
@@ -77,7 +81,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawA
 
     uint32_t projectforwardtimedt = tap::arch::clock::getTimeMicroseconds() - aimData.timestamp;
 
-    targetState.position = targetState.projectForward(projectforwardtimedt / 1E6);
+    targetState.position = targetState.projectForward(projectforwardtimedt / (float)1E6);
 
     return ballistics::findTargetProjectileIntersection(
         targetState,

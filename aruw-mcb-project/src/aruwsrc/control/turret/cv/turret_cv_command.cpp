@@ -53,6 +53,7 @@ TurretCVCommand::TurretCVCommand(
           *drivers,
           odometryInterface,
           chassisSubsystem,
+          *turretSubsystem,
           frictionWheels,
           defaultLaunchSpeed),
       userPitchInputScalar(userPitchInputScalar),
