@@ -86,11 +86,7 @@ public:
      */
     AgitatorSubsystem(
         aruwsrc::Drivers* drivers,
-        float kp,
-        float ki,
-        float kd,
-        float maxIAccum,
-        float maxOutput,
+        tap::algorithms::SmoothPid pidParams,
         float agitatorGearRatio,
         tap::motor::MotorId agitatorMotorId,
         tap::can::CanBus agitatorCanBusId,

@@ -17,30 +17,35 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "tap/motor/dji_motor.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 
 // Do not include this file directly, use agitator_consants.hpp
 
 namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
-static constexpr float PID_HERO_WATERWHEEL_P = 100000.0f;
-static constexpr float PID_HERO_WATERWHEEL_I = 0.0f;
-static constexpr float PID_HERO_WATERWHEEL_D = 10.0f;
-static constexpr float PID_HERO_WATERWHEEL_MAX_ERR_SUM = 0.0f;
-static constexpr float PID_HERO_WATERWHEEL_MAX_OUT = 16000.0f;
+static constexpr tap::algorithms::SmoothPidConfig PID_HERO_WATERFALL = {
+    .kp = 100000.0f,
+    .ki = 0.0f,
+    .kd = 10.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 16000.0f
+};
 
 static constexpr tap::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = tap::motor::MOTOR3;
 static constexpr tap::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 static constexpr bool HERO_WATERWHEEL_INVERTED = true;
 
 // PID terms for the hero kicker
-static constexpr float PID_HERO_KICKER_P = 50000.0f;
-static constexpr float PID_HERO_KICKER_I = 0.0f;
-static constexpr float PID_HERO_KICKER_D = 10.0f;
-static constexpr float PID_HERO_KICKER_MAX_ERR_SUM = 0.0f;
-// max out added by Tenzin since it wasn't here. This should
-// also be changed by someone who know's what they're doing!
-static constexpr float PID_HERO_KICKER_MAX_OUT = 16000.0f;
+static constexpr tap::algorithms::SmoothPidConfig PID_HERO_KICKER = {
+    .kp = 50000.0f,
+    .ki = 0.0f,
+    .kd = 10.0f,
+    // max out added by Tenzin since it wasn't here. This should
+    // also be changed by someone who know's what they're doing!
+    .maxICumulative = 0.0f,
+    .maxOutput = 16000.0f
+};
 
 // There are two kicker motors that drive the shaft.
 static constexpr tap::motor::MotorId HERO_KICKER1_MOTOR_ID = tap::motor::MOTOR7;
