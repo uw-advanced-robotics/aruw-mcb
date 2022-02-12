@@ -33,7 +33,7 @@ namespace aruwsrc::chassis
 class ChassisSubsystem;
 }
 
-namespace aruwsrc::control::odometry
+namespace aruwsrc::algorithms::odometry
 {
 /**
  * @brief Class that gets 2D chassis displacement by integrating chassis velocity.
@@ -80,6 +80,6 @@ private:
     bool dataValid;
 };
 
-}  // namespace aruwsrc::control::odometry
+}  // namespace aruwsrc::algorithms::odometry
 
 #endif  // OTTO_CHASSIS_VELOCITY_DISPLACEMENT_2D_OBSERVER_HPP_

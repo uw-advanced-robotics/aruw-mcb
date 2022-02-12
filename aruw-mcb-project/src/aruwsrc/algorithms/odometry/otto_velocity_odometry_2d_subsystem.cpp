@@ -21,7 +21,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc::control::odometry
+namespace aruwsrc::algorithms::odometry
 {
 // Yep that's all this constructor does, is construct the right getters and pass
 // their pointers to the base class (not in that order)
@@ -42,4 +42,4 @@ void OttoVelocityOdometry2DSubsystem::refresh()
     odometryTracker.update();
 }
 
-}  // namespace aruwsrc::control::odometry
+}  // namespace aruwsrc::algorithms::odometry

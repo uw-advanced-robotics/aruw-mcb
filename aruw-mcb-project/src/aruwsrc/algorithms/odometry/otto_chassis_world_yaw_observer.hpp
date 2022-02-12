@@ -32,7 +32,7 @@ namespace aruwsrc::control::turret
 class TurretSubsystem;
 }
 
-namespace aruwsrc::control::odometry
+namespace aruwsrc::algorithms::odometry
 {
 /**
  * @brief Otto specific ChassisWorldYawObserverInterface implementation
@@ -74,6 +74,6 @@ private:
     aruwsrc::control::turret::TurretSubsystem* turret;
 };
 
-}  // namespace aruwsrc::control::odometry
+}  // namespace aruwsrc::algorithms::odometry
 
 #endif  // OTTO_CHASSIS_WORLD_YAW_OBSERVER_HPP_

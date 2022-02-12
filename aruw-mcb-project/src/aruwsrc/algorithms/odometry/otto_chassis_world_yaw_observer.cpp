@@ -23,7 +23,7 @@
 #include "aruwsrc/drivers.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-namespace aruwsrc::control::odometry
+namespace aruwsrc::algorithms::odometry
 {
 OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
     aruwsrc::Drivers* drivers,
@@ -59,4 +59,4 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     }
 }
 
-}  // namespace aruwsrc::control::odometry
+}  // namespace aruwsrc::algorithms::odometry
