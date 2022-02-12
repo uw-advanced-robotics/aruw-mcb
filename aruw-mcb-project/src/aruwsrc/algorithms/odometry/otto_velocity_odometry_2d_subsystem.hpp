@@ -43,7 +43,7 @@ namespace aruwsrc::chassis
 class ChassisSubsystem;
 }
 
-namespace aruwsrc::control::odometry
+namespace aruwsrc::algorithms::odometry
 {
 /**
  * @brief Velocity-based odometry class for the Otto vision system.
@@ -89,6 +89,6 @@ private:
     OttoChassisVelocityDisplacement2DObserver displacementObserver;
 };
 
-}  // namespace aruwsrc::control::odometry
+}  // namespace aruwsrc::algorithms::odometry
 
 #endif  // OTTO_VELOCITY_ODOMETRY_2D_SUBSYSTEM_HPP_
