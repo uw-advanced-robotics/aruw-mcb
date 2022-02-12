@@ -95,8 +95,8 @@ void VisionCoprocessor::sendOdometryData()
 
     OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
 
-    odometryData->chassisX = 0.0f;
-    odometryData->chassisY = 0.0f;
+    odometryData->chassisX = location.getX();
+    odometryData->chassisY = location.getY();
     odometryData->chassisZ = 0.0f;
     odometryData->turretPitch = turretMCBCanComm->getPitch();
     odometryData->turretYaw = turretMCBCanComm->getYaw();
