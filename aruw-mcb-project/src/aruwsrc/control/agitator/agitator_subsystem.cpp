@@ -63,6 +63,35 @@ AgitatorSubsystem::AgitatorSubsystem(
 {
 }
 
+AgitatorSubsystem::AgitatorSubsystem(
+    aruwsrc::Drivers* drivers,
+    float kp,
+    float ki,
+    float kd,
+    float maxIAccum,
+    float maxOutput,
+    float agitatorGearRatio,
+    tap::motor::MotorId agitatorMotorId,
+    tap::can::CanBus agitatorCanBusId,
+    bool isAgitatorInverted,
+    float jammingDistance,
+    uint32_t jammingTime,
+    bool jamLogicEnabled)
+    : tap::control::Subsystem(drivers),
+      agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
+      jamChecker(this, jammingDistance, jammingTime),
+      gearRatio(agitatorGearRatio),
+      jamLogicEnabled(jamLogicEnabled),
+      agitatorMotor(
+          drivers,
+          agitatorMotorId,
+          agitatorCanBusId,
+          isAgitatorInverted,
+          "agitator motor")
+{
+}
+
+
 void AgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
 
 void AgitatorSubsystem::refresh()

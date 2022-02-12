@@ -104,6 +104,30 @@ public:
      */
     mockable inline float getSetpoint() const override { return desiredAgitatorAngle; }
 
+    AgitatorSubsystem(
+        aruwsrc::Drivers* drivers,
+        float kp,
+        float ki,
+        float kd,
+        float maxIAccum,
+        float maxOutput,
+        float agitatorGearRatio,
+        tap::motor::MotorId agitatorMotorId,
+        tap::can::CanBus agitatorCanBusId,
+        bool isAgitatorInverted,
+        float jammingDistance,
+        uint32_t jammingTime,
+        bool jamLogicEnabled);
+
+    void initialize() override;
+
+    void refresh() override;
+
+    /**
+     * @return The angle set in `setSetpoint`.
+     */
+    mockable inline float getSetpoint() const override { return desiredAgitatorAngle; }
+
     /**
      * Sets desired angle in radians of the agitator motor, relative to where the agitator
      * has been initialized.

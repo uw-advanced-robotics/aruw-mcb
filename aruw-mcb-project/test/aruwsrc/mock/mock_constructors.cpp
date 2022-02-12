@@ -51,7 +51,8 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
     float jammingDistance,
     uint32_t jammingTime,
     bool jamLogicEnabled)
-    : AgitatorSubsystem(
+    : Subsystem(drivers),
+      AgitatorSubsystem(
           drivers,
           kp,
           ki,
