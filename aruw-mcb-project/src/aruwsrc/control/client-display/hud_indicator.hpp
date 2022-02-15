@@ -39,6 +39,9 @@ namespace aruwsrc::control::client_display
     delayTimer.restart(RefSerialData::Tx::getWaitTimeAfterGraphicSendMs(graphic)); \
     RF_WAIT_UNTIL(delayTimer.isExpired() || delayTimer.isStopped());
 
+/**
+ * A generic HUD indicator interface class with helper utilities that other HUD indicators may use.
+ */
 class HudIndicator : protected modm::Resumable<2>,
                      protected tap::communication::serial::RefSerialData
 {

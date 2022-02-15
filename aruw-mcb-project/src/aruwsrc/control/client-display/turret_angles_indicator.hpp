@@ -34,9 +34,19 @@ class Drivers;
 
 namespace aruwsrc::control::client_display
 {
+/**
+ * Draws the current pitch/yaw turret angles (in degrees, in the world frame).
+ */
 class TurretAnglesIndicator : public HudIndicator
 {
 public:
+    /**
+     * Construct a TurretAnglesIndicator object.
+     *
+     * @param[in] drivers Global drivers instance.
+     * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
+     * turret and to print turret angles (if turret chassis relative angles are being printed).
+     */
     TurretAnglesIndicator(
         aruwsrc::Drivers *drivers,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem);

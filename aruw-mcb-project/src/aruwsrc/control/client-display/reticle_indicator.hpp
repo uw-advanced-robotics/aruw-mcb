@@ -35,9 +35,19 @@ class Drivers;
 
 namespace aruwsrc::control::client_display
 {
+/**
+ * Draws a static reticle defined as a bunch of horizontal lines with a verticle line connecting
+ * them. The reticle location is defined by the array
+ * `TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES`.
+ */
 class ReticleIndicator : public HudIndicator
 {
 public:
+    /**
+     * Construct a ReticleIndicator.
+     *
+     * @param[in] drivers Global drivers instance.
+     */
     ReticleIndicator(aruwsrc::Drivers *drivers);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;

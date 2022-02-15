@@ -89,6 +89,8 @@ public:
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
      * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
      * turret and to print turret angles (if turret chassis relative angles are being printed).
+     * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
+     * calibrated.
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
      * never be selected as the current chassis command.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command

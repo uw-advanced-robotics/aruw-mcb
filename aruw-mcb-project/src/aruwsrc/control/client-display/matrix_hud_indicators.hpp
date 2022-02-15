@@ -39,9 +39,44 @@ class Drivers;
 
 namespace aruwsrc::control::client_display
 {
+/**
+ * The matrix HUD will display a matrix of possible robot states. Each column is a different
+ * robot feature (for example chassis, turret, firing system, etc.). A box circling a particular
+ * robot state indicates the robot is in that particular state.
+ *
+ * The matrix indicator looks something like this:
+ *
+ * ```
+ *   CHAS   SHOT
+ *  +----+
+ *  |BEYB|  REDY
+ *  +----+ +----+
+ *   FLLW  |LOAD|
+ *         +----+
+ * ```
+ *
+ * In the example above, the chassis is beyblading and the launcher is loading.
+ */
 class MatrixHudIndicators : public HudIndicator
 {
 public:
+    /**
+     * Construct a MatrixHudIndicators object.
+     *
+     * @param[in] drivers Global drivers instance.
+     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
+     * that may be nullptr if no hopper exists.
+     * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
+     * are on or off.
+     * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
+     * never be selected as the current chassis command.
+     * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
+     * will never be selected as the current chassis command.
+     * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
+     * will never be selected as the current chassis command.
+     * @param[in] chassisDriveCmd May be nullptr. If nullptr the chassis drive command will never be
+     * selected as the current chassis command.
+     */
     MatrixHudIndicators(
         aruwsrc::Drivers *drivers,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
@@ -58,25 +93,6 @@ public:
     void initialize() override final;
 
 private:
-    /*
-     * The matrix HUD will display a matrix of possible robot states. Each column is a different
-     * robot feature (for example chassis, turret, firing system, etc.). A box circling a particular
-     * robot state indicates the robot is in that particular state.
-     *
-     * The matrix indicator looks something like this:
-     *
-     * ```
-     *   CHAS   SHOT
-     *  +----+
-     *  |BEYB|  REDY
-     *  +----+ +----+
-     *   FLLW  |LOAD|
-     *         +----+
-     * ```
-     *
-     * In the example above, the chassis is beyblading and the launcher is loading.
-     */
-
     /** The color of the title row of the matrix HUD indicator */
     static constexpr Tx::GraphicColor MATRIX_HUD_INDICATOR_TITLE_COLOR = Tx::GraphicColor::GREEN;
     /** The color of the labels in the HUD matrix. */

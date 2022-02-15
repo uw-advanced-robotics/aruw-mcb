@@ -38,9 +38,24 @@ class Drivers;
 
 namespace aruwsrc::control::client_display
 {
+/**
+ * A list of indicators that represent different boolean (true/false) states.
+ */
 class BooleanHudIndicators : public HudIndicator
 {
 public:
+    /**
+     * Construct a BooleanHudIndicators object.
+     *
+     * @param[in] drivers Global drivers instance.
+     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
+     * that may be nullptr if no hopper exists.
+     * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
+     * are on or off.
+     * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
+     * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
+     * calibrated.
+     */
     BooleanHudIndicators(
         aruwsrc::Drivers *drivers,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,

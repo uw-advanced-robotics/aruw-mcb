@@ -159,7 +159,7 @@ void MatrixHudIndicators::updateIndicatorState()
             shooterState = ShooterState::LOADING;
         }
 #elif defined(TARGET_HERO)
-        if (drivers->turretMCBCanComm.getLimitSwitchDepressed())
+        if (!drivers->turretMCBCanComm.getLimitSwitchDepressed())
         {
             shooterState = ShooterState::LOADING;
         }

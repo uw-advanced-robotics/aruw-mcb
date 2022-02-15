@@ -36,9 +36,21 @@ class Drivers;
 
 namespace aruwsrc::control::client_display
 {
+/**
+ * Draws a little chassis graphic on the HUD that represents the actual rotation of the chassis.
+ * Relative to the turret. A turret is drawn as a line straight up and the chassis rotates around
+ * the turret.
+ */
 class ChassisOrientationIndicator : public HudIndicator
 {
 public:
+    /**
+     * Construct a ClientDisplayCommand.
+     *
+     * @param[in] drivers Global drivers instance.
+     * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
+     * turret and to print turret angles (if turret chassis relative angles are being printed).
+     */
     ChassisOrientationIndicator(
         aruwsrc::Drivers *drivers,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem);
