@@ -87,8 +87,8 @@ void VisionCoprocessor::sendShutdownMessage()
     DJISerial::SerialMessage<1> shutdownMessage;
 
     shutdownMessage.messageType = CV_MESSAGE_TYPE_SHUTDOWN;
-    shutdownMessage.data[0] = 1;
-    shutdownMessage.computeCRC16();
+    shutdownMessage.data[0] = 0;
+    shutdownMessage.setCRC16();
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
         reinterpret_cast<uint8_t*>(&shutdownMessage),
@@ -99,8 +99,8 @@ void VisionCoprocessor::sendRebootMessage()
 {
     DJISerial::SerialMessage<1> rebootMessage;
     rebootMessage.messageType = CV_MESSAGE_TYPE_REBOOT;
-    rebootMessage.data[0] = 1;
-    rebootMessage.computeCRC16();
+    rebootMessage.data[0] = 0;
+    rebootMessage.setCRC16();
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
         reinterpret_cast<uint8_t*>(&rebootMessage),
@@ -129,7 +129,7 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->turretYaw = turretMCBCanComm->getYaw();
     odometryData->timestamp = tap::arch::clock::getTimeMicroseconds();
 
-    odometryMessage.computeCRC16();
+    odometryMessage.setCRC16();
 
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
@@ -146,7 +146,7 @@ void VisionCoprocessor::sendRobotTypeData()
         DJISerial::SerialMessage<1> robotTypeMessage;
         robotTypeMessage.messageType = CV_MESSAGE_TYPE_ROBOT_ID;
         robotTypeMessage.data[0] = static_cast<uint8_t>(currRobotId);
-        robotTypeMessage.computeCRC16();
+        robotTypeMessage.setCRC16();
         drivers->uart.write(
             VISION_COPROCESSOR_TX_UART_PORT,
             reinterpret_cast<uint8_t*>(&robotTypeMessage),
