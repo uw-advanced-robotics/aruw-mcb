@@ -256,7 +256,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
-    hopperCover,
+    &hopperCover,
     frictionWheels,
     agitator,
     turret,

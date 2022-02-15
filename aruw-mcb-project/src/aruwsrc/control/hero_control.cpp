@@ -235,6 +235,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
     &clientDisplay,
+    nullptr,
     frictionWheels,
     waterwheelAgitator,
     turret,

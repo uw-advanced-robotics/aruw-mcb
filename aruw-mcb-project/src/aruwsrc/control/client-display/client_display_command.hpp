@@ -20,12 +20,12 @@
 #ifndef CLIENT_DISPLAY_COMMAND_HPP_
 #define CLIENT_DISPLAY_COMMAND_HPP_
 
+#include <array>
 #include <tuple>
-#include <vector>
 
 #include "tap/architecture/periodic_timer.hpp"
-#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
@@ -59,6 +59,13 @@ class ClientDisplaySubsystem;
 /**
  * A command that controls what is displayed on the RoboMaster client's interactive HUD.
  *
+ * The following graphic features are supported:
+ * - Static reticle.
+ * - Simulated chassis to represent chassis location.
+ * - A list of boolean indicators.
+ * - A table of selection indicators (where the graphic can be in one of multiple states).
+ * - Turret pitch/yaw angles.
+ *
  * @note Only a single ClientDisplayCommand should be instantiated. If more than 1 is instantiated,
  * this will lead to undefined behavior.
  */
@@ -73,7 +80,8 @@ public:
      *
      * @param[in] drivers Global drivers instance.
      * @param[in] clientDisplay The client display subsystem associated with the command.
-     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed.
+     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
+     * that may be nullptr if no hopper exists.
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
      * are on or off.
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
@@ -91,9 +99,7 @@ public:
     ClientDisplayCommand(
         aruwsrc::Drivers *drivers,
         ClientDisplaySubsystem *clientDisplay,
-#if defined(ALL_SOLDIERS)
-        const aruwsrc::control::TurretMCBHopperSubsystem &hopperSubsystem,
-#endif
+        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
@@ -118,7 +124,7 @@ private:
 
     /*
      * Note that absolute X/Y pixel coordinates are measured from the bottom left side of the
-     * screen.
+     * screen, X is increasing from left to right and Y is increasing from bottom to top.
      */
 
     /** Width of the screen, in pixels. */
@@ -133,7 +139,7 @@ private:
 
     // Boolean HUD indicator related constants
 
-    /** X pixel where the boolean hud indicator circles will be centered around. */
+    /** X pixel coordinate that the boolean hud indicator circles will be centered around. */
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_CENTER_X = 280;
     /** Starting y value where boolean hud indicator circles will start. The top most circle in the
      * list will be centered around this point. Subsequent circles will be below this y pixel value.
@@ -175,6 +181,9 @@ private:
         AGITATOR_STATUS_HEALTHY,
         /** Indicates that the vision system is online and a target has been acquired. */
         CV_AIM_DATA_VALID,
+        /** Should always be the last value, the number of enum values listed in this enum (as such,
+           the first element in this enum should be 0 and subsequent ones should increment by 1
+           each). */
         NUM_BOOLEAN_HUD_INDICATORS,
     };
 
@@ -182,11 +191,21 @@ private:
      * List of `NUM_BOOLEAN_HUD_INDICATORS` `BooleanHUDIndicatorTuple`s. Each item associated with
      * an enum value above.
      */
-    static constexpr BooleanHUDIndicatorTuple BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[]{
-        BooleanHUDIndicatorTuple("SYS CALIB ", Tx::GraphicColor::PURPLISH_RED, Tx::GraphicColor::GREEN),
-        BooleanHUDIndicatorTuple("AGI ", Tx::GraphicColor::GREEN, Tx::GraphicColor::PURPLISH_RED),
-        BooleanHUDIndicatorTuple("CV ", Tx::GraphicColor::GREEN, Tx::GraphicColor::PURPLISH_RED),
-    };
+    static constexpr BooleanHUDIndicatorTuple
+        BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[NUM_BOOLEAN_HUD_INDICATORS]{
+            BooleanHUDIndicatorTuple(
+                "SYS CALIB ",
+                Tx::GraphicColor::PURPLISH_RED,
+                Tx::GraphicColor::GREEN),
+            BooleanHUDIndicatorTuple(
+                "AGI ",
+                Tx::GraphicColor::GREEN,
+                Tx::GraphicColor::PURPLISH_RED),
+            BooleanHUDIndicatorTuple(
+                "CV ",
+                Tx::GraphicColor::GREEN,
+                Tx::GraphicColor::PURPLISH_RED),
+        };
 
     // matrix HUD indicator related constants
 
@@ -243,21 +262,30 @@ private:
         FLYWHEEL_AND_HOPPER_STATE,
         /** The current projectile launching state (single, burst, full auto). TODO */
         SHOOTER_STATE,
+        /** Should always be the last value, the number of enum values listed in this enum (as such,
+           the first element in this enum should be 0 and subsequent ones should increment by 1
+           each). */
         NUM_MATRIX_HUD_INDICATORS,
     };
     /** The number of characters in a matrix indicator title (or label). */
     static constexpr uint8_t MATRIX_HUD_INDICATOR_TITLE_WIDTH = 4;
     /** List of titles and their associated labels. Labels should contain a newline characters
      * between each other. All titles and labels should be MATRIX_HUD_INDICATOR_TITLE_WIDTH
-     * characters long. */
-    static constexpr const char *MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[][2] = {
-        {"CHAS", "BEYB\nFLLW\nMIMU\nMNOR"},
-        {"SHOT", "REDY\nLOAD\nFOFF"},
-        {"FIRE", "SNGL\nBRST\nFULL"},
-    };
+     * characters long, otherwise the graphics won't align properly when these strings are drawn.
+     * None of the below strings should be > 30 characters, otherwise they will be cut off when
+     * drawing. */
+    static constexpr const char
+        *MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[NUM_MATRIX_HUD_INDICATORS][2] = {
+            {"CHAS", "BEYB\nFLLW\nMIMU\nMNOR"},
+            {"SHOT", "REDY\nLOAD\nFOFF"},
+            {"FIRE", "SNGL\nBRST\nFULL"},
+        };
+
+    /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
+    static constexpr int NUM_CHASSIS_STATES = 4;
 
     /** Enum representing different states that the shooting mechanism can be in. Corresponds to
-     * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[1]. */
+     * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[SHOOTER_STATE]. */
     enum class ShooterState
     {
         /** The launcher is ready to fire. Any hoppers are sealed, the flywheels are on, and if
@@ -309,8 +337,6 @@ private:
 
     // chassis orientation constants
 
-    /** TODO finish constants */
-
     /** The X location of the center of the animated chassis on the screen, in pixels. */
     static constexpr uint16_t CHASSIS_CENTER_X = 1300;
     /** The Y location of the center of the animated chassis on the screen, in pixels. */
@@ -330,7 +356,7 @@ private:
 
     // turret angles constants
 
-    /** Minimum period between sending turret angles permitted. */
+    /** Minimum period between sending turret angles. */
     static constexpr uint32_t TURRET_ANGLES_SEND_DATA_PERIOD = 250;
     /** Font size of the turret angles. */
     static constexpr uint16_t TURRET_ANGLES_CHAR_SIZE = 10;
@@ -361,18 +387,17 @@ private:
     tap::arch::MilliTimeout delayTimer;
 
     /**
-     * Used to determine the current name of the graphic, queried by `getUnusedListName`
+     * Used to determine the current name of the graphic, queried by `getUnusedListName`. Max value
+     * is 2^24-1.
      */
     uint32_t currListName = 0;
 
     // Boolean HUD indicator related variables
 
-#if defined(ALL_SOLDIERS)
     /**
      * Hopper subsystem that provides information about whether or not the cover is open or closed.
      */
-    const aruwsrc::control::TurretMCBHopperSubsystem &hopperSubsystem;
-#endif
+    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
 
     /**
      * Friction wheel subsystem that provides info about if they are on/off.
@@ -397,7 +422,7 @@ private:
      */
     Tx::Graphic1Message booleanHudIndicatorGraphics[NUM_BOOLEAN_HUD_INDICATORS];
 
-    /** The object that will do the actual drawing of the hopper open indicator. */
+    /** The objects that will do the actual drawing of the hopper open indicator. */
     tap::communication::referee::BooleanHUDIndicator
         booleanHudIndicatorDrawers[NUM_BOOLEAN_HUD_INDICATORS];
 
@@ -408,7 +433,7 @@ private:
      * Graphics associated with the the hud indicator graphics that do not change (labels and
      * circles around the indicators).
      */
-    Tx::Graphic1Message booleanHudIndicatorStaticGrahpics[NUM_BOOLEAN_HUD_INDICATORS];
+    Tx::Graphic1Message booleanHudIndicatorStaticGraphics[NUM_BOOLEAN_HUD_INDICATORS];
     Tx::GraphicCharacterMessage booleanHudIndicatorStaticLabelGraphics[NUM_BOOLEAN_HUD_INDICATORS];
 
     // position selection HUD indicator related variables
@@ -417,9 +442,10 @@ private:
      * List of commands that will be checked for in the scheduler when determining which drive
      * command is being run.
      */
-    std::vector<const tap::control::Command *> driveCommands;
+    std::array<const tap::control::Command *, NUM_CHASSIS_STATES> driveCommands;
 
-    /** Index in `driveCommands` that is currently being displayed. */
+    /** Index in `driveCommands` that is currently being displayed. Start at -1, indicating no drive
+     * command has been selected and displayed. */
     int currDriveCommandIndex = -1;
 
     /** Array of graphic messages to be used by the `matrixHudIndicatorDrawers`. */
@@ -427,7 +453,7 @@ private:
 
     /**
      * Array of character graphic messages. Indices `[0, NUM_MATRIX_HUD_INDICATORS)` contain
-     * individual label columns not indlucing the title (i.e.
+     * individual label columns not including the title (i.e.
      * `MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[:][1]`). index `NUM_MATRIX_HUD_INDICATORS` contains
      * the titles. The titles are separate character message from the labels because their color is
      * different.
@@ -448,8 +474,13 @@ private:
      * Array of `Graphic5Message`s that will be used to send all of the reticle related graphics.
      * This includes all of the reticle markers from `TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES`
      * plus a verticle line to connect the reticle markers.
+     *
+     * This is an array of `Graphic5Message`s. There are NUM_RETICLE_COORDINATES + 1 reticle
+     * graphics that must be fit into N Graphic5Messages. Each Graphic5Message can hold 5 reticle
+     * graphics. Thus there are (NUM_RETICLE_COORDINATES + 1)/5 Graphic5Message structs rounded up
+     * to the nearest whole number required to fit the reticle graphics.
      */
-    Tx::Graphic5Message reticleMsg[(NUM_RETICLE_COORDINATES + 1) / 5 + 1];
+    Tx::Graphic5Message reticleMsg[tap::algorithms::ceil((NUM_RETICLE_COORDINATES + 1) / 5)];
 
     /** Index used when iterating through the reticleMsg in protothreads. */
     size_t reticleIndex = 0;
@@ -458,9 +489,10 @@ private:
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
     /**
-     * Vector with origin `(0, 0)`. The turret is considered to be pointing up in the y axis. This
-     * vector can be rotated around the origin by some amount to represent the rotation of the
-     * chassis orientation.
+     * Vector with origin `(0, 0)`. The turret drawn on the screen is considered to be pointing up
+     * in the y axis (of the screen). This vector can be rotated around the origin by some amount to
+     * represent the rotation of the chassis orientation. A clockwise rotation of the turret results
+     * in a clockwise rotation of the graphic (the graphic is the chassis relative to the turret).
      */
     modm::Vector2i chassisOrientation;
     /** Previous chassis orientation. Should be a local variable but cannot since it is in a
@@ -476,9 +508,9 @@ private:
     // turret pitch/yaw angles
 
     /** Character graphic containing turret pitch/yaw angles. */
-    Tx::GraphicCharacterMessage turretAnglesGraphics;
+    Tx::GraphicCharacterMessage turretAnglesGraphic;
     /** Character graphic containing labeles "pitch" and "yaw", situated next to
-     * turretAnglesGraphics. */
+     * turretAnglesGraphic. */
     Tx::GraphicCharacterMessage turretAnglesLabelGraphics;
     /** Local variable but is in a protothread, so must be not local, current turret yaw value, in
      * degrees. */

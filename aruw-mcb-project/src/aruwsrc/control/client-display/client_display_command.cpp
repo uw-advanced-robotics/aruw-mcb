@@ -35,6 +35,14 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 
+/**
+ * Macro that should be used in a resumable function. Blocks (in a resumable fashion) for some time
+ * based on the associated graphic. After sending a graphic via ref serial, you should call this
+ * macro and pass in a pointer to the graphic you just sent via serial. Delaying avoids overwhelming
+ * the serial line.
+ *
+ * @param[in] graphic Pointer to graphic data that was just sent.
+ */
 #define delay(graphic)                                                             \
     delayTimer.restart(RefSerialData::Tx::getWaitTimeAfterGraphicSendMs(graphic)); \
     RF_WAIT_UNTIL(delayTimer.isExpired() || delayTimer.isStopped());
@@ -46,19 +54,25 @@ namespace aruwsrc::display
  * `OFF_COLOR` if `indicatorStatus == false`.
  */
 template <RefSerial::Tx::GraphicColor ON_COLOR, RefSerial::Tx::GraphicColor OFF_COLOR>
-static void updateGraphicColor(bool indicatorStatus, RefSerialData::Tx::Graphic1Message *graphic)
+static inline void updateGraphicColor(
+    bool indicatorStatus,
+    RefSerialData::Tx::Graphic1Message *graphic)
 {
     graphic->graphicData.color =
         static_cast<uint32_t>(indicatorStatus ? ON_COLOR : OFF_COLOR) & 0xf;
 }
 
 /**
- * Update the start and end Y coordinates of a graphic based on the specified `location`.
+ * Updates the `graphic`'s `startY` to the specified `location`. Updates `endY` such that the
+ * distance between `endY` and `startY` are maintained. Thus, a graphic's position in the Y
+ * direction may be translated up or down using this function
  *
  * @note By convention expected that `endY > startY`. If this is not true, this function does
  * nothing.
  */
-static void updateGraphicYLocation(uint16_t location, RefSerialData::Tx::Graphic1Message *graphic)
+static inline void updateGraphicYLocation(
+    uint16_t location,
+    RefSerialData::Tx::Graphic1Message *graphic)
 {
     if (graphic->graphicData.endY < graphic->graphicData.startY)
     {
@@ -73,9 +87,7 @@ static void updateGraphicYLocation(uint16_t location, RefSerialData::Tx::Graphic
 ClientDisplayCommand::ClientDisplayCommand(
     aruwsrc::Drivers *drivers,
     ClientDisplaySubsystem *clientDisplay,
-#if defined(ALL_SOLDIERS)
-    const TurretMCBHopperSubsystem &hopperSubsystem,
-#endif
+    const TurretMCBHopperSubsystem *hopperSubsystem,
     const FrictionWheelSubsystem &frictionWheelSubsystem,
     AgitatorSubsystem &agitatorSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
@@ -86,9 +98,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd)
     : Command(),
       drivers(drivers),
-#if defined(ALL_SOLDIERS)
       hopperSubsystem(hopperSubsystem),
-#endif
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
@@ -136,7 +146,8 @@ ClientDisplayCommand::ClientDisplayCommand(
               drivers,
               &matrixHudIndicatorGraphics[SHOOTER_STATE],
               updateGraphicYLocation,
-              false)},
+              false),
+      },
       turretSubsystem(turretSubsystem)
 {
     modm_assert(drivers != nullptr, "ClientDisplayCommand", "drivers nullptr");
@@ -186,8 +197,8 @@ modm::ResumableResult<bool> ClientDisplayCommand::sendInitialGraphics()
         RF_CALL(booleanHudIndicatorDrawers[booleanHudIndicatorIndex].initialize());
 
         drivers->refSerial.sendGraphic(
-            &booleanHudIndicatorStaticGrahpics[booleanHudIndicatorIndex]);
-        delay(&booleanHudIndicatorStaticGrahpics[booleanHudIndicatorIndex]);
+            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndex]);
+        delay(&booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndex]);
         drivers->refSerial.sendGraphic(
             &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndex]);
         delay(&booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndex]);
@@ -220,9 +231,9 @@ modm::ResumableResult<bool> ClientDisplayCommand::sendInitialGraphics()
     chassisOrientationGraphics.graphicData[1].operation = Tx::ADD_GRAPHIC_MODIFY;
 
     // send turret angle data graphic and associated labels
-    drivers->refSerial.sendGraphic(&turretAnglesGraphics);
-    delay(&turretAnglesGraphics);
-    turretAnglesGraphics.graphicData.operation = Tx::ADD_GRAPHIC_MODIFY;
+    drivers->refSerial.sendGraphic(&turretAnglesGraphic);
+    delay(&turretAnglesGraphic);
+    turretAnglesGraphic.graphicData.operation = Tx::ADD_GRAPHIC_MODIFY;
 
     drivers->refSerial.sendGraphic(&turretAnglesLabelGraphics);
     delay(&turretAnglesLabelGraphics);
@@ -282,10 +293,14 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
             currDriveCommandIndex = i;
         }
     }
-    matrixHudIndicatorDrawers[CHASSIS_STATE].setIndicatorState(
-        MATRIX_HUD_INDICATOR_LABELS_START_Y -
-        CHARACTER_LINE_SPACING * currDriveCommandIndex * MATRIX_HUD_INDICATOR_CHAR_SIZE -
-        MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
+
+    if (currDriveCommandIndex != -1)
+    {
+        matrixHudIndicatorDrawers[CHASSIS_STATE].setIndicatorState(
+            MATRIX_HUD_INDICATOR_LABELS_START_Y -
+            CHARACTER_LINE_SPACING * currDriveCommandIndex * MATRIX_HUD_INDICATOR_CHAR_SIZE -
+            MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
+    }
 
     // update flywheel and hopper state
     bool flywheelsOff =
@@ -297,7 +312,7 @@ void ClientDisplayCommand::updatePositionSelectionHudIndicatorState()
     if (shooterState == ShooterState::READY_TO_FIRE)
     {
 #if defined(ALL_SOLDIERS)
-        if (hopperSubsystem.getIsHopperOpen())
+        if (hopperSubsystem != nullptr && hopperSubsystem->getIsHopperOpen())
         {
             shooterState = ShooterState::LOADING;
         }
@@ -364,13 +379,13 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateTurretAngles()
         (!compareFloatClose(prevYaw, yaw, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION) ||
          !compareFloatClose(prevPitch, pitch, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION)))
     {
-        // set the character buffer `turretAnglesGraphics.msg` to the turret pitch/yaw angle
+        // set the character buffer `turretAnglesGraphic.msg` to the turret pitch/yaw angle
         // values
         // note that `%f` doesn't work in `sprintf` and neither do the integer or floating point
         // graphics, so this is why we are using `sprintf` to put floating point numbers in a
         // character graphic
         bytesWritten = sprintf(
-            turretAnglesGraphics.msg,
+            turretAnglesGraphic.msg,
             "%i.%i\n\n%i.%i",
             static_cast<int>(yaw),
             abs(static_cast<int>(yaw * TURRET_ANGLES_DECIMAL_PRECISION) %
@@ -379,10 +394,10 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateTurretAngles()
             abs(static_cast<int>(pitch * TURRET_ANGLES_DECIMAL_PRECISION) %
                 TURRET_ANGLES_DECIMAL_PRECISION));
         // `endAngle` is actually length of the string
-        turretAnglesGraphics.graphicData.endAngle = bytesWritten;
+        turretAnglesGraphic.graphicData.endAngle = bytesWritten;
 
-        drivers->refSerial.sendGraphic(&turretAnglesGraphics);
-        delay(&turretAnglesGraphics);
+        drivers->refSerial.sendGraphic(&turretAnglesGraphic);
+        delay(&turretAnglesGraphic);
 
         prevYaw = yaw;
         prevPitch = pitch;
@@ -420,7 +435,7 @@ void ClientDisplayCommand::initializeBooleanHudIndicators()
         getUnusedListName(booleanHudIndicatorName);
 
         RefSerial::configGraphicGenerics(
-            &booleanHudIndicatorStaticGrahpics[i].graphicData,
+            &booleanHudIndicatorStaticGraphics[i].graphicData,
             booleanHudIndicatorName,
             Tx::ADD_GRAPHIC,
             DEFAULT_GRAPHIC_LAYER,
@@ -431,7 +446,7 @@ void ClientDisplayCommand::initializeBooleanHudIndicators()
             BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
             hudIndicatorListCurrY,
             BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
-            &booleanHudIndicatorStaticGrahpics[i].graphicData);
+            &booleanHudIndicatorStaticGraphics[i].graphicData);
 
         // config the label associated with the particular indicator
         getUnusedListName(booleanHudIndicatorName);
@@ -686,7 +701,7 @@ void ClientDisplayCommand::initializeTurretAngles()
     getUnusedListName(turretAnglesName);
 
     RefSerial::configGraphicGenerics(
-        &turretAnglesGraphics.graphicData,
+        &turretAnglesGraphic.graphicData,
         turretAnglesName,
         Tx::ADD_GRAPHIC,
         DEFAULT_GRAPHIC_LAYER,
@@ -698,7 +713,7 @@ void ClientDisplayCommand::initializeTurretAngles()
         TURRET_ANGLES_START_X,
         TURRET_ANGLES_START_Y,
         "0\n\n0",
-        &turretAnglesGraphics);
+        &turretAnglesGraphic);
 
     turretAnglesName[2]++;
 
