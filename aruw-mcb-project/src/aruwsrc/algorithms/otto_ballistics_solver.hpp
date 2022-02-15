@@ -25,6 +25,12 @@ namespace aruwsrc::chassis
 class ChassisSubsystem;
 }
 
+namespace aruwsrc::control::turret
+{
+class TurretSubsystem;
+}
+
+
 namespace aruwsrc
 {
 class Drivers;
@@ -70,6 +76,7 @@ public:
         const aruwsrc::Drivers &drivers,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const chassis::ChassisSubsystem &chassisSubsystem,
+        const control::turret::TurretSubsystem &turretSubsystem,
         const control::launcher::FrictionWheelSubsystem &frictionWheels,
         const float defaultLaunchSpeed);
 
@@ -89,6 +96,7 @@ private:
     const Drivers &drivers;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     const chassis::ChassisSubsystem &chassisSubsystem;
+    const control::turret::TurretSubsystem &turretSubsystem;
     const control::launcher::FrictionWheelSubsystem &frictionWheels;
     const float defaultLaunchSpeed;
 };
