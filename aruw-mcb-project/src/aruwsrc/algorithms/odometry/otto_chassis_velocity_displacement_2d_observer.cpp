@@ -25,7 +25,7 @@
 #include "modm/math/geometry/vector.hpp"
 #include "modm/math/matrix.hpp"
 
-namespace aruwsrc::control::odometry
+namespace aruwsrc::algorithms::odometry
 {
 OttoChassisVelocityDisplacement2DObserver::OttoChassisVelocityDisplacement2DObserver(
     aruwsrc::chassis::ChassisSubsystem* chassis)
@@ -75,4 +75,4 @@ bool OttoChassisVelocityDisplacement2DObserver::getChassisDisplacement(
 
     return dataValid;
 }
-}  // namespace aruwsrc::control::odometry
+}  // namespace aruwsrc::algorithms::odometry
