@@ -76,8 +76,7 @@ protected:
      * Graphics must have unique 3 byte names. Utility function for getting a list name that is
      * currently unused. Use this function exclusively to avoid graphic name clashes.
      *
-     * If no list names are available (all are in use), won't set the listName and will raise an
-     * error.
+     * If no list names are available (all are in use), won't set the listName.
      *
      * @param[out] listName Array to put an unused list name in.
      */

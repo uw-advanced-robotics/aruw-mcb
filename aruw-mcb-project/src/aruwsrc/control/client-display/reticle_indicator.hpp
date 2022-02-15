@@ -93,7 +93,8 @@ private:
      * graphics. Thus there are (NUM_RETICLE_COORDINATES + 1)/5 Graphic5Message structs rounded up
      * to the nearest whole number required to fit the reticle graphics.
      */
-    Tx::Graphic5Message reticleMsg[tap::algorithms::ceil((NUM_RETICLE_COORDINATES + 1) / 5)];
+    Tx::Graphic5Message
+        reticleMsg[tap::algorithms::ceil(static_cast<float>(NUM_RETICLE_COORDINATES + 1) / 5.0f)];
 
     /** Index used when iterating through the reticleMsg in protothreads. */
     size_t reticleIndex = 0;

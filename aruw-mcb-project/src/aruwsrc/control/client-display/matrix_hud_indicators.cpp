@@ -17,11 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "position_hud_indicators.hpp"
+#include "matrix_hud_indicators.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 using namespace tap::communication::referee;
 using namespace tap::communication::serial;
@@ -51,14 +52,16 @@ static inline void updateGraphicYLocation(
     graphic->graphicData.endY = location + startYDiff;
 }
 
-PositionHudIndicators::PositionHudIndicators(
+MatrixHudIndicators::MatrixHudIndicators(
     aruwsrc::Drivers *drivers,
+    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
     const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd)
     : drivers(drivers),
+      hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       driveCommands{
           chassisBeybladeCmd,
@@ -86,7 +89,7 @@ PositionHudIndicators::PositionHudIndicators(
 {
 }
 
-modm::ResumableResult<bool> PositionHudIndicators::sendInitialGraphics()
+modm::ResumableResult<bool> MatrixHudIndicators::sendInitialGraphics()
 {
     RF_BEGIN(0);
 
@@ -106,7 +109,7 @@ modm::ResumableResult<bool> PositionHudIndicators::sendInitialGraphics()
     RF_END();
 }
 
-modm::ResumableResult<bool> PositionHudIndicators::update()
+modm::ResumableResult<bool> MatrixHudIndicators::update()
 {
     RF_BEGIN(1);
 
@@ -122,7 +125,7 @@ modm::ResumableResult<bool> PositionHudIndicators::update()
     RF_END();
 }
 
-void PositionHudIndicators::updateIndicatorState()
+void MatrixHudIndicators::updateIndicatorState()
 {
     // update chassis state
     for (size_t i = 0; i < driveCommands.size(); i++)
@@ -169,7 +172,7 @@ void PositionHudIndicators::updateIndicatorState()
         MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
 }
 
-void PositionHudIndicators::initialize()
+void MatrixHudIndicators::initialize()
 {
     uint8_t matrixHudIndicatorName[3];
     getUnusedListName(matrixHudIndicatorName);

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef POSITION_HUD_INDICATORS_HPP_
-#define POSITION_HUD_INDICATORS_HPP_
+#ifndef MATRIX_HUD_INDICATORS_HPP_
+#define MATRIX_HUD_INDICATORS_HPP_
 
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
@@ -27,6 +27,7 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 
 #include "hud_indicator.hpp"
@@ -38,11 +39,12 @@ class Drivers;
 
 namespace aruwsrc::control::client_display
 {
-class PositionHudIndicators : public HudIndicator
+class MatrixHudIndicators : public HudIndicator
 {
 public:
-    PositionHudIndicators(
+    MatrixHudIndicators(
         aruwsrc::Drivers *drivers,
+        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
@@ -148,6 +150,8 @@ private:
 
     aruwsrc::Drivers *drivers;
 
+    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
+
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem;
 
     /**
@@ -184,4 +188,4 @@ private:
 };
 }  // namespace aruwsrc::control::client_display
 
-#endif  //  POSITION_HUD_INDICATORS_HPP_
+#endif  //  MATRIX_HUD_INDICATORS_HPP_

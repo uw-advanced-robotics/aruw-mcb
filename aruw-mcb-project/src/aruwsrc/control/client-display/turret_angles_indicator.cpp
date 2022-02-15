@@ -60,7 +60,7 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
 #if defined(TARGET_HERO)
     pitch = turretSubsystem.getPitchAngleFromCenter();
 #else
-    pitch = drivers->turretMCBCanComm.isConnected() ? drivers->turretMCBCanComm.getPitch() : 0.0f;
+    pitch = drivers->turretMCBCanComm.isConnected() ? -drivers->turretMCBCanComm.getPitch() : 0.0f;
 #endif
 
     if (sendTurretDataTimer.execute() &&

@@ -43,7 +43,7 @@
 
 #include "boolean_hud_indicators.hpp"
 #include "chassis_orientation_indicator.hpp"
-#include "position_hud_indicators.hpp"
+#include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "turret_angles_indicator.hpp"
 
@@ -126,7 +126,7 @@ private:
 
     BooleanHudIndicators booleanHudIndicators;
     ChassisOrientationIndicator chassisOrientationIndicator;
-    PositionHudIndicators positionHudIndicators;
+    MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
     TurretAnglesIndicator turretAnglesIndicator;
 

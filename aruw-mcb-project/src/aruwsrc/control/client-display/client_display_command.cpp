@@ -61,6 +61,7 @@ ClientDisplayCommand::ClientDisplayCommand(
       chassisOrientationIndicator(drivers, turretSubsystem),
       positionHudIndicators(
           drivers,
+          hopperSubsystem,
           frictionWheelSubsystem,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
