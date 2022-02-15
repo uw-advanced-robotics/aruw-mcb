@@ -54,7 +54,7 @@ modm::ResumableResult<bool> TurretAnglesIndicator::sendInitialGraphics()
 
 modm::ResumableResult<bool> TurretAnglesIndicator::update()
 {
-    RF_BEGIN(0);
+    RF_BEGIN(1);
 
     yaw = drivers->turretMCBCanComm.isConnected() ? drivers->turretMCBCanComm.getYaw() : 0.0f;
 #if defined(TARGET_HERO)
