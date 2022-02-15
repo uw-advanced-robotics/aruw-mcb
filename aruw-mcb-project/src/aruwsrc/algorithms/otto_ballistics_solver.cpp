@@ -81,7 +81,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawA
 
     uint32_t projectforwardtimedt = tap::arch::clock::getTimeMicroseconds() - aimData.timestamp;
 
-    targetState.position = targetState.projectForward(projectforwardtimedt / (float)1E6);
+    targetState.position = targetState.projectForward(projectforwardtimedt / 1E6f);
 
     return ballistics::findTargetProjectileIntersection(
         targetState,
