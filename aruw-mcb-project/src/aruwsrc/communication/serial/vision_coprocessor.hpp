@@ -23,6 +23,7 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 
 namespace aruwsrc
 {
@@ -117,10 +118,17 @@ public:
         this->odometryInterface = odometryInterface;
     }
 
+    mockable void sendShutdownMessage();
+
+    mockable void sendRebootMessage();
+
 private:
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
+        CV_MESSAGE_TYPE_ROBOT_ID = 6,
+        CV_MESSAGE_TYPE_REBOOT = 8,
+        CV_MESSAGE_TYPE_SHUTDOWN = 9,
     };
 
     enum RxMessageTypes
@@ -142,6 +150,8 @@ private:
 
     tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
 
+    tap::communication::serial::RefSerialData::RobotId prevSentRobotId;
+
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information, and updates the `lastAimData`.
@@ -158,6 +168,7 @@ public:
 #endif
 
     void sendOdometryData();
+    void sendRobotTypeData();
 };
 }  // namespace serial
 }  // namespace aruwsrc
