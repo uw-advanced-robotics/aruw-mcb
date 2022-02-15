@@ -61,7 +61,7 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control::odometry;
-using namespace aruwsrc::display;
+using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;

@@ -17,29 +17,29 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CLIENT_DISPLAY_HPP_
-#define CLIENT_DISPLAY_HPP_
+#include "hud_indicator.hpp"
 
-#include "tap/control/command.hpp"
-#include "tap/control/subsystem.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
+#include <cstdint>
 
 namespace aruwsrc::control::client_display
 {
-/**
- * A placeholder subsystem for running the client display command
- */
-class ClientDisplaySubsystem : public tap::control::Subsystem
-{
-public:
-    ClientDisplaySubsystem(aruwsrc::Drivers* drivers);
-    virtual ~ClientDisplaySubsystem() {}
-    const char* getName() override { return "client display"; }
-};
-}  // namespace aruwsrc::control::client_display
+uint32_t HudIndicator::currListName = 0;
 
-#endif  // CLIENT_DISPLAY_HPP_
+void HudIndicator::resetListNameGenerator() { currListName = 0; }
+
+void HudIndicator::getUnusedListName(uint8_t listName[3])
+{
+    if (currListName > 0xffffff)
+    {
+        return;
+    }
+    else
+    {
+        listName[0] = static_cast<uint8_t>((currListName >> 16) & 0xff);
+        listName[1] = static_cast<uint8_t>((currListName >> 8) & 0xff);
+        listName[2] = static_cast<uint8_t>(currListName & 0xff);
+        currListName++;
+    }
+}
+
+}  // namespace aruwsrc::control::client_display
