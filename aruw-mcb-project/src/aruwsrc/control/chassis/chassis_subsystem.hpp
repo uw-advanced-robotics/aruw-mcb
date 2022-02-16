@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -168,7 +168,7 @@ public:
         modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
         float chassisHeading) const;
 
-    inline int getNumChassisMotors() const override { return 4; }
+    inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
     inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
     inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }

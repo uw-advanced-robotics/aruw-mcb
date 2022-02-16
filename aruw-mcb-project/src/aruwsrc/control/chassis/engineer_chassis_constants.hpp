@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -32,7 +32,7 @@ namespace aruwsrc::chassis
 static constexpr int MIN_WHEEL_SPEED_SINGLE_MOTOR = 8000;
 static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 8000;
 static constexpr int MIN_CHASSIS_POWER = 200;
-static constexpr int MAX_CHASSIS_POWER = 200;
+static constexpr int MAX_CHASSIS_POWER = 201;
 
 /**
  * The minimum desired wheel speed for chassis rotation, measured in RPM before
