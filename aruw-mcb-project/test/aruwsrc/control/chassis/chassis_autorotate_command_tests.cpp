@@ -30,7 +30,7 @@ using namespace testing;
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-static constexpr float TEST_WHEEL_SPEED = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
+static constexpr float TEST_WHEEL_SPEED = MIN_WHEEL_SPEED_SINGLE_MOTOR;
 
 #define DEFAULT_SETUP_TEST(chassisFrontBackIdentical) \
     aruwsrc::Drivers drivers;                         \

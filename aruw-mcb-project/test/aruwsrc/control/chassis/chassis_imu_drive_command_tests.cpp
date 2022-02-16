@@ -95,9 +95,9 @@ TEST(ChassisImuDriveCommand, execute__normal_rotation_translation_when_imu_not_c
         EXPECT_CALL(
             chassis,
             setDesiredOutput(
-                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[0],
-                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[1],
-                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[2]));
+                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[0],
+                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[1],
+                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[2]));
     }
 
     for (auto triplet : desiredOutputValuesToTest)
@@ -282,8 +282,8 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     imuYaw = 10;
     userX = 1.0f;
     userY = 1.0f;
-    float xExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
-    float yExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    float xExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    float yExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
     tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(10));
 
     EXPECT_CALL(
@@ -310,7 +310,7 @@ TEST(ChassisImuDriveCommand, execute__turret_relative_when_turret_not_nullptr)
 
     userX = 1.0f;
     userY = 0.0f;
-    float xExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    float xExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
     float yExpected = 0.0f;
     tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(-45.0f));
 
