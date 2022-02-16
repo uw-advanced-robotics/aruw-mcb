@@ -128,8 +128,11 @@ WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadeP
 
 void WorldFrameYawTurretImuCascadePidTurretController::initialize()
 {
-    positionPid.reset();
-    velocityPid.reset();
+    if (resetPidTimeout.isExpired())
+    {
+        positionPid.reset();
+        velocityPid.reset();
+    }
 
     // Capture initial target angle in chassis frame and transform to world frame.
     worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
@@ -164,6 +167,8 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
     float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
     turretSubsystem->setYawMotorOutput(velocityPidOutput);
+
+    resetPidTimeout.restart(RESET_TIME_MS);
 }
 
 float WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
@@ -233,8 +238,11 @@ WorldFramePitchTurretImuCascadePidTurretController::
 
 void WorldFramePitchTurretImuCascadePidTurretController::initialize()
 {
-    positionPid.reset();
-    velocityPid.reset();
+    if (resetPidTimeout.isExpired())
+    {
+        positionPid.reset();
+        velocityPid.reset();
+    }
 
     worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
         turretSubsystem->getCurrentPitchValue().getValue(),
@@ -270,6 +278,8 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         TurretSubsystem::GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(velocityPidOutput);
+
+    resetPidTimeout.restart(RESET_TIME_MS);
 }
 
 float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const

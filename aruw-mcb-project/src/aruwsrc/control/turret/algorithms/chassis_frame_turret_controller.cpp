@@ -36,7 +36,13 @@ ChassisFrameYawTurretController::ChassisFrameYawTurretController(
 {
 }
 
-void ChassisFrameYawTurretController::initialize() { pid.reset(); }
+void ChassisFrameYawTurretController::initialize()
+{
+    if (resetPidTimeout.isExpired())
+    {
+        pid.reset();
+    }
+}
 
 void ChassisFrameYawTurretController::runController(const uint32_t dt, const float desiredSetpoint)
 {
@@ -51,6 +57,8 @@ void ChassisFrameYawTurretController::runController(const uint32_t dt, const flo
         pid.runController(positionControllerError, turretSubsystem->getYawVelocity(), dt);
 
     turretSubsystem->setYawMotorOutput(pidOutput);
+
+    resetPidTimeout.restart(RESET_TIME_MS);
 }
 
 float ChassisFrameYawTurretController::getSetpoint() const
@@ -68,7 +76,13 @@ ChassisFramePitchTurretController::ChassisFramePitchTurretController(
 {
 }
 
-void ChassisFramePitchTurretController::initialize() { pid.reset(); }
+void ChassisFramePitchTurretController::initialize()
+{
+    if (resetPidTimeout.isExpired())
+    {
+        pid.reset();
+    }
+}
 
 void ChassisFramePitchTurretController::runController(
     const uint32_t dt,
@@ -91,6 +105,8 @@ void ChassisFramePitchTurretController::runController(
         TurretSubsystem::GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
+
+    resetPidTimeout.restart(RESET_TIME_MS);
 }
 
 float ChassisFramePitchTurretController::getSetpoint() const

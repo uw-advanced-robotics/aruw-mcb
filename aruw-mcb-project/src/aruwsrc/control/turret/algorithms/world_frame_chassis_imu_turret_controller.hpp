@@ -24,6 +24,7 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/timeout.hpp"
 
 #include "../turret_subsystem.hpp"
 
@@ -78,9 +79,15 @@ public:
     bool isOnline() const final;
 
 private:
+    /** Minimum time during which the PID controller isn't running that will cause the PID
+     * controller to be reset when initializing. */
+    static constexpr uint32_t RESET_TIME_MS = 100;
+
     aruwsrc::Drivers *drivers;
 
     tap::algorithms::SmoothPid pid;
+
+    tap::arch::MilliTimeout resetPidTimeout;
 
     tap::algorithms::ContiguousFloat worldFrameSetpoint;
 
