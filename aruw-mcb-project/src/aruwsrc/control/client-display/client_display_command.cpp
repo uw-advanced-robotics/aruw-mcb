@@ -24,7 +24,7 @@
 #include "client_display_subsystem.hpp"
 
 using namespace tap::control;
-using namespace tap::serial;
+using namespace tap::communication::serial;
 
 #define delay()                                  \
     delayTimer.restart(DELAY_PERIOD_BTWN_SENDS); \
@@ -113,7 +113,6 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
 
         drivers->refSerial.configCharacterMsg(
             FONT_SIZE,
-            400,
             LINE_THICKNESS,
             SCREEN_MARGIN,
             TEXT_TOP_ROW_Y,
@@ -138,7 +137,6 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
 
         drivers->refSerial.configCharacterMsg(
             FONT_SIZE,
-            400,
             LINE_THICKNESS,
             SCREEN_MARGIN,
             TEXT_TOP_ROW_Y,
@@ -164,14 +162,14 @@ modm::ResumableResult<bool> ClientDisplayCommand::updateCapBankMsg()
         delay();
 
         capPowerRemainMsg.graphicData.operation = RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC;
-        drivers->refSerial.updateInteger(capicatance++, &capPowerRemainMsg.graphicData);
+        capPowerRemainMsg.graphicData.value = capicatance++;
         drivers->refSerial.sendGraphic(&capPowerRemainMsg);
         capPowerRemainMsg.graphicData.operation =
             RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
     }
     else
     {
-        drivers->refSerial.updateInteger(capicatance++, &capPowerRemainMsg.graphicData);
+        capPowerRemainMsg.graphicData.value = capicatance++;
         drivers->refSerial.sendGraphic(&capPowerRemainMsg);
     }
 
@@ -202,7 +200,6 @@ void ClientDisplayCommand::initCapBankMsg()
 
     drivers->refSerial.configCharacterMsg(
         FONT_SIZE,
-        200,
         FONT_THICKNESS,
         SCREEN_WIDTH - 400,
         TEXT_TOP_ROW_Y,
@@ -237,7 +234,6 @@ void ClientDisplayCommand::initDriveCommandMsg()
 
     drivers->refSerial.configCharacterMsg(
         FONT_SIZE,
-        400,
         LINE_THICKNESS,
         SCREEN_MARGIN,
         TEXT_TOP_ROW_Y,

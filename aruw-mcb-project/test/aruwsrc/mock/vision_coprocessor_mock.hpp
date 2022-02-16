@@ -17,38 +17,29 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LEGACY_VISION_COPROCESSOR_MOCK_HPP_
-#define LEGACY_VISION_COPROCESSOR_MOCK_HPP_
+#ifndef VISION_COPROCESSOR_MOCK_HPP_
+#define VISION_COPROCESSOR_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/communication/serial/legacy_vision_coprocessor.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc
 {
 namespace mock
 {
-class LegacyVisionCoprocessorMock : public serial::LegacyVisionCoprocessor
+class VisionCoprocessorMock : public serial::VisionCoprocessor
 {
 public:
-    LegacyVisionCoprocessorMock(aruwsrc::Drivers *drivers);
-    virtual ~LegacyVisionCoprocessorMock();
+    VisionCoprocessorMock(aruwsrc::Drivers *drivers);
+    virtual ~VisionCoprocessorMock();
 
     MOCK_METHOD(void, initializeCV, (), (override));
-    MOCK_METHOD(void, messageReceiveCallback, (const SerialMessage &), (override));
-    MOCK_METHOD(bool, sendMessage, (), (override));
-    MOCK_METHOD(void, beginAutoAim, (), (override));
-    MOCK_METHOD(void, stopAutoAim, (), (override));
+    MOCK_METHOD(void, messageReceiveCallback, (const ReceivedSerialMessage &), (override));
+    MOCK_METHOD(void, sendMessage, (), (override));
     MOCK_METHOD(const TurretAimData &, getLastAimData, (), (const override));
-    MOCK_METHOD(bool, lastAimDataValid, (), (const override));
-    MOCK_METHOD(void, attachTurret, (tap::control::turret::TurretSubsystemInterface *), (override));
-    MOCK_METHOD(
-        void,
-        attachChassis,
-        (tap::control::chassis::ChassisSubsystemInterface *),
-        (override));
-};  // class LegacyVisionCoprocessorMock
+};  // class VisionCoprocessorMock
 }  // namespace mock
 }  // namespace aruwsrc
 
-#endif  // LEGACY_VISION_COPROCESSOR_MOCK_HPP_
+#endif  // VISION_COPROCESSOR_MOCK_HPP_

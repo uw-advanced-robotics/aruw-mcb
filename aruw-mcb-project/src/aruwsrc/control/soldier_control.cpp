@@ -31,7 +31,9 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
@@ -49,7 +51,6 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "turret/cv/turret_cv_command.hpp"
 #include "turret/turret_controller_constants.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
@@ -66,10 +67,11 @@ using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
+using namespace aruwsrc::algorithms::odometry;
 using namespace tap::control;
 using namespace aruwsrc::display;
 using namespace aruwsrc::control;
-using tap::Remote;
+using namespace tap::communication::serial;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -86,7 +88,7 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     TurretSubsystem::PITCH_MOTOR_ID,
     TurretSubsystem::CAN_BUS_MOTORS,
-    true,
+    false,
     "Pitch Turret");
 tap::motor::DjiMotor yawMotor(
     drivers(),
@@ -101,6 +103,8 @@ tap::motor::DjiMotor yawMotor(
 TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 ChassisSubsystem chassis(drivers());
+
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 
 AgitatorSubsystem agitator(
     drivers(),
@@ -166,8 +170,14 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
 cv::TurretCVCommand turretCVCommand(
     drivers(),
     &turret,
-    &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
+    &worldFrameYawTurretImuController,
+    &worldFramePitchTurretImuController,
+    odometrySubsystem,
+    chassis,
+    frictionWheels,
+    1,
+    1,
+    14.5f);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
 
@@ -265,7 +275,7 @@ HoldCommandMapping leftSwitchDown(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
+    {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
@@ -308,6 +318,7 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -318,12 +329,11 @@ void initializeSubsystems()
 {
     turret.initialize();
     chassis.initialize();
+    odometrySubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
     hopperCover.initialize();
     clientDisplay.initialize();
-    drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
-    drivers()->legacyVisionCoprocessor.attachTurret(&turret);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -340,6 +350,7 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
 }
 
 /* register io mappings here ------------------------------------------------*/
