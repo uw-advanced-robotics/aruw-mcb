@@ -30,7 +30,6 @@ namespace aruwsrc::control::turret
 class TurretSubsystem;
 }
 
-
 namespace aruwsrc
 {
 class Drivers;
