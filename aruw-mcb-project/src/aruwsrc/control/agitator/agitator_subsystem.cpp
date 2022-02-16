@@ -41,7 +41,7 @@ namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
     aruwsrc::Drivers* drivers,
-    tap::algorithms::SmoothPid pidParams,
+    const tap::algorithms::SmoothPid &pidParams,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,
     tap::can::CanBus agitatorCanBusId,
@@ -90,7 +90,6 @@ AgitatorSubsystem::AgitatorSubsystem(
           "agitator motor")
 {
 }
-
 
 void AgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
 

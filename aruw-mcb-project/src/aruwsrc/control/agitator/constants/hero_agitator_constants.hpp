@@ -46,10 +46,8 @@ static constexpr tap::algorithms::SmoothPidConfig PID_HERO_KICKER = {
 };
 
 // There are two kicker motors that drive the shaft.
-static constexpr tap::motor::MotorId HERO_KICKER1_MOTOR_ID = tap::motor::MOTOR7;
-static constexpr tap::motor::MotorId HERO_KICKER2_MOTOR_ID = tap::motor::MOTOR8;
-static constexpr tap::can::CanBus HERO_KICKER1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::can::CanBus HERO_KICKER2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::motor::MotorId HERO_KICKER_MOTOR_ID = tap::motor::MOTOR8;
+static constexpr tap::can::CanBus HERO_KICKER_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 static constexpr bool HERO_KICKER_INVERTED = false;
 
 /**
