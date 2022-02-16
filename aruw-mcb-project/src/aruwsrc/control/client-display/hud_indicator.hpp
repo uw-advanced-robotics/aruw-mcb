@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -69,7 +69,7 @@ public:
     virtual void initialize() = 0;
 
     /**
-     * Resets the list name generator so the next time it is queried via `getUnusedListName`, the
+     * Resets the list name generator so the next time it is queried via `getUnusedGraphicName`, the
      * function returns {0, 0, 0}.
      */
     static void resetListNameGenerator();
@@ -83,7 +83,7 @@ protected:
      *
      * @param[out] listName Array to put an unused list name in.
      */
-    static void getUnusedListName(uint8_t listName[3]);
+    static void getUnusedGraphicName(uint8_t listName[3]);
 
     static uint32_t currListName;
 

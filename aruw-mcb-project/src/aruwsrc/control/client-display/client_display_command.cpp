@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,27 +29,20 @@
 
 using namespace tap::control;
 
-using namespace tap::communication::serial;
-using namespace tap::algorithms;
-using namespace tap::communication::referee;
-using namespace aruwsrc::control;
-using namespace aruwsrc::control::launcher;
-using namespace aruwsrc::agitator;
-
 namespace aruwsrc::control::client_display
 {
 ClientDisplayCommand::ClientDisplayCommand(
     aruwsrc::Drivers *drivers,
     ClientDisplaySubsystem *clientDisplay,
     const TurretMCBHopperSubsystem *hopperSubsystem,
-    const FrictionWheelSubsystem &frictionWheelSubsystem,
-    AgitatorSubsystem &agitatorSubsystem,
-    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
-    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
-    const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd)
+    const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+    agitator::AgitatorSubsystem &agitatorSubsystem,
+    const control::turret::TurretSubsystem &turretSubsystem,
+    const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+    const chassis::BeybladeCommand *chassisBeybladeCmd,
+    const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
+    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+    const chassis::ChassisDriveCommand *chassisDriveCmd)
     : Command(),
       drivers(drivers),
       booleanHudIndicators(

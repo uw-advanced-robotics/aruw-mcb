@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -80,7 +80,7 @@ private:
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
     /** The line width of the indicator circles. Should be approximately twice
      * BOOLEAN_HUD_INDICATOR_RADIUS if you want the circle to be filled completely. There is no way
-     * to fill in circle grpahics, so the next best thing is to make the line width very large. */
+     * to fill in circle graphics, so the next best thing is to make the line width very large. */
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_WIDTH = 17;
     /** The radius of the boolean indicator circles. */
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_RADIUS = 9;
@@ -119,15 +119,15 @@ private:
     };
 
     /**
-     * List of `NUM_BOOLEAN_HUD_INDICATORS` `BooleanHUDIndicatorTuple`s. Each item associated with
-     * an enum value above.
+     * List of `BooleanHUDIndicatorTuple`s of length `NUM_BOOLEAN_HUD_INDICATORS`. Each item
+     * associated with an enum value above.
      */
     static constexpr BooleanHUDIndicatorTuple
         BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[NUM_BOOLEAN_HUD_INDICATORS]{
             BooleanHUDIndicatorTuple(
                 "SYS CALIB ",
-                Tx::GraphicColor::PURPLISH_RED,
-                Tx::GraphicColor::GREEN),
+                Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
+                Tx::GraphicColor::GREEN),        // Green when not calibrating
             BooleanHUDIndicatorTuple(
                 "AGI ",
                 Tx::GraphicColor::GREEN,
@@ -172,8 +172,12 @@ private:
     tap::communication::referee::BooleanHUDIndicator
         booleanHudIndicatorDrawers[NUM_BOOLEAN_HUD_INDICATORS];
 
-    /** Use this index when iterating through the  booleanHudIndicatorDrawers in protothreads. */
-    int booleanHudIndicatorIndex = 0;
+    /** Use this index when iterating through the booleanHudIndicatorDrawers in the update function.
+     * Should be a local variable, but since it's in a protothread it can't be local. */
+    int booleanHudIndicatorIndexUpdate = 0;
+    /** @see booleanHudIndicatorIndexUpdate, similar variable but used in sendInitialGraphics
+     * function. */
+    int booleanHudIndicatorIndexSendInitialGraphics = 0;
 
     /**
      * Graphics associated with the the hud indicator graphics that do not change (labels and

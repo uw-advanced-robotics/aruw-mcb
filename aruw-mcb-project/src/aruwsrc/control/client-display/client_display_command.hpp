@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -71,8 +71,8 @@ class ClientDisplaySubsystem;
  * - A table of selection indicators (where the graphic can be in one of multiple states).
  * - Turret pitch/yaw angles.
  *
- * @note Only a single ClientDisplayCommand should be instantiated. If more than 1 is instantiated,
- * this will lead to undefined behavior.
+ * @note Only a single ClientDisplayCommand should be instantiated. If more than one is
+ * instantiated, this will lead to undefined behavior.
  */
 class ClientDisplayCommand : public tap::control::Command, ::modm::pt::Protothread
 {

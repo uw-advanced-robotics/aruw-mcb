@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -97,7 +97,7 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
 void TurretAnglesIndicator::initialize()
 {
     uint8_t turretAnglesName[3];
-    getUnusedListName(turretAnglesName);
+    getUnusedGraphicName(turretAnglesName);
 
     RefSerial::configGraphicGenerics(
         &turretAnglesGraphic.graphicData,

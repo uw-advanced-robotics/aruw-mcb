@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "chassis_orientation_indicator.hpp"
 
 #include "tap/communication/serial/ref_serial.hpp"
@@ -42,7 +61,7 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::update()
     if (chassisOrientation != chassisOrientationPrev)
     {
         // since chassisOrientation is a pixel coordinate centered around
-        // `CHASSIS_CENTER_X/Y`, when configuring the line center it about these coordinates
+        // `CHASSIS_CENTER_X/Y`, center the line about these coordinates during configuration
         RefSerial::configLine(
             CHASSIS_WIDTH,
             CHASSIS_CENTER_X + chassisOrientation.x,
@@ -70,7 +89,7 @@ void ChassisOrientationIndicator::initialize()
     chassisOrientationPrev = chassisOrientation;
 
     uint8_t chassisOrientationName[3];
-    getUnusedListName(chassisOrientationName);
+    getUnusedGraphicName(chassisOrientationName);
 
     // config the chassis graphic
 
@@ -89,7 +108,7 @@ void ChassisOrientationIndicator::initialize()
         CHASSIS_CENTER_Y - chassisOrientation.y,
         &chassisOrientationGraphics.graphicData[0]);
 
-    getUnusedListName(chassisOrientationName);
+    getUnusedGraphicName(chassisOrientationName);
 
     // config the turret graphic
 

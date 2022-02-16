@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -50,7 +50,7 @@ modm::ResumableResult<bool> ReticleIndicator::update()
 void ReticleIndicator::initialize()
 {
     uint8_t currLineName[3];
-    getUnusedListName(currLineName);
+    getUnusedGraphicName(currLineName);
 
     // Add reticle markers
     uint16_t maxReticleY = 0;
@@ -71,7 +71,7 @@ void ReticleIndicator::initialize()
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]));
 
-        getUnusedListName(currLineName);
+        getUnusedGraphicName(currLineName);
 
         // center of the reticle, in pixels
         uint16_t reticleXCenter = static_cast<int>(SCREEN_WIDTH / 2) + RETICLE_CENTER_X_OFFSET;

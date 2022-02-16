@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -93,7 +93,7 @@ public:
     void initialize() override final;
 
 private:
-    /** The color of the title row of the matrix HUD indicator */
+    /** The color of the title row of the matrix HUD indicator. */
     static constexpr Tx::GraphicColor MATRIX_HUD_INDICATOR_TITLE_COLOR = Tx::GraphicColor::GREEN;
     /** The color of the labels in the HUD matrix. */
     static constexpr Tx::GraphicColor MATRIX_HUD_INDICATOR_LABELS_COLOR = Tx::GraphicColor::ORANGE;

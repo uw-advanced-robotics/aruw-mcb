@@ -37,8 +37,8 @@ class Drivers;
 namespace aruwsrc::control::client_display
 {
 /**
- * Draws a little chassis graphic on the HUD that represents the actual rotation of the chassis.
- * Relative to the turret. A turret is drawn as a line straight up and the chassis rotates around
+ * Draws a little chassis graphic on the HUD that represents the actual rotation of the chassis
+ * relative to the turret. A turret is drawn as a line straight up and the chassis rotates around
  * the turret.
  */
 class ChassisOrientationIndicator : public HudIndicator
@@ -86,17 +86,17 @@ private:
      * Vector with origin `(0, 0)`. The turret drawn on the screen is considered to be pointing up
      * in the y axis (of the screen). This vector can be rotated around the origin by some amount to
      * represent the rotation of the chassis orientation. A clockwise rotation of the turret results
-     * in a counterclockwise rotation of the graphic (the graphic is the chassis relative to the
-     * turret).
+     * in a counterclockwise rotation of the graphic (since the graphic is the chassis relative to
+     * the turret).
      */
     modm::Vector2i chassisOrientation;
     /** Previous chassis orientation. Should be a local variable but cannot since it is in a
      * protothread. */
     modm::Vector2i chassisOrientationPrev;
     /**
-     * 2 graphics that represent chassis orientation. First graphic is the line representing the
-     * turret and the second graphic is a thick line that represents the chassis and is rotated some
-     * amount to represent chassis orientation.
+     * Two graphics that represent chassis orientation. The first graphic is the line representing
+     * the turret, and the second graphic is a thick line that represents the chassis and is rotated
+     * some amount to represent chassis orientation.
      */
     Tx::Graphic2Message chassisOrientationGraphics;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -24,6 +24,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "modm/math/utils/misc.hpp"
 
 #include "hud_indicator.hpp"
 
@@ -68,9 +69,9 @@ private:
         modm::pow(10, TURRET_ANGLES_DECIMAL_POINTS);
     /** The character line width of the turret angles text. */
     static constexpr uint16_t TURRET_ANGLES_CHAR_WIDTH = 2;
-    /** Starting X coordinate of the turret angles mssage, in pixels. Location where turret floating
-     * point angles will be displayed at. The labels associated with the numbers will be to the left
-     * of this. */
+    /** Starting X coordinate of the turret angles message, in pixels. Location where turret
+     * floating point angles will be displayed at. The labels associated with the numbers will be to
+     * the left of this. */
     static constexpr uint16_t TURRET_ANGLES_START_X = 1430;
     /** Starting Y coordinate of the turret angles message, in pixels. */
     static constexpr uint16_t TURRET_ANGLES_START_Y = 460;
@@ -86,18 +87,18 @@ private:
     /** Character graphic containing labeles "pitch" and "yaw", situated next to
      * turretAnglesGraphic. */
     Tx::GraphicCharacterMessage turretAnglesLabelGraphics;
-    /** Local variable but is in a protothread, so must be not local, current turret yaw value, in
-     * degrees. */
+    /** Current turret yaw value, in degrees. Should be a local variable, but since it's in a
+     * protothread it can't be local. */
     float yaw = 0.0f;
-    /** Local variable but is in a protothread, so must be not local, current turret pitch angle
-     * value, in degrees. */
+    /** Current turret pitch angle value, in degrees. Should be a local variable, but since it's in
+     * a protothread it can't be local. */
     float pitch = 0.0f;
     /** Previous turret yaw value used to determine if yaw turret angle has changed. */
     float prevYaw = 0.0f;
     /** Previous turret pitch value used to determine if pitch turret angle has changed. */
     float prevPitch = 0.0f;
-    /** Local variable but is in a protothread, so must be not local...number of bytes written when
-     * writing the angle data graphic. */
+    /** Mumber of bytes written when writing the angle data graphic. Should be a local variable, but
+     * since it's in a protothread it can't be local. */
     int bytesWritten = 0;
     /** Periodic timer used to regulate how often the turret angles will update. */
     tap::arch::PeriodicMilliTimer sendTurretDataTimer{TURRET_ANGLES_SEND_DATA_PERIOD};

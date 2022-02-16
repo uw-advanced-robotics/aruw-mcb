@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -27,7 +27,7 @@ uint32_t HudIndicator::currListName = 0;
 
 void HudIndicator::resetListNameGenerator() { currListName = 0; }
 
-void HudIndicator::getUnusedListName(uint8_t listName[3])
+void HudIndicator::getUnusedGraphicName(uint8_t listName[3])
 {
     if (currListName > 0xffffff)
     {

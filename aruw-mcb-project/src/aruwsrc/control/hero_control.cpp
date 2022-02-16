@@ -279,6 +279,9 @@ PressCommandMapping bNotCtrlPressed(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState({Remote::Key::B}, {Remote::Key::CTRL}));
+// The user can press b+ctrl to restart the client display command. This is necessary since we don't
+// know when the robot is connected to the server and thus don't know when to start sending the
+// initial HUD graphics.
 PressCommandMapping bCtrlPressed(
     drivers(),
     {&clientDisplayCommand},

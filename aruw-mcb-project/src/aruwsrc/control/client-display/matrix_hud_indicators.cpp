@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -42,10 +42,10 @@ static inline void updateGraphicYLocation(
     uint16_t location,
     RefSerialData::Tx::Graphic1Message *graphic)
 {
-    if (graphic->graphicData.endY < graphic->graphicData.startY)
-    {
-        return;
-    }
+    modm_assert(
+        graphic->graphicData.endY >= graphic->graphicData.startY,
+        "updateGraphicYLocation",
+        "invalid graphic data struct");
 
     uint16_t startYDiff = graphic->graphicData.endY - graphic->graphicData.startY;
     graphic->graphicData.startY = location;
@@ -175,7 +175,7 @@ void MatrixHudIndicators::updateIndicatorState()
 void MatrixHudIndicators::initialize()
 {
     uint8_t matrixHudIndicatorName[3];
-    getUnusedListName(matrixHudIndicatorName);
+    getUnusedGraphicName(matrixHudIndicatorName);
 
     uint16_t hudIndicatorListCurrX = MATRIX_HUD_INDICATOR_START_X;
 
@@ -191,7 +191,7 @@ void MatrixHudIndicators::initialize()
             DEFAULT_GRAPHIC_LAYER,
             MATRIX_HUD_INDICATOR_SELECTOR_BOX_COLOR);
 
-        getUnusedListName(matrixHudIndicatorName);
+        getUnusedGraphicName(matrixHudIndicatorName);
 
         RefSerial::configRectangle(
             MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH,
@@ -213,7 +213,7 @@ void MatrixHudIndicators::initialize()
             DEFAULT_GRAPHIC_LAYER,
             MATRIX_HUD_INDICATOR_LABELS_COLOR);
 
-        getUnusedListName(matrixHudIndicatorName);
+        getUnusedGraphicName(matrixHudIndicatorName);
 
         RefSerial::configCharacterMsg(
             MATRIX_HUD_INDICATOR_CHAR_SIZE,
@@ -227,7 +227,8 @@ void MatrixHudIndicators::initialize()
                                  MATRIX_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS;
     }
 
-    // title
+    // configure the title (the first row of the matrix indicator, giving meaning to each label
+    // column)
 
     RefSerial::configGraphicGenerics(
         &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS].graphicData,

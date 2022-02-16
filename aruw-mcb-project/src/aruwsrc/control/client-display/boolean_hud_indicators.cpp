@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "boolean_hud_indicators.hpp"
 
 #include "tap/communication/serial/ref_serial.hpp"
@@ -64,17 +83,21 @@ modm::ResumableResult<bool> BooleanHudIndicators::sendInitialGraphics()
     RF_BEGIN(0);
 
     // send all boolean hud indicator graphics (labels and circles)
-    for (booleanHudIndicatorIndex = 0; booleanHudIndicatorIndex < NUM_BOOLEAN_HUD_INDICATORS;
-         booleanHudIndicatorIndex++)
+    for (booleanHudIndicatorIndexSendInitialGraphics = 0;
+         booleanHudIndicatorIndexSendInitialGraphics < NUM_BOOLEAN_HUD_INDICATORS;
+         booleanHudIndicatorIndexSendInitialGraphics++)
     {
-        RF_CALL(booleanHudIndicatorDrawers[booleanHudIndicatorIndex].initialize());
+        RF_CALL(
+            booleanHudIndicatorDrawers[booleanHudIndicatorIndexSendInitialGraphics].initialize());
 
         drivers->refSerial.sendGraphic(
-            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndex]);
-        DELAY_REF_GRAPHIC(&booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndex]);
+            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
+        DELAY_REF_GRAPHIC(
+            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
         drivers->refSerial.sendGraphic(
-            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndex]);
-        DELAY_REF_GRAPHIC(&booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndex]);
+            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
+        DELAY_REF_GRAPHIC(
+            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
     }
 
     RF_END();
@@ -97,10 +120,11 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
         drivers->commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
-    for (booleanHudIndicatorIndex = 0; booleanHudIndicatorIndex < NUM_BOOLEAN_HUD_INDICATORS;
-         booleanHudIndicatorIndex++)
+    for (booleanHudIndicatorIndexUpdate = 0;
+         booleanHudIndicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS;
+         booleanHudIndicatorIndexUpdate++)
     {
-        RF_CALL(booleanHudIndicatorDrawers[booleanHudIndicatorIndex].draw());
+        RF_CALL(booleanHudIndicatorDrawers[booleanHudIndicatorIndexUpdate].draw());
     }
 
     RF_END();
@@ -114,8 +138,8 @@ void BooleanHudIndicators::initialize()
     // Configure hopper cover hud indicator
     for (int i = 0; i < NUM_BOOLEAN_HUD_INDICATORS; i++)
     {
-        // config the boolean HUD indicator graphic
-        getUnusedListName(booleanHudIndicatorName);
+        // config the boolean HUD indicator circle (that will switch colors based on state)
+        getUnusedGraphicName(booleanHudIndicatorName);
 
         RefSerial::configGraphicGenerics(
             &booleanHudIndicatorGraphics[i].graphicData,
@@ -132,7 +156,7 @@ void BooleanHudIndicators::initialize()
             &booleanHudIndicatorGraphics[i].graphicData);
 
         // config the border circle that bounds the booleanHudIndicatorGraphics
-        getUnusedListName(booleanHudIndicatorName);
+        getUnusedGraphicName(booleanHudIndicatorName);
 
         RefSerial::configGraphicGenerics(
             &booleanHudIndicatorStaticGraphics[i].graphicData,
@@ -149,7 +173,7 @@ void BooleanHudIndicators::initialize()
             &booleanHudIndicatorStaticGraphics[i].graphicData);
 
         // config the label associated with the particular indicator
-        getUnusedListName(booleanHudIndicatorName);
+        getUnusedGraphicName(booleanHudIndicatorName);
 
         RefSerial::configGraphicGenerics(
             &booleanHudIndicatorStaticLabelGraphics[i].graphicData,
