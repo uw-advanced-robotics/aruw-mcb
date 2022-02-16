@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -68,7 +68,7 @@ private:
     using PrintCVMenuLineFn = void (CVMenu::*)(modm::IOStream &);
     using UpdateCVStateFn = void (CVMenu::*)();
 
-    static constexpr int IMU_CALIBRATE_MENU_ID = 8;
+    static constexpr int CV_MENU_ID = 8;
 
     aruwsrc::Drivers *drivers;
     tap::display::VerticalScrollLogicHandler verticalScroll;

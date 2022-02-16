@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -28,7 +28,7 @@ namespace aruwsrc::display
 CVMenu::CVMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
     aruwsrc::Drivers *drivers)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, IMU_CALIBRATE_MENU_ID),
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, CV_MENU_ID),
       drivers(drivers),
       verticalScroll(
           drivers,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,6 +21,7 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
@@ -139,6 +140,9 @@ private:
     /// Time in ms since last CV aim data was received before deciding CV is offline.
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
 
+    /** Time in ms between sending the robot ID message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
+
     /// The last aim data received from the xavier.
     TurretAimData lastAimData;
 
@@ -150,7 +154,7 @@ private:
 
     tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
 
-    tap::communication::serial::RefSerialData::RobotId prevSentRobotId;
+    tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim

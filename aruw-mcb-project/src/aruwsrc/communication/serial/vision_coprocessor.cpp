@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -32,8 +32,7 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_PORT),
       lastAimData(),
       turretMCBCanComm(&drivers->turretMCBCanComm),
-      odometryInterface(nullptr),
-      prevSentRobotId(RefSerialData::RobotId::INVALID)
+      odometryInterface(nullptr)
 {
 }
 
@@ -139,20 +138,16 @@ void VisionCoprocessor::sendOdometryData()
 
 void VisionCoprocessor::sendRobotTypeData()
 {
-    auto currRobotId = drivers->refSerial.getRobotData().robotId;
-
-    if (currRobotId != prevSentRobotId)
+    if (sendRobotIdTimeout.execute())
     {
         DJISerial::SerialMessage<1> robotTypeMessage;
         robotTypeMessage.messageType = CV_MESSAGE_TYPE_ROBOT_ID;
-        robotTypeMessage.data[0] = static_cast<uint8_t>(currRobotId);
+        robotTypeMessage.data[0] = static_cast<uint8_t>(drivers->refSerial.getRobotData().robotId);
         robotTypeMessage.setCRC16();
         drivers->uart.write(
             VISION_COPROCESSOR_TX_UART_PORT,
             reinterpret_cast<uint8_t*>(&robotTypeMessage),
             sizeof(robotTypeMessage));
-
-        prevSentRobotId = currRobotId;
     }
 }
 
