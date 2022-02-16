@@ -20,8 +20,9 @@
 #ifndef CHASSIS_CONSTANTS_HPP_
 #define CHASSIS_CONSTANTS_HPP_
 
-#include "aruwsrc/util_macros.hpp"
 #include "tap/motor/dji_motor.hpp"
+
+#include "aruwsrc/util_macros.hpp"
 
 #if defined(ALL_SOLDIERS)
 #include "soldier_chassis_constants.hpp"

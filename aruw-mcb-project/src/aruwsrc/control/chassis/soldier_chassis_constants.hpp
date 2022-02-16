@@ -20,8 +20,9 @@
 #ifndef SOLDIER_CHASSIS_CONSTANTS_HPP_
 #define SOLDIER_CHASSIS_CONSTANTS_HPP_
 
-#include "modm/math/filter/pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
+
+#include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc::chassis
 {

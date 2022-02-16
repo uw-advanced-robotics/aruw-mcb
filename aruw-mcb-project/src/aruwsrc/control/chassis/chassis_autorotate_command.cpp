@@ -93,7 +93,7 @@ void ChassisAutorotateCommand::execute()
 
             // Apply autorotation
             chassisRotationDesiredWheelspeed =
-                chassis->chassisSpeedRotationPID(-angleFromCenterForChassisAutorotate);
+                chassis->chassisSpeedRotationPID(angleFromCenterForChassisAutorotate);
         }
 
         // what we will multiply x and y speed by to take into account rotation
@@ -119,7 +119,7 @@ void ChassisAutorotateCommand::execute()
         rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            -modm::toRadian(turretAngleFromCenter));
+            modm::toRadian(turretAngleFromCenter));
 
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,

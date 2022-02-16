@@ -71,7 +71,7 @@ void ChassisImuDriveCommand::execute()
         else
         {
             const float yaw = drivers->mpu6500.getYaw();
-            angleFromDesiredRotation = rotationSetpoint.difference(yaw);
+            angleFromDesiredRotation = -rotationSetpoint.difference(yaw);
 
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
             // angle. This way if the chassis is picked up and rotated, it won't try and spin around
@@ -97,7 +97,7 @@ void ChassisImuDriveCommand::execute()
             }
 
             // compute error again now that user input has been updated
-            angleFromDesiredRotation = rotationSetpoint.difference(yaw);
+            angleFromDesiredRotation = -rotationSetpoint.difference(yaw);
 
             // run PID controller to attempt to attain the setpoint
             chassisRotationDesiredWheelspeed =
@@ -131,7 +131,7 @@ void ChassisImuDriveCommand::execute()
         tap::algorithms::rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            modm::toRadian(-turret->getYawAngleFromCenter()));
+            modm::toRadian(turret->getYawAngleFromCenter()));
     }
     else
     {
