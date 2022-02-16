@@ -124,7 +124,7 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
     auto runTest = [&](float x, float y) {
         float rotatedX = x;
         float rotatedY = y;
-        rotateVector(&rotatedX, &rotatedY, -modm::toRadian(turretAngleFromCenter));
+        rotateVector(&rotatedX, &rotatedY, modm::toRadian(turretAngleFromCenter));
         EXPECT_CALL(
             chassis,
             setDesiredOutput(

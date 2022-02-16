@@ -168,7 +168,7 @@ TEST(ChassisImuDriveCommand, execute__imu_setpoint_target_setpoint_same_0_rotati
     chassisImuDriveCommand.execute();
 }
 
-TEST(ChassisImuDriveCommand, execute__target_gt_actual_negative_rotation_output)
+TEST(ChassisImuDriveCommand, execute__target_gt_actual_positive_rotation_output)
 {
     SETUP_TEST_OBJECTS_NO_TURRET();
 
@@ -184,12 +184,11 @@ TEST(ChassisImuDriveCommand, execute__target_gt_actual_negative_rotation_output)
 
     userR = 1.0f;  // user rotation positive, setpoint will be gt current imu yaw.
 
-    // since chassis rotation backward, expect desired output to be less than 0
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Lt(0)));
+    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Gt(0)));
     chassisImuDriveCommand.execute();
 }
 
-TEST(ChassisImuDriveCommand, execute__target_lt_actual_positive_rotation_output)
+TEST(ChassisImuDriveCommand, execute__target_lt_actual_negative_rotation_output)
 {
     SETUP_TEST_OBJECTS_NO_TURRET();
 
@@ -205,8 +204,7 @@ TEST(ChassisImuDriveCommand, execute__target_lt_actual_positive_rotation_output)
 
     userR = -1.0f;  // user rotation negative, setpoint will be gt current imu yaw.
 
-    // since chassis rotation backward, expect desired output to be less than 0
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Gt(0)));
+    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Lt(0)));
     chassisImuDriveCommand.execute();
 }
 
@@ -284,7 +282,7 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     userY = 1.0f;
     float xExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
     float yExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
-    tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(10));
+    tap::algorithms::rotateVector(&xExpected, &yExpected, -modm::toRadian(10));
 
     EXPECT_CALL(
         chassis,
@@ -312,7 +310,7 @@ TEST(ChassisImuDriveCommand, execute__turret_relative_when_turret_not_nullptr)
     userY = 0.0f;
     float xExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
     float yExpected = 0.0f;
-    tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(-45.0f));
+    tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(45.0f));
 
     EXPECT_CALL(
         chassis,
