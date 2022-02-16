@@ -28,13 +28,4 @@
 #elif defined(TARGET_HERO)
 #include "hero_agitator_constants.hpp"
 #endif
-namespace aruwsrc::control::agitator::constants{
-    static constexpr tap::algorithms::SmoothPidConfig PID_17MM = {
-        .kp = 300'000.0f,
-        .ki = 0.0f,
-        .kd = 50.0f,
-        .maxICumulative = 0.0f,
-        .maxOutput =  16000.0f
-    };
-}
 #endif

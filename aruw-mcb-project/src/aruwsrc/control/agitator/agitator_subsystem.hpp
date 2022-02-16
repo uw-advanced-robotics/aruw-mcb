@@ -119,15 +119,6 @@ public:
         uint32_t jammingTime,
         bool jamLogicEnabled);
 
-    void initialize() override;
-
-    void refresh() override;
-
-    /**
-     * @return The angle set in `setSetpoint`.
-     */
-    mockable inline float getSetpoint() const override { return desiredAgitatorAngle; }
-
     /**
      * Sets desired angle in radians of the agitator motor, relative to where the agitator
      * has been initialized.

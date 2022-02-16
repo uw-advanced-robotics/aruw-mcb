@@ -104,7 +104,7 @@ ChassisSubsystem chassis(drivers());
 
 AgitatorSubsystem agitator(
     drivers(),
-    aruwsrc::control::agitator::constants::PID_17MM,
+    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
     aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,

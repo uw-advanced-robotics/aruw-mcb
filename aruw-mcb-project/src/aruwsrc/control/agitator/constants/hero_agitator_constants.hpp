@@ -41,8 +41,6 @@ static constexpr tap::algorithms::SmoothPidConfig PID_HERO_KICKER = {
     .kp = 100'000.0f,
     .ki = 0.0f,
     .kd = 50.0f,
-    // max out added by Tenzin since it wasn't here. This should
-    // also be changed by someone who know's what they're doing!
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f
 };

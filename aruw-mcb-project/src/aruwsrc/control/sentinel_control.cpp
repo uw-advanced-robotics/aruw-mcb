@@ -68,7 +68,7 @@ static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
 /* define subsystems --------------------------------------------------------*/
 AgitatorSubsystem agitator(
     drivers(),
-    aruwsrc::control::agitator::constants::PID_17MM,
+    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
     aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
