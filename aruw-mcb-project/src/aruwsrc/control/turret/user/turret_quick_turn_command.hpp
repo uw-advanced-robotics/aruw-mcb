@@ -21,7 +21,7 @@
 #define TURRET_QUICK_TURN_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
-#include "tap/control/turret_subsystem_interface.hpp"
+#include "../turret_subsystem.hpp"
 
 namespace tap
 {
@@ -49,7 +49,7 @@ public:
      *      will be updated to when this command is run.
      */
     TurretQuickTurnCommand(
-        tap::control::turret::TurretSubsystemInterface *turretSubsystem,
+        TurretSubsystem *turretSubsystem,
         const float targetOffsetToTurn);
 
     bool isReady() override;
@@ -65,7 +65,7 @@ public:
     void end(bool) override {}
 
 private:
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem;
+    TurretSubsystem *turretSubsystem;
     const float targetOffsetToTurn;
 };
 }  // namespace aruwsrc::control::turret::user
