@@ -41,7 +41,7 @@ namespace aruwsrc::control::client_display
 /**
  * A list of indicators that represent different boolean (true/false) states.
  */
-class BooleanHudIndicators : public HudIndicator
+class BooleanHudIndicators : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**

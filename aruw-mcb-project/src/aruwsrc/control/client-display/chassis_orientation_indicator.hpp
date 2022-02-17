@@ -41,7 +41,7 @@ namespace aruwsrc::control::client_display
  * relative to the turret. A turret is drawn as a line straight up and the chassis rotates around
  * the turret.
  */
-class ChassisOrientationIndicator : public HudIndicator
+class ChassisOrientationIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**

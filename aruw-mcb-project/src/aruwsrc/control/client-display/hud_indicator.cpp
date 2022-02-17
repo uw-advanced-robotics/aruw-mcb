@@ -23,22 +23,22 @@
 
 namespace aruwsrc::control::client_display
 {
-uint32_t HudIndicator::currListName = 0;
+uint32_t HudIndicator::currGraphicName = 0;
 
-void HudIndicator::resetListNameGenerator() { currListName = 0; }
+void HudIndicator::resetGraphicNameGenerator() { currGraphicName = 0; }
 
-void HudIndicator::getUnusedGraphicName(uint8_t listName[3])
+void HudIndicator::getUnusedGraphicName(uint8_t graphicName[3])
 {
-    if (currListName > 0xffffff)
+    if (currGraphicName > 0xffffff)
     {
         return;
     }
     else
     {
-        listName[0] = static_cast<uint8_t>((currListName >> 16) & 0xff);
-        listName[1] = static_cast<uint8_t>((currListName >> 8) & 0xff);
-        listName[2] = static_cast<uint8_t>(currListName & 0xff);
-        currListName++;
+        graphicName[0] = static_cast<uint8_t>((currGraphicName >> 16) & 0xff);
+        graphicName[1] = static_cast<uint8_t>((currGraphicName >> 8) & 0xff);
+        graphicName[2] = static_cast<uint8_t>(currGraphicName & 0xff);
+        currGraphicName++;
     }
 }
 

@@ -40,7 +40,7 @@ namespace aruwsrc::control::client_display
  * them. The reticle location is defined by the array
  * `TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES`.
  */
-class ReticleIndicator : public HudIndicator
+class ReticleIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**

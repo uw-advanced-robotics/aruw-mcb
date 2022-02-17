@@ -35,8 +35,7 @@ namespace aruwsrc::control::client_display
  * distance between `endY` and `startY` are maintained. Thus, a graphic's position in the Y
  * direction may be translated up or down using this function
  *
- * @note By convention expected that `endY > startY`. If this is not true, this function does
- * nothing.
+ * @note This function asserts that `endY > startY` must be true (as it indicates a bug otherwise).
  */
 static inline void updateGraphicYLocation(
     uint16_t location,
@@ -240,7 +239,7 @@ void MatrixHudIndicators::initialize()
     char positionHudGraphicTitles[30];
     char *currHudGraphicTitlePos = positionHudGraphicTitles;
 
-    const int spacesBetweenCols =
+    static constexpr int spacesBetweenCols =
         MATRIX_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS / MATRIX_HUD_INDICATOR_CHAR_SIZE;
 
     // The individual titles are values in MATRIX_HUD_INDICATOR_TITLES_AND_LABELS, so copy over

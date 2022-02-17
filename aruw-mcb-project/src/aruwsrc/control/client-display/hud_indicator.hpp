@@ -42,8 +42,7 @@ namespace aruwsrc::control::client_display
 /**
  * A generic HUD indicator interface class with helper utilities that other HUD indicators may use.
  */
-class HudIndicator : protected modm::Resumable<2>,
-                     protected tap::communication::serial::RefSerialData
+class HudIndicator : protected tap::communication::serial::RefSerialData
 {
 public:
     /*
@@ -69,23 +68,23 @@ public:
     virtual void initialize() = 0;
 
     /**
-     * Resets the list name generator so the next time it is queried via `getUnusedGraphicName`, the
-     * function returns {0, 0, 0}.
+     * Resets the graphic name generator so the next time it is queried via `getUnusedGraphicName`,
+     * the function returns {0, 0, 0}.
      */
-    static void resetListNameGenerator();
+    static void resetGraphicNameGenerator();
 
 protected:
     /**
-     * Graphics must have unique 3 byte names. Utility function for getting a list name that is
+     * Graphics must have unique 3 byte names. Utility function for getting a graphic name that is
      * currently unused. Use this function exclusively to avoid graphic name clashes.
      *
-     * If no list names are available (all are in use), won't set the listName.
+     * If no list names are available (all are in use), won't set the graphicName.
      *
-     * @param[out] listName Array to put an unused list name in.
+     * @param[out] graphicName Array to put an unused list name in.
      */
-    static void getUnusedGraphicName(uint8_t listName[3]);
+    static void getUnusedGraphicName(uint8_t graphicName[3]);
 
-    static uint32_t currListName;
+    static uint32_t currGraphicName;
 
     /**
      * Timer used to delay between sending messages to the referee system.

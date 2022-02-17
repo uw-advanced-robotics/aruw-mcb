@@ -69,7 +69,7 @@ ClientDisplayCommand::ClientDisplayCommand(
 
 void ClientDisplayCommand::initialize()
 {
-    HudIndicator::resetListNameGenerator();
+    HudIndicator::resetGraphicNameGenerator();
     restart();  // restart protothread
     booleanHudIndicators.initialize();
     chassisOrientationIndicator.initialize();

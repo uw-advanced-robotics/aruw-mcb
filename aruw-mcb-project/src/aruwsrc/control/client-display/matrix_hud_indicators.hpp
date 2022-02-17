@@ -57,7 +57,7 @@ namespace aruwsrc::control::client_display
  *
  * In the example above, the chassis is beyblading and the launcher is loading.
  */
-class MatrixHudIndicators : public HudIndicator
+class MatrixHudIndicators : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**

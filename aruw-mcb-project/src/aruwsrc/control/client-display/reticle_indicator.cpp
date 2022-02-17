@@ -105,7 +105,7 @@ void ReticleIndicator::initialize()
         }
     }
 
-    // Add horizontal reticle line to connect reticle markers
+    // Add vertical reticle line to connect reticle markers
     RefSerial::configGraphicGenerics(
         &reticleMsg[NUM_RETICLE_COORDINATES / MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]
              .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)],

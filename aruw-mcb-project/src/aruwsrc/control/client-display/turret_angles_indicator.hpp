@@ -38,7 +38,7 @@ namespace aruwsrc::control::client_display
 /**
  * Draws the current pitch/yaw turret angles (in degrees, in the world frame).
  */
-class TurretAnglesIndicator : public HudIndicator
+class TurretAnglesIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**
