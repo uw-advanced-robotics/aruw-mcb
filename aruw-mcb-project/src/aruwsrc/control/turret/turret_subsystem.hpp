@@ -41,6 +41,12 @@ namespace aruwsrc
 class Drivers;
 }
 
+namespace aruwsrc::control::turret::algorithms
+{
+class TurretPitchControllerInterface;
+class TurretYawControllerInterface;
+}  // namespace aruwsrc::control::turret::algorithms
+
 namespace aruwsrc::control::turret
 {
 /**
@@ -254,6 +260,26 @@ public:
      */
     mockable void updateCurrentTurretAngles();
 
+    mockable algorithms::TurretPitchControllerInterface* getPrevRanPitchTurretController() const
+    {
+        return prevRanPitchTurretController;
+    }
+    mockable algorithms::TurretYawControllerInterface* getPrevRanYawTurretController() const
+    {
+        return prevRanYawTurretController;
+    }
+
+    mockable void setPrevRanPitchTurretController(
+        algorithms::TurretPitchControllerInterface* controller)
+    {
+        prevRanPitchTurretController = controller;
+    }
+    mockable void setPrevRanYawTurretController(
+        algorithms::TurretYawControllerInterface* controller)
+    {
+        prevRanYawTurretController = controller;
+    }
+
 private:
     tap::algorithms::ContiguousFloat currPitchAngle;
     tap::algorithms::ContiguousFloat currYawAngle;
@@ -273,6 +299,9 @@ private:
     {
         return 360 / 60 * motor->getShaftRPM();
     }
+
+    algorithms::TurretPitchControllerInterface* prevRanPitchTurretController = nullptr;
+    algorithms::TurretYawControllerInterface* prevRanYawTurretController = nullptr;
 
     tap::motor::MotorInterface* pitchMotor;
     tap::motor::MotorInterface* yawMotor;

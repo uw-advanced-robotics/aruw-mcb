@@ -128,17 +128,19 @@ WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadeP
 
 void WorldFrameYawTurretImuCascadePidTurretController::initialize()
 {
-    if (resetPidTimeout.isExpired())
+    if (this != turretSubsystem->getPrevRanYawTurretController())
     {
         positionPid.reset();
         velocityPid.reset();
-    }
 
-    // Capture initial target angle in chassis frame and transform to world frame.
-    worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-        turretSubsystem->getCurrentYawValue().getValue(),
-        drivers->turretMCBCanComm.getYaw(),
-        turretSubsystem->getYawSetpoint()));
+        // Capture initial target angle in chassis frame and transform to world frame.
+        worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
+            turretSubsystem->getCurrentYawValue().getValue(),
+            drivers->turretMCBCanComm.getYaw(),
+            turretSubsystem->getYawSetpoint()));
+
+        turretSubsystem->setPrevRanYawTurretController(this);
+    }
 }
 
 void WorldFrameYawTurretImuCascadePidTurretController::runController(
@@ -167,8 +169,6 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
     float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
     turretSubsystem->setYawMotorOutput(velocityPidOutput);
-
-    resetPidTimeout.restart(RESET_TIME_MS);
 }
 
 float WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
@@ -238,16 +238,18 @@ WorldFramePitchTurretImuCascadePidTurretController::
 
 void WorldFramePitchTurretImuCascadePidTurretController::initialize()
 {
-    if (resetPidTimeout.isExpired())
+    if (turretSubsystem->getPrevRanPitchTurretController() != this)
     {
         positionPid.reset();
         velocityPid.reset();
-    }
 
-    worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-        turretSubsystem->getCurrentPitchValue().getValue(),
-        drivers->turretMCBCanComm.getPitch(),
-        turretSubsystem->getPitchSetpoint()));
+        worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
+            turretSubsystem->getCurrentPitchValue().getValue(),
+            drivers->turretMCBCanComm.getPitch(),
+            turretSubsystem->getPitchSetpoint()));
+
+        turretSubsystem->setPrevRanPitchTurretController(this);
+    }
 }
 
 void WorldFramePitchTurretImuCascadePidTurretController::runController(
@@ -278,8 +280,6 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         TurretSubsystem::GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(velocityPidOutput);
-
-    resetPidTimeout.restart(RESET_TIME_MS);
 }
 
 float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const
