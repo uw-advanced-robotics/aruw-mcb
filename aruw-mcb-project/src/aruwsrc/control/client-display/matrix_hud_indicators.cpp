@@ -226,7 +226,7 @@ void MatrixHudIndicators::initialize()
                                  MATRIX_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS;
     }
 
-    // configure the title (the first row of the matrix indicator, giving meaning to each label
+    // configure the title (the first row of the matrix indicator, giving meaning to each labeled
     // column)
 
     RefSerial::configGraphicGenerics(
