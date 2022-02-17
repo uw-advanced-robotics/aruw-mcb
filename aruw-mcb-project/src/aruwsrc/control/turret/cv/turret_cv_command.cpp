@@ -68,6 +68,7 @@ void TurretCVCommand::initialize()
 {
     pitchController->initialize();
     yawController->initialize();
+    prevTime = getTimeMilliseconds();
 }
 
 void TurretCVCommand::execute()

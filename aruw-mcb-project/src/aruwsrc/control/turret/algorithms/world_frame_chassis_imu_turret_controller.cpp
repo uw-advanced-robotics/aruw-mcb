@@ -122,9 +122,15 @@ WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController
 
 void WorldFrameYawChassisImuTurretController::initialize()
 {
-    pid.reset();
-    chassisFrameInitImuYawAngle = drivers->mpu6500.getYaw();
-    worldFrameSetpoint.setValue(turretSubsystem->getYawSetpoint());
+    if (turretSubsystem->getPrevRanYawTurretController() != this)
+    {
+        pid.reset();
+
+        chassisFrameInitImuYawAngle = drivers->mpu6500.getYaw();
+        worldFrameSetpoint.setValue(turretSubsystem->getYawSetpoint());
+
+        turretSubsystem->setPrevRanYawTurretController(this);
+    }
 }
 
 void WorldFrameYawChassisImuTurretController::runController(
