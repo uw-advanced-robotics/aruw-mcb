@@ -69,13 +69,13 @@ public:
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
      * are on or off.
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
-     * never be selected as the current chassis command.
+     * never be selected as the current chassis command in the HUD.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
-     * will never be selected as the current chassis command.
+     * will never be selected as the current chassis command in the HUD.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
-     * will never be selected as the current chassis command.
+     * will never be selected as the current chassis command in the HUD.
      * @param[in] chassisDriveCmd May be nullptr. If nullptr the chassis drive command will never be
-     * selected as the current chassis command.
+     * selected as the current chassis command in the HUD.
      */
     MatrixHudIndicators(
         aruwsrc::Drivers *drivers,
