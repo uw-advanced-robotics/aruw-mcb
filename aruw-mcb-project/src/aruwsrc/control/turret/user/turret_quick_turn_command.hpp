@@ -21,6 +21,7 @@
 #define TURRET_QUICK_TURN_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+
 #include "../turret_subsystem.hpp"
 
 namespace tap
@@ -48,9 +49,7 @@ public:
      * @param[in] targetOffsetToTurn Offset angle, in degrees, that the turret setpoint
      *      will be updated to when this command is run.
      */
-    TurretQuickTurnCommand(
-        TurretSubsystem *turretSubsystem,
-        const float targetOffsetToTurn);
+    TurretQuickTurnCommand(TurretSubsystem *turretSubsystem, const float targetOffsetToTurn);
 
     bool isReady() override;
 
