@@ -376,7 +376,7 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedShiftPressed)
+    drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
