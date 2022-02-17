@@ -181,6 +181,29 @@ HeroAgitatorCommand heroAgitatorCommand(
     &frictionWheels,
     heroAgitatorCommandConfig);
 
+static constexpr HeroAgitatorCommand::Config heroAgitatorCommandConfigRefNotLimited = {
+    .kickerShootRotateAngle = M_PI / 2.0,
+    .kickerShootRotateTime = 75,
+    .kickerShootSetpointTolerance = M_PI / 16.0f,
+    .kickerLoadRotateAngle = M_PI / 2.0,
+    .kickerLoadSetpointTolerance = M_PI / 16.0f,
+    .waterwheelLoadRotateAngle = M_PI / 7.0,
+    .waterwheelLoadSetpointTolerance = M_PI / 16.0f,
+    .loadRotateTime = 200,
+    .waterwheelUnjamDisplacement = M_PI / 14.0,
+    .waterwheelUnjamThreshold = M_PI / 20.0,
+    .waterwheelUnjamMaxWaitTime = 130,
+    .heatLimiting = false,
+    .heatLimitBuffer = 0,
+};
+
+HeroAgitatorCommand heroAgitatorCommandRefNotLimited(
+    drivers(),
+    &kickerAgitator,
+    &waterwheelAgitator,
+    &frictionWheels,
+    heroAgitatorCommandConfigRefNotLimited);
+
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     &turret,
@@ -265,10 +288,15 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-PressCommandMapping leftMousePressed(
+PressCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
     {&heroAgitatorCommand},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT));
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
+HoldRepeatCommandMapping leftMousePressedShiftPressed(
+    drivers(),
+    {&heroAgitatorCommandRefNotLimited},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
+    false);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
@@ -347,7 +375,8 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressed);
+    drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedShiftPressed)
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
