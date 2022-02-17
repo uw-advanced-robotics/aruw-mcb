@@ -31,11 +31,9 @@ namespace aruwsrc::control::agitator::constants
         .maxICumulative = 0.0f,
         .maxOutput =  16000.0f
     };
-static constexpr float PID_HOPPER_P = 100000.0f;
 
 static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-
 static constexpr bool isAgitatorInverted = false;
 
 /**
