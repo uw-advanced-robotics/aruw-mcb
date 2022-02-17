@@ -124,9 +124,9 @@ private:
         /** The current command controlling the chassis. */
         CHASSIS_STATE = 0,
         /** The current reloading and flywheel state of the firing system. */
-        FLYWHEEL_AND_HOPPER_STATE,
-        /** The current projectile launching state (single, burst, full auto). TODO */
         SHOOTER_STATE,
+        /** The current projectile launching state (single, burst, full auto). TODO */
+        FIRING_MODE,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -150,7 +150,7 @@ private:
     static constexpr int NUM_CHASSIS_STATES = 4;
 
     /** Enum representing different states that the shooting mechanism can be in. Corresponds to
-     * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[SHOOTER_STATE]. */
+     * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[FIRING_MODE]. */
     enum class ShooterState
     {
         /** The launcher is ready to fire. Any hoppers are sealed, the flywheels are on, and if

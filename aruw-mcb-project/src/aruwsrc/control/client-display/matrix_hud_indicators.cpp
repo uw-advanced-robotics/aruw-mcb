@@ -76,12 +76,12 @@ MatrixHudIndicators::MatrixHudIndicators(
               false),
           StateHUDIndicator<uint16_t>(
               drivers,
-              &matrixHudIndicatorGraphics[FLYWHEEL_AND_HOPPER_STATE],
+              &matrixHudIndicatorGraphics[SHOOTER_STATE],
               updateGraphicYLocation,
               false),
           StateHUDIndicator<uint16_t>(
               drivers,
-              &matrixHudIndicatorGraphics[SHOOTER_STATE],
+              &matrixHudIndicatorGraphics[FIRING_MODE],
               updateGraphicYLocation,
               false),
       }
@@ -165,7 +165,7 @@ void MatrixHudIndicators::updateIndicatorState()
 #endif
     }
 
-    matrixHudIndicatorDrawers[FLYWHEEL_AND_HOPPER_STATE].setIndicatorState(
+    matrixHudIndicatorDrawers[SHOOTER_STATE].setIndicatorState(
         MATRIX_HUD_INDICATOR_LABELS_START_Y -
         CHARACTER_LINE_SPACING * static_cast<int>(shooterState) * MATRIX_HUD_INDICATOR_CHAR_SIZE -
         MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
