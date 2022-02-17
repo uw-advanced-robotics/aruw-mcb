@@ -69,11 +69,12 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
     {
         // set the character buffer `turretAnglesGraphic.msg` to the turret pitch/yaw angle
         // values
-        // note that `%f` doesn't work in `sprintf` and neither do the integer or floating point
-        // graphics, so this is why we are using `sprintf` to put floating point numbers in a
+        // note that `%f` doesn't work in `snprintf` and neither do the integer or floating point
+        // graphics, so this is why we are using `snprintf` to put floating point numbers in a
         // character graphic
-        bytesWritten = sprintf(
+        bytesWritten = snprintf(
             turretAnglesGraphic.msg,
+            sizeof(turretAnglesGraphic.msg),
             "%i.%i\n\n%i.%i",
             static_cast<int>(yaw),
             abs(static_cast<int>(yaw * TURRET_ANGLES_DECIMAL_PRECISION) %

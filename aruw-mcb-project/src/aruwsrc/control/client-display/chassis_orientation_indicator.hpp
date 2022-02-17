@@ -83,11 +83,11 @@ private:
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
     /**
-     * Vector with origin `(0, 0)`. The turret drawn on the screen is considered to be pointing up
-     * in the y axis (of the screen). This vector can be rotated around the origin by some amount to
-     * represent the rotation of the chassis orientation. A clockwise rotation of the turret results
-     * in a counterclockwise rotation of the graphic (since the graphic is the chassis relative to
-     * the turret).
+     * Vector with origin `(0, 0)` and length CHASSIS_LENGTH / 2. The turret drawn on the screen is
+     * considered to be pointing up in the y axis (of the screen). This vector can be rotated around
+     * the origin by some amount to represent the rotation of the chassis orientation. A clockwise
+     * rotation of the turret results in a counterclockwise rotation of the graphic (since the
+     * graphic is the chassis relative to the turret).
      */
     modm::Vector2i chassisOrientation;
     /** Previous chassis orientation. Should be a local variable but cannot since it is in a
