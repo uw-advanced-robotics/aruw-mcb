@@ -71,17 +71,8 @@ void TurretCVCommand::initialize()
     yawController->initialize();
 }
 
-modm::Matrix<float, 3, 1> chassisVelocity;
-
 void TurretCVCommand::execute()
 {
-    chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    const float worldRelativeOrientation =
-        drivers->turretMCBCanComm.getYaw() - turretSubsystem->getYawAngleFromCenter();
-    chassisSubsystem.getVelocityWorldRelative(
-        chassisVelocity,
-        modm::toRadian(worldRelativeOrientation));
-
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
