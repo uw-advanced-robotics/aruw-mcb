@@ -99,9 +99,11 @@ private:
     float prevPitch = 0.0f;
     /** Mumber of bytes written when writing the angle data graphic. Should be a local variable, but
      * since it's in a protothread it can't be local. */
-    int bytesWritten = 0;
+    std::size_t bytesWritten = 0;
     /** Periodic timer used to regulate how often the turret angles will update. */
     tap::arch::PeriodicMilliTimer sendTurretDataTimer{TURRET_ANGLES_SEND_DATA_PERIOD};
+
+    void updateTurretAnglesGraphicMsg();
 };
 }  // namespace aruwsrc::control::client_display
 

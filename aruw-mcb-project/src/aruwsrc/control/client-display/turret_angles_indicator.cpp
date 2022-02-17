@@ -67,23 +67,7 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
         (!compareFloatClose(prevYaw, yaw, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION) ||
          !compareFloatClose(prevPitch, pitch, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION)))
     {
-        // set the character buffer `turretAnglesGraphic.msg` to the turret pitch/yaw angle
-        // values
-        // note that `%f` doesn't work in `snprintf` and neither do the integer or floating point
-        // graphics, so this is why we are using `snprintf` to put floating point numbers in a
-        // character graphic
-        bytesWritten = snprintf(
-            turretAnglesGraphic.msg,
-            sizeof(turretAnglesGraphic.msg),
-            "%i.%i\n\n%i.%i",
-            static_cast<int>(yaw),
-            abs(static_cast<int>(yaw * TURRET_ANGLES_DECIMAL_PRECISION) %
-                TURRET_ANGLES_DECIMAL_PRECISION),
-            static_cast<int>(pitch),
-            abs(static_cast<int>(pitch * TURRET_ANGLES_DECIMAL_PRECISION) %
-                TURRET_ANGLES_DECIMAL_PRECISION));
-        // `endAngle` is actually length of the string
-        turretAnglesGraphic.graphicData.endAngle = bytesWritten;
+        updateTurretAnglesGraphicMsg();
 
         drivers->refSerial.sendGraphic(&turretAnglesGraphic);
         DELAY_REF_GRAPHIC(&turretAnglesGraphic);
@@ -135,4 +119,54 @@ void TurretAnglesIndicator::initialize()
     prevYaw = 0.0f;
     prevPitch = 0.0f;
 }
+
+void TurretAnglesIndicator::updateTurretAnglesGraphicMsg()
+{
+    // set the character buffer `turretAnglesGraphic.msg` to the turret pitch/yaw angle
+    // values
+    // note that `%f` doesn't work in `snprintf` and neither do the integer or floating point
+    // graphics, so this is why we are using `snprintf` to put floating point numbers in a
+    // character graphic
+    turretAnglesGraphic.msg[0] = yaw < 0 ? '-' : ' ';
+    bytesWritten = 1;
+
+    bytesWritten += snprintf(
+        turretAnglesGraphic.msg + bytesWritten,
+        sizeof(turretAnglesGraphic.msg) > bytesWritten
+            ? sizeof(turretAnglesGraphic.msg) - bytesWritten
+            : 0,
+        "%i.%i\n\n",
+        abs(static_cast<int>(yaw)),
+        abs(static_cast<int>(yaw * TURRET_ANGLES_DECIMAL_PRECISION) %
+            TURRET_ANGLES_DECIMAL_PRECISION));
+
+    if (bytesWritten < sizeof(turretAnglesGraphic.msg))
+    {
+        turretAnglesGraphic.msg[bytesWritten] = (pitch < 0 ? '-' : ' ');
+        bytesWritten++;
+    }
+
+    bytesWritten += snprintf(
+        turretAnglesGraphic.msg + bytesWritten,
+        sizeof(turretAnglesGraphic.msg) > bytesWritten
+            ? sizeof(turretAnglesGraphic.msg) - bytesWritten
+            : 0,
+        "%i.%i\n\n",
+        abs(static_cast<int>(pitch)),
+        abs(static_cast<int>(pitch * TURRET_ANGLES_DECIMAL_PRECISION) %
+            TURRET_ANGLES_DECIMAL_PRECISION));
+
+    // because the RoboMaster client is trash, set all bytes after index bytesWritten to '\0'
+    memset(
+        turretAnglesGraphic.msg + bytesWritten,
+        '\0',
+        sizeof(turretAnglesGraphic.msg) > bytesWritten
+            ? sizeof(turretAnglesGraphic.msg) - bytesWritten
+            : 0);
+
+    // `endAngle` is actually length of the string, but currently robomaster client doesn't actually
+    // use it
+    turretAnglesGraphic.graphicData.endAngle = bytesWritten;
+}
+
 }  // namespace aruwsrc::control::client_display
