@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,35 +19,63 @@
 
 #include "client_display_command.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/errors/create_errors.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 #include "client_display_subsystem.hpp"
+#include "hud_indicator.hpp"
 
 using namespace tap::control;
-using namespace tap::communication::serial;
 
-#define delay()                                  \
-    delayTimer.restart(DELAY_PERIOD_BTWN_SENDS); \
-    RF_WAIT_UNTIL(delayTimer.execute());
-
-namespace aruwsrc::display
+namespace aruwsrc::control::client_display
 {
 ClientDisplayCommand::ClientDisplayCommand(
     aruwsrc::Drivers *drivers,
     ClientDisplaySubsystem *clientDisplay,
-    const Command *wiggleCommand,
-    const Command *followTurretCommand,
-    const Command *beybladeCommand,
-    const Command *baseDriveCommand)
+    const TurretMCBHopperSubsystem *hopperSubsystem,
+    const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+    agitator::AgitatorSubsystem &agitatorSubsystem,
+    const control::turret::TurretSubsystem &turretSubsystem,
+    const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+    const chassis::BeybladeCommand *chassisBeybladeCmd,
+    const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
+    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+    const chassis::ChassisDriveCommand *chassisDriveCmd)
     : Command(),
       drivers(drivers),
-      wiggleCommand(wiggleCommand),
-      followTurretCommand(followTurretCommand),
-      beybladeCommand(beybladeCommand),
-      baseDriveCommand(baseDriveCommand),
-      driveCommandMsg()
+      booleanHudIndicators(
+          drivers,
+          hopperSubsystem,
+          frictionWheelSubsystem,
+          agitatorSubsystem,
+          imuCalibrateCommand),
+      chassisOrientationIndicator(drivers, turretSubsystem),
+      positionHudIndicators(
+          drivers,
+          hopperSubsystem,
+          frictionWheelSubsystem,
+          chassisBeybladeCmd,
+          chassisAutorotateCmd,
+          chassisImuDriveCommand,
+          chassisDriveCmd),
+      reticleIndicator(drivers),
+      turretAnglesIndicator(drivers, turretSubsystem)
 {
+    modm_assert(drivers != nullptr, "ClientDisplayCommand", "drivers nullptr");
     addSubsystemRequirement(clientDisplay);
+}
+
+void ClientDisplayCommand::initialize()
+{
+    HudIndicator::resetGraphicNameGenerator();
+    restart();  // restart protothread
+    booleanHudIndicators.initialize();
+    chassisOrientationIndicator.initialize();
+    positionHudIndicators.initialize();
+    reticleIndicator.initialize();
+    turretAnglesIndicator.initialize();
 }
 
 void ClientDisplayCommand::execute() { run(); }
@@ -55,269 +83,25 @@ void ClientDisplayCommand::execute() { run(); }
 bool ClientDisplayCommand::run()
 {
     PT_BEGIN();
-    PT_CALL(initializeNonblocking());
+
+    PT_WAIT_UNTIL(drivers->refSerial.getRefSerialReceivingData());
+
+    PT_CALL(booleanHudIndicators.sendInitialGraphics());
+    PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
+    PT_CALL(positionHudIndicators.sendInitialGraphics());
+    PT_CALL(reticleIndicator.sendInitialGraphics());
+    PT_CALL(turretAnglesIndicator.sendInitialGraphics());
+
     while (true)
     {
-        PT_CALL(updateDriveCommandMsg());
-        // PT_CALL(updateCapBankMsg());
-        PT_CALL(updateTurretReticleMsg());
+        PT_CALL(booleanHudIndicators.update());
+        PT_CALL(chassisOrientationIndicator.update());
+        PT_CALL(positionHudIndicators.update());
+        PT_CALL(reticleIndicator.update());
+        PT_CALL(turretAnglesIndicator.update());
         PT_YIELD();
     }
     PT_END();
 }
 
-modm::ResumableResult<bool> ClientDisplayCommand::initializeNonblocking()
-{
-    RF_BEGIN(0);
-    RF_WAIT_WHILE(drivers->refSerial.getRobotData().robotId == RefSerial::RobotId::INVALID);
-    initDriveCommandMsg();
-    initTurretReticleMsg();
-    initCapBankMsg();
-    RF_END();
-}
-
-modm::ResumableResult<bool> ClientDisplayCommand::updateDriveCommandMsg()
-{
-    RF_BEGIN(1);
-    // Check if updating is necessary
-    if (drivers->commandScheduler.isCommandScheduled(wiggleCommand))
-    {
-        newDriveCommandScheduled = wiggleCommand;
-        driveCommandColor = RefSerial::Tx::GraphicColor::YELLOW;
-    }
-    else if (drivers->commandScheduler.isCommandScheduled(followTurretCommand))
-    {
-        newDriveCommandScheduled = followTurretCommand;
-        driveCommandColor = RefSerial::Tx::GraphicColor::ORANGE;
-    }
-    else if (drivers->commandScheduler.isCommandScheduled(beybladeCommand))
-    {
-        newDriveCommandScheduled = beybladeCommand;
-        driveCommandColor = RefSerial::Tx::GraphicColor::PURPLISH_RED;
-    }
-    else if (drivers->commandScheduler.isCommandScheduled(baseDriveCommand))
-    {
-        newDriveCommandScheduled = baseDriveCommand;
-        driveCommandColor = RefSerial::Tx::GraphicColor::GREEN;
-    }
-
-    if (addDriveCommandTimer.execute())
-    {
-        // Add the graphic
-        drivers->refSerial.configGraphicGenerics(
-            &driveCommandMsg.graphicData,
-            DRIVE_TEXT_NAME,
-            RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-            DRIVE_COMMAND_GRAPHIC_LAYER,
-            driveCommandColor);
-
-        drivers->refSerial.configCharacterMsg(
-            FONT_SIZE,
-            LINE_THICKNESS,
-            SCREEN_MARGIN,
-            TEXT_TOP_ROW_Y,
-            "",
-            &driveCommandMsg);
-
-        drivers->refSerial.sendGraphic(&driveCommandMsg);
-        delay();
-    }
-    else if ((newDriveCommandScheduled != currDriveCommandScheduled &&
-              newDriveCommandScheduled != nullptr))
-    {
-        currDriveCommandScheduled = newDriveCommandScheduled;
-
-        // Modify the graphic
-        drivers->refSerial.configGraphicGenerics(
-            &driveCommandMsg.graphicData,
-            DRIVE_TEXT_NAME,
-            RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY,
-            DRIVE_COMMAND_GRAPHIC_LAYER,
-            driveCommandColor);
-
-        drivers->refSerial.configCharacterMsg(
-            FONT_SIZE,
-            LINE_THICKNESS,
-            SCREEN_MARGIN,
-            TEXT_TOP_ROW_Y,
-            currDriveCommandScheduled->getName(),
-            &driveCommandMsg);
-
-        drivers->refSerial.sendGraphic(&driveCommandMsg);
-        delay();
-    }
-
-    // No delay necessary since didn't send anything
-    RF_END();
-}
-
-modm::ResumableResult<bool> ClientDisplayCommand::updateCapBankMsg()
-{
-    RF_BEGIN(2);
-
-    if (sendCapBankTimer.execute())
-    {
-        drivers->refSerial.sendGraphic(&capStringMsg, false, true);
-
-        delay();
-
-        capPowerRemainMsg.graphicData.operation = RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC;
-        capPowerRemainMsg.graphicData.value = capicatance++;
-        drivers->refSerial.sendGraphic(&capPowerRemainMsg);
-        capPowerRemainMsg.graphicData.operation =
-            RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY;
-    }
-    else
-    {
-        capPowerRemainMsg.graphicData.value = capicatance++;
-        drivers->refSerial.sendGraphic(&capPowerRemainMsg);
-    }
-
-    delay();
-    RF_END();
-}
-
-modm::ResumableResult<bool> ClientDisplayCommand::updateTurretReticleMsg()
-{
-    RF_BEGIN(3);
-    delay();
-    if (sendReticleTimer.execute())
-    {
-        drivers->refSerial.sendGraphic(&reticleMsg, false, true);
-        delay();
-    }
-    RF_END();
-}
-
-void ClientDisplayCommand::initCapBankMsg()
-{
-    drivers->refSerial.configGraphicGenerics(
-        &capStringMsg.graphicData,
-        CAP_TEXT_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        CAP_BANK_LAYER_1,
-        RefSerial::Tx::GraphicColor::YELLOW);
-
-    drivers->refSerial.configCharacterMsg(
-        FONT_SIZE,
-        FONT_THICKNESS,
-        SCREEN_WIDTH - 400,
-        TEXT_TOP_ROW_Y,
-        "Capacitance:",
-        &capStringMsg);
-    drivers->refSerial.sendGraphic(&capStringMsg, true, false);
-
-    drivers->refSerial.configGraphicGenerics(
-        &capPowerRemainMsg.graphicData,
-        CAP_VALUE_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC_MODIFY,
-        CAP_BANK_LAYER_2,
-        RefSerial::Tx::GraphicColor::YELLOW);
-
-    drivers->refSerial.configInteger(
-        FONT_SIZE + 10,  // Slightly larger than other text
-        FONT_THICKNESS,
-        SCREEN_WIDTH - 350,
-        TEXT_TOP_ROW_Y - 60,
-        capicatance++,
-        &capPowerRemainMsg.graphicData);
-}
-
-void ClientDisplayCommand::initDriveCommandMsg()
-{
-    drivers->refSerial.configGraphicGenerics(
-        &driveCommandMsg.graphicData,
-        DRIVE_TEXT_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        DRIVE_COMMAND_GRAPHIC_LAYER,
-        driveCommandColor);
-
-    drivers->refSerial.configCharacterMsg(
-        FONT_SIZE,
-        LINE_THICKNESS,
-        SCREEN_MARGIN,
-        TEXT_TOP_ROW_Y,
-        "",
-        &driveCommandMsg);
-}
-
-void ClientDisplayCommand::initTurretReticleMsg()
-{
-    drivers->refSerial.configGraphicGenerics(
-        &reticleMsg.graphicData[0],
-        RETICLE_LINE1_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        RETICLE_GRAPHIC_LAYER,
-        RefSerial::Tx::GraphicColor::YELLOW);
-
-    drivers->refSerial.configGraphicGenerics(
-        &reticleMsg.graphicData[1],
-        RETICLE_LINE2_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        RETICLE_GRAPHIC_LAYER,
-        RefSerial::Tx::GraphicColor::YELLOW);
-
-    drivers->refSerial.configGraphicGenerics(
-        &reticleMsg.graphicData[2],
-        RETICLE_LINE3_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        RETICLE_GRAPHIC_LAYER,
-        RefSerial::Tx::GraphicColor::YELLOW);
-
-    drivers->refSerial.configGraphicGenerics(
-        &reticleMsg.graphicData[3],
-        RETICLE_LINE4_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        RETICLE_GRAPHIC_LAYER,
-        RefSerial::Tx::GraphicColor::YELLOW);
-
-    drivers->refSerial.configGraphicGenerics(
-        &reticleMsg.graphicData[4],
-        RETICLE_CIRCLE_NAME,
-        RefSerial::Tx::AddGraphicOperation::ADD_GRAPHIC,
-        RETICLE_GRAPHIC_LAYER,
-        RefSerial::Tx::GraphicColor::YELLOW);
-
-    drivers->refSerial.configLine(
-        LINE_THICKNESS,
-        SCREEN_WIDTH / 2 - TURRET_RETICLE_1M_WIDTH / 2,
-        TURRET_RETICLE_1MY,
-        SCREEN_WIDTH / 2 + TURRET_RETICLE_1M_WIDTH / 2,
-        TURRET_RETICLE_1MY,
-        &reticleMsg.graphicData[0]);
-
-    drivers->refSerial.configLine(
-        LINE_THICKNESS,
-        SCREEN_WIDTH / 2 - TURRET_RETICLE_3M_WIDTH / 2,
-        TURRET_RETICLE_3MY,
-        SCREEN_WIDTH / 2 + TURRET_RETICLE_3M_WIDTH / 2,
-        TURRET_RETICLE_3MY,
-        &reticleMsg.graphicData[1]);
-
-    drivers->refSerial.configLine(
-        LINE_THICKNESS,
-        SCREEN_WIDTH / 2 - TURRET_RETICLE_5M_WIDTH / 2,
-        TURRET_RETICLE_5MY,
-        SCREEN_WIDTH / 2 + TURRET_RETICLE_5M_WIDTH / 2,
-        TURRET_RETICLE_5MY,
-        &reticleMsg.graphicData[2]);
-
-    drivers->refSerial.configLine(
-        LINE_THICKNESS,
-        SCREEN_WIDTH / 2,
-        TURRET_RETICLE_1MY,
-        SCREEN_WIDTH / 2,
-        TURRET_RETICLE_5MY - 50,
-        &reticleMsg.graphicData[3]);
-
-    drivers->refSerial.configCircle(
-        LINE_THICKNESS,
-        SCREEN_WIDTH / 2,
-        TURRET_RETICLE_1MY,
-        5,
-        &reticleMsg.graphicData[4]);
-
-    // Computes crcs which won't be changing in the future
-    drivers->refSerial.sendGraphic(&reticleMsg, true, false);
-}
-}  // namespace aruwsrc::display
+}  // namespace aruwsrc::control::client_display

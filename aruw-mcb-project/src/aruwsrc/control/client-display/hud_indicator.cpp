@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,29 +17,29 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CLIENT_DISPLAY_HPP_
-#define CLIENT_DISPLAY_HPP_
+#include "hud_indicator.hpp"
 
-#include "tap/control/command.hpp"
-#include "tap/control/subsystem.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
+#include <cstdint>
 
 namespace aruwsrc::control::client_display
 {
-/**
- * A placeholder subsystem for running the client display command
- */
-class ClientDisplaySubsystem : public tap::control::Subsystem
-{
-public:
-    ClientDisplaySubsystem(aruwsrc::Drivers* drivers);
-    virtual ~ClientDisplaySubsystem() {}
-    const char* getName() override { return "client display"; }
-};
-}  // namespace aruwsrc::control::client_display
+uint32_t HudIndicator::currGraphicName = 0;
 
-#endif  // CLIENT_DISPLAY_HPP_
+void HudIndicator::resetGraphicNameGenerator() { currGraphicName = 0; }
+
+void HudIndicator::getUnusedGraphicName(uint8_t graphicName[3])
+{
+    if (currGraphicName > 0xffffff)
+    {
+        return;
+    }
+    else
+    {
+        graphicName[0] = static_cast<uint8_t>((currGraphicName >> 16) & 0xff);
+        graphicName[1] = static_cast<uint8_t>((currGraphicName >> 8) & 0xff);
+        graphicName[2] = static_cast<uint8_t>(currGraphicName & 0xff);
+        currGraphicName++;
+    }
+}
+
+}  // namespace aruwsrc::control::client_display
