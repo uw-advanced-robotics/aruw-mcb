@@ -116,11 +116,18 @@ void UnjamCommand::execute()
     }
 }
 
-void UnjamCommand::end(bool)
+void UnjamCommand::end(bool interrupted)
 {
     if (currUnjamState == JAM_CLEARED)
     {
         setpointSubsystem->clearJam();
+    }
+    else if (interrupted)
+    {
+        // clear the jam but the agitator might still be jammed, so set setpoint to current
+        // value to be safe
+        setpointSubsystem->clearJam();
+        setpointSubsystem->setSetpoint(setpointSubsystem->getCurrentValue());
     }
     else
     {
