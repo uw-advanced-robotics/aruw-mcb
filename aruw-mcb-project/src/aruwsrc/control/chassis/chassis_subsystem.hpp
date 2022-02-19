@@ -68,7 +68,7 @@ public:
      * we use this for wheel speed since this is how dji's motors measures motor speed.
      */
     static constexpr int MIN_WHEEL_SPEED_SINGLE_MOTOR = 4000;
-    static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 8000;
+    static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 7000;
     static constexpr int MIN_CHASSIS_POWER = 40;
     static constexpr int MAX_CHASSIS_POWER = 120;
     static constexpr int WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE =
