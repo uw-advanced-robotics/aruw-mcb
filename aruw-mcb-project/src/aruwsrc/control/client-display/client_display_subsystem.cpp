@@ -21,7 +21,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc::display
+namespace aruwsrc::control::client_display
 {
 ClientDisplaySubsystem::ClientDisplaySubsystem(aruwsrc::Drivers* drivers) : Subsystem(drivers) {}
-}  // namespace aruwsrc::display
+}  // namespace aruwsrc::control::client_display
