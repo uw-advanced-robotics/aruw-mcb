@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "vision_coprocessor.hpp"
 
 #include "aruwsrc/drivers.hpp"
@@ -69,9 +70,38 @@ bool VisionCoprocessor::decodeToTurretAimData(
     return true;
 }
 
-void VisionCoprocessor::sendMessage() { sendOdometryData(); }
+void VisionCoprocessor::sendMessage()
+{
+    sendOdometryData();
+    sendRobotTypeData();
+}
 
 bool VisionCoprocessor::isCvOnline() { return !cvOfflineTimeout.isExpired(); }
+
+void VisionCoprocessor::sendShutdownMessage()
+{
+    DJISerial::SerialMessage<1> shutdownMessage;
+
+    shutdownMessage.messageType = CV_MESSAGE_TYPE_SHUTDOWN;
+    shutdownMessage.data[0] = 0;
+    shutdownMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&shutdownMessage),
+        sizeof(shutdownMessage));
+}
+
+void VisionCoprocessor::sendRebootMessage()
+{
+    DJISerial::SerialMessage<1> rebootMessage;
+    rebootMessage.messageType = CV_MESSAGE_TYPE_REBOOT;
+    rebootMessage.data[0] = 0;
+    rebootMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&rebootMessage),
+        sizeof(rebootMessage));
+}
 
 void VisionCoprocessor::sendOdometryData()
 {
@@ -84,13 +114,6 @@ void VisionCoprocessor::sendOdometryData()
         location = odometryInterface->getCurrentLocation2D();
     }
 
-    odometryMessage.header.headByte = 0xa5;
-    odometryMessage.header.dataLength = sizeof(OdometryData);
-    odometryMessage.header.seq = 0;
-    odometryMessage.header.CRC8 = tap::algorithms::calculateCRC8(
-        reinterpret_cast<uint8_t*>(&odometryMessage),
-        sizeof(odometryMessage.header) - 1);
-
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
 
     OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
@@ -102,14 +125,39 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->turretYaw = turretMCBCanComm->getYaw();
     odometryData->timestamp = tap::arch::clock::getTimeMicroseconds();
 
-    odometryMessage.CRC16 = tap::algorithms::calculateCRC16(
-        reinterpret_cast<uint8_t*>(&odometryMessage),
-        sizeof(odometryMessage) - 2);
+    odometryMessage.setCRC16();
 
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
         reinterpret_cast<uint8_t*>(&odometryMessage),
         sizeof(odometryMessage));
+}
+
+void VisionCoprocessor::sendRobotTypeData()
+{
+    if (sendRobotIdTimeout.execute())
+    {
+        DJISerial::SerialMessage<1> robotTypeMessage;
+        robotTypeMessage.messageType = CV_MESSAGE_TYPE_ROBOT_ID;
+        robotTypeMessage.data[0] = static_cast<uint8_t>(drivers->refSerial.getRobotData().robotId);
+        robotTypeMessage.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&robotTypeMessage),
+            sizeof(robotTypeMessage));
+    }
+}
+
+void VisionCoprocessor::sendSelectNewTargetMessage()
+{
+    DJISerial::SerialMessage<1> selectNewTargetMessage;
+    selectNewTargetMessage.messageType = CV_MESSAGE_TYPE_SELECT_NEW_TARGET;
+    selectNewTargetMessage.data[0] = 0;
+    selectNewTargetMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&selectNewTargetMessage),
+        sizeof(selectNewTargetMessage));
 }
 
 }  // namespace serial
