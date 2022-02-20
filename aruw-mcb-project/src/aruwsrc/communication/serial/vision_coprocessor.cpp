@@ -150,9 +150,12 @@ void VisionCoprocessor::sendRobotTypeData()
 
 void VisionCoprocessor::sendSelectNewTargetMessage()
 {
-    DJISerial::SerialMessage<1> selectNewTargetMessage;
+    DJISerial::SerialMessage<4> selectNewTargetMessage;
     selectNewTargetMessage.messageType = CV_MESSAGE_TYPE_SELECT_NEW_TARGET;
     selectNewTargetMessage.data[0] = 0;
+    selectNewTargetMessage.data[1] = 0;
+    selectNewTargetMessage.data[2] = 0;
+    selectNewTargetMessage.data[3] = 0;
     selectNewTargetMessage.setCRC16();
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
