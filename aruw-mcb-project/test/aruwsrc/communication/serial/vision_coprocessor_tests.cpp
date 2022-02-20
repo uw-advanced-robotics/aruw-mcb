@@ -33,6 +33,7 @@ using tap::communication::serial::RefSerialData;
 using namespace tap::arch;
 using namespace tap::algorithms;
 using namespace testing;
+using namespace tap::arch::clock;
 
 // RX tests
 
@@ -145,7 +146,8 @@ static void checkHeaderAndTail(const DJISerial::SerialMessage<DATA_LEN> &msg)
 
 TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
 {
-    clock::setTime(1);
+    ClockStub clock;
+    clock.time = 1;
 
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
@@ -190,7 +192,7 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
 
 TEST(VisionCoprocessor, sendRobotTypeData_timer_not_expired_nothing_sent)
 {
-    clock::setTime(0);
+    ClockStub clock;
 
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
@@ -202,7 +204,7 @@ TEST(VisionCoprocessor, sendRobotTypeData_timer_not_expired_nothing_sent)
 
 TEST(VisionCoprocessor, sendRobotTypeData_timer_expired_robot_type_sent)
 {
-    clock::setTime(0);
+    ClockStub clock;
 
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
@@ -237,14 +239,14 @@ TEST(VisionCoprocessor, sendRobotTypeData_timer_expired_robot_type_sent)
             return length;
         });
 
-    clock::setTime(10'000);
+    clock.time = 10'000;
 
     serial.sendRobotTypeData();
 }
 
 TEST(VisionCoprocessor, sendShutdownMessage_sends_blank_msg_with_correct_id)
 {
-    clock::setTime(0);
+    ClockStub clock;
 
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
@@ -278,7 +280,7 @@ TEST(VisionCoprocessor, sendShutdownMessage_sends_blank_msg_with_correct_id)
 
 TEST(VisionCoprocessor, sendRebootMessage_sends_blank_msg_with_correct_id)
 {
-    clock::setTime(0);
+    ClockStub clock;
 
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);

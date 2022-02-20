@@ -44,6 +44,7 @@ static constexpr float MAX_REMOTE = 1.0f;
 
 #define INIT_TEST    \
     Drivers drivers; \
+    ClockStub clock; \
     ControlOperatorInterface operatorInterface(&drivers);
 
 static float runChassisXInputTest(
@@ -137,7 +138,7 @@ static float runSentinelChassisInputTest(
 TEST(ControlOperatorInterface, getChassisInput_zeros)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(0, runChassisXInputTest(drivers, operatorInterface, 0, false, false), 1E-3);
     EXPECT_NEAR(0, runChassisYInputTest(drivers, operatorInterface, 0, false, false), 1E-3);
     EXPECT_NEAR(0, runChassisRInputTest(drivers, operatorInterface, 0, false, false), 1E-3);
@@ -146,7 +147,7 @@ TEST(ControlOperatorInterface, getChassisInput_zeros)
 TEST(ControlOperatorInterface, getChassisInput_min_key_user_input_limited)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         -ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX,
         runChassisXInputTest(drivers, operatorInterface, 0, false, true),
@@ -164,7 +165,7 @@ TEST(ControlOperatorInterface, getChassisInput_min_key_user_input_limited)
 TEST(ControlOperatorInterface, getChassisInput_max_key_user_input_limited)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX,
         runChassisXInputTest(drivers, operatorInterface, 0, true, false),
@@ -182,7 +183,7 @@ TEST(ControlOperatorInterface, getChassisInput_max_key_user_input_limited)
 TEST(ControlOperatorInterface, getChassisInput_min_and_max_keys_cancel)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(0, runChassisXInputTest(drivers, operatorInterface, 0, true, true), 1E-3);
     EXPECT_NEAR(0, runChassisYInputTest(drivers, operatorInterface, 0, true, true), 1E-3);
     EXPECT_NEAR(0, runChassisRInputTest(drivers, operatorInterface, 0, true, true), 1E-3);
@@ -191,7 +192,7 @@ TEST(ControlOperatorInterface, getChassisInput_min_and_max_keys_cancel)
 TEST(ControlOperatorInterface, getChassisInput_min_remote_limited)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         -1,
         runChassisXInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false),
@@ -209,7 +210,7 @@ TEST(ControlOperatorInterface, getChassisInput_min_remote_limited)
 TEST(ControlOperatorInterface, getChassisInput_max_remote_limited)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
 
     EXPECT_NEAR(
         1,
@@ -228,7 +229,7 @@ TEST(ControlOperatorInterface, getChassisInput_max_remote_limited)
 TEST(ControlOperatorInterface, getChassisInput_half_min_remote_half_min_output)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         -0.5f,
         runChassisXInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false),
@@ -246,7 +247,7 @@ TEST(ControlOperatorInterface, getChassisInput_half_min_remote_half_min_output)
 TEST(ControlOperatorInterface, getChassisInput_half_max_remote_half_max_output)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         0.5f,
         runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false),
@@ -264,7 +265,7 @@ TEST(ControlOperatorInterface, getChassisInput_half_max_remote_half_max_output)
 TEST(ControlOperatorInterface, getChassisInput_max_remote_and_min_key_pressed_cancels)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         -ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX + MAX_REMOTE,
         runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE, false, true),
@@ -282,7 +283,7 @@ TEST(ControlOperatorInterface, getChassisInput_max_remote_and_min_key_pressed_ca
 TEST(ControlOperatorInterface, getChassisInput_half_max_remote_and_max_and_min_key_pressed_cancels)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         0.5f,
         runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true),
@@ -300,7 +301,7 @@ TEST(ControlOperatorInterface, getChassisInput_half_max_remote_and_max_and_min_k
 TEST(ControlOperatorInterface, getChassisInput_shift)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         1.0f * ControlOperatorInterface::SHIFT_SCALAR,
         runChassisXInputTest(drivers, operatorInterface, 1.0f, true, false, true),
@@ -314,7 +315,7 @@ TEST(ControlOperatorInterface, getChassisInput_shift)
 TEST(ControlOperatorInterface, getChassisInput_ctrl)
 {
     INIT_TEST
-    setTime(1);
+    clock.time = 1;
     EXPECT_NEAR(
         1.0f * ControlOperatorInterface::CTRL_SCALAR,
         runChassisXInputTest(drivers, operatorInterface, 1.0f, true, false, false, true),

@@ -28,10 +28,11 @@
 using namespace aruwsrc::can;
 using namespace aruwsrc;
 using namespace testing;
+using namespace tap::arch::clock;
 
 TEST(TurretMCBCanComm, sendData_hopper_cover_data)
 {
-    tap::arch::clock::setTime(0);
+    ClockStub clock;
 
     Drivers drivers;
     TurretMCBCanComm dut(&drivers);
@@ -42,18 +43,18 @@ TEST(TurretMCBCanComm, sendData_hopper_cover_data)
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(blankMsg)));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(filledMsg)));
 
-    tap::arch::clock::setTime(10000);
+    clock.time = 10'000;
     dut.setOpenHopperCover(false);
     dut.sendData();
 
-    tap::arch::clock::setTime(20000);
+    clock.time = 20'000;
     dut.setOpenHopperCover(true);
     dut.sendData();
 }
 
 TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
 {
-    tap::arch::clock::setTime(0);
+    ClockStub clock;
 
     Drivers drivers;
     TurretMCBCanComm dut(&drivers);
@@ -64,17 +65,17 @@ TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, blankMsg));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, filledMsg));
 
-    tap::arch::clock::setTime(10000);
+    clock.time = 10'000;
     dut.sendImuCalibrationRequest();
     dut.sendData();
 
-    tap::arch::clock::setTime(20000);
+    clock.time = 20'000;
     dut.sendData();
 }
 
 TEST(TurretMCBCanComm, sendData_laser_data)
 {
-    tap::arch::clock::setTime(0);
+    ClockStub clock;
 
     Drivers drivers;
     TurretMCBCanComm dut(&drivers);
@@ -85,18 +86,18 @@ TEST(TurretMCBCanComm, sendData_laser_data)
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(blankMsg)));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(filledMsg)));
 
-    tap::arch::clock::setTime(10000);
+    clock.time = 10'000;
     dut.setLaserStatus(false);
     dut.sendData();
 
-    tap::arch::clock::setTime(20000);
+    clock.time = 20'000;
     dut.setLaserStatus(true);
     dut.sendData();
 }
 
 TEST(TurretMCBCanComm, receive_limit_switch_info)
 {
-    tap::arch::clock::setTime(0);
+    ClockStub clock;
 
     Drivers drivers;
     TurretMCBCanComm dut(&drivers);
@@ -122,7 +123,7 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
 
 TEST(TurretMCBCanComm, receive_turret_data)
 {
-    tap::arch::clock::setTime(0);
+    ClockStub clock;
 
     Drivers drivers;
     TurretMCBCanComm dut(&drivers);
@@ -160,7 +161,7 @@ TEST(TurretMCBCanComm, receive_turret_data)
 
     EXPECT_TRUE(dut.isConnected());
 
-    tap::arch::clock::setTime(10000);
+    clock.time = 10'000;
 
     EXPECT_FALSE(dut.isConnected());
 }
