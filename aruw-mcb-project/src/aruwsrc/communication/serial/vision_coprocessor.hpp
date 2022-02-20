@@ -113,7 +113,7 @@ public:
 
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
-    inline void attachOdometryInterface(
+    mockable inline void attachOdometryInterface(
         tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
     {
         this->odometryInterface = odometryInterface;
@@ -123,11 +123,14 @@ public:
 
     mockable void sendRebootMessage();
 
+    mockable void sendSelectNewTargetMessage();
+
 private:
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
         CV_MESSAGE_TYPE_ROBOT_ID = 6,
+        CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
     };

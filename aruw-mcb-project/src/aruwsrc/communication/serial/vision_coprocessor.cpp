@@ -151,5 +151,17 @@ void VisionCoprocessor::sendRobotTypeData()
     }
 }
 
+void VisionCoprocessor::sendSelectNewTargetMessage()
+{
+    DJISerial::SerialMessage<1> selectNewTargetMessage;
+    selectNewTargetMessage.messageType = CV_MESSAGE_TYPE_SELECT_NEW_TARGET;
+    selectNewTargetMessage.data[0] = 0;
+    selectNewTargetMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&selectNewTargetMessage),
+        sizeof(selectNewTargetMessage));
+}
+
 }  // namespace serial
 }  // namespace aruwsrc
