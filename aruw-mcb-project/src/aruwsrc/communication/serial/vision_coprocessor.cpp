@@ -72,9 +72,6 @@ bool VisionCoprocessor::decodeToTurretAimData(
 
 void VisionCoprocessor::sendMessage()
 {
-    // Send odometry data always
-    // TODO we should check if we can send messages back to back (we should be able to with our
-    // current bandwidth)
     sendOdometryData();
     sendRobotTypeData();
 }

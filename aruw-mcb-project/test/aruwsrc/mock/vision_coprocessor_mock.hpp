@@ -38,7 +38,11 @@ public:
     MOCK_METHOD(void, messageReceiveCallback, (const ReceivedSerialMessage &), (override));
     MOCK_METHOD(void, sendMessage, (), (override));
     MOCK_METHOD(const TurretAimData &, getLastAimData, (), (const override));
-    MOCK_METHOD(void, attachOdometryInterface, (tap::algorithms::odometry::Odometry2DInterface*), (override));
+    MOCK_METHOD(
+        void,
+        attachOdometryInterface,
+        (tap::algorithms::odometry::Odometry2DInterface *),
+        (override));
     MOCK_METHOD(void, sendShutdownMessage, (), (override));
     MOCK_METHOD(void, sendRebootMessage, (), (override));
     MOCK_METHOD(void, sendSelectNewTargetMessage, (), (override));
