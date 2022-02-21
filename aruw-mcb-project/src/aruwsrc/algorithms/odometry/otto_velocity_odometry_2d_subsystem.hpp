@@ -53,12 +53,12 @@ namespace aruwsrc::algorithms::odometry
  * error) and are based on the axes used by the turret IMU (positive z-axis should be up and
  * out of field, x and y axes direction is undefined and just based on whatever the IMU uses).
  *
- * User is responsible for registering this subsystem with the command scheduler.
+ * User is responsible for registering this subsystem with the command scheduler, or using some
+ * other mechanism to call the `refresh` function periodically.
  *
- * A shallow inheritance of the tap::algorithms::odometry::Odometry2DSubsystem which just
+ * A shallow inheritance of the tap::algorithms::odometry::Odometry2DInterface which just
  * simplifies the construction of the Otto chassis velocity and orientation getters.
  *
- * @see tap::algorithms::odometry::VelocityOdometrySubsystem
  * @see OttoChassisOrientationGetter
  * @see OttoChassisVelocityGetter
  */
@@ -78,9 +78,14 @@ public:
 
     void refresh() override;
 
-    modm::Location2D<float> getCurrentLocation2D() const override
+    modm::Location2D<float> getCurrentLocation2D() const override final
     {
         return odometryTracker.getCurrentLocation2D();
+    }
+
+    inline uint32_t getPrevOdomComputeTime() const override final
+    {
+        return odometryTracker.getPrevOdomComputeTime();
     }
 
 private:

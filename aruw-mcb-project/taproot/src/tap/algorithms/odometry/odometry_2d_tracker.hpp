@@ -69,6 +69,8 @@ public:
      */
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
+    inline uint32_t getPrevOdomComputeTime() const override final { return prevOdomComputeTime; }
+
 private:
     ChassisWorldYawObserverInterface* chassisYawObserver;
     ChassisDisplacementObserverInterface* chassisDisplacementObserver;
@@ -78,6 +80,7 @@ private:
     modm::Vector<float, 3> prevChassisAbsoluteDisplacement;
     // `true` iff `this` has been updated with valid chassis data at least once.
     bool displacementPrimed = false;
+    uint32_t prevOdomComputeTime = 0;
 };
 
 }  // namespace tap::algorithms::odometry

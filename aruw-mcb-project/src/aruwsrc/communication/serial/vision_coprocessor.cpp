@@ -53,6 +53,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage, &lastAimData);
             return;
         }
+        case CV_MESSAGE_TYPE_TIME_DELAY_REQ:
+        {
+            decodeAndSendDelayReq(completeMessage);
+            return;
+        }
         default:
             return;
     }
@@ -70,10 +75,28 @@ bool VisionCoprocessor::decodeToTurretAimData(
     return true;
 }
 
+void VisionCoprocessor::decodeAndSendDelayReq(const ReceivedSerialMessage& message)
+{
+    if (message.header.dataLength != 1)
+    {
+        return;
+    }
+
+    DJISerial::SerialMessage<sizeof(uint32_t)> delayedResponseMessage;
+    *reinterpret_cast<uint32_t*>(delayedResponseMessage.data) =
+        tap::arch::clock::getTimeMicroseconds();
+    delayedResponseMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&delayedResponseMessage),
+        sizeof(delayedResponseMessage));
+}
+
 void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
     sendRobotTypeData();
+    sendTimeSyncData();
 }
 
 bool VisionCoprocessor::isCvOnline() { return !cvOfflineTimeout.isExpired(); }
@@ -108,10 +131,12 @@ void VisionCoprocessor::sendOdometryData()
     DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
 
     modm::Location2D<float> location = modm::Location2D<float>();
+    uint32_t chassisOdomTime = 0;
 
     if (odometryInterface != nullptr)
     {
         location = odometryInterface->getCurrentLocation2D();
+        chassisOdomTime = odometryInterface->getPrevOdomComputeTime();
     }
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
@@ -123,7 +148,8 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisZ = 0.0f;
     odometryData->turretPitch = turretMCBCanComm->getPitch();
     odometryData->turretYaw = turretMCBCanComm->getYaw();
-    odometryData->timestamp = tap::arch::clock::getTimeMicroseconds();
+    odometryData->turretTimestamp = turretMCBCanComm->getIMUDataTimestamp();
+    odometryData->chassisTimestamp = chassisOdomTime;
 
     odometryMessage.setCRC16();
 
@@ -163,5 +189,18 @@ void VisionCoprocessor::sendSelectNewTargetMessage()
         sizeof(selectNewTargetMessage));
 }
 
+void VisionCoprocessor::sendTimeSyncData()
+{
+    if (sendTimeSyncTimeout.execute())
+    {
+        DJISerial::SerialMessage<4> syncMessage;
+        *reinterpret_cast<uint32_t*>(syncMessage.data) = tap::arch::clock::getTimeMicroseconds();
+        syncMessage.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&syncMessage),
+            sizeof(syncMessage));
+    }
+}
 }  // namespace serial
 }  // namespace aruwsrc
