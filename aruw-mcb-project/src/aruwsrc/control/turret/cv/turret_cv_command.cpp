@@ -57,7 +57,8 @@ TurretCVCommand::TurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed),
       userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar)
+      userYawInputScalar(userYawInputScalar),
+      chassisSubsystem(chassisSubsystem)
 {
     addSubsystemRequirement(turretSubsystem);
 }
