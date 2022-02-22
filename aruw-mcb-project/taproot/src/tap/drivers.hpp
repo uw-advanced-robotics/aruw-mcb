@@ -74,7 +74,7 @@ public:
 protected:
 #endif
     Drivers()
-        : profiler(),
+        : profiler(this),
           analog(),
           can(),
           canRxHandler(this),
