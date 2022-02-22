@@ -30,8 +30,8 @@
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
-#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "agitator/multi_shot_handler.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -196,24 +196,10 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     0,
     true,
     M_PI / 20.0f,
-    M_PI / 2.0f,
+    M_PI / 8.0f,
     M_PI / 4.0f,
-    200,
-    2,
-    true,
-    10);
-MoveUnjamRefLimitedCommand agitatorMultiShotCommand(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
     100,
-    0,
-    true,
-    M_PI / 20.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    200,
-    2,
+    3,
     true,
     10);
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
@@ -225,13 +211,13 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     50,
     0,
     true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
+    M_PI / 20.0f,
+    M_PI / 8.0f,
     M_PI / 4.0f,
-    200,
-    2,
+    100,
+    3,
     false,
-    10);
+    0);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -295,8 +281,10 @@ ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({R
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&agitatorMultiShotCommand},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}), false, 1);
+    {&agitatorShootFastLimited},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
+    false,
+    1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
     {&agitatorShootFastNotLimited},
@@ -349,7 +337,7 @@ CycleStateCommandMapping<
     MultiShotHandler::ShooterState,
     MultiShotHandler::NUM_SHOOTER_STATES,
     MultiShotHandler>
-    vTogglePressed(
+    vPressed(
         drivers(),
         RemoteMapState({Remote::Key::V}),
         MultiShotHandler::SINGLE,
@@ -418,7 +406,7 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&vTogglePressed);
+    drivers->commandMapper.addMap(&vPressed);
 }
 }  // namespace soldier_control
 
