@@ -75,7 +75,7 @@ private:
     /** Starting y value where boolean hud indicator circles will start. The top most circle in the
      * list will be centered around this point. Subsequent circles will be below this y pixel value.
      */
-    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_START_Y = 775;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_START_Y = 760;
     /** Distance between the center of the the boolean indicators, in the y direction. */
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
     /** The line width of the indicator circles. Should be approximately twice
@@ -127,7 +127,7 @@ private:
                 Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
                 Tx::GraphicColor::GREEN),        // Green when not calibrating
             BooleanHUDIndicatorTuple(
-                "CV ",
+                "AGI ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };

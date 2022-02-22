@@ -106,7 +106,7 @@ private:
     /** The horizontal distance between columns in the HUD matrix, the distance between the
      * rightmost character in one column and the leftmost character in the column next to it. */
     static constexpr uint8_t MATRIX_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS =
-        2 * MATRIX_HUD_INDICATOR_CHAR_SIZE;
+        MATRIX_HUD_INDICATOR_CHAR_SIZE;
 
     /** The starting X point where the matrix HUD indicator will be situated, in pixels. */
     static constexpr uint16_t MATRIX_HUD_INDICATOR_START_X = 350;
