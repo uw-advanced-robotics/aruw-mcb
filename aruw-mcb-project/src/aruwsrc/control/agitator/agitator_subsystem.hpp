@@ -125,6 +125,17 @@ public:
      */
     static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = M_PI / 14.0f;
     static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
+
+#elif defined(TARGET_DART)
+    // position PID terms
+    // PID terms for soldier
+    static constexpr float PID_INDEXER_P = 50000.0f;
+    static constexpr float PID_INDEXER_I = 0.0f;
+    static constexpr float PID_INDEXER_D = 50.0f;
+    static constexpr float PID_INDEXER_MAX_ERR_SUM = 0.0f;
+    static constexpr float PID_INDEXER_MAX_OUT = 16000.0f;
+    static constexpr bool isAgitatorInverted = false;
+    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 5;
 #endif
 
     /**
