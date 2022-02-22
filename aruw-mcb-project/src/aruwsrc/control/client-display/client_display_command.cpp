@@ -41,8 +41,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const chassis::ChassisDriveCommand *chassisDriveCmd)
+    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
     : Command(),
       drivers(drivers),
       booleanHudIndicators(
@@ -58,8 +57,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           frictionWheelSubsystem,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
-          chassisImuDriveCommand,
-          chassisDriveCmd),
+          chassisImuDriveCommand),
       reticleIndicator(drivers),
       turretAnglesIndicator(drivers, turretSubsystem)
 {

@@ -263,8 +263,7 @@ ClientDisplayCommand clientDisplayCommand(
     imuCalibrateCommand,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
-    &chassisDriveCommand);
+    &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings

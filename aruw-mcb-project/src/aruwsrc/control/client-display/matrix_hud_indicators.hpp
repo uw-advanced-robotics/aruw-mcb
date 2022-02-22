@@ -83,8 +83,7 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-        const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -127,6 +126,8 @@ private:
         SHOOTER_STATE,
         /** The current projectile launching state (single, burst, full auto). TODO */
         FIRING_MODE,
+        /** The current state of CV. */
+        CV_STATUS,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -141,10 +142,10 @@ private:
      * drawing. */
     static constexpr const char
         *MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[NUM_MATRIX_HUD_INDICATORS][2] = {
-            {"CHAS", "BEYB\nFLLW\nMIMU\nMNOR"},
+            {"CHAS", "BEYB\nFLLW\nMIMU"},
             {"SHOT", "REDY\nLOAD\nFOFF"},
             {"FIRE", "SNGL\nBRST\nFULL"},
-        };
+            {"CV  ", "DECT\nCONE\nOFFL"}};
 
     /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
     static constexpr int NUM_CHASSIS_STATES = 4;
@@ -162,6 +163,18 @@ private:
         LOADING,
         /** The flywheels are off, indicating the shooter is not ready to fire. */
         FLYWHEELS_OFF,
+    };
+
+    /** Enum representing different states that the CV can be in. Corresponds to
+     * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[CV_STATUS]. */
+    enum class CVStatus
+    {
+        /** A target is being detected by the vision system. */
+        DETECTING_TARGET,
+        /** The vision coprocessor is connected, but no target is detected. */
+        VISION_COPROCESSOR_CONNECTED,
+        /** The vision coprocessor is offline. */
+        VISION_COPROCESSOR_OFFLINE,
     };
 
     aruwsrc::Drivers *drivers;
@@ -201,6 +214,17 @@ private:
     int matrixHudIndicatorIndex = 0;
 
     void updateIndicatorState();
+
+    /**
+     * Converts a 0-based index to a physical y-coordinate on the screen that represents the
+     * location of the indicator on the screen.
+     */
+    static inline uint16_t getIndicatorState(int index)
+    {
+        return MATRIX_HUD_INDICATOR_LABELS_START_Y -
+               CHARACTER_LINE_SPACING * index * MATRIX_HUD_INDICATOR_CHAR_SIZE -
+               MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1;
+    }
 };
 }  // namespace aruwsrc::control::client_display
 

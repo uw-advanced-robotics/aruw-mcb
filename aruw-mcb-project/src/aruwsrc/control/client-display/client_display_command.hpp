@@ -97,8 +97,6 @@ public:
      * will never be selected as the current chassis command.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command.
-     * @param[in] chassisDriveCmd May be nullptr. If nullptr the chassis drive command will never be
-     * selected as the current chassis command.
      */
     ClientDisplayCommand(
         aruwsrc::Drivers *drivers,
@@ -110,8 +108,7 @@ public:
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-        const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
 
     const char *getName() const override { return "client display"; }
 

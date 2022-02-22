@@ -110,8 +110,6 @@ private:
         SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
-        /** Indicates that the vision system is online and a target has been acquired. */
-        CV_AIM_DATA_VALID,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -128,10 +126,6 @@ private:
                 "SYS CALIB ",
                 Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
                 Tx::GraphicColor::GREEN),        // Green when not calibrating
-            BooleanHUDIndicatorTuple(
-                "AGI ",
-                Tx::GraphicColor::GREEN,
-                Tx::GraphicColor::PURPLISH_RED),
             BooleanHUDIndicatorTuple(
                 "CV ",
                 Tx::GraphicColor::GREEN,
