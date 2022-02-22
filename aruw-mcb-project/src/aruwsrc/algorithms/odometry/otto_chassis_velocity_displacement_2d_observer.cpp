@@ -47,11 +47,9 @@ void OttoChassisVelocityDisplacement2DObserver::update()
             modm::Matrix<float, 3, 1> chassisVelocityMatrix =
                 chassis->getActualVelocityChassisRelative();
 
-            // Negate y-component of velocity because chassis has y-component to the
-            // left but we want it to the right.
             modm::Vector<float, 2> chassisVelocity(
                 chassisVelocityMatrix[0][0],
-                -chassisVelocityMatrix[1][0]);
+                chassisVelocityMatrix[1][0]);
             // m/s * ms * 1s / 1000ms
             modm::Vector<float, 2> displacementThisTick =
                 chassisVelocity * (static_cast<float>(currTime - prevTime) / 1'000.0f);

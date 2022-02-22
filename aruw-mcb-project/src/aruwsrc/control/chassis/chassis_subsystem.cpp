@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -44,30 +44,10 @@ ChassisSubsystem::ChassisSubsystem(
     tap::gpio::Analog::Pin currentPin)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       velocityPid{
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT)},
+          modm::Pid<float>(VELOCITY_PID_CONFIG),
+          modm::Pid<float>(VELOCITY_PID_CONFIG),
+          modm::Pid<float>(VELOCITY_PID_CONFIG),
+          modm::Pid<float>(VELOCITY_PID_CONFIG)},
       chassisRotationErrorKalman(1.0f, 5.0f),
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
@@ -89,18 +69,18 @@ ChassisSubsystem::ChassisSubsystem(
     constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
                             ? 1
                             : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
-    wheelVelToChassisVelMat[0][0] = 1;
-    wheelVelToChassisVelMat[0][1] = -1;
-    wheelVelToChassisVelMat[0][2] = 1;
-    wheelVelToChassisVelMat[0][3] = -1;
-    wheelVelToChassisVelMat[1][0] = 1;
-    wheelVelToChassisVelMat[1][1] = 1;
-    wheelVelToChassisVelMat[1][2] = -1;
-    wheelVelToChassisVelMat[1][3] = -1;
-    wheelVelToChassisVelMat[2][0] = 1.0 / A;
-    wheelVelToChassisVelMat[2][1] = 1.0 / A;
-    wheelVelToChassisVelMat[2][2] = 1.0 / A;
-    wheelVelToChassisVelMat[2][3] = 1.0 / A;
+    wheelVelToChassisVelMat[X][LF] = 1;
+    wheelVelToChassisVelMat[X][RF] = -1;
+    wheelVelToChassisVelMat[X][LB] = 1;
+    wheelVelToChassisVelMat[X][RB] = -1;
+    wheelVelToChassisVelMat[Y][LF] = -1;
+    wheelVelToChassisVelMat[Y][RF] = -1;
+    wheelVelToChassisVelMat[Y][LB] = 1;
+    wheelVelToChassisVelMat[Y][RB] = 1;
+    wheelVelToChassisVelMat[R][LF] = -1.0 / A;
+    wheelVelToChassisVelMat[R][RF] = -1.0 / A;
+    wheelVelToChassisVelMat[R][LB] = -1.0 / A;
+    wheelVelToChassisVelMat[R][RB] = -1.0 / A;
     wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
 
     motors[LF] = &leftFrontMotor;
@@ -111,11 +91,10 @@ ChassisSubsystem::ChassisSubsystem(
 
 void ChassisSubsystem::initialize()
 {
-    // All of these DjiMotors are registered on CAN_BUS2
-    leftBackMotor.initialize();    // Motor3: 0x203 = 515
-    leftFrontMotor.initialize();   // Motor2: 0x202 = 514
-    rightBackMotor.initialize();   // Motor4: 0x204 = 516
-    rightFrontMotor.initialize();  // Motor1: 0x201 = 513
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
+    {
+        motors[i]->initialize();
+    }
 }
 
 void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
@@ -131,17 +110,17 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
 
 void ChassisSubsystem::refresh()
 {
-    updateMotorRpmPid(&velocityPid[LF], &leftFrontMotor, *desiredWheelRPM[LF]);
-    updateMotorRpmPid(&velocityPid[RF], &rightFrontMotor, *desiredWheelRPM[RF]);
-    updateMotorRpmPid(&velocityPid[LB], &leftBackMotor, *desiredWheelRPM[LB]);
-    updateMotorRpmPid(&velocityPid[RB], &rightBackMotor, *desiredWheelRPM[RB]);
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
+    {
+        updateMotorRpmPid(&velocityPid[i], motors[i], *desiredWheelRPM[i]);
+    }
 
     limitChassisPower();
 }
 
 void ChassisSubsystem::limitChassisPower()
 {
-    static constexpr size_t NUM_MOTORS = MODM_ARRAY_SIZE(velocityPid);
+    static constexpr size_t NUM_MOTORS = MODM_ARRAY_SIZE(motors);
 
     // use power limiting object to compute initial power limiting fraction
     currentSensor.update();
@@ -203,20 +182,20 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
         modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
 
     float chassisRotateTranslated = modm::toDegree(r) / chassisRotationRatio;
-    desiredWheelRPM[LF][0] = limitVal<float>(
-        y + x + chassisRotateTranslated * leftFrontRotationRatio,
+    desiredWheelRPM[LF][0] = limitVal(
+        -y + x - chassisRotateTranslated * leftFrontRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
-    desiredWheelRPM[RF][0] = limitVal<float>(
-        y - x + chassisRotateTranslated * rightFrontRotationRatio,
+    desiredWheelRPM[RF][0] = limitVal(
+        -y - x - chassisRotateTranslated * rightFrontRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
-    desiredWheelRPM[LB][0] = limitVal<float>(
-        -y + x + chassisRotateTranslated * leftBackRotationRatio,
+    desiredWheelRPM[LB][0] = limitVal(
+        y + x - chassisRotateTranslated * leftBackRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
-    desiredWheelRPM[RB][0] = limitVal<float>(
-        -y - x + chassisRotateTranslated * rightBackRotationRatio,
+    desiredWheelRPM[RB][0] = limitVal(
+        y - x - chassisRotateTranslated * rightBackRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
 
@@ -269,9 +248,8 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
         // power(max revolve speed - specified revolve speed, 2)
         // / power(max revolve speed, 2)
         rTranslationalGain = powf(
-            ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
-                fabsf(chassisRotationDesiredWheelspeed) /
-                    ChassisSubsystem::MAX_WHEEL_SPEED_SINGLE_MOTOR,
+            MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
+                fabsf(chassisRotationDesiredWheelspeed) / MAX_WHEEL_SPEED_SINGLE_MOTOR,
             2.0f);
         rTranslationalGain = tap::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
     }
@@ -285,11 +263,12 @@ modm::Matrix<float, 3, 1> ChassisSubsystem::getDesiredVelocityChassisRelative() 
 
 modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() const
 {
-    modm::Matrix<float, 4, 1> wheelVelocity;
-    wheelVelocity[0][0] = leftFrontMotor.getShaftRPM();
-    wheelVelocity[1][0] = rightFrontMotor.getShaftRPM();
-    wheelVelocity[2][0] = leftBackMotor.getShaftRPM();
-    wheelVelocity[3][0] = rightBackMotor.getShaftRPM();
+    modm::Matrix<float, MODM_ARRAY_SIZE(motors), 1> wheelVelocity;
+
+    wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
+    wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
+    wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
+    wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
 }
 
