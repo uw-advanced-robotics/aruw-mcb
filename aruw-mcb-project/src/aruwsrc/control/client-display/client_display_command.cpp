@@ -39,6 +39,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     agitator::AgitatorSubsystem &agitatorSubsystem,
     const control::turret::TurretSubsystem &turretSubsystem,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+    const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
@@ -55,6 +56,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           drivers,
           hopperSubsystem,
           frictionWheelSubsystem,
+          multiShotHandler,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
           chassisImuDriveCommand),

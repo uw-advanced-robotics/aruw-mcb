@@ -55,12 +55,14 @@ MatrixHudIndicators::MatrixHudIndicators(
     aruwsrc::Drivers *drivers,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+    const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
     : drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
+      multiShotHandler(multiShotHandler),
       driveCommands{
           chassisBeybladeCmd,
           chassisAutorotateCmd,
@@ -179,6 +181,10 @@ void MatrixHudIndicators::updateIndicatorState()
 
     matrixHudIndicatorDrawers[CV_STATUS].setIndicatorState(
         getIndicatorState(static_cast<int>(cvStatus)));
+
+    // update firing mode
+    matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorState(
+        static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
 }
 
 void MatrixHudIndicators::initialize()

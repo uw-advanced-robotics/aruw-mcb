@@ -251,6 +251,7 @@ ClientDisplayCommand clientDisplayCommand(
     agitator,
     turret,
     imuCalibrateCommand,
+    &multiShotHandler,
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);

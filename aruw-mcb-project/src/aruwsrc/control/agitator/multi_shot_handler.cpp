@@ -32,6 +32,7 @@ MultiShotHandler::MultiShotHandler(
 void MultiShotHandler::setShooterState(ShooterState state)
 {
     int timesToReschedule = 0;
+    this->state = state;
     switch (state)
     {
         case SINGLE:

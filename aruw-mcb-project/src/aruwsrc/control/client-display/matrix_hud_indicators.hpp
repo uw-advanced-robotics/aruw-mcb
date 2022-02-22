@@ -23,6 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+#include "aruwsrc/control/agitator/multi_shot_handler.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -68,6 +69,8 @@ public:
      * that may be nullptr if no hopper exists.
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
      * are on or off.
+     * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
+     * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the HUD).
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
      * never be selected as the current chassis command in the HUD.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
@@ -81,6 +84,7 @@ public:
         aruwsrc::Drivers *drivers,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+        const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
@@ -108,7 +112,7 @@ private:
     /** The horizontal distance between columns in the HUD matrix, the distance between the
      * rightmost character in one column and the leftmost character in the column next to it. */
     static constexpr uint8_t MATRIX_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS =
-        2 * MATRIX_HUD_INDICATOR_CHAR_SIZE;
+        MATRIX_HUD_INDICATOR_CHAR_SIZE;
 
     /** The starting X point where the matrix HUD indicator will be situated, in pixels. */
     static constexpr uint16_t MATRIX_HUD_INDICATOR_START_X = 350;
@@ -182,6 +186,8 @@ private:
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
 
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem;
+
+    const aruwsrc::agitator::MultiShotHandler *multiShotHandler;
 
     /**
      * List of commands that will be checked for in the scheduler when determining which drive

@@ -43,9 +43,12 @@ public:
 
     void setShooterState(ShooterState state);
 
+    ShooterState getShooterState() const { return state; }
+
 private:
     tap::control::HoldRepeatCommandMapping *commandMapping;
-    int burstCount;
+    const int burstCount;
+    ShooterState state = SINGLE;
 };
 
 }
