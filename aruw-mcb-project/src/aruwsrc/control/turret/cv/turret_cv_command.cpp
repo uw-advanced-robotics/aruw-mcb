@@ -69,6 +69,8 @@ void TurretCVCommand::initialize()
 {
     pitchController->initialize();
     yawController->initialize();
+    prevTime = getTimeMilliseconds();
+    drivers->visionCoprocessor.sendSelectNewTargetMessage();
 }
 
 void TurretCVCommand::execute()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,8 +29,11 @@
 
 using aruwsrc::serial::VisionCoprocessor;
 using tap::communication::serial::DJISerial;
+using tap::communication::serial::RefSerialData;
 using namespace tap::arch;
 using namespace tap::algorithms;
+using namespace testing;
+using namespace tap::arch::clock;
 
 // RX tests
 
@@ -132,9 +135,19 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
         false);
 }
 
+template <uint32_t DATA_LEN>
+static void checkHeaderAndTail(const DJISerial::SerialMessage<DATA_LEN> &msg)
+{
+    EXPECT_EQ(0xa5, msg.header.headByte);
+    EXPECT_EQ(DATA_LEN, msg.header.dataLength);
+    EXPECT_EQ(calculateCRC8(reinterpret_cast<const uint8_t *>(&msg.header), 4), msg.header.CRC8);
+    EXPECT_EQ(calculateCRC16(reinterpret_cast<const uint8_t *>(&msg), sizeof(msg) - 2), msg.CRC16);
+}
+
 TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
 {
-    clock::setTime(1);
+    ClockStub clock;
+    clock.time = 1;
 
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
@@ -144,18 +157,15 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
     static constexpr int CRC16_LEN = 2;
     static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
 
-    EXPECT_CALL(drivers.uart, write(testing::_, testing::_, MSG_LEN))
+    EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
         .WillOnce([&](tap::communication::serial::Uart::UartPort,
                       const uint8_t *data,
                       std::size_t length) {
             DJISerial::SerialMessage<DATA_LEN> msg;
             memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
 
-            EXPECT_EQ(0xa5, msg.header.headByte);
-            EXPECT_EQ(DATA_LEN, msg.header.dataLength);
-            EXPECT_EQ(calculateCRC8(data, 4), msg.header.CRC8);
+            checkHeaderAndTail<DATA_LEN>(msg);
             EXPECT_EQ(1, msg.messageType);
-            EXPECT_EQ(calculateCRC16(data, sizeof(msg) - 2), msg.CRC16);
 
             float cx, cy, cz, pitch, yaw;
             uint32_t time;
@@ -178,4 +188,126 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
         });
 
     serial.sendOdometryData();
+}
+
+TEST(VisionCoprocessor, sendRobotTypeData_timer_not_expired_nothing_sent)
+{
+    ClockStub clock;
+
+    aruwsrc::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+
+    EXPECT_CALL(drivers.uart, write(_, _, _)).Times(0);
+
+    serial.sendRobotTypeData();
+}
+
+TEST(VisionCoprocessor, sendRobotTypeData_timer_expired_robot_type_sent)
+{
+    ClockStub clock;
+
+    aruwsrc::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+
+    static constexpr int HEADER_LEN = 7;
+    static constexpr int DATA_LEN = 1;
+    static constexpr int CRC16_LEN = 2;
+    static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
+
+    RefSerialData::Rx::RobotData robotData;
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+
+    robotData.robotId = RefSerialData::RobotId::BLUE_SOLDIER_2;
+
+    EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
+        .Times(1)
+        .WillOnce([&](tap::communication::serial::Uart::UartPort,
+                      const uint8_t *data,
+                      std::size_t length) {
+            DJISerial::SerialMessage<DATA_LEN> msg;
+            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+
+            checkHeaderAndTail<1>(msg);
+            EXPECT_EQ(6, msg.messageType);
+
+            uint8_t robotId;
+
+            convertFromLittleEndian(&robotId, msg.data);
+
+            EXPECT_EQ(static_cast<uint8_t>(robotData.robotId), robotId);
+
+            return length;
+        });
+
+    clock.time = 10'000;
+
+    serial.sendRobotTypeData();
+}
+
+TEST(VisionCoprocessor, sendShutdownMessage_sends_blank_msg_with_correct_id)
+{
+    ClockStub clock;
+
+    aruwsrc::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+
+    static constexpr int HEADER_LEN = 7;
+    static constexpr int DATA_LEN = 1;
+    static constexpr int CRC16_LEN = 2;
+    static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
+
+    RefSerialData::Rx::RobotData robotData;
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+
+    robotData.robotId = RefSerialData::RobotId::BLUE_SOLDIER_2;
+
+    EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
+        .Times(1)
+        .WillOnce([&](tap::communication::serial::Uart::UartPort,
+                      const uint8_t *data,
+                      std::size_t length) {
+            DJISerial::SerialMessage<DATA_LEN> msg;
+            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+
+            checkHeaderAndTail<1>(msg);
+            EXPECT_EQ(9, msg.messageType);
+
+            return length;
+        });
+
+    serial.sendShutdownMessage();
+}
+
+TEST(VisionCoprocessor, sendRebootMessage_sends_blank_msg_with_correct_id)
+{
+    ClockStub clock;
+
+    aruwsrc::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+
+    static constexpr int HEADER_LEN = 7;
+    static constexpr int DATA_LEN = 1;
+    static constexpr int CRC16_LEN = 2;
+    static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
+
+    RefSerialData::Rx::RobotData robotData;
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+
+    robotData.robotId = RefSerialData::RobotId::BLUE_SOLDIER_2;
+
+    EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
+        .Times(1)
+        .WillOnce([&](tap::communication::serial::Uart::UartPort,
+                      const uint8_t *data,
+                      std::size_t length) {
+            DJISerial::SerialMessage<DATA_LEN> msg;
+            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+
+            checkHeaderAndTail<1>(msg);
+            EXPECT_EQ(8, msg.messageType);
+
+            return length;
+        });
+
+    serial.sendRebootMessage();
 }

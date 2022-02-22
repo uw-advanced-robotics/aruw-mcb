@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,12 +20,32 @@
 #ifndef CLIENT_DISPLAY_COMMAND_HPP_
 #define CLIENT_DISPLAY_COMMAND_HPP_
 
+#include <array>
+#include <tuple>
+
 #include "tap/architecture/periodic_timer.hpp"
+#include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "modm/math/geometry/polygon_2d.hpp"
+#include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
-#include "modm/processing/resumable.hpp"
+
+#include "boolean_hud_indicators.hpp"
+#include "chassis_orientation_indicator.hpp"
+#include "matrix_hud_indicators.hpp"
+#include "reticle_indicator.hpp"
+#include "turret_angles_indicator.hpp"
 
 namespace tap::control
 {
@@ -37,26 +57,65 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::display
+namespace aruwsrc::control::client_display
 {
 class ClientDisplaySubsystem;
 
-class ClientDisplayCommand : public tap::control::Command,
-                             ::modm::pt::Protothread,
-                             modm::Resumable<4>
+/**
+ * A command that controls what is displayed on the RoboMaster client's interactive HUD.
+ *
+ * The following graphic features are supported:
+ * - Static reticle.
+ * - Simulated chassis to represent chassis location.
+ * - A list of boolean indicators.
+ * - A table of selection indicators (where the graphic can be in one of multiple states).
+ * - Turret pitch/yaw angles.
+ *
+ * @note Only a single ClientDisplayCommand should be instantiated. If more than one is
+ * instantiated, this will lead to undefined behavior.
+ */
+class ClientDisplayCommand : public tap::control::Command, ::modm::pt::Protothread
 {
 public:
+    /**
+     * Construct a ClientDisplayCommand.
+     *
+     * @param[in] drivers Global drivers instance.
+     * @param[in] clientDisplay The client display subsystem associated with the command.
+     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
+     * that may be nullptr if no hopper exists.
+     * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
+     * are on or off.
+     * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
+     * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
+     * turret and to print turret angles (if turret chassis relative angles are being printed).
+     * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
+     * calibrated.
+     * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
+     * never be selected as the current chassis command.
+     * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
+     * will never be selected as the current chassis command.
+     * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
+     * will never be selected as the current chassis command.
+     * @param[in] chassisDriveCmd May be nullptr. If nullptr the chassis drive command will never be
+     * selected as the current chassis command.
+     */
     ClientDisplayCommand(
         aruwsrc::Drivers *drivers,
         ClientDisplaySubsystem *clientDisplay,
-        const tap::control::Command *wiggleCommand,
-        const tap::control::Command *followTurret,
-        const tap::control::Command *beybladeCommand,
-        const tap::control::Command *baseDriveCommand);
+        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
+        const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+        aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+        const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
+        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+        const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
+        const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd);
 
     const char *getName() const override { return "client display"; }
 
-    void initialize() override {}
+    void initialize() override;
 
     void execute() override;
 
@@ -65,79 +124,16 @@ public:
     bool isFinished() const override { return false; }
 
 private:
-    static constexpr uint16_t SCREEN_WIDTH = 1920;
-    static constexpr uint16_t SCREEN_HEIGHT = 1080;
-    static constexpr uint16_t FONT_SIZE = 30;
-    static constexpr uint16_t FONT_THICKNESS = 4;
-    static constexpr uint16_t LINE_THICKNESS = 4;
-    static constexpr uint16_t TEXT_TOP_ROW_Y = 850;
-    static constexpr uint16_t SCREEN_MARGIN = 100;
-    static constexpr uint8_t DRIVE_COMMAND_GRAPHIC_LAYER = 1;
-    static constexpr uint8_t RETICLE_GRAPHIC_LAYER = 2;
-    static constexpr uint8_t CAP_BANK_LAYER_1 = 3;
-    static constexpr uint8_t CAP_BANK_LAYER_2 = 4;
-    static constexpr int32_t DELAY_PERIOD_BTWN_SENDS = 110;
-    static constexpr uint8_t RETICLE_LINE1_NAME[] = {0, 0, 0};
-    static constexpr uint8_t RETICLE_LINE2_NAME[] = {0, 0, 1};
-    static constexpr uint8_t RETICLE_LINE3_NAME[] = {0, 0, 2};
-    static constexpr uint8_t RETICLE_LINE4_NAME[] = {0, 0, 3};
-    static constexpr uint8_t RETICLE_CIRCLE_NAME[] = {0, 0, 4};
-    static constexpr uint8_t DRIVE_TEXT_NAME[] = {0, 0, 5};
-    static constexpr uint8_t CAP_TEXT_NAME[] = {0, 0, 6};
-    static constexpr uint8_t CAP_VALUE_NAME[] = {0, 0, 7};
-
     aruwsrc::Drivers *drivers;
 
-    // General variables
-    /// @note The maximum frequency of this timer is 10 Hz according to RM rules.
-    tap::arch::MilliTimeout delayTimer{DELAY_PERIOD_BTWN_SENDS};
+    BooleanHudIndicators booleanHudIndicators;
+    ChassisOrientationIndicator chassisOrientationIndicator;
+    MatrixHudIndicators positionHudIndicators;
+    ReticleIndicator reticleIndicator;
+    TurretAnglesIndicator turretAnglesIndicator;
 
-    // Drive related variables
-    const tap::control::Command *wiggleCommand;
-    const tap::control::Command *followTurretCommand;
-    const tap::control::Command *beybladeCommand;
-    const tap::control::Command *baseDriveCommand;
-    const tap::control::Command *currDriveCommandScheduled = nullptr;
-    const tap::control::Command *newDriveCommandScheduled = nullptr;
-    tap::communication::serial::RefSerial::Tx::GraphicCharacterMessage driveCommandMsg;
-    tap::communication::serial::RefSerial::Tx::GraphicColor driveCommandColor;
-    tap::arch::PeriodicMilliTimer addDriveCommandTimer{10000};
-
-    // Turret reticle variables
-    static constexpr uint16_t TURRET_RETICLE_1M_WIDTH = 150;
-    static constexpr uint16_t TURRET_RETICLE_3M_WIDTH = 100;
-    static constexpr uint16_t TURRET_RETICLE_5M_WIDTH = 50;
-#ifdef TARGET_HERO  // TODO tune the things
-    static constexpr uint16_t TURRET_RETICLE_1MY = 500;
-    static constexpr uint16_t TURRET_RETICLE_3MY = 250;
-    static constexpr uint16_t TURRET_RETICLE_5MY = 200;
-#else
-    static constexpr uint16_t TURRET_RETICLE_1MY = 500;
-    static constexpr uint16_t TURRET_RETICLE_3MY = 400;
-    static constexpr uint16_t TURRET_RETICLE_5MY = 300;
-#endif
-    tap::arch::PeriodicMilliTimer sendReticleTimer{10000};
-    tap::communication::serial::RefSerial::Tx::Graphic5Message reticleMsg;
-
-    // Cap bank related variables
-    tap::arch::PeriodicMilliTimer sendCapBankTimer{10000};
-    tap::communication::serial::RefSerial::Tx::GraphicCharacterMessage capStringMsg;
-    tap::communication::serial::RefSerial::Tx::Graphic1Message capPowerRemainMsg;
-    int capMsgAdded = 0;
-    int32_t capicatance = 0;
-
-    modm::ResumableResult<bool> initializeNonblocking();
     bool run();
-
-    void initDriveCommandMsg();
-    modm::ResumableResult<bool> updateDriveCommandMsg();
-
-    void initTurretReticleMsg();
-    modm::ResumableResult<bool> updateTurretReticleMsg();
-
-    void initCapBankMsg();
-    modm::ResumableResult<bool> updateCapBankMsg();
 };
-}  // namespace aruwsrc::display
+}  // namespace aruwsrc::control::client_display
 
 #endif  // CLIENT_DISPLAY_COMMAND_HPP_

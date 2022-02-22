@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,8 +21,10 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 
 namespace aruwsrc
 {
@@ -111,16 +113,26 @@ public:
 
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
-    inline void attachOdometryInterface(
+    mockable inline void attachOdometryInterface(
         tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
     {
         this->odometryInterface = odometryInterface;
     }
 
+    mockable void sendShutdownMessage();
+
+    mockable void sendRebootMessage();
+
+    mockable void sendSelectNewTargetMessage();
+
 private:
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
+        CV_MESSAGE_TYPE_ROBOT_ID = 6,
+        CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
+        CV_MESSAGE_TYPE_REBOOT = 8,
+        CV_MESSAGE_TYPE_SHUTDOWN = 9,
     };
 
     enum RxMessageTypes
@@ -130,6 +142,9 @@ private:
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
+
+    /** Time in ms between sending the robot ID message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData;
@@ -141,6 +156,8 @@ private:
     const aruwsrc::can::TurretMCBCanComm* turretMCBCanComm;
 
     tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
+
+    tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
@@ -158,6 +175,7 @@ public:
 #endif
 
     void sendOdometryData();
+    void sendRobotTypeData();
 };
 }  // namespace serial
 }  // namespace aruwsrc
