@@ -74,8 +74,6 @@ public:
      * will never be selected as the current chassis command in the HUD.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command in the HUD.
-     * @param[in] chassisDriveCmd May be nullptr. If nullptr the chassis drive command will never be
-     * selected as the current chassis command in the HUD.
      */
     MatrixHudIndicators(
         aruwsrc::Drivers *drivers,
