@@ -47,6 +47,12 @@ TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
           TURRET_MCB_CAN_BUS,
           this,
           &TurretMCBCanComm::handleTurretMessage),
+      timeSynchronizationRxHandler(
+          drivers,
+          SYNC_RX_CAN_ID,
+          TURRET_MCB_CAN_BUS,
+          this,
+          &TurretMCBCanComm::handleTimeSynchronizationRequest),
       txCommandMsgBitmask(),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
@@ -57,6 +63,7 @@ void TurretMCBCanComm::init()
     yawAngleGyroMessageHandler.attachSelfToRxHandler();
     pitchAngleGyroMessageHandler.attachSelfToRxHandler();
     turretStatusRxHandler.attachSelfToRxHandler();
+    timeSynchronizationRxHandler.attachSelfToRxHandler();
 }
 
 void TurretMCBCanComm::sendData()
@@ -125,11 +132,12 @@ void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
     limitSwitchDepressed = message.data[0] & 0b1;
 }
 
-void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message& message)
+void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message&)
 {
     modm::can::Message syncResponseMessage(SYNC_TX_CAN_ID, 4);
     syncResponseMessage.setExtended(false);
-    *reinterpret_cast<uint32_t*>(syncResponseMessage.data) = tap::arch::clock::getTimeMicroseconds();
+    *reinterpret_cast<uint32_t*>(syncResponseMessage.data) =
+        tap::arch::clock::getTimeMicroseconds();
     drivers->can.sendMessage(TURRET_MCB_CAN_BUS, syncResponseMessage);
 }
 

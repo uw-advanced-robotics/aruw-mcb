@@ -177,6 +177,8 @@ private:
 
     TurretMcbRxHandler turretStatusRxHandler;
 
+    TurretMcbRxHandler timeSynchronizationRxHandler;
+
     tap::arch::MilliTimeout imuConnectedTimeout;
 
     TxCommandMsgBitmask_t txCommandMsgBitmask;
