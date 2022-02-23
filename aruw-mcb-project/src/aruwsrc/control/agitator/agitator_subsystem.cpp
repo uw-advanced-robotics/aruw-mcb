@@ -81,6 +81,8 @@ void AgitatorSubsystem::refresh()
     {
         subsystemJamStatus = true;
     }
+
+    currAgitatorAngle = getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
 }
 
 void AgitatorSubsystem::agitatorRunPositionPid()
