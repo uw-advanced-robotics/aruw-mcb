@@ -87,7 +87,7 @@ public:
 
     mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
 
-    mockable inline float isConnected() const
+    mockable inline bool isConnected() const
     {
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
     }

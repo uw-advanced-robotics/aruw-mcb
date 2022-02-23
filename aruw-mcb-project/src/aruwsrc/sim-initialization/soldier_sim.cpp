@@ -46,20 +46,20 @@ void initialize_robot_sim()
         tap::motorsim::MotorSim::MotorType::M3508;
     tap::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::LEFT_FRONT_MOTOR_ID);
+        aruwsrc::chassis::CAN_BUS_MOTORS,
+        aruwsrc::chassis::LEFT_FRONT_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::LEFT_BACK_MOTOR_ID);
+        aruwsrc::chassis::CAN_BUS_MOTORS,
+        aruwsrc::chassis::LEFT_BACK_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::RIGHT_FRONT_MOTOR_ID);
+        aruwsrc::chassis::CAN_BUS_MOTORS,
+        aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::ChassisSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::chassis::ChassisSubsystem::RIGHT_BACK_MOTOR_ID);
+        aruwsrc::chassis::CAN_BUS_MOTORS,
+        aruwsrc::chassis::RIGHT_BACK_MOTOR_ID);
 
     // Register the motor sims for the turret subsystem
     tap::motorsim::SimHandler::registerSim(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -30,7 +30,7 @@ using namespace testing;
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-static constexpr float TEST_WHEEL_SPEED = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
+static constexpr float TEST_WHEEL_SPEED = MIN_WHEEL_SPEED_SINGLE_MOTOR;
 
 #define DEFAULT_SETUP_TEST(chassisFrontBackIdentical) \
     aruwsrc::Drivers drivers;                         \
@@ -124,7 +124,7 @@ static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
     auto runTest = [&](float x, float y) {
         float rotatedX = x;
         float rotatedY = y;
-        rotateVector(&rotatedX, &rotatedY, -modm::toRadian(turretAngleFromCenter));
+        rotateVector(&rotatedX, &rotatedY, modm::toRadian(turretAngleFromCenter));
         EXPECT_CALL(
             chassis,
             setDesiredOutput(

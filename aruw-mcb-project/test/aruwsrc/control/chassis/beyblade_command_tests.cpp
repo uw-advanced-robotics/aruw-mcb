@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -49,7 +49,7 @@ using aruwsrc::mock::TurretSubsystemMock;
 using tap::algorithms::Ramp;
 using namespace tap::communication::serial;
 
-static constexpr float BASE_DESIRED_OUT = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR / 2;
+static constexpr float BASE_DESIRED_OUT = MIN_WHEEL_SPEED_SINGLE_MOTOR / 2;
 static constexpr float BASE_DESIRED_R_TRANSLATIONAL =
     BeybladeCommand::ROTATION_TARGET_45W_CUTOFF * BeybladeCommand::RAMP_TARGET_TRANSLATIONAL_FRAC *
     BeybladeCommand::RAMP_UPDATE_FRAC;
