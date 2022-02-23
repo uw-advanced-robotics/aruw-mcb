@@ -78,13 +78,14 @@ public:
      */
     struct OdometryData
     {
-        float chassisX;      /// x position of the chassis.
-        float chassisY;      /// y position of the chassis.
-        float chassisZ;      /// z position of the chassis.
-        float turretPitch;   /// Pitch angle of turret relative to plane parallel to the ground.
-        float turretYaw;     /// Clockwise turret rotation angle between 0 and 360.
+        float chassisX;     /// x position of the chassis.
+        float chassisY;     /// y position of the chassis.
+        float chassisZ;     /// z position of the chassis.
+        float turretPitch;  /// Pitch angle of turret relative to plane parallel to the ground.
+        float turretYaw;    /// Clockwise turret rotation angle between 0 and 360.
         uint32_t turretTimestamp;  /// Timestamp in microseconds, when turret data was computed.
-        uint32_t chassisTimestamp;  /// Timestamp in microseconds, when chassis odom data was computed
+        uint32_t
+            chassisTimestamp;  /// Timestamp in microseconds, when chassis odom data was computed
     } modm_packed;
 
     VisionCoprocessor(aruwsrc::Drivers* drivers);
@@ -134,14 +135,13 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC = 10,
-        CV_MESSAGE_TYPE_TIME_DELAY_RESP = 11,
+        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 10,
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_TIME_DELAY_REQ = 3,
+        CV_MESSAGE_TYPE_TIME_SYNC_REQ = 3,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -179,7 +179,7 @@ private:
      */
     static bool decodeToTurretAimData(const ReceivedSerialMessage& message, TurretAimData* aimData);
 
-    void decodeAndSendDelayReq(const ReceivedSerialMessage &message);
+    void decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message);
 
 #ifdef ENV_UNIT_TESTS
 public:
@@ -187,7 +187,6 @@ public:
 
     void sendOdometryData();
     void sendRobotTypeData();
-    void sendTimeSyncData();
 };
 }  // namespace serial
 }  // namespace aruwsrc

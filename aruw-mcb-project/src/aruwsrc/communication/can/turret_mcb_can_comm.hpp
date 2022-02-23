@@ -197,7 +197,7 @@ private:
 
     void handleTurretMessage(const modm::can::Message& message);
 
-    void handleTimeSynchronizationRequest(const modm::can::Message &message);
+    void handleTimeSynchronizationRequest(const modm::can::Message& message);
 };
 }  // namespace aruwsrc::can
 

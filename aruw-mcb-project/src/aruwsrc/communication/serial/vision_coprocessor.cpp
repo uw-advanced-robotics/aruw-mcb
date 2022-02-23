@@ -23,6 +23,7 @@
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
+using tap::arch::clock::getTimeMicroseconds;
 
 namespace aruwsrc
 {
@@ -53,9 +54,9 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage, &lastAimData);
             return;
         }
-        case CV_MESSAGE_TYPE_TIME_DELAY_REQ:
+        case CV_MESSAGE_TYPE_TIME_SYNC_REQ:
         {
-            decodeAndSendDelayReq(completeMessage);
+            decodeAndSendTimeSyncMessage(completeMessage);
             return;
         }
         default:
@@ -75,28 +76,27 @@ bool VisionCoprocessor::decodeToTurretAimData(
     return true;
 }
 
-void VisionCoprocessor::decodeAndSendDelayReq(const ReceivedSerialMessage& message)
+void VisionCoprocessor::decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message)
 {
     if (message.header.dataLength != 1)
     {
         return;
     }
 
-    DJISerial::SerialMessage<sizeof(uint32_t)> delayedResponseMessage;
-    *reinterpret_cast<uint32_t*>(delayedResponseMessage.data) =
-        tap::arch::clock::getTimeMicroseconds();
-    delayedResponseMessage.setCRC16();
+    DJISerial::SerialMessage<sizeof(uint32_t)> timeSyncResponseMessage;
+    timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
+    *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = getTimeMicroseconds();
+    timeSyncResponseMessage.setCRC16();
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
-        reinterpret_cast<uint8_t*>(&delayedResponseMessage),
-        sizeof(delayedResponseMessage));
+        reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
+        sizeof(timeSyncResponseMessage));
 }
 
 void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
     sendRobotTypeData();
-    sendTimeSyncData();
 }
 
 bool VisionCoprocessor::isCvOnline() { return !cvOfflineTimeout.isExpired(); }
@@ -189,18 +189,5 @@ void VisionCoprocessor::sendSelectNewTargetMessage()
         sizeof(selectNewTargetMessage));
 }
 
-void VisionCoprocessor::sendTimeSyncData()
-{
-    if (sendTimeSyncTimeout.execute())
-    {
-        DJISerial::SerialMessage<4> syncMessage;
-        *reinterpret_cast<uint32_t*>(syncMessage.data) = tap::arch::clock::getTimeMicroseconds();
-        syncMessage.setCRC16();
-        drivers->uart.write(
-            VISION_COPROCESSOR_TX_UART_PORT,
-            reinterpret_cast<uint8_t*>(&syncMessage),
-            sizeof(syncMessage));
-    }
-}
 }  // namespace serial
 }  // namespace aruwsrc
