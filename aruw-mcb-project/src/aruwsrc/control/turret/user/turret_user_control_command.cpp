@@ -47,6 +47,7 @@ void TurretUserControlCommand::initialize()
 {
     yawController->initialize();
     pitchController->initialize();
+    prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
 void TurretUserControlCommand::execute()

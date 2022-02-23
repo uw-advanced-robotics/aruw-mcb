@@ -24,7 +24,6 @@
 #include "friction_wheel_subsystem_mock.hpp"
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
-#include "legacy_vision_coprocessor_mock.hpp"
 #include "oled_display_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
@@ -159,9 +158,9 @@ XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Dig
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
-LegacyVisionCoprocessorMock::LegacyVisionCoprocessorMock(aruwsrc::Drivers *drivers)
-    : serial::LegacyVisionCoprocessor(drivers)
+VisionCoprocessorMock::VisionCoprocessorMock(aruwsrc::Drivers *drivers)
+    : serial::VisionCoprocessor(drivers)
 {
 }
-LegacyVisionCoprocessorMock::~LegacyVisionCoprocessorMock() {}
+VisionCoprocessorMock::~VisionCoprocessorMock() {}
 }  // namespace aruwsrc::mock

@@ -19,13 +19,18 @@
 
 #include "turret_cv_command.hpp"
 
+#include "tap/algorithms/ballistics.hpp"
 #include "tap/architecture/clock.hpp"
 
 #include "../turret_controller_constants.hpp"
 #include "../turret_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch::clock;
+using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret::cv
 {
@@ -33,11 +38,27 @@ TurretCVCommand::TurretCVCommand(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
-    algorithms::TurretPitchControllerInterface *pitchController)
+    algorithms::TurretPitchControllerInterface *pitchController,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const chassis::ChassisSubsystem &chassisSubsystem,
+    const control::launcher::FrictionWheelSubsystem &frictionWheels,
+    const float userPitchInputScalar,
+    const float userYawInputScalar,
+    const float defaultLaunchSpeed)
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
-      pitchController(pitchController)
+      pitchController(pitchController),
+      ballisticsSolver(
+          *drivers,
+          odometryInterface,
+          chassisSubsystem,
+          *turretSubsystem,
+          frictionWheels,
+          defaultLaunchSpeed),
+      userPitchInputScalar(userPitchInputScalar),
+      userYawInputScalar(userYawInputScalar),
+      chassisSubsystem(chassisSubsystem)
 {
     addSubsystemRequirement(turretSubsystem);
 }
@@ -46,9 +67,10 @@ bool TurretCVCommand::isReady() { return !isFinished(); }
 
 void TurretCVCommand::initialize()
 {
-    drivers->legacyVisionCoprocessor.beginAutoAim();
     pitchController->initialize();
     yawController->initialize();
+    prevTime = getTimeMilliseconds();
+    drivers->visionCoprocessor.sendSelectNewTargetMessage();
 }
 
 void TurretCVCommand::execute()
@@ -56,26 +78,32 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    if (drivers->legacyVisionCoprocessor.lastAimDataValid())
+    if (!(drivers->visionCoprocessor.isCvOnline() &&
+          drivers->visionCoprocessor.getLastAimData().hasTarget &&
+          ballisticsSolver.computeTurretAimAngles(&pitchSetpoint, &yawSetpoint)))
     {
-        const auto &cvData = drivers->legacyVisionCoprocessor.getLastAimData();
-        if (cvData.hasTarget)
-        {
-            pitchSetpoint = cvData.pitch;
-            yawSetpoint = cvData.yaw;
-        }
+        // no valid CV data, let user control turret
+        pitchSetpoint +=
+            userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
+
+        yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
+    }
+    else
+    {
+        pitchSetpoint = modm::toDegree(pitchSetpoint);
+        yawSetpoint = modm::toDegree(yawSetpoint);
     }
 
     uint32_t currTime = getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    // updates the turret pitch setpoint based on CV input, runs the PID controller, and sets
-    // the turret subsystem's desired pitch output
+    // updates the turret pitch setpoint based on either CV or user input, runs the PID controller,
+    // and sets the turret subsystem's desired pitch output
     pitchController->runController(dt, pitchSetpoint);
 
-    // updates the turret yaw setpoint based on CV input, runs the PID controller, and sets
-    // the turret subsystem's desired yaw output
+    // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
+    // and sets the turret subsystem's desired yaw output
     yawController->runController(dt, yawSetpoint);
 }
 
@@ -86,7 +114,6 @@ bool TurretCVCommand::isFinished() const
 
 void TurretCVCommand::end(bool)
 {
-    drivers->legacyVisionCoprocessor.stopAutoAim();
     turretSubsystem->setYawMotorOutput(0);
     turretSubsystem->setPitchMotorOutput(0);
 }

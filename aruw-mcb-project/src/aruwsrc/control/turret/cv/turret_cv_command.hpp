@@ -23,6 +23,12 @@
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+
+namespace tap::control::odometry
+{
+class Odometry2DInterface;
+}
 
 namespace aruwsrc
 {
@@ -34,31 +40,64 @@ namespace aruwsrc::control::turret
 class TurretSubsystem;
 }
 
+namespace aruwsrc::control::launcher
+{
+class FrictionWheelSubsystem;
+}
+
+namespace aruwsrc::chassis
+{
+class ChassisSubsystem;
+}
+
 namespace aruwsrc::control::turret::cv
 {
 /**
- * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
+ * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turret accordingly using a position PID controller.
  *
  * This command, unlike the `SentinelTurretCVCommand`, is not responsible for firing projectiles
- * when the auto aim system determines it should fire.
+ * when the auto aim system determines it should fire. Nor does this class scan the turret back and
+ * forth.
+ *
+ * @note If the auto aim system is offline, does not have a target acquired, or has an invalid
+ * target (for example, the target is too far away), then user input from the
+ * `ControlOperatorInterface` is used to control the turret instead.
  */
 class TurretCVCommand : public tap::control::Command
 {
 public:
     /**
+     * Constructs a TurretCVCommand
+     *
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] turretSubsystem Pointer to the turret to control.
      * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
      * axis of the turret.
      * @param[in] pitchController Pointer to a pitch controller that will be used to control the
      * pitch axis of the turret.
+     * @param[in] odometryInterface Odometry object, used for position odometry information.
+     * @param[in] chassisSubsystem Chassis subsystem object, used to get the velocity of the robot.
+     * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
+     * a target is a function of how fast a projectile is launched at.
+     * @param[in] userPitchInputScalar When user input is used, this scalar is used to scale the
+     * pitch user input.
+     * @param[in] userYawInputScalar When user input is used, this scalar is used to scale the yaw
+     * user input.
+     * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
+     * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
      */
     TurretCVCommand(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController);
+        algorithms::TurretPitchControllerInterface *pitchController,
+        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        const chassis::ChassisSubsystem &chassisSubsystem,
+        const control::launcher::FrictionWheelSubsystem &frictionWheels,
+        const float userPitchInputScalar,
+        const float userYawInputScalar,
+        const float defaultLaunchSpeed);
 
     void initialize() override;
 
@@ -80,9 +119,15 @@ private:
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
-    uint32_t prevTime;
-};  // class TurretCvCommand
+    aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
 
+    const float userPitchInputScalar;
+    const float userYawInputScalar;
+
+    uint32_t prevTime;
+    const chassis::ChassisSubsystem &chassisSubsystem;
+    void computeTurretAimAngles(float *pitch, float *yaw);
+};
 }  // namespace aruwsrc::control::turret::cv
 
 #endif  // TURRET_CV_COMMAND_HPP_

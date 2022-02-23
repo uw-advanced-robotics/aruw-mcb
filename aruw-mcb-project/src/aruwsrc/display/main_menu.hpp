@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,6 +29,7 @@
 
 #include "modm/ui/menu/standard_menu.hpp"
 
+#include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
 
@@ -61,6 +62,7 @@ private:
     aruwsrc::Drivers *drivers;
 
     ImuCalibrateMenu imuCalibrateMenu;
+    CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
@@ -69,6 +71,7 @@ private:
     TurretMCBMenu turretStatusMenu;
 
     void addImuCalibrateMenuCallback();
+    void addCVMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
     void addMotorMenuCallback();
