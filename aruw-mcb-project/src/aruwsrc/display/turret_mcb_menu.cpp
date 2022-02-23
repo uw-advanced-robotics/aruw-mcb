@@ -26,7 +26,7 @@ namespace aruwsrc::display
 TurretMCBMenu::TurretMCBMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
     aruwsrc::Drivers *drivers)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, IMU_CALIBRATE_MENU_ID),
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       drivers(drivers)
 {
 }
@@ -38,14 +38,16 @@ void TurretMCBMenu::draw()
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
-    display << "Receiving Turret IMU data " << drivers->turretMCBCanComm.isConnected() << modm::endl
-            << "Limit switch depressed" << drivers->turretMCBCanComm.getLimitSwitchDepressed() << modm::endl;
+    display << "Receiving Turret IMU data: " << drivers->turretMCBCanComm.isConnected()
+            << modm::endl
+            << "Limit switch depressed: " << drivers->turretMCBCanComm.getLimitSwitchDepressed()
+            << modm::endl;
     display.printf(
         "Yaw: %.2f\nYaw Velocity: %.2f\nPitch: %.2f\nPitch Velocity: %.2f",
-        drivers->turretMCBCanComm.getYaw(),
-        drivers->turretMCBCanComm.getYawVelocity(),
-        drivers->turretMCBCanComm.getPitch(),
-        drivers->turretMCBCanComm.getPitchVelocity());
+        static_cast<double>(drivers->turretMCBCanComm.getYaw()),
+        static_cast<double>(drivers->turretMCBCanComm.getYawVelocity()),
+        static_cast<double>(drivers->turretMCBCanComm.getPitch()),
+        static_cast<double>(drivers->turretMCBCanComm.getPitchVelocity()));
 }
 
 void TurretMCBMenu::update() {}

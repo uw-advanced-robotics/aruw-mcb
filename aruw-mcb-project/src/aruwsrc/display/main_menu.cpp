@@ -52,7 +52,7 @@ void MainMenu::initialize()
             &MainMenu::addImuCalibrateMenuCallback));
     addEntry(
         CVMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addCVMenuCallback));
     addEntry(
@@ -66,6 +66,11 @@ void MainMenu::initialize()
             this,
             &MainMenu::addRefSerialMenuCallback));
     addEntry(
+        TurretMCBMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addTurretMCBMenuCallback));
+    addEntry(
         CommandSchedulerMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
@@ -75,11 +80,6 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addHardwareTestMenuCallback));
-    addEntry(
-        TurretMCBMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-            this,
-            &MainMenu::addTurretMCBMenuCallback));
 
     setTitle("Main Menu");
 }

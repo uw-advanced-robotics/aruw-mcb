@@ -24,7 +24,6 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/display/hardware_test_menu.hpp"
 #include "tap/display/motor_menu.hpp"
-#include "turret_mcb_menu.hpp"
 #include "tap/display/ref_serial_menu.hpp"
 
 #include "modm/ui/menu/standard_menu.hpp"
@@ -32,6 +31,7 @@
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
+#include "turret_mcb_menu.hpp"
 
 namespace aruwsrc
 {
@@ -65,8 +65,8 @@ private:
     CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
-    tap::display::CommandSchedulerMenu commandSchedulerMenu;
     tap::display::MotorMenu motorMenu;
+    tap::display::CommandSchedulerMenu commandSchedulerMenu;
     tap::display::RefSerialMenu refSerialMenu;
     TurretMCBMenu turretStatusMenu;
 

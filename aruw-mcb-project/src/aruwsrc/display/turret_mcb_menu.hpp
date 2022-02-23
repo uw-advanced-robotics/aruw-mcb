@@ -20,8 +20,8 @@
 #ifndef TURRET_MCB_MENU_HPP_
 #define TURRET_MCB_MENU_HPP_
 
-#include "tap/display/dummy_allocator.hpp"
 #include "tap/architecture/periodic_timer.hpp"
+#include "tap/display/dummy_allocator.hpp"
 
 #include "modm/ui/menu/abstract_menu.hpp"
 
@@ -36,8 +36,7 @@ namespace aruwsrc::display
  * Menu that allows the user to schedule an `ImuCalibrateCommand` in the `CommandScheduler`. Also
  * displays the current calibration state of the `ImuCalibrationCommand`.
  */
-class TurretMCBMenu
-    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class TurretMCBMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
     /** Time between calls to `draw`, which will redraw the turret status menu. */
@@ -62,7 +61,7 @@ public:
     static const char *getMenuName() { return "Turret MCB Menu"; }
 
 private:
-    static constexpr int IMU_CALIBRATE_MENU_ID = 7;
+    static constexpr int TURRET_MCB_MENU_ID = 12;
 
     aruwsrc::Drivers *drivers;
 
