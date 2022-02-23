@@ -117,11 +117,17 @@ public:
 private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
 
-    static constexpr uint32_t YAW_ANGLE_GYRO_RX_CAN_ID = 0x1fd;
-    static constexpr uint32_t PITCH_ANGLE_GYRO_RX_CAN_ID = 0x1fc;
-    static constexpr uint32_t TURRET_MCB_TX_CAN_ID = 0x1fe;
-    static constexpr uint32_t TURRET_STATUS_RX_CAN_ID = 0x1fb;
-    static constexpr tap::can::CanBus IMU_MSG_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+    enum CanIDs
+    {
+        SYNC_RX_CAN_ID = 0x1f9,
+        SYNC_TX_CAN_ID = 0x1fa,
+        TURRET_STATUS_RX_CAN_ID = 0x1fb,
+        PITCH_RX_CAN_ID = 0x1fc,
+        YAW_RX_CAN_ID = 0x1fd,
+        TURRET_MCB_TX_CAN_ID = 0x1fe,
+    };
+
+    static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
@@ -142,22 +148,6 @@ private:
         CanCommListenerFunc funcToCall;
     };
 
-    class TurretStatusRxHandler : public tap::can::CanRxListener
-    {
-    public:
-        TurretStatusRxHandler(
-            aruwsrc::Drivers* drivers,
-            uint32_t id,
-            tap::can::CanBus cB,
-            TurretMCBCanComm* msgHandler,
-            CanCommListenerFunc funcToCall);
-        void processMessage(const modm::can::Message& message) override;
-
-    private:
-        TurretMCBCanComm* msgHandler;
-        CanCommListenerFunc funcToCall;
-    };
-
     struct AngleMessageData
     {
         int16_t angleFixedPoint;
@@ -165,8 +155,6 @@ private:
         uint8_t seq;
         uint16_t timestamp;
     } modm_packed;
-
-    aruwsrc::Drivers* drivers;
 
     struct ImuData
     {
@@ -177,6 +165,8 @@ private:
         uint32_t turretDataTimestamp;
         uint8_t seq;
     };
+
+    aruwsrc::Drivers* drivers;
 
     ImuData currProcessingImuData;
     ImuData lastCompleteImuData;
@@ -204,6 +194,8 @@ private:
     void handlePitchAngleGyroMessage(const modm::can::Message& message);
 
     void handleTurretMessage(const modm::can::Message& message);
+
+    void handleTimeSynchronizationRequest(const modm::can::Message &message);
 };
 }  // namespace aruwsrc::can
 

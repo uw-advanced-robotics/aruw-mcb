@@ -31,20 +31,20 @@ TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
     : drivers(drivers),
       yawAngleGyroMessageHandler(
           drivers,
-          YAW_ANGLE_GYRO_RX_CAN_ID,
-          IMU_MSG_CAN_BUS,
+          YAW_RX_CAN_ID,
+          TURRET_MCB_CAN_BUS,
           this,
           &TurretMCBCanComm::handleYawAngleGyroMessage),
       pitchAngleGyroMessageHandler(
           drivers,
-          PITCH_ANGLE_GYRO_RX_CAN_ID,
-          IMU_MSG_CAN_BUS,
+          PITCH_RX_CAN_ID,
+          TURRET_MCB_CAN_BUS,
           this,
           &TurretMCBCanComm::handlePitchAngleGyroMessage),
       turretStatusRxHandler(
           drivers,
           TURRET_STATUS_RX_CAN_ID,
-          IMU_MSG_CAN_BUS,
+          TURRET_MCB_CAN_BUS,
           this,
           &TurretMCBCanComm::handleTurretMessage),
       txCommandMsgBitmask(),
@@ -63,10 +63,9 @@ void TurretMCBCanComm::sendData()
 {
     if (sendMcbDataTimer.execute())
     {
-        modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 5);
+        modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 1);
         txMsg.setExtended(false);
         txMsg.data[0] = txCommandMsgBitmask.value;
-        tap::arch::convertToLittleEndian(tap::arch::clock::getTimeMicroseconds(), txMsg.data + 1);
         drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, txMsg);
 
         // set this calibrate flag to false so the calibrate command is only sent once
@@ -126,6 +125,14 @@ void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
     limitSwitchDepressed = message.data[0] & 0b1;
 }
 
+void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message& message)
+{
+    modm::can::Message syncResponseMessage(SYNC_TX_CAN_ID, 4);
+    syncResponseMessage.setExtended(false);
+    *reinterpret_cast<uint32_t*>(syncResponseMessage.data) = tap::arch::clock::getTimeMicroseconds();
+    drivers->can.sendMessage(TURRET_MCB_CAN_BUS, syncResponseMessage);
+}
+
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(
     aruwsrc::Drivers* drivers,
     uint32_t id,
@@ -138,24 +145,7 @@ TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(
 {
 }
 
-TurretMCBCanComm::TurretStatusRxHandler::TurretStatusRxHandler(
-    aruwsrc::Drivers* drivers,
-    uint32_t id,
-    tap::can::CanBus cB,
-    TurretMCBCanComm* msgHandler,
-    CanCommListenerFunc funcToCall)
-    : CanRxListener(drivers, id, cB),
-      msgHandler(msgHandler),
-      funcToCall(funcToCall)
-{
-}
-
 void TurretMCBCanComm::TurretMcbRxHandler::processMessage(const modm::can::Message& message)
-{
-    (msgHandler->*funcToCall)(message);
-}
-
-void TurretMCBCanComm::TurretStatusRxHandler::processMessage(const modm::can::Message& message)
 {
     (msgHandler->*funcToCall)(message);
 }
