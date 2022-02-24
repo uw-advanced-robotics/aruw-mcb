@@ -31,6 +31,7 @@
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
+#include "turret_mcb_menu.hpp"
 
 namespace aruwsrc
 {
@@ -67,6 +68,7 @@ private:
     tap::display::MotorMenu motorMenu;
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
     tap::display::RefSerialMenu refSerialMenu;
+    TurretMCBMenu turretStatusMenu;
 
     void addImuCalibrateMenuCallback();
     void addCVMenuCallback();
@@ -76,6 +78,7 @@ private:
     void addPropertyTableCallback();
     void addCommandSchedulerCallback();
     void addRefSerialMenuCallback();
+    void addTurretMCBMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc
