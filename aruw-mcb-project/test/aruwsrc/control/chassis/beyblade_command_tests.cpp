@@ -112,8 +112,8 @@ TEST(BeybladeCommand, execute_fullxy_fullr_180_ramp)
 TEST(BeybladeCommand, execute_halfxy_halfr_270_ramp)
 {
     basicFrameworkTest(
-        -BASE_DESIRED_OUT / 2,
         BASE_DESIRED_OUT / 2,
+        -BASE_DESIRED_OUT / 2,
         BASE_DESIRED_R_NON_TRANSLATIONAL,
         270,
         0.5);
