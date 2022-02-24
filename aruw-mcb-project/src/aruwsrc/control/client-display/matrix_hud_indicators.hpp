@@ -70,7 +70,8 @@ public:
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
      * are on or off.
      * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
-     * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the HUD).
+     * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the
+     * HUD).
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
      * never be selected as the current chassis command in the HUD.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command

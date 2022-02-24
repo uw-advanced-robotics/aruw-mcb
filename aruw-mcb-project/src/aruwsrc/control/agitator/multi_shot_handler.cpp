@@ -47,6 +47,6 @@ void MultiShotHandler::setShooterState(ShooterState state)
         default:
             break;
     }
-    commandMapping->setMaxCommandsToSchedule(timesToReschedule);
+    commandMapping->setMaxTimesToSchedule(timesToReschedule);
 }
 }  // namespace aruwsrc::agitator

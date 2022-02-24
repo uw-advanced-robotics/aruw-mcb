@@ -27,7 +27,8 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::agitator {
+namespace aruwsrc::agitator
+{
 class MultiShotHandler
 {
 public:
@@ -51,6 +52,6 @@ private:
     ShooterState state = SINGLE;
 };
 
-}
+}  // namespace aruwsrc::agitator
 
 #endif  // MULTI_SHOT_HANDLER_HPP_
