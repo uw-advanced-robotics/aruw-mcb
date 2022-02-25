@@ -277,8 +277,6 @@ private:
      */
     float desiredAgitatorAngle = 0.0f;
 
-    float currAgitatorAngle = 0.0f;
-
     /**
      * You can calibrate the agitator, which will set the current agitator angle to zero radians.
      */
