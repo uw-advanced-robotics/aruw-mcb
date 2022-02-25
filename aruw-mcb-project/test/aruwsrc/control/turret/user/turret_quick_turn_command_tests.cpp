@@ -52,6 +52,7 @@ TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_
     tap::algorithms::ContiguousFloat turretYawValue(0, 0, 360);
     tap::algorithms::ContiguousFloat turret2YawValue(45, 0, 360);
 
+    EXPECT_CALL(turret, setPrevRanYawTurretController(nullptr));
     EXPECT_CALL(turret, getCurrentYawValue).WillRepeatedly(ReturnRef(turretYawValue));
     EXPECT_CALL(turret, setYawSetpoint(180));
     EXPECT_CALL(turret2, getCurrentYawValue).WillRepeatedly(ReturnRef(turret2YawValue));
