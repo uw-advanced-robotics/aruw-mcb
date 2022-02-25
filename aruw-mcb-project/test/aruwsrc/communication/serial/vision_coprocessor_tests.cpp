@@ -152,7 +152,7 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
     VisionCoprocessor serial(&drivers);
 
     static constexpr int HEADER_LEN = 7;
-    static constexpr int DATA_LEN = 28;
+    static constexpr int DATA_LEN = 24;  // 28;
     static constexpr int CRC16_LEN = 2;
     static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
 
@@ -177,7 +177,7 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
             convertFromLittleEndian(&pitch, msg.data + 12);
             convertFromLittleEndian(&yaw, msg.data + 16);
             convertFromLittleEndian(&turretImuTime, msg.data + 20);
-            convertFromLittleEndian(&chassisOdomTime, msg.data + 24);
+            // convertFromLittleEndian(&chassisOdomTime, msg.data + 24);
 
             EXPECT_EQ(0, cx);
             EXPECT_EQ(0, cy);

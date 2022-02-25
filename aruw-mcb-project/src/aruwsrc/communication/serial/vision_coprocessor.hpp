@@ -84,8 +84,8 @@ public:
         float turretPitch;  /// Pitch angle of turret relative to plane parallel to the ground.
         float turretYaw;    /// Clockwise turret rotation angle between 0 and 360.
         uint32_t turretTimestamp;  /// Timestamp in microseconds, when turret data was computed.
-        uint32_t
-            chassisTimestamp;  /// Timestamp in microseconds, when chassis odom data was computed
+        // uint32_t
+        //     chassisTimestamp;  /// Timestamp in microseconds, when chassis odom data was computed
     } modm_packed;
 
     VisionCoprocessor(aruwsrc::Drivers* drivers);
