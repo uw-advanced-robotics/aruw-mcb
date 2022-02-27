@@ -169,13 +169,9 @@ void MatrixHudIndicators::updateIndicatorState()
     matrixHudIndicatorDrawers[SHOOTER_STATE].setIndicatorState(
         getIndicatorState(static_cast<int>(shooterState)));
 
-    CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;
-    if (drivers->visionCoprocessor.isCvOnline())
-    {
-        cvStatus = drivers->visionCoprocessor.getLastAimData().hasTarget
-                       ? CVStatus::DETECTING_TARGET
-                       : CVStatus::VISION_COPROCESSOR_CONNECTED;
-    }
+    CVStatus cvStatus = drivers->visionCoprocessor.isCvOnline()
+                            ? CVStatus::VISION_COPROCESSOR_CONNECTED
+                            : CVStatus::VISION_COPROCESSOR_OFFLINE;
 
     matrixHudIndicatorDrawers[CV_STATUS].setIndicatorState(
         getIndicatorState(static_cast<int>(cvStatus)));

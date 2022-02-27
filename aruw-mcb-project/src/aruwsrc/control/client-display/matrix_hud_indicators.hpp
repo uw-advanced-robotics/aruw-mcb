@@ -143,7 +143,7 @@ private:
             {"CHAS", "BEYB\nFLLW\nMIMU"},
             {"SHOT", "REDY\nLOAD\nFOFF"},
             {"FIRE", "SNGL\nBRST\nFULL"},
-            {"CV  ", "DECT\nCONE\nOFFL"}};
+            {"CV  ", "CONE\nOFFL"}};
 
     /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
     static constexpr int NUM_CHASSIS_STATES = 4;
@@ -167,8 +167,6 @@ private:
      * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[CV_STATUS]. */
     enum class CVStatus
     {
-        /** A target is being detected by the vision system. */
-        DETECTING_TARGET,
         /** The vision coprocessor is connected, but no target is detected. */
         VISION_COPROCESSOR_CONNECTED,
         /** The vision coprocessor is offline. */
