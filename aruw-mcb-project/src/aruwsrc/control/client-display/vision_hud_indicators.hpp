@@ -57,9 +57,9 @@ public:
     void initialize() override final;
 
 private:
-    static constexpr uint16_t VISION_TARGET_FOUND_SQUARE_WIDTH = 50;
-    static constexpr uint16_t VISION_TARGET_FOUND_DISTANCE_FROM_CENTER = 50;
-    static constexpr uint16_t VISION_TARGET_FOUND_Y_LOCATION = 500;
+    static constexpr int VISION_TARGET_FOUND_SQUARE_WIDTH = 15;
+    static constexpr int VISION_TARGET_FOUND_X_DISTANCE_FROM_CENTER = 100;
+    static constexpr int VISION_TARGET_FOUND_Y_LOCATION = 425;
     static constexpr Tx::GraphicColor VISION_TARGET_FOUND_COLOR = Tx::GraphicColor::GREEN;
     static constexpr uint32_t VISION_TARGET_FOUND_MAX_REFRESH_RATE = 250;
 
@@ -73,6 +73,8 @@ private:
     bool currVisionTargetStatus = false;
 
     modm::ResumableResult<bool> updateVisionTargetStatus();
+
+    void initializeVisionHudIndicator(Tx::GraphicData *graphicData, int xBoxLocation);
 };
 }  // namespace aruwsrc::control::client_display
 

@@ -61,40 +61,41 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
             currVisionTargetStatus ? Tx::ADD_GRAPHIC : Tx::ADD_GRAPHIC_DELETE;
 
         drivers->refSerial.sendGraphic(&visionTargetFoundGraphics);
-    }
 
-    updateVisionTargetFoundTimeout.restart(VISION_TARGET_FOUND_MAX_REFRESH_RATE);
+        DELAY_REF_GRAPHIC(&visionTargetFoundGraphics);
+
+        updateVisionTargetFoundTimeout.restart(VISION_TARGET_FOUND_MAX_REFRESH_RATE);
+        prevVisionTargetStatus = currVisionTargetStatus;
+    }
 
     RF_END();
 }
 
 void VisionHudIndicators::initialize()
 {
-    static constexpr uint16_t CENTER_X_OFFSET =
+    prevVisionTargetStatus = false;
+
+    static constexpr int CENTER_X_OFFSET =
         SCREEN_WIDTH / 2 + ReticleIndicator::RETICLE_CENTER_X_OFFSET;
 
-    uint8_t hudIndicatorName[3] = {};
-    getUnusedGraphicName(hudIndicatorName);
-
-    RefSerial::configGraphicGenerics(
+    initializeVisionHudIndicator(
         &visionTargetFoundGraphics.graphicData[0],
-        hudIndicatorName,
-        Tx::ADD_GRAPHIC,
-        DEFAULT_GRAPHIC_LAYER,
-        VISION_TARGET_FOUND_COLOR);
+        CENTER_X_OFFSET - VISION_TARGET_FOUND_X_DISTANCE_FROM_CENTER);
+    initializeVisionHudIndicator(
+        &visionTargetFoundGraphics.graphicData[1],
+        CENTER_X_OFFSET + VISION_TARGET_FOUND_X_DISTANCE_FROM_CENTER);
+}
 
-    RefSerial::configLine(
-        VISION_TARGET_FOUND_SQUARE_WIDTH,
-        CENTER_X_OFFSET - VISION_TARGET_FOUND_SQUARE_WIDTH,
-        CENTER_X_OFFSET - VISION_TARGET_FOUND_SQUARE_WIDTH,
-        VISION_TARGET_FOUND_Y_LOCATION - VISION_TARGET_FOUND_SQUARE_WIDTH / 2,
-        VISION_TARGET_FOUND_Y_LOCATION + VISION_TARGET_FOUND_SQUARE_WIDTH / 2,
-        &visionTargetFoundGraphics.graphicData[0]);
+void VisionHudIndicators::initializeVisionHudIndicator(
+    Tx::GraphicData *graphicData,
+    int xBoxLocation)
+{
+    uint8_t hudIndicatorName[3] = {};
 
     getUnusedGraphicName(hudIndicatorName);
 
     RefSerial::configGraphicGenerics(
-        &visionTargetFoundGraphics.graphicData[1],
+        graphicData,
         hudIndicatorName,
         Tx::ADD_GRAPHIC,
         DEFAULT_GRAPHIC_LAYER,
@@ -102,10 +103,11 @@ void VisionHudIndicators::initialize()
 
     RefSerial::configLine(
         VISION_TARGET_FOUND_SQUARE_WIDTH,
-        CENTER_X_OFFSET + VISION_TARGET_FOUND_SQUARE_WIDTH,
-        CENTER_X_OFFSET + VISION_TARGET_FOUND_SQUARE_WIDTH,
+        xBoxLocation,
         VISION_TARGET_FOUND_Y_LOCATION - VISION_TARGET_FOUND_SQUARE_WIDTH / 2,
+        xBoxLocation,
         VISION_TARGET_FOUND_Y_LOCATION + VISION_TARGET_FOUND_SQUARE_WIDTH / 2,
-        &visionTargetFoundGraphics.graphicData[1]);
+        graphicData);
 }
+
 }  // namespace aruwsrc::control::client_display
