@@ -23,6 +23,7 @@
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
+using tap::arch::clock::getTimeMicroseconds;
 
 namespace aruwsrc
 {
@@ -53,6 +54,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage, &lastAimData);
             return;
         }
+        case CV_MESSAGE_TYPE_TIME_SYNC_REQ:
+        {
+            decodeAndSendTimeSyncMessage(completeMessage);
+            return;
+        }
         default:
             return;
     }
@@ -68,6 +74,23 @@ bool VisionCoprocessor::decodeToTurretAimData(
     }
     memcpy(aimData, &message.data, sizeof(*aimData));
     return true;
+}
+
+void VisionCoprocessor::decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message)
+{
+    if (message.header.dataLength != 1)
+    {
+        return;
+    }
+
+    DJISerial::SerialMessage<sizeof(uint32_t)> timeSyncResponseMessage;
+    timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
+    *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = getTimeMicroseconds();
+    timeSyncResponseMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
+        sizeof(timeSyncResponseMessage));
 }
 
 void VisionCoprocessor::sendMessage()
@@ -123,7 +146,7 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisZ = 0.0f;
     odometryData->turretPitch = turretMCBCanComm->getPitch();
     odometryData->turretYaw = turretMCBCanComm->getYaw();
-    odometryData->timestamp = tap::arch::clock::getTimeMicroseconds();
+    odometryData->turretTimestamp = turretMCBCanComm->getIMUDataTimestamp();
 
     odometryMessage.setCRC16();
 
