@@ -131,12 +131,10 @@ void VisionCoprocessor::sendOdometryData()
     DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
 
     modm::Location2D<float> location = modm::Location2D<float>();
-    uint32_t chassisOdomTime = 0;
 
     if (odometryInterface != nullptr)
     {
         location = odometryInterface->getCurrentLocation2D();
-        // chassisOdomTime = odometryInterface->getPrevOdomComputeTime();
     }
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
@@ -149,7 +147,6 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->turretPitch = turretMCBCanComm->getPitch();
     odometryData->turretYaw = turretMCBCanComm->getYaw();
     odometryData->turretTimestamp = turretMCBCanComm->getIMUDataTimestamp();
-    // odometryData->chassisTimestamp = chassisOdomTime;
 
     odometryMessage.setCRC16();
 

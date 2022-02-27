@@ -83,11 +83,6 @@ public:
         return odometryTracker.getCurrentLocation2D();
     }
 
-    inline uint32_t getPrevOdomComputeTime() const override final
-    {
-        return odometryTracker.getPrevOdomComputeTime();
-    }
-
 private:
     tap::algorithms::odometry::Odometry2DTracker odometryTracker;
     OttoChassisWorldYawObserver orientationObserver;

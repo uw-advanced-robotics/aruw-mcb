@@ -60,8 +60,6 @@ void Odometry2DTracker::update()
         }
 
         prevChassisAbsoluteDisplacement = chassisAbsoluteDisplacement;
-
-        prevOdomComputeTime = tap::arch::clock::getTimeMicroseconds();
     }
 }
 

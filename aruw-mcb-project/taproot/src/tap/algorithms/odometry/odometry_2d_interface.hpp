@@ -43,11 +43,6 @@ public:
      * @return the current location (x and y coordinate) and orientation (in radians)
      */
     virtual modm::Location2D<float> getCurrentLocation2D() const = 0;
-
-    /**
-     * @return The time in microseconds at which odometry was last computed.
-     */
-    virtual uint32_t getPrevOdomComputeTime() const = 0;
 };
 
 }  // namespace tap::algorithms::odometry

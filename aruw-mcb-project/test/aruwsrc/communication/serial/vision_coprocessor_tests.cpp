@@ -169,7 +169,7 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
             EXPECT_EQ(1, msg.messageType);
 
             float cx, cy, cz, pitch, yaw;
-            uint32_t turretImuTime, chassisOdomTime;
+            uint32_t turretImuTime;
 
             convertFromLittleEndian(&cx, msg.data);
             convertFromLittleEndian(&cy, msg.data + 4);
@@ -177,7 +177,6 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
             convertFromLittleEndian(&pitch, msg.data + 12);
             convertFromLittleEndian(&yaw, msg.data + 16);
             convertFromLittleEndian(&turretImuTime, msg.data + 20);
-            // convertFromLittleEndian(&chassisOdomTime, msg.data + 24);
 
             EXPECT_EQ(0, cx);
             EXPECT_EQ(0, cy);
@@ -185,7 +184,6 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
             EXPECT_EQ(0, pitch);
             EXPECT_EQ(0, yaw);
             EXPECT_EQ(2000, turretImuTime);
-            EXPECT_EQ(0, chassisOdomTime);
 
             return length;
         });
