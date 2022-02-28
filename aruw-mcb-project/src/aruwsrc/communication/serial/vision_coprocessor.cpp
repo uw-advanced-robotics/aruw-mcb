@@ -78,11 +78,6 @@ bool VisionCoprocessor::decodeToTurretAimData(
 
 void VisionCoprocessor::decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message)
 {
-    if (message.header.dataLength != 1)
-    {
-        return;
-    }
-
     DJISerial::SerialMessage<sizeof(uint32_t)> timeSyncResponseMessage;
     timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
     *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = getTimeMicroseconds();
