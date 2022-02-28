@@ -46,7 +46,7 @@
 #include "client-display/client_display_subsystem.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "launcher/friction_wheel_subsystem.hpp"
+#include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
@@ -81,7 +81,11 @@ namespace hero_control
 /* define subsystems --------------------------------------------------------*/
 ChassisSubsystem chassis(drivers());
 
-FrictionWheelSubsystem frictionWheels(drivers());
+RefereeFeedbackFrictionWheelSubsystem frictionWheels(
+    drivers(),
+    tap::motor::MOTOR2,
+    tap::motor::MOTOR1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
