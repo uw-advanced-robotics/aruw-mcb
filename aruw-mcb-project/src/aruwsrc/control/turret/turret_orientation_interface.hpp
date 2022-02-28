@@ -38,6 +38,12 @@ class TurretOrientationInterface
      * turret counterclockwise when looking at the turret from the right side.
      */
     virtual float getWorldPitch() const = 0;
+
+    /**
+     * @return timestamp of when the turret subsystem returns the angle
+     * measurements
+     */
+    virtual uint32_t getLastMeasurementTimeMicros() const = 0;
 };  // class TurretOrientation
 
 }  // namespace aruwsrc::control::turret
