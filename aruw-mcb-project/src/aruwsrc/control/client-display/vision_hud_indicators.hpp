@@ -57,10 +57,17 @@ public:
     void initialize() override final;
 
 private:
+    /** width/height (in pixels) of the square "vision has target" indicators to the left/right of
+     * the hud center. */
     static constexpr int VISION_TARGET_FOUND_SQUARE_WIDTH = 15;
+    /** The x location (in pixels) from the center of the reticle where the vision target found
+     * squares are located. */
     static constexpr int VISION_TARGET_FOUND_X_DISTANCE_FROM_CENTER = 100;
+    /** The y location (in pixels) where the vision target found squares are located. */
     static constexpr int VISION_TARGET_FOUND_Y_LOCATION = 425;
+    /** The color of the vision target found squares. */
     static constexpr Tx::GraphicColor VISION_TARGET_FOUND_COLOR = Tx::GraphicColor::GREEN;
+    /** The maximum refresh rate of the vision target found squares. */
     static constexpr uint32_t VISION_TARGET_FOUND_MAX_REFRESH_RATE = 250;
 
     aruwsrc::Drivers *drivers;
@@ -74,6 +81,10 @@ private:
 
     modm::ResumableResult<bool> updateVisionTargetStatus();
 
+    /**
+     * Initialize some vision hud indicator (a little square) with some x pixel location
+     * (xBoxLocation), relative to the leftmost side of the screen.
+     */
     void initializeVisionHudIndicator(Tx::GraphicData *graphicData, int xBoxLocation);
 };
 }  // namespace aruwsrc::control::client_display
