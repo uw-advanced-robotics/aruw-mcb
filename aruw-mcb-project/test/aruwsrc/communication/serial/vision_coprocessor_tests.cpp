@@ -152,7 +152,7 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
     VisionCoprocessor serial(&drivers);
 
     static constexpr int HEADER_LEN = 7;
-    static constexpr int DATA_LEN = 24;  // 28;
+    static constexpr int DATA_LEN = 24;
     static constexpr int CRC16_LEN = 2;
     static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
 
