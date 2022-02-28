@@ -107,7 +107,7 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
             drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
         });
 
-    modm::can::Message limitSwitchMsg(0x1fb, 1, {1}, false);
+    modm::can::Message limitSwitchMsg(0x1fc, 1, {1}, false);
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
         .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
             *message = limitSwitchMsg;
@@ -133,30 +133,19 @@ TEST(TurretMCBCanComm, receive_turret_data)
             drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
         });
 
-    modm::can::Message yawMessage(0x1fd, 8, 0, false);
-    modm::can::Message pitchMessage(0x1fc, 8, 0, false);
-    modm::can::Message* messageToSend = &yawMessage;
-
-    tap::arch::convertToLittleEndian<int16_t>(0x1234, yawMessage.data);
-    tap::arch::convertToLittleEndian<int16_t>(0x4567, yawMessage.data + 2);
-    tap::arch::convertToLittleEndian<uint8_t>(0x12, yawMessage.data + 4);
-    tap::arch::convertToLittleEndian<uint16_t>(0x1234, yawMessage.data + 5);
-
-    tap::arch::convertToLittleEndian<int16_t>(0x4321, pitchMessage.data);
-    tap::arch::convertToLittleEndian<int16_t>(0x7654, pitchMessage.data + 2);
-    tap::arch::convertToLittleEndian<uint8_t>(0x12, pitchMessage.data + 4);
-    tap::arch::convertToLittleEndian<uint16_t>(0x5678, pitchMessage.data + 5);
-
+    modm::can::Message turretDataMsg(0x1fd, 8, 0, false);
+    tap::arch::convertToLittleEndian(0x1234, turretDataMsg.data);
+    tap::arch::convertToLittleEndian(0x4567, turretDataMsg.data + 2);
+    tap::arch::convertToLittleEndian(0x4321, turretDataMsg.data + 4);
+    tap::arch::convertToLittleEndian(0x8765, turretDataMsg.data + 6);
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
         .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
-            *message = *messageToSend;
+            *message = turretDataMsg;
             return true;
         });
 
     dut.init();
 
-    drivers.canRxHandler.CanRxHandler::pollCanData();
-    messageToSend = &pitchMessage;
     drivers.canRxHandler.CanRxHandler::pollCanData();
 
     EXPECT_NEAR((360.0f / UINT16_MAX) * static_cast<int16_t>(0x1234), dut.getYaw(), 1E-5);
@@ -166,44 +155,13 @@ TEST(TurretMCBCanComm, receive_turret_data)
         1E-5);
     EXPECT_NEAR((360.0f / UINT16_MAX) * static_cast<int16_t>(0x4321), dut.getPitch(), 1E-5);
     EXPECT_NEAR(
-        static_cast<int16_t>(0x7654) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S,
+        static_cast<int16_t>(0x8765) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S,
         dut.getPitchVelocity(),
         1E-5);
-    EXPECT_EQ(0X12345678, dut.getIMUDataTimestamp());
 
     EXPECT_TRUE(dut.isConnected());
 
     clock.time = 10'000;
 
     EXPECT_FALSE(dut.isConnected());
-}
-
-TEST(TurretMCBCanComm, sendTimeSyncData)
-{
-    ClockStub clock;
-    clock.time = 10'000;
-
-    Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
-
-    ON_CALL(drivers.canRxHandler, attachReceiveHandler)
-        .WillByDefault([&](tap::can::CanRxListener* const listener) {
-            drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
-        });
-
-    modm::can::Message syncReqMessage(0x1f9, 0, 0, false);
-
-    ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
-        .WillByDefault([syncReqMessage](tap::can::CanBus, modm::can::Message* message) {
-            *message = syncReqMessage;
-            return true;
-        });
-
-    modm::can::Message syncMessage(0x1fa, 4, 0, false);
-    tap::arch::convertToLittleEndian(getTimeMicroseconds(), syncMessage.data);
-    EXPECT_CALL(drivers.can, sendMessage(_, Eq(syncMessage)));
-
-    dut.init();
-
-    drivers.canRxHandler.CanRxHandler::pollCanData();
 }

@@ -75,12 +75,11 @@ static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 120.0f;
-static constexpr float AUTOROTATION_PID_KD = 30.0f;
+static constexpr float AUTOROTATION_PID_KP = 210.0f;
+static constexpr float AUTOROTATION_PID_KD = 4500.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
-static constexpr float AUTOROTATION_PID_TK = 5.0f;
 
 // mechanical chassis constants
 /**

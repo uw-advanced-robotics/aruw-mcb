@@ -78,12 +78,12 @@ public:
      */
     struct OdometryData
     {
-        float chassisX;     /// x position of the chassis.
-        float chassisY;     /// y position of the chassis.
-        float chassisZ;     /// z position of the chassis.
-        float turretPitch;  /// Pitch angle of turret relative to plane parallel to the ground.
-        float turretYaw;    /// Clockwise turret rotation angle between 0 and 360.
-        uint32_t turretTimestamp;  /// Timestamp in microseconds, when turret data was computed.
+        float chassisX;      /// x position of the chassis.
+        float chassisY;      /// y position of the chassis.
+        float chassisZ;      /// z position of the chassis.
+        float turretPitch;   /// Pitch angle of turret relative to plane parallel to the ground.
+        float turretYaw;     /// Clockwise turret rotation angle between 0 and 360.
+        uint32_t timestamp;  /// Timestamp in microseconds.
     } modm_packed;
 
     VisionCoprocessor(aruwsrc::Drivers* drivers);
@@ -133,13 +133,11 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 10,
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_TIME_SYNC_REQ = 3,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -147,9 +145,6 @@ private:
 
     /** Time in ms between sending the robot ID message. */
     static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
-
-    /** Time in ms between sending the time sync message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData;
@@ -164,8 +159,6 @@ private:
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
-    tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
-
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information, and updates the `lastAimData`.
@@ -176,8 +169,6 @@ private:
      *      otherwise.
      */
     static bool decodeToTurretAimData(const ReceivedSerialMessage& message, TurretAimData* aimData);
-
-    void decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message);
 
 #ifdef ENV_UNIT_TESTS
 public:

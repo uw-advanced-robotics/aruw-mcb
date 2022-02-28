@@ -48,7 +48,7 @@ ChassisSubsystem::ChassisSubsystem(
           modm::Pid<float>(VELOCITY_PID_CONFIG),
           modm::Pid<float>(VELOCITY_PID_CONFIG),
           modm::Pid<float>(VELOCITY_PID_CONFIG)},
-      chassisRotationErrorKalman(1.0f, AUTOROTATION_PID_TK),
+      chassisRotationErrorKalman(1.0f, 5.0f),
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),

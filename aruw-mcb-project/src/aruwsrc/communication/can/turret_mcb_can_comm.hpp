@@ -47,8 +47,6 @@ namespace aruwsrc::can
 class TurretMCBCanComm
 {
 public:
-    using ImuDataReceivedCallbackFunc = void (*)();
-
     enum class TxCommandMsgBitmask : uint8_t
     {
         OPEN_HOPPER = modm::Bit0,
@@ -62,27 +60,20 @@ public:
 
     mockable void init();
 
-    mockable inline void attachImuDataReceivedCallback(ImuDataReceivedCallbackFunc func)
-    {
-        imuDataReceivedCallbackFunc = func;
-    }
-
     /** @return turret pitch angle in deg */
-    mockable inline float getPitch() const { return lastCompleteImuData.pitch; }
+    mockable inline float getPitch() const { return pitch; }
     /** @return turret pitch angular velocity in deg/sec */
     mockable inline float getPitchVelocity() const
     {
-        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-               tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return static_cast<float>(rawPitchVelocity) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
 
     /** @return turret yaw angle in degrees */
-    mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
+    mockable inline float getYaw() const { return yaw; }
     /** @return turret yaw angular velocity in deg/sec */
     mockable inline float getYawVelocity() const
     {
-        return static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-               tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return static_cast<float>(rawYawVelocity) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
 
     mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
@@ -109,33 +100,21 @@ public:
 
     mockable void sendData();
 
-    mockable inline uint32_t getIMUDataTimestamp() const
-    {
-        return lastCompleteImuData.turretDataTimestamp;
-    }
-
 private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
 
-    enum CanIDs
-    {
-        SYNC_RX_CAN_ID = 0x1f9,
-        SYNC_TX_CAN_ID = 0x1fa,
-        TURRET_STATUS_RX_CAN_ID = 0x1fb,
-        PITCH_RX_CAN_ID = 0x1fc,
-        YAW_RX_CAN_ID = 0x1fd,
-        TURRET_MCB_TX_CAN_ID = 0x1fe,
-    };
-
-    static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+    static constexpr uint32_t ANGLE_GYRO_RX_CAN_ID = 0x1fd;
+    static constexpr uint32_t TURRET_MCB_TX_CAN_ID = 0x1fe;
+    static constexpr uint32_t TURRET_STATUS_RX_CAN_ID = 0x1fc;
+    static constexpr tap::can::CanBus IMU_MSG_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 
-    class TurretMcbRxHandler : public tap::can::CanRxListener
+    class ImuRxHandler : public tap::can::CanRxListener
     {
     public:
-        TurretMcbRxHandler(
+        ImuRxHandler(
             aruwsrc::Drivers* drivers,
             uint32_t id,
             tap::can::CanBus cB,
@@ -148,36 +127,33 @@ private:
         CanCommListenerFunc funcToCall;
     };
 
-    struct AngleMessageData
+    class TurretStatusRxHandler : public tap::can::CanRxListener
     {
-        int16_t angleFixedPoint;
-        int16_t angleAngularVelocityRaw;
-        uint8_t seq;
-        uint16_t timestamp;
-    } modm_packed;
+    public:
+        TurretStatusRxHandler(
+            aruwsrc::Drivers* drivers,
+            uint32_t id,
+            tap::can::CanBus cB,
+            TurretMCBCanComm* msgHandler,
+            CanCommListenerFunc funcToCall);
+        void processMessage(const modm::can::Message& message) override;
 
-    struct ImuData
-    {
-        float yaw;
-        int16_t rawYawVelocity;
-        float pitch;
-        int16_t rawPitchVelocity;
-        uint32_t turretDataTimestamp;
-        uint8_t seq;
+    private:
+        TurretMCBCanComm* msgHandler;
+        CanCommListenerFunc funcToCall;
     };
 
     aruwsrc::Drivers* drivers;
 
-    ImuData currProcessingImuData;
-    ImuData lastCompleteImuData;
+    float yaw;
+    int16_t rawYawVelocity;
 
-    TurretMcbRxHandler yawAngleGyroMessageHandler;
+    float pitch;
+    int16_t rawPitchVelocity;
 
-    TurretMcbRxHandler pitchAngleGyroMessageHandler;
+    ImuRxHandler angleGyroMessageHandler;
 
-    TurretMcbRxHandler turretStatusRxHandler;
-
-    TurretMcbRxHandler timeSynchronizationRxHandler;
+    ImuRxHandler turretStatusRxHandler;
 
     tap::arch::MilliTimeout imuConnectedTimeout;
 
@@ -189,15 +165,9 @@ private:
 
     bool limitSwitchDepressed;
 
-    ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
-
-    void handleYawAngleGyroMessage(const modm::can::Message& message);
-
-    void handlePitchAngleGyroMessage(const modm::can::Message& message);
+    void handleAngleGyroMessage(const modm::can::Message& message);
 
     void handleTurretMessage(const modm::can::Message& message);
-
-    void handleTimeSynchronizationRequest(const modm::can::Message& message);
 };
 }  // namespace aruwsrc::can
 
