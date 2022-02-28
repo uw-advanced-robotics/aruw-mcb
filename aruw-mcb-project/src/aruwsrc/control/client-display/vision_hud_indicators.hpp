@@ -44,7 +44,7 @@ class VisionHudIndicators : public HudIndicator, protected modm::Resumable<3>
 {
 public:
     /**
-     * Construct a BooleanHudIndicators object.
+     * Construct a VisionHudIndicators object.
      *
      * @param[in] drivers Global drivers instance.
      */
