@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -38,8 +38,10 @@ namespace aruwsrc::control::turret
  * TODO: write a more detailed specification for this subsystem.
  */
 class HeroTurretSubsystem : public aruwsrc::control::turret::TurretSubsystem,
-                               public aruwsrc::control::turret::TurretOrientationInterface
+                            public aruwsrc::control::turret::TurretOrientationInterface
 {
+    float getWorldYaw() const override;
+    float getWorldPitch() const override;
 };  // class HeroTurretSubsystem
 
 }  // namespace aruwsrc::control::turret

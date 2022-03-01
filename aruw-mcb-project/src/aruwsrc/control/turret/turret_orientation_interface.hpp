@@ -17,6 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdint.h>
+
 namespace aruwsrc::control::turret
 {
 /**
@@ -28,6 +30,7 @@ namespace aruwsrc::control::turret
  */
 class TurretOrientationInterface
 {
+public:
     /**
      * @return An angle between [0, 360] that is the world-relative angle of the
      * turret counterclockwise when looking at the turret from above.

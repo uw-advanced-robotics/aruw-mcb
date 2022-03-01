@@ -21,21 +21,14 @@
 
 namespace aruwsrc::control::turret
 {
+/**
+ *  TODO: implement this
+ */
+float SoldierTurretSubsystem::getWorldYaw() const { return 0; }
 
 /**
  *  TODO: implement this
  */
-float TurretOrientationInterface::getWorldYaw() const
-{   
-    return 0;
-}
-
-/**
- *  TODO: implement this
- */
-float TurretOrientationInterface::getWorldPitch() const
-{
-    return 0;
-}
+float SoldierTurretSubsystem::getWorldPitch() const { return 0; }
 
 }  // namespace aruwsrc::control::turret
