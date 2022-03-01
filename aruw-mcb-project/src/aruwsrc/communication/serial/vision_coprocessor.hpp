@@ -24,14 +24,16 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
+#include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+
 namespace aruwsrc
 {
 class Drivers;
 }
 
-namespace aruwsrc::can
+namespace aruwsrc::control::turret
 {
-class TurretMCBCanComm;
+class TurretOrientationInterface;
 }
 
 namespace aruwsrc
@@ -117,6 +119,15 @@ public:
         this->odometryInterface = odometryInterface;
     }
 
+    /**
+     * Specify the turret orientation for auto-aim to reference based on the target robot.
+     */
+    inline void attachTurretOrientationInterface(
+        aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface)
+    {
+        this->turretOrientationInterface = turretOrientationInterface;
+    }
+
 private:
     enum TxMessageTypes
     {
@@ -138,9 +149,9 @@ private:
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 
-    const aruwsrc::can::TurretMCBCanComm* turretMCBCanComm;
-
     tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
+
+    aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface;
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim

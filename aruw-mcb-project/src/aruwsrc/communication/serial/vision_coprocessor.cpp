@@ -30,8 +30,8 @@ namespace serial
 VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_PORT),
       lastAimData(),
-      turretMCBCanComm(&drivers->turretMCBCanComm),
-      odometryInterface(nullptr)
+      odometryInterface(nullptr),
+      turretOrientationInterface(nullptr)
 {
 }
 
@@ -98,8 +98,16 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisX = location.getX();
     odometryData->chassisY = location.getY();
     odometryData->chassisZ = 0.0f;
-    odometryData->turretPitch = turretMCBCanComm->getPitch();
-    odometryData->turretYaw = turretMCBCanComm->getYaw();
+    if (turretOrientationInterface != nullptr)
+    {
+        odometryData->turretPitch = turretOrientationInterface->getWorldPitch();
+        odometryData->turretYaw = turretOrientationInterface->getWorldYaw();
+    }
+    else
+    {
+        odometryData->turretPitch = 0.0;
+        odometryData->turretYaw = 0.0;
+    }
     odometryData->timestamp = tap::arch::clock::getTimeMicroseconds();
 
     odometryMessage.CRC16 = tap::algorithms::calculateCRC16(
