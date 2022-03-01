@@ -17,13 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef SENTINEL_TURRET_SUBSYSTEM_HPP_
+#define SENTINEL_TURRET_SUBSYSTEM_HPP_
+
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret::algorithms
 {
@@ -37,11 +35,14 @@ namespace aruwsrc::control::turret
  * Turret subsystem for the Sentinel.
  * TODO: write a more detailed specification for this subsystem.
  */
-class SentinelTurretSubsystem : public aruwsrc::control::turret::TurretSubsystem,
-                                public aruwsrc::control::turret::TurretOrientationInterface
+class SentinelTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
+                                      public aruwsrc::control::turret::TurretOrientationInterface
 {
     float getWorldYaw() const override;
     float getWorldPitch() const override;
+    uint32_t getLastMeasurementTimeMicros() const override;
 };  // class SentinelTurretSubsystem
 
 }  // namespace aruwsrc::control::turret
+
+#endif  // SENTINEL_TURRET_SUBSYSTEM_HPP_

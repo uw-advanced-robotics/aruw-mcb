@@ -17,13 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef SOLDIER_TURRET_SUBSYSTEM_HPP_
+#define SOLDIER_TURRET_SUBSYSTEM_HPP_
+
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret::algorithms
 {
@@ -37,11 +35,14 @@ namespace aruwsrc::control::turret
  * Turret subsystem for the Soldier.
  * TODO: write a more detailed specification for this subsystem.
  */
-class SoldierTurretSubsystem : public aruwsrc::control::turret::TurretSubsystem,
-                               public aruwsrc::control::turret::TurretOrientationInterface
+class SoldierTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
+                                     public aruwsrc::control::turret::TurretOrientationInterface
 {
     float getWorldYaw() const override;
     float getWorldPitch() const override;
+    uint32_t getLastMeasurementTimeMicros() const override;
 };  // class SoldierTurretSubsystem
 
 }  // namespace aruwsrc::control::turret
+
+#endif  // SOLDIER_TURRET_SUBSYSTEM_HPP_

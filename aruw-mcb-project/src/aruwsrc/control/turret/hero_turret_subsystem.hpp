@@ -17,13 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef HERO_TURRET_SUBSYSTEM_HPP_
+#define HERO_TURRET_SUBSYSTEM_HPP_
+
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret::algorithms
 {
@@ -37,11 +35,14 @@ namespace aruwsrc::control::turret
  * Turret subsystem for the Hero.
  * TODO: write a more detailed specification for this subsystem.
  */
-class HeroTurretSubsystem : public aruwsrc::control::turret::TurretSubsystem,
-                            public aruwsrc::control::turret::TurretOrientationInterface
+class HeroTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
+                                  public aruwsrc::control::turret::TurretOrientationInterface
 {
     float getWorldYaw() const override;
     float getWorldPitch() const override;
+    uint32_t getLastMeasurementTimeMicros() const override;
 };  // class HeroTurretSubsystem
 
 }  // namespace aruwsrc::control::turret
+
+#endif  // HERO_TURRET_SUBSYSTEM_HPP_

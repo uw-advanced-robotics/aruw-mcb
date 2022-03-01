@@ -35,18 +35,18 @@ public:
      * @return An angle between [0, 360] that is the world-relative angle of the
      * turret counterclockwise when looking at the turret from above.
      */
-    virtual float getWorldYaw() const = 0;
+    virtual inline float getWorldYaw() const = 0;
     /**
      * @return An angle between [0, 360] that is the world-relative angle of the
      * turret counterclockwise when looking at the turret from the right side.
      */
-    virtual float getWorldPitch() const = 0;
+    virtual inline float getWorldPitch() const = 0;
 
     /**
      * @return timestamp of when the turret subsystem returns the angle
      * measurements
      */
-    virtual uint32_t getLastMeasurementTimeMicros() const = 0;
+    virtual inline uint32_t getLastMeasurementTimeMicros() const = 0;
 };  // class TurretOrientation
 
 }  // namespace aruwsrc::control::turret

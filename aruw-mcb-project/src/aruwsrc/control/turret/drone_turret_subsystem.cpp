@@ -24,11 +24,16 @@ namespace aruwsrc::control::turret
 /**
  *  TODO: implement this
  */
-float DroneTurretSubsystem::getWorldYaw() const { return 0; }
+float DroneTurretSubsystem::getWorldYaw() const { return 0.0f; }
 
 /**
  *  TODO: implement this
  */
-float DroneTurretSubsystem::getWorldPitch() const { return 0; }
+float DroneTurretSubsystem::getWorldPitch() const { return 0.0f; }
+
+/**
+ *  TODO: implement this
+ */
+uint32_t DroneTurretSubsystem::getLastMeasurementTimeMicros() const { return 0; }
 
 }  // namespace aruwsrc::control::turret

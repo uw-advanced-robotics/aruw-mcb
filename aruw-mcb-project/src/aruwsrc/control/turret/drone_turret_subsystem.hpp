@@ -17,13 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef DRONE_TURRET_SUBSYSTEM_HPP_
+#define DRONE_TURRET_SUBSYSTEM_HPP_
+
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret::algorithms
 {
@@ -34,14 +32,17 @@ class TurretYawControllerInterface;
 namespace aruwsrc::control::turret
 {
 /**
- * Turret subsystem for the Drone.
+ * Turret subsystem for the Soldier.
  * TODO: write a more detailed specification for this subsystem.
  */
-class DroneTurretSubsystem : public aruwsrc::control::turret::TurretSubsystem,
-                             public aruwsrc::control::turret::TurretOrientationInterface
+class DroneTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
+                                   public aruwsrc::control::turret::TurretOrientationInterface
 {
     float getWorldYaw() const override;
     float getWorldPitch() const override;
-};  // class DroneTurretSubsystem
+    uint32_t getLastMeasurementTimeMicros() const override;
+};  // class SoldierTurretSubsystem
 
 }  // namespace aruwsrc::control::turret
+
+#endif  // DRONE_TURRET_SUBSYSTEM_HPP_
