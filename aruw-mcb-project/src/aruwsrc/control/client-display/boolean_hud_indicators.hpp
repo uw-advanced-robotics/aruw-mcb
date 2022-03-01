@@ -75,7 +75,7 @@ private:
     /** Starting y value where boolean hud indicator circles will start. The top most circle in the
      * list will be centered around this point. Subsequent circles will be below this y pixel value.
      */
-    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_START_Y = 775;
+    static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_START_Y = 760;
     /** Distance between the center of the the boolean indicators, in the y direction. */
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS = 50;
     /** The line width of the indicator circles. Should be approximately twice
@@ -110,8 +110,6 @@ private:
         SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
-        /** Indicates that the vision system is online and a target has been acquired. */
-        CV_AIM_DATA_VALID,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -130,10 +128,6 @@ private:
                 Tx::GraphicColor::GREEN),        // Green when not calibrating
             BooleanHUDIndicatorTuple(
                 "AGI ",
-                Tx::GraphicColor::GREEN,
-                Tx::GraphicColor::PURPLISH_RED),
-            BooleanHUDIndicatorTuple(
-                "CV ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };

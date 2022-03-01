@@ -195,9 +195,9 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     0,
     true,
     M_PI / 20.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    200,
+    0.4f,
+    0.2f,
+    140,
     2,
     true,
     10);
@@ -209,9 +209,9 @@ MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     0,
     true,
     M_PI / 20.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    200,
+    0.4f,
+    0.2f,
+    140,
     2,
     true,
     10);
@@ -222,10 +222,10 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     50,
     0,
     true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    200,
+    M_PI / 20.0f,
+    0.4f,
+    0.2f,
+    140,
     2,
     false,
     10);
@@ -264,8 +264,7 @@ ClientDisplayCommand clientDisplayCommand(
     imuCalibrateCommand,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
-    &chassisDriveCommand);
+    &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings

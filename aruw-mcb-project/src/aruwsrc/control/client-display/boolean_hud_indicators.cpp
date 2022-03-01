@@ -67,13 +67,6 @@ BooleanHudIndicators::BooleanHudIndicators(
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY])>,
               0),
-          BooleanHUDIndicator(
-              drivers,
-              &booleanHudIndicatorGraphics[CV_AIM_DATA_VALID],
-              updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[CV_AIM_DATA_VALID])>,
-              0),
       }
 {
 }
@@ -106,11 +99,6 @@ modm::ResumableResult<bool> BooleanHudIndicators::sendInitialGraphics()
 modm::ResumableResult<bool> BooleanHudIndicators::update()
 {
     RF_BEGIN(1);
-
-    // update CV aim data state
-    booleanHudIndicatorDrawers[CV_AIM_DATA_VALID].setIndicatorState(
-        drivers->visionCoprocessor.isCvOnline() &&
-        drivers->visionCoprocessor.getLastAimData().hasTarget);
 
     // update agitator state
     booleanHudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(
