@@ -242,8 +242,7 @@ ClientDisplayCommand clientDisplayCommand(
     imuCalibrateCommand,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
-    &chassisDriveCommand);
+    &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
