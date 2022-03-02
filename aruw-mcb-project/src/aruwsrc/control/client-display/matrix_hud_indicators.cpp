@@ -57,8 +57,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::chassis::ChassisDriveCommand *chassisDriveCmd)
+    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
     : drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
@@ -66,24 +65,28 @@ MatrixHudIndicators::MatrixHudIndicators(
           chassisBeybladeCmd,
           chassisAutorotateCmd,
           chassisImuDriveCommand,
-          chassisDriveCmd,
       },
       matrixHudIndicatorDrawers{
           StateHUDIndicator<uint16_t>(
               drivers,
               &matrixHudIndicatorGraphics[CHASSIS_STATE],
               updateGraphicYLocation,
-              false),
+              0),
           StateHUDIndicator<uint16_t>(
               drivers,
               &matrixHudIndicatorGraphics[SHOOTER_STATE],
               updateGraphicYLocation,
-              false),
+              0),
           StateHUDIndicator<uint16_t>(
               drivers,
               &matrixHudIndicatorGraphics[FIRING_MODE],
               updateGraphicYLocation,
-              false),
+              0),
+          StateHUDIndicator<uint16_t>(
+              drivers,
+              &matrixHudIndicatorGraphics[CV_STATUS],
+              updateGraphicYLocation,
+              0),
       }
 {
 }
@@ -138,9 +141,7 @@ void MatrixHudIndicators::updateIndicatorState()
     if (currDriveCommandIndex != -1)
     {
         matrixHudIndicatorDrawers[CHASSIS_STATE].setIndicatorState(
-            MATRIX_HUD_INDICATOR_LABELS_START_Y -
-            CHARACTER_LINE_SPACING * currDriveCommandIndex * MATRIX_HUD_INDICATOR_CHAR_SIZE -
-            MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
+            getIndicatorYCoordinate(currDriveCommandIndex));
     }
 
     // update flywheel and hopper state
@@ -166,9 +167,14 @@ void MatrixHudIndicators::updateIndicatorState()
     }
 
     matrixHudIndicatorDrawers[SHOOTER_STATE].setIndicatorState(
-        MATRIX_HUD_INDICATOR_LABELS_START_Y -
-        CHARACTER_LINE_SPACING * static_cast<int>(shooterState) * MATRIX_HUD_INDICATOR_CHAR_SIZE -
-        MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1);
+        getIndicatorYCoordinate(static_cast<int>(shooterState)));
+
+    CVStatus cvStatus = drivers->visionCoprocessor.isCvOnline()
+                            ? CVStatus::VISION_COPROCESSOR_CONNECTED
+                            : CVStatus::VISION_COPROCESSOR_OFFLINE;
+
+    matrixHudIndicatorDrawers[CV_STATUS].setIndicatorState(
+        getIndicatorYCoordinate(static_cast<int>(cvStatus)));
 }
 
 void MatrixHudIndicators::initialize()
