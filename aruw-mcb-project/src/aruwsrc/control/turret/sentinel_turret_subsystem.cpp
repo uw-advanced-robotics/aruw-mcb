@@ -21,19 +21,13 @@
 
 namespace aruwsrc::control::turret
 {
-/**
- *  TODO: implement this
- */
-float SentinelTurretSubsystem::getWorldYaw() const { return 0.0f; }
+float SentinelTurretSubsystem::getWorldYaw() const { return getCurrentYawValue().getValue(); }
 
-/**
- *  TODO: implement this
- */
-float SentinelTurretSubsystem::getWorldPitch() const { return 0.0f; }
+float SentinelTurretSubsystem::getWorldPitch() const { return getCurrentPitchValue().getValue(); }
 
-/**
- *  TODO: implement this
- */
-uint32_t SentinelTurretSubsystem::getLastMeasurementTimeMicros() const { return 0; }
+uint32_t SentinelTurretSubsystem::getLastMeasurementTimeMicros() const
+{
+    return tap::arch::clock::getTimeMicroseconds();
+}
 
 }  // namespace aruwsrc::control::turret
