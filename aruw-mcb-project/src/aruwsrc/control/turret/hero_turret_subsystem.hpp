@@ -33,11 +33,11 @@ namespace aruwsrc::control::turret
 {
 /**
  * Turret subsystem for the Hero.
- * TODO: write a more detailed specification for this subsystem.
  */
 class HeroTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
                                   public aruwsrc::control::turret::TurretOrientationInterface
 {
+    using TurretSubsystem::TurretSubsystem;
     float getWorldYaw() const override;
     float getWorldPitch() const override;
     uint32_t getLastMeasurementTimeMicros() const override;
