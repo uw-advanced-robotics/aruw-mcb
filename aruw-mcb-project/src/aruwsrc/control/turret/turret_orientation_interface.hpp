@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef TURRET_ORIENTATION_INTERFACE_HPP_
+#define TURRET_ORIENTATION_INTERFACE_HPP_
+
 #include <stdint.h>
 
 namespace aruwsrc::control::turret
@@ -43,10 +46,12 @@ public:
     virtual inline float getWorldPitch() const = 0;
 
     /**
-     * @return timestamp of when the turret subsystem returns the angle
-     * measurements
+     * @return Timestamp of when the turret subsystem returns the angle
+     * measurements.
      */
     virtual inline uint32_t getLastMeasurementTimeMicros() const = 0;
 };  // class TurretOrientation
 
 }  // namespace aruwsrc::control::turret
+
+#endif  // TURRET_ORIENTATION_INTERFACE_HPP_
