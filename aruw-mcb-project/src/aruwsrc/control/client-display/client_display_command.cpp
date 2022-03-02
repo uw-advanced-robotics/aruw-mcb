@@ -41,8 +41,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const chassis::ChassisDriveCommand *chassisDriveCmd)
+    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
     : Command(),
       drivers(drivers),
       booleanHudIndicators(
@@ -58,10 +57,10 @@ ClientDisplayCommand::ClientDisplayCommand(
           frictionWheelSubsystem,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
-          chassisImuDriveCommand,
-          chassisDriveCmd),
+          chassisImuDriveCommand),
       reticleIndicator(drivers),
-      turretAnglesIndicator(drivers, turretSubsystem)
+      turretAnglesIndicator(drivers, turretSubsystem),
+      visionHudIndicators(drivers)
 {
     modm_assert(drivers != nullptr, "ClientDisplayCommand", "drivers nullptr");
     addSubsystemRequirement(clientDisplay);
@@ -76,6 +75,7 @@ void ClientDisplayCommand::initialize()
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     turretAnglesIndicator.initialize();
+    visionHudIndicators.initialize();
 }
 
 void ClientDisplayCommand::execute() { run(); }
@@ -91,6 +91,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(turretAnglesIndicator.sendInitialGraphics());
+    PT_CALL(visionHudIndicators.sendInitialGraphics());
 
     while (true)
     {
@@ -99,6 +100,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
         PT_CALL(turretAnglesIndicator.update());
+        PT_CALL(visionHudIndicators.update());
         PT_YIELD();
     }
     PT_END();

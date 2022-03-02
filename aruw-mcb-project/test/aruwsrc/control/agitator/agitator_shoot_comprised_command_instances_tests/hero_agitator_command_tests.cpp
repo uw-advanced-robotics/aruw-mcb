@@ -30,7 +30,7 @@ using namespace aruwsrc::mock;
 using namespace tap::communication::serial;
 using namespace testing;
 
-using tap::arch::clock::setTime;
+using tap::arch::clock::ClockStub;
 
 #define SETUP_TEST(heroAgitatorCommandConfig)                      \
     Drivers drivers;                                               \
@@ -211,7 +211,7 @@ TEST(HeroAgitatorCommand, isFinished_true_when_motors_disconnected)
 
 TEST(HeroAgitatorCommand, execute_ball_not_loaded_loading_happens)
 {
-    setTime(0);
+    ClockStub clock;
 
     SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
 
@@ -243,7 +243,7 @@ TEST(HeroAgitatorCommand, execute_ball_not_loaded_loading_happens)
         float prevKickerPosition = kickerPosition;
         float prevWaterwheelPosition = waterwheelPosition;
         EXPECT_FALSE(cmd.isFinished());
-        setTime(i + 1);
+        clock.time = i + 1;
         cmd.execute();
         // both positions should be strictly increaseing
         EXPECT_LE(prevKickerPosition, kickerPosition);
@@ -259,7 +259,7 @@ TEST(HeroAgitatorCommand, execute_ball_not_loaded_loading_happens)
 
 TEST(HeroAgitatorCommand, execute_ball_not_loaded_multiple_load_cycles_happen)
 {
-    setTime(0);
+    ClockStub clock;
 
     SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
 
@@ -292,7 +292,7 @@ TEST(HeroAgitatorCommand, execute_ball_not_loaded_multiple_load_cycles_happen)
         float prevKickerPosition = kickerPosition;
         float prevWaterwheelPosition = waterwheelPosition;
         EXPECT_FALSE(cmd.isFinished());
-        setTime(i + 1);
+        clock.time = i + 1;
         cmd.execute();
         // both positions should be increaseing or the same
         EXPECT_LE(prevKickerPosition, kickerPosition);
@@ -313,7 +313,7 @@ TEST(
     HeroAgitatorCommand,
     execute_ready_to_fire_refserial_offline_firing_happens_then_loading_stops_immediately_when_limit_switch_still_depressed)
 {
-    setTime(0);
+    ClockStub clock;
 
     SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
 
@@ -342,7 +342,7 @@ TEST(
     for (uint16_t i = 0; i < 2 * DEFAULT_HERO_AGITATOR_CMD_CONFIG.kickerShootRotateTime; i++)
     {
         float prevKickerPosition = kickerPosition;
-        setTime(i + 1);
+        clock.time = i + 1;
         cmd.execute();
         EXPECT_LE(prevKickerPosition, kickerPosition);
         EXPECT_NEAR(0.0f, waterwheelPosition, 1E-5);
@@ -357,7 +357,7 @@ TEST(
     HeroAgitatorCommand,
     execute_ready_to_fire_refserial_online_firing_stops_when_ref_serial_detected_shot)
 {
-    setTime(0);
+    ClockStub clock;
 
     SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
 
@@ -396,7 +396,7 @@ TEST(
     HeroAgitatorCommand,
     execute_ready_to_fire_refserial_online_loading_starts_after_firing_when_limit_switch_not_depressed)
 {
-    setTime(0);
+    ClockStub clock;
 
     SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
 
@@ -435,7 +435,7 @@ TEST(
         float prevKickerPosition = kickerPosition;
         float prevWaterwheelPosition = waterwheelPosition;
         EXPECT_FALSE(cmd.isFinished());
-        setTime(i + 1);
+        clock.time = i + 1;
         cmd.execute();
         // both positions should be increaseing or the same
         EXPECT_LE(prevKickerPosition, kickerPosition);

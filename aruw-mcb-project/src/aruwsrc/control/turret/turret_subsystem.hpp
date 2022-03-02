@@ -72,19 +72,27 @@ public:
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = 0.0f;
     static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_MIN_ANGLE = 65.0f;
-    static constexpr float PITCH_MAX_ANGLE = 117.0f;
 
 #ifdef TARGET_SOLDIER_2021
+    static constexpr float PITCH_MIN_ANGLE = 40.0f;
+    static constexpr float PITCH_MAX_ANGLE = 117.0f;
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 7500;
+
+    static constexpr float TURRET_CG_X = 0;
+    static constexpr float TURRET_CG_Z = 0;
+    static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 #else
+    static constexpr float PITCH_MIN_ANGLE = 65.0f;
+    static constexpr float PITCH_MAX_ANGLE = 117.0f;
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 1100;
-#endif
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
 
     static constexpr float TURRET_CG_X = 12;
     static constexpr float TURRET_CG_Z = 23;
     static constexpr float GRAVITY_COMPENSATION_SCALAR = 2000.0f;
+#endif
+
 #elif defined(TARGET_HERO)
     static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;
     static constexpr tap::motor::MotorId YAW_FRONT_MOTOR_ID = tap::motor::MOTOR5;

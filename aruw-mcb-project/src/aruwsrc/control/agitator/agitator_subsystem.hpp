@@ -77,8 +77,8 @@ public:
      *
      * This should be positive or else weird behavior can occur
      */
-    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
-    static constexpr uint32_t JAMMING_TIME = 250;
+    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20.0f;
+    static constexpr uint32_t JAMMING_TIME = 70;
 
     // The motor that controls the hopper lid is an agitator_subsystem instance, so
     // I'm adding its constants here as well.

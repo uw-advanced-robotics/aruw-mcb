@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -95,9 +95,9 @@ TEST(ChassisImuDriveCommand, execute__normal_rotation_translation_when_imu_not_c
         EXPECT_CALL(
             chassis,
             setDesiredOutput(
-                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[0],
-                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[1],
-                ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[2]));
+                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[0],
+                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[1],
+                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[2]));
     }
 
     for (auto triplet : desiredOutputValuesToTest)
@@ -168,7 +168,7 @@ TEST(ChassisImuDriveCommand, execute__imu_setpoint_target_setpoint_same_0_rotati
     chassisImuDriveCommand.execute();
 }
 
-TEST(ChassisImuDriveCommand, execute__target_gt_actual_negative_rotation_output)
+TEST(ChassisImuDriveCommand, execute__target_gt_actual_positive_rotation_output)
 {
     SETUP_TEST_OBJECTS_NO_TURRET();
 
@@ -184,12 +184,11 @@ TEST(ChassisImuDriveCommand, execute__target_gt_actual_negative_rotation_output)
 
     userR = 1.0f;  // user rotation positive, setpoint will be gt current imu yaw.
 
-    // since chassis rotation backward, expect desired output to be less than 0
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Lt(0)));
+    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Gt(0)));
     chassisImuDriveCommand.execute();
 }
 
-TEST(ChassisImuDriveCommand, execute__target_lt_actual_positive_rotation_output)
+TEST(ChassisImuDriveCommand, execute__target_lt_actual_negative_rotation_output)
 {
     SETUP_TEST_OBJECTS_NO_TURRET();
 
@@ -205,8 +204,7 @@ TEST(ChassisImuDriveCommand, execute__target_lt_actual_positive_rotation_output)
 
     userR = -1.0f;  // user rotation negative, setpoint will be gt current imu yaw.
 
-    // since chassis rotation backward, expect desired output to be less than 0
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Gt(0)));
+    EXPECT_CALL(chassis, setDesiredOutput(0, 0, Lt(0)));
     chassisImuDriveCommand.execute();
 }
 
@@ -282,9 +280,9 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     imuYaw = 10;
     userX = 1.0f;
     userY = 1.0f;
-    float xExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
-    float yExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
-    tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(10));
+    float xExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    float yExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    tap::algorithms::rotateVector(&xExpected, &yExpected, -modm::toRadian(10));
 
     EXPECT_CALL(
         chassis,
@@ -310,9 +308,9 @@ TEST(ChassisImuDriveCommand, execute__turret_relative_when_turret_not_nullptr)
 
     userX = 1.0f;
     userY = 0.0f;
-    float xExpected = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    float xExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
     float yExpected = 0.0f;
-    tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(-45.0f));
+    tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(45.0f));
 
     EXPECT_CALL(
         chassis,

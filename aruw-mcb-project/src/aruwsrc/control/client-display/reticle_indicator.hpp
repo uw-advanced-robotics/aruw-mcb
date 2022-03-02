@@ -43,6 +43,9 @@ namespace aruwsrc::control::client_display
 class ReticleIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
+    /** Number of pixels to offset the reticle from the horizontal center of the screen. */
+    static constexpr int RETICLE_CENTER_X_OFFSET = -5;
+
     /**
      * Construct a ReticleIndicator.
      *
@@ -59,8 +62,6 @@ public:
 private:
     /** Line thickness of the reticle, in pixels. */
     static constexpr uint16_t RETICLE_THICKNESS = 1;
-    /** Number of pixels to offset the reticle from the horizontal center of the screen. */
-    static constexpr int RETICLE_CENTER_X_OFFSET = -5;
 
     /** Tuple representing a possible horizontal reticle line. The first element is the pixel width
      * of the line, second is Y location of the line (in pixels), third is the color of the reticle
