@@ -18,6 +18,8 @@
  */
 #include "vision_coprocessor.hpp"
 
+#include "tap/errors/create_errors.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch;
@@ -102,13 +104,15 @@ void VisionCoprocessor::sendOdometryData()
     {
         odometryData->turretPitch = turretOrientationInterface->getWorldPitch();
         odometryData->turretYaw = turretOrientationInterface->getWorldYaw();
+        odometryData->timestamp = turretOrientationInterface->getLastMeasurementTimeMicros();
     }
     else
     {
-        odometryData->turretPitch = 0.0;
-        odometryData->turretYaw = 0.0;
+        odometryData->turretPitch = 0.0f;
+        odometryData->turretYaw = 0.0f;
+        odometryData->timestamp = 0;
+        RAISE_ERROR(drivers, "turret interface not attached");
     }
-    odometryData->timestamp = tap::arch::clock::getTimeMicroseconds();
 
     odometryMessage.CRC16 = tap::algorithms::calculateCRC16(
         reinterpret_cast<uint8_t*>(&odometryMessage),
