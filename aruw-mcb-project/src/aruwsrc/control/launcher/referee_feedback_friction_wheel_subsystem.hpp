@@ -26,7 +26,7 @@ public:
     void refresh() override;
 
 private:
-static constexpr float  PREDICTED_BULLET_SPEED_LOW_PASS_ALPHA = 0.1f;
+    static constexpr float PREDICTED_BULLET_SPEED_LOW_PASS_ALPHA = 0.1f;
 
     const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
 
