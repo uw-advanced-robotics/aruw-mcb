@@ -19,6 +19,8 @@
 
 #include "vision_coprocessor.hpp"
 
+#include "tap/errors/create_errors.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch;
@@ -31,8 +33,8 @@ namespace serial
 VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_PORT),
       lastAimData(),
-      turretMCBCanComm(&drivers->turretMCBCanComm),
-      odometryInterface(nullptr)
+      odometryInterface(nullptr),
+      turretOrientationInterface(nullptr)
 {
 }
 
@@ -121,9 +123,19 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisX = location.getX();
     odometryData->chassisY = location.getY();
     odometryData->chassisZ = 0.0f;
-    odometryData->turretPitch = turretMCBCanComm->getPitch();
-    odometryData->turretYaw = turretMCBCanComm->getYaw();
-    odometryData->timestamp = tap::arch::clock::getTimeMicroseconds();
+    if (turretOrientationInterface != nullptr)
+    {
+        odometryData->turretPitch = turretOrientationInterface->getWorldPitch();
+        odometryData->turretYaw = turretOrientationInterface->getWorldYaw();
+        odometryData->timestamp = turretOrientationInterface->getLastMeasurementTimeMicros();
+    }
+    else
+    {
+        odometryData->turretPitch = 0.0f;
+        odometryData->turretYaw = 0.0f;
+        odometryData->timestamp = 0;
+        RAISE_ERROR(drivers, "turret interface not attached");
+    }
 
     odometryMessage.setCRC16();
 
