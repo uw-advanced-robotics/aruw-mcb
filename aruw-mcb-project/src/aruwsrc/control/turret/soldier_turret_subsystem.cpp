@@ -19,21 +19,23 @@
 
 #include "soldier_turret_subsystem.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 namespace aruwsrc::control::turret
 {
-/**
- *  TODO: implement this
- */
-float SoldierTurretSubsystem::getWorldYaw() const { return 0.0f; }
+float SoldierTurretSubsystem::getWorldYaw() const
+{
+    return TurretSubsystem::drivers->turretMCBCanComm.getYaw();
+}
 
-/**
- *  TODO: implement this
- */
-float SoldierTurretSubsystem::getWorldPitch() const { return 0.0f; }
+float SoldierTurretSubsystem::getWorldPitch() const
+{
+    return TurretSubsystem::drivers->turretMCBCanComm.getPitch();
+}
 
-/**
- *  TODO: implement this
- */
-uint32_t SoldierTurretSubsystem::getLastMeasurementTimeMicros() const { return 0; }
+uint32_t SoldierTurretSubsystem::getLastMeasurementTimeMicros() const
+{
+    return tap::arch::clock::getTimeMicroseconds();
+}
 
 }  // namespace aruwsrc::control::turret
