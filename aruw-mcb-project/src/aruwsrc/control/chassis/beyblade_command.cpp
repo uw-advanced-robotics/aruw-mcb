@@ -43,9 +43,12 @@ BeybladeCommand::BeybladeCommand(
     const tap::control::turret::TurretSubsystemInterface* turret)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret)
+      turret(turret),
+      rotationalSpeedLinearInterpolator(
+          POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT,
+          MODM_ARRAY_SIZE(POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT))
 {
-    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
+    addSubsystemRequirement(chassis);
 }
 
 // Resets ramp
@@ -72,26 +75,26 @@ void BeybladeCommand::execute()
         // scaling due to rotation as this will be fairly constant and thus it isn't
         // worth scaling here.
         ChassisRelDrive::computeDesiredUserTranslation(drivers, chassis, 0, &x, &y);
-        x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
-        y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE;
+        x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
+        y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
         const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        const float TRANSLATION_LIMIT = TRANSLATION_LIMITING_FRACTION *
-                                        TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE *
-                                        MAX_WHEEL_SPEED;
+        const float TRANSLATION_LIMIT =
+            BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_FOR_ROTATION_SPEED_DECREASE *
+            BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * MAX_WHEEL_SPEED;
 
         rampTarget = rotationDirection * getRotationTarget();
         if (fabsf(x) > TRANSLATION_LIMIT || fabsf(y) > TRANSLATION_LIMIT)
         {
-            rampTarget *= RAMP_TARGET_TRANSLATIONAL_FRAC;
+            rampTarget *= BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING;
         }
 
         rotateSpeedRamp.setTarget(rampTarget);
-        // Update the r speed by 1/8 of target (linear for each update)
-        rotateSpeedRamp.update(rampTarget * RAMP_UPDATE_FRAC);
+        // Update the r speed by BEYBLADE_RAMP_UPDATE_RMP of target (linear for each update)
+        rotateSpeedRamp.update(BEYBLADE_RAMP_UPDATE_RMP);
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
@@ -113,27 +116,11 @@ bool BeybladeCommand::isFinished() const { return false; }
 float BeybladeCommand::getRotationTarget() const
 {
     const uint16_t powerConsumptionLimit =
-        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
-    if (!drivers->refSerial.getRefSerialReceivingData() || powerConsumptionLimit <= 45)
-    {
-        return ROTATION_TARGET_45W_CUTOFF;
-    }
-    else if (powerConsumptionLimit <= 60)
-    {
-        return ROTATION_TARGET_60W_CUTOFF;
-    }
-    else if (powerConsumptionLimit <= 80)
-    {
-        return ROTATION_TARGET_80W_CUTOFF;
-    }
-    else if (powerConsumptionLimit <= 100)
-    {
-        return ROTATION_TARGET_100W_CUTOFF;
-    }
-    else
-    {
-        return ROTATION_TARGET_MAX_CUTOFF;
-    }
+        drivers->refSerial.getRefSerialReceivingData()
+            ? drivers->refSerial.getRobotData().chassis.powerConsumptionLimit
+            : 0;
+
+    return rotationalSpeedLinearInterpolator.interpolate(powerConsumptionLimit);
 }
 }  // namespace chassis
 

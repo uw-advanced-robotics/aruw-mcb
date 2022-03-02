@@ -49,7 +49,10 @@ ChassisAutorotateCommand::ChassisAutorotateCommand(
     addSubsystemRequirement(chassis);
 }
 
-void ChassisAutorotateCommand::initialize() {}
+void ChassisAutorotateCommand::initialize()
+{
+    rotateSpeedRamp.setValue(chassis->getDesiredRotation());
+}
 
 void ChassisAutorotateCommand::updateAutorotateState(
     const tap::control::turret::TurretSubsystemInterface* turret)
@@ -82,8 +85,6 @@ void ChassisAutorotateCommand::execute()
 
         float turretAngleFromCenter = turret->getYawAngleFromCenter();
 
-        float chassisRotationDesiredWheelspeed = 0.0f;
-
         if (chassisAutorotating)
         {
             float angleFromCenterForChassisAutorotate =
@@ -91,14 +92,20 @@ void ChassisAutorotateCommand::execute()
                     ? ContiguousFloat(turretAngleFromCenter, -90.0f, 90.0f).getValue()
                     : turretAngleFromCenter;
 
-            // Apply autorotation
-            chassisRotationDesiredWheelspeed =
-                chassis->chassisSpeedRotationPID(angleFromCenterForChassisAutorotate);
+            // Apply autorotation to a ramp to limit acceleration
+            rotateSpeedRamp.setTarget(
+                chassis->chassisSpeedRotationPID(angleFromCenterForChassisAutorotate));
+            rotateSpeedRamp.update(MAX_AUTOROTATE_DESIRED_WHEEL_SPEED_RPM);
+        }
+        else
+        {
+            rotateSpeedRamp.setTarget(0);
+            rotateSpeedRamp.setValue(0);
         }
 
         // what we will multiply x and y speed by to take into account rotation
         float rTranslationalGain =
-            chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
+            chassis->calculateRotationTranslationalGain(rotateSpeedRamp.getValue());
 
         const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
@@ -124,7 +131,7 @@ void ChassisAutorotateCommand::execute()
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,
             chassisYDesiredWheelspeed,
-            chassisRotationDesiredWheelspeed);
+            rotateSpeedRamp.getValue());
     }
     else
     {

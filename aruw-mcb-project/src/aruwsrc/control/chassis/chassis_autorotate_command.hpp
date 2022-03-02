@@ -20,6 +20,7 @@
 #ifndef CHASSIS_AUTOROTATE_COMMAND_HPP_
 #define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
+#include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
 #include "tap/control/turret_subsystem_interface.hpp"
 
@@ -67,6 +68,8 @@ private:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
+    tap::algorithms::Ramp rotateSpeedRamp;
+
     /**
      * If the front and back of the chassis may be treated as the same entities.
      * This only matters if your turret can spin 360 degrees and will allow the
