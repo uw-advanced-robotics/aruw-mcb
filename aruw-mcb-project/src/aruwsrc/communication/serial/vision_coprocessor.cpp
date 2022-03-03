@@ -25,6 +25,7 @@
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
+using tap::arch::clock::getTimeMicroseconds;
 
 namespace aruwsrc
 {
@@ -55,6 +56,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage, &lastAimData);
             return;
         }
+        case CV_MESSAGE_TYPE_TIME_SYNC_REQ:
+        {
+            decodeAndSendTimeSyncMessage(completeMessage);
+            return;
+        }
         default:
             return;
     }
@@ -70,6 +76,18 @@ bool VisionCoprocessor::decodeToTurretAimData(
     }
     memcpy(aimData, &message.data, sizeof(*aimData));
     return true;
+}
+
+void VisionCoprocessor::decodeAndSendTimeSyncMessage(const ReceivedSerialMessage&)
+{
+    DJISerial::SerialMessage<sizeof(uint32_t)> timeSyncResponseMessage;
+    timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
+    *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = getTimeMicroseconds();
+    timeSyncResponseMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
+        sizeof(timeSyncResponseMessage));
 }
 
 void VisionCoprocessor::sendMessage()
@@ -127,13 +145,13 @@ void VisionCoprocessor::sendOdometryData()
     {
         odometryData->turretPitch = turretOrientationInterface->getWorldPitch();
         odometryData->turretYaw = turretOrientationInterface->getWorldYaw();
-        odometryData->timestamp = turretOrientationInterface->getLastMeasurementTimeMicros();
+        odometryData->turretTimestamp = turretOrientationInterface->getLastMeasurementTimeMicros();
     }
     else
     {
         odometryData->turretPitch = 0.0f;
         odometryData->turretYaw = 0.0f;
-        odometryData->timestamp = 0;
+        odometryData->turretTimestamp = 0;
         RAISE_ERROR(drivers, "turret interface not attached");
     }
 
