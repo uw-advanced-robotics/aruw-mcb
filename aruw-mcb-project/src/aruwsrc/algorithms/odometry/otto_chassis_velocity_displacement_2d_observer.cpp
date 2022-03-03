@@ -36,7 +36,7 @@ OttoChassisVelocityDisplacement2DObserver::OttoChassisVelocityDisplacement2DObse
 
 void OttoChassisVelocityDisplacement2DObserver::update()
 {
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t currTime = tap::arch::clock::getTimeMicroseconds();
     if (chassis->allMotorsOnline())
     {
         // Check whether this is first update
@@ -50,9 +50,9 @@ void OttoChassisVelocityDisplacement2DObserver::update()
             modm::Vector<float, 2> chassisVelocity(
                 chassisVelocityMatrix[0][0],
                 chassisVelocityMatrix[1][0]);
-            // m/s * ms * 1s / 1000ms
+            // m/s * us * 1s / 1'000'000 us
             modm::Vector<float, 2> displacementThisTick =
-                chassisVelocity * (static_cast<float>(currTime - prevTime) / 1'000.0f);
+                chassisVelocity * (static_cast<float>(currTime - prevTime) / 1'000'000.0f);
             absoluteDisplacement.move(displacementThisTick);
         }
         prevTime = currTime;

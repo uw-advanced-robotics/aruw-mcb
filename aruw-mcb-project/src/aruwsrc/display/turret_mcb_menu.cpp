@@ -43,11 +43,15 @@ void TurretMCBMenu::draw()
             << "Limit switch depressed: " << drivers->turretMCBCanComm.getLimitSwitchDepressed()
             << modm::endl;
     display.printf(
-        "Yaw: %.2f\nYaw Velocity: %.2f\nPitch: %.2f\nPitch Velocity: %.2f",
+        "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\nPitch (deg): %.2f\nPitch Velocity (deg/s): "
+        "%.2f\n",
         static_cast<double>(drivers->turretMCBCanComm.getYaw()),
         static_cast<double>(drivers->turretMCBCanComm.getYawVelocity()),
         static_cast<double>(drivers->turretMCBCanComm.getPitch()),
         static_cast<double>(drivers->turretMCBCanComm.getPitchVelocity()));
+    display << "IMU latency (us): "
+            << (tap::arch::clock::getTimeMicroseconds() -
+                drivers->turretMCBCanComm.getIMUDataTimestamp());
 }
 
 void TurretMCBMenu::update() {}

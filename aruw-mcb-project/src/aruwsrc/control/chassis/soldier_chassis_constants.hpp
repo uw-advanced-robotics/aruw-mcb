@@ -80,7 +80,7 @@ static constexpr float AUTOROTATION_PID_KD = 30.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
-static constexpr float AUTOROTATION_PID_TK = 5.0f;
+static constexpr float AUTOROTATION_PID_TK = 0.0f;
 
 /**
  * Radius of the wheels (m).

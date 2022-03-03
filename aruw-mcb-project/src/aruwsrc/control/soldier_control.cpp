@@ -50,8 +50,8 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "turret/soldier_turret_subsystem.hpp"
 #include "turret/turret_controller_constants.hpp"
-#include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
@@ -85,25 +85,26 @@ namespace soldier_control
 /* define subsystems --------------------------------------------------------*/
 tap::motor::DjiMotor pitchMotor(
     drivers(),
-    TurretSubsystem::PITCH_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    SoldierTurretSubsystem::PITCH_MOTOR_ID,
+    SoldierTurretSubsystem::CAN_BUS_MOTORS,
     false,
     "Pitch Turret");
 tap::motor::DjiMotor yawMotor(
     drivers(),
-    TurretSubsystem::YAW_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    SoldierTurretSubsystem::YAW_MOTOR_ID,
+    SoldierTurretSubsystem::CAN_BUS_MOTORS,
 #ifdef TARGET_SOLDIER_2021
     false,
 #else
     true,
 #endif
     "Yaw Turret");
-TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 ChassisSubsystem chassis(drivers());
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
+static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 AgitatorSubsystem agitator(
     drivers(),
@@ -349,7 +350,6 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -382,6 +382,8 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
 }
 
 /* register io mappings here ------------------------------------------------*/
