@@ -185,7 +185,7 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
             EXPECT_EQ(0, pitch);
             EXPECT_EQ(0, yaw);
             // no turret orientation interface -> returns 0 as time
-            EXPECT_EQ(0, time);
+            EXPECT_EQ(0, turretImuTime);
 
             return length;
         });
