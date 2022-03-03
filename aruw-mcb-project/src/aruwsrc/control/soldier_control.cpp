@@ -104,6 +104,7 @@ SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 ChassisSubsystem chassis(drivers());
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
+static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 AgitatorSubsystem agitator(
     drivers(),
@@ -349,7 +350,6 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -382,6 +382,7 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
 }
 

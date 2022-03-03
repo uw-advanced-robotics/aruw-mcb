@@ -35,7 +35,7 @@ float SoldierTurretSubsystem::getWorldPitch() const
 
 uint32_t SoldierTurretSubsystem::getLastMeasurementTimeMicros() const
 {
-    return tap::arch::clock::getTimeMicroseconds();
+    return TurretSubsystem::drivers->turretMCBCanComm.getIMUDataTimestamp();
 }
 
 }  // namespace aruwsrc::control::turret
