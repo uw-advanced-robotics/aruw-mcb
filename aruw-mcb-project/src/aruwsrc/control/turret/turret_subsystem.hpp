@@ -288,6 +288,9 @@ public:
         prevRanYawTurretController = controller;
     }
 
+protected:
+    Drivers* drivers;
+
 private:
     tap::algorithms::ContiguousFloat currPitchAngle;
     tap::algorithms::ContiguousFloat currYawAngle;

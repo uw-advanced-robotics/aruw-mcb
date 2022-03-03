@@ -26,14 +26,16 @@
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+#include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+
 namespace aruwsrc
 {
 class Drivers;
 }
 
-namespace aruwsrc::can
+namespace aruwsrc::control::turret
 {
-class TurretMCBCanComm;
+class TurretOrientationInterface;
 }
 
 namespace aruwsrc
@@ -119,6 +121,15 @@ public:
         this->odometryInterface = odometryInterface;
     }
 
+    /**
+     * Specify the turret orientation for auto-aim to reference based on the target robot.
+     */
+    inline void attachTurretOrientationInterface(
+        aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface)
+    {
+        this->turretOrientationInterface = turretOrientationInterface;
+    }
+
     mockable void sendShutdownMessage();
 
     mockable void sendRebootMessage();
@@ -158,9 +169,9 @@ private:
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 
-    const aruwsrc::can::TurretMCBCanComm* turretMCBCanComm;
-
     tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
+
+    aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 

@@ -156,7 +156,8 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
     static constexpr int CRC16_LEN = 2;
     static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
 
-    ON_CALL(drivers.turretMCBCanComm, getIMUDataTimestamp).WillByDefault(Return(2000));
+    // turret orientation interface not attached - will raise error
+    EXPECT_CALL(drivers.errorController, addToErrorList);
 
     EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
         .WillOnce([&](tap::communication::serial::Uart::UartPort,
@@ -183,7 +184,8 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
             EXPECT_EQ(0, cz);
             EXPECT_EQ(0, pitch);
             EXPECT_EQ(0, yaw);
-            EXPECT_EQ(2000, turretImuTime);
+            // no turret orientation interface -> returns 0 as time
+            EXPECT_EQ(0, time);
 
             return length;
         });
