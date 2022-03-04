@@ -54,7 +54,7 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
 
-    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_PORT =
+    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
     /**
