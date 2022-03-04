@@ -51,8 +51,6 @@ static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
-static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
-static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
 static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
     /** Kp */

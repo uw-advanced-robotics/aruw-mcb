@@ -47,7 +47,11 @@ public:
 
     /** Maximum alpha value for the x-key low-pass filter. Must be in range (0, 1] (0 is only
      * previous value, 1 is no filter). */
+#if defined(TARGET_HERO)
+    static constexpr float CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX = 0.02f;
+#else
     static constexpr float CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX = 0.05f;
+#endif
 
     /** Output magnitude in range [0, 1] above which the upward output ramp shallows (alpha becomes
      * dynamic) for the x-key low-pass filter. */
@@ -56,7 +60,11 @@ public:
 
     /** Maximum alpha value for the y-key low-pass filter. Must be in range (0, 1] (0 is only
      * previous value, 1 is no filter). */
+#if defined(TARGET_HERO)
+    static constexpr float CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX = 0.02f;
+#else
     static constexpr float CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX = 0.025f;
+#endif
 
     /** Output magnitude in range [0, 1] above which the upward output ramp shallows (alpha becomes
      * dynamic) for the y-key low-pass filter. */

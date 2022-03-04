@@ -31,9 +31,9 @@ namespace aruwsrc::chassis
  * Max wheel speed, measured in RPM of the encoder (rather than shaft)
  * we use this for wheel speed since this is how dji's motors measures motor speed.
  */
-static constexpr int MIN_WHEEL_SPEED_SINGLE_MOTOR = 4000;
-static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 8000;
-static constexpr int MIN_CHASSIS_POWER = 40;
+static constexpr int MIN_WHEEL_SPEED_SINGLE_MOTOR = 2'500;
+static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 6'500;
+static constexpr int MIN_CHASSIS_POWER = 55;
 static constexpr int MAX_CHASSIS_POWER = 120;
 
 /**
@@ -51,18 +51,16 @@ static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
-static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
-static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
 static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
     /** Kp */
-    20.0f,
+    22.0f,
     /** Ki */
-    0.0f,
+    0.2f,
     /** Kd */
     0.0f,
     /** maxErrorSum */
-    0.0f,
+    5'000.0f,
     /**
      * This max output is measured in the c620 robomaster translated current.
      * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
@@ -77,10 +75,10 @@ static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
  * controller are listed below.
  */
 static constexpr float AUTOROTATION_PID_KP = 120.0f;
-static constexpr float AUTOROTATION_PID_KD = 3.0f;
-static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
+static constexpr float AUTOROTATION_PID_KD = 5.0f;
+static constexpr float AUTOROTATION_PID_MAX_P = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;
 
 // mechanical chassis constants
 /**
@@ -109,7 +107,7 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
  * Maps particular max power thresholds to beyblade rotation thresholds.
  */
 static constexpr modm::Pair<float, float> BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[] =
-    {{55, 3000}, {60, 3200}, {65, 3500}, {70, 5500}, {90, 6000}, {120, 7500}};
+    {{55, 3000}, {60, 3200}, {65, 3500}, {70, 5500}, {90, 6000}, {120, 6'500}};
 
 /**
  * Fraction betweeh [0, 1], what we multiply user translational input by when beyblading.
@@ -125,7 +123,7 @@ static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_FOR_ROTATION_SPEED
 /**
  * The fraction to cut rotation speed while moving and beyblading
  */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING = 0.5f;
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING = 0.75f;
 /**
  * Rotational speed to update the beyblade ramp target by each iteration until final rotation
  * setpoint reached.
