@@ -105,12 +105,10 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
-static constexpr float AUTOROTATE_DESIRED_WHEEL_SPEED_DELTA_RPM = 500.0f;
-
 /**
  * Maps particular max power thresholds to beyblade rotation thresholds.
  */
-static constexpr modm::Pair<float, float> POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[] =
+static constexpr modm::Pair<float, float> BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[] =
     {{45, 3000}, {60, 3500}, {80, 5500}, {100, 6000}, {120, 7500}};
 
 /**

@@ -49,10 +49,7 @@ ChassisAutorotateCommand::ChassisAutorotateCommand(
     addSubsystemRequirement(chassis);
 }
 
-void ChassisAutorotateCommand::initialize()
-{
-    rotateSpeedRamp.setValue(chassis->getDesiredRotation());
-}
+void ChassisAutorotateCommand::initialize() {}
 
 void ChassisAutorotateCommand::updateAutorotateState(
     const tap::control::turret::TurretSubsystemInterface* turret)
@@ -85,6 +82,8 @@ void ChassisAutorotateCommand::execute()
 
         float turretAngleFromCenter = turret->getYawAngleFromCenter();
 
+        float desiredRotation = 0;
+
         if (chassisAutorotating)
         {
             float angleFromCenterForChassisAutorotate =
@@ -93,20 +92,13 @@ void ChassisAutorotateCommand::execute()
                     : turretAngleFromCenter;
 
             // Apply autorotation to a ramp to limit acceleration
-            rotateSpeedRamp.setTarget(chassis->chassisSpeedRotationPID(
+            desiredRotation = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
-                turret->getYawVelocity() - drivers->mpu6500.getGz()));
-            rotateSpeedRamp.update(AUTOROTATE_DESIRED_WHEEL_SPEED_DELTA_RPM);
-        }
-        else
-        {
-            rotateSpeedRamp.setTarget(0);
-            rotateSpeedRamp.setValue(0);
+                turret->getYawVelocity() - drivers->mpu6500.getGz());
         }
 
         // what we will multiply x and y speed by to take into account rotation
-        float rTranslationalGain =
-            chassis->calculateRotationTranslationalGain(rotateSpeedRamp.getValue());
+        float rTranslationalGain = chassis->calculateRotationTranslationalGain(desiredRotation);
 
         const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
@@ -132,7 +124,7 @@ void ChassisAutorotateCommand::execute()
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,
             chassisYDesiredWheelspeed,
-            rotateSpeedRamp.getValue());
+            desiredRotation);
     }
     else
     {

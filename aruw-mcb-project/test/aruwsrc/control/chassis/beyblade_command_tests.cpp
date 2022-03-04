@@ -51,7 +51,7 @@ using namespace tap::communication::serial;
 
 static constexpr float BASE_DESIRED_OUT = MIN_WHEEL_SPEED_SINGLE_MOTOR / 2;
 
-void basicFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, float baseInput)
+void basicFrameworkTest(float baseX, float baseY, float maxR, float yawAngle, float baseInput)
 {
     aruwsrc::Drivers d;
     NiceMock<TurretSubsystemMock> t(&d);
@@ -61,12 +61,19 @@ void basicFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, f
 
     bc.initialize();
 
-    DEFINE_EXPECTATIONS_FOR_EXECUTE(t, d, cs, baseInput, baseX, baseY, baseR);
+    DEFINE_EXPECTATIONS_FOR_EXECUTE(
+        t,
+        d,
+        cs,
+        baseInput,
+        baseX,
+        baseY,
+        std::min(maxR, BEYBLADE_RAMP_UPDATE_RMP));
 
     bc.execute();
 }
 
-void basicBigFrameworkTest(float baseX, float baseY, float baseR, float yawAngle, float baseInput)
+void basicBigFrameworkTest(float baseX, float baseY, float maxR, float yawAngle, float baseInput)
 {
     aruwsrc::Drivers d;
     NiceMock<TurretSubsystemMock> t(&d);
@@ -76,27 +83,51 @@ void basicBigFrameworkTest(float baseX, float baseY, float baseR, float yawAngle
 
     bc.initialize();
 
-    for (int i = 1; i <= 8; i++)
+    for (int i = 1; i <= 10; i++)
     {
-        DEFINE_EXPECTATIONS_FOR_EXECUTE(t, d, cs, baseInput, baseX, baseY, i * baseR);
+        DEFINE_EXPECTATIONS_FOR_EXECUTE(
+            t,
+            d,
+            cs,
+            baseInput,
+            baseX,
+            baseY,
+            std::min(maxR, i * BEYBLADE_RAMP_UPDATE_RMP));
         bc.execute();
     }
 }
 
 TEST(BeybladeCommand, execute_all_zeroes_no_ramp)
 {
-    basicFrameworkTest(0, 0, BEYBLADE_RAMP_UPDATE_RMP, 0, 0);
+    basicFrameworkTest(0, 0, BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[0].second, 0, 0);
 }
 
 TEST(BeybladeCommand, execute_fullxy_no_ramp)
 {
-    basicFrameworkTest(BASE_DESIRED_OUT, BASE_DESIRED_OUT, BEYBLADE_RAMP_UPDATE_RMP, 0, 1);
+    basicFrameworkTest(
+        BASE_DESIRED_OUT,
+        BASE_DESIRED_OUT,
+        BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[0].second,
+        0,
+        1);
 }
 
 TEST(BeybladeCommand, execute_fullxy_fullr_180_ramp)
 {
-    basicFrameworkTest(-BASE_DESIRED_OUT, -BASE_DESIRED_OUT, BEYBLADE_RAMP_UPDATE_RMP, 180, 1);
-    basicBigFrameworkTest(-BASE_DESIRED_OUT, -BASE_DESIRED_OUT, BEYBLADE_RAMP_UPDATE_RMP, 180, 1);
+    basicFrameworkTest(
+        -BASE_DESIRED_OUT,
+        -BASE_DESIRED_OUT,
+        BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[0].second *
+            BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING,
+        180,
+        1);
+    basicBigFrameworkTest(
+        -BASE_DESIRED_OUT,
+        -BASE_DESIRED_OUT,
+        BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[0].second *
+            BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING,
+        180,
+        1);
 }
 
 TEST(BeybladeCommand, execute_halfxy_halfr_270_ramp)
@@ -104,8 +135,15 @@ TEST(BeybladeCommand, execute_halfxy_halfr_270_ramp)
     basicFrameworkTest(
         BASE_DESIRED_OUT / 2,
         -BASE_DESIRED_OUT / 2,
-        BEYBLADE_RAMP_UPDATE_RMP,
+        BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[0].second *
+            BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING,
         270,
         0.5);
-    basicBigFrameworkTest(-BASE_DESIRED_OUT, -BASE_DESIRED_OUT, BEYBLADE_RAMP_UPDATE_RMP, 180, 1);
+    basicBigFrameworkTest(
+        -BASE_DESIRED_OUT,
+        -BASE_DESIRED_OUT,
+        BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[0].second *
+            BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING,
+        180,
+        1);
 }

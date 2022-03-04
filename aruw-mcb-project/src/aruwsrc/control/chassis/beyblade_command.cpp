@@ -45,8 +45,8 @@ BeybladeCommand::BeybladeCommand(
       chassis(chassis),
       turret(turret),
       rotationalSpeedLinearInterpolator(
-          POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT,
-          MODM_ARRAY_SIZE(POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT))
+          BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT,
+          MODM_ARRAY_SIZE(BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT))
 {
     addSubsystemRequirement(chassis);
 }

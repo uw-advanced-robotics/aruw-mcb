@@ -69,7 +69,7 @@ TEST(ChassisAutorotateCommand, end_sets_chassis_out_0)
 {
     DEFAULT_SETUP_TEST(false);
 
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0)).Times(2);
+    EXPECT_CALL(chassis, setZeroRPM).Times(2);
 
     cac.end(true);
     cac.end(false);
@@ -99,8 +99,8 @@ TEST(ChassisAutorotateCommand, execute_turret_offline_chassis_rel_driving_no_aut
 #define SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)      \
     ON_CALL(turret, isOnline).WillByDefault(Return(true));                                     \
     ON_CALL(turret, yawLimited).WillByDefault(Return(isYawLimited));                           \
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle) {                 \
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle);                       \
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {        \
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);                    \
     });                                                                                        \
     ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(turretAngleFromCenter));       \
     ContiguousFloat turretAngleActualContiguous(turretAngleActual, 0, 360);                    \

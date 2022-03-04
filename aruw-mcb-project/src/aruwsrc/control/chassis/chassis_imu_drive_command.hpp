@@ -94,6 +94,7 @@ private:
     const tap::control::turret::TurretSubsystemInterface* turret;
     tap::algorithms::ContiguousFloat rotationSetpoint;
     bool imuSetpointInitialized = false;
+    uint32_t prevTime = 0;
 };  // class ChassisImuDriveCommand
 
 }  // namespace aruwsrc::chassis

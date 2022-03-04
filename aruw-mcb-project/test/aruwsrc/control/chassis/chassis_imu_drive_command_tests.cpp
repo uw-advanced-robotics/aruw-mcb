@@ -52,7 +52,7 @@ TEST(ChassisImuDriveCommand, end__sets_des_out_0)
 {
     SETUP_TEST_OBJECTS_NO_TURRET();
 
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0)).Times(2);
+    EXPECT_CALL(chassis, setZeroRPM).Times(2);
 
     chassisImuDriveCommand.end(true);
     chassisImuDriveCommand.end(false);
@@ -137,8 +137,8 @@ static void setupDefaultChassisBehavior(mock::ChassisSubsystemMock &chassis)
     ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
         return chassis.ChassisSubsystem::calculateRotationTranslationalGain(r);
     });
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r) {
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r);
+    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float d) {
+        return chassis.ChassisSubsystem::chassisSpeedRotationPID(r, d);
     });
 }
 

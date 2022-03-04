@@ -54,6 +54,8 @@ void ChassisImuDriveCommand::initialize()
         const float yaw = drivers->mpu6500.getYaw();
         rotationSetpoint.setValue(yaw);
     }
+
+    prevTime = tap::arch::clock::getTimeMicroseconds();
 }
 
 void ChassisImuDriveCommand::execute()
@@ -76,6 +78,8 @@ void ChassisImuDriveCommand::execute()
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
             // angle. This way if the chassis is picked up and rotated, it won't try and spin around
             // to get to the same position that it was at previously.
+            float chassisRInput = drivers->controlOperatorInterface.getChassisRInput() *
+                                  USER_INPUT_TO_ANGLE_DELTA_SCALAR;
             if (abs(angleFromDesiredRotation) > MAX_ROTATION_ERR)
             {
                 // doesn't have to be in the if statement but this is more computationally intensive
@@ -86,15 +90,18 @@ void ChassisImuDriveCommand::execute()
                         rotationSetpoint,
                         yaw - MAX_ROTATION_ERR,
                         yaw + MAX_ROTATION_ERR) +
-                    drivers->controlOperatorInterface.getChassisRInput() *
-                        USER_INPUT_TO_ANGLE_DELTA_SCALAR);
+                    chassisRInput);
             }
             else
             {
-                rotationSetpoint.shiftValue(
-                    drivers->controlOperatorInterface.getChassisRInput() *
-                    USER_INPUT_TO_ANGLE_DELTA_SCALAR);
+                rotationSetpoint.shiftValue(chassisRInput);
             }
+
+            uint32_t currTime = tap::arch::clock::getTimeMicroseconds();
+            uint32_t dt = currTime - prevTime;
+            prevTime = currTime;
+
+            float targetVelocity = chassisRInput * 1'000'000.0f / dt;
 
             // compute error again now that user input has been updated
             angleFromDesiredRotation = -rotationSetpoint.difference(yaw);
@@ -102,7 +109,7 @@ void ChassisImuDriveCommand::execute()
             // run PID controller to attempt to attain the setpoint
             chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
                 angleFromDesiredRotation,
-                turret->getYawVelocity() - drivers->mpu6500.getGz());
+                targetVelocity - drivers->mpu6500.getGz());
         }
     }
     else
