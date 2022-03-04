@@ -101,7 +101,7 @@ void ChassisImuDriveCommand::execute()
             uint32_t dt = currTime - prevTime;
             prevTime = currTime;
 
-            float targetVelocity = chassisRInput * 1'000'000.0f / dt;
+            float targetVelocity = (dt == 0) ? 0.0f : chassisRInput * 1'000'000.0f / dt;
 
             // compute error again now that user input has been updated
             angleFromDesiredRotation = -rotationSetpoint.difference(yaw);

@@ -221,7 +221,21 @@ void ChassisSubsystem::updateMotorRpmPid(
 float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
     // P
-    float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
+    // Find kp from AUTOROTATION_PID_ERR_TO_KP_MAP
+    float kp = AUTOROTATION_PID_ERR_TO_KP_MAP[0][1];
+    for (size_t i = 1; i < MODM_ARRAY_SIZE(AUTOROTATION_PID_ERR_TO_KP_MAP); i++)
+    {
+        if (currentAngleError > AUTOROTATION_PID_ERR_TO_KP_MAP[i][0])
+        {
+            kp = AUTOROTATION_PID_ERR_TO_KP_MAP[i][1];
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    float currRotationPidP = currentAngleError * kp;
     currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
 
     // D
