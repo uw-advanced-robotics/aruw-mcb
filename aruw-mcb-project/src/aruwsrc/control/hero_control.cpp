@@ -118,15 +118,15 @@ AgitatorSubsystem waterwheelAgitator(
 tap::motor::DjiMotor pitchMotor(
     drivers(),
     TurretSubsystem::PITCH_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    TurretSubsystem::CAN_BUS_PITCH_MOTOR,
     false,
     "Pitch Turret");
 tap::motor::DoubleDjiMotor yawMotor(
     drivers(),
     TurretSubsystem::YAW_BACK_MOTOR_ID,
     TurretSubsystem::YAW_FRONT_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    TurretSubsystem::CAN_BUS_YAW_MOTORS,
+    TurretSubsystem::CAN_BUS_YAW_MOTORS,
     true,
     true,
     "Yaw Back Turret",
@@ -317,7 +317,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    chassis.initialize();
+    // chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
     clientDisplay.initialize();
