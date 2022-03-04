@@ -24,9 +24,11 @@
 
 using aruwsrc::Drivers;
 using namespace testing;
+using namespace tap::arch::clock;
 using namespace aruwsrc::control::launcher;
 
 #define SETUP_TEST() \
+    ClockStub clock; \
     Drivers drivers; \
     FrictionWheelSubsystem frictionWheels(&drivers);
 
@@ -53,13 +55,13 @@ TEST(FrictionWheelSubsystem, refresh__0_output_when_desired_speed_0_shaft_rpm_0)
     ON_CALL(frictionWheels.rightWheel, getShaftRPM()).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(0)).Times(2);
 
-    tap::arch::clock::setTime(0);
+    clock.time = 0;
     frictionWheels.initialize();
 
-    tap::arch::clock::setTime(1);
+    clock.time = 1;
     frictionWheels.refresh();
 
-    tap::arch::clock::setTime(2);
+    clock.time = 2;
     frictionWheels.setDesiredLaunchSpeed(0);
     frictionWheels.refresh();
 }
@@ -75,10 +77,10 @@ TEST(FrictionWheelSubsystem, refresh__positive_output_when_desired_speed_10_shaf
 
     frictionWheels.setDesiredLaunchSpeed(10);
 
-    tap::arch::clock::setTime(0);
+    clock.time = 0;
     frictionWheels.initialize();
 
-    tap::arch::clock::setTime(1);
+    clock.time = 1;
     frictionWheels.refresh();
 }
 
@@ -91,10 +93,10 @@ TEST(FrictionWheelSubsystem, refresh__negative_output_when_desired_speed_0_shaft
     ON_CALL(frictionWheels.rightWheel, getShaftRPM()).WillByDefault(Return(1000));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(Lt(0)));
 
-    tap::arch::clock::setTime(0);
+    clock.time = 0;
     frictionWheels.initialize();
 
-    tap::arch::clock::setTime(1);
+    clock.time = 1;
     frictionWheels.refresh();
 }
 
@@ -108,13 +110,13 @@ TEST(FrictionWheelSubsystem, refresh_updates_desiredRpmRamp_when_target_not_reac
                 .first);
 
     uint32_t time = 0;
-    tap::arch::clock::setTime(time);
+    clock.time = time;
     float prevRpmTarget = frictionWheels.desiredRpmRamp.getValue();
 
     for (int i = 0; i < 1000; i++)
     {
         time += 10;
-        tap::arch::clock::setTime(time);
+        clock.time = time;
         frictionWheels.refresh();
 
         if (!frictionWheels.desiredRpmRamp.isTargetReached())

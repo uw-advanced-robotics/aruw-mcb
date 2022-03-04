@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -24,8 +24,8 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
@@ -62,9 +62,8 @@ bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawA
     const Vector2f robotPosition = odometryInterface.getCurrentLocation2D().getPosition();
 
     Matrix<float, 3, 1> chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    // chassis subsystem uses Z-down (Y-right) convention, while vision contract expects X-up (Y-left)
-    chassisVelocity[1][0] *= -1;
-    const float worldRelativeOrientation = drivers.turretMCBCanComm.getYaw() - this->turretSubsystem.getYawAngleFromCenter();
+    const float worldRelativeOrientation =
+        drivers.turretMCBCanComm.getYaw() - this->turretSubsystem.getYawAngleFromCenter();
     chassisSubsystem.getVelocityWorldRelative(chassisVelocity, toRadian(worldRelativeOrientation));
 
     // target state, frame whose axis is at the turret center and z is up

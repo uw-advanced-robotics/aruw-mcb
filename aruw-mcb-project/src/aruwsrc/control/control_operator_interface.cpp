@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -85,13 +85,13 @@ float ControlOperatorInterface::getChassisYInput()
     if (prevUpdateCounterY != updateCounter)
     {
         chassisYInput.update(
-            drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
+            -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
             currTime);
         prevUpdateCounterY = updateCounter;
     }
 
     int16_t input =
-        drivers->remote.keyPressed(Remote::Key::D) - drivers->remote.keyPressed(Remote::Key::A);
+        drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
 
     // Note for readability: chassisYKeyInputFiltered = The most recently filtered value computed by
     // this function (which we update below)
@@ -133,7 +133,7 @@ float ControlOperatorInterface::getChassisRInput()
     if (prevUpdateCounterR != updateCounter)
     {
         chassisRInput.update(
-            drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
+            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
             currTime);
         prevUpdateCounterR = updateCounter;
     }

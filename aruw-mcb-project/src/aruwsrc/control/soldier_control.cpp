@@ -51,8 +51,8 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "turret/soldier_turret_subsystem.hpp"
 #include "turret/turret_controller_constants.hpp"
-#include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
@@ -69,7 +69,7 @@ using namespace aruwsrc::control::turret;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::algorithms::odometry;
 using namespace tap::control;
-using namespace aruwsrc::display;
+using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 
@@ -86,25 +86,26 @@ namespace soldier_control
 /* define subsystems --------------------------------------------------------*/
 tap::motor::DjiMotor pitchMotor(
     drivers(),
-    TurretSubsystem::PITCH_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    SoldierTurretSubsystem::PITCH_MOTOR_ID,
+    SoldierTurretSubsystem::CAN_BUS_MOTORS,
     false,
     "Pitch Turret");
 tap::motor::DjiMotor yawMotor(
     drivers(),
-    TurretSubsystem::YAW_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    SoldierTurretSubsystem::YAW_MOTOR_ID,
+    SoldierTurretSubsystem::CAN_BUS_MOTORS,
 #ifdef TARGET_SOLDIER_2021
     false,
 #else
     true,
 #endif
     "Yaw Turret");
-TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 ChassisSubsystem chassis(drivers());
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
+static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 AgitatorSubsystem agitator(
     drivers(),
@@ -191,9 +192,9 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     0,
     true,
     M_PI / 20.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    200,
+    0.4f,
+    0.2f,
+    140,
     2,
     true,
     10);
@@ -205,9 +206,9 @@ MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     0,
     true,
     M_PI / 20.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    200,
+    0.4f,
+    0.2f,
+    140,
     2,
     true,
     10);
@@ -218,10 +219,10 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     50,
     0,
     true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    200,
+    M_PI / 20.0f,
+    0.4f,
+    0.2f,
+    140,
     2,
     false,
     10);
@@ -240,14 +241,6 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-ClientDisplayCommand clientDisplayCommand(
-    drivers(),
-    &clientDisplay,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
-    &chassisDriveCommand);
-
 OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
@@ -257,6 +250,18 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     true);
+
+ClientDisplayCommand clientDisplayCommand(
+    drivers(),
+    &clientDisplay,
+    &hopperCover,
+    frictionWheels,
+    agitator,
+    turret,
+    imuCalibrateCommand,
+    &beybladeCommand,
+    &chassisAutorotateCommand,
+    &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -295,7 +300,31 @@ HoldCommandMapping rightMousePressed(
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
-PressCommandMapping bPressed(drivers(), {&imuCalibrateCommand}, RemoteMapState({Remote::Key::B}));
+// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+PressCommandMapping bNotCtrlPressedRightSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::B},
+        {Remote::Key::CTRL},
+        false,
+        false));
+// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// client display command. This is necessary since we don't know when the robot is connected to the
+// server and thus don't know when to start sending the initial HUD graphics.
+PressCommandMapping bCtrlPressedRightSwitchDown(
+    drivers(),
+    {&clientDisplayCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::CTRL, Remote::Key::B},
+        {},
+        false,
+        false));
+
 PressCommandMapping qPressed(
     drivers(),
     {&chassisImuDriveCommand},
@@ -318,7 +347,6 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -342,15 +370,17 @@ void setDefaultSoldierCommands(aruwsrc::Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startSoldierCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -366,7 +396,8 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bPressed);
+    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);

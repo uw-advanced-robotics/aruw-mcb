@@ -61,7 +61,7 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::display;
+using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
@@ -150,14 +150,6 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
-ClientDisplayCommand clientDisplayCommand(
-    drivers(),
-    &clientDisplay,
-    nullptr,
-    nullptr,
-    nullptr,
-    &chassisDriveCommand);
-
 static constexpr HeroAgitatorCommand::Config heroAgitatorCommandConfig = {
     .kickerShootRotateAngle = M_PI / 2.0,
     .kickerShootRotateTime = 75,
@@ -232,6 +224,18 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassisFramePitchTurretController,
     false);
 
+ClientDisplayCommand clientDisplayCommand(
+    drivers(),
+    &clientDisplay,
+    nullptr,
+    frictionWheels,
+    waterwheelAgitator,
+    turret,
+    imuCalibrateCommand,
+    &beybladeCommand,
+    &chassisAutorotateCommand,
+    &chassisImuDriveCommand);
+
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
     drivers(),
@@ -262,7 +266,30 @@ HoldCommandMapping rightMousePressed(
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
-PressCommandMapping bPressed(drivers(), {&imuCalibrateCommand}, RemoteMapState({Remote::Key::B}));
+// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+PressCommandMapping bNotCtrlPressedRightSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::B},
+        {Remote::Key::CTRL},
+        false,
+        false));
+// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// client display command. This is necessary since we don't know when the robot is connected to the
+// server and thus don't know when to start sending the initial HUD graphics.
+PressCommandMapping bCtrlPressedRightSwitchDown(
+    drivers(),
+    {&clientDisplayCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::CTRL, Remote::Key::B},
+        {},
+        false,
+        false));
 PressCommandMapping qPressed(
     drivers(),
     {&chassisImuDriveCommand},
@@ -308,13 +335,14 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startHeroCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
 }
 
@@ -329,7 +357,8 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bPressed);
+    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);

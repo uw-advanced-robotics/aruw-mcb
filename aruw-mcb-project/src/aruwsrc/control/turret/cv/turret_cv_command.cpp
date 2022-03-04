@@ -57,7 +57,8 @@ TurretCVCommand::TurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed),
       userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar)
+      userYawInputScalar(userYawInputScalar),
+      chassisSubsystem(chassisSubsystem)
 {
     addSubsystemRequirement(turretSubsystem);
 }
@@ -68,6 +69,8 @@ void TurretCVCommand::initialize()
 {
     pitchController->initialize();
     yawController->initialize();
+    prevTime = getTimeMilliseconds();
+    drivers->visionCoprocessor.sendSelectNewTargetMessage();
 }
 
 void TurretCVCommand::execute()

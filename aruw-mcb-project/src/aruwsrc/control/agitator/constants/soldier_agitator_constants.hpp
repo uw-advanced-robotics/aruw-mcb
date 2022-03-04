@@ -45,5 +45,5 @@ static constexpr bool isAgitatorInverted = false;
  * This should be positive or else weird behavior can occur
  */
 static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
-static constexpr uint32_t JAMMING_TIME = 250;
+static constexpr uint32_t JAMMING_TIME = 70;
 }  // namespace aruwsrc::control::agitator::constants
