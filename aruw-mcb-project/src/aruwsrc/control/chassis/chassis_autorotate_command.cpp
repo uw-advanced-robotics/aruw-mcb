@@ -93,8 +93,9 @@ void ChassisAutorotateCommand::execute()
                     : turretAngleFromCenter;
 
             // Apply autorotation to a ramp to limit acceleration
-            rotateSpeedRamp.setTarget(
-                chassis->chassisSpeedRotationPID(angleFromCenterForChassisAutorotate));
+            rotateSpeedRamp.setTarget(chassis->chassisSpeedRotationPID(
+                angleFromCenterForChassisAutorotate,
+                turret->getYawVelocity() - drivers->mpu6500.getGz()));
             rotateSpeedRamp.update(AUTOROTATE_DESIRED_WHEEL_SPEED_DELTA_RPM);
         }
         else

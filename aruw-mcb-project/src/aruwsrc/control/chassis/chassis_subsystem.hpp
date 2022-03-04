@@ -133,7 +133,7 @@ public:
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    mockable float chassisSpeedRotationPID(float currentAngleError);
+    mockable float chassisSpeedRotationPID(float currentAngleError, float errD);
 
     void refresh() override;
 
@@ -206,8 +206,6 @@ private:
      * Stores the desired RPM of each of the motors in a matrix, indexed by WheelRPMIndex
      */
     modm::Matrix<float, 4, 1> desiredWheelRPM;
-
-    tap::algorithms::ExtendedKalman chassisRotationErrorKalman;
 
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 

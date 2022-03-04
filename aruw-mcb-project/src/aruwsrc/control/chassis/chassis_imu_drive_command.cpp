@@ -100,8 +100,9 @@ void ChassisImuDriveCommand::execute()
             angleFromDesiredRotation = -rotationSetpoint.difference(yaw);
 
             // run PID controller to attempt to attain the setpoint
-            chassisRotationDesiredWheelspeed =
-                chassis->chassisSpeedRotationPID(angleFromDesiredRotation);
+            chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
+                angleFromDesiredRotation,
+                turret->getYawVelocity() - drivers->mpu6500.getGz());
         }
     }
     else

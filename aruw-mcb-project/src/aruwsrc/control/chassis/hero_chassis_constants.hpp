@@ -77,11 +77,10 @@ static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
  * controller are listed below.
  */
 static constexpr float AUTOROTATION_PID_KP = 120.0f;
-static constexpr float AUTOROTATION_PID_KD = 30.0f;
+static constexpr float AUTOROTATION_PID_KD = 3.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
-static constexpr float AUTOROTATION_PID_TK = 5.0f;
 
 // mechanical chassis constants
 /**
@@ -106,7 +105,7 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
-static constexpr float AUTOROTATE_DESIRED_WHEEL_SPEED_DELTA_RPM = 50.0f;
+static constexpr float AUTOROTATE_DESIRED_WHEEL_SPEED_DELTA_RPM = 500.0f;
 
 /**
  * Maps particular max power thresholds to beyblade rotation thresholds.

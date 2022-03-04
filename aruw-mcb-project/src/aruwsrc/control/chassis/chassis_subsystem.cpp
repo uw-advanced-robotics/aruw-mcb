@@ -48,7 +48,6 @@ ChassisSubsystem::ChassisSubsystem(
           modm::Pid<float>(VELOCITY_PID_CONFIG),
           modm::Pid<float>(VELOCITY_PID_CONFIG),
           modm::Pid<float>(VELOCITY_PID_CONFIG)},
-      chassisRotationErrorKalman(1.0f, AUTOROTATION_PID_TK),
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
@@ -219,18 +218,14 @@ void ChassisSubsystem::updateMotorRpmPid(
     motor->setDesiredOutput(pid->getValue());
 }
 
-float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError)
+float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
-    float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.getLastFiltered();
-    float currentFilteredAngleError = chassisRotationErrorKalman.filterData(currentAngleError);
-
     // P
     float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
     currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
 
     // D
-    float currentRotationPidD =
-        (currentFilteredAngleError - currentFilteredAngleErrorPrevious) * AUTOROTATION_PID_KD;
+    float currentRotationPidD = errD * AUTOROTATION_PID_KD;
 
     currentRotationPidD =
         limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
