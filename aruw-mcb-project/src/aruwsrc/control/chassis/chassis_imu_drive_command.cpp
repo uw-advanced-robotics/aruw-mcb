@@ -150,7 +150,7 @@ void ChassisImuDriveCommand::execute()
         chassisRotationDesiredWheelspeed);
 }
 
-void ChassisImuDriveCommand::end(bool) { chassis->setDesiredOutput(0, 0, 0); }
+void ChassisImuDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisImuDriveCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::chassis

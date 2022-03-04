@@ -106,7 +106,7 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
-static constexpr float MAX_AUTOROTATE_DESIRED_WHEEL_SPEED_RPM = 500.0f;
+static constexpr float AUTOROTATE_DESIRED_WHEEL_SPEED_DELTA_RPM = 500.0f;
 
 /**
  * Maps particular max power thresholds to beyblade rotation thresholds.

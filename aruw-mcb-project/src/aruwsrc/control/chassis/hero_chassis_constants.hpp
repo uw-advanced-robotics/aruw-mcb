@@ -106,13 +106,13 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
-static constexpr float MAX_AUTOROTATE_DESIRED_WHEEL_SPEED_RPM = 500.0f;
+static constexpr float AUTOROTATE_DESIRED_WHEEL_SPEED_DELTA_RPM = 50.0f;
 
 /**
  * Maps particular max power thresholds to beyblade rotation thresholds.
  */
 static constexpr modm::Pair<float, float> POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[] =
-    {{45, 3000}, {60, 3500}, {80, 5500}, {100, 6000}, {120, 7500}};
+    {{55, 3000}, {60, 3200}, {65, 3500}, {70, 5500}, {90, 6000}, {120, 7500}};
 
 /**
  * Fraction betweeh [0, 1], what we multiply user translational input by when beyblading.
@@ -133,7 +133,7 @@ static constexpr float BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING = 0.5f;
  * Rotational speed to update the beyblade ramp target by each iteration until final rotation
  * setpoint reached.
  */
-static constexpr float BEYBLADE_RAMP_UPDATE_RMP = 0.125;
+static constexpr float BEYBLADE_RAMP_UPDATE_RMP = 50;
 }  // namespace aruwsrc::chassis
 
 #endif  // HERO_CHASSIS_CONSTANTS_HPP_

@@ -109,7 +109,7 @@ void BeybladeCommand::execute()
     }
 }
 
-void BeybladeCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
+void BeybladeCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool BeybladeCommand::isFinished() const { return false; }
 

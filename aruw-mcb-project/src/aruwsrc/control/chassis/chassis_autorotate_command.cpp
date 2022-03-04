@@ -95,7 +95,7 @@ void ChassisAutorotateCommand::execute()
             // Apply autorotation to a ramp to limit acceleration
             rotateSpeedRamp.setTarget(
                 chassis->chassisSpeedRotationPID(angleFromCenterForChassisAutorotate));
-            rotateSpeedRamp.update(MAX_AUTOROTATE_DESIRED_WHEEL_SPEED_RPM);
+            rotateSpeedRamp.update(AUTOROTATE_DESIRED_WHEEL_SPEED_DELTA_RPM);
         }
         else
         {
@@ -139,7 +139,7 @@ void ChassisAutorotateCommand::execute()
     }
 }
 
-void ChassisAutorotateCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
+void ChassisAutorotateCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 

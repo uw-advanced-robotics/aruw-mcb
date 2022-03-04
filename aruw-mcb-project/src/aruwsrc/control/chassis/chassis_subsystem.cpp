@@ -108,6 +108,14 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
+void ChassisSubsystem::setZeroRPM()
+{
+    for (size_t i = 0; i < desiredWheelRPM.getNumberOfRows(); i++)
+    {
+        desiredWheelRPM[i][0] = 0;
+    }
+}
+
 void ChassisSubsystem::refresh()
 {
     for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)

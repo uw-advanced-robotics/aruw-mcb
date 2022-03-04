@@ -105,7 +105,7 @@ void WiggleDriveCommand::execute()
     }
 }
 
-void WiggleDriveCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
+void WiggleDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool WiggleDriveCommand::isFinished() const { return false; }
 

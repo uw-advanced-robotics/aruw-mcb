@@ -317,7 +317,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    // chassis.initialize();
+    chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
     clientDisplay.initialize();

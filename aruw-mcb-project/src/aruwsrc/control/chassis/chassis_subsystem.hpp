@@ -123,6 +123,8 @@ public:
      */
     mockable void setDesiredOutput(float x, float y, float r);
 
+    mockable void setZeroRPM();
+
     /**
      * Run chassis rotation PID on some actual turret angle offset.
      *

@@ -36,6 +36,7 @@ public:
 
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, setDesiredOutput, (float, float, float), (override));
+    MOCK_METHOD(void, setZeroRPM, (), (override));
     MOCK_METHOD(float, chassisSpeedRotationPID, (float), (override));
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(float, calculateRotationTranslationalGain, (float), ());
