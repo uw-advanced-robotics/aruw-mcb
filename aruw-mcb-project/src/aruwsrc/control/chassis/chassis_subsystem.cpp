@@ -35,21 +35,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-float desWheelSpeed = 1000;
-float ChassisSubsystem::getMaxUserWheelSpeed(bool refSerialOnline, int chassisPower)
-{
-    if (refSerialOnline)
-    {
-        return tap::algorithms::limitVal(
-            desWheelSpeed,
-            static_cast<float>(MIN_WHEEL_SPEED_SINGLE_MOTOR),
-            static_cast<float>(MAX_WHEEL_SPEED_SINGLE_MOTOR));
-    }
-    else
-    {
-        return MIN_WHEEL_SPEED_SINGLE_MOTOR;
-    }
-}
 ChassisSubsystem::ChassisSubsystem(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId leftFrontMotorId,
