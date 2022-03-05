@@ -36,7 +36,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     ClientDisplaySubsystem *clientDisplay,
     const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-    agitator::AgitatorSubsystem &agitatorSubsystem,
+    aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
     const control::turret::TurretSubsystem &turretSubsystem,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const chassis::BeybladeCommand *chassisBeybladeCmd,

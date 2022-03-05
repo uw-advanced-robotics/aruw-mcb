@@ -38,8 +38,8 @@ void initialize_robot_sim()
     // TODO: Create simulator for correct motor
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-        aruwsrc::agitator::AgitatorSubsystem::AGITATOR_MOTOR_ID);
+        aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
+        aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID);
 
     // Register the motor sims for the Chassis subsystem
     tap::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
