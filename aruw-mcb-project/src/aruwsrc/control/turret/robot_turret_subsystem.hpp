@@ -17,24 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hero_turret_subsystem.hpp"
+#ifndef ROBOT_TURRET_SUBSYSTEM_HPP_
+#define ROBOT_TURRET_SUBSYSTEM_HPP_
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
-float HeroTurretSubsystem::getWorldYaw() const { return drivers->turretMCBCanComm.getYaw(); }
-
-float HeroTurretSubsystem::getWorldPitch() const
+/**
+ * Subsystem that must be extended. Extends both the TurretSubsystem and TurretOrientationInterface.
+ */
+class RobotTurretSubsystem : public aruwsrc::control::turret::TurretSubsystem,
+                             public aruwsrc::control::turret::TurretOrientationInterface
 {
-    // TODO replace with drivers->turretMCBCanComm.getPitch() when new mechanical IMU mounting
-    // complete
-    return drivers->turretMCBCanComm.getPitch() + getPitchAngleFromCenter();
-}
-
-uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
-{
-    return drivers->turretMCBCanComm.getPitch();
-}
-
+    using TurretSubsystem::TurretSubsystem;
+};
 }  // namespace aruwsrc::control::turret
+
+#endif  // ROBOT_TURRET_SUBSYSTEM_HPP_
