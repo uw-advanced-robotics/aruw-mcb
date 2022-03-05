@@ -87,32 +87,24 @@ ClientDisplaySubsystem clientDisplay(drivers());
 
 AgitatorSubsystem kickerAgitator(
     drivers(),
-    AgitatorSubsystem::PID_HERO_KICKER_P,
-    AgitatorSubsystem::PID_HERO_KICKER_I,
-    AgitatorSubsystem::PID_HERO_KICKER_D,
-    AgitatorSubsystem::PID_HERO_KICKER_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_HERO_KICKER_MAX_OUT,
+    aruwsrc::control::agitator::constants::PID_HERO_KICKER,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HERO_KICKER_MOTOR_ID,
-    AgitatorSubsystem::HERO_KICKER_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_KICKER_INVERTED,
+    aruwsrc::control::agitator::constants::HERO_KICKER_MOTOR_ID,
+    aruwsrc::control::agitator::constants::HERO_KICKER_MOTOR_CAN_BUS,
+    aruwsrc::control::agitator::constants::HERO_KICKER_INVERTED,
     0,
     0,
     false);
 
 AgitatorSubsystem waterwheelAgitator(
     drivers(),
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_P,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_I,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_D,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_OUT,
+    aruwsrc::control::agitator::constants::PID_HERO_WATERWHEEL,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508,
-    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_ID,
-    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_WATERWHEEL_INVERTED,
-    AgitatorSubsystem::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
-    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_MOTOR_ID,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_MOTOR_CAN_BUS,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_INVERTED,
+    aruwsrc::control::agitator::constants::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
+    aruwsrc::control::agitator::constants::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
     true);
 
 tap::motor::DjiMotor pitchMotor(
