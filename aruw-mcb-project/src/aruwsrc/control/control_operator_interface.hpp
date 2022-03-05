@@ -129,6 +129,7 @@ public:
 
 private:
     aruwsrc::Drivers *drivers;
+
     uint32_t prevUpdateCounterX = 0;
     uint32_t prevUpdateCounterY = 0;
     uint32_t prevUpdateCounterR = 0;
