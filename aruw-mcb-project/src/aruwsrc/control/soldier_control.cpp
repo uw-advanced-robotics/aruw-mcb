@@ -29,6 +29,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -108,17 +109,13 @@ static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 AgitatorSubsystem agitator(
     drivers(),
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted,
-    AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
-    AgitatorSubsystem::JAMMING_TIME,
+    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
+    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
+    aruwsrc::control::agitator::constants::isAgitatorInverted,
+    aruwsrc::control::agitator::constants::AGITATOR_JAMMING_DISTANCE,
+    aruwsrc::control::agitator::constants::JAMMING_TIME,
     true);
 
 FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
