@@ -23,7 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/math/geometry/vector2.hpp"
 #include "modm/processing/resumable.hpp"
 
@@ -53,7 +53,7 @@ public:
      */
     ChassisOrientationIndicator(
         aruwsrc::Drivers *drivers,
-        const aruwsrc::control::turret::TurretSubsystem &turretSubsystem);
+        const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 

@@ -23,7 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/math/utils/misc.hpp"
 
 #include "hud_indicator.hpp"
@@ -45,12 +45,13 @@ public:
      * Construct a TurretAnglesIndicator object.
      *
      * @param[in] drivers Global drivers instance.
-     * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
-     * turret and to print turret angles (if turret chassis relative angles are being printed).
+     * @param[in] robotTurretSubsystem Turret used when updating chassis orientation relative
+     * to the turret and to print turret angles (if turret chassis relative angles are being
+     * printed).
      */
     TurretAnglesIndicator(
         aruwsrc::Drivers *drivers,
-        const aruwsrc::control::turret::TurretSubsystem &turretSubsystem);
+        const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -80,7 +81,7 @@ private:
 
     aruwsrc::Drivers *drivers;
 
-    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
+    const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem;
 
     /** Character graphic containing turret pitch/yaw angles. */
     Tx::GraphicCharacterMessage turretAnglesGraphic;
