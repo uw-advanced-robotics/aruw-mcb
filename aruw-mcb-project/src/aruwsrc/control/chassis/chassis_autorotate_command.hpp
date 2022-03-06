@@ -41,11 +41,18 @@ class ChassisAutorotateCommand : public tap::control::Command
 public:
     static constexpr float SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD = 1.0f;
 
+    enum class ChassisSymmetry
+    {
+        SYMMETRICAL_NONE,
+        SYMMETRICAL_180,
+        SYMMETRICAL_90,
+    };
+
     ChassisAutorotateCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
         const tap::control::turret::TurretSubsystemInterface* turret,
-        bool chassisFrontBackIdentical = false);
+        ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE);
 
     void initialize() override;
 
@@ -68,12 +75,15 @@ private:
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
 
+    /** Autorotation setpoint, smoothed using a low pass filter. */
+    float autorotationSetpointAverage = 0;
+
     /**
      * If the front and back of the chassis may be treated as the same entities.
      * This only matters if your turret can spin 360 degrees and will allow the
      * autorotate to recenter either around the front or back of the chassis.
      */
-    bool chassisFrontBackIdentical;
+    ChassisSymmetry chassisSymmetry;
     /**
      * `true` if the chassis is currently actually autorotating, `false` otherwise
      * (in which case on rotation may happen). Autorotation may not happen if the

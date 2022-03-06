@@ -32,7 +32,7 @@ namespace aruwsrc::chassis
  * we use this for wheel speed since this is how dji's motors measures motor speed.
  */
 static constexpr int MIN_WHEEL_SPEED_SINGLE_MOTOR = 2'500;
-static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 6'500;
+static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 6'000;
 static constexpr int MIN_CHASSIS_POWER = 55;
 static constexpr int MAX_CHASSIS_POWER = 120;
 
@@ -50,7 +50,7 @@ static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::
 /// @see power_limiter.hpp for what these mean
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
-static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
+static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 20.0f;
 
 static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
     /** Kp */
@@ -74,11 +74,12 @@ static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_ERR_TO_KP_MAP[][2] = {{0, 120}, {45, 60}};
+static constexpr float AUTOROTATION_PID_KP = 150.0f;
 static constexpr float AUTOROTATION_PID_KD = 5.0f;
-static constexpr float AUTOROTATION_PID_MAX_P = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_P = 2'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;
+static constexpr float AUTOROTATE_MIN_SMOOTHING_ALPHA = 0.001f;
 
 // mechanical chassis constants
 /**
@@ -106,13 +107,13 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 /**
  * Maps particular max power thresholds to beyblade rotation thresholds.
  */
-static constexpr modm::Pair<float, float> BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[] =
-    {{55, 3000}, {60, 3200}, {65, 3500}, {70, 5500}, {90, 6000}, {120, 6'500}};
+static constexpr modm::Pair<int, float> BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[] =
+    {{55, 3000}, {60, 3200}, {65, 4'000}, {70, 5'500}, {90, 6'000}, {120, 7'000}};
 
 /**
  * Fraction betweeh [0, 1], what we multiply user translational input by when beyblading.
  */
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.5f;
+static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.75f;
 
 /**
  * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade

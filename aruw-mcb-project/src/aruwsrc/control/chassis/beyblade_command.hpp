@@ -73,7 +73,7 @@ private:
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
 
-    modm::interpolation::Linear<modm::Pair<float, float>> rotationalSpeedLinearInterpolator;
+    modm::interpolation::Linear<modm::Pair<int, float>> rotationalSpeedLinearInterpolator;
 
     float getRotationTarget() const;
 };  // class BeybladeCommand
