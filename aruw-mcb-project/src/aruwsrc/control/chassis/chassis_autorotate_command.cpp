@@ -51,7 +51,7 @@ ChassisAutorotateCommand::ChassisAutorotateCommand(
 
 void ChassisAutorotateCommand::initialize()
 {
-    autorotationSetpointAverage = chassis->getDesiredRotation();
+    desiredRotationAverage = chassis->getDesiredRotation();
 }
 
 void ChassisAutorotateCommand::updateAutorotateState(
@@ -86,8 +86,6 @@ void ChassisAutorotateCommand::execute()
 
         float turretAngleFromCenter = turret->getYawAngleFromCenter();
 
-        float desiredRotation = 0;
-
         if (chassisAutorotating)
         {
             float maxAngleFromCenter = 180.0f;
@@ -112,24 +110,28 @@ void ChassisAutorotateCommand::execute()
                 ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
                     .getValue();
 
-            // Apply autorotation to a ramp to limit acceleration
-            desiredRotation = chassis->chassisSpeedRotationPID(
+            // PD controller to find desired rotational component of the chassis control
+            float desiredRotation = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
                 turret->getYawVelocity() - drivers->mpu6500.getGz());
 
+            // find an alpha value to be used for the low pass filter, some value >
+            // AUTOROTATE_MIN_SMOOTHING_ALPHA, inversely proportional to
+            // angleFromCenterForChassisAutorotate, so when autorotate angle error is large, low
+            // pass filter alpha is small and more averaging will be applied to the desired
+            // autorotation
             float autorotateSmoothingAlpha = std::max(
                 1.0f - abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
                 AUTOROTATE_MIN_SMOOTHING_ALPHA);
 
-            autorotationSetpointAverage = tap::algorithms::lowPassFilter(
-                autorotationSetpointAverage,
-                desiredRotation,
-                autorotateSmoothingAlpha);
+            // low pass filter the desiredRotation
+            desiredRotationAverage =
+                lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
 
         // what we will multiply x and y speed by to take into account rotation
         float rTranslationalGain =
-            chassis->calculateRotationTranslationalGain(autorotationSetpointAverage);
+            chassis->calculateRotationTranslationalGain(desiredRotationAverage);
 
         const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
@@ -155,7 +157,7 @@ void ChassisAutorotateCommand::execute()
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,
             chassisYDesiredWheelspeed,
-            autorotationSetpointAverage);
+            desiredRotationAverage);
     }
     else
     {

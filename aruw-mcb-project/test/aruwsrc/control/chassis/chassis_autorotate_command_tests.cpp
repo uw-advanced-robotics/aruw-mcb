@@ -213,28 +213,29 @@ static void runExecuteAutorotateValidationTest(
     }
 }
 
-#define EXECUTE_AUTOROTATE_VALIDATION_TEST(                                                                                                                                           \
-    turretAngleActualStr,                                                                                                                                                             \
-    turretAngleActual,                                                                                                                                                                \
-    turretAngleSetpointStr,                                                                                                                                                           \
-    turretAngleSetpoint,                                                                                                                                                              \
-    yawLimited,                                                                                                                                                                       \
-    chassisSymmetry)                                                                                                                                                                  \
-    TEST(                                                                                                                                                                             \
-        ChassisAutorotateCommand,                                                                                                                                                     \
-        execute_autorotate_validation_turret_actual_##turretAngleActualStr##_deg_setpoint_##turretAngleSetpointStr##_deg_yawLimited_##yawLimited##_chassisSymmetry_##chassisSymmetry) \
-    {                                                                                                                                                                                 \
-        DEFAULT_SETUP_TEST(chassisSymmetry);                                                                                                                                          \
-        SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers);                                                                                                                                     \
-        runExecuteAutorotateValidationTest(                                                                                                                                           \
-            drivers,                                                                                                                                                                  \
-            chassis,                                                                                                                                                                  \
-            turret,                                                                                                                                                                   \
-            cac,                                                                                                                                                                      \
-            turretAngleActual,                                                                                                                                                        \
-            turretAngleSetpoint,                                                                                                                                                      \
-            yawLimited,                                                                                                                                                               \
-            chassisSymmetry);                                                                                                                                                         \
+#define EXECUTE_AUTOROTATE_VALIDATION_TEST(                                                                                                                                              \
+    turretAngleActualStr,                                                                                                                                                                \
+    turretAngleActual,                                                                                                                                                                   \
+    turretAngleSetpointStr,                                                                                                                                                              \
+    turretAngleSetpoint,                                                                                                                                                                 \
+    yawLimited,                                                                                                                                                                          \
+    chassisSymmetry,                                                                                                                                                                     \
+    chassisSymmetryStr)                                                                                                                                                                  \
+    TEST(                                                                                                                                                                                \
+        ChassisAutorotateCommand,                                                                                                                                                        \
+        execute_autorotate_validation_turret_actual_##turretAngleActualStr##_deg_setpoint_##turretAngleSetpointStr##_deg_yawLimited_##yawLimited##_chassisSymmetry_##chassisSymmetryStr) \
+    {                                                                                                                                                                                    \
+        DEFAULT_SETUP_TEST(chassisSymmetry);                                                                                                                                             \
+        SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers);                                                                                                                                        \
+        runExecuteAutorotateValidationTest(                                                                                                                                              \
+            drivers,                                                                                                                                                                     \
+            chassis,                                                                                                                                                                     \
+            turret,                                                                                                                                                                      \
+            cac,                                                                                                                                                                         \
+            turretAngleActual,                                                                                                                                                           \
+            turretAngleSetpoint,                                                                                                                                                         \
+            yawLimited,                                                                                                                                                                  \
+            chassisSymmetry);                                                                                                                                                            \
     }
 
 EXECUTE_AUTOROTATE_VALIDATION_TEST(
@@ -243,28 +244,32 @@ EXECUTE_AUTOROTATE_VALIDATION_TEST(
     0,
     0,
     false,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE)
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+    none)
 EXECUTE_AUTOROTATE_VALIDATION_TEST(
     0,
     0,
     0,
     0,
     false,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180)
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
+    180)
 EXECUTE_AUTOROTATE_VALIDATION_TEST(
     0,
     0,
     0,
     0,
     true,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE)
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+    none)
 EXECUTE_AUTOROTATE_VALIDATION_TEST(
     0,
     0,
     0,
     0,
     true,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180)
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
+    180)
 
 EXECUTE_AUTOROTATE_VALIDATION_TEST(
     0,
@@ -272,25 +277,29 @@ EXECUTE_AUTOROTATE_VALIDATION_TEST(
     180,
     180,
     false,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE)
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+    none)
 EXECUTE_AUTOROTATE_VALIDATION_TEST(
     0,
     0,
     180,
     180,
     false,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180)
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
+    180)
 EXECUTE_AUTOROTATE_VALIDATION_TEST(
     0,
     0,
     180,
     180,
     true,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE)
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+    none)
 EXECUTE_AUTOROTATE_VALIDATION_TEST(
     0,
     0,
     180,
     180,
     true,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180)
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
+    180)

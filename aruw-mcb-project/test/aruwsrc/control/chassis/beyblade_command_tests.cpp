@@ -49,7 +49,8 @@ using aruwsrc::mock::TurretSubsystemMock;
 using tap::algorithms::Ramp;
 using namespace tap::communication::serial;
 
-static constexpr float BASE_DESIRED_OUT = MIN_WHEEL_SPEED_SINGLE_MOTOR / 2;
+static constexpr float BASE_DESIRED_OUT =
+    MIN_WHEEL_SPEED_SINGLE_MOTOR * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
 void basicFrameworkTest(float baseX, float baseY, float maxR, float yawAngle, float baseInput)
 {

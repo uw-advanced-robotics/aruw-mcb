@@ -93,7 +93,7 @@ void BeybladeCommand::execute()
         }
 
         rotateSpeedRamp.setTarget(rampTarget);
-        // Update the r speed by BEYBLADE_RAMP_UPDATE_RMP of target (linear for each update)
+        // Update the r speed by BEYBLADE_RAMP_UPDATE_RMP each iteration
         rotateSpeedRamp.update(BEYBLADE_RAMP_UPDATE_RMP);
         float r = rotateSpeedRamp.getValue();
 
