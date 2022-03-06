@@ -28,15 +28,6 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "aruwsrc/control/chassis/beyblade_command.hpp"
-#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-#include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
-#include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
-#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "modm/math/geometry/polygon_2d.hpp"
 #include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
@@ -88,8 +79,9 @@ public:
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
      * are on or off.
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
-     * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
-     * turret and to print turret angles (if turret chassis relative angles are being printed).
+     * @param[in] robotTurretSubsystem Turret used when updating chassis orientation relative
+     * to the turret and to print turret angles (if turret chassis relative angles are being
+     * printed).
      * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
      * calibrated.
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
@@ -105,7 +97,7 @@ public:
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
-        const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
+        const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
