@@ -29,7 +29,7 @@ float HeroTurretSubsystem::getWorldPitch() const
 {
     // TODO replace with drivers->turretMCBCanComm.getPitch() when new mechanical IMU mounting
     // complete
-    return drivers->turretMCBCanComm.getPitch() + getPitchAngleFromCenter();
+    return getPitchAngleFromCenter() - drivers->turretMCBCanComm.getPitch();
 }
 
 uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
