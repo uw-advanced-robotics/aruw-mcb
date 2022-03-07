@@ -129,25 +129,23 @@ void ChassisAutorotateCommand::execute()
                 lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
 
-        // what we will multiply x and y speed by to take into account rotation
-        float rTranslationalGain =
-            chassis->calculateRotationTranslationalGain(desiredRotationAverage);
-
         const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
+        // what we will multiply x and y speed by to take into account rotation
+        float rTranslationalGain =
+            MAX_WHEEL_SPEED * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
+
         float chassisXDesiredWheelspeed = limitVal(
-                                              drivers->controlOperatorInterface.getChassisXInput(),
-                                              -rTranslationalGain,
-                                              rTranslationalGain) *
-                                          MAX_WHEEL_SPEED;
+            drivers->controlOperatorInterface.getChassisXInput(),
+            -rTranslationalGain,
+            rTranslationalGain);
 
         float chassisYDesiredWheelspeed = limitVal(
-                                              drivers->controlOperatorInterface.getChassisYInput(),
-                                              -rTranslationalGain,
-                                              rTranslationalGain) *
-                                          MAX_WHEEL_SPEED;
+            drivers->controlOperatorInterface.getChassisYInput(),
+            -rTranslationalGain,
+            rTranslationalGain);
         // Rotate X and Y depending on turret angle
         rotateVector(
             &chassisXDesiredWheelspeed,

@@ -28,13 +28,16 @@
 namespace aruwsrc::chassis
 {
 /**
- * Max wheel speed, measured in RPM of the encoder (rather than shaft)
- * we use this for wheel speed since this is how dji's motors measures motor speed.
+ * Maps max power (in Watts) to max chassis wheel speed (RPM) for a particular direction (x, y, or
+ * R).
  */
-static constexpr int MIN_WHEEL_SPEED_SINGLE_MOTOR = 2'500;
-static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 6'000;
-static constexpr int MIN_CHASSIS_POWER = 55;
-static constexpr int MAX_CHASSIS_POWER = 120;
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
+    {50, 2'500},
+    {120, 6'000}};
+
+static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
+    CHASSIS_POWER_TO_MAX_SPEED_LUT,
+    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
 
 /**
  * The minimum desired wheel speed for chassis rotation, measured in RPM before
@@ -105,10 +108,9 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 /**
- * Maps particular max power thresholds to beyblade rotation thresholds.
+ * Fraction of max chassis speed that will be applied to rotation when beyblading
  */
-static constexpr modm::Pair<int, float> BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT[] =
-    {{55, 3000}, {60, 3200}, {65, 4'000}, {70, 5'500}, {90, 6'000}, {120, 7'000}};
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
 
 /**
  * Fraction betweeh [0, 1], what we multiply user translational input by when beyblading.

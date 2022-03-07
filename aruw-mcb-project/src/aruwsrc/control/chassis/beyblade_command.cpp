@@ -43,10 +43,7 @@ BeybladeCommand::BeybladeCommand(
     const tap::control::turret::TurretSubsystemInterface* turret)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret),
-      rotationalSpeedLinearInterpolator(
-          BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT,
-          MODM_ARRAY_SIZE(BEYBLADE_POWER_LIMIT_W_TO_ROTATION_TARGET_RPM_LUT))
+      turret(turret)
 {
     addSubsystemRequirement(chassis);
 }
@@ -86,7 +83,9 @@ void BeybladeCommand::execute()
             BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_FOR_ROTATION_SPEED_DECREASE *
             BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * MAX_WHEEL_SPEED;
 
-        rampTarget = rotationDirection * getRotationTarget();
+        rampTarget =
+            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * MAX_WHEEL_SPEED;
+
         if (fabsf(x) > TRANSLATION_LIMIT || fabsf(y) > TRANSLATION_LIMIT)
         {
             rampTarget *= BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING;
@@ -110,18 +109,6 @@ void BeybladeCommand::execute()
 }
 
 void BeybladeCommand::end(bool) { chassis->setZeroRPM(); }
-
-bool BeybladeCommand::isFinished() const { return false; }
-
-float BeybladeCommand::getRotationTarget() const
-{
-    const uint16_t powerConsumptionLimit =
-        drivers->refSerial.getRefSerialReceivingData()
-            ? drivers->refSerial.getRobotData().chassis.powerConsumptionLimit
-            : 0;
-
-    return rotationalSpeedLinearInterpolator.interpolate(powerConsumptionLimit);
-}
 }  // namespace chassis
 
 }  // namespace aruwsrc

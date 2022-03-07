@@ -73,28 +73,14 @@ public:
         R = 2,
     };
 
-    static constexpr int WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE =
-        (MAX_WHEEL_SPEED_SINGLE_MOTOR - MIN_WHEEL_SPEED_SINGLE_MOTOR) /
-        (MAX_CHASSIS_POWER - MIN_CHASSIS_POWER);
-    static_assert(WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE >= 0);
-
-    static inline float getMaxUserWheelSpeed(bool refSerialOnline, int chassisPower)
+    static float getMaxUserWheelSpeed(bool refSerialOnline, int chassisPower)
     {
         if (refSerialOnline)
         {
-            float desWheelSpeed = WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE *
-                                      static_cast<float>(chassisPower - MIN_CHASSIS_POWER) +
-                                  MIN_WHEEL_SPEED_SINGLE_MOTOR;
+            chassisPower = 0;
+        }
 
-            return tap::algorithms::limitVal(
-                desWheelSpeed,
-                static_cast<float>(MIN_WHEEL_SPEED_SINGLE_MOTOR),
-                static_cast<float>(MAX_WHEEL_SPEED_SINGLE_MOTOR));
-        }
-        else
-        {
-            return MIN_WHEEL_SPEED_SINGLE_MOTOR;
-        }
+        return CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
     }
 
 public:

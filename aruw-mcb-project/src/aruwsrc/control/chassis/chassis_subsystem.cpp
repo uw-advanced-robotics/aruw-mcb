@@ -250,10 +250,10 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     {
         // power(max revolve speed - specified revolve speed, 2)
         // / power(max revolve speed, 2)
-        rTranslationalGain = powf(
-            MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
-                fabsf(chassisRotationDesiredWheelspeed) / MAX_WHEEL_SPEED_SINGLE_MOTOR,
-            2.0f);
+        // rTranslationalGain = powf(
+        //     MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
+        //         fabsf(chassisRotationDesiredWheelspeed) / MAX_WHEEL_SPEED_SINGLE_MOTOR,
+        //     2.0f);
         rTranslationalGain = tap::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;

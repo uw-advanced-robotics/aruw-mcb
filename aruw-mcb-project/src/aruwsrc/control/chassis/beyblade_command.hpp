@@ -59,7 +59,7 @@ public:
 
     void end(bool) override;
 
-    bool isFinished() const override;
+    bool isFinished() const override { return false; }
 
     const char* getName() const override { return "chassis beyblade"; }
 
@@ -72,10 +72,6 @@ private:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
-
-    modm::interpolation::Linear<modm::Pair<int, float>> rotationalSpeedLinearInterpolator;
-
-    float getRotationTarget() const;
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::chassis

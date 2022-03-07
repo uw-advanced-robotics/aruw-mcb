@@ -23,6 +23,7 @@
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "chassis/chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::serial;
@@ -31,10 +32,45 @@ namespace aruwsrc
 {
 namespace control
 {
+float ControlOperatorInterface::applyChassisSpeedScaling(float value)
+{
+    if (drivers->remote.keyPressed(Remote::Key::CTRL))
+    {
+        value *= CTRL_SCALAR;
+    }
+    if (drivers->remote.keyPressed(Remote::Key::SHIFT))
+    {
+        value *= SHIFT_SCALAR;
+    }
+
+    return value;
+}
+
+static inline void applyChassisAcceleration(
+    tap::algorithms::Ramp &ramp,
+    float maxAcceleration,
+    float maxDeceleration,
+    float dt)
+{
+    if (getSign(ramp.getTarget()) == getSign(ramp.getValue()) &&
+        abs(ramp.getTarget()) > abs(ramp.getValue()))
+    {
+        // we are trying to speed up
+        ramp.update(maxAcceleration * dt);
+    }
+    else
+    {
+        // we are trying to slow down
+        ramp.update(maxDeceleration * dt);
+    }
+}
+
 float ControlOperatorInterface::getChassisXInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisXInuptCalledTime;
+    prevChassisXInuptCalledTime = currTime;
 
     if (prevUpdateCounterX != updateCounter)
     {
@@ -42,46 +78,34 @@ float ControlOperatorInterface::getChassisXInput()
         prevUpdateCounterX = updateCounter;
     }
 
-    int16_t input =
+    float keyInput =
         drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
 
-    // Note for readability: chassisXKeyInputFiltered = The most recently filtered value computed by
-    // this function (which we update below)
-    if (abs(chassisXKeyInputFiltered) < CHASSIS_X_KEY_INPUT_FILTER_CHANGE_THRESHOLD ||
-        abs(input) <= abs(chassisXKeyInputFiltered))
-    {
-        chassisXKeyInputFiltered =
-            lowPassFilter(chassisXKeyInputFiltered, input, CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX);
-    }
-    else
-    {
-        chassisXKeyInputFiltered = lowPassFilter(
-            chassisXKeyInputFiltered,
-            input,
-            abs(chassisXKeyInputFiltered / input) * CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX);
-    }
+    const float MAX_CHASSIS_SPEED = chassis::ChassisSubsystem::getMaxUserWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        drivers->refSerial.getRobotData().chassis.power);
 
-    float finalX = limitVal<float>(
-        chassisXInput.getInterpolatedValue(currTime) + chassisXKeyInputFiltered,
-        -1.0f,
-        1.0f);
+    float finalX = MAX_CHASSIS_SPEED *
+                   limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
 
-    if (drivers->remote.keyPressed(Remote::Key::CTRL))
-    {
-        finalX *= CTRL_SCALAR;
-    }
-    if (drivers->remote.keyPressed(Remote::Key::SHIFT))
-    {
-        finalX *= SHIFT_SCALAR;
-    }
+    chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
 
-    return finalX;
+    applyChassisAcceleration(
+        chassisXInputRamp,
+        MAX_ACCELERATION_X,
+        MAX_DECELERATION_X,
+        static_cast<float>(dt) / 1E3F);
+
+    return chassisXInputRamp.getValue();
 }
 
 float ControlOperatorInterface::getChassisYInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisYInuptCalledTime;
+    prevChassisYInuptCalledTime = currTime;
+
     if (prevUpdateCounterY != updateCounter)
     {
         chassisYInput.update(
@@ -90,46 +114,34 @@ float ControlOperatorInterface::getChassisYInput()
         prevUpdateCounterY = updateCounter;
     }
 
-    int16_t input =
+    float keyInput =
         drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
 
-    // Note for readability: chassisYKeyInputFiltered = The most recently filtered value computed by
-    // this function (which we update below)
-    if (abs(chassisYKeyInputFiltered) < CHASSIS_Y_KEY_INPUT_FILTER_CHANGE_THRESHOLD ||
-        abs(input) <= abs(chassisYKeyInputFiltered))
-    {
-        chassisYKeyInputFiltered =
-            lowPassFilter(chassisYKeyInputFiltered, input, CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX);
-    }
-    else
-    {
-        chassisYKeyInputFiltered = lowPassFilter(
-            chassisYKeyInputFiltered,
-            input,
-            abs(chassisYKeyInputFiltered / input) * CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX);
-    }
+    const float MAX_CHASSIS_SPEED = chassis::ChassisSubsystem::getMaxUserWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        drivers->refSerial.getRobotData().chassis.power);
 
-    float finalY = limitVal<float>(
-        chassisYInput.getInterpolatedValue(currTime) + chassisYKeyInputFiltered,
-        -1.0f,
-        1.0f);
+    float finalY = MAX_CHASSIS_SPEED *
+                   limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
 
-    if (drivers->remote.keyPressed(Remote::Key::CTRL))
-    {
-        finalY *= CTRL_SCALAR;
-    }
-    if (drivers->remote.keyPressed(Remote::Key::SHIFT))
-    {
-        finalY *= SHIFT_SCALAR;
-    }
+    chassisYInputRamp.setTarget(applyChassisSpeedScaling(finalY));
 
-    return finalY;
+    applyChassisAcceleration(
+        chassisYInputRamp,
+        MAX_ACCELERATION_Y,
+        MAX_DECELERATION_Y,
+        static_cast<float>(dt) / 1E3F);
+
+    return chassisYInputRamp.getValue();
 }
 
 float ControlOperatorInterface::getChassisRInput()
 {
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisRInuptCalledTime;
+    prevChassisRInuptCalledTime = currTime;
+
     if (prevUpdateCounterR != updateCounter)
     {
         chassisRInput.update(
@@ -138,15 +150,25 @@ float ControlOperatorInterface::getChassisRInput()
         prevUpdateCounterR = updateCounter;
     }
 
-    chassisRKeyInputFiltered = lowPassFilter(
-        chassisRKeyInputFiltered,
-        drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E),
-        CHASSIS_R_KEY_INPUT_FILTER_ALPHA);
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
 
-    return limitVal<float>(
-        chassisRInput.getInterpolatedValue(currTime) + chassisRKeyInputFiltered,
-        -1.0f,
-        1.0f);
+    const float MAX_CHASSIS_SPEED = chassis::ChassisSubsystem::getMaxUserWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        drivers->refSerial.getRobotData().chassis.power);
+
+    float finalR = MAX_CHASSIS_SPEED *
+                   limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisRInputRamp.setTarget(finalR);
+
+    applyChassisAcceleration(
+        chassisRInputRamp,
+        MAX_ACCELERATION_R,
+        MAX_DECELERATION_R,
+        static_cast<float>(dt) / 1E3);
+
+    return chassisRInputRamp.getValue();
 }
 
 float ControlOperatorInterface::getTurretYawInput()
