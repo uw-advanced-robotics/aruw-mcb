@@ -95,16 +95,16 @@ TEST(ChassisImuDriveCommand, execute__normal_rotation_translation_when_imu_not_c
         EXPECT_CALL(
             chassis,
             setDesiredOutput(
-                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[0],
-                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[1],
-                MIN_WHEEL_SPEED_SINGLE_MOTOR * triplet[2]));
+                CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first * triplet[0],
+                CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first * triplet[1],
+                CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first * triplet[2]));
     }
 
     for (auto triplet : desiredOutputValuesToTest)
     {
-        userX = triplet[0];
-        userY = triplet[1];
-        userR = triplet[2];
+        userX = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first * triplet[0];
+        userY = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first * triplet[1];
+        userR = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first * triplet[2];
         chassisImuDriveCommand.execute();
     }
 }
@@ -182,7 +182,8 @@ TEST(ChassisImuDriveCommand, execute__target_gt_actual_positive_rotation_output)
     // imu yaw initially 0
     chassisImuDriveCommand.initialize();
 
-    userR = 1.0f;  // user rotation positive, setpoint will be gt current imu yaw.
+    userR = CHASSIS_POWER_TO_MAX_SPEED_LUT[0]
+                .first;  // user rotation positive, setpoint will be gt current imu yaw.
 
     EXPECT_CALL(chassis, setDesiredOutput(0, 0, Gt(0)));
     chassisImuDriveCommand.execute();
@@ -202,7 +203,8 @@ TEST(ChassisImuDriveCommand, execute__target_lt_actual_negative_rotation_output)
     // imu yaw initially 0
     chassisImuDriveCommand.initialize();
 
-    userR = -1.0f;  // user rotation negative, setpoint will be gt current imu yaw.
+    userR = -CHASSIS_POWER_TO_MAX_SPEED_LUT[0]
+                 .first;  // user rotation negative, setpoint will be gt current imu yaw.
 
     EXPECT_CALL(chassis, setDesiredOutput(0, 0, Lt(0)));
     chassisImuDriveCommand.execute();
@@ -278,10 +280,10 @@ TEST(ChassisImuDriveCommand, execute__translational_rotation_transformed_based_o
     // imu off center a bit, the user rotation is put through rotation matrix s.t. forward is
     // forward relative to the desired heading
     imuYaw = 10;
-    userX = 1.0f;
-    userY = 1.0f;
-    float xExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
-    float yExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    userX = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
+    userY = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
+    float xExpected = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
+    float yExpected = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
     tap::algorithms::rotateVector(&xExpected, &yExpected, -modm::toRadian(10));
 
     EXPECT_CALL(
@@ -306,9 +308,9 @@ TEST(ChassisImuDriveCommand, execute__turret_relative_when_turret_not_nullptr)
     ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(45));
     ON_CALL(turret, isOnline).WillByDefault(Return(true));
 
-    userX = 1.0f;
+    userX = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
     userY = 0.0f;
-    float xExpected = MIN_WHEEL_SPEED_SINGLE_MOTOR;
+    float xExpected = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
     float yExpected = 0.0f;
     tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(45.0f));
 

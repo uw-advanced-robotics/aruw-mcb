@@ -124,12 +124,12 @@ static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_FOR_ROTATION_SPEED
 /**
  * The fraction to cut rotation speed while moving and beyblading.
  */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING = 0.5f;
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0.5f;
 /**
  * Rotational speed to update the beyblade ramp target by each iteration until final rotation
  * setpoint reached.
  */
-static constexpr float BEYBLADE_RAMP_UPDATE_RMP = 100;
+static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 100;
 }  // namespace aruwsrc::chassis
 
 #endif  // ENGINEER_CHASSIS_CONSTANTS_HPP_

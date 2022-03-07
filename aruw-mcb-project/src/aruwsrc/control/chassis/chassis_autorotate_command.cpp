@@ -167,4 +167,4 @@ void ChassisAutorotateCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 
-}  // namespace chassis
+}  // namespace aruwsrc::chassis

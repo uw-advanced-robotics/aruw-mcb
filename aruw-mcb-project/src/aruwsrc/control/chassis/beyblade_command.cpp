@@ -88,12 +88,12 @@ void BeybladeCommand::execute()
 
         if (fabsf(x) > TRANSLATION_LIMIT || fabsf(y) > TRANSLATION_LIMIT)
         {
-            rampTarget *= BEYBLADE_ROTATIONAL_SPEED_CUTOFF_WHEN_TRANSLATING;
+            rampTarget *= BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING;
         }
 
         rotateSpeedRamp.setTarget(rampTarget);
-        // Update the r speed by BEYBLADE_RAMP_UPDATE_RMP each iteration
-        rotateSpeedRamp.update(BEYBLADE_RAMP_UPDATE_RMP);
+        // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
+        rotateSpeedRamp.update(BEYBLADE_RAMP_UPDATE_RAMP);
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
