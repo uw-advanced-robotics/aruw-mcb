@@ -32,9 +32,9 @@ namespace aruwsrc::control::client_display
 {
 TurretAnglesIndicator::TurretAnglesIndicator(
     aruwsrc::Drivers *drivers,
-    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem)
+    const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem)
     : drivers(drivers),
-      turretSubsystem(turretSubsystem)
+      robotTurretSubsystem(robotTurretSubsystem)
 {
 }
 
@@ -56,12 +56,8 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
 {
     RF_BEGIN(1);
 
-    yaw = drivers->turretMCBCanComm.isConnected() ? drivers->turretMCBCanComm.getYaw() : 0.0f;
-#if defined(TARGET_HERO)
-    pitch = turretSubsystem.getPitchAngleFromCenter();
-#else
-    pitch = drivers->turretMCBCanComm.isConnected() ? -drivers->turretMCBCanComm.getPitch() : 0.0f;
-#endif
+    yaw = robotTurretSubsystem.getWorldYaw();
+    pitch = robotTurretSubsystem.getWorldPitch();
 
     if (sendTurretDataTimer.execute() &&
         (!compareFloatClose(prevYaw, yaw, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION) ||

@@ -29,7 +29,7 @@ namespace aruwsrc::control::client_display
 {
 ChassisOrientationIndicator::ChassisOrientationIndicator(
     aruwsrc::Drivers *drivers,
-    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem)
+    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem)
     : drivers(drivers),
       turretSubsystem(turretSubsystem)
 {
