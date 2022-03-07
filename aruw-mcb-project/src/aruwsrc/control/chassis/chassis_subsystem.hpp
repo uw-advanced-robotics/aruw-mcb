@@ -75,7 +75,7 @@ public:
 
     static float getMaxUserWheelSpeed(bool refSerialOnline, int chassisPower)
     {
-        if (refSerialOnline)
+        if (!refSerialOnline)
         {
             chassisPower = 0;
         }

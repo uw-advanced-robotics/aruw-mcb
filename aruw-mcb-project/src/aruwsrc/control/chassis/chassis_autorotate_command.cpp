@@ -31,9 +31,7 @@
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     aruwsrc::Drivers* drivers,
@@ -133,7 +131,8 @@ void ChassisAutorotateCommand::execute()
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        // what we will multiply x and y speed by to take into account rotation
+        // the x/y translational speed is limited to this value, this means when rotation is large,
+        // the translational speed will be clamped to a smaller value to compensate
         float rTranslationalGain =
             MAX_WHEEL_SPEED * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
 
@@ -146,6 +145,7 @@ void ChassisAutorotateCommand::execute()
             drivers->controlOperatorInterface.getChassisYInput(),
             -rTranslationalGain,
             rTranslationalGain);
+
         // Rotate X and Y depending on turret angle
         rotateVector(
             &chassisXDesiredWheelspeed,
@@ -168,5 +168,3 @@ void ChassisAutorotateCommand::end(bool) { chassis->setZeroRPM(); }
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 
 }  // namespace chassis
-
-}  // namespace aruwsrc

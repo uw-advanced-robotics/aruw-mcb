@@ -32,7 +32,7 @@ namespace aruwsrc::chassis
  * R).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 2'500},
+    {50, 3'500},
     {120, 6'000}};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
@@ -53,7 +53,7 @@ static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::
 /// @see power_limiter.hpp for what these mean
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
-static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 20.0f;
+static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 15.0f;
 
 static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
     /** Kp */
@@ -110,7 +110,7 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 /**
  * Fraction of max chassis speed that will be applied to rotation when beyblading
  */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.85f;
 
 /**
  * Fraction betweeh [0, 1], what we multiply user translational input by when beyblading.
