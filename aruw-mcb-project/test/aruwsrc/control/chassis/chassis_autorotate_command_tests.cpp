@@ -40,18 +40,6 @@ protected:
         ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
         ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));
-
-        // ON_CALL(turret, isOnline).WillByDefault(Return(true));
-        // ON_CALL(turret, yawLimited).WillByDefault(Return(isYawLimited));
-        // ON_CALL(chassis, chassisSpeedRotationPID)
-        //     .WillByDefault([&](float angle, float d)
-        //                    { return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);
-        //                    });
-        // ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(turretAngleFromCenter));
-        // ContiguousFloat turretAngleActualContiguous(turretAngleActual, 0, 360);
-        // ON_CALL(turret,
-        // getCurrentYawValue).WillByDefault(ReturnRef(turretAngleActualContiguous));
-        // ON_CALL(turret, getYawSetpoint).WillByDefault(Return(turretAngleSetpoint));
     }
 
     aruwsrc::Drivers drivers;

@@ -39,10 +39,19 @@ static constexpr float MAX_R =
 static constexpr float BASE_DESIRED_OUT =
     CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
-class BeybladeCommandTest : public Test
+class BeybladeCommandTest : public Test, public WithParamInterface<std::tuple<float, float, float>>
 {
 protected:
-    BeybladeCommandTest() : d(), t(&d), cs(&d), bc(&d, &cs, &t) {}
+    BeybladeCommandTest()
+        : d(),
+          t(&d),
+          cs(&d),
+          bc(&d, &cs, &t),
+          yawAngle(std::get<2>(GetParam())),
+          x(std::get<0>(GetParam())),
+          y(std::get<1>(GetParam()))
+    {
+    }
 
     void SetUp() override
     {
@@ -53,7 +62,6 @@ protected:
         ON_CALL(d.controlOperatorInterface, getChassisYInput()).WillByDefault(ReturnPointee(&y));
         ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
         ON_CALL(cs, calculateRotationTranslationalGain).WillByDefault(Return(1));
-        RefSerial::Rx::RobotData rd{};
         ON_CALL(d.refSerial, getRobotData).WillByDefault(ReturnRef(rd));
 
         bc.initialize();
@@ -76,52 +84,19 @@ protected:
     NiceMock<TurretSubsystemMock> t;
     NiceMock<ChassisSubsystemMock> cs;
     BeybladeCommand bc;
+    RefSerial::Rx::RobotData rd{};
     float yawAngle = 0;
     float x = 0, y = 0;
 };
 
-TEST_F(BeybladeCommandTest, execute_all_zeroes_no_ramp)
+TEST_P(BeybladeCommandTest, single_execute)
 {
-    x = 0, y = 0;
-
     setupDesiredOutputExpectations(std::min(MAX_R, BEYBLADE_RAMP_UPDATE_RAMP));
-
     bc.execute();
 }
 
-TEST_F(BeybladeCommandTest, execute_positive_xy)
+TEST_P(BeybladeCommandTest, multiple_execute)
 {
-    x = BASE_DESIRED_OUT, y = BASE_DESIRED_OUT;
-
-    setupDesiredOutputExpectations(std::min(MAX_R, BEYBLADE_RAMP_UPDATE_RAMP));
-
-    bc.execute();
-}
-
-TEST_F(BeybladeCommandTest, execute_negative_xy)
-{
-    x = -BASE_DESIRED_OUT / 2.0f, y = -BASE_DESIRED_OUT / 4.0f;
-
-    setupDesiredOutputExpectations(std::min(MAX_R, BEYBLADE_RAMP_UPDATE_RAMP));
-
-    bc.execute();
-}
-
-TEST_F(BeybladeCommandTest, execute_nonzero_yaw)
-{
-    x = BASE_DESIRED_OUT, y = -BASE_DESIRED_OUT;
-    yawAngle = 90;
-
-    setupDesiredOutputExpectations(std::min(MAX_R, BEYBLADE_RAMP_UPDATE_RAMP));
-
-    bc.execute();
-}
-
-TEST_F(BeybladeCommandTest, multiple_executes_beyblade_ramps)
-{
-    x = BASE_DESIRED_OUT, y = -BASE_DESIRED_OUT;
-    yawAngle = 180;
-
     for (int i = 1; i < 10; i++)
     {
         setupDesiredOutputExpectations(std::min(MAX_R, i * BEYBLADE_RAMP_UPDATE_RAMP));
@@ -132,3 +107,16 @@ TEST_F(BeybladeCommandTest, multiple_executes_beyblade_ramps)
         bc.execute();
     }
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    BeybladeCommand,
+    BeybladeCommandTest,
+    Values(
+        std::tuple<float, float, float>(0, 0, 0),
+        std::tuple<float, float, float>(BASE_DESIRED_OUT, BASE_DESIRED_OUT, 0),
+        std::tuple<float, float, float>(BASE_DESIRED_OUT, -BASE_DESIRED_OUT, 0),
+        std::tuple<float, float, float>(0, BASE_DESIRED_OUT, 0),
+        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, 0),
+        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, 90),
+        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, -90),
+        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, 180)));
