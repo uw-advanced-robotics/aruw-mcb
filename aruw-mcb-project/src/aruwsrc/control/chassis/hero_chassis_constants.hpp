@@ -82,7 +82,7 @@ static constexpr float AUTOROTATION_PID_KD = 5.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 2'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;
-static constexpr float AUTOROTATE_MIN_SMOOTHING_ALPHA = 0.001f;
+static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 // mechanical chassis constants
 /**
@@ -121,7 +121,8 @@ static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.75f;
  * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
  * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
  */
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_FOR_ROTATION_SPEED_DECREASE = 0.5f;
+static constexpr float
+    BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.5f;
 
 /**
  * The fraction to cut rotation speed while moving and beyblading

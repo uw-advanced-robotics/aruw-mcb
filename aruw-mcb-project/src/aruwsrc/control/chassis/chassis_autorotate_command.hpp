@@ -39,7 +39,9 @@ class ChassisSubsystem;
 class ChassisAutorotateCommand : public tap::control::Command
 {
 public:
-    static constexpr float SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD = 1.0f;
+    /** When the turret yaw setpoint and measured value is < 180 - this value, autorotation will be
+     * paused until the difference is within this value again. */
+    static constexpr float TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION = 1.0f;
 
     /** The symmetry of the chassis. */
     enum class ChassisSymmetry

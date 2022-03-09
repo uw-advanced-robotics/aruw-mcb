@@ -27,7 +27,7 @@ namespace aruwsrc::control::turret
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 10.0f,
+    .kp = 13.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -40,7 +40,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 700.0f,
+    .kp = 500.0f,
     .ki = 5.0f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
@@ -48,7 +48,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.0f,
+    .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
 };
 }  // namespace world_rel_turret_imu

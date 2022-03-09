@@ -24,8 +24,6 @@
 #include "tap/control/command.hpp"
 #include "tap/control/turret_subsystem_interface.hpp"
 
-#include "modm/math/interpolation/linear.hpp"
-
 namespace aruwsrc
 {
 class Drivers;
@@ -64,7 +62,6 @@ public:
     const char* getName() const override { return "chassis beyblade"; }
 
 private:
-    float rampTarget;
     float rotationDirection;
 
     tap::algorithms::Ramp rotateSpeedRamp;

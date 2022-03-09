@@ -40,23 +40,23 @@ void ChassisRelDrive::computeDesiredUserTranslation(
         return;
     }
 
-    const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
+    const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
     // what we will multiply x and y speed by to take into account rotation
-    float rTranslationalGain =
-        chassis->calculateRotationTranslationalGain(chassisRotation) * MAX_WHEEL_SPEED;
+    float rotationLimitedMaxTranslationalSpeed =
+        chassis->calculateRotationTranslationalGain(chassisRotation) * maxWheelSpeed;
 
     *chassisXDesiredWheelspeed = limitVal(
         drivers->controlOperatorInterface.getChassisXInput(),
-        -rTranslationalGain,
-        rTranslationalGain);
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
 
     *chassisYDesiredWheelspeed = limitVal(
         drivers->controlOperatorInterface.getChassisYInput(),
-        -rTranslationalGain,
-        rTranslationalGain);
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
 }
 
 void ChassisRelDrive::onExecute(aruwsrc::Drivers *drivers, ChassisSubsystem *chassis)

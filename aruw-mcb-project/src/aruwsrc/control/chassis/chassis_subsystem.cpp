@@ -35,6 +35,9 @@ namespace aruwsrc
 {
 namespace chassis
 {
+modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
+    CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
+
 ChassisSubsystem::ChassisSubsystem(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId leftFrontMotorId,
@@ -102,7 +105,7 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
         x,
         y,
         r,
-        ChassisSubsystem::getMaxUserWheelSpeed(
+        ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
@@ -241,22 +244,27 @@ float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float e
 float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
 {
     // what we will multiply x and y speed by to take into account rotation
-    float rTranslationalGain = 1.0f;
+    float rotationLimitedMaxTranslationalSpeed = 1.0f;
 
     // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
     // power consumption when the wheel rotation speed for chassis rotationis greater than the
     // MIN_ROTATION_THRESHOLD
     if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
     {
-        // power(max revolve speed - specified revolve speed, 2)
-        // / power(max revolve speed, 2)
-        // rTranslationalGain = powf(
-        //     MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
-        //         fabsf(chassisRotationDesiredWheelspeed) / MAX_WHEEL_SPEED_SINGLE_MOTOR,
-        //     2.0f);
-        rTranslationalGain = tap::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
+        // power(max revolve speed - specified revolve speed, 2) / power(max revolve speed, 2)
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+
+        rotationLimitedMaxTranslationalSpeed = powf(
+            maxWheelSpeed + MIN_ROTATION_THRESHOLD -
+                fabsf(chassisRotationDesiredWheelspeed) / maxWheelSpeed,
+            2.0f);
+
+        rotationLimitedMaxTranslationalSpeed =
+            tap::algorithms::limitVal<float>(rotationLimitedMaxTranslationalSpeed, 0.0f, 1.0f);
     }
-    return rTranslationalGain;
+    return rotationLimitedMaxTranslationalSpeed;
 }
 
 modm::Matrix<float, 3, 1> ChassisSubsystem::getDesiredVelocityChassisRelative() const

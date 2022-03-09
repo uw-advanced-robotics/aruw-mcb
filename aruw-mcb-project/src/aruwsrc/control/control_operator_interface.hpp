@@ -83,17 +83,26 @@ public:
     mockable ~ControlOperatorInterface() = default;
 
     /**
-     * @return the value used for chassis movement forward and backward, between -1 and 1.
+     * @return The value used for chassis movement forward and backward, between
+     * `[-getMaxUserWheelSpeed, getMaxUserWheelSpeed]`. Acceleration is applied to this value
+     * controlled by `MAX_ACCELERATION_X` and `MAX_DECELERATION_X`. A combination of keyboard and
+     * remote joystick information.
      */
     mockable float getChassisXInput();
 
     /**
-     * @return the value used for chassis movement side to side, between -1 and 1.
+     * @return The value used for chassis movement side to side, between `[-getMaxUserWheelSpeed,
+     * getMaxUserWheelSpeed]`. Acceleration is applied to this value controlled by
+     * `MAX_ACCELERATION_Y` and `MAX_DECELERATION_Y`. A combination of keyboard and remote joystick
+     * information.
      */
     mockable float getChassisYInput();
 
     /**
-     * @return the value used for chassis rotation, between -1 and 1.
+     * @return The value used for chassis rotation, between `[-getMaxUserWheelSpeed,
+     * getMaxUserWheelSpeed]`. Acceleration is applied to this value controlled by
+     * `MAX_ACCELERATION_R` and `MAX_DECELERATION_R`. A combination of keyboard and remote joystick
+     * information.
      */
     mockable float getChassisRInput();
 

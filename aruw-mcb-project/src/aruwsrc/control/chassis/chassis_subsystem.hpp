@@ -73,17 +73,25 @@ public:
         R = 2,
     };
 
-    static float getMaxUserWheelSpeed(bool refSerialOnline, int chassisPower)
+    static float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
     {
         if (!refSerialOnline)
         {
             chassisPower = 0;
         }
 
-        return CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
+        // only re-interpolate when needed (since this function is called a lot and the chassis
+        // power rarely changes, this helps cut down on unnecessary array searching/interpolation)
+        if (lastComputedMaxWheelSpeed.first != chassisPower)
+        {
+            lastComputedMaxWheelSpeed.first = chassisPower;
+            lastComputedMaxWheelSpeed.second =
+                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
+        }
+
+        return lastComputedMaxWheelSpeed.second;
     }
 
-public:
     ChassisSubsystem(
         aruwsrc::Drivers* drivers,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
@@ -109,13 +117,18 @@ public:
      */
     mockable void setDesiredOutput(float x, float y, float r);
 
+    /**
+     * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
+     * chassis state information like desired rotation.
+     */
     mockable void setZeroRPM();
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
      *
-     * @param currentAngleError the error as an angle. For autorotation,
+     * @param currentAngleError The error as an angle. For autorotation,
      * error between gimbal and center of chassis.
+     * @param errD The derivative of currentAngleError.
      *
      * @retval a desired rotation speed (wheel speed)
      */
@@ -174,6 +187,8 @@ public:
     mockable float getDesiredRotation() const { return desiredRotation; }
 
 private:
+    static modm::Pair<int, float> lastComputedMaxWheelSpeed;
+
     /**
      * Used to index into the desiredWheelRPM matrix and velocityPid array.
      */

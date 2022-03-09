@@ -81,11 +81,11 @@ float ControlOperatorInterface::getChassisXInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
 
-    const float MAX_CHASSIS_SPEED = chassis::ChassisSubsystem::getMaxUserWheelSpeed(
+    const float maxChassisSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 
-    float finalX = MAX_CHASSIS_SPEED *
+    float finalX = maxChassisSpeed *
                    limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
 
     chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
@@ -117,11 +117,11 @@ float ControlOperatorInterface::getChassisYInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
 
-    const float MAX_CHASSIS_SPEED = chassis::ChassisSubsystem::getMaxUserWheelSpeed(
+    const float maxChassisSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 
-    float finalY = MAX_CHASSIS_SPEED *
+    float finalY = maxChassisSpeed *
                    limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
 
     chassisYInputRamp.setTarget(applyChassisSpeedScaling(finalY));
@@ -153,11 +153,11 @@ float ControlOperatorInterface::getChassisRInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
 
-    const float MAX_CHASSIS_SPEED = chassis::ChassisSubsystem::getMaxUserWheelSpeed(
+    const float maxChassisSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 
-    float finalR = MAX_CHASSIS_SPEED *
+    float finalR = maxChassisSpeed *
                    limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
 
     chassisRInputRamp.setTarget(finalR);

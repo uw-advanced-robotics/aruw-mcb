@@ -75,18 +75,23 @@ void BeybladeCommand::execute()
         x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
         y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
-        const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        const float TRANSLATION_LIMIT =
-            BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_FOR_ROTATION_SPEED_DECREASE *
-            BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * MAX_WHEEL_SPEED;
+        // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
+        // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
+        const float translationalSpeedThreshold =
+            BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE *
+            BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
 
-        rampTarget =
-            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * MAX_WHEEL_SPEED;
+        float rampTarget =
+            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed;
 
-        if (fabsf(x) > TRANSLATION_LIMIT || fabsf(y) > TRANSLATION_LIMIT)
+        // reduce the beyblade rotation when translating to allow for better translational speed
+        // (otherwise it is likely that you will barely move unless
+        // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
+        if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
         {
             rampTarget *= BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING;
         }

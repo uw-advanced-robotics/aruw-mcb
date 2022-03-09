@@ -60,14 +60,14 @@ void ChassisAutorotateCommand::updateAutorotateState(
 
     if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
         !turret->yawLimited() &&
-        turretYawActualSetpointDiff > (180 - SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD))
+        turretYawActualSetpointDiff > (180 - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         // If turret setpoint all of a sudden turns around, don't autorotate
         chassisAutorotating = false;
     }
     else if (
         !chassisAutorotating &&
-        turretYawActualSetpointDiff < SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD)
+        turretYawActualSetpointDiff < TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION)
     {
         // Once the turret setpoint/target have reached each other, start turning again
         chassisAutorotating = true;
@@ -114,37 +114,37 @@ void ChassisAutorotateCommand::execute()
                 turret->getYawVelocity() - drivers->mpu6500.getGz());
 
             // find an alpha value to be used for the low pass filter, some value >
-            // AUTOROTATE_MIN_SMOOTHING_ALPHA, inversely proportional to
+            // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to
             // angleFromCenterForChassisAutorotate, so when autorotate angle error is large, low
             // pass filter alpha is small and more averaging will be applied to the desired
             // autorotation
             float autorotateSmoothingAlpha = std::max(
                 1.0f - abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
-                AUTOROTATE_MIN_SMOOTHING_ALPHA);
+                AUTOROTATION_MIN_SMOOTHING_ALPHA);
 
             // low pass filter the desiredRotation
             desiredRotationAverage =
                 lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
 
-        const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
         // the x/y translational speed is limited to this value, this means when rotation is large,
         // the translational speed will be clamped to a smaller value to compensate
-        float rTranslationalGain =
-            MAX_WHEEL_SPEED * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
+        float rotationLimitedMaxTranslationalSpeed =
+            maxWheelSpeed * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
 
         float chassisXDesiredWheelspeed = limitVal(
             drivers->controlOperatorInterface.getChassisXInput(),
-            -rTranslationalGain,
-            rTranslationalGain);
+            -rotationLimitedMaxTranslationalSpeed,
+            rotationLimitedMaxTranslationalSpeed);
 
         float chassisYDesiredWheelspeed = limitVal(
             drivers->controlOperatorInterface.getChassisYInput(),
-            -rTranslationalGain,
-            rTranslationalGain);
+            -rotationLimitedMaxTranslationalSpeed,
+            rotationLimitedMaxTranslationalSpeed);
 
         // Rotate X and Y depending on turret angle
         rotateVector(

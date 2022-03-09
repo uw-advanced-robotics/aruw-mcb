@@ -204,7 +204,7 @@ TEST_P(TurretOnlineTest, execute_autorotation_works)
     if (GetParam().chassisSymmetry != ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE &&
         !GetParam().yawLimited &&
         turretAngleActualContiguous.difference(GetParam().yawSetpoint) >
-            (180 - ChassisAutorotateCommand::SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD))
+            (180 - ChassisAutorotateCommand::TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         shouldAutorotate = false;
     }
@@ -314,15 +314,4 @@ INSTANTIATE_TEST_SUITE_P(
             .yawSetpoint = 90,
             .yawLimited = false,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
-        }),
-    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
-        std::stringstream ss;
-        ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) << "_r_"
-           << PrintToString(info.param.r) << "_yawAngle_" << PrintToString(info.param.yawAngle)
-           << "_yawSetpoint_" << PrintToString(info.param.yawSetpoint) << "_yawLimited_"
-           << PrintToString(info.param.yawLimited) << "_chassisSymmetry_"
-           << PrintToString(static_cast<int>(info.param.chassisSymmetry));
-        std::string s = ss.str();
-        std::replace(s.begin(), s.end(), '-', '_');
-        return s;
-    });
+        }));
