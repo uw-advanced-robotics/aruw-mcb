@@ -337,7 +337,7 @@ TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
             memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
 
             checkHeaderAndTail<DATA_LEN>(msg);
-            EXPECT_EQ(msg.messageType, 10);
+            EXPECT_EQ(msg.messageType, 11);
             EXPECT_EQ(getTimeMicroseconds(), *reinterpret_cast<uint32_t *>(msg.data));
 
             return length;
@@ -345,7 +345,7 @@ TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
 
     DJISerial::ReceivedSerialMessage syncRequestMessage;
     syncRequestMessage.header.dataLength = 1;
-    syncRequestMessage.messageType = 3;
+    syncRequestMessage.messageType = 10;
 
     serial.messageReceiveCallback(syncRequestMessage);
 }
