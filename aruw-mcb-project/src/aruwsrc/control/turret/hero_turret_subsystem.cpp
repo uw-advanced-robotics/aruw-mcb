@@ -25,16 +25,11 @@ namespace aruwsrc::control::turret
 {
 float HeroTurretSubsystem::getWorldYaw() const { return drivers->turretMCBCanComm.getYaw(); }
 
-float HeroTurretSubsystem::getWorldPitch() const
-{
-    // TODO replace with drivers->turretMCBCanComm.getPitch() when new mechanical IMU mounting
-    // complete
-    return getPitchAngleFromCenter() - drivers->turretMCBCanComm.getPitch();
-}
+float HeroTurretSubsystem::getWorldPitch() const { return drivers->turretMCBCanComm.getPitch(); }
 
 uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
 {
-    return drivers->turretMCBCanComm.getPitch();
+    return drivers->turretMCBCanComm.getIMUDataTimestamp();
 }
 
 }  // namespace aruwsrc::control::turret
