@@ -144,13 +144,13 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
+        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 10,
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_TIME_SYNC_REQ = 10,
+        CV_MESSAGE_TYPE_TIME_SYNC_REQ = 3,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
