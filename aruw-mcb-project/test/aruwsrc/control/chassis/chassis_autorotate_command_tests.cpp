@@ -110,10 +110,15 @@ INSTANTIATE_TEST_SUITE_P(
 
 struct TurretOnlineTestStruct
 {
-    float x = 0, y = 0, r = 0, yawAngle = 0, yawSetpoint = 0;
+    float x = 0;
+    float y = 0;
+    float r = 0;
+    float yawAngle = 0;
+    float yawSetpoint = 0;
     bool yawLimited = false;
     ChassisAutorotateCommand::ChassisSymmetry chassisSymmetry =
         ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE;
+    uint8_t padding[2] = {};  // padding to avoid valgrind errors
 };
 
 class TurretOnlineTest : public ChassisAutorotateCommandTest,
@@ -314,4 +319,15 @@ INSTANTIATE_TEST_SUITE_P(
             .yawSetpoint = 90,
             .yawLimited = false,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
-        }));
+        }),
+    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
+        std::stringstream ss;
+        ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) << "_r_"
+           << PrintToString(info.param.r) << "_yawAngle_" << PrintToString(info.param.yawAngle)
+           << "_yawSetpoint_" << PrintToString(info.param.yawSetpoint) << "_yawLimited_"
+           << PrintToString(info.param.yawLimited) << "_chassisSymmetry_"
+           << PrintToString(static_cast<int>(info.param.chassisSymmetry));
+        std::string s = ss.str();
+        std::replace(s.begin(), s.end(), '-', '_');
+        return s;
+    });

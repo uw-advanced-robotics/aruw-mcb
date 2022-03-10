@@ -44,7 +44,7 @@ public:
     static constexpr float TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION = 1.0f;
 
     /** The symmetry of the chassis. */
-    enum class ChassisSymmetry
+    enum class ChassisSymmetry : uint8_t
     {
         /** No symmetry, only one "front". */
         SYMMETRICAL_NONE,
