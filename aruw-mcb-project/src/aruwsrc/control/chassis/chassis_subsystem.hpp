@@ -214,10 +214,10 @@ private:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    tap::mock::DjiMotorMock leftFrontMotor;
-    tap::mock::DjiMotorMock leftBackMotor;
-    tap::mock::DjiMotorMock rightFrontMotor;
-    tap::mock::DjiMotorMock rightBackMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
 
 private:
 #else

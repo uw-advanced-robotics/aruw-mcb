@@ -257,8 +257,8 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
         rotationLimitedMaxTranslationalSpeed = powf(
-            maxWheelSpeed + MIN_ROTATION_THRESHOLD -
-                fabsf(chassisRotationDesiredWheelspeed) / maxWheelSpeed,
+            (maxWheelSpeed + MIN_ROTATION_THRESHOLD - fabsf(chassisRotationDesiredWheelspeed)) /
+                maxWheelSpeed,
             2.0f);
 
         rotationLimitedMaxTranslationalSpeed =

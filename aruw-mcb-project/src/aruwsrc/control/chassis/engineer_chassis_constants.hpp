@@ -31,7 +31,7 @@ namespace aruwsrc::chassis
  * Maps max power (in Watts) to max chassis wheel speed (RPM) for a particular direction (x, y, or
  * R).
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}};
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {2, 9'000}};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
