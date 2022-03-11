@@ -55,6 +55,7 @@ TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_
     EXPECT_CALL(turret, setPrevRanYawTurretController(nullptr));
     EXPECT_CALL(turret, getCurrentYawValue).WillRepeatedly(ReturnRef(turretYawValue));
     EXPECT_CALL(turret, setYawSetpoint(180));
+    EXPECT_CALL(turret2, setPrevRanYawTurretController(nullptr));
     EXPECT_CALL(turret2, getCurrentYawValue).WillRepeatedly(ReturnRef(turret2YawValue));
     EXPECT_CALL(turret2, setYawSetpoint(135));
 
