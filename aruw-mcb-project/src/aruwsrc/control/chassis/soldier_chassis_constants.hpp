@@ -39,8 +39,8 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
     MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
 
 /**
- * The minimum desired wheel speed for chassis rotation, measured in RPM before
- * we start slowing down translational speed.
+ * The minimum desired wheel speed for chassis rotation when translational scaling via
+ * calculateRotationTranslationalGain is performed.
  */
 static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 

@@ -54,6 +54,13 @@ public:
         SYMMETRICAL_90,
     };
 
+    /**
+     * @param[in] drivers Pointer to global drivers object.
+     * @param[in] chassis Chassis to control.
+     * @param[in] turret Turret subsytem, used to determine which point the chassis should be
+     * autorotating around.
+     * @param[in] chassisSymmetry The symmetry of the chassis.
+     */
     ChassisAutorotateCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,

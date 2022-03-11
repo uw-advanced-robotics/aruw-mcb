@@ -122,7 +122,8 @@ void ChassisAutorotateCommand::execute()
                 1.0f - abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
                 AUTOROTATION_MIN_SMOOTHING_ALPHA);
 
-            // low pass filter the desiredRotation
+            // low pass filter the desiredRotation to avoid radical changes in the desired rotation
+            // when far away from where we are centering the chassis around
             desiredRotationAverage =
                 lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }

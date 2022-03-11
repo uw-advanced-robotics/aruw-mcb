@@ -137,8 +137,15 @@ public:
     void refresh() override;
 
     /**
-     * @return A number between 0 and 1 that is the ratio between the rotationRpm and
-     *      the max rotation speed.
+     * When the desired rotational wheel speed is large, you can slow down your translational speed
+     * to make a tighter and more controllable turn. This function that can be used to scale down
+     * the translational chassis speed based on the desired rotational wheel speed.
+     *
+     * @param chassisRotationDesiredWheelspeed The desired rotational component of the chassis, in
+     * wheel RPM.
+     * @return A value between [0, 1] that is inversely proportional to the square of
+     * chassisRotationDesiredWheelspeed. You then multiply your desired translational RPM by this
+     * value.
      */
     mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 

@@ -112,10 +112,7 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
 
 void ChassisSubsystem::setZeroRPM()
 {
-    for (size_t i = 0; i < desiredWheelRPM.getNumberOfRows(); i++)
-    {
-        desiredWheelRPM[i][0] = 0;
-    }
+    desiredWheelRPM.zeroMatrix();
 }
 
 void ChassisSubsystem::refresh()
@@ -247,22 +244,23 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     float rotationLimitedMaxTranslationalSpeed = 1.0f;
 
     // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
-    // power consumption when the wheel rotation speed for chassis rotationis greater than the
+    // power consumption when the wheel rotation speed for chassis rotation is greater than the
     // MIN_ROTATION_THRESHOLD
     if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
     {
-        // power(max revolve speed - specified revolve speed, 2) / power(max revolve speed, 2)
         const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
+        // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
+        // power(max revolve speed, 2)
         rotationLimitedMaxTranslationalSpeed = powf(
             (maxWheelSpeed + MIN_ROTATION_THRESHOLD - fabsf(chassisRotationDesiredWheelspeed)) /
                 maxWheelSpeed,
             2.0f);
 
         rotationLimitedMaxTranslationalSpeed =
-            tap::algorithms::limitVal<float>(rotationLimitedMaxTranslationalSpeed, 0.0f, 1.0f);
+            limitVal(rotationLimitedMaxTranslationalSpeed, 0.0f, 1.0f);
     }
     return rotationLimitedMaxTranslationalSpeed;
 }
