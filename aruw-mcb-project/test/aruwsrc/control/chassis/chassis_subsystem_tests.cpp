@@ -70,6 +70,8 @@ TEST_F(ChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_velocity)
     chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
     chassis.setZeroRPM();
     EXPECT_NEAR(CHASSIS_VEL, chassis.getDesiredRotation(), 1E-3);
+    modm::Matrix<float, 3, 1> desiredVelocity = chassis.getDesiredVelocityChassisRelative();
+    EXPECT_NEAR(0, desiredVelocity[2][0], 1E-3);
 }
 
 TEST_F(ChassisSubsystemTest, allMotorsOnline)

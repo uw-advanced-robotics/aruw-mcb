@@ -30,6 +30,9 @@ namespace aruwsrc::chassis
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM) for a particular direction (x, y, or
  * R).
+ *
+ * Since the engineer has no power limiting, this lookup table doesn't matter much, just set some
+ * high values.
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {2, 9'000}};
 

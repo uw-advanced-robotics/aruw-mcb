@@ -112,7 +112,7 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
 
 void ChassisSubsystem::setZeroRPM()
 {
-    desiredWheelRPM.zeroMatrix();
+    desiredWheelRPM = desiredWheelRPM.zeroMatrix();
 }
 
 void ChassisSubsystem::refresh()
@@ -241,7 +241,7 @@ float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float e
 float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
 {
     // what we will multiply x and y speed by to take into account rotation
-    float rotationLimitedMaxTranslationalSpeed = 1.0f;
+    float rTranslationalGain = 1.0f;
 
     // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
     // power consumption when the wheel rotation speed for chassis rotation is greater than the
@@ -254,15 +254,15 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
 
         // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
         // power(max revolve speed, 2)
-        rotationLimitedMaxTranslationalSpeed = powf(
+        rTranslationalGain = powf(
             (maxWheelSpeed + MIN_ROTATION_THRESHOLD - fabsf(chassisRotationDesiredWheelspeed)) /
                 maxWheelSpeed,
             2.0f);
 
-        rotationLimitedMaxTranslationalSpeed =
-            limitVal(rotationLimitedMaxTranslationalSpeed, 0.0f, 1.0f);
+        rTranslationalGain =
+            limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
-    return rotationLimitedMaxTranslationalSpeed;
+    return rTranslationalGain;
 }
 
 modm::Matrix<float, 3, 1> ChassisSubsystem::getDesiredVelocityChassisRelative() const
