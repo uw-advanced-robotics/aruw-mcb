@@ -41,6 +41,30 @@ namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
     aruwsrc::Drivers* drivers,
+    const tap::algorithms::SmoothPid& pidParams,
+    float agitatorGearRatio,
+    tap::motor::MotorId agitatorMotorId,
+    tap::can::CanBus agitatorCanBusId,
+    bool isAgitatorInverted,
+    float jammingDistance,
+    uint32_t jammingTime,
+    bool jamLogicEnabled)
+    : tap::control::Subsystem(drivers),
+      agitatorPositionPid(pidParams),
+      jamChecker(this, jammingDistance, jammingTime),
+      gearRatio(agitatorGearRatio),
+      jamLogicEnabled(jamLogicEnabled),
+      agitatorMotor(
+          drivers,
+          agitatorMotorId,
+          agitatorCanBusId,
+          isAgitatorInverted,
+          "agitator motor")
+{
+}
+
+AgitatorSubsystem::AgitatorSubsystem(
+    aruwsrc::Drivers* drivers,
     float kp,
     float ki,
     float kd,

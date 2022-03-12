@@ -27,120 +27,91 @@
 using aruwsrc::engineer::AutoTowCommand;
 using aruwsrc::mock::TowSubsystemMock;
 using tap::gpio::Digital;
+using namespace testing;
 
 static constexpr Digital::OutputPin LEFT_TOW_PIN = Digital::OutputPin::E;
 static constexpr Digital::OutputPin RIGHT_TOW_PIN = Digital::OutputPin::F;
 static constexpr Digital::InputPin LEFT_TOW_LIMIT_SWITCH_PIN = Digital::InputPin::A;
 static constexpr Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN = Digital::InputPin::B;
 
-TEST(AutoTowCommand, execute_dont_trigger_auto_tow_when_neither_switches_enabled)
+class AutoTowCommandTest : public Test
 {
+protected:
+    AutoTowCommandTest()
+        : ts(&drivers,
+             LEFT_TOW_PIN,
+             RIGHT_TOW_PIN,
+             LEFT_TOW_LIMIT_SWITCH_PIN,
+             RIGHT_TOW_LIMIT_SWITCH_PIN),
+          tc(&ts)
+    {
+    }
+
     aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    AutoTowCommand tc(&ts);
+    TowSubsystemMock ts;
+    AutoTowCommand tc;
+};
+
+TEST_F(AutoTowCommandTest, execute_dont_trigger_auto_tow_when_neither_switches_enabled)
+{
     EXPECT_CALL(ts, setLeftClamped).Times(0);
     EXPECT_CALL(ts, setRightClamped).Times(0);
-    EXPECT_CALL(ts, getLeftClamped).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getRightClamped).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getLeftLimitSwitchTriggered).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getRightLeftLimitSwitchTriggered).WillOnce([] { return false; });
+    EXPECT_CALL(ts, getLeftClamped).WillOnce(Return(false));
+    EXPECT_CALL(ts, getRightClamped).WillOnce(Return(false));
+    EXPECT_CALL(ts, getLeftLimitSwitchTriggered).WillOnce(Return(false));
+    EXPECT_CALL(ts, getRightLeftLimitSwitchTriggered).WillOnce(Return(false));
 
     tc.execute();
 }
 
-TEST(AutoTowCommand, execute_trigger_left_clamp_when_left_switch_enabled)
+TEST_F(AutoTowCommandTest, execute_trigger_left_clamp_when_left_switch_enabled)
 {
-    aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    AutoTowCommand tc(&ts);
-    EXPECT_CALL(ts, setLeftClamped(true)).Times(1);
+    EXPECT_CALL(ts, setLeftClamped(true));
     EXPECT_CALL(ts, setRightClamped).Times(0);
-    EXPECT_CALL(ts, getLeftClamped).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getRightClamped).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getLeftLimitSwitchTriggered).WillOnce([] { return true; });
-    EXPECT_CALL(ts, getRightLeftLimitSwitchTriggered).WillOnce([] { return false; });
+    EXPECT_CALL(ts, getLeftClamped).WillOnce(Return(false));
+    EXPECT_CALL(ts, getRightClamped).WillOnce(Return(false));
+    EXPECT_CALL(ts, getLeftLimitSwitchTriggered).WillOnce(Return(true));
+    EXPECT_CALL(ts, getRightLeftLimitSwitchTriggered).WillOnce(Return(false));
 
     tc.execute();
 }
 
-TEST(AutoTowCommand, execute_trigger_right_clamp_when_right_switch_enabled)
+TEST_F(AutoTowCommandTest, execute_trigger_right_clamp_when_right_switch_enabled)
 {
-    aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    AutoTowCommand tc(&ts);
     EXPECT_CALL(ts, setLeftClamped).Times(0);
-    EXPECT_CALL(ts, setRightClamped(true)).Times(1);
-    EXPECT_CALL(ts, getLeftClamped).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getRightClamped).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getLeftLimitSwitchTriggered).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getRightLeftLimitSwitchTriggered).WillOnce([] { return true; });
+    EXPECT_CALL(ts, setRightClamped(true));
+    EXPECT_CALL(ts, getLeftClamped).WillOnce(Return(false));
+    EXPECT_CALL(ts, getRightClamped).WillOnce(Return(false));
+    EXPECT_CALL(ts, getLeftLimitSwitchTriggered).WillOnce(Return(false));
+    EXPECT_CALL(ts, getRightLeftLimitSwitchTriggered).WillOnce(Return(true));
 
     tc.execute();
 }
 
-TEST(AutoTowCommand, execute_trigger_both_clamps_when_both_switches_enabled)
+TEST_F(AutoTowCommandTest, execute_trigger_both_clamps_when_both_switches_enabled)
 {
-    aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    AutoTowCommand tc(&ts);
-    EXPECT_CALL(ts, setLeftClamped(true)).Times(1);
-    EXPECT_CALL(ts, setRightClamped(true)).Times(1);
-    EXPECT_CALL(ts, getLeftClamped).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getRightClamped).WillOnce([] { return false; });
-    EXPECT_CALL(ts, getLeftLimitSwitchTriggered).WillOnce([] { return true; });
-    EXPECT_CALL(ts, getRightLeftLimitSwitchTriggered).WillOnce([] { return true; });
+    EXPECT_CALL(ts, setLeftClamped(true));
+    EXPECT_CALL(ts, setRightClamped(true));
+    EXPECT_CALL(ts, getLeftClamped).WillOnce(Return(false));
+    EXPECT_CALL(ts, getRightClamped).WillOnce(Return(false));
+    EXPECT_CALL(ts, getLeftLimitSwitchTriggered).WillOnce(Return(true));
+    EXPECT_CALL(ts, getRightLeftLimitSwitchTriggered).WillOnce(Return(true));
 
     tc.execute();
 }
 
-TEST(AutoTowCommand, execute_dont_trigger_both_clamps_when_both_clamps_already_enabled)
+TEST_F(AutoTowCommandTest, execute_dont_trigger_both_clamps_when_both_clamps_already_enabled)
 {
-    aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    AutoTowCommand tc(&ts);
     EXPECT_CALL(ts, setLeftClamped).Times(0);
     EXPECT_CALL(ts, setRightClamped).Times(0);
-    EXPECT_CALL(ts, getLeftClamped).WillOnce([] { return true; });
-    EXPECT_CALL(ts, getRightClamped).WillOnce([] { return true; });
+    EXPECT_CALL(ts, getLeftClamped).WillOnce(Return(true));
+    EXPECT_CALL(ts, getRightClamped).WillOnce(Return(true));
 
     tc.execute();
 }
 
-TEST(AutoTowCommand, end_always_sets_both_clamps_open)
+TEST_F(AutoTowCommandTest, end_always_sets_both_clamps_open)
 {
-    aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    AutoTowCommand tc(&ts);
     EXPECT_CALL(ts, setLeftClamped(false)).Times(2);
     EXPECT_CALL(ts, setRightClamped(false)).Times(2);
 
@@ -148,16 +119,4 @@ TEST(AutoTowCommand, end_always_sets_both_clamps_open)
     tc.end(true);
 }
 
-TEST(AutoTowCommand, isFinished_always_returns_false)
-{
-    aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    AutoTowCommand tc(&ts);
-
-    EXPECT_FALSE(tc.isFinished());
-}
+TEST_F(AutoTowCommandTest, isFinished_always_returns_false) { EXPECT_FALSE(tc.isFinished()); }
