@@ -30,14 +30,16 @@ class Drivers;
 namespace aruwsrc::control
 {
 /**
- * A command mapping that doesn't actual schedule commands. Instead, allows the user to change the
- * state of some other object. This can allow you to change the state of a command or subsystem that
+ * A command mapping that doesn't actually schedule commands. Instead, allows the user to change the
+ * state of an object. This can allow you to change the state of a command or subsystem that
  * might be actually mapped to be scheduled by some other remote map state.
  *
- * Each time the remote map state is "pressed" by the user, the state changes and a callback
- * function is called with the new state.
+ * Each time the remote map state is "pressed" by the user, the state changes and a class-member
+ * callback function is called with the new state. The state cycles through a number of states
+ * determined by the user.
  *
- * @tparam T The type of state that is being cycled through.
+ * @tparam T The type of state that is being cycled through. Assums that the states to cycle through
+ * start at 0 and are integers that increment by 1 between each state.
  * @tparam N The number of states to cycle through.
  * @tparam C The class whose associated update state function will be called when the state has
  * changed.

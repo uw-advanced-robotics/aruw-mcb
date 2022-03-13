@@ -29,9 +29,22 @@ class Drivers;
 
 namespace aruwsrc::agitator
 {
+/**
+ * Class that stores and allows the user to set some ShooterState. Possible shooter states include
+ * single, burst, or full auto mode.
+ *
+ * The MultiShotHandler has an associated HoldRepeatCommandMapping. When the shooter state is set,
+ * the HoldRepeatCommandMapping's `maxTiemsToSchedule` is updated. Thus, assuming the
+ * HoldRepeatCommandMapping is associated with some command that launches a projectile, this class
+ * will control the "state" of the shooter.
+ */
 class MultiShotHandler
 {
 public:
+    /**
+     * State of the shooting mechanism, how many times the associated command mapping should
+     * reschedule the command when the mapping is met.
+     */
     enum ShooterState : uint8_t
     {
         SINGLE = 0,
@@ -40,6 +53,11 @@ public:
         NUM_SHOOTER_STATES,
     };
 
+    /**
+     * @param[in] commandMapping The HoldRepeatCommandMapping whose `maxTimesToSchedule` variable to
+     * update.
+     * @param[in] burstCount What to set `maxTimesToSchedule` to when in burst mode.
+     */
     MultiShotHandler(tap::control::HoldRepeatCommandMapping *commandMapping, int burstCount);
 
     void setShooterState(ShooterState state);
