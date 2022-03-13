@@ -32,53 +32,56 @@ using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
-#define SETUP_TEST()                                                                            \
-    Drivers drivers;                                                                            \
-    NiceMock<TurretSubsystemMock> turret(&drivers);                                             \
-    ChassisFramePitchTurretController pitchController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}); \
-    ChassisFrameYawTurretController yawController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});     \
-    TurretUserControlCommand turretCmd(&drivers, &turret, &yawController, &pitchController);
+#define SETUP_TEST()
 
-TEST(TurretUserControlCommand, isReady_return_true_when_turret_online)
+class TurretUserControlCommandTest : public Test
 {
-    SETUP_TEST();
+protected:
+    TurretUserControlCommandTest()
+        : turret(&drivers),
+          pitchController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          yawController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          turretCmd(&drivers, &turret, &yawController, &pitchController)
+    {
+    }
 
+    Drivers drivers;
+    NiceMock<TurretSubsystemMock> turret;
+    ChassisFramePitchTurretController pitchController;
+    ChassisFrameYawTurretController yawController;
+    TurretUserControlCommand turretCmd;
+};
+
+TEST_F(TurretUserControlCommandTest, isReady_return_true_when_turret_online)
+{
     ON_CALL(turret, isOnline).WillByDefault(Return(true));
 
     EXPECT_TRUE(turretCmd.isReady());
 }
 
-TEST(TurretUserControlCommand, isReady_return_false_when_turret_offline)
+TEST_F(TurretUserControlCommandTest, isReady_return_false_when_turret_offline)
 {
-    SETUP_TEST();
-
     ON_CALL(turret, isOnline).WillByDefault(Return(false));
 
     EXPECT_FALSE(turretCmd.isReady());
 }
 
-TEST(TurretUserControlCommand, isFinished_return_true_when_turret_offline)
+TEST_F(TurretUserControlCommandTest, isFinished_return_true_when_turret_offline)
 {
-    SETUP_TEST();
-
     ON_CALL(turret, isOnline).WillByDefault(Return(false));
 
     EXPECT_TRUE(turretCmd.isFinished());
 }
 
-TEST(TurretUserControlCommand, isFinished_return_false_when_turret_online)
+TEST_F(TurretUserControlCommandTest, isFinished_return_false_when_turret_online)
 {
-    SETUP_TEST();
-
     ON_CALL(turret, isOnline).WillByDefault(Return(true));
 
     EXPECT_FALSE(turretCmd.isFinished());
 }
 
-TEST(TurretUserControlCommand, end_sets_motor_out_to_0)
+TEST_F(TurretUserControlCommandTest, end_sets_motor_out_to_0)
 {
-    SETUP_TEST();
-
     EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(2);
     EXPECT_CALL(turret, setYawMotorOutput(0)).Times(2);
 
@@ -86,10 +89,8 @@ TEST(TurretUserControlCommand, end_sets_motor_out_to_0)
     turretCmd.end(false);
 }
 
-TEST(TurretUserControlCommand, execute_output_0_when_error_0)
+TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
 {
-    SETUP_TEST();
-
     tap::algorithms::ContiguousFloat yawActual(90, 0, 360);
     tap::algorithms::ContiguousFloat pitchActual(90, 0, 360);
     ON_CALL(drivers.controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(0));
@@ -118,10 +119,8 @@ TEST(TurretUserControlCommand, execute_output_0_when_error_0)
     turretCmd.execute();
 }
 
-TEST(TurretUserControlCommand, execute_output_nonzero_when_error_nonzero)
+TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
 {
-    SETUP_TEST();
-
     float pitchSetpoint = 90, yawSetpoint = 90;
     tap::algorithms::ContiguousFloat yawActual(90, 0, 360);
     tap::algorithms::ContiguousFloat pitchActual(90, 0, 360);
