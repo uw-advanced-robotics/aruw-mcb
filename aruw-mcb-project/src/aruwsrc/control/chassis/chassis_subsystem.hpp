@@ -73,31 +73,25 @@ public:
         R = 2,
     };
 
-    static constexpr int WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE =
-        (MAX_WHEEL_SPEED_SINGLE_MOTOR - MIN_WHEEL_SPEED_SINGLE_MOTOR) /
-        (MAX_CHASSIS_POWER - MIN_CHASSIS_POWER);
-    static_assert(WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE >= 0);
-
-    static inline float getMaxUserWheelSpeed(bool refSerialOnline, int chassisPower)
+    static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
     {
-        if (refSerialOnline)
+        if (!refSerialOnline)
         {
-            float desWheelSpeed = WHEEL_SPEED_OVER_CHASSIS_POWER_SLOPE *
-                                      static_cast<float>(chassisPower - MIN_CHASSIS_POWER) +
-                                  MIN_WHEEL_SPEED_SINGLE_MOTOR;
+            chassisPower = 0;
+        }
 
-            return tap::algorithms::limitVal(
-                desWheelSpeed,
-                static_cast<float>(MIN_WHEEL_SPEED_SINGLE_MOTOR),
-                static_cast<float>(MAX_WHEEL_SPEED_SINGLE_MOTOR));
-        }
-        else
+        // only re-interpolate when needed (since this function is called a lot and the chassis
+        // power rarely changes, this helps cut down on unnecessary array searching/interpolation)
+        if (lastComputedMaxWheelSpeed.first != chassisPower)
         {
-            return MIN_WHEEL_SPEED_SINGLE_MOTOR;
+            lastComputedMaxWheelSpeed.first = chassisPower;
+            lastComputedMaxWheelSpeed.second =
+                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
         }
+
+        return lastComputedMaxWheelSpeed.second;
     }
 
-public:
     ChassisSubsystem(
         aruwsrc::Drivers* drivers,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
@@ -124,20 +118,34 @@ public:
     mockable void setDesiredOutput(float x, float y, float r);
 
     /**
+     * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
+     * chassis state information like desired rotation.
+     */
+    mockable void setZeroRPM();
+
+    /**
      * Run chassis rotation PID on some actual turret angle offset.
      *
-     * @param currentAngleError the error as an angle. For autorotation,
+     * @param currentAngleError The error as an angle. For autorotation,
      * error between gimbal and center of chassis.
+     * @param errD The derivative of currentAngleError.
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    mockable float chassisSpeedRotationPID(float currentAngleError);
+    mockable float chassisSpeedRotationPID(float currentAngleError, float errD);
 
     void refresh() override;
 
     /**
-     * @return A number between 0 and 1 that is the ratio between the rotationRpm and
-     *      the max rotation speed.
+     * When the desired rotational wheel speed is large, you can slow down your translational speed
+     * to make a tighter and more controllable turn. This function that can be used to scale down
+     * the translational chassis speed based on the desired rotational wheel speed.
+     *
+     * @param chassisRotationDesiredWheelspeed The desired rotational component of the chassis, in
+     * wheel RPM.
+     * @return A value between [0, 1] that is inversely proportional to the square of
+     * chassisRotationDesiredWheelspeed. You then multiply your desired translational RPM by this
+     * value.
      */
     mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
@@ -186,6 +194,8 @@ public:
     mockable float getDesiredRotation() const { return desiredRotation; }
 
 private:
+    static modm::Pair<int, float> lastComputedMaxWheelSpeed;
+
     /**
      * Used to index into the desiredWheelRPM matrix and velocityPid array.
      */
@@ -205,18 +215,16 @@ private:
      */
     modm::Matrix<float, 4, 1> desiredWheelRPM;
 
-    tap::algorithms::ExtendedKalman chassisRotationErrorKalman;
-
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
     float desiredRotation = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    tap::mock::DjiMotorMock leftFrontMotor;
-    tap::mock::DjiMotorMock leftBackMotor;
-    tap::mock::DjiMotorMock rightFrontMotor;
-    tap::mock::DjiMotorMock rightBackMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
 
 private:
 #else
