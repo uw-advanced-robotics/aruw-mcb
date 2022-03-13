@@ -19,6 +19,8 @@
 
 #include "agitator_subsystem.hpp"
 
+#include <cassert>
+
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -41,7 +43,7 @@ namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
     aruwsrc::Drivers* drivers,
-    const tap::algorithms::SmoothPid& pidParams,
+    const tap::algorithms::SmoothPidConfig& pidParams,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,
     tap::can::CanBus agitatorCanBusId,
@@ -61,34 +63,7 @@ AgitatorSubsystem::AgitatorSubsystem(
           isAgitatorInverted,
           "agitator motor")
 {
-}
-
-AgitatorSubsystem::AgitatorSubsystem(
-    aruwsrc::Drivers* drivers,
-    float kp,
-    float ki,
-    float kd,
-    float maxIAccum,
-    float maxOutput,
-    float agitatorGearRatio,
-    tap::motor::MotorId agitatorMotorId,
-    tap::can::CanBus agitatorCanBusId,
-    bool isAgitatorInverted,
-    float jammingDistance,
-    uint32_t jammingTime,
-    bool jamLogicEnabled)
-    : tap::control::Subsystem(drivers),
-      agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
-      jamChecker(this, jammingDistance, jammingTime),
-      gearRatio(agitatorGearRatio),
-      jamLogicEnabled(jamLogicEnabled),
-      agitatorMotor(
-          drivers,
-          agitatorMotorId,
-          agitatorCanBusId,
-          isAgitatorInverted,
-          "agitator motor")
-{
+    assert(jammingDistance >= 0);
 }
 
 void AgitatorSubsystem::initialize() { agitatorMotor.initialize(); }

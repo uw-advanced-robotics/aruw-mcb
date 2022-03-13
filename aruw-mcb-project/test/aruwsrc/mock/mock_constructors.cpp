@@ -38,11 +38,7 @@ namespace aruwsrc::mock
 {
 AgitatorSubsystemMock::AgitatorSubsystemMock(
     aruwsrc::Drivers *drivers,
-    float kp,
-    float ki,
-    float kd,
-    float maxIAccum,
-    float maxOutput,
+    const tap::algorithms::SmoothPidConfig &pidConfig,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,
     tap::can::CanBus agitatorCanBusId,
@@ -52,11 +48,7 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
     bool jamLogicEnabled)
     : AgitatorSubsystem(
           drivers,
-          kp,
-          ki,
-          kd,
-          maxIAccum,
-          maxOutput,
+          pidConfig,
           agitatorGearRatio,
           agitatorMotorId,
           agitatorCanBusId,

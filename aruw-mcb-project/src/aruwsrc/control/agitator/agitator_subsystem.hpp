@@ -68,11 +68,7 @@ public:
      * Jam parameters are not used if jam logic is disabled.
      *
      * @param[in] drivers pointer to aruwsrc drivers struct
-     * @param[in] kp PID kp constant
-     * @param[in] ki PID ki constant
-     * @param[in] kd PID kd constant
-     * @param[in] maxIAccum limit on integral value in PID
-     * @param[in] maxOutput max output of PID
+     * @param[in] pidParams Position PID configuration struct for the agitator motor controller.
      * @param[in] agitatorGearRatio the gear ratio of this motor
      * @param[in] agitatorMotorId the motor ID for this motor
      * @param[in] isAgitatorInverted if `true` positive rotation is clockwise when
@@ -86,7 +82,7 @@ public:
      */
     AgitatorSubsystem(
         aruwsrc::Drivers* drivers,
-        const tap::algorithms::SmoothPid& pidParams,
+        const tap::algorithms::SmoothPidConfig& pidParams,
         float agitatorGearRatio,
         tap::motor::MotorId agitatorMotorId,
         tap::can::CanBus agitatorCanBusId,
@@ -103,21 +99,6 @@ public:
      * @return The angle set in `setSetpoint`.
      */
     mockable inline float getSetpoint() const override { return desiredAgitatorAngle; }
-
-    AgitatorSubsystem(
-        aruwsrc::Drivers* drivers,
-        float kp,
-        float ki,
-        float kd,
-        float maxIAccum,
-        float maxOutput,
-        float agitatorGearRatio,
-        tap::motor::MotorId agitatorMotorId,
-        tap::can::CanBus agitatorCanBusId,
-        bool isAgitatorInverted,
-        float jammingDistance,
-        uint32_t jammingTime,
-        bool jamLogicEnabled);
 
     /**
      * Sets desired angle in radians of the agitator motor, relative to where the agitator
@@ -157,7 +138,11 @@ public:
     /**
      * Clear the jam status of the subsystem, indicating that it has been unjammed.
      */
-    void clearJam() override { subsystemJamStatus = false; }
+    void clearJam() override
+    {
+        subsystemJamStatus = false;
+        jamChecker.restart();
+    }
 
     /**
      * @return `true` if the agitator has been calibrated (`calibrateHere` has been
@@ -239,7 +224,7 @@ private:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    tap::mock::DjiMotorMock agitatorMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> agitatorMotor;
 
 private:
 #else
