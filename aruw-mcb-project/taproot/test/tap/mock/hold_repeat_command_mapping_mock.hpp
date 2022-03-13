@@ -29,7 +29,8 @@ namespace tap::mock
 class HoldRepeatCommandMappingMock : public control::HoldRepeatCommandMapping
 {
 public:
-    HoldRepeatCommandMappingMock(Drivers *drivers,
+    HoldRepeatCommandMappingMock(
+        Drivers *drivers,
         const std::vector<control::Command *> cmds,
         const control::RemoteMapState &rms,
         bool endCommandsWhenNotHeld,
@@ -39,6 +40,6 @@ public:
     MOCK_METHOD(void, executeCommandMapping, (const tap::control::RemoteMapState &), (override));
     MOCK_METHOD(void, setMaxTimesToSchedule, (int), (override));
 };  // class HoldRepeatCommandMappingMock
-}  // namespace tap
+}  // namespace tap::mock
 
 #endif  // HOLD_REPEAT_COMMAND_MAPPING_MOCK_HPP_
