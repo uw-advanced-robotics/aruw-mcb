@@ -33,6 +33,12 @@ static constexpr float GEAR_RATIO = AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM350
 static constexpr float ENC_TO_ANGLE_RATIO =
     2.0 * M_PI / (static_cast<float>(DjiMotor::ENC_RESOLUTION) * GEAR_RATIO);
 
+/**
+ * TestWithParam tuple template params:
+ * - element 0: jammingDistance
+ * - element 1: jammingTime
+ * - element 2: jamLogicEnabled
+ */
 class AgitatorSubsystemTest : public TestWithParam<std::tuple<float, uint32_t, bool>>
 {
 protected:
@@ -95,7 +101,7 @@ TEST_P(AgitatorSubsystemTest, refresh_runs_pid_controller)
 
     agitator.setSetpoint(M_PI);
 
-    for (size_t i = 0; i < 200; i++)
+    for (size_t i = 0; i < 100; i++)
     {
         agitator.refresh();
     }
