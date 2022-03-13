@@ -132,7 +132,11 @@ ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, true);
+ChassisAutorotateCommand chassisAutorotateCommand(
+    drivers(),
+    &chassis,
+    &turret,
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
