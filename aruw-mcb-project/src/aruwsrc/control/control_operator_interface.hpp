@@ -58,7 +58,7 @@ public:
      */
     static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
     static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
-#else
+#else  // TARGET_ENGINEER (and other targets that don't use a traditional chassis)
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
@@ -85,24 +85,24 @@ public:
     /**
      * @return The value used for chassis movement forward and backward, between
      * `[-getMaxUserWheelSpeed, getMaxUserWheelSpeed]`. Acceleration is applied to this value
-     * controlled by `MAX_ACCELERATION_X` and `MAX_DECELERATION_X`. A combination of keyboard and
-     * remote joystick information.
+     * controlled by `MAX_ACCELERATION_X` and `MAX_DECELERATION_X`. A linear combination of keyboard
+     * and remote joystick information.
      */
     mockable float getChassisXInput();
 
     /**
      * @return The value used for chassis movement side to side, between `[-getMaxUserWheelSpeed,
      * getMaxUserWheelSpeed]`. Acceleration is applied to this value controlled by
-     * `MAX_ACCELERATION_Y` and `MAX_DECELERATION_Y`. A combination of keyboard and remote joystick
-     * information.
+     * `MAX_ACCELERATION_Y` and `MAX_DECELERATION_Y`. A linear combination of keyboard and remote
+     * joystick information.
      */
     mockable float getChassisYInput();
 
     /**
      * @return The value used for chassis rotation, between `[-getMaxUserWheelSpeed,
      * getMaxUserWheelSpeed]`. Acceleration is applied to this value controlled by
-     * `MAX_ACCELERATION_R` and `MAX_DECELERATION_R`. A combination of keyboard and remote joystick
-     * information.
+     * `MAX_ACCELERATION_R` and `MAX_DECELERATION_R`. A linear combination of keyboard and remote
+     * joystick information.
      */
     mockable float getChassisRInput();
 
@@ -141,10 +141,13 @@ private:
     tap::algorithms::Ramp chassisYInputRamp;
     tap::algorithms::Ramp chassisRInputRamp;
 
-    uint32_t prevChassisXInuptCalledTime = 0;
-    uint32_t prevChassisYInuptCalledTime = 0;
-    uint32_t prevChassisRInuptCalledTime = 0;
+    uint32_t prevChassisXInputCalledTime = 0;
+    uint32_t prevChassisYInputCalledTime = 0;
+    uint32_t prevChassisRInputCalledTime = 0;
 
+    /**
+     * Scales `value` when ctrl/shift are pressed and returns the scaled value.
+     */
     float applyChassisSpeedScaling(float value);
 };  // class ControlOperatorInterface
 

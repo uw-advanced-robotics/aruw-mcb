@@ -28,13 +28,12 @@
 namespace aruwsrc::chassis
 {
 /**
- * Maps max power (in Watts) to max chassis wheel speed (RPM) for a particular direction (x, y, or
- * R).
+ * Maps max power (in Watts) to max chassis wheel speed (RPM).
  *
  * Since the engineer has no power limiting, this lookup table doesn't matter much, just set some
  * high values.
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {2, 9'000}};
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1, 8'000}};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -114,7 +113,7 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
 
 /**
- * Fraction betweeh [0, 1], what we multiply user translational input by when beyblading.
+ * Fraction between [0, 1], what we multiply user translational input by when beyblading.
  */
 static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.5f;
 
@@ -131,7 +130,7 @@ static constexpr float
 static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0.5f;
 /**
  * Rotational speed to update the beyblade ramp target by each iteration until final rotation
- * setpoint reached.
+ * setpoint reached, in RPM.
  */
 static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 100;
 }  // namespace aruwsrc::chassis

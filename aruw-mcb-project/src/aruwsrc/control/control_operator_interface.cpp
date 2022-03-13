@@ -46,7 +46,14 @@ float ControlOperatorInterface::applyChassisSpeedScaling(float value)
     return value;
 }
 
-static inline void applyChassisAcceleration(
+/**
+ * @param[out] ramp Ramp that should have acceleration applied to. The ramp is updated some
+ * increment based on the passed in acceleration values. Ramp stores values in some units.
+ * @param[in] maxAcceleration Positive acceleration value to apply to the ramp in units/time^2.
+ * @param[in] maxDeceleration Negative acceleration value to apply to the ramp, in units/time^2.
+ * @param[in] dt Change in time since this function was last called, in units of some time.
+ */
+static inline void applyAccelerationToRamp(
     tap::algorithms::Ramp &ramp,
     float maxAcceleration,
     float maxDeceleration,
@@ -69,8 +76,8 @@ float ControlOperatorInterface::getChassisXInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevChassisXInuptCalledTime;
-    prevChassisXInuptCalledTime = currTime;
+    uint32_t dt = currTime - prevChassisXInputCalledTime;
+    prevChassisXInputCalledTime = currTime;
 
     if (prevUpdateCounterX != updateCounter)
     {
@@ -90,7 +97,7 @@ float ControlOperatorInterface::getChassisXInput()
 
     chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
 
-    applyChassisAcceleration(
+    applyAccelerationToRamp(
         chassisXInputRamp,
         MAX_ACCELERATION_X,
         MAX_DECELERATION_X,
@@ -103,8 +110,8 @@ float ControlOperatorInterface::getChassisYInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevChassisYInuptCalledTime;
-    prevChassisYInuptCalledTime = currTime;
+    uint32_t dt = currTime - prevChassisYInputCalledTime;
+    prevChassisYInputCalledTime = currTime;
 
     if (prevUpdateCounterY != updateCounter)
     {
@@ -126,7 +133,7 @@ float ControlOperatorInterface::getChassisYInput()
 
     chassisYInputRamp.setTarget(applyChassisSpeedScaling(finalY));
 
-    applyChassisAcceleration(
+    applyAccelerationToRamp(
         chassisYInputRamp,
         MAX_ACCELERATION_Y,
         MAX_DECELERATION_Y,
@@ -139,8 +146,8 @@ float ControlOperatorInterface::getChassisRInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevChassisRInuptCalledTime;
-    prevChassisRInuptCalledTime = currTime;
+    uint32_t dt = currTime - prevChassisRInputCalledTime;
+    prevChassisRInputCalledTime = currTime;
 
     if (prevUpdateCounterR != updateCounter)
     {
@@ -162,7 +169,7 @@ float ControlOperatorInterface::getChassisRInput()
 
     chassisRInputRamp.setTarget(finalR);
 
-    applyChassisAcceleration(
+    applyAccelerationToRamp(
         chassisRInputRamp,
         MAX_ACCELERATION_R,
         MAX_DECELERATION_R,
