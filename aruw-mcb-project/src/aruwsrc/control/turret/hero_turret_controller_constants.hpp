@@ -40,10 +40,36 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 500.0f,
+    .kp = 700.0f,
     .ki = 5.0f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
+    .maxOutput = 30000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
+    .kp = 22.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 10'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
+    .kp = 750.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
     .maxOutput = 30000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,

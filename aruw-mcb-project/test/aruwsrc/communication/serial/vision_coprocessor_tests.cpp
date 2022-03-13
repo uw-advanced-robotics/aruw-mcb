@@ -315,7 +315,7 @@ TEST(VisionCoprocessor, sendRebootMessage_sends_blank_msg_with_correct_id)
     serial.sendRebootMessage();
 }
 
-TEST(VisionCoprocesor, time_sync_message_sent_after_time_sync_req_received)
+TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
 {
     ClockStub clock;
     clock.time = 10'000;

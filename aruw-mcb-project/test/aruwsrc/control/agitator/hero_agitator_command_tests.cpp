@@ -32,18 +32,6 @@ using namespace testing;
 
 using tap::arch::clock::ClockStub;
 
-#define SETUP_TEST(heroAgitatorCommandConfig)                      \
-    Drivers drivers;                                               \
-    NiceMock<AgitatorSubsystemMock> kicker(&drivers);              \
-    NiceMock<AgitatorSubsystemMock> waterwheel(&drivers);          \
-    NiceMock<FrictionWheelSubsystemMock> frictionWheels(&drivers); \
-    HeroAgitatorCommand cmd(                                       \
-        &drivers,                                                  \
-        &kicker,                                                   \
-        &waterwheel,                                               \
-        &frictionWheels,                                           \
-        heroAgitatorCommandConfig);
-
 static HeroAgitatorCommand::Config DEFAULT_HERO_AGITATOR_CMD_CONFIG{
     .kickerShootRotateAngle = M_PI_2,
     .kickerShootRotateTime = 10,
@@ -60,12 +48,34 @@ static HeroAgitatorCommand::Config DEFAULT_HERO_AGITATOR_CMD_CONFIG{
     .heatLimitBuffer = 100,
 };
 
-TEST(HeroAgitatorCommand, isReady_no_heat_limiting_true_when_both_motors_online)
+class HeroAgitatorCommandTest : public Test
 {
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
+protected:
+    HeroAgitatorCommandTest()
+        : drivers(),
+          kicker(&drivers),
+          waterwheel(&drivers),
+          frictionWheels(&drivers),
+          cmd(&drivers, &kicker, &waterwheel, &frictionWheels, DEFAULT_HERO_AGITATOR_CMD_CONFIG)
+    {
+    }
 
+    void SetUp() override
+    {
+        ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+    }
+
+    Drivers drivers;
+    NiceMock<AgitatorSubsystemMock> kicker;
+    NiceMock<AgitatorSubsystemMock> waterwheel;
+    NiceMock<FrictionWheelSubsystemMock> frictionWheels;
+    HeroAgitatorCommand cmd;
     RefSerial::Rx::RobotData robotData;
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+    ClockStub clock;
+};
+
+TEST_F(HeroAgitatorCommandTest, isReady_no_heat_limiting_true_when_both_motors_online)
+{
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
     ON_CALL(kicker, isOnline).WillByDefault(Return(true));
     ON_CALL(waterwheel, isOnline).WillByDefault(Return(true));
@@ -73,12 +83,8 @@ TEST(HeroAgitatorCommand, isReady_no_heat_limiting_true_when_both_motors_online)
     EXPECT_TRUE(cmd.isReady());
 }
 
-TEST(HeroAgitatorCommand, isReady_no_heat_limiting_false_when_single_motor_offline)
+TEST_F(HeroAgitatorCommandTest, isReady_no_heat_limiting_false_when_single_motor_offline)
 {
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
-    RefSerial::Rx::RobotData robotData;
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
     EXPECT_CALL(kicker, isOnline)
         .Times(AnyNumber())
@@ -96,12 +102,8 @@ TEST(HeroAgitatorCommand, isReady_no_heat_limiting_false_when_single_motor_offli
     EXPECT_FALSE(cmd.isReady());
 }
 
-TEST(HeroAgitatorCommand, isReady_no_heat_limiting_true_when_heat_limit_within_buffer)
+TEST_F(HeroAgitatorCommandTest, isReady_no_heat_limiting_true_when_heat_limit_within_buffer)
 {
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
-    RefSerial::Rx::RobotData robotData;
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
     ON_CALL(kicker, isOnline).WillByDefault(Return(true));
     ON_CALL(waterwheel, isOnline).WillByDefault(Return(true));
@@ -112,15 +114,15 @@ TEST(HeroAgitatorCommand, isReady_no_heat_limiting_true_when_heat_limit_within_b
     EXPECT_TRUE(cmd.isReady());
 }
 
-TEST(HeroAgitatorCommand, isReady_heat_limiting_true_when_heat_limit_below_buffer)
+TEST_F(HeroAgitatorCommandTest, isReady_heat_limiting_true_when_heat_limit_below_buffer)
 {
     auto agitatorConfig = DEFAULT_HERO_AGITATOR_CMD_CONFIG;
     agitatorConfig.heatLimiting = true;
-    SETUP_TEST(agitatorConfig);
 
-    RefSerial::Rx::RobotData robotData;
+    // declare new HeroAgitatorCommand that has a custom agitator config
+    HeroAgitatorCommand cmd(&drivers, &kicker, &waterwheel, &frictionWheels, agitatorConfig);
+
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
     ON_CALL(kicker, isOnline).WillByDefault(Return(true));
     ON_CALL(waterwheel, isOnline).WillByDefault(Return(true));
@@ -136,14 +138,14 @@ TEST(HeroAgitatorCommand, isReady_heat_limiting_true_when_heat_limit_below_buffe
     EXPECT_TRUE(cmd.isReady());
 }
 
-TEST(HeroAgitatorCommand, isReady_heat_limiting_false_when_heat_limit_above_buffer)
+TEST_F(HeroAgitatorCommandTest, isReady_heat_limiting_false_when_heat_limit_above_buffer)
 {
     auto agitatorConfig = DEFAULT_HERO_AGITATOR_CMD_CONFIG;
     agitatorConfig.heatLimiting = true;
-    SETUP_TEST(agitatorConfig);
 
-    RefSerial::Rx::RobotData robotData;
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+    // declare new HeroAgitatorCommand that has a custom agitator config
+    HeroAgitatorCommand cmd(&drivers, &kicker, &waterwheel, &frictionWheels, agitatorConfig);
+
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
     ON_CALL(kicker, isOnline).WillByDefault(Return(true));
@@ -164,12 +166,8 @@ TEST(HeroAgitatorCommand, isReady_heat_limiting_false_when_heat_limit_above_buff
     EXPECT_FALSE(cmd.isReady());
 }
 
-TEST(HeroAgitatorCommand, isReady_false_when_flywheels_not_on)
+TEST_F(HeroAgitatorCommandTest, isReady_false_when_flywheels_not_on)
 {
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
-    RefSerial::Rx::RobotData robotData;
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(0));
     ON_CALL(kicker, isOnline).WillByDefault(Return(true));
     ON_CALL(waterwheel, isOnline).WillByDefault(Return(true));
@@ -177,10 +175,8 @@ TEST(HeroAgitatorCommand, isReady_false_when_flywheels_not_on)
     EXPECT_FALSE(cmd.isReady());
 }
 
-TEST(HeroAgitatorCommand, isFinished_true_when_flywheels_not_on)
+TEST_F(HeroAgitatorCommandTest, isFinished_true_when_flywheels_not_on)
 {
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(0));
     ON_CALL(kicker, isOnline).WillByDefault(Return(true));
     ON_CALL(waterwheel, isOnline).WillByDefault(Return(true));
@@ -188,10 +184,8 @@ TEST(HeroAgitatorCommand, isFinished_true_when_flywheels_not_on)
     EXPECT_TRUE(cmd.isFinished());
 }
 
-TEST(HeroAgitatorCommand, isFinished_true_when_motors_disconnected)
+TEST_F(HeroAgitatorCommandTest, isFinished_true_when_motors_disconnected)
 {
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
     EXPECT_CALL(kicker, isOnline)
         .Times(AnyNumber())
@@ -209,12 +203,8 @@ TEST(HeroAgitatorCommand, isFinished_true_when_motors_disconnected)
     EXPECT_TRUE(cmd.isFinished());
 }
 
-TEST(HeroAgitatorCommand, execute_ball_not_loaded_loading_happens)
+TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_loading_happens)
 {
-    ClockStub clock;
-
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
     // The first DEFAULT_HERO_AGITATOR_CMD_CONFIG.loadRotateTime getLimitSwitchDepressed returns
     // false, then the last time it returns true
     InSequence seq;
@@ -257,12 +247,8 @@ TEST(HeroAgitatorCommand, execute_ball_not_loaded_loading_happens)
     EXPECT_TRUE(cmd.isFinished());
 }
 
-TEST(HeroAgitatorCommand, execute_ball_not_loaded_multiple_load_cycles_happen)
+TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_multiple_load_cycles_happen)
 {
-    ClockStub clock;
-
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
     // The first 4 * DEFAULT_HERO_AGITATOR_CMD_CONFIG.loadRotateTime getLimitSwitchDepressed returns
     // false, then the last time it returns true
     InSequence seq;
@@ -309,18 +295,12 @@ TEST(HeroAgitatorCommand, execute_ball_not_loaded_multiple_load_cycles_happen)
     EXPECT_TRUE(cmd.isFinished());
 }
 
-TEST(
-    HeroAgitatorCommand,
+TEST_F(
+    HeroAgitatorCommandTest,
     execute_ready_to_fire_refserial_offline_firing_happens_then_loading_stops_immediately_when_limit_switch_still_depressed)
 {
-    ClockStub clock;
-
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
     ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed).WillByDefault(Return(true));
 
-    RefSerial::Rx::RobotData robotData;
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
 
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
@@ -353,18 +333,12 @@ TEST(
     EXPECT_TRUE(cmd.isFinished());
 }
 
-TEST(
-    HeroAgitatorCommand,
+TEST_F(
+    HeroAgitatorCommandTest,
     execute_ready_to_fire_refserial_online_firing_stops_when_ref_serial_detected_shot)
 {
-    ClockStub clock;
-
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
     ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed).WillByDefault(Return(true));
 
-    RefSerial::Rx::RobotData robotData;
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
     robotData.turret.heatLimit42 = 100;
     robotData.turret.heat42 = 0;
@@ -392,21 +366,15 @@ TEST(
     EXPECT_TRUE(cmd.isFinished());
 }
 
-TEST(
-    HeroAgitatorCommand,
+TEST_F(
+    HeroAgitatorCommandTest,
     execute_ready_to_fire_refserial_online_loading_starts_after_firing_when_limit_switch_not_depressed)
 {
-    ClockStub clock;
-
-    SETUP_TEST(DEFAULT_HERO_AGITATOR_CMD_CONFIG);
-
     EXPECT_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
         .Times(AnyNumber())
         .WillOnce(Return(true))
         .WillRepeatedly(Return(false));
 
-    RefSerial::Rx::RobotData robotData;
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
     robotData.turret.heatLimit42 = 100;
     robotData.turret.heat42 = 0;

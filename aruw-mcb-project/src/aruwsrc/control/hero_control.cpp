@@ -197,6 +197,12 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG,
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
@@ -204,7 +210,7 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
-    &chassisFramePitchTurretController);
+    &worldFramePitchTurretImuController);
 
 cv::TurretCVCommand turretCVCommand(
     drivers(),
@@ -226,7 +232,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassis,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
-    false);
+    true);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),

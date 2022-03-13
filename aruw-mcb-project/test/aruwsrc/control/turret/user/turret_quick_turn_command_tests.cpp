@@ -29,12 +29,18 @@ using namespace aruwsrc::control::turret::user;
 using namespace testing;
 using aruwsrc::Drivers;
 
-TEST(TurretQuickTurnCommand, isReady_return_true_when_turret_online)
+class TurretQuickTurnCommandTest : public Test
 {
-    Drivers drivers;
-    TurretSubsystemMock turret(&drivers);
-    TurretQuickTurnCommand turretUturnCommand(&turret, 180);
+protected:
+    TurretQuickTurnCommandTest() : turret(&drivers), turretUturnCommand(&turret, 180) {}
 
+    Drivers drivers;
+    TurretSubsystemMock turret;
+    TurretQuickTurnCommand turretUturnCommand;
+};
+
+TEST_F(TurretQuickTurnCommandTest, isReady_return_true_when_turret_online)
+{
     EXPECT_CALL(turret, isOnline).Times(2).WillOnce(Return(false)).WillOnce(Return(true));
 
     EXPECT_FALSE(turretUturnCommand.isReady());
@@ -55,6 +61,7 @@ TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_
     EXPECT_CALL(turret, setPrevRanYawTurretController(nullptr));
     EXPECT_CALL(turret, getCurrentYawValue).WillRepeatedly(ReturnRef(turretYawValue));
     EXPECT_CALL(turret, setYawSetpoint(180));
+    EXPECT_CALL(turret2, setPrevRanYawTurretController(nullptr));
     EXPECT_CALL(turret2, getCurrentYawValue).WillRepeatedly(ReturnRef(turret2YawValue));
     EXPECT_CALL(turret2, setYawSetpoint(135));
 
@@ -62,12 +69,9 @@ TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_
     turretUturnCommand90Deg.initialize();
 }
 
-TEST(TurretQuickTurnCommand, successfully_registers_with_scheduler)
+TEST_F(TurretQuickTurnCommandTest, successfully_registers_with_scheduler)
 {
-    Drivers drivers;
     tap::control::CommandScheduler commandScheduler(&drivers, true);
-    testing::NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretQuickTurnCommand turretUturnCommand(&turret, 180);
 
     EXPECT_CALL(turret, isOnline).WillOnce(Return(true));
     tap::algorithms::ContiguousFloat currentYawValue(0, 0, 360);
@@ -79,13 +83,8 @@ TEST(TurretQuickTurnCommand, successfully_registers_with_scheduler)
     EXPECT_TRUE(commandScheduler.isCommandScheduled(&turretUturnCommand));
 }
 
-TEST(TurretUturnCOmmand, isFinished_always_return_true)
+TEST_F(TurretQuickTurnCommandTest, isFinished_always_return_true)
 {
-    Drivers drivers;
-    tap::control::CommandScheduler commandScheduler(&drivers, true);
-    testing::NiceMock<TurretSubsystemMock> turret(&drivers);
-    TurretQuickTurnCommand turretUturnCommand(&turret, 180);
-
     EXPECT_TRUE(turretUturnCommand.isFinished());
     EXPECT_TRUE(turretUturnCommand.isFinished());
     EXPECT_TRUE(turretUturnCommand.isFinished());
