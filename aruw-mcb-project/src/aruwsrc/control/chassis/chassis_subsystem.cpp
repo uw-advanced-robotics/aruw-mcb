@@ -35,6 +35,9 @@ namespace aruwsrc
 {
 namespace chassis
 {
+modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
+    CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
+
 ChassisSubsystem::ChassisSubsystem(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId leftFrontMotorId,
@@ -48,7 +51,6 @@ ChassisSubsystem::ChassisSubsystem(
           modm::Pid<float>(VELOCITY_PID_CONFIG),
           modm::Pid<float>(VELOCITY_PID_CONFIG),
           modm::Pid<float>(VELOCITY_PID_CONFIG)},
-      chassisRotationErrorKalman(1.0f, AUTOROTATION_PID_TK),
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
@@ -103,10 +105,12 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
         x,
         y,
         r,
-        ChassisSubsystem::getMaxUserWheelSpeed(
+        ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
+
+void ChassisSubsystem::setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
 void ChassisSubsystem::refresh()
 {
@@ -211,18 +215,14 @@ void ChassisSubsystem::updateMotorRpmPid(
     motor->setDesiredOutput(pid->getValue());
 }
 
-float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError)
+float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
-    float currentFilteredAngleErrorPrevious = chassisRotationErrorKalman.getLastFiltered();
-    float currentFilteredAngleError = chassisRotationErrorKalman.filterData(currentAngleError);
-
     // P
     float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
     currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
 
     // D
-    float currentRotationPidD =
-        (currentFilteredAngleError - currentFilteredAngleErrorPrevious) * AUTOROTATION_PID_KD;
+    float currentRotationPidD = errD * AUTOROTATION_PID_KD;
 
     currentRotationPidD =
         limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
@@ -241,17 +241,22 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     float rTranslationalGain = 1.0f;
 
     // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
-    // power consumption when the wheel rotation speed for chassis rotationis greater than the
+    // power consumption when the wheel rotation speed for chassis rotation is greater than the
     // MIN_ROTATION_THRESHOLD
     if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
     {
-        // power(max revolve speed - specified revolve speed, 2)
-        // / power(max revolve speed, 2)
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+
+        // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
+        // power(max revolve speed, 2)
         rTranslationalGain = powf(
-            MAX_WHEEL_SPEED_SINGLE_MOTOR + MIN_ROTATION_THRESHOLD -
-                fabsf(chassisRotationDesiredWheelspeed) / MAX_WHEEL_SPEED_SINGLE_MOTOR,
+            (maxWheelSpeed + MIN_ROTATION_THRESHOLD - fabsf(chassisRotationDesiredWheelspeed)) /
+                maxWheelSpeed,
             2.0f);
-        rTranslationalGain = tap::algorithms::limitVal<float>(rTranslationalGain, 0.0f, 1.0f);
+
+        rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
 }
