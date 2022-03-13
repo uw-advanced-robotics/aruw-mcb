@@ -33,11 +33,7 @@ class AgitatorSubsystemMock : public agitator::AgitatorSubsystem
 public:
     AgitatorSubsystemMock(
         aruwsrc::Drivers* drivers,
-        float kp = 0,
-        float ki = 0,
-        float kd = 0,
-        float maxIAccum = 0,
-        float maxOutput = 0,
+        const tap::algorithms::SmoothPidConfig& pidConfig = tap::algorithms::SmoothPidConfig(),
         float agitatorGearRatio = 0,
         tap::motor::MotorId agitatorMotorId = tap::motor::MOTOR1,
         tap::can::CanBus agitatorCanBusId = tap::can::CanBus::CAN_BUS1,

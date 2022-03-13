@@ -29,6 +29,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
@@ -52,8 +53,8 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "turret/soldier_turret_subsystem.hpp"
 #include "turret/turret_controller_constants.hpp"
-#include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
@@ -87,39 +88,36 @@ namespace soldier_control
 /* define subsystems --------------------------------------------------------*/
 tap::motor::DjiMotor pitchMotor(
     drivers(),
-    TurretSubsystem::PITCH_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    SoldierTurretSubsystem::PITCH_MOTOR_ID,
+    SoldierTurretSubsystem::CAN_BUS_MOTORS,
     false,
     "Pitch Turret");
 tap::motor::DjiMotor yawMotor(
     drivers(),
-    TurretSubsystem::YAW_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    SoldierTurretSubsystem::YAW_MOTOR_ID,
+    SoldierTurretSubsystem::CAN_BUS_MOTORS,
 #ifdef TARGET_SOLDIER_2021
     false,
 #else
     true,
 #endif
     "Yaw Turret");
-TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 ChassisSubsystem chassis(drivers());
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
+static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 AgitatorSubsystem agitator(
     drivers(),
-    AgitatorSubsystem::PID_17MM_P,
-    AgitatorSubsystem::PID_17MM_I,
-    AgitatorSubsystem::PID_17MM_D,
-    AgitatorSubsystem::PID_17MM_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_17MM_MAX_OUT,
+    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::AGITATOR_MOTOR_ID,
-    AgitatorSubsystem::AGITATOR_MOTOR_CAN_BUS,
-    AgitatorSubsystem::isAgitatorInverted,
-    AgitatorSubsystem::AGITATOR_JAMMING_DISTANCE,
-    AgitatorSubsystem::JAMMING_TIME,
+    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
+    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
+    aruwsrc::control::agitator::constants::isAgitatorInverted,
+    aruwsrc::control::agitator::constants::AGITATOR_JAMMING_DISTANCE,
+    aruwsrc::control::agitator::constants::JAMMING_TIME,
     true);
 
 FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
@@ -196,10 +194,24 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     0,
     true,
     M_PI / 20.0f,
-    M_PI / 8.0f,
-    M_PI / 4.0f,
+    0.4f,
+    0.2f,
+    140,
+    2,
+    true,
+    10);
+MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
+    drivers(),
+    &agitator,
+    M_PI / 5.0f,
     100,
-    3,
+    0,
+    true,
+    M_PI / 20.0f,
+    0.4f,
+    0.2f,
+    140,
+    2,
     true,
     10);
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
@@ -212,10 +224,10 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     0,
     true,
     M_PI / 20.0f,
-    M_PI / 8.0f,
-    M_PI / 4.0f,
-    100,
-    3,
+    0.4f,
+    0.2f,
+    140,
+    2,
     false,
     0);
 
@@ -353,7 +365,6 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -386,6 +397,8 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
 }
 
 /* register io mappings here ------------------------------------------------*/

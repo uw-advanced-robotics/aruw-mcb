@@ -78,8 +78,6 @@ public:
      * will never be selected as the current chassis command in the HUD.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command in the HUD.
-     * @param[in] chassisDriveCmd May be nullptr. If nullptr the chassis drive command will never be
-     * selected as the current chassis command in the HUD.
      */
     MatrixHudIndicators(
         aruwsrc::Drivers *drivers,
@@ -150,7 +148,7 @@ private:
             {"CHAS", "BEYB\nFLLW\nMIMU"},
             {"SHOT", "REDY\nLOAD\nFOFF"},
             {"FIRE", "SNGL\nBRST\nFULL"},
-            {"CV  ", "DECT\nCONE\nOFFL"}};
+            {"CV  ", "ONLN\nOFFL"}};
 
     /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
     static constexpr int NUM_CHASSIS_STATES = 4;
@@ -174,8 +172,6 @@ private:
      * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[CV_STATUS]. */
     enum class CVStatus
     {
-        /** A target is being detected by the vision system. */
-        DETECTING_TARGET,
         /** The vision coprocessor is connected, but no target is detected. */
         VISION_COPROCESSOR_CONNECTED,
         /** The vision coprocessor is offline. */
@@ -226,7 +222,7 @@ private:
      * Converts a 0-based index to a physical y-coordinate on the screen that represents the
      * location of the indicator on the screen.
      */
-    static inline uint16_t getIndicatorState(int index)
+    static inline uint16_t getIndicatorYCoordinate(int index)
     {
         return MATRIX_HUD_INDICATOR_LABELS_START_Y -
                CHARACTER_LINE_SPACING * index * MATRIX_HUD_INDICATOR_CHAR_SIZE -

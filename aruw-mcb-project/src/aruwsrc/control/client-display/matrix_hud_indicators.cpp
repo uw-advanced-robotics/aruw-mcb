@@ -143,7 +143,7 @@ void MatrixHudIndicators::updateIndicatorState()
     if (currDriveCommandIndex != -1)
     {
         matrixHudIndicatorDrawers[CHASSIS_STATE].setIndicatorState(
-            getIndicatorState(currDriveCommandIndex));
+            getIndicatorYCoordinate(currDriveCommandIndex));
     }
 
     // update flywheel and hopper state
@@ -169,22 +169,18 @@ void MatrixHudIndicators::updateIndicatorState()
     }
 
     matrixHudIndicatorDrawers[SHOOTER_STATE].setIndicatorState(
-        getIndicatorState(static_cast<int>(shooterState)));
-
-    CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;
-    if (drivers->visionCoprocessor.isCvOnline())
-    {
-        cvStatus = drivers->visionCoprocessor.getLastAimData().hasTarget
-                       ? CVStatus::DETECTING_TARGET
-                       : CVStatus::VISION_COPROCESSOR_CONNECTED;
-    }
-
-    matrixHudIndicatorDrawers[CV_STATUS].setIndicatorState(
-        getIndicatorState(static_cast<int>(cvStatus)));
+        getIndicatorYCoordinate(static_cast<int>(shooterState)));
 
     // update firing mode
-    matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorState(
+    matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
         static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
+
+    CVStatus cvStatus = drivers->visionCoprocessor.isCvOnline()
+                            ? CVStatus::VISION_COPROCESSOR_CONNECTED
+                            : CVStatus::VISION_COPROCESSOR_OFFLINE;
+
+    matrixHudIndicatorDrawers[CV_STATUS].setIndicatorState(
+        getIndicatorYCoordinate(static_cast<int>(cvStatus)));
 }
 
 void MatrixHudIndicators::initialize()
