@@ -229,7 +229,7 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     140,
     2,
     false,
-    0);
+    10);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
