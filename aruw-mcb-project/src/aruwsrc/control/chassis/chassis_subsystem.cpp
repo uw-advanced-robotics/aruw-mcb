@@ -110,10 +110,7 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
-void ChassisSubsystem::setZeroRPM()
-{
-    desiredWheelRPM = desiredWheelRPM.zeroMatrix();
-}
+void ChassisSubsystem::setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
 void ChassisSubsystem::refresh()
 {
@@ -259,8 +256,7 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
                 maxWheelSpeed,
             2.0f);
 
-        rTranslationalGain =
-            limitVal(rTranslationalGain, 0.0f, 1.0f);
+        rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
 }
