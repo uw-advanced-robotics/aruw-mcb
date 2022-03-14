@@ -83,12 +83,16 @@ bool VisionCoprocessor::decodeToTurretAimData(
     return true;
 }
 
-void VisionCoprocessor::decodeAndSendTimeSyncMessage(const ReceivedSerialMessage&)
+void VisionCoprocessor::decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message)
 {
-    DJISerial::SerialMessage<sizeof(uint32_t)> timeSyncResponseMessage;
+    DJISerial::SerialMessage<sizeof(uint32_t)+sizeof(uint8_t)> timeSyncResponseMessage;
+
     timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
+
     *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = getTimeMicroseconds();
+    *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data+sizeof(uint32_t)) = message.data[0];
     timeSyncResponseMessage.setCRC16();
+
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
         reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
