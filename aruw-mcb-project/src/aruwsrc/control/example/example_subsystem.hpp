@@ -67,6 +67,8 @@ public:
 
     void refresh() override;
 
+    void inertRefresh() override;
+
     void runHardwareTests() override;
 
     const char* getName() override { return "Example"; }

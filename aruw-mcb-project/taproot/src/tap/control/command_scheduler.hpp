@@ -35,21 +35,10 @@ class Command;
 class Subsystem;
 
 /**
- * Abstract base class for a functor that defines how a robot is considered
- * "disconnected" in the CommandScheduler. When the functor returns true, the
- * robot is then considered disconnected and will end all Commands in the
- * CommandScheduler and disallow new Commands from being added.
- *
- * By default, the SafeDisconnectFunction will always return false, i.e.,
- * allow the CommandScheduler to continue running Commands in a
- * "disconnected" state.
+ * Function pointer that defines when a robot should be considered "inert". When the functor returns
+ * true, the scheduler will be rendered inert--no motors or actuators should move.
  */
-class SafeDisconnectFunction
-{
-public:
-    SafeDisconnectFunction(){};
-    virtual bool operator()() { return false; }
-};
+using SetSchedulerInertFn = bool (*)();
 
 /**
  * Class for handling all the commands you would like to currently run.
@@ -111,8 +100,7 @@ public:
     CommandScheduler(
         Drivers* drivers,
         bool masterScheduler = false,
-        SafeDisconnectFunction* safeDisconnectFunction =
-            &CommandScheduler::defaultSafeDisconnectFunction);
+        SetSchedulerInertFn setSchedulerInertFn = nullptr);
     DISALLOW_COPY_AND_ASSIGN(CommandScheduler)
     mockable ~CommandScheduler();
 
@@ -188,12 +176,14 @@ public:
     mockable void registerSubsystem(Subsystem* subsystem);
 
     /**
-     * @brief Set the SafeDisconnectFunction to the given function.
+     * @brief Set the SetSchedulerInertFn to the given function.
      *
      * @param[in] func the function that the CommandScheduler will use to
-     *      determine what constitutes a "disconnected" state.
+     *      determine when the scheduler should be in an inert state state.
      */
-    mockable void setSafeDisconnectFunction(SafeDisconnectFunction* func);
+    mockable void setSetSchedulerInertFn(SetSchedulerInertFn func);
+
+    mockable bool isSchedulerInert() const { return setSchedulerInertFn(); }
 
     /**
      * @param[in] subsystem the subsystem to check
@@ -329,24 +319,13 @@ private:
      */
     static bool masterSchedulerExists;
 
-    /**
-     * Returns true if the remote is disconnected and the safeDisconnectMode flag is
-     * enabled.
-     */
-    bool safeDisconnected();
-
     Drivers* drivers;
 
     /**
-     * A global SafeDisconnectFunction used by CommandScheduler by default.
-     */
-    static SafeDisconnectFunction defaultSafeDisconnectFunction;
-
-    /**
-     * The SafeDisconnectFunction used by the CommandScheduler to determine
+     * The SetSchedulerInertFn used by the CommandScheduler to determine
      * the "disconnected" state.
      */
-    SafeDisconnectFunction* safeDisconnectFunction;
+    SetSchedulerInertFn setSchedulerInertFn;
 
     /**
      * Each bit in the bitmap represents a unique subsystem that has been constructed

@@ -109,7 +109,8 @@ void TurretCVCommand::execute()
 
 bool TurretCVCommand::isFinished() const
 {
-    return !pitchController->isOnline() || !yawController->isOnline();
+    return (!pitchController->isOnline() || !yawController->isOnline()) &&
+           drivers->commandScheduler.isSchedulerInert();
 }
 
 void TurretCVCommand::end(bool)

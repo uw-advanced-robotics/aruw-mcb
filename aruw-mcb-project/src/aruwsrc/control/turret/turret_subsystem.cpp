@@ -73,6 +73,13 @@ float TurretSubsystem::getPitchAngleFromCenter() const
 
 void TurretSubsystem::refresh() { updateCurrentTurretAngles(); }
 
+void TurretSubsystem::inertRefresh()
+{
+    updateCurrentTurretAngles();
+    yawMotor->setDesiredOutput(0);
+    pitchMotor->setDesiredOutput(0);
+}
+
 /**
  * Update the turret angle based on the current motor encoder value.
  */

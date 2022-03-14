@@ -106,6 +106,15 @@ void SentinelDriveSubsystem::refresh()
     resetOffsetFromLimitSwitch();
 }
 
+void SentinelDriveSubsystem::inertRefresh()
+{
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(chassisMotors); i++)
+    {
+        chassisMotors[i]->setDesiredOutput(0);
+    }
+    resetOffsetFromLimitSwitch();
+}
+
 float SentinelDriveSubsystem::absolutePosition()
 {
     float leftPosition = distanceFromEncoder(&leftWheel) - leftWheelZeroRailOffset;

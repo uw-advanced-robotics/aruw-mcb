@@ -95,6 +95,8 @@ public:
 
     void refresh() override;
 
+    void inertRefresh() override;
+
     /**
      * @return The angle set in `setSetpoint`.
      */

@@ -39,11 +39,27 @@ HopperSubsystem::HopperSubsystem(
     hopper.setTargetPwm(close);
 }
 
-void HopperSubsystem::setOpen() { hopper.setTargetPwm(hopper.getMaxPWM()); }
+void HopperSubsystem::setOpen()
+{
+    if (drivers->commandScheduler.isSchedulerInert())
+    {
+        return;
+    }
+    hopper.setTargetPwm(hopper.getMaxPWM());
+}
 
-void HopperSubsystem::setClose() { hopper.setTargetPwm(hopper.getMinPWM()); }
+void HopperSubsystem::setClose()
+{
+    if (drivers->commandScheduler.isSchedulerInert())
+    {
+        return;
+    }
+    hopper.setTargetPwm(hopper.getMinPWM());
+}
 
 void HopperSubsystem::refresh() { hopper.updateSendPwmRamp(); }
+
+void HopperSubsystem::inertRefresh() { hopper.setTargetPwm(hopper.getMaxPWM()); }
 
 float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
 

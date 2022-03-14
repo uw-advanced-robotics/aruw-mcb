@@ -24,7 +24,7 @@
 
 #include "../turret_subsystem.hpp"
 
-namespace tap
+namespace aruwsrc
 {
 class Drivers;
 }
@@ -49,7 +49,7 @@ public:
      * @param[in] targetOffsetToTurn Offset angle, in degrees, that the turret setpoint
      *      will be updated to when this command is run.
      */
-    TurretQuickTurnCommand(TurretSubsystem *turretSubsystem, const float targetOffsetToTurn);
+    TurretQuickTurnCommand(aruwsrc::Drivers *drivers,TurretSubsystem *turretSubsystem, const float targetOffsetToTurn);
 
     bool isReady() override;
 
@@ -64,6 +64,7 @@ public:
     void end(bool) override {}
 
 private:
+aruwsrc::Drivers *drivers;
     TurretSubsystem *turretSubsystem;
     const float targetOffsetToTurn;
 };

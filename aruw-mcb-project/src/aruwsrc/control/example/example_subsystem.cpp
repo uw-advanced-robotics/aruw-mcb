@@ -55,6 +55,12 @@ void ExampleSubsystem::refresh()
     updateMotorRpmPid(&velocityPidRightWheel, &rightWheel, desiredRpm);
 }
 
+void ExampleSubsystem::inertRefresh()
+{
+    leftWheel.setDesiredOutput(0);
+    rightWheel.setDesiredOutput(0);
+}
+
 void ExampleSubsystem::updateMotorRpmPid(
     modm::Pid<float>* pid,
     tap::motor::DjiMotor* motor,

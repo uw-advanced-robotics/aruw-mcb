@@ -34,6 +34,10 @@ XAxisSubsystem::XAxisSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Digital::Ou
 
 void XAxisSubsystem::setExtended(bool isExtended)
 {
+    if (drivers->commandScheduler.isSchedulerInert())
+    {
+        return;
+    }
     drivers->digital.set(pin, extended);
     extended = isExtended;
 }

@@ -46,17 +46,31 @@ public:
 
     mockable void setOpen()
     {
+        if (drivers->commandScheduler.isSchedulerInert())
+        {
+            return;
+        }
         hopperOpen = true;
         drivers->turretMCBCanComm.setOpenHopperCover(true);
     }
 
     mockable void setClose()
     {
+        if (drivers->commandScheduler.isSchedulerInert())
+        {
+            return;
+        }
         hopperOpen = false;
         drivers->turretMCBCanComm.setOpenHopperCover(false);
     }
 
     void refresh() override {}
+
+    void inertRefresh()
+    {
+        hopperOpen = true;
+        drivers->turretMCBCanComm.setOpenHopperCover(true);
+    }
 
     void runHardwareTests() override {}
 

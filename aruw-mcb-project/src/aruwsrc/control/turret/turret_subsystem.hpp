@@ -175,6 +175,8 @@ public:
 
     void refresh() override;
 
+    void inertRefresh() override;
+
     const char* getName() override { return "Turret"; }
 
     void onHardwareTestStart() override;

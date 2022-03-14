@@ -39,6 +39,8 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     addSubsystemRequirement(frictionWheels);
 }
 
+bool FrictionWheelSpinRefLimitedCommand::isReady() { return !isFinished(); }
+
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
     if (alwaysUseDefaultLaunchSpeed || !drivers->refSerial.getRefSerialReceivingData())
@@ -64,6 +66,11 @@ void FrictionWheelSpinRefLimitedCommand::execute()
 
         frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);
     }
+}
+
+bool FrictionWheelSpinRefLimitedCommand::isFinished() const
+{
+    return drivers->commandScheduler.isSchedulerInert();
 }
 
 }  // namespace aruwsrc::control::launcher

@@ -43,6 +43,10 @@ TowSubsystem::TowSubsystem(
 
 void TowSubsystem::setLeftClamped(bool isClamped)
 {
+    if (drivers->commandScheduler.isSchedulerInert())
+    {
+        return;
+    }
     leftClamped = isClamped;
     drivers->digital.set(LEFT_TOW_PIN, leftClamped);
 }
@@ -51,6 +55,10 @@ bool TowSubsystem::getLeftClamped() const { return leftClamped; }
 
 void TowSubsystem::setRightClamped(bool isClamped)
 {
+    if (drivers->commandScheduler.isSchedulerInert())
+    {
+        return;
+    }
     rightClamped = isClamped;
     drivers->digital.set(RIGHT_TOW_PIN, rightClamped);
 }

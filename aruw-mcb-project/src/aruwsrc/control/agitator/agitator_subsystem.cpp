@@ -82,6 +82,12 @@ void AgitatorSubsystem::refresh()
     }
 }
 
+void AgitatorSubsystem::inertRefresh()
+{
+    refresh();
+    agitatorMotor.setDesiredOutput(0);
+}
+
 void AgitatorSubsystem::agitatorRunPositionPid()
 {
     if (!agitatorIsCalibrated)

@@ -136,6 +136,8 @@ public:
 
     void refresh() override;
 
+    void inertRefresh() override;
+
     /**
      * When the desired rotational wheel speed is large, you can slow down your translational speed
      * to make a tighter and more controllable turn. This function that can be used to scale down

@@ -72,13 +72,15 @@ public:
         bool alwaysUseDefaultLaunchSpeed,
         Barrel barrel);
 
+    bool isReady() override;
+
     void initialize() override {}
 
     void execute() override;
 
     void end(bool) override { frictionWheels->setDesiredLaunchSpeed(0); }
 
-    bool isFinished() const override { return false; }
+    bool isFinished() const override;
 
     const char *getName() const override { return "friction wheel spin ref limited"; }
 

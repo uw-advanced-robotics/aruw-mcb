@@ -78,11 +78,11 @@ void ImuCalibrateCommand::execute()
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
-            // Only start calibrating if the turret is online and if there is an IMU online to be
-            // calibrated. The onboard Mpu6500 will never be in the `IMU_NOT_CONNECTED` state unless
-            // the Mpu6500 is shorted (which has never happened). The turret MCB will only be
-            // offline if the turret MCB is unplugged.
-            if (turret->isOnline() &&
+            // Only start calibrating if the command scheduler is not inert, the turret is online
+            // and if there is an IMU online to be calibrated. The onboard Mpu6500 will never be in
+            // the `IMU_NOT_CONNECTED` state unless the Mpu6500 is shorted (which has never
+            // happened). The turret MCB will only be offline if the turret MCB is unplugged.
+            if (!drivers->commandScheduler.isSchedulerInert() && turret->isOnline() &&
                 (drivers->turretMCBCanComm.isConnected() ||
                  (drivers->mpu6500.getImuState() != Mpu6500::ImuState::IMU_NOT_CONNECTED)))
             {
@@ -145,7 +145,9 @@ bool ImuCalibrateCommand::isFinished() const
 {
     return (calibrationState == CalibrationState::WAITING_CALIBRATION_COMPLETE &&
             calibrationTimer.isExpired()) ||
-           calibrationLongTimeout.isExpired();
+           calibrationLongTimeout.isExpired() ||
+           (calibrationState != CalibrationState::WAITING_FOR_SYSTEMS_ONLINE &&
+            drivers->commandScheduler.isSchedulerInert());
 }
 
 }  // namespace aruwsrc::control::imu

@@ -69,7 +69,8 @@ void TurretUserControlCommand::execute()
 
 bool TurretUserControlCommand::isFinished() const
 {
-    return !pitchController->isOnline() || !yawController->isOnline();
+    return (!pitchController->isOnline() || !yawController->isOnline()) &&
+           !drivers->commandScheduler.isSchedulerInert();
 }
 
 void TurretUserControlCommand::end(bool)

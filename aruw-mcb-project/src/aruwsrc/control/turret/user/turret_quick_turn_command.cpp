@@ -24,6 +24,7 @@
 namespace aruwsrc::control::turret::user
 {
 TurretQuickTurnCommand::TurretQuickTurnCommand(
+    aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
     const float targetOffsetToTurn)
     : turretSubsystem(turretSubsystem),
@@ -32,7 +33,10 @@ TurretQuickTurnCommand::TurretQuickTurnCommand(
     addSubsystemRequirement(turretSubsystem);
 }
 
-bool TurretQuickTurnCommand::isReady() { return turretSubsystem->isOnline(); }
+bool TurretQuickTurnCommand::isReady()
+{
+    return !drivers->commandScheduler.isSchedulerInert() && turretSubsystem->isOnline();
+}
 
 void TurretQuickTurnCommand::initialize()
 {

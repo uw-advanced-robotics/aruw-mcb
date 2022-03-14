@@ -85,6 +85,8 @@ public:
 
     void refresh() override;
 
+    void inertRefresh()override;
+
     void runHardwareTests() override;
 
     void onHardwareTestStart() override;

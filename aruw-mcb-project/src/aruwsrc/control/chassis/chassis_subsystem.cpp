@@ -122,6 +122,8 @@ void ChassisSubsystem::refresh()
     limitChassisPower();
 }
 
+void ChassisSubsystem::inertRefresh() { setZeroRPM(); }
+
 void ChassisSubsystem::limitChassisPower()
 {
     static constexpr size_t NUM_MOTORS = MODM_ARRAY_SIZE(motors);

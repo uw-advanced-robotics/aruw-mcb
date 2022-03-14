@@ -75,6 +75,13 @@ void FrictionWheelSubsystem::refresh()
     rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
 }
 
+void FrictionWheelSubsystem::inertRefresh()
+{
+    leftWheel.setDesiredOutput(0);
+    rightWheel.setDesiredOutput(0);
+    prevTime=tap::arch::clock::getTimeMilliseconds();
+}
+
 void FrictionWheelSubsystem::runHardwareTests()
 {
     if (abs(rightWheel.getShaftRPM()) > 4000.0f) this->setHardwareTestsComplete();
