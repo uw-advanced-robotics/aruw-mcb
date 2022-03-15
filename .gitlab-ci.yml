@@ -67,9 +67,9 @@ before_script:
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
-    - python3 ./scripts/check_singleton_drivers.py ./aruw-mcb-project/src/ 
-    - python3 ./scripts/check_license_headers.py
-    - ./scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot
+    - python3 ./taproot-scripts/check_singleton_drivers.py DoNotUse_getDrivers -p ./aruw-mcb-project/src/ -w aruwsrc/drivers_singleton.cpp aruwsrc/drivers_singleton.hpp aruwsrc/control/engineer_control.cpp aruwsrc/control/sentinel_control.cpp aruwsrc/control/soldier_control.cpp aruwsrc/control/drone_control.cpp aruwsrc/control/hero_control.cpp main.cpp
+    - python3 ./taproot-scripts/check_license_headers.py
+    - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot
   only: *verification_only
   except: *verification_except
 
@@ -84,7 +84,7 @@ before_script:
     - cd aruw-mcb-project
     - scons build robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS
     - scons size robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
-    - python3 ../scripts/parse_metrics.py $ROBOT
+    - python3 ../taproot-scripts/parse_metrics.py -i size.txt -o metrics.txt --identifier $ROBOT
     - cp $DEFAULT_BUILD_ELF_FILE ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$ROBOT-mcb"
@@ -363,7 +363,7 @@ pages:
     - git remote rm origin
     - git remote add origin git@gitlab.com:aruw/controls/aruw-mcb.git
   script:
-    - ./scripts/update_taproot_submodule.sh ./aruw-mcb-project
+    - ./taproot-scripts/update_taproot_submodule.sh ./aruw-mcb-project 20675733 develop
   only:
     variables:
       - $UPDATE_SUBMODULE
