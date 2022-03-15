@@ -324,7 +324,7 @@ TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
     VisionCoprocessor serial(&drivers);
 
     static constexpr int HEADER_LEN = 7;
-    static constexpr int DATA_LEN = 4;
+    static constexpr int DATA_LEN = 5;
     static constexpr int CRC16_LEN = 2;
     static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
 
@@ -337,15 +337,17 @@ TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
             memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
 
             checkHeaderAndTail<DATA_LEN>(msg);
-            EXPECT_EQ(msg.messageType, 10);
+            EXPECT_EQ(msg.messageType, 11);
             EXPECT_EQ(getTimeMicroseconds(), *reinterpret_cast<uint32_t *>(msg.data));
+            EXPECT_EQ(77, msg.data[4]);
 
             return length;
         });
 
     DJISerial::ReceivedSerialMessage syncRequestMessage;
     syncRequestMessage.header.dataLength = 1;
-    syncRequestMessage.messageType = 3;
+    syncRequestMessage.messageType = 10;
+    syncRequestMessage.data[0] = 77;
 
     serial.messageReceiveCallback(syncRequestMessage);
 }
