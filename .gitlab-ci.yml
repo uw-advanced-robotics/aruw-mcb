@@ -80,6 +80,8 @@ before_script:
   only: *default_only
   except: *default_except
   needs: ["MCB Lib Build"]
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   script:
     - cd aruw-mcb-project
     - scons build robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS
@@ -114,6 +116,8 @@ before_script:
   only: *default_only
   except: *default_except
   needs: ["Test Lib Build"]
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   script:
     - cd aruw-mcb-project
     - scons build-tests profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
@@ -181,6 +185,8 @@ before_script:
   needs: []
   only: *default_only
   except: *default_except
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   script:
     - cd aruw-mcb-project
     - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER_2022 -j${NUM_JOBS}
