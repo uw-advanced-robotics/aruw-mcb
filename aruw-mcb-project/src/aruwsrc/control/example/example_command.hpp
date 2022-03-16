@@ -23,8 +23,8 @@
  * Example code for a default command for the subsystem-example subsystem.
  */
 
-#ifndef __COMMAND_EXAMPLE_HPP__
-#define __COMMAND_EXAMPLE_HPP__
+#ifndef EXAMPLE_COMMAND_HPP_
+#define EXAMPLE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -82,4 +82,5 @@ private:
 }  // namespace control
 
 }  // namespace aruwsrc
-#endif
+
+#endif  // EXAMPLE_COMMAND_HPP_

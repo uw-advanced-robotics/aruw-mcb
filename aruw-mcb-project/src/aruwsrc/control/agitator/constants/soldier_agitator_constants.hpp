@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#ifndef SOLDIER_AGITATOR_CONSTANTS_HPP_
+#define SOLDIER_AGITATOR_CONSTANTS_HPP_
+
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly, use agitator_consants.hpp
@@ -42,3 +46,5 @@ static constexpr bool isAgitatorInverted = false;
 static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
 static constexpr uint32_t JAMMING_TIME = 70;
 }  // namespace aruwsrc::control::agitator::constants
+
+#endif  // SOLDIER_AGITATOR_CONSTANTS_HPP_

@@ -30,8 +30,8 @@
  * outside of this class because pulsing is a specific command.
  */
 
-#ifndef __SUBSYSTEM_EXAMPLE_HPP__
-#define __SUBSYSTEM_EXAMPLE_HPP__
+#ifndef EXAMPLE_SUBSYSTEM_HPP_
+#define EXAMPLE_SUBSYSTEM_HPP_
 
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/subsystem.hpp"
@@ -109,4 +109,4 @@ private:
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // EXAMPLE_SUBSYSTEM_HPP_

@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "tap/algorithms/smooth_pid.hpp"
 
 #ifndef AGITATOR_CONSTANTS_HPP_
 #define AGITATOR_CONSTANTS_HPP_
+
+#include "tap/algorithms/smooth_pid.hpp"
 
 #if defined(ALL_SOLDIERS)
 #include "soldier_agitator_constants.hpp"
@@ -28,4 +29,5 @@
 #elif defined(TARGET_HERO)
 #include "hero_agitator_constants.hpp"
 #endif
-#endif
+
+#endif  // AGITATOR_CONSTANTS_HPP_

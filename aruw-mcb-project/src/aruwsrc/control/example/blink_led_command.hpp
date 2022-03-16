@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __BLINK_LED_COMMAND_HPP__
-#define __BLINK_LED_COMMAND_HPP__
+#ifndef BLINK_LED_COMMAND_HPP_
+#define BLINK_LED_COMMAND_HPP_
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
@@ -70,4 +70,4 @@ public:
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // BLINK_LED_COMMAND_HPP_
