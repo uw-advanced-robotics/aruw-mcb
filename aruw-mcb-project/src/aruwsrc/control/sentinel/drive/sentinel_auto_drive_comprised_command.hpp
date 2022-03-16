@@ -17,9 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SENTINEL)
 #ifndef SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_
 #define SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_
+
+#if defined(TARGET_SENTINEL)
 
 #include "tap/control/comprised_command.hpp"
 
@@ -57,5 +58,6 @@ private:
 };
 }  // namespace aruwsrc::control::sentinel::drive
 
-#endif  // SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_
 #endif
+
+#endif  // SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_

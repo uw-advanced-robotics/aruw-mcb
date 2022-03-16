@@ -17,10 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ENV_UNIT_TESTS
-
 #ifndef DRIVERS_SINGLETON_HPP_
 #define DRIVERS_SINGLETON_HPP_
+
+#ifndef ENV_UNIT_TESTS
 
 #include "aruwsrc/drivers.hpp"
 
@@ -37,6 +37,6 @@ aruwsrc::Drivers *DoNotUse_getDrivers();
 using driversFunc = aruwsrc::Drivers *(*)();
 }  // namespace aruwsrc
 
-#endif  // DRIVERS_SINGLETON_HPP_
-
 #endif
+
+#endif  // DRIVERS_SINGLETON_HPP_

@@ -17,9 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SENTINEL)
 #ifndef SENTINEL_FULL_TRAVERSE_COMMAND_HPP_
 #define SENTINEL_FULL_TRAVERSE_COMMAND_HPP_
+
+#if defined(TARGET_SENTINEL)
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/architecture/clock.hpp"
@@ -67,5 +68,6 @@ private:
 
 }  // namespace aruwsrc::control::sentinel::drive
 
-#endif  // SENTINEL_FULL_TRAVERSE_COMMAND_HPP_
 #endif
+
+#endif  // SENTINEL_FULL_TRAVERSE_COMMAND_HPP_

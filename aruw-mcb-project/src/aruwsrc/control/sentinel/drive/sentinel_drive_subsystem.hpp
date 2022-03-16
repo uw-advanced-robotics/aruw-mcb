@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUBSYSTEM_SENTINEL_DRIVE_HPP_
-#define SUBSYSTEM_SENTINEL_DRIVE_HPP_
+#ifndef SENTINEL_DRIVE_SUBSYSTEM_HPP_
+#define SENTINEL_DRIVE_SUBSYSTEM_HPP_
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
@@ -152,4 +152,4 @@ private:
 
 }  // namespace aruwsrc::control::sentinel::drive
 
-#endif
+#endif  // SENTINEL_DRIVE_SUBSYSTEM_HPP_
