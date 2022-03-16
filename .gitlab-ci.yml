@@ -67,8 +67,24 @@ before_script:
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
-    - python3 ./taproot-scripts/check_singleton_drivers.py DoNotUse_getDrivers -p ./aruw-mcb-project/src/ -w aruwsrc/drivers_singleton.cpp aruwsrc/drivers_singleton.hpp aruwsrc/control/engineer_control.cpp aruwsrc/control/sentinel_control.cpp aruwsrc/control/soldier_control.cpp aruwsrc/control/drone_control.cpp aruwsrc/control/hero_control.cpp main.cpp
-    - python3 ./taproot-scripts/check_license_headers.py
+    - python3 ./taproot-scripts/check_singleton_drivers.py DoNotUse_getDrivers \
+        -p ./aruw-mcb-project/src/ \
+        -w aruwsrc/drivers_singleton.cpp \
+            aruwsrc/drivers_singleton.hpp \
+            aruwsrc/control/engineer_control.cpp \
+            aruwsrc/control/sentinel_control.cpp \
+            aruwsrc/control/soldier_control.cpp \
+            aruwsrc/control/drone_control.cpp \
+            aruwsrc/control/hero_control.cpp \
+            main.cpp
+
+    - python3 ./taproot-scripts/check_license_headers.py \
+        -p aruw-mcb \
+        -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*'\
+        -o 'Advanced Robotics at the University of Washington'
+
+    - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
+
     - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot
   only: *verification_only
   except: *verification_except
