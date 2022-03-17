@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#ifndef HERO_AGITATOR_CONSTANTS_HPP_
+#define HERO_AGITATOR_CONSTANTS_HPP_
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -48,3 +52,5 @@ static constexpr bool HERO_KICKER_INVERTED = false;
 static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = M_PI / 14.0f;
 static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
 }  // namespace aruwsrc::control::agitator::constants
+
+#endif  // HERO_AGITATOR_CONSTANTS_HPP_

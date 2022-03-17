@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __EXAMPLE_COMPRISED_COMAND_HPP__
-#define __EXAMPLE_COMPRISED_COMAND_HPP__
+#ifndef EXAMPLE_COMPRISED_COMMAND_HPP_
+#define EXAMPLE_COMPRISED_COMMAND_HPP_
 
 #include "tap/control/comprised_command.hpp"
 
