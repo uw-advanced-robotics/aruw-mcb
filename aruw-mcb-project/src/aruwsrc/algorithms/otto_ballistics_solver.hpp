@@ -37,7 +37,7 @@ class Drivers;
 
 namespace aruwsrc::control::launcher
 {
-class RefereeFeedbackFrictionWheelSubsystem;
+class LaunchSpeedPredictorInterface;
 }
 
 namespace tap::algorithms::odometry
@@ -76,7 +76,7 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const chassis::ChassisSubsystem &chassisSubsystem,
         const control::turret::TurretSubsystem &turretSubsystem,
-        const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+        const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed);
 
     /**
@@ -96,7 +96,7 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     const chassis::ChassisSubsystem &chassisSubsystem;
     const control::turret::TurretSubsystem &turretSubsystem;
-    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels;
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
 };
 }  // namespace aruwsrc::algorithms

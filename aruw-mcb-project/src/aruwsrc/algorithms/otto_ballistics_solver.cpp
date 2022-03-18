@@ -24,7 +24,7 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -38,7 +38,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const chassis::ChassisSubsystem &chassisSubsystem,
     const control::turret::TurretSubsystem &turretSubsystem,
-    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed)
     : drivers(drivers),
       odometryInterface(odometryInterface),

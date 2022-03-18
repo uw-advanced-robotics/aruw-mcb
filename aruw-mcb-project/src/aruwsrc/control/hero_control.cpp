@@ -85,7 +85,8 @@ RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
     tap::motor::MOTOR2,
     tap::motor::MOTOR1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
+    0.5f);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 

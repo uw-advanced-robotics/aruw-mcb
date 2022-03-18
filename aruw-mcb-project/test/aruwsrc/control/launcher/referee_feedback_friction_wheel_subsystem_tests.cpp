@@ -9,25 +9,36 @@ using namespace aruwsrc;
 using namespace aruwsrc::control::launcher;
 using namespace testing;
 
-#define SETUP_TEST()                                                                \
-    tap::arch::clock::ClockStub clock;                                              \
-    Drivers drivers;                                                                \
-    RefereeFeedbackFrictionWheelSubsystem frictionWheels(                           \
-        &drivers,                                                                   \
-        tap::motor::MOTOR1,                                                         \
-        tap::motor::MOTOR2,                                                         \
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1); \
-    tap::communication::serial::RefSerialData::Rx::RobotData robotData;             \
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+class RefereeFeedbackFrictionWheelSubsystemTest : public Test
+{
+protected:
+    RefereeFeedbackFrictionWheelSubsystemTest()
+        : frictionWheels(
+              &drivers,
+              tap::motor::MOTOR1,
+              tap::motor::MOTOR2,
+              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
+    {
+    }
+
+    void SetUp() override
+    {
+        ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+    }
+
+    tap::arch::clock::ClockStub clock;
+    Drivers drivers;
+    RefereeFeedbackFrictionWheelSubsystem frictionWheels;
+    tap::communication::serial::RefSerialData::Rx::RobotData robotData;
+};
 
 // Refresh this many times to compensate for averaging
 static constexpr size_t TIMES_TO_REFRESH = 100;
 
-TEST(
-    RefereeFeedbackFrictionWheelSubsystemTests,
+TEST_F(
+    RefereeFeedbackFrictionWheelSubsystemTest,
     getPredictedLaunchSpeed_same_as_desired_launch_speed_when_ref_system_offline)
 {
-    SETUP_TEST();
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
 
     frictionWheels.setDesiredLaunchSpeed(
@@ -45,11 +56,10 @@ TEST(
     EXPECT_EQ(frictionWheels.getDesiredLaunchSpeed(), frictionWheels.getPredictedLaunchSpeed());
 }
 
-TEST(
-    RefereeFeedbackFrictionWheelSubsystemTests,
+TEST_F(
+    RefereeFeedbackFrictionWheelSubsystemTest,
     getPredictedLaunchSpeed_launch_speed_based_on_ref_system_measured_bullet_speed)
 {
-    SETUP_TEST();
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
 
     frictionWheels.setDesiredLaunchSpeed(
@@ -86,11 +96,10 @@ TEST(
     EXPECT_NEAR(robotData.turret.bulletSpeed, frictionWheels.getPredictedLaunchSpeed(), 1E-1);
 }
 
-TEST(
-    RefereeFeedbackFrictionWheelSubsystemTests,
+TEST_F(
+    RefereeFeedbackFrictionWheelSubsystemTest,
     getPredictedLaunchSpeed_does_not_update_when_lastReceivedLaunchingInfoTimestamp_does_not_change)
 {
-    SETUP_TEST();
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;

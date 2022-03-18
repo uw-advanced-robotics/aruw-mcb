@@ -17,25 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "referee_feedback_friction_wheel_subsystem.hpp"
+#ifndef LAUNCH_SPEED_PREDICTOR_INTERFACE_HPP_
+#define LAUNCH_SPEED_PREDICTOR_INTERFACE_HPP_
 
 namespace aruwsrc::control::launcher
 {
-RefereeFeedbackFrictionWheelSubsystem::RefereeFeedbackFrictionWheelSubsystem(
-    aruwsrc::Drivers *drivers,
-    tap::motor::MotorId leftMotorId,
-    tap::motor::MotorId rightMotorId,
-    tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-    float bulletSpeedLowPassAlpha)
-    : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId),
-      firingSystemMechanismID(firingSystemMechanismID),
-      bulletSpeedLowPassAlpha(bulletSpeedLowPassAlpha)
+/**
+ * Interface for retreiving the predicted launch velocity of a launching mechanism.
+ */
+class LaunchSpeedPredictorInterface
 {
-}
-
-void RefereeFeedbackFrictionWheelSubsystem::refresh()
-{
-    FrictionWheelSubsystem::refresh();
-    updatePredictedLaunchSpeed();
-}
+public:
+    virtual inline float getPredictedLaunchSpeed() const = 0;
+};
 }  // namespace aruwsrc::control::launcher
+
+#endif  // LAUNCH_SPEED_PREDICTOR_INTERFACE_HPP_
