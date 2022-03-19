@@ -242,6 +242,7 @@ ClientDisplayCommand clientDisplayCommand(
     waterwheelAgitator,
     turret,
     imuCalibrateCommand,
+    nullptr,
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
