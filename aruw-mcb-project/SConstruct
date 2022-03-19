@@ -25,6 +25,7 @@ from SCons.Script import *
 
 from build_tools import parse_args, extract_robot_type
 
+import shutil
 
 # Define project settings and build paths
 PROJECT_NAME         = "aruw-mcb"
@@ -122,6 +123,13 @@ print("Configured {0} parallel build jobs (-j{0}), {1}"
 # Ensure that modm is first, since Taproot depends on modm
 external_scons_libraries = [modm_path, TAPROOT_PATH]
 env.SConscript(dirs=external_scons_libraries, exports="env")
+
+if sys.platform == "win32" and shutil.which("lld") != None:
+    # Use lld as MinGW linking is slow as hecc. Do this after modm's SConscript
+    # is run as otherwise all LINKFLAGS are overwritten
+    env.AppendUnique(LINKFLAGS=["-fuse-ld=lld"])
+    # remove modm linkflags which lld won't accept
+    env["LINKFLAGS"].remove("-Wl,--relax")
 
 # References:
 #   GCC flags: https://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html
