@@ -84,6 +84,9 @@ public:
      * printed).
      * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
      * calibrated.
+     * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
+     * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the
+     * HUD).
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
      * never be selected as the current chassis command.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
@@ -99,6 +102,7 @@ public:
         aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+        const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
