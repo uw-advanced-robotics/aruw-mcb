@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include <gtest/gtest.h>
 
 #include "tap/architecture/clock.hpp"
@@ -17,7 +36,8 @@ protected:
               &drivers,
               tap::motor::MOTOR1,
               tap::motor::MOTOR2,
-              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
+              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+              1)
     {
     }
 
@@ -31,9 +51,6 @@ protected:
     RefereeFeedbackFrictionWheelSubsystem frictionWheels;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
-
-// Refresh this many times to compensate for averaging
-static constexpr size_t TIMES_TO_REFRESH = 100;
 
 TEST_F(
     RefereeFeedbackFrictionWheelSubsystemTest,
@@ -71,12 +88,8 @@ TEST_F(
     robotData.turret.launchMechanismID =
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 
-    for (size_t i = 0; i < TIMES_TO_REFRESH; i++)
-    {
-        frictionWheels.refresh();
-        clock.time += 1;
-        robotData.turret.lastReceivedLaunchingInfoTimestamp += 1;
-    }
+    robotData.turret.lastReceivedLaunchingInfoTimestamp += 1;
+    frictionWheels.refresh();
 
     EXPECT_NEAR(robotData.turret.bulletSpeed, frictionWheels.getPredictedLaunchSpeed(), 1E-1);
 
@@ -86,12 +99,8 @@ TEST_F(
     robotData.turret.bulletSpeed =
         FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].first + 5.0f;
 
-    for (size_t i = 0; i < TIMES_TO_REFRESH; i++)
-    {
-        frictionWheels.refresh();
-        clock.time += 1;
-        robotData.turret.lastReceivedLaunchingInfoTimestamp += 1;
-    }
+    robotData.turret.lastReceivedLaunchingInfoTimestamp += 1;
+    frictionWheels.refresh();
 
     EXPECT_NEAR(robotData.turret.bulletSpeed, frictionWheels.getPredictedLaunchSpeed(), 1E-1);
 }
@@ -111,11 +120,7 @@ TEST_F(
     frictionWheels.setDesiredLaunchSpeed(
         FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first);
 
-    for (size_t i = 0; i < TIMES_TO_REFRESH; i++)
-    {
-        frictionWheels.refresh();
-        clock.time += 1;
-    }
+    frictionWheels.refresh();
 
     EXPECT_EQ(frictionWheels.getDesiredLaunchSpeed(), frictionWheels.getPredictedLaunchSpeed());
 }
