@@ -29,8 +29,11 @@ namespace aruwsrc::control::agitator::constants
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG =
     {.kp = 300'000.0f, .ki = 0.0f, .kd = 50.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
-static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
-static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::motor::MotorId AGITATOR1_MOTOR_ID = tap::motor::MOTOR7;
+static constexpr tap::can::CanBus AGITATOR1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+
+static constexpr tap::motor::MotorId AGITATOR2_MOTOR_ID = tap::motor::MOTOR7;
+static constexpr tap::can::CanBus AGITATOR2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // SENTINEL_AGITATOR_CONSTANTS_HPP_
