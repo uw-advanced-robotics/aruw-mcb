@@ -20,12 +20,15 @@
 #ifndef VISION_COPROCESSOR_HPP_
 #define VISION_COPROCESSOR_HPP_
 
+#include <cassert>
+
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+#include "aruwsrc/control/turret/turret_controller_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
 namespace aruwsrc
@@ -62,30 +65,45 @@ public:
      */
     struct TurretAimData
     {
-        float xPos;          /// x position of the target.
-        float yPos;          /// y position of the target.
-        float zPos;          /// z position of the target.
-        float xVel;          /// x velocity of the target.
-        float yVel;          /// y velocity of the target.
-        float zVel;          /// z velocity of the target.
-        float xAcc;          /// x acceleration of the target.
-        float yAcc;          /// y acceleration of the target.
-        float zAcc;          /// z acceleration of the target.
-        bool hasTarget;      /// Whether or not the xavier has a target.
-        uint32_t timestamp;  /// Timestamp in microseconds.
+        float xPos;          ///< x position of the target (in m).
+        float yPos;          ///< y position of the target (in m).
+        float zPos;          ///< z position of the target (in m).
+        float xVel;          ///< x velocity of the target (in m/s).
+        float yVel;          ///< y velocity of the target (in m/s).
+        float zVel;          ///< z velocity of the target (in m/s).
+        float xAcc;          ///< x acceleration of the target (in m/s^2).
+        float yAcc;          ///< y acceleration of the target (in m/s^2).
+        float zAcc;          ///< z acceleration of the target (in m/s^2).
+        bool hasTarget;      ///< Whether or not the xavier has a target.
+        uint32_t timestamp;  ///< Timestamp in microseconds.
     } modm_packed;
 
     /**
-     * Odometry data to send to Jetson.
+     * Chassis odometry data to send to Jetson.
      */
+    struct ChassisOdometryData
+    {
+        float xPos;          ///< x position of the chassis (in m).
+        float yPos;          ///< y position of the chassis (in m).
+        float zPos;          ///< z position of the chassis (in m).
+        uint32_t timestamp;  ///< timestamp associated with chassis odometry (in us).
+    } modm_packed;
+
+    /**
+     * Turret odometry data to send to Jetson.
+     */
+    struct TurretOdometryData
+    {
+        float pitch;         ///< Pitch angle of turret relative to plane parallel to the ground (in
+                             ///< deg).
+        float yaw;           ///< Clockwise turret rotation angle between 0 and 360 (in deg).
+        uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
+    } modm_packed;
+
     struct OdometryData
     {
-        float chassisX;     /// x position of the chassis.
-        float chassisY;     /// y position of the chassis.
-        float chassisZ;     /// z position of the chassis.
-        float turretPitch;  /// Pitch angle of turret relative to plane parallel to the ground.
-        float turretYaw;    /// Clockwise turret rotation angle between 0 and 360.
-        uint32_t turretTimestamp;  /// Timestamp in microseconds, when turret data was computed.
+        ChassisOdometryData chassisOdometry;
+        TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
     VisionCoprocessor(aruwsrc::Drivers* drivers);
@@ -113,7 +131,11 @@ public:
      */
     mockable bool isCvOnline();
 
-    mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
+    mockable inline const TurretAimData& getLastAimData(uint8_t turretID) const
+    {
+        assert(turretID < control::turret::NUM_TURRETS);
+        return lastAimData[turretID];
+    }
 
     mockable inline void attachOdometryInterface(
         tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
@@ -124,10 +146,12 @@ public:
     /**
      * Specify the turret orientation for auto-aim to reference based on the target robot.
      */
-    inline void attachTurretOrientationInterface(
-        aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface)
+    mockable inline void attachTurretOrientationInterface(
+        aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface,
+        uint8_t turretID)
     {
-        this->turretOrientationInterface = turretOrientationInterface;
+        assert(turretID < control::turret::NUM_TURRETS);
+        turretOrientationInterfaces[turretID] = turretOrientationInterface;
     }
 
     mockable void sendShutdownMessage();
@@ -163,7 +187,7 @@ private:
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
 
     /// The last aim data received from the xavier.
-    TurretAimData lastAimData;
+    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
     // CV online variables.
     /// Timer for determining if serial is offline.
@@ -171,7 +195,7 @@ private:
 
     tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
 
-    aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface;
+    aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterfaces[control::turret::NUM_TURRETS];
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
@@ -186,7 +210,7 @@ private:
      * @return `false` if the message length doesn't match `sizeof(*aimData)`, `true`
      *      otherwise.
      */
-    static bool decodeToTurretAimData(const ReceivedSerialMessage& message, TurretAimData* aimData);
+    bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
     void decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message);
 

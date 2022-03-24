@@ -44,8 +44,10 @@ TurretCVCommand::TurretCVCommand(
     const control::launcher::FrictionWheelSubsystem &frictionWheels,
     const float userPitchInputScalar,
     const float userYawInputScalar,
-    const float defaultLaunchSpeed)
+    const float defaultLaunchSpeed,
+    uint8_t turretID)
     : drivers(drivers),
+      turretID(turretID),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
@@ -78,9 +80,10 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
+    const auto &aimData = drivers->visionCoprocessor.getLastAimData(turretID);
+
     if (!(drivers->visionCoprocessor.isCvOnline() &&
-          drivers->visionCoprocessor.getLastAimData().hasTarget &&
-          ballisticsSolver.computeTurretAimAngles(&pitchSetpoint, &yawSetpoint)))
+          ballisticsSolver.computeTurretAimAngles(&pitchSetpoint, &yawSetpoint, aimData)))
     {
         // no valid CV data, let user control turret
         pitchSetpoint +=

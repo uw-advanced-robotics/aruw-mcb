@@ -20,6 +20,8 @@
 #ifndef OTTO_BALLISTICS_SOLVER_HPP_
 #define OTTO_BALLISTICS_SOLVER_HPP_
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
 namespace aruwsrc::chassis
 {
 class ChassisSubsystem;
@@ -87,9 +89,13 @@ public:
      * coordinates invalid.
      * @param[out] yawAngle The computed yaw angle in the world frame. Not set if the aim
      * coordinates invalid.
+     * @param[in] aimData
      * @return `true` if the computation succeeded, `false` otherwise.
      */
-    bool computeTurretAimAngles(float *pitchAngle, float *yawAngle);
+    bool computeTurretAimAngles(
+        float *pitchAngle,
+        float *yawAngle,
+        const serial::VisionCoprocessor::TurretAimData &aimData);
 
 private:
     const Drivers &drivers;

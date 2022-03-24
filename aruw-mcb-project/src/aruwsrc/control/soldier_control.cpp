@@ -402,7 +402,7 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
 /* register io mappings here ------------------------------------------------*/

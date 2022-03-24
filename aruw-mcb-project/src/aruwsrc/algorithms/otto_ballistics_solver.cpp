@@ -49,10 +49,11 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 {
 }
 
-bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawAngle)
+bool OttoBallisticsSolver::computeTurretAimAngles(
+    float *pitchAngle,
+    float *yawAngle,
+    const serial::VisionCoprocessor::TurretAimData &aimData)
 {
-    const auto &aimData = drivers.visionCoprocessor.getLastAimData();
-
     // if the friction wheel launch speed is 0, use a default launch speed so ballistics gives a
     // reasonable computation
     const float launchSpeed = compareFloatClose(frictionWheels.getDesiredLaunchSpeed(), 0, 1E-5)

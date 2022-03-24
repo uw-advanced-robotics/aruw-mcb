@@ -86,6 +86,7 @@ public:
      * user input.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
+     * @param[in] turretID
      */
     TurretCVCommand(
         aruwsrc::Drivers *drivers,
@@ -97,7 +98,8 @@ public:
         const control::launcher::FrictionWheelSubsystem &frictionWheels,
         const float userPitchInputScalar,
         const float userYawInputScalar,
-        const float defaultLaunchSpeed);
+        const float defaultLaunchSpeed,
+        uint8_t turretID = 0);
 
     void initialize() override;
 
@@ -113,6 +115,8 @@ public:
 
 private:
     aruwsrc::Drivers *drivers;
+
+    uint8_t turretID;
 
     TurretSubsystem *turretSubsystem;
 

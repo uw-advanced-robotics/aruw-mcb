@@ -355,7 +355,7 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
 /* register io mappings here ------------------------------------------------*/

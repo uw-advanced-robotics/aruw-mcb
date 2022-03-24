@@ -35,7 +35,7 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       lastAimData(),
       odometryInterface(nullptr),
-      turretOrientationInterface(nullptr)
+      turretOrientationInterfaces{}
 {
 }
 
@@ -58,7 +58,7 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
         {
-            decodeToTurretAimData(completeMessage, &lastAimData);
+            decodeToTurretAimData(completeMessage);
             return;
         }
         case CV_MESSAGE_TYPE_TIME_SYNC_REQ:
@@ -71,15 +71,13 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
     }
 }
 
-bool VisionCoprocessor::decodeToTurretAimData(
-    const ReceivedSerialMessage& message,
-    TurretAimData* aimData)
+bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    if (message.header.dataLength != sizeof(*aimData))
+    if (message.header.dataLength != sizeof(lastAimData))
     {
         return false;
     }
-    memcpy(aimData, &message.data, sizeof(*aimData));
+    memcpy(lastAimData, &message.data, sizeof(lastAimData));
     return true;
 }
 
@@ -134,34 +132,29 @@ void VisionCoprocessor::sendRebootMessage()
 
 void VisionCoprocessor::sendOdometryData()
 {
+    assert(odometryInterface != nullptr);
+
     DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
-
-    modm::Location2D<float> location = modm::Location2D<float>();
-
-    if (odometryInterface != nullptr)
-    {
-        location = odometryInterface->getCurrentLocation2D();
-    }
+    OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
 
-    OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
+    modm::Location2D<float> location = odometryInterface->getCurrentLocation2D();
 
-    odometryData->chassisX = location.getX();
-    odometryData->chassisY = location.getY();
-    odometryData->chassisZ = 0.0f;
-    if (turretOrientationInterface != nullptr)
+    // chassis odometry
+    odometryData->chassisOdometry.xPos = location.getX();
+    odometryData->chassisOdometry.yPos = location.getY();
+    odometryData->chassisOdometry.zPos = 0.0f;
+    odometryData->chassisOdometry.timestamp = tap::arch::clock::getTimeMicroseconds();
+
+    // turret odometry
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
     {
-        odometryData->turretPitch = turretOrientationInterface->getWorldPitch();
-        odometryData->turretYaw = turretOrientationInterface->getWorldYaw();
-        odometryData->turretTimestamp = turretOrientationInterface->getLastMeasurementTimeMicros();
-    }
-    else
-    {
-        odometryData->turretPitch = 0.0f;
-        odometryData->turretYaw = 0.0f;
-        odometryData->turretTimestamp = 0;
-        RAISE_ERROR(drivers, "turret interface not attached");
+        assert(turretOrientationInterfaces[i] != nullptr);
+        odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
+        odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
+        odometryData->turretOdometry[i].timestamp =
+            turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
     }
 
     odometryMessage.setCRC16();
