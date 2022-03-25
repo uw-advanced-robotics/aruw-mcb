@@ -15,9 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
+from os.path import abspath
+
 Import("env")
 Import("args")
 Import("sources")
+
+env.AppendUnique(CPPPATH=[abspath(r".")])
 
 # Don't compile this stuff when testing
 IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/control/*_control.cpp", "aruwsrc/sim-initialization/*_sim.cpp"]
