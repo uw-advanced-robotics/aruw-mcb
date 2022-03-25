@@ -48,7 +48,6 @@ env["CONFIG_PROFILE"] = args["BUILD_PROFILE"]
 
 # Add scons-tools directory to toolpath so we can use the various tools inside it,
 # then add various tools
-print(TAPROOT_SCRIPTS_TOOLPATH)
 env.Append(toolpath=[TAPROOT_SCRIPTS_TOOLPATH])
 
 
@@ -77,7 +76,7 @@ if args["COMPILE_SRC"]:
         program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)
 
         # The executable depends on the linkerscript
-        env.Depends(target=program, dependency=args["LINKERSCRIPT_FILE"])
+        env.Depends(target=program, dependency=env["LINKERSCRIPT_FILE"])
 
         # Add target environment-specific SCons aliases
         # WARNING: all aliases must be checked during argument validation

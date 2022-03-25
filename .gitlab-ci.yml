@@ -20,7 +20,7 @@ default:
 
 variables:
   ARTIFACT_PATH: isolated-deploy
-  GIT_SUBMODULE_STRATEGY: none
+  GIT_SUBMODULE_STRATEGY: normal
   BUILD_PATH: aruw-mcb-project/build
   DEFAULT_BUILD_ELF_FILE: build/hardware/scons-release/aruw-mcb.elf
   DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/scons-fast/aruw-mcb-tests.elf
@@ -96,8 +96,6 @@ before_script:
   only: *default_only
   except: *default_except
   needs: ["MCB Lib Build"]
-  variables:
-    GIT_SUBMODULE_STRATEGY: normal
   script:
     - cd aruw-mcb-project
     - scons build robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS
@@ -132,8 +130,6 @@ before_script:
   only: *default_only
   except: *default_except
   needs: ["Test Lib Build"]
-  variables:
-    GIT_SUBMODULE_STRATEGY: normal
   script:
     - cd aruw-mcb-project
     - scons build-tests profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
@@ -149,6 +145,8 @@ before_script:
   only: *default_only
   except: *default_except
   needs: []
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
     - scons build compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
@@ -201,8 +199,6 @@ before_script:
   needs: []
   only: *default_only
   except: *default_except
-  variables:
-    GIT_SUBMODULE_STRATEGY: normal
   script:
     - cd aruw-mcb-project
     - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER_2022 -j${NUM_JOBS}
@@ -321,6 +317,8 @@ before_script:
 "Generate Docs":
   image: alpine
   needs: []
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
   stage: Deploy Pages
   before_script:
     - apk update
@@ -350,6 +348,8 @@ pages:
   image: alpine
   needs: ["Generate Docs"]
   dependencies: ["Generate Docs"]
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
   stage: Deploy Pages
   before_script:
     - "true"
