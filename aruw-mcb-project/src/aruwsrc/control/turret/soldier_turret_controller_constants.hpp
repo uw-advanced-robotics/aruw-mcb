@@ -24,7 +24,7 @@
 
 namespace aruwsrc::control::turret
 {
-static constexpr uint8_t NUM_TURRETS = 2;
+static constexpr uint8_t NUM_TURRETS = 1;
 
 namespace world_rel_turret_imu
 {

@@ -54,6 +54,8 @@ namespace serial
 class VisionCoprocessor : public tap::communication::serial::DJISerial
 {
 public:
+    static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
+
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
 

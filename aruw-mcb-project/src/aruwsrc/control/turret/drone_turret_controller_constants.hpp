@@ -24,6 +24,7 @@
 
 namespace aruwsrc::control::turret
 {
+static constexpr uint8_t NUM_TURRETS = 1;
 }  // namespace aruwsrc::control::turret
 
 #endif  // DRONE_TURRET_CONTROLLER_CONSTANTS_HPP_
