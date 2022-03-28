@@ -63,6 +63,13 @@ elif args["TARGET_ENV"] == "hardware":
     modm_path = HARDWARE_MODM_PATH
 
 
+# Append include path to environment so both src/test environments have access to them
+env.AppendUnique(CPPPATH=[
+    abspath(r"src"),
+    abspath(r"test"),
+])
+
+
 # Building all libraries (read from sconscript files located in provided dirs)
 # Ensure that modm is first, since Taproot depends on modm
 sources = []

@@ -21,7 +21,6 @@ Import("env")
 Import("args")
 Import("sources")
 
-env.AppendUnique(CPPPATH=[abspath(r".")])
 
 # Don't compile this stuff when testing
 IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/control/*_control.cpp", "aruwsrc/sim-initialization/*_sim.cpp"]
