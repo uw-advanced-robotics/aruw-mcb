@@ -195,7 +195,8 @@ private:
 
     tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
 
-    aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterfaces[control::turret::NUM_TURRETS];
+    aruwsrc::control::turret::TurretOrientationInterface*
+        turretOrientationInterfaces[control::turret::NUM_TURRETS];
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 

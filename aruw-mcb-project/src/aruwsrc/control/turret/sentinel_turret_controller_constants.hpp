@@ -25,7 +25,7 @@
 namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 2;
-    
+
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
