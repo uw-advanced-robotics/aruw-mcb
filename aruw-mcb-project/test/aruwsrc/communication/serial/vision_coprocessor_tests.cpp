@@ -22,9 +22,11 @@
 #include "tap/algorithms/crc.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/mock/turret_orientation_interface_mock.hpp"
 #include "gtest/gtest.h"
 
 using aruwsrc::serial::VisionCoprocessor;
@@ -203,6 +205,112 @@ static void checkHeaderAndTail(const DJISerial::SerialMessage<DATA_LEN> &msg)
     EXPECT_EQ(DATA_LEN, msg.header.dataLength);
     EXPECT_EQ(calculateCRC8(reinterpret_cast<const uint8_t *>(&msg.header), 4), msg.header.CRC8);
     EXPECT_EQ(calculateCRC16(reinterpret_cast<const uint8_t *>(&msg), sizeof(msg) - 2), msg.CRC16);
+}
+
+TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
+{
+    ClockStub clock;
+
+    aruwsrc::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+
+    testing::NiceMock<tap::mock::Odometry2DInterfaceMock> odometryInterface;
+    std::array<testing::NiceMock<aruwsrc::mock::TurretOrientationInterfaceMock>, NUM_TURRETS>
+        turretInterfaces;
+
+    serial.attachOdometryInterface(&odometryInterface);
+    for (size_t i = 0; i < turretInterfaces.size(); i++)
+    {
+        serial.attachTurretOrientationInterface(&turretInterfaces[i], i);
+    }
+
+    VisionCoprocessor::OdometryData odometryData;
+
+    odometryData.chassisOdometry.xPos = 10;
+    odometryData.chassisOdometry.yPos = -100;
+    odometryData.chassisOdometry.zPos = 0;
+    odometryData.chassisOdometry.timestamp = 132'000;
+
+    odometryData.turretOdometry[0].pitch = 45;
+    odometryData.turretOdometry[0].yaw = -30;
+    odometryData.turretOdometry[0].timestamp = 456;
+
+    clock.time = odometryData.chassisOdometry.timestamp / 1000;
+
+    for (size_t i = 1; i < MODM_ARRAY_SIZE(odometryData.turretOdometry); i++)
+    {
+        odometryData.turretOdometry[i] = odometryData.turretOdometry[i - 1];
+        odometryData.turretOdometry[i].pitch++;
+        odometryData.turretOdometry[i].yaw++;
+        odometryData.turretOdometry[i].timestamp++;
+    }
+
+    ON_CALL(odometryInterface, getCurrentLocation2D)
+        .WillByDefault(Return(modm::Location2D<float>(
+            odometryData.chassisOdometry.xPos,
+            odometryData.chassisOdometry.yPos,
+            0)));
+
+    for (size_t i = 0; i < turretInterfaces.size(); i++)
+    {
+        ON_CALL(turretInterfaces[i], getWorldYaw)
+            .WillByDefault(Return(odometryData.turretOdometry[i].yaw));
+        ON_CALL(turretInterfaces[i], getWorldPitch)
+            .WillByDefault(Return(odometryData.turretOdometry[i].pitch));
+        ON_CALL(turretInterfaces[i], getLastMeasurementTimeMicros)
+            .WillByDefault(Return(odometryData.turretOdometry[i].timestamp));
+    }
+
+    static constexpr int HEADER_LEN = 7;
+    static constexpr int DATA_LEN = sizeof(VisionCoprocessor::OdometryData);
+    static constexpr int CRC16_LEN = 2;
+    static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
+
+    EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
+        .WillOnce([&](tap::communication::serial::Uart::UartPort,
+                      const uint8_t *data,
+                      std::size_t length) {
+            DJISerial::SerialMessage<DATA_LEN> msg;
+            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+
+            checkHeaderAndTail<DATA_LEN>(msg);
+            EXPECT_EQ(1, msg.messageType);
+
+            float cx, cy, cz;
+            uint32_t cTime;
+
+            // chassis odometry
+            convertFromLittleEndian(&cx, msg.data);
+            convertFromLittleEndian(&cy, msg.data + 4);
+            convertFromLittleEndian(&cz, msg.data + 8);
+            convertFromLittleEndian(&cTime, msg.data + 12);
+
+            EXPECT_EQ(odometryData.chassisOdometry.xPos, cx);
+            EXPECT_EQ(odometryData.chassisOdometry.yPos, cy);
+            EXPECT_EQ(odometryData.chassisOdometry.zPos, cz);
+            EXPECT_EQ(odometryData.chassisOdometry.timestamp, cTime);
+
+            // turret odometry
+            uint32_t startIndex = 16;
+            int i = 0;
+            std::array<std::tuple<float, float, uint32_t>, NUM_TURRETS> turretOdom;
+            for (auto &odom : turretOdom)
+            {
+                convertFromLittleEndian(&std::get<0>(odom), msg.data + startIndex);
+                convertFromLittleEndian(&std::get<1>(odom), msg.data + startIndex + 4);
+                convertFromLittleEndian(&std::get<2>(odom), msg.data + startIndex + 8);
+
+                EXPECT_EQ(odometryData.turretOdometry[i].pitch, std::get<0>(odom));
+                EXPECT_EQ(odometryData.turretOdometry[i].yaw, std::get<1>(odom));
+                EXPECT_EQ(odometryData.turretOdometry[i].timestamp, std::get<2>(odom));
+                startIndex += 12;
+                i++;
+            }
+
+            return length;
+        });
+
+    serial.sendOdometryData();
 }
 
 TEST(VisionCoprocessor, sendRobotTypeData_timer_not_expired_nothing_sent)
