@@ -58,6 +58,13 @@ sources = []
 env.SConscript(dirs=[TAPROOT_PATH, SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
 
 
+# Tests must be included as sources (rather than built as a separate library) in order for
+# googletest to identify any tests that need to be run. Not an issue for us since we don't
+# normally run tests in taproot from this project, but in general this is an issue.
+if args["TARGET_ENV"] == "tests":
+    sources.extend(env.FindSourceFiles("taproot/test"))
+
+
 print("Configured {0} parallel build jobs (-j{0}), {1}"
     .format(GetOption("num_jobs"), args["ROBOT_TYPE"]))
 
