@@ -46,11 +46,14 @@ static void initAndRunAutoAimRxTest(
     DJISerial::ReceivedSerialMessage message;
     message.header.headByte = 0xA5;
     message.messageType = 2;
-    message.header.dataLength = 10 * sizeof(float) + sizeof(uint8_t);
+    message.header.dataLength = expectedAimData.size() * sizeof(VisionCoprocessor::TurretAimData);
 
-    for (const auto &aimData : expectedAimData)
+    for (size_t i = 0; i < expectedAimData.size(); i++)
     {
-        memcpy(&message.data, &aimData, sizeof(aimData));
+        memcpy(
+            message.data + i * sizeof(VisionCoprocessor::TurretAimData),
+            &expectedAimData[i],
+            sizeof(VisionCoprocessor::TurretAimData));
     }
 
     serial.messageReceiveCallback(message);
@@ -58,7 +61,7 @@ static void initAndRunAutoAimRxTest(
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
         const VisionCoprocessor::TurretAimData &callbackData = serial.getLastAimData(i);
-        EXPECT_EQ(expectedAimData[i].hasTarget, callbackData.hasTarget);
+        std::cout << i << std::endl;
         EXPECT_EQ(expectedAimData[i].xPos, callbackData.xPos);
         EXPECT_EQ(expectedAimData[i].yPos, callbackData.yPos);
         EXPECT_EQ(expectedAimData[i].zPos, callbackData.zPos);
@@ -68,6 +71,7 @@ static void initAndRunAutoAimRxTest(
         EXPECT_EQ(expectedAimData[i].xAcc, callbackData.xAcc);
         EXPECT_EQ(expectedAimData[i].yAcc, callbackData.yAcc);
         EXPECT_EQ(expectedAimData[i].zAcc, callbackData.zAcc);
+        EXPECT_EQ(expectedAimData[i].hasTarget, callbackData.hasTarget);
         EXPECT_EQ(expectedAimData[i].timestamp, callbackData.timestamp);
     }
 }
