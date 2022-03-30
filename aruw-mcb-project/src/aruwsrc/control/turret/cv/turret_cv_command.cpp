@@ -22,7 +22,7 @@
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/architecture/clock.hpp"
 
-#include "../turret_controller_constants.hpp"
+#include "aruwsrc/constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"

@@ -127,7 +127,6 @@ private:
         TURRET_MCB_TX_CAN_ID = 0x1fe,
     };
 
-    static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;

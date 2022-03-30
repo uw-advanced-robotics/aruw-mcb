@@ -51,12 +51,6 @@ namespace serial
 class VisionCoprocessor : public tap::communication::serial::DJISerial
 {
 public:
-    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart2;
-
-    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart3;
-
     /**
      * AutoAim data to receive from Jetson.
      */

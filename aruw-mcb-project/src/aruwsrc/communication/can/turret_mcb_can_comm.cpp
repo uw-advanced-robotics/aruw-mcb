@@ -25,6 +25,8 @@
 #include "aruwsrc/drivers.hpp"
 #include "modm/architecture/interface/can.hpp"
 
+#include "aruwsrc/constants.hpp"
+
 namespace aruwsrc::can
 {
 TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)

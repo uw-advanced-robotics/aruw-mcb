@@ -19,7 +19,7 @@
 
 #include "turret_user_world_relative_command.hpp"
 
-#include "../turret_controller_constants.hpp"
+#include "aruwsrc/constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 

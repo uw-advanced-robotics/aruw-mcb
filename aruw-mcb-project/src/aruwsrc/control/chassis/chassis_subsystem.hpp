@@ -40,7 +40,7 @@
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
 
-#include "chassis_constants.hpp"
+#include "aruwsrc/constants.hpp"
 
 namespace aruwsrc
 {
