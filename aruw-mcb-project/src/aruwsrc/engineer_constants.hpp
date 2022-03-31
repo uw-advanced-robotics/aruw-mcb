@@ -21,7 +21,6 @@
 #define ENGINEER_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
-
 #include "tap/motor/dji_motor.hpp"
 
 namespace aruwsrc::control::turret
@@ -49,19 +48,19 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 
 namespace aruwsrc::can
 {
-    // Come back to this - may be helpful to have other constants in here
-    static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-} // namespace aruwsrc::can
+// Come back to this - may be helpful to have other constants in here
+static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+}  // namespace aruwsrc::can
 
 #include "tap/communication/serial/dji_serial.hpp"
 
 namespace aruwsrc::serial
 {
-    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart2;
+static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
+    tap::communication::serial::Uart::UartPort::Uart2;
 
-    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart3;
+static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
+    tap::communication::serial::Uart::UartPort::Uart3;
 }  // namespace aruwsrc::serial
 
 #include "tap/communication/gpio/analog.hpp"
@@ -184,5 +183,26 @@ namespace aruwsrc::control::launcher
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] =
     {{0.0f, 0.0f}, {15.0f, 4600.0f}, {18.0f, 5000.0f}, {30.0f, 7200.2f}, {32.0f, 8300.0f}};
 }  // namespace aruwsrc::control::launcher
+
+namespace aruwsrc::control::control_operator_interface
+{
+/**
+ * Max acceleration in rpm/s^2 of the chassis in the x direction
+ */
+static constexpr float MAX_ACCELERATION_X = 10'000.0f;
+static constexpr float MAX_DECELERATION_X = 20'000.0f;
+
+/**
+ * Max acceleration in rpm/s^2 of the chassis in the y direction
+ */
+static constexpr float MAX_ACCELERATION_Y = 9'000.0f;
+static constexpr float MAX_DECELERATION_Y = 20'000.0f;
+
+/**
+ * Max acceleration in rpm/s^2 of the chassis in the r direction
+ */
+static constexpr float MAX_ACCELERATION_R = 40'000.0f;
+static constexpr float MAX_DECELERATION_R = 50'000.0f;
+}  // namespace aruwsrc::control::control_operator_interface
 
 #endif  // ENGINEER_CONSTANTS_HPP_

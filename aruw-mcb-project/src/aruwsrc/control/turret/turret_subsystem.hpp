@@ -20,11 +20,12 @@
 #ifndef TURRET_SUBSYSTEM_HPP_
 #define TURRET_SUBSYSTEM_HPP_
 
-#include "aruwsrc/constants.hpp"
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/control/turret_subsystem_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
+
+#include "aruwsrc/constants.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/motor_interface_mock.hpp"

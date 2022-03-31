@@ -49,19 +49,19 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 namespace aruwsrc::control::launcher
 {
-    static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
-    static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
-    /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
-    static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
+/** speed of ramp when you set a new desired ramp speed [rpm / ms] */
+static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
 
-    // TODO: Unfuck this
-    static constexpr float PID_P = 20.0f;
-    static constexpr float PID_I = 0.2f;
-    static constexpr float PID_D = 0.0f;
-    static constexpr float PID_MAX_ERROR_SUM = 5'000.0f;
-    static constexpr float PID_MAX_OUTPUT = 16000.0f;
+// TODO: Unfuck this
+static constexpr float PID_P = 20.0f;
+static constexpr float PID_I = 0.2f;
+static constexpr float PID_D = 0.0f;
+static constexpr float PID_MAX_ERROR_SUM = 5'000.0f;
+static constexpr float PID_MAX_OUTPUT = 16000.0f;
 }  // namespace aruwsrc::control::launcher
 
 #endif  // TURRET_CONTROLLER_CONSTANTS_HPP_

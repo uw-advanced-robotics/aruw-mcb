@@ -36,11 +36,10 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/constants.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
-
-#include "aruwsrc/constants.hpp"
 
 namespace aruwsrc
 {

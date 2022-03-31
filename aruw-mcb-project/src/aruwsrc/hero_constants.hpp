@@ -46,7 +46,6 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 3500.0f;
 
 namespace world_rel_turret_imu
 {
-
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 13.0f,
     .ki = 0.0f,
@@ -150,22 +149,24 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 
 namespace aruwsrc::can
 {
-    // Come back to this - may be helpful to have other constants in here
-    static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-} // namespace aruwsrc::can
+// Come back to this - may be helpful to have other constants in here
+static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+}  // namespace aruwsrc::can
 
 #include "tap/communication/serial/dji_serial.hpp"
 
 namespace aruwsrc::serial
 {
-    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart2;
+static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
+    tap::communication::serial::Uart::UartPort::Uart2;
 
-    static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart3;
+static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
+    tap::communication::serial::Uart::UartPort::Uart3;
 }  // namespace aruwsrc::serial
 
 #include "tap/motor/dji_motor.hpp"
+
+#include "modm/math/geometry.hpp"
 
 namespace aruwsrc::control::agitator::constants
 {
@@ -311,12 +312,32 @@ static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
 namespace aruwsrc::control::launcher
 {
-    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-        {0.0f, 0.0f},
-        {10, 3900.0f},
-        {16.0f, 6700.0f},
-        { 20.0f,
-          8500.0f }};
+static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+    {0.0f, 0.0f},
+    {10, 3900.0f},
+    {16.0f, 6700.0f},
+    {20.0f, 8500.0f}};
 }  // namespace aruwsrc::control::launcher
+
+namespace aruwsrc::control::control_operator_interface
+{
+/**
+ * Max acceleration in rpm/s^2 of the chassis in the x direction
+ */
+static constexpr float MAX_ACCELERATION_X = 7'000.0f;
+static constexpr float MAX_DECELERATION_X = 20'000.0f;
+
+/**
+ * Max acceleration in rpm/s^2 of the chassis in the y direction
+ */
+static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
+static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
+
+/**
+ * Max acceleration in rpm/s^2 of the chassis in the r direction
+ */
+static constexpr float MAX_ACCELERATION_R = 40'000.0f;
+static constexpr float MAX_DECELERATION_R = 50'000.0f;
+}  // namespace aruwsrc::control::control_operator_interface
 
 #endif  // HERO_CONSTANTS_HPP_
