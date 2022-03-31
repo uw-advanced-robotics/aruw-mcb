@@ -64,10 +64,8 @@
 #endif
 
 using namespace tap::control::setpoint;
-using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
-using namespace aruwsrc::chassis;
 using namespace aruwsrc::algorithms::odometry;
 using namespace tap::control;
 using namespace aruwsrc::control::client_display;
@@ -85,16 +83,11 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 namespace soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
-tap::motor::DjiMotor pitchMotor(
-    drivers(),
-    SoldierTurretSubsystem::PITCH_MOTOR_ID,
-    SoldierTurretSubsystem::CAN_BUS_MOTORS,
-    false,
-    "Pitch Turret");
+tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
 tap::motor::DjiMotor yawMotor(
     drivers(),
-    SoldierTurretSubsystem::YAW_MOTOR_ID,
-    SoldierTurretSubsystem::CAN_BUS_MOTORS,
+    YAW_MOTOR_ID,
+    CAN_BUS_MOTORS,
 #ifdef TARGET_SOLDIER_2021
     false,
 #else
@@ -103,7 +96,7 @@ tap::motor::DjiMotor yawMotor(
     "Yaw Turret");
 SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
-ChassisSubsystem chassis(drivers());
+aruwsrc::chassis::ChassisSubsystem chassis(drivers());
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 static inline void refreshOdom() { odometrySubsystem.refresh(); }
@@ -119,24 +112,27 @@ AgitatorSubsystem agitator(
     aruwsrc::control::agitator::constants::JAMMING_TIME,
     true);
 
-FrictionWheelSubsystem frictionWheels(drivers(), tap::motor::MOTOR1, tap::motor::MOTOR2);
+aruwsrc::control::launcher::FrictionWheelSubsystem frictionWheels(
+    drivers(),
+    tap::motor::MOTOR1,
+    tap::motor::MOTOR2);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
 TurretMCBHopperSubsystem hopperCover(drivers());
 
 /* define commands ----------------------------------------------------------*/
-ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
+aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
 
-ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
+aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(
+aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &chassis,
     &turret,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+    aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
+aruwsrc::chassis::BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -234,19 +230,19 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     false,
     10);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
     15.0f,
     false,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 

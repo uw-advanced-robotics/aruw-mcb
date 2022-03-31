@@ -99,8 +99,8 @@ float ControlOperatorInterface::getChassisXInput()
 
     applyAccelerationToRamp(
         chassisXInputRamp,
-        MAX_ACCELERATION_X,
-        MAX_DECELERATION_X,
+        control_operator_interface::MAX_ACCELERATION_X,
+        control_operator_interface::MAX_DECELERATION_X,
         static_cast<float>(dt) / 1E3F);
 
     return chassisXInputRamp.getValue();
@@ -135,8 +135,8 @@ float ControlOperatorInterface::getChassisYInput()
 
     applyAccelerationToRamp(
         chassisYInputRamp,
-        MAX_ACCELERATION_Y,
-        MAX_DECELERATION_Y,
+        control_operator_interface::MAX_ACCELERATION_Y,
+        control_operator_interface::MAX_DECELERATION_Y,
         static_cast<float>(dt) / 1E3F);
 
     return chassisYInputRamp.getValue();
@@ -171,8 +171,8 @@ float ControlOperatorInterface::getChassisRInput()
 
     applyAccelerationToRamp(
         chassisRInputRamp,
-        MAX_ACCELERATION_R,
-        MAX_DECELERATION_R,
+        control_operator_interface::MAX_ACCELERATION_R,
+        control_operator_interface::MAX_DECELERATION_R,
         static_cast<float>(dt) / 1E3);
 
     return chassisRInputRamp.getValue();

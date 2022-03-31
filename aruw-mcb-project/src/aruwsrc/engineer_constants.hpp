@@ -21,7 +21,13 @@
 #define ENGINEER_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/can/can_rx_listener.hpp"
+#include "tap/communication/gpio/analog.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
 #include "tap/motor/dji_motor.hpp"
+
+#include "modm/math/filter/pid.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -44,15 +50,11 @@ static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 }  // namespace aruwsrc::control::turret
 
-#include "tap/communication/can/can_rx_listener.hpp"
-
 namespace aruwsrc::can
 {
 // Come back to this - may be helpful to have other constants in here
 static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 }  // namespace aruwsrc::can
-
-#include "tap/communication/serial/dji_serial.hpp"
 
 namespace aruwsrc::serial
 {
@@ -62,11 +64,6 @@ static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_T
 static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
     tap::communication::serial::Uart::UartPort::Uart3;
 }  // namespace aruwsrc::serial
-
-#include "tap/communication/gpio/analog.hpp"
-
-#include "modm/math/filter/pid.hpp"
-#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::chassis
 {

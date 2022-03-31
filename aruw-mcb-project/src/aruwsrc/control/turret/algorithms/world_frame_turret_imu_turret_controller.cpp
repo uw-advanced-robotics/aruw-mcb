@@ -274,10 +274,10 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
     float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
     velocityPidOutput += computeGravitationalForceOffset(
-        TurretSubsystem::TURRET_CG_X,
-        TurretSubsystem::TURRET_CG_Z,
+        TURRET_CG_X,
+        TURRET_CG_Z,
         -turretSubsystem->getPitchAngleFromCenter(),
-        TurretSubsystem::GRAVITY_COMPENSATION_SCALAR);
+        GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(velocityPidOutput);
 }

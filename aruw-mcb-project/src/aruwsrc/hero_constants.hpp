@@ -21,6 +21,14 @@
 #define HERO_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/can/can_rx_listener.hpp"
+#include "tap/communication/gpio/analog.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
+#include "tap/motor/dji_motor.hpp"
+
+#include "modm/math/filter/pid.hpp"
+#include "modm/math/geometry.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -145,15 +153,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 }  // namespace chassis_rel
 }  // namespace aruwsrc::control::turret
 
-#include "tap/communication/can/can_rx_listener.hpp"
-
 namespace aruwsrc::can
 {
 // Come back to this - may be helpful to have other constants in here
 static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 }  // namespace aruwsrc::can
-
-#include "tap/communication/serial/dji_serial.hpp"
 
 namespace aruwsrc::serial
 {
@@ -163,10 +167,6 @@ static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_T
 static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
     tap::communication::serial::Uart::UartPort::Uart3;
 }  // namespace aruwsrc::serial
-
-#include "tap/motor/dji_motor.hpp"
-
-#include "modm/math/geometry.hpp"
 
 namespace aruwsrc::control::agitator::constants
 {
@@ -195,11 +195,6 @@ static constexpr bool HERO_KICKER_INVERTED = false;
 static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = M_PI / 14.0f;
 static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
 }  // namespace aruwsrc::control::agitator::constants
-
-#include "tap/communication/gpio/analog.hpp"
-
-#include "modm/math/filter/pid.hpp"
-#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::chassis
 {

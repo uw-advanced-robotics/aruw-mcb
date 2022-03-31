@@ -34,8 +34,6 @@
 #include "engineer_constants.hpp"
 #endif
 
-#include "tap/motor/dji_motor.hpp"
-
 namespace aruwsrc::chassis
 {
 // hardware constants, not specific to any particular chassis
