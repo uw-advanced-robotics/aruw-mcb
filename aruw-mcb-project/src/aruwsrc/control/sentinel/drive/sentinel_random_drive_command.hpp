@@ -17,10 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SENTINEL)
-
 #ifndef SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
 #define SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
+
+#if defined(TARGET_SENTINEL)
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
@@ -59,6 +59,6 @@ private:
 
 }  // namespace aruwsrc::control::sentinel::drive
 
-#endif  // SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
-
 #endif
+
+#endif  // SENTINEL_RANDOM_DRIVE_COMMAND_HPP_

@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#ifndef SOLDIER_AGITATOR_CONSTANTS_HPP_
+#define SOLDIER_AGITATOR_CONSTANTS_HPP_
+
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly, use agitator_consants.hpp
@@ -25,7 +29,7 @@ namespace aruwsrc::control::agitator::constants
 // position PID terms
 // PID terms for soldier
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG =
-    {.kp = 300'000.0f, .ki = 0.0f, .kd = 50.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+    {.kp = 200'000.0f, .ki = 0.0f, .kd = 100.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
 static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
@@ -42,3 +46,5 @@ static constexpr bool isAgitatorInverted = false;
 static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
 static constexpr uint32_t JAMMING_TIME = 70;
 }  // namespace aruwsrc::control::agitator::constants
+
+#endif  // SOLDIER_AGITATOR_CONSTANTS_HPP_

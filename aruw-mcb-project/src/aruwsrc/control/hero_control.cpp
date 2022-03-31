@@ -126,8 +126,8 @@ tap::motor::DoubleDjiMotor yawMotor(
     TurretSubsystem::CAN_BUS_YAW_MOTORS,
     true,
     true,
-    "Yaw Back Turret",
-    "Yaw Front Turret");
+    "Yaw Front Turret",
+    "Yaw Back Turret");
 HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
@@ -247,6 +247,7 @@ ClientDisplayCommand clientDisplayCommand(
     waterwheelAgitator,
     turret,
     imuCalibrateCommand,
+    nullptr,
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);

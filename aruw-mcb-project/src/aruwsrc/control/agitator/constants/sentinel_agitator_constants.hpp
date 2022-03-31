@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#ifndef SENTINEL_AGITATOR_CONSTANTS_HPP_
+#define SENTINEL_AGITATOR_CONSTANTS_HPP_
+
 #include "tap/motor/dji_motor.hpp"
 
 // Do not include this file directly, use agitator_consants.hpp
@@ -28,3 +32,5 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG =
 static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 }  // namespace aruwsrc::control::agitator::constants
+
+#endif  // SENTINEL_AGITATOR_CONSTANTS_HPP_

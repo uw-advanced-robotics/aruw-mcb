@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -17,24 +17,20 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_CURRENT_SENSOR_INTERFACE_HPP_
-#define TAPROOT_CURRENT_SENSOR_INTERFACE_HPP_
+#ifndef TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#define TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
 
-#include "tap/communication/sensors/sensor_interface.hpp"
+#include <gmock/gmock.h>
 
-namespace tap::communication::sensors::current
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+
+namespace tap::mock
 {
-/**
- * Interface for a generic current sensor.
- */
-class CurrentSensorInterface : public tap::communication::sensors::SensorInterface
+class Odometry2DInterfaceMock : public algorithms::odometry::Odometry2DInterface
 {
 public:
-    /**
-     * @return The current read by the current sensor, in milliamps.
-     */
-    virtual float getCurrentMa() const = 0;
+    MOCK_METHOD(modm::Location2D<float>, getCurrentLocation2D, (), (const override));
 };
-}  // namespace tap::communication::sensors::current
+}  // namespace tap::mock
 
-#endif  // TAPROOT_CURRENT_SENSOR_INTERFACE_HPP_
+#endif  // TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
