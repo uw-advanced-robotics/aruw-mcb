@@ -21,6 +21,7 @@
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/turret_controller_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
@@ -224,10 +225,10 @@ private:
 static float computeCGOffset(float pitchAngleFromCenter = 0.0f)
 {
     return computeGravitationalForceOffset(
-        TurretSubsystem::TURRET_CG_X,
-        TurretSubsystem::TURRET_CG_Z,
+        TURRET_CG_X,
+        TURRET_CG_Z,
         pitchAngleFromCenter,
-        TurretSubsystem::GRAVITY_COMPENSATION_SCALAR);
+        GRAVITY_COMPENSATION_SCALAR);
 }
 
 TEST_F(

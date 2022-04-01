@@ -34,7 +34,6 @@
 #include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/constants.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 namespace aruwsrc

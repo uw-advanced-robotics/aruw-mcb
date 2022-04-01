@@ -21,6 +21,7 @@
 
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/turret_controller_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
@@ -81,20 +82,16 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
     EXPECT_CALL(
         turretSubsystem,
         setPitchMotorOutput(computeGravitationalForceOffset(
-            TurretSubsystem::TURRET_CG_X,
-            TurretSubsystem::TURRET_CG_Z,
+            TURRET_CG_X,
+            TURRET_CG_Z,
             0,
-            TurretSubsystem::GRAVITY_COMPENSATION_SCALAR)))
+            GRAVITY_COMPENSATION_SCALAR)))
         .Times(3);
 
     setpoint = 0;
     currentAngle.setValue(0);
     turretController.runController(
-        computeGravitationalForceOffset(
-            TurretSubsystem::TURRET_CG_X,
-            TurretSubsystem::TURRET_CG_Z,
-            0,
-            TurretSubsystem::GRAVITY_COMPENSATION_SCALAR),
+        computeGravitationalForceOffset(TURRET_CG_X, TURRET_CG_Z, 0, GRAVITY_COMPENSATION_SCALAR),
         setpoint);
 
     setpoint = 90;
@@ -115,10 +112,10 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_positive_when_setpoint
     EXPECT_CALL(
         turretSubsystem,
         setPitchMotorOutput(Gt(computeGravitationalForceOffset(
-            TurretSubsystem::TURRET_CG_X,
-            TurretSubsystem::TURRET_CG_Z,
+            TURRET_CG_X,
+            TURRET_CG_Z,
             0,
-            TurretSubsystem::GRAVITY_COMPENSATION_SCALAR))));
+            GRAVITY_COMPENSATION_SCALAR))));
 
     turretController.runController(1, setpoint);
 }
@@ -132,10 +129,10 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_negative_when_setpoint
     EXPECT_CALL(
         turretSubsystem,
         setPitchMotorOutput(Lt(computeGravitationalForceOffset(
-            TurretSubsystem::TURRET_CG_X,
-            TurretSubsystem::TURRET_CG_Z,
+            TURRET_CG_X,
+            TURRET_CG_Z,
             0,
-            TurretSubsystem::GRAVITY_COMPENSATION_SCALAR))));
+            GRAVITY_COMPENSATION_SCALAR))));
 
     turretController.runController(1, setpoint);
 }

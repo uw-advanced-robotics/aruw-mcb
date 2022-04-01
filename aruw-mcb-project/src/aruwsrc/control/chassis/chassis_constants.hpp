@@ -17,21 +17,30 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CONSTANTS_HPP_
-#define CONSTANTS_HPP_
+#ifndef CHASSIS_CONSTANTS_HPP_
+#define CHASSIS_CONSTANTS_HPP_
+
+#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/util_macros.hpp"
 
 #if defined(ALL_SOLDIERS)
-#include "soldier_constants.hpp"
+#include "soldier_chassis_constants.hpp"
 #elif defined(TARGET_HERO)
-#include "hero_constants.hpp"
-#elif defined(TARGET_SENTINEL)
-#include "sentinel_constants.hpp"
-#elif defined(TARGET_DRONE)
-#include "drone_constants.hpp"
-#elif defined(TARGET_ENGINEER)
-#include "engineer_constants.hpp"
+#include "hero_chassis_constants.hpp"
+#else  // by default use engineer constants (for robots that don't use them)
+#include "engineer_chassis_constants.hpp"
 #endif
 
-#endif  // CONSTANTS_HPP_
+namespace aruwsrc::chassis
+{
+// hardware constants, not specific to any particular chassis
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
+
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+}  // namespace aruwsrc::chassis
+
+#endif  // CHASSIS_CONSTANTS_HPP_

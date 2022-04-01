@@ -33,7 +33,8 @@
 #endif
 
 #include "modm/math/filter/pid.hpp"
-#include "modm/math/interpolation/linear.hpp"
+
+#include "launcher_constants.hpp"
 
 namespace aruwsrc
 {
@@ -49,29 +50,6 @@ namespace aruwsrc::control::launcher
 class FrictionWheelSubsystem : public tap::control::Subsystem
 {
 public:
-    static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
-    static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-
-    /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
-    static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
-
-    /**
-     * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
-     * linear interpolation is used.
-     */
-#ifdef TARGET_HERO
-    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-        {0.0f, 0.0f},
-        {10, 3900.0f},
-        {16.0f, 6700.0f},
-        { 20.0f,
-          8500.0f }};
-#else
-    static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] =
-        {{0.0f, 0.0f}, {15.0f, 4600.0f}, {18.0f, 5000.0f}, {30.0f, 7200.2f}, {32.0f, 8300.0f}};
-#endif
-
     /**
      * Creates a new friction wheel subsystem with DJI motor1 and motor2
      * unless otherwise specified on CAN bus 1.

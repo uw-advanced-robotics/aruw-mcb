@@ -17,21 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CONSTANTS_HPP_
-#define CONSTANTS_HPP_
-
-#include "aruwsrc/util_macros.hpp"
+#ifndef AGITATOR_CONSTANTS_HPP_
+#define AGITATOR_CONSTANTS_HPP_
 
 #if defined(ALL_SOLDIERS)
-#include "soldier_constants.hpp"
-#elif defined(TARGET_HERO)
-#include "hero_constants.hpp"
+#include "soldier_agitator_constants.hpp"
 #elif defined(TARGET_SENTINEL)
-#include "sentinel_constants.hpp"
-#elif defined(TARGET_DRONE)
-#include "drone_constants.hpp"
-#elif defined(TARGET_ENGINEER)
-#include "engineer_constants.hpp"
+#include "sentinel_agitator_constants.hpp"
+#elif defined(TARGET_HERO)
+#include "hero_agitator_constants.hpp"
 #endif
 
-#endif  // CONSTANTS_HPP_
+#endif  // AGITATOR_CONSTANTS_HPP_

@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/turret/turret_controller_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
@@ -127,8 +128,7 @@ class TurretOnlineTest : public ChassisAutorotateCommandTest,
 public:
     TurretOnlineTest()
         : yawAngleFromCenter(
-              ContiguousFloat(GetParam().yawAngle - TurretSubsystem::YAW_START_ANGLE, -180, 180)
-                  .getValue()),
+              ContiguousFloat(GetParam().yawAngle - YAW_START_ANGLE, -180, 180).getValue()),
           cac(&drivers, &chassis, &turret, GetParam().chassisSymmetry),
           turretAngleActualContiguous(GetParam().yawAngle, 0, 360)
     {

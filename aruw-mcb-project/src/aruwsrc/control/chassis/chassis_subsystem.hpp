@@ -25,21 +25,21 @@
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
+#include "tap/control/chassis/power_limiter.hpp"
+#include "tap/motor/m3508_constants.hpp"
+#include "tap/util_macros.hpp"
+
+#include "aruwsrc/util_macros.hpp"
+#include "modm/math/filter/pid.hpp"
+#include "modm/math/matrix.hpp"
+
+#include "chassis_constants.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
 #else
 #include "tap/motor/dji_motor.hpp"
 #endif
-
-#include "tap/control/chassis/power_limiter.hpp"
-#include "tap/motor/m3508_constants.hpp"
-#include "tap/util_macros.hpp"
-
-#include "aruwsrc/constants.hpp"
-#include "aruwsrc/util_macros.hpp"
-#include "modm/math/filter/pid.hpp"
-#include "modm/math/matrix.hpp"
 
 namespace aruwsrc
 {

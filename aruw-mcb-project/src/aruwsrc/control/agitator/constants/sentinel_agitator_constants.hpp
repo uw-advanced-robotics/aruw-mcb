@@ -17,21 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CONSTANTS_HPP_
-#define CONSTANTS_HPP_
+#ifndef SENTINEL_AGITATOR_CONSTANTS_HPP_
+#define SENTINEL_AGITATOR_CONSTANTS_HPP_
 
-#include "aruwsrc/util_macros.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/motor/dji_motor.hpp"
 
-#if defined(ALL_SOLDIERS)
-#include "soldier_constants.hpp"
-#elif defined(TARGET_HERO)
-#include "hero_constants.hpp"
-#elif defined(TARGET_SENTINEL)
-#include "sentinel_constants.hpp"
-#elif defined(TARGET_DRONE)
-#include "drone_constants.hpp"
-#elif defined(TARGET_ENGINEER)
-#include "engineer_constants.hpp"
-#endif
+// Do not include this file directly, use agitator_consants.hpp
 
-#endif  // CONSTANTS_HPP_
+namespace aruwsrc::control::agitator::constants
+{
+static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG =
+    {.kp = 300'000.0f, .ki = 0.0f, .kd = 50.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+
+static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
+static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+}  // namespace aruwsrc::control::agitator::constants
+
+#endif  // SENTINEL_AGITATOR_CONSTANTS_HPP_

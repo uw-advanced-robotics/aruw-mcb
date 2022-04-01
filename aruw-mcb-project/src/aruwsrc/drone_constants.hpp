@@ -27,30 +27,8 @@
 
 #include "modm/container/pair.hpp"
 
-namespace aruwsrc::control::turret
-{
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
-
-static constexpr float YAW_START_ANGLE = 90.0f;
-static constexpr float YAW_MIN_ANGLE = 0.0f;
-static constexpr float YAW_MAX_ANGLE = 180.0f;
-static constexpr float PITCH_START_ANGLE = 90.0f;
-static constexpr float PITCH_MIN_ANGLE = 0.0f;
-static constexpr float PITCH_MAX_ANGLE = 180.0f;
-
-static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
-static constexpr uint16_t PITCH_START_ENCODER_POSITION = 0;
-
-static constexpr float TURRET_CG_X = 0;
-static constexpr float TURRET_CG_Z = 0;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-}  // namespace aruwsrc::control::turret
-
 namespace aruwsrc::can
 {
-// Come back to this - may be helpful to have other constants in here
 static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 }  // namespace aruwsrc::can
 
@@ -62,12 +40,6 @@ static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_T
 static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
     tap::communication::serial::Uart::UartPort::Uart3;
 }  // namespace aruwsrc::serial
-
-namespace aruwsrc::control::launcher
-{
-static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] =
-    {{0.0f, 0.0f}, {15.0f, 4600.0f}, {18.0f, 5000.0f}, {30.0f, 7200.2f}, {32.0f, 8300.0f}};
-}  // namespace aruwsrc::control::launcher
 
 namespace aruwsrc::control::control_operator_interface
 {
