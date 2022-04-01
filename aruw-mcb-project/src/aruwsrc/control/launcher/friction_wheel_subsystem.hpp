@@ -86,6 +86,9 @@ public:
 
     const char *getName() override { return "Friction wheels"; }
 
+protected:
+    aruwsrc::Drivers *drivers;
+
 private:
     aruwsrc::Drivers *drivers;
 
@@ -98,6 +101,8 @@ private:
     float desiredLaunchSpeed;
 
     uint32_t prevTime = 0;
+
+    float predictedLaunchSpeed = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

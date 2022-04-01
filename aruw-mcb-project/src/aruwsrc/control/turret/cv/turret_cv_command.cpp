@@ -26,7 +26,7 @@
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/constants.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch::clock;
@@ -41,7 +41,7 @@ TurretCVCommand::TurretCVCommand(
     algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const chassis::ChassisSubsystem &chassisSubsystem,
-    const control::launcher::FrictionWheelSubsystem &frictionWheels,
+    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
     const float userPitchInputScalar,
     const float userYawInputScalar,
     const float defaultLaunchSpeed)
