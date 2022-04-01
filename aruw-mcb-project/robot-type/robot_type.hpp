@@ -14,10 +14,19 @@
  * this file helps with the above mentioned purposes.
  *
  * So as to not mess with the build system this file should **NOT** be included
- * normally unless you're sure of what you're doing.
+ * normally.
  */
 
-#ifndef __ROBOT_TYPE_HPP__
-#define __ROBOT_TYPE_HPP__
+#ifndef ROBOT_TYPE_HPP_
+#define ROBOT_TYPE_HPP_
+
+// Check that target isn't already defined. This would be caused by including the file
+// when building (assuming define has been passed in through command line)
+#if defined(TARGET_SOLDIER_2022) || defined(TARGET_SOLDIER_2021) || defined(TARGET_DRONE) || \
+    defined(TARGET_ENGINEER) || defined(TARGET_SENTINEL) || defined(TARGET_HERO)
+#error "DON'T INCLUDE 'robot_type.hpp'!"
+#endif
+
 #define TARGET_SOLDIER_2022
+
 #endif
