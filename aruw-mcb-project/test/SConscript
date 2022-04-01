@@ -15,11 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
+from os.path import abspath
+
 Import("env")
 Import("args")
 Import("sources")
 
+
 if args["TARGET_ENV"] == "tests":
+    print("etss")
     env_cpy = env.Clone()
 
     # Append on the global robot target build flag
