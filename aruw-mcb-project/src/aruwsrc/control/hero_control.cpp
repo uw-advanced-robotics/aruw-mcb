@@ -221,7 +221,7 @@ cv::TurretCVCommand turretCVCommand(
     drivers(),
     &turret,
     &worldFrameYawTurretImuController,
-    &chassisFramePitchTurretController,
+    &worldFramePitchTurretImuController,
     odometrySubsystem,
     chassis,
     frictionWheels,
