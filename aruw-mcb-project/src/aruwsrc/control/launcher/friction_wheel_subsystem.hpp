@@ -67,7 +67,7 @@ public:
           8500.0f }};
 #else
     static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] =
-        {{0.0f, 0.0f}, {15.0f, 4300.0f}, {18.0f, 4800.0f}, {30.0f, 7500.2f}, {32.0f, 8300.0f}};
+        {{0.0f, 0.0f}, {15.0f, 4600.0f}, {18.0f, 5000.0f}, {30.0f, 7200.2f}, {32.0f, 8300.0f}};
 #endif
 
     /**
@@ -106,14 +106,15 @@ public:
 
     const char *getName() override { return "Friction wheels"; }
 
+protected:
+    aruwsrc::Drivers *drivers;
+
 private:
     static constexpr float PID_P = 20.0f;
     static constexpr float PID_I = 0.2f;
     static constexpr float PID_D = 0.0f;
     static constexpr float PID_MAX_ERROR_SUM = 5'000.0f;
     static constexpr float PID_MAX_OUTPUT = 16000.0f;
-
-    aruwsrc::Drivers *drivers;
 
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
@@ -124,6 +125,8 @@ private:
     float desiredLaunchSpeed;
 
     uint32_t prevTime = 0;
+
+    float predictedLaunchSpeed = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
