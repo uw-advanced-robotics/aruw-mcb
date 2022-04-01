@@ -90,8 +90,6 @@ protected:
     aruwsrc::Drivers *drivers;
 
 private:
-    aruwsrc::Drivers *drivers;
-
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
     modm::Pid<float> velocityPidLeftWheel;

@@ -23,7 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-// Do not include this file directly, use agitator_consants.hpp
+// Do not include this file directly: use agitator_consants.hpp instead.
 
 namespace aruwsrc::control::agitator::constants
 {

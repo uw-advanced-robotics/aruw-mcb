@@ -25,7 +25,7 @@
 
 #include "modm/math/geometry.hpp"
 
-// Do not include this file directly, use agitator_consants.hpp
+// Do not include this file directly: use agitator_consants.hpp instead.
 
 namespace aruwsrc::control::agitator::constants
 {

@@ -23,6 +23,8 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+// Do not include this file directly: use turret_controller_consants.hpp instead.
+
 namespace aruwsrc::control::turret
 {
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;

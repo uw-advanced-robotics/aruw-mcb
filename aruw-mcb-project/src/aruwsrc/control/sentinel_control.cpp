@@ -50,7 +50,6 @@ using namespace aruwsrc::control;
 using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
-using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
 
 /*
@@ -80,21 +79,16 @@ AgitatorSubsystem agitator(
 
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
-FrictionWheelSubsystem frictionWheels(drivers());
+aruwsrc::control::launcher::FrictionWheelSubsystem frictionWheels(drivers());
 
 // Note: motor "one" is right, "two" is left
 tap::motor::DjiMotor pitchMotor(
     drivers(),
     tap::motor::MOTOR5,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    CAN_BUS_MOTORS,
     false,
     "Pitch Turret");
-tap::motor::DjiMotor yawMotor(
-    drivers(),
-    tap::motor::MOTOR6,
-    TurretSubsystem::CAN_BUS_MOTORS,
-    true,
-    "Yaw Turret");
+tap::motor::DjiMotor yawMotor(drivers(), tap::motor::MOTOR6, CAN_BUS_MOTORS, true, "Yaw Turret");
 TurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
 
 /* define commands ----------------------------------------------------------*/
@@ -119,19 +113,19 @@ CalibrateCommand agitatorCalibrateCommand(&agitator);
 SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
     30.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(

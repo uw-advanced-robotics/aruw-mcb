@@ -114,7 +114,7 @@ AgitatorSubsystem agitator(
     aruwsrc::control::agitator::constants::JAMMING_TIME,
     true);
 
-RefereeFeedbackFrictionWheelSubsystem frictionWheels(
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
     tap::motor::MOTOR1,
     tap::motor::MOTOR2,
