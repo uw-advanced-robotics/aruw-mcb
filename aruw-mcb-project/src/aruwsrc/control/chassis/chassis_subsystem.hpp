@@ -63,6 +63,11 @@ namespace chassis
 class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
+    enum class ChassisType {
+        MECANUM = 0,
+        X_DRIVE = 1,
+    };
+
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
      */
@@ -94,6 +99,7 @@ public:
 
     ChassisSubsystem(
         aruwsrc::Drivers* drivers,
+        ChassisType chassisType,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
