@@ -45,10 +45,14 @@
 #include "aruwsrc/control/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
+#include "tap/communication/gpio/pwm.hpp"
+#include "tap/communication/gpio/digital.hpp"
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
 tap::arch::PeriodicMilliTimer sendVisionCoprocessorTimeout(3);
+tap::gpio::Pwm::Pin pulse = tap::gpio::Pwm::Pin::X;
+tap::gpio::Digital::OutputPin direction = tap::gpio::Digital::OutputPin::E;
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -58,7 +62,7 @@ static void initializeIo(aruwsrc::Drivers *drivers);
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
 static void updateIo(aruwsrc::Drivers *drivers);
-
+using namespace tap::gpio;
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -74,7 +78,8 @@ int main()
 
     Board::initialize();
     initializeIo(drivers);
-    aruwsrc::control::initSubsystemCommands(drivers);
+    drivers->pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 100);
+
 
 #ifdef PLATFORM_HOSTED
     aruwsrc::sim::initialize_robot_sim();
@@ -82,31 +87,10 @@ int main()
     // Blocking call, waits until Windows Simulator connects.
     tap::communication::TCPServer::MainServer()->getConnection();
 #endif
-
+    drivers->digital.set(direction, true);
     while (1)
     {
-        // do this as fast as you can
-        PROFILE(drivers->profiler, updateIo, (drivers));
-
-        if (sendVisionCoprocessorTimeout.execute())
-        {
-            PROFILE(drivers->profiler, drivers->legacyVisionCoprocessor.sendMessage, ());
-            // TODO try faster baude rate so we can send more frequently (currently mcb's serial
-            // buffers are overflowing if you try and send faster than 3 ms).
-        }
-
-        if (sendMotorTimeout.execute())
-        {
-            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
-            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
-            PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
-#endif
-        }
-        modm::delay_us(10);
+        drivers->pwm.write(0.5, pulse);
     }
     return 0;
 }

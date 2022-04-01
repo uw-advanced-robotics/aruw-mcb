@@ -87,9 +87,9 @@ static constexpr float AGITATOR_TARGET_ANGLE_ONE = M_PI;
 
 static constexpr float AGITATOR_TARGET_ANGLE_TWO = 2 * M_PI;
 
-static constexpr uint32_t DART_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
+static constexpr uint32_t AGITATOR_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
 
-static constexpr float DART_TOLERANCE = 0.05f;
+static constexpr float AGITATOR_TOLERANCE = 0.05f;
 
 CalibrateCommand agitatorTopCalibrateCommand(&agitatorTop);
 
@@ -166,12 +166,12 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheelsBottomBack(
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 //Mappings
-HoldCommandMapping rightSwitchDown(
+HoldCommandMapping leftSwitchDown(
     drivers(),
     {&stopFrictionWheelsTopBack, &stopFrictionWheelsTopFront, &stopFrictionWheelsBottomBack, &stopFrictionWheelsBottomFront},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-HoldCommandMapping rightSwitchUp(
+HoldCommandMapping leftSwitchMidRightSwitchMid(
     drivers(),
     {&spinFrictionWheelsTopFront, &spinFrictionWheelsTopBack, &spinFrictionWheelsBottomFront, &spinFrictionWheelsBottomBack},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
@@ -179,7 +179,7 @@ HoldCommandMapping rightSwitchUp(
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&agitatorBottomMoveCommandZero, &agitatorTopMoveCommandZero},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
 HoldCommandMapping leftSwitchMid(
     drivers(),
@@ -231,8 +231,8 @@ void setDefaultDartCommands(aruwsrc::Drivers *)
 /* register io mappings here ------------------------------------------------*/
 void registerDartIoMappings(aruwsrc::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchMidRightSwitchMid);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchMid);
     drivers->commandMapper.addMap(&leftSwitchUp);

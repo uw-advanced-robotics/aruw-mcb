@@ -15,7 +15,7 @@ class StpMotor : public MotorInterface {
         bool isInverted
     );
 
-    void initialize();
+    void initialize() override;
 
     int64_t getEncoderUnwrapped() const override;
 
