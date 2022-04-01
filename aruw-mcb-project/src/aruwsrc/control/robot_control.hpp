@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ROBOT_CONTROL_HPP__
-#define __ROBOT_CONTROL_HPP__
+#ifndef ROBOT_CONTROL_HPP_
+#define ROBOT_CONTROL_HPP_
 
 #include "aruwsrc/drivers.hpp"
 
@@ -31,4 +31,4 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers);
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // ROBOT_CONTROL_HPP_

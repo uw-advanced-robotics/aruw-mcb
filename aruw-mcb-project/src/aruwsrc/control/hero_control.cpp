@@ -46,12 +46,12 @@
 #include "client-display/client_display_subsystem.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "launcher/friction_wheel_subsystem.hpp"
+#include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "turret/hero_turret_subsystem.hpp"
 #include "turret/turret_controller_constants.hpp"
-#include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
@@ -81,38 +81,35 @@ namespace hero_control
 /* define subsystems --------------------------------------------------------*/
 ChassisSubsystem chassis(drivers());
 
-FrictionWheelSubsystem frictionWheels(drivers());
+RefereeFeedbackFrictionWheelSubsystem frictionWheels(
+    drivers(),
+    tap::motor::MOTOR2,
+    tap::motor::MOTOR1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
+    0.5f);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
 AgitatorSubsystem kickerAgitator(
     drivers(),
-    AgitatorSubsystem::PID_HERO_KICKER_P,
-    AgitatorSubsystem::PID_HERO_KICKER_I,
-    AgitatorSubsystem::PID_HERO_KICKER_D,
-    AgitatorSubsystem::PID_HERO_KICKER_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_HERO_KICKER_MAX_OUT,
+    aruwsrc::control::agitator::constants::PID_HERO_KICKER,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    AgitatorSubsystem::HERO_KICKER_MOTOR_ID,
-    AgitatorSubsystem::HERO_KICKER_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_KICKER_INVERTED,
+    aruwsrc::control::agitator::constants::HERO_KICKER_MOTOR_ID,
+    aruwsrc::control::agitator::constants::HERO_KICKER_MOTOR_CAN_BUS,
+    aruwsrc::control::agitator::constants::HERO_KICKER_INVERTED,
     0,
     0,
     false);
 
 AgitatorSubsystem waterwheelAgitator(
     drivers(),
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_P,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_I,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_D,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_ERR_SUM,
-    AgitatorSubsystem::PID_HERO_WATERWHEEL_MAX_OUT,
+    aruwsrc::control::agitator::constants::PID_HERO_WATERWHEEL,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508,
-    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_ID,
-    AgitatorSubsystem::HERO_WATERWHEEL_MOTOR_CAN_BUS,
-    AgitatorSubsystem::HERO_WATERWHEEL_INVERTED,
-    AgitatorSubsystem::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
-    AgitatorSubsystem::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_MOTOR_ID,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_MOTOR_CAN_BUS,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_INVERTED,
+    aruwsrc::control::agitator::constants::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
+    aruwsrc::control::agitator::constants::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
     true);
 
 tap::motor::DjiMotor pitchMotor(
@@ -129,9 +126,9 @@ tap::motor::DoubleDjiMotor yawMotor(
     TurretSubsystem::CAN_BUS_YAW_MOTORS,
     true,
     true,
-    "Yaw Back Turret",
-    "Yaw Front Turret");
-TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+    "Yaw Front Turret",
+    "Yaw Back Turret");
+HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 
@@ -140,7 +137,11 @@ ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, true);
+ChassisAutorotateCommand chassisAutorotateCommand(
+    drivers(),
+    &chassis,
+    &turret,
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
@@ -201,6 +202,12 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG,
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
@@ -208,7 +215,7 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
-    &chassisFramePitchTurretController);
+    &worldFramePitchTurretImuController);
 
 cv::TurretCVCommand turretCVCommand(
     drivers(),
@@ -230,7 +237,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassis,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
-    false);
+    true);
 
 ClientDisplayCommand clientDisplayCommand(
     drivers(),
@@ -240,6 +247,7 @@ ClientDisplayCommand clientDisplayCommand(
     waterwheelAgitator,
     turret,
     imuCalibrateCommand,
+    nullptr,
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
@@ -352,6 +360,7 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
 }
 
 /* register io mappings here ------------------------------------------------*/

@@ -23,21 +23,23 @@
 #include "tap/communication/gpio/analog.hpp"
 
 #include "modm/math/filter/pid.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::chassis
 {
 /**
- * Max wheel speed, measured in RPM of the encoder (rather than shaft)
- * we use this for wheel speed since this is how dji's motors measures motor speed.
+ * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
-static constexpr int MIN_WHEEL_SPEED_SINGLE_MOTOR = 4000;
-static constexpr int MAX_WHEEL_SPEED_SINGLE_MOTOR = 8000;
-static constexpr int MIN_CHASSIS_POWER = 40;
-static constexpr int MAX_CHASSIS_POWER = 120;
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] =
+    {{50, 4'500}, {60, 5'700}, {70, 6'400}, {80, 6'700}, {100, 7'000}, {120, 8'000}};
+
+static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
+    CHASSIS_POWER_TO_MAX_SPEED_LUT,
+    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
 
 /**
- * The minimum desired wheel speed for chassis rotation, measured in RPM before
- * we start slowing down translational speed.
+ * The minimum desired wheel speed for chassis rotation when translational scaling via
+ * calculateRotationTranslationalGain is performed.
  */
 static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
@@ -50,8 +52,6 @@ static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
-static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 20;
-static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 30000;
 
 static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
     /** Kp */
@@ -74,12 +74,12 @@ static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 120.0f;
-static constexpr float AUTOROTATION_PID_KD = 30.0f;
-static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
-static constexpr float AUTOROTATION_PID_TK = 0.0f;
+static constexpr float AUTOROTATION_PID_KP = 100.0f;
+static constexpr float AUTOROTATION_PID_KD = 1.0f;
+static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
+static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
  * Radius of the wheels (m).
@@ -103,6 +103,32 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
+/**
+ * Fraction of max chassis speed that will be applied to rotation when beyblading
+ */
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
+
+/**
+ * Fraction between [0, 1], what we multiply user translational input by when beyblading.
+ */
+static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
+
+/**
+ * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
+ * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
+ */
+static constexpr float
+    BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.5f;
+
+/**
+ * The fraction to cut rotation speed while moving and beyblading
+ */
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0.7f;
+/**
+ * Rotational speed to update the beyblade ramp target by each iteration until final rotation
+ * setpoint reached, in RPM.
+ */
+static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 }  // namespace aruwsrc::chassis
 
 #endif  // SOLDIER_CHASSIS_CONSTANTS_HPP_

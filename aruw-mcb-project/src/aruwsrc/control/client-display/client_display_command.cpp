@@ -36,9 +36,10 @@ ClientDisplayCommand::ClientDisplayCommand(
     ClientDisplaySubsystem *clientDisplay,
     const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-    agitator::AgitatorSubsystem &agitatorSubsystem,
-    const control::turret::TurretSubsystem &turretSubsystem,
+    aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+    const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+    const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
@@ -50,16 +51,17 @@ ClientDisplayCommand::ClientDisplayCommand(
           frictionWheelSubsystem,
           agitatorSubsystem,
           imuCalibrateCommand),
-      chassisOrientationIndicator(drivers, turretSubsystem),
+      chassisOrientationIndicator(drivers, robotTurretSubsystem),
       positionHudIndicators(
           drivers,
           hopperSubsystem,
           frictionWheelSubsystem,
+          multiShotHandler,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
           chassisImuDriveCommand),
       reticleIndicator(drivers),
-      turretAnglesIndicator(drivers, turretSubsystem),
+      turretAnglesIndicator(drivers, robotTurretSubsystem),
       visionHudIndicators(drivers)
 {
     modm_assert(drivers != nullptr, "ClientDisplayCommand", "drivers nullptr");

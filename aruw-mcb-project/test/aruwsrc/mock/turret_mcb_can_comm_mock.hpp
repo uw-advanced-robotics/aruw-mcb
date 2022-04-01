@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef IMU_RX_LISTENER_MOCK_HPP_
-#define IMU_RX_LISTENER_MOCK_HPP_
+#ifndef TURRET_MCB_CAN_COMM_MOCK_HPP_
+#define TURRET_MCB_CAN_COMM_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
@@ -47,4 +47,4 @@ public:
 };
 }  // namespace aruwsrc::mock
 
-#endif  // IMU_RX_LISTENER_MOCK_HPP_
+#endif  // TURRET_MCB_CAN_COMM_MOCK_HPP_

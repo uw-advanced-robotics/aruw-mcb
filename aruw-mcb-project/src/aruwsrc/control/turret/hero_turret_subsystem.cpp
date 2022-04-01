@@ -19,21 +19,17 @@
 
 #include "hero_turret_subsystem.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 namespace aruwsrc::control::turret
 {
-/**
- *  TODO: implement this
- */
-float HeroTurretSubsystem::getWorldYaw() const { return 0.0f; }
+float HeroTurretSubsystem::getWorldYaw() const { return drivers->turretMCBCanComm.getYaw(); }
 
-/**
- *  TODO: implement this
- */
-float HeroTurretSubsystem::getWorldPitch() const { return 0.0f; }
+float HeroTurretSubsystem::getWorldPitch() const { return drivers->turretMCBCanComm.getPitch(); }
 
-/**
- *  TODO: implement this
- */
-uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const { return 0; }
+uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
+{
+    return drivers->turretMCBCanComm.getIMUDataTimestamp();
+}
 
 }  // namespace aruwsrc::control::turret

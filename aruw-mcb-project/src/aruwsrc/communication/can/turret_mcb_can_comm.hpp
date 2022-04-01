@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_MCB_CAN_COMM_
-#define TURRET_MCB_CAN_COMM_
+#ifndef TURRET_MCB_CAN_COMM_HPP_
+#define TURRET_MCB_CAN_COMM_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
@@ -201,4 +201,4 @@ private:
 };
 }  // namespace aruwsrc::can
 
-#endif  // TURRET_MCB_CAN_COMM_
+#endif  // TURRET_MCB_CAN_COMM_HPP_

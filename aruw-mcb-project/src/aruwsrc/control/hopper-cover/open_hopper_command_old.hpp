@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __OPEN_HOPPER_COMMAND_OLD_HPP__
-#define __OPEN_HOPPER_COMMAND_OLD_HPP__
+#ifndef OPEN_HOPPER_COMMAND_OLD_HPP_
+#define OPEN_HOPPER_COMMAND_OLD_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -52,4 +52,5 @@ private:
 }  // namespace control
 
 }  // namespace aruwsrc
-#endif
+
+#endif  // OPEN_HOPPER_COMMAND_OLD_HPP_

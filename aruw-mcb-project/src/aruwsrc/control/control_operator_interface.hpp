@@ -21,6 +21,7 @@
 #define CONTROL_OPERATOR_INTERFACE_HPP_
 
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
+#include "tap/algorithms/ramp.hpp"
 #include "tap/util_macros.hpp"
 
 namespace aruwsrc
@@ -45,65 +46,63 @@ public:
     static constexpr float SHIFT_SCALAR = (1.0f / 2);
     static constexpr float USER_STICK_SENTINEL_DRIVE_SCALAR = 5000.0f;
 
-    /** Maximum alpha value for the x-key low-pass filter. Must be in range (0, 1] (0 is only
-     * previous value, 1 is no filter). */
-    static constexpr float CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX = 0.05f;
+#if defined(TARGET_HERO)
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the x direction
+     */
+    static constexpr float MAX_ACCELERATION_X = 7'000.0f;
+    static constexpr float MAX_DECELERATION_X = 20'000.0f;
 
-    /** Output magnitude in range [0, 1] above which the upward output ramp shallows (alpha becomes
-     * dynamic) for the x-key low-pass filter. */
-    static constexpr float CHASSIS_X_KEY_INPUT_FILTER_CHANGE_THRESHOLD =
-        0.1f;  // Must be in range [0, 1]
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the y direction
+     */
+    static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
+    static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
+#else  // TARGET_ENGINEER (and other targets that don't use a traditional chassis)
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the x direction
+     */
+    static constexpr float MAX_ACCELERATION_X = 10'000.0f;
+    static constexpr float MAX_DECELERATION_X = 20'000.0f;
 
-    /** Maximum alpha value for the y-key low-pass filter. Must be in range (0, 1] (0 is only
-     * previous value, 1 is no filter). */
-    static constexpr float CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX = 0.025f;
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the y direction
+     */
+    static constexpr float MAX_ACCELERATION_Y = 9'000.0f;
+    static constexpr float MAX_DECELERATION_Y = 20'000.0f;
+#endif
 
-    /** Output magnitude in range [0, 1] above which the upward output ramp shallows (alpha becomes
-     * dynamic) for the y-key low-pass filter. */
-    static constexpr float CHASSIS_Y_KEY_INPUT_FILTER_CHANGE_THRESHOLD = 0.1f;
-
-    /** Alpha value for the rotation-key low-pass filter. Must be in range (0, 1] (0 is only
-     * previous value, 1 is no filter). */
-    static constexpr float CHASSIS_R_KEY_INPUT_FILTER_ALPHA = 0.05f;
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the r direction
+     */
+    static constexpr float MAX_ACCELERATION_R = 40'000.0f;
+    static constexpr float MAX_DECELERATION_R = 50'000.0f;
 
     ControlOperatorInterface(aruwsrc::Drivers *drivers) : drivers(drivers) {}
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)
     mockable ~ControlOperatorInterface() = default;
 
     /**
-     * Filtering Method Explained: \n
-     * Because this output is contributing to the translation of our wheels,
-     * we would like to have a larger ramp time to full output so that
-     * the mechanum wheels slip as little as possible. To do this,
-     * we let the alpha in our low-pass filter be a function of
-     * the ratio between the previous output over the current input,
-     * i.e. alpha = [(chassisXKeyInputFiltered)/(input)] * (alpha_max), where
-     * chassisXKeyInputFiltered is the last filtered value computed by this function.
-     * We apply this ONLY if we are increasing in speed; if we are slowing down,
-     * the low-pass filter works normally using alpha_max.
-     *
-     * @return the value used for chassis movement forward and backward, between -1 and 1.
+     * @return The value used for chassis movement forward and backward, between
+     * `[-getMaxUserWheelSpeed, getMaxUserWheelSpeed]`. Acceleration is applied to this value
+     * controlled by `MAX_ACCELERATION_X` and `MAX_DECELERATION_X`. A linear combination of keyboard
+     * and remote joystick information.
      */
     mockable float getChassisXInput();
 
     /**
-     * Filtering Method Explained: \n
-     * Because this output is contributing to the translation of our wheels,
-     * we would like to have a larger ramp time to full output so that
-     * the mechanum wheels slip as little as possible. To do this,
-     * we let the alpha in our low-pass filter be a function of
-     * the ratio between the previous output over the current input,
-     * i.e. alpha = [(chassisYKeyInputFiltered)/(input)] * (alpha_max), where
-     * chassisYKeyInputFiltered is the last filtered value computed by this function.
-     * We apply this ONLY if we are increasing in speed; if we are slowing down,
-     * the low-pass filter works normally using alpha_max.
-     *
-     * @return the value used for chassis movement side to side, between -1 and 1.
+     * @return The value used for chassis movement side to side, between `[-getMaxUserWheelSpeed,
+     * getMaxUserWheelSpeed]`. Acceleration is applied to this value controlled by
+     * `MAX_ACCELERATION_Y` and `MAX_DECELERATION_Y`. A linear combination of keyboard and remote
+     * joystick information.
      */
     mockable float getChassisYInput();
 
     /**
-     * @return the value used for chassis rotation, between -1 and 1.
+     * @return The value used for chassis rotation, between `[-getMaxUserWheelSpeed,
+     * getMaxUserWheelSpeed]`. Acceleration is applied to this value controlled by
+     * `MAX_ACCELERATION_R` and `MAX_DECELERATION_R`. A linear combination of keyboard and remote
+     * joystick information.
      */
     mockable float getChassisRInput();
 
@@ -138,9 +137,18 @@ private:
     tap::algorithms::LinearInterpolationPredictor chassisYInput;
     tap::algorithms::LinearInterpolationPredictor chassisRInput;
 
-    float chassisXKeyInputFiltered = 0;
-    float chassisYKeyInputFiltered = 0;
-    float chassisRKeyInputFiltered = 0;
+    tap::algorithms::Ramp chassisXInputRamp;
+    tap::algorithms::Ramp chassisYInputRamp;
+    tap::algorithms::Ramp chassisRInputRamp;
+
+    uint32_t prevChassisXInputCalledTime = 0;
+    uint32_t prevChassisYInputCalledTime = 0;
+    uint32_t prevChassisRInputCalledTime = 0;
+
+    /**
+     * Scales `value` when ctrl/shift are pressed and returns the scaled value.
+     */
+    float applyChassisSpeedScaling(float value);
 };  // class ControlOperatorInterface
 
 }  // namespace control

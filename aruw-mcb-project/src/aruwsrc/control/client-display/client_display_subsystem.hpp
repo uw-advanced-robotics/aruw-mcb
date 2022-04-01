@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CLIENT_DISPLAY_HPP_
-#define CLIENT_DISPLAY_HPP_
+#ifndef CLIENT_DISPLAY_SUBSYSTEM_HPP_
+#define CLIENT_DISPLAY_SUBSYSTEM_HPP_
 
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
@@ -42,4 +42,4 @@ public:
 };
 }  // namespace aruwsrc::control::client_display
 
-#endif  // CLIENT_DISPLAY_HPP_
+#endif  // CLIENT_DISPLAY_SUBSYSTEM_HPP_

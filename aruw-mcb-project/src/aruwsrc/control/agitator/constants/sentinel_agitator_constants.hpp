@@ -17,37 +17,20 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "blink_led_command.hpp"
+#ifndef SENTINEL_AGITATOR_CONSTANTS_HPP_
+#define SENTINEL_AGITATOR_CONSTANTS_HPP_
 
-#include "tap/control/subsystem.hpp"
+#include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/drivers.hpp"
+// Do not include this file directly, use agitator_consants.hpp
 
-namespace aruwsrc
+namespace aruwsrc::control::agitator::constants
 {
-namespace control
-{
-BlinkLEDCommand::BlinkLEDCommand(
-    aruwsrc::Drivers* drivers,
-    aruwsrc::control::ExampleSubsystem* subsystem)
-    : drivers(drivers)
-{
-    this->addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(subsystem));
-}
+static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG =
+    {.kp = 300'000.0f, .ki = 0.0f, .kd = 50.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
-void BlinkLEDCommand::initialize()
-{
-    completedTimer.restart(3000);
-    startCounter++;
-}
+static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
+static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+}  // namespace aruwsrc::control::agitator::constants
 
-void BlinkLEDCommand::execute()
-{
-    refershCounter++;
-    drivers->leds.set(tap::gpio::Leds::A, true);
-}
-
-bool BlinkLEDCommand::isFinished() const { return completedTimer.isExpired(); }
-}  // namespace control
-
-}  // namespace aruwsrc
+#endif  // SENTINEL_AGITATOR_CONSTANTS_HPP_

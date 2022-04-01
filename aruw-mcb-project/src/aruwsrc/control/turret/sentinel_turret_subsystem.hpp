@@ -20,24 +20,16 @@
 #ifndef SENTINEL_TURRET_SUBSYSTEM_HPP_
 #define SENTINEL_TURRET_SUBSYSTEM_HPP_
 
-#include "aruwsrc/control/turret/turret_orientation_interface.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
-
-namespace aruwsrc::control::turret::algorithms
-{
-class TurretPitchControllerInterface;
-class TurretYawControllerInterface;
-}  // namespace aruwsrc::control::turret::algorithms
+#include "robot_turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
 /**
  * Turret subsystem for the Sentinel.
  */
-class SentinelTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
-                                      public aruwsrc::control::turret::TurretOrientationInterface
+class SentinelTurretSubsystem final : public RobotTurretSubsystem
 {
-    using TurretSubsystem::TurretSubsystem;
+    using RobotTurretSubsystem::RobotTurretSubsystem;
     float getWorldYaw() const override;
     float getWorldPitch() const override;
     uint32_t getLastMeasurementTimeMicros() const override;

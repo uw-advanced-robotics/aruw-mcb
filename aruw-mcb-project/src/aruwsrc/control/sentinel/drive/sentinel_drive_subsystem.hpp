@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUBSYSTEM_SENTINEL_DRIVE_HPP_
-#define SUBSYSTEM_SENTINEL_DRIVE_HPP_
+#ifndef SENTINEL_DRIVE_SUBSYSTEM_HPP_
+#define SENTINEL_DRIVE_SUBSYSTEM_HPP_
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
@@ -50,8 +50,6 @@ public:
     static constexpr float STARTING_ENERGY_BUFFER = 200.0f;
     static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 100.0f;
     static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10;
-    static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 5;
-    static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 15000;
 
     // radius of the wheel in mm
     static constexpr float WHEEL_RADIUS = 35.0f;
@@ -154,4 +152,4 @@ private:
 
 }  // namespace aruwsrc::control::sentinel::drive
 
-#endif
+#endif  // SENTINEL_DRIVE_SUBSYSTEM_HPP_

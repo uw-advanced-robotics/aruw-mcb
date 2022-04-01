@@ -85,11 +85,11 @@ public:
     static constexpr float PITCH_MIN_ANGLE = 65.0f;
     static constexpr float PITCH_MAX_ANGLE = 117.0f;
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 1100;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 7500;
 
-    static constexpr float TURRET_CG_X = 12;
-    static constexpr float TURRET_CG_Z = 23;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 2000.0f;
+    static constexpr float TURRET_CG_X = 0;
+    static constexpr float TURRET_CG_Z = 0;
+    static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
 #endif
 
 #elif defined(TARGET_HERO)
@@ -103,11 +103,11 @@ public:
     static constexpr float PITCH_START_ANGLE = 90.0f;
     static constexpr float YAW_MIN_ANGLE = YAW_START_ANGLE - 70.0f;
     static constexpr float YAW_MAX_ANGLE = YAW_START_ANGLE + 70.0f;
-    static constexpr float PITCH_MIN_ANGLE = 48.0f;
-    static constexpr float PITCH_MAX_ANGLE = 116.0f;
+    static constexpr float PITCH_MIN_ANGLE = 70.0f;
+    static constexpr float PITCH_MAX_ANGLE = 115.0f;
 
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 6880;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1154;
+    static constexpr uint16_t YAW_START_ENCODER_POSITION = 4872;
+    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 3900;
 
     static constexpr float TURRET_CG_X = 1;
     static constexpr float TURRET_CG_Z = -0.2;
