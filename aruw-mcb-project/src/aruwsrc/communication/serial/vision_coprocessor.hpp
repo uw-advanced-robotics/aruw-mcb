@@ -51,6 +51,8 @@ namespace serial
 class VisionCoprocessor : public tap::communication::serial::DJISerial
 {
 public:
+    using TimeSyncTriggerPin = modm::platform::GpioI0;  ///< Pin "A" as labeled on the type A board
+
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
 
@@ -136,6 +138,8 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
+    static void handleTimeSyncRequest();
+
 private:
     enum TxMessageTypes
     {
@@ -150,7 +154,6 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_TIME_SYNC_REQ = 10,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -161,6 +164,12 @@ private:
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
+
+    static VisionCoprocessor* visionCoprocessorInstance;
+
+    volatile uint32_t risingEdgeTime = 0;
+
+    uint32_t prevRisingEdgeTime = 0;
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData;
@@ -188,7 +197,7 @@ private:
      */
     static bool decodeToTurretAimData(const ReceivedSerialMessage& message, TurretAimData* aimData);
 
-    void decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message);
+    void sendTimeSyncMessage();
 
 #ifdef ENV_UNIT_TESTS
 public:

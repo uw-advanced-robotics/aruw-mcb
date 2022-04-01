@@ -19,28 +19,49 @@
 
 #include "vision_coprocessor.hpp"
 
+#include <cassert>
+
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
+using namespace aruwsrc::serial;
 using tap::arch::clock::getTimeMicroseconds;
 
-namespace aruwsrc
+VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;
+
+MODM_ISR(EXTI0)
 {
-namespace serial
-{
+    // Currently the EXTI0 interrupt handler is only used by the time sync pin
+    aruwsrc::serial::VisionCoprocessor::TimeSyncTriggerPin::acknowledgeExternalInterruptFlag();
+    VisionCoprocessor::handleTimeSyncRequest();
+}
+
 VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       lastAimData(),
       odometryInterface(nullptr),
       turretOrientationInterface(nullptr)
 {
+    assert(visionCoprocessorInstance == nullptr);
+    visionCoprocessorInstance = this;
+}
+
+void VisionCoprocessor::handleTimeSyncRequest()
+{
+    visionCoprocessorInstance->risingEdgeTime = getTimeMicroseconds();
 }
 
 void VisionCoprocessor::initializeCV()
 {
+    VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
+    VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterruptVector(0);
+    VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterrupt();
+    VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
+        modm::platform::Gpio::InputTrigger::RisingEdge);
+
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
 #if defined(TARGET_HERO)
     drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
@@ -61,11 +82,6 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage, &lastAimData);
             return;
         }
-        case CV_MESSAGE_TYPE_TIME_SYNC_REQ:
-        {
-            decodeAndSendTimeSyncMessage(completeMessage);
-            return;
-        }
         default:
             return;
     }
@@ -83,26 +99,34 @@ bool VisionCoprocessor::decodeToTurretAimData(
     return true;
 }
 
-void VisionCoprocessor::decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message)
+void VisionCoprocessor::sendTimeSyncMessage()
 {
-    DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
+    uint32_t newRisingEdgeTime = risingEdgeTime;
 
-    timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
+    if (prevRisingEdgeTime != newRisingEdgeTime)
+    {
+        prevRisingEdgeTime = newRisingEdgeTime;
 
-    *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = getTimeMicroseconds();
-    *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = message.data[0];
-    timeSyncResponseMessage.setCRC16();
+        DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
 
-    drivers->uart.write(
-        VISION_COPROCESSOR_TX_UART_PORT,
-        reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
-        sizeof(timeSyncResponseMessage));
+        timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
+
+        *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = risingEdgeTime;
+        *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = 0;
+        timeSyncResponseMessage.setCRC16();
+
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
+            sizeof(timeSyncResponseMessage));
+    }
 }
 
 void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
     sendRobotTypeData();
+    sendTimeSyncMessage();
 }
 
 bool VisionCoprocessor::isCvOnline() { return !cvOfflineTimeout.isExpired(); }
@@ -201,6 +225,3 @@ void VisionCoprocessor::sendSelectNewTargetMessage()
         reinterpret_cast<uint8_t*>(&selectNewTargetMessage),
         sizeof(selectNewTargetMessage));
 }
-
-}  // namespace serial
-}  // namespace aruwsrc
