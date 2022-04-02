@@ -21,7 +21,7 @@
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "aruwsrc/control/turret/turret_controller_constants.hpp"
+#include "aruwsrc/control/turret/constants/turret_controller_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 

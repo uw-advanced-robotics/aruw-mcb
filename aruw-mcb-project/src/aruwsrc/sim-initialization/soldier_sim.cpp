@@ -23,10 +23,10 @@
 
 #include "tap/motor/motorsim/sim_handler.hpp"
 
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
+#include "aruwsrc/control/turret/constants/turret_controller_constants.hpp"
 
 #include "robot_sim.hpp"
 
@@ -64,23 +64,23 @@ void initialize_robot_sim()
     // Register the motor sims for the turret subsystem
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::control::turret::TurretSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::control::turret::TurretSubsystem::PITCH_MOTOR_ID);
+        aruwsrc::control::turret::CAN_BUS_MOTORS,
+        aruwsrc::control::turret::PITCH_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::control::turret::TurretSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::control::turret::TurretSubsystem::YAW_MOTOR_ID);
+        aruwsrc::control::turret::CAN_BUS_MOTORS,
+        aruwsrc::control::turret::YAW_MOTOR_ID);
 
     // Register the motor sims for the Hopper Cover (There aren't any)
     // Register the motor sims for the Friction Wheels
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::control::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::control::launcher::FrictionWheelSubsystem::LEFT_MOTOR_ID);
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        aruwsrc::control::launcher::LEFT_MOTOR_ID);
     tap::motorsim::SimHandler::registerSim(
         tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::control::launcher::FrictionWheelSubsystem::CAN_BUS_MOTORS,
-        aruwsrc::control::launcher::FrictionWheelSubsystem::RIGHT_MOTOR_ID);
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID);
 }
 }  // namespace aruwsrc::sim
 
