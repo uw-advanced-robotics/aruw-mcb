@@ -25,8 +25,6 @@
 #include "tap/control/turret_subsystem_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/constants.hpp"
-
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/motor_interface_mock.hpp"
 #else

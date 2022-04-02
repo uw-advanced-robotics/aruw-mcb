@@ -22,7 +22,6 @@
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "modm/architecture/interface/can.hpp"
 

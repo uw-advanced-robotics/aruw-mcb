@@ -22,7 +22,6 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "chassis/chassis_subsystem.hpp"
 
@@ -100,8 +99,8 @@ float ControlOperatorInterface::getChassisXInput()
 
     applyAccelerationToRamp(
         chassisXInputRamp,
-        control_operator_interface::MAX_ACCELERATION_X,
-        control_operator_interface::MAX_DECELERATION_X,
+        MAX_ACCELERATION_X,
+        MAX_DECELERATION_X,
         static_cast<float>(dt) / 1E3F);
 
     return chassisXInputRamp.getValue();
@@ -136,8 +135,8 @@ float ControlOperatorInterface::getChassisYInput()
 
     applyAccelerationToRamp(
         chassisYInputRamp,
-        control_operator_interface::MAX_ACCELERATION_Y,
-        control_operator_interface::MAX_DECELERATION_Y,
+        MAX_ACCELERATION_Y,
+        MAX_DECELERATION_Y,
         static_cast<float>(dt) / 1E3F);
 
     return chassisYInputRamp.getValue();
@@ -172,8 +171,8 @@ float ControlOperatorInterface::getChassisRInput()
 
     applyAccelerationToRamp(
         chassisRInputRamp,
-        control_operator_interface::MAX_ACCELERATION_R,
-        control_operator_interface::MAX_DECELERATION_R,
+        MAX_ACCELERATION_R,
+        MAX_DECELERATION_R,
         static_cast<float>(dt) / 1E3);
 
     return chassisRInputRamp.getValue();

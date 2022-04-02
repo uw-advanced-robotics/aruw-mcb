@@ -24,8 +24,6 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/constants.hpp"
-
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
 #else

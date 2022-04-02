@@ -21,7 +21,6 @@
 
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/constants.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch;
