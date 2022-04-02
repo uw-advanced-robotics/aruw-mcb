@@ -63,7 +63,8 @@ namespace chassis
 class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
-    enum class ChassisType {
+    enum class ChassisType
+    {
         MECANUM = 0,
         X_DRIVE = 1,
     };
