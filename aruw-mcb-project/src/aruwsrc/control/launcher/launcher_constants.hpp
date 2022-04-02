@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef LAUNCHER_CONSTANTS_HPP_
+#define LAUNCHER_CONSTANTS_HPP_
+
 #include "tap/motor/dji_motor.hpp"
 
 #include "modm/math/filter/pid.hpp"
@@ -67,3 +70,5 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {32.0f, 8300.0f}};
 #endif
 }  // namespace aruwsrc::control::launcher
+
+#endif  // LAUNCHER_CONSTANTS_HPP_
