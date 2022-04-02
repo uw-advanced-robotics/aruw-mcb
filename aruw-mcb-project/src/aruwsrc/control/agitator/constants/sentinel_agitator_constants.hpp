@@ -24,6 +24,9 @@
 #include "tap/motor/dji_motor.hpp"
 
 // Do not include this file directly: use agitator_constants.hpp instead.
+#ifndef AGITATOR_CONSTANTS_HPP_
+#error "Do not include this file directly! Use agitator_constants.hpp instead.
+#endif
 
 namespace aruwsrc::control::agitator::constants
 {

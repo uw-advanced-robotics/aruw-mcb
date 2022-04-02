@@ -26,6 +26,9 @@
 #include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
+#ifndef CHASSIS_CONSTANTS_HPP_
+#error "Do not include this file directly! Use chassis_constants.hpp instead.
+#endif
 
 namespace aruwsrc::chassis
 {
