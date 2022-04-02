@@ -25,7 +25,7 @@
 
 #include "modm/math/geometry/angle.hpp"
 
-// Do not include this file directly: use agitator_consants.hpp instead.
+// Do not include this file directly: use agitator_constants.hpp instead.
 
 namespace aruwsrc::control::agitator::constants
 {

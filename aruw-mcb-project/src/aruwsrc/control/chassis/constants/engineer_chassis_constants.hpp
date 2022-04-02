@@ -25,6 +25,8 @@
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
+// Do not include this file directly: use chassis_constants.hpp instead.
+
 namespace aruwsrc::chassis
 {
 /**

@@ -23,13 +23,13 @@
 #include "aruwsrc/util_macros.hpp"
 
 #if defined(ALL_SOLDIERS)
-#include "constants/soldier_turret_controller_constants.hpp"
+#include "soldier_turret_controller_constants.hpp"
 #elif defined(TARGET_HERO)
-#include "constants/hero_turret_controller_constants.hpp"
+#include "hero_turret_controller_constants.hpp"
 #elif defined(TARGET_DRONE)
-#include "constants/drone_turret_controller_constants.hpp"
+#include "drone_turret_controller_constants.hpp"
 #elif defined(TARGET_SENTINEL) || defined(TARGET_ENGINEER)
-#include "constants/sentinel_turret_controller_constants.hpp"
+#include "sentinel_turret_controller_constants.hpp"
 #endif
 
 #endif  // TURRET_CONTROLLER_CONSTANTS_HPP_
