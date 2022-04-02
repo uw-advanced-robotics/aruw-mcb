@@ -81,7 +81,7 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 namespace hero_control
 {
 /* define subsystems --------------------------------------------------------*/
-ChassisSubsystem chassis(drivers());
+ChassisSubsystem chassis(drivers(), ChassisSubsystem::ChassisType::X_DRIVE);
 
 RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
@@ -223,7 +223,7 @@ cv::TurretCVCommand turretCVCommand(
     drivers(),
     &turret,
     &worldFrameYawTurretImuController,
-    &chassisFramePitchTurretController,
+    &worldFramePitchTurretImuController,
     odometrySubsystem,
     chassis,
     frictionWheels,

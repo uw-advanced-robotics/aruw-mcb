@@ -98,7 +98,7 @@ tap::motor::DjiMotor yawMotor(
     "Yaw Turret");
 SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
-aruwsrc::chassis::ChassisSubsystem chassis(drivers());
+aruwsrc::chassis::ChassisSubsystem chassis(drivers(), aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 static inline void refreshOdom() { odometrySubsystem.refresh(); }

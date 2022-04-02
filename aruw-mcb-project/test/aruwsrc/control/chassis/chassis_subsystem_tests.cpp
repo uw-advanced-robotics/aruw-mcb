@@ -46,7 +46,7 @@ static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_
 class ChassisSubsystemTest : public Test
 {
 protected:
-    ChassisSubsystemTest() : chassis(&drivers) {}
+    ChassisSubsystemTest() : chassis(&drivers, ChassisSubsystem::ChassisType::MECANUM) {}
 
     void SetUp() override
     {
