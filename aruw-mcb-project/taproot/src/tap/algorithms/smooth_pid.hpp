@@ -64,7 +64,7 @@ public:
 
     SmoothPid(const SmoothPidConfig &pidConfig);
 
-    float runController(float error, float rotationalSpeed, float dt);
+    virtual float runController(float error, float errorDerivative, float dt);
 
     float runControllerDerivateError(float error, float dt);
 
@@ -78,6 +78,8 @@ public:
     inline void setMaxICumulative(float maxICumulative) { config.maxICumulative = maxICumulative; }
     inline void setMaxOutput(float maxOutput) { config.maxOutput = maxOutput; }
     inline void setErrDeadzone(float errDeadzone) { config.errDeadzone = errDeadzone; }
+
+    const SmoothPidConfig &getConfig() const { return config; }
 
 private:
     // gains and constants, to be set by the user

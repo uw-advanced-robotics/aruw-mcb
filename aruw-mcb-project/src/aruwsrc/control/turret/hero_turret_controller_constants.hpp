@@ -20,7 +20,9 @@
 #ifndef HERO_TURRET_CONTROLLER_CONSTANTS_HPP_
 #define HERO_TURRET_CONTROLLER_CONSTANTS_HPP_
 
-#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/fuzzy_pid.hpp"
+
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -29,7 +31,7 @@ namespace world_rel_turret_imu
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 9.0f,
     .ki = 0.0f,
-    .kd = 0.6f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 3'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -37,6 +39,91 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+};
+
+static constexpr float KD_S = 0.01f;
+
+/**
+ * Columns correspond to error, rows to delta error
+ */
+static constexpr auto KD_FUZZY_RULE_TABLE = std::array<std::array<float, 7>, 7>({
+    std::array<float, 7>({
+        KD_S * tap::algorithms::FuzzyRuleTable::PS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NB,
+        KD_S* tap::algorithms::FuzzyRuleTable::NB,
+        KD_S* tap::algorithms::FuzzyRuleTable::NB,
+        KD_S* tap::algorithms::FuzzyRuleTable::NM,
+        KD_S* tap::algorithms::FuzzyRuleTable::PS,
+    }),
+    std::array<float, 7>({
+        KD_S * tap::algorithms::FuzzyRuleTable::PS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NB,
+        KD_S* tap::algorithms::FuzzyRuleTable::NM,
+        KD_S* tap::algorithms::FuzzyRuleTable::NM,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+    }),
+    std::array<float, 7>({
+        KD_S * tap::algorithms::FuzzyRuleTable::ZO,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NM,
+        KD_S* tap::algorithms::FuzzyRuleTable::NM,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+    }),
+    std::array<float, 7>({
+        KD_S * tap::algorithms::FuzzyRuleTable::ZO,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+    }),
+    std::array<float, 7>({
+        KD_S * tap::algorithms::FuzzyRuleTable::ZO,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
+    }),
+    std::array<float, 7>({
+        KD_S * tap::algorithms::FuzzyRuleTable::PB,
+        KD_S* tap::algorithms::FuzzyRuleTable::NS,
+        KD_S* tap::algorithms::FuzzyRuleTable::PS,
+        KD_S* tap::algorithms::FuzzyRuleTable::PS,
+        KD_S* tap::algorithms::FuzzyRuleTable::PS,
+        KD_S* tap::algorithms::FuzzyRuleTable::PS,
+        KD_S* tap::algorithms::FuzzyRuleTable::PB,
+    }),
+    std::array<float, 7>({
+        KD_S * tap::algorithms::FuzzyRuleTable::PB,
+        KD_S* tap::algorithms::FuzzyRuleTable::PM,
+        KD_S* tap::algorithms::FuzzyRuleTable::PM,
+        KD_S* tap::algorithms::FuzzyRuleTable::PM,
+        KD_S* tap::algorithms::FuzzyRuleTable::PS,
+        KD_S* tap::algorithms::FuzzyRuleTable::PS,
+        KD_S* tap::algorithms::FuzzyRuleTable::PB,
+    }),
+});
+
+static tap::algorithms::FuzzyPidConfig YAW_FUZZY_POS_PID_CONFIG{
+    .kpMin = YAW_POS_PID_CONFIG.kp,
+    .kpMax = YAW_POS_PID_CONFIG.kp,
+    .kiMin = YAW_POS_PID_CONFIG.ki,
+    .kiMax = YAW_POS_PID_CONFIG.ki,
+    .kdMin = 0.0f,
+    .kdMax = 0.7f,
+    .maxError = 180.0f,  ///< 180 degrees physical max angle error 
+    .maxErrorDerivative = 720.0f,  ///< 2 rotations per second max speed of turret
+    .kpTable = tap::algorithms::FuzzyRuleTable(),
+    .kiTable = tap::algorithms::FuzzyRuleTable(),
+    .kdTable = tap::algorithms::FuzzyRuleTable(KD_FUZZY_RULE_TABLE),
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {

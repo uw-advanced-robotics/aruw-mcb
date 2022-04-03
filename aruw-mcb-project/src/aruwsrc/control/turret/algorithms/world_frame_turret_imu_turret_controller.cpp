@@ -181,6 +181,75 @@ bool WorldFrameYawTurretImuCascadePidTurretController::isOnline() const
     return turretSubsystem->isOnline() && drivers->turretMCBCanComm.isConnected();
 }
 
+HeroTurretImuCascadePidTurretController::HeroTurretImuCascadePidTurretController(
+    const aruwsrc::Drivers *drivers,
+    TurretSubsystem *turretSubsystem,
+    const tap::algorithms::SmoothPidConfig &posPidConfig,
+    const tap::algorithms::FuzzyPidConfig &fuzzyPidConfig,
+    const tap::algorithms::SmoothPidConfig &velPidConfig)
+    : TurretYawControllerInterface(turretSubsystem),
+      drivers(drivers),
+      positionPid(fuzzyPidConfig, posPidConfig),
+      velocityPid(velPidConfig),
+      worldFrameSetpoint(0, 0, 360)
+{
+}
+
+void HeroTurretImuCascadePidTurretController::initialize()
+{
+    if (this != turretSubsystem->getPrevRanYawTurretController())
+    {
+        positionPid.reset();
+        velocityPid.reset();
+
+        // Capture initial target angle in chassis frame and transform to world frame.
+        worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
+            turretSubsystem->getCurrentYawValue().getValue(),
+            drivers->turretMCBCanComm.getYaw(),
+            turretSubsystem->getYawSetpoint()));
+
+        turretSubsystem->setPrevRanYawTurretController(this);
+    }
+}
+
+void HeroTurretImuCascadePidTurretController::runController(
+    const uint32_t dt,
+    const float desiredSetpoint)
+{
+    const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
+    const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
+    const float worldFrameYawVelocity = drivers->turretMCBCanComm.getYawVelocity();
+
+    updateYawWorldFrameSetpoint(
+        desiredSetpoint,
+        chassisFrameYaw,
+        worldFrameYawAngle,
+        &worldFrameSetpoint,
+        turretSubsystem);
+
+    // position controller based on imu and yaw gimbal angle,
+    // precisely, - (yawActual - worldFrameYawSetpoint), or more obvious,
+    // worldFrameYawSetpoint - yawActual
+    float positionControllerError = -worldFrameSetpoint.difference(worldFrameYawAngle);
+    float positionPidOutput =
+        positionPid.runController(positionControllerError, worldFrameYawVelocity, dt);
+
+    float velocityControllerError = positionPidOutput - worldFrameYawVelocity;
+    float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
+
+    turretSubsystem->setYawMotorOutput(velocityPidOutput);
+}
+
+float HeroTurretImuCascadePidTurretController::getSetpoint() const
+{
+    return worldFrameSetpoint.getValue();
+}
+
+bool HeroTurretImuCascadePidTurretController::isOnline() const
+{
+    return turretSubsystem->isOnline() && drivers->turretMCBCanComm.isConnected();
+}
+
 /**
  * A helper function for the `run*PidPitchWorldFrameController` functions below. Updates the passed
  * in `turretSubsystem`'s desired chassis frame setpoint and the passed in
