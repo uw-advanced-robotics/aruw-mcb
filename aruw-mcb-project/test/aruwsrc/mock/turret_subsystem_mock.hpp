@@ -22,7 +22,7 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/turret/constants/turret_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 namespace aruwsrc
 {
