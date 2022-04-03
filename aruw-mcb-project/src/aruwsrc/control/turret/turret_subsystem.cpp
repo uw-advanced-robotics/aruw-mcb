@@ -29,7 +29,6 @@
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
-
 #include "constants/turret_controller_constants.hpp"
 
 using namespace tap::motor;

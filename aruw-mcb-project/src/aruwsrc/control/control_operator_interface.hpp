@@ -46,31 +46,31 @@ public:
     static constexpr float SHIFT_SCALAR = (1.0f / 2);
     static constexpr float USER_STICK_SENTINEL_DRIVE_SCALAR = 5000.0f;
 
-    #if defined(TARGET_HERO)
-        /**
-         * Max acceleration in rpm/s^2 of the chassis in the x direction
-         */
-        static constexpr float MAX_ACCELERATION_X = 7'000.0f;
-        static constexpr float MAX_DECELERATION_X = 20'000.0f;
+#if defined(TARGET_HERO)
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the x direction
+     */
+    static constexpr float MAX_ACCELERATION_X = 7'000.0f;
+    static constexpr float MAX_DECELERATION_X = 20'000.0f;
 
-        /**
-         * Max acceleration in rpm/s^2 of the chassis in the y direction
-         */
-        static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
-        static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
-    #else  // TARGET_ENGINEER (and other targets that don't use a traditional chassis)
-        /**
-         * Max acceleration in rpm/s^2 of the chassis in the x direction
-         */
-        static constexpr float MAX_ACCELERATION_X = 10'000.0f;
-        static constexpr float MAX_DECELERATION_X = 20'000.0f;
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the y direction
+     */
+    static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
+    static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
+#else  // TARGET_ENGINEER (and other targets that don't use a traditional chassis)
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the x direction
+     */
+    static constexpr float MAX_ACCELERATION_X = 10'000.0f;
+    static constexpr float MAX_DECELERATION_X = 20'000.0f;
 
-        /**
-         * Max acceleration in rpm/s^2 of the chassis in the y direction
-         */
-        static constexpr float MAX_ACCELERATION_Y = 9'000.0f;
-        static constexpr float MAX_DECELERATION_Y = 20'000.0f;
-    #endif
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the y direction
+     */
+    static constexpr float MAX_ACCELERATION_Y = 9'000.0f;
+    static constexpr float MAX_DECELERATION_Y = 20'000.0f;
+#endif
 
     /**
      * Max acceleration in rpm/s^2 of the chassis in the r direction

@@ -53,8 +53,8 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "turret/soldier_turret_subsystem.hpp"
 #include "turret/constants/turret_controller_constants.hpp"
+#include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
@@ -97,7 +97,9 @@ tap::motor::DjiMotor yawMotor(
     "Yaw Turret");
 SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
-aruwsrc::chassis::ChassisSubsystem chassis(drivers(), aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
+aruwsrc::chassis::ChassisSubsystem chassis(
+    drivers(),
+    aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 static inline void refreshOdom() { odometrySubsystem.refresh(); }
