@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,7 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ROBOT_TYPE_HPP__
-#define __ROBOT_TYPE_HPP__
-#define TARGET_SOLDIER_2022
-#endif
+#ifndef LAUNCH_SPEED_PREDICTOR_INTERFACE_HPP_
+#define LAUNCH_SPEED_PREDICTOR_INTERFACE_HPP_
+
+namespace aruwsrc::control::launcher
+{
+/**
+ * Interface for retreiving the predicted launch velocity of a launching mechanism.
+ */
+class LaunchSpeedPredictorInterface
+{
+public:
+    virtual inline float getPredictedLaunchSpeed() const = 0;
+};
+}  // namespace aruwsrc::control::launcher
+
+#endif  // LAUNCH_SPEED_PREDICTOR_INTERFACE_HPP_

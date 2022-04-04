@@ -106,14 +106,15 @@ public:
 
     const char *getName() override { return "Friction wheels"; }
 
+protected:
+    aruwsrc::Drivers *drivers;
+
 private:
     static constexpr float PID_P = 20.0f;
     static constexpr float PID_I = 0.2f;
     static constexpr float PID_D = 0.0f;
     static constexpr float PID_MAX_ERROR_SUM = 5'000.0f;
     static constexpr float PID_MAX_OUTPUT = 16000.0f;
-
-    aruwsrc::Drivers *drivers;
 
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
@@ -124,6 +125,8 @@ private:
     float desiredLaunchSpeed;
 
     uint32_t prevTime = 0;
+
+    float predictedLaunchSpeed = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

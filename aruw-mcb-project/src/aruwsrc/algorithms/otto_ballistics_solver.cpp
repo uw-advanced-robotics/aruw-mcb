@@ -24,7 +24,7 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -38,7 +38,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const chassis::ChassisSubsystem &chassisSubsystem,
     const control::turret::TurretSubsystem &turretSubsystem,
-    const control::launcher::FrictionWheelSubsystem &frictionWheels,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed)
     : drivers(drivers),
       odometryInterface(odometryInterface),
@@ -56,9 +56,9 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
 {
     // if the friction wheel launch speed is 0, use a default launch speed so ballistics gives a
     // reasonable computation
-    const float launchSpeed = compareFloatClose(frictionWheels.getDesiredLaunchSpeed(), 0, 1E-5)
+    const float launchSpeed = compareFloatClose(frictionWheels.getPredictedLaunchSpeed(), 0, 1E-5)
                                   ? defaultLaunchSpeed
-                                  : frictionWheels.getDesiredLaunchSpeed();
+                                  : frictionWheels.getPredictedLaunchSpeed();
 
     const Vector2f robotPosition = odometryInterface.getCurrentLocation2D().getPosition();
 

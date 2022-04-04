@@ -42,7 +42,7 @@ class TurretSubsystem;
 
 namespace aruwsrc::control::launcher
 {
-class FrictionWheelSubsystem;
+class RefereeFeedbackFrictionWheelSubsystem;
 }
 
 namespace aruwsrc::chassis
@@ -95,7 +95,7 @@ public:
         algorithms::TurretPitchControllerInterface *pitchController,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const chassis::ChassisSubsystem &chassisSubsystem,
-        const control::launcher::FrictionWheelSubsystem &frictionWheels,
+        const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
         const float userPitchInputScalar,
         const float userYawInputScalar,
         const float defaultLaunchSpeed,
