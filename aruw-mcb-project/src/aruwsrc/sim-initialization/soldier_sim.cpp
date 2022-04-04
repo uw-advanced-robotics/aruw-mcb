@@ -26,7 +26,7 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
-#include "aruwsrc/control/turret/constants/turret_controller_constants.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 #include "robot_sim.hpp"
 

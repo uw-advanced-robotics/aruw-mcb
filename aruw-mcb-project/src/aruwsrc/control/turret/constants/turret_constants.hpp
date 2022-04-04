@@ -17,19 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_CONTROLLER_CONSTANTS_HPP_
-#define TURRET_CONTROLLER_CONSTANTS_HPP_
+#ifndef TURRET_CONSTANTS_HPP_
+#define TURRET_CONSTANTS_HPP_
 
 #include "aruwsrc/util_macros.hpp"
 
 #if defined(ALL_SOLDIERS)
-#include "soldier_turret_controller_constants.hpp"
+#include "soldier_turret_constants.hpp"
 #elif defined(TARGET_HERO)
-#include "hero_turret_controller_constants.hpp"
+#include "hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
-#include "drone_turret_controller_constants.hpp"
+#include "drone_turret_constants.hpp"
 #elif defined(TARGET_SENTINEL) || defined(TARGET_ENGINEER)
-#include "sentinel_turret_controller_constants.hpp"
+#include "sentinel_turret_constants.hpp"
 #endif
 
-#endif  // TURRET_CONTROLLER_CONSTANTS_HPP_
+#endif  // TURRET_CONSTANTS_HPP_

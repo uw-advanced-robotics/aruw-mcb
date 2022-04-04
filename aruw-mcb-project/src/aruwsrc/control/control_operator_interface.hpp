@@ -58,7 +58,7 @@ public:
      */
     static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
     static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
-#else  // TARGET_ENGINEER (and other targets that don't use a traditional chassis)
+#else  // TARGET_SOLDIER, TARGET_ENGINEER (and other targets that don't use a traditional chassis)
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
