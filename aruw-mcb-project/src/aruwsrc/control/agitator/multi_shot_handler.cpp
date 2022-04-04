@@ -17,37 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "example_command.hpp"
+#include "multi_shot_handler.hpp"
 
-#include "example_subsystem.hpp"
-
-using tap::control::Subsystem;
-
-namespace aruwsrc
+namespace aruwsrc::agitator
 {
-namespace control
+MultiShotHandler::MultiShotHandler(
+    tap::control::HoldRepeatCommandMapping *commandMapping,
+    int burstCount)
+    : commandMapping(commandMapping),
+      burstCount(burstCount)
 {
-ExampleCommand::ExampleCommand(ExampleSubsystem* subsystem, int speed)
-    : subsystemExample(subsystem),
-      speed(speed)
-{
-    addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
 }
 
-void ExampleCommand::initialize() {}
-
-void ExampleCommand::execute() { subsystemExample->setDesiredRpm(speed); }
-
-void ExampleCommand::end(bool interrupted)
+void MultiShotHandler::setShooterState(ShooterState state)
 {
-    if (interrupted)
+    int timesToReschedule = 0;
+    this->state = state;
+    switch (state)
     {
-        subsystemExample->setDesiredRpm(0);
+        case SINGLE:
+            timesToReschedule = 1;
+            break;
+        case BURST:
+            timesToReschedule = burstCount;
+            break;
+        case FULL_AUTO:
+            timesToReschedule = -1;
+            break;
+        default:
+            break;
     }
-    subsystemExample->setDesiredRpm(0);
+    commandMapping->setMaxTimesToSchedule(timesToReschedule);
 }
-
-bool ExampleCommand::isFinished(void) const { return false; }
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::agitator
