@@ -142,19 +142,22 @@ void VisionCoprocessor::sendOdometryData()
     modm::Location2D<float> location = odometryInterface->getCurrentLocation2D();
 
     // chassis odometry
+    odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
-    odometryData->chassisOdometry.timestamp = tap::arch::clock::getTimeMicroseconds();
+
+    // number of turrets
+    odometryData->numTurrets = control::turret::NUM_TURRETS;
 
     // turret odometry
     for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
     {
         assert(turretOrientationInterfaces[i] != nullptr);
-        odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
-        odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
         odometryData->turretOdometry[i].timestamp =
             turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
+        odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
+        odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
     }
 
     odometryMessage.setCRC16();

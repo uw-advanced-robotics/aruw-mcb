@@ -109,8 +109,8 @@ public:
     static constexpr uint16_t YAW_START_ENCODER_POSITION = 4872;
     static constexpr uint16_t PITCH_START_ENCODER_POSITION = 3900;
 
-    static constexpr float TURRET_CG_X = 1;
-    static constexpr float TURRET_CG_Z = -0.2;
+    static constexpr float TURRET_CG_X = 0.02288f;
+    static constexpr float TURRET_CG_Z = 0.00923f;
     static constexpr float GRAVITY_COMPENSATION_SCALAR = 3500.0f;
 #elif defined(TARGET_SENTINEL)
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;

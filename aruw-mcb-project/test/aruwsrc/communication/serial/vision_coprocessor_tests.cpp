@@ -61,7 +61,6 @@ static void initAndRunAutoAimRxTest(
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
         const VisionCoprocessor::TurretAimData &callbackData = serial.getLastAimData(i);
-        std::cout << i << std::endl;
         EXPECT_EQ(expectedAimData[i].xPos, callbackData.xPos);
         EXPECT_EQ(expectedAimData[i].yPos, callbackData.yPos);
         EXPECT_EQ(expectedAimData[i].zPos, callbackData.zPos);
@@ -284,31 +283,39 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
             uint32_t cTime;
 
             // chassis odometry
-            convertFromLittleEndian(&cx, msg.data);
-            convertFromLittleEndian(&cy, msg.data + 4);
-            convertFromLittleEndian(&cz, msg.data + 8);
-            convertFromLittleEndian(&cTime, msg.data + 12);
+            convertFromLittleEndian(&cTime, msg.data);
+            convertFromLittleEndian(&cx, msg.data + 4);
+            convertFromLittleEndian(&cy, msg.data + 8);
+            convertFromLittleEndian(&cz, msg.data + 12);
 
+            EXPECT_EQ(odometryData.chassisOdometry.timestamp, cTime);
             EXPECT_EQ(odometryData.chassisOdometry.xPos, cx);
             EXPECT_EQ(odometryData.chassisOdometry.yPos, cy);
             EXPECT_EQ(odometryData.chassisOdometry.zPos, cz);
-            EXPECT_EQ(odometryData.chassisOdometry.timestamp, cTime);
+
+            uint8_t numTurrets = msg.data[sizeof(VisionCoprocessor::ChassisOdometryData)];
+            EXPECT_EQ(NUM_TURRETS, numTurrets);
 
             // turret odometry
-            uint32_t startIndex = 16;
-            int i = 0;
-            std::array<std::tuple<float, float, uint32_t>, NUM_TURRETS> turretOdom;
-            for (auto &odom : turretOdom)
+            const uint32_t startIndex = sizeof(VisionCoprocessor::ChassisOdometryData) + 1;
+            std::array<std::tuple<uint32_t, float, float>, NUM_TURRETS> turretOdom;
+            for (size_t i = 0; i < turretOdom.size(); i++)
             {
-                convertFromLittleEndian(&std::get<0>(odom), msg.data + startIndex);
-                convertFromLittleEndian(&std::get<1>(odom), msg.data + startIndex + 4);
-                convertFromLittleEndian(&std::get<2>(odom), msg.data + startIndex + 8);
+                auto &odom = turretOdom[i];
 
-                EXPECT_EQ(odometryData.turretOdometry[i].pitch, std::get<0>(odom));
-                EXPECT_EQ(odometryData.turretOdometry[i].yaw, std::get<1>(odom));
-                EXPECT_EQ(odometryData.turretOdometry[i].timestamp, std::get<2>(odom));
-                startIndex += 12;
-                i++;
+                convertFromLittleEndian(
+                    &std::get<0>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData));
+                convertFromLittleEndian(
+                    &std::get<1>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) + 4);
+                convertFromLittleEndian(
+                    &std::get<2>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) + 8);
+
+                EXPECT_EQ(odometryData.turretOdometry[i].timestamp, std::get<0>(odom));
+                EXPECT_EQ(odometryData.turretOdometry[i].pitch, std::get<1>(odom));
+                EXPECT_EQ(odometryData.turretOdometry[i].yaw, std::get<2>(odom));
             }
 
             return length;

@@ -105,7 +105,7 @@ public:
     struct OdometryData
     {
         ChassisOdometryData chassisOdometry;
-        uint8_t numTurrets = control::turret::NUM_TURRETS;
+        uint8_t numTurrets;
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
