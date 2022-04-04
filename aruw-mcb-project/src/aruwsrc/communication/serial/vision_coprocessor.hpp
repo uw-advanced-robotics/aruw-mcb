@@ -51,7 +51,9 @@ namespace serial
 class VisionCoprocessor : public tap::communication::serial::DJISerial
 {
 public:
+#ifndef PLATFORM_HOSTED
     using TimeSyncTriggerPin = modm::platform::GpioI0;  ///< Pin "A" as labeled on the type A board
+#endif
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
@@ -92,7 +94,7 @@ public:
 
     VisionCoprocessor(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
-    mockable ~VisionCoprocessor() = default;
+    mockable ~VisionCoprocessor();
 
     /**
      * Call this before using the serial line, initializes the uart line
@@ -138,7 +140,10 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
-    static void handleTimeSyncRequest();
+    static inline void handleTimeSyncRequest()
+    {
+        visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
+    }
 
 private:
     enum TxMessageTypes
@@ -197,14 +202,13 @@ private:
      */
     static bool decodeToTurretAimData(const ReceivedSerialMessage& message, TurretAimData* aimData);
 
-    void sendTimeSyncMessage();
-
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
 
     void sendOdometryData();
     void sendRobotTypeData();
+    void sendTimeSyncMessage();
 };
 }  // namespace serial
 }  // namespace aruwsrc

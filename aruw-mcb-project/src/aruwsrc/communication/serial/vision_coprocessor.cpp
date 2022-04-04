@@ -32,12 +32,14 @@ using tap::arch::clock::getTimeMicroseconds;
 
 VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;
 
+#ifndef PLATFORM_HOSTED
 MODM_ISR(EXTI0)
 {
     // Currently the EXTI0 interrupt handler is only used by the time sync pin
-    aruwsrc::serial::VisionCoprocessor::TimeSyncTriggerPin::acknowledgeExternalInterruptFlag();
+    VisionCoprocessor::TimeSyncTriggerPin::acknowledgeExternalInterruptFlag();
     VisionCoprocessor::handleTimeSyncRequest();
 }
+#endif
 
 VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
@@ -45,22 +47,26 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
       odometryInterface(nullptr),
       turretOrientationInterface(nullptr)
 {
+#ifndef ENV_UNIT_TESTS
+    // when testing it is OK to have multiple vision coprocessor instances, so this assertion
+    // doesn't hold
     assert(visionCoprocessorInstance == nullptr);
+#endif
     visionCoprocessorInstance = this;
 }
 
-void VisionCoprocessor::handleTimeSyncRequest()
-{
-    visionCoprocessorInstance->risingEdgeTime = getTimeMicroseconds();
-}
+VisionCoprocessor::~VisionCoprocessor() { visionCoprocessorInstance = nullptr; }
 
 void VisionCoprocessor::initializeCV()
 {
+#ifndef PLATFORM_HOSTED
+    // Set up the interrupt for the vision coprocessor sync handler
     VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
     VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterruptVector(0);
     VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterrupt();
     VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
         modm::platform::Gpio::InputTrigger::RisingEdge);
+#endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
 #if defined(TARGET_HERO)
@@ -97,29 +103,6 @@ bool VisionCoprocessor::decodeToTurretAimData(
     }
     memcpy(aimData, &message.data, sizeof(*aimData));
     return true;
-}
-
-void VisionCoprocessor::sendTimeSyncMessage()
-{
-    uint32_t newRisingEdgeTime = risingEdgeTime;
-
-    if (prevRisingEdgeTime != newRisingEdgeTime)
-    {
-        prevRisingEdgeTime = newRisingEdgeTime;
-
-        DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
-
-        timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
-
-        *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = risingEdgeTime;
-        *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = 0;
-        timeSyncResponseMessage.setCRC16();
-
-        drivers->uart.write(
-            VISION_COPROCESSOR_TX_UART_PORT,
-            reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
-            sizeof(timeSyncResponseMessage));
-    }
 }
 
 void VisionCoprocessor::sendMessage()
@@ -208,6 +191,29 @@ void VisionCoprocessor::sendRobotTypeData()
             VISION_COPROCESSOR_TX_UART_PORT,
             reinterpret_cast<uint8_t*>(&robotTypeMessage),
             sizeof(robotTypeMessage));
+    }
+}
+
+void VisionCoprocessor::sendTimeSyncMessage()
+{
+    uint32_t newRisingEdgeTime = risingEdgeTime;
+
+    if (prevRisingEdgeTime != newRisingEdgeTime)
+    {
+        prevRisingEdgeTime = newRisingEdgeTime;
+
+        DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
+
+        timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
+
+        *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = risingEdgeTime;
+        *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = 0;
+        timeSyncResponseMessage.setCRC16();
+
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
+            sizeof(timeSyncResponseMessage));
     }
 }
 
