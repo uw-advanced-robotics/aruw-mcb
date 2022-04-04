@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
+#define TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
+
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
@@ -31,3 +34,5 @@ public:
     MOCK_METHOD(uint32_t, getLastMeasurementTimeMicros, (), (const override));
 };
 }  // namespace aruwsrc::mock
+
+#endif  // TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
