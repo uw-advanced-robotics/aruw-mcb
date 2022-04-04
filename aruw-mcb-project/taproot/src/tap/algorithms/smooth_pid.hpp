@@ -45,23 +45,13 @@ struct SmoothPidConfig
                                         * that is applied to the proportional error. */
     float errDeadzone = 0.0f;          /**< Within [-errDeadzone, errDeadzone], the PID controller
                                         * error will be set to 0. */
+    float errorDerivativeFloor; /**< Minimum error value at which the PID controller will compute
+                                   and apply the derivative term. */
 };
 
 class SmoothPid
 {
 public:
-    SmoothPid(
-        float kp,
-        float ki,
-        float kd,
-        float maxICumulative,
-        float maxOutput,
-        float tQDerivativeKalman,
-        float tRDerivativeKalman,
-        float tQProportionalKalman,
-        float tRProportionalKalman,
-        float errDeadzone = 0.0f);
-
     SmoothPid(const SmoothPidConfig &pidConfig);
 
     virtual float runController(float error, float errorDerivative, float dt);
@@ -78,8 +68,6 @@ public:
     inline void setMaxICumulative(float maxICumulative) { config.maxICumulative = maxICumulative; }
     inline void setMaxOutput(float maxOutput) { config.maxOutput = maxOutput; }
     inline void setErrDeadzone(float errDeadzone) { config.errDeadzone = errDeadzone; }
-
-    const SmoothPidConfig &getConfig() const { return config; }
 
 private:
     // gains and constants, to be set by the user

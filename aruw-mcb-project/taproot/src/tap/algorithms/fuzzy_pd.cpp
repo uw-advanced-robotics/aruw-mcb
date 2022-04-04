@@ -17,7 +17,7 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fuzzy_pid.hpp"
+#include "fuzzy_pd.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
@@ -25,30 +25,26 @@ using namespace tap::algorithms;
 
 namespace tap::algorithms
 {
-modm::interpolation::Linear<modm::Pair<float, float>> FuzzyRuleTable::
-    classificationLinearInterpolator(
-        FuzzyRuleTable::FUZZY_CLASSIFICATION_TO_INDEX_LUT,
-        MODM_ARRAY_SIZE(FuzzyRuleTable::FUZZY_CLASSIFICATION_TO_INDEX_LUT));
-
-FuzzyPid::FuzzyPid(const FuzzyPidConfig &pidConfig, const SmoothPidConfig &smoothPidConfig)
+FuzzyPD::FuzzyPD(const FuzzyPDConfig &pidConfig, const SmoothPidConfig &smoothPidConfig)
     : SmoothPid(smoothPidConfig),
       config(pidConfig)
 {
 }
 
-float FuzzyPid::runController(float error, float errorDerivative, float dt)
+float FuzzyPD::runController(float error, float errorDerivative, float dt)
 {
-    FuzzyPid::udpatePidGains(
+    udpatePidGains(
         limitVal(error / config.maxError, -1.0f, 1.0f),
         limitVal(errorDerivative / config.maxErrorDerivative, -1.0f, 1.0f));
     return SmoothPid::runController(error, errorDerivative, dt);
 }
 
-void FuzzyPid::udpatePidGains(float error, float errorDerivative)
+void FuzzyPD::udpatePidGains(float error, float errorDerivative)
 {
-    setP(limitVal(config.kpTable.getOutput(error, errorDerivative), config.kpMin, config.kpMax));
-    setI(limitVal(config.kiTable.getOutput(error, errorDerivative), config.kiMin, config.kiMax));
-    setD(limitVal(config.kdTable.getOutput(error, errorDerivative), config.kdMin, config.kdMax));
+    config.fuzzyTable.performFuzzyUpdate(error, errorDerivative);
+
+    setP(config.fuzzyTable.getFuzzyGains()[0][0]);
+    setD(config.fuzzyTable.getFuzzyGains()[1][0]);
 }
 
 }  // namespace tap::algorithms

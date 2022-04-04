@@ -20,7 +20,7 @@
 #ifndef HERO_TURRET_CONTROLLER_CONSTANTS_HPP_
 #define HERO_TURRET_CONTROLLER_CONSTANTS_HPP_
 
-#include "tap/algorithms/fuzzy_pid.hpp"
+#include "tap/algorithms/fuzzy_pd.hpp"
 
 #include "modm/math/interpolation/linear.hpp"
 
@@ -39,91 +39,15 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.1f,
 };
 
-static constexpr float KD_S = 0.01f;
-
-/**
- * Columns correspond to error, rows to delta error
- */
-static constexpr auto KD_FUZZY_RULE_TABLE = std::array<std::array<float, 7>, 7>({
-    std::array<float, 7>({
-        KD_S * tap::algorithms::FuzzyRuleTable::PS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NB,
-        KD_S* tap::algorithms::FuzzyRuleTable::NB,
-        KD_S* tap::algorithms::FuzzyRuleTable::NB,
-        KD_S* tap::algorithms::FuzzyRuleTable::NM,
-        KD_S* tap::algorithms::FuzzyRuleTable::PS,
-    }),
-    std::array<float, 7>({
-        KD_S * tap::algorithms::FuzzyRuleTable::PS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NB,
-        KD_S* tap::algorithms::FuzzyRuleTable::NM,
-        KD_S* tap::algorithms::FuzzyRuleTable::NM,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-    }),
-    std::array<float, 7>({
-        KD_S * tap::algorithms::FuzzyRuleTable::ZO,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NM,
-        KD_S* tap::algorithms::FuzzyRuleTable::NM,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-    }),
-    std::array<float, 7>({
-        KD_S * tap::algorithms::FuzzyRuleTable::ZO,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-    }),
-    std::array<float, 7>({
-        KD_S * tap::algorithms::FuzzyRuleTable::ZO,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-        KD_S* tap::algorithms::FuzzyRuleTable::ZO,
-    }),
-    std::array<float, 7>({
-        KD_S * tap::algorithms::FuzzyRuleTable::PB,
-        KD_S* tap::algorithms::FuzzyRuleTable::NS,
-        KD_S* tap::algorithms::FuzzyRuleTable::PS,
-        KD_S* tap::algorithms::FuzzyRuleTable::PS,
-        KD_S* tap::algorithms::FuzzyRuleTable::PS,
-        KD_S* tap::algorithms::FuzzyRuleTable::PS,
-        KD_S* tap::algorithms::FuzzyRuleTable::PB,
-    }),
-    std::array<float, 7>({
-        KD_S * tap::algorithms::FuzzyRuleTable::PB,
-        KD_S* tap::algorithms::FuzzyRuleTable::PM,
-        KD_S* tap::algorithms::FuzzyRuleTable::PM,
-        KD_S* tap::algorithms::FuzzyRuleTable::PM,
-        KD_S* tap::algorithms::FuzzyRuleTable::PS,
-        KD_S* tap::algorithms::FuzzyRuleTable::PS,
-        KD_S* tap::algorithms::FuzzyRuleTable::PB,
-    }),
-});
-
-static tap::algorithms::FuzzyPidConfig YAW_FUZZY_POS_PID_CONFIG{
-    .kpMin = YAW_POS_PID_CONFIG.kp,
-    .kpMax = YAW_POS_PID_CONFIG.kp,
-    .kiMin = YAW_POS_PID_CONFIG.ki,
-    .kiMax = YAW_POS_PID_CONFIG.ki,
-    .kdMin = 0.0f,
-    .kdMax = 0.7f,
-    .maxError = 180.0f,  ///< 180 degrees physical max angle error 
+static tap::algorithms::FuzzyPDConfig YAW_FUZZY_POS_PD_CONFIG{
+    .maxError = 180.0f,            ///< 180 degrees physical max angle error
     .maxErrorDerivative = 720.0f,  ///< 2 rotations per second max speed of turret
-    .kpTable = tap::algorithms::FuzzyRuleTable(),
-    .kiTable = tap::algorithms::FuzzyRuleTable(),
-    .kdTable = tap::algorithms::FuzzyRuleTable(KD_FUZZY_RULE_TABLE),
+    .fuzzyTable = tap::algorithms::FuzzyPDRuleTable(
+        std::array<float, 3>({YAW_POS_PID_CONFIG.kp, YAW_POS_PID_CONFIG.kp, YAW_POS_PID_CONFIG.kp}),
+        std::array<float, 3>({0, 0.1, 0.7})),
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
@@ -137,6 +61,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
@@ -150,6 +75,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
@@ -163,6 +89,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace world_rel_turret_imu
 
@@ -179,6 +106,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace world_rel_chassis_imu
 
@@ -195,6 +123,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
@@ -208,6 +137,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 2.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace chassis_rel
 }  // namespace aruwsrc::control::turret

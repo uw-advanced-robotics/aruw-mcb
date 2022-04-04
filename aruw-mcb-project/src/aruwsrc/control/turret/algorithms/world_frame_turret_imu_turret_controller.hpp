@@ -23,7 +23,7 @@
 #include <cstdint>
 
 #include "tap/algorithms/contiguous_float.hpp"
-#include "tap/algorithms/fuzzy_pid.hpp"
+#include "tap/algorithms/fuzzy_pd.hpp"
 
 #include "turret_controller_interface.hpp"
 
@@ -97,7 +97,7 @@ public:
         const aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
-        const tap::algorithms::FuzzyPidConfig &fuzzyPidConfig,
+        const tap::algorithms::FuzzyPDConfig &fuzzyPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 
     void initialize() final;
@@ -115,7 +115,7 @@ public:
 private:
     const aruwsrc::Drivers *drivers;
 
-    tap::algorithms::FuzzyPid positionPid;
+    tap::algorithms::FuzzyPD positionPid;
     tap::algorithms::SmoothPid velocityPid;
 
     tap::algorithms::ContiguousFloat worldFrameSetpoint;

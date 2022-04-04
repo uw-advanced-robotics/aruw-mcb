@@ -19,7 +19,6 @@
 
 #if defined(TARGET_HERO)
 
-#include "tap/algorithms/fuzzy_pid.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
@@ -201,7 +200,7 @@ algorithms::HeroTurretImuCascadePidTurretController worldFrameYawTurretImuContro
     drivers(),
     &turret,
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
-    world_rel_turret_imu::YAW_FUZZY_POS_PID_CONFIG,
+    world_rel_turret_imu::YAW_FUZZY_POS_PD_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
@@ -398,6 +397,6 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }
 }  // namespace aruwsrc::control
 
-// imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
+imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
 
 #endif

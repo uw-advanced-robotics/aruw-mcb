@@ -185,7 +185,7 @@ HeroTurretImuCascadePidTurretController::HeroTurretImuCascadePidTurretController
     const aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
     const tap::algorithms::SmoothPidConfig &posPidConfig,
-    const tap::algorithms::FuzzyPidConfig &fuzzyPidConfig,
+    const tap::algorithms::FuzzyPDConfig &fuzzyPidConfig,
     const tap::algorithms::SmoothPidConfig &velPidConfig)
     : TurretYawControllerInterface(turretSubsystem),
       drivers(drivers),
