@@ -85,10 +85,10 @@ public:
      */
     struct ChassisOdometryData
     {
+        uint32_t timestamp;  ///< timestamp associated with chassis odometry (in us).
         float xPos;          ///< x position of the chassis (in m).
         float yPos;          ///< y position of the chassis (in m).
         float zPos;          ///< z position of the chassis (in m).
-        uint32_t timestamp;  ///< timestamp associated with chassis odometry (in us).
     } modm_packed;
 
     /**
@@ -96,15 +96,16 @@ public:
      */
     struct TurretOdometryData
     {
+        uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
         float pitch;         ///< Pitch angle of turret relative to plane parallel to the ground (in
                              ///< deg).
         float yaw;           ///< Clockwise turret rotation angle between 0 and 360 (in deg).
-        uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
     } modm_packed;
 
     struct OdometryData
     {
         ChassisOdometryData chassisOdometry;
+        uint8_t numTurrets = control::turret::NUM_TURRETS;
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
