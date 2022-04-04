@@ -32,7 +32,7 @@ def get_robot_type():
     if robot_type == None:
         with open(ROBOT_TYPE_FILE, "r") as robot_type_file_reader:
             for word in robot_type_file_reader.read().splitlines():
-                if "#" in word and "define" in word and "TARGET_" in word:
+                if "#define" in word and "TARGET_" in word:
                     robot_type = word.split()[-1]
                     break
     if robot_type not in VALID_ROBOT_TYPES:
