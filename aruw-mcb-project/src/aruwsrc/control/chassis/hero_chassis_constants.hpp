@@ -56,13 +56,13 @@ static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 15.0f;
 
 static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
     /** Kp */
-    22.0f,
+    20.0f,
     /** Ki */
     0.2f,
     /** Kd */
     0.0f,
     /** maxErrorSum */
-    5'000.0f,
+    3'000.0f,
     /**
      * This max output is measured in the c620 robomaster translated current.
      * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
@@ -76,8 +76,8 @@ static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 150.0f;
-static constexpr float AUTOROTATION_PID_KD = 5.0f;
+static constexpr float AUTOROTATION_PID_KP = 100.0f;
+static constexpr float AUTOROTATION_PID_KD = 1.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 2'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;

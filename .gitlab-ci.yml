@@ -80,7 +80,7 @@ before_script:
 
     - python3 ./taproot-scripts/check_license_headers.py
         -p aruw-mcb
-        -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*'
+        -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*' 'aruw-mcb-project/robot-type/robot_type.hpp'
         -o 'Advanced Robotics at the University of Washington'
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
