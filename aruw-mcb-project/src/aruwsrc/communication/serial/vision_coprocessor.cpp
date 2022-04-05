@@ -43,6 +43,7 @@ MODM_ISR(EXTI0)
 
 VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
+      risingEdgeTime(0),
       lastAimData(),
       odometryInterface(nullptr),
       turretOrientationInterface(nullptr)
