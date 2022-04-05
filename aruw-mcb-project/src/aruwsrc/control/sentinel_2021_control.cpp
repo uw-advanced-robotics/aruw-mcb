@@ -115,7 +115,7 @@ aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
 // Two identical drive commands since you can't map an identical command to two different mappings
-SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
+SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
@@ -164,7 +164,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     true);
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&sentinelDriveManual, &turretManual},
+    {&sentinelDriveManual1, &turretManual},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchMid(

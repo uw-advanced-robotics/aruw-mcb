@@ -130,7 +130,7 @@ TurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
 
 /* define commands ----------------------------------------------------------*/
 // Two identical drive commands since you can't map an identical command to two different mappings
-SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
+SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
@@ -250,7 +250,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     true);
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&sentinelDriveManual, &turret1::turretManual, &turret2::turretManual},
+    {&sentinelDriveManual1, &turret1::turretManual, &turret2::turretManual},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchMid(

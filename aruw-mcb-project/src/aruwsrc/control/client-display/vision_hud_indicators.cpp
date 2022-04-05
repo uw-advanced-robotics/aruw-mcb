@@ -49,7 +49,7 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
     RF_BEGIN(2);
 
     currVisionTargetStatus = drivers->visionCoprocessor.isCvOnline() &&
-                             drivers->visionCoprocessor.getLastAimData(0).hasTarget;
+                             drivers->visionCoprocessor.getSomeTurretHasTarget();
 
     if ((updateVisionTargetFoundTimeout.isExpired() ||
          updateVisionTargetFoundTimeout.isStopped()) &&
