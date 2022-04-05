@@ -28,6 +28,7 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -36,7 +37,7 @@
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "turret/turret_controller_constants.hpp"
+#include "turret/constants/turret_constants.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
@@ -48,7 +49,6 @@ using namespace aruwsrc::control;
 using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
-using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
 
 /*
@@ -80,7 +80,9 @@ AgitatorSubsystem agitator(
     150,
     true);
 
-FrictionWheelSubsystem frictionWheels(drivers());
+SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
+
+aruwsrc::control::launcher::FrictionWheelSubsystem frictionWheels(drivers());
 
 DjiMotor pitchMotor(drivers(), MOTOR5, tap::can::CanBus::CAN_BUS1, false, "Pitch Turret 1");
 DjiMotor yawMotor(drivers(), MOTOR6, TurretSubsystem::CAN_BUS_MOTORS, true, "Yaw Turret 1");
@@ -133,19 +135,23 @@ aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+// Two identical drive commands since you can't map an identical command to two different mappings
+SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
+SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
+
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
     30.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(

@@ -30,7 +30,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/control/chassis/chassis_constants.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/drivers.hpp"
 

@@ -31,6 +31,7 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -50,8 +51,8 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "turret/constants/turret_constants.hpp"
 #include "turret/hero_turret_subsystem.hpp"
-#include "turret/turret_controller_constants.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
@@ -114,16 +115,16 @@ AgitatorSubsystem waterwheelAgitator(
 
 tap::motor::DjiMotor pitchMotor(
     drivers(),
-    TurretSubsystem::PITCH_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_PITCH_MOTOR,
+    PITCH_MOTOR_ID,
+    CAN_BUS_PITCH_MOTOR,
     false,
     "Pitch Turret");
 tap::motor::DoubleDjiMotor yawMotor(
     drivers(),
-    TurretSubsystem::YAW_BACK_MOTOR_ID,
-    TurretSubsystem::YAW_FRONT_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_YAW_MOTORS,
-    TurretSubsystem::CAN_BUS_YAW_MOTORS,
+    YAW_BACK_MOTOR_ID,
+    YAW_FRONT_MOTOR_ID,
+    CAN_BUS_YAW_MOTORS,
+    CAN_BUS_YAW_MOTORS,
     true,
     true,
     "Yaw Front Turret",
