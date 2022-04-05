@@ -46,6 +46,7 @@ public:
     MOCK_METHOD(void, sendShutdownMessage, (), (override));
     MOCK_METHOD(void, sendRebootMessage, (), (override));
     MOCK_METHOD(void, sendSelectNewTargetMessage, (), (override));
+    MOCK_METHOD(bool, getSomeTurretHasTarget, (), (const override));
 };  // class VisionCoprocessorMock
 }  // namespace mock
 }  // namespace aruwsrc

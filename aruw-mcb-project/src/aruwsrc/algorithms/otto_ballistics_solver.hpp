@@ -89,7 +89,7 @@ public:
      * coordinates invalid.
      * @param[out] yawAngle The computed yaw angle in the world frame. Not set if the aim
      * coordinates invalid.
-     * @param[in] aimData
+     * @param[in] aimData Last computed valid aim data by the vision coprocessor.
      * @return `true` if the computation succeeded, `false` otherwise.
      */
     bool computeTurretAimAngles(

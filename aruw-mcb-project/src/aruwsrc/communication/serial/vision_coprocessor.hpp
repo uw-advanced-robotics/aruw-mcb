@@ -28,7 +28,7 @@
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/control/turret/turret_controller_constants.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
 namespace aruwsrc
@@ -138,6 +138,16 @@ public:
     {
         assert(turretID < control::turret::NUM_TURRETS);
         return lastAimData[turretID];
+    }
+
+    mockable inline bool getSomeTurretHasTarget() const
+    {
+        bool hasTarget = false;
+        for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
+        {
+            hasTarget |= lastAimData[i].hasTarget;
+        }
+        return hasTarget;
     }
 
     mockable inline void attachOdometryInterface(

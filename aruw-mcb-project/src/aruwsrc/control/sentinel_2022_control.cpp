@@ -28,6 +28,7 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -36,7 +37,7 @@
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "turret/turret_controller_constants.hpp"
+#include "turret/constants/turret_constants.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
@@ -73,7 +74,7 @@ AgitatorSubsystem agitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    aruwsrc::control::agitator::constants::AGITATOR1_MOTOR_ID,
+    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
     aruwsrc::control::agitator::constants::AGITATOR1_MOTOR_CAN_BUS,
     false,
     M_PI / 10,
@@ -82,8 +83,18 @@ AgitatorSubsystem agitator(
 
 FrictionWheelSubsystem frictionWheels(drivers());
 
-DjiMotor pitchMotor(drivers(), MOTOR5, tap::can::CanBus::CAN_BUS1, false, "Pitch Turret 1");
-DjiMotor yawMotor(drivers(), MOTOR6, TurretSubsystem::CAN_BUS_MOTORS, true, "Yaw Turret 1");
+DjiMotor pitchMotor(
+    drivers(),
+    aruwsrc::control::turret::PITCH_MOTOR_ID,
+    aruwsrc::control::turret::turret1::CAN_BUS_MOTORS,
+    false,
+    "Pitch Turret 1");
+DjiMotor yawMotor(
+    drivers(),
+    aruwsrc::control::turret::YAW_MOTOR_ID,
+    aruwsrc::control::turret::turret1::CAN_BUS_MOTORS,
+    true,
+    "Yaw Turret 1");
 TurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
 }  // namespace turret1
 
@@ -93,7 +104,7 @@ AgitatorSubsystem agitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    aruwsrc::control::agitator::constants::AGITATOR2_MOTOR_ID,
+    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
     aruwsrc::control::agitator::constants::AGITATOR2_MOTOR_CAN_BUS,
     false,
     M_PI / 10,
@@ -102,8 +113,18 @@ AgitatorSubsystem agitator(
 
 FrictionWheelSubsystem frictionWheels(drivers());
 
-DjiMotor pitchMotor(drivers(), MOTOR5, tap::can::CanBus::CAN_BUS2, false, "Pitch Turret 2");
-DjiMotor yawMotor(drivers(), MOTOR6, tap::can::CanBus::CAN_BUS2, true, "Yaw Turret 2");
+DjiMotor pitchMotor(
+    drivers(),
+    aruwsrc::control::turret::PITCH_MOTOR_ID,
+    aruwsrc::control::turret::turret2::CAN_BUS_MOTORS,
+    false,
+    "Pitch Turret 2");
+DjiMotor yawMotor(
+    drivers(),
+    aruwsrc::control::turret::YAW_MOTOR_ID,
+    aruwsrc::control::turret::turret2::CAN_BUS_MOTORS,
+    true,
+    "Yaw Turret 2");
 TurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
 }  // namespace turret2
 

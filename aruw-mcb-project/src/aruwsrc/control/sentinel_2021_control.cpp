@@ -28,6 +28,7 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
+#include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -36,7 +37,7 @@
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "turret/turret_controller_constants.hpp"
+#include "turret/constants/turret_constants.hpp"
 #include "turret/turret_subsystem.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
@@ -84,13 +85,13 @@ FrictionWheelSubsystem frictionWheels(drivers());
 tap::motor::DjiMotor pitchMotor(
     drivers(),
     tap::motor::MOTOR5,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    aruwsrc::control::turret::CAN_BUS_MOTORS,
     false,
     "Pitch Turret");
 tap::motor::DjiMotor yawMotor(
     drivers(),
     tap::motor::MOTOR6,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    aruwsrc::control::turret::CAN_BUS_MOTORS,
     true,
     "Yaw Turret");
 TurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
