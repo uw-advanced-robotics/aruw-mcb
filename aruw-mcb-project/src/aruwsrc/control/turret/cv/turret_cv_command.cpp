@@ -81,7 +81,7 @@ void TurretCVCommand::execute()
 
     const auto &aimData = drivers->visionCoprocessor.getLastAimData(turretID);
 
-    if (!(drivers->visionCoprocessor.isCvOnline() &&
+    if (!(drivers->visionCoprocessor.isCvOnline() && aimData.hasTarget &&
           ballisticsSolver.computeTurretAimAngles(&pitchSetpoint, &yawSetpoint, aimData)))
     {
         // no valid CV data, let user control turret

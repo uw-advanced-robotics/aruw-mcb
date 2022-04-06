@@ -89,6 +89,9 @@ public:
         float xPos;          ///< x position of the chassis (in m).
         float yPos;          ///< y position of the chassis (in m).
         float zPos;          ///< z position of the chassis (in m).
+        float pitch;         ///< world frame pitch of the chassis (in degrees).
+        float yaw;           ///< world frame yaw of the chassis (in degrees).
+        float roll;          ///< world frame roll of the chassis (in degrees).
     } modm_packed;
 
     /**

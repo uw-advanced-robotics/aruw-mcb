@@ -233,6 +233,9 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
     odometryData.chassisOdometry.yPos = -100;
     odometryData.chassisOdometry.zPos = 0;
     odometryData.chassisOdometry.timestamp = 132'000;
+    odometryData.chassisOdometry.pitch = 0;
+    odometryData.chassisOdometry.yaw = 0;
+    odometryData.chassisOdometry.roll = 0;
 
     odometryData.turretOdometry[0].pitch = 45;
     odometryData.turretOdometry[0].yaw = -30;
@@ -279,7 +282,7 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
             checkHeaderAndTail<DATA_LEN>(msg);
             EXPECT_EQ(1, msg.messageType);
 
-            float cx, cy, cz;
+            float cx, cy, cz, pitch, yaw, roll;
             uint32_t cTime;
 
             // chassis odometry
@@ -287,11 +290,17 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
             convertFromLittleEndian(&cx, msg.data + 4);
             convertFromLittleEndian(&cy, msg.data + 8);
             convertFromLittleEndian(&cz, msg.data + 12);
+            convertFromLittleEndian(&pitch, msg.data + 16);
+            convertFromLittleEndian(&yaw, msg.data + 20);
+            convertFromLittleEndian(&roll, msg.data + 24);
 
             EXPECT_EQ(odometryData.chassisOdometry.timestamp, cTime);
             EXPECT_EQ(odometryData.chassisOdometry.xPos, cx);
             EXPECT_EQ(odometryData.chassisOdometry.yPos, cy);
             EXPECT_EQ(odometryData.chassisOdometry.zPos, cz);
+            EXPECT_EQ(odometryData.chassisOdometry.pitch, pitch);
+            EXPECT_EQ(odometryData.chassisOdometry.yaw, yaw);
+            EXPECT_EQ(odometryData.chassisOdometry.roll, roll);
 
             uint8_t numTurrets = msg.data[sizeof(VisionCoprocessor::ChassisOdometryData)];
             EXPECT_EQ(NUM_TURRETS, numTurrets);
