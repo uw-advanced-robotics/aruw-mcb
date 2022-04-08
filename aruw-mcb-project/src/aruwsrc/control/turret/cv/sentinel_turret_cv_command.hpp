@@ -17,13 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_CV_COMMAND_HPP_
-#define TURRET_CV_COMMAND_HPP_
+#ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
+#define SENTINEL_TURRET_CV_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
+
+#include "setpoint_scanner.hpp"
 
 namespace tap::control::odometry
 {
@@ -42,7 +45,7 @@ class TurretSubsystem;
 
 namespace aruwsrc::control::launcher
 {
-class RefereeFeedbackFrictionWheelSubsystem;
+class FrictionWheelSubsystem;
 }
 
 namespace aruwsrc::chassis
@@ -64,9 +67,15 @@ namespace aruwsrc::control::turret::cv
  * target (for example, the target is too far away), then user input from the
  * `ControlOperatorInterface` is used to control the turret instead.
  */
-class TurretCVCommand : public tap::control::Command
+class SentinelTurretCVCommand : public tap::control::Command
 {
 public:
+    /**
+     * Command will shoot when turret pitch and yaw are both respectively within `FIRING_TOLERANCE`
+     * degrees of the ballistics solution.
+     */
+    static constexpr float FIRING_TOLERANCE = 0.5f;
+
     /**
      * Constructs a TurretCVCommand
      *
@@ -76,6 +85,8 @@ public:
      * axis of the turret.
      * @param[in] pitchController Pointer to a pitch controller that will be used to control the
      * pitch axis of the turret.
+     * @param[in] firingCommand Pointer to command to schedule when this command deems it's time to
+     * shoot.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
      * @param[in] chassisSubsystem Chassis subsystem object, used to get the velocity of the robot.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
@@ -87,14 +98,15 @@ public:
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
      */
-    TurretCVCommand(
+    SentinelTurretCVCommand(
         aruwsrc::Drivers *drivers,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
+        Command *const firingCommand,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const chassis::ChassisSubsystem &chassisSubsystem,
-        const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+        const control::launcher::FrictionWheelSubsystem &frictionWheels,
         const float userPitchInputScalar,
         const float userYawInputScalar,
         const float defaultLaunchSpeed);
@@ -119,14 +131,56 @@ private:
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
+    /**
+     * The command to be scheduled when the sentinel is ready to shoot.
+     */
+    Command *const firingCommand;
+
     aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
 
     const float userPitchInputScalar;
     const float userYawInputScalar;
 
     uint32_t prevTime;
+
     const chassis::ChassisSubsystem &chassisSubsystem;
+
+    /**
+     * Handles scanning logic in the pitch direction
+     */
+    SetpointScanner pitchScanner;
+
+    /**
+     * Handles scanning logic in the yaw direction
+     */
+    SetpointScanner yawScanner;
+
+    /**
+     * A counter that is reset to 0 every time CV starts tracking a target
+     * and that keeps track of the number of times `refresh` is called when
+     * an aiming solution couldn't be found (either because CV had no target
+     * or aiming solution was impossible)
+     */
+    unsigned int lostTargetCounter = 0;
+
+    /**
+     * Yaw and pitch angle increments that the turret will change by each call
+     * to refresh when the turret is scanning for a target, in degrees.
+     */
+    static constexpr float SCAN_DELTA_ANGLE = 0.1f;
+
+    /**
+     * The number of times refresh is called without receiving valid CV data to when
+     * the command will consider the target lost and start tracking.
+     */
+    static constexpr int AIM_LOST_NUM_COUNTS = 500;
+
+    /**
+     * @return an angle in degrees representing the next "scanning" setpoint
+     */
+    float scanForTarget(char axis);
 };
+
 }  // namespace aruwsrc::control::turret::cv
 
-#endif  // TURRET_CV_COMMAND_HPP_
+#endif  // SENTINEL_TURRET_CV_COMMAND_HPP_

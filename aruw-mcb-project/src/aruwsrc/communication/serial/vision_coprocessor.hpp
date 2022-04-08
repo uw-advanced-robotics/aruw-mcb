@@ -109,9 +109,10 @@ public:
     mockable void sendMessage();
 
     /**
-     * is CV online
+     * @return `true` iff CV is online (i.e.: `true` if we have received a CV message within the
+     * last TIME_OFFLINE_CV_AIM_DATA_MS milliseconds)
      */
-    mockable bool isCvOnline();
+    mockable bool isCvOnline() const;
 
     mockable inline const TurretAimData& getLastAimData() const { return lastAimData; }
 
