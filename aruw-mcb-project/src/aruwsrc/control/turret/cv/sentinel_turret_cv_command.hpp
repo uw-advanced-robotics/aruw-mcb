@@ -56,20 +56,6 @@ class ChassisSubsystem;
 namespace aruwsrc::control::turret::cv
 {
 /**
- * Result of checking ballistics state. Contains a boolean describing whether
- * turret aim angles are available and the results if they were.
- */
-struct BallisticsResult
-{
-    /// `true` iff CV has provided a target that ballistics was able to compute a solution to.
-    bool targetingAvailable;
-    /// The targetYaw to aim for. Only valid if `targetingAvailable == true`
-    float targetYaw;
-    /// The targetPitch to aim for. Only valid if `targetingAvailable == true`
-    float targetPitch;
-};
-
-/**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turret accordingly using a position PID controller.
  *
@@ -193,14 +179,6 @@ private:
      * @return an angle in degrees representing the next "scanning" setpoint
      */
     float scanForTarget(char axis);
-
-    /**
-     * Attempts to get a target from CV and find an aiming solution for that target
-     * using ballistics.
-     *
-     * @return a BallisticsResult containing the results of finding a target
-     */
-    inline BallisticsResult getBallisticsResult();
 };
 
 }  // namespace aruwsrc::control::turret::cv

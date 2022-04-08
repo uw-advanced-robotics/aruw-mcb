@@ -53,6 +53,12 @@ bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawA
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData();
 
+    // Verify that CV is actually online and that the aimData had a target
+    if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
+    {
+        return false;
+    }
+
     // if the friction wheel launch speed is 0, use a default launch speed so ballistics gives a
     // reasonable computation
     const float launchSpeed = compareFloatClose(frictionWheels.getDesiredLaunchSpeed(), 0, 1E-5)

@@ -126,7 +126,6 @@ private:
 
     uint32_t prevTime;
     const chassis::ChassisSubsystem &chassisSubsystem;
-    void computeTurretAimAngles(float *pitch, float *yaw);
 };
 }  // namespace aruwsrc::control::turret::cv
 

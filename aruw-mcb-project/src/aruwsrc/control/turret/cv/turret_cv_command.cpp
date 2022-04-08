@@ -78,20 +78,23 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    if (!(drivers->visionCoprocessor.isCvOnline() &&
-          drivers->visionCoprocessor.getLastAimData().hasTarget &&
-          ballisticsSolver.computeTurretAimAngles(&pitchSetpoint, &yawSetpoint)))
+    float targetPitch;
+    float targetYaw;
+    bool ballisticsSolutionAvailable =
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+
+    if (ballisticsSolutionAvailable)
     {
-        // no valid CV data, let user control turret
+        pitchSetpoint = modm::toDegree(targetPitch);
+        yawSetpoint = modm::toDegree(targetYaw);
+    }
+    else
+    {
+        // no valid ballistics solution, let user control turret
         pitchSetpoint +=
             userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
 
         yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
-    }
-    else
-    {
-        pitchSetpoint = modm::toDegree(pitchSetpoint);
-        yawSetpoint = modm::toDegree(yawSetpoint);
     }
 
     uint32_t currTime = getTimeMilliseconds();

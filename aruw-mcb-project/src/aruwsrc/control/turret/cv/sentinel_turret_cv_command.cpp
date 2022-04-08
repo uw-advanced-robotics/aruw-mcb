@@ -74,6 +74,9 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
 {
     assert(firingCommand != nullptr);
     assert(turretSubsystem != nullptr);
+    assert(pitchController != nullptr);
+    assert(yawController != nullptr);
+
     addSubsystemRequirement(turretSubsystem);
 }
 
@@ -87,42 +90,21 @@ void SentinelTurretCVCommand::initialize()
     drivers->visionCoprocessor.sendSelectNewTargetMessage();
 }
 
-bool updateScanningDirection(
-    const float motorSetpoint,
-    const float minMotorSetpoint,
-    const float maxMotorSetpoint,
-    const float boundsTolerance,
-    bool scanningPositive)
-{
-    tap::algorithms::ContiguousFloat setpointContiguous(motorSetpoint, 0, 360);
-
-    bool retVal = scanningPositive;
-
-    if (scanningPositive && abs(setpointContiguous.difference(maxMotorSetpoint)) < boundsTolerance)
-    {
-        retVal = false;
-    }
-    else if (
-        !scanningPositive && abs(setpointContiguous.difference(minMotorSetpoint)) < boundsTolerance)
-    {
-        retVal = true;
-    }
-
-    return retVal;
-}
-
 void SentinelTurretCVCommand::execute()
 {
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    BallisticsResult ballisticsResult = getBallisticsResult();
+    float targetPitch;
+    float targetYaw;
+    bool ballisticsSolutionAvailable =
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
 
-    if (ballisticsResult.targetingAvailable)
+    if (ballisticsSolutionAvailable)
     {
         // Target available
-        pitchSetpoint = ballisticsResult.targetPitch;
-        yawSetpoint = ballisticsResult.targetYaw;
+        pitchSetpoint = modm::toDegree(targetPitch);
+        yawSetpoint = modm::toDegree(targetYaw);
 
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
@@ -184,25 +166,6 @@ void SentinelTurretCVCommand::end(bool)
 {
     turretSubsystem->setYawMotorOutput(0);
     turretSubsystem->setPitchMotorOutput(0);
-}
-
-inline BallisticsResult SentinelTurretCVCommand::getBallisticsResult()
-{
-    BallisticsResult result;
-
-    // NOTE: ballisticsSolver.computeTurretAimAngles returns values through two output params
-    if (drivers->visionCoprocessor.isCvOnline() &&
-        drivers->visionCoprocessor.getLastAimData().hasTarget &&
-        ballisticsSolver.computeTurretAimAngles(&result.targetPitch, &result.targetYaw))
-    {
-        result.targetingAvailable = true;
-    }
-    else
-    {
-        result.targetingAvailable = false;
-    }
-
-    return result;
 }
 
 }  // namespace aruwsrc::control::turret::cv

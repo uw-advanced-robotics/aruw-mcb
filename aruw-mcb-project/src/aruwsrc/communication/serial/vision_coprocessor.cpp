@@ -105,7 +105,7 @@ void VisionCoprocessor::sendMessage()
     sendRobotTypeData();
 }
 
-bool VisionCoprocessor::isCvOnline() { return !cvOfflineTimeout.isExpired(); }
+bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
 
 void VisionCoprocessor::sendShutdownMessage()
 {
