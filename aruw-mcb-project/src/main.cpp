@@ -90,7 +90,7 @@ int main()
 
         if (sendVisionCoprocessorTimeout.execute())
         {
-            PROFILE(drivers->profiler, drivers->legacyVisionCoprocessor.sendMessage, ());
+            // PROFILE(drivers->profiler, drivers->legacyVisionCoprocessor.sendMessage, ());
             // TODO try faster baude rate so we can send more frequently (currently mcb's serial
             // buffers are overflowing if you try and send faster than 3 ms).
         }
