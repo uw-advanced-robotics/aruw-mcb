@@ -38,20 +38,29 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::TurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const float defaultLaunchSpeed)
+    const float defaultLaunchSpeed,
+    const uint8_t turretID)
     : drivers(drivers),
       odometryInterface(odometryInterface),
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
-      defaultLaunchSpeed(defaultLaunchSpeed)
+      defaultLaunchSpeed(defaultLaunchSpeed),
+      turretID(turretID)
 {
 }
 
 bool OttoBallisticsSolver::computeTurretAimAngles(
     float *pitchAngle,
-    float *yawAngle,
-    const serial::VisionCoprocessor::TurretAimData &aimData)
+    float *yawAngle)
 {
+    const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
+
+    // Verify that CV is actually online and that the aimData had a target
+    if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
+    {
+        return false;
+    }
+
     // if the friction wheel launch speed is 0, use a default launch speed so ballistics gives a
     // reasonable computation
     const float launchSpeed = compareFloatClose(frictionWheels.getPredictedLaunchSpeed(), 0, 1E-5)

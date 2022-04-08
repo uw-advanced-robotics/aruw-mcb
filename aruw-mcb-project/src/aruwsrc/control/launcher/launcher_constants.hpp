@@ -21,13 +21,14 @@
 #define LAUNCHER_CONSTANTS_HPP_
 
 #include "tap/motor/dji_motor.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::control::launcher
 {
-#if defined(TARGET_HERO)
+#if defined(TARGET_HERO) || defined(ALL_SENTINELS)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 #else
