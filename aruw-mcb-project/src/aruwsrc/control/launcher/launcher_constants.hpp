@@ -27,9 +27,20 @@
 
 namespace aruwsrc::control::launcher
 {
+#if defined(TARGET_HERO)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
+#else
+static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
+#endif
+
+#if defined(TARGET_SENTINEL_2022)
+static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus TURRET2_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+#else
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+#endif
 
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;

@@ -31,7 +31,8 @@ namespace aruwsrc::control::launcher
 FrictionWheelSubsystem::FrictionWheelSubsystem(
     aruwsrc::Drivers *drivers,
     tap::motor::MotorId leftMotorId,
-    tap::motor::MotorId rightMotorId)
+    tap::motor::MotorId rightMotorId,
+    tap::can::CanBus canBus)
     : tap::control::Subsystem(drivers),
       drivers(drivers),
       launchSpeedLinearInterpolator(
@@ -40,8 +41,8 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
       velocityPidLeftWheel(LAUNCHER_PID),
       velocityPidRightWheel(LAUNCHER_PID),
       desiredRpmRamp(0),
-      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "Left flywheel"),
-      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "Right flywheel")
+      leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),
+      rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel")
 {
 }
 

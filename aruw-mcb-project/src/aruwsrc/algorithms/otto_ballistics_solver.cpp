@@ -36,13 +36,11 @@ namespace aruwsrc::algorithms
 OttoBallisticsSolver::OttoBallisticsSolver(
     const Drivers &drivers,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const chassis::ChassisSubsystem &chassisSubsystem,
     const control::turret::TurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed)
     : drivers(drivers),
       odometryInterface(odometryInterface),
-      chassisSubsystem(chassisSubsystem),
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed)
@@ -62,19 +60,14 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
 
     const Vector2f robotPosition = odometryInterface.getCurrentLocation2D().getPosition();
 
-    Matrix<float, 3, 1> chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    const float worldRelativeOrientation =
-        drivers.turretMCBCanComm.getYaw() - this->turretSubsystem.getYawAngleFromCenter();
-    chassisSubsystem.getVelocityWorldRelative(chassisVelocity, toRadian(worldRelativeOrientation));
+    const Vector2f chassisVelocity = odometryInterface.getCurrentVelocity2D();
 
     // target state, frame whose axis is at the turret center and z is up
     // assume acceleration of the chassis is 0 since we don't measure it
     ballistics::MeasuredKinematicState targetState = {
         .position = {aimData.xPos - robotPosition.x, aimData.yPos - robotPosition.y, aimData.zPos},
         .velocity =
-            {aimData.xVel - chassisVelocity[0][0],
-             aimData.yVel - chassisVelocity[1][0],
-             aimData.zVel},
+            {aimData.xVel - chassisVelocity.x, aimData.yVel - chassisVelocity.y, aimData.zVel},
         .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
                                                                      // acceleration from IMU
     };

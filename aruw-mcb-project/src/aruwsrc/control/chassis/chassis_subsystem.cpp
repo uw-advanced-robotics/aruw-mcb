@@ -298,28 +298,6 @@ modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() c
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
 }
 
-void ChassisSubsystem::getVelocityWorldRelative(
-    modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
-    float chassisHeading) const
-{
-    modm::Matrix<float, 3, 3> transform;
-    float headingCos = cosf(chassisHeading);
-    float headingSin = sinf(chassisHeading);
-    headingCos = compareFloatClose(headingCos, 0.0f, 1e-6) ? 0.0f : headingCos;
-    headingSin = compareFloatClose(headingSin, 0.0f, 1e-6) ? 0.0f : headingSin;
-
-    transform[0][0] = headingCos;
-    transform[1][0] = headingSin;
-    transform[2][0] = 0;
-    transform[0][1] = -headingSin;
-    transform[1][1] = headingCos;
-    transform[2][1] = 0;
-    transform[0][2] = 0;
-    transform[1][2] = 0;
-    transform[2][2] = 1;
-    chassisRelativeVelocity = transform * chassisRelativeVelocity;
-}
-
 void ChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
 
 }  // namespace chassis

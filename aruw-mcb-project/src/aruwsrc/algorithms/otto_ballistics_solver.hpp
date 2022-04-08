@@ -67,7 +67,6 @@ public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
-     * @param[in] chassisSubsystem Chassis subsystem object, used to get the velocity of the robot.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
@@ -76,7 +75,6 @@ public:
     OttoBallisticsSolver(
         const aruwsrc::Drivers &drivers,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const chassis::ChassisSubsystem &chassisSubsystem,
         const control::turret::TurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed);
@@ -100,7 +98,6 @@ public:
 private:
     const Drivers &drivers;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const chassis::ChassisSubsystem &chassisSubsystem;
     const control::turret::TurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;

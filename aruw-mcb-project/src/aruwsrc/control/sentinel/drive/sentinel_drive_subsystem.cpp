@@ -84,6 +84,18 @@ void SentinelDriveSubsystem::initialize()
 
 void SentinelDriveSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
 
+modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelative() const
+{
+    static constexpr float ratio = 2.0f * M_PI * GEAR_RATIO / 60.0f;
+    float wheelVel = (leftWheel.getShaftRPM() + rightWheel.getShaftRPM()) / 2.0f;
+
+    modm::Matrix<float, 3, 1> wheelVelMat;
+    wheelVelMat[0][0] = 0;
+    wheelVelMat[0][1] = wheelVel * ratio;
+    wheelVelMat[0][2] = 0;
+    return wheelVelMat;
+}
+
 void SentinelDriveSubsystem::refresh()
 {
     velocityPidLeftWheel.update(desiredRpm - leftWheel.getShaftRPM());

@@ -20,15 +20,15 @@
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 
 #include "tap/architecture/clock.hpp"
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "modm/math/geometry/vector.hpp"
 #include "modm/math/matrix.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 OttoChassisVelocityDisplacement2DObserver::OttoChassisVelocityDisplacement2DObserver(
-    aruwsrc::chassis::ChassisSubsystem* chassis)
+    tap::control::chassis::ChassisSubsystemInterface* chassis)
     : chassis(chassis),
       absoluteDisplacement(0.0f, 0.0f, 0.0f)
 {
@@ -44,15 +44,16 @@ void OttoChassisVelocityDisplacement2DObserver::update()
         {
             // This is subsequent update, data is now definitely valid
             dataValid = true;
-            modm::Matrix<float, 3, 1> chassisVelocityMatrix =
+            modm::Matrix<float, 3, 1> chassisRelativeVelocity =
                 chassis->getActualVelocityChassisRelative();
 
-            modm::Vector<float, 2> chassisVelocity(
-                chassisVelocityMatrix[0][0],
-                chassisVelocityMatrix[1][0]);
+            // initially set velocity to chassis relative velocity to be used in displacement
+            // computations
+            velocity.set(chassisRelativeVelocity[0][0], chassisRelativeVelocity[1][0]);
+
             // m/s * us * 1s / 1'000'000 us
             modm::Vector<float, 2> displacementThisTick =
-                chassisVelocity * (static_cast<float>(currTime - prevTime) / 1'000'000.0f);
+                velocity * (static_cast<float>(currTime - prevTime) / 1'000'000.0f);
             absoluteDisplacement.move(displacementThisTick);
         }
         prevTime = currTime;
@@ -64,9 +65,14 @@ void OttoChassisVelocityDisplacement2DObserver::update()
     }
 }
 
-bool OttoChassisVelocityDisplacement2DObserver::getChassisDisplacement(
-    modm::Vector<float, 3>* displacement) const
+bool OttoChassisVelocityDisplacement2DObserver::getVelocityChassisDisplacement(
+    modm::Vector3f* const velocity,
+    modm::Vector3f* const displacement) const
 {
+    velocity->setX(this->velocity.getX());
+    velocity->setY(this->velocity.getY());
+    velocity->setZ(0.0f);
+
     displacement->setX(absoluteDisplacement.getX());
     displacement->setY(absoluteDisplacement.getY());
     displacement->setZ(0.0f);
