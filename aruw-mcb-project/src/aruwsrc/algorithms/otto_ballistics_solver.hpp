@@ -51,7 +51,6 @@ namespace aruwsrc::algorithms
  * An object that computes the world-relative pitch and yaw turret angles based on CV aim data and
  * odometry measurements.
  */
-
 class OttoBallisticsSolver
 {
 public:
@@ -83,11 +82,16 @@ public:
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
      * data to compute aim coordinates.
      *
-     * @param[out] pitchAngle The computed pitch angle in the world frame. Not set if aim
-     * coordinates invalid.
-     * @param[out] yawAngle The computed yaw angle in the world frame. Not set if the aim
-     * coordinates invalid.
-     * @return `true` if the computation succeeded, `false` otherwise.
+     * This function verifies that the aim data it uses is valid (i.e.: it contains coords for a
+     * real target and CV is online).
+     *
+     * @note This function may modify `pitchAngle` and `yawAngle` even if no valid solution is
+     * found.
+     *
+     * @param[out] pitchAngle The computed pitch angle in the world frame in radians.
+     * @param[out] yawAngle The computed yaw angle in the world frame in radians.
+     * @return `true` if CV is online, the most recent aim data is valid, and a valid ballistics
+     * solution was found. `false` otherwise.
      */
     bool computeTurretAimAngles(float *pitchAngle, float *yawAngle);
 

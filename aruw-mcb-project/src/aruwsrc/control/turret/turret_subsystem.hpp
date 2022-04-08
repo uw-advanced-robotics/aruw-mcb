@@ -68,8 +68,8 @@ public:
      * @param[in] drivers Pointer to a drivers singleton object.
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
-     * @param[in] limitYaw `true` if the yaw should be limited between `TURRET_YAW_MIN_ANGLE` and
-     *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
+     * @param[in] limitYaw `true` if the yaw should be limited between `YAW_MIN_ANGLE` and
+     *      `YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
      * @param[in] chassisFrontBackIdentical `true` if the front and back of the chassis are
      *      interchangable, indicating that `YAW_START_ANGLE` is identical to `YAW_START_ANGLE +
