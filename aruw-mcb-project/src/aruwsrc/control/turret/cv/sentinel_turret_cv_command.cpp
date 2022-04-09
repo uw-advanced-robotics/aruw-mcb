@@ -46,8 +46,6 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     Command *const firingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
-    const float userPitchInputScalar,
-    const float userYawInputScalar,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : drivers(drivers),
@@ -63,8 +61,6 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed,
           turretID),
-      userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar),
       pitchScanner(PITCH_MIN_ANGLE, PITCH_MAX_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(YAW_MIN_ANGLE, YAW_MAX_ANGLE, SCAN_DELTA_ANGLE)
 {
