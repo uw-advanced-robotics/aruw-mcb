@@ -21,6 +21,7 @@
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::algorithms::odometry
@@ -35,6 +36,11 @@ OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
 
 bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
+    /// @todo fix this in the future, should use some sort of interface
+#if defined(ALL_SENTINELS)
+    *output = 0;
+    return true;
+#else
     // We need both turret IMU data and turret yaw data to generate odometry which is
     // meaningful for the vision system.
     /// @todo in the future we could have the odometry subsystem fall back to using
@@ -57,6 +63,7 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
         *output = modm::Angle::normalize(turretWorldYawRadians - turretChassisYawRadians);
         return true;
     }
+#endif
 }
 
 }  // namespace aruwsrc::algorithms::odometry

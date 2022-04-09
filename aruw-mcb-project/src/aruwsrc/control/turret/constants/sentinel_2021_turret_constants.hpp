@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTINEL_TURRET_CONSTANTS_HPP_
-#define SENTINEL_TURRET_CONSTANTS_HPP_
+#ifndef SENTINEL_2021_TURRET_CONSTANTS_HPP_
+#define SENTINEL_2021_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -30,6 +30,8 @@
 
 namespace aruwsrc::control::turret
 {
+static constexpr uint8_t NUM_TURRETS = 1;
+
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;

@@ -22,8 +22,9 @@
 
 // Check that target isn't already defined. This would be caused by including the file
 // when building (assuming define has been passed in through command line)
-#if defined(TARGET_SOLDIER_2022) || defined(TARGET_SOLDIER_2021) || defined(TARGET_DRONE) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_SENTINEL) || defined(TARGET_HERO)
+#if defined(TARGET_SOLDIER_2022) || defined(TARGET_SOLDIER_2021) || defined(TARGET_DRONE) ||      \
+    defined(TARGET_ENGINEER) || defined(TARGET_SENTINEL_2021) || defined(TARGET_SENTINEL_2022) || \
+    defined(TARGET_HERO)
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 

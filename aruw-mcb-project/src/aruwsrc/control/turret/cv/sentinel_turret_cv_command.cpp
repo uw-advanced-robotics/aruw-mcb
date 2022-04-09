@@ -26,11 +26,10 @@
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/architecture/clock.hpp"
 
-#include "../turret_controller_constants.hpp"
+#include "../constants/turret_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -46,31 +45,28 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     algorithms::TurretPitchControllerInterface *pitchController,
     Command *const firingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const chassis::ChassisSubsystem &chassisSubsystem,
-    const control::launcher::FrictionWheelSubsystem &frictionWheels,
+    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
     const float userPitchInputScalar,
     const float userYawInputScalar,
-    const float defaultLaunchSpeed)
+    const float defaultLaunchSpeed,
+    const uint8_t turretID)
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
+      turretID(turretID),
       firingCommand(firingCommand),
       ballisticsSolver(
           *drivers,
           odometryInterface,
-          chassisSubsystem,
           *turretSubsystem,
           frictionWheels,
-          defaultLaunchSpeed),
+          defaultLaunchSpeed,
+          turretID),
       userPitchInputScalar(userPitchInputScalar),
       userYawInputScalar(userYawInputScalar),
-      chassisSubsystem(chassisSubsystem),
-      pitchScanner(
-          TurretSubsystem::PITCH_MIN_ANGLE,
-          TurretSubsystem::PITCH_MAX_ANGLE,
-          SCAN_DELTA_ANGLE),
-      yawScanner(TurretSubsystem::YAW_MIN_ANGLE, TurretSubsystem::YAW_MAX_ANGLE, SCAN_DELTA_ANGLE)
+      pitchScanner(PITCH_MIN_ANGLE, PITCH_MAX_ANGLE, SCAN_DELTA_ANGLE),
+      yawScanner(YAW_MIN_ANGLE, YAW_MAX_ANGLE, SCAN_DELTA_ANGLE)
 {
     assert(firingCommand != nullptr);
     assert(turretSubsystem != nullptr);

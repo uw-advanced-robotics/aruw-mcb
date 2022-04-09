@@ -24,7 +24,8 @@ VALID_ROBOT_TYPES   = [ "TARGET_SOLDIER_2021",
                         "TARGET_SOLDIER_2022",
                         "TARGET_DRONE",
                         "TARGET_ENGINEER",
-                        "TARGET_SENTINEL",
+                        "TARGET_SENTINEL_2021",
+                        "TARGET_SENTINEL_2022",
                         "TARGET_HERO" ]
 
 def get_robot_type():

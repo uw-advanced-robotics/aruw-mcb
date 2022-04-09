@@ -20,6 +20,8 @@
 #ifndef OTTO_BALLISTICS_SOLVER_HPP_
 #define OTTO_BALLISTICS_SOLVER_HPP_
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
 namespace aruwsrc::chassis
 {
 class ChassisSubsystem;
@@ -64,19 +66,20 @@ public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
-     * @param[in] chassisSubsystem Chassis subsystem object, used to get the velocity of the robot.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
+     * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
+     * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
         const aruwsrc::Drivers &drivers,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const chassis::ChassisSubsystem &chassisSubsystem,
         const control::turret::TurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed);
+        const float defaultLaunchSpeed,
+        const uint8_t turretID);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -98,10 +101,10 @@ public:
 private:
     const Drivers &drivers;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const chassis::ChassisSubsystem &chassisSubsystem;
     const control::turret::TurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
+    const uint8_t turretID;
 };
 }  // namespace aruwsrc::algorithms
 

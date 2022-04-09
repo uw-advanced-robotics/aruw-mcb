@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,23 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UTIL_MACROS_HPP_
-#define UTIL_MACROS_HPP_
+#ifndef TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
+#define TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
 
-/**
- * Define a helper macro that makes it easier to specify at compile time something that should be
- * true for all soldiers.
- */
-#if defined(TARGET_SOLDIER_2021) || defined(TARGET_SOLDIER_2022)
-#define ALL_SOLDIERS
-#endif
+#include <gmock/gmock.h>
 
-/**
- * A helper macro that makes it easier to specify at compile time something that should be true for
- * all sentinels.
- */
-#if defined(TARGET_SENTINEL_2021) || defined(TARGET_SENTINEL_2022)
-#define ALL_SENTINELS
-#endif
+#include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
-#endif  // UTIL_MACROS_HPP_
+namespace aruwsrc::mock
+{
+class TurretOrientationInterfaceMock : public control::turret::TurretOrientationInterface
+{
+public:
+    MOCK_METHOD(float, getWorldYaw, (), (const override));
+    MOCK_METHOD(float, getWorldPitch, (), (const override));
+    MOCK_METHOD(uint32_t, getLastMeasurementTimeMicros, (), (const override));
+};
+}  // namespace aruwsrc::mock
+
+#endif  // TURRET_ORIENTATION_INTERFACE_MOCK_HPP_

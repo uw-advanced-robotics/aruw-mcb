@@ -28,9 +28,9 @@
 #include "modm/math/geometry/vector.hpp"
 
 // Forward declarations
-namespace aruwsrc::chassis
+namespace tap::control::chassis
 {
-class ChassisSubsystem;
+class ChassisSubsystemInterface;
 }
 
 namespace aruwsrc::algorithms::odometry
@@ -52,7 +52,8 @@ public:
     /**
      * @param[in] pointer to an aruwsrc ChassisSubsystem. Used to get chassis relative velocity
      */
-    OttoChassisVelocityDisplacement2DObserver(aruwsrc::chassis::ChassisSubsystem* chassis);
+    OttoChassisVelocityDisplacement2DObserver(
+        tap::control::chassis::ChassisSubsystemInterface* chassis);
 
     /**
      * Update the observed displacement. Call frequently
@@ -65,15 +66,19 @@ public:
      *
      * @see ChassisDisplacementObserverInterface for more details
      *
+     * @param[out] velocity
      * @param[out] displacement
      *
      * @return `true` if valid chassis velocity was available. `false` otherwise.
      */
-    bool getChassisDisplacement(modm::Vector<float, 3>* displacement) const final;
+    bool getVelocityChassisDisplacement(
+        modm::Vector3f* const velocity,
+        modm::Vector3f* const displacement) const final;
 
 private:
-    aruwsrc::chassis::ChassisSubsystem* chassis;
+    tap::control::chassis::ChassisSubsystemInterface* chassis;
     modm::Location2D<float> absoluteDisplacement;
+    modm::Vector2f velocity;
     // Previous time at which motors are all online. 0 iff motors were offline last update.
     uint32_t prevTime = 0;
     // Stores whether or not stored displacement is valid. `True` after first good update.

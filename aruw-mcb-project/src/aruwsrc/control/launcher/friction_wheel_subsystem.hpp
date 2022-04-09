@@ -49,13 +49,13 @@ class FrictionWheelSubsystem : public tap::control::Subsystem
 {
 public:
     /**
-     * Creates a new friction wheel subsystem with DJI motor1 and motor2
-     * unless otherwise specified on CAN bus 1.
+     * Creates a new friction wheel subsystem
      */
     FrictionWheelSubsystem(
         aruwsrc::Drivers *drivers,
-        tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
-        tap::motor::MotorId rightMotorId = RIGHT_MOTOR_ID);
+        tap::motor::MotorId leftMotorId,
+        tap::motor::MotorId rightMotorId,
+        tap::can::CanBus canBus);
 
     void initialize() override;
 

@@ -38,9 +38,10 @@ namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
 }
-namespace aruwsrc::chassis
+
+namespace tap::control::chassis
 {
-class ChassisSubsystem;
+class ChassisSubsystemInterface;
 }
 
 namespace aruwsrc::algorithms::odometry
@@ -74,13 +75,18 @@ public:
     OttoVelocityOdometry2DSubsystem(
         aruwsrc::Drivers* drivers,
         aruwsrc::control::turret::TurretSubsystem* turret,
-        aruwsrc::chassis::ChassisSubsystem* chassis);
+        tap::control::chassis::ChassisSubsystemInterface* chassis);
 
     void refresh() override;
 
     modm::Location2D<float> getCurrentLocation2D() const override final
     {
         return odometryTracker.getCurrentLocation2D();
+    }
+
+    modm::Vector2f getCurrentVelocity2D() const override final
+    {
+        return odometryTracker.getCurrentVelocity2D();
     }
 
 private:

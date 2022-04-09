@@ -49,6 +49,7 @@ public:
         aruwsrc::Drivers *drivers,
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
+        tap::can::CanBus canBus,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
         float bulletSpeedLowPassAlpha);
 

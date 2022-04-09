@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DRONE_TURRET_CONSTANTS_HPP_
-#define DRONE_TURRET_CONSTANTS_HPP_
+#ifndef SENTINEL_2022_TURRET_CONSTANTS_HPP_
+#define SENTINEL_2022_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -30,25 +30,64 @@
 
 namespace aruwsrc::control::turret
 {
-static constexpr uint8_t NUM_TURRETS = 1;
+static constexpr uint8_t NUM_TURRETS = 2;
 
+namespace turret1
+{
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+}  // namespace turret1
+
+namespace turret2
+{
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+}  // namespace turret2
+
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr float YAW_START_ANGLE = 90.0f;
-static constexpr float YAW_MIN_ANGLE = 0.0f;
-static constexpr float YAW_MAX_ANGLE = 180.0f;
-static constexpr float PITCH_START_ANGLE = 90.0f;
-static constexpr float PITCH_MIN_ANGLE = 0.0f;
-static constexpr float PITCH_MAX_ANGLE = 180.0f;
+static constexpr float YAW_MIN_ANGLE = 5.0f;
+static constexpr float YAW_MAX_ANGLE = 175.0f;
 
-static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
-static constexpr uint16_t PITCH_START_ENCODER_POSITION = 0;
+static constexpr float PITCH_START_ANGLE = 90.0f;
+static constexpr float PITCH_MIN_ANGLE = 80.0f;
+static constexpr float PITCH_MAX_ANGLE = 165.0f;
+
+static constexpr uint16_t YAW_START_ENCODER_POSITION = 2801;
+static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
 
 static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-}  // namespace aruwsrc::control::turret
 
-#endif  // DRONE_TURRET_CONSTANTS_HPP_
+namespace chassis_rel
+{
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 4000.0f,
+    .ki = 0.0f,
+    .kd = 130.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 30000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 10.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
+    .kp = 3400.0f,
+    .ki = 0.0f,
+    .kd = 100.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 30000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+}  // namespace chassis_rel
+}  // namespace  aruwsrc::control::turret
+
+#endif  // SENTINEL_TURRET_CONSTANTS_HPP_
