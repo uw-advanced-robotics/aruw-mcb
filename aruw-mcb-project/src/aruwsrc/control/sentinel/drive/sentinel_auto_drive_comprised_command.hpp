@@ -20,7 +20,9 @@
 #ifndef SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_
 #define SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_
 
-#if defined(TARGET_SENTINEL)
+#include "aruwsrc/util_macros.hpp"
+
+#if defined(ALL_SENTINELS)
 
 #include "tap/control/comprised_command.hpp"
 

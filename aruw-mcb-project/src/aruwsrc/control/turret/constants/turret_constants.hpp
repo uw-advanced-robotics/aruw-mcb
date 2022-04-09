@@ -22,14 +22,16 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-#if defined(ALL_SOLDIERS)
+#if defined(ALL_SOLDIERS) || defined(TARGET_ENGINEER)
 #include "soldier_turret_constants.hpp"
 #elif defined(TARGET_HERO)
 #include "hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
 #include "drone_turret_constants.hpp"
-#elif defined(TARGET_SENTINEL) || defined(TARGET_ENGINEER)
-#include "sentinel_turret_constants.hpp"
+#elif defined(TARGET_SENTINEL_2021)
+#include "sentinel_2021_turret_constants.hpp"
+#elif defined(TARGET_SENTINEL_2022)
+#include "sentinel_2022_turret_constants.hpp"
 #endif
 
 #endif  // TURRET_CONSTANTS_HPP_

@@ -20,7 +20,9 @@
 #ifndef SENTINEL_FULL_TRAVERSE_COMMAND_HPP_
 #define SENTINEL_FULL_TRAVERSE_COMMAND_HPP_
 
-#if defined(TARGET_SENTINEL)
+#include "aruwsrc/util_macros.hpp"
+
+#if defined(ALL_SENTINELS)
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/architecture/clock.hpp"

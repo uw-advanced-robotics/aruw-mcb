@@ -84,8 +84,9 @@ ChassisSubsystem chassis(drivers(), ChassisSubsystem::ChassisType::X_DRIVE);
 
 RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
-    tap::motor::MOTOR2,
-    tap::motor::MOTOR1,
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
     0.5f);
 
@@ -224,7 +225,6 @@ cv::TurretCVCommand turretCVCommand(
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
     odometrySubsystem,
-    chassis,
     frictionWheels,
     1,
     1,
@@ -361,7 +361,7 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
 /* register io mappings here ------------------------------------------------*/

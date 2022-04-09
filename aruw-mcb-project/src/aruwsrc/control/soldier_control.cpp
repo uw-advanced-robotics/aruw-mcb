@@ -117,8 +117,9 @@ AgitatorSubsystem agitator(
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
-    tap::motor::MOTOR1,
-    tap::motor::MOTOR2,
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     0.1f);
 
@@ -180,7 +181,6 @@ cv::TurretCVCommand turretCVCommand(
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
     odometrySubsystem,
-    chassis,
     frictionWheels,
     1,
     1,
@@ -402,7 +402,7 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
 /* register io mappings here ------------------------------------------------*/

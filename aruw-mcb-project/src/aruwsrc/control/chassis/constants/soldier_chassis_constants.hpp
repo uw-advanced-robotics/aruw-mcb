@@ -58,23 +58,17 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static modm::Pid<float>::Parameter VELOCITY_PID_CONFIG{
-    /** Kp */
-    22.0f,
-    /** Ki */
-    0.2f,
-    /** Kd */
-    0.0f,
-    /** maxErrorSum */
-    5'000.0f,
-    /**
-     * This max output is measured in the c620 robomaster translated current.
-     * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
-     * The corresponding speed controller output torque current range is
-     * -20 ~ 0 ~ 20 A.
-     */
-    16'000.0f,
-};
+static constexpr float VELOCITY_PID_KP = 20.0f;
+static constexpr float VELOCITY_PID_KI = 0.2f;
+static constexpr float VELOCITY_PID_KD = 0.0f;
+static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
+/**
+ * This max output is measured in the c620 robomaster translated current.
+ * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
+ * The corresponding speed controller output torque current range is
+ * -20 ~ 0 ~ 20 A.
+ */
+static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 
 /**
  * Rotation PID: A PD controller for chassis autorotation.

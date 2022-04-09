@@ -30,7 +30,14 @@ using namespace aruwsrc::control::launcher;
 class FrictionWheelSubsystemTest : public Test
 {
 protected:
-    FrictionWheelSubsystemTest() : frictionWheels(&drivers) {}
+    FrictionWheelSubsystemTest()
+        : frictionWheels(
+              &drivers,
+              tap::motor::MOTOR1,
+              tap::motor::MOTOR2,
+              tap::can::CanBus::CAN_BUS1)
+    {
+    }
 
     ClockStub clock;
     Drivers drivers;
