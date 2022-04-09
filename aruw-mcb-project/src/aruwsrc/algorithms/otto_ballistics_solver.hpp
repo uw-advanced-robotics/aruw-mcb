@@ -70,7 +70,8 @@ public:
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
-     * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving for, see the VisionCoprocessor for more information about this id.
+     * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
+     * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
         const aruwsrc::Drivers &drivers,
@@ -95,9 +96,7 @@ public:
      * @return `true` if CV is online, the most recent aim data is valid, and a valid ballistics
      * solution was found. `false` otherwise.
      */
-    bool computeTurretAimAngles(
-        float *pitchAngle,
-        float *yawAngle);
+    bool computeTurretAimAngles(float *pitchAngle, float *yawAngle);
 
 private:
     const Drivers &drivers;

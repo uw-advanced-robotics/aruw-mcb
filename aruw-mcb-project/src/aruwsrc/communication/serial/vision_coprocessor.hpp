@@ -138,6 +138,14 @@ public:
      */
     mockable bool isCvOnline() const;
 
+    /**
+     * @param[in] turretID The zero-indexed turret ID that will be used to identify which aim data
+     * the will be used. In particular, the turret ID should identify different turret hardware. The
+     * turret ID should match the turret ID you specified when attaching the turret orientation
+     * interface in attachTurretOrientationInterface. For example, if the robot has 2 turrets,
+     * turret 0 should refer to the same physical turret in this function and the
+     * attachTurretOrientationInterface function.
+     */
     mockable inline const TurretAimData& getLastAimData(uint8_t turretID) const
     {
         assert(turretID < control::turret::NUM_TURRETS);
@@ -162,6 +170,11 @@ public:
 
     /**
      * Specify the turret orientation for auto-aim to reference based on the target robot.
+     *
+     * @param[in] turretOrientationInterface The interface that provides turret information to the
+     * vision coprocessor
+     * @param[in] turretID The turret ID of the orientation interface that will be used to identify
+     * the turret.
      */
     mockable inline void attachTurretOrientationInterface(
         aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface,

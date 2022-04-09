@@ -88,7 +88,8 @@ modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelati
 {
     static constexpr float C = 2 * M_PI * WHEEL_RADIUS / 1000.0f;
     static constexpr float RPM_TO_MPS = C / (60.0f * GEAR_RATIO);
-    float wheelVelRPM = leftWheel.getShaftRPM();// (leftWheel.getShaftRPM() + rightWheel.getShaftRPM()) / 2.0f;
+    float wheelVelRPM =
+        leftWheel.getShaftRPM();  // (leftWheel.getShaftRPM() + rightWheel.getShaftRPM()) / 2.0f;
 
     modm::Matrix<float, 3, 1> wheelVelMat;
     wheelVelMat[0][0] = 0;

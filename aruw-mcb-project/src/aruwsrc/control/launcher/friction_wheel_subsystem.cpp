@@ -38,8 +38,18 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
       launchSpeedLinearInterpolator(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
-      velocityPidLeftWheel(LAUNCHER_PID),
-      velocityPidRightWheel(LAUNCHER_PID),
+      velocityPidLeftWheel(
+          LAUNCHER_PID_KP,
+          LAUNCHER_PID_KI,
+          LAUNCHER_PID_KD,
+          LAUNCHER_PID_MAX_ERROR_SUM,
+          LAUNCHER_PID_MAX_OUTPUT),
+      velocityPidRightWheel(
+          LAUNCHER_PID_KP,
+          LAUNCHER_PID_KI,
+          LAUNCHER_PID_KD,
+          LAUNCHER_PID_MAX_ERROR_SUM,
+          LAUNCHER_PID_MAX_OUTPUT),
       desiredRpmRamp(0),
       leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),
       rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel")

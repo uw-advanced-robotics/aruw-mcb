@@ -85,7 +85,8 @@ public:
      * user input.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
-     * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor for more information.
+     * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
+     * for more information.
      */
     TurretCVCommand(
         aruwsrc::Drivers *drivers,
