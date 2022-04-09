@@ -34,6 +34,8 @@
 #include "tap/architecture/profiler.hpp"
 
 /* communication includes ---------------------------------------------------*/
+#include "tap/communication/serial/uart.hpp"
+
 #include "aruwsrc/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
@@ -74,7 +76,7 @@ int main()
     Board::initialize();
     initializeIo(drivers);
     aruwsrc::control::initSubsystemCommands(drivers);
-
+ 
 #ifdef PLATFORM_HOSTED
     aruwsrc::sim::initialize_robot_sim();
     tap::motorsim::SimHandler::resetMotorSims();
@@ -84,24 +86,11 @@ int main()
 
     while (1)
     {
-        // do this as fast as you can
-        PROFILE(drivers->profiler, updateIo, (drivers));
+        static constexpr tap::communication::serial::Uart::UartPort LIDAR_UART_PORT =
+            tap::communication::serial::Uart::Uart1;
 
-        if (sendMotorTimeout.execute())
-        {
-            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
-            PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
-            PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
-#endif
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-        }
-        modm::delay_us(10);
+        
     }
-    return 0;
 }
 
 static void initializeIo(aruwsrc::Drivers *drivers)
