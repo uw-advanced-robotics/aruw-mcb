@@ -166,6 +166,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &turretSubsystem,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
+    agitator,
     &rotateAgitatorManual,
     odometrySubsystem,
     frictionWheels,
@@ -185,10 +186,6 @@ HoldRepeatCommandMapping rightSwitchUp(
     {&rotateAgitatorManual},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
     {&sentinelDriveManual1, &turretManual},
@@ -224,6 +221,7 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
 {
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
+    turretSubsystem.setDefaultCommand(&turretCVCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretSubsystem, 0);
 }
@@ -241,7 +239,6 @@ void registerSentinelIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchMid);
-    drivers->commandMapper.addMap(&leftSwitchUp);
 }
 }  // namespace sentinel_control
 

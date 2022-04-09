@@ -21,8 +21,10 @@
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+#include "tap/control/subsystem.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
+#include "../constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
@@ -65,6 +67,9 @@ namespace aruwsrc::control::turret::cv
 class SentinelTurretCVCommand : public tap::control::Command
 {
 public:
+    /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
+    static constexpr float PITCH_MIN_SCAN_ANGLE = 100.0f;
+
     /**
      * Command will shoot when turret pitch and yaw are both respectively within `FIRING_TOLERANCE`
      * degrees of the ballistics solution.
@@ -95,6 +100,7 @@ public:
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
+        tap::control::Subsystem &firingSubsystem,
         Command *const firingCommand,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
@@ -154,7 +160,7 @@ private:
      * Yaw and pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in degrees.
      */
-    static constexpr float SCAN_DELTA_ANGLE = 0.1f;
+    static constexpr float SCAN_DELTA_ANGLE = 0.2f;
 
     /**
      * The number of times refresh is called without receiving valid CV data to when
