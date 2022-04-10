@@ -55,7 +55,7 @@ public:
     /** @return turret pitch angular velocity in deg/sec */
     mockable inline float getPitchVelocity() const
     {
-        return static_cast<float>(rawPitchVelocity) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return static_cast<float>(rawPitchVelocity) / tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
 
     /** @return turret yaw angle in degrees */
@@ -63,7 +63,7 @@ public:
     /** @return turret yaw angular velocity in deg/sec */
     mockable inline float getYawVelocity() const
     {
-        return static_cast<float>(rawYawVelocity) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return static_cast<float>(rawYawVelocity) / tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
     }
 
     mockable inline float isConnected() const
