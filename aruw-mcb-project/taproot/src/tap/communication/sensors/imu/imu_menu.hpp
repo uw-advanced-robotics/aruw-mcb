@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -74,6 +74,6 @@ private:
 
     ImuInterfaceFnPtr imuAccelGyroAngleFnPtrs[3][3];
 };
-}  // namespace tap::sensors::imu
+}  // namespace tap::communication::sensors::imu
 
 #endif  // IMU_MENU_HPP_

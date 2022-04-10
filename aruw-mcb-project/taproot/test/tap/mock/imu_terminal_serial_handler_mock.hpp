@@ -29,7 +29,9 @@ namespace tap::mock
 class ImuTerminalSerialHandlerMock : public communication::sensors::imu::ImuTerminalSerialHandler
 {
 public:
-    ImuTerminalSerialHandlerMock(tap::Drivers* drivers, communication::sensors::imu::ImuInterface* imu);
+    ImuTerminalSerialHandlerMock(
+        tap::Drivers* drivers,
+        communication::sensors::imu::ImuInterface* imu);
     virtual ~ImuTerminalSerialHandlerMock();
 
     MOCK_METHOD(void, init, (), (override));

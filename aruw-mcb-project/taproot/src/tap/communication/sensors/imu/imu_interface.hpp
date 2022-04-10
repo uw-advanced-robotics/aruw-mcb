@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -104,6 +104,6 @@ public:
      */
     virtual inline float getRoll() = 0;
 };
-}  // namespace tap::sensors
+}  // namespace tap::communication::sensors::imu
 
 #endif  // IMU_INTERFACE_HPP_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -157,4 +157,4 @@ void ImuTerminalSerialHandler::printHeader(modm::IOStream& outputStream)
     }
     outputStream << modm::endl;
 }
-}  // namespace tap::sensors
+}  // namespace tap::communication::sensors::imu

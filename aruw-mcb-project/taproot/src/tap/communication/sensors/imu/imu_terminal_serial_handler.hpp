@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -99,6 +99,6 @@ private:
 
     void printHeader(modm::IOStream& outputStream);
 };  // class ImuTerminalSerialHandler
-}  // namespace sensors
+}  // namespace tap::communication::sensors::imu
 
 #endif  // TAPROOT_MPU6500_TERMINAL_SERIAL_HANDLER_HPP_

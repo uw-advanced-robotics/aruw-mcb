@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -85,4 +85,4 @@ void ImuMenu::shortButtonPress(modm::MenuButtons::Button button)
 
 const char *ImuMenu::getMenuName() { return imu->getName(); }
 
-}  // namespace tap::sensors::imu
+}  // namespace tap::communication::sensors::imu
