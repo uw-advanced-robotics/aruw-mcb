@@ -39,7 +39,7 @@ MainMenu::MainMenu(
       motorMenu(stack, drivers),
       commandSchedulerMenu(stack, drivers),
       refSerialMenu(stack, drivers),
-      imuMenu(stack, &drivers->mpu6500)
+      imuMenu(stack, &drivers->mpu6500),
       turretStatusMenu(stack, drivers)
 {
 }
@@ -68,7 +68,7 @@ void MainMenu::initialize()
             &MainMenu::addRefSerialMenuCallback));
     addEntry(
         imuMenu.getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addImuMenuCallback));
     addEntry(
@@ -141,8 +141,8 @@ void MainMenu::addRefSerialMenuCallback()
 
 void MainMenu::addImuMenuCallback()
 {
-    tap::sensors::imu::ImuMenu* imc =
-        new (&imuMenu) tap::sensors::imu::ImuMenu(getViewStack(), &drivers->mpu6500);
+    tap::communication::sensors::imu::ImuMenu* imc =
+        new (&imuMenu) tap::communication::sensors::imu::ImuMenu(getViewStack(), &drivers->mpu6500);
     getViewStack()->push(imc);
 }
 

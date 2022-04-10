@@ -17,8 +17,8 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef IMU_MENU_HPP_
-#define IMU_MENU_HPP_
+#ifndef TAPROOT_IMU_MENU_HPP_
+#define TAPROOT_IMU_MENU_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/display/dummy_allocator.hpp"
@@ -27,10 +27,10 @@
 
 #include "imu_interface.hpp"
 
-namespace tap::sensors::imu
+namespace tap::communication::sensors::imu
 {
 /**
- * Menu that displays IMU readings from some particular `ImuInterfac`.
+ * Menu that displays IMU readings from some particular `ImuInterface`.
  */
 class ImuMenu : public modm::AbstractMenu<display::DummyAllocator<modm::IAbstractView> >
 {

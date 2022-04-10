@@ -124,7 +124,7 @@ public:
     gpio::Digital digital;
     gpio::Leds leds;
     gpio::Pwm pwm;
-    sensors::Mpu6500 mpu6500;
+    communication::sensors::imu::mpu6500::Mpu6500 mpu6500;
     communication::serial::RefSerial refSerial;
     communication::serial::Remote remote;
     communication::serial::Uart uart;

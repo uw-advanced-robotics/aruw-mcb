@@ -33,7 +33,9 @@
 namespace tap
 {
 class Drivers;
-namespace sensors
+}
+
+namespace tap::communication::sensors::imu::mpu6500
 {
 /**
  * A class specifically designed for interfacing with the RoboMaster type A board Mpu6500.
@@ -48,24 +50,6 @@ namespace sensors
 class Mpu6500 final_mockable : public ::modm::pt::Protothread, public ImuInterface
 {
 public:
-    /**
-     * Possible IMU states for an IMU.
-     */
-    enum class ImuState
-    {
-        /** Indicates the IMU's init function was not called or initialization failed, so data from
-           this class will be undefined. */
-        IMU_NOT_CONNECTED,
-        /** Indicates the IMU is connected and reading data, but calibration offsets have not been
-           computed. */
-        IMU_NOT_CALIBRATED,
-        /** Indicates the IMU is in the process of computing calibration offsets. Data read when the
-           IMU is in this state is undefined. */
-        IMU_CALIBRATING,
-        /// Indicates the IMU is connected and calibration offsets have been computed.
-        IMU_CALIBRATED,
-    };
-
     Mpu6500(Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(Mpu6500)
     mockable ~Mpu6500() = default;
@@ -109,8 +93,8 @@ public:
     virtual inline const char *getName() const { return "mpu6500"; }
 
     /**
-     * If the imu is not initializes, logs an error and returns 0,
-     * otherwise returns the value passed in.
+     * If the imu is not initialized, logs an error and returns 0.
+     * Otherwise, returns the value passed in.
      */
     inline float validateReading(float reading)
     {
@@ -134,8 +118,6 @@ public:
             return 0.0f;
         }
     }
-
-    uint8_t errorState = 0;
 
     /**
      * Returns the acceleration reading in the x direction, in
@@ -202,6 +184,8 @@ public:
 
     /**
      * Returns the temperature of the imu in degrees C.
+     * 
+     * @see page 33 of this datasheet: https://3cfeqx1hf82y3xcoull08ihx-wpengine.netdna-ssl.com/wp-content/uploads/2015/02/MPU-6500-Register-Map2.pdf for what the magic numbers are used.
      */
     inline float getTemp() final_mockable
     {
@@ -327,7 +311,7 @@ private:
 
     Mahony mahonyAlgorithm;
 
-    sensors::ImuHeater imuHeater;
+    imu_heater::ImuHeater imuHeater;
 
     float tiltAngle = 0.0f;
     bool tiltAngleCalculated = false;
@@ -337,6 +321,8 @@ private:
     uint8_t rxBuff[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE] = {0};
 
     int calibrationSample = 0;
+
+    uint8_t errorState = 0;
 
     // Functions for interacting with hardware directly.
 
@@ -374,7 +360,5 @@ private:
 };
 
 }  // namespace sensors
-
-}  // namespace tap
 
 #endif  // TAPROOT_MPU6500_HPP_

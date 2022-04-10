@@ -17,8 +17,8 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_MPU6500_TERMINAL_SERIAL_HANDLER_HPP_
-#define TAPROOT_MPU6500_TERMINAL_SERIAL_HANDLER_HPP_
+#ifndef TAPROOT_IMU_TERMINAL_SERIAL_HANDLER_HPP_
+#define TAPROOT_IMU_TERMINAL_SERIAL_HANDLER_HPP_
 
 #include "tap/communication/serial/terminal_serial.hpp"
 #include "tap/util_macros.hpp"
@@ -30,8 +30,9 @@
 namespace tap
 {
 class Drivers;
+}
 
-namespace sensors
+namespace tap::communication::sensors::imu
 {
 /**
  * Interface for reading IMU data. Connects to the terminal serial driver and allows
@@ -99,6 +100,5 @@ private:
     void printHeader(modm::IOStream& outputStream);
 };  // class ImuTerminalSerialHandler
 }  // namespace sensors
-}  // namespace tap
 
 #endif  // TAPROOT_MPU6500_TERMINAL_SERIAL_HANDLER_HPP_

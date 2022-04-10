@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -17,14 +17,15 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_IMU_HEATER_CONSTANTS_HPP_
-#define TAPROOT_IMU_HEATER_CONSTANTS_HPP_
+#include "imu_terminal_serial_handler_mock.hpp"
 
-#include "tap/communication/gpio/pwm.hpp"
-
-namespace tap::communication::sensors::imu_heater::bound_ports
+namespace tap::mock
 {
-    static constexpr tap::gpio::Pwm::Timer IMU_HEATER_TIMER = tap::gpio::Pwm::Timer::TIMER3;
-}  // tap::sensors
-
-#endif  // TAPROOT_IMU_HEATER_CONSTANTS_HPP_
+ImuTerminalSerialHandlerMock::ImuTerminalSerialHandlerMock(
+    tap::Drivers* drivers,
+    communication::sensors::imu::ImuInterface* imu)
+    : communication::sensors::imu::ImuTerminalSerialHandler(drivers, imu)
+{
+}
+ImuTerminalSerialHandlerMock::~ImuTerminalSerialHandlerMock() {}
+}  // namespace tap::mock
