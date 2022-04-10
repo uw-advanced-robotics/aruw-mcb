@@ -26,7 +26,6 @@
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/architecture/clock.hpp"
 
-#include "../constants/turret_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -43,11 +42,10 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
+    tap::control::Subsystem &firingSubsystem,
     Command *const firingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
-    const float userPitchInputScalar,
-    const float userYawInputScalar,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : drivers(drivers),
@@ -63,9 +61,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed,
           turretID),
-      userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar),
-      pitchScanner(PITCH_MIN_ANGLE, PITCH_MAX_ANGLE, SCAN_DELTA_ANGLE),
+      pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(YAW_MIN_ANGLE, YAW_MAX_ANGLE, SCAN_DELTA_ANGLE)
 {
     assert(firingCommand != nullptr);
@@ -74,6 +70,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     assert(yawController != nullptr);
 
     addSubsystemRequirement(turretSubsystem);
+    addSubsystemRequirement(&firingSubsystem);
 }
 
 bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
