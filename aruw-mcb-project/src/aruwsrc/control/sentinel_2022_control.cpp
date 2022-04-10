@@ -39,7 +39,7 @@
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
-#include "turret/cv/turret_cv_command.hpp"
+#include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/sentinel_turret_subsystem.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
@@ -205,16 +205,17 @@ user::TurretUserControlCommand turretManual(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController);
 
-cv::TurretCVCommand turretCVCommand(
+cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
     &turretSubsystem,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
+    agitator,
+    &rotateAgitatorManual,
     odometrySubsystem,
     frictionWheels,
-    1,
-    1,
-    29.5f);
+    29.5f,
+    0);
 }  // namespace turret1
 
 namespace turret2
@@ -267,16 +268,17 @@ user::TurretUserControlCommand turretManual(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController);
 
-cv::TurretCVCommand turretCVCommand(
+cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
     &turretSubsystem,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
+    agitator,
+    &rotateAgitatorManual,
     odometrySubsystem,
     frictionWheels,
-    1,
-    1,
-    29.5f);
+    29.5f,
+    0);
 }  // namespace turret2
 
 /* define command mappings --------------------------------------------------*/
