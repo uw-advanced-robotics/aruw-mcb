@@ -17,8 +17,8 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAP_DRIVERS_HPP_
-#define TAP_DRIVERS_HPP_
+#ifndef TAPROOT_DRIVERS_HPP_
+#define TAPROOT_DRIVERS_HPP_
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/architecture/profiler.hpp"
@@ -72,7 +72,7 @@ public:
 protected:
 #endif
     Drivers()
-        : profiler(),
+        : profiler(this),
           analog(),
           can(),
           canRxHandler(this),
@@ -125,9 +125,9 @@ public:
     gpio::Leds leds;
     gpio::Pwm pwm;
     sensors::Mpu6500 mpu6500;
-    serial::RefSerial refSerial;
-    Remote remote;
-    serial::Uart uart;
+    communication::serial::RefSerial refSerial;
+    communication::serial::Remote remote;
+    communication::serial::Uart uart;
     communication::serial::TerminalSerial terminalSerial;
     control::CommandMapper commandMapper;
     control::SchedulerTerminalHandler schedulerTerminalHandler;
@@ -140,4 +140,4 @@ public:
 
 }  // namespace tap
 
-#endif  // TAP_DRIVERS_HPP_
+#endif  // TAPROOT_DRIVERS_HPP_

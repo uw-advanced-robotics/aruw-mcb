@@ -30,7 +30,12 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "agitator/agitator_subsystem.hpp"
+#include "agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
 #include "chassis/chassis_autorotate_command.hpp"
@@ -40,17 +45,14 @@
 #include "chassis/wiggle_drive_command.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
-#include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
-#include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "launcher/friction_wheel_subsystem.hpp"
+#include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "turret/cv/turret_cv_command.hpp"
-#include "turret/turret_controller_constants.hpp"
-#include "turret/turret_subsystem.hpp"
+#include "turret/constants/turret_constants.hpp"
+#include "turret/hero_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
@@ -59,9 +61,11 @@ using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
-using namespace aruwsrc::display;
+using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::launcher;
-using tap::Remote;
+using namespace tap::communication::serial;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
 
@@ -76,38 +80,70 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 namespace hero_control
 {
 /* define subsystems --------------------------------------------------------*/
-ChassisSubsystem chassis(drivers());
+ChassisSubsystem chassis(drivers(), ChassisSubsystem::ChassisType::X_DRIVE);
 
-FrictionWheelSubsystem frictionWheels(drivers());
+RefereeFeedbackFrictionWheelSubsystem frictionWheels(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
+    0.5f);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
+AgitatorSubsystem kickerAgitator(
+    drivers(),
+    aruwsrc::control::agitator::constants::PID_HERO_KICKER,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
+    aruwsrc::control::agitator::constants::HERO_KICKER_MOTOR_ID,
+    aruwsrc::control::agitator::constants::HERO_KICKER_MOTOR_CAN_BUS,
+    aruwsrc::control::agitator::constants::HERO_KICKER_INVERTED,
+    0,
+    0,
+    false);
+
+AgitatorSubsystem waterwheelAgitator(
+    drivers(),
+    aruwsrc::control::agitator::constants::PID_HERO_WATERWHEEL,
+    AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_MOTOR_ID,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_MOTOR_CAN_BUS,
+    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_INVERTED,
+    aruwsrc::control::agitator::constants::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
+    aruwsrc::control::agitator::constants::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
+    true);
+
 tap::motor::DjiMotor pitchMotor(
     drivers(),
-    TurretSubsystem::PITCH_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
-    true,
+    PITCH_MOTOR_ID,
+    CAN_BUS_PITCH_MOTOR,
+    false,
     "Pitch Turret");
 tap::motor::DoubleDjiMotor yawMotor(
     drivers(),
-    TurretSubsystem::YAW_BACK_MOTOR_ID,
-    TurretSubsystem::YAW_FRONT_MOTOR_ID,
-    TurretSubsystem::CAN_BUS_MOTORS,
-    TurretSubsystem::CAN_BUS_MOTORS,
+    YAW_BACK_MOTOR_ID,
+    YAW_FRONT_MOTOR_ID,
+    CAN_BUS_YAW_MOTORS,
+    CAN_BUS_YAW_MOTORS,
     true,
     true,
-    "Yaw Back Turret",
-    "Yaw Front Turret");
-TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+    "Yaw Front Turret",
+    "Yaw Back Turret");
+HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
 
-TurretMCBHopperSubsystem hopperCover(drivers());
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 
 /* define commands ----------------------------------------------------------*/
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(drivers(), &chassis, &turret, true);
+ChassisAutorotateCommand chassisAutorotateCommand(
+    drivers(),
+    &chassis,
+    &turret,
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
 
@@ -125,13 +161,28 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
-ClientDisplayCommand clientDisplayCommand(
+static constexpr HeroAgitatorCommand::Config heroAgitatorCommandConfig = {
+    .kickerShootRotateAngle = M_PI / 2.0,
+    .kickerShootRotateTime = 75,
+    .kickerShootSetpointTolerance = M_PI / 16.0f,
+    .kickerLoadRotateAngle = M_PI / 2.0,
+    .kickerLoadSetpointTolerance = M_PI / 16.0f,
+    .waterwheelLoadRotateAngle = M_PI / 7.0,
+    .waterwheelLoadSetpointTolerance = M_PI / 16.0f,
+    .loadRotateTime = 200,
+    .waterwheelUnjamDisplacement = M_PI / 14.0,
+    .waterwheelUnjamThreshold = M_PI / 20.0,
+    .waterwheelUnjamMaxWaitTime = 130,
+    .heatLimiting = true,
+    .heatLimitBuffer = 100,
+};
+
+HeroAgitatorCommand heroAgitatorCommand(
     drivers(),
-    &clientDisplay,
-    nullptr,
-    nullptr,
-    nullptr,
-    &chassisDriveCommand);
+    &kickerAgitator,
+    &waterwheelAgitator,
+    &frictionWheels,
+    heroAgitatorCommandConfig);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -153,6 +204,12 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    drivers(),
+    &turret,
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG,
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
@@ -160,17 +217,20 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
-    &chassisFramePitchTurretController);
+    &worldFramePitchTurretImuController);
 
 cv::TurretCVCommand turretCVCommand(
     drivers(),
     &turret,
-    &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
+    &worldFrameYawTurretImuController,
+    &worldFramePitchTurretImuController,
+    odometrySubsystem,
+    frictionWheels,
+    1,
+    1,
+    9.5f);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
-
-OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
@@ -178,13 +238,31 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassis,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
-    false);
+    true);
+
+ClientDisplayCommand clientDisplayCommand(
+    drivers(),
+    &clientDisplay,
+    nullptr,
+    frictionWheels,
+    waterwheelAgitator,
+    turret,
+    imuCalibrateCommand,
+    nullptr,
+    &beybladeCommand,
+    &chassisAutorotateCommand,
+    &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
     drivers(),
-    {&openHopperCommand, &stopFrictionWheels},
+    {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&heroAgitatorCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    false);
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
@@ -195,14 +273,40 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+PressCommandMapping leftMousePressed(
+    drivers(),
+    {&heroAgitatorCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT));
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
-PressCommandMapping bPressed(drivers(), {&imuCalibrateCommand}, RemoteMapState({Remote::Key::B}));
+// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+PressCommandMapping bNotCtrlPressedRightSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::B},
+        {Remote::Key::CTRL},
+        false,
+        false));
+// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// client display command. This is necessary since we don't know when the robot is connected to the
+// server and thus don't know when to start sending the initial HUD graphics.
+PressCommandMapping bCtrlPressedRightSwitchDown(
+    drivers(),
+    {&clientDisplayCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::CTRL, Remote::Key::B},
+        {},
+        false,
+        false));
 PressCommandMapping qPressed(
     drivers(),
     {&chassisImuDriveCommand},
@@ -224,11 +328,11 @@ void initializeSubsystems()
 {
     chassis.initialize();
     frictionWheels.initialize();
+    odometrySubsystem.initialize();
     clientDisplay.initialize();
+    kickerAgitator.initialize();
+    waterwheelAgitator.initialize();
     turret.initialize();
-    hopperCover.initialize();
-    drivers()->legacyVisionCoprocessor.attachChassis(&chassis);
-    drivers()->legacyVisionCoprocessor.attachTurret(&turret);
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -236,9 +340,11 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandScheduler.registerSubsystem(&kickerAgitator);
+    drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&hopperCover);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -246,24 +352,31 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(aruwsrc::Drivers *) {}
+void startHeroCommands(aruwsrc::Drivers *drivers)
+{
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftMousePressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&rToggled);
     drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bPressed);
+    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CLIENT_DISPLAY_HPP_
-#define CLIENT_DISPLAY_HPP_
+#ifndef CLIENT_DISPLAY_SUBSYSTEM_HPP_
+#define CLIENT_DISPLAY_SUBSYSTEM_HPP_
 
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
@@ -28,7 +28,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::display
+namespace aruwsrc::control::client_display
 {
 /**
  * A placeholder subsystem for running the client display command
@@ -40,6 +40,6 @@ public:
     virtual ~ClientDisplaySubsystem() {}
     const char* getName() override { return "client display"; }
 };
-}  // namespace aruwsrc::display
+}  // namespace aruwsrc::control::client_display
 
-#endif  // CLIENT_DISPLAY_HPP_
+#endif  // CLIENT_DISPLAY_SUBSYSTEM_HPP_

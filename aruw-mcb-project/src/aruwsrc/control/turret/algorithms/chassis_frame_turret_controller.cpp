@@ -19,6 +19,7 @@
 
 #include "chassis_frame_turret_controller.hpp"
 
+#include "../constants/turret_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -36,7 +37,14 @@ ChassisFrameYawTurretController::ChassisFrameYawTurretController(
 {
 }
 
-void ChassisFrameYawTurretController::initialize() { pid.reset(); }
+void ChassisFrameYawTurretController::initialize()
+{
+    if (turretSubsystem->getPrevRanYawTurretController() != this)
+    {
+        pid.reset();
+        turretSubsystem->setPrevRanYawTurretController(this);
+    }
+}
 
 void ChassisFrameYawTurretController::runController(const uint32_t dt, const float desiredSetpoint)
 {
@@ -68,7 +76,14 @@ ChassisFramePitchTurretController::ChassisFramePitchTurretController(
 {
 }
 
-void ChassisFramePitchTurretController::initialize() { pid.reset(); }
+void ChassisFramePitchTurretController::initialize()
+{
+    if (turretSubsystem->getPrevRanPitchTurretController() != this)
+    {
+        pid.reset();
+        turretSubsystem->setPrevRanPitchTurretController(this);
+    }
+}
 
 void ChassisFramePitchTurretController::runController(
     const uint32_t dt,
@@ -85,10 +100,10 @@ void ChassisFramePitchTurretController::runController(
         pid.runController(positionControllerError, turretSubsystem->getPitchVelocity(), dt);
 
     pidOutput += computeGravitationalForceOffset(
-        TurretSubsystem::TURRET_CG_X,
-        TurretSubsystem::TURRET_CG_Z,
-        turretSubsystem->getPitchAngleFromCenter(),
-        TurretSubsystem::GRAVITY_COMPENSATION_SCALAR);
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        -turretSubsystem->getPitchAngleFromCenter(),
+        GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
 }

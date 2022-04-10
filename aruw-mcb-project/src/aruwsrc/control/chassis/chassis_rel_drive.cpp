@@ -40,35 +40,28 @@ void ChassisRelDrive::computeDesiredUserTranslation(
         return;
     }
 
-    const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
+    const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
     // what we will multiply x and y speed by to take into account rotation
-    float rTranslationalGain =
-        chassis->calculateRotationTranslationalGain(chassisRotation) * MAX_WHEEL_SPEED;
+    float rotationLimitedMaxTranslationalSpeed =
+        chassis->calculateRotationTranslationalGain(chassisRotation) * maxWheelSpeed;
 
     *chassisXDesiredWheelspeed = limitVal(
-                                     drivers->controlOperatorInterface.getChassisXInput(),
-                                     -rTranslationalGain,
-                                     rTranslationalGain) *
-                                 MAX_WHEEL_SPEED;
+        drivers->controlOperatorInterface.getChassisXInput(),
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
 
     *chassisYDesiredWheelspeed = limitVal(
-                                     drivers->controlOperatorInterface.getChassisYInput(),
-                                     -rTranslationalGain,
-                                     rTranslationalGain) *
-                                 MAX_WHEEL_SPEED;
+        drivers->controlOperatorInterface.getChassisYInput(),
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
 }
 
 void ChassisRelDrive::onExecute(aruwsrc::Drivers *drivers, ChassisSubsystem *chassis)
 {
-    const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
-
-    float chassisRotationDesiredWheelspeed =
-        drivers->controlOperatorInterface.getChassisRInput() * MAX_WHEEL_SPEED;
+    float chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput();
 
     float chassisXDesiredWheelspeed = 0.0f;
     float chassisYDesiredWheelspeed = 0.0f;

@@ -24,84 +24,101 @@
 
 using aruwsrc::Drivers;
 using namespace testing;
+using namespace tap::arch::clock;
 using namespace aruwsrc::control::launcher;
 
-#define SETUP_TEST() \
-    Drivers drivers; \
-    FrictionWheelSubsystem frictionWheels(&drivers);
-
-TEST(FrictionWheelSubsystem, onHardwareTestStart__sets_desired_speed_nonzero)
+class FrictionWheelSubsystemTest : public Test
 {
-    SETUP_TEST();
+protected:
+    FrictionWheelSubsystemTest()
+        : frictionWheels(
+              &drivers,
+              tap::motor::MOTOR1,
+              tap::motor::MOTOR2,
+              tap::can::CanBus::CAN_BUS1)
+    {
+    }
+
+    ClockStub clock;
+    Drivers drivers;
+    FrictionWheelSubsystem frictionWheels;
+};
+
+TEST_F(FrictionWheelSubsystemTest, onHardwareTestStart__sets_desired_speed_nonzero)
+{
     frictionWheels.onHardwareTestStart();
     EXPECT_NEAR(15.0f, frictionWheels.getDesiredLaunchSpeed(), 1E-3);
 }
 
-TEST(FrictionWheelSubsystem, onHardwareTestComplete__sets_desired_speed_zero)
+TEST_F(FrictionWheelSubsystemTest, onHardwareTestComplete__sets_desired_speed_zero)
 {
-    SETUP_TEST();
     frictionWheels.onHardwareTestComplete();
     EXPECT_NEAR(0.0f, frictionWheels.getDesiredLaunchSpeed(), 1E-3);
 }
 
-TEST(FrictionWheelSubsystem, refresh__0_output_when_desired_speed_0_shaft_rpm_0)
+TEST_F(FrictionWheelSubsystemTest, refresh__0_output_when_desired_speed_0_shaft_rpm_0)
 {
-    SETUP_TEST();
-
-    ON_CALL(frictionWheels.leftWheel, getShaftRPM()).WillByDefault(Return(0));
+    ON_CALL(frictionWheels.leftWheel, getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.leftWheel, setDesiredOutput(0)).Times(2);
-    ON_CALL(frictionWheels.rightWheel, getShaftRPM()).WillByDefault(Return(0));
+    ON_CALL(frictionWheels.rightWheel, getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(0)).Times(2);
 
+    clock.time = 0;
+    frictionWheels.initialize();
+
+    clock.time = 1;
     frictionWheels.refresh();
 
+    clock.time = 2;
     frictionWheels.setDesiredLaunchSpeed(0);
     frictionWheels.refresh();
 }
 
-TEST(FrictionWheelSubsystem, refresh__positive_output_when_desired_speed_10_shaft_rpm_0)
+TEST_F(FrictionWheelSubsystemTest, refresh__positive_output_when_desired_speed_10_shaft_rpm_0)
 {
-    SETUP_TEST();
-
-    ON_CALL(frictionWheels.leftWheel, getShaftRPM()).WillByDefault(Return(0));
+    ON_CALL(frictionWheels.leftWheel, getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.leftWheel, setDesiredOutput(Gt(0)));
-    ON_CALL(frictionWheels.rightWheel, getShaftRPM()).WillByDefault(Return(0));
+    ON_CALL(frictionWheels.rightWheel, getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(Gt(0)));
 
     frictionWheels.setDesiredLaunchSpeed(10);
 
+    clock.time = 0;
+    frictionWheels.initialize();
+
+    clock.time = 1;
     frictionWheels.refresh();
 }
 
-TEST(FrictionWheelSubsystem, refresh__negative_output_when_desired_speed_0_shaft_rpm_negative)
+TEST_F(FrictionWheelSubsystemTest, refresh__negative_output_when_desired_speed_0_shaft_rpm_negative)
 {
-    SETUP_TEST();
-
-    ON_CALL(frictionWheels.leftWheel, getShaftRPM()).WillByDefault(Return(1000));
+    ON_CALL(frictionWheels.leftWheel, getShaftRPM).WillByDefault(Return(1000));
     EXPECT_CALL(frictionWheels.leftWheel, setDesiredOutput(Lt(0)));
-    ON_CALL(frictionWheels.rightWheel, getShaftRPM()).WillByDefault(Return(1000));
+    ON_CALL(frictionWheels.rightWheel, getShaftRPM).WillByDefault(Return(1000));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(Lt(0)));
 
+    clock.time = 0;
+    frictionWheels.initialize();
+
+    clock.time = 1;
     frictionWheels.refresh();
 }
 
-TEST(FrictionWheelSubsystem, refresh_updates_desiredRpmRamp_when_target_not_reached)
+TEST_F(FrictionWheelSubsystemTest, refresh_updates_desiredRpmRamp_when_target_not_reached)
 {
-    SETUP_TEST();
-
     frictionWheels.setDesiredLaunchSpeed(
-        FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
-            [MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]
+        LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+            [MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]
                 .first);
 
     uint32_t time = 0;
-    tap::arch::clock::setTime(time);
+    clock.time = time;
     float prevRpmTarget = frictionWheels.desiredRpmRamp.getValue();
 
     for (int i = 0; i < 1000; i++)
     {
         time += 10;
-        tap::arch::clock::setTime(time);
+        clock.time = time;
         frictionWheels.refresh();
 
         if (!frictionWheels.desiredRpmRamp.isTargetReached())
@@ -112,38 +129,28 @@ TEST(FrictionWheelSubsystem, refresh_updates_desiredRpmRamp_when_target_not_reac
     }
 }
 
-TEST(
-    FrictionWheelSubsystem,
+TEST_F(
+    FrictionWheelSubsystemTest,
     setDesiredLaunchSpeed__setting_to_values_in_LUT_updates_rpm_ramp_correctly)
 {
-    SETUP_TEST();
-
-    for (size_t i = 0;
-         i < MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT);
-         i++)
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT); i++)
     {
-        const auto& tuple = FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
+        const auto& tuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
         frictionWheels.setDesiredLaunchSpeed(tuple.first);
         EXPECT_NEAR(frictionWheels.desiredRpmRamp.getTarget(), tuple.second, 1E-3);
     }
 }
 
-TEST(
-    FrictionWheelSubsystem,
+TEST_F(
+    FrictionWheelSubsystemTest,
     setDesiredLaunchSpeed__setting_to_value_in_between_LUT_updates_rpm_ramp_correctly)
 {
-    if (MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) == 0)
-        return;
+    if (MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) == 0) return;
 
-    SETUP_TEST();
-
-    for (size_t i = 0;
-         i < MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1;
-         i++)
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1; i++)
     {
-        const auto& firstTuple = FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
-        const auto& secondTuple =
-            FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i + 1];
+        const auto& firstTuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
+        const auto& secondTuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i + 1];
 
         float middleSpeed = (firstTuple.first + secondTuple.first) / 2.0f;
         float middleRpm = (firstTuple.second + secondTuple.second) / 2.0f;
@@ -153,23 +160,19 @@ TEST(
     }
 }
 
-TEST(FrictionWheelSubsystem, setDesiredLaunchSpeed__negative_launch_speed_0_desired_rpm)
+TEST_F(FrictionWheelSubsystemTest, setDesiredLaunchSpeed__negative_launch_speed_0_desired_rpm)
 {
-    SETUP_TEST();
-
     frictionWheels.setDesiredLaunchSpeed(-100);
 
     EXPECT_EQ(0, frictionWheels.desiredRpmRamp.getTarget());
 }
 
-TEST(
-    FrictionWheelSubsystem,
+TEST_F(
+    FrictionWheelSubsystemTest,
     setDesiredLaunchSpeed__speed_above_max_speed_set_launch_speed_to_max_rpm)
 {
-    SETUP_TEST();
-
-    const auto& tuple = FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
-        [MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1];
+    const auto& tuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+        [MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1];
 
     frictionWheels.setDesiredLaunchSpeed(tuple.first + 10);
 

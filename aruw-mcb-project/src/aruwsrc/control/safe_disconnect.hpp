@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef SAFE_DISCONNECT_HPP_
+#define SAFE_DISCONNECT_HPP_
+
 #include "tap/control/command_scheduler.hpp"
 
 #include "aruwsrc/drivers.hpp"
@@ -38,3 +41,5 @@ private:
     aruwsrc::Drivers *drivers;
 };
 }  // namespace aruwsrc::control
+
+#endif  // SAFE_DISCONNECT_HPP_

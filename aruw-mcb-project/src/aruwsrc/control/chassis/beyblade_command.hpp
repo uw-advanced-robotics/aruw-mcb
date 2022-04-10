@@ -44,46 +44,6 @@ public:
         ChassisSubsystem* chassis,
         const tap::control::turret::TurretSubsystemInterface* turret);
 
-    // fractional multiplier for user input and maximum motor speed to calculate desired x and y
-    // speeds
-    static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_BEYBLADE = 0.5f;
-
-    // additional fractional multiplier/limit to calculate x and y translational speed limits
-    // will be used to determine desired rotation speeds to ramp up to
-    static constexpr float TRANSLATION_LIMITING_FRACTION = 0.5f;
-
-    // set ramp targets for rotational speed + units unknown(?)
-    /**
-     * Use this rotation speed if power consumption limit is <= 45 W
-     */
-    static constexpr float ROTATION_TARGET_45W_CUTOFF = 3000.0f;
-    /**
-     * Use this rotation speed if power consumption limit is <= 60 W and > 45 W
-     */
-    static constexpr float ROTATION_TARGET_60W_CUTOFF = 3500.0f;
-    /**
-     * Use this rotation speed if power consumption limit is <= 80 W and > 60 W
-     */
-    static constexpr float ROTATION_TARGET_80W_CUTOFF = 5500.0f;
-    /**
-     * Use this rotation speed if power consumption limit is <= 100 W and > 80 W
-     */
-    static constexpr float ROTATION_TARGET_100W_CUTOFF = 6000.0f;
-    /**
-     * Use this rotation speed if power consumption limit is > 100 W
-     */
-    static constexpr float ROTATION_TARGET_MAX_CUTOFF = 7500.0f;
-
-    /**
-     * The fraction to cut rotation speed while moving and beyblading
-     */
-    static constexpr float RAMP_TARGET_TRANSLATIONAL_FRAC = 0.5f;
-    /**
-     * Fraction of the final setpoint to update the ramp target each time until
-     * the final setpoint is reached
-     */
-    static constexpr float RAMP_UPDATE_FRAC = 0.125;
-
     /**
      * Sets rotational input target on Ramp
      */
@@ -97,12 +57,11 @@ public:
 
     void end(bool) override;
 
-    bool isFinished() const override;
+    bool isFinished() const override { return false; }
 
     const char* getName() const override { return "chassis beyblade"; }
 
 private:
-    float rampTarget;
     float rotationDirection;
 
     tap::algorithms::Ramp rotateSpeedRamp;
@@ -110,8 +69,6 @@ private:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     const tap::control::turret::TurretSubsystemInterface* turret;
-
-    float getRotationTarget() const;
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::chassis

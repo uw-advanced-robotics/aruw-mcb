@@ -24,10 +24,8 @@
 #include "friction_wheel_subsystem_mock.hpp"
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
-#include "legacy_vision_coprocessor_mock.hpp"
 #include "oled_display_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
-#include "sentinel_switcher_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
@@ -40,26 +38,24 @@ namespace aruwsrc::mock
 {
 AgitatorSubsystemMock::AgitatorSubsystemMock(
     aruwsrc::Drivers *drivers,
-    float kp,
-    float ki,
-    float kd,
-    float maxIAccum,
-    float maxOutput,
+    const tap::algorithms::SmoothPidConfig &pidConfig,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,
     tap::can::CanBus agitatorCanBusId,
-    bool isAgitatorInverted)
+    bool isAgitatorInverted,
+    float jammingDistance,
+    uint32_t jammingTime,
+    bool jamLogicEnabled)
     : AgitatorSubsystem(
           drivers,
-          kp,
-          ki,
-          kd,
-          maxIAccum,
-          maxOutput,
+          pidConfig,
           agitatorGearRatio,
           agitatorMotorId,
           agitatorCanBusId,
-          isAgitatorInverted)
+          isAgitatorInverted,
+          jammingDistance,
+          jammingTime,
+          jamLogicEnabled)
 {
     ON_CALL(*this, isOnline).WillByDefault(testing::Return(true));
 }
@@ -80,11 +76,18 @@ ChassisDriveCommandMock::ChassisDriveCommandMock(aruwsrc::Drivers *d, chassis::C
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
-ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers) : ChassisSubsystem(drivers) {}
+ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
+    : ChassisSubsystem(drivers, chassis::ChassisSubsystem::ChassisType::MECANUM)
+{
+}
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers)
-    : FrictionWheelSubsystem(drivers)
+    : FrictionWheelSubsystem(
+          drivers,
+          tap::motor::MOTOR1,
+          tap::motor::MOTOR2,
+          tap::can::CanBus::CAN_BUS1)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
@@ -126,14 +129,6 @@ SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
 }
 SentinelDriveSubsystemMock::~SentinelDriveSubsystemMock() {}
 
-SentinelSwitcherSubsystemMock::SentinelSwitcherSubsystemMock(
-    aruwsrc::Drivers *drivers,
-    tap::gpio::Pwm::Pin switcherServoPin)
-    : control::sentinel::firing::SentinelSwitcherSubsystem(drivers, switcherServoPin)
-{
-}
-SentinelSwitcherSubsystemMock::~SentinelSwitcherSubsystemMock() {}
-
 TowSubsystemMock::TowSubsystemMock(
     aruwsrc::Drivers *drivers,
     tap::gpio::Digital::OutputPin leftTowPin,
@@ -162,9 +157,9 @@ XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Dig
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
-LegacyVisionCoprocessorMock::LegacyVisionCoprocessorMock(aruwsrc::Drivers *drivers)
-    : serial::LegacyVisionCoprocessor(drivers)
+VisionCoprocessorMock::VisionCoprocessorMock(aruwsrc::Drivers *drivers)
+    : serial::VisionCoprocessor(drivers)
 {
 }
-LegacyVisionCoprocessorMock::~LegacyVisionCoprocessorMock() {}
+VisionCoprocessorMock::~VisionCoprocessorMock() {}
 }  // namespace aruwsrc::mock

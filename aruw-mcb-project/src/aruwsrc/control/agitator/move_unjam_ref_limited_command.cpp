@@ -31,19 +31,30 @@ namespace agitator
 {
 MoveUnjamRefLimitedCommand::MoveUnjamRefLimitedCommand(
     aruwsrc::Drivers *drivers,
-    AgitatorSubsystem *agitator17mm,
-    float agitatorRotateAngle,
-    float maxUnjamRotateAngle,
-    uint32_t rotateTime,
+    SetpointSubsystem *setpointSubsystem,
+    float moveDisplacement,
+    uint32_t moveTime,
+    uint32_t pauseAfterMoveTime,
+    bool setToTargetOnEnd,
+    float setpointTolerance,
+    float unjamDisplacement,
+    float unjamThreshold,
+    uint32_t maxUnjamWaitTime,
+    uint_fast16_t unjamCycleCount,
     bool heatLimiting,
     float heatLimitBuffer)
     : tap::control::setpoint::MoveUnjamComprisedCommand(
           drivers,
-          agitator17mm,
-          agitatorRotateAngle,
-          maxUnjamRotateAngle,
-          rotateTime,
-          0),
+          setpointSubsystem,
+          moveDisplacement,
+          moveTime,
+          pauseAfterMoveTime,
+          setToTargetOnEnd,
+          setpointTolerance,
+          unjamDisplacement,
+          unjamThreshold,
+          maxUnjamWaitTime,
+          unjamCycleCount),
       drivers(drivers),
       heatLimiting(heatLimiting),
       heatLimitBuffer(heatLimitBuffer)
@@ -54,8 +65,6 @@ bool MoveUnjamRefLimitedCommand::isReady()
 {
     const auto &robotData = drivers->refSerial.getRobotData();
 
-    // TODO remove isOnline check when https://gitlab.com/aruw/controls/taproot/-/merge_requests/49
-    // is merged in
     return MoveUnjamComprisedCommand::isReady() && setpointSubsystem->isOnline() &&
            !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
              (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));

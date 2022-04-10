@@ -48,7 +48,6 @@
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
-tap::arch::PeriodicMilliTimer sendVisionCoprocessorTimeout(3);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -88,23 +87,17 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
-        if (sendVisionCoprocessorTimeout.execute())
-        {
-            PROFILE(drivers->profiler, drivers->legacyVisionCoprocessor.sendMessage, ());
-            // TODO try faster baude rate so we can send more frequently (currently mcb's serial
-            // buffers are overflowing if you try and send faster than 3 ms).
-        }
-
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
+            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
             PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
 #endif
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
         }
         modm::delay_us(10);
     }
@@ -126,7 +119,7 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    drivers->legacyVisionCoprocessor.initializeCV();
+    drivers->visionCoprocessor.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
 #if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
     drivers->turretMCBCanComm.init();
@@ -144,5 +137,5 @@ static void updateIo(aruwsrc::Drivers *drivers)
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    drivers->legacyVisionCoprocessor.updateSerial();
+    drivers->visionCoprocessor.updateSerial();
 }

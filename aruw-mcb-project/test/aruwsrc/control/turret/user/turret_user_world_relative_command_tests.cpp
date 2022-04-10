@@ -30,71 +30,78 @@ using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::turret::user;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc;
+using namespace tap::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
-#define SETUP_TEST()                                                                       \
-    Drivers drivers;                                                                       \
-    NiceMock<TurretSubsystemMock> turret(&drivers);                                        \
-    ChassisFramePitchTurretController chassisFramePitchTurretController(                   \
-        &turret,                                                                           \
-        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
-    WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(             \
-        &drivers,                                                                          \
-        &turret,                                                                           \
-        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
-    WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController( \
-        &drivers,                                                                          \
-        &turret,                                                                           \
-        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},                                                    \
-        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
-                                                                                           \
-    WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(     \
-        &drivers,                                                                          \
-        &turret,                                                                           \
-        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},                                                    \
-        {1, 0, 0, 0, 1, 1, 0, 1, 0, 0});                                                   \
-    TurretUserWorldRelativeCommand turretCmd(                                              \
-        &drivers,                                                                          \
-        &turret,                                                                           \
-        &worldFrameYawChassisImuController,                                                \
-        &chassisFramePitchTurretController,                                                \
-        &worldFrameYawTurretImuController,                                                 \
-        &worldFramePitchTurretImuController);
-
-TEST(TurretUserWorldRelativeCommand, isReady_true_if_turret_online)
+class TurretUserWorldRelativeCommandTest : public Test
 {
-    SETUP_TEST();
+protected:
+    TurretUserWorldRelativeCommandTest()
+        : turret(&drivers),
+          chassisFramePitchTurretController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          worldFrameYawChassisImuController(&drivers, &turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          worldFramePitchTurretImuController(
+              &drivers,
+              &turret,
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          worldFrameYawTurretImuController(
+              &drivers,
+              &turret,
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          turretCmd(
+              &drivers,
+              &turret,
+              &worldFrameYawChassisImuController,
+              &chassisFramePitchTurretController,
+              &worldFrameYawTurretImuController,
+              &worldFramePitchTurretImuController),
+          currentYawValue(0, 0, 360),
+          currentPitchValue(0, 0, 360)
+    {
+    }
 
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+    void SetUp() override
+    {
+        ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(currentYawValue));
+        ON_CALL(turret, getCurrentPitchValue).WillByDefault(ReturnRef(currentPitchValue));
+        ON_CALL(turret, isOnline).WillByDefault(ReturnPointee(&turretOnline));
+        ON_CALL(drivers.turretMCBCanComm, isConnected)
+            .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));
+    }
+
+    Drivers drivers;
+    NiceMock<TurretSubsystemMock> turret;
+    ChassisFramePitchTurretController chassisFramePitchTurretController;
+    WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController;
+    WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController;
+    WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
+    TurretUserWorldRelativeCommand turretCmd;
+    ContiguousFloat currentYawValue;
+    ContiguousFloat currentPitchValue;
+    bool turretOnline = false;
+    bool turretMcbCanCommConnected = false;
+};
+
+TEST_F(TurretUserWorldRelativeCommandTest, isReady_true_if_turret_online_isFinished_opposite)
+{
+    turretOnline = true;
     EXPECT_TRUE(turretCmd.isReady());
-
-    ON_CALL(turret, isOnline).WillByDefault(Return(false));
-    EXPECT_FALSE(turretCmd.isReady());
-}
-
-TEST(TurretUserWorldRelativeCommand, isFinished_true_if_turret_offline)
-{
-    SETUP_TEST();
-
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));
     EXPECT_FALSE(turretCmd.isFinished());
 
-    ON_CALL(turret, isOnline).WillByDefault(Return(false));
+    turretOnline = false;
+    EXPECT_FALSE(turretCmd.isReady());
     EXPECT_TRUE(turretCmd.isFinished());
 }
 
-TEST(TurretUserWorldRelativeCommand, execute_runs_turret_wr_turret_imu_cmd_when_turret_imu_online)
+TEST_F(
+    TurretUserWorldRelativeCommandTest,
+    execute_runs_turret_wr_turret_imu_cmd_when_turret_imu_online)
 {
-    SETUP_TEST();
-
-    tap::algorithms::ContiguousFloat currentYawValue(0, 0, 360);
-    tap::algorithms::ContiguousFloat currentPitchValue(0, 0, 360);
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(currentYawValue));
-    ON_CALL(turret, getCurrentPitchValue).WillByDefault(ReturnRef(currentYawValue));
-
-    ON_CALL(drivers.turretMCBCanComm, isConnected).WillByDefault(Return(true));
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+    turretMcbCanCommConnected = true;
+    turretOnline = true;
 
     // The turret MCB comm will be queried if the turret IMU command is running
     EXPECT_CALL(drivers.turretMCBCanComm, getYaw).Times(AtLeast(1));
@@ -103,17 +110,12 @@ TEST(TurretUserWorldRelativeCommand, execute_runs_turret_wr_turret_imu_cmd_when_
     turretCmd.execute();
 }
 
-TEST(TurretUserWorldRelativeCommand, execute_runs_turret_wr_chassis_imu_cmd_when_turret_imu_offline)
+TEST_F(
+    TurretUserWorldRelativeCommandTest,
+    execute_runs_turret_wr_chassis_imu_cmd_when_turret_imu_offline)
 {
-    SETUP_TEST();
-
-    tap::algorithms::ContiguousFloat currentYawValue(0, 0, 360);
-    tap::algorithms::ContiguousFloat currentPitchValue(0, 0, 360);
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(currentYawValue));
-    ON_CALL(turret, getCurrentPitchValue).WillByDefault(ReturnRef(currentYawValue));
-
-    ON_CALL(drivers.turretMCBCanComm, isConnected).WillByDefault(Return(false));
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+    turretMcbCanCommConnected = false;
+    turretOnline = true;
 
     // The turret MCB comm will be queried if the turret IMU command is running
     EXPECT_CALL(drivers.turretMCBCanComm, getYaw).Times(0);
@@ -122,11 +124,9 @@ TEST(TurretUserWorldRelativeCommand, execute_runs_turret_wr_chassis_imu_cmd_when
     turretCmd.execute();
 }
 
-TEST(TurretUserWorldRelativeCommand, end_doesnt_set_des_out_when_no_cmds_scheduled)
+TEST_F(TurretUserWorldRelativeCommandTest, end_doesnt_set_des_out_when_no_cmds_scheduled)
 {
-    SETUP_TEST();
-
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+    turretOnline = true;
 
     EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(0);
     EXPECT_CALL(turret, setYawMotorOutput(0)).Times(0);
@@ -134,28 +134,20 @@ TEST(TurretUserWorldRelativeCommand, end_doesnt_set_des_out_when_no_cmds_schedul
     turretCmd.end(true);
 }
 
-TEST(
-    TurretUserWorldRelativeCommand,
+TEST_F(
+    TurretUserWorldRelativeCommandTest,
     end_set_des_out_0_when_either_turret_command_initially_scheduled)
 {
-    SETUP_TEST();
-
-    tap::algorithms::ContiguousFloat currentYawValue(0, 0, 360);
-    tap::algorithms::ContiguousFloat currentPitchValue(0, 0, 360);
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(currentYawValue));
-    ON_CALL(turret, getCurrentPitchValue).WillByDefault(ReturnRef(currentYawValue));
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+    turretOnline = true;
 
     EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(2);
     EXPECT_CALL(turret, setYawMotorOutput(0)).Times(2);
 
-    ON_CALL(drivers.turretMCBCanComm, isConnected).WillByDefault(Return(false));
-
+    turretMcbCanCommConnected = false;
     turretCmd.initialize();
     turretCmd.end(true);
 
-    ON_CALL(drivers.turretMCBCanComm, isConnected).WillByDefault(Return(true));
-
+    turretMcbCanCommConnected = true;
     turretCmd.initialize();
     turretCmd.end(true);
 }

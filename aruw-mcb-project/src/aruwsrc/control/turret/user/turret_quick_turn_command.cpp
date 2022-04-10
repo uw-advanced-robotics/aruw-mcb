@@ -24,7 +24,7 @@
 namespace aruwsrc::control::turret::user
 {
 TurretQuickTurnCommand::TurretQuickTurnCommand(
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem,
+    TurretSubsystem *turretSubsystem,
     const float targetOffsetToTurn)
     : turretSubsystem(turretSubsystem),
       targetOffsetToTurn(targetOffsetToTurn)
@@ -38,5 +38,6 @@ void TurretQuickTurnCommand::initialize()
 {
     turretSubsystem->setYawSetpoint(
         turretSubsystem->getCurrentYawValue().getValue() + targetOffsetToTurn);
+    turretSubsystem->setPrevRanYawTurretController(nullptr);
 }
 }  // namespace aruwsrc::control::turret::user

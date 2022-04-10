@@ -31,25 +31,26 @@
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
     const tap::control::turret::TurretSubsystemInterface* turret,
-    bool chassisFrontBackIdentical)
+    ChassisSymmetry chassisSymmetry)
     : drivers(drivers),
       chassis(chassis),
       turret(turret),
-      chassisFrontBackIdentical(chassisFrontBackIdentical),
+      chassisSymmetry(chassisSymmetry),
       chassisAutorotating(true)
 {
     addSubsystemRequirement(chassis);
 }
 
-void ChassisAutorotateCommand::initialize() {}
+void ChassisAutorotateCommand::initialize()
+{
+    desiredRotationAverage = chassis->getDesiredRotation();
+}
 
 void ChassisAutorotateCommand::updateAutorotateState(
     const tap::control::turret::TurretSubsystemInterface* turret)
@@ -57,15 +58,16 @@ void ChassisAutorotateCommand::updateAutorotateState(
     float turretYawActualSetpointDiff =
         abs(turret->getCurrentYawValue().difference(turret->getYawSetpoint()));
 
-    if (chassisAutorotating && chassisFrontBackIdentical && !turret->yawLimited() &&
-        turretYawActualSetpointDiff > (180 - SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD))
+    if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
+        !turret->yawLimited() &&
+        turretYawActualSetpointDiff > (180 - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         // If turret setpoint all of a sudden turns around, don't autorotate
         chassisAutorotating = false;
     }
     else if (
         !chassisAutorotating &&
-        turretYawActualSetpointDiff < SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD)
+        turretYawActualSetpointDiff < TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION)
     {
         // Once the turret setpoint/target have reached each other, start turning again
         chassisAutorotating = true;
@@ -82,49 +84,79 @@ void ChassisAutorotateCommand::execute()
 
         float turretAngleFromCenter = turret->getYawAngleFromCenter();
 
-        float chassisRotationDesiredWheelspeed = 0.0f;
-
         if (chassisAutorotating)
         {
-            float angleFromCenterForChassisAutorotate =
-                chassisFrontBackIdentical && !turret->yawLimited()
-                    ? ContiguousFloat(turretAngleFromCenter, -90.0f, 90.0f).getValue()
-                    : turretAngleFromCenter;
+            float maxAngleFromCenter = 180.0f;
 
-            // Apply autorotation
-            chassisRotationDesiredWheelspeed =
-                chassis->chassisSpeedRotationPID(-angleFromCenterForChassisAutorotate);
+            if (!turret->yawLimited())
+            {
+                switch (chassisSymmetry)
+                {
+                    case ChassisSymmetry::SYMMETRICAL_180:
+                        maxAngleFromCenter = 90.0f;
+                        break;
+                    case ChassisSymmetry::SYMMETRICAL_90:
+                        maxAngleFromCenter = 45.0f;
+                        break;
+                    case ChassisSymmetry::SYMMETRICAL_NONE:
+                    default:
+                        break;
+                }
+            }
+
+            float angleFromCenterForChassisAutorotate =
+                ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
+                    .getValue();
+
+            // PD controller to find desired rotational component of the chassis control
+            float desiredRotation = chassis->chassisSpeedRotationPID(
+                angleFromCenterForChassisAutorotate,
+                turret->getYawVelocity() - drivers->mpu6500.getGz());
+
+            // find an alpha value to be used for the low pass filter, some value >
+            // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to
+            // angleFromCenterForChassisAutorotate, so when autorotate angle error is large, low
+            // pass filter alpha is small and more averaging will be applied to the desired
+            // autorotation
+            float autorotateSmoothingAlpha = std::max(
+                1.0f - abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
+                AUTOROTATION_MIN_SMOOTHING_ALPHA);
+
+            // low pass filter the desiredRotation to avoid radical changes in the desired rotation
+            // when far away from where we are centering the chassis around
+            desiredRotationAverage =
+                lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
 
-        // what we will multiply x and y speed by to take into account rotation
-        float rTranslationalGain =
-            chassis->calculateRotationTranslationalGain(chassisRotationDesiredWheelspeed);
-
-        const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
+        // the x/y translational speed is limited to this value, this means when rotation is large,
+        // the translational speed will be clamped to a smaller value to compensate
+        float rotationLimitedMaxTranslationalSpeed =
+            maxWheelSpeed * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
+
         float chassisXDesiredWheelspeed = limitVal(
-                                              drivers->controlOperatorInterface.getChassisXInput(),
-                                              -rTranslationalGain,
-                                              rTranslationalGain) *
-                                          MAX_WHEEL_SPEED;
+            drivers->controlOperatorInterface.getChassisXInput(),
+            -rotationLimitedMaxTranslationalSpeed,
+            rotationLimitedMaxTranslationalSpeed);
 
         float chassisYDesiredWheelspeed = limitVal(
-                                              drivers->controlOperatorInterface.getChassisYInput(),
-                                              -rTranslationalGain,
-                                              rTranslationalGain) *
-                                          MAX_WHEEL_SPEED;
+            drivers->controlOperatorInterface.getChassisYInput(),
+            -rotationLimitedMaxTranslationalSpeed,
+            rotationLimitedMaxTranslationalSpeed);
+
         // Rotate X and Y depending on turret angle
         rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            -modm::toRadian(turretAngleFromCenter));
+            modm::toRadian(turretAngleFromCenter));
 
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,
             chassisYDesiredWheelspeed,
-            chassisRotationDesiredWheelspeed);
+            desiredRotationAverage);
     }
     else
     {
@@ -132,10 +164,8 @@ void ChassisAutorotateCommand::execute()
     }
 }
 
-void ChassisAutorotateCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
+void ChassisAutorotateCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::chassis

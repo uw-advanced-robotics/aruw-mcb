@@ -19,6 +19,8 @@
 
 #include "agitator_subsystem.hpp"
 
+#include <cassert>
+
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -41,20 +43,16 @@ namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
     aruwsrc::Drivers* drivers,
-    float kp,
-    float ki,
-    float kd,
-    float maxIAccum,
-    float maxOutput,
+    const tap::algorithms::SmoothPidConfig& pidParams,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,
     tap::can::CanBus agitatorCanBusId,
     bool isAgitatorInverted,
-    bool jamLogicEnabled,
     float jammingDistance,
-    uint32_t jammingTime)
+    uint32_t jammingTime,
+    bool jamLogicEnabled)
     : tap::control::Subsystem(drivers),
-      agitatorPositionPid(kp, ki, kd, maxIAccum, maxOutput, 1.0f, 0.0f, 1.0f, 0.0f),
+      agitatorPositionPid(pidParams),
       jamChecker(this, jammingDistance, jammingTime),
       gearRatio(agitatorGearRatio),
       jamLogicEnabled(jamLogicEnabled),
@@ -65,6 +63,7 @@ AgitatorSubsystem::AgitatorSubsystem(
           isAgitatorInverted,
           "agitator motor")
 {
+    assert(jammingDistance >= 0);
 }
 
 void AgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
@@ -115,6 +114,7 @@ bool AgitatorSubsystem::calibrateHere()
     agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
     agitatorIsCalibrated = true;
     desiredAgitatorAngle = 0.0f;
+    clearJam();
     return true;
 }
 
@@ -125,6 +125,11 @@ float AgitatorSubsystem::getCurrentValue() const
         return 0.0f;
     }
     return getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
+}
+
+float AgitatorSubsystem::getJamSetpointTolerance() const
+{
+    return jamChecker.getJamSetpointTolerance();
 }
 
 float AgitatorSubsystem::getUncalibratedAgitatorAngle() const

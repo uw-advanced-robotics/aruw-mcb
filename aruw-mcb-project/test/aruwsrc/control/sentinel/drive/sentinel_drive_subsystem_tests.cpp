@@ -33,24 +33,22 @@ static constexpr float ENC_RES = tap::motor::DjiMotor::ENC_RESOLUTION;
 static constexpr float GEAR_RATIO = SentinelDriveSubsystem::GEAR_RATIO;
 static constexpr float WHEEL_RADIUS = SentinelDriveSubsystem::WHEEL_RADIUS;
 
-#define SET_SHAFT_RPM(shaftRpm)                                                     \
-    ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(Return(shaftRpm)); \
-    ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(Return(shaftRpm));
-
-#define SET_EXPECTED_OUTPUT(output)                                  \
-    EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(output)); \
-    EXPECT_CALL(sentinelDrive.leftWheel, setDesiredOutput(output));
-
 static constexpr float calculatePosition(int encTicks)
 {
     return (static_cast<float>(encTicks) / ENC_RES) * 2.0f * M_PI * WHEEL_RADIUS / GEAR_RATIO;
 }
 
-TEST(SentinelDriveSubsystem, initialize_initializes_both_motors_and_configs_pins)
+class SentinelDriveSubsystemTest : public Test
 {
-    aruwsrc::Drivers drivers;
-    SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
+protected:
+    SentinelDriveSubsystemTest() : sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH) {}
 
+    aruwsrc::Drivers drivers;
+    SentinelDriveSubsystem sentinelDrive;
+};
+
+TEST_F(SentinelDriveSubsystemTest, initialize_initializes_both_motors_and_configs_pins)
+{
     EXPECT_CALL(sentinelDrive.leftWheel, initialize);
     EXPECT_CALL(sentinelDrive.rightWheel, initialize);
     EXPECT_CALL(drivers.digital, configureInputPullMode(LEFT_LIMIT_SWITCH, _));
@@ -59,7 +57,7 @@ TEST(SentinelDriveSubsystem, initialize_initializes_both_motors_and_configs_pins
     sentinelDrive.initialize();
 }
 
-TEST(SentinelDriveSubsystem, initialize_with_same_input_pins_raises_error)
+TEST_F(SentinelDriveSubsystemTest, initialize_with_same_input_pins_raises_error)
 {
     aruwsrc::Drivers drivers;
     SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, LEFT_LIMIT_SWITCH);
@@ -69,11 +67,8 @@ TEST(SentinelDriveSubsystem, initialize_with_same_input_pins_raises_error)
     sentinelDrive.initialize();
 }
 
-TEST(SentinelDriveSubsystem, absolutePosition_returns_0_when_motors_offline)
+TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_0_when_motors_offline)
 {
-    aruwsrc::Drivers drivers;
-    SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
-
     EXPECT_CALL(drivers.errorController, addToErrorList);
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(false));
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(false));
@@ -81,11 +76,9 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_0_when_motors_offline)
     EXPECT_NEAR(0.0f, sentinelDrive.absolutePosition(), 1E-3);
 }
 
-TEST(SentinelDriveSubsystem, absolutePosition_returns_right_pos_when_left_not_connected)
+TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_right_pos_when_left_not_connected)
 {
     static constexpr int ENC_TICKS = 1000;
-    aruwsrc::Drivers drivers;
-    SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     EXPECT_CALL(drivers.errorController, addToErrorList);
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(false));
@@ -95,11 +88,9 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_right_pos_when_left_not_co
     EXPECT_NEAR(calculatePosition(ENC_TICKS), sentinelDrive.absolutePosition(), 1E-3);
 }
 
-TEST(SentinelDriveSubsystem, absolutePosition_returns_left_pos_when_right_not_connected)
+TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_left_pos_when_right_not_connected)
 {
     static constexpr int ENC_TICKS = 1000;
-    aruwsrc::Drivers drivers;
-    SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
     EXPECT_CALL(drivers.errorController, addToErrorList);
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(false));
@@ -109,99 +100,118 @@ TEST(SentinelDriveSubsystem, absolutePosition_returns_left_pos_when_right_not_co
     EXPECT_NEAR(calculatePosition(ENC_TICKS), sentinelDrive.absolutePosition(), 1E-3);
 }
 
-TEST(SentinelDriveSubsystem, absolutePosition_returns_wheel_avg_when_both_connected)
+TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_wheel_avg_when_both_connected)
 {
-    aruwsrc::Drivers drivers;
-    SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
-
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(true));
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(true));
 
-    ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped).WillByDefault(Return(2000));
-    ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped).WillByDefault(Return(100));
-    EXPECT_NEAR(calculatePosition((2000 + 100) / 2), sentinelDrive.absolutePosition(), 1E-3);
+    int32_t leftEncUnwrapped = 0;
+    int32_t rightEncUnwrapped = 0;
 
-    ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped).WillByDefault(Return(2000));
-    ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped).WillByDefault(Return(-2000));
+    ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped)
+        .WillByDefault(ReturnPointee(&leftEncUnwrapped));
+    ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped)
+        .WillByDefault(ReturnPointee(&rightEncUnwrapped));
+
+    leftEncUnwrapped = 2000;
+    rightEncUnwrapped = 100;
+    EXPECT_NEAR(calculatePosition((2'000 + 100) / 2), sentinelDrive.absolutePosition(), 1E-3);
+
+    leftEncUnwrapped = 2'000;
+    rightEncUnwrapped = -2'000;
     EXPECT_NEAR(calculatePosition(0), sentinelDrive.absolutePosition(), 1E-3);
 
-    ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped).WillByDefault(Return(20000));
-    ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped).WillByDefault(Return(20000));
-    EXPECT_NEAR(calculatePosition(20000), sentinelDrive.absolutePosition(), 1E-3);
+    leftEncUnwrapped = 20'000;
+    rightEncUnwrapped = 20'000;
+    EXPECT_NEAR(calculatePosition(20'000), sentinelDrive.absolutePosition(), 1E-3);
 }
 
-TEST(SentinelDriveSubsystem, desired_output_reasonable_for_various_setpoints)
+TEST_F(SentinelDriveSubsystemTest, desired_output_reasonable_for_various_setpoints)
 {
-    aruwsrc::Drivers drivers;
-    SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
-
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(true));
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(true));
+
+    int16_t shaftRpm = 0;
+
+    ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(ReturnPointee(&shaftRpm));
+    ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(ReturnPointee(&shaftRpm));
+
+    {
+        InSequence sequence;
+        EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(0));
+        EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(Gt(0)));
+        EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(Lt(0)));
+        EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(Lt(0)));
+        EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(Gt(0)));
+    }
+
+    {
+        InSequence sequence;
+        EXPECT_CALL(sentinelDrive.leftWheel, setDesiredOutput(0));
+        EXPECT_CALL(sentinelDrive.leftWheel, setDesiredOutput(Gt(0)));
+        EXPECT_CALL(sentinelDrive.leftWheel, setDesiredOutput(Lt(0)));
+        EXPECT_CALL(sentinelDrive.leftWheel, setDesiredOutput(Lt(0)));
+        EXPECT_CALL(sentinelDrive.leftWheel, setDesiredOutput(Gt(0)));
+    }
 
     // 0 desired and actual = 0 output
     sentinelDrive.setDesiredRpm(0);
-    SET_SHAFT_RPM(0);
-    SET_EXPECTED_OUTPUT(0);
+    shaftRpm = 0;
     sentinelDrive.refresh();
 
     // 1000 desired, 0 actual = positive output
     sentinelDrive.setDesiredRpm(1000);
-    SET_SHAFT_RPM(0);
-    SET_EXPECTED_OUTPUT(Gt(0));
+    shaftRpm = 0;
     sentinelDrive.refresh();
 
     // 0 desired, 1000 actual = negative output
     sentinelDrive.setDesiredRpm(0);
-    SET_SHAFT_RPM(1000);
-    SET_EXPECTED_OUTPUT(Lt(0));
+    shaftRpm = 1000;
     sentinelDrive.refresh();
 
     // -1000 desired, 0 actual = negative output
     sentinelDrive.setDesiredRpm(-1000);
-    SET_SHAFT_RPM(0);
-    SET_EXPECTED_OUTPUT(Lt(0));
+    shaftRpm = 0;
     sentinelDrive.refresh();
 
     // 0 desired, -1000 actual = positive output
     sentinelDrive.setDesiredRpm(0);
-    SET_SHAFT_RPM(-1000);
-    SET_EXPECTED_OUTPUT(Gt(0));
+    shaftRpm = -1000;
     sentinelDrive.refresh();
 }
 
-TEST(SentinelDriveSubsystem, runHardwareTests_sets_complete_if_shaftRPM_large)
+TEST_F(SentinelDriveSubsystemTest, runHardwareTests_sets_complete_if_shaftRPM_large)
 {
-    aruwsrc::Drivers drivers;
-    SentinelDriveSubsystem sentinelDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
+    int16_t leftShaftRpm = 0;
+    int16_t rightShaftRpm = 0;
+
+    ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(ReturnPointee(&leftShaftRpm));
+    ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(ReturnPointee(&rightShaftRpm));
 
     // large negative, tests not complete
-    ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(Return(-1000));
-    ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(Return(-1000));
-
+    leftShaftRpm = -1'000;
+    rightShaftRpm = -1'000;
     sentinelDrive.runHardwareTests();
 
     EXPECT_FALSE(sentinelDrive.isHardwareTestComplete());
 
     // small positive, tests not complete
-    ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(Return(10));
-    ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(Return(10));
-
+    leftShaftRpm = 10;
+    rightShaftRpm = 10;
     sentinelDrive.runHardwareTests();
 
     EXPECT_FALSE(sentinelDrive.isHardwareTestComplete());
 
     // one small positive, tests not complete
-    ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(Return(10));
-    ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(Return(10000));
-
+    leftShaftRpm = 10;
+    rightShaftRpm = 10'000;
     sentinelDrive.runHardwareTests();
 
     EXPECT_FALSE(sentinelDrive.isHardwareTestComplete());
 
     // two large positive, tests complete
-    ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(Return(10000));
-    ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(Return(10000));
-
+    leftShaftRpm = 10'000;
+    rightShaftRpm = 10'000;
     sentinelDrive.runHardwareTests();
 
     EXPECT_TRUE(sentinelDrive.isHardwareTestComplete());

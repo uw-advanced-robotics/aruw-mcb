@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -30,495 +30,228 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using aruwsrc::Drivers;
 using aruwsrc::control::ControlOperatorInterface;
-using tap::Remote;
+using namespace tap::communication::serial;
 using namespace testing;
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
 
-static constexpr float MAX_REMOTE = 1.0f;
-
-#define INIT_TEST    \
-    Drivers drivers; \
-    ControlOperatorInterface operatorInterface(&drivers);
-
-static float runChassisXInputTest(
-    Drivers &drivers,
-    ControlOperatorInterface &operatorInterface,
-    float remoteVal,
-    bool wPressed,
-    bool sPressed,
-    bool shiftPressed = false,
-    bool ctrlPressed = false)
+class ControlOperatorInterfaceTest : public Test
 {
-    EXPECT_CALL(drivers.remote, getUpdateCounter).WillOnce(Return(1));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::W)).WillOnce(Return(wPressed));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::S)).WillOnce(Return(sPressed));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::SHIFT)).WillOnce(Return(shiftPressed));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::CTRL)).WillOnce(Return(ctrlPressed));
-    EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_VERTICAL))
-        .WillOnce(Return(remoteVal));
-    return operatorInterface.getChassisXInput();
+protected:
+    ControlOperatorInterfaceTest() : operatorInterface(&drivers) {}
+
+    void SetUp() override
+    {
+        ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+        ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
+        ON_CALL(drivers.remote, getUpdateCounter).WillByDefault(ReturnPointee(&updateCounter));
+    }
+
+    Drivers drivers;
+    ClockStub clock;
+    ControlOperatorInterface operatorInterface;
+    tap::communication::serial::RefSerialData::Rx::RobotData robotData;
+    uint32_t updateCounter = 0;
+};
+
+static constexpr float MAX_CHASSIS_SPEED =
+    aruwsrc::chassis::CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
+
+using COIChassisTuple = std::tuple<float, bool, bool, bool, bool, float>;
+
+class ChassisTest : public ControlOperatorInterfaceTest, public WithParamInterface<COIChassisTuple>
+{
+};
+
+TEST_P(ChassisTest, getChassisXInput_settles_to_des_rpm)
+{
+    auto params = GetParam();
+
+    float remoteVal = std::get<0>(params);
+    bool wPressed = std::get<1>(params);
+    bool sPressed = std::get<2>(params);
+    bool shiftPressed = std::get<3>(params);
+    bool ctrlPressed = std::get<4>(params);
+    float expectedValue = std::get<5>(params);
+
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::W)).WillByDefault(Return(wPressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::S)).WillByDefault(Return(sPressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::SHIFT)).WillByDefault(Return(shiftPressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::CTRL)).WillByDefault(Return(ctrlPressed));
+    ON_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_VERTICAL))
+        .WillByDefault(Return(remoteVal));
+
+    // Since acceleration schemes are volatile, we only care about steady state behavior of the
+    // function, so call it a bunch to allow it to settle to the expected value
+    for (int i = 0; i < 10; i++)
+    {
+        clock.time += 1'000;
+        updateCounter++;
+        operatorInterface.getChassisXInput();
+    }
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getChassisXInput(), 1E-3);
 }
 
-static float runChassisYInputTest(
-    Drivers &drivers,
-    ControlOperatorInterface &operatorInterface,
-    float remoteVal,
-    bool dPressed,
-    bool aPressed,
-    bool shiftPressed = false,
-    bool ctrlPressed = false)
+TEST_P(ChassisTest, getChassisYInput_settles_to_des_rpm)
 {
-    EXPECT_CALL(drivers.remote, getUpdateCounter).WillOnce(Return(1));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::A)).WillOnce(Return(aPressed));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::D)).WillOnce(Return(dPressed));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::SHIFT)).WillOnce(Return(shiftPressed));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::CTRL)).WillOnce(Return(ctrlPressed));
-    EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_HORIZONTAL))
-        .WillOnce(Return(remoteVal));
-    return operatorInterface.getChassisYInput();
+    auto params = GetParam();
+
+    float remoteVal = std::get<0>(params);
+    bool aPressed = std::get<1>(params);
+    bool dPressed = std::get<2>(params);
+    bool shiftPressed = std::get<3>(params);
+    bool ctrlPressed = std::get<4>(params);
+    float expectedValue = std::get<5>(params);
+
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::A)).WillByDefault(Return(aPressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::D)).WillByDefault(Return(dPressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::SHIFT)).WillByDefault(Return(shiftPressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::CTRL)).WillByDefault(Return(ctrlPressed));
+    ON_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_HORIZONTAL))
+        .WillByDefault(Return(-remoteVal));
+
+    for (int i = 0; i < 10; i++)
+    {
+        clock.time += 1'000;
+        updateCounter++;
+        operatorInterface.getChassisYInput();
+    }
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getChassisYInput(), 1E-3);
 }
 
-static float runChassisRInputTest(
-    Drivers &drivers,
-    ControlOperatorInterface &operatorInterface,
-    float remoteVal,
-    bool qPressed,
-    bool ePressed)
+TEST_P(ChassisTest, getChassisRInput_settles_to_des_rpm)
 {
-    EXPECT_CALL(drivers.remote, getUpdateCounter).WillOnce(Return(1));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::Q)).WillOnce(Return(qPressed));
-    EXPECT_CALL(drivers.remote, keyPressed(Remote::Key::E)).WillOnce(Return(ePressed));
-    EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_HORIZONTAL))
-        .WillOnce(Return(remoteVal));
-    return operatorInterface.getChassisRInput();
+    auto params = GetParam();
+
+    float remoteVal = std::get<0>(params);
+    bool qPressed = std::get<1>(params);
+    bool ePressed = std::get<2>(params);
+    bool shiftPressed = std::get<3>(params);
+    bool ctrlPressed = std::get<4>(params);
+    float expectedValue = std::get<5>(params);
+
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::Q)).WillByDefault(Return(qPressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::E)).WillByDefault(Return(ePressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::SHIFT)).WillByDefault(Return(shiftPressed));
+    ON_CALL(drivers.remote, keyPressed(Remote::Key::CTRL)).WillByDefault(Return(ctrlPressed));
+    ON_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_HORIZONTAL))
+        .WillByDefault(Return(-remoteVal));
+
+    for (int i = 0; i < 10; i++)
+    {
+        clock.time += 1'000;
+        updateCounter++;
+        operatorInterface.getChassisRInput();
+    }
+
+    // Do this to compensate for the fact that rotation doesn't account for shift/ctrl (this is on
+    // purpose)
+    if (shiftPressed)
+    {
+        expectedValue /= 0.5f;
+    }
+    if (ctrlPressed)
+    {
+        expectedValue /= 0.25f;
+    }
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getChassisRInput(), 1E-3);
 }
 
-static float runTurretYawInputTest(
-    Drivers &drivers,
-    ControlOperatorInterface &operatorInterface,
-    float remoteInput,
-    int16_t mouseInput)
+INSTANTIATE_TEST_SUITE_P(
+    ControlOperatorInterface,
+    ChassisTest,
+    Values(
+        COIChassisTuple(0, false, false, false, false, 0),
+        COIChassisTuple(0, true, false, false, false, MAX_CHASSIS_SPEED),
+        COIChassisTuple(0, true, true, false, false, 0),
+        COIChassisTuple(0, false, true, false, false, -MAX_CHASSIS_SPEED),
+        COIChassisTuple(1, false, false, false, false, MAX_CHASSIS_SPEED),
+        COIChassisTuple(1, false, true, false, false, 0),
+        COIChassisTuple(0, true, false, true, false, MAX_CHASSIS_SPEED * 0.5),
+        COIChassisTuple(0, true, false, false, true, MAX_CHASSIS_SPEED * 0.25),
+        COIChassisTuple(0, true, false, true, true, MAX_CHASSIS_SPEED * 0.25 * 0.5),
+        COIChassisTuple(0.5, false, false, false, false, MAX_CHASSIS_SPEED * 0.5)));
+
+class TurretTest : public ControlOperatorInterfaceTest,
+                   public WithParamInterface<std::tuple<float, int16_t, float>>
 {
+};
+
+TEST_P(TurretTest, getTurretYawInput_returns_user_input)
+{
+    auto params = GetParam();
+
+    float remoteInput = std::get<0>(params);
+    int16_t mouseInput = std::get<1>(params);
+    float expectedValue = std::get<2>(params);
+
     EXPECT_CALL(drivers.remote, getMouseX).WillOnce(Return(mouseInput));
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_HORIZONTAL))
         .WillOnce(Return(remoteInput));
-    return operatorInterface.getTurretYawInput();
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretYawInput(), 1E-3);
 }
 
-static float runTurretPitchInputTest(
-    Drivers &drivers,
-    ControlOperatorInterface &operatorInterface,
-    float remoteInput,
-    int16_t mouseInput)
+TEST_P(TurretTest, getTurretPitchInput_returns_user_input)
 {
-    EXPECT_CALL(drivers.remote, getMouseY).WillOnce(Return(mouseInput));
+    auto params = GetParam();
+
+    float remoteInput = std::get<0>(params);
+    int16_t mouseInput = std::get<1>(params);
+    float expectedValue = std::get<2>(params);
+
+    EXPECT_CALL(drivers.remote, getMouseY).WillOnce(Return(-mouseInput));
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_VERTICAL))
         .WillOnce(Return(remoteInput));
-    return operatorInterface.getTurretPitchInput();
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretPitchInput(), 1E-3);
 }
 
-static float runSentinelChassisInputTest(
-    Drivers &drivers,
-    ControlOperatorInterface &operatorInterface,
-    float remoteInput)
-{
-    EXPECT_CALL(drivers.remote, getChannel).WillOnce(Return(remoteInput));
-    return operatorInterface.getSentinelSpeedInput();
-}
-
-// Tests run x, y and r input at the same time, testing similar input parameters.
-
-TEST(ControlOperatorInterface, getChassisInput_zeros)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(0, runChassisXInputTest(drivers, operatorInterface, 0, false, false), 1E-3);
-    EXPECT_NEAR(0, runChassisYInputTest(drivers, operatorInterface, 0, false, false), 1E-3);
-    EXPECT_NEAR(0, runChassisRInputTest(drivers, operatorInterface, 0, false, false), 1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_min_key_user_input_limited)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        -ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX,
-        runChassisXInputTest(drivers, operatorInterface, 0, false, true),
-        1E-3);
-    EXPECT_NEAR(
-        -ControlOperatorInterface::CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX,
-        runChassisYInputTest(drivers, operatorInterface, 0, false, true),
-        1E-3);
-    EXPECT_NEAR(
-        -ControlOperatorInterface::CHASSIS_R_KEY_INPUT_FILTER_ALPHA,
-        runChassisRInputTest(drivers, operatorInterface, 0, false, true),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_max_key_user_input_limited)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX,
-        runChassisXInputTest(drivers, operatorInterface, 0, true, false),
-        1E-3);
-    EXPECT_NEAR(
-        ControlOperatorInterface::CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX,
-        runChassisYInputTest(drivers, operatorInterface, 0, true, false),
-        1E-3);
-    EXPECT_NEAR(
-        ControlOperatorInterface::CHASSIS_R_KEY_INPUT_FILTER_ALPHA,
-        runChassisRInputTest(drivers, operatorInterface, 0, true, false),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_min_and_max_keys_cancel)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(0, runChassisXInputTest(drivers, operatorInterface, 0, true, true), 1E-3);
-    EXPECT_NEAR(0, runChassisYInputTest(drivers, operatorInterface, 0, true, true), 1E-3);
-    EXPECT_NEAR(0, runChassisRInputTest(drivers, operatorInterface, 0, true, true), 1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_min_remote_limited)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        -1,
-        runChassisXInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false),
-        1E-3);
-    EXPECT_NEAR(
-        -1,
-        runChassisYInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false),
-        1E-3);
-    EXPECT_NEAR(
-        -1,
-        runChassisRInputTest(drivers, operatorInterface, -MAX_REMOTE - 10, false, false),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_max_remote_limited)
-{
-    INIT_TEST
-    setTime(1);
-
-    EXPECT_NEAR(
-        1,
-        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false),
-        1E-3);
-    EXPECT_NEAR(
-        1,
-        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false),
-        1E-3);
-    EXPECT_NEAR(
-        1,
-        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE + 10, false, false),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_half_min_remote_half_min_output)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        -0.5f,
-        runChassisXInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false),
-        1E-3);
-    EXPECT_NEAR(
-        -0.5f,
-        runChassisYInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false),
-        1E-3);
-    EXPECT_NEAR(
-        -0.5f,
-        runChassisRInputTest(drivers, operatorInterface, -MAX_REMOTE / 2.0f, false, false),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_half_max_remote_half_max_output)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        0.5f,
-        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false),
-        1E-3);
-    EXPECT_NEAR(
-        0.5f,
-        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false),
-        1E-3);
-    EXPECT_NEAR(
-        0.5f,
-        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, false, false),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_max_remote_and_min_key_pressed_cancels)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        -ControlOperatorInterface::CHASSIS_X_KEY_INPUT_FILTER_ALPHA_MAX + MAX_REMOTE,
-        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE, false, true),
-        1E-3);
-    EXPECT_NEAR(
-        -ControlOperatorInterface::CHASSIS_Y_KEY_INPUT_FILTER_ALPHA_MAX + MAX_REMOTE,
-        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE, false, true),
-        1E-3);
-    EXPECT_NEAR(
-        -ControlOperatorInterface::CHASSIS_R_KEY_INPUT_FILTER_ALPHA + MAX_REMOTE,
-        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE, false, true),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_half_max_remote_and_max_and_min_key_pressed_cancels)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        0.5f,
-        runChassisXInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true),
-        1E-3);
-    EXPECT_NEAR(
-        0.5f,
-        runChassisYInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true),
-        1E-3);
-    EXPECT_NEAR(
-        0.5f,
-        runChassisRInputTest(drivers, operatorInterface, MAX_REMOTE / 2.0f, true, true),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getChassisInput_shift)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        1.0f * ControlOperatorInterface::SHIFT_SCALAR,
-        runChassisXInputTest(drivers, operatorInterface, 1.0f, true, false, true),
-        1E-3);  // walk forward
-    EXPECT_NEAR(
-        1.0f * ControlOperatorInterface::SHIFT_SCALAR,
-        runChassisYInputTest(drivers, operatorInterface, 1.0f, true, false, true),
-        1E-3);  // walk left
-}
-
-TEST(ControlOperatorInterface, getChassisInput_ctrl)
-{
-    INIT_TEST
-    setTime(1);
-    EXPECT_NEAR(
-        1.0f * ControlOperatorInterface::CTRL_SCALAR,
-        runChassisXInputTest(drivers, operatorInterface, 1.0f, true, false, false, true),
-        1E-3);  // crouch forward
-    EXPECT_NEAR(
-        1.0f * ControlOperatorInterface::CTRL_SCALAR,
-        runChassisYInputTest(drivers, operatorInterface, 1.0f, true, false, false, true),
-        1E-3);  // crouch
-                // left
-}
-
-// Note: Remote input inverted for yaw control.
-
-TEST(ControlOperatorInterface, getTurretInput_zeros)
-{
-    INIT_TEST
-    EXPECT_NEAR(0, runTurretYawInputTest(drivers, operatorInterface, 0, 0), 1E-3);
-    EXPECT_NEAR(0, runTurretPitchInputTest(drivers, operatorInterface, 0, 0), 1E-3);
-}
-
-TEST(ControlOperatorInterface, getTurretInput_min_remote_input_limited)
-{
-    INIT_TEST
-    EXPECT_NEAR(1, runTurretYawInputTest(drivers, operatorInterface, -1, 0), 1E-3);
-    EXPECT_NEAR(-1, runTurretPitchInputTest(drivers, operatorInterface, -1, 0), 1E-3);
-}
-
-TEST(ControlOperatorInterface, getTurretInput_max_remote_input_limited)
-{
-    INIT_TEST
-    EXPECT_NEAR(-1, runTurretYawInputTest(drivers, operatorInterface, 1, 0), 1E-3);
-    EXPECT_NEAR(1, runTurretPitchInputTest(drivers, operatorInterface, 1, 0), 1E-3);
-}
-
-TEST(ControlOperatorInterface, getTurretInput_range_of_remote_input_directly_maps_to_output)
-{
-    INIT_TEST
-    for (float i = -1; i < 1; i += 0.1f)
-    {
-        EXPECT_NEAR(-i, runTurretYawInputTest(drivers, operatorInterface, i, 0), 1E-3);
-        EXPECT_NEAR(i, runTurretPitchInputTest(drivers, operatorInterface, i, 0), 1E-3);
-    }
-}
-
-TEST(ControlOperatorInterface, getTurretInput_min_mouse_limited)
-{
-    INIT_TEST
-    EXPECT_NEAR(1, runTurretYawInputTest(drivers, operatorInterface, 0, INT16_MIN + 1), 1E-3);
-    EXPECT_NEAR(1, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MIN + 1), 1E-3);
-
-    EXPECT_NEAR(
-        1,
-        runTurretYawInputTest(
-            drivers,
-            operatorInterface,
-            0,
-            -ControlOperatorInterface::USER_MOUSE_YAW_MAX - 100),
-        1E-3);
-    EXPECT_NEAR(
-        1,
-        runTurretPitchInputTest(
-            drivers,
-            operatorInterface,
-            0,
-            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX - 100),
-        1E-3);
-
-    EXPECT_NEAR(
-        1,
-        runTurretYawInputTest(
-            drivers,
-            operatorInterface,
-            0,
-            -ControlOperatorInterface::USER_MOUSE_YAW_MAX),
-        1E-3);
-    EXPECT_NEAR(
-        1,
-        runTurretPitchInputTest(
-            drivers,
-            operatorInterface,
-            0,
-            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getTurretInput_max_mouse_limited)
-{
-    INIT_TEST
-    EXPECT_NEAR(-1, runTurretYawInputTest(drivers, operatorInterface, 0, INT16_MAX), 1E-3);
-    EXPECT_NEAR(-1, runTurretPitchInputTest(drivers, operatorInterface, 0, INT16_MAX), 1E-3);
-
-    EXPECT_NEAR(
-        -1,
-        runTurretYawInputTest(
-            drivers,
-            operatorInterface,
-            0,
-            ControlOperatorInterface::USER_MOUSE_YAW_MAX + 100),
-        1E-3);
-    EXPECT_NEAR(
-        -1,
-        runTurretPitchInputTest(
-            drivers,
-            operatorInterface,
-            0,
-            ControlOperatorInterface::USER_MOUSE_PITCH_MAX + 100),
-        1E-3);
-
-    EXPECT_NEAR(
-        -1,
-        runTurretYawInputTest(
-            drivers,
-            operatorInterface,
-            0,
-            ControlOperatorInterface::USER_MOUSE_YAW_MAX),
-        1E-3);
-    EXPECT_NEAR(
-        -1,
-        runTurretPitchInputTest(
-            drivers,
-            operatorInterface,
-            0,
-            ControlOperatorInterface::USER_MOUSE_PITCH_MAX),
-        1E-3);
-}
-
-TEST(
+INSTANTIATE_TEST_SUITE_P(
     ControlOperatorInterface,
-    getTurretInput_range_of_mouse_mappings_directly_maps_to_output_within_min_max_boundary)
+    TurretTest,
+    Values(
+        std::tuple<float, int16_t, float>(0, 0, 0),
+        std::tuple<float, int16_t, float>(-1, 0, 1),
+        std::tuple<float, int16_t, float>(-0.9, 0, 0.9),
+        std::tuple<float, int16_t, float>(-0.9, 0, 0.9),
+        std::tuple<float, int16_t, float>(-0.6, 0, 0.6),
+        std::tuple<float, int16_t, float>(-0.2, 0, 0.2),
+        std::tuple<float, int16_t, float>(0, INT16_MIN + 1, 1),
+        std::tuple<float, int16_t, float>(0, INT16_MAX - 1, -1),
+        std::tuple<float, int16_t, float>(1, INT16_MIN + 1, 0)));
+
+class SentinelChassisTest : public ControlOperatorInterfaceTest,
+                            public WithParamInterface<std::tuple<float, float>>
 {
-    INIT_TEST
-    for (int16_t i = -ControlOperatorInterface::USER_MOUSE_YAW_MAX;
-         i < ControlOperatorInterface::USER_MOUSE_YAW_MAX;
-         i += 10)
-    {
-        EXPECT_NEAR(
-            static_cast<float>(i) / ControlOperatorInterface::USER_MOUSE_YAW_MAX,
-            runTurretYawInputTest(drivers, operatorInterface, 0, -i),
-            1E-3);
-    }
-    for (int16_t i = -ControlOperatorInterface::USER_MOUSE_PITCH_MAX;
-         i < ControlOperatorInterface::USER_MOUSE_PITCH_MAX;
-         i += 10)
-    {
-        EXPECT_NEAR(
-            -static_cast<float>(i) / ControlOperatorInterface::USER_MOUSE_PITCH_MAX,
-            runTurretPitchInputTest(drivers, operatorInterface, 0, i),
-            1E-3);
-    }
+};
+
+TEST_P(SentinelChassisTest, getSentinelSpeedInput_retuns_user_input)
+{
+    ON_CALL(drivers.remote, getChannel).WillByDefault(Return(std::get<0>(GetParam())));
+
+    EXPECT_NEAR(std::get<1>(GetParam()), operatorInterface.getSentinelSpeedInput(), 1E-3);
 }
 
-TEST(ControlOperatorInterface, getTurretInput_mouse_and_remote_mappings_additive)
-{
-    INIT_TEST
-    EXPECT_NEAR(
-        -1,
-        runTurretYawInputTest(
-            drivers,
-            operatorInterface,
-            MAX_REMOTE / 2.0f,
-            ControlOperatorInterface::USER_MOUSE_YAW_MAX / 2.0f),
-        1E-3);
-    EXPECT_NEAR(
-        1,
-        runTurretPitchInputTest(
-            drivers,
-            operatorInterface,
-            MAX_REMOTE / 2.0f,
-            -ControlOperatorInterface::USER_MOUSE_PITCH_MAX / 2.0f),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getSentinelSpeedInput_zeros)
-{
-    INIT_TEST
-    EXPECT_NEAR(0, runSentinelChassisInputTest(drivers, operatorInterface, 0), 1E-3);
-}
-
-TEST(ControlOperatorInterface, getSentinelSpeedInput_min_remote)
-{
-    INIT_TEST
-    EXPECT_NEAR(
-        -MAX_REMOTE * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR,
-        runSentinelChassisInputTest(drivers, operatorInterface, -MAX_REMOTE),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getSentinelSpeedInput_max_remote)
-{
-    INIT_TEST
-    EXPECT_NEAR(
-        MAX_REMOTE * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR,
-        runSentinelChassisInputTest(drivers, operatorInterface, MAX_REMOTE),
-        1E-3);
-}
-
-TEST(ControlOperatorInterface, getSentinelSpeedInput_complete_remote_range_valid)
-{
-    INIT_TEST
-    for (float i = -MAX_REMOTE; i < MAX_REMOTE; i += 0.1f)
-    {
-        EXPECT_NEAR(
-            i * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR,
-            runSentinelChassisInputTest(drivers, operatorInterface, i),
-            1E-3);
-    }
-}
+INSTANTIATE_TEST_SUITE_P(
+    ControlOperatorInterface,
+    SentinelChassisTest,
+    Values(
+        std::tuple<float, float>(0, 0),
+        std::tuple<float, float>(-1, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(1, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(
+            0.5,
+            0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(
+            -0.5,
+            -0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR)));

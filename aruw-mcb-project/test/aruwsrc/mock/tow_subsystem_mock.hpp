@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef TOW_SUBSYSTEM_MOCK_HPP_
+#define TOW_SUBSYSTEM_MOCK_HPP_
+
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/engineer/tow_subsystem.hpp"
@@ -45,3 +48,5 @@ public:
 };  // class TowSubsystem
 }  // namespace mock
 }  // namespace aruwsrc
+
+#endif  // TOW_SUBSYSTEM_MOCK_HPP_

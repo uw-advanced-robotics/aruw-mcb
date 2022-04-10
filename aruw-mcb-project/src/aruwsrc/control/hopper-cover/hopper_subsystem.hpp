@@ -23,8 +23,8 @@
    the open position and the close position
 */
 
-#ifndef __OPEN_HOPPER_SUBSYSTEM__
-#define __OPEN_HOPPER_SUBSYSTEM__
+#ifndef HOPPER_SUBSYSTEM_HPP_
+#define HOPPER_SUBSYSTEM_HPP_
 
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/subsystem.hpp"
@@ -109,4 +109,4 @@ private:
 
 }  // namespace aruwsrc
 
-#endif
+#endif  // HOPPER_SUBSYSTEM_HPP_

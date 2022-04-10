@@ -19,6 +19,7 @@
 
 #include "world_frame_turret_imu_turret_controller.hpp"
 
+#include "../constants/turret_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -128,14 +129,19 @@ WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadeP
 
 void WorldFrameYawTurretImuCascadePidTurretController::initialize()
 {
-    positionPid.reset();
-    velocityPid.reset();
+    if (this != turretSubsystem->getPrevRanYawTurretController())
+    {
+        positionPid.reset();
+        velocityPid.reset();
 
-    // Capture initial target angle in chassis frame and transform to world frame.
-    worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-        turretSubsystem->getCurrentYawValue().getValue(),
-        drivers->turretMCBCanComm.getYaw(),
-        turretSubsystem->getYawSetpoint()));
+        // Capture initial target angle in chassis frame and transform to world frame.
+        worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
+            turretSubsystem->getCurrentYawValue().getValue(),
+            drivers->turretMCBCanComm.getYaw(),
+            turretSubsystem->getYawSetpoint()));
+
+        turretSubsystem->setPrevRanYawTurretController(this);
+    }
 }
 
 void WorldFrameYawTurretImuCascadePidTurretController::runController(
@@ -233,13 +239,18 @@ WorldFramePitchTurretImuCascadePidTurretController::
 
 void WorldFramePitchTurretImuCascadePidTurretController::initialize()
 {
-    positionPid.reset();
-    velocityPid.reset();
+    if (turretSubsystem->getPrevRanPitchTurretController() != this)
+    {
+        positionPid.reset();
+        velocityPid.reset();
 
-    worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-        turretSubsystem->getCurrentPitchValue().getValue(),
-        drivers->turretMCBCanComm.getPitch(),
-        turretSubsystem->getPitchSetpoint()));
+        worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
+            turretSubsystem->getCurrentPitchValue().getValue(),
+            drivers->turretMCBCanComm.getPitch(),
+            turretSubsystem->getPitchSetpoint()));
+
+        turretSubsystem->setPrevRanPitchTurretController(this);
+    }
 }
 
 void WorldFramePitchTurretImuCascadePidTurretController::runController(
@@ -264,10 +275,10 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
     float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
     velocityPidOutput += computeGravitationalForceOffset(
-        TurretSubsystem::TURRET_CG_X,
-        TurretSubsystem::TURRET_CG_Z,
-        turretSubsystem->getPitchAngleFromCenter(),
-        TurretSubsystem::GRAVITY_COMPENSATION_SCALAR);
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        -turretSubsystem->getPitchAngleFromCenter(),
+        GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(velocityPidOutput);
 }

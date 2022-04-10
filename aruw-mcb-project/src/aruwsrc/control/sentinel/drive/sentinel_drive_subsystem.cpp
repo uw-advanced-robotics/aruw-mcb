@@ -84,6 +84,20 @@ void SentinelDriveSubsystem::initialize()
 
 void SentinelDriveSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
 
+modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelative() const
+{
+    static constexpr float C = 2 * M_PI * WHEEL_RADIUS / 1000.0f;
+    static constexpr float RPM_TO_MPS = C / (60.0f * GEAR_RATIO);
+    float wheelVelRPM =
+        leftWheel.getShaftRPM();  // (leftWheel.getShaftRPM() + rightWheel.getShaftRPM()) / 2.0f;
+
+    modm::Matrix<float, 3, 1> wheelVelMat;
+    wheelVelMat[0][0] = 0;
+    wheelVelMat[0][1] = -wheelVelRPM * RPM_TO_MPS;
+    wheelVelMat[0][2] = 0;
+    return wheelVelMat;
+}
+
 void SentinelDriveSubsystem::refresh()
 {
     velocityPidLeftWheel.update(desiredRpm - leftWheel.getShaftRPM());
@@ -155,8 +169,8 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 
 // Returns the distance covered by the sentinel wheel on the rail
 // with respect to the encoders
-// Equation used: Arc Length = Angle * numberOfRotations * radius
-// Here we get the radius from the getEncoderUnwrapped function
+// Equation used: Arc Length = Angle * radius
+// Here we get the shaft angle from the getEncoderUnwrapped function
 float SentinelDriveSubsystem::distanceFromEncoder(tap::motor::DjiMotor* motor)
 {
     float unwrappedAngle = motor->getEncoderUnwrapped();

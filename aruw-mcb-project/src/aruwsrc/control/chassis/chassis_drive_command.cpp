@@ -42,7 +42,7 @@ void ChassisDriveCommand::initialize() {}
 
 void ChassisDriveCommand::execute() { ChassisRelDrive::onExecute(drivers, chassis); }
 
-void ChassisDriveCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
+void ChassisDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisDriveCommand::isFinished() const { return false; }
 

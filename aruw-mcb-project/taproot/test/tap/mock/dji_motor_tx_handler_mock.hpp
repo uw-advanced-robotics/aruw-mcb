@@ -17,8 +17,8 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DJI_MOTOR_TX_HANDLER_MOCK_HPP_
-#define DJI_MOTOR_TX_HANDLER_MOCK_HPP_
+#ifndef TAPROOT_DJI_MOTOR_TX_HANDLER_MOCK_HPP_
+#define TAPROOT_DJI_MOTOR_TX_HANDLER_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
@@ -37,7 +37,7 @@ public:
     virtual ~DjiMotorTxHandlerMock();
 
     MOCK_METHOD(void, addMotorToManager, (tap::motor::DjiMotor * motor), (override));
-    MOCK_METHOD(void, processCanSendData, (), (override));
+    MOCK_METHOD(void, encodeAndSendCanData, (), (override));
     MOCK_METHOD(void, removeFromMotorManager, (const tap::motor::DjiMotor &motor), (override));
     MOCK_METHOD(
         const tap::motor::DjiMotor *,
@@ -53,4 +53,4 @@ public:
 }  // namespace mock
 }  // namespace tap
 
-#endif  //  DJI_MOTOR_TX_HANDLER_MOCK_HPP_
+#endif  //  TAPROOT_DJI_MOTOR_TX_HANDLER_MOCK_HPP_

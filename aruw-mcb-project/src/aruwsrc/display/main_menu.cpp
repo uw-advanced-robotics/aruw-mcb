@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -28,17 +28,19 @@ namespace aruwsrc
 namespace display
 {
 MainMenu::MainMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* stack,
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>>* stack,
     aruwsrc::Drivers* drivers)
-    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, MAIN_MENU_ID),
+    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
+      cvMenu(stack, drivers),
       errorMenu(stack, drivers),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers),
       commandSchedulerMenu(stack, drivers),
       refSerialMenu(stack, drivers),
       imuMenu(stack, &drivers->mpu6500)
+      turretStatusMenu(stack, drivers)
 {
 }
 
@@ -46,17 +48,22 @@ void MainMenu::initialize()
 {
     addEntry(
         ImuCalibrateMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addImuCalibrateMenuCallback));
     addEntry(
+        CVMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addCVMenuCallback));
+    addEntry(
         MotorMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addMotorMenuCallback));
     addEntry(
         RefSerialMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addRefSerialMenuCallback));
     addEntry(
@@ -65,13 +72,18 @@ void MainMenu::initialize()
             this,
             &MainMenu::addImuMenuCallback));
     addEntry(
+        TurretMCBMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addTurretMCBMenuCallback));
+    addEntry(
         CommandSchedulerMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addCommandSchedulerCallback));
     addEntry(
         HardwareTestMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addHardwareTestMenuCallback));
 
@@ -82,6 +94,12 @@ void MainMenu::addImuCalibrateMenuCallback()
 {
     ImuCalibrateMenu* icm = new (&imuCalibrateMenu) ImuCalibrateMenu(getViewStack(), drivers);
     getViewStack()->push(icm);
+}
+
+void MainMenu::addCVMenuCallback()
+{
+    CVMenu* cvm = new (&cvMenu) CVMenu(getViewStack(), drivers);
+    getViewStack()->push(cvm);
 }
 
 void MainMenu::addErrorMenuCallback()
@@ -126,6 +144,12 @@ void MainMenu::addImuMenuCallback()
     tap::sensors::imu::ImuMenu* imc =
         new (&imuMenu) tap::sensors::imu::ImuMenu(getViewStack(), &drivers->mpu6500);
     getViewStack()->push(imc);
+}
+
+void MainMenu::addTurretMCBMenuCallback()
+{
+    TurretMCBMenu* tsm = new (&turretStatusMenu) TurretMCBMenu(getViewStack(), drivers);
+    getViewStack()->push(tsm);
 }
 }  // namespace display
 
