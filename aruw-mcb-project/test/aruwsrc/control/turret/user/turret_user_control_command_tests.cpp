@@ -21,6 +21,7 @@
 
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
@@ -106,10 +107,10 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
         turret,
         setPitchMotorOutput(FloatNear(
             computeGravitationalForceOffset(
-                TurretSubsystem::TURRET_CG_X,
-                TurretSubsystem::TURRET_CG_Z,
+                TURRET_CG_X,
+                TURRET_CG_Z,
                 0,
-                TurretSubsystem::GRAVITY_COMPENSATION_SCALAR),
+                GRAVITY_COMPENSATION_SCALAR),
             1E-3)));
     EXPECT_CALL(turret, setYawMotorOutput(0));
     EXPECT_CALL(turret, setPitchSetpoint(90));
@@ -136,10 +137,10 @@ TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
     EXPECT_CALL(
         turret,
         setPitchMotorOutput(Gt(computeGravitationalForceOffset(
-            TurretSubsystem::TURRET_CG_X,
-            TurretSubsystem::TURRET_CG_Z,
+            TURRET_CG_X,
+            TURRET_CG_Z,
             0,
-            TurretSubsystem::GRAVITY_COMPENSATION_SCALAR))));
+            GRAVITY_COMPENSATION_SCALAR))));
     EXPECT_CALL(turret, setYawMotorOutput(Lt(0)));
     EXPECT_CALL(turret, setPitchSetpoint(Gt(90))).WillRepeatedly([&](float setpoint) {
         pitchSetpoint = setpoint;

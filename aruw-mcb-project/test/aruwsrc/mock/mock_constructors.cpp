@@ -83,7 +83,11 @@ ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers)
-    : FrictionWheelSubsystem(drivers)
+    : FrictionWheelSubsystem(
+          drivers,
+          tap::motor::MOTOR1,
+          tap::motor::MOTOR2,
+          tap::can::CanBus::CAN_BUS1)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}

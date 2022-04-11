@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,13 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ENGINEER_TURRET_CONTROLLER_CONSTANTS_HPP_
-#define ENGINEER_TURRET_CONTROLLER_CONSTANTS_HPP_
+#ifndef TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
+#define TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
 
-#include "tap/algorithms/smooth_pid.hpp"
+#include <gmock/gmock.h>
 
-namespace aruwsrc::control::turret
+#include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+
+namespace aruwsrc::mock
 {
-}  // namespace aruwsrc::control::turret
+class TurretOrientationInterfaceMock : public control::turret::TurretOrientationInterface
+{
+public:
+    MOCK_METHOD(float, getWorldYaw, (), (const override));
+    MOCK_METHOD(float, getWorldPitch, (), (const override));
+    MOCK_METHOD(uint32_t, getLastMeasurementTimeMicros, (), (const override));
+};
+}  // namespace aruwsrc::mock
 
-#endif  // ENGINEER_TURRET_CONTROLLER_CONSTANTS_HPP_
+#endif  // TURRET_ORIENTATION_INTERFACE_MOCK_HPP_

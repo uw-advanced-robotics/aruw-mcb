@@ -105,6 +105,14 @@ public:
         return leftWheel.isMotorOnline() && rightWheel.isMotorOnline();
     }
 
+    /**
+     * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. Since the sentinel is constrained to a single
+     *      axis, vx and vz are 0. This is the velocity calculated from the chassis's
+     *      encoders. Units: m/s
+     */
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+
 private:
     static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
     static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;

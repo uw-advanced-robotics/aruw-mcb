@@ -62,102 +62,14 @@ class TurretSubsystem : public tap::control::turret::TurretSubsystemInterface
 public:
     static constexpr float MAX_OUT_6020 = 30'000;
 
-#if defined(ALL_SOLDIERS)
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-    static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-    static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
-
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = 0.0f;
-    static constexpr float YAW_MAX_ANGLE = 180.0f;
-
-#ifdef TARGET_SOLDIER_2021
-    static constexpr float PITCH_MIN_ANGLE = 40.0f;
-    static constexpr float PITCH_MAX_ANGLE = 117.0f;
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 7500;
-
-    static constexpr float TURRET_CG_X = 0;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
-#else
-    static constexpr float PITCH_MIN_ANGLE = 65.0f;
-    static constexpr float PITCH_MAX_ANGLE = 117.0f;
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 1100;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 7500;
-
-    static constexpr float TURRET_CG_X = 0;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
-#endif
-
-#elif defined(TARGET_HERO)
-    static constexpr tap::can::CanBus CAN_BUS_YAW_MOTORS = tap::can::CanBus::CAN_BUS2;
-    static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
-    static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;
-    static constexpr tap::motor::MotorId YAW_FRONT_MOTOR_ID = tap::motor::MOTOR5;
-    static constexpr tap::motor::MotorId YAW_BACK_MOTOR_ID = tap::motor::MOTOR6;
-
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = YAW_START_ANGLE - 70.0f;
-    static constexpr float YAW_MAX_ANGLE = YAW_START_ANGLE + 70.0f;
-    static constexpr float PITCH_MIN_ANGLE = 55.0f;
-    static constexpr float PITCH_MAX_ANGLE = 115.0f;
-
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 4872;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 3900;
-
-    static constexpr float TURRET_CG_X = 1;
-    static constexpr float TURRET_CG_Z = -0.2;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 3500.0f;
-#elif defined(TARGET_SENTINEL)
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-    static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-    static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
-
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = 5.0f;
-    static constexpr float YAW_MAX_ANGLE = 175.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float PITCH_MIN_ANGLE = 80.0f;
-    static constexpr float PITCH_MAX_ANGLE = 165.0f;
-
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 2801;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
-
-    static constexpr float TURRET_CG_X = 0;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-#else
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-    static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-    static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
-
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = 0.0f;
-    static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float PITCH_MIN_ANGLE = 0.0f;
-    static constexpr float PITCH_MAX_ANGLE = 180.0f;
-
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 0;
-
-    static constexpr float TURRET_CG_X = 0;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-#endif
-
     /**
      * Constructs a TurretSubsystem.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
-     * @param[in] limitYaw `true` if the yaw should be limited between `TURRET_YAW_MIN_ANGLE` and
-     *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
+     * @param[in] limitYaw `true` if the yaw should be limited between `YAW_MIN_ANGLE` and
+     *      `YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
      * @param[in] chassisFrontBackIdentical `true` if the front and back of the chassis are
      *      interchangable, indicating that `YAW_START_ANGLE` is identical to `YAW_START_ANGLE +

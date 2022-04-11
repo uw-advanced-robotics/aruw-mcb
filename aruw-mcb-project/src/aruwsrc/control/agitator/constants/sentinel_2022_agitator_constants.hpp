@@ -17,13 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SOLDIER_AGITATOR_CONSTANTS_HPP_
-#define SOLDIER_AGITATOR_CONSTANTS_HPP_
+#ifndef SENTINEL_2022_AGITATOR_CONSTANTS_HPP_
+#define SENTINEL_2022_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
-
-#include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use agitator_constants.hpp instead.
 #ifndef AGITATOR_CONSTANTS_HPP_
@@ -32,31 +30,19 @@
 
 namespace aruwsrc::control::agitator::constants
 {
-// position PID terms
-// PID terms for soldier
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 200'000.0f,
+    .kp = 300'000.0f,
     .ki = 0.0f,
-    .kd = 100.0f,
+    .kd = 50.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
-static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-static constexpr bool isAgitatorInverted = false;
 
-/**
- * The jamming constants. Agitator is considered jammed if difference between setpoint
- * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
- *
- * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
- *
- * This should be positive or else weird behavior can occur
- */
-static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
-static constexpr uint32_t JAMMING_TIME = 70;
+static constexpr tap::can::CanBus AGITATOR1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus AGITATOR2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 }  // namespace aruwsrc::control::agitator::constants
 
-#endif  // SOLDIER_AGITATOR_CONSTANTS_HPP_
+#endif  // SENTINEL_AGITATOR_CONSTANTS_HPP_

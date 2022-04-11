@@ -25,9 +25,10 @@ RefereeFeedbackFrictionWheelSubsystem::RefereeFeedbackFrictionWheelSubsystem(
     aruwsrc::Drivers *drivers,
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId,
+    tap::can::CanBus canBus,
     tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
     float bulletSpeedLowPassAlpha)
-    : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId),
+    : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus),
       firingSystemMechanismID(firingSystemMechanismID),
       bulletSpeedLowPassAlpha(bulletSpeedLowPassAlpha)
 {

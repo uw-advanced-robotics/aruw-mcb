@@ -1,23 +1,33 @@
-/*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+/**
+ * @file robot_type.hpp
  *
- * This file is part of aruw-mcb.
+ * @brief Header for intellisense and default robot selection
  *
- * aruw-mcb is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This file serves two main purposes:
+ *  1. To provide a default build target if one isn't provided when building.
+ *     This functionality is handled by the build script searching this file.
+ *  2. To help syntax highlighting. We setup the VSCode configuration to
+ *     "include" this file for intellisense
  *
- * aruw-mcb is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * `aruw-mcb` builds take a target option. This specifies which robot to build
+ * for as different robots will have different subsystems and constants etc., and
+ * this file helps with the above mentioned purposes.
  *
- * You should have received a copy of the GNU General Public License
- * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ * So as to not mess with the build system this file should **NOT** be included
+ * normally.
  */
 
-#ifndef __ROBOT_TYPE_HPP__
-#define __ROBOT_TYPE_HPP__
+#ifndef ROBOT_TYPE_HPP_
+#define ROBOT_TYPE_HPP_
+
+// Check that target isn't already defined. This would be caused by including the file
+// when building (assuming define has been passed in through command line)
+#if defined(TARGET_SOLDIER_2022) || defined(TARGET_SOLDIER_2021) || defined(TARGET_DRONE) ||      \
+    defined(TARGET_ENGINEER) || defined(TARGET_SENTINEL_2021) || defined(TARGET_SENTINEL_2022) || \
+    defined(TARGET_HERO)
+#error "DON'T INCLUDE 'robot_type.hpp'!"
+#endif
+
 #define TARGET_SOLDIER_2022
+
 #endif
