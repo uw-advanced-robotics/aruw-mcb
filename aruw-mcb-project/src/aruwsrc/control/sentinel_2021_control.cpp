@@ -104,7 +104,7 @@ tap::motor::DjiMotor yawMotor(
     aruwsrc::control::turret::CAN_BUS_MOTORS,
     true,
     "Yaw Turret");
-SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
+SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor, TURRET_CONFIG);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turretSubsystem, &sentinelDrive);
 

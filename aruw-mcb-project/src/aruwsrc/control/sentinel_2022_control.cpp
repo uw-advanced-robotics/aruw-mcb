@@ -104,7 +104,7 @@ DjiMotor yawMotor(
     aruwsrc::control::turret::turret1::CAN_BUS_MOTORS,
     true,
     "Yaw Turret 1");
-SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
+SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor, TURRET_CONFIG);
 }  // namespace turret1
 
 namespace turret2

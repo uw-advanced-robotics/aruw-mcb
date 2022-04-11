@@ -52,8 +52,8 @@ void ImuCalibrateCommand::initialize()
 {
     calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
     chassis->setDesiredOutput(0, 0, 0);
-    turret->setYawSetpoint(turret::YAW_START_ANGLE);
-    turret->setPitchSetpoint(turret::PITCH_START_ANGLE);
+    turret->setYawSetpoint(turret->getTurretConfig().yawStartAngle);
+    turret->setPitchSetpoint(turret->getTurretConfig().pitchStartAngle);
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();

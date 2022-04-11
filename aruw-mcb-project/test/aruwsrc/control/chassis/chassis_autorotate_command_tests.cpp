@@ -151,7 +151,7 @@ public:
         ON_CALL(turret, yawLimited).WillByDefault(Return(GetParam().yawLimited));
         ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(yawAngleFromCenter));
         ON_CALL(turret, getYawVelocity).WillByDefault(Return(0));
-        ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(turretAngleActualContiguous));
+        ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(turretAngleActualContiguous));
         ON_CALL(turret, getYawSetpoint).WillByDefault(Return(GetParam().yawSetpoint));
 
         ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {

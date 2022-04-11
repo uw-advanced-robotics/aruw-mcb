@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -24,6 +24,8 @@
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/control/turret_subsystem_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
+
+#include "turret_subsystem_config.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/motor_interface_mock.hpp"
@@ -79,9 +81,13 @@ public:
         aruwsrc::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
-        bool limitYaw = true);
+        const TurretSubsystemConfig& turretConfig);
 
-    inline bool yawLimited() const override { return limitYaw; }
+    mockable inline const TurretSubsystemConfig& getTurretConfig() const { return turretConfig; }
+
+    /// Kept for backwards compatibility reasons, in reality should use use getTurretConfig from now
+    /// on
+    inline bool yawLimited() const override { return turretConfig.limitYaw; }
 
     void initialize() override;
 
@@ -102,28 +108,35 @@ public:
     /**
      * @return The wrapped yaw angle of the actual yaw gimbal, in degrees in the chassis frame.
      */
-    inline const tap::algorithms::ContiguousFloat& getCurrentYawValue() const override
+    inline float getMeasuredYawValue() const override
     {
-        return currYawAngle;
+        return turretConfig.limitYaw ? currYawAngle : currYawAngleWrapped.getValue();
     }
 
     /**
      * @return The wrapped pitch angle of the actual pitch gimbal, in degrees in the chassis frame.
      */
-    inline const tap::algorithms::ContiguousFloat& getCurrentPitchValue() const override
+    inline float getMeasuredPitchValue() const override { return currPitchAngle; }
+
+    float getYawMeasuredSetpointDifference() const
     {
-        return currPitchAngle;
+        return turretConfig.limitYaw ? currYawAngleWrapped.difference(yawSetpointWrapped)
+                                     : yawSetpoint - currYawAngle;
     }
+    float getPitchMeasuredSetpointDifference() const { return pitchSetpoint - currPitchAngle; }
 
     /**
      * @return The yaw target as set by the user in `setYawSetpoint`, in the chassis frame.
      */
-    inline float getYawSetpoint() const override { return yawTarget.getValue(); }
+    inline float getYawSetpoint() const override
+    {
+        return turretConfig.limitYaw ? yawSetpoint : yawSetpointWrapped.getValue();
+    }
 
     /**
      * @return The pitch target as set by the user in `setPitchSetpoint`, in the chassis frame.
      */
-    inline float getPitchSetpoint() const override { return pitchTarget.getValue(); }
+    inline float getPitchSetpoint() const override { return pitchSetpoint; }
 
     /**
      * @return The velocity, in degrees / second, of the turret's pitch yaw, in the chassis frame.
@@ -207,16 +220,23 @@ protected:
     Drivers* drivers;
 
 private:
-    tap::algorithms::ContiguousFloat currPitchAngle;
-    tap::algorithms::ContiguousFloat currYawAngle;
+    const TurretSubsystemConfig turretConfig;
+
+    /// If the turret doesn't have a slip ring (limitVal == false), this value is used instead of
+    /// `yawSetpointWrapped`
+    float yawSetpoint;
+    /// Used when limitValue == true
+    tap::algorithms::ContiguousFloat yawSetpointWrapped;
+    /// Used when limitYaw == false
+    float currYawAngle;
+    /// Used when limitYaw == true
+    tap::algorithms::ContiguousFloat currYawAngleWrapped;
+
+    float pitchSetpoint;
+    float currPitchAngle;
 
     uint16_t pitchEncoderWhenLastUpdated;
     uint16_t yawEncoderWhenLastUpdated;
-
-    tap::algorithms::ContiguousFloat yawTarget;
-    tap::algorithms::ContiguousFloat pitchTarget;
-
-    bool limitYaw;
 
     /**
      * @return velocity of 6020 motor, in degrees / sec

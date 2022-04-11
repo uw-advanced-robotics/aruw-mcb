@@ -98,8 +98,8 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
     ON_CALL(drivers.controlOperatorInterface, getTurretYawInput).WillByDefault(Return(0));
     ON_CALL(turret, getPitchSetpoint).WillByDefault(Return(90));
     ON_CALL(turret, getYawSetpoint).WillByDefault(Return(90));
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawActual));
-    ON_CALL(turret, getCurrentPitchValue).WillByDefault(ReturnRef(pitchActual));
+    ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(yawActual));
+    ON_CALL(turret, getMeasuredPitchValue).WillByDefault(ReturnRef(pitchActual));
     ON_CALL(turret, getPitchVelocity).WillByDefault(Return(0));
     ON_CALL(turret, getYawVelocity).WillByDefault(Return(0));
 
@@ -129,8 +129,8 @@ TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
     ON_CALL(drivers.controlOperatorInterface, getTurretYawInput).WillByDefault(Return(-1));
     ON_CALL(turret, getPitchSetpoint).WillByDefault(ReturnPointee(&pitchSetpoint));
     ON_CALL(turret, getYawSetpoint).WillByDefault(ReturnPointee(&yawSetpoint));
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawActual));
-    ON_CALL(turret, getCurrentPitchValue).WillByDefault(ReturnRef(pitchActual));
+    ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(yawActual));
+    ON_CALL(turret, getMeasuredPitchValue).WillByDefault(ReturnRef(pitchActual));
     ON_CALL(turret, getPitchVelocity).WillByDefault(Return(0));
     ON_CALL(turret, getYawVelocity).WillByDefault(Return(0));
 

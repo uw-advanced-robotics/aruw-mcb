@@ -136,7 +136,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::initialize()
 
         // Capture initial target angle in chassis frame and transform to world frame.
         worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-            turretSubsystem->getCurrentYawValue().getValue(),
+            turretSubsystem->getMeasuredYawValue(),
             drivers->turretMCBCanComm.getYaw(),
             turretSubsystem->getYawSetpoint()));
 
@@ -148,7 +148,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
+    const float chassisFrameYaw = turretSubsystem->getMeasuredYawValue();
     const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
     const float worldFrameYawVelocity = drivers->turretMCBCanComm.getYawVelocity();
 
@@ -211,14 +211,14 @@ static inline void updatePitchWorldFrameSetpoint(
     // Project user desired setpoint that is in world relative to chassis relative
     // to limit the value
     turretSubsystem->setPitchSetpoint(transformWorldFrameValueToChassisFrame(
-        turretSubsystem->getCurrentPitchValue().getValue(),
+        turretSubsystem->getMeasuredPitchValue(),
         worldFramePitchAngle,
         worldFramePitchSetpoint->getValue()));
 
     // Project angle limited by the tap::control::turret::TurretSubsystemInterface back to world
     // relative to use the value
     worldFramePitchSetpoint->setValue(transformChassisFrameToWorldFrame(
-        turretSubsystem->getCurrentPitchValue().getValue(),
+        turretSubsystem->getMeasuredPitchValue(),
         worldFramePitchAngle,
         turretSubsystem->getPitchSetpoint()));
 }
@@ -245,7 +245,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::initialize()
         velocityPid.reset();
 
         worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-            turretSubsystem->getCurrentPitchValue().getValue(),
+            turretSubsystem->getMeasuredPitchValue(),
             drivers->turretMCBCanComm.getPitch(),
             turretSubsystem->getPitchSetpoint()));
 

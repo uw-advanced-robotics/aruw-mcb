@@ -114,7 +114,7 @@ TEST_F(TurretSubsystemTest, setPitchSetpoint__limited_to_min_max)
     }
 }
 
-TEST_F(TurretSubsystemTest, getCurrentYawValue__returns_default_when_yaw_motor_offline)
+TEST_F(TurretSubsystemTest, getMeasuredYawValue__returns_default_when_yaw_motor_offline)
 {
     // Default expectations so turret assumes motors are good to go and within valid angle range
     pitchMotorOnline = false;
@@ -122,12 +122,12 @@ TEST_F(TurretSubsystemTest, getCurrentYawValue__returns_default_when_yaw_motor_o
 
     turret.refresh();
 
-    EXPECT_NEAR(YAW_START_ANGLE, turret.getCurrentYawValue().getValue(), 1E-3);
+    EXPECT_NEAR(YAW_START_ANGLE, turret.getMeasuredYawValue().getValue(), 1E-3);
 }
 
 TEST_F(
     TurretSubsystemTest,
-    getCurrentYawValue__returns_values_based_on_enc_position_if_yaw_motor_online)
+    getMeasuredYawValue__returns_values_based_on_enc_position_if_yaw_motor_online)
 {
     // Default expectations so turret assumes motors are good to go and within valid angle range
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
@@ -143,23 +143,23 @@ TEST_F(
     {
         yawEncoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
         turret.refresh();
-        EXPECT_NEAR(0.0f, turret.getCurrentYawValue().difference(angle), 1E-3);
+        EXPECT_NEAR(0.0f, turret.getMeasuredYawValue().difference(angle), 1E-3);
     }
 }
 
-TEST_F(TurretSubsystemTest, getCurrentPitchValue__returns_default_when_pitch_motor_offline)
+TEST_F(TurretSubsystemTest, getMeasuredPitchValue__returns_default_when_pitch_motor_offline)
 {
     // Default expectations so turret assumes motors are good to go and within valid angle range
     pitchMotorOnline = false;
 
     turret.refresh();
 
-    EXPECT_NEAR(PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue(), 1E-3);
+    EXPECT_NEAR(PITCH_START_ANGLE, turret.getMeasuredPitchValue().getValue(), 1E-3);
 }
 
 TEST_F(
     TurretSubsystemTest,
-    getCurrentPitchValue__returns_values_based_on_enc_position_if_pitch_motor_online)
+    getMeasuredPitchValue__returns_values_based_on_enc_position_if_pitch_motor_online)
 {
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
         {90, PITCH_START_ENCODER_POSITION},
@@ -174,7 +174,7 @@ TEST_F(
     {
         pitchEncoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
         turret.refresh();
-        EXPECT_NEAR(0, turret.getCurrentPitchValue().difference(angle), 1E-3);
+        EXPECT_NEAR(0, turret.getMeasuredPitchValue().difference(angle), 1E-3);
     }
 }
 
@@ -501,8 +501,8 @@ TEST_F(TurretSubsystemTest, refresh_sets_actual_angle_back_to_start_when_offline
 
     turret.refresh();
 
-    EXPECT_NE(YAW_START_ANGLE, turret.getCurrentYawValue().getValue());
-    EXPECT_NE(PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue());
+    EXPECT_NE(YAW_START_ANGLE, turret.getMeasuredYawValue().getValue());
+    EXPECT_NE(PITCH_START_ANGLE, turret.getMeasuredPitchValue().getValue());
 
     // Now turret offline
     yawMotorOnline = false;
@@ -510,6 +510,6 @@ TEST_F(TurretSubsystemTest, refresh_sets_actual_angle_back_to_start_when_offline
 
     turret.refresh();
 
-    EXPECT_NEAR(YAW_START_ANGLE, turret.getCurrentYawValue().getValue(), 1E-3);
-    EXPECT_NEAR(PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue(), 1E-3);
+    EXPECT_NEAR(YAW_START_ANGLE, turret.getMeasuredYawValue().getValue(), 1E-3);
+    EXPECT_NEAR(PITCH_START_ANGLE, turret.getMeasuredPitchValue().getValue(), 1E-3);
 }

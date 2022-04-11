@@ -65,8 +65,8 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(currentYawValue));
-        ON_CALL(turret, getCurrentPitchValue).WillByDefault(ReturnRef(currentPitchValue));
+        ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(currentYawValue));
+        ON_CALL(turret, getMeasuredPitchValue).WillByDefault(ReturnRef(currentPitchValue));
         ON_CALL(turret, isOnline).WillByDefault(ReturnPointee(&turretOnline));
         ON_CALL(drivers.turretMCBCanComm, isConnected)
             .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));

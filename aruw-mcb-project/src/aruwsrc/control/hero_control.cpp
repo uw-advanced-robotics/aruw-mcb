@@ -130,7 +130,7 @@ tap::motor::DoubleDjiMotor yawMotor(
     true,
     "Yaw Front Turret",
     "Yaw Back Turret");
-HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, TURRET_CONFIG);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
 

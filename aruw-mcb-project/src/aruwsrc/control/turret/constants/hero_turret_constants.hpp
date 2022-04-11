@@ -23,6 +23,8 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "../turret_subsystem_config.hpp"
+
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
 #error "Do not include this file directly! Use turret_controller_constants.hpp instead."
@@ -38,15 +40,17 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr tap::motor::MotorId YAW_FRONT_MOTOR_ID = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId YAW_BACK_MOTOR_ID = tap::motor::MOTOR6;
 
-static constexpr float YAW_START_ANGLE = 90.0f;
-static constexpr float PITCH_START_ANGLE = 90.0f;
-static constexpr float YAW_MIN_ANGLE = YAW_START_ANGLE - 70.0f;
-static constexpr float YAW_MAX_ANGLE = YAW_START_ANGLE + 70.0f;
-static constexpr float PITCH_MIN_ANGLE = 55.0f;
-static constexpr float PITCH_MAX_ANGLE = 115.0f;
-
-static constexpr uint16_t YAW_START_ENCODER_POSITION = 4872;
-static constexpr uint16_t PITCH_START_ENCODER_POSITION = 3900;
+static constexpr TurretSubsystemConfig TURRET_CONFIG = {
+    .yawStartAngle = 90,
+    .yawStartEncoderValue = 4872,
+    .yawMinAngle = 0,    ///< Doesn't matter since yaw not limited
+    .yawMaxAngle = 180,  ///< Doesn't matter since yaw not limited
+    .pitchStartAngle = 90,
+    .pitchStartEncoderValue = 3900,
+    .pitchMinAngle = 55,
+    .pitchMaxAngle = 115,
+    .limitYaw = false,
+};
 
 static constexpr float TURRET_CG_X = 1;
 static constexpr float TURRET_CG_Z = -0.2;

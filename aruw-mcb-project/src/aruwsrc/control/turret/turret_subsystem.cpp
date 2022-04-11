@@ -29,7 +29,6 @@
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
-#include "constants/turret_constants.hpp"
 
 using namespace tap::motor;
 using namespace tap::algorithms;
@@ -40,19 +39,24 @@ TurretSubsystem::TurretSubsystem(
     aruwsrc::Drivers *drivers,
     MotorInterface *pitchMotor,
     MotorInterface *yawMotor,
-    bool limitYaw)
+    const TurretSubsystemConfig &turretConfig)
     : tap::control::turret::TurretSubsystemInterface(drivers),
       drivers(drivers),
-      currPitchAngle(PITCH_START_ANGLE, 0.0f, 360.0f),
-      currYawAngle(YAW_START_ANGLE, 0.0f, 360.0f),
-      pitchEncoderWhenLastUpdated(PITCH_START_ENCODER_POSITION),
-      yawEncoderWhenLastUpdated(YAW_START_ENCODER_POSITION),
-      yawTarget(YAW_START_ANGLE, 0.0f, 360.0f),
-      pitchTarget(PITCH_START_ANGLE, 0.0f, 360.0f),
-      limitYaw(limitYaw),
+      turretConfig(turretConfig),
+      yawSetpoint(turretConfig.yawStartAngle),
+      yawSetpointWrapped(turretConfig.yawStartAngle, 0, 360),
+      currYawAngle(turretConfig.yawStartAngle),
+      currYawAngleWrapped(turretConfig.yawStartAngle, 0, 360),
+      pitchSetpoint(turretConfig.pitchStartAngle),
+      currPitchAngle(turretConfig.pitchStartAngle),
+      pitchEncoderWhenLastUpdated(turretConfig.pitchStartEncoderValue),
+      yawEncoderWhenLastUpdated(turretConfig.yawStartEncoderValue),
       pitchMotor(pitchMotor),
       yawMotor(yawMotor)
 {
+    assert(drivers != nullptr);
+    assert(pitchMotor != nullptr);
+    assert(yawMotor != nullptr);
 }
 
 void TurretSubsystem::initialize()
@@ -63,12 +67,13 @@ void TurretSubsystem::initialize()
 
 float TurretSubsystem::getYawAngleFromCenter() const
 {
-    return ContiguousFloat(currYawAngle.getValue() - YAW_START_ANGLE, -180.0f, 180.0f).getValue();
+    float yawAngle = turretConfig.limitYaw ? currYawAngle : currYawAngleWrapped.getValue();
+    return ContiguousFloat(yawAngle - turretConfig.yawStartAngle, -180.0f, 180.0f).getValue();
 }
 
 float TurretSubsystem::getPitchAngleFromCenter() const
 {
-    return ContiguousFloat(currPitchAngle.getValue() - PITCH_START_ANGLE, -180.0f, 180.0f)
+    return ContiguousFloat(currPitchAngle - turretConfig.pitchStartAngle, -180.0f, 180.0f)
         .getValue();
 }
 
@@ -77,52 +82,62 @@ void TurretSubsystem::refresh() { updateCurrentTurretAngles(); }
 /**
  * Update the turret angle based on the current motor encoder value.
  */
-static inline void updateCurrentMotorAngle(
-    const MotorInterface *motor,
+static inline float updateCurrentMotorAngle(
+    const float currMotorAngle,
+    const MotorInterface &motor,
     const uint16_t startEncoderPosition,
     const float startAngle,
-    ContiguousFloat *currAngle,
     uint16_t *encoderWhenLastUpdated)
 {
-    if (motor->isMotorOnline())
+    if (motor.isMotorOnline())
     {
-        uint16_t encoder = motor->getEncoderWrapped();
+        uint16_t encoder = motor.getEncoderUnwrapped();
         if (*encoderWhenLastUpdated == encoder)
         {
-            return;
+            return currMotorAngle;
         }
 
-        currAngle->setValue(
-            DjiMotor::encoderToDegrees(static_cast<uint16_t>(encoder - startEncoderPosition)) +
-            startAngle);
-
         *encoderWhenLastUpdated = encoder;
+
+        return DjiMotor::encoderToDegrees(static_cast<uint16_t>(encoder - startEncoderPosition)) +
+               startAngle;
     }
     else
     {
         if (*encoderWhenLastUpdated == startEncoderPosition)
         {
-            return;
+            return currMotorAngle;
         }
 
-        currAngle->setValue(startAngle);
         *encoderWhenLastUpdated = startEncoderPosition;
+
+        return startAngle;
     }
 }
 
 void TurretSubsystem::updateCurrentTurretAngles()
 {
-    updateCurrentMotorAngle(
-        yawMotor,
-        YAW_START_ENCODER_POSITION,
-        YAW_START_ANGLE,
-        &currYawAngle,
+    float yawAngle = updateCurrentMotorAngle(
+        turretConfig.limitYaw ? yawSetpoint : yawSetpointWrapped.getValue(),
+        *yawMotor,
+        turretConfig.yawStartEncoderValue,
+        turretConfig.yawStartAngle,
         &yawEncoderWhenLastUpdated);
-    updateCurrentMotorAngle(
-        pitchMotor,
-        PITCH_START_ENCODER_POSITION,
-        PITCH_START_ANGLE,
-        &currPitchAngle,
+
+    if (turretConfig.limitYaw)
+    {
+        yawSetpoint = yawAngle;
+    }
+    else
+    {
+        yawSetpointWrapped.setValue(yawAngle);
+    }
+
+    pitchSetpoint = updateCurrentMotorAngle(
+        pitchSetpoint,
+        *pitchMotor,
+        turretConfig.pitchStartEncoderValue,
+        turretConfig.pitchStartAngle,
         &pitchEncoderWhenLastUpdated);
 }
 
@@ -133,7 +148,7 @@ static inline void setMotorOutput(
     MotorInterface *motor,
     float out,
     const bool limitAngleInput,
-    const ContiguousFloat &currMotorAngle,
+    const float currMotorAngle,
     const float minAngle,
     const float maxAngle)
 {
@@ -144,14 +159,8 @@ static inline void setMotorOutput(
         // If angle equal to min or max angle, set desired output to desired output
         if (limitAngleInput)
         {
-            // Wrap angle between min, max
-            ContiguousFloat limitedVal(
-                ContiguousFloat::limitValue(currMotorAngle, minAngle, maxAngle),
-                0,
-                360);
-
-            if ((abs(limitedVal.difference(minAngle)) < 1E-5 && out < 0) ||
-                (abs(limitedVal.difference(maxAngle)) < 1E-5 && out > 0))
+            if ((minAngle - currMotorAngle < 0 && out < 0) ||
+                (maxAngle - currMotorAngle > 0 && out > 0))
             {
                 motor->setDesiredOutput(0);
                 return;
@@ -169,8 +178,8 @@ void TurretSubsystem::setPitchMotorOutput(float out)
         out,
         true,
         currPitchAngle,
-        PITCH_MIN_ANGLE - 5.0f,
-        PITCH_MAX_ANGLE + 5.0f);
+        turretConfig.pitchMinAngle - 5.0f,
+        turretConfig.pitchMaxAngle + 5.0f);
 }
 
 void TurretSubsystem::setYawMotorOutput(float out)
@@ -178,26 +187,27 @@ void TurretSubsystem::setYawMotorOutput(float out)
     setMotorOutput(
         yawMotor,
         out,
-        limitYaw,
-        currYawAngle,
-        YAW_MIN_ANGLE - 5.0f,
-        YAW_MAX_ANGLE + 5.0f);
+        turretConfig.limitYaw,
+        turretConfig.limitYaw ? currYawAngleWrapped.getValue() : currYawAngle,
+        turretConfig.yawMinAngle - 5.0f,
+        turretConfig.yawMaxAngle + 5.0f);
 }
 
 void TurretSubsystem::setYawSetpoint(float target)
 {
-    yawTarget.setValue(target);
-    if (limitYaw)
+    if (turretConfig.limitYaw)
     {
-        yawTarget.setValue(ContiguousFloat::limitValue(yawTarget, YAW_MIN_ANGLE, YAW_MAX_ANGLE));
+        yawSetpoint = limitVal(target, turretConfig.yawMinAngle, turretConfig.yawMaxAngle);
+    }
+    else
+    {
+        yawSetpointWrapped.setValue(target);
     }
 }
 
 void TurretSubsystem::setPitchSetpoint(float target)
 {
-    pitchTarget.setValue(target);
-    pitchTarget.setValue(
-        ContiguousFloat::limitValue(pitchTarget, PITCH_MIN_ANGLE, PITCH_MAX_ANGLE));
+    pitchSetpoint = limitVal(target, turretConfig.pitchMinAngle, turretConfig.pitchMaxAngle);
 }
 
 void TurretSubsystem::onHardwareTestStart()

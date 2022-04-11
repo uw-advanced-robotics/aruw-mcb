@@ -95,7 +95,7 @@ tap::motor::DjiMotor yawMotor(
     true,
 #endif
     "Yaw Turret");
-SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+SoldierTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, TURRET_CONFIG);
 
 aruwsrc::chassis::ChassisSubsystem chassis(
     drivers(),

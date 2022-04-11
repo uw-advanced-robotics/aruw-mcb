@@ -41,7 +41,7 @@ protected:
     void SetUp() override
     {
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
-        ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
+        ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(yawValue));
     }
 
     aruwsrc::Drivers drivers;
@@ -67,7 +67,7 @@ TEST_F(
     runYawPidController_setpoint_gt_actual_output_positive)
 {
     yawValue.setValue(80);
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
+    ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(yawValue));
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(0));
 
     EXPECT_CALL(turret, setYawMotorOutput(Gt(0)));

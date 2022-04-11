@@ -41,10 +41,14 @@ public:
     MOCK_METHOD(float, getPitchVelocity, (), (const override));
     MOCK_METHOD(float, getYawAngleFromCenter, (), (const override));
     MOCK_METHOD(float, getPitchAngleFromCenter, (), (const override));
-    MOCK_METHOD(const tap::algorithms::ContiguousFloat &, getCurrentYawValue, (), (const override));
     MOCK_METHOD(
         const tap::algorithms::ContiguousFloat &,
-        getCurrentPitchValue,
+        getMeasuredYawValue,
+        (),
+        (const override));
+    MOCK_METHOD(
+        const tap::algorithms::ContiguousFloat &,
+        getMeasuredPitchValue,
         (),
         (const override));
     MOCK_METHOD(void, setYawMotorOutput, (float out), (override));
@@ -56,6 +60,7 @@ public:
     MOCK_METHOD(void, updateCurrentTurretAngles, (), (override));
     MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char *, getName, (), (override));
+    MOCK_METHOD(const control::turret::TurretSubsystemConfig, getTurretConfig, (const override));
     MOCK_METHOD(bool, yawLimited, (), (const override));
     MOCK_METHOD(
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *,

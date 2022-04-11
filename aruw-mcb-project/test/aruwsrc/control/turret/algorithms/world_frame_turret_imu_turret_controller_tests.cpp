@@ -64,7 +64,7 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(turretSubsystem, getCurrentYawValue).WillByDefault(ReturnRef(currentValue));
+        ON_CALL(turretSubsystem, getMeasuredYawValue).WillByDefault(ReturnRef(currentValue));
         ON_CALL(drivers.turretMCBCanComm, getYaw).WillByDefault(ReturnPointee(&imuValue));
         ON_CALL(drivers.turretMCBCanComm, getYawVelocity)
             .WillByDefault(ReturnPointee(&imuVelocity));
@@ -184,7 +184,7 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(turretSubsystem, getCurrentPitchValue).WillByDefault(ReturnRef(currentValue));
+        ON_CALL(turretSubsystem, getMeasuredPitchValue).WillByDefault(ReturnRef(currentValue));
         ON_CALL(turretSubsystem, getPitchAngleFromCenter).WillByDefault(Return(0));
         ON_CALL(drivers.turretMCBCanComm, getPitch).WillByDefault(ReturnPointee(&imuValue));
         ON_CALL(drivers.turretMCBCanComm, getPitchVelocity)

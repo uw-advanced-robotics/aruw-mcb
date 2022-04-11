@@ -55,8 +55,7 @@ void ChassisAutorotateCommand::initialize()
 void ChassisAutorotateCommand::updateAutorotateState(
     const tap::control::turret::TurretSubsystemInterface* turret)
 {
-    float turretYawActualSetpointDiff =
-        abs(turret->getCurrentYawValue().difference(turret->getYawSetpoint()));
+    float turretYawActualSetpointDiff = abs(turret->getYawMeasuredSetpointDifference());
 
     if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
         !turret->yawLimited() &&

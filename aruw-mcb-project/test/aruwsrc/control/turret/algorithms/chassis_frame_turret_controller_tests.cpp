@@ -41,8 +41,8 @@ protected:
     {
         ON_CALL(turretSubsystem, getPitchSetpoint).WillByDefault(ReturnPointee(&setpoint));
         ON_CALL(turretSubsystem, getYawSetpoint).WillByDefault(ReturnPointee(&setpoint));
-        ON_CALL(turretSubsystem, getCurrentPitchValue).WillByDefault(ReturnRef(currentAngle));
-        ON_CALL(turretSubsystem, getCurrentYawValue).WillByDefault(ReturnRef(currentAngle));
+        ON_CALL(turretSubsystem, getMeasuredPitchValue).WillByDefault(ReturnRef(currentAngle));
+        ON_CALL(turretSubsystem, getMeasuredYawValue).WillByDefault(ReturnRef(currentAngle));
         ON_CALL(turretSubsystem, getPitchAngleFromCenter).WillByDefault(Return(0));
         ON_CALL(turretSubsystem, getYawAngleFromCenter).WillByDefault(Return(0));
         ON_CALL(turretSubsystem, getPitchVelocity).WillByDefault(Return(0));

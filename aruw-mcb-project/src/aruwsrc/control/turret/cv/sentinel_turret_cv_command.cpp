@@ -61,8 +61,14 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed,
           turretID),
-      pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_ANGLE, SCAN_DELTA_ANGLE),
-      yawScanner(YAW_MIN_ANGLE, YAW_MAX_ANGLE, SCAN_DELTA_ANGLE)
+      pitchScanner(
+          turretSubsystem->getTurretConfig().pitchMinAngle,
+          turretSubsystem->getTurretConfig().pitchMaxAngle,
+          SCAN_DELTA_ANGLE),
+      yawScanner(
+          turretSubsystem->getTurretConfig().yawMinAngle,
+          turretSubsystem->getTurretConfig().yawMaxAngle,
+          SCAN_DELTA_ANGLE)
 {
     assert(firingCommand != nullptr);
     assert(turretSubsystem != nullptr);
@@ -103,11 +109,11 @@ void SentinelTurretCVCommand::execute()
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
         if (compareFloatClose(
-                turretSubsystem->getCurrentPitchValue().getValue(),
+                turretSubsystem->getMeasuredPitchValue(),
                 pitchSetpoint,
                 FIRING_TOLERANCE) &&
             compareFloatClose(
-                turretSubsystem->getCurrentYawValue().getValue(),
+                turretSubsystem->getMeasuredYawValue(),
                 yawSetpoint,
                 FIRING_TOLERANCE))
         {

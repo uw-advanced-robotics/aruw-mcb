@@ -57,11 +57,16 @@ public:
     /**
      * @return The current value of the turret's physical yaw.
      */
-    virtual const tap::algorithms::ContiguousFloat &getCurrentYawValue() const = 0;
+    virtual float getMeasuredYawValue() const = 0;
     /**
-     * @see getCurrentYawValue
+     * @see getMeasuredYawValue
      */
-    virtual const tap::algorithms::ContiguousFloat &getCurrentPitchValue() const = 0;
+    virtual float getMeasuredPitchValue() const = 0;
+
+    /// @return difference between the current yaw value and the setpoint (current - setpoint)
+    virtual float getYawMeasuredSetpointDifference() const = 0;
+    /// @see getYawMeasuredSetpointDifference
+    virtual float getPitchMeasuredSetpointDifference() const = 0;
 
     /**
      * @return `true` if the turret is online (i.e.: is connected)

@@ -149,7 +149,7 @@ void WorldFrameYawChassisImuTurretController::runController(
     float worldFrameYawAngle = transformChassisFrameYawToWorldFrame(
         chassisFrameInitImuYawAngle,
         chassisFrameImuYawAngle,
-        turretSubsystem->getCurrentYawValue().getValue());
+        turretSubsystem->getMeasuredYawValue());
 
     // position controller based on imu and yaw gimbal angle
     float positionControllerError = -worldFrameSetpoint.difference(worldFrameYawAngle);

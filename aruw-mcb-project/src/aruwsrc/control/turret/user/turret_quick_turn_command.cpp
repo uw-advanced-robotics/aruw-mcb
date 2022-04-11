@@ -36,8 +36,7 @@ bool TurretQuickTurnCommand::isReady() { return turretSubsystem->isOnline(); }
 
 void TurretQuickTurnCommand::initialize()
 {
-    turretSubsystem->setYawSetpoint(
-        turretSubsystem->getCurrentYawValue().getValue() + targetOffsetToTurn);
+    turretSubsystem->setYawSetpoint(turretSubsystem->getMeasuredYawValue() + targetOffsetToTurn);
     turretSubsystem->setPrevRanYawTurretController(nullptr);
 }
 }  // namespace aruwsrc::control::turret::user
