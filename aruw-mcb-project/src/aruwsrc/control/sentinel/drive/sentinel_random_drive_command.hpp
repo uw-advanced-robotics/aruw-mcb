@@ -50,14 +50,16 @@ private:
     static const int16_t CHANGE_TIME_INTERVAL = 750;
     static constexpr float TURNAROUND_BUFFER = 0.25f * SentinelDriveSubsystem::RAIL_LENGTH;
 
-    float currentRPM = 0;
-    bool chosenNewRPM = false;
-    float newPos = 0;
-    float oldPos = 0;
+    float currentRPM;
+    //bool chosenNewRPM = false;
+    float newPos;
+    float oldPos;
     bool prevEvade = true;
 
     SentinelDriveSubsystem* subsystemSentinelDrive;
     tap::arch::MilliTimeout changeVelocityTimer;
+
+    float portableRandom();
 };
 
 }  // namespace aruwsrc::control::sentinel::drive

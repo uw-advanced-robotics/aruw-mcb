@@ -29,6 +29,7 @@
 #ifndef PLATFORM_HOSTED
 using modm::platform::RandomNumberGenerator;
 #endif
+
 using tap::control::Subsystem;
 
 namespace aruwsrc::control::sentinel::drive
@@ -38,55 +39,56 @@ SentinelRandomDriveCommand::SentinelRandomDriveCommand(SentinelDriveSubsystem* s
       changeVelocityTimer(CHANGE_TIME_INTERVAL)
 {
     addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
-#ifndef PLATFORM_HOSTED
-    RandomNumberGenerator::enable();
-#endif
+
+    // RandomNumberGenerator::enable();
+
 }
 
 void SentinelRandomDriveCommand::initialize() { 
-    chosenNewRPM = false
-    oldPos = subsystemSentinelDrive->absolutePosition(); 
+    // chosenNewRPM = false;
+    //oldPos = 0; 
+    //newPos = 0;
     prevEvade = true;
+    //currentRPM = 0;
 }
 
 void SentinelRandomDriveCommand::execute()
 {
 
-    if (this->changeVelocityTimer.isExpired() || !chosenNewRPM) 
+    if (this->changeVelocityTimer.isExpired() || prevEvade) 
     {
-#ifdef PLATFORM_HOSTED
-        chosenNewRPM = true;
-#else
-        chosenNewRPM = RandomNumberGenerator::isReady();
-#endif
+
+        //  chosenNewRPM = RandomNumberGenerator::isReady();
+
         newPos = subsystemSentinelDrive->absolutePosition();
-        if (chosenNewRPM && (abs(oldPos - newPos) >= 200.0 || prevEvade)) 
+        // if (chosenNewRPM && (abs(oldPos - newPos) >= 200.0 || prevEvade)) 
+        if (abs(oldPos - newPos) >= 200.0 || prevEvade)
         {
             prevEvade = false;
             this->changeVelocityTimer.restart(CHANGE_TIME_INTERVAL);
             oldPos = subsystemSentinelDrive->absolutePosition();
-#ifdef PLATFORM_HOSTED
-            currentRPM = MIN_RPM + (MAX_RPM - MIN_RPM) / 2;
-#else
-            uint32_t randVal = RandomNumberGenerator::getValue();
+
+
+            uint32_t randVal = portableRandom();
             currentRPM = randVal % (MAX_RPM - MIN_RPM + 1) + MIN_RPM;
+            
             if (randVal % 2 == 0)
             {
                 currentRPM *= -1.0f;
-            }
-
-            float sentinelRPM = subsystemSentinelDrive->getRpm();
-            if ((sentinelRPM < 0 && currentRPM < 0) || (sentinelRPM > 0 && currentRpm > 0))
+            } 
+            
+            float sentinelRPM = subsystemSentinelDrive->getRpm() ;
+            if ((sentinelRPM < 0 && currentRPM < 0) || (sentinelRPM > 0 && currentRPM > 0))
             {
-                currentRPM = - currentRPM
+                currentRPM = -currentRPM;
             }
-#endif
+            
         } else {
             this->changeVelocityTimer.restart(CHANGE_TIME_INTERVAL);
         }
     }
 
-
+    
     // reverse direction if close to the end of the rail
     float curPos = subsystemSentinelDrive->absolutePosition();
     if ((currentRPM < 0 && curPos < TURNAROUND_BUFFER) ||
@@ -96,7 +98,7 @@ void SentinelRandomDriveCommand::execute()
     {
         currentRPM = -currentRPM;
     }
-
+    
     
     subsystemSentinelDrive->setDesiredRpm(currentRPM);
 }
@@ -104,6 +106,21 @@ void SentinelRandomDriveCommand::execute()
 void SentinelRandomDriveCommand::end(bool) { subsystemSentinelDrive->setDesiredRpm(0); }
 
 bool SentinelRandomDriveCommand::isFinished() const { return false; }
+
+float SentinelRandomDriveCommand::portableRandom() 
+{
+    #ifndef PLATFORM_HOSTED
+    RandomNumberGenerator::enable();
+    if (RandomNumberGenerator::isReady())
+    {
+        return RandomNumberGenerator::getValue();
+    } else {
+        return 0;
+    }
+    #else
+    return -1;    
+    #endif
+}
 
 }  // namespace aruwsrc::control::sentinel::drive
 
