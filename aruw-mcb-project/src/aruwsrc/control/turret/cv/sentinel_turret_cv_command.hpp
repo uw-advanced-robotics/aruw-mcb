@@ -20,57 +20,96 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "tap/algorithms/smooth_pid.hpp"
-#include "tap/architecture/timeout.hpp"
-#include "tap/control/comprised_command.hpp"
-#include "tap/control/turret_subsystem_interface.hpp"
+#include "tap/control/command.hpp"
+#include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/control/agitator/move_unjam_ref_limited_command.hpp"
+#include "../algorithms/turret_controller_interface.hpp"
+#include "../constants/turret_constants.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
-namespace aruwsrc::agitator
+#include "setpoint_scanner.hpp"
+
+namespace tap::control::odometry
 {
-class AgitatorSubsystem;
+class Odometry2DInterface;
+}
+
+namespace aruwsrc
+{
+class Drivers;
 }
 
 namespace aruwsrc::control::turret
 {
+class TurretSubsystem;
+}
+
+namespace aruwsrc::control::launcher
+{
+class RefereeFeedbackFrictionWheelSubsystem;
+}
+
+namespace aruwsrc::control::turret::cv
+{
 /**
- * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
- * aims the turret accordingly. In addition to aiming, this command is responsible for determining
- * when to fire and scheduling an agitator rotate command accordingly. Finally, when a target is not
- * acquired, this command scans the turret back and forth.
+ * A command that receives input from the vision system via the `VisionCoprocessor` driver and
+ * aims the turret accordingly using a position PID controller.
+ *
+ * This command, unlike the `SentinelTurretCVCommand`, is not responsible for firing projectiles
+ * when the auto aim system determines it should fire. Nor does this class scan the turret back and
+ * forth.
+ *
+ * @note If the auto aim system is offline, does not have a target acquired, or has an invalid
+ * target (for example, the target is too far away), then user input from the
+ * `ControlOperatorInterface` is used to control the turret instead.
  */
-class SentinelTurretCVCommand : public tap::control::ComprisedCommand
+class SentinelTurretCVCommand : public tap::control::Command
 {
 public:
-    /**
-     * Pitch/yaw error margins within which the auto aim deems it acceptable
-     * to fire the launcher, in degrees.
-     */
-    static constexpr float YAW_FIRE_ERROR_MARGIN = 2.0f;
-    static constexpr float PITCH_FIRE_ERROR_MARGIN = 2.0f;
+    /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
+    static constexpr float PITCH_MIN_SCAN_ANGLE = 100.0f;
 
     /**
-     * Pitch/yaw angle increments that the turret will change by each call
-     * to refresh when the turret is scanning for a target, in degrees.
+     * Command will shoot when turret pitch and yaw are both respectively within `FIRING_TOLERANCE`
+     * degrees of the ballistics solution.
      */
-    static constexpr float SCAN_DELTA_ANGLE_YAW = 0.1f;
-    static constexpr float SCAN_DELTA_ANGLE_PITCH = 0.1f;
+    static constexpr float FIRING_TOLERANCE = 0.5f;
 
     /**
-     * The number of times refresh is called without receiving valid CV data to when
-     * the command will consider the target lost and start tracking.
+     * Constructs a TurretCVCommand
+     *
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the turret to control.
+     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * axis of the turret.
+     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
+     * pitch axis of the turret.
+     * @param[in] firingCommand Pointer to command to schedule when this command deems it's time to
+     * shoot.
+     * @param[in] odometryInterface Odometry object, used for position odometry information.
+     * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
+     * a target is a function of how fast a projectile is launched at.
+     * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
+     * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
+     * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
+     * for more information.
      */
-    static constexpr int AIM_LOST_NUM_COUNTS = 500;
-
     SentinelTurretCVCommand(
         aruwsrc::Drivers *drivers,
-        tap::control::turret::TurretSubsystemInterface *sentinelTurret,
-        aruwsrc::agitator::AgitatorSubsystem *agitatorSubsystem);
-
-    bool isReady() override;
+        TurretSubsystem *turretSubsystem,
+        algorithms::TurretYawControllerInterface *yawController,
+        algorithms::TurretPitchControllerInterface *pitchController,
+        tap::control::Subsystem &firingSubsystem,
+        Command *const firingCommand,
+        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+        const float defaultLaunchSpeed,
+        const uint8_t turretID);
 
     void initialize() override;
+
+    bool isReady() override;
 
     void execute() override;
 
@@ -78,72 +117,63 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "sentinel turret CV"; }
-
-    inline bool isAimingAtTarget() const { return aimingAtTarget; }
+    const char *getName() const override { return "turret CV"; }
 
 private:
-    static constexpr float YAW_P = 4000.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 130.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 30000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 10.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 3400.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 100.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 30000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 20.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float BOUNDS_TOLERANCE = 1.0f;
-
-    static constexpr float AGITATOR_ROTATE_ANGLE = M_PI / 5.0f;
-    static constexpr float AGITATOR_MAX_UNJAM_ANGLE = M_PI / 2.0f;
-    static constexpr uint32_t AGITATOR_ROTATE_TIME = 50;
-
     aruwsrc::Drivers *drivers;
 
-    tap::control::turret::TurretSubsystemInterface *sentinelTurret;
+    TurretSubsystem *turretSubsystem;
 
-    aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitator;
+    algorithms::TurretYawControllerInterface *yawController;
+    algorithms::TurretPitchControllerInterface *pitchController;
 
-    bool pitchScanningUp;
-    bool yawScanningRight;
-    bool aimingAtTarget;
+    const uint8_t turretID;
+
+    /**
+     * The command to be scheduled when the sentinel is ready to shoot.
+     */
+    Command *const firingCommand;
+
+    aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
+
+    uint32_t prevTime;
+
+    /**
+     * Handles scanning logic in the pitch direction
+     */
+    SetpointScanner pitchScanner;
+
+    /**
+     * Handles scanning logic in the yaw direction
+     */
+    SetpointScanner yawScanner;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
      * and that keeps track of the number of times `refresh` is called when
-     * CV no longer is tracking a target.
+     * an aiming solution couldn't be found (either because CV had no target
+     * or aiming solution was impossible)
      */
-    int lostTargetCounter;
-
-    tap::algorithms::SmoothPid yawPid;
-    tap::algorithms::SmoothPid pitchPid;
-
-    uint32_t prevTime = 0;
-
-    void scanForTarget();
+    unsigned int lostTargetCounter = 0;
 
     /**
-     * Updates `axisScanningUp` based on the current setpoint and the min and max scanning
-     * setpoints.
+     * Yaw and pitch angle increments that the turret will change by each call
+     * to refresh when the turret is scanning for a target, in degrees.
      */
-    static void updateScanningUp(
-        const float motorSetpoint,
-        const float minMotorSetpoint,
-        const float maxMotorSetpoint,
-        bool *axisScanningUp);
-};  // class SentinelTurretCVCommand
+    static constexpr float SCAN_DELTA_ANGLE = 0.2f;
 
-}  // namespace aruwsrc::control::turret
+    /**
+     * The number of times refresh is called without receiving valid CV data to when
+     * the command will consider the target lost and start tracking.
+     */
+    static constexpr int AIM_LOST_NUM_COUNTS = 500;
+
+    /**
+     * @return an angle in degrees representing the next "scanning" setpoint
+     */
+    float scanForTarget(char axis);
+};
+
+}  // namespace aruwsrc::control::turret::cv
 
 #endif  // SENTINEL_TURRET_CV_COMMAND_HPP_

@@ -57,6 +57,26 @@ public:
     MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char *, getName, (), (override));
     MOCK_METHOD(bool, yawLimited, (), (const override));
+    MOCK_METHOD(
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *,
+        getPrevRanPitchTurretController,
+        (),
+        (const override));
+    MOCK_METHOD(
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface *,
+        getPrevRanYawTurretController,
+        (),
+        (const override));
+    MOCK_METHOD(
+        void,
+        setPrevRanPitchTurretController,
+        (aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *),
+        (override));
+    MOCK_METHOD(
+        void,
+        setPrevRanYawTurretController,
+        (aruwsrc::control::turret::algorithms::TurretYawControllerInterface *),
+        (override));
 };  // class TurretSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc

@@ -24,104 +24,76 @@
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace testing;
-
-#define SETUP_SINGLE_PID_TEST()                                             \
-    aruwsrc::Drivers drivers;                                               \
-    tap::algorithms::ContiguousFloat worldFrameYawSetpoint(0, 0, 360);      \
-    testing::NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers); \
-    tap::algorithms::SmoothPid positionPid(1, 0, 0, 0, 1, 1, 0, 1, 0);
-
-#define RUN_SINGLE_PID_YAW_CONTROLLER()                        \
-    WorldFrameChassisImuTurretController::runYawPidController( \
-        drivers,                                               \
-        1,                                                     \
-        yawSetpoint,                                           \
-        0,                                                     \
-        &worldFrameYawSetpoint,                                \
-        &positionPid,                                          \
-        &turret);
-
 using namespace aruwsrc::control::turret;
+using namespace tap::algorithms;
+using namespace aruwsrc::control::turret::algorithms;
 
-TEST(WorldFrameChassisImuTurretController, runYawPidController__setpoint_actual_identical_output_0)
+class WorldFrameChassisImuTurretControllerTest : public Test
 {
-    // Setpoint used in gmock pointee
-    float yawSetpoint = 0.0f;
-    // Value used in gmock return reference
-    tap::algorithms::ContiguousFloat yawValue(0, 0, 360);
+protected:
+    WorldFrameChassisImuTurretControllerTest()
+        : turret(&drivers),
+          turretController(&drivers, &turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          yawValue(0, 0, 360)
+    {
+    }
 
-    SETUP_SINGLE_PID_TEST();
+    void SetUp() override
+    {
+        ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
+        ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
+    }
 
-    yawSetpoint = 90.0f;
+    aruwsrc::Drivers drivers;
+    testing::NiceMock<aruwsrc::mock::TurretSubsystemMock> turret;
+    WorldFrameYawChassisImuTurretController turretController;
+    float mpu6500Yaw = 0;
+    ContiguousFloat yawValue;
+};
+
+TEST_F(
+    WorldFrameChassisImuTurretControllerTest,
+    runYawPidController_setpoint_actual_identical_output_0)
+{
     yawValue.setValue(90);
-    worldFrameYawSetpoint.setValue(yawSetpoint);
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
-    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(0));
 
-    EXPECT_CALL(turret, setYawMotorOutput(FloatEq(0)));
+    EXPECT_CALL(turret, setYawMotorOutput(FloatNear(0, 1E-3)));
 
-    RUN_SINGLE_PID_YAW_CONTROLLER();
+    turretController.runController(1, 90);
 }
 
-TEST(WorldFrameChassisImuTurretController, runYawPidController__setpoint_gt_actual_output_positive)
+TEST_F(
+    WorldFrameChassisImuTurretControllerTest,
+    runYawPidController_setpoint_gt_actual_output_positive)
 {
-    // Setpoint used in gmock pointee
-    float yawSetpoint = 0.0f;
-    // Value used in gmock return reference
-    tap::algorithms::ContiguousFloat yawValue(0, 0, 360);
-    SETUP_SINGLE_PID_TEST();
-
-    // setpoint > value, output should be > 0
-    yawSetpoint = 90;
     yawValue.setValue(80);
-    worldFrameYawSetpoint.setValue(yawSetpoint);
     ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(0));
 
     EXPECT_CALL(turret, setYawMotorOutput(Gt(0)));
 
-    RUN_SINGLE_PID_YAW_CONTROLLER();
+    turretController.runController(1, 90);
 }
 
-TEST(WorldFrameChassisImuTurretController, runYawPidController__setpoint_lt_actual_output_negative)
+TEST_F(
+    WorldFrameChassisImuTurretControllerTest,
+    runYawPidController_setpoint_lt_actual_output_negative)
 {
-    // Setpoint used in gmock pointee
-    float yawSetpoint = 0.0f;
-    // Value used in gmock return reference
-    tap::algorithms::ContiguousFloat yawValue(0, 0, 360);
-
-    SETUP_SINGLE_PID_TEST();
-
-    // setpoint < value, output should be < 0
-    yawSetpoint = 90;
     yawValue.setValue(100);
-    worldFrameYawSetpoint.setValue(yawSetpoint);
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
-    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(0));
 
     EXPECT_CALL(turret, setYawMotorOutput(Lt(0)));
 
-    RUN_SINGLE_PID_YAW_CONTROLLER();
+    turretController.runController(1, 90);
 }
 
-TEST(
-    WorldFrameChassisImuTurretController,
-    runYawPidController__chassis_frame_rotated_setpoint_actual_equal_0_output)
+TEST_F(
+    WorldFrameChassisImuTurretControllerTest,
+    runYawPidController_chassis_frame_rotated_setpoint_actual_equal_0_output)
 {
-    // Setpoint used in gmock pointee
-    float yawSetpoint = 0.0f;
-    // Value used in gmock return reference
-    tap::algorithms::ContiguousFloat yawValue(0, 0, 360);
-
-    SETUP_SINGLE_PID_TEST();
-
-    yawSetpoint = 90;
     yawValue.setValue(0);
-    worldFrameYawSetpoint.setValue(yawSetpoint);
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(yawValue));
-    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(90));
+    mpu6500Yaw = 90;
 
-    EXPECT_CALL(turret, setYawMotorOutput(FloatEq(0)));
+    EXPECT_CALL(turret, setYawMotorOutput(FloatNear(0, 1E-3)));
 
-    RUN_SINGLE_PID_YAW_CONTROLLER();
+    turretController.runController(1, 90);
 }

@@ -17,201 +17,148 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentinel_turret_cv_command.hpp"
+//#include "sentinel.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/control/comprised_command.hpp"
+#include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
-#include "../algorithms/chassis_frame_turret_controller.hpp"
+#include <cassert>
+
+#include "tap/algorithms/ballistics.hpp"
+#include "tap/architecture/clock.hpp"
+
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/communication/serial/legacy_vision_coprocessor.hpp"
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/drivers.hpp"
 
+using namespace tap::arch::clock;
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::cv
 {
 SentinelTurretCVCommand::SentinelTurretCVCommand(
     aruwsrc::Drivers *drivers,
-    tap::control::turret::TurretSubsystemInterface *sentinelTurret,
-    aruwsrc::agitator::AgitatorSubsystem *agitator)
-    : tap::control::ComprisedCommand(drivers),
-      drivers(drivers),
-      sentinelTurret(sentinelTurret),
-      rotateAgitator(
-          drivers,
-          agitator,
-          AGITATOR_ROTATE_ANGLE,
-          AGITATOR_MAX_UNJAM_ANGLE,
-          AGITATOR_ROTATE_TIME,
-          true,
-          10),
-      aimingAtTarget(false),
-      lostTargetCounter(0),
-      yawPid(
-          YAW_P,
-          YAW_I,
-          YAW_D,
-          YAW_MAX_ERROR_SUM,
-          YAW_MAX_OUTPUT,
-          YAW_Q_DERIVATIVE_KALMAN,
-          YAW_R_DERIVATIVE_KALMAN,
-          YAW_Q_PROPORTIONAL_KALMAN,
-          YAW_R_PROPORTIONAL_KALMAN),
-      pitchPid(
-          PITCH_P,
-          PITCH_I,
-          PITCH_D,
-          PITCH_MAX_ERROR_SUM,
-          PITCH_MAX_OUTPUT,
-          PITCH_Q_DERIVATIVE_KALMAN,
-          PITCH_R_DERIVATIVE_KALMAN,
-          PITCH_Q_PROPORTIONAL_KALMAN,
-          PITCH_R_PROPORTIONAL_KALMAN)
+    TurretSubsystem *turretSubsystem,
+    algorithms::TurretYawControllerInterface *yawController,
+    algorithms::TurretPitchControllerInterface *pitchController,
+    tap::control::Subsystem &firingSubsystem,
+    Command *const firingCommand,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    const float defaultLaunchSpeed,
+    const uint8_t turretID)
+    : drivers(drivers),
+      turretSubsystem(turretSubsystem),
+      yawController(yawController),
+      pitchController(pitchController),
+      turretID(turretID),
+      firingCommand(firingCommand),
+      ballisticsSolver(
+          *drivers,
+          odometryInterface,
+          *turretSubsystem,
+          frictionWheels,
+          defaultLaunchSpeed,
+          turretID),
+      pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_ANGLE, SCAN_DELTA_ANGLE),
+      yawScanner(YAW_MIN_ANGLE, YAW_MAX_ANGLE, SCAN_DELTA_ANGLE)
 {
-    addSubsystemRequirement(agitator);
-    addSubsystemRequirement(sentinelTurret);
-    comprisedCommandScheduler.registerSubsystem(agitator);
-    comprisedCommandScheduler.registerSubsystem(sentinelTurret);
+    assert(firingCommand != nullptr);
+    assert(turretSubsystem != nullptr);
+    assert(pitchController != nullptr);
+    assert(yawController != nullptr);
+
+    addSubsystemRequirement(turretSubsystem);
+    addSubsystemRequirement(&firingSubsystem);
 }
 
-bool SentinelTurretCVCommand::isReady() { return sentinelTurret->isOnline(); }
+bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
 
 void SentinelTurretCVCommand::initialize()
 {
-    drivers->legacyVisionCoprocessor.beginAutoAim();
-    pitchScanningUp = false;
-    yawScanningRight = false;
-    lostTargetCounter = 0;
-    prevTime = tap::arch::clock::getTimeMilliseconds();
+    pitchController->initialize();
+    yawController->initialize();
+    prevTime = getTimeMilliseconds();
+    drivers->visionCoprocessor.sendSelectNewTargetMessage();
 }
 
 void SentinelTurretCVCommand::execute()
 {
-    if (drivers->legacyVisionCoprocessor.lastAimDataValid())
-    {
-        const auto &cvData = drivers->legacyVisionCoprocessor.getLastAimData();
-        if (cvData.hasTarget)
-        {
-            aimingAtTarget = true;
-            sentinelTurret->setYawSetpoint(cvData.yaw);
-            sentinelTurret->setPitchSetpoint(cvData.pitch);
+    float pitchSetpoint = pitchController->getSetpoint();
+    float yawSetpoint = yawController->getSetpoint();
 
-            if (fabs(sentinelTurret->getCurrentYawValue().difference(cvData.yaw)) <=
-                    YAW_FIRE_ERROR_MARGIN &&
-                fabs(sentinelTurret->getCurrentPitchValue().difference(cvData.pitch)) <=
-                    PITCH_FIRE_ERROR_MARGIN)
-            {
-                if (!comprisedCommandScheduler.isCommandScheduled(&rotateAgitator))
-                {
-                    comprisedCommandScheduler.addCommand(&rotateAgitator);
-                }
-            }
-        }
-        else
+    float targetPitch;
+    float targetYaw;
+    bool ballisticsSolutionAvailable =
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+
+    if (ballisticsSolutionAvailable)
+    {
+        // Target available
+        pitchSetpoint = modm::toDegree(targetPitch);
+        yawSetpoint = modm::toDegree(targetYaw);
+
+        // Check if we are aiming within tolerance, if so fire
+        /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
+        /// to indicate whether it's worth firing at
+        if (compareFloatClose(
+                turretSubsystem->getCurrentPitchValue().getValue(),
+                pitchSetpoint,
+                FIRING_TOLERANCE) &&
+            compareFloatClose(
+                turretSubsystem->getCurrentYawValue().getValue(),
+                yawSetpoint,
+                FIRING_TOLERANCE))
         {
-            scanForTarget();
+            // Do not re-add command if it's already scheduled as that would interrupt it
+            if (!drivers->commandScheduler.isCommandScheduled(firingCommand))
+            {
+                drivers->commandScheduler.addCommand(firingCommand);
+            }
         }
     }
     else
     {
-        scanForTarget();
-    }
+        // Target unavailable
 
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTime;
-    prevTime = currTime;
-
-    // updates the turret pitch setpoint based on CV input, runs the PID controller, and sets
-    // the turret subsystem's desired pitch output
-    ChassisFrameTurretController::runPitchPidController(
-        dt,
-        sentinelTurret->getPitchSetpoint(),
-        TurretSubsystem::TURRET_CG_X,
-        TurretSubsystem::TURRET_CG_Z,
-        TurretSubsystem::GRAVITY_COMPENSATION_SCALAR,
-        &pitchPid,
-        sentinelTurret);
-
-    // updates the turret yaw setpoint based on CV input, runs the PID controller, and sets
-    // the turret subsystem's desired yaw output
-    ChassisFrameTurretController::runYawPidController(
-        dt,
-        sentinelTurret->getYawSetpoint(),
-        &yawPid,
-        sentinelTurret);
-
-    comprisedCommandScheduler.run();
-}
-
-bool SentinelTurretCVCommand::isFinished() const { return !sentinelTurret->isOnline(); }
-
-void SentinelTurretCVCommand::end(bool interrupted)
-{
-    drivers->legacyVisionCoprocessor.stopAutoAim();
-    comprisedCommandScheduler.removeCommand(&rotateAgitator, interrupted);
-    sentinelTurret->setPitchMotorOutput(0);
-    sentinelTurret->setYawMotorOutput(0);
-}
-
-void SentinelTurretCVCommand::updateScanningUp(
-    const float motorSetpoint,
-    const float minMotorSetpoint,
-    const float maxMotorSetpoint,
-    bool *axisScanningUp)
-{
-    tap::algorithms::ContiguousFloat setpointContiguous(motorSetpoint, 0, 360);
-
-    if (abs(setpointContiguous.difference(maxMotorSetpoint)) < BOUNDS_TOLERANCE)
-    {
-        *axisScanningUp = false;
-    }
-    else if (abs(setpointContiguous.difference(minMotorSetpoint)) < BOUNDS_TOLERANCE)
-    {
-        *axisScanningUp = true;
-    }
-}
-
-void SentinelTurretCVCommand::scanForTarget()
-{
-    // Increment aim counter and stop aiming at target if the target has been lost for some time
-    if (aimingAtTarget)
-    {
-        lostTargetCounter++;
-
-        if (lostTargetCounter > AIM_LOST_NUM_COUNTS)
+        // See how recently we lost target
+        if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
         {
-            lostTargetCounter = 0;
-            aimingAtTarget = false;
+            // We recently had a target. Don't start scanning yet
+            lostTargetCounter++;
+            // Pitch and yaw setpoint already at reasonable default value
+            // by this point
         }
         else
         {
-            return;
+            pitchSetpoint = pitchScanner.scan(pitchSetpoint);
+            yawSetpoint = yawScanner.scan(yawSetpoint);
         }
     }
 
-    const float pitchSetpoint = sentinelTurret->getPitchSetpoint();
+    uint32_t currTime = getTimeMilliseconds();
+    uint32_t dt = currTime - prevTime;
+    prevTime = currTime;
 
-    updateScanningUp(
-        pitchSetpoint,
-        TurretSubsystem::PITCH_MIN_ANGLE,
-        TurretSubsystem::PITCH_MAX_ANGLE,
-        &pitchScanningUp);
+    // updates the turret pitch setpoint based on either CV or user input, runs the PID controller,
+    // and sets the turret subsystem's desired pitch output
+    pitchController->runController(dt, pitchSetpoint);
 
-    sentinelTurret->setPitchSetpoint(
-        pitchSetpoint + (pitchScanningUp ? SCAN_DELTA_ANGLE_PITCH : -SCAN_DELTA_ANGLE_PITCH));
-
-    const float yawSetpoint = sentinelTurret->getYawSetpoint();
-
-    updateScanningUp(
-        yawSetpoint,
-        TurretSubsystem::YAW_MIN_ANGLE,
-        TurretSubsystem::YAW_MAX_ANGLE,
-        &yawScanningRight);
-
-    sentinelTurret->setYawSetpoint(
-        yawSetpoint + (yawScanningRight ? SCAN_DELTA_ANGLE_YAW : -SCAN_DELTA_ANGLE_YAW));
+    // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
+    // and sets the turret subsystem's desired yaw output
+    yawController->runController(dt, yawSetpoint);
 }
 
-}  // namespace aruwsrc::control::turret
+bool SentinelTurretCVCommand::isFinished() const
+{
+    return !pitchController->isOnline() || !yawController->isOnline();
+}
+
+void SentinelTurretCVCommand::end(bool)
+{
+    turretSubsystem->setYawMotorOutput(0);
+    turretSubsystem->setPitchMotorOutput(0);
+}
+
+}  // namespace aruwsrc::control::turret::cv

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARUWSRC_UTIL_MACROS_HPP_
-#define ARUWSRC_UTIL_MACROS_HPP_
+#ifndef UTIL_MACROS_HPP_
+#define UTIL_MACROS_HPP_
 
 /**
  * Define a helper macro that makes it easier to specify at compile time something that should be
@@ -28,4 +28,12 @@
 #define ALL_SOLDIERS
 #endif
 
-#endif  // ARUWSRC_UTIL_MACROS_HPP_
+/**
+ * A helper macro that makes it easier to specify at compile time something that should be true for
+ * all sentinels.
+ */
+#if defined(TARGET_SENTINEL_2021) || defined(TARGET_SENTINEL_2022)
+#define ALL_SENTINELS
+#endif
+
+#endif  // UTIL_MACROS_HPP_

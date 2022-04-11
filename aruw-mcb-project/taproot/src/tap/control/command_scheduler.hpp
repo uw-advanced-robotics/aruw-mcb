@@ -17,8 +17,8 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMAND_SCHEDULER_HPP_
-#define COMMAND_SCHEDULER_HPP_
+#ifndef TAPROOT_COMMAND_SCHEDULER_HPP_
+#define TAPROOT_COMMAND_SCHEDULER_HPP_
 
 #include <iterator>
 
@@ -154,6 +154,9 @@ public:
      *
      * If a Command is successfully added, the Command's `initialize()` function will
      * be called.
+     *
+     * @note If the `commandToAdd` was already scheduled, it will be interrupted (its `end()`
+     *      will be called) and then the command will be rescheduled.
      *
      * @param[in] commandToAdd the Command to be added to the scheduler.
      */
@@ -377,4 +380,4 @@ private:
 
 }  // namespace tap
 
-#endif  // COMMAND_SCHEDULER_HPP_
+#endif  // TAPROOT_COMMAND_SCHEDULER_HPP_

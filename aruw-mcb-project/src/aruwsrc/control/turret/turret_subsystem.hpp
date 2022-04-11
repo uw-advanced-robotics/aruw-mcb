@@ -41,82 +41,26 @@ namespace aruwsrc
 class Drivers;
 }
 
+namespace aruwsrc::control::turret::algorithms
+{
+class TurretPitchControllerInterface;
+class TurretYawControllerInterface;
+}  // namespace aruwsrc::control::turret::algorithms
+
 namespace aruwsrc::control::turret
 {
 /**
  * Stores software necessary for interacting with two gimbals that control the pitch and
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
+ *
+ * All angles computed using a right hand coordinate system. In other words, yaw is a value from
+ * 0-360 rotated counterclockwise when looking at the turret from above. Pitch is a value from 0-360
+ * rotated counterclockwise when looking at the turret from the right side of the turret.
  */
 class TurretSubsystem : public tap::control::turret::TurretSubsystemInterface
 {
 public:
-    static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-    static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-    static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
-
     static constexpr float MAX_OUT_6020 = 30'000;
-
-#if defined(ALL_SOLDIERS)
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = 0.0f;
-    static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_MIN_ANGLE = 63.0f;
-    static constexpr float PITCH_MAX_ANGLE = 125.0f;
-
-#ifdef TARGET_SOLDIER_2021
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 6821;
-#else
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 1100;
-#endif
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4100;
-
-    static constexpr float TURRET_CG_X = 12;
-    static constexpr float TURRET_CG_Z = 23;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 2000.0f;
-#elif defined(TARGET_HERO)
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = YAW_START_ANGLE - 70.0f;
-    static constexpr float YAW_MAX_ANGLE = YAW_START_ANGLE + 70.0f;
-    static constexpr float PITCH_MIN_ANGLE = 65.0f;
-    static constexpr float PITCH_MAX_ANGLE = 104.0f;
-
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 3000;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 1418;
-
-    static constexpr float TURRET_CG_X = 0;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-#elif defined(TARGET_SENTINEL)
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = 5.0f;
-    static constexpr float YAW_MAX_ANGLE = 175.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float PITCH_MIN_ANGLE = 15.0f;
-    static constexpr float PITCH_MAX_ANGLE = 100.0f;
-
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 2801;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4150;
-
-    static constexpr float TURRET_CG_X = 0;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-#else
-    static constexpr float YAW_START_ANGLE = 90.0f;
-    static constexpr float YAW_MIN_ANGLE = 0.0f;
-    static constexpr float YAW_MAX_ANGLE = 180.0f;
-    static constexpr float PITCH_START_ANGLE = 90.0f;
-    static constexpr float PITCH_MIN_ANGLE = 0.0f;
-    static constexpr float PITCH_MAX_ANGLE = 180.0f;
-
-    static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
-    static constexpr uint16_t PITCH_START_ENCODER_POSITION = 0;
-
-    static constexpr float TURRET_CG_X = 0;
-    static constexpr float TURRET_CG_Z = 0;
-    static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-#endif
 
     /**
      * Constructs a TurretSubsystem.
@@ -124,8 +68,8 @@ public:
      * @param[in] drivers Pointer to a drivers singleton object.
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
-     * @param[in] limitYaw `true` if the yaw should be limited between `TURRET_YAW_MIN_ANGLE` and
-     *      `TURRET_YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
+     * @param[in] limitYaw `true` if the yaw should be limited between `YAW_MIN_ANGLE` and
+     *      `YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
      * @param[in] chassisFrontBackIdentical `true` if the front and back of the chassis are
      *      interchangable, indicating that `YAW_START_ANGLE` is identical to `YAW_START_ANGLE +
@@ -239,6 +183,29 @@ public:
      */
     mockable void updateCurrentTurretAngles();
 
+    mockable algorithms::TurretPitchControllerInterface* getPrevRanPitchTurretController() const
+    {
+        return prevRanPitchTurretController;
+    }
+    mockable algorithms::TurretYawControllerInterface* getPrevRanYawTurretController() const
+    {
+        return prevRanYawTurretController;
+    }
+
+    mockable void setPrevRanPitchTurretController(
+        algorithms::TurretPitchControllerInterface* controller)
+    {
+        prevRanPitchTurretController = controller;
+    }
+    mockable void setPrevRanYawTurretController(
+        algorithms::TurretYawControllerInterface* controller)
+    {
+        prevRanYawTurretController = controller;
+    }
+
+protected:
+    Drivers* drivers;
+
 private:
     tap::algorithms::ContiguousFloat currPitchAngle;
     tap::algorithms::ContiguousFloat currYawAngle;
@@ -258,6 +225,9 @@ private:
     {
         return 360 / 60 * motor->getShaftRPM();
     }
+
+    algorithms::TurretPitchControllerInterface* prevRanPitchTurretController = nullptr;
+    algorithms::TurretYawControllerInterface* prevRanYawTurretController = nullptr;
 
     tap::motor::MotorInterface* pitchMotor;
     tap::motor::MotorInterface* yawMotor;

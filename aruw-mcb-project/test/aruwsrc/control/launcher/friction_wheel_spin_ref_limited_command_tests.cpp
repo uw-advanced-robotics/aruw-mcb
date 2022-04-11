@@ -26,24 +26,38 @@
 using aruwsrc::Drivers;
 using aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand;
 using namespace testing;
+using namespace tap::communication::serial;
 
-#define SETUP_TEST(...)                                                    \
-    Drivers drivers;                                                       \
-    aruwsrc::mock::FrictionWheelSubsystemMock frictionWheels(&drivers);    \
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand( \
-        &drivers,                                                          \
-        &frictionWheels,                                                   \
-        __VA_ARGS__);                                                      \
-    tap::serial::RefSerialData::Rx::RobotData robotData{};                 \
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+class FrictionWheelSpinRefLimitedCommandTest : public Test
+{
+protected:
+    FrictionWheelSpinRefLimitedCommandTest() : frictionWheels(&drivers) {}
 
-#define TEST_EXECUTE(name) TEST(FrictionWheelSpinRefLimitedCommand, execute__##name)
+    void SetUp() override
+    {
+        ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+        ON_CALL(drivers.refSerial, getRefSerialReceivingData)
+            .WillByDefault(ReturnPointee(&refSerialOnline));
+    }
+
+    Drivers drivers;
+    aruwsrc::mock::FrictionWheelSubsystemMock frictionWheels;
+    RefSerialData::Rx::RobotData robotData{};
+    bool refSerialOnline = false;
+};
+
+#define TEST_EXECUTE(name) TEST_F(FrictionWheelSpinRefLimitedCommandTest, execute__##name)
 
 TEST_EXECUTE(defaultLaunchSpeed_used_when_ref_serial_offline)
 {
-    SETUP_TEST(5, false, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        5,
+        false,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
+    refSerialOnline = false;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(5));
 
     frictionWheelSpinRefLimitedCommand.execute();
@@ -51,9 +65,14 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_ref_serial_offline)
 
 TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_1_specified)
 {
-    SETUP_TEST(5, false, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        5,
+        false,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
+    refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
     robotData.turret.barrelSpeedLimit17ID1 = 10;
 
@@ -62,9 +81,14 @@ TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_1_specifie
 
 TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_2_specified)
 {
-    SETUP_TEST(5, false, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_2);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        5,
+        false,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_2);
 
-    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
+    refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
     robotData.turret.barrelSpeedLimit17ID2 = 10;
 
@@ -73,9 +97,14 @@ TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_2_specifie
 
 TEST_EXECUTE(barrelSpeedLimit17ID2_used_when_ref_serial_online_barrel_42mm_specified)
 {
-    SETUP_TEST(5, false, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        5,
+        false,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
-    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
+    refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
     robotData.turret.barrelSpeedLimit42 = 10;
 
@@ -84,9 +113,14 @@ TEST_EXECUTE(barrelSpeedLimit17ID2_used_when_ref_serial_online_barrel_42mm_speci
 
 TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_serial_online)
 {
-    SETUP_TEST(0, true, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        0,
+        true,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
+    refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
     robotData.turret.barrelSpeedLimit17ID1 = 10;
 
@@ -95,9 +129,14 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
 
 TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_serial_offline)
 {
-    SETUP_TEST(0, true, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        0,
+        true,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
+    refSerialOnline = false;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
     robotData.turret.barrelSpeedLimit17ID1 = 10;
 
@@ -106,12 +145,13 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
 
 TEST_EXECUTE(launch_speed_changes_when_ref_serial_online_and_barrel_speed_changes)
 {
-    SETUP_TEST(0, false, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        0,
+        false,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
-    bool refSerialOnline = false;
-
-    ON_CALL(drivers.refSerial, getRefSerialReceivingData)
-        .WillByDefault(ReturnPointee(&refSerialOnline));
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(15));
@@ -131,16 +171,26 @@ TEST_EXECUTE(launch_speed_changes_when_ref_serial_online_and_barrel_speed_change
     frictionWheelSpinRefLimitedCommand.execute();
 }
 
-TEST(FrictionWheelSpinRefLimitedCommand, isFinished__always_false)
+TEST_F(FrictionWheelSpinRefLimitedCommandTest, isFinished__always_false)
 {
-    SETUP_TEST(0, false, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        0,
+        true,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
     EXPECT_FALSE(frictionWheelSpinRefLimitedCommand.isFinished());
 }
 
-TEST(FrictionWheelSpinRefLimitedCommand, end__sets_launch_speed_to_0)
+TEST_F(FrictionWheelSpinRefLimitedCommandTest, end__sets_launch_speed_to_0)
 {
-    SETUP_TEST(0, false, FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
+        &drivers,
+        &frictionWheels,
+        0,
+        true,
+        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0)).Times(2);
 

@@ -20,13 +20,15 @@
 #ifndef TURRET_CV_COMMAND_HPP_
 #define TURRET_CV_COMMAND_HPP_
 
-#include "tap/algorithms/contiguous_float.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
-#include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 
-#include "../turret_subsystem.hpp"
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "../algorithms/turret_controller_interface.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+
+namespace tap::control::odometry
+{
+class Odometry2DInterface;
+}
 
 namespace aruwsrc
 {
@@ -35,14 +37,68 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
+class TurretSubsystem;
+}
+
+namespace aruwsrc::control::launcher
+{
+class RefereeFeedbackFrictionWheelSubsystem;
+}
+
+namespace aruwsrc::chassis
+{
+class ChassisSubsystem;
+}
+
+namespace aruwsrc::control::turret::cv
+{
 /**
- * A command that receives input from the vision system via the `LegacyVisionCoprocessor` driver and
+ * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turret accordingly using a position PID controller.
+ *
+ * This command, unlike the `SentinelTurretCVCommand`, is not responsible for firing projectiles
+ * when the auto aim system determines it should fire. Nor does this class scan the turret back and
+ * forth.
+ *
+ * @note If the auto aim system is offline, does not have a target acquired, or has an invalid
+ * target (for example, the target is too far away), then user input from the
+ * `ControlOperatorInterface` is used to control the turret instead.
  */
 class TurretCVCommand : public tap::control::Command
 {
 public:
-    TurretCVCommand(aruwsrc::Drivers *legacyVisionCoprocessor, TurretSubsystem *subsystem);
+    /**
+     * Constructs a TurretCVCommand
+     *
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the turret to control.
+     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * axis of the turret.
+     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
+     * pitch axis of the turret.
+     * @param[in] odometryInterface Odometry object, used for position odometry information.
+     * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
+     * a target is a function of how fast a projectile is launched at.
+     * @param[in] userPitchInputScalar When user input is used, this scalar is used to scale the
+     * pitch user input.
+     * @param[in] userYawInputScalar When user input is used, this scalar is used to scale the yaw
+     * user input.
+     * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
+     * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
+     * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
+     * for more information.
+     */
+    TurretCVCommand(
+        aruwsrc::Drivers *drivers,
+        TurretSubsystem *turretSubsystem,
+        algorithms::TurretYawControllerInterface *yawController,
+        algorithms::TurretPitchControllerInterface *pitchController,
+        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+        const float userPitchInputScalar,
+        const float userYawInputScalar,
+        const float defaultLaunchSpeed,
+        uint8_t turretID = 0);
 
     void initialize() override;
 
@@ -57,36 +113,22 @@ public:
     const char *getName() const override { return "turret CV"; }
 
 private:
-    static constexpr float YAW_P = 4000.0f;
-    static constexpr float YAW_I = 0.0f;
-    static constexpr float YAW_D = 190.0f;
-    static constexpr float YAW_MAX_ERROR_SUM = 0.0f;
-    static constexpr float YAW_MAX_OUTPUT = 32000.0f;
-    static constexpr float YAW_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float YAW_R_DERIVATIVE_KALMAN = 30.0f;
-    static constexpr float YAW_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float YAW_R_PROPORTIONAL_KALMAN = 0.0f;
-
-    static constexpr float PITCH_P = 4000.0f;
-    static constexpr float PITCH_I = 0.0f;
-    static constexpr float PITCH_D = 130.0f;
-    static constexpr float PITCH_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PITCH_MAX_OUTPUT = 32000.0f;
-    static constexpr float PITCH_Q_DERIVATIVE_KALMAN = 1.0f;
-    static constexpr float PITCH_R_DERIVATIVE_KALMAN = 10.0f;
-    static constexpr float PITCH_Q_PROPORTIONAL_KALMAN = 1.0f;
-    static constexpr float PITCH_R_PROPORTIONAL_KALMAN = 2.0f;
-
     aruwsrc::Drivers *drivers;
+
+    uint8_t turretID;
 
     TurretSubsystem *turretSubsystem;
 
-    tap::algorithms::SmoothPid yawPid;
-    tap::algorithms::SmoothPid pitchPid;
+    algorithms::TurretYawControllerInterface *yawController;
+    algorithms::TurretPitchControllerInterface *pitchController;
+
+    aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
+
+    const float userPitchInputScalar;
+    const float userYawInputScalar;
 
     uint32_t prevTime;
-};  // class TurretCvCommand
-
-}  // namespace aruwsrc::control::turret
+};
+}  // namespace aruwsrc::control::turret::cv
 
 #endif  // TURRET_CV_COMMAND_HPP_

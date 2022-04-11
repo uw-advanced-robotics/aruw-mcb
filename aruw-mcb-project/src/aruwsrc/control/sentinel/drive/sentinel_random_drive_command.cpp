@@ -17,7 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SENTINEL)
+#include "aruwsrc/util_macros.hpp"
+
+#if defined(ALL_SENTINELS)
 
 #ifndef PLATFORM_HOSTED
 #include "modm/platform/random/random_number_generator.hpp"

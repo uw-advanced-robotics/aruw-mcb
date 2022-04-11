@@ -17,14 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SENTINEL)
+#include "aruwsrc/util_macros.hpp"
 
-#include "sentinel_auto_drive_comprised_command.hpp"
+#if defined(ALL_SENTINELS)
 
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
+#include "sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel_drive_subsystem.hpp"
 
 using namespace tap::algorithms;

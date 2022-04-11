@@ -19,96 +19,104 @@
 
 #include "turret_cv_command.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/ballistics.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/communication/serial/remote.hpp"
 
-#include "../algorithms/chassis_frame_turret_controller.hpp"
+#include "../turret_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch::clock;
+using namespace tap::algorithms;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret::cv
 {
-TurretCVCommand::TurretCVCommand(aruwsrc::Drivers *drivers, TurretSubsystem *subsystem)
+TurretCVCommand::TurretCVCommand(
+    aruwsrc::Drivers *drivers,
+    TurretSubsystem *turretSubsystem,
+    algorithms::TurretYawControllerInterface *yawController,
+    algorithms::TurretPitchControllerInterface *pitchController,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    const float userPitchInputScalar,
+    const float userYawInputScalar,
+    const float defaultLaunchSpeed,
+    uint8_t turretID)
     : drivers(drivers),
-      turretSubsystem(subsystem),
-      yawPid(
-          YAW_P,
-          YAW_I,
-          YAW_D,
-          YAW_MAX_ERROR_SUM,
-          YAW_MAX_OUTPUT,
-          YAW_Q_DERIVATIVE_KALMAN,
-          YAW_R_DERIVATIVE_KALMAN,
-          YAW_Q_PROPORTIONAL_KALMAN,
-          YAW_R_PROPORTIONAL_KALMAN),
-      pitchPid(
-          PITCH_P,
-          PITCH_I,
-          PITCH_D,
-          PITCH_MAX_ERROR_SUM,
-          PITCH_MAX_OUTPUT,
-          PITCH_Q_DERIVATIVE_KALMAN,
-          PITCH_R_DERIVATIVE_KALMAN,
-          PITCH_Q_PROPORTIONAL_KALMAN,
-          PITCH_R_PROPORTIONAL_KALMAN)
+      turretID(turretID),
+      turretSubsystem(turretSubsystem),
+      yawController(yawController),
+      pitchController(pitchController),
+      ballisticsSolver(
+          *drivers,
+          odometryInterface,
+          *turretSubsystem,
+          frictionWheels,
+          defaultLaunchSpeed,
+          turretID),
+      userPitchInputScalar(userPitchInputScalar),
+      userYawInputScalar(userYawInputScalar)
 {
-    addSubsystemRequirement(subsystem);
+    addSubsystemRequirement(turretSubsystem);
 }
 
-bool TurretCVCommand::isReady() { return turretSubsystem->isOnline(); }
+bool TurretCVCommand::isReady() { return !isFinished(); }
 
 void TurretCVCommand::initialize()
 {
-    drivers->legacyVisionCoprocessor.beginAutoAim();
-    yawPid.reset();
-    pitchPid.reset();
+    pitchController->initialize();
+    yawController->initialize();
+    prevTime = getTimeMilliseconds();
+    drivers->visionCoprocessor.sendSelectNewTargetMessage();
 }
 
 void TurretCVCommand::execute()
 {
-    if (drivers->legacyVisionCoprocessor.lastAimDataValid())
+    float pitchSetpoint = pitchController->getSetpoint();
+    float yawSetpoint = yawController->getSetpoint();
+
+    float targetPitch;
+    float targetYaw;
+    bool ballisticsSolutionAvailable =
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+
+    if (ballisticsSolutionAvailable)
     {
-        const auto &cvData = drivers->legacyVisionCoprocessor.getLastAimData();
-        if (cvData.hasTarget)
-        {
-            turretSubsystem->setYawSetpoint(cvData.yaw);
-            turretSubsystem->setPitchSetpoint(cvData.pitch);
-        }
+        pitchSetpoint = modm::toDegree(targetPitch);
+        yawSetpoint = modm::toDegree(targetYaw);
+    }
+    else
+    {
+        // no valid ballistics solution, let user control turret
+        pitchSetpoint +=
+            userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
+
+        yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
     }
 
     uint32_t currTime = getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    // updates the turret pitch setpoint based on CV input, runs the PID controller, and sets
-    // the turret subsystem's desired pitch output
-    ChassisFrameTurretController::runPitchPidController(
-        dt,
-        turretSubsystem->getPitchSetpoint(),
-        TurretSubsystem::TURRET_CG_X,
-        TurretSubsystem::TURRET_CG_Z,
-        TurretSubsystem::GRAVITY_COMPENSATION_SCALAR,
-        &pitchPid,
-        turretSubsystem);
+    // updates the turret pitch setpoint based on either CV or user input, runs the PID controller,
+    // and sets the turret subsystem's desired pitch output
+    pitchController->runController(dt, pitchSetpoint);
 
-    // updates the turret yaw setpoint based on CV input, runs the PID controller, and sets
-    // the turret subsystem's desired yaw output
-    ChassisFrameTurretController::runYawPidController(
-        dt,
-        turretSubsystem->getYawSetpoint(),
-        &yawPid,
-        turretSubsystem);
+    // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
+    // and sets the turret subsystem's desired yaw output
+    yawController->runController(dt, yawSetpoint);
 }
 
-bool TurretCVCommand::isFinished() const { return !turretSubsystem->isOnline(); }
+bool TurretCVCommand::isFinished() const
+{
+    return !pitchController->isOnline() || !yawController->isOnline();
+}
 
 void TurretCVCommand::end(bool)
 {
-    drivers->legacyVisionCoprocessor.stopAutoAim();
     turretSubsystem->setYawMotorOutput(0);
     turretSubsystem->setPitchMotorOutput(0);
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret::cv

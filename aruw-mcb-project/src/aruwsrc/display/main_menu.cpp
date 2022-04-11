@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -28,46 +28,72 @@ namespace aruwsrc
 namespace display
 {
 MainMenu::MainMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* stack,
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>>* stack,
     aruwsrc::Drivers* drivers)
-    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, MAIN_MENU_ID),
+    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
+      imuCalibrateMenu(stack, drivers),
+      cvMenu(stack, drivers),
       errorMenu(stack, drivers),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers),
-      commandSchedulerMenu(stack, drivers)
+      commandSchedulerMenu(stack, drivers),
+      refSerialMenu(stack, drivers),
+      turretStatusMenu(stack, drivers)
 {
 }
 
 void MainMenu::initialize()
 {
     addEntry(
-        ErrorMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        ImuCalibrateMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
-            &MainMenu::addErrorMenuCallback));
+            &MainMenu::addImuCalibrateMenuCallback));
     addEntry(
-        HardwareTestMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        CVMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
-            &MainMenu::addHardwareTestMenuCallback));
+            &MainMenu::addCVMenuCallback));
     addEntry(
         MotorMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addMotorMenuCallback));
     addEntry(
-        "Property Table Menu",
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        RefSerialMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
-            &MainMenu::addPropertyTableCallback));
+            &MainMenu::addRefSerialMenuCallback));
+    addEntry(
+        TurretMCBMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addTurretMCBMenuCallback));
     addEntry(
         CommandSchedulerMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addCommandSchedulerCallback));
+    addEntry(
+        HardwareTestMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addHardwareTestMenuCallback));
 
     setTitle("Main Menu");
+}
+
+void MainMenu::addImuCalibrateMenuCallback()
+{
+    ImuCalibrateMenu* icm = new (&imuCalibrateMenu) ImuCalibrateMenu(getViewStack(), drivers);
+    getViewStack()->push(icm);
+}
+
+void MainMenu::addCVMenuCallback()
+{
+    CVMenu* cvm = new (&cvMenu) CVMenu(getViewStack(), drivers);
+    getViewStack()->push(cvm);
 }
 
 void MainMenu::addErrorMenuCallback()
@@ -96,7 +122,21 @@ void MainMenu::addPropertyTableCallback()
 
 void MainMenu::addCommandSchedulerCallback()
 {
-    getViewStack()->push(new CommandSchedulerMenu(getViewStack(), drivers));
+    CommandSchedulerMenu* csm =
+        new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers);
+    getViewStack()->push(csm);
+}
+
+void MainMenu::addRefSerialMenuCallback()
+{
+    RefSerialMenu* rsm = new (&refSerialMenu) RefSerialMenu(getViewStack(), drivers);
+    getViewStack()->push(rsm);
+}
+
+void MainMenu::addTurretMCBMenuCallback()
+{
+    TurretMCBMenu* tsm = new (&turretStatusMenu) TurretMCBMenu(getViewStack(), drivers);
+    getViewStack()->push(tsm);
 }
 }  // namespace display
 

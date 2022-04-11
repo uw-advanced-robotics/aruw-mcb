@@ -825,7 +825,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../aruw-mcb-project/src ../aruw-mcb-project/taproot/src
+INPUT                  = ../aruw-mcb-project/src ../aruw-mcb-project/taproot/src \
+                         ../aruw-mcb-project/robot-type/robot_type.hpp
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

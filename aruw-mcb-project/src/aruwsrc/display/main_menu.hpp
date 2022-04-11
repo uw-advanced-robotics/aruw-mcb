@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -24,10 +24,14 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/display/hardware_test_menu.hpp"
 #include "tap/display/motor_menu.hpp"
+#include "tap/display/ref_serial_menu.hpp"
 
 #include "modm/ui/menu/standard_menu.hpp"
 
+#include "cv_menu.hpp"
 #include "error_menu.hpp"
+#include "imu_calibrate_menu.hpp"
+#include "turret_mcb_menu.hpp"
 
 namespace aruwsrc
 {
@@ -57,16 +61,24 @@ private:
 
     aruwsrc::Drivers *drivers;
 
+    ImuCalibrateMenu imuCalibrateMenu;
+    CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
     tap::display::MotorMenu motorMenu;
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
+    tap::display::RefSerialMenu refSerialMenu;
+    TurretMCBMenu turretStatusMenu;
 
+    void addImuCalibrateMenuCallback();
+    void addCVMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
     void addMotorMenuCallback();
     void addPropertyTableCallback();
     void addCommandSchedulerCallback();
+    void addRefSerialMenuCallback();
+    void addTurretMCBMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

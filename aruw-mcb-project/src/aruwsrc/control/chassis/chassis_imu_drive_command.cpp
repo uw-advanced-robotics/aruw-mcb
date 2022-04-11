@@ -26,6 +26,8 @@
 #include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
+using namespace tap::sensors;
+
 namespace aruwsrc::chassis
 {
 ChassisImuDriveCommand::ChassisImuDriveCommand(
@@ -43,13 +45,17 @@ ChassisImuDriveCommand::ChassisImuDriveCommand(
 
 void ChassisImuDriveCommand::initialize()
 {
-    imuSetpointInitialized = drivers->mpu6500.initialized();
+    imuSetpointInitialized =
+        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED ||
+        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_NOT_CALIBRATED;
 
     if (imuSetpointInitialized)
     {
         const float yaw = drivers->mpu6500.getYaw();
         rotationSetpoint.setValue(yaw);
     }
+
+    prevTime = tap::arch::clock::getTimeMicroseconds();
 }
 
 void ChassisImuDriveCommand::execute()
@@ -57,7 +63,8 @@ void ChassisImuDriveCommand::execute()
     float chassisRotationDesiredWheelspeed = 0.0f;
     float angleFromDesiredRotation = 0.0f;
 
-    if (drivers->mpu6500.initialized())
+    if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED ||
+        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_NOT_CALIBRATED)
     {
         if (!imuSetpointInitialized)
         {
@@ -66,11 +73,13 @@ void ChassisImuDriveCommand::execute()
         else
         {
             const float yaw = drivers->mpu6500.getYaw();
-            angleFromDesiredRotation = rotationSetpoint.difference(yaw);
+            angleFromDesiredRotation = -rotationSetpoint.difference(yaw);
 
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
             // angle. This way if the chassis is picked up and rotated, it won't try and spin around
             // to get to the same position that it was at previously.
+            float chassisRInput = drivers->controlOperatorInterface.getChassisRInput() *
+                                  USER_INPUT_TO_ANGLE_DELTA_SCALAR;
             if (abs(angleFromDesiredRotation) > MAX_ROTATION_ERR)
             {
                 // doesn't have to be in the if statement but this is more computationally intensive
@@ -81,32 +90,32 @@ void ChassisImuDriveCommand::execute()
                         rotationSetpoint,
                         yaw - MAX_ROTATION_ERR,
                         yaw + MAX_ROTATION_ERR) +
-                    drivers->controlOperatorInterface.getChassisRInput() *
-                        USER_INPUT_TO_ANGLE_DELTA_SCALAR);
+                    chassisRInput);
             }
             else
             {
-                rotationSetpoint.shiftValue(
-                    drivers->controlOperatorInterface.getChassisRInput() *
-                    USER_INPUT_TO_ANGLE_DELTA_SCALAR);
+                rotationSetpoint.shiftValue(chassisRInput);
             }
 
+            uint32_t currTime = tap::arch::clock::getTimeMicroseconds();
+            uint32_t dt = currTime - prevTime;
+            prevTime = currTime;
+
+            float targetVelocity = (dt == 0) ? 0.0f : chassisRInput * 1'000'000.0f / dt;
+
             // compute error again now that user input has been updated
-            angleFromDesiredRotation = rotationSetpoint.difference(yaw);
+            angleFromDesiredRotation = -rotationSetpoint.difference(yaw);
 
             // run PID controller to attempt to attain the setpoint
-            chassisRotationDesiredWheelspeed =
-                chassis->chassisSpeedRotationPID(angleFromDesiredRotation);
+            chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
+                angleFromDesiredRotation,
+                targetVelocity - drivers->mpu6500.getGz());
         }
     }
     else
     {
         imuSetpointInitialized = false;
-        const float MAX_WHEEL_SPEED = ChassisSubsystem::getMaxUserWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
-        chassisRotationDesiredWheelspeed =
-            drivers->controlOperatorInterface.getChassisRInput() * MAX_WHEEL_SPEED;
+        chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput();
     }
 
     float chassisXDesiredWheelspeed = 0.0f;
@@ -126,7 +135,7 @@ void ChassisImuDriveCommand::execute()
         tap::algorithms::rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            modm::toRadian(-turret->getYawAngleFromCenter()));
+            modm::toRadian(turret->getYawAngleFromCenter()));
     }
     else
     {
@@ -145,7 +154,7 @@ void ChassisImuDriveCommand::execute()
         chassisRotationDesiredWheelspeed);
 }
 
-void ChassisImuDriveCommand::end(bool) { chassis->setDesiredOutput(0, 0, 0); }
+void ChassisImuDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisImuDriveCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::chassis

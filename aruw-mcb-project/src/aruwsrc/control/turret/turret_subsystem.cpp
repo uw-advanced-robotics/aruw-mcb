@@ -29,6 +29,7 @@
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "constants/turret_constants.hpp"
 
 using namespace tap::motor;
 using namespace tap::algorithms;
@@ -41,6 +42,7 @@ TurretSubsystem::TurretSubsystem(
     MotorInterface *yawMotor,
     bool limitYaw)
     : tap::control::turret::TurretSubsystemInterface(drivers),
+      drivers(drivers),
       currPitchAngle(PITCH_START_ANGLE, 0.0f, 360.0f),
       currYawAngle(YAW_START_ANGLE, 0.0f, 360.0f),
       pitchEncoderWhenLastUpdated(PITCH_START_ENCODER_POSITION),

@@ -21,6 +21,7 @@
 
 #include "tap/mock/dji_motor_mock.hpp"
 
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -31,308 +32,261 @@ using namespace tap::motor;
 using namespace testing;
 using namespace aruwsrc::control::turret;
 
-#define CONSTRUCT_SHARED_TEST_OBJECTS()                                                    \
-    Drivers drivers;                                                                       \
-    NiceMock<DjiMotorMock> pitchMotor(&drivers, MOTOR1, CanBus::CAN_BUS1, false, "pitch"); \
-    NiceMock<DjiMotorMock> yawMotor(&drivers, MOTOR2, CanBus::CAN_BUS1, false, "yaw");
-
-static void setEncoderWrapped(DjiMotorMock &motor, uint16_t encoder)
+class TurretSubsystemTest : public Test
 {
-    ON_CALL(motor, getEncoderWrapped).WillByDefault(Return(encoder));
-}
+protected:
+    TurretSubsystemTest()
+        : pitchMotor(&drivers, MOTOR1, CanBus::CAN_BUS1, false, "pitch"),
+          yawMotor(&drivers, MOTOR2, CanBus::CAN_BUS1, false, "yaw"),
+          turret(&drivers, &pitchMotor, &yawMotor)
+    {
+    }
 
-TEST(TurretSubsystem, initialize__initializes_both_motors)
+    void SetUp() override
+    {
+        ON_CALL(pitchMotor, isMotorOnline).WillByDefault(ReturnPointee(&pitchMotorOnline));
+        ON_CALL(pitchMotor, getEncoderWrapped).WillByDefault(ReturnPointee(&pitchEncoderWrapped));
+        ON_CALL(yawMotor, isMotorOnline).WillByDefault(ReturnPointee(&yawMotorOnline));
+        ON_CALL(yawMotor, getEncoderWrapped).WillByDefault(ReturnPointee(&yawEncoderWrapped));
+    }
+
+    Drivers drivers;
+    NiceMock<DjiMotorMock> pitchMotor;
+    NiceMock<DjiMotorMock> yawMotor;
+    TurretSubsystem turret;
+    bool yawMotorOnline = true;
+    bool pitchMotorOnline = true;
+    uint16_t pitchEncoderWrapped = 0;
+    uint16_t yawEncoderWrapped = 0;
+};
+
+TEST_F(TurretSubsystemTest, initialize__initializes_both_motors)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
     EXPECT_CALL(pitchMotor, initialize);
     EXPECT_CALL(yawMotor, initialize);
 
     turret.initialize();
 }
 
-TEST(TurretSubsystem, setYawSetpoint__limited_to_min_max_when_limitYaw_false)
+TEST_F(TurretSubsystemTest, setYawSetpoint__limited_to_min_max_when_limitYaw_false)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
     // Default expectations so turret assumes motors are good to go and within valid angle range
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-
     std::vector<std::tuple<float, float>> limitedAndInputAnglePairs{
-        {TurretSubsystem::YAW_START_ANGLE, TurretSubsystem::YAW_START_ANGLE},
-        {TurretSubsystem::YAW_MIN_ANGLE, TurretSubsystem::YAW_MIN_ANGLE - 5},
-        {TurretSubsystem::YAW_MAX_ANGLE, TurretSubsystem::YAW_MAX_ANGLE + 5}};
+        {YAW_START_ANGLE, YAW_START_ANGLE},
+        {YAW_MIN_ANGLE, YAW_MIN_ANGLE - 5},
+        {YAW_MAX_ANGLE, YAW_MAX_ANGLE + 5}};
 
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
         turret.setYawSetpoint(inputAngle);
-        EXPECT_FLOAT_EQ(expectedAngle, turret.getYawSetpoint());
+        EXPECT_NEAR(expectedAngle, turret.getYawSetpoint(), 1E-3);
     }
 }
 
-TEST(TurretSubsystem, setYawSetpoint__not_limited_when_limitYaw_true)
+TEST_F(TurretSubsystemTest, setYawSetpoint__not_limited_when_limitYaw_false)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
     TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor, false);
 
-    // Default expectations so turret assumes motors are good to go and within valid angle range
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-
     std::vector<std::tuple<float, float>> limitedAndInputAnglePairs{
-        {TurretSubsystem::YAW_START_ANGLE, TurretSubsystem::YAW_START_ANGLE},
-        {tap::algorithms::ContiguousFloat(TurretSubsystem::YAW_MIN_ANGLE - 5, 0, 360).getValue(),
-         TurretSubsystem::YAW_MIN_ANGLE - 5},
-        {tap::algorithms::ContiguousFloat(TurretSubsystem::YAW_MAX_ANGLE + 5, 0, 360).getValue(),
-         TurretSubsystem::YAW_MAX_ANGLE + 5}};
+        {YAW_START_ANGLE, YAW_START_ANGLE},
+        {tap::algorithms::ContiguousFloat(YAW_MIN_ANGLE - 5, 0, 360).getValue(), YAW_MIN_ANGLE - 5},
+        {tap::algorithms::ContiguousFloat(YAW_MAX_ANGLE + 5, 0, 360).getValue(),
+         YAW_MAX_ANGLE + 5}};
 
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
         turret.setYawSetpoint(inputAngle);
-        EXPECT_FLOAT_EQ(expectedAngle, turret.getYawSetpoint());
+        EXPECT_NEAR(expectedAngle, turret.getYawSetpoint(), 1E-3);
     }
 }
 
-TEST(TurretSubsystem, setPitchSetpoint__limited_to_min_max)
+TEST_F(TurretSubsystemTest, setPitchSetpoint__limited_to_min_max)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    // Default expectations so turret assumes motors are good to go and within valid angle range
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
-
     std::vector<std::tuple<float, float>> limitedAndInputAnglePairs{
-        {TurretSubsystem::PITCH_START_ANGLE, TurretSubsystem::PITCH_START_ANGLE},
-        {TurretSubsystem::PITCH_MIN_ANGLE, TurretSubsystem::PITCH_MIN_ANGLE - 5},
-        {TurretSubsystem::PITCH_MAX_ANGLE, TurretSubsystem::PITCH_MAX_ANGLE + 5}};
+        {PITCH_START_ANGLE, PITCH_START_ANGLE},
+        {PITCH_MIN_ANGLE, PITCH_MIN_ANGLE - 5},
+        {PITCH_MAX_ANGLE, PITCH_MAX_ANGLE + 5}};
 
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
         turret.setPitchSetpoint(inputAngle);
-        EXPECT_FLOAT_EQ(expectedAngle, turret.getPitchSetpoint());
+        EXPECT_NEAR(expectedAngle, turret.getPitchSetpoint(), 1E-3);
     }
 }
 
-TEST(TurretSubsystem, getCurrentYawValue__returns_default_when_yaw_motor_offline)
+TEST_F(TurretSubsystemTest, getCurrentYawValue__returns_default_when_yaw_motor_offline)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
     // Default expectations so turret assumes motors are good to go and within valid angle range
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
+    pitchMotorOnline = false;
+    yawMotorOnline = false;
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(TurretSubsystem::YAW_START_ANGLE, turret.getCurrentYawValue().getValue());
+    EXPECT_NEAR(YAW_START_ANGLE, turret.getCurrentYawValue().getValue(), 1E-3);
 }
 
-TEST(TurretSubsystem, getCurrentYawValue__returns_values_based_on_enc_position_if_yaw_motor_online)
+TEST_F(
+    TurretSubsystemTest,
+    getCurrentYawValue__returns_values_based_on_enc_position_if_yaw_motor_online)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
     // Default expectations so turret assumes motors are good to go and within valid angle range
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {90, TurretSubsystem::YAW_START_ENCODER_POSITION},
-        {135, TurretSubsystem::YAW_START_ENCODER_POSITION + DjiMotor::ENC_RESOLUTION / 8},
-        {180, TurretSubsystem::YAW_START_ENCODER_POSITION + 2 * DjiMotor::ENC_RESOLUTION / 8},
-        {225, TurretSubsystem::YAW_START_ENCODER_POSITION + 3 * DjiMotor::ENC_RESOLUTION / 8},
-        {270, TurretSubsystem::YAW_START_ENCODER_POSITION + 4 * DjiMotor::ENC_RESOLUTION / 8},
-        {315, TurretSubsystem::YAW_START_ENCODER_POSITION + 5 * DjiMotor::ENC_RESOLUTION / 8},
-        {0, TurretSubsystem::YAW_START_ENCODER_POSITION + 6 * DjiMotor::ENC_RESOLUTION / 8}};
+        {90, YAW_START_ENCODER_POSITION},
+        {135, YAW_START_ENCODER_POSITION + DjiMotor::ENC_RESOLUTION / 8},
+        {180, YAW_START_ENCODER_POSITION + 2 * DjiMotor::ENC_RESOLUTION / 8},
+        {225, YAW_START_ENCODER_POSITION + 3 * DjiMotor::ENC_RESOLUTION / 8},
+        {270, YAW_START_ENCODER_POSITION + 4 * DjiMotor::ENC_RESOLUTION / 8},
+        {315, YAW_START_ENCODER_POSITION + 5 * DjiMotor::ENC_RESOLUTION / 8},
+        {0, YAW_START_ENCODER_POSITION + 6 * DjiMotor::ENC_RESOLUTION / 8}};
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
     {
-        setEncoderWrapped(yawMotor, encoder % DjiMotor::ENC_RESOLUTION);
+        yawEncoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
         turret.refresh();
-        EXPECT_FLOAT_EQ(0.0f, turret.getCurrentYawValue().difference(angle));
+        EXPECT_NEAR(0.0f, turret.getCurrentYawValue().difference(angle), 1E-3);
     }
 }
 
-TEST(TurretSubsystem, getCurrentPitchValue__returns_default_when_pitch_motor_offline)
+TEST_F(TurretSubsystemTest, getCurrentPitchValue__returns_default_when_pitch_motor_offline)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
     // Default expectations so turret assumes motors are good to go and within valid angle range
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
+    pitchMotorOnline = false;
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(TurretSubsystem::PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue());
+    EXPECT_NEAR(PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue(), 1E-3);
 }
 
-TEST(
-    TurretSubsystem,
+TEST_F(
+    TurretSubsystemTest,
     getCurrentPitchValue__returns_values_based_on_enc_position_if_pitch_motor_online)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    // Default expectations so turret assumes motors are good to go and within valid angle range
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
-
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {90, TurretSubsystem::PITCH_START_ENCODER_POSITION},
-        {135, TurretSubsystem::PITCH_START_ENCODER_POSITION + DjiMotor::ENC_RESOLUTION / 8},
-        {180, TurretSubsystem::PITCH_START_ENCODER_POSITION + 2 * DjiMotor::ENC_RESOLUTION / 8},
-        {225, TurretSubsystem::PITCH_START_ENCODER_POSITION + 3 * DjiMotor::ENC_RESOLUTION / 8},
-        {270, TurretSubsystem::PITCH_START_ENCODER_POSITION + 4 * DjiMotor::ENC_RESOLUTION / 8},
-        {315, TurretSubsystem::PITCH_START_ENCODER_POSITION + 5 * DjiMotor::ENC_RESOLUTION / 8},
-        {0, TurretSubsystem::PITCH_START_ENCODER_POSITION + 6 * DjiMotor::ENC_RESOLUTION / 8}};
+        {90, PITCH_START_ENCODER_POSITION},
+        {135, PITCH_START_ENCODER_POSITION + DjiMotor::ENC_RESOLUTION / 8},
+        {180, PITCH_START_ENCODER_POSITION + 2 * DjiMotor::ENC_RESOLUTION / 8},
+        {225, PITCH_START_ENCODER_POSITION + 3 * DjiMotor::ENC_RESOLUTION / 8},
+        {270, PITCH_START_ENCODER_POSITION + 4 * DjiMotor::ENC_RESOLUTION / 8},
+        {315, PITCH_START_ENCODER_POSITION + 5 * DjiMotor::ENC_RESOLUTION / 8},
+        {0, PITCH_START_ENCODER_POSITION + 6 * DjiMotor::ENC_RESOLUTION / 8}};
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
     {
-        setEncoderWrapped(pitchMotor, encoder % DjiMotor::ENC_RESOLUTION);
+        pitchEncoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
         turret.refresh();
-        EXPECT_FLOAT_EQ(0, turret.getCurrentPitchValue().difference(angle));
+        EXPECT_NEAR(0, turret.getCurrentPitchValue().difference(angle), 1E-3);
     }
 }
 
-TEST(TurretSubsystem, onHardwareTestStart__sets_des_out_0)
+TEST_F(TurretSubsystemTest, onHardwareTestStart__sets_des_out_0)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
     // Default expectations so turret assumes motors are good to go and within valid angle range
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(pitchMotor, getEncoderWrapped)
-        .WillByDefault(Return(TurretSubsystem::PITCH_START_ENCODER_POSITION));
-    ON_CALL(yawMotor, getEncoderWrapped)
-        .WillByDefault(Return(TurretSubsystem::YAW_START_ENCODER_POSITION));
+    pitchEncoderWrapped = PITCH_START_ENCODER_POSITION;
+    yawEncoderWrapped = YAW_START_ENCODER_POSITION;
+
     turret.refresh();
 
     // Make sure desired output isn't 0
-    EXPECT_CALL(pitchMotor, setDesiredOutput(Ne(0)));
-    EXPECT_CALL(yawMotor, setDesiredOutput(Ne(0)));
+    {
+        InSequence seq;
+        EXPECT_CALL(pitchMotor, setDesiredOutput(Ne(0)));
+        EXPECT_CALL(pitchMotor, setDesiredOutput(0));
+    }
+
+    {
+        InSequence seq;
+        EXPECT_CALL(yawMotor, setDesiredOutput(Ne(0)));
+        EXPECT_CALL(yawMotor, setDesiredOutput(0));
+    }
 
     turret.setYawMotorOutput(100);
     turret.setPitchMotorOutput(100);
 
-    EXPECT_CALL(pitchMotor, setDesiredOutput(0));
-    EXPECT_CALL(yawMotor, setDesiredOutput(0));
-
     turret.onHardwareTestStart();
 }
 
-TEST(TurretSubsystem, isOnline__return_true_when_all_motors_online)
+TEST_F(TurretSubsystemTest, isOnline__return_true_when_all_motors_online)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
     EXPECT_TRUE(turret.isOnline());
 }
 
-TEST(TurretSubsystem, isOnline__return_false_when_some_motors_offline)
+TEST_F(TurretSubsystemTest, isOnline__return_false_when_some_motors_offline)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
     TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
 
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
+    pitchMotorOnline = false;
+    yawMotorOnline = false;
     EXPECT_FALSE(turret.isOnline());
 
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
+    pitchMotorOnline = true;
+    yawMotorOnline = false;
     EXPECT_FALSE(turret.isOnline());
 
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
+    pitchMotorOnline = false;
+    yawMotorOnline = true;
     EXPECT_FALSE(turret.isOnline());
 }
 
-TEST(TurretSubsystem, getPitchAngleFromCenter__return_0_when_motors_offline)
+TEST_F(TurretSubsystemTest, getPitchAngleFromCenter__return_0_when_motors_offline)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
+    yawMotorOnline = false;
+    pitchMotorOnline = false;
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(0, turret.getPitchAngleFromCenter());
+    EXPECT_NEAR(0, turret.getPitchAngleFromCenter(), 1E-3);
 }
 
-TEST(TurretSubsystem, getPitchAngleFromCenter__valid_encoder_angles)
+TEST_F(TurretSubsystemTest, getPitchAngleFromCenter__valid_encoder_angles)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {0, TurretSubsystem::PITCH_START_ENCODER_POSITION},
-        {45, TurretSubsystem::PITCH_START_ENCODER_POSITION + DjiMotor::ENC_RESOLUTION / 8},
-        {90, TurretSubsystem::PITCH_START_ENCODER_POSITION + 2 * DjiMotor::ENC_RESOLUTION / 8},
-        {135, TurretSubsystem::PITCH_START_ENCODER_POSITION + 3 * DjiMotor::ENC_RESOLUTION / 8},
-        {180, TurretSubsystem::PITCH_START_ENCODER_POSITION + 4 * DjiMotor::ENC_RESOLUTION / 8},
-        {-135, TurretSubsystem::PITCH_START_ENCODER_POSITION + 5 * DjiMotor::ENC_RESOLUTION / 8},
-        {-90, TurretSubsystem::PITCH_START_ENCODER_POSITION + 6 * DjiMotor::ENC_RESOLUTION / 8}};
+        {0, PITCH_START_ENCODER_POSITION},
+        {45, PITCH_START_ENCODER_POSITION + DjiMotor::ENC_RESOLUTION / 8},
+        {90, PITCH_START_ENCODER_POSITION + 2 * DjiMotor::ENC_RESOLUTION / 8},
+        {135, PITCH_START_ENCODER_POSITION + 3 * DjiMotor::ENC_RESOLUTION / 8},
+        {180, PITCH_START_ENCODER_POSITION + 4 * DjiMotor::ENC_RESOLUTION / 8},
+        {-135, PITCH_START_ENCODER_POSITION + 5 * DjiMotor::ENC_RESOLUTION / 8},
+        {-90, PITCH_START_ENCODER_POSITION + 6 * DjiMotor::ENC_RESOLUTION / 8}};
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
     {
-        setEncoderWrapped(pitchMotor, encoder % DjiMotor::ENC_RESOLUTION);
+        pitchEncoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
         turret.refresh();
-        EXPECT_FLOAT_EQ(angle, turret.getPitchAngleFromCenter());
+        EXPECT_NEAR(angle, turret.getPitchAngleFromCenter(), 1E-3);
     }
 }
 
-TEST(TurretSubsystem, getYawAngleFromCenter__return_0_when_motors_offline)
+TEST_F(TurretSubsystemTest, getYawAngleFromCenter__return_0_when_motors_offline)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
+    yawMotorOnline = false;
+    pitchMotorOnline = false;
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(0, turret.getYawAngleFromCenter());
+    EXPECT_NEAR(0, turret.getYawAngleFromCenter(), 1E-3);
 }
 
-TEST(TurretSubsystem, getYawAngleFromCenter)
+TEST_F(TurretSubsystemTest, getYawAngleFromCenter)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-
     std::vector<std::tuple<float, int>> angleFromCenterEncoderPairs{
-        {0, TurretSubsystem::YAW_START_ENCODER_POSITION},
-        {45, TurretSubsystem::YAW_START_ENCODER_POSITION + DjiMotor::ENC_RESOLUTION / 8},
-        {90, TurretSubsystem::YAW_START_ENCODER_POSITION + 2 * DjiMotor::ENC_RESOLUTION / 8},
-        {135, TurretSubsystem::YAW_START_ENCODER_POSITION + 3 * DjiMotor::ENC_RESOLUTION / 8},
-        {180, TurretSubsystem::YAW_START_ENCODER_POSITION + 4 * DjiMotor::ENC_RESOLUTION / 8},
-        {-135, TurretSubsystem::YAW_START_ENCODER_POSITION + 5 * DjiMotor::ENC_RESOLUTION / 8},
-        {-90, TurretSubsystem::YAW_START_ENCODER_POSITION + 6 * DjiMotor::ENC_RESOLUTION / 8}};
+        {0, YAW_START_ENCODER_POSITION},
+        {45, YAW_START_ENCODER_POSITION + DjiMotor::ENC_RESOLUTION / 8},
+        {90, YAW_START_ENCODER_POSITION + 2 * DjiMotor::ENC_RESOLUTION / 8},
+        {135, YAW_START_ENCODER_POSITION + 3 * DjiMotor::ENC_RESOLUTION / 8},
+        {180, YAW_START_ENCODER_POSITION + 4 * DjiMotor::ENC_RESOLUTION / 8},
+        {-135, YAW_START_ENCODER_POSITION + 5 * DjiMotor::ENC_RESOLUTION / 8},
+        {-90, YAW_START_ENCODER_POSITION + 6 * DjiMotor::ENC_RESOLUTION / 8}};
 
     for (auto [angle, encoder] : angleFromCenterEncoderPairs)
     {
-        setEncoderWrapped(yawMotor, encoder % DjiMotor::ENC_RESOLUTION);
+        yawEncoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
         turret.refresh();
-        EXPECT_FLOAT_EQ(angle, turret.getYawAngleFromCenter());
+        EXPECT_NEAR(angle, turret.getYawAngleFromCenter(), 1E-3);
     }
 }
 
-TEST(TurretSubsystem, yawLimited__return_matches_constructor_value)
+TEST_F(TurretSubsystemTest, yawLimited__return_matches_constructor_value)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
     TurretSubsystem t1(&drivers, &pitchMotor, &yawMotor);
     TurretSubsystem t2(&drivers, &pitchMotor, &yawMotor, false);
 
@@ -340,234 +294,198 @@ TEST(TurretSubsystem, yawLimited__return_matches_constructor_value)
     EXPECT_FALSE(t2.yawLimited());
 }
 
-TEST(TurretSubsystem, setPitchMotorOutput__desired_output_0_when_turret_offline)
+TEST_F(TurretSubsystemTest, setPitchMotorOutput__desired_output_0_when_turret_offline)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
+    pitchMotorOnline = false;
 
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
     EXPECT_CALL(pitchMotor, setDesiredOutput).Times(0);
 
     turret.setPitchMotorOutput(1000);
 }
 
-TEST(
-    TurretSubsystem,
+TEST_F(
+    TurretSubsystemTest,
     setPitchMotorOutput__desired_output_identical_to_input_when_turret_online_and_enc_within_bounds)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
+    pitchEncoderWrapped = PITCH_START_ENCODER_POSITION;
 
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(pitchMotor, getEncoderWrapped)
-        .WillByDefault(Return(TurretSubsystem::PITCH_START_ENCODER_POSITION));
-
+    InSequence seq;
     EXPECT_CALL(pitchMotor, setDesiredOutput(1000));
+    EXPECT_CALL(pitchMotor, setDesiredOutput(-1000));
+
     turret.setPitchMotorOutput(1000);
 
-    EXPECT_CALL(pitchMotor, setDesiredOutput(-1000));
     turret.setPitchMotorOutput(-1000);
 }
 
-TEST(TurretSubsystem, setPitchMotorOutput__desired_output_not_limited_if_equal_to_min_max_bound)
+TEST_F(
+    TurretSubsystemTest,
+    setPitchMotorOutput__desired_output_not_limited_if_equal_to_min_max_bound)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-
     uint16_t minEncoderValue =
         tap::algorithms::ContiguousFloat(
-            TurretSubsystem::PITCH_START_ENCODER_POSITION +
-                +(TurretSubsystem::PITCH_MIN_ANGLE - TurretSubsystem::PITCH_START_ANGLE) *
-                    DjiMotor::ENC_RESOLUTION / 360.0f +
-                1,
+            PITCH_START_ENCODER_POSITION +
+                +(PITCH_MIN_ANGLE - PITCH_START_ANGLE) * DjiMotor::ENC_RESOLUTION / 360.0f + 1,
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
 
     uint16_t maxEncoderValue =
         tap::algorithms::ContiguousFloat(
-            TurretSubsystem::PITCH_START_ENCODER_POSITION +
-                +(TurretSubsystem::PITCH_MAX_ANGLE - TurretSubsystem::PITCH_START_ANGLE) *
-                    DjiMotor::ENC_RESOLUTION / 360.0f -
-                1,
+            PITCH_START_ENCODER_POSITION +
+                +(PITCH_MAX_ANGLE - PITCH_START_ANGLE) * DjiMotor::ENC_RESOLUTION / 360.0f - 1,
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
 
-    // desired output negative, equal to min
-    ON_CALL(pitchMotor, getEncoderWrapped).WillByDefault(Return(minEncoderValue));
+    InSequence seq;
     EXPECT_CALL(pitchMotor, setDesiredOutput(-1000));
+    EXPECT_CALL(pitchMotor, setDesiredOutput(1000));
+
+    // desired output negative, equal to min
+    pitchEncoderWrapped = minEncoderValue;
     turret.refresh();
     turret.setPitchMotorOutput(-1000);
 
     // desired output position, equal to max
-    ON_CALL(pitchMotor, getEncoderWrapped).WillByDefault(Return(maxEncoderValue));
-    EXPECT_CALL(pitchMotor, setDesiredOutput(1000));
+    pitchEncoderWrapped = maxEncoderValue;
     turret.refresh();
     turret.setPitchMotorOutput(1000);
 }
 
-TEST(
-    TurretSubsystem,
+TEST_F(
+    TurretSubsystemTest,
     setPitchMotorOutput__desired_output_0_if_out_of_bounds_and_input_des_output_wrong_way)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-
     uint16_t lessThanMinEncoderValue =
         tap::algorithms::ContiguousFloat(
-            TurretSubsystem::PITCH_START_ENCODER_POSITION +
-                +(TurretSubsystem::PITCH_MIN_ANGLE - TurretSubsystem::PITCH_START_ANGLE - 10) *
-                    DjiMotor::ENC_RESOLUTION / 360.0f,
+            PITCH_START_ENCODER_POSITION +
+                +(PITCH_MIN_ANGLE - PITCH_START_ANGLE - 10) * DjiMotor::ENC_RESOLUTION / 360.0f,
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
 
     uint16_t greaterThanMaxEncoderValue =
         tap::algorithms::ContiguousFloat(
-            TurretSubsystem::PITCH_START_ENCODER_POSITION +
-                +(TurretSubsystem::PITCH_MAX_ANGLE - TurretSubsystem::PITCH_START_ANGLE + 10) *
-                    DjiMotor::ENC_RESOLUTION / 360.0f,
+            PITCH_START_ENCODER_POSITION +
+                +(PITCH_MAX_ANGLE - PITCH_START_ANGLE + 10) * DjiMotor::ENC_RESOLUTION / 360.0f,
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
 
-    // desired output negative, angle less than min
-    ON_CALL(pitchMotor, getEncoderWrapped).WillByDefault(Return(lessThanMinEncoderValue));
+    InSequence seq;
     EXPECT_CALL(pitchMotor, setDesiredOutput(0));
+    EXPECT_CALL(pitchMotor, setDesiredOutput(0));
+
+    // desired output negative, angle less than min
+    pitchEncoderWrapped = lessThanMinEncoderValue;
     turret.refresh();
     turret.setPitchMotorOutput(-1000);
 
     // desired output position, angle greater than max
-    ON_CALL(pitchMotor, getEncoderWrapped).WillByDefault(Return(greaterThanMaxEncoderValue));
-    EXPECT_CALL(pitchMotor, setDesiredOutput(0));
+    pitchEncoderWrapped = greaterThanMaxEncoderValue;
     turret.refresh();
     turret.setPitchMotorOutput(1000);
 }
 
-TEST(TurretSubsystem, setYawMotorOutput__desired_output_0_when_turret_offline)
+TEST_F(TurretSubsystemTest, setYawMotorOutput__desired_output_0_when_turret_offline)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
+    yawMotorOnline = false;
 
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
     EXPECT_CALL(yawMotor, setDesiredOutput).Times(0);
 
     turret.setYawMotorOutput(1000);
 }
 
-TEST(
-    TurretSubsystem,
+TEST_F(
+    TurretSubsystemTest,
     setYawMotorOutput__desired_output_identical_to_input_when_turret_online_and_enc_within_bounds)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(yawMotor, getEncoderWrapped)
-        .WillByDefault(Return(TurretSubsystem::YAW_START_ENCODER_POSITION));
+    yawEncoderWrapped = YAW_START_ENCODER_POSITION;
 
     turret.refresh();
 
+    InSequence seq;
     EXPECT_CALL(yawMotor, setDesiredOutput(1000));
+    EXPECT_CALL(yawMotor, setDesiredOutput(-1000));
+
     turret.setYawMotorOutput(1000);
 
-    EXPECT_CALL(yawMotor, setDesiredOutput(-1000));
     turret.setYawMotorOutput(-1000);
 }
 
-TEST(TurretSubsystem, setYawMotorOutput__desired_output_not_limited_if_equal_to_min_max_bound)
+TEST_F(TurretSubsystemTest, setYawMotorOutput__desired_output_not_limited_if_equal_to_min_max_bound)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-
     uint16_t minEncoderValue =
         tap::algorithms::ContiguousFloat(
-            TurretSubsystem::YAW_START_ENCODER_POSITION +
-                +(TurretSubsystem::YAW_MIN_ANGLE - TurretSubsystem::YAW_START_ANGLE) *
-                    DjiMotor::ENC_RESOLUTION / 360.0f +
-                1,
+            YAW_START_ENCODER_POSITION +
+                +(YAW_MIN_ANGLE - YAW_START_ANGLE) * DjiMotor::ENC_RESOLUTION / 360.0f + 1,
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
 
     uint16_t maxEncoderValue =
         tap::algorithms::ContiguousFloat(
-            TurretSubsystem::YAW_START_ENCODER_POSITION +
-                +(TurretSubsystem::YAW_MAX_ANGLE - TurretSubsystem::YAW_START_ANGLE) *
-                    DjiMotor::ENC_RESOLUTION / 360.0f -
-                1,
+            YAW_START_ENCODER_POSITION +
+                +(YAW_MAX_ANGLE - YAW_START_ANGLE) * DjiMotor::ENC_RESOLUTION / 360.0f - 1,
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
 
-    // desired output negative, angle equal to min
-    ON_CALL(yawMotor, getEncoderWrapped).WillByDefault(Return(minEncoderValue));
+    InSequence seq;
     EXPECT_CALL(yawMotor, setDesiredOutput(-1000));
+    EXPECT_CALL(yawMotor, setDesiredOutput(1000));
+
+    // desired output negative, angle equal to min
+    yawEncoderWrapped = minEncoderValue;
     turret.refresh();
     turret.setYawMotorOutput(-1000);
 
     // desired output position, angle equal to max
-    ON_CALL(yawMotor, getEncoderWrapped).WillByDefault(Return(maxEncoderValue));
-    EXPECT_CALL(yawMotor, setDesiredOutput(1000));
+    yawEncoderWrapped = maxEncoderValue;
     turret.refresh();
     turret.setYawMotorOutput(1000);
 }
 
-TEST(
-    TurretSubsystem,
+TEST_F(
+    TurretSubsystemTest,
     setYawMotorOutput__desired_output_0_if_out_of_bounds_and_input_des_output_wrong_way)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-
     uint16_t lessThanMinEncoderValue =
         tap::algorithms::ContiguousFloat(
-            TurretSubsystem::YAW_START_ENCODER_POSITION +
-                +(TurretSubsystem::YAW_MIN_ANGLE - 6 - TurretSubsystem::YAW_START_ANGLE) *
-                    DjiMotor::ENC_RESOLUTION / 360.0f,
+            YAW_START_ENCODER_POSITION +
+                +(YAW_MIN_ANGLE - 6 - YAW_START_ANGLE) * DjiMotor::ENC_RESOLUTION / 360.0f,
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
 
     uint16_t greaterThanMaxEncoderValue =
         tap::algorithms::ContiguousFloat(
-            TurretSubsystem::YAW_START_ENCODER_POSITION +
-                +(TurretSubsystem::YAW_MAX_ANGLE + 10 - TurretSubsystem::YAW_START_ANGLE) *
-                    DjiMotor::ENC_RESOLUTION / 360.0f,
+            YAW_START_ENCODER_POSITION +
+                +(YAW_MAX_ANGLE + 10 - YAW_START_ANGLE) * DjiMotor::ENC_RESOLUTION / 360.0f,
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
 
-    // desired output negative, angle less than min
-    ON_CALL(yawMotor, getEncoderWrapped).WillByDefault(Return(lessThanMinEncoderValue));
+    InSequence seq;
     EXPECT_CALL(yawMotor, setDesiredOutput(0));
+    EXPECT_CALL(yawMotor, setDesiredOutput(0));
+
+    // desired output negative, angle less than min
+    yawEncoderWrapped = lessThanMinEncoderValue;
     turret.refresh();
     turret.setYawMotorOutput(-1000);
 
     // desired output position, angle greater than max
-    ON_CALL(yawMotor, getEncoderWrapped).WillByDefault(Return(greaterThanMaxEncoderValue));
-    EXPECT_CALL(yawMotor, setDesiredOutput(0));
+    yawEncoderWrapped = greaterThanMaxEncoderValue;
     turret.refresh();
     turret.setYawMotorOutput(1000);
 }
 
-TEST(TurretSubsystem, turret_actual_angles_update_when_subsystem_in_scheduler)
+TEST_F(TurretSubsystemTest, turret_actual_angles_update_when_subsystem_in_scheduler)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
     tap::control::CommandScheduler scheduler(&drivers, true);
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
 
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
     EXPECT_CALL(yawMotor, getEncoderWrapped).WillOnce(Return(100));
     EXPECT_CALL(pitchMotor, getEncoderWrapped).WillOnce(Return(100));
 
@@ -575,30 +493,23 @@ TEST(TurretSubsystem, turret_actual_angles_update_when_subsystem_in_scheduler)
     scheduler.run();
 }
 
-TEST(TurretSubsystem, refresh_sets_actual_angle_back_to_start_when_offline)
+TEST_F(TurretSubsystemTest, refresh_sets_actual_angle_back_to_start_when_offline)
 {
-    CONSTRUCT_SHARED_TEST_OBJECTS();
-    TurretSubsystem turret(&drivers, &pitchMotor, &yawMotor);
-
     // Initially turret online
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(true));
-    ON_CALL(yawMotor, getEncoderWrapped)
-        .WillByDefault(Return(TurretSubsystem::YAW_START_ENCODER_POSITION + 1000));
-    ON_CALL(pitchMotor, getEncoderWrapped)
-        .WillByDefault(Return(TurretSubsystem::PITCH_START_ENCODER_POSITION + 1000));
+    yawEncoderWrapped = YAW_START_ENCODER_POSITION + 1000;
+    pitchEncoderWrapped = PITCH_START_ENCODER_POSITION + 1000;
 
     turret.refresh();
 
-    EXPECT_NE(TurretSubsystem::YAW_START_ANGLE, turret.getCurrentYawValue().getValue());
-    EXPECT_NE(TurretSubsystem::PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue());
+    EXPECT_NE(YAW_START_ANGLE, turret.getCurrentYawValue().getValue());
+    EXPECT_NE(PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue());
 
     // Now turret offline
-    ON_CALL(yawMotor, isMotorOnline).WillByDefault(Return(false));
-    ON_CALL(pitchMotor, isMotorOnline).WillByDefault(Return(false));
+    yawMotorOnline = false;
+    pitchMotorOnline = false;
 
     turret.refresh();
 
-    EXPECT_FLOAT_EQ(TurretSubsystem::YAW_START_ANGLE, turret.getCurrentYawValue().getValue());
-    EXPECT_FLOAT_EQ(TurretSubsystem::PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue());
+    EXPECT_NEAR(YAW_START_ANGLE, turret.getCurrentYawValue().getValue(), 1E-3);
+    EXPECT_NEAR(PITCH_START_ANGLE, turret.getCurrentPitchValue().getValue(), 1E-3);
 }

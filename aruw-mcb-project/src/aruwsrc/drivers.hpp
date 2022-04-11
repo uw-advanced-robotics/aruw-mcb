@@ -24,12 +24,12 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
-#include "aruwsrc/mock/legacy_vision_coprocessor_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
+#include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #else
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/communication/serial/legacy_vision_coprocessor.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #endif
@@ -46,7 +46,7 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          legacyVisionCoprocessor(this),
+          visionCoprocessor(this),
           oledDisplay(this),
           turretMCBCanComm(this)
     {
@@ -54,13 +54,13 @@ public:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
-    testing::NiceMock<mock::LegacyVisionCoprocessorMock> legacyVisionCoprocessor;
+    testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanComm;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
-    serial::LegacyVisionCoprocessor legacyVisionCoprocessor;
+    serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanComm;
 #endif

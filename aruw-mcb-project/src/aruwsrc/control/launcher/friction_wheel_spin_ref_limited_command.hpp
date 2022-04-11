@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FRICTION_WHEEL_REF_SERIAL_RPM_CONTROL_COMMAND_
-#define FRICTION_WHEEL_REF_SERIAL_RPM_CONTROL_COMMAND_
+#ifndef FRICTION_WHEEL_SPIN_REF_LIMITED_COMMAND_HPP_
+#define FRICTION_WHEEL_SPIN_REF_LIMITED_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -95,4 +95,4 @@ private:
 };
 }  // namespace aruwsrc::control::launcher
 
-#endif  // FRICTION_WHEEL_REF_SERIAL_RPM_CONTROL_COMMAND_
+#endif  // FRICTION_WHEEL_SPIN_REF_LIMITED_COMMAND_HPP_

@@ -19,80 +19,34 @@
 
 #include "chassis_frame_turret_controller.hpp"
 
+#include "../constants/turret_constants.hpp"
+#include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 #include "turret_gravity_compensation.hpp"
 
-namespace aruwsrc::control::turret
+using namespace tap::control::turret;
+
+namespace aruwsrc::control::turret::algorithms
 {
-void ChassisFrameTurretController::runPitchPidController(
-    const uint32_t dt,
-    const float desiredSetpoint,
-    const float turretCGX,
-    const float turretCGZ,
-    const float gravityCompensationMotorOutputMax,
-    tap::algorithms::SmoothPid *pid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+ChassisFrameYawTurretController::ChassisFrameYawTurretController(
+    TurretSubsystem *turretSubsystem,
+    const tap::algorithms::SmoothPidConfig &pidConfig)
+    : TurretYawControllerInterface(turretSubsystem),
+      pid(pidConfig)
 {
-    // limit the yaw min and max angles
-    turretSubsystem->setPitchSetpoint(desiredSetpoint);
-
-    // position controller based on turret pitch gimbal
-    float positionControllerError =
-        turretSubsystem->getCurrentPitchValue().difference(turretSubsystem->getPitchSetpoint());
-
-    float pidOutput =
-        pid->runController(positionControllerError, turretSubsystem->getPitchVelocity(), dt);
-
-    pidOutput += computeGravitationalForceOffset(
-        turretCGX,
-        turretCGZ,
-        turretSubsystem->getPitchAngleFromCenter(),
-        gravityCompensationMotorOutputMax);
-
-    turretSubsystem->setPitchMotorOutput(pidOutput);
 }
 
-void ChassisFrameTurretController::runPitchCascadePidController(
-    const uint32_t dt,
-    const float desiredSetpoint,
-    const float turretCGX,
-    const float turretCGZ,
-    const float gravityCompensationMotorOutputMax,
-    tap::algorithms::SmoothPid *positionPid,
-    tap::algorithms::SmoothPid *velocityPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+void ChassisFrameYawTurretController::initialize()
 {
-    // limit the yaw min and max angles
-    turretSubsystem->setPitchSetpoint(desiredSetpoint);
-
-    // position controller based on turret pitch gimbal
-    float positionControllerError =
-        turretSubsystem->getCurrentPitchValue().difference(turretSubsystem->getPitchSetpoint());
-
-    float positionPidOutput = positionPid->runController(
-        positionControllerError,
-        turretSubsystem->getPitchVelocity(),
-        dt);
-
-    float velocityControllerError = positionPidOutput - turretSubsystem->getPitchVelocity();
-
-    float velocityPidOutput = velocityPid->runControllerDerivateError(velocityControllerError, dt);
-
-    velocityPidOutput += computeGravitationalForceOffset(
-        turretCGX,
-        turretCGZ,
-        turretSubsystem->getPitchAngleFromCenter(),
-        gravityCompensationMotorOutputMax);
-
-    turretSubsystem->setPitchMotorOutput(velocityPidOutput);
+    if (turretSubsystem->getPrevRanYawTurretController() != this)
+    {
+        pid.reset();
+        turretSubsystem->setPrevRanYawTurretController(this);
+    }
 }
 
-void ChassisFrameTurretController::runYawPidController(
-    const uint32_t dt,
-    const float desiredSetpoint,
-    tap::algorithms::SmoothPid *pid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+void ChassisFrameYawTurretController::runController(const uint32_t dt, const float desiredSetpoint)
 {
     // limit the yaw min and max angles
     turretSubsystem->setYawSetpoint(desiredSetpoint);
@@ -102,32 +56,63 @@ void ChassisFrameTurretController::runYawPidController(
         turretSubsystem->getCurrentYawValue().difference(turretSubsystem->getYawSetpoint());
 
     float pidOutput =
-        pid->runController(positionControllerError, turretSubsystem->getYawVelocity(), dt);
+        pid.runController(positionControllerError, turretSubsystem->getYawVelocity(), dt);
 
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 
-void ChassisFrameTurretController::runYawCascadePidController(
+float ChassisFrameYawTurretController::getSetpoint() const
+{
+    return turretSubsystem->getYawSetpoint();
+}
+
+bool ChassisFrameYawTurretController::isOnline() const { return turretSubsystem->isOnline(); }
+
+ChassisFramePitchTurretController::ChassisFramePitchTurretController(
+    TurretSubsystem *turretSubsystem,
+    const tap::algorithms::SmoothPidConfig &pidConfig)
+    : TurretPitchControllerInterface(turretSubsystem),
+      pid(pidConfig)
+{
+}
+
+void ChassisFramePitchTurretController::initialize()
+{
+    if (turretSubsystem->getPrevRanPitchTurretController() != this)
+    {
+        pid.reset();
+        turretSubsystem->setPrevRanPitchTurretController(this);
+    }
+}
+
+void ChassisFramePitchTurretController::runController(
     const uint32_t dt,
-    const float desiredSetpoint,
-    tap::algorithms::SmoothPid *positionPid,
-    tap::algorithms::SmoothPid *velocityPid,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    const float desiredSetpoint)
 {
     // limit the yaw min and max angles
-    turretSubsystem->setYawSetpoint(desiredSetpoint);
+    turretSubsystem->setPitchSetpoint(desiredSetpoint);
 
-    // position controller based on turret yaw gimbal
+    // position controller based on turret pitch gimbal
     float positionControllerError =
-        turretSubsystem->getCurrentYawValue().difference(turretSubsystem->getYawSetpoint());
+        turretSubsystem->getCurrentPitchValue().difference(turretSubsystem->getPitchSetpoint());
 
-    float positionPidOutput =
-        positionPid->runController(positionControllerError, turretSubsystem->getYawVelocity(), dt);
+    float pidOutput =
+        pid.runController(positionControllerError, turretSubsystem->getPitchVelocity(), dt);
 
-    float velocityControllerError = positionPidOutput - turretSubsystem->getYawVelocity();
+    pidOutput += computeGravitationalForceOffset(
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        -turretSubsystem->getPitchAngleFromCenter(),
+        GRAVITY_COMPENSATION_SCALAR);
 
-    float velocityPidOutput = velocityPid->runControllerDerivateError(velocityControllerError, dt);
-
-    turretSubsystem->setYawMotorOutput(velocityPidOutput);
+    turretSubsystem->setPitchMotorOutput(pidOutput);
 }
-}  // namespace aruwsrc::control::turret
+
+float ChassisFramePitchTurretController::getSetpoint() const
+{
+    return turretSubsystem->getPitchSetpoint();
+}
+
+bool ChassisFramePitchTurretController::isOnline() const { return turretSubsystem->isOnline(); }
+
+}  // namespace aruwsrc::control::turret::algorithms
