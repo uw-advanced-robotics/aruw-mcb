@@ -29,25 +29,25 @@ namespace aruwsrc::control::turret
  */
 struct TurretSubsystemConfig
 {
-    float yawStartAngle = 0;  /// Angle (in degrees) where the turret is assumed to start at. This
-                              /// angle value maps to the same value (in encoder ticks) as
-                              /// pitchStartEncoderValue.
-    uint16_t yawStartEncoderValue = 0;  /// Encoder value between [0, ENC_RESOLUTION) associated
-                                        /// with yawStartAngle.
-    float yawMinAngle = 0;  /// Min yaw angle that the turret will be limited to (in degrees). This
-                            /// value should be between [0, 360) and should be < yawMaxAngle.
-    float yawMaxAngle = 0;  /// Max yaw angle that the turret will be limited to (in degrees). This
-                            /// value should be between [0, 360) and should be > yawMinAngle.
-    float pitchStartAngle = 0;  /// Angle (in degrees) where the turret is assumed to start at. This
-                                /// angle value maps to
-                                /// the same value (in encoder ticks) as pitchStartEncoderValue
-    uint16_t pitchStartEncoderValue = 0;  /// Encoder value between [0, ENC_RESOLUTION) associated
-                                          /// with pitchStartAngle.
-    float pitchMinAngle = 0;  /// Min pitch angle that the turret will be limited to (in degrees).
-                              /// This value should be between [0, 360) and should be < yawMaxAngle.
-    float pitchMaxAngle = 0;  /// Max pitch angle that the turret will be limited to (in degrees).
-                              /// This value should be between [0, 360) and should be > yawMinAngle.
-    bool limitYaw = true;     /// true if the yaw will be limited, false otherwise.
+    float startAngle = 0;  /// Angle (in degrees) where the turret is assumed to start at. This
+                           /// angle value maps to the same value (in encoder ticks) as
+                           /// startEncoderValue.
+    uint16_t startEncoderValue = 0;  /// Encoder value between [0, ENC_RESOLUTION) associated
+                                     /// with startAngle.
+    float minAngle = 0;    /// Min yaw angle that the turret will be limited to (in degrees). This
+                           /// value should be between [0, 360) and should be < maxAngle.
+    float maxAngle = 0;    /// Max yaw angle that the turret will be limited to (in degrees). This
+                           /// value should be between [0, 360) and should be > minAngle.
+    float startAngle = 0;  /// Angle (in degrees) where the turret is assumed to start at. This
+                           /// angle value maps to
+                           /// the same value (in encoder ticks) as startEncoderValue
+    uint16_t startEncoderValue = 0;  /// Encoder value between [0, ENC_RESOLUTION) associated
+                                     /// with startAngle.
+    float minAngle = 0;  /// Min pitch angle that the turret will be limited to (in degrees).
+                         /// This value should be between [0, 360) and should be < maxAngle.
+    float maxAngle = 0;  /// Max pitch angle that the turret will be limited to (in degrees).
+                         /// This value should be between [0, 360) and should be > minAngle.
+    bool limitMotorAngles = true;  /// true if the yaw will be limited, false otherwise.
 };
 }  // namespace aruwsrc::control::turret
 

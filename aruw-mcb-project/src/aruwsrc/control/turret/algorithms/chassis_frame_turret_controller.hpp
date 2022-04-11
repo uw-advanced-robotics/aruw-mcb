@@ -28,7 +28,7 @@
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class TurretMotor;
 }
 
 namespace aruwsrc::control::turret::algorithms
@@ -43,11 +43,11 @@ class ChassisFrameYawTurretController final : public TurretYawControllerInterfac
 {
 public:
     /**
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFrameYawTurretController(
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *turretMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -79,11 +79,11 @@ class ChassisFramePitchTurretController final : public TurretPitchControllerInte
 {
 public:
     /**
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFramePitchTurretController(
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *turretMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;

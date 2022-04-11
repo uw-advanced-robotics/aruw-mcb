@@ -104,9 +104,17 @@ tap::motor::DjiMotor yawMotor(
     aruwsrc::control::turret::CAN_BUS_MOTORS,
     true,
     "Yaw Turret");
-SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor, TURRET_CONFIG);
+SentinelTurretSubsystem turretSubsystem(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    PITCH_MOTOR_CONFIG,
+    YAW_MOTOR_CONFIG);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turretSubsystem, &sentinelDrive);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(
+    drivers(),
+    &turretSubsystem.yawMotor,
+    &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
@@ -146,11 +154,11 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem,
+    &turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem,
+    &turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands

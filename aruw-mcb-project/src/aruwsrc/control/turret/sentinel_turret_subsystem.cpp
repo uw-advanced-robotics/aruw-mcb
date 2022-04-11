@@ -23,12 +23,12 @@ namespace aruwsrc::control::turret
 {
 float SentinelTurretSubsystem::getWorldYaw() const
 {
-    return tap::algorithms::ContiguousFloat(getMeasuredYawValue(), 0, 360).getValue();
+    return yawMotor.getChassisFrameMeasuredAngle().getValue();
 }
 
 float SentinelTurretSubsystem::getWorldPitch() const
 {
-    return tap::algorithms::ContiguousFloat(getMeasuredPitchValue(), 0, 360).getValue();
+    return pitchMotor.getChassisFrameMeasuredAngle().getValue();
 }
 
 uint32_t SentinelTurretSubsystem::getLastMeasurementTimeMicros() const

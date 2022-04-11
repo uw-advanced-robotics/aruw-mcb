@@ -23,7 +23,8 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "../turret_subsystem_config.hpp"
+#include "../turret_motor_config.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -40,16 +41,20 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr tap::motor::MotorId YAW_FRONT_MOTOR_ID = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId YAW_BACK_MOTOR_ID = tap::motor::MOTOR6;
 
-static constexpr TurretSubsystemConfig TURRET_CONFIG = {
-    .yawStartAngle = 90,
-    .yawStartEncoderValue = 4872,
-    .yawMinAngle = 0,    ///< Doesn't matter since yaw not limited
-    .yawMaxAngle = 180,  ///< Doesn't matter since yaw not limited
-    .pitchStartAngle = 90,
-    .pitchStartEncoderValue = 3900,
-    .pitchMinAngle = 55,
-    .pitchMaxAngle = 115,
-    .limitYaw = false,
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = 90,
+    .startEncoderValue = 4872,
+    .minAngle = 0,     ///< Doesn't matter since yaw not limited
+    .maxAngle = M_PI,  ///< Doesn't matter since yaw not limited
+    .limitMotorAngles = false,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 3900,
+    .minAngle = modm::toRadian(55),
+    .maxAngle = modm::toRadian(115),
+    .limitMotorAngles = false,
 };
 
 static constexpr float TURRET_CG_X = 1;

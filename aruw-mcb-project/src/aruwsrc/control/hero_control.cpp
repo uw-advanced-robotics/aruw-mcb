@@ -130,22 +130,22 @@ tap::motor::DoubleDjiMotor yawMotor(
     true,
     "Yaw Front Turret",
     "Yaw Back Turret");
-HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, TURRET_CONFIG);
+HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, PITCH_MOTOR_CONFIG, YAW_MOTOR_CONFIG);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret.yawMotor, &chassis);
 
 /* define commands ----------------------------------------------------------*/
-ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
+ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &chassis,
-    &turret,
+    &turret.yawMotor,
     ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
-BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
+BeybladeCommand beybladeCommand(drivers(), &chassis, &turret.yawMotor);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -186,27 +186,27 @@ HeroAgitatorCommand heroAgitatorCommand(
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turret,
+    &turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turret,
+    &turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
     drivers(),
-    &turret,
+    &turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
     drivers(),
-    &turret,
+    &turret.yawMotor,
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
     drivers(),
-    &turret,
+    &turret.pitchMotor,
     world_rel_turret_imu::PITCH_POS_PID_CONFIG,
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 

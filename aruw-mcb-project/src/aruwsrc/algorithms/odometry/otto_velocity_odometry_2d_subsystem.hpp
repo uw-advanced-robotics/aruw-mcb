@@ -36,7 +36,7 @@ class Drivers;
 }
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class TurretMotor;
 }
 
 namespace tap::control::chassis
@@ -69,12 +69,12 @@ class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
 public:
     /**
      * @param[in] drivers pointer to aruwsrc drivers
-     * @param[in] turret pointer to object that implements TurretSubsystemInterface
+     * @param[in] turret pointer to a TurretMotor object
      * @param[in] chassis pointer to aruwsrc ChassisSubsystem
      */
     OttoVelocityOdometry2DSubsystem(
         aruwsrc::Drivers* drivers,
-        aruwsrc::control::turret::TurretSubsystem* turret,
+        aruwsrc::control::turret::TurretMotor* turret,
         tap::control::chassis::ChassisSubsystemInterface* chassis);
 
     void refresh() override;

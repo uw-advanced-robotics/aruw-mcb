@@ -62,12 +62,12 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           defaultLaunchSpeed,
           turretID),
       pitchScanner(
-          turretSubsystem->getTurretConfig().pitchMinAngle,
-          turretSubsystem->getTurretConfig().pitchMaxAngle,
+          turretSubsystem->pitchMotor.getConfig().minAngle,
+          turretSubsystem->pitchMotor.getConfig().maxAngle,
           SCAN_DELTA_ANGLE),
       yawScanner(
-          turretSubsystem->getTurretConfig().yawMinAngle,
-          turretSubsystem->getTurretConfig().yawMaxAngle,
+          turretSubsystem->yawMotor.getConfig().minAngle,
+          turretSubsystem->yawMotor.getConfig().maxAngle,
           SCAN_DELTA_ANGLE)
 {
     assert(firingCommand != nullptr);
@@ -109,11 +109,11 @@ void SentinelTurretCVCommand::execute()
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
         if (compareFloatClose(
-                turretSubsystem->getMeasuredPitchValue(),
+                turretSubsystem->pitchMotor.getChassisFrameMeasuredAngle().getValue(),
                 pitchSetpoint,
                 FIRING_TOLERANCE) &&
             compareFloatClose(
-                turretSubsystem->getMeasuredYawValue(),
+                turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue(),
                 yawSetpoint,
                 FIRING_TOLERANCE))
         {
@@ -163,8 +163,8 @@ bool SentinelTurretCVCommand::isFinished() const
 
 void SentinelTurretCVCommand::end(bool)
 {
-    turretSubsystem->setYawMotorOutput(0);
-    turretSubsystem->setPitchMotorOutput(0);
+    turretSubsystem->yawMotor.setMotorOutput(0);
+    turretSubsystem->pitchMotor.setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::cv

@@ -34,7 +34,7 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class TurretMotor;
 }
 
 namespace aruwsrc::control::turret::algorithms
@@ -55,13 +55,13 @@ class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawC
 public:
     /**
      * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] posPidConfig Position PID configuration struct for the controller.
      * @param[in] velPidConfig Velocity PID configuration struct for the controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *turretMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 
@@ -103,13 +103,13 @@ class WorldFramePitchTurretImuCascadePidTurretController final
 public:
     /**
      * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] posPidConfig Position PID configuration struct for the controller.
      * @param[in] velPidConfig Velocity PID configuration struct for the controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *turretMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 

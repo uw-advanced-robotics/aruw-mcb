@@ -21,7 +21,8 @@
 #define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
-#include "tap/control/turret_subsystem_interface.hpp"
+
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 namespace aruwsrc
 {
@@ -64,7 +65,7 @@ public:
     ChassisAutorotateCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const tap::control::turret::TurretSubsystemInterface* turret,
+        const aruwsrc::control::turret::TurretMotor* yawMotor,
         ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE);
 
     void initialize() override;
@@ -86,7 +87,7 @@ public:
 private:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const tap::control::turret::TurretSubsystemInterface* turret;
+    const aruwsrc::control::turret::TurretMotor* yawMotor;
 
     /** Autorotation setpoint, smoothed using a low pass filter. */
     float desiredRotationAverage = 0;
@@ -108,7 +109,7 @@ private:
      */
     bool chassisAutorotating;
 
-    void updateAutorotateState(const tap::control::turret::TurretSubsystemInterface* turret);
+    void updateAutorotateState();
 };  // class ChassisAutorotateCommand
 
 }  // namespace aruwsrc::chassis

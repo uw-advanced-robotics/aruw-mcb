@@ -74,8 +74,8 @@ bool TurretUserControlCommand::isFinished() const
 
 void TurretUserControlCommand::end(bool)
 {
-    turretSubsystem->setPitchMotorOutput(0);
-    turretSubsystem->setYawMotorOutput(0);
+    turretSubsystem->yawMotor.setMotorOutput(0);
+    turretSubsystem->pitchMotor.setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::user

@@ -54,8 +54,9 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::update()
 
     // update chassisOrientation if turret is online
     // otherwise don't rotate chassis
-    chassisOrientation.rotate(modm::toRadian(
-        (turretSubsystem.isOnline()) ? -turretSubsystem.getYawAngleFromCenter() : 0.0f));
+    chassisOrientation.rotate(
+        turretSubsystem.yawMotor.isOnline() ? -turretSubsystem.yawMotor.getAngleFromCenter()
+                                            : 0.0f);
 
     // if chassis orientation has changed, send new graphic with updated orientation
     if (chassisOrientation != chassisOrientationPrev)

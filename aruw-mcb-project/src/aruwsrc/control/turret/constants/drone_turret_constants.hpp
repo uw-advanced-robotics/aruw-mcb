@@ -23,7 +23,8 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "../turret_subsystem_config.hpp"
+#include "../turret_motor_config.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -38,16 +39,20 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr TurretSubsystemConfig TURRET_CONFIG = {
-    .yawStartAngle = 90,
-    .yawStartEncoderValue = 0,
-    .yawMinAngle = 0,
-    .yawMaxAngle = 180,
-    .pitchStartAngle = 90,
-    .pitchStartEncoderValue = 0,
-    .pitchMinAngle = 0,
-    .pitchMaxAngle = 180,
-    .limitYaw = true,
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 0,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = true,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 0,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = true,
 };
 
 static constexpr float TURRET_CG_X = 0;

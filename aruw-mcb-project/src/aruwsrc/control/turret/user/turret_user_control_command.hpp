@@ -23,6 +23,7 @@
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
+#include "../turret_subsystem.hpp"
 
 namespace aruwsrc
 {

@@ -36,11 +36,11 @@ namespace aruwsrc::chassis
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const tap::control::turret::TurretSubsystemInterface* turret,
+    const aruwsrc::control::turret::TurretMotor* yawMotor,
     ChassisSymmetry chassisSymmetry)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret),
+      yawMotor(yawMotor),
       chassisSymmetry(chassisSymmetry),
       chassisAutorotating(true)
 {
@@ -52,13 +52,13 @@ void ChassisAutorotateCommand::initialize()
     desiredRotationAverage = chassis->getDesiredRotation();
 }
 
-void ChassisAutorotateCommand::updateAutorotateState(
-    const tap::control::turret::TurretSubsystemInterface* turret)
+void ChassisAutorotateCommand::updateAutorotateState()
 {
-    float turretYawActualSetpointDiff = abs(turret->getYawMeasuredSetpointDifference());
+    float turretYawActualSetpointDiff = abs(yawMotor->getChassisFrameMeasuredAngle().difference(
+        yawMotor->getChassisFrameSetpoint().getValue()));
 
     if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
-        !turret->yawLimited() &&
+        !yawMotor->getConfig().limitMotorAngles &&
         turretYawActualSetpointDiff > (180 - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         // If turret setpoint all of a sudden turns around, don't autorotate
@@ -77,25 +77,25 @@ void ChassisAutorotateCommand::execute()
 {
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
-    if (turret->isOnline())
+    if (yawMotor->isOnline())
     {
-        updateAutorotateState(turret);
+        updateAutorotateState();
 
-        float turretAngleFromCenter = turret->getYawAngleFromCenter();
+        float turretAngleFromCenter = yawMotor->getAngleFromCenter();
 
         if (chassisAutorotating)
         {
             float maxAngleFromCenter = 180.0f;
 
-            if (!turret->yawLimited())
+            if (!yawMotor->getConfig().limitMotorAngles)
             {
                 switch (chassisSymmetry)
                 {
                     case ChassisSymmetry::SYMMETRICAL_180:
-                        maxAngleFromCenter = 90.0f;
+                        maxAngleFromCenter = M_PI_2;
                         break;
                     case ChassisSymmetry::SYMMETRICAL_90:
-                        maxAngleFromCenter = 45.0f;
+                        maxAngleFromCenter = M_PI_4;
                         break;
                     case ChassisSymmetry::SYMMETRICAL_NONE:
                     default:
@@ -110,7 +110,7 @@ void ChassisAutorotateCommand::execute()
             // PD controller to find desired rotational component of the chassis control
             float desiredRotation = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
-                turret->getYawVelocity() - drivers->mpu6500.getGz());
+                yawMotor->getChassisFrameVelocity() - modm::toRadian(drivers->mpu6500.getGz()));
 
             // find an alpha value to be used for the low pass filter, some value >
             // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to

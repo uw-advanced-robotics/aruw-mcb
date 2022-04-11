@@ -104,7 +104,12 @@ DjiMotor yawMotor(
     aruwsrc::control::turret::turret1::CAN_BUS_MOTORS,
     true,
     "Yaw Turret 1");
-SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor, TURRET_CONFIG);
+SentinelTurretSubsystem turretSubsystem(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    aruwsrc::control::turret::turret1::PITCH_MOTOR_CONFIG,
+    aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG);
 }  // namespace turret1
 
 namespace turret2
@@ -140,12 +145,17 @@ DjiMotor yawMotor(
     aruwsrc::control::turret::turret2::CAN_BUS_MOTORS,
     true,
     "Yaw Turret 2");
-SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
+SentinelTurretSubsystem turretSubsystem(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    aruwsrc::control::turret::turret1::PITCH_MOTOR_CONFIG,
+    aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG);
 }  // namespace turret2
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(
     drivers(),
-    &turret1::turretSubsystem,
+    &turret1::turretSubsystem.yawMotor,
     &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
@@ -190,11 +200,11 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem,
+    &turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem,
+    &turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands
@@ -253,11 +263,11 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem,
+    &turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem,
+    &turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands

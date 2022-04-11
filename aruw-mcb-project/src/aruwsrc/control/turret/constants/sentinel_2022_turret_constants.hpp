@@ -23,7 +23,8 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "../turret_subsystem_config.hpp"
+#include "../turret_motor_config.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -38,16 +39,20 @@ namespace turret1
 {
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
-static constexpr TurretSubsystemConfig TURRET_CONFIG = {
-    .yawStartAngle = 90,
-    .yawStartEncoderValue = 2801,
-    .yawMinAngle = 5,
-    .yawMaxAngle = 175,
-    .pitchStartEncoderValue = 4035,
-    .pitchStartAngle = 90,
-    .pitchMinAngle = 80,
-    .pitchMaxAngle = 165,
-    .limitYaw = true,
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 2801,
+    .minAngle = modm::toRadian(5),
+    .maxAngle = modm::toRadian(175),
+    .limitMotorAngles = false,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 4035,
+    .minAngle = modm::toRadian(80),
+    .maxAngle = modm::toRadian(165),
+    .limitMotorAngles = false,
 };
 }  // namespace turret1
 
@@ -55,16 +60,20 @@ namespace turret2
 {
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
-static constexpr TurretSubsystemConfig TURRET_CONFIG = {
-    .yawStartAngle = 90,
-    .yawStartEncoderValue = 2801,
-    .yawMinAngle = 5,
-    .yawMaxAngle = 175,
-    .pitchStartAngle = 90,
-    .pitchStartEncoderValue = 4035,
-    .pitchMinAngle = 80,
-    .pitchMaxAngle = 165,
-    .limitYaw = true,
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 2801,
+    .minAngle = modm::toRadian(5),
+    .maxAngle = modm::toRadian(175),
+    .limitMotorAngles = true,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 4035,
+    .minAngle = modm::toRadian(80),
+    .maxAngle = modm::toRadian(165),
+    .limitMotorAngles = true,
 };
 }  // namespace turret2
 

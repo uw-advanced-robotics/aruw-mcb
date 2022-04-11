@@ -22,7 +22,8 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/control/command.hpp"
-#include "tap/control/turret_subsystem_interface.hpp"
+
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 namespace aruwsrc
 {
@@ -55,7 +56,7 @@ public:
      * The value to scale the rotation as specified by `controlOperatorInterface.getChassisRInput()`
      * by.
      */
-    static constexpr float USER_INPUT_TO_ANGLE_DELTA_SCALAR = 0.0001f;
+    static constexpr float USER_INPUT_TO_ANGLE_DELTA_SCALAR = 0.000001f;
     /**
      * Maximum error between the actual IMU angle and target angle specified by the user. We cap the
      * rotation error to avoid issues that occur if the robot is picked up, turned around, and
@@ -63,20 +64,20 @@ public:
      * will spin around in an attempt to reach the original setpoint. Instead, the error will only
      * be `MAX_ROTATION_ERR`.
      */
-    static constexpr float MAX_ROTATION_ERR = 30.0f;
+    static constexpr float MAX_ROTATION_ERR = modm::toRadian(30);
 
     /**
      * Constructs a ChassisImuDriveCommand that will control `chassis`.
      *
      * @param[in] drivers A pointer to the global drivers object.
      * @param[in] chassis A `ChassisSubsystem` that this command will control.
-     * @param[in] turret A turret that the command will use to drive relative to the turret. If the
-     *      robot does not have a turret, pass in `nullptr`.
+     * @param[in] yawMotor A turret yaw motor that the command will use to drive relative to the
+     * turret. If the robot does not have a turret, pass in `nullptr`.
      */
     ChassisImuDriveCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
-        tap::control::turret::TurretSubsystemInterface* turret);
+        aruwsrc::control::turret::TurretMotor* yawMotor);
 
     void initialize() override;
 
@@ -91,7 +92,7 @@ public:
 private:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const tap::control::turret::TurretSubsystemInterface* turret;
+    const aruwsrc::control::turret::TurretMotor* yawMotor;
     tap::algorithms::ContiguousFloat rotationSetpoint;
     bool imuSetpointInitialized = false;
     uint32_t prevTime = 0;
