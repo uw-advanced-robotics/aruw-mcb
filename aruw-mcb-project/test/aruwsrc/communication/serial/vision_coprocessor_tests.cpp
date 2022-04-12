@@ -478,16 +478,15 @@ TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
 
             checkHeaderAndTail<DATA_LEN>(msg);
             EXPECT_EQ(msg.messageType, 11);
-            EXPECT_EQ(getTimeMicroseconds(), *reinterpret_cast<uint32_t *>(msg.data));
-            EXPECT_EQ(77, msg.data[4]);
+            EXPECT_EQ(10'000'000, *reinterpret_cast<uint32_t *>(msg.data));
 
             return length;
         });
 
-    DJISerial::ReceivedSerialMessage syncRequestMessage;
-    syncRequestMessage.header.dataLength = 1;
-    syncRequestMessage.messageType = 10;
-    syncRequestMessage.data[0] = 77;
+    VisionCoprocessor::handleTimeSyncRequest();
 
-    serial.messageReceiveCallback(syncRequestMessage);
+    // the time we send should be the the time when `handleTimeSyncRequest` was sent
+    clock.time += 100;
+
+    serial.sendTimeSyncMessage();
 }

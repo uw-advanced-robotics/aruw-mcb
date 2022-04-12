@@ -54,6 +54,10 @@ namespace serial
 class VisionCoprocessor : public tap::communication::serial::DJISerial
 {
 public:
+#ifndef PLATFORM_HOSTED
+    using TimeSyncTriggerPin = modm::platform::GpioI0;  ///< Pin "A" as labeled on the type A board
+#endif
+
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
@@ -114,7 +118,7 @@ public:
 
     VisionCoprocessor(aruwsrc::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
-    mockable ~VisionCoprocessor() = default;
+    mockable ~VisionCoprocessor();
 
     /**
      * Call this before using the serial line, initializes the uart line
@@ -190,6 +194,11 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
+    static inline void handleTimeSyncRequest()
+    {
+        visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
+    }
+
 private:
     enum TxMessageTypes
     {
@@ -204,7 +213,6 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_TIME_SYNC_REQ = 10,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -215,6 +223,12 @@ private:
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
+
+    static VisionCoprocessor* visionCoprocessorInstance;
+
+    volatile uint32_t risingEdgeTime = 0;
+
+    uint32_t prevRisingEdgeTime = 0;
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
@@ -243,14 +257,13 @@ private:
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
-    void decodeAndSendTimeSyncMessage(const ReceivedSerialMessage& message);
-
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
 
     void sendOdometryData();
     void sendRobotTypeData();
+    void sendTimeSyncMessage();
 };
 }  // namespace serial
 }  // namespace aruwsrc
