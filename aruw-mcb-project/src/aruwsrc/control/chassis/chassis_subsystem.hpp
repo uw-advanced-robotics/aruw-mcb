@@ -188,6 +188,39 @@ public:
     inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
     inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
 
+    /**
+     * @return the unwrapped angular position of the left front motor in radians
+     */
+    inline float getLeftFrontAngularPosition() const
+    {
+        return 2.0f * M_PI * static_cast<float>(leftFrontMotor.getEncoderUnwrapped()) /
+               static_cast<float>(tap::motor::DjiMotor::ENC_RESOLUTION);
+    }
+    /**
+     * @return the unwrapped angular position of the left back motor in radians
+     */
+    inline float getLeftBackAngularPosition() const
+    {
+        return 2.0f * M_PI * static_cast<float>(leftBackMotor.getEncoderUnwrapped()) /
+               static_cast<float>(tap::motor::DjiMotor::ENC_RESOLUTION);
+    }
+    /**
+     * @return the unwrapped angular position of the left back motor in radians
+     */
+    inline float getLeftFrontAngularPosition() const
+    {
+        return 2.0f * M_PI * static_cast<float>(rightFrontMotor.getEncoderUnwrapped()) /
+               static_cast<float>(tap::motor::DjiMotor::ENC_RESOLUTION);
+    }
+    /**
+     * @return the unwrapped angular position of the left back motor in radians
+     */
+    inline float getLeftFrontAngularPosition() const
+    {
+        return 2.0f * M_PI * static_cast<float>(rightBackMotor.getEncoderUnwrapped()) /
+               static_cast<float>(tap::motor::DjiMotor::ENC_RESOLUTION);
+    }
+
     inline bool allMotorsOnline() const override
     {
         return leftFrontMotor.isMotorOnline() && rightFrontMotor.isMotorOnline() &&
