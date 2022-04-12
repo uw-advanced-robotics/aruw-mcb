@@ -76,11 +76,18 @@ ChassisDriveCommandMock::ChassisDriveCommandMock(aruwsrc::Drivers *d, chassis::C
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
-ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers) : ChassisSubsystem(drivers) {}
+ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
+    : ChassisSubsystem(drivers, chassis::ChassisSubsystem::ChassisType::MECANUM)
+{
+}
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers)
-    : FrictionWheelSubsystem(drivers)
+    : FrictionWheelSubsystem(
+          drivers,
+          tap::motor::MOTOR1,
+          tap::motor::MOTOR2,
+          tap::can::CanBus::CAN_BUS1)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}

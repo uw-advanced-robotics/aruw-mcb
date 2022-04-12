@@ -30,7 +30,14 @@ using namespace aruwsrc::control::launcher;
 class FrictionWheelSubsystemTest : public Test
 {
 protected:
-    FrictionWheelSubsystemTest() : frictionWheels(&drivers) {}
+    FrictionWheelSubsystemTest()
+        : frictionWheels(
+              &drivers,
+              tap::motor::MOTOR1,
+              tap::motor::MOTOR2,
+              tap::can::CanBus::CAN_BUS1)
+    {
+    }
 
     ClockStub clock;
     Drivers drivers;
@@ -100,8 +107,8 @@ TEST_F(FrictionWheelSubsystemTest, refresh__negative_output_when_desired_speed_0
 TEST_F(FrictionWheelSubsystemTest, refresh_updates_desiredRpmRamp_when_target_not_reached)
 {
     frictionWheels.setDesiredLaunchSpeed(
-        FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
-            [MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]
+        LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+            [MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]
                 .first);
 
     uint32_t time = 0;
@@ -126,11 +133,9 @@ TEST_F(
     FrictionWheelSubsystemTest,
     setDesiredLaunchSpeed__setting_to_values_in_LUT_updates_rpm_ramp_correctly)
 {
-    for (size_t i = 0;
-         i < MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT);
-         i++)
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT); i++)
     {
-        const auto& tuple = FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
+        const auto& tuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
         frictionWheels.setDesiredLaunchSpeed(tuple.first);
         EXPECT_NEAR(frictionWheels.desiredRpmRamp.getTarget(), tuple.second, 1E-3);
     }
@@ -140,16 +145,12 @@ TEST_F(
     FrictionWheelSubsystemTest,
     setDesiredLaunchSpeed__setting_to_value_in_between_LUT_updates_rpm_ramp_correctly)
 {
-    if (MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) == 0)
-        return;
+    if (MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) == 0) return;
 
-    for (size_t i = 0;
-         i < MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1;
-         i++)
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1; i++)
     {
-        const auto& firstTuple = FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
-        const auto& secondTuple =
-            FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i + 1];
+        const auto& firstTuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
+        const auto& secondTuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i + 1];
 
         float middleSpeed = (firstTuple.first + secondTuple.first) / 2.0f;
         float middleRpm = (firstTuple.second + secondTuple.second) / 2.0f;
@@ -170,8 +171,8 @@ TEST_F(
     FrictionWheelSubsystemTest,
     setDesiredLaunchSpeed__speed_above_max_speed_set_launch_speed_to_max_rpm)
 {
-    const auto& tuple = FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
-        [MODM_ARRAY_SIZE(FrictionWheelSubsystem::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1];
+    const auto& tuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+        [MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1];
 
     frictionWheels.setDesiredLaunchSpeed(tuple.first + 10);
 

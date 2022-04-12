@@ -40,6 +40,7 @@ modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
 
 ChassisSubsystem::ChassisSubsystem(
     aruwsrc::Drivers* drivers,
+    ChassisType chassisType,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
@@ -47,10 +48,30 @@ ChassisSubsystem::ChassisSubsystem(
     tap::gpio::Analog::Pin currentPin)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       velocityPid{
-          modm::Pid<float>(VELOCITY_PID_CONFIG),
-          modm::Pid<float>(VELOCITY_PID_CONFIG),
-          modm::Pid<float>(VELOCITY_PID_CONFIG),
-          modm::Pid<float>(VELOCITY_PID_CONFIG)},
+          modm::Pid<float>(
+              VELOCITY_PID_KP,
+              VELOCITY_PID_KI,
+              VELOCITY_PID_KD,
+              VELOCITY_PID_MAX_ERROR_SUM,
+              VELOCITY_PID_MAX_OUTPUT),
+          modm::Pid<float>(
+              VELOCITY_PID_KP,
+              VELOCITY_PID_KI,
+              VELOCITY_PID_KD,
+              VELOCITY_PID_MAX_ERROR_SUM,
+              VELOCITY_PID_MAX_OUTPUT),
+          modm::Pid<float>(
+              VELOCITY_PID_KP,
+              VELOCITY_PID_KI,
+              VELOCITY_PID_KD,
+              VELOCITY_PID_MAX_ERROR_SUM,
+              VELOCITY_PID_MAX_OUTPUT),
+          modm::Pid<float>(
+              VELOCITY_PID_KP,
+              VELOCITY_PID_KI,
+              VELOCITY_PID_KD,
+              VELOCITY_PID_MAX_ERROR_SUM,
+              VELOCITY_PID_MAX_OUTPUT)},
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
@@ -71,20 +92,40 @@ ChassisSubsystem::ChassisSubsystem(
     constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
                             ? 1
                             : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
-    wheelVelToChassisVelMat[X][LF] = 1;
-    wheelVelToChassisVelMat[X][RF] = -1;
-    wheelVelToChassisVelMat[X][LB] = 1;
-    wheelVelToChassisVelMat[X][RB] = -1;
-    wheelVelToChassisVelMat[Y][LF] = -1;
-    wheelVelToChassisVelMat[Y][RF] = -1;
-    wheelVelToChassisVelMat[Y][LB] = 1;
-    wheelVelToChassisVelMat[Y][RB] = 1;
-    wheelVelToChassisVelMat[R][LF] = -1.0 / A;
-    wheelVelToChassisVelMat[R][RF] = -1.0 / A;
-    wheelVelToChassisVelMat[R][LB] = -1.0 / A;
-    wheelVelToChassisVelMat[R][RB] = -1.0 / A;
-    wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
 
+    switch (chassisType)
+    {
+        case ChassisType::MECANUM:
+            wheelVelToChassisVelMat[X][LF] = 1;
+            wheelVelToChassisVelMat[X][RF] = -1;
+            wheelVelToChassisVelMat[X][LB] = 1;
+            wheelVelToChassisVelMat[X][RB] = -1;
+            wheelVelToChassisVelMat[Y][LF] = -1;
+            wheelVelToChassisVelMat[Y][RF] = -1;
+            wheelVelToChassisVelMat[Y][LB] = 1;
+            wheelVelToChassisVelMat[Y][RB] = 1;
+            wheelVelToChassisVelMat[R][LF] = -1.0 / A;
+            wheelVelToChassisVelMat[R][RF] = -1.0 / A;
+            wheelVelToChassisVelMat[R][LB] = -1.0 / A;
+            wheelVelToChassisVelMat[R][RB] = -1.0 / A;
+            wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
+            break;
+        case ChassisType::X_DRIVE:
+            wheelVelToChassisVelMat[X][LF] = sqrtf(2);
+            wheelVelToChassisVelMat[X][RF] = -sqrtf(2);
+            wheelVelToChassisVelMat[X][LB] = sqrtf(2);
+            wheelVelToChassisVelMat[X][RB] = -sqrtf(2);
+            wheelVelToChassisVelMat[Y][LF] = -sqrtf(2);
+            wheelVelToChassisVelMat[Y][RF] = -sqrtf(2);
+            wheelVelToChassisVelMat[Y][LB] = sqrtf(2);
+            wheelVelToChassisVelMat[Y][RB] = sqrtf(2);
+            wheelVelToChassisVelMat[R][LF] = -1.0 / (2.0 * A);
+            wheelVelToChassisVelMat[R][RF] = -1.0 / (2.0 * A);
+            wheelVelToChassisVelMat[R][LB] = -1.0 / (2.0 * A);
+            wheelVelToChassisVelMat[R][RB] = -1.0 / (2.0 * A);
+            wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
+            break;
+    }
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;
     motors[LB] = &leftBackMotor;
@@ -275,28 +316,6 @@ modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() c
     wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
     wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
-}
-
-void ChassisSubsystem::getVelocityWorldRelative(
-    modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
-    float chassisHeading) const
-{
-    modm::Matrix<float, 3, 3> transform;
-    float headingCos = cosf(chassisHeading);
-    float headingSin = sinf(chassisHeading);
-    headingCos = compareFloatClose(headingCos, 0.0f, 1e-6) ? 0.0f : headingCos;
-    headingSin = compareFloatClose(headingSin, 0.0f, 1e-6) ? 0.0f : headingSin;
-
-    transform[0][0] = headingCos;
-    transform[1][0] = headingSin;
-    transform[2][0] = 0;
-    transform[0][1] = -headingSin;
-    transform[1][1] = headingCos;
-    transform[2][1] = 0;
-    transform[0][2] = 0;
-    transform[1][2] = 0;
-    transform[2][2] = 1;
-    chassisRelativeVelocity = transform * chassisRelativeVelocity;
 }
 
 void ChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }

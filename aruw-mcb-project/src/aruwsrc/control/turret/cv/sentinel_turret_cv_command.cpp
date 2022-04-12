@@ -17,7 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "turret_cv_command.hpp"
+//#include "sentinel.hpp"
+
+#include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
+
+#include <cassert>
 
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/architecture/clock.hpp"
@@ -25,6 +29,7 @@
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch::clock;
@@ -32,22 +37,23 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret::cv
 {
-TurretCVCommand::TurretCVCommand(
+SentinelTurretCVCommand::SentinelTurretCVCommand(
     aruwsrc::Drivers *drivers,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
+    tap::control::Subsystem &firingSubsystem,
+    Command *const firingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
-    const float userPitchInputScalar,
-    const float userYawInputScalar,
     const float defaultLaunchSpeed,
-    uint8_t turretID)
+    const uint8_t turretID)
     : drivers(drivers),
-      turretID(turretID),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
+      turretID(turretID),
+      firingCommand(firingCommand),
       ballisticsSolver(
           *drivers,
           odometryInterface,
@@ -55,15 +61,21 @@ TurretCVCommand::TurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed,
           turretID),
-      userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar)
+      pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_ANGLE, SCAN_DELTA_ANGLE),
+      yawScanner(YAW_MIN_ANGLE, YAW_MAX_ANGLE, SCAN_DELTA_ANGLE)
 {
+    assert(firingCommand != nullptr);
+    assert(turretSubsystem != nullptr);
+    assert(pitchController != nullptr);
+    assert(yawController != nullptr);
+
     addSubsystemRequirement(turretSubsystem);
+    addSubsystemRequirement(&firingSubsystem);
 }
 
-bool TurretCVCommand::isReady() { return !isFinished(); }
+bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
 
-void TurretCVCommand::initialize()
+void SentinelTurretCVCommand::initialize()
 {
     pitchController->initialize();
     yawController->initialize();
@@ -71,7 +83,7 @@ void TurretCVCommand::initialize()
     drivers->visionCoprocessor.sendSelectNewTargetMessage();
 }
 
-void TurretCVCommand::execute()
+void SentinelTurretCVCommand::execute()
 {
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
@@ -83,16 +95,46 @@ void TurretCVCommand::execute()
 
     if (ballisticsSolutionAvailable)
     {
+        // Target available
         pitchSetpoint = modm::toDegree(targetPitch);
         yawSetpoint = modm::toDegree(targetYaw);
+
+        // Check if we are aiming within tolerance, if so fire
+        /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
+        /// to indicate whether it's worth firing at
+        if (compareFloatClose(
+                turretSubsystem->getCurrentPitchValue().getValue(),
+                pitchSetpoint,
+                FIRING_TOLERANCE) &&
+            compareFloatClose(
+                turretSubsystem->getCurrentYawValue().getValue(),
+                yawSetpoint,
+                FIRING_TOLERANCE))
+        {
+            // Do not re-add command if it's already scheduled as that would interrupt it
+            if (!drivers->commandScheduler.isCommandScheduled(firingCommand))
+            {
+                drivers->commandScheduler.addCommand(firingCommand);
+            }
+        }
     }
     else
     {
-        // no valid ballistics solution, let user control turret
-        pitchSetpoint +=
-            userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
+        // Target unavailable
 
-        yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
+        // See how recently we lost target
+        if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
+        {
+            // We recently had a target. Don't start scanning yet
+            lostTargetCounter++;
+            // Pitch and yaw setpoint already at reasonable default value
+            // by this point
+        }
+        else
+        {
+            pitchSetpoint = pitchScanner.scan(pitchSetpoint);
+            yawSetpoint = yawScanner.scan(yawSetpoint);
+        }
     }
 
     uint32_t currTime = getTimeMilliseconds();
@@ -108,12 +150,12 @@ void TurretCVCommand::execute()
     yawController->runController(dt, yawSetpoint);
 }
 
-bool TurretCVCommand::isFinished() const
+bool SentinelTurretCVCommand::isFinished() const
 {
     return !pitchController->isOnline() || !yawController->isOnline();
 }
 
-void TurretCVCommand::end(bool)
+void SentinelTurretCVCommand::end(bool)
 {
     turretSubsystem->setYawMotorOutput(0);
     turretSubsystem->setPitchMotorOutput(0);

@@ -22,9 +22,11 @@
 #include "tap/algorithms/crc.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/mock/turret_orientation_interface_mock.hpp"
 #include "gtest/gtest.h"
 
 using aruwsrc::serial::VisionCoprocessor;
@@ -34,105 +36,169 @@ using namespace tap::arch;
 using namespace tap::algorithms;
 using namespace testing;
 using namespace tap::arch::clock;
-
-// RX tests
+using namespace aruwsrc::control::turret;
 
 static void initAndRunAutoAimRxTest(
-    float xPosDesired,
-    float yPosDesired,
-    float zPosDesired,
-    float xVelDesired,
-    float yVelDesired,
-    float zVelDesired,
-    float xAccDesired,
-    float yAccDesired,
-    float zAccDesired,
-    bool hasTarget)
+    std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> expectedAimData)
 {
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
     DJISerial::ReceivedSerialMessage message;
     message.header.headByte = 0xA5;
     message.messageType = 2;
-    message.header.dataLength = 10 * sizeof(float) + sizeof(uint8_t);
-    aruwsrc::serial::VisionCoprocessor::TurretAimData testData;
-    testData.xPos = xPosDesired;
-    testData.yPos = yPosDesired;
-    testData.zPos = zPosDesired;
-    testData.xVel = xVelDesired;
-    testData.yVel = yVelDesired;
-    testData.zVel = zVelDesired;
-    testData.xAcc = xAccDesired;
-    testData.yAcc = yAccDesired;
-    testData.zAcc = zAccDesired;
-    testData.hasTarget = hasTarget;
-    testData.timestamp = 1234;
-    memcpy(&message.data, &testData, sizeof(testData));
+    message.header.dataLength = expectedAimData.size() * sizeof(VisionCoprocessor::TurretAimData);
+
+    for (size_t i = 0; i < expectedAimData.size(); i++)
+    {
+        memcpy(
+            message.data + i * sizeof(VisionCoprocessor::TurretAimData),
+            &expectedAimData[i],
+            sizeof(VisionCoprocessor::TurretAimData));
+    }
 
     serial.messageReceiveCallback(message);
 
-    const VisionCoprocessor::TurretAimData &callbackData = serial.getLastAimData();
-    EXPECT_EQ(hasTarget, callbackData.hasTarget);
-    EXPECT_EQ(xPosDesired, callbackData.xPos);
-    EXPECT_EQ(yPosDesired, callbackData.yPos);
-    EXPECT_EQ(zPosDesired, callbackData.zPos);
-    EXPECT_EQ(xVelDesired, callbackData.xVel);
-    EXPECT_EQ(yVelDesired, callbackData.yVel);
-    EXPECT_EQ(zVelDesired, callbackData.zVel);
-    EXPECT_EQ(xAccDesired, callbackData.xAcc);
-    EXPECT_EQ(yAccDesired, callbackData.yAcc);
-    EXPECT_EQ(zAccDesired, callbackData.zAcc);
-    EXPECT_EQ(1234, callbackData.timestamp);
+    for (size_t i = 0; i < expectedAimData.size(); i++)
+    {
+        const VisionCoprocessor::TurretAimData &callbackData = serial.getLastAimData(i);
+        EXPECT_EQ(expectedAimData[i].xPos, callbackData.xPos);
+        EXPECT_EQ(expectedAimData[i].yPos, callbackData.yPos);
+        EXPECT_EQ(expectedAimData[i].zPos, callbackData.zPos);
+        EXPECT_EQ(expectedAimData[i].xVel, callbackData.xVel);
+        EXPECT_EQ(expectedAimData[i].yVel, callbackData.yVel);
+        EXPECT_EQ(expectedAimData[i].zVel, callbackData.zVel);
+        EXPECT_EQ(expectedAimData[i].xAcc, callbackData.xAcc);
+        EXPECT_EQ(expectedAimData[i].yAcc, callbackData.yAcc);
+        EXPECT_EQ(expectedAimData[i].zAcc, callbackData.zAcc);
+        EXPECT_EQ(expectedAimData[i].hasTarget, callbackData.hasTarget);
+        EXPECT_EQ(expectedAimData[i].timestamp, callbackData.timestamp);
+    }
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_zeros)
 {
-    initAndRunAutoAimRxTest(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false);
+    std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {};
+    initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_has_target)
 {
-    initAndRunAutoAimRxTest(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, true);
+    std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {};
+    aimData[0].hasTarget = true;
+    initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
 {
-    initAndRunAutoAimRxTest(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, false);
+    std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
+        VisionCoprocessor::TurretAimData{
+            .xPos = 1,
+            .yPos = 2,
+            .zPos = 3,
+            .xVel = 4,
+            .yVel = 5,
+            .zVel = 6,
+            .xAcc = 7,
+            .yAcc = 8,
+            .zAcc = 9,
+            .hasTarget = false,
+            .timestamp = 1234,
+        }};
+    initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
 {
-    initAndRunAutoAimRxTest(-1.0f, -2.0f, -3.0f, -4.0f, -5.0f, -6.0f, -7.0f, -8.0f, -9.0f, false);
+    std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
+        VisionCoprocessor::TurretAimData{
+            .xPos = -1,
+            .yPos = -2,
+            .zPos = -3,
+            .xVel = -4,
+            .yVel = -5,
+            .zVel = -6,
+            .xAcc = -7,
+            .yAcc = -8,
+            .zAcc = -9,
+            .hasTarget = false,
+            .timestamp = 1234,
+        }};
+    initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
 {
-    initAndRunAutoAimRxTest(
-        -0.45f,
-        -0.35f,
-        -0.25f,
-        -0.15f,
-        -0.05f,
-        0.05f,
-        0.15f,
-        0.25f,
-        0.35f,
-        false);
+    std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
+        VisionCoprocessor::TurretAimData{
+            .xPos = -0.45,
+            .yPos = -0.35,
+            .zPos = -0.25,
+            .xVel = -0.15,
+            .yVel = -0.05,
+            .zVel = 0.05,
+            .xAcc = 0.15,
+            .yAcc = 0.25,
+            .zAcc = 0.35,
+            .hasTarget = false,
+            .timestamp = 1234,
+        }};
+    initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
 {
-    initAndRunAutoAimRxTest(
-        123456789.0f,
-        123456789.0f,
-        123456789.0f,
-        123456789.0f,
-        123456789.0f,
-        123456789.0f,
-        123456789.0f,
-        123456789.0f,
-        123456789.0f,
-        false);
+    std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
+        VisionCoprocessor::TurretAimData{
+            .xPos = 123456789.0f,
+            .yPos = 123456789.0f,
+            .zPos = 123456789.0f,
+            .xVel = 123456789.0f,
+            .yVel = 123456789.0f,
+            .zVel = 123456789.0f,
+            .xAcc = 123456789.0f,
+            .yAcc = 123456789.0f,
+            .zAcc = 123456789.0f,
+            .hasTarget = false,
+            .timestamp = 1234,
+        }};
+
+    initAndRunAutoAimRxTest(aimData);
+}
+
+TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
+{
+    std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
+        VisionCoprocessor::TurretAimData{
+            .xPos = -10,
+            .yPos = -0.32,
+            .zPos = 234.523,
+            .xVel = 12.2,
+            .yVel = -90,
+            .zVel = 0,
+            .xAcc = 76,
+            .yAcc = 42,
+            .zAcc = -14.2,
+            .hasTarget = true,
+            .timestamp = 1234,
+        }};
+
+    // if there are > 1 turret, fill in aim data
+    for (size_t i = 1; i < aimData.size(); i++)
+    {
+        aimData[i] = aimData[i - 1];
+        aimData[i].xPos++;
+        aimData[i].yPos++;
+        aimData[i].zPos++;
+        aimData[i].xVel++;
+        aimData[i].yVel++;
+        aimData[i].zVel++;
+        aimData[i].xAcc++;
+        aimData[i].yAcc++;
+        aimData[i].zAcc++;
+        aimData[i].timestamp++;
+    }
+
+    initAndRunAutoAimRxTest(aimData);
 }
 
 template <uint32_t DATA_LEN>
@@ -144,20 +210,67 @@ static void checkHeaderAndTail(const DJISerial::SerialMessage<DATA_LEN> &msg)
     EXPECT_EQ(calculateCRC16(reinterpret_cast<const uint8_t *>(&msg), sizeof(msg) - 2), msg.CRC16);
 }
 
-TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
+TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
 {
     ClockStub clock;
 
     aruwsrc::Drivers drivers;
     VisionCoprocessor serial(&drivers);
 
+    testing::NiceMock<tap::mock::Odometry2DInterfaceMock> odometryInterface;
+    std::array<testing::NiceMock<aruwsrc::mock::TurretOrientationInterfaceMock>, NUM_TURRETS>
+        turretInterfaces;
+
+    serial.attachOdometryInterface(&odometryInterface);
+    for (size_t i = 0; i < turretInterfaces.size(); i++)
+    {
+        serial.attachTurretOrientationInterface(&turretInterfaces[i], i);
+    }
+
+    VisionCoprocessor::OdometryData odometryData;
+
+    odometryData.chassisOdometry.xPos = 10;
+    odometryData.chassisOdometry.yPos = -100;
+    odometryData.chassisOdometry.zPos = 0;
+    odometryData.chassisOdometry.timestamp = 132'000;
+    odometryData.chassisOdometry.pitch = 0;
+    odometryData.chassisOdometry.yaw = 0;
+    odometryData.chassisOdometry.roll = 0;
+
+    odometryData.turretOdometry[0].pitch = 45;
+    odometryData.turretOdometry[0].yaw = -30;
+    odometryData.turretOdometry[0].timestamp = 456;
+
+    clock.time = odometryData.chassisOdometry.timestamp / 1000;
+
+    for (size_t i = 1; i < MODM_ARRAY_SIZE(odometryData.turretOdometry); i++)
+    {
+        odometryData.turretOdometry[i] = odometryData.turretOdometry[i - 1];
+        odometryData.turretOdometry[i].pitch++;
+        odometryData.turretOdometry[i].yaw++;
+        odometryData.turretOdometry[i].timestamp++;
+    }
+
+    ON_CALL(odometryInterface, getCurrentLocation2D)
+        .WillByDefault(Return(modm::Location2D<float>(
+            odometryData.chassisOdometry.xPos,
+            odometryData.chassisOdometry.yPos,
+            0)));
+
+    for (size_t i = 0; i < turretInterfaces.size(); i++)
+    {
+        ON_CALL(turretInterfaces[i], getWorldYaw)
+            .WillByDefault(Return(odometryData.turretOdometry[i].yaw));
+        ON_CALL(turretInterfaces[i], getWorldPitch)
+            .WillByDefault(Return(odometryData.turretOdometry[i].pitch));
+        ON_CALL(turretInterfaces[i], getLastMeasurementTimeMicros)
+            .WillByDefault(Return(odometryData.turretOdometry[i].timestamp));
+    }
+
     static constexpr int HEADER_LEN = 7;
-    static constexpr int DATA_LEN = 24;
+    static constexpr int DATA_LEN = sizeof(VisionCoprocessor::OdometryData);
     static constexpr int CRC16_LEN = 2;
     static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
-
-    // turret orientation interface not attached - will raise error
-    EXPECT_CALL(drivers.errorController, addToErrorList);
 
     EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
         .WillOnce([&](tap::communication::serial::Uart::UartPort,
@@ -169,23 +282,50 @@ TEST(VisionCoprocessor, sendOdometryData_nullptr_odomInterface)
             checkHeaderAndTail<DATA_LEN>(msg);
             EXPECT_EQ(1, msg.messageType);
 
-            float cx, cy, cz, pitch, yaw;
-            uint32_t turretImuTime;
+            float cx, cy, cz, pitch, yaw, roll;
+            uint32_t cTime;
 
-            convertFromLittleEndian(&cx, msg.data);
-            convertFromLittleEndian(&cy, msg.data + 4);
-            convertFromLittleEndian(&cz, msg.data + 8);
-            convertFromLittleEndian(&pitch, msg.data + 12);
-            convertFromLittleEndian(&yaw, msg.data + 16);
-            convertFromLittleEndian(&turretImuTime, msg.data + 20);
+            // chassis odometry
+            convertFromLittleEndian(&cTime, msg.data);
+            convertFromLittleEndian(&cx, msg.data + 4);
+            convertFromLittleEndian(&cy, msg.data + 8);
+            convertFromLittleEndian(&cz, msg.data + 12);
+            convertFromLittleEndian(&pitch, msg.data + 16);
+            convertFromLittleEndian(&yaw, msg.data + 20);
+            convertFromLittleEndian(&roll, msg.data + 24);
 
-            EXPECT_EQ(0, cx);
-            EXPECT_EQ(0, cy);
-            EXPECT_EQ(0, cz);
-            EXPECT_EQ(0, pitch);
-            EXPECT_EQ(0, yaw);
-            // no turret orientation interface -> returns 0 as time
-            EXPECT_EQ(0, turretImuTime);
+            EXPECT_EQ(odometryData.chassisOdometry.timestamp, cTime);
+            EXPECT_EQ(odometryData.chassisOdometry.xPos, cx);
+            EXPECT_EQ(odometryData.chassisOdometry.yPos, cy);
+            EXPECT_EQ(odometryData.chassisOdometry.zPos, cz);
+            EXPECT_EQ(odometryData.chassisOdometry.pitch, pitch);
+            EXPECT_EQ(odometryData.chassisOdometry.yaw, yaw);
+            EXPECT_EQ(odometryData.chassisOdometry.roll, roll);
+
+            uint8_t numTurrets = msg.data[sizeof(VisionCoprocessor::ChassisOdometryData)];
+            EXPECT_EQ(NUM_TURRETS, numTurrets);
+
+            // turret odometry
+            const uint32_t startIndex = sizeof(VisionCoprocessor::ChassisOdometryData) + 1;
+            std::array<std::tuple<uint32_t, float, float>, NUM_TURRETS> turretOdom;
+            for (size_t i = 0; i < turretOdom.size(); i++)
+            {
+                auto &odom = turretOdom[i];
+
+                convertFromLittleEndian(
+                    &std::get<0>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData));
+                convertFromLittleEndian(
+                    &std::get<1>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) + 4);
+                convertFromLittleEndian(
+                    &std::get<2>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) + 8);
+
+                EXPECT_EQ(odometryData.turretOdometry[i].timestamp, std::get<0>(odom));
+                EXPECT_EQ(odometryData.turretOdometry[i].pitch, std::get<1>(odom));
+                EXPECT_EQ(odometryData.turretOdometry[i].yaw, std::get<2>(odom));
+            }
 
             return length;
         });

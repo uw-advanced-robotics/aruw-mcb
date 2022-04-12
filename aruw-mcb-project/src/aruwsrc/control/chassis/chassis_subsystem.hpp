@@ -25,22 +25,20 @@
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
+#include "tap/control/chassis/power_limiter.hpp"
+#include "tap/motor/m3508_constants.hpp"
+#include "tap/util_macros.hpp"
+
+#include "aruwsrc/util_macros.hpp"
+#include "constants/chassis_constants.hpp"
+#include "modm/math/filter/pid.hpp"
+#include "modm/math/matrix.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
 #else
 #include "tap/motor/dji_motor.hpp"
 #endif
-
-#include "tap/control/chassis/power_limiter.hpp"
-#include "tap/motor/m3508_constants.hpp"
-#include "tap/util_macros.hpp"
-
-#include "aruwsrc/util_macros.hpp"
-#include "modm/math/filter/pid.hpp"
-#include "modm/math/matrix.hpp"
-
-#include "chassis_constants.hpp"
 
 namespace aruwsrc
 {
@@ -63,6 +61,12 @@ namespace chassis
 class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
+    enum class ChassisType
+    {
+        MECANUM = 0,
+        X_DRIVE = 1,
+    };
+
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
      */
@@ -94,6 +98,7 @@ public:
 
     ChassisSubsystem(
         aruwsrc::Drivers* drivers,
+        ChassisType chassisType,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
@@ -165,16 +170,7 @@ public:
      *      where vz is rotational velocity. This is the velocity calculated from the chassis's
      *      encoders. Units: m/s
      */
-    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const;
-
-    /**
-     * Transforms the chassis relative velocity of the form <vx, vy, vz> into world relative frame,
-     * given some particular chassis heading (z direction, assumed to be in radians). Transforms
-     * the input matrix chassisRelativeVelocity. Units: m/s
-     */
-    void getVelocityWorldRelative(
-        modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
-        float chassisHeading) const;
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
