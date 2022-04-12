@@ -13,7 +13,7 @@
     <option name="taproot:communication:serial:ref_serial:uart_port">Uart6</option>
     <option name="taproot:communication:serial:uart_port_2.baud_rate">1000000</option>
     <option name="taproot:communication:serial:uart_port_3.baud_rate">1000000</option>
-    <option name="taproot:board:digital_in_pins">A,B,C,D,Button</option>
+    <option name="taproot:board:digital_in_pins">B,C,D,Button</option>
     <option name="taproot:board:digital_out_pins">E,F,G,H,Laser</option>
     <option name="taproot:board:analog_in_pins">S,T,U,V,OledJoystick</option>
     <option name="taproot:board:pwm_pins">W,X,Y,Z,Buzzer,ImuHeater</option>

@@ -33,16 +33,28 @@
 namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
-static constexpr tap::algorithms::SmoothPidConfig PID_HERO_WATERWHEEL =
-    {.kp = 150'000.0f, .ki = 0.0f, .kd = 50.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+static constexpr tap::algorithms::SmoothPidConfig PID_HERO_WATERWHEEL = {
+    .kp = 150'000.0f,
+    .ki = 0.0f,
+    .kd = 50.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 16000.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 
 static constexpr tap::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 static constexpr bool HERO_WATERWHEEL_INVERTED = false;
 
 // PID terms for the hero kicker
-static constexpr tap::algorithms::SmoothPidConfig PID_HERO_KICKER =
-    {.kp = 100'000.0f, .ki = 0.0f, .kd = 50.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+static constexpr tap::algorithms::SmoothPidConfig PID_HERO_KICKER = {
+    .kp = 100'000.0f,
+    .ki = 0.0f,
+    .kd = 50.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 16000.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 
 // There are two kicker motors that drive the shaft.
 static constexpr tap::motor::MotorId HERO_KICKER_MOTOR_ID = tap::motor::MOTOR8;

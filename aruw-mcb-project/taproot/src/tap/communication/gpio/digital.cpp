@@ -47,9 +47,6 @@ void Digital::configureInputPullMode(Digital::InputPin pin, Digital::InputPullMo
 #else
     switch (pin)
     {
-        case Digital::InputPin::A:
-            DigitalInPinA::configure(mode);
-            break;
         case Digital::InputPin::B:
             DigitalInPinB::configure(mode);
             break;
@@ -101,8 +98,6 @@ bool Digital::read(Digital::InputPin pin) const
 #else
     switch (pin)
     {
-        case Digital::InputPin::A:
-            return DigitalInPinA::read();
         case Digital::InputPin::B:
             return DigitalInPinB::read();
         case Digital::InputPin::C:
