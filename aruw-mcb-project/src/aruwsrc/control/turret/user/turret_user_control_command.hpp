@@ -55,8 +55,8 @@ public:
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        float userYawInputScalar = 1.0f,
-        float userPitchInputScalar = 1.0f);
+        float userYawInputScalar,
+        float userPitchInputScalar);
 
     bool isReady() override;
 

@@ -90,7 +90,7 @@ void TurretMCBCanComm::handleYawAngleGyroMessage(const modm::can::Message& messa
     const AngleMessageData* angleMessage = reinterpret_cast<const AngleMessageData*>(message.data);
 
     currProcessingImuData.yaw =
-        static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION;
+        modm::toRadian(static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
     currProcessingImuData.rawYawVelocity = angleMessage->angleAngularVelocityRaw;
     currProcessingImuData.seq = angleMessage->seq;
     // clear top 16 bits
@@ -112,7 +112,7 @@ void TurretMCBCanComm::handlePitchAngleGyroMessage(const modm::can::Message& mes
     }
 
     currProcessingImuData.pitch =
-        static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION;
+        modm::toRadian(static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
     currProcessingImuData.rawPitchVelocity = angleMessage->angleAngularVelocityRaw;
     // clear bottom 16 bits
     currProcessingImuData.turretDataTimestamp &= 0xffff0000;

@@ -41,12 +41,14 @@ protected:
         ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
         ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));
+        ON_CALL(turret.yawMotor, getConfig).WillByDefault(ReturnRef(turretConfig));
     }
 
     aruwsrc::Drivers drivers;
     NiceMock<ChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
+    TurretMotorConfig turretConfig;
 };
 
 class TurretOfflineTest : public ChassisAutorotateCommandTest,
@@ -56,9 +58,9 @@ class TurretOfflineTest : public ChassisAutorotateCommandTest,
 
 TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret);
+    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
 
-    ON_CALL(turret, isOnline).WillByDefault(Return(false));
+    ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(false));
 
     ON_CALL(drivers.controlOperatorInterface, getChassisXInput)
         .WillByDefault(Return(std::get<0>(GetParam())));
@@ -79,13 +81,13 @@ TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 
 TEST_F(ChassisAutorotateCommandTest, constructor_only_adds_chassis_sub_req)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret);
+    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
     EXPECT_EQ(1U << chassis.getGlobalIdentifier(), cac.getRequirementsBitwise());
 }
 
 TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret);
+    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
 
     EXPECT_CALL(chassis, setZeroRPM).Times(2);
 
@@ -95,7 +97,7 @@ TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 
 TEST_F(ChassisAutorotateCommandTest, isFinished_returns_false)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret);
+    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
 
     EXPECT_FALSE(cac.isFinished());
 }
@@ -128,8 +130,8 @@ class TurretOnlineTest : public ChassisAutorotateCommandTest,
 public:
     TurretOnlineTest()
         : yawAngleFromCenter(
-              ContiguousFloat(GetParam().yawAngle - YAW_START_ANGLE, -180, 180).getValue()),
-          cac(&drivers, &chassis, &turret, GetParam().chassisSymmetry),
+              ContiguousFloat(GetParam().yawAngle - turret.yawMotor.getConfig().startAngle, -M_PI, M_PI).getValue()),
+          cac(&drivers, &chassis, &turret.yawMotor, GetParam().chassisSymmetry),
           turretAngleActualContiguous(GetParam().yawAngle, 0, 360)
     {
     }
@@ -147,12 +149,13 @@ public:
         ON_CALL(drivers.controlOperatorInterface, getChassisRInput)
             .WillByDefault(Return(GetParam().r));
 
-        ON_CALL(turret, isOnline).WillByDefault(Return(true));
-        ON_CALL(turret, yawLimited).WillByDefault(Return(GetParam().yawLimited));
-        ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(yawAngleFromCenter));
-        ON_CALL(turret, getYawVelocity).WillByDefault(Return(0));
-        ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(turretAngleActualContiguous));
-        ON_CALL(turret, getYawSetpoint).WillByDefault(Return(GetParam().yawSetpoint));
+        turretConfig.limitMotorAngles = GetParam().yawLimited;
+
+        ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(true));
+        ON_CALL(turret.yawMotor, getAngleFromCenter).WillByDefault(Return(yawAngleFromCenter));
+        ON_CALL(turret.yawMotor, getChassisFrameVelocity).WillByDefault(Return(0));
+        ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turretAngleActualContiguous));
+        ON_CALL(turret.yawMotor, getChassisFrameSetpoint).WillByDefault(Return(GetParam().yawSetpoint));
 
         ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
             return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);

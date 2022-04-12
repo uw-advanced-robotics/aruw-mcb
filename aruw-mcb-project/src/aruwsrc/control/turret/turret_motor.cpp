@@ -51,8 +51,8 @@ void TurretMotor::updateMotorAngle()
 
         lastUpdatedEncoderValue = encoder;
 
-        chassisFrameMeasuredAngle.setValue(
-            DjiMotor::encoderToDegrees(static_cast<uint16_t>(encoder - config.startEncoderValue)));
+        chassisFrameMeasuredAngle.setValue(modm::toRadian(
+            DjiMotor::encoderToDegrees(static_cast<uint16_t>(encoder - config.startEncoderValue))));
     }
     else
     {

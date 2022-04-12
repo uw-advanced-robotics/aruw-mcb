@@ -25,16 +25,16 @@ namespace aruwsrc::control::turret::algorithms
 {
 /**
  * Transforms the passed in turret yaw angle in the chassis frame to the world frame (units
- * degrees).
+ * radians).
  *
- * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
+ * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
  *      PID controller.
- * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in degrees, measured from the
+ * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU.
- * @param[in] angleToTransform The angle, in degrees, to transform. Measured as a turret yaw angle
+ * @param[in] angleToTransform The angle, in radians, to transform. Measured as a turret yaw angle
  *      in the chassis frame.
- * @return A turret yaw angle in degrees. `angleToTransform` transformed into the world frame.
+ * @return A turret yaw angle in radians. `angleToTransform` transformed into the world frame.
  */
 static inline float transformChassisFrameYawToWorldFrame(
     const float initChassisFrameImuAngle,
@@ -46,16 +46,16 @@ static inline float transformChassisFrameYawToWorldFrame(
 
 /**
  * Transforms the passed in turret yaw angle in the world frame to the chassis frame (units
- * degrees).
+ * radians).
  *
- * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
+ * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
  * PID controller.
- * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in degrees, measured from the
+ * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU.
- * @param[in] angleToTransform The angle, in degrees to transform. Measured as a turret yaw angle in
+ * @param[in] angleToTransform The angle, in radians to transform. Measured as a turret yaw angle in
  *      the world frame.
- * @return A turret yaw angle in degrees. `angleToTransform` transformed into the chassis frame.
+ * @return A turret yaw angle in radians. `angleToTransform` transformed into the chassis frame.
  */
 static inline float transformWorldFrameYawToChassisFrame(
     const float initChassisFrameImuAngle,
@@ -72,14 +72,14 @@ static inline float transformWorldFrameYawToChassisFrame(
  * min/max yaw setpoints.
  *
  * @param[in] desiredSetpoint The new user-specified world frame turret yaw angle setpoint, in
- *      degrees.
- * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
+ *      radians.
+ * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
  *      PID controller.
- * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in degrees, measured from the
+ * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU.
  * @param[out] worldFrameYawSetpoint The limited and wrapped world frame turret yaw setpoint, in
- *      degrees. Set to `desiredSetpoint` and then wrapped/limited as necessary.
+ *      radians. Set to `desiredSetpoint` and then wrapped/limited as necessary.
  * @param[out] turretMotor The turret subsystem whose chassis relative turret yaw angle is
  *      updated by this function.
  */
@@ -137,7 +137,7 @@ void WorldFrameYawChassisImuTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    const float chassisFrameImuYawAngle = drivers->mpu6500.getYaw();
+    const float chassisFrameImuYawAngle = modm::toRadian(drivers->mpu6500.getYaw());
 
     updateYawWorldFrameSetpoint(
         desiredSetpoint,

@@ -35,6 +35,9 @@ namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 2;
 
+static constexpr float USER_YAW_INPUT_SCALAR = 0.001f;
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.001f;
+
 namespace turret1
 {
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;

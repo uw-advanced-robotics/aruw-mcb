@@ -27,6 +27,7 @@
 #include "modm/math/geometry/angle.hpp"
 
 #include "turret_motor_config.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -37,12 +38,12 @@ public:
 
     TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig);
 
-    inline void initialize() { motor->initialize(); }
+    mockable inline void initialize() { motor->initialize(); }
 
     /// Updates the measured motor angle
-    void updateMotorAngle();
+    mockable void updateMotorAngle();
 
-    void setMotorOutput(float out);
+    mockable void setMotorOutput(float out);
 
     /**
      * Attaches the specified turretController with the turret motor. This does not give ownership
@@ -50,33 +51,33 @@ public:
      * is currently being run (since turret controllers are shared by commands but persist across
      * different commands).
      */
-    void attachTurretController(const algorithms::TurretControllerInterface *turretController)
+    mockable void attachTurretController(const algorithms::TurretControllerInterface *turretController)
     {
         this->turretController = turretController;
     }
 
     /// Sets (and limits!) the chassis frame turret measurement
-    void setChassisFrameSetpoint(float setpoint);
+    mockable void setChassisFrameSetpoint(float setpoint);
 
     /// @return `true` if the hardware motor is connected and powered on
-    inline bool isOnline() const { return motor->isMotorOnline(); }
+    mockable inline bool isOnline() const { return motor->isMotorOnline(); }
 
     /// @return turret motor angle setpoint relative to the chassis, in radians
-    inline const tap::algorithms::ContiguousFloat &getChassisFrameSetpoint() const
+    mockable inline const tap::algorithms::ContiguousFloat &getChassisFrameSetpoint() const
     {
         return chassisFrameSetpoint;
     }
 
     /// @return turret motor measurement relative to the chassis, in radians
-    inline const tap::algorithms::ContiguousFloat &getChassisFrameMeasuredAngle() const
+    mockable inline const tap::algorithms::ContiguousFloat &getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
     }
 
     /// @return velocity of the turret, in rad/sec
-    inline float getChassisFrameVelocity() const { return (M_TWOPI / 60) * motor->getShaftRPM(); }
+    mockable inline float getChassisFrameVelocity() const { return (M_TWOPI / 60) * motor->getShaftRPM(); }
 
-    inline float getAngleFromCenter() const
+    mockable inline float getAngleFromCenter() const
     {
         return tap::algorithms::ContiguousFloat(
                    chassisFrameMeasuredAngle.getValue() - config.startAngle,
@@ -86,12 +87,12 @@ public:
     }
 
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)
-    const algorithms::TurretControllerInterface *getTurretController() const
+    mockable const algorithms::TurretControllerInterface *getTurretController() const
     {
         return turretController;
     }
 
-    const TurretMotorConfig &getConfig() const { return config; }
+    mockable const TurretMotorConfig &getConfig() const { return config; }
 
 private:
     const TurretMotorConfig config;

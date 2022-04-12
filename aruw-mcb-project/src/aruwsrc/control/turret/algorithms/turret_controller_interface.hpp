@@ -59,12 +59,12 @@ public:
      * @param[in] dt The time difference in milliseconds between previous and current call of
      * `runController`.
      * @param[in] desiredSetpoint The controller's desired setpoint in whatever frame the controller
-     * is operating. Units degrees.
+     * is operating. Units radians.
      */
     virtual void runController(const uint32_t dt, const float desiredSetpoint) = 0;
 
     /**
-     * @return The controller's setpoint, units degrees. **Does not** have to be in the same
+     * @return The controller's setpoint, units radians. **Does not** have to be in the same
      * reference frame as the TurretMotor's `get<yaw|pitch>Setpoint` functions.
      */
     virtual float getSetpoint() const = 0;

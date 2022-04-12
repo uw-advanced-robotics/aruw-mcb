@@ -28,7 +28,7 @@
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * Transforms the specified `angleToTransform`, a yaw/pitch angle (in degrees) from the chassis
+ * Transforms the specified `angleToTransform`, a yaw/pitch angle (in radians) from the chassis
  * frame to the world frame.
  *
  * @note It is expected that the user wraps the value returned to be between [0, 360)
@@ -49,7 +49,7 @@ static inline float transformChassisFrameToWorldFrame(
 }
 
 /**
- * Transforms the specified `angleToTransform`, a yaw or pitch angle (in degrees), from the world
+ * Transforms the specified `angleToTransform`, a yaw or pitch angle (in radians), from the world
  * frame to the chassis frame.
  *
  * @note It is expected that the user wraps the value returned to be between [0, 360)
@@ -76,14 +76,14 @@ static inline float transformWorldFrameValueToChassisFrame(
  * min/max yaw setpoints.
  *
  * @param[in] desiredSetpoint The new user-specified world frame turret yaw angle setpoint, in
- *      degrees.
- * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
+ *      radians.
+ * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
  *      PID controller.
- * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in degrees, measured from the
+ * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU.
  * @param[out] worldFrameYawSetpoint The limited and wrapped world frame turret yaw setpoint, in
- *      degrees. Set to `desiredSetpoint` and then wrapped/limited as necessary.
+ *      radians. Set to `desiredSetpoint` and then wrapped/limited as necessary.
  * @param[out] turretMotor The turret subsystem whose chassis relative turret yaw angle is
  *      updated by this function.
  */
@@ -190,14 +190,14 @@ bool WorldFrameYawTurretImuCascadePidTurretController::isOnline() const
  * the `turretMotor`'s min/max pitch setpoints.
  *
  * @param[in] desiredSetpoint The new user-specified world frame turret yaw angle setpoint, in
- *      degrees.
- * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
+ *      radians.
+ * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
  *      PID controller.
- * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in degrees, measured from the
+ * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU.
  * @param[out] worldFrameYawSetpoint The limited and wrapped world frame turret yaw setpoint, in
- *      degrees. Set to `desiredSetpoint` and then wrapped/limited as necessary.
+ *      radians. Set to `desiredSetpoint` and then wrapped/limited as necessary.
  * @param[out] turretMotor The turret subsystem whose chassis relative turret yaw angle is
  *      updated by this function.
  */

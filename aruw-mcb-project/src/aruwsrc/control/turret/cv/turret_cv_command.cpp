@@ -83,8 +83,8 @@ void TurretCVCommand::execute()
 
     if (ballisticsSolutionAvailable)
     {
-        pitchSetpoint = modm::toDegree(targetPitch);
-        yawSetpoint = modm::toDegree(targetYaw);
+        pitchSetpoint = targetPitch;
+        yawSetpoint = targetYaw;
     }
     else
     {

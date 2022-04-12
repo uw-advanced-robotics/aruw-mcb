@@ -69,7 +69,7 @@ private:
     {
         float rotationSpeed;    /// Target rotation speed (in wheel RPM)
         float turnaroundAngle;  /// Turret angle from center to change chassis rotation direction
-                                /// (in degrees)
+                                /// (in radians)
         float rotationSpeedIncrement;  /// Increment in RPM / 0.002s to change the rotation speed by
                                        /// each time step
     };

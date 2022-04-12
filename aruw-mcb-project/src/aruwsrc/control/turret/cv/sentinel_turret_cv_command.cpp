@@ -102,8 +102,8 @@ void SentinelTurretCVCommand::execute()
     if (ballisticsSolutionAvailable)
     {
         // Target available
-        pitchSetpoint = modm::toDegree(targetPitch);
-        yawSetpoint = modm::toDegree(targetYaw);
+        pitchSetpoint = targetPitch;
+        yawSetpoint = targetYaw;
 
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score

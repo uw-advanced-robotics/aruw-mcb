@@ -29,17 +29,15 @@
 #include "turret_motor_config.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "tap/mock/motor_interface_mock.hpp"
+#include "aruwsrc/mock/turret_motor_mock.hpp"
 #else
-#include "tap/motor/motor_interface.hpp"
+#include "turret_motor.hpp"
 #endif
 
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
-
-#include "turret_motor.hpp"
 
 namespace aruwsrc
 {
@@ -89,14 +87,19 @@ public:
 
     void refresh();
 
-    const char* getName() { return "Turret"; }
+    const char* getName() override { return "Turret"; }
 
     void onHardwareTestStart();
 
+#ifdef ENV_UNIT_TESTS
+    testing::NiceMock<mock::TurretMotorMock> pitchMotor;
+    testing::NiceMock<mock::TurretMotorMock> yawMotor;
+#else
     /// Associated with and contains logic for controlling the turret's pitch motor
     TurretMotor pitchMotor;
     /// Associated with and contains logic for controlling the turret's yaw motor
     TurretMotor yawMotor;
+#endif
 
 protected:
     Drivers* drivers;

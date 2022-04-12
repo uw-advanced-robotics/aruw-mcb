@@ -21,6 +21,7 @@
 #define TURRET_MCB_CAN_COMM_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
+#include "modm/math/geometry/angle.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/mpu6500/mpu6500.hpp"
 
@@ -43,6 +44,8 @@ namespace aruwsrc::can
  * microcontroller. Reads IMU data and sends instructions to the turret microcontroller. Follows the
  * protocol described in the wiki here:
  * https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Turret-MCB-Comm-Protocol.
+ * 
+ * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in degrees are converted to radians by this object.
  */
 class TurretMCBCanComm
 {
@@ -72,17 +75,17 @@ public:
     /** @return turret pitch angular velocity in deg/sec */
     mockable inline float getPitchVelocity() const
     {
-        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-               tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return modm::toRadian(static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
+               tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
 
-    /** @return turret yaw angle in degrees */
+    /** @return turret yaw angle in radians */
     mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
     /** @return turret yaw angular velocity in deg/sec */
     mockable inline float getYawVelocity() const
     {
-        return static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-               tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return modm::toRadian(static_cast<float>(lastCompleteImuData.rawYawVelocity) /
+               tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
 
     mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
