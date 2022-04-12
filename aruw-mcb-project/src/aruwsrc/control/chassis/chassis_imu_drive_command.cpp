@@ -26,7 +26,7 @@
 #include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 
-using namespace tap::sensors;
+using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::chassis
 {
