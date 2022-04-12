@@ -64,8 +64,8 @@ AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 BeybladeCommandMock::BeybladeCommandMock(
     aruwsrc::Drivers *drivers,
     chassis::ChassisSubsystem *chassis,
-    tap::control::turret::TurretSubsystemInterface *turret)
-    : BeybladeCommand(drivers, chassis, turret)
+    aruwsrc::control::turret::TurretMotor *yawMotor)
+    : BeybladeCommand(drivers, chassis, yawMotor)
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
@@ -145,8 +145,16 @@ TowSubsystemMock::TowSubsystemMock(
 }
 TowSubsystemMock::~TowSubsystemMock() {}
 
+static constexpr aruwsrc::control::turret::TurretMotorConfig MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 0,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = true,
+};
+
 TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers)
-    : TurretSubsystem(drivers, nullptr, nullptr)
+    : TurretSubsystem(drivers, nullptr, nullptr, MOTOR_CONFIG, MOTOR_CONFIG)
 {
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}

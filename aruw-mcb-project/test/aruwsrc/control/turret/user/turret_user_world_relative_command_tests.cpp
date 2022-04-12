@@ -34,21 +34,39 @@ using namespace tap::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
+
+
+// static float computeValidMeasurementSetpointError(const TurretMotor &motor,
+// float setpoint, float measurement) {
+//     // motor.get
+
+//     tap::algorithms::ContiguousFloat setpointMeasurementDiff(setpoint, 0, M_TWOPI);
+//     setpointMeasurementDiff.difference(measurement);
+
+//     // Get chassis frame setpoint
+
+//     return 0;
+// }
+
+
 class TurretUserWorldRelativeCommandTest : public Test
 {
 protected:
     TurretUserWorldRelativeCommandTest()
         : turret(&drivers),
-          chassisFramePitchTurretController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          worldFrameYawChassisImuController(&drivers, &turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          chassisFramePitchTurretController(&turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          worldFrameYawChassisImuController(
+              &drivers,
+              &turret.yawMotor,
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFramePitchTurretImuController(
               &drivers,
-              &turret,
+              &turret.pitchMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFrameYawTurretImuController(
               &drivers,
-              &turret,
+              &turret.yawMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           turretCmd(
@@ -57,7 +75,9 @@ protected:
               &worldFrameYawChassisImuController,
               &chassisFramePitchTurretController,
               &worldFrameYawTurretImuController,
-              &worldFramePitchTurretImuController),
+              &worldFramePitchTurretImuController,
+              1,
+              1),
           currentYawValue(0, 0, 360),
           currentPitchValue(0, 0, 360)
     {
@@ -65,9 +85,12 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(currentYawValue));
-        ON_CALL(turret, getMeasuredPitchValue).WillByDefault(ReturnRef(currentPitchValue));
-        ON_CALL(turret, isOnline).WillByDefault(ReturnPointee(&turretOnline));
+        ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(currentYawValue));
+        ON_CALL(turret.pitchMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(currentPitchValue));
+        ON_CALL(turret.yawMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
+        ON_CALL(turret.pitchMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
         ON_CALL(drivers.turretMCBCanComm, isConnected)
             .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));
     }
@@ -128,8 +151,8 @@ TEST_F(TurretUserWorldRelativeCommandTest, end_doesnt_set_des_out_when_no_cmds_s
 {
     turretOnline = true;
 
-    EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(0);
-    EXPECT_CALL(turret, setYawMotorOutput(0)).Times(0);
+    EXPECT_CALL(turret.yawMotor, setMotorOutput(0)).Times(0);
+    EXPECT_CALL(turret.pitchMotor, setMotorOutput(0)).Times(0);
 
     turretCmd.end(true);
 }
@@ -140,8 +163,8 @@ TEST_F(
 {
     turretOnline = true;
 
-    EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(2);
-    EXPECT_CALL(turret, setYawMotorOutput(0)).Times(2);
+    EXPECT_CALL(turret.pitchMotor, setMotorOutput(0)).Times(2);
+    EXPECT_CALL(turret.yawMotor, setMotorOutput(0)).Times(2);
 
     turretMcbCanCommConnected = false;
     turretCmd.initialize();

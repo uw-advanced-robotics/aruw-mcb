@@ -56,8 +56,8 @@ protected:
     void SetUp() override
     {
         ON_CALL(cs, getDesiredRotation).WillByDefault(Return(0));
-        ON_CALL(t, getYawAngleFromCenter()).WillByDefault(ReturnPointee(&yawAngle));
-        ON_CALL(t, isOnline).WillByDefault(Return(true));
+        ON_CALL(t.yawMotor, getAngleFromCenter).WillByDefault(ReturnPointee(&yawAngle));
+        ON_CALL(t.yawMotor, isOnline).WillByDefault(Return(true));
         ON_CALL(d.controlOperatorInterface, getChassisXInput()).WillByDefault(ReturnPointee(&x));
         ON_CALL(d.controlOperatorInterface, getChassisYInput()).WillByDefault(ReturnPointee(&y));
         ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));

@@ -19,6 +19,8 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/mock/motor_interface_mock.hpp"
+
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
@@ -31,9 +33,18 @@ using namespace aruwsrc::control::turret::algorithms;
 class WorldFrameChassisImuTurretControllerTest : public Test
 {
 protected:
+    static constexpr aruwsrc::control::turret::TurretMotorConfig TURRET_MOTOR_CONFIG = {
+        .startAngle = M_PI_2,
+        .startEncoderValue = 0,
+        .minAngle = 0,
+        .maxAngle = M_PI,
+        .limitMotorAngles = false,
+    };
+
     WorldFrameChassisImuTurretControllerTest()
-        : turret(&drivers),
-          turretController(&drivers, &turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+        : 
+        turretMotor(&motor, TURRET_MOTOR_CONFIG),
+          turretController(&drivers, &turretMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           yawValue(0, 0, 360)
     {
     }
@@ -41,11 +52,13 @@ protected:
     void SetUp() override
     {
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
-        ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(yawValue));
+        ON_CALL(turretMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(yawValue));
     }
 
+    // tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig
     aruwsrc::Drivers drivers;
-    testing::NiceMock<aruwsrc::mock::TurretSubsystemMock> turret;
+    testing::NiceMock<tap::mock::MotorInterfaceMock> motor;
+    testing::NiceMock<aruwsrc::mock::TurretMotorMock> turretMotor;
     WorldFrameYawChassisImuTurretController turretController;
     float mpu6500Yaw = 0;
     ContiguousFloat yawValue;
@@ -57,7 +70,7 @@ TEST_F(
 {
     yawValue.setValue(90);
 
-    EXPECT_CALL(turret, setYawMotorOutput(FloatNear(0, 1E-3)));
+    EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
     turretController.runController(1, 90);
 }
@@ -67,10 +80,10 @@ TEST_F(
     runYawPidController_setpoint_gt_actual_output_positive)
 {
     yawValue.setValue(80);
-    ON_CALL(turret, getMeasuredYawValue).WillByDefault(ReturnRef(yawValue));
+    ON_CALL(turretMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(yawValue));
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(0));
 
-    EXPECT_CALL(turret, setYawMotorOutput(Gt(0)));
+    EXPECT_CALL(turretMotor, setMotorOutput(Gt(0)));
 
     turretController.runController(1, 90);
 }
@@ -81,7 +94,7 @@ TEST_F(
 {
     yawValue.setValue(100);
 
-    EXPECT_CALL(turret, setYawMotorOutput(Lt(0)));
+    EXPECT_CALL(turretMotor, setMotorOutput(Lt(0)));
 
     turretController.runController(1, 90);
 }
@@ -93,7 +106,7 @@ TEST_F(
     yawValue.setValue(0);
     mpu6500Yaw = 90;
 
-    EXPECT_CALL(turret, setYawMotorOutput(FloatNear(0, 1E-3)));
+    EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
     turretController.runController(1, 90);
 }

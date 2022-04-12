@@ -35,30 +35,42 @@ using namespace testing;
 class ChassisFrameTurretControllerTest : public Test
 {
 protected:
-    ChassisFrameTurretControllerTest() : turretSubsystem(&drivers), currentAngle(0, 0, 360) {}
+    ChassisFrameTurretControllerTest()
+        : turretSubsystem(&drivers),
+          setpoint(0, 0, M_TWOPI),
+          currentAngle(0, 0, M_TWOPI)
+    {
+    }
 
     void SetUp() override
     {
-        ON_CALL(turretSubsystem, getPitchSetpoint).WillByDefault(ReturnPointee(&setpoint));
-        ON_CALL(turretSubsystem, getYawSetpoint).WillByDefault(ReturnPointee(&setpoint));
-        ON_CALL(turretSubsystem, getMeasuredPitchValue).WillByDefault(ReturnRef(currentAngle));
-        ON_CALL(turretSubsystem, getMeasuredYawValue).WillByDefault(ReturnRef(currentAngle));
-        ON_CALL(turretSubsystem, getPitchAngleFromCenter).WillByDefault(Return(0));
-        ON_CALL(turretSubsystem, getYawAngleFromCenter).WillByDefault(Return(0));
-        ON_CALL(turretSubsystem, getPitchVelocity).WillByDefault(Return(0));
-        ON_CALL(turretSubsystem, getYawVelocity).WillByDefault(Return(0));
+        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnRef(setpoint));
+        ON_CALL(turretSubsystem.yawMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnRef(setpoint));
+        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(currentAngle));
+        ON_CALL(turretSubsystem.yawMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(currentAngle));
+        ON_CALL(turretSubsystem.pitchMotor, getAngleFromCenter).WillByDefault(Return(0));
+        ON_CALL(turretSubsystem.yawMotor, getAngleFromCenter).WillByDefault(Return(0));
+        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameVelocity).WillByDefault(Return(0));
+        ON_CALL(turretSubsystem.yawMotor, getChassisFrameVelocity).WillByDefault(Return(0));
     }
 
     aruwsrc::Drivers drivers;
     NiceMock<TurretSubsystemMock> turretSubsystem;
-    float setpoint = 0;
+    ContiguousFloat setpoint;
     ContiguousFloat currentAngle;
 };
 
 class PitchControllerTest : public ChassisFrameTurretControllerTest
 {
 protected:
-    PitchControllerTest() : turretController(&turretSubsystem, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}) {}
+    PitchControllerTest()
+        : turretController(&turretSubsystem.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
+    {
+    }
 
     ChassisFramePitchTurretController turretController;
 };
@@ -66,7 +78,10 @@ protected:
 class YawControllerTest : public ChassisFrameTurretControllerTest
 {
 protected:
-    YawControllerTest() : turretController(&turretSubsystem, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}) {}
+    YawControllerTest()
+        : turretController(&turretSubsystem.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
+    {
+    }
 
     ChassisFrameYawTurretController turretController;
 };
@@ -74,107 +89,107 @@ protected:
 TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match_p_controller)
 {
     // check setpoints 0, 90, 150
-    EXPECT_CALL(turretSubsystem, setPitchSetpoint(0));
-    EXPECT_CALL(turretSubsystem, setPitchSetpoint(90));
-    EXPECT_CALL(turretSubsystem, setPitchSetpoint(150));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(0));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(M_PI_2));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(modm::toRadian(150)));
 
     // should set motor output to 0 for each setpoint
     EXPECT_CALL(
-        turretSubsystem,
-        setPitchMotorOutput(computeGravitationalForceOffset(
+        turretSubsystem.pitchMotor,
+        setMotorOutput(computeGravitationalForceOffset(
             TURRET_CG_X,
             TURRET_CG_Z,
             0,
             GRAVITY_COMPENSATION_SCALAR)))
         .Times(3);
 
-    setpoint = 0;
+    setpoint.setValue(0);
     currentAngle.setValue(0);
     turretController.runController(
         computeGravitationalForceOffset(TURRET_CG_X, TURRET_CG_Z, 0, GRAVITY_COMPENSATION_SCALAR),
-        setpoint);
+        setpoint.getValue());
 
-    setpoint = 90;
-    currentAngle.setValue(90);
-    turretController.runController(1, setpoint);
+    setpoint.setValue(M_PI_2);
+    currentAngle.setValue(M_PI_2);
+    turretController.runController(1, setpoint.getValue());
 
-    setpoint = 150;
-    currentAngle.setValue(150);
-    turretController.runController(1, setpoint);
+    setpoint.setValue(modm::toRadian(150));
+    currentAngle.setValue(modm::toRadian(150));
+    turretController.runController(1, setpoint.getValue());
 }
 
 TEST_F(PitchControllerTest, runPitchPidController_pid_out_positive_when_setpoint_gt_current)
 {
     // setpoint > pitch angle, output should be > 0
-    setpoint = 30;
-    currentAngle.setValue(20);
-    EXPECT_CALL(turretSubsystem, setPitchSetpoint(setpoint));
+    setpoint.setValue(modm::toRadian(30));
+    currentAngle.setValue(modm::toRadian(20));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(setpoint.getValue()));
     EXPECT_CALL(
-        turretSubsystem,
-        setPitchMotorOutput(Gt(computeGravitationalForceOffset(
+        turretSubsystem.pitchMotor,
+        setMotorOutput(Gt(computeGravitationalForceOffset(
             TURRET_CG_X,
             TURRET_CG_Z,
             0,
             GRAVITY_COMPENSATION_SCALAR))));
 
-    turretController.runController(1, setpoint);
+    turretController.runController(1, setpoint.getValue());
 }
 
 TEST_F(PitchControllerTest, runPitchPidController_pid_out_negative_when_setpoint_lt_current)
 {
     // setpoint < pitch angle, output should be < 0
-    setpoint = 30;
-    currentAngle.setValue(40);
-    EXPECT_CALL(turretSubsystem, setPitchSetpoint(setpoint));
+    setpoint.setValue(modm::toRadian(30));
+    currentAngle.setValue(modm::toRadian(40));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(setpoint.getValue()));
     EXPECT_CALL(
-        turretSubsystem,
-        setPitchMotorOutput(Lt(computeGravitationalForceOffset(
+        turretSubsystem.pitchMotor,
+        setMotorOutput(Lt(computeGravitationalForceOffset(
             TURRET_CG_X,
             TURRET_CG_Z,
             0,
             GRAVITY_COMPENSATION_SCALAR))));
 
-    turretController.runController(1, setpoint);
+    turretController.runController(1, setpoint.getValue());
 }
 
 TEST_F(YawControllerTest, runYawPidController_pid_out_0_when_setpoints_match_p_controller)
 {
     // Validate pitch setpoint set and pid output is reasonable
-    EXPECT_CALL(turretSubsystem, setYawSetpoint(0));
-    EXPECT_CALL(turretSubsystem, setYawSetpoint(90));
-    EXPECT_CALL(turretSubsystem, setYawSetpoint(150));
+    EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(0));
+    EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(M_PI_2));
+    EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(modm::toRadian(150)));
 
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(0)).Times(3);
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(0)).Times(3);
 
-    setpoint = 0;
+    setpoint.setValue(0);
     currentAngle.setValue(0);
-    turretController.runController(1, setpoint);
+    turretController.runController(1, setpoint.getValue());
 
-    setpoint = 90;
-    currentAngle.setValue(90);
-    turretController.runController(1, setpoint);
+    setpoint.setValue(M_PI_2);
+    currentAngle.setValue(M_PI_2);
+    turretController.runController(1, setpoint.getValue());
 
-    setpoint = 150;
-    currentAngle.setValue(150);
-    turretController.runController(1, setpoint);
+    setpoint.setValue(modm::toRadian(150));
+    currentAngle.setValue(modm::toRadian(150));
+    turretController.runController(1, setpoint.getValue());
 }
 
 TEST_F(YawControllerTest, runYawPidController_pid_out_positive_if_setpoint_gt_current)
 {
     // setpoint > pitch angle, output should be positive
-    setpoint = 30;
-    currentAngle.setValue(20);
-    EXPECT_CALL(turretSubsystem, setYawSetpoint(setpoint));
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(Gt(0)));
-    turretController.runController(1, setpoint);
+    setpoint.setValue(modm::toRadian(30));
+    currentAngle.setValue(modm::toRadian(20));
+    EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(setpoint.getValue()));
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Gt(0)));
+    turretController.runController(1, setpoint.getValue());
 }
 
 TEST_F(YawControllerTest, runYawPidController_pid_out_negative_if_setpoint_lt_current)
 {
     // setpoint < pitch angle, output should be < 0
-    setpoint = 30;
-    currentAngle.setValue(40);
-    EXPECT_CALL(turretSubsystem, setYawSetpoint(setpoint));
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(Lt(0)));
-    turretController.runController(1, setpoint);
+    setpoint.setValue(modm::toRadian(30));
+    currentAngle.setValue(modm::toRadian(40));
+    EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(setpoint.getValue()));
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Lt(0)));
+    turretController.runController(1, setpoint.getValue());
 }

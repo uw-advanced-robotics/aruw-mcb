@@ -37,8 +37,8 @@ class WorldFrameTurretImuTurretControllerTest : public Test
 protected:
     WorldFrameTurretImuTurretControllerTest()
         : turretSubsystem(&drivers),
-          worldFrameSetpoint(0, 0, 360),
-          currentValue(0, 0, 360)
+          worldFrameSetpoint(0, 0, M_TWOPI),
+          currentValue(0, 0, M_TWOPI)
     {
     }
 
@@ -56,7 +56,7 @@ protected:
     YawWorldFrameTurretImuTurretControllerTest()
         : turretController(
               &drivers,
-              &turretSubsystem,
+              &turretSubsystem.yawMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
     {
@@ -64,22 +64,23 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(turretSubsystem, getMeasuredYawValue).WillByDefault(ReturnRef(currentValue));
+        ON_CALL(turretSubsystem.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(currentValue));
         ON_CALL(drivers.turretMCBCanComm, getYaw).WillByDefault(ReturnPointee(&imuValue));
         ON_CALL(drivers.turretMCBCanComm, getYawVelocity)
             .WillByDefault(ReturnPointee(&imuVelocity));
-        ON_CALL(turretSubsystem, yawLimited).WillByDefault(ReturnPointee(&yawLimited));
+        yawMotorConfig.limitMotorAngles = false;
+        ON_CALL(turretSubsystem.yawMotor, getConfig).WillByDefault(ReturnRef(yawMotorConfig));
     }
 
-    bool yawLimited = false;
     WorldFrameYawTurretImuCascadePidTurretController turretController;
+    TurretMotorConfig yawMotorConfig;
 };
 
 TEST_F(
     YawWorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_not_moving_setpoint_actual_identical_0_out)
 {
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(0));
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(0));
 
     turretController.runController(1, 0);
 }
@@ -89,12 +90,12 @@ TEST_F(
     runYawPidController_chassis_not_moving_setpoint_gt_actual_output_positive)
 {
     // User input > current angle, output should be positive
-    currentValue.setValue(80);
-    imuValue = 80;
+    currentValue.setValue(modm::toRadian(modm::toRadian(80)));
+    imuValue = modm::toRadian(modm::toRadian(80));
 
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(Gt(0)));
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Gt(0)));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }
 
 TEST_F(
@@ -102,62 +103,62 @@ TEST_F(
     runYawPidController_chassis_not_moving_setpoint_lt_actual_output_negative)
 {
     // Setpoint < current angle, output should be negative
-    currentValue.setValue(110);
-    imuValue = 110;
+    currentValue.setValue(modm::toRadian(110));
+    imuValue = modm::toRadian(110);
 
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(Lt(0)));
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Lt(0)));
 
-    turretController.runController(1, 100);
+    turretController.runController(1, modm::toRadian(modm::toRadian(100)));
 }
 
 TEST_F(
     YawWorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_rotated_positive_direction_world_setpoint_and_actual_equal_0_output)
 {
-    // chassis frame yaw value 80, so chassis moved +10 degrees
-    currentValue.setValue(80);
+    // chassis frame yaw value modm::toRadian(80), so chassis moved +10 degrees
+    currentValue.setValue(modm::toRadian(modm::toRadian(80)));
     // user input in world frame still equal to imu yaw, so output 0
-    imuValue = 90;
+    imuValue = M_PI_2;
 
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(0));
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(0));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }
 
 TEST_F(
     YawWorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_rotated_negative_direction_world_setpoint_and_actual_equal_0_output)
 {
-    // yaw value 100, so chassis moved -10 degrees
-    currentValue.setValue(100);
-    imuValue = 90;
+    // yaw value modm::toRadian(100), so chassis moved -10 degrees
+    currentValue.setValue(modm::toRadian(100));
+    imuValue = M_PI_2;
 
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(0));
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(0));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }
 
 TEST_F(
     YawWorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_rotated_positive_direction_world_setpoint_lt_actual_negative_output)
 {
-    currentValue.setValue(90);
-    imuValue = 100;
+    currentValue.setValue(M_PI_2);
+    imuValue = modm::toRadian(100);
 
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(Lt(0)));
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Lt(0)));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }
 
 TEST_F(
     YawWorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_rotated_negative_direction_world_setpoint_gt_actual_positive_output)
 {
-    currentValue.setValue(90);
-    imuValue = 80;
-    EXPECT_CALL(turretSubsystem, setYawMotorOutput(Gt(0)));
+    currentValue.setValue(M_PI_2);
+    imuValue = modm::toRadian(80);
+    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Gt(0)));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }
 
 #define SETUP_PITCH_TEST()                                   \
@@ -165,8 +166,8 @@ TEST_F(
     NiceMock<TurretSubsystemMock> turretSubsystem(&drivers); \
     ;                                                        \
     float turretSetpoint = 0;                                \
-    ContiguousFloat worldFramePitchSetpoint(0, 0, 360);      \
-    ContiguousFloat currentValue(0, 0, 360);                 \
+    ContiguousFloat worldFramePitchSetpoint(0, 0, M_TWOPI);      \
+    ContiguousFloat currentValue(0, 0, M_TWOPI);                 \
     float imuValue = 0;                                      \
     float imuVelocity = 0;
 
@@ -176,24 +177,25 @@ protected:
     PitchWorldFrameTurretImuTurretControllerTest()
         : turretController(
               &drivers,
-              &turretSubsystem,
+              &turretSubsystem.pitchMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+        chassisFrameSetpoint(0, 0, M_TWOPI)
     {
     }
 
     void SetUp() override
     {
-        ON_CALL(turretSubsystem, getMeasuredPitchValue).WillByDefault(ReturnRef(currentValue));
-        ON_CALL(turretSubsystem, getPitchAngleFromCenter).WillByDefault(Return(0));
+        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(currentValue));
+        ON_CALL(turretSubsystem.pitchMotor, getAngleFromCenter).WillByDefault(Return(0));
         ON_CALL(drivers.turretMCBCanComm, getPitch).WillByDefault(ReturnPointee(&imuValue));
         ON_CALL(drivers.turretMCBCanComm, getPitchVelocity)
             .WillByDefault(ReturnPointee(&imuVelocity));
 
-        ON_CALL(turretSubsystem, setPitchSetpoint).WillByDefault([&](float setpiont) {
-            chassisFrameSetpoint = setpiont;
+        ON_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint).WillByDefault([&](float setpoint) {
+            chassisFrameSetpoint.setValue(setpoint);
         });
-        ON_CALL(turretSubsystem, getPitchSetpoint).WillByDefault([&]() {
+        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameSetpoint).WillByDefault([&]() {
             return chassisFrameSetpoint;
         });
     }
@@ -219,7 +221,7 @@ protected:
     WorldFramePitchTurretImuCascadePidTurretController turretController;
 
 private:
-    float chassisFrameSetpoint = 0;
+    tap::algorithms::ContiguousFloat chassisFrameSetpoint;
 };
 
 static float computeCGOffset(float pitchAngleFromCenter = 0.0f)
@@ -236,20 +238,20 @@ TEST_F(
     runPitchPidController_chassis_moving_world_frame_stationary_output_0)
 {
     InSequence seq;
-    EXPECT_CALL(turretSubsystem, setPitchMotorOutput(computeCGOffset()));
-    EXPECT_CALL(turretSubsystem, setPitchMotorOutput(computeCGOffset()));
-    EXPECT_CALL(turretSubsystem, setPitchMotorOutput(computeCGOffset()));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
 
-    turretSetpoint = 90;
-    imuValue = 90;
+    turretSetpoint = M_PI_2;
+    imuValue = M_PI_2;
 
-    currentValue.setValue(90);
+    currentValue.setValue(M_PI_2);
     turretController.runController(1, turretSetpoint);
 
     currentValue.setValue(100);
     turretController.runController(1, turretSetpoint);
 
-    currentValue.setValue(80);
+    currentValue.setValue(modm::toRadian(80));
     turretController.runController(1, turretSetpoint);
 }
 
@@ -257,11 +259,11 @@ TEST_F(
     PitchWorldFrameTurretImuTurretControllerTest,
     runPitchPidController_chassis_tilted_up_world_setpoint_gt_actual_output_positive)
 {
-    EXPECT_CALL(turretSubsystem, setPitchMotorOutput(Gt(computeCGOffset())));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Gt(computeCGOffset())));
 
     turretSetpoint = 110;
-    currentValue.setValue(90);
-    imuValue = 90;
+    currentValue.setValue(M_PI_2);
+    imuValue = M_PI_2;
 
     turretController.runController(1, turretSetpoint);
 }
@@ -270,11 +272,11 @@ TEST_F(
     PitchWorldFrameTurretImuTurretControllerTest,
     runPitchPidController_chassis_tilted_up_world_setpoint_lt_actual_output_negative)
 {
-    EXPECT_CALL(turretSubsystem, setPitchMotorOutput(Lt(computeCGOffset())));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Lt(computeCGOffset())));
 
-    turretSetpoint = 80;
-    currentValue.setValue(90);
-    imuValue = 90;
+    turretSetpoint = modm::toRadian(80);
+    currentValue.setValue(M_PI_2);
+    imuValue = M_PI_2;
 
     turretController.runController(1, turretSetpoint);
 }
@@ -283,10 +285,10 @@ TEST_F(
     PitchWorldFrameTurretImuTurretControllerTest,
     runPitchPidController_chassis_tilted_down_world_setpoint_gt_actual_output_positive)
 {
-    EXPECT_CALL(turretSubsystem, setPitchMotorOutput(Gt(computeCGOffset())));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Gt(computeCGOffset())));
 
-    turretSetpoint = 90;
-    currentValue.setValue(90);
+    turretSetpoint = M_PI_2;
+    currentValue.setValue(M_PI_2);
     imuValue = -10;
 
     turretController.runController(1, turretSetpoint);
@@ -296,11 +298,11 @@ TEST_F(
     PitchWorldFrameTurretImuTurretControllerTest,
     runPitchPidController_chassis_tilted_down_world_setpoint_lt_actual_output_negative)
 {
-    EXPECT_CALL(turretSubsystem, setPitchMotorOutput(Lt(computeCGOffset())));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Lt(computeCGOffset())));
 
     turretSetpoint = 70;
-    currentValue.setValue(90);
-    imuValue = 90;
+    currentValue.setValue(M_PI_2);
+    imuValue = M_PI_2;
 
     turretController.runController(1, turretSetpoint);
 }
@@ -309,14 +311,14 @@ TEST_F(
     PitchWorldFrameTurretImuTurretControllerTest,
     runPitchPidController_chassis_moved_world_frame_stationary_output_0)
 {
-    EXPECT_CALL(turretSubsystem, setPitchMotorOutput(computeCGOffset())).Times(2);
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset())).Times(2);
 
-    turretSetpoint = 90;
-    currentValue.setValue(80);
-    imuValue = 90;
+    turretSetpoint = M_PI_2;
+    currentValue.setValue(modm::toRadian(modm::toRadian(80)));
+    imuValue = M_PI_2;
     turretController.runController(1, turretSetpoint);
 
-    imuValue = 90;
-    currentValue.setValue(100);
+    imuValue = M_PI_2;
+    currentValue.setValue(modm::toRadian(100));
     turretController.runController(1, turretSetpoint);
 }
