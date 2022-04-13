@@ -20,7 +20,6 @@
 #include "turret_motor.hpp"
 
 #include <cassert>
-#include <iostream>
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -56,8 +55,6 @@ void TurretMotor::updateMotorAngle()
             modm::toRadian(DjiMotor::encoderToDegrees(
                 static_cast<uint16_t>(encoder - config.startEncoderValue))) +
             config.startAngle);
-
-        std::cout << modm::toDegree(chassisFrameMeasuredAngle.getValue()) << std::endl;
     }
     else
     {

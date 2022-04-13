@@ -27,6 +27,7 @@
 
 using namespace aruwsrc;
 using namespace tap::mock;
+using namespace tap::algorithms;
 using namespace tap::can;
 using namespace tap::motor;
 using namespace testing;
@@ -97,16 +98,17 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint__not_limited_when_limit_angles_f
     TurretMotorConfig motorConfig = TURRET_MOTOR_CONFIG;
     motorConfig.limitMotorAngles = false;
 
-    TurretMotor turret(&motor, motorConfig);
+    TurretMotor turretMotor(&motor, motorConfig);
+
+    const float offsetAngle = modm::toRadian(5);
+    const float pastMinAngle = motorConfig.minAngle - offsetAngle;
+    const float pastMaxAngle = motorConfig.maxAngle + offsetAngle;
 
     std::vector<std::tuple<float, float>> limitedAndInputAnglePairs{
         {motorConfig.startAngle, motorConfig.startAngle},
-        {tap::algorithms::ContiguousFloat(motorConfig.minAngle - modm::toRadian(5), 0, M_TWOPI)
-             .getValue(),
-         motorConfig.minAngle - modm::toRadian(5)},
-        {tap::algorithms::ContiguousFloat(motorConfig.maxAngle + modm::toRadian(5), 0, M_TWOPI)
-             .getValue(),
-         motorConfig.maxAngle + modm::toRadian(5)}};
+        {ContiguousFloat(pastMinAngle, 0, M_TWOPI).getValue(), pastMinAngle},
+        {ContiguousFloat(pastMaxAngle, 0, M_TWOPI).getValue(), pastMaxAngle},
+    };
 
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
@@ -133,17 +135,16 @@ TEST_F(
     getChassisFrameMeasuredAngle__returns_values_based_on_enc_position_if_yaw_motor_online)
 {
     // Default expectations so turret assumes motors are good to go and within valid angle range
+    const int encStep = DjiMotor::ENC_RESOLUTION / 8;
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {modm::toRadian(90), TURRET_MOTOR_CONFIG.startEncoderValue},
+        {M_PI_2, TURRET_MOTOR_CONFIG.startEncoderValue},
+        {M_PI_2 + M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
+        {M_PI_2 + 2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
+        {M_PI_2 + 3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
+        {M_PI_2 + 4 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
+        {M_PI_2 + 5 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
+        {M_PI_2 + 6 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
     };
-    // {modm::toRadian(135), TURRET_MOTOR_CONFIG.startEncoderValue + DjiMotor::ENC_RESOLUTION / 8},
-    // {modm::toRadian(180), TURRET_MOTOR_CONFIG.startEncoderValue + 2 * DjiMotor::ENC_RESOLUTION /
-    // 8}, {modm::toRadian(225), TURRET_MOTOR_CONFIG.startEncoderValue + 3 *
-    // DjiMotor::ENC_RESOLUTION / 8}, {modm::toRadian(270), TURRET_MOTOR_CONFIG.startEncoderValue +
-    // 4 * DjiMotor::ENC_RESOLUTION / 8}, {modm::toRadian(315),
-    // TURRET_MOTOR_CONFIG.startEncoderValue + 5 * DjiMotor::ENC_RESOLUTION / 8},
-    // {modm::toRadian(0), TURRET_MOTOR_CONFIG.startEncoderValue + 6 * DjiMotor::ENC_RESOLUTION /
-    // 8}};
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
     {
@@ -164,25 +165,25 @@ TEST_F(TurretMotorTest, getAngleFromCenter__return_0_when_motors_offline)
 
 TEST_F(TurretMotorTest, getAngleFromCenter__valid_encoder_angles)
 {
+    const int encStep = DjiMotor::ENC_RESOLUTION / 8;
+
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {modm::toRadian(0), TURRET_MOTOR_CONFIG.startEncoderValue},
-        {modm::toRadian(45), TURRET_MOTOR_CONFIG.startEncoderValue + DjiMotor::ENC_RESOLUTION / 8},
-        {modm::toRadian(90),
-         TURRET_MOTOR_CONFIG.startEncoderValue + 2 * DjiMotor::ENC_RESOLUTION / 8},
-        {modm::toRadian(135),
-         TURRET_MOTOR_CONFIG.startEncoderValue + 3 * DjiMotor::ENC_RESOLUTION / 8},
-        {modm::toRadian(180),
-         TURRET_MOTOR_CONFIG.startEncoderValue + 4 * DjiMotor::ENC_RESOLUTION / 8},
-        {modm::toRadian(-135),
-         TURRET_MOTOR_CONFIG.startEncoderValue + 5 * DjiMotor::ENC_RESOLUTION / 8},
-        {modm::toRadian(-90),
-         TURRET_MOTOR_CONFIG.startEncoderValue + 6 * DjiMotor::ENC_RESOLUTION / 8}};
+        {0, TURRET_MOTOR_CONFIG.startEncoderValue},
+        {M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
+        {2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
+        {3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
+        {4 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
+        {-3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
+        {-2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
+    };
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
     {
         encoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
         turretMotor.updateMotorAngle();
         EXPECT_NEAR(angle, turretMotor.getAngleFromCenter(), 1E-3);
+        std::cout << encoderWrapped << ", " << angle << ", " << turretMotor.getAngleFromCenter()
+                  << std::endl;
     }
 }
 
@@ -213,7 +214,7 @@ TEST_F(
 TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_min_max_bound)
 {
     uint16_t minEncoderValue =
-        tap::algorithms::ContiguousFloat(
+        ContiguousFloat(
             TURRET_MOTOR_CONFIG.startEncoderValue +
                 +(TURRET_MOTOR_CONFIG.minAngle - TURRET_MOTOR_CONFIG.startAngle) *
                     DjiMotor::ENC_RESOLUTION / M_TWOPI +
@@ -223,7 +224,7 @@ TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_m
             .getValue();
 
     uint16_t maxEncoderValue =
-        tap::algorithms::ContiguousFloat(
+        ContiguousFloat(
             TURRET_MOTOR_CONFIG.startEncoderValue +
                 +(TURRET_MOTOR_CONFIG.maxAngle - TURRET_MOTOR_CONFIG.startAngle) *
                     DjiMotor::ENC_RESOLUTION / M_TWOPI -
@@ -251,15 +252,8 @@ TEST_F(
     TurretMotorTest,
     setMotorOutput__desired_output_0_if_out_of_bounds_and_input_des_output_wrong_way)
 {
-    std::cout << TURRET_MOTOR_CONFIG.minAngle - TURRET_MOTOR_CONFIG.startAngle - modm::toRadian(10)
-              << std::endl;
-    std::cout << (TURRET_MOTOR_CONFIG.minAngle - TURRET_MOTOR_CONFIG.startAngle -
-                  modm::toRadian(10)) *
-                     DjiMotor::ENC_RESOLUTION / M_TWOPI
-              << std::endl;
-
     uint16_t lessThanMinEncoderValue =
-        tap::algorithms::ContiguousFloat(
+        ContiguousFloat(
             TURRET_MOTOR_CONFIG.startEncoderValue +
                 +(TURRET_MOTOR_CONFIG.minAngle - TURRET_MOTOR_CONFIG.startAngle -
                   modm::toRadian(10)) *
@@ -267,9 +261,8 @@ TEST_F(
             0,
             DjiMotor::ENC_RESOLUTION)
             .getValue();
-    std::cout << lessThanMinEncoderValue << std::endl;
     uint16_t greaterThanMaxEncoderValue =
-        tap::algorithms::ContiguousFloat(
+        ContiguousFloat(
             TURRET_MOTOR_CONFIG.startEncoderValue +
                 +(TURRET_MOTOR_CONFIG.maxAngle - TURRET_MOTOR_CONFIG.startAngle +
                   modm::toRadian(10)) *
