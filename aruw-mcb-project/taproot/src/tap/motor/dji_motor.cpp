@@ -40,7 +40,7 @@ DjiMotor::~DjiMotor() { drivers->djiMotorTxHandler.removeFromMotorManager(*this)
 DjiMotor::DjiMotor(
     Drivers* drivers,
     MotorId desMotorIdentifier,
-    tap::can::CanBus motorCanBus,
+    tap::can::CanBus motorzCanBus,
     bool isInverted,
     const char* name,
     uint16_t encoderWrapped,
@@ -128,8 +128,6 @@ void DjiMotor::serializeCanSendData(modm::can::Message* txMessage) const
     txMessage->data[2 * id + 1] = this->getOutputDesired() & 0xFF;
 }
 
-// getter functions
-int16_t DjiMotor::getOutputDesired() const { return desiredOutput; }
 
 uint32_t DjiMotor::getMotorIdentifier() const { return motorIdentifier; }
 
