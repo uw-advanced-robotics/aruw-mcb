@@ -217,7 +217,9 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
-    &worldFramePitchTurretImuController);
+    &worldFramePitchTurretImuController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR);
 
 cv::TurretCVCommand turretCVCommand(
     drivers(),

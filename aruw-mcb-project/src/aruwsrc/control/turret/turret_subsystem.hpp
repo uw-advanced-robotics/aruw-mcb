@@ -57,7 +57,7 @@ namespace aruwsrc::control::turret
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
  *
  * All angles computed using a right hand coordinate system. In other words, yaw is a value from
- * 0-360 rotated counterclockwise when looking at the turret from above. Pitch is a value from 0-360
+ * 0-M_TWOPI rotated counterclockwise when looking at the turret from above. Pitch is a value from 0-M_TWOPI
  * rotated counterclockwise when looking at the turret from the right side of the turret.
  */
 class TurretSubsystem : public tap::control::Subsystem

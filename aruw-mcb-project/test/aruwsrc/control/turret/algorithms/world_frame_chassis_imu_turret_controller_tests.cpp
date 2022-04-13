@@ -42,10 +42,10 @@ protected:
     };
 
     WorldFrameChassisImuTurretControllerTest()
-        : 
-        turretMotor(&motor, TURRET_MOTOR_CONFIG),
+        : turretMotor(&motor, TURRET_MOTOR_CONFIG),
           turretController(&drivers, &turretMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          yawValue(0, 0, 360)
+          yawValue(0, 0, M_TWOPI),
+          setpoint(0, 0, M_TWOPI)
     {
     }
 
@@ -53,50 +53,53 @@ protected:
     {
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
         ON_CALL(turretMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(yawValue));
+        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(setpoint));
+        ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(motorConfig));
     }
 
-    // tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig
     aruwsrc::Drivers drivers;
     testing::NiceMock<tap::mock::MotorInterfaceMock> motor;
     testing::NiceMock<aruwsrc::mock::TurretMotorMock> turretMotor;
     WorldFrameYawChassisImuTurretController turretController;
     float mpu6500Yaw = 0;
     ContiguousFloat yawValue;
+    ContiguousFloat setpoint;
+    aruwsrc::control::turret::TurretMotorConfig motorConfig{};
 };
 
 TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_actual_identical_output_0)
 {
-    yawValue.setValue(90);
+    yawValue.setValue(M_PI_2);
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }
 
 TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_gt_actual_output_positive)
 {
-    yawValue.setValue(80);
+    yawValue.setValue(modm::toRadian(80));
     ON_CALL(turretMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(yawValue));
     ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(0));
 
     EXPECT_CALL(turretMotor, setMotorOutput(Gt(0)));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }
 
 TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_lt_actual_output_negative)
 {
-    yawValue.setValue(100);
+    yawValue.setValue(modm::toRadian(100));
 
     EXPECT_CALL(turretMotor, setMotorOutput(Lt(0)));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }
 
 TEST_F(
@@ -108,5 +111,5 @@ TEST_F(
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
-    turretController.runController(1, 90);
+    turretController.runController(1, M_PI_2);
 }

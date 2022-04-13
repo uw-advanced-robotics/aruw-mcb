@@ -38,7 +38,7 @@ ChassisImuDriveCommand::ChassisImuDriveCommand(
       drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
-      rotationSetpoint(0, 0, 360)
+      rotationSetpoint(0, 0, M_TWOPI)
 {
     addSubsystemRequirement(chassis);
 }

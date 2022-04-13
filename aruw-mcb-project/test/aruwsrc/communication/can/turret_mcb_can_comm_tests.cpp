@@ -161,12 +161,12 @@ TEST(TurretMCBCanComm, receive_turret_data)
 
     EXPECT_NEAR(modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x1234), dut.getYaw(), 1E-5);
     EXPECT_NEAR(
-        static_cast<int16_t>(0x4567) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S,
+        modm::toRadian(static_cast<int16_t>(0x4567) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S),
         dut.getYawVelocity(),
         1E-5);
     EXPECT_NEAR(modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x4321), dut.getPitch(), 1E-5);
     EXPECT_NEAR(
-        static_cast<int16_t>(0x7654) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S,
+        modm::toRadian(static_cast<int16_t>(0x7654) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S),
         dut.getPitchVelocity(),
         1E-5);
     EXPECT_EQ(0X12345678, dut.getIMUDataTimestamp());

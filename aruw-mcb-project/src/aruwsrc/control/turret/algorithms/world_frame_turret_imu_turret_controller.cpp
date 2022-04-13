@@ -31,7 +31,7 @@ namespace aruwsrc::control::turret::algorithms
  * Transforms the specified `angleToTransform`, a yaw/pitch angle (in radians) from the chassis
  * frame to the world frame.
  *
- * @note It is expected that the user wraps the value returned to be between [0, 360)
+ * @note It is expected that the user wraps the value returned to be between [0, M_TWOPI)
  *      (or whatever range they require).
  *
  * @param[in] turretChassisFrameCurrAngle The current chassis relative (gimbal encoder) angle.
@@ -52,7 +52,7 @@ static inline float transformChassisFrameToWorldFrame(
  * Transforms the specified `angleToTransform`, a yaw or pitch angle (in radians), from the world
  * frame to the chassis frame.
  *
- * @note It is expected that the user wraps the value returned to be between [0, 360)
+ * @note It is expected that the user wraps the value returned to be between [0, M_TWOPI)
  *      (or whatever range they require).
  *
  * @param[in] turretChassisFrameCurrAngle The current chassis relative (gimbal encoder) angle.
@@ -124,7 +124,7 @@ WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadeP
       drivers(drivers),
       positionPid(posPidConfig),
       velocityPid(velPidConfig),
-      worldFrameSetpoint(0, 0, 360)
+      worldFrameSetpoint(0, 0, M_TWOPI)
 {
 }
 
@@ -234,7 +234,7 @@ WorldFramePitchTurretImuCascadePidTurretController::
       drivers(drivers),
       positionPid(posPidConfig),
       velocityPid(velPidConfig),
-      worldFrameSetpoint(0, 0, 360)
+      worldFrameSetpoint(0, 0, M_TWOPI)
 {
 }
 

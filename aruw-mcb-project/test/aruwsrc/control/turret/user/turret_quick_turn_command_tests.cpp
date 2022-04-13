@@ -41,8 +41,7 @@ protected:
 
 TEST_F(TurretQuickTurnCommandTest, isReady_return_true_when_turret_online)
 {
-    EXPECT_CALL(turret.yawMotor, isOnline).WillOnce(Return(false));
-    EXPECT_CALL(turret.yawMotor, isOnline).WillOnce(Return(true));
+    EXPECT_CALL(turret.yawMotor, isOnline).Times(2).WillOnce(Return(false)).WillOnce(Return(true));
 
     EXPECT_FALSE(turretUturnCommand.isReady());
     EXPECT_TRUE(turretUturnCommand.isReady());
@@ -60,12 +59,12 @@ TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_
     tap::algorithms::ContiguousFloat turret2YawValue(M_PI_4, 0, M_TWOPI);
 
     EXPECT_CALL(turret.yawMotor, attachTurretController(nullptr));
-    EXPECT_CALL(turret.yawMotor, getChassisFrameMeasuredAngle).WillRepeatedly(ReturnRef(turretYawValue));
+    ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turretYawValue));
     EXPECT_CALL(turret.yawMotor, setChassisFrameSetpoint(M_PI));
 
     EXPECT_CALL(turret2.yawMotor, attachTurretController(nullptr));
-    EXPECT_CALL(turret2.yawMotor, getChassisFrameMeasuredAngle).WillRepeatedly(ReturnRef(turret2YawValue));
-    EXPECT_CALL(turret2.yawMotor, setChassisFrameSetpoint(M_PI_2 + M_PI_4));
+    ON_CALL(turret2.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turret2YawValue));
+    EXPECT_CALL(turret2.yawMotor, setChassisFrameSetpoint(M_PI_4 + M_PI_2));
 
     turretUturnCommand180Deg.initialize();
     turretUturnCommand90Deg.initialize();
@@ -76,7 +75,7 @@ TEST_F(TurretQuickTurnCommandTest, successfully_registers_with_scheduler)
     tap::control::CommandScheduler commandScheduler(&drivers, true);
 
     EXPECT_CALL(turret.yawMotor, isOnline).WillOnce(Return(true));
-    tap::algorithms::ContiguousFloat currentYawValue(0, 0, 360);
+    tap::algorithms::ContiguousFloat currentYawValue(0, 0, M_TWOPI);
     ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(currentYawValue));
 
     commandScheduler.registerSubsystem(&turret);

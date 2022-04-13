@@ -167,7 +167,9 @@ user::TurretUserControlCommand turretManual(
     drivers(),
     &turretSubsystem,
     &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
+    &chassisFramePitchTurretController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR);
 
 cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),

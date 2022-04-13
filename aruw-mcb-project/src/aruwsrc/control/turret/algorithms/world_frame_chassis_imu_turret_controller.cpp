@@ -116,7 +116,7 @@ WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController
     : TurretYawControllerInterface(turretMotor),
       drivers(drivers),
       pid(pidConfig),
-      worldFrameSetpoint(0, 0, 360)
+      worldFrameSetpoint(0, 0, M_TWOPI)
 {
 }
 

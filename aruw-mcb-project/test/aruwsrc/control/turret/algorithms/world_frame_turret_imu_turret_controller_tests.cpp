@@ -195,9 +195,7 @@ protected:
         ON_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint).WillByDefault([&](float setpoint) {
             chassisFrameSetpoint.setValue(setpoint);
         });
-        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameSetpoint).WillByDefault([&]() {
-            return chassisFrameSetpoint;
-        });
+        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(chassisFrameSetpoint));
     }
 
     static inline float transformWorldFrameValueToChassisFrame(
@@ -248,11 +246,11 @@ TEST_F(
     currentValue.setValue(M_PI_2);
     turretController.runController(1, turretSetpoint);
 
-    currentValue.setValue(100);
-    turretController.runController(1, turretSetpoint);
+    // currentValue.setValue(modm::toRadian(100));
+    // turretController.runController(1, turretSetpoint);
 
-    currentValue.setValue(modm::toRadian(80));
-    turretController.runController(1, turretSetpoint);
+    // currentValue.setValue(modm::toRadian(80));
+    // turretController.runController(1, turretSetpoint);
 }
 
 TEST_F(
@@ -261,7 +259,7 @@ TEST_F(
 {
     EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Gt(computeCGOffset())));
 
-    turretSetpoint = 110;
+    turretSetpoint = modm::toRadian(110);
     currentValue.setValue(M_PI_2);
     imuValue = M_PI_2;
 
@@ -289,7 +287,7 @@ TEST_F(
 
     turretSetpoint = M_PI_2;
     currentValue.setValue(M_PI_2);
-    imuValue = -10;
+    imuValue = modm::toRadian(-10);
 
     turretController.runController(1, turretSetpoint);
 }
@@ -300,7 +298,7 @@ TEST_F(
 {
     EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Lt(computeCGOffset())));
 
-    turretSetpoint = 70;
+    turretSetpoint = modm::toRadian(70);
     currentValue.setValue(M_PI_2);
     imuValue = M_PI_2;
 

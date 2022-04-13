@@ -89,9 +89,9 @@ public:
         float xPos;          ///< x position of the chassis (in m).
         float yPos;          ///< y position of the chassis (in m).
         float zPos;          ///< z position of the chassis (in m).
-        float pitch;         ///< world frame pitch of the chassis (in degrees).
-        float yaw;           ///< world frame yaw of the chassis (in degrees).
-        float roll;          ///< world frame roll of the chassis (in degrees).
+        float pitch;         ///< world frame pitch of the chassis (in rad).
+        float yaw;           ///< world frame yaw of the chassis (in rad).
+        float roll;          ///< world frame roll of the chassis (in rad).
     } modm_packed;
 
     /**
@@ -101,8 +101,8 @@ public:
     {
         uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
         float pitch;         ///< Pitch angle of turret relative to plane parallel to the ground (in
-                             ///< deg).
-        float yaw;           ///< Clockwise turret rotation angle between 0 and 360 (in deg).
+                             ///< rad).
+        float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
     } modm_packed;
 
     struct OdometryData

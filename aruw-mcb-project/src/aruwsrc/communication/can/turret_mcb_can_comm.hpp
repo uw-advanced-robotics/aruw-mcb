@@ -70,9 +70,9 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
-    /** @return turret pitch angle in deg */
+    /** @return turret pitch angle in rad */
     mockable inline float getPitch() const { return lastCompleteImuData.pitch; }
-    /** @return turret pitch angular velocity in deg/sec */
+    /** @return turret pitch angular velocity in rad/sec */
     mockable inline float getPitchVelocity() const
     {
         return modm::toRadian(static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
@@ -81,7 +81,7 @@ public:
 
     /** @return turret yaw angle in radians */
     mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
-    /** @return turret yaw angular velocity in deg/sec */
+    /** @return turret yaw angular velocity in rad/sec */
     mockable inline float getYawVelocity() const
     {
         return modm::toRadian(static_cast<float>(lastCompleteImuData.rawYawVelocity) /

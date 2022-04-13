@@ -93,7 +93,7 @@ private:
     float desiredRotationAverage = 0;
 
     /**
-     * The chassis's symmetry. This only matters if your turret can spin 360 degrees. If the
+     * The chassis's symmetry. This only matters if your turret can spin TWOPI radians. If the
      * symmetry is not SYMMETRY_NONE, the chassis will attempt to recenter itself around whichever
      * "center" the turret is closest to, where a "center" is defined by either the front of the
      * chassis or one of the chassis's points that is symmetrical to the front.

@@ -188,7 +188,7 @@ TEST_P(
     imuYaw += 90;
     chassisImuDriveCommand.execute();
 
-    imuYaw = 90 - ChassisImuDriveCommand::MAX_ROTATION_ERR;
+    imuYaw = 90 - modm::toDegree(ChassisImuDriveCommand::MAX_ROTATION_ERR);
     float rotation = INFINITY;
     ON_CALL(chassis, setDesiredOutput).WillByDefault([&](float, float, float r) { rotation = r; });
 

@@ -145,16 +145,8 @@ TowSubsystemMock::TowSubsystemMock(
 }
 TowSubsystemMock::~TowSubsystemMock() {}
 
-static constexpr aruwsrc::control::turret::TurretMotorConfig MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 0,
-    .minAngle = 0,
-    .maxAngle = M_PI,
-    .limitMotorAngles = true,
-};
-
 TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers)
-    : TurretSubsystem(drivers, nullptr, nullptr, MOTOR_CONFIG, MOTOR_CONFIG)
+    : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG)
 {
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
@@ -170,4 +162,13 @@ VisionCoprocessorMock::VisionCoprocessorMock(aruwsrc::Drivers *drivers)
 {
 }
 VisionCoprocessorMock::~VisionCoprocessorMock() {}
+
+TurretMotorMock::TurretMotorMock(
+    tap::motor::MotorInterface *motor,
+    const control::turret::TurretMotorConfig &motorConfig)
+    : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
+{
+}
+TurretMotorMock::~TurretMotorMock() {}
+
 }  // namespace aruwsrc::mock

@@ -78,8 +78,10 @@ protected:
               &worldFramePitchTurretImuController,
               1,
               1),
-          currentYawValue(0, 0, 360),
-          currentPitchValue(0, 0, 360)
+          currentYawValue(0, 0, M_TWOPI),
+          currentPitchValue(0, 0, M_TWOPI),
+          yawSetpoint(0, 0, M_TWOPI),
+          pitchSetpoint(0, 0, M_TWOPI)
     {
     }
 
@@ -93,6 +95,10 @@ protected:
         ON_CALL(turret.pitchMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
         ON_CALL(drivers.turretMCBCanComm, isConnected)
             .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));
+        ON_CALL(turret.yawMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(yawSetpoint));
+        ON_CALL(turret.pitchMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(pitchSetpoint));
+        ON_CALL(turret.yawMotor, getConfig).WillByDefault(ReturnRef(config));
+        ON_CALL(turret.pitchMotor, getConfig).WillByDefault(ReturnRef(config));
     }
 
     Drivers drivers;
@@ -104,8 +110,11 @@ protected:
     TurretUserWorldRelativeCommand turretCmd;
     ContiguousFloat currentYawValue;
     ContiguousFloat currentPitchValue;
+    ContiguousFloat yawSetpoint;
+    ContiguousFloat pitchSetpoint;
     bool turretOnline = false;
     bool turretMcbCanCommConnected = false;
+    TurretMotorConfig config = {};
 };
 
 TEST_F(TurretUserWorldRelativeCommandTest, isReady_true_if_turret_online_isFinished_opposite)

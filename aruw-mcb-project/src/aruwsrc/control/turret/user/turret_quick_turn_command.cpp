@@ -19,6 +19,8 @@
 
 #include "turret_quick_turn_command.hpp"
 
+#include <iostream>
+
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::turret::user
@@ -36,8 +38,9 @@ bool TurretQuickTurnCommand::isReady() { return turretSubsystem->yawMotor.isOnli
 
 void TurretQuickTurnCommand::initialize()
 {
-    turretSubsystem->yawMotor.setMotorOutput(
-        turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue() + targetOffsetToTurn);
+    float newSetpoint =
+        turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue() + targetOffsetToTurn;
+    turretSubsystem->yawMotor.setChassisFrameSetpoint(newSetpoint);
     turretSubsystem->yawMotor.attachTurretController(nullptr);
 }
 }  // namespace aruwsrc::control::turret::user

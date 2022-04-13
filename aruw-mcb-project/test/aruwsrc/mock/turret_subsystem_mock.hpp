@@ -23,6 +23,7 @@
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "tap/mock/motor_interface_mock.hpp"
 
 namespace aruwsrc
 {
@@ -38,6 +39,17 @@ public:
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(const char *, getName, (), (override));
     MOCK_METHOD(void, onHardwareTestStart, (), (override));
+
+private:
+static constexpr aruwsrc::control::turret::TurretMotorConfig MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 0,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = true,
+};
+
+testing::NiceMock<tap::mock::MotorInterfaceMock> m;
 };  // class TurretSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc
