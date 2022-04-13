@@ -40,7 +40,7 @@ DjiMotor::~DjiMotor() { drivers->djiMotorTxHandler.removeFromMotorManager(*this)
 DjiMotor::DjiMotor(
     Drivers* drivers,
     MotorId desMotorIdentifier,
-    tap::can::CanBus motorzCanBus,
+    tap::can::CanBus motorCanBus,
     bool isInverted,
     const char* name,
     uint16_t encoderWrapped,
