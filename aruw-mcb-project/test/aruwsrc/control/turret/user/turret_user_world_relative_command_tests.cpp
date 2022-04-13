@@ -34,8 +34,6 @@ using namespace tap::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
-
-
 // static float computeValidMeasurementSetpointError(const TurretMotor &motor,
 // float setpoint, float measurement) {
 //     // motor.get
@@ -47,7 +45,6 @@ using namespace testing;
 
 //     return 0;
 // }
-
 
 class TurretUserWorldRelativeCommandTest : public Test
 {

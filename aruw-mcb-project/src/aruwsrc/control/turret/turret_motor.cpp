@@ -20,11 +20,10 @@
 #include "turret_motor.hpp"
 
 #include <cassert>
+#include <iostream>
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/motor/dji_motor.hpp"
-
-#include <iostream>
 
 using namespace tap::motor;
 using namespace tap::algorithms;
@@ -53,8 +52,10 @@ void TurretMotor::updateMotorAngle()
 
         lastUpdatedEncoderValue = encoder;
 
-        chassisFrameMeasuredAngle.setValue(modm::toRadian(
-            DjiMotor::encoderToDegrees(static_cast<uint16_t>(encoder - config.startEncoderValue))));
+        chassisFrameMeasuredAngle.setValue(
+            modm::toRadian(DjiMotor::encoderToDegrees(
+                static_cast<uint16_t>(encoder - config.startEncoderValue))) +
+            config.startAngle);
 
         std::cout << modm::toDegree(chassisFrameMeasuredAngle.getValue()) << std::endl;
     }
@@ -103,12 +104,12 @@ void TurretMotor::setMotorOutput(float out)
 
 void TurretMotor::setChassisFrameSetpoint(float setpoint)
 {
+    chassisFrameSetpoint.setValue(setpoint);
     if (config.limitMotorAngles)
     {
-        setpoint = limitVal(setpoint, config.minAngle, config.maxAngle);
+        chassisFrameSetpoint.setValue(
+            ContiguousFloat::limitValue(chassisFrameSetpoint, config.minAngle, config.maxAngle));
     }
-
-    chassisFrameSetpoint.setValue(setpoint);
 }
 
 }  // namespace aruwsrc::control::turret

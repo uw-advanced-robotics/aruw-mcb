@@ -22,12 +22,12 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/motor/motor_interface.hpp"
+#include "tap/util_macros.hpp"
 
 #include "algorithms/turret_controller_interface.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 #include "turret_motor_config.hpp"
-#include "tap/util_macros.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -51,7 +51,8 @@ public:
      * is currently being run (since turret controllers are shared by commands but persist across
      * different commands).
      */
-    mockable void attachTurretController(const algorithms::TurretControllerInterface *turretController)
+    mockable void attachTurretController(
+        const algorithms::TurretControllerInterface *turretController)
     {
         this->turretController = turretController;
     }
@@ -75,7 +76,10 @@ public:
     }
 
     /// @return velocity of the turret, in rad/sec
-    mockable inline float getChassisFrameVelocity() const { return (M_TWOPI / 60) * motor->getShaftRPM(); }
+    mockable inline float getChassisFrameVelocity() const
+    {
+        return (M_TWOPI / 60) * motor->getShaftRPM();
+    }
 
     mockable inline float getAngleFromCenter() const
     {

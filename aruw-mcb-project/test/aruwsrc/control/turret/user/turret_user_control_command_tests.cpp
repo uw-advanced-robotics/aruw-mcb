@@ -100,7 +100,7 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
     tap::algorithms::ContiguousFloat pitchActual(M_PI_2, 0, M_TWOPI);
     tap::algorithms::ContiguousFloat yawSetpoint(M_PI_2, 0, M_TWOPI);
     tap::algorithms::ContiguousFloat pitchSetpoint(M_PI_2, 0, M_TWOPI);
-    
+
     ON_CALL(drivers.controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(0));
     ON_CALL(drivers.controlOperatorInterface, getTurretYawInput).WillByDefault(Return(0));
     ON_CALL(turret.pitchMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(yawSetpoint));
@@ -150,12 +150,10 @@ TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
             0,
             GRAVITY_COMPENSATION_SCALAR))));
     EXPECT_CALL(turret.yawMotor, setMotorOutput(Lt(0)));
-    EXPECT_CALL(turret.pitchMotor, setChassisFrameSetpoint(Gt(M_PI_2))).WillRepeatedly([&](float setpoint) {
-        pitchSetpoint.setValue(setpoint);
-    });
-    EXPECT_CALL(turret.yawMotor, setChassisFrameSetpoint(Lt(M_PI_2))).WillRepeatedly([&](float setpoint) {
-        yawSetpoint.setValue(setpoint);
-    });
+    EXPECT_CALL(turret.pitchMotor, setChassisFrameSetpoint(Gt(M_PI_2)))
+        .WillRepeatedly([&](float setpoint) { pitchSetpoint.setValue(setpoint); });
+    EXPECT_CALL(turret.yawMotor, setChassisFrameSetpoint(Lt(M_PI_2)))
+        .WillRepeatedly([&](float setpoint) { yawSetpoint.setValue(setpoint); });
 
     turretCmd.initialize();
     turretCmd.execute();

@@ -58,6 +58,8 @@ env.SConscript(dirs=[modm_path], exports=["env"])
 
 if ((args["TARGET_ENV"] == "tests" or args["TARGET_ENV"] == "sim") and
         sys.platform == "win32" and shutil.which("lld") != None):
+
+    print("sdlfksdjklfs")
     # Use lld for linking when on Windows targeting the hosted environment
     # as MinGW linking is slow as hecc. Do this after modm's SConscript
     # is run as otherwise all LINKFLAGS are overwritten

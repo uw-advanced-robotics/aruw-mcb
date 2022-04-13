@@ -129,8 +129,11 @@ class TurretOnlineTest : public ChassisAutorotateCommandTest,
 {
 public:
     TurretOnlineTest()
-        : yawAngleFromCenter(
-              ContiguousFloat(GetParam().yawAngle - turret.yawMotor.getConfig().startAngle, -M_PI, M_PI).getValue()),
+        : yawAngleFromCenter(ContiguousFloat(
+                                 GetParam().yawAngle - turret.yawMotor.getConfig().startAngle,
+                                 -M_PI,
+                                 M_PI)
+                                 .getValue()),
           cac(&drivers, &chassis, &turret.yawMotor, GetParam().chassisSymmetry),
           turretAngleActualContiguous(GetParam().yawAngle, 0, 360)
     {
@@ -154,8 +157,10 @@ public:
         ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(true));
         ON_CALL(turret.yawMotor, getAngleFromCenter).WillByDefault(Return(yawAngleFromCenter));
         ON_CALL(turret.yawMotor, getChassisFrameVelocity).WillByDefault(Return(0));
-        ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turretAngleActualContiguous));
-        ON_CALL(turret.yawMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(GetParam().yawSetpoint));
+        ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(turretAngleActualContiguous));
+        ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnRef(GetParam().yawSetpoint));
 
         ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
             return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);
@@ -325,9 +330,11 @@ TEST_P(TurretOnlineTest, execute_autorotation_works)
 //         }),
 //     [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
 //         std::stringstream ss;
-//         ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) << "_r_"
+//         ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) <<
+//         "_r_"
 //            << PrintToString(info.param.r) << "_yawAngle_" << PrintToString(info.param.yawAngle)
-//            << "_yawSetpoint_" << PrintToString(info.param.yawSetpoint.getValue()) << "_yawLimited_"
+//            << "_yawSetpoint_" << PrintToString(info.param.yawSetpoint.getValue()) <<
+//            "_yawLimited_"
 //            << PrintToString(info.param.yawLimited) << "_chassisSymmetry_"
 //            << PrintToString(static_cast<int>(info.param.chassisSymmetry));
 //         std::string s = ss.str();

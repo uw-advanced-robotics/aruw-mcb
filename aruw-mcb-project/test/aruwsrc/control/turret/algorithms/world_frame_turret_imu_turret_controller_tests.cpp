@@ -64,7 +64,8 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(turretSubsystem.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(currentValue));
+        ON_CALL(turretSubsystem.yawMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(currentValue));
         ON_CALL(drivers.turretMCBCanComm, getYaw).WillByDefault(ReturnPointee(&imuValue));
         ON_CALL(drivers.turretMCBCanComm, getYawVelocity)
             .WillByDefault(ReturnPointee(&imuVelocity));
@@ -166,8 +167,8 @@ TEST_F(
     NiceMock<TurretSubsystemMock> turretSubsystem(&drivers); \
     ;                                                        \
     float turretSetpoint = 0;                                \
-    ContiguousFloat worldFramePitchSetpoint(0, 0, M_TWOPI);      \
-    ContiguousFloat currentValue(0, 0, M_TWOPI);                 \
+    ContiguousFloat worldFramePitchSetpoint(0, 0, M_TWOPI);  \
+    ContiguousFloat currentValue(0, 0, M_TWOPI);             \
     float imuValue = 0;                                      \
     float imuVelocity = 0;
 
@@ -180,22 +181,23 @@ protected:
               &turretSubsystem.pitchMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-        chassisFrameSetpoint(0, 0, M_TWOPI)
+          chassisFrameSetpoint(0, 0, M_TWOPI)
     {
     }
 
     void SetUp() override
     {
-        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(currentValue));
+        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(currentValue));
         ON_CALL(turretSubsystem.pitchMotor, getAngleFromCenter).WillByDefault(Return(0));
         ON_CALL(drivers.turretMCBCanComm, getPitch).WillByDefault(ReturnPointee(&imuValue));
         ON_CALL(drivers.turretMCBCanComm, getPitchVelocity)
             .WillByDefault(ReturnPointee(&imuVelocity));
 
-        ON_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint).WillByDefault([&](float setpoint) {
-            chassisFrameSetpoint.setValue(setpoint);
-        });
-        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(chassisFrameSetpoint));
+        ON_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint)
+            .WillByDefault([&](float setpoint) { chassisFrameSetpoint.setValue(setpoint); });
+        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnRef(chassisFrameSetpoint));
     }
 
     static inline float transformWorldFrameValueToChassisFrame(
@@ -237,8 +239,8 @@ TEST_F(
 {
     InSequence seq;
     EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
+    // EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
+    // EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
 
     turretSetpoint = M_PI_2;
     imuValue = M_PI_2;

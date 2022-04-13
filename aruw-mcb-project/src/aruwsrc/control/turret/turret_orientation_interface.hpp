@@ -28,8 +28,8 @@ namespace aruwsrc::control::turret
  * An interface that provides turret world yaw and pitch.
  *
  * All angles computed using a right hand coordinate system. In other words, yaw is a value from
- * 0-M_TWOPI rotated counterclockwise when looking at the turret from above. Pitch is a value from 0-M_TWOPI
- * rotated counterclockwise when looking at the turret from the right side of the turret.
+ * 0-M_TWOPI rotated counterclockwise when looking at the turret from above. Pitch is a value from
+ * 0-M_TWOPI rotated counterclockwise when looking at the turret from the right side of the turret.
  */
 class TurretOrientationInterface
 {

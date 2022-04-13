@@ -67,7 +67,8 @@ namespace aruwsrc::control::turret::cv
 class SentinelTurretCVCommand : public tap::control::Command
 {
 public:
-    /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up (in radians)
+    /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
+    /// (in radians)
     static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(100.0f);
 
     /**

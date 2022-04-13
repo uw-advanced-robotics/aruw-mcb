@@ -17,8 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/control/turret/turret_motor.hpp"
 #include <gmock/gmock.h>
+
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 namespace aruwsrc::mock
 {

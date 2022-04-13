@@ -54,7 +54,7 @@ protected:
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
         ON_CALL(turretMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(yawValue));
         ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(setpoint));
-        ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(motorConfig));
+        ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(TURRET_MOTOR_CONFIG));
     }
 
     aruwsrc::Drivers drivers;
@@ -64,7 +64,6 @@ protected:
     float mpu6500Yaw = 0;
     ContiguousFloat yawValue;
     ContiguousFloat setpoint;
-    aruwsrc::control::turret::TurretMotorConfig motorConfig{};
 };
 
 TEST_F(
