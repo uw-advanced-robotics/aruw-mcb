@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef TURRET_MOTOR_MOCK_HPP_
+#define TURRET_MOTOR_MOCK_HPP_
+
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
@@ -63,3 +66,5 @@ public:
     MOCK_METHOD(float, getValidMinError, (const float), (const override));
 };
 }  // namespace aruwsrc::mock
+
+#endif  //  TURRET_MOTOR_MOCK_HPP_
