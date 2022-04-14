@@ -168,6 +168,12 @@ TurretMotorMock::TurretMotorMock(
     const control::turret::TurretMotorConfig &motorConfig)
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
+    ON_CALL(*this, getValidMinError).WillByDefault([&](const float measurement) {
+        return -getChassisFrameSetpoint().difference(measurement);
+    });
+    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
+        return getValidMinError(getChassisFrameMeasuredAngle().getValue());
+    });
 }
 TurretMotorMock::~TurretMotorMock() {}
 

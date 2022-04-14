@@ -98,6 +98,27 @@ public:
 
     mockable const TurretMotorConfig &getConfig() const { return config; }
 
+    mockable float getValidChassisMeasurementError() const;
+
+    /**
+     * @param[in] measurement A turret measurement in the chassis frame. This can be encoder based
+     * (via getChassisFrameMeasuredAngle) or can be measured by some other means (for example, an
+     * IMU on the turret that is than transformed to the chassis frame).
+     *
+     * @return The minimum wrapped error between the specified measurement.
+     *
+     * @note Call getValidChassisMeasurementError if you want the error between the chassis-frame
+     * setpoint and measurement
+     *
+     * @note The measurement does not need to be normalized to [0, 2*PI]. In fact, if the turret
+     * motor is limited, an unwrapped measurement should be used in order to avoid unexpected
+     * wrapping errors.
+     *
+     * @note Before calling this function, you **must** first set the chassis frame setpoint before
+     * calling this function (i.e. call `setChassisFrameSetpoint`).
+     */
+    mockable float getValidMinError(const float measurement) const;
+
 private:
     const TurretMotorConfig config;
 
@@ -110,6 +131,8 @@ private:
     tap::algorithms::ContiguousFloat chassisFrameMeasuredAngle;
 
     uint16_t lastUpdatedEncoderValue;
+
+    float chassisFrameUnwrappedMeasurement;
 };
 }  // namespace aruwsrc::control::turret
 

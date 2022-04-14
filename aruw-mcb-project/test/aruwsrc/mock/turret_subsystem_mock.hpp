@@ -47,7 +47,7 @@ private:
         .startEncoderValue = 0,
         .minAngle = 0,
         .maxAngle = M_PI,
-        .limitMotorAngles = true,
+        .limitMotorAngles = false,
     };
 
     testing::NiceMock<tap::mock::MotorInterfaceMock> m;

@@ -52,8 +52,7 @@ void ChassisFrameYawTurretController::runController(const uint32_t dt, const flo
     turretMotor->setChassisFrameSetpoint(desiredSetpoint);
 
     // position controller based on turret yaw gimbal
-    float positionControllerError = turretMotor->getChassisFrameMeasuredAngle().difference(
-        turretMotor->getChassisFrameSetpoint());
+    float positionControllerError = turretMotor->getValidChassisMeasurementError();
 
     float pidOutput =
         pid.runController(positionControllerError, turretMotor->getChassisFrameVelocity(), dt);
@@ -93,8 +92,7 @@ void ChassisFramePitchTurretController::runController(
     turretMotor->setChassisFrameSetpoint(desiredSetpoint);
 
     // position controller based on turret pitch gimbal
-    float positionControllerError = turretMotor->getChassisFrameMeasuredAngle().difference(
-        turretMotor->getChassisFrameSetpoint());
+    float positionControllerError = turretMotor->getValidChassisMeasurementError();
 
     float pidOutput =
         pid.runController(positionControllerError, turretMotor->getChassisFrameVelocity(), dt);

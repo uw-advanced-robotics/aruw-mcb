@@ -34,7 +34,8 @@ TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorCon
       motor(motor),
       chassisFrameSetpoint(config.startAngle, 0, M_TWOPI),
       chassisFrameMeasuredAngle(config.startAngle, 0, M_TWOPI),
-      lastUpdatedEncoderValue(config.startEncoderValue)
+      lastUpdatedEncoderValue(config.startEncoderValue),
+      chassisFrameUnwrappedMeasurement(config.startAngle)
 {
     assert(motor != nullptr);
 }
@@ -54,6 +55,11 @@ void TurretMotor::updateMotorAngle()
         chassisFrameMeasuredAngle.setValue(
             modm::toRadian(DjiMotor::encoderToDegrees(
                 static_cast<uint16_t>(encoder - config.startEncoderValue))) +
+            config.startAngle);
+
+        chassisFrameUnwrappedMeasurement = modm::toRadian(
+            DjiMotor::encoderToDegrees(
+                motor->getEncoderUnwrapped() - static_cast<int64_t>(config.startEncoderValue)) +
             config.startAngle);
     }
     else
@@ -109,4 +115,21 @@ void TurretMotor::setChassisFrameSetpoint(float setpoint)
     }
 }
 
+float TurretMotor::getValidChassisMeasurementError() const
+{
+    return getValidMinError(chassisFrameUnwrappedMeasurement);
+}
+
+float TurretMotor::getValidMinError(const float measurement) const
+{
+    if (config.limitMotorAngles)
+    {
+        return chassisFrameSetpoint.getValue() - measurement;
+    }
+    else
+    {
+        // equivalent to this - other
+        return -chassisFrameSetpoint.difference(measurement);
+    }
+}
 }  // namespace aruwsrc::control::turret

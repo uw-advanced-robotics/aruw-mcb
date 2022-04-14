@@ -54,6 +54,7 @@ protected:
     {
         ON_CALL(motor, isMotorOnline).WillByDefault(ReturnPointee(&motorOnline));
         ON_CALL(motor, getEncoderWrapped).WillByDefault(ReturnPointee(&encoderWrapped));
+        ON_CALL(motor, getEncoderUnwrapped).WillByDefault(ReturnPointee(&encoderWrapped));
     }
 
     Drivers drivers;
@@ -182,8 +183,6 @@ TEST_F(TurretMotorTest, getAngleFromCenter__valid_encoder_angles)
         encoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
         turretMotor.updateMotorAngle();
         EXPECT_NEAR(angle, turretMotor.getAngleFromCenter(), 1E-3);
-        std::cout << encoderWrapped << ", " << angle << ", " << turretMotor.getAngleFromCenter()
-                  << std::endl;
     }
 }
 
@@ -307,3 +306,69 @@ TEST_F(TurretMotorTest, updateMotorAngle_sets_actual_angle_back_to_start_when_of
         turretMotor.getChassisFrameMeasuredAngle().getValue(),
         1E-3);
 }
+
+TEST_F(TurretMotorTest, getValidMinError_small_min_max_values)
+{
+    TurretMotorConfig mc = {
+        .startAngle = M_PI_4 + M_PI_2,
+        .startEncoderValue = 0,
+        .minAngle = M_PI_2,
+        .maxAngle = M_PI,
+        .limitMotorAngles = true,
+    };
+    TurretMotor tm(&motor, mc);
+
+    std::vector<std::tuple<float, float, float>> setpointMeasurementErrorPairs = {
+        {M_PI_2, M_PI_2, 0},
+        {M_PI_2 + M_PI_4, M_PI_2 + M_PI_4, 0},
+        {M_PI, M_PI, 0},
+        {M_PI_2, M_PI, -M_PI_2},
+        {M_PI, M_PI_2, M_PI_2},
+        {M_PI_2, 0, M_PI_2},
+        {M_PI_2, 1.5 * M_PI, -M_PI},
+        {M_PI, 0, M_PI},
+        {M_PI, 1.5 * M_PI, -M_PI_2},
+        {M_PI, 0.1, M_PI - 0.1},
+    };
+
+    for (auto [setpoint, measurement, error] : setpointMeasurementErrorPairs)
+    {
+        tm.setChassisFrameSetpoint(setpoint);
+        EXPECT_NEAR(error, tm.getValidMinError(measurement), 1E-3);
+    }
+}
+
+TEST_F(TurretMotorTest, getValidMinError_large_min_max_values)
+{
+    TurretMotorConfig mc = {
+        .startAngle = 0,
+        .startEncoderValue = 0,
+        .minAngle = 0,
+        .maxAngle = 1.5f * M_PI,
+        .limitMotorAngles = true,
+    };
+    TurretMotor tm(&motor, mc);
+
+    std::vector<std::tuple<float, float, float>> setpointMeasurementErrorPairs = {
+        {0, 0, 0},
+        {M_PI, M_PI, 0},
+        {1.5 * M_PI, 1.5 * M_PI, 0},
+        {0, M_PI - 0.1, -M_PI + 0.1},
+        {0, M_PI + 0.1, -M_PI - 0.1},
+        {0, M_PI_2 + M_PI_4, -M_PI_2 - M_PI_4},
+        {0, M_PI_4, -M_PI_4},
+        {0.1, M_PI - 0.1, -M_PI + 0.2},
+        {M_PI_2 + M_PI_4, 1.5 * M_PI + 0.1, -M_PI_2 - M_PI_4 - 0.1},
+        {M_PI_2 + M_PI_4, M_TWOPI - 0.1, -M_PI - M_PI_4 + 0.1},
+        {0, 1.5 * M_PI, -1.5 * M_PI},
+        {1.5 * M_PI, 0, 1.5 * M_PI},
+    };
+
+    for (auto [setpoint, measurement, error] : setpointMeasurementErrorPairs)
+    {
+        tm.setChassisFrameSetpoint(setpoint);
+        EXPECT_NEAR(error, tm.getValidMinError(measurement), 1E-3);
+    }
+}
+
+TEST_F(TurretMotorTest, getValidMinError_large_swapped_min_max_values) {}
