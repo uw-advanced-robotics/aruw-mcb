@@ -20,7 +20,7 @@
 #ifndef HERO_TURRET_CONSTANTS_HPP_
 #define HERO_TURRET_CONSTANTS_HPP_
 
-#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "../turret_motor_config.hpp"
@@ -67,9 +67,9 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 3500.0f;
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 11.0f,
+    .kp = 9.0f,
     .ki = 0.0f,
-    .kd = 0.6f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 3'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -77,6 +77,15 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.1f,
+};
+
+static tap::algorithms::FuzzyPDConfig YAW_FUZZY_POS_PD_CONFIG{
+    .maxError = 180.0f,            ///< 180 degrees physical max angle error
+    .maxErrorDerivative = 720.0f,  ///< 2 rotations per second max speed of turret
+    .fuzzyTable = tap::algorithms::FuzzyPDRuleTable(
+        std::array<float, 3>({YAW_POS_PID_CONFIG.kp, YAW_POS_PID_CONFIG.kp, YAW_POS_PID_CONFIG.kp}),
+        std::array<float, 3>({0, 0.1, 0.7})),
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
@@ -90,6 +99,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
@@ -103,6 +113,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
@@ -116,6 +127,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace world_rel_turret_imu
 
@@ -132,6 +144,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace world_rel_chassis_imu
 
@@ -148,6 +161,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
@@ -161,6 +175,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 2.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace chassis_rel
 }  // namespace aruwsrc::control::turret

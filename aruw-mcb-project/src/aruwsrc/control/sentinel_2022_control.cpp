@@ -65,8 +65,8 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace sentinel_control
 {
-static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::A;
-static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
+static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::B;
+static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 
 /* define subsystems --------------------------------------------------------*/
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);

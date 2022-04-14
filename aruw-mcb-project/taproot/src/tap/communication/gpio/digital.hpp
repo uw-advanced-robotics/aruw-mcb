@@ -52,7 +52,6 @@ public:
      */
     enum InputPin
     {
-        A,
         B,
         C,
         D,

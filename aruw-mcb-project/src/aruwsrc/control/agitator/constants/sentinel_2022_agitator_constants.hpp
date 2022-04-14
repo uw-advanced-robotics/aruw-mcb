@@ -36,6 +36,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .kd = 50.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;

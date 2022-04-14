@@ -26,7 +26,7 @@
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
-using namespace tap::sensors;
+using namespace tap::communication::sensors::imu::mpu6500;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc;
 using namespace testing;

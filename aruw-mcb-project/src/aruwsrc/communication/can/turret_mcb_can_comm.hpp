@@ -22,7 +22,7 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
-#include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/geometry/angle.hpp"
@@ -78,7 +78,7 @@ public:
     {
         return modm::toRadian(
             static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-            tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
 
     /** @return turret yaw angle in radians */
@@ -88,7 +88,7 @@ public:
     {
         return modm::toRadian(
             static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-            tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
 
     mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }

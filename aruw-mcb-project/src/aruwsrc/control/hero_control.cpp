@@ -198,10 +198,11 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     &turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
-algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+algorithms::HeroTurretImuCascadePidTurretController worldFrameYawTurretImuController(
     drivers(),
     &turret.yawMotor,
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
+    world_rel_turret_imu::YAW_FUZZY_POS_PD_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
