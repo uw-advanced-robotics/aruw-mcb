@@ -95,7 +95,7 @@ class HeroTurretImuCascadePidTurretController final : public TurretYawController
 public:
     HeroTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *turretMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::FuzzyPDConfig &fuzzyPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
