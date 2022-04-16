@@ -40,20 +40,14 @@ public:
     void initialize() override;
 
     int64_t getEncoderUnwrapped() const override;
-    // same as getEncoderUnwrapped
     uint16_t getEncoderWrapped() const override;
     // controls the stepper in some way (take a step)
     void setDesiredOutput(int32_t desiredOutput) override;
-
-    // return true
     bool isMotorOnline() const override;
     // return -1 if going backwards, 0 if not moving 1 if forwards
     int16_t getOutputDesired() const override;
-    // return 0
     int8_t getTemperature() const override;
-    // return 0
     int16_t getTorque() const override;
-    // return 0
     int16_t getShaftRPM() const override;
 
 private:

@@ -48,20 +48,38 @@ void StepperMotor::setDesiredOutput(int32_t desiredOutput)
     int16_t desOutputNotInverted =
         static_cast<int16_t>(tap::algorithms::limitVal<int32_t>(desiredOutput, SHRT_MIN, SHRT_MAX));
     this->desiredOutput = motorInverted ? -desOutputNotInverted : desOutputNotInverted;
-    drivers->pwm.write(desiredOutput, pulse);
+
     if (desiredOutput >= 0)
     {
         drivers->digital.set(direction, false);
+        motorInverted = true;
     }
     else
     {
         drivers->digital.set(direction, true);
+        motorInverted = false;
     }
+
+    drivers->pwm.write(abs(desiredOutput), pulse);
 }
 
 bool StepperMotor::isMotorOnline() const { return true; };
 
-int16_t StepperMotor::getOutputDesired() const { return desiredOutput; }
+int16_t StepperMotor::getOutputDesired() const
+{
+    if (desiredOutput == 0)
+    {
+        return 0;
+    }
+    else if (motorInverted)
+    {
+        return 1;
+    }
+    else
+    {
+        return -1;
+    }
+}
 
 int8_t StepperMotor::getTemperature() const { return 0; }
 
