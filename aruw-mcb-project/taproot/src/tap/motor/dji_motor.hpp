@@ -223,7 +223,6 @@ private:
      */
     bool motorInverted;
 
-
     /**
      * The raw encoder value reported by the motor controller. It wraps around from
      * {0..8191}, hence "Wrapped"
