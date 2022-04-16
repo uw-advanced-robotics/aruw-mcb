@@ -35,7 +35,7 @@ class StepperMotor : public MotorInterface
 public:
     static constexpr uint16_t ENC_RESOLUTION = 1600;
 
-    StepperMotor(Drivers* drivers, bool isInverted, const char* name);
+    StepperMotor(Drivers* drivers, bool motorInverted, const char* name);
 
     void initialize() override;
 
