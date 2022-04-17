@@ -119,6 +119,10 @@ public:
 
     const char *getName() const override { return "turret CV"; }
 
+    void requestNewTarget();
+
+    void changeScanningQuadrant();
+
 private:
     aruwsrc::Drivers *drivers;
 
