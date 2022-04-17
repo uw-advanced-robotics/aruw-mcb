@@ -33,6 +33,8 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
 #include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -80,6 +82,8 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 namespace hero_control
 {
 /* define subsystems --------------------------------------------------------*/
+aruwsrc::communication::serial::SentinelRequestSubsystem sentinelRequestSubsystem(drivers());
+
 ChassisSubsystem chassis(drivers(), ChassisSubsystem::ChassisType::X_DRIVE);
 
 RefereeFeedbackFrictionWheelSubsystem frictionWheels(
@@ -135,6 +139,11 @@ HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, PITCH_MOTOR_CONFIG
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret.yawMotor, &chassis);
 
 /* define commands ----------------------------------------------------------*/
+aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
+    &sentinelRequestSubsystem);
+aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
+    &sentinelRequestSubsystem);
+
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
@@ -244,8 +253,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     true);
 
 ClientDisplayCommand clientDisplayCommand(
-    drivers(),
-    &clientDisplay,
+    *drivers(),
+    clientDisplay,
     nullptr,
     frictionWheels,
     waterwheelAgitator,
@@ -276,6 +285,14 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
+PressCommandMapping gPressedCtrlNotPressed(
+    drivers(),
+    {&sentinelSelectNewRobotCommand},
+    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
+PressCommandMapping gCtrlPressed(
+    drivers(),
+    {&sentinelTargetNewQuadrantCommand},
+    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 PressCommandMapping leftMousePressed(
     drivers(),
     {&heroAgitatorCommand},
@@ -329,6 +346,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
+    sentinelRequestSubsystem.initialize();
     chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
@@ -341,6 +359,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&sentinelRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -383,6 +402,8 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+    drivers->commandMapper.addMap(&gCtrlPressed);
 }
 }  // namespace hero_control
 

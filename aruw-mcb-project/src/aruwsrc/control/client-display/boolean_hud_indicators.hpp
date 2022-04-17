@@ -57,7 +57,8 @@ public:
      * calibrated.
      */
     BooleanHudIndicators(
-        aruwsrc::Drivers *drivers,
+        aruwsrc::Drivers &drivers,
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
@@ -132,7 +133,7 @@ private:
                 Tx::GraphicColor::PURPLISH_RED),
         };
 
-    aruwsrc::Drivers *drivers;
+    aruwsrc::Drivers &drivers;
 
     /**
      * Hopper subsystem that provides information about whether or not the cover is open or closed.
