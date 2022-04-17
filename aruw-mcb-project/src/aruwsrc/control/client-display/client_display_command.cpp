@@ -32,8 +32,8 @@ using namespace tap::control;
 namespace aruwsrc::control::client_display
 {
 ClientDisplayCommand::ClientDisplayCommand(
-    aruwsrc::Drivers *drivers,
-    ClientDisplaySubsystem *clientDisplay,
+    aruwsrc::Drivers &drivers,
+    ClientDisplaySubsystem &clientDisplay,
     const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
@@ -45,27 +45,29 @@ ClientDisplayCommand::ClientDisplayCommand(
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
     : Command(),
       drivers(drivers),
+      refSerialTransmitter(&drivers),
       booleanHudIndicators(
           drivers,
+          refSerialTransmitter,
           hopperSubsystem,
           frictionWheelSubsystem,
           agitatorSubsystem,
           imuCalibrateCommand),
-      chassisOrientationIndicator(drivers, robotTurretSubsystem),
+      chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(
           drivers,
+          refSerialTransmitter,
           hopperSubsystem,
           frictionWheelSubsystem,
           multiShotHandler,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
           chassisImuDriveCommand),
-      reticleIndicator(drivers),
-      turretAnglesIndicator(drivers, robotTurretSubsystem),
-      visionHudIndicators(drivers)
+      reticleIndicator(drivers, refSerialTransmitter),
+      turretAnglesIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
+      visionHudIndicators(drivers, refSerialTransmitter)
 {
-    modm_assert(drivers != nullptr, "ClientDisplayCommand", "drivers nullptr");
-    addSubsystemRequirement(clientDisplay);
+    addSubsystemRequirement(&clientDisplay);
 }
 
 void ClientDisplayCommand::initialize()
@@ -86,7 +88,7 @@ bool ClientDisplayCommand::run()
 {
     PT_BEGIN();
 
-    PT_WAIT_UNTIL(drivers->refSerial.getRefSerialReceivingData());
+    PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
     PT_CALL(booleanHudIndicators.sendInitialGraphics());
     PT_CALL(chassisOrientationIndicator.sendInitialGraphics());

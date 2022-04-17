@@ -25,6 +25,11 @@ namespace aruwsrc::control::client_display
 {
 uint32_t HudIndicator::currGraphicName = 0;
 
+HudIndicator::HudIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
+    : refSerialTransmitter(refSerialTransmitter)
+{
+}
+
 void HudIndicator::resetGraphicNameGenerator() { currGraphicName = 0; }
 
 void HudIndicator::getUnusedGraphicName(uint8_t graphicName[3])

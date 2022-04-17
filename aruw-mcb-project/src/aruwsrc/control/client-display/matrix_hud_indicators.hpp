@@ -80,7 +80,8 @@ public:
      * will never be selected as the current chassis command in the HUD.
      */
     MatrixHudIndicators(
-        aruwsrc::Drivers *drivers,
+        aruwsrc::Drivers &drivers,
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
@@ -178,7 +179,7 @@ private:
         VISION_COPROCESSOR_OFFLINE,
     };
 
-    aruwsrc::Drivers *drivers;
+    aruwsrc::Drivers &drivers;
 
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
 
