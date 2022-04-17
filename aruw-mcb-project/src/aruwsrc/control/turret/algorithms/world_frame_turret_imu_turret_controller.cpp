@@ -172,6 +172,19 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
     turretSubsystem->setYawMotorOutput(velocityPidOutput);
 }
 
+void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
+{
+    const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
+    const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
+
+    updateYawWorldFrameSetpoint(
+        desiredSetpoint,
+        chassisFrameYaw,
+        worldFrameYawAngle,
+        &worldFrameSetpoint,
+        turretSubsystem);
+}
+
 float WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
 {
     return worldFrameSetpoint.getValue();
@@ -239,6 +252,19 @@ void HeroTurretImuCascadePidTurretController::runController(
     float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
     turretSubsystem->setYawMotorOutput(velocityPidOutput);
+}
+
+void HeroTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
+{
+    const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
+    const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
+
+    updateYawWorldFrameSetpoint(
+        desiredSetpoint,
+        chassisFrameYaw,
+        worldFrameYawAngle,
+        &worldFrameSetpoint,
+        turretSubsystem);
 }
 
 float HeroTurretImuCascadePidTurretController::getSetpoint() const
@@ -350,6 +376,17 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(velocityPidOutput);
+}
+
+void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
+{
+    const float worldFramePitchAngle = drivers->turretMCBCanComm.getPitch();
+
+    updatePitchWorldFrameSetpoint(
+        desiredSetpoint,
+        worldFramePitchAngle,
+        &worldFrameSetpoint,
+        turretSubsystem);
 }
 
 float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const
