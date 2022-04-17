@@ -25,20 +25,13 @@
 
 #include "modm/processing/resumable.hpp"
 
+namespace tap::communication::serial
+{
+class RefSerialTransmitter;
+}
+
 namespace aruwsrc::control::client_display
 {
-/**
- * Macro that should be used in a resumable function. Blocks (in a resumable fashion) for some time
- * based on the associated graphic. After sending a graphic via ref serial, you should call this
- * macro and pass in a pointer to the graphic you just sent via serial. Delaying avoids overwhelming
- * the serial line.
- *
- * @param[in] graphic Pointer to graphic data that was just sent.
- */
-#define DELAY_REF_GRAPHIC(graphic)                                                 \
-    delayTimer.restart(RefSerialData::Tx::getWaitTimeAfterGraphicSendMs(graphic)); \
-    RF_WAIT_UNTIL(delayTimer.isExpired() || delayTimer.isStopped());
-
 /**
  * A generic HUD indicator interface class with helper utilities that other HUD indicators may use.
  */
@@ -60,6 +53,8 @@ public:
     /** The line spacing of the characters in a characterGraphicMessage if a `\n` character is
      * inserted. */
     static constexpr float CHARACTER_LINE_SPACING = 1.5f;
+
+    HudIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     virtual modm::ResumableResult<bool> sendInitialGraphics() = 0;
 
@@ -85,6 +80,8 @@ protected:
     static void getUnusedGraphicName(uint8_t graphicName[3]);
 
     static uint32_t currGraphicName;
+
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter;
 
     /**
      * Timer used to delay between sending messages to the referee system.

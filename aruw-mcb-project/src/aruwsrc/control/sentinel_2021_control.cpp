@@ -31,6 +31,8 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
@@ -68,6 +70,8 @@ namespace sentinel_control
 {
 static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::C;
 static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
+
+aruwsrc::communication::serial::SentinelRequestHandler sentinelRequestHandler(drivers());
 
 /* define subsystems --------------------------------------------------------*/
 AgitatorSubsystem agitator(
@@ -206,7 +210,8 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
 }
 
-/* register subsystems here -------------------------------------------------*/
+/* register subsystems here ------------------
+-------------------------------*/
 void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
@@ -230,6 +235,13 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
 void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
+
+    // TODO add callbacks after seninel CV command implemented
+    // sentinelRequestHandler.attachSelectNewRobotMessageHandler();
+    // sentinelRequestHandler.attachTargetNewQuadrantMessageHandler();
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
+        &sentinelRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/

@@ -26,6 +26,7 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command.hpp"
 
 #include "modm/math/geometry/polygon_2d.hpp"
@@ -95,8 +96,8 @@ public:
      * will never be selected as the current chassis command.
      */
     ClientDisplayCommand(
-        aruwsrc::Drivers *drivers,
-        ClientDisplaySubsystem *clientDisplay,
+        aruwsrc::Drivers &drivers,
+        ClientDisplaySubsystem &clientDisplay,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
@@ -118,7 +119,9 @@ public:
     bool isFinished() const override { return false; }
 
 private:
-    aruwsrc::Drivers *drivers;
+    aruwsrc::Drivers &drivers;
+
+    tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
 
     BooleanHudIndicators booleanHudIndicators;
     ChassisOrientationIndicator chassisOrientationIndicator;
