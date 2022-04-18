@@ -35,6 +35,7 @@
 
 /* communication includes ---------------------------------------------------*/
 #include "tap/communication/serial/uart.hpp"
+#include "tap/communication/sensors/distance/tfmini.hpp"
 
 #include "aruwsrc/drivers_singleton.hpp"
 
@@ -60,6 +61,14 @@ static void initializeIo(aruwsrc::Drivers *drivers);
 // called as frequently.
 static void updateIo(aruwsrc::Drivers *drivers);
 
+using tap::communication::sensors::distance::TFMiniUartDriver;
+
+
+static constexpr tap::communication::serial::Uart::UartPort LIDAR_UART_PORT =
+    tap::communication::serial::Uart::Uart8;
+
+static TFMiniUartDriver<LIDAR_UART_PORT> tfmini(aruwsrc::DoNotUse_getDrivers());
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -83,13 +92,13 @@ int main()
     // Blocking call, waits until Windows Simulator connects.
     tap::communication::TCPServer::MainServer()->getConnection();
 #endif
+    
+    // Initialize TFMini
+    tfmini.initialize();
 
     while (1)
     {
-        static constexpr tap::communication::serial::Uart::UartPort LIDAR_UART_PORT =
-            tap::communication::serial::Uart::Uart1;
-
-        
+        tfmini.update();
     }
 }
 

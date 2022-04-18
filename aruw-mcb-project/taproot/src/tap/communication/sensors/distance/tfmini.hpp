@@ -21,65 +21,246 @@
 #define TAPROOT_TFMINI_HPP_
 
 #include "tap/communication/serial/uart.hpp"
+#include "tap/drivers.hpp"
+
+#include "modm/architecture/interface/uart.hpp"
 
 namespace tap::communication::sensors::distance
 {
 /**
- * For communicating with TFMini LiDar sensor. Although apparently it's
- * not actually lidar :)
+ * Object for interpreting and decoding the serial communications of a TFMini
+ *
+ * Takes in bytes one at a time and appropriately interprets as a TFMini message. Handles dropped
+ * bytes by using the robustness in the TFMini protocol (unique start sequence and final checksum).
+ *
+ * Datasheet (which contains serial protocol) can be found online by searching "TFMini Lidar"
+ *
+ * This class is stateful and expects serial bytes, and thus should not be used to decode two
+ * different TFMini streams at the same time.
  */
-template <serial::Uart::UartPort uartPort>
-class TFMini
+class TFMiniDecoder
 {
 public:
-    TFMini()
+    /**
+     * Process the next data byte received from the tfmini
+     *
+     * @param data the byte to be processed
+     *
+     * @return `true` iff this byte was the last in a valid message frame (i.e.: new data
+     * is now available through the getter methods). `false` otherwise (either message is still in
+     * progress or message completed but failed checksum)
+     */
+    bool processNextByte(uint8_t data)
     {
-        serial::Uart::init<uartPort, 115200>();
-    }
-
-    void processNextByte(uint8_t byte)
-    {
-        uint8_t data;
-        serial::Uart::read(uartPort, &data);
-        if (sequenceNum < 2) {
+        if (sequenceNum < 2)
+        {
             // we wait for two 0x59's in a row as that indicates
             // start of message
-            if (data == 0x59) {
+            if (data == 0x59)
+            {
                 buffer[sequenceNum] = data;
                 sequenceNum++;
             }
-        } else {
+            else
+            {
+                // Reset sequence num to beginning as we are lost in the sauce
+                sequenceNum = 0;
+            }
+        }
+        else
+        {
             buffer[sequenceNum] = data;
             sequenceNum++;
         }
 
-        if (sequenceNum == 9) {
-            parseBuffer();
+        // Parse buffer once full
+        if (sequenceNum == FRAME_SIZE)
+        {
             sequenceNum = 0;
+            return parseBuffer();
+        }
+        else
+        {
+            return false;
         }
     }
 
-    void parseBuffer()
-    {
-        dist = buffer[2] | buffer[3] << 8;
-        strength = buffer[4] | buffer[5] << 8;
-        integrationTime = buffer[6];
+    /**
+     * @return the distance last reported by the sensor in centimeters. -1 if no valid reading
+     * available
+     */
+    inline int16_t getDistanceCm() const { return dist; }
 
-        // TODO: checksum logic
-    }
+    /**
+     * @return strength (unsure what this is)
+     */
+    inline uint16_t getStrength() const { return strength; }
+
+    /**
+     * @return integration time (unsure what this is)
+     */
+    inline uint8_t getIntegrationTime() const { return integrationTime; }
 
 private:
-    bool awaitingHeader = true;
-    bool headerCount = 0;
+    static constexpr size_t FRAME_SIZE = 9;
+
+    /**
+     * Parses the contents of the buffer and stores them into appropriate member variables if
+     * successful.
+     *
+     * @return `true` iff the buffer was successfully parsed as a valid TFMini message frame with
+     * a valid checksum
+     */
+    bool parseBuffer()
+    {
+        if (isChecksumValid())
+        {
+            // buffer[0] and buffer[1] are start of frame indicators
+            dist = buffer[2] | buffer[3] << 8;
+            strength = buffer[4] | buffer[5] << 8;
+            integrationTime = buffer[6];
+            // buffer[7] is reserved
+            // buffer[8] is checksum
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * @returns `true` iff the checksum in this->buffer is correct. More precisely, checks that
+     * buffer[8] is equal to the lowest byte of sum(buffer[0..7]), i.e.: if the checksum is valid.
+     */
+    inline bool isChecksumValid()
+    {
+        uint8_t checksum = buffer[8];
+
+        int ourChecksum = 0;
+        // Checksum is last 8 bits of sum of first 8 bytes of message
+        for (int i = 0; i < 8; i++)
+        {
+            ourChecksum += buffer[i];
+        }
+
+        return checksum == (ourChecksum & 0xFF);
+    }
+
+    /**
+     * Index in the message frame of the next byte to be received (also points to next position for
+     * byte to be inserted into this->buffer). Tracks where we are in the message frame. A full
+     * frame from the TFMini has 9 bytes, so this should always be < 9.
+     */
     int sequenceNum = 0;
 
-    uint8_t buffer[9];
+    /**
+     * Stores the current message frame as it's being built. buffer[0..sequenceNum-1] are bytes that
+     * have been read for the current in-progress message.
+     */
+    uint8_t buffer[FRAME_SIZE];
 
-    uint16_t dist = 0;
+    /**
+     * Distance reported by the sensor in centimeters (cm). -1 if no valid distance available
+     */
+    int16_t dist = 0;
+
+    /**
+     * "Signal strength" according to the datasheet. No idea what this actually means :/
+     * TODO: find out what this means. Probably not relevant for most use cases though
+     */
     uint16_t strength = 0;
+
+    /**
+     * "Integration time". TODO: find out units and meaning.
+     */
     uint8_t integrationTime = 0;
 };
 
-} // namespace tap::communication::sensors::distance
+/**
+ * Handles communication with a TFMini over a single UART port
+ *
+ * @tparam UartPort the uart port the TFMini is bound to
+ */
+template <::tap::communication::serial::Uart::UartPort TFMINI_UART_PORT>
+class TFMiniUartDriver
+{
+public:
+    static constexpr int TFMINI_BAUDRATE = 115200;
 
-#endif // TAPROOT_TFMINI_HPP_
+    TFMiniUartDriver(::tap::Drivers* drivers) : drivers(drivers) {}
+
+    /**
+     * Initialize the driver.
+     *
+     * @warning Call before using this object!
+     */
+    void initialize()
+    {
+        // Initialize the uart
+        drivers->uart.init<
+            TFMINI_UART_PORT,
+            TFMINI_BAUDRATE,
+            ::tap::communication::serial::Uart::Parity::Disabled>();
+    }
+
+    /**
+     * Reads a byte from UART buffer if available and parses it.
+     */
+    void update()
+    {
+        uint8_t data;
+
+        // Read as many bytes as possible from the UART buffer
+        while (drivers->uart.read(TFMINI_UART_PORT, &data))
+        {
+            if (decoder.processNextByte(data))
+            {
+                sequenceNumber++;
+            }
+        }
+    }
+
+    /**
+     * @return the distance last reported by the sensor in centimeters. -1 if no valid reading
+     * available
+     */
+    inline int16_t getDistanceCm() const { return decoder.getDistanceCm(); }
+
+    /**
+     * @return strength (unsure what this is)
+     */
+    inline uint16_t getStrength() const { return decoder.strength(); }
+
+    /**
+     * @return integration time (unsure what this is)
+     */
+    inline uint16_t getIntegrationTime() const { return decoder.integrationTime(); }
+
+    /**
+     * @return sequence number of the most recently received valid distance message. 0 means that no
+     * messages have been received
+     *
+     * Use this to see if new data has been received since this was last queried
+     */
+    inline unsigned int getSequenceNumber() const { return sequenceNumber; }
+
+private:
+    /**
+     * Decodes messages
+     */
+    TFMiniDecoder decoder;
+
+    tap::Drivers* const drivers;
+
+    /**
+     * Updated every time a new full message is received from the TFMini
+     *
+     * Can be used by client to determine when a new message has been received
+     */
+    unsigned int sequenceNumber = 0;
+};
+
+}  // namespace tap::communication::sensors::distance
+
+#endif  // TAPROOT_TFMINI_HPP_

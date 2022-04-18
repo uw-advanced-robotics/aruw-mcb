@@ -114,7 +114,7 @@ public:
     }
 
     /**
-     * Read a single byte.
+     * Read a single byte if available
      *
      * @param[in] port the port to read from.
      * @param[out] data Byte read, if any.
