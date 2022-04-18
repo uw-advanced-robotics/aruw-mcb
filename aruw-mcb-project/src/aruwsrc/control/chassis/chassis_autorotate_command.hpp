@@ -42,7 +42,8 @@ class ChassisAutorotateCommand : public tap::control::Command
 public:
     /** When the turret yaw setpoint and measured value is < M_PI - this value, autorotation will be
      * paused until the difference is within this value again. */
-    static constexpr float TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION = modm::toRadian(1.0f);
+    static constexpr float TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION =
+        modm::toRadian(1.0f);
 
     /** The symmetry of the chassis. */
     enum class ChassisSymmetry : uint8_t

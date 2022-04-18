@@ -57,10 +57,10 @@ void TurretMotor::updateMotorAngle()
                 static_cast<uint16_t>(encoder - config.startEncoderValue))) +
             config.startAngle);
 
-        chassisFrameUnwrappedMeasurement = modm::toRadian(
-            DjiMotor::encoderToDegrees(
-                motor->getEncoderUnwrapped() - static_cast<int64_t>(config.startEncoderValue)) +
-            config.startAngle);
+        chassisFrameUnwrappedMeasurement =
+            modm::toRadian(DjiMotor::encoderToDegrees(
+                motor->getEncoderUnwrapped() - static_cast<int64_t>(config.startEncoderValue))) +
+            config.startAngle;
     }
     else
     {

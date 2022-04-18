@@ -62,7 +62,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           defaultLaunchSpeed,
           turretID),
       pitchScanner(
-          turretSubsystem->pitchMotor.getConfig().minAngle,
+          PITCH_MIN_SCAN_ANGLE,
           turretSubsystem->pitchMotor.getConfig().maxAngle,
           SCAN_DELTA_ANGLE),
       yawScanner(

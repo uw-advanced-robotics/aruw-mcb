@@ -238,8 +238,8 @@ cv::TurretCVCommand turretCVCommand(
     &worldFramePitchTurretImuController,
     odometrySubsystem,
     frictionWheels,
-    1,
-    1,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
     9.5f);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);

@@ -56,7 +56,7 @@ public:
      * The value to scale the rotation as specified by `controlOperatorInterface.getChassisRInput()`
      * by.
      */
-    static constexpr float USER_INPUT_TO_ANGLE_DELTA_SCALAR = 0.000001f;
+    static constexpr float USER_INPUT_TO_ANGLE_DELTA_SCALAR = 0.000002f;
     /**
      * Maximum error between the actual IMU angle and target angle specified by the user. We cap the
      * rotation error to avoid issues that occur if the robot is picked up, turned around, and

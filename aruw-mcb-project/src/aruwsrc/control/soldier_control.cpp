@@ -143,7 +143,10 @@ aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotComm
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
     &sentinelRequestSubsystem);
 
-aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
+aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
+    drivers(),
+    &chassis,
+    &turret.yawMotor);
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
@@ -199,8 +202,8 @@ cv::TurretCVCommand turretCVCommand(
     &worldFramePitchTurretImuController,
     odometrySubsystem,
     frictionWheels,
-    1,
-    1,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
     14.5f);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
