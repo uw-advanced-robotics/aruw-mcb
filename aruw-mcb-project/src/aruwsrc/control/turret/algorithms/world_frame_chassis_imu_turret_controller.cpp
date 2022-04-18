@@ -126,7 +126,7 @@ void WorldFrameYawChassisImuTurretController::initialize()
     {
         pid.reset();
 
-        chassisFrameInitImuYawAngle = drivers->mpu6500.getYaw();
+        chassisFrameInitImuYawAngle = modm::toRadian(drivers->mpu6500.getYaw());
         worldFrameSetpoint.setValue(turretMotor->getChassisFrameSetpoint().getValue());
 
         turretMotor->attachTurretController(this);
@@ -155,7 +155,7 @@ void WorldFrameYawChassisImuTurretController::runController(
     float positionControllerError = -worldFrameSetpoint.difference(worldFrameYawAngle);
     float pidOutput = pid.runController(
         positionControllerError,
-        turretMotor->getChassisFrameVelocity() + drivers->mpu6500.getGz(),
+        turretMotor->getChassisFrameVelocity() + modm::toRadian(drivers->mpu6500.getGz()),
         dt);
 
     turretMotor->setMotorOutput(pidOutput);

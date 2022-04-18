@@ -47,6 +47,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startEncoderValue = 2801,
     .minAngle = modm::toRadian(5),
     .maxAngle = modm::toRadian(175),
+    .limitMotorAngles = true,
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
@@ -64,11 +65,11 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 4000.0f,
+    .kp = 229'183.1f,
     .ki = 0.0f,
-    .kd = 130.0f,
+    .kd = 7'448.5f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30000.0f,
+    .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 10.0f,
     .tQProportionalKalman = 1.0f,
@@ -78,11 +79,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 3400.0f,
+    .kp = 194'805.7f,
     .ki = 0.0f,
-    .kd = 100.0f,
+    .kd = 5'729.6f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30000.0f,
+    .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,

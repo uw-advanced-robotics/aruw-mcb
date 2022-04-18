@@ -85,7 +85,7 @@ void ChassisAutorotateCommand::execute()
 
         if (chassisAutorotating)
         {
-            float maxAngleFromCenter = 180.0f;
+            float maxAngleFromCenter = M_PI;
 
             if (!yawMotor->getConfig().limitMotorAngles)
             {
