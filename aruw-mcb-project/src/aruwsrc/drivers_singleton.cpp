@@ -23,19 +23,13 @@
 
 namespace aruwsrc
 {
-/**
- * Class that allows one to construct a Drivers instance because of frienship
- * with the Drivers class.
- */
-class DriversSingleton
+
+aruwsrc::Drivers* DoNotUse_getDrivers()
 {
-public:
-    static aruwsrc::Drivers drivers;
-};  // class DriversSingleton
+    static aruwsrc::Drivers* singleton_drivers = new aruwsrc::Drivers();
+    return singleton_drivers;
+}
 
-aruwsrc::Drivers DriversSingleton::drivers;
-
-aruwsrc::Drivers *DoNotUse_getDrivers() { return &DriversSingleton::drivers; }
 }  // namespace aruwsrc
 
 #endif

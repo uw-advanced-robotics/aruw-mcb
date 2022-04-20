@@ -28,7 +28,8 @@ namespace aruwsrc
 {
 /**
  * @return The singleton instance of the Drivers class. This is the only instance of the
- *      Drivers class that should be created anywhere in the non-unit test framework.
+ *      Drivers class that should be created anywhere in the non-unit test framework. The object
+ *      pointed to by the returned pointer is guaranteed to be fully constructed.
  * @note It is likely that you will never have to use this. There are only two files you
  *      should be calling this function from -- `main.cpp` and `*_control.cpp`, either to
  *      run I/O stuff and to add a Drivers pointer to an instance of a Subsystem or Command.

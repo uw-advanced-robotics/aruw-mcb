@@ -43,6 +43,7 @@ namespace aruwsrc
 class Drivers : public tap::Drivers
 {
     friend class DriversSingleton;
+    friend aruwsrc::Drivers *DoNotUse_getDrivers();
 
 #ifdef ENV_UNIT_TESTS
 public:
