@@ -201,7 +201,7 @@ void MatrixHudIndicators::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &matrixHudIndicatorGraphics[i].graphicData,
             matrixHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             MATRIX_HUD_INDICATOR_SELECTOR_BOX_COLOR);
 
@@ -223,7 +223,7 @@ void MatrixHudIndicators::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &matrixHudLabelAndTitleGraphics[i].graphicData,
             matrixHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             MATRIX_HUD_INDICATOR_LABELS_COLOR);
 
@@ -247,7 +247,7 @@ void MatrixHudIndicators::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS].graphicData,
         matrixHudIndicatorName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         MATRIX_HUD_INDICATOR_TITLE_COLOR);
 

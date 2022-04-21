@@ -74,7 +74,7 @@ void ReticleIndicator::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &reticleMsg[reticleMsgIndex].graphicData[graphicDataIndex],
             currLineName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]));
 
@@ -117,7 +117,7 @@ void ReticleIndicator::initialize()
         &reticleMsg[NUM_RETICLE_COORDINATES / MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]
              .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)],
         currLineName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         RETICLE_VERTICAL_COLOR);
 
