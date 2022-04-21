@@ -34,8 +34,13 @@ namespace aruwsrc::control::turret
 class TurretMotor
 {
 public:
+    /// Maximum output, voltage control between [-24, 24] volts scaled up to [-30,000, 30,000] units
     static constexpr float MAX_OUT_6020 = 30'000;
 
+    /**
+     * Construct a turret motor with some particular hardware motor interface and a motor
+     * configuration struct.
+     */
     TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig);
 
     mockable inline void initialize() { motor->initialize(); }
@@ -46,18 +51,22 @@ public:
     mockable void setMotorOutput(float out);
 
     /**
-     * Attaches the specified turretController with the turret motor. This does not give ownership
+     * Attaches the specified turretController to this turret motor. This does not give ownership
      * of the controller to this object. Instead it allows commands to know which turret controller
      * is currently being run (since turret controllers are shared by commands but persist across
      * different commands).
      */
-    mockable void attachTurretController(
+    mockable inline void attachTurretController(
         const algorithms::TurretControllerInterface *turretController)
     {
         this->turretController = turretController;
     }
 
-    /// Sets (and limits!) the chassis frame turret measurement
+    /**
+     * Sets (and limits!) the chassis frame turret measurement.
+     * 
+     * The setpoint is limited between the min and max config angles as specified in the constructor.
+     */
     mockable void setChassisFrameSetpoint(float setpoint);
 
     /// @return `true` if the hardware motor is connected and powered on
@@ -69,13 +78,14 @@ public:
         return chassisFrameSetpoint;
     }
 
-    /// @return turret motor measurement relative to the chassis, in radians
+    /// @return turret motor measurement relative to the chassis, in radians, wrapped between [0, 2
+    /// PI)
     mockable inline const tap::algorithms::ContiguousFloat &getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
     }
 
-    /// @return velocity of the turret, in rad/sec
+    /// @return angular velocity of the turret, in rad/sec.
     mockable inline float getChassisFrameVelocity() const
     {
         return (M_TWOPI / 60) * motor->getShaftRPM();
