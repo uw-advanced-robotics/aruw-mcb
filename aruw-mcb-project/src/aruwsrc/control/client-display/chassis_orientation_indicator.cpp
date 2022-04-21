@@ -44,8 +44,8 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::sendInitialGraphics()
 
     // send initial chassis orientation graphics
     RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
-    chassisOrientationGraphics.graphicData[0].operation = Tx::ADD_GRAPHIC_MODIFY;
-    chassisOrientationGraphics.graphicData[1].operation = Tx::ADD_GRAPHIC_MODIFY;
+    chassisOrientationGraphics.graphicData[0].operation = Tx::GRAPHIC_MODIFY;
+    chassisOrientationGraphics.graphicData[1].operation = Tx::GRAPHIC_MODIFY;
 
     RF_END();
 }
@@ -97,7 +97,7 @@ void ChassisOrientationIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[0],
         chassisOrientationName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         CHASSIS_ORIENTATION_COLOR);
 
@@ -116,7 +116,7 @@ void ChassisOrientationIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[1],
         chassisOrientationName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         CHASSIS_BARREL_COLOR);
 

@@ -64,9 +64,9 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
         prevVisionTargetStatus != currVisionTargetStatus)
     {
         visionTargetFoundGraphics.graphicData[0].operation =
-            currVisionTargetStatus ? Tx::ADD_GRAPHIC : Tx::ADD_GRAPHIC_DELETE;
+            currVisionTargetStatus ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
         visionTargetFoundGraphics.graphicData[1].operation =
-            currVisionTargetStatus ? Tx::ADD_GRAPHIC : Tx::ADD_GRAPHIC_DELETE;
+            currVisionTargetStatus ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
 
         RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetFoundGraphics));
 
@@ -103,7 +103,7 @@ void VisionHudIndicators::initializeVisionHudIndicator(
     RefSerialTransmitter::configGraphicGenerics(
         graphicData,
         hudIndicatorName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         VISION_TARGET_FOUND_COLOR);
 
