@@ -131,7 +131,7 @@ void BooleanHudIndicators::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]));
 
@@ -148,7 +148,7 @@ void BooleanHudIndicators::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorStaticGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
 
@@ -165,7 +165,7 @@ void BooleanHudIndicators::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorStaticLabelGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
 
