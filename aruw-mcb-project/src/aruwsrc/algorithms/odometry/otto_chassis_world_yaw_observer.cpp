@@ -28,7 +28,7 @@ namespace aruwsrc::algorithms::odometry
 {
 OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
     aruwsrc::Drivers* drivers,
-    aruwsrc::control::turret::TurretMotor* turretMotor)
+    const aruwsrc::control::turret::TurretMotor* turretMotor)
     : drivers(drivers),
       turretMotor(turretMotor)
 {

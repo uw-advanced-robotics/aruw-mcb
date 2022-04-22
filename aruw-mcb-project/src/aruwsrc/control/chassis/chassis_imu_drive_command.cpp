@@ -33,7 +33,7 @@ namespace aruwsrc::chassis
 ChassisImuDriveCommand::ChassisImuDriveCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
-    aruwsrc::control::turret::TurretMotor* yawMotor)
+    const aruwsrc::control::turret::TurretMotor* yawMotor)
     : tap::control::Command(),
       drivers(drivers),
       chassis(chassis),

@@ -69,12 +69,13 @@ class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
 public:
     /**
      * @param[in] drivers pointer to aruwsrc drivers
-     * @param[in] turret pointer to a TurretMotor object
+     * @param[in] turret pointer to a TurretMotor object, @see OttoChassisWorldYawObserver for how
+     * it is used
      * @param[in] chassis pointer to aruwsrc ChassisSubsystem
      */
     OttoVelocityOdometry2DSubsystem(
         aruwsrc::Drivers* drivers,
-        aruwsrc::control::turret::TurretMotor* turret,
+        const aruwsrc::control::turret::TurretMotor* turret,
         tap::control::chassis::ChassisSubsystemInterface* chassis);
 
     void refresh() override;

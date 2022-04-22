@@ -64,8 +64,9 @@ public:
 
     /**
      * Sets (and limits!) the chassis frame turret measurement.
-     * 
-     * The setpoint is limited between the min and max config angles as specified in the constructor.
+     *
+     * The setpoint is limited between the min and max config angles as specified in the
+     * constructor.
      */
     mockable void setChassisFrameSetpoint(float setpoint);
 

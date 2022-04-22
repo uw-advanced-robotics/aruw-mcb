@@ -49,12 +49,12 @@ public:
     /**
      * @param[in] drivers a pointer to the aruwsrc drivers struct. Used for accessing the
      *      turretMCB IMU
-     * @param[in] turret a pointer to the turret motor used for getting world frame axes. Used to
-     * get yaw angle of chassis relative to turret.
+     * @param[in] turret a pointer to the yaw turret motor used for getting world frame axes. Used
+     * to get yaw angle of chassis relative to turret.
      */
     OttoChassisWorldYawObserver(
         aruwsrc::Drivers* drivers,
-        aruwsrc::control::turret::TurretMotor* turret);
+        const aruwsrc::control::turret::TurretMotor* turret);
 
     /**
      * Get the current chassis yaw in radians.
@@ -71,7 +71,7 @@ public:
 
 private:
     aruwsrc::Drivers* drivers;
-    aruwsrc::control::turret::TurretMotor* turretMotor;
+    const aruwsrc::control::turret::TurretMotor* turretMotor;
 };
 
 }  // namespace aruwsrc::algorithms::odometry
