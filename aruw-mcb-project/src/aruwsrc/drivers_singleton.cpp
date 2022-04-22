@@ -26,8 +26,8 @@ namespace aruwsrc
 
 aruwsrc::Drivers* DoNotUse_getDrivers()
 {
-    static aruwsrc::Drivers* singleton_drivers = new aruwsrc::Drivers();
-    return singleton_drivers;
+    static aruwsrc::Drivers singletonDrivers;
+    return &singletonDrivers;
 }
 
 }  // namespace aruwsrc
