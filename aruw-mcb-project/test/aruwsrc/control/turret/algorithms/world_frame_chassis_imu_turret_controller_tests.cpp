@@ -45,7 +45,7 @@ protected:
         : turretMotor(&motor, TURRET_MOTOR_CONFIG),
           turretController(&drivers, &turretMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           yawValue(0, 0, M_TWOPI),
-          setpoint(0, 0, M_TWOPI)
+          setpoint(0)
     {
     }
 
@@ -53,7 +53,7 @@ protected:
     {
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
         ON_CALL(turretMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(yawValue));
-        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(setpoint));
+        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&setpoint));
         ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(TURRET_MOTOR_CONFIG));
     }
 
@@ -63,7 +63,7 @@ protected:
     WorldFrameYawChassisImuTurretController turretController;
     float mpu6500Yaw = 0;
     ContiguousFloat yawValue;
-    ContiguousFloat setpoint;
+    float setpoint;
 };
 
 TEST_F(

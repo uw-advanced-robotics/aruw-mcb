@@ -181,7 +181,7 @@ protected:
               &turretSubsystem.pitchMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          chassisFrameSetpoint(0, 0, M_TWOPI)
+          chassisFrameSetpoint(0)
     {
     }
 
@@ -195,9 +195,9 @@ protected:
             .WillByDefault(ReturnPointee(&imuVelocity));
 
         ON_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint)
-            .WillByDefault([&](float setpoint) { chassisFrameSetpoint.setValue(setpoint); });
+            .WillByDefault([&](float setpoint) { chassisFrameSetpoint = setpoint; });
         ON_CALL(turretSubsystem.pitchMotor, getChassisFrameSetpoint)
-            .WillByDefault(ReturnRef(chassisFrameSetpoint));
+            .WillByDefault(ReturnPointee(&chassisFrameSetpoint));
     }
 
     static inline float transformWorldFrameValueToChassisFrame(
@@ -221,7 +221,7 @@ protected:
     WorldFramePitchTurretImuCascadePidTurretController turretController;
 
 private:
-    tap::algorithms::ContiguousFloat chassisFrameSetpoint;
+    float chassisFrameSetpoint;
 };
 
 static float computeCGOffset(float pitchAngleFromCenter = 0.0f)

@@ -32,7 +32,7 @@ namespace aruwsrc::control::turret
 TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig)
     : config(motorConfig),
       motor(motor),
-      chassisFrameSetpoint(config.startAngle, 0, M_TWOPI),
+      chassisFrameSetpoint(config.startAngle),
       chassisFrameMeasuredAngle(config.startAngle, 0, M_TWOPI),
       lastUpdatedEncoderValue(config.startEncoderValue),
       chassisFrameUnwrappedMeasurement(config.startAngle)
@@ -44,23 +44,20 @@ void TurretMotor::updateMotorAngle()
 {
     if (isOnline())
     {
-        uint16_t encoder = motor->getEncoderWrapped();
-        if (lastUpdatedEncoderValue == encoder)
+        int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
+        if (lastUpdatedEncoderValue == encoderUnwrapped)
         {
             return;
         }
 
-        lastUpdatedEncoderValue = encoder;
-
-        chassisFrameMeasuredAngle.setValue(
-            modm::toRadian(DjiMotor::encoderToDegrees(
-                static_cast<uint16_t>(encoder - config.startEncoderValue))) +
-            config.startAngle);
+        lastUpdatedEncoderValue = encoderUnwrapped;
 
         chassisFrameUnwrappedMeasurement =
-            modm::toRadian(DjiMotor::encoderToDegrees(
-                motor->getEncoderUnwrapped() - static_cast<int64_t>(config.startEncoderValue))) +
+            static_cast<float>(encoderUnwrapped - static_cast<int64_t>(config.startEncoderValue)) *
+                M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
             config.startAngle;
+
+        chassisFrameMeasuredAngle.setValue(chassisFrameUnwrappedMeasurement);
     }
     else
     {
@@ -81,38 +78,18 @@ void TurretMotor::setMotorOutput(float out)
 
     if (motor->isMotorOnline())
     {
-        // If angle equal to min or max angle, set desired output to desired output
-        if (config.limitMotorAngles)
-        {
-            // Wrap angle between min, max
-            ContiguousFloat limitedVal(
-                ContiguousFloat::limitValue(
-                    chassisFrameMeasuredAngle,
-                    config.minAngle,
-                    config.maxAngle),
-                0,
-                M_TWOPI);
-
-            if ((abs(limitedVal.difference(config.minAngle)) < 1E-5 && out < 0) ||
-                (abs(limitedVal.difference(config.maxAngle)) < 1E-5 && out > 0))
-            {
-                motor->setDesiredOutput(0);
-                return;
-            }
-        }
-
         motor->setDesiredOutput(out);
     }
 }
 
 void TurretMotor::setChassisFrameSetpoint(float setpoint)
 {
-    chassisFrameSetpoint.setValue(setpoint);
     if (config.limitMotorAngles)
     {
-        chassisFrameSetpoint.setValue(
-            ContiguousFloat::limitValue(chassisFrameSetpoint, config.minAngle, config.maxAngle));
+        setpoint = limitVal(setpoint, config.minAngle, config.maxAngle);
     }
+
+    chassisFrameSetpoint = setpoint;
 }
 
 float TurretMotor::getValidChassisMeasurementError() const
@@ -124,12 +101,14 @@ float TurretMotor::getValidMinError(const float measurement) const
 {
     if (config.limitMotorAngles)
     {
-        return chassisFrameSetpoint.getValue() - measurement;
+        // the error is absolute
+        return chassisFrameSetpoint - measurement;
     }
     else
     {
+        // the error can be wrapped around the unit circle
         // equivalent to this - other
-        return -chassisFrameSetpoint.difference(measurement);
+        return ContiguousFloat(measurement, 0, M_TWOPI).difference(chassisFrameSetpoint);
     }
 }
 }  // namespace aruwsrc::control::turret

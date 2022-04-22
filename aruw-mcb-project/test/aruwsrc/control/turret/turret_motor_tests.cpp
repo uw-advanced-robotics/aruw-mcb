@@ -40,7 +40,7 @@ protected:
         .startAngle = M_PI_2,
         .startEncoderValue = 2000,
         .minAngle = 0,
-        .maxAngle = modm::toRadian(179),
+        .maxAngle = M_PI,
         .limitMotorAngles = true,
     };
 
@@ -54,14 +54,23 @@ protected:
     {
         ON_CALL(motor, isMotorOnline).WillByDefault(ReturnPointee(&motorOnline));
         ON_CALL(motor, getEncoderWrapped).WillByDefault(ReturnPointee(&encoderWrapped));
-        ON_CALL(motor, getEncoderUnwrapped).WillByDefault(ReturnPointee(&encoderWrapped));
+        ON_CALL(motor, getEncoderUnwrapped).WillByDefault(ReturnPointee(&encoderUnwrapped));
+    }
+
+    void setEncoder(int64_t encoderUnwrapped)
+    {
+        this->encoderUnwrapped = encoderUnwrapped;
+        encoderWrapped = encoderUnwrapped % DjiMotor::ENC_RESOLUTION;
     }
 
     Drivers drivers;
     NiceMock<DjiMotorMock> motor;
     TurretMotor turretMotor;
     bool motorOnline = true;
+
+private:
     uint16_t encoderWrapped = 0;
+    int64_t encoderUnwrapped = 0;
 };
 
 TEST_F(TurretMotorTest, isOnline_reflective_of_motor_online)
@@ -90,7 +99,7 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint__limited_to_min_max_when_limit_a
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
         turretMotor.setChassisFrameSetpoint(inputAngle);
-        EXPECT_NEAR(expectedAngle, turretMotor.getChassisFrameSetpoint().getValue(), 1E-3);
+        EXPECT_NEAR(expectedAngle, turretMotor.getChassisFrameSetpoint(), 1E-3);
     }
 }
 
@@ -105,16 +114,16 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint__not_limited_when_limit_angles_f
     const float pastMinAngle = motorConfig.minAngle - offsetAngle;
     const float pastMaxAngle = motorConfig.maxAngle + offsetAngle;
 
-    std::vector<std::tuple<float, float>> limitedAndInputAnglePairs{
-        {motorConfig.startAngle, motorConfig.startAngle},
-        {ContiguousFloat(pastMinAngle, 0, M_TWOPI).getValue(), pastMinAngle},
-        {ContiguousFloat(pastMaxAngle, 0, M_TWOPI).getValue(), pastMaxAngle},
+    std::vector<float> limitedAndInputAnglePairs{
+        {motorConfig.startAngle},
+        {pastMinAngle},
+        {pastMaxAngle},
     };
 
-    for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
+    for (auto expectedAngle : limitedAndInputAnglePairs)
     {
-        turretMotor.setChassisFrameSetpoint(inputAngle);
-        EXPECT_NEAR(expectedAngle, turretMotor.getChassisFrameSetpoint().getValue(), 1E-3);
+        turretMotor.setChassisFrameSetpoint(expectedAngle);
+        EXPECT_NEAR(expectedAngle, turretMotor.getChassisFrameSetpoint(), 1E-3);
     }
 }
 
@@ -149,7 +158,7 @@ TEST_F(
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
     {
-        encoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
+        setEncoder(encoder);
         turretMotor.updateMotorAngle();
         EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().difference(angle), 1E-3);
     }
@@ -180,7 +189,7 @@ TEST_F(TurretMotorTest, getAngleFromCenter__valid_encoder_angles)
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
     {
-        encoderWrapped = encoder % DjiMotor::ENC_RESOLUTION;
+        setEncoder(encoder);
         turretMotor.updateMotorAngle();
         EXPECT_NEAR(angle, turretMotor.getAngleFromCenter(), 1E-3);
     }
@@ -199,7 +208,7 @@ TEST_F(
     TurretMotorTest,
     setMotorOutput__desired_output_identical_to_input_when_turret_online_and_enc_within_bounds)
 {
-    encoderWrapped = TURRET_MOTOR_CONFIG.startEncoderValue;
+    setEncoder(TURRET_MOTOR_CONFIG.startEncoderValue);
 
     InSequence seq;
     EXPECT_CALL(motor, setDesiredOutput(1000));
@@ -237,50 +246,11 @@ TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_m
     EXPECT_CALL(motor, setDesiredOutput(1000));
 
     // desired output negative, equal to min
-    encoderWrapped = minEncoderValue;
-    turretMotor.updateMotorAngle();
+    setEncoder(minEncoderValue);
     turretMotor.setMotorOutput(-1000);
 
     // desired output position, equal to max
-    encoderWrapped = maxEncoderValue;
-    turretMotor.updateMotorAngle();
-    turretMotor.setMotorOutput(1000);
-}
-
-TEST_F(
-    TurretMotorTest,
-    setMotorOutput__desired_output_0_if_out_of_bounds_and_input_des_output_wrong_way)
-{
-    uint16_t lessThanMinEncoderValue =
-        ContiguousFloat(
-            TURRET_MOTOR_CONFIG.startEncoderValue +
-                +(TURRET_MOTOR_CONFIG.minAngle - TURRET_MOTOR_CONFIG.startAngle -
-                  modm::toRadian(10)) *
-                    DjiMotor::ENC_RESOLUTION / M_TWOPI,
-            0,
-            DjiMotor::ENC_RESOLUTION)
-            .getValue();
-    uint16_t greaterThanMaxEncoderValue =
-        ContiguousFloat(
-            TURRET_MOTOR_CONFIG.startEncoderValue +
-                +(TURRET_MOTOR_CONFIG.maxAngle - TURRET_MOTOR_CONFIG.startAngle +
-                  modm::toRadian(10)) *
-                    DjiMotor::ENC_RESOLUTION / M_TWOPI,
-            0,
-            DjiMotor::ENC_RESOLUTION)
-            .getValue();
-
-    InSequence seq;
-    EXPECT_CALL(motor, setDesiredOutput(0));
-    EXPECT_CALL(motor, setDesiredOutput(0));
-
-    // desired output negative, angle less than min
-    encoderWrapped = lessThanMinEncoderValue;
-    turretMotor.updateMotorAngle();
-    turretMotor.setMotorOutput(-1000);
-
-    // desired output position, angle greater than max
-    encoderWrapped = greaterThanMaxEncoderValue;
+    setEncoder(maxEncoderValue);
     turretMotor.updateMotorAngle();
     turretMotor.setMotorOutput(1000);
 }
@@ -288,7 +258,7 @@ TEST_F(
 TEST_F(TurretMotorTest, updateMotorAngle_sets_actual_angle_back_to_start_when_offline)
 {
     // Initially turret online
-    encoderWrapped = TURRET_MOTOR_CONFIG.startEncoderValue + 1000;
+    setEncoder(TURRET_MOTOR_CONFIG.startEncoderValue + 1000);
 
     turretMotor.updateMotorAngle();
 
@@ -371,4 +341,62 @@ TEST_F(TurretMotorTest, getValidMinError_large_min_max_values)
     }
 }
 
-TEST_F(TurretMotorTest, getValidMinError_large_swapped_min_max_values) {}
+TEST_F(TurretMotorTest, setChassisFrameSetpoint_large_min_max_difference_limited_correctly)
+{
+    TurretMotorConfig mc = {
+        .startAngle = 0,
+        .startEncoderValue = 0,
+        .minAngle = -M_PI,
+        .maxAngle = M_PI,
+        .limitMotorAngles = true,
+    };
+    TurretMotor tm(&motor, mc);
+
+    tm.setChassisFrameSetpoint(-M_TWOPI);
+    EXPECT_NEAR(-M_PI, tm.getChassisFrameSetpoint(), 1E-3);
+
+    tm.setChassisFrameSetpoint(M_TWOPI);
+    EXPECT_NEAR(M_PI, tm.getChassisFrameSetpoint(), 1E-3);
+}
+
+static int64_t getEncoderUnwrapped(const TurretMotorConfig &motorConfig, float angle)
+{
+    return static_cast<int64_t>(motorConfig.startEncoderValue) +
+           static_cast<int64_t>(DjiMotor::ENC_RESOLUTION) * (angle - motorConfig.startAngle) /
+               M_TWOPI;
+}
+
+TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
+{
+    TurretMotorConfig mc = {
+        .startAngle = 0,
+        .startEncoderValue = 0,
+        .minAngle = -M_TWOPI,
+        .maxAngle = M_TWOPI,
+        .limitMotorAngles = true,
+    };
+    TurretMotor tm(&motor, mc);
+
+    motorOnline = true;
+
+    std::vector<std::tuple<float, float, float>> errorMeasurementsToTest = {
+        {-M_TWOPI, -M_TWOPI, 0},
+        {-M_TWOPI, 0, M_TWOPI},
+        {-M_TWOPI, M_TWOPI, 2 * M_TWOPI},
+        {M_TWOPI, -M_TWOPI, -2 * M_TWOPI},
+    };
+
+    for (auto [measured, setpoint, expectedErr] : errorMeasurementsToTest)
+    {
+        setEncoder(getEncoderUnwrapped(mc, measured));
+        tm.updateMotorAngle();
+
+        EXPECT_NEAR(measured, tm.getChassisFrameUnwrappedMeasuredAngle(), 1E-3);
+
+        tm.setChassisFrameSetpoint(setpoint);
+
+        EXPECT_NEAR(setpoint, tm.getChassisFrameSetpoint(), 1E-3);
+
+        EXPECT_NEAR(expectedErr, tm.getValidChassisMeasurementError(), 1E-3);
+    }
+}

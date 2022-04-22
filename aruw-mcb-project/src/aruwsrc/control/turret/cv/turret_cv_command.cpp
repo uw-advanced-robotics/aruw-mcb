@@ -85,6 +85,18 @@ void TurretCVCommand::execute()
     {
         pitchSetpoint = targetPitch;
         yawSetpoint = targetYaw;
+
+        // the setpoint returned by the ballistics solver is between [0, 2*PI)
+        // the desired setpoint is not required to be between [0, 2*PI)
+        // so, find the setpoint that is closest to the unwrapped measured angle
+        // (this is only an issue for turrets w/o a slip ring)
+        if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
+        {
+            // TODO fix for non-chassis frame controllers
+            const float yawMeasured =
+                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle();
+            yawSetpoint = fmod(yawSetpoint - yawMeasured, M_TWOPI) + yawMeasured;
+        }
     }
     else
     {

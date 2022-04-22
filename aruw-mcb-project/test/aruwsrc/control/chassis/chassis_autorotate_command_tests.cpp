@@ -34,7 +34,13 @@ using namespace aruwsrc::control::turret;
 class ChassisAutorotateCommandTest : public Test
 {
 protected:
-    ChassisAutorotateCommandTest() : drivers(), chassis(&drivers), turret(&drivers) {}
+    ChassisAutorotateCommandTest()
+        : drivers(),
+          chassis(&drivers),
+          turret(&drivers),
+          turretConfig{0, 0, 0, M_PI, false}
+    {
+    }
 
     void SetUp() override
     {
@@ -117,7 +123,7 @@ struct TurretOnlineTestStruct
     float y = 0;
     float r = 0;
     float yawAngle = 0;
-    ContiguousFloat yawSetpoint = ContiguousFloat(0, 0, M_TWOPI);
+    float yawSetpoint = 0;
     bool yawLimited = false;
     ChassisAutorotateCommand::ChassisSymmetry chassisSymmetry =
         ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE;
@@ -135,7 +141,7 @@ public:
                                  M_PI)
                                  .getValue()),
           cac(&drivers, &chassis, &turret.yawMotor, GetParam().chassisSymmetry),
-          turretAngleActualContiguous(GetParam().yawAngle, 0, 360)
+          turretAngleActual(GetParam().yawAngle, 0, M_TWOPI)
     {
     }
 
@@ -158,9 +164,9 @@ public:
         ON_CALL(turret.yawMotor, getAngleFromCenter).WillByDefault(Return(yawAngleFromCenter));
         ON_CALL(turret.yawMotor, getChassisFrameVelocity).WillByDefault(Return(0));
         ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
-            .WillByDefault(ReturnRef(turretAngleActualContiguous));
+            .WillByDefault(ReturnRef(turretAngleActual));
         ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
-            .WillByDefault(ReturnRef(GetParam().yawSetpoint));
+            .WillByDefault(ReturnPointee(&GetParam().yawSetpoint));
 
         ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
             return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);
@@ -170,7 +176,7 @@ public:
     float yawAngleFromCenter;
 
     ChassisAutorotateCommand cac;
-    ContiguousFloat turretAngleActualContiguous;
+    ContiguousFloat turretAngleActual;
 };
 
 TEST_P(TurretOnlineTest, execute_rotated_xy)
@@ -193,17 +199,17 @@ TEST_P(TurretOnlineTest, execute_autorotation_works)
     if (!GetParam().yawLimited &&
         GetParam().chassisSymmetry == ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90)
     {
-        yawAnglesWhereNoAutorotation.push_back(-90);
-        yawAnglesWhereNoAutorotation.push_back(90);
-        yawAnglesWhereNoAutorotation.push_back(-180);
-        yawAnglesWhereNoAutorotation.push_back(180);
+        yawAnglesWhereNoAutorotation.push_back(-M_PI_2);
+        yawAnglesWhereNoAutorotation.push_back(M_PI_2);
+        yawAnglesWhereNoAutorotation.push_back(-M_PI);
+        yawAnglesWhereNoAutorotation.push_back(M_PI);
     }
     else if (
         !GetParam().yawLimited &&
         GetParam().chassisSymmetry == ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180)
     {
-        yawAnglesWhereNoAutorotation.push_back(-180);
-        yawAnglesWhereNoAutorotation.push_back(180);
+        yawAnglesWhereNoAutorotation.push_back(-M_PI);
+        yawAnglesWhereNoAutorotation.push_back(M_PI);
     }
 
     for (float val : yawAnglesWhereNoAutorotation)
@@ -216,8 +222,8 @@ TEST_P(TurretOnlineTest, execute_autorotation_works)
 
     if (GetParam().chassisSymmetry != ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE &&
         !GetParam().yawLimited &&
-        turretAngleActualContiguous.difference(GetParam().yawSetpoint) >
-            (180 - ChassisAutorotateCommand::TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
+        turretAngleActual.difference(GetParam().yawSetpoint) >
+            (M_PI - ChassisAutorotateCommand::TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         shouldAutorotate = false;
     }
@@ -234,110 +240,110 @@ TEST_P(TurretOnlineTest, execute_autorotation_works)
     cac.execute();
 }
 
-// INSTANTIATE_TEST_SUITE_P(
-//     ChassisAutorotateCommand,
-//     TurretOnlineTest,
-//     Values(
-//         TurretOnlineTestStruct{
-//             .x = 0,
-//             .y = 0,
-//             .r = 0,
-//             .yawAngle = M_PI_4,
-//             .yawSetpoint = ContiguousFloat(0, 0, M_TWOPI),
-//             .yawLimited = true,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = 10,
-//             .y = 10,
-//             .r = 10,
-//             .yawAngle = M_PI_2,
-//             .yawSetpoint = ContiguousFloat(0, 0, M_TWOPI),
-//             .yawLimited = true,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = -10,
-//             .y = -10,
-//             .r = -10,
-//             .yawAngle = -M_PI_4,
-//             .yawSetpoint = ContiguousFloat(0, 0, M_TWOPI),
-//             .yawLimited = true,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = -10,
-//             .y = 0,
-//             .r = 10,
-//             .yawAngle = modm::toRadian(-135),
-//             .yawSetpoint = ContiguousFloat(0, 0, M_TWOPI),
-//             .yawLimited = true,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = 0,
-//             .y = 0,
-//             .r = 0,
-//             .yawAngle = -M_PI,
-//             .yawSetpoint = ContiguousFloat(0, 0, M_TWOPI),
-//             .yawLimited = true,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = 0,
-//             .y = 0,
-//             .r = 0,
-//             .yawAngle = 0,
-//             .yawSetpoint = ContiguousFloat(M_PI, 0, M_TWOPI),
-//             .yawLimited = true,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = 0,
-//             .y = 0,
-//             .r = 0,
-//             .yawAngle = M_PI
-//             .yawSetpoint = ContiguousFloat(M_PI, 0, M_TWOPI),
-//             .yawLimited = false,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = 0,
-//             .y = 0,
-//             .r = 0,
-//             .yawAngle = -180,
-//             .yawSetpoint = ContiguousFloat(0, 0, M_TWOPI),
-//             .yawLimited = false,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = 0,
-//             .y = 0,
-//             .r = 0,
-//             .yawAngle = 45,
-//             .yawSetpoint = ContiguousFloat(-M_PI_4, 0, M_TWOPI),
-//             .yawLimited = true,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
-//         },
-//         TurretOnlineTestStruct{
-//             .x = 0,
-//             .y = 0,
-//             .r = 0,
-//             .yawAngle = 0,
-//             .yawSetpoint = ContiguousFloat(M_PI_2, 0, M_TWOPI),
-//             .yawLimited = false,
-//             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
-//         }),
-//     [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
-//         std::stringstream ss;
-//         ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) <<
-//         "_r_"
-//            << PrintToString(info.param.r) << "_yawAngle_" << PrintToString(info.param.yawAngle)
-//            << "_yawSetpoint_" << PrintToString(info.param.yawSetpoint.getValue()) <<
-//            "_yawLimited_"
-//            << PrintToString(info.param.yawLimited) << "_chassisSymmetry_"
-//            << PrintToString(static_cast<int>(info.param.chassisSymmetry));
-//         std::string s = ss.str();
-//         std::replace(s.begin(), s.end(), '-', '_');
-//         return s;
-//     });
+INSTANTIATE_TEST_SUITE_P(
+    ChassisAutorotateCommand,
+    TurretOnlineTest,
+    Values(
+        // TurretOnlineTestStruct{
+        //     .x = 0,
+        //     .y = 0,
+        //     .r = 0,
+        //     .yawAngle = M_PI_4,
+        //     .yawSetpoint = 0,
+        //     .yawLimited = true,
+        //     .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        // },
+        // TurretOnlineTestStruct{
+        //     .x = 10,
+        //     .y = 10,
+        //     .r = 10,
+        //     .yawAngle = M_PI_2,
+        //     .yawSetpoint = 0,
+        //     .yawLimited = true,
+        //     .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        // },
+        // TurretOnlineTestStruct{
+        //     .x = -10,
+        //     .y = -10,
+        //     .r = -10,
+        //     .yawAngle = -M_PI_4,
+        //     .yawSetpoint = 0,
+        //     .yawLimited = true,
+        //     .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        // },
+        // TurretOnlineTestStruct{
+        //     .x = -10,
+        //     .y = 0,
+        //     .r = 10,
+        //     .yawAngle = modm::toRadian(-135),
+        //     .yawSetpoint = 0,
+        //     .yawLimited = true,
+        //     .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        // },
+        // TurretOnlineTestStruct{
+        //     .x = 0,
+        //     .y = 0,
+        //     .r = 0,
+        //     .yawAngle = -M_PI,
+        //     .yawSetpoint = 0,
+        //     .yawLimited = true,
+        //     .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        // },
+        // TurretOnlineTestStruct{
+        //     .x = 0,
+        //     .y = 0,
+        //     .r = 0,
+        //     .yawAngle = 0,
+        //     .yawSetpoint = M_PI,
+        //     .yawLimited = true,
+        //     .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
+        // },
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = M_PI,
+            .yawSetpoint = M_PI,
+            .yawLimited = false,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
+        },
+        // TurretOnlineTestStruct{
+        //     .x = 0,
+        //     .y = 0,
+        //     .r = 0,
+        //     .yawAngle = -M_PI,
+        //     .yawSetpoint = 0,
+        //     .yawLimited = false,
+        //     .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
+        // },
+        // TurretOnlineTestStruct{
+        //     .x = 0,
+        //     .y = 0,
+        //     .r = 0,
+        //     .yawAngle = M_PI_4,
+        //     .yawSetpoint = -M_PI_4,
+        //     .yawLimited = true,
+        //     .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
+        // },
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = 0,
+            .yawSetpoint = M_PI_2,
+            .yawLimited = false,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
+        }),
+    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
+        std::stringstream ss;
+        ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) << "_r_"
+           << PrintToString(info.param.r) << "_yawAngle_"
+           << PrintToString(static_cast<int>(modm::toDegree(info.param.yawAngle)))
+           << "_yawSetpoint_"
+           << PrintToString(static_cast<int>(modm::toDegree(info.param.yawSetpoint)))
+           << "_yawLimited_" << PrintToString(info.param.yawLimited) << "_chassisSymmetry_"
+           << PrintToString(static_cast<int>(info.param.chassisSymmetry));
+        std::string s = ss.str();
+        std::replace(s.begin(), s.end(), '-', '_');
+        return s;
+    });

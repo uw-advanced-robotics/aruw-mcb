@@ -74,16 +74,19 @@ public:
     mockable inline bool isOnline() const { return motor->isMotorOnline(); }
 
     /// @return turret motor angle setpoint relative to the chassis, in radians
-    mockable inline const tap::algorithms::ContiguousFloat &getChassisFrameSetpoint() const
-    {
-        return chassisFrameSetpoint;
-    }
+    mockable inline float getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
 
     /// @return turret motor measurement relative to the chassis, in radians, wrapped between [0, 2
     /// PI)
     mockable inline const tap::algorithms::ContiguousFloat &getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
+    }
+
+    /// @return turret motor measurement in chassis frame, unwrapped.
+    mockable inline float getChassisFrameUnwrappedMeasuredAngle() const
+    {
+        return chassisFrameUnwrappedMeasurement;
     }
 
     /// @return angular velocity of the turret, in rad/sec.
@@ -138,10 +141,10 @@ private:
 
     /// Associated turret controller interface that is being used by a command to control this motor
     const algorithms::TurretControllerInterface *turretController;
-    tap::algorithms::ContiguousFloat chassisFrameSetpoint;
+    float chassisFrameSetpoint;
     tap::algorithms::ContiguousFloat chassisFrameMeasuredAngle;
 
-    uint16_t lastUpdatedEncoderValue;
+    int64_t lastUpdatedEncoderValue;
 
     float chassisFrameUnwrappedMeasurement;
 };

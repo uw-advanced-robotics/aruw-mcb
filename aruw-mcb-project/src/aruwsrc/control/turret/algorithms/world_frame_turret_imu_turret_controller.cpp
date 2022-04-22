@@ -111,7 +111,7 @@ static inline void updateYawWorldFrameSetpoint(
         worldFrameYawSetpoint->setValue(transformChassisFrameToWorldFrame(
             chassisFrameYaw,
             worldFrameYawAngle,
-            turretMotor->getChassisFrameSetpoint().getValue()));
+            turretMotor->getChassisFrameSetpoint()));
     }
 }
 
@@ -139,7 +139,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::initialize()
         worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
             turretMotor->getChassisFrameMeasuredAngle().getValue(),
             drivers->turretMCBCanComm.getYaw(),
-            turretMotor->getChassisFrameSetpoint().getValue()));
+            turretMotor->getChassisFrameSetpoint()));
 
         turretMotor->attachTurretController(this);
     }
@@ -193,7 +193,7 @@ HeroTurretImuCascadePidTurretController::HeroTurretImuCascadePidTurretController
       drivers(drivers),
       positionPid(fuzzyPidConfig, posPidConfig),
       velocityPid(velPidConfig),
-      worldFrameSetpoint(0, 0, 360)
+      worldFrameSetpoint(0, 0, M_TWOPI)
 {
 }
 
@@ -208,7 +208,7 @@ void HeroTurretImuCascadePidTurretController::initialize()
         worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
             turretMotor->getChassisFrameMeasuredAngle().getValue(),
             drivers->turretMCBCanComm.getYaw(),
-            turretMotor->getChassisFrameSetpoint().getValue()));
+            turretMotor->getChassisFrameSetpoint()));
 
         turretMotor->attachTurretController(this);
     }
@@ -290,7 +290,7 @@ static inline void updatePitchWorldFrameSetpoint(
     worldFramePitchSetpoint->setValue(transformChassisFrameToWorldFrame(
         turretMotor->getChassisFrameMeasuredAngle().getValue(),
         worldFramePitchAngle,
-        turretMotor->getChassisFrameSetpoint().getValue()));
+        turretMotor->getChassisFrameSetpoint()));
 }
 
 WorldFramePitchTurretImuCascadePidTurretController::
@@ -317,7 +317,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::initialize()
         worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
             turretMotor->getChassisFrameMeasuredAngle().getValue(),
             drivers->turretMCBCanComm.getPitch(),
-            turretMotor->getChassisFrameSetpoint().getValue()));
+            turretMotor->getChassisFrameSetpoint()));
 
         turretMotor->attachTurretController(this);
     }

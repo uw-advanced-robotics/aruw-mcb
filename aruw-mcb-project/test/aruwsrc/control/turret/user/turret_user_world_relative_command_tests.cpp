@@ -34,18 +34,6 @@ using namespace tap::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
-// static float computeValidMeasurementSetpointError(const TurretMotor &motor,
-// float setpoint, float measurement) {
-//     // motor.get
-
-//     tap::algorithms::ContiguousFloat setpointMeasurementDiff(setpoint, 0, M_TWOPI);
-//     setpointMeasurementDiff.difference(measurement);
-
-//     // Get chassis frame setpoint
-
-//     return 0;
-// }
-
 class TurretUserWorldRelativeCommandTest : public Test
 {
 protected:
@@ -77,8 +65,8 @@ protected:
               1),
           currentYawValue(0, 0, M_TWOPI),
           currentPitchValue(0, 0, M_TWOPI),
-          yawSetpoint(0, 0, M_TWOPI),
-          pitchSetpoint(0, 0, M_TWOPI)
+          yawSetpoint(0),
+          pitchSetpoint(0)
     {
     }
 
@@ -92,8 +80,10 @@ protected:
         ON_CALL(turret.pitchMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
         ON_CALL(drivers.turretMCBCanComm, isConnected)
             .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));
-        ON_CALL(turret.yawMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(yawSetpoint));
-        ON_CALL(turret.pitchMotor, getChassisFrameSetpoint).WillByDefault(ReturnRef(pitchSetpoint));
+        ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnPointee(&yawSetpoint));
+        ON_CALL(turret.pitchMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnPointee(&pitchSetpoint));
         ON_CALL(turret.yawMotor, getConfig).WillByDefault(ReturnRef(config));
         ON_CALL(turret.pitchMotor, getConfig).WillByDefault(ReturnRef(config));
     }
@@ -107,8 +97,8 @@ protected:
     TurretUserWorldRelativeCommand turretCmd;
     ContiguousFloat currentYawValue;
     ContiguousFloat currentPitchValue;
-    ContiguousFloat yawSetpoint;
-    ContiguousFloat pitchSetpoint;
+    float yawSetpoint;
+    float pitchSetpoint;
     bool turretOnline = false;
     bool turretMcbCanCommConnected = false;
     TurretMotorConfig config = {};

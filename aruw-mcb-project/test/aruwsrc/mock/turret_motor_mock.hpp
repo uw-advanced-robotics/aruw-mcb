@@ -44,16 +44,13 @@ public:
         (override));
     MOCK_METHOD(void, setChassisFrameSetpoint, (float), (override));
     MOCK_METHOD(bool, isOnline, (), (const override));
-    MOCK_METHOD(
-        const tap::algorithms::ContiguousFloat &,
-        getChassisFrameSetpoint,
-        (),
-        (const override));
+    MOCK_METHOD(float, getChassisFrameSetpoint, (), (const override));
     MOCK_METHOD(
         const tap::algorithms::ContiguousFloat &,
         getChassisFrameMeasuredAngle,
         (),
         (const override));
+    MOCK_METHOD(float, getChassisFrameUnwrappedMeasuredAngle, (), (const override));
     MOCK_METHOD(float, getChassisFrameVelocity, (), (const override));
     MOCK_METHOD(float, getAngleFromCenter, (), (const override));
     MOCK_METHOD(
@@ -64,6 +61,9 @@ public:
     MOCK_METHOD(const control::turret::TurretMotorConfig &, getConfig, (), (const override));
     MOCK_METHOD(float, getValidChassisMeasurementError, (), (const override));
     MOCK_METHOD(float, getValidMinError, (const float), (const override));
+
+private:
+    aruwsrc::control::turret::TurretMotorConfig defaultConfig;
 };
 }  // namespace aruwsrc::mock
 

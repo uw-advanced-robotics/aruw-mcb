@@ -140,9 +140,9 @@ void ImuCalibrateCommand::execute()
     // don't run pitch controller when turret IMU not on pitch (as there is no need)
     if (turretImuOnPitch)
     {
-        pitchController->runController(dt, turret->pitchMotor.getChassisFrameSetpoint().getValue());
+        pitchController->runController(dt, turret->pitchMotor.getChassisFrameSetpoint());
     }
-    yawController->runController(dt, turret->yawMotor.getChassisFrameSetpoint().getValue());
+    yawController->runController(dt, turret->yawMotor.getChassisFrameSetpoint());
 }
 
 void ImuCalibrateCommand::end(bool)

@@ -62,7 +62,7 @@ void ChassisFrameYawTurretController::runController(const uint32_t dt, const flo
 
 float ChassisFrameYawTurretController::getSetpoint() const
 {
-    return turretMotor->getChassisFrameSetpoint().getValue();
+    return turretMotor->getChassisFrameSetpoint();
 }
 
 bool ChassisFrameYawTurretController::isOnline() const { return turretMotor->isOnline(); }
@@ -108,7 +108,7 @@ void ChassisFramePitchTurretController::runController(
 
 float ChassisFramePitchTurretController::getSetpoint() const
 {
-    return turretMotor->getChassisFrameSetpoint().getValue();
+    return turretMotor->getChassisFrameSetpoint();
 }
 
 bool ChassisFramePitchTurretController::isOnline() const { return turretMotor->isOnline(); }
