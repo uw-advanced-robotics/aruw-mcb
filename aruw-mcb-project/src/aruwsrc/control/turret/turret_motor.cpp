@@ -111,4 +111,40 @@ float TurretMotor::getValidMinError(const float measurement) const
         return ContiguousFloat(measurement, 0, M_TWOPI).difference(chassisFrameSetpoint);
     }
 }
+
+float TurretMotor::getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint)
+{
+    return ContiguousFloat(
+               ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint),
+               -M_PI,
+               M_PI)
+               .getValue() +
+           measurement;
+}
+
+float TurretMotor::getSetpointWithinTurretRange(float setpoint) const
+{
+    if (setpoint < config.minAngle)
+    {
+        float newSetpoint = setpoint;
+        while (newSetpoint < config.minAngle)
+        {
+            newSetpoint += M_TWOPI;
+        }
+        return newSetpoint <= config.maxAngle ? newSetpoint : setpoint;
+    }
+
+    if (setpoint > config.maxAngle)
+    {
+        float newSetpoint = setpoint;
+        while (newSetpoint > config.maxAngle)
+        {
+            newSetpoint -= M_TWOPI;
+        }
+        return newSetpoint >= config.minAngle ? newSetpoint : setpoint;
+    }
+
+    return setpoint;
+}
+
 }  // namespace aruwsrc::control::turret

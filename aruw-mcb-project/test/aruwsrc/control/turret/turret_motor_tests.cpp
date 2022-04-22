@@ -400,3 +400,54 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
         EXPECT_NEAR(expectedErr, tm.getValidChassisMeasurementError(), 1E-3);
     }
 }
+
+TEST(TurretMotor, getClosestNonNormalizedSetpointToMeasurement)
+{
+    std::vector<std::tuple<float, float, float>> valuesToTest = {
+        {0, 0, 0},
+        {-M_TWOPI, 0, -M_TWOPI},
+        {M_TWOPI, 0, M_TWOPI},
+        {-M_TWOPI, 0.1, -M_TWOPI + 0.1},
+        {-M_PI, M_PI, -M_PI},
+        {M_PI_2, 0, 0},
+        {M_PI, 0, 0},
+        {M_TWOPI + M_PI_2, -M_TWOPI, M_TWOPI},
+        {M_TWOPI + M_PI_2, -M_TWOPI - M_PI, M_TWOPI + M_PI},
+    };
+
+    for (auto &[measurement, setpoint, nonNormalizedSetpoint] : valuesToTest)
+    {
+        EXPECT_NEAR(
+            nonNormalizedSetpoint,
+            TurretMotor::getClosestNonNormalizedSetpointToMeasurement(measurement, setpoint),
+            1E-3);
+    }
+}
+
+TEST_F(TurretMotorTest, getSetpointWithinTurretRange)
+{
+    TurretMotorConfig mc = {
+        .startAngle = 0,
+        .startEncoderValue = 0,
+        .minAngle = -M_TWOPI,
+        .maxAngle = M_TWOPI,
+        .limitMotorAngles = true,
+    };
+    TurretMotor tm(&motor, mc);
+
+    std::vector<std::tuple<float, float>> valuesToTest = {
+        {0, 0},
+        {-M_TWOPI, -M_TWOPI},
+        {M_TWOPI, M_TWOPI},
+        {M_PI, M_PI},
+        {-M_PI, -M_PI},
+        {-M_TWOPI - 0.1, -0.1},
+        {M_TWOPI + 0.1, 0.1},
+        {4 * M_TWOPI + 0.1, 0.1},
+    };
+
+    for (auto [setpoint, expected] : valuesToTest)
+    {
+        EXPECT_NEAR(expected, tm.getSetpointWithinTurretRange(setpoint), 1E-3);
+    }
+}

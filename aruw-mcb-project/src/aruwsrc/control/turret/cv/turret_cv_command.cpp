@@ -93,9 +93,10 @@ void TurretCVCommand::execute()
         if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
         {
             // TODO fix for non-chassis frame controllers
-            const float yawMeasured =
-                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle();
-            yawSetpoint = fmod(yawSetpoint - yawMeasured, M_TWOPI) + yawMeasured;
+            yawSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
+                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle(),
+                yawSetpoint);
+            yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
         }
     }
     else

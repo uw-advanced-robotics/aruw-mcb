@@ -133,6 +133,10 @@ public:
      */
     mockable float getValidMinError(const float measurement) const;
 
+    static float getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint);
+
+    float getSetpointWithinTurretRange(float setpoint) const;
+
 private:
     const TurretMotorConfig config;
 
