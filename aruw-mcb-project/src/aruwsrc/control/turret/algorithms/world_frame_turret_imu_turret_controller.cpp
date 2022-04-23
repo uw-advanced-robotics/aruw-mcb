@@ -323,8 +323,6 @@ void WorldFramePitchTurretImuCascadePidTurretController::initialize()
     }
 }
 
-float positionControllerError = 0;
-float velocityControllerError = 0;
 void WorldFramePitchTurretImuCascadePidTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
@@ -339,11 +337,11 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         turretMotor);
 
     // Compute error between pitch target and reference angle
-    positionControllerError = -worldFrameSetpoint.difference(worldFramePitchAngle);
+    float positionControllerError = -worldFrameSetpoint.difference(worldFramePitchAngle);
     float positionPidOutput =
         positionPid.runController(positionControllerError, worldFramePitchVelocity, dt);
 
-    velocityControllerError = positionPidOutput - worldFramePitchVelocity;
+    float velocityControllerError = positionPidOutput - worldFramePitchVelocity;
     float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
     velocityPidOutput += computeGravitationalForceOffset(

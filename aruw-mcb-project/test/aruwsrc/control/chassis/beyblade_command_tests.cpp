@@ -95,18 +95,18 @@ TEST_P(BeybladeCommandTest, single_execute)
     bc.execute();
 }
 
-// TEST_P(BeybladeCommandTest, multiple_execute)
-// {
-//     for (int i = 1; i < 10; i++)
-//     {
-//         setupDesiredOutputExpectations(std::min(MAX_R, i * BEYBLADE_RAMP_UPDATE_RAMP));
-//     }
+TEST_P(BeybladeCommandTest, multiple_execute)
+{
+    for (int i = 1; i < 10; i++)
+    {
+        setupDesiredOutputExpectations(std::min(MAX_R, i * BEYBLADE_RAMP_UPDATE_RAMP));
+    }
 
-//     for (int i = 1; i < 10; i++)
-//     {
-//         bc.execute();
-//     }
-// }
+    for (int i = 1; i < 10; i++)
+    {
+        bc.execute();
+    }
+}
 
 INSTANTIATE_TEST_SUITE_P(
     BeybladeCommand,
