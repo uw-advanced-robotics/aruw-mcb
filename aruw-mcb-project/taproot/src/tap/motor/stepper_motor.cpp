@@ -34,9 +34,11 @@ namespace motor
 {
 static constexpr uint16_t ENC_RESOLUTION = 1600;
 
-StepperMotor::StepperMotor(Drivers* drivers, bool motorInverted, const char* name) : drivers(drivers)
+StepperMotor::StepperMotor(Drivers* drivers, bool motorInverted, const char* name)
+    : drivers(drivers),
+      motorName(name),
+      motorInverted(motorInverted)
 {
-    this->motorInverted=motorInverted;
 }
 
 void StepperMotor::initialize()
@@ -58,7 +60,6 @@ void StepperMotor::setDesiredOutput(int32_t desiredOutput)
     {
         drivers->digital.set(direction, true);
     }
-
     drivers->pwm.write(abs(desiredOutput), pulse);
 }
 
@@ -70,7 +71,7 @@ int16_t StepperMotor::getOutputDesired() const
     {
         return 0;
     }
-    else if (motorInverted)
+    else if (desiredOutput > 0)
     {
         return 1;
     }
