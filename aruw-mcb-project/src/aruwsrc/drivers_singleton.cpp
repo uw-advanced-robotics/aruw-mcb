@@ -23,7 +23,6 @@
 
 namespace aruwsrc
 {
-
 aruwsrc::Drivers* DoNotUse_getDrivers()
 {
     static aruwsrc::Drivers singletonDrivers;
