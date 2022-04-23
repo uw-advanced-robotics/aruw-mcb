@@ -128,6 +128,8 @@ void DjiMotor::serializeCanSendData(modm::can::Message* txMessage) const
     txMessage->data[2 * id + 1] = this->getOutputDesired() & 0xFF;
 }
 
+// getter functions
+int16_t DjiMotor::getOutputDesired() const { return desiredOutput; }
 
 uint32_t DjiMotor::getMotorIdentifier() const { return motorIdentifier; }
 
