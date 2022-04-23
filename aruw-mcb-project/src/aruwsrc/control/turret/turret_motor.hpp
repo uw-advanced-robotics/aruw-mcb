@@ -73,7 +73,9 @@ public:
     /// @return `true` if the hardware motor is connected and powered on
     mockable inline bool isOnline() const { return motor->isMotorOnline(); }
 
-    /// @return turret motor angle setpoint relative to the chassis, in radians
+    /**
+     * @return turret motor angle setpoint relative to the chassis, in radians, not normalized
+     */
     mockable inline float getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
 
     /// @return turret motor measurement relative to the chassis, in radians, wrapped between [0, 2
@@ -83,7 +85,7 @@ public:
         return chassisFrameMeasuredAngle;
     }
 
-    /// @return turret motor measurement in chassis frame, unwrapped.
+    /// @return turret motor measurement in chassis frame, unwrapped (not normalized).
     mockable inline float getChassisFrameUnwrappedMeasuredAngle() const
     {
         return chassisFrameUnwrappedMeasurement;
@@ -95,6 +97,10 @@ public:
         return (M_TWOPI / 60) * motor->getShaftRPM();
     }
 
+    /**
+     * @return A normalized angle between [-PI, PI] that is the angle difference between the turret
+     * and the turret motors' specified "start angle".
+     */
     mockable inline float getAngleFromCenter() const
     {
         return tap::algorithms::ContiguousFloat(
@@ -110,8 +116,11 @@ public:
         return turretController;
     }
 
+    /// @return The turret motor config struct associated with this motor
     mockable const TurretMotorConfig &getConfig() const { return config; }
 
+    /// @return valid minimum error between the chassis relative setpoint and measurement, in
+    /// radians
     mockable float getValidChassisMeasurementError() const;
 
     /**
@@ -133,8 +142,29 @@ public:
      */
     mockable float getValidMinError(const float measurement) const;
 
+    /**
+     * "Unwraps" a normalized (between [0, 2PI)) angle. Does so in such a way that setpoint returned
+     * is an equivalent angle to the specified setpoint, but the setpoint returned is the closest
+     * possible angle to the passed in measurement.
+     *
+     * @param[in] measurement Some non-normalized measurement in radians. The returned setpoint will
+     * be the closest possible angle to this measurement.
+     * @param[in] setpoint A setpoint in radians that is assumed to be normalized.
+     *
+     * @return An angle in radians normalized between
+     */
     static float getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint);
 
+    /**
+     * Translates the setpoint that may or may not be within the range of the turret to an angle
+     * that is within the min/max bounds of the turret motor if possible.
+     *
+     * For example, if the minimum angle is -PI and the max angle is PI, if the setpoint is -2*PI
+     * then the value returned is -2*PI + 2*PI = 0. This angle is within the acceptable bounds and
+     * rotationally equivalent to the specified setpoint.
+     *
+     * @param[in] setpoint Some non-normalized turret setpoint, in radians.
+     */
     float getSetpointWithinTurretRange(float setpoint) const;
 
 private:
