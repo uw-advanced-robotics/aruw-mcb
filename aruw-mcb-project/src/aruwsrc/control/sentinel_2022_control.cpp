@@ -33,6 +33,7 @@
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -100,7 +101,7 @@ DjiMotor pitchMotor(
     drivers(),
     aruwsrc::control::turret::PITCH_MOTOR_ID,
     aruwsrc::control::turret::turret1::CAN_BUS_MOTORS,
-    false,
+    true,
     "Pitch Turret 1");
 DjiMotor yawMotor(
     drivers(),
@@ -133,7 +134,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels
     drivers(),
     aruwsrc::control::launcher::LEFT_MOTOR_ID,
     aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-    aruwsrc::control::launcher::TURRET1_CAN_BUS_MOTORS,
+    aruwsrc::control::launcher::TURRET2_CAN_BUS_MOTORS,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     0.1f);
 
@@ -153,8 +154,8 @@ SentinelTurretSubsystem turretSubsystem(
     drivers(),
     &pitchMotor,
     &yawMotor,
-    aruwsrc::control::turret::turret1::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG);
+    aruwsrc::control::turret::turret2::PITCH_MOTOR_CONFIG,
+    aruwsrc::control::turret::turret2::YAW_MOTOR_CONFIG);
 }  // namespace turret2
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(
@@ -337,6 +338,8 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
 }
 
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* register subsystems here -------------------------------------------------*/
 void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
 {
@@ -389,6 +392,8 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &sentinel_control::remoteSafeDisconnectFunction);
     sentinel_control::initializeSubsystems();
     sentinel_control::registerSentinelSubsystems(drivers);
     sentinel_control::setDefaultSentinelCommands(drivers);

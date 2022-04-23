@@ -114,8 +114,13 @@ public:
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
 private:
+#if defined(TARGET_SENTINEL_2021)
     static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
     static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
+#else
+    static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR4;
+    static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR3;
+#endif
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
     static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::Pin::S;
 
