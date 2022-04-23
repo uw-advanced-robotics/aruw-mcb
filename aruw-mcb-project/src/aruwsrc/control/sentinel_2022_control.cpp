@@ -320,10 +320,6 @@ HoldCommandMapping leftSwitchMid(
     drivers(),
     {&sentinelDriveManual2},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&turret1::turretCVCommand, &turret2::turretCVCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -362,6 +358,8 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *)
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     turret1::frictionWheels.setDefaultCommand(&turret1::spinFrictionWheels);
     turret2::frictionWheels.setDefaultCommand(&turret2::spinFrictionWheels);
+    turret1::turretSubsystem.setDefaultCommand(&turret1::turretCVCommand);
+    turret2::turretSubsystem.setDefaultCommand(&turret2::turretCVCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -384,7 +382,6 @@ void registerSentinelIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchMid);
-    drivers->commandMapper.addMap(&leftSwitchUp);
 }
 }  // namespace sentinel_control
 
