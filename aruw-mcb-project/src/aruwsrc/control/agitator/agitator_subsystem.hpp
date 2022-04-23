@@ -135,7 +135,7 @@ public:
     static constexpr float PID_INDEXER_MAX_ERR_SUM = 0.0f;
     static constexpr float PID_INDEXER_MAX_OUT = 16000.0f;
     static constexpr bool isAgitatorInverted = false;
-    static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 5;
+    static constexpr float AGITATOR_JAMMING_DISTANCE = 10 * M_PI;
 #endif
 
     /**
