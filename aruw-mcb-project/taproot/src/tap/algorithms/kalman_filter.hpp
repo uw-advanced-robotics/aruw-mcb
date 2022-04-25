@@ -65,32 +65,54 @@ public:
           K(),
           I()
     {
-        arm_mat_trans_f32(&this->A.matrix, &At.matrix);
-        arm_mat_trans_f32(&this->C.matrix, &Ct.matrix);
-        I.constructIdentityMatrix();
+        // arm_mat_trans_f32(&this->A.matrix, &At.matrix);
+        // arm_mat_trans_f32(&this->C.matrix, &Ct.matrix);
+
+        At = this->A.asTransposed();
+        Ct = this->C.asTransposed();
+        I = I.identityMatrix();
+        // I.constructIdentityMatrix();
+    }
+
+    template<int ROWS, int COLS>
+    inline void print(const modm::Matrix<float, ROWS, COLS> &m) const
+    {
+        for (size_t i = 0; i < ROWS; i++)
+        {
+            for (size_t j = 0; j < COLS; j++)
+            {
+                std::cout << m.element[i * COLS + j] << (j != COLS - 1 ? " " : "");
+            }
+            if (i != ROWS - 1)
+            {
+                std::cout << '\n';
+            }
+        }
     }
 
     void init(const float (&initialX)[STATES * 1])
     {
-        xHat.copyData(initialX);
-        P.copyData(P0.data);
+        xHat = initialX;
+        P = P0;
+        // xHat.copyData(initialX);
+        // P.copyData(P0.element);
         initialized = true;
     }
 
-    CMSISMat<STATES, 1> AxHat;
-    CMSISMat<STATES, STATES> APAtQ;
-    CMSISMat<INPUTS, INPUTS> beforeInv;
-    CMSISMat<INPUTS, INPUTS> inv;
+    modm::Matrix<float, STATES, 1> AxHat;
+    modm::Matrix<float, STATES, STATES> APAtQ;
+    modm::Matrix<float, INPUTS, INPUTS> beforeInv;
+    modm::Matrix<float, INPUTS, INPUTS> inv;
 
     template <int ROWS, int COLS>
-    inline void printMat(const std::string &name, const CMSISMat<ROWS, COLS> &m)
+    inline void printMat(const std::string &name, const modm::Matrix<float, ROWS, COLS> &m)
     {
         std::cout << name << "\n===============\n";
-        m.print();
+        print<ROWS, COLS>(m);
         std::cout << "\n===============\n";
     }
 
-    void performUpdate(const CMSISMat<INPUTS, 1> &y)
+    void performUpdate(const modm::Matrix<float, INPUTS, 1> &y)
     {
         if (!initialized)
         {
@@ -111,7 +133,7 @@ public:
         // Update step
         beforeInv = C * APAtQ * Ct + R;
         printMat<INPUTS, INPUTS>("beforeinv", beforeInv);
-        inv = beforeInv.inverse();
+        // inv = beforeInv.inverse();
         K = APAtQ * Ct * inv;
         xHat = AxHat + K * (y - C * AxHat);
         P = (I - K * C) * APAtQ;
@@ -124,7 +146,7 @@ public:
     }
 
     using StateVectorArray = float[STATES];
-    const StateVectorArray &getStateMatrix() const { return xHat.data; }
+    const StateVectorArray &getStateMatrix() const { return xHat.element; }
 
 private:
     /**
@@ -132,13 +154,13 @@ private:
      *
      * @note Also referred to as "F" in literature.
      */
-    const CMSISMat<STATES, STATES> A;
+    const modm::Matrix<float, STATES, STATES> A;
 
     /**
      * Transpose of A, computed at the beginning and stored
      * to speed up update step.
      */
-    CMSISMat<STATES, STATES> At;
+    modm::Matrix<float, STATES, STATES> At;
 
     /**
      * Observation matrix. How we transform the input into the form
@@ -146,47 +168,47 @@ private:
      *
      * @note Also referred to as "H" in literature.
      */
-    const CMSISMat<INPUTS, STATES> C;
+    const modm::Matrix<float, INPUTS, STATES> C;
 
     /**
      * Transpose of C.
      */
-    CMSISMat<STATES, INPUTS> Ct;
+    modm::Matrix<float, STATES, INPUTS> Ct;
 
     /**
      * Covariance matrices
      */
-    const CMSISMat<STATES, STATES> Q;
-    const CMSISMat<INPUTS, INPUTS> R;
+    const modm::Matrix<float, STATES, STATES> Q;
+    const modm::Matrix<float, INPUTS, INPUTS> R;
 
     /**
      * Predicted state matrix at the current time.
      *
      * Expectation of the actual state given \f$Y_{i - 1}\f$.
      */
-    CMSISMat<STATES, 1> xHat;
+    modm::Matrix<float, STATES, 1> xHat;
 
     /**
      * Estimate error covariance.
      *
      * The variance of the actual state given \f$Y_{i - 1}\f$.
      */
-    CMSISMat<STATES, STATES> P;
+    modm::Matrix<float, STATES, STATES> P;
 
     /**
      * Initial error covariance
      */
-    CMSISMat<STATES, STATES> P0;
+    modm::Matrix<float, STATES, STATES> P0;
 
     /**
      */
-    CMSISMat<STATES, INPUTS> K;
+    modm::Matrix<float, STATES, INPUTS> K;
 
     /**
      * Identity matrix created upon construction and stored to avoid
      * having to compute it each update step.
      */
-    CMSISMat<STATES, STATES> I;
+    modm::Matrix<float, STATES, STATES> I;
 
     bool initialized = false;
 };

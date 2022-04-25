@@ -15,6 +15,9 @@
 #	error	"Don't include this file directly, use 'matrix.hpp' instead!"
 #endif
 
+#include <cmath>
+
+
 // ----------------------------------------------------------------------------
 template<typename T, uint8_t ROWS, uint8_t COLUMNS>
 modm::Matrix<T, ROWS, COLUMNS>::Matrix()
