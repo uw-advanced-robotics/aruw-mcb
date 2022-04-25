@@ -37,10 +37,10 @@ ChassisKFOdometry::ChassisKFOdometry(
 void ChassisKFOdometry::update()
 {
     float chassisYaw = 0;
-    // if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
-    // {
-    //     return;
-    // }
+    if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
+    {
+        return;
+    }
 
     // get chassis relative velocity
     modm::Matrix<float, 3, 1> chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
@@ -52,10 +52,8 @@ void ChassisKFOdometry::update()
     float y[static_cast<int>(OdomInput::INPUTS)] = {};
     y[static_cast<int>(OdomInput::VEL_X)] = chassisVelocity[0][0];
     y[static_cast<int>(OdomInput::VEL_Y)] = chassisVelocity[1][0];
-    y[static_cast<int>(OdomInput::VEL_Z)] = 0;
     y[static_cast<int>(OdomInput::ACC_X)] = imu.getAx();
     y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
-    y[static_cast<int>(OdomInput::ACC_Z)] = 0;
 
     // acceleration in chassis frame, rotate to be in world frame
     tap::algorithms::rotateVector(
@@ -71,12 +69,17 @@ void ChassisKFOdometry::update()
     velocity.x = x[static_cast<int>(OdomState::VEL_X)];
     velocity.y = x[static_cast<int>(OdomState::VEL_Y)];
 
-    // std::cout << x[static_cast<int>(OdomState::POS_X)] << std::endl;
-
     location.setOrientation(chassisYaw);
     location.setPosition(
         x[static_cast<int>(OdomState::POS_X)],
         x[static_cast<int>(OdomState::POS_Y)]);
+
+#ifdef PLATFORM_HOSTED
+    std::cout << x[static_cast<int>(OdomState::POS_X)] << ", "
+              << x[static_cast<int>(OdomState::POS_Y)] << ", "
+              << x[static_cast<int>(OdomState::VEL_X)] << ", "
+              << x[static_cast<int>(OdomState::VEL_Y)] << std::endl;
+#endif
 }
 
 }  // namespace aruwsrc::algorithms::odometry

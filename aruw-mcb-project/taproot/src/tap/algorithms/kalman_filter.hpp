@@ -63,18 +63,28 @@ public:
           P(P),
           P0(P),
           K(),
-          I()
+          I(),
+          CPCtR(),
+          CPCtRInverse()
     {
-        // arm_mat_trans_f32(&this->A.matrix, &At.matrix);
-        // arm_mat_trans_f32(&this->C.matrix, &Ct.matrix);
+        arm_mat_init_f32(&CPCtRARM, INPUTS, INPUTS, CPCtR.element);
+        arm_mat_init_f32(&CPCtRInverseARM, INPUTS, INPUTS, CPCtRInverse.element);
 
         At = this->A.asTransposed();
         Ct = this->C.asTransposed();
-        I = I.identityMatrix();
-        // I.constructIdentityMatrix();
+        I = modm::Matrix<float, STATES, STATES>::identityMatrix();
     }
 
-    template<int ROWS, int COLS>
+    void init(const float (&initialX)[STATES * 1])
+    {
+        xHat = initialX;
+        P = P0;
+
+        initialized = true;
+    }
+
+#ifdef PLATFORM_HOSTED
+template<int ROWS, int COLS>
     inline void print(const modm::Matrix<float, ROWS, COLS> &m) const
     {
         for (size_t i = 0; i < ROWS; i++)
@@ -90,20 +100,6 @@ public:
         }
     }
 
-    void init(const float (&initialX)[STATES * 1])
-    {
-        xHat = initialX;
-        P = P0;
-        // xHat.copyData(initialX);
-        // P.copyData(P0.element);
-        initialized = true;
-    }
-
-    modm::Matrix<float, STATES, 1> AxHat;
-    modm::Matrix<float, STATES, STATES> APAtQ;
-    modm::Matrix<float, INPUTS, INPUTS> beforeInv;
-    modm::Matrix<float, INPUTS, INPUTS> inv;
-
     template <int ROWS, int COLS>
     inline void printMat(const std::string &name, const modm::Matrix<float, ROWS, COLS> &m)
     {
@@ -111,6 +107,7 @@ public:
         print<ROWS, COLS>(m);
         std::cout << "\n===============\n";
     }
+#endif
 
     void performUpdate(const modm::Matrix<float, INPUTS, 1> &y)
     {
@@ -121,35 +118,15 @@ public:
 
         // Predict state
         // TODO add control vector if necessary in the future
-        // xHat = A * xHat;
-        AxHat = A * xHat;
-        auto AP = A * P;
-        printMat<STATES, STATES>("P", P);
-        printMat<STATES, STATES>("A", A);
-        printMat<STATES, STATES>("AP", AP);
-        APAtQ = A * P * At + Q;
-        printMat<STATES, STATES>("APAtQ", APAtQ);
+        xHat = A * xHat;
+        P = A * P * At + Q;
 
-        // Update step
-        beforeInv = C * APAtQ * Ct + R;
-        printMat<INPUTS, INPUTS>("beforeinv", beforeInv);
-       
-        arm_matrix_instance_f32 matrix;
-        arm_matrix_instance_f32 matrixBefore;
-
-        arm_mat_init_f32(&matrix, INPUTS, INPUTS, inv.element);
-        arm_mat_init_f32(&matrixBefore, INPUTS, INPUTS, beforeInv.element);
-        arm_mat_inverse_f32(&matrixBefore, &matrix);
-        // inv = beforeInv.inverse();
-        K = APAtQ * Ct * inv;
-        xHat = AxHat + K * (y - C * AxHat);
-        P = (I - K * C) * APAtQ;
-
-        printMat<INPUTS, INPUTS>("inv", inv);
-        printMat<STATES, INPUTS>("K", K);
-        printMat<STATES, 1>("xhat", xHat);
-        printMat<STATES, STATES>("P", P);
-        std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
+        CPCtR = C * P * Ct + R;
+        // Use CMSIS inverse since modm::Matrix doesn't support inverse
+        arm_mat_inverse_f32(&CPCtRARM, &CPCtRInverseARM);
+        K = P * Ct * CPCtRInverse;
+        xHat = xHat + K * (y - C * xHat);
+        P = (I - K * C) * P;
     }
 
     using StateVectorArray = float[STATES];
@@ -216,6 +193,14 @@ private:
      * having to compute it each update step.
      */
     modm::Matrix<float, STATES, STATES> I;
+
+    arm_matrix_instance_f32 CPCtRARM;
+    arm_matrix_instance_f32 CPCtRInverseARM;
+
+    /// C * P * C^t + R
+    modm::Matrix<float, INPUTS, INPUTS> CPCtR;
+    /// Inverse matrix computation of CPCtR
+    modm::Matrix<float, INPUTS, INPUTS> CPCtRInverse;
 
     bool initialized = false;
 };
