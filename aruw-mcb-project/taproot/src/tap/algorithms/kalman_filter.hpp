@@ -22,6 +22,7 @@
 
 #include <cinttypes>
 
+#include "modm/math/matrix.hpp"
 #include "modm/architecture/interface/assert.h"
 
 #include "matrix_utils.hpp"
@@ -76,6 +77,19 @@ public:
         initialized = true;
     }
 
+    CMSISMat<STATES, 1> AxHat;
+    CMSISMat<STATES, STATES> APAtQ;
+    CMSISMat<INPUTS, INPUTS> beforeInv;
+    CMSISMat<INPUTS, INPUTS> inv;
+
+    template <int ROWS, int COLS>
+    inline void printMat(const std::string &name, const CMSISMat<ROWS, COLS> &m)
+    {
+        std::cout << name << "\n===============\n";
+        m.print();
+        std::cout << "\n===============\n";
+    }
+
     void performUpdate(const CMSISMat<INPUTS, 1> &y)
     {
         if (!initialized)
@@ -85,13 +99,28 @@ public:
 
         // Predict state
         // TODO add control vector if necessary in the future
-        xHat = A * xHat;
-        P = A * P * At + Q;
+        // xHat = A * xHat;
+        AxHat = A * xHat;
+        auto AP = A * P;
+        printMat<STATES, STATES>("P", P);
+        printMat<STATES, STATES>("A", A);
+        printMat<STATES, STATES>("AP", AP);
+        APAtQ = A * P * At + Q;
+        printMat<STATES, STATES>("APAtQ", APAtQ);
 
         // Update step
-        K = P * Ct * (C * P * Ct + R).inverse();
-        xHat = xHat + K * (y - C * xHat);
-        P = (I - K * C) * P;
+        beforeInv = C * APAtQ * Ct + R;
+        printMat<INPUTS, INPUTS>("beforeinv", beforeInv);
+        inv = beforeInv.inverse();
+        K = APAtQ * Ct * inv;
+        xHat = AxHat + K * (y - C * AxHat);
+        P = (I - K * C) * APAtQ;
+
+        printMat<INPUTS, INPUTS>("inv", inv);
+        printMat<STATES, INPUTS>("K", K);
+        printMat<STATES, 1>("xhat", xHat);
+        printMat<STATES, STATES>("P", P);
+        std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
     }
 
     using StateVectorArray = float[STATES];
@@ -100,7 +129,7 @@ public:
 private:
     /**
      * State transition matrix. For "transitioning" the previous `xHat` to `xHat`
-     * 
+     *
      * @note Also referred to as "F" in literature.
      */
     const CMSISMat<STATES, STATES> A;
@@ -114,7 +143,7 @@ private:
     /**
      * Observation matrix. How we transform the input into the form
      * of the state matrix.
-     * 
+     *
      * @note Also referred to as "H" in literature.
      */
     const CMSISMat<INPUTS, STATES> C;

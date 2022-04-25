@@ -21,9 +21,11 @@
 #define TAPROOT_MATRIX_UTILS_HPP_
 
 #include <cinttypes>
+#include <iostream>
 
 #include "modm/architecture/utils.hpp"
 
+#include <cassert>
 #include "arm_math.h"
 
 namespace tap::algorithms
@@ -71,7 +73,7 @@ struct CMSISMat
         {
             for (int j = 0; j < COLS; j++)
             {
-                data[i * ROWS + j] = (i == j) ? 1 : 0;
+                data[i * COLS + j] = (i == j) ? 1 : 0;
             }
         }
 
@@ -81,8 +83,23 @@ struct CMSISMat
     inline CMSISMat<COLS, ROWS> inverse()
     {
         CMSISMat<COLS, ROWS> ret;
-        arm_mat_inverse_f32(&this->matrix, &ret.matrix);
+        assert(ARM_MATH_SUCCESS == arm_mat_inverse_f32(&this->matrix, &ret.matrix));
         return ret;
+    }
+
+    inline void print() const
+    {
+        for (size_t i = 0; i < ROWS; i++)
+        {
+            for (size_t j = 0; j < COLS; j++)
+            {
+                std::cout << data[i * COLS + j] << (j != COLS - 1 ? " " : "");
+            }
+            if (i != ROWS - 1)
+            {
+                std::cout << '\n';
+            }
+        }
     }
 };
 
@@ -96,7 +113,7 @@ inline CMSISMat<A_ROWS, B_COLS> operator+(
         "Invalid size of CMSISMat matricies in operator+");
 
     CMSISMat<A_ROWS, A_COLS> c;
-    arm_mat_add_f32(&a.matrix, &b.matrix, &c.matrix);
+    assert(ARM_MATH_SUCCESS == arm_mat_add_f32(&a.matrix, &b.matrix, &c.matrix));
     return c;
 }
 
@@ -110,7 +127,7 @@ inline CMSISMat<A_ROWS, B_COLS> operator-(
         "Invalid size of CMSISMat matricies in operator-");
 
     CMSISMat<A_ROWS, A_COLS> c;
-    arm_mat_sub_f32(&a.matrix, &b.matrix, &c.matrix);
+    assert(ARM_MATH_SUCCESS == arm_mat_sub_f32(&a.matrix, &b.matrix, &c.matrix));
     return c;
 }
 
@@ -122,7 +139,7 @@ inline CMSISMat<A_ROWS, B_COLS> operator*(
     static_assert(A_COLS == B_ROWS, "Invalid size of CMSISMat matricies in operator*");
 
     CMSISMat<A_ROWS, B_COLS> c;
-    arm_mat_mult_f32(&a.matrix, &b.matrix, &c.matrix);
+    assert(ARM_MATH_SUCCESS == arm_mat_mult_f32(&a.matrix, &b.matrix, &c.matrix));
     return c;
 }
 

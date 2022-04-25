@@ -37,10 +37,10 @@ ChassisKFOdometry::ChassisKFOdometry(
 void ChassisKFOdometry::update()
 {
     float chassisYaw = 0;
-    if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
-    {
-        return;
-    }
+    // if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
+    // {
+    //     return;
+    // }
 
     // get chassis relative velocity
     modm::Matrix<float, 3, 1> chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
@@ -49,19 +49,19 @@ void ChassisKFOdometry::update()
         chassisYaw);
 
     // assume 0 velocity/acceleration in z direction
-    float y[static_cast<int>(OdomInput::INPUTS)];
-    y[static_cast<int>(OdomInput::VEL_X)] = chassisVelocity[0][0];
-    y[static_cast<int>(OdomInput::VEL_Y)] = chassisVelocity[1][0];
-    y[static_cast<int>(OdomInput::VEL_Z)] = 0;
-    y[static_cast<int>(OdomInput::ACC_X)] = imu.getAx();
-    y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
-    y[static_cast<int>(OdomInput::ACC_Z)] = 0;
+    float y[static_cast<int>(OdomInput::INPUTS)] = {};
+    // y[static_cast<int>(OdomInput::VEL_X)] = chassisVelocity[0][0];
+    // y[static_cast<int>(OdomInput::VEL_Y)] = chassisVelocity[1][0];
+    // y[static_cast<int>(OdomInput::VEL_Z)] = 0;
+    // y[static_cast<int>(OdomInput::ACC_X)] = imu.getAx();
+    // y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
+    // y[static_cast<int>(OdomInput::ACC_Z)] = 0;
 
     // acceleration in chassis frame, rotate to be in world frame
-    tap::algorithms::rotateVector(
-        &y[static_cast<int>(OdomInput::ACC_X)],
-        &y[static_cast<int>(OdomInput::ACC_Y)],
-        chassisYaw);
+    // tap::algorithms::rotateVector(
+    //     &y[static_cast<int>(OdomInput::ACC_X)],
+    //     &y[static_cast<int>(OdomInput::ACC_Y)],
+    //     chassisYaw);
 
     // perform the update, new state matrix now available.
     kf.performUpdate(y);

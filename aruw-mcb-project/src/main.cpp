@@ -98,6 +98,8 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
 #endif
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+
+            modm::delay_ms(1000);
         }
         modm::delay_us(10);
     }
