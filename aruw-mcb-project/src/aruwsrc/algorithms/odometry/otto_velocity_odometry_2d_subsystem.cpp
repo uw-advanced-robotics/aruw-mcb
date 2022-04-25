@@ -24,7 +24,7 @@
 namespace aruwsrc::algorithms::odometry
 {
 // Yep that's all this constructor does, is construct the right getters and pass
-// their pointers to the base class (not in that order)
+// their pointers to the base class (not necessarily in that order)
 OttoVelocityOdometry2DSubsystem::OttoVelocityOdometry2DSubsystem(
     aruwsrc::Drivers* drivers,
     aruwsrc::control::turret::TurretSubsystem* turret,
@@ -38,6 +38,7 @@ OttoVelocityOdometry2DSubsystem::OttoVelocityOdometry2DSubsystem(
 
 void OttoVelocityOdometry2DSubsystem::refresh()
 {
+    // Update displacement first, as that is then consumed in odometryTracker
     displacementObserver.update();
     odometryTracker.update();
 }

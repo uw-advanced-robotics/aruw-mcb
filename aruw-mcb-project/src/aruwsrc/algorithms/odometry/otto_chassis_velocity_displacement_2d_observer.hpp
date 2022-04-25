@@ -50,7 +50,8 @@ class OttoChassisVelocityDisplacement2DObserver
 {
 public:
     /**
-     * @param[in] pointer to an aruwsrc ChassisSubsystem. Used to get chassis relative velocity
+     * @param[in] chassis pointer to a ChassisSubsystemInterface. Used to get chassis relative
+     * velocity
      */
     OttoChassisVelocityDisplacement2DObserver(
         tap::control::chassis::ChassisSubsystemInterface* chassis);
@@ -63,6 +64,10 @@ public:
     /**
      * Get absolute chassis displacement in chassis frame in meters since some arbitrary point
      * in time.
+     *
+     * No intuitive physical meaning when interpreted on it's own. Instead it is expected that
+     * this value is sampled frequently and that differences between subsequent samples are used
+     * for displacement in some consistent coordinate frame.
      *
      * @see ChassisDisplacementObserverInterface for more details
      *
