@@ -133,6 +133,13 @@ public:
         // Update step
         beforeInv = C * APAtQ * Ct + R;
         printMat<INPUTS, INPUTS>("beforeinv", beforeInv);
+       
+        arm_matrix_instance_f32 matrix;
+        arm_matrix_instance_f32 matrixBefore;
+
+        arm_mat_init_f32(&matrix, INPUTS, INPUTS, inv.element);
+        arm_mat_init_f32(&matrixBefore, INPUTS, INPUTS, beforeInv.element);
+        arm_mat_inverse_f32(&matrixBefore, &matrix);
         // inv = beforeInv.inverse();
         K = APAtQ * Ct * inv;
         xHat = AxHat + K * (y - C * AxHat);

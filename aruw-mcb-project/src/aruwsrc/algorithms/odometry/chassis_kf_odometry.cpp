@@ -50,18 +50,18 @@ void ChassisKFOdometry::update()
 
     // assume 0 velocity/acceleration in z direction
     float y[static_cast<int>(OdomInput::INPUTS)] = {};
-    // y[static_cast<int>(OdomInput::VEL_X)] = chassisVelocity[0][0];
-    // y[static_cast<int>(OdomInput::VEL_Y)] = chassisVelocity[1][0];
-    // y[static_cast<int>(OdomInput::VEL_Z)] = 0;
-    // y[static_cast<int>(OdomInput::ACC_X)] = imu.getAx();
-    // y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
-    // y[static_cast<int>(OdomInput::ACC_Z)] = 0;
+    y[static_cast<int>(OdomInput::VEL_X)] = chassisVelocity[0][0];
+    y[static_cast<int>(OdomInput::VEL_Y)] = chassisVelocity[1][0];
+    y[static_cast<int>(OdomInput::VEL_Z)] = 0;
+    y[static_cast<int>(OdomInput::ACC_X)] = imu.getAx();
+    y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
+    y[static_cast<int>(OdomInput::ACC_Z)] = 0;
 
     // acceleration in chassis frame, rotate to be in world frame
-    // tap::algorithms::rotateVector(
-    //     &y[static_cast<int>(OdomInput::ACC_X)],
-    //     &y[static_cast<int>(OdomInput::ACC_Y)],
-    //     chassisYaw);
+    tap::algorithms::rotateVector(
+        &y[static_cast<int>(OdomInput::ACC_X)],
+        &y[static_cast<int>(OdomInput::ACC_Y)],
+        chassisYaw);
 
     // perform the update, new state matrix now available.
     kf.performUpdate(y);
@@ -70,6 +70,8 @@ void ChassisKFOdometry::update()
 
     velocity.x = x[static_cast<int>(OdomState::VEL_X)];
     velocity.y = x[static_cast<int>(OdomState::VEL_Y)];
+
+    // std::cout << x[static_cast<int>(OdomState::POS_X)] << std::endl;
 
     location.setOrientation(chassisYaw);
     location.setPosition(
