@@ -17,10 +17,71 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <array>
 #include "chassis_kf_odometry.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
+    static constexpr int STATES_SQUARED =
+        static_cast<int>(ChassisKFOdometry::OdomState::STATES) * static_cast<int>(ChassisKFOdometry::OdomState::STATES);
+    static constexpr int INPUTS_SQUARED =
+        static_cast<int>(ChassisKFOdometry::OdomInput::INPUTS) * static_cast<int>(ChassisKFOdometry::OdomInput::INPUTS);
+    static constexpr int INPUTS_MULT_STATES =
+        static_cast<int>(ChassisKFOdometry::OdomInput::INPUTS) * static_cast<int>(ChassisKFOdometry::OdomState::STATES);
+
+    static constexpr float DT = 0.002f;
+
+
+    // clang-format off
+    // static constexpr float KF_A[STATES_SQUARED] = {
+    //     1, DT, 0.5 * DT * DT, 0, 0, 0,
+    //     0,  1, DT, 0, 0, 0,
+    //     0,  0, 1, 0, 0, 0,
+    //     0, 0, 0, 1, DT, 0.5 * DT * DT,
+    //     0, 0, 0, 0, 1, DT,
+    //     0, 0, 0, 0, 0, 1,
+    // };
+
+    static constexpr float KF_A[STATES_SQUARED] = {
+        1, DT, 0, 0, 0, 0,
+        0, 0, DT, 0, 0, 0,
+        0, 0, 0, 0, 0, 0,
+        0, 0, 0, 1, DT, 0,
+        0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0,
+    };
+
+    static constexpr float KF_C[INPUTS_MULT_STATES] = {
+        0, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0,
+    };
+    static constexpr float KF_Q[STATES_SQUARED] = {
+        1, 0, 0, 0, 0, 0,
+        0, 1, 0, 0, 0, 0,
+        0, 0, 1, 0, 0, 0,
+        0, 0, 0, 1, 0, 0,
+        0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 1,
+    };
+    static constexpr float KF_R[INPUTS_SQUARED] = {
+        0.1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 0.1, 0,
+        0, 0, 0, 1,
+    };
+    static constexpr float KF_P[STATES_SQUARED] = {
+        1E3, 0, 0, 0, 0, 0,
+        0, 1E3, 0, 0, 0, 0,
+        0, 0, 1E3, 0, 0, 0,
+        0, 0, 0, 1E3, 0, 0,
+        0, 0, 0, 0, 1E3, 0,
+        0, 0, 0, 0, 0, 1E3,
+    };
+    // clang-format on
+
+
 ChassisKFOdometry::ChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
@@ -66,6 +127,7 @@ void ChassisKFOdometry::update()
 
     const auto& x = kf.getStateMatrix();
 
+    // update odometry velocity and orientation
     velocity.x = x[static_cast<int>(OdomState::VEL_X)];
     velocity.y = x[static_cast<int>(OdomState::VEL_Y)];
 

@@ -20,12 +20,13 @@
 #ifndef TAPROOT_MATRIX_UTILS_HPP_
 #define TAPROOT_MATRIX_UTILS_HPP_
 
+#include <array>
+#include <cassert>
 #include <cinttypes>
 #include <iostream>
 
 #include "modm/architecture/utils.hpp"
 
-#include <cassert>
 #include "arm_math.h"
 
 namespace tap::algorithms
@@ -38,26 +39,45 @@ namespace tap::algorithms
 template <uint16_t ROWS, uint16_t COLS>
 struct CMSISMat
 {
-    float data[ROWS * COLS];
+    std::array<float, ROWS * COLS> data;
     arm_matrix_instance_f32 matrix;
 
-    CMSISMat() : data(), matrix{ROWS, COLS, data} {}
+    CMSISMat() : data(), matrix{ROWS, COLS, data.data()} {}
 
     CMSISMat(const float (&initialData)[ROWS * COLS])
     {
         copyData(initialData);
-        arm_mat_init_f32(&matrix, ROWS, COLS, data);
+        arm_mat_init_f32(&matrix, ROWS, COLS, data.data());
     }
 
     // Delete the copy constructor, create a move constructor. This will
     // Avoid us doing costly copys but will still allow move semantics.
     CMSISMat(const CMSISMat &other) = delete;
-    constexpr CMSISMat(CMSISMat &&) = default;
+    CMSISMat(CMSISMat &&other)
+    {
+        this->data = std::move(other.data);
+        matrix.numRows = ROWS;
+        matrix.numCols = COLS;
+        matrix.pData = data.data();
+    }
 
     CMSISMat &operator=(CMSISMat &) = delete;
-    constexpr CMSISMat &operator=(CMSISMat &&) = default;
+    CMSISMat &operator=(CMSISMat &&other)
+    {
+        this->data = std::move(other.data);
+        matrix.numRows = ROWS;
+        matrix.numCols = COLS;
+        matrix.pData = data.data();
+        return *this;
+    }
 
-    inline void copyData(const float (&other)[ROWS * COLS]) { memcpy(data, other, sizeof(data)); }
+    inline void copyData(const float (&other)[ROWS * COLS])
+    {
+        for (size_t i = 0; i < data.size(); i++)
+        {
+            data[i] = other[i];
+        }
+    }
 
     /**
      * Construct identity matrix in the current CMSISMat
@@ -85,21 +105,6 @@ struct CMSISMat
         CMSISMat<COLS, ROWS> ret;
         assert(ARM_MATH_SUCCESS == arm_mat_inverse_f32(&this->matrix, &ret.matrix));
         return ret;
-    }
-
-    inline void print() const
-    {
-        for (size_t i = 0; i < ROWS; i++)
-        {
-            for (size_t j = 0; j < COLS; j++)
-            {
-                std::cout << data[i * COLS + j] << (j != COLS - 1 ? " " : "");
-            }
-            if (i != ROWS - 1)
-            {
-                std::cout << '\n';
-            }
-        }
     }
 };
 

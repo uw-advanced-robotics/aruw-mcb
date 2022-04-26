@@ -67,31 +67,27 @@ public:
           CPCtR(),
           CPCtRInverse()
     {
-        arm_mat_init_f32(&CPCtRARM, INPUTS, INPUTS, CPCtR.element);
-        arm_mat_init_f32(&CPCtRInverseARM, INPUTS, INPUTS, CPCtRInverse.element);
-
-        At = this->A.asTransposed();
-        Ct = this->C.asTransposed();
-        I = modm::Matrix<float, STATES, STATES>::identityMatrix();
+        arm_mat_trans_f32(&this->A.matrix, &At.matrix);
+        arm_mat_trans_f32(&this->C.matrix, &Ct.matrix);
+        I.constructIdentityMatrix();
     }
 
     void init(const float (&initialX)[STATES * 1])
     {
         xHat = initialX;
-        P = P0;
-
+        P.data = P0.data;
         initialized = true;
     }
 
 #ifdef PLATFORM_HOSTED
 template<int ROWS, int COLS>
-    inline void print(const modm::Matrix<float, ROWS, COLS> &m) const
+    inline void print(const CMSISMat<ROWS, COLS> &m) const
     {
         for (size_t i = 0; i < ROWS; i++)
         {
             for (size_t j = 0; j < COLS; j++)
             {
-                std::cout << m.element[i * COLS + j] << (j != COLS - 1 ? " " : "");
+                std::cout << m.data[i * COLS + j] << (j != COLS - 1 ? " " : "");
             }
             if (i != ROWS - 1)
             {
@@ -101,7 +97,7 @@ template<int ROWS, int COLS>
     }
 
     template <int ROWS, int COLS>
-    inline void printMat(const std::string &name, const modm::Matrix<float, ROWS, COLS> &m)
+    inline void printMat(const std::string &name, const CMSISMat<ROWS, COLS> &m)
     {
         std::cout << name << "\n===============\n";
         print<ROWS, COLS>(m);
@@ -109,7 +105,7 @@ template<int ROWS, int COLS>
     }
 #endif
 
-    void performUpdate(const modm::Matrix<float, INPUTS, 1> &y)
+    void performUpdate(const CMSISMat<INPUTS, 1> &y)
     {
         if (!initialized)
         {
@@ -121,16 +117,13 @@ template<int ROWS, int COLS>
         xHat = A * xHat;
         P = A * P * At + Q;
 
-        CPCtR = C * P * Ct + R;
-        // Use CMSIS inverse since modm::Matrix doesn't support inverse
-        arm_mat_inverse_f32(&CPCtRARM, &CPCtRInverseARM);
-        K = P * Ct * CPCtRInverse;
+        // Update step
+        K = P * Ct * (C * P * Ct + R).inverse();
         xHat = xHat + K * (y - C * xHat);
         P = (I - K * C) * P;
     }
 
-    using StateVectorArray = float[STATES];
-    const StateVectorArray &getStateMatrix() const { return xHat.element; }
+    const std::array<float, STATES> &getStateMatrix() const { return xHat.data; }
 
 private:
     /**
@@ -138,13 +131,13 @@ private:
      *
      * @note Also referred to as "F" in literature.
      */
-    const modm::Matrix<float, STATES, STATES> A;
+    const CMSISMat<STATES, STATES> A;
 
     /**
      * Transpose of A, computed at the beginning and stored
      * to speed up update step.
      */
-    modm::Matrix<float, STATES, STATES> At;
+    CMSISMat<STATES, STATES> At;
 
     /**
      * Observation matrix. How we transform the input into the form
@@ -152,55 +145,55 @@ private:
      *
      * @note Also referred to as "H" in literature.
      */
-    const modm::Matrix<float, INPUTS, STATES> C;
+    const CMSISMat<INPUTS, STATES> C;
 
     /**
      * Transpose of C.
      */
-    modm::Matrix<float, STATES, INPUTS> Ct;
+    CMSISMat<STATES, INPUTS> Ct;
 
     /**
      * Covariance matrices
      */
-    const modm::Matrix<float, STATES, STATES> Q;
-    const modm::Matrix<float, INPUTS, INPUTS> R;
+    const CMSISMat<STATES, STATES> Q;
+    const CMSISMat<INPUTS, INPUTS> R;
 
     /**
      * Predicted state matrix at the current time.
      *
      * Expectation of the actual state given \f$Y_{i - 1}\f$.
      */
-    modm::Matrix<float, STATES, 1> xHat;
+    CMSISMat<STATES, 1> xHat;
 
     /**
      * Estimate error covariance.
      *
      * The variance of the actual state given \f$Y_{i - 1}\f$.
      */
-    modm::Matrix<float, STATES, STATES> P;
+    CMSISMat<STATES, STATES> P;
 
     /**
      * Initial error covariance
      */
-    modm::Matrix<float, STATES, STATES> P0;
+    CMSISMat<STATES, STATES> P0;
 
     /**
      */
-    modm::Matrix<float, STATES, INPUTS> K;
+    CMSISMat<STATES, INPUTS> K;
 
     /**
      * Identity matrix created upon construction and stored to avoid
      * having to compute it each update step.
      */
-    modm::Matrix<float, STATES, STATES> I;
+    CMSISMat<STATES, STATES> I;
 
     arm_matrix_instance_f32 CPCtRARM;
     arm_matrix_instance_f32 CPCtRInverseARM;
 
     /// C * P * C^t + R
-    modm::Matrix<float, INPUTS, INPUTS> CPCtR;
+    CMSISMat<INPUTS, INPUTS> CPCtR;
     /// Inverse matrix computation of CPCtR
-    modm::Matrix<float, INPUTS, INPUTS> CPCtRInverse;
+    CMSISMat<INPUTS, INPUTS> CPCtRInverse;
 
     bool initialized = false;
 };

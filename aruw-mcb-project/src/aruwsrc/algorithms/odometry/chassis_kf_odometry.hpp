@@ -46,6 +46,7 @@ public:
     void update();
 
 private:
+public:
     enum class OdomState
     {
         POS_X = 0,
@@ -74,47 +75,6 @@ private:
         static_cast<int>(OdomInput::INPUTS) * static_cast<int>(OdomState::STATES);
 
     static constexpr float DT = 0.002f;
-
-    // clang-format off
-    static constexpr float KF_A[STATES_SQUARED] = {
-        1, DT, 0.5 * DT * DT, 0, 0, 0,
-        0,  1, DT, 0, 0, 0,
-        0,  0, 1, 0, 0, 0,
-
-        0, 0, 0, 1, DT, 0.5 * DT * DT,
-        0, 0, 0, 0, 1, DT,
-        0, 0, 0, 0, 0, 1,
-    };
-
-    static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 1, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 1,
-    };
-    static constexpr float KF_Q[STATES_SQUARED] = {
-        1, 1, 1, 0, 0, 0,
-        1, 1, 1, 0, 0, 0,
-        1, 1, 1, 0, 0, 0,
-        0, 0, 0, 1, 1, 1,
-        0, 0, 0, 1, 1, 1,
-        0, 0, 0, 1, 1, 1,
-    };
-    static constexpr float KF_R[INPUTS_SQUARED] = {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1,
-    };
-    static constexpr float KF_P[STATES_SQUARED] = {
-        1E3, 0, 0, 0, 0, 0,
-        0, 1E3, 0, 0, 0, 0,
-        0, 0, 1E3, 0, 0, 0,
-        0, 0, 0, 1E3, 0, 0,
-        0, 0, 0, 0, 1E3, 0,
-        0, 0, 0, 0, 0, 1E3,
-    };
-    // clang-format on
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
