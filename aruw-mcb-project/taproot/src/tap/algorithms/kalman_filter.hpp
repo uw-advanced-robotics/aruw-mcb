@@ -63,9 +63,7 @@ public:
           P(P),
           P0(P),
           K(),
-          I(),
-          CPCtR(),
-          CPCtRInverse()
+          I()
     {
         arm_mat_trans_f32(&this->A.matrix, &At.matrix);
         arm_mat_trans_f32(&this->C.matrix, &Ct.matrix);
@@ -74,36 +72,10 @@ public:
 
     void init(const float (&initialX)[STATES * 1])
     {
-        xHat = initialX;
+        xHat.copyData(initialX);
         P.data = P0.data;
         initialized = true;
     }
-
-#ifdef PLATFORM_HOSTED
-template<int ROWS, int COLS>
-    inline void print(const CMSISMat<ROWS, COLS> &m) const
-    {
-        for (size_t i = 0; i < ROWS; i++)
-        {
-            for (size_t j = 0; j < COLS; j++)
-            {
-                std::cout << m.data[i * COLS + j] << (j != COLS - 1 ? " " : "");
-            }
-            if (i != ROWS - 1)
-            {
-                std::cout << '\n';
-            }
-        }
-    }
-
-    template <int ROWS, int COLS>
-    inline void printMat(const std::string &name, const CMSISMat<ROWS, COLS> &m)
-    {
-        std::cout << name << "\n===============\n";
-        print<ROWS, COLS>(m);
-        std::cout << "\n===============\n";
-    }
-#endif
 
     void performUpdate(const CMSISMat<INPUTS, 1> &y)
     {
@@ -186,14 +158,6 @@ private:
      * having to compute it each update step.
      */
     CMSISMat<STATES, STATES> I;
-
-    arm_matrix_instance_f32 CPCtRARM;
-    arm_matrix_instance_f32 CPCtRInverseARM;
-
-    /// C * P * C^t + R
-    CMSISMat<INPUTS, INPUTS> CPCtR;
-    /// Inverse matrix computation of CPCtR
-    CMSISMat<INPUTS, INPUTS> CPCtRInverse;
 
     bool initialized = false;
 };
