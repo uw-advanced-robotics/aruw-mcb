@@ -84,9 +84,9 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
     aruwsrc::control::agitator::constants::AGITATOR1_MOTOR_CAN_BUS,
-    false,
-    M_PI / 10,
-    150,
+    aruwsrc::control::agitator::constants::isAgitatorInverted,
+    aruwsrc::control::agitator::constants::AGITATOR_JAMMING_DISTANCE,
+    aruwsrc::control::agitator::constants::JAMMING_TIME,
     true);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
@@ -179,10 +179,10 @@ aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
     50,
     0,
     true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    130,
+    M_PI / 20.0f,
+    0.4f,
+    0.2f,
+    300,
     2,
     true,
     10);
