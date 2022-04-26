@@ -67,8 +67,8 @@ static inline float transformWorldFrameYawToChassisFrame(
 
 /**
  * A helper function for the `run*PidYawWorldFrameController` functions below. Updates the passed in
- * `turretMotor`'s desired chassis frame setpoint and the passed in `worldFrameYawSetpoint`'.
- * Performs necessary limiting of the `worldFrameYawSetpoint` based on the `turretMotor`'s
+ * `yawMotor`'s desired chassis frame setpoint and the passed in `worldFrameYawSetpoint`'.
+ * Performs necessary limiting of the `worldFrameYawSetpoint` based on the `yawMotor`'s
  * min/max yaw setpoints.
  *
  * @param[in] desiredSetpoint The new user-specified world frame turret yaw angle setpoint, in
@@ -80,7 +80,7 @@ static inline float transformWorldFrameYawToChassisFrame(
  *      chassis mounted IMU.
  * @param[out] worldFrameYawSetpoint The limited and wrapped world frame turret yaw setpoint, in
  *      radians. Set to `desiredSetpoint` and then wrapped/limited as necessary.
- * @param[out] turretMotor The turret subsystem whose chassis relative turret yaw angle is
+ * @param[out] yawMotor The turret subsystem whose chassis relative turret yaw angle is
  *      updated by this function.
  */
 static inline void updateYawWorldFrameSetpoint(
@@ -88,32 +88,32 @@ static inline void updateYawWorldFrameSetpoint(
     const float chassisFrameInitImuYawAngle,
     const float chassisFrameImuYawAngle,
     tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-    TurretMotor *turretMotor)
+    TurretMotor *yawMotor)
 {
     worldFrameYawSetpoint->setValue(desiredSetpoint);
 
     // project target angle in world relative to chassis relative to limit the value
-    turretMotor->setChassisFrameSetpoint(transformWorldFrameYawToChassisFrame(
+    yawMotor->setChassisFrameSetpoint(transformWorldFrameYawToChassisFrame(
         chassisFrameInitImuYawAngle,
         chassisFrameImuYawAngle,
         worldFrameYawSetpoint->getValue()));
 
-    if (turretMotor->getConfig().limitMotorAngles)
+    if (yawMotor->getConfig().limitMotorAngles)
     {
         // project angle that is limited by the subsystem to world relative again to run the
         // controller. Otherwise use worldFrameYawSetpoint directly.
         worldFrameYawSetpoint->setValue(transformChassisFrameYawToWorldFrame(
             chassisFrameInitImuYawAngle,
             chassisFrameImuYawAngle,
-            turretMotor->getChassisFrameSetpoint()));
+            yawMotor->getChassisFrameSetpoint()));
     }
 }
 
 WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController(
     aruwsrc::Drivers *drivers,
-    TurretMotor *turretMotor,
+    TurretMotor *yawMotor,
     const tap::algorithms::SmoothPidConfig &pidConfig)
-    : TurretYawControllerInterface(turretMotor),
+    : TurretYawControllerInterface(yawMotor),
       drivers(drivers),
       pid(pidConfig),
       worldFrameSetpoint(0, 0, M_TWOPI)

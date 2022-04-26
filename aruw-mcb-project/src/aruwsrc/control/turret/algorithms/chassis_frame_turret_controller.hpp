@@ -43,11 +43,11 @@ class ChassisFrameYawTurretController final : public TurretYawControllerInterfac
 {
 public:
     /**
-     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFrameYawTurretController(
-        TurretMotor *turretMotor,
+        TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -79,11 +79,11 @@ class ChassisFramePitchTurretController final : public TurretPitchControllerInte
 {
 public:
     /**
-     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFramePitchTurretController(
-        TurretMotor *turretMotor,
+        TurretMotor *pitchMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;

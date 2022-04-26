@@ -91,7 +91,7 @@ TEST_F(
     runYawPidController_chassis_not_moving_setpoint_gt_actual_output_positive)
 {
     // User input > current angle, output should be positive
-    currentValue.setValue(modm::toRadian(modm::toRadian(80)));
+    currentValue.setValue(modm::toRadian(80));
     imuValue = modm::toRadian(modm::toRadian(80));
 
     EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Gt(0)));
@@ -239,8 +239,8 @@ TEST_F(
 {
     InSequence seq;
     EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
-    // EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
-    // EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
+    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
 
     turretSetpoint = M_PI_2;
     imuValue = M_PI_2;
@@ -248,11 +248,11 @@ TEST_F(
     currentValue.setValue(M_PI_2);
     turretController.runController(1, turretSetpoint);
 
-    // currentValue.setValue(modm::toRadian(100));
-    // turretController.runController(1, turretSetpoint);
+    currentValue.setValue(modm::toRadian(100));
+    turretController.runController(1, turretSetpoint);
 
-    // currentValue.setValue(modm::toRadian(80));
-    // turretController.runController(1, turretSetpoint);
+    currentValue.setValue(modm::toRadian(80));
+    turretController.runController(1, turretSetpoint);
 }
 
 TEST_F(

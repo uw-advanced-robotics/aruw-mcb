@@ -54,12 +54,12 @@ class WorldFrameYawChassisImuTurretController final : public TurretYawController
 public:
     /**
      * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     WorldFrameYawChassisImuTurretController(
         aruwsrc::Drivers *drivers,
-        TurretMotor *turretMotor,
+        TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;

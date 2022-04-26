@@ -55,13 +55,13 @@ class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawC
 public:
     /**
      * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] posPidConfig Position PID configuration struct for the controller.
      * @param[in] velPidConfig Velocity PID configuration struct for the controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretMotor *turretMotor,
+        TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 
@@ -95,7 +95,7 @@ class HeroTurretImuCascadePidTurretController final : public TurretYawController
 public:
     HeroTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretMotor *turretMotor,
+        TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::FuzzyPDConfig &fuzzyPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
@@ -138,13 +138,13 @@ class WorldFramePitchTurretImuCascadePidTurretController final
 public:
     /**
      * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] posPidConfig Position PID configuration struct for the controller.
      * @param[in] velPidConfig Velocity PID configuration struct for the controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretMotor *turretMotor,
+        TurretMotor *pitchMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 
