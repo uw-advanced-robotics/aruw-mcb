@@ -40,6 +40,10 @@ struct TurretMotorConfig
                          /// value should be > minAngle.
     bool limitMotorAngles = true;  /// true if the motor will be limited between [minAngle,
                                    /// maxAngle], false otherwise.
+    
+    // constexpr TurretMotorConfig(float startAngle, uint16_t startEncoderValue, float minAngle,
+    // float maxAngle, bool limitMotorAngles) : startAngle(startAngle), startEncoderValue(startEncoderValue), minAngle(minAngle),
+    // maxAngle(maxAngle), limitMotorAngles(limitMotorAngles) {}
 };
 }  // namespace aruwsrc::control::turret
 

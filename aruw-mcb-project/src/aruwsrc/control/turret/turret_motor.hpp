@@ -31,6 +31,15 @@
 
 namespace aruwsrc::control::turret
 {
+/**
+ * Logic encapsulating the control of a single axis of a turret gimbal motor. Contains logic for
+ * storing chassis relative position measurements and setpoints and logic for limiting the angle
+ * setpoint.
+ *
+ * Currently, there are GM6020-specific motor parameters in this object such that it is expected
+ * that the gimbal motor used is a 6020, but in general with some taproot-side MRs, this class can
+ * be generalized to work with any motor interface.
+ */
 class TurretMotor
 {
 public:
@@ -128,7 +137,8 @@ public:
      * (via getChassisFrameMeasuredAngle) or can be measured by some other means (for example, an
      * IMU on the turret that is than transformed to the chassis frame).
      *
-     * @return The minimum wrapped error between the specified measurement.
+     * @return The minimum error between the specified measurement. If the turret motor is not limited,
+     * the error is wrapped between [0, 2*PI), otherwise the error is absolute.
      *
      * @note Call getValidChassisMeasurementError if you want the error between the chassis-frame
      * setpoint and measurement
