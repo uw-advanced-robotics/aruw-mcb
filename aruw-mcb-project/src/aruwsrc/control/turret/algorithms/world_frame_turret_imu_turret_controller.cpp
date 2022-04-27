@@ -174,7 +174,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
 
 void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
 {
-    const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
+    const float chassisFrameYaw = turretMotor->getChassisFrameMeasuredAngle().getValue();
     const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
 
     updateYawWorldFrameSetpoint(
@@ -182,7 +182,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(float desired
         chassisFrameYaw,
         worldFrameYawAngle,
         &worldFrameSetpoint,
-        turretSubsystem);
+        turretMotor);
 }
 
 float WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
@@ -256,7 +256,7 @@ void HeroTurretImuCascadePidTurretController::runController(
 
 void HeroTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
 {
-    const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
+    const float chassisFrameYaw = turretMotor->getChassisFrameMeasuredAngle().getValue();
     const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
 
     updateYawWorldFrameSetpoint(
@@ -264,7 +264,7 @@ void HeroTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
         chassisFrameYaw,
         worldFrameYawAngle,
         &worldFrameSetpoint,
-        turretSubsystem);
+        turretMotor);
 }
 
 float HeroTurretImuCascadePidTurretController::getSetpoint() const
@@ -383,7 +383,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(float desir
         desiredSetpoint,
         worldFramePitchAngle,
         &worldFrameSetpoint,
-        turretSubsystem);
+        turretMotor);
 }
 
 float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const

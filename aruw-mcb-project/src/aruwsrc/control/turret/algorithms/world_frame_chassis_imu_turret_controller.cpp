@@ -168,7 +168,7 @@ void WorldFrameYawChassisImuTurretController::setSetpoint(float desiredSetpoint)
         chassisFrameInitImuYawAngle,
         chassisFrameInitImuYawAngle,
         &worldFrameSetpoint,
-        turretSubsystem);
+        turretMotor);
 }
 
 float WorldFrameYawChassisImuTurretController::getSetpoint() const
