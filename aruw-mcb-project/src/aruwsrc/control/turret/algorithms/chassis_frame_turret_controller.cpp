@@ -61,6 +61,11 @@ void ChassisFrameYawTurretController::runController(const uint32_t dt, const flo
     turretSubsystem->setYawMotorOutput(pidOutput);
 }
 
+void ChassisFrameYawTurretController::setSetpoint(float desiredSetpoint)
+{
+    turretSubsystem->setYawSetpoint(desiredSetpoint);
+}
+
 float ChassisFrameYawTurretController::getSetpoint() const
 {
     return turretSubsystem->getYawSetpoint();
@@ -106,6 +111,11 @@ void ChassisFramePitchTurretController::runController(
         GRAVITY_COMPENSATION_SCALAR);
 
     turretSubsystem->setPitchMotorOutput(pidOutput);
+}
+
+void ChassisFramePitchTurretController::setSetpoint(float desiredSetpoint)
+{
+    turretSubsystem->setPitchSetpoint(desiredSetpoint);
 }
 
 float ChassisFramePitchTurretController::getSetpoint() const
