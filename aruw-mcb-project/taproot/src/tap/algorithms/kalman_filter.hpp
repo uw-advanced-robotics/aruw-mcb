@@ -112,8 +112,7 @@ private:
     CMSISMat<STATES, STATES> At;
 
     /**
-     * Observation matrix. How we transform the input into the form
-     * of the state matrix.
+     * Observation matrix. How we transform the system vector into a measurement vector.
      *
      * @note Also referred to as "H" in literature.
      */
@@ -124,10 +123,9 @@ private:
      */
     CMSISMat<STATES, INPUTS> Ct;
 
-    /**
-     * Covariance matrices
-     */
+    /// System noise covariance
     const CMSISMat<STATES, STATES> Q;
+    /// Measurement noise covariance
     const CMSISMat<INPUTS, INPUTS> R;
 
     /**

@@ -107,7 +107,6 @@ aruwsrc::chassis::ChassisSubsystem chassis(
     aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
-static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 AgitatorSubsystem agitator(
     drivers(),
@@ -423,7 +422,6 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
