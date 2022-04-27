@@ -186,6 +186,8 @@ cv::SentinelTurretCVCommand turretCVCommand(
     frictionWheels,
     14.5f,
     0);
+void selectNewRobotMessageHandler() { turretCVCommand.requestNewTarget(); }
+void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
@@ -246,9 +248,8 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 
-    // TODO add callbacks after seninel CV command implemented
-    // sentinelRequestHandler.attachSelectNewRobotMessageHandler();
-    // sentinelRequestHandler.attachTargetNewQuadrantMessageHandler();
+    sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
+    sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
         &sentinelRequestHandler);

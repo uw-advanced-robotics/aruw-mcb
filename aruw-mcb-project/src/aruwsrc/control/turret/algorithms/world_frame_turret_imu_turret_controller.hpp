@@ -73,6 +73,8 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    void setSetpoint(float desiredSetpoint) final;
+
     float getSetpoint() const final;
 
     bool isOnline() const final;
@@ -107,6 +109,8 @@ public:
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
+
+    void setSetpoint(float desiredSetpoint) final;
 
     float getSetpoint() const final;
 
@@ -155,6 +159,8 @@ public:
      * @param[in] desiredSetpoint The pitch desired setpoint in the world frame.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
+
+    void setSetpoint(float desiredSetpoint) final;
 
     float getSetpoint() const final;
 

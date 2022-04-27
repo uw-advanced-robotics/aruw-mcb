@@ -70,6 +70,8 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    void setSetpoint(float desiredSetpoint) final;
+
     /**
      * @return The yaw setpoint, in the world frame.
      */

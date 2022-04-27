@@ -58,6 +58,8 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    void setSetpoint(float desiredSetpoint) final;
+
     /**
      * @return The yaw setpoint, in the chassis frame.
      */
@@ -93,6 +95,8 @@ public:
      * @param[in] desiredSetpoint The pitch desired setpoint in the chassis frame.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
+
+    void setSetpoint(float desiredSetpoint) final;
 
     /**
      * @return The pitch setpoint, in the chassis frame.
