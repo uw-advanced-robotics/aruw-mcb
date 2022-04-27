@@ -153,7 +153,7 @@ void VisionCoprocessor::sendOdometryData()
     float pitch = drivers->mpu6500.getPitch();
     float roll = drivers->mpu6500.getRoll();
     // transform the pitch/roll from the chassis frame to the world frame
-    tap::algorithms::rotateVector(&pitch, &roll, odometryData->chassisOdometry.yaw);
+    tap::algorithms::rotateVector(&pitch, &roll, location.getOrientation());
 
     // chassis odometry
     odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
