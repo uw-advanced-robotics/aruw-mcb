@@ -190,7 +190,7 @@ void SentinelTurretCVCommand::changeScanningQuadrant()
 {
     // basic quadrant change for proof-of concept, if turret on left side, move right, otherwise
     // move left
-    const float angleChange = copysignf(90, -turretSubsystem->getYawAngleFromCenter());
+    const float angleChange = copysignf(M_PI_2, -turretSubsystem->yawMotor.getAngleFromCenter());
     yawController->setSetpoint(yawController->getSetpoint() + angleChange);
 }
 
