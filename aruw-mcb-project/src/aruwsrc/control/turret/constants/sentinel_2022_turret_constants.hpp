@@ -18,7 +18,7 @@
  */
 
 #ifndef SENTINEL_2022_TURRET_CONSTANTS_HPP_
-#define SENTINEL_2022_TURRET_CONSTANTS_HPP_
+#define SENTINEL_2022_TURRET_CONscoSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -44,7 +44,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 5585,
+    .startEncoderValue = 5455,
     .minAngle = -M_PI_2,
     .maxAngle = M_PI,
     .limitMotorAngles = true,
@@ -90,9 +90,9 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 229'183.1f,
-    .ki = 0.0f,
-    .kd = 7'448.5,
+    .kp = 180'000.0f,
+    .ki = 0.1f,
+    .kd = 9'000.0,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
