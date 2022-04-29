@@ -43,11 +43,11 @@ class ChassisFrameYawTurretController final : public TurretYawControllerInterfac
 {
 public:
     /**
-     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFrameYawTurretController(
-        TurretMotor *turretMotor,
+        TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -57,6 +57,8 @@ public:
      * @param[in] desiredSetpoint The yaw desired setpoint in the chassis frame.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
+
+    void setSetpoint(float desiredSetpoint) final;
 
     /**
      * @return The yaw setpoint, in the chassis frame.
@@ -79,11 +81,11 @@ class ChassisFramePitchTurretController final : public TurretPitchControllerInte
 {
 public:
     /**
-     * @param[in] turretMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFramePitchTurretController(
-        TurretMotor *turretMotor,
+        TurretMotor *pitchMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -93,6 +95,8 @@ public:
      * @param[in] desiredSetpoint The pitch desired setpoint in the chassis frame.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
+
+    void setSetpoint(float desiredSetpoint) final;
 
     /**
      * @return The pitch setpoint, in the chassis frame.

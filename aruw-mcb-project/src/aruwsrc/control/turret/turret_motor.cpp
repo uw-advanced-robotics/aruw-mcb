@@ -34,9 +34,10 @@ TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorCon
       motor(motor),
       chassisFrameSetpoint(config.startAngle),
       chassisFrameMeasuredAngle(config.startAngle, 0, M_TWOPI),
-      lastUpdatedEncoderValue(config.startEncoderValue),
-      chassisFrameUnwrappedMeasurement(config.startAngle)
+      chassisFrameUnwrappedMeasurement(config.startAngle),
+      lastUpdatedEncoderValue(config.startEncoderValue)
 {
+    assert(config.minAngle <= config.maxAngle);
     assert(motor != nullptr);
 }
 
@@ -79,6 +80,10 @@ void TurretMotor::setMotorOutput(float out)
     if (motor->isMotorOnline())
     {
         motor->setDesiredOutput(out);
+    }
+    else
+    {
+        motor->setDesiredOutput(0);
     }
 }
 
