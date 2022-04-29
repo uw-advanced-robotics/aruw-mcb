@@ -183,14 +183,14 @@ float ControlOperatorInterface::getTurretYawInput(uint8_t turretID)
 {
     switch (turretID)
     {
-        case 1:
+        case 0:
             return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) +
                    static_cast<float>(limitVal<int16_t>(
                        -drivers->remote.getMouseX(),
                        -USER_MOUSE_YAW_MAX,
                        USER_MOUSE_YAW_MAX)) *
                        USER_MOUSE_YAW_SCALAR;
-        case 2:
+        case 1:
             return -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) +
                    static_cast<float>(limitVal<int16_t>(
                        -drivers->remote.getMouseX(),
@@ -206,14 +206,14 @@ float ControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
 {
     switch (turretID)
     {
-        case 1:
+        case 0:
             return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
                    static_cast<float>(limitVal<int16_t>(
                        drivers->remote.getMouseY(),
                        -USER_MOUSE_PITCH_MAX,
                        USER_MOUSE_PITCH_MAX)) *
                        USER_MOUSE_PITCH_SCALAR;
-        case 2:
+        case 1:
             return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) +
                    static_cast<float>(limitVal<int16_t>(
                        drivers->remote.getMouseY(),

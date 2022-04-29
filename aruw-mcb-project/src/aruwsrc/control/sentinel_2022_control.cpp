@@ -356,9 +356,9 @@ void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turret1::agitator);
     drivers->commandScheduler.registerSubsystem(&turret1::frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turret1::turretSubsystem);
-    // drivers->commandScheduler.registerSubsystem(&turret2::agitator);
-    // drivers->commandScheduler.registerSubsystem(&turret2::frictionWheels);
-    // drivers->commandScheduler.registerSubsystem(&turret2::turretSubsystem);
+    drivers->commandScheduler.registerSubsystem(&turret2::agitator);
+    drivers->commandScheduler.registerSubsystem(&turret2::frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&turret2::turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret1::turretSubsystem, 0);

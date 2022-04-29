@@ -52,7 +52,11 @@ public:
     static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10;
 
     // radius of the wheel in mm
+#ifdef TARGET_SENTINEL_2021
     static constexpr float WHEEL_RADIUS = 35.0f;
+#else
+    static constexpr float WHEEL_RADIUS = 44.45f;
+#endif
     static constexpr float GEAR_RATIO = 19.0f;
 
     // RMUL length of the rail, in mm
