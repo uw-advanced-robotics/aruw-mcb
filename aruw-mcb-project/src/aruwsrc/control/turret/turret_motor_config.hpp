@@ -20,6 +20,7 @@
 #ifndef TURRET_MOTOR_CONFIG_HPP_
 #define TURRET_MOTOR_CONFIG_HPP_
 
+#include <cassert>
 #include <cstdint>
 
 namespace aruwsrc::control::turret

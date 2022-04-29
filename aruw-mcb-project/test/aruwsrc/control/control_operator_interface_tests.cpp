@@ -198,7 +198,22 @@ TEST_P(TurretTest, getTurretYawInput_returns_user_input)
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_HORIZONTAL))
         .WillOnce(Return(remoteInput));
 
-    EXPECT_NEAR(expectedValue, operatorInterface.getTurretYawInput(), 1E-3);
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretYawInput(0), 1E-3);
+}
+
+TEST_P(TurretTest, getTurretYawInput_turret2_returns_user_input)
+{
+    auto params = GetParam();
+
+    float remoteInput = std::get<0>(params);
+    int16_t mouseInput = std::get<1>(params);
+    float expectedValue = std::get<2>(params);
+
+    EXPECT_CALL(drivers.remote, getMouseX).WillOnce(Return(mouseInput));
+    EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_HORIZONTAL))
+        .WillOnce(Return(remoteInput));
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretYawInput(1), 1E-3);
 }
 
 TEST_P(TurretTest, getTurretPitchInput_returns_user_input)
@@ -213,7 +228,22 @@ TEST_P(TurretTest, getTurretPitchInput_returns_user_input)
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_VERTICAL))
         .WillOnce(Return(remoteInput));
 
-    EXPECT_NEAR(expectedValue, operatorInterface.getTurretPitchInput(), 1E-3);
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretPitchInput(0), 1E-3);
+}
+
+TEST_P(TurretTest, getTurretPitchInput_turret2_returns_user_input)
+{
+    auto params = GetParam();
+
+    float remoteInput = std::get<0>(params);
+    int16_t mouseInput = std::get<1>(params);
+    float expectedValue = std::get<2>(params);
+
+    EXPECT_CALL(drivers.remote, getMouseY).WillOnce(Return(-mouseInput));
+    EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_VERTICAL))
+        .WillOnce(Return(remoteInput));
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretPitchInput(1), 1E-3);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -237,7 +267,7 @@ class SentinelChassisTest : public ControlOperatorInterfaceTest,
 
 TEST_P(SentinelChassisTest, getSentinelSpeedInput_retuns_user_input)
 {
-    ON_CALL(drivers.remote, getChannel).WillByDefault(Return(std::get<0>(GetParam())));
+    ON_CALL(drivers.remote, getWheel).WillByDefault(Return(std::get<0>(GetParam())));
 
     EXPECT_NEAR(std::get<1>(GetParam()), operatorInterface.getSentinelSpeedInput(), 1E-3);
 }
@@ -247,11 +277,11 @@ INSTANTIATE_TEST_SUITE_P(
     SentinelChassisTest,
     Values(
         std::tuple<float, float>(0, 0),
-        std::tuple<float, float>(-1, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
-        std::tuple<float, float>(1, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(-660, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(660, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
         std::tuple<float, float>(
-            0.5,
+            330,
             0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
         std::tuple<float, float>(
-            -0.5,
+            -330,
             -0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR)));

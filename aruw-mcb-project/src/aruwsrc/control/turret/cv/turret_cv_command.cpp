@@ -22,6 +22,7 @@
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/architecture/clock.hpp"
 
+#include "../algorithms/chassis_frame_turret_controller.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -86,13 +87,18 @@ void TurretCVCommand::execute()
         pitchSetpoint = targetPitch;
         yawSetpoint = targetYaw;
 
-        // the setpoint returned by the ballistics solver is between [0, 2*PI)
-        // the desired setpoint is not required to be between [0, 2*PI)
-        // so, find the setpoint that is closest to the unwrapped measured angle
-        // (this is only an issue for turrets w/o a slip ring)
+        /**
+         * the setpoint returned by the ballistics solver is between [0, 2*PI)
+         * the desired setpoint is unwrapped, so find the setpoint that is closest
+         * to the unwrapped measured angle.
+         * Since the world frame controllers don't unwrapping the setpoint to values
+         * outside of [0, 2*PI), we don't have to worry about unwrapping the world
+         * frame controllers.
+         *
+         * TODO fix for non-chassis frame controllers
+         */
         if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
         {
-            // TODO fix for non-chassis frame controllers
             yawSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
                 turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle(),
                 yawSetpoint);
@@ -103,9 +109,10 @@ void TurretCVCommand::execute()
     {
         // no valid ballistics solution, let user control turret
         pitchSetpoint +=
-            userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
+            userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput(turretID);
 
-        yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
+        yawSetpoint +=
+            userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
     }
 
     uint32_t currTime = getTimeMilliseconds();

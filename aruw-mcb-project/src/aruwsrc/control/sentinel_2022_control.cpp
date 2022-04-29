@@ -220,7 +220,8 @@ user::TurretUserControlCommand turretManual(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+    USER_PITCH_INPUT_SCALAR,
+    0);
 
 cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
@@ -285,7 +286,8 @@ user::TurretUserControlCommand turretManual(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+    USER_PITCH_INPUT_SCALAR,
+    1);
 
 cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
@@ -299,6 +301,17 @@ cv::SentinelTurretCVCommand turretCVCommand(
     29.5f,
     0);
 }  // namespace turret2
+
+void selectNewRobotMessageHandler()
+{
+    turret1::turretCVCommand.requestNewTarget();
+    turret2::turretCVCommand.requestNewTarget();
+}
+void targetNewQuadrantMessageHandler()
+{
+    turret1::turretCVCommand.changeScanningQuadrant();
+    turret2::turretCVCommand.changeScanningQuadrant();
+}
 
 /* define command mappings --------------------------------------------------*/
 
@@ -368,8 +381,8 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&turret1::agitatorCalibrateCommand);
     drivers->commandScheduler.addCommand(&turret2::agitatorCalibrateCommand);
 
-    // sentinelRequestHandler.attachSelectNewRobotMessageHandler();
-    // sentinelRequestHandler.attachTargetNewQuadrantMessageHandler();
+    sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
+    sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
         &sentinelRequestHandler);

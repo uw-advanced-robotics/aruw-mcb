@@ -30,9 +30,9 @@ using namespace tap::control::turret;
 namespace aruwsrc::control::turret::algorithms
 {
 ChassisFrameYawTurretController::ChassisFrameYawTurretController(
-    TurretMotor *turretMotor,
+    TurretMotor *yawMotor,
     const tap::algorithms::SmoothPidConfig &pidConfig)
-    : TurretYawControllerInterface(turretMotor),
+    : TurretYawControllerInterface(yawMotor),
       pid(pidConfig)
 {
 }
@@ -60,6 +60,11 @@ void ChassisFrameYawTurretController::runController(const uint32_t dt, const flo
     turretMotor->setMotorOutput(pidOutput);
 }
 
+void ChassisFrameYawTurretController::setSetpoint(float desiredSetpoint)
+{
+    turretMotor->setChassisFrameSetpoint(desiredSetpoint);
+}
+
 float ChassisFrameYawTurretController::getSetpoint() const
 {
     return turretMotor->getChassisFrameSetpoint();
@@ -68,9 +73,9 @@ float ChassisFrameYawTurretController::getSetpoint() const
 bool ChassisFrameYawTurretController::isOnline() const { return turretMotor->isOnline(); }
 
 ChassisFramePitchTurretController::ChassisFramePitchTurretController(
-    TurretMotor *turretMotor,
+    TurretMotor *pitchMotorp,
     const tap::algorithms::SmoothPidConfig &pidConfig)
-    : TurretPitchControllerInterface(turretMotor),
+    : TurretPitchControllerInterface(pitchMotorp),
       pid(pidConfig)
 {
 }
@@ -104,6 +109,11 @@ void ChassisFramePitchTurretController::runController(
         GRAVITY_COMPENSATION_SCALAR);
 
     turretMotor->setMotorOutput(pidOutput);
+}
+
+void ChassisFramePitchTurretController::setSetpoint(float desiredSetpoint)
+{
+    turretMotor->setChassisFrameSetpoint(desiredSetpoint);
 }
 
 float ChassisFramePitchTurretController::getSetpoint() const
