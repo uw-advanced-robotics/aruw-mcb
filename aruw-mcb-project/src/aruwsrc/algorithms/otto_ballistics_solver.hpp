@@ -20,6 +20,8 @@
 #ifndef OTTO_BALLISTICS_SOLVER_HPP_
 #define OTTO_BALLISTICS_SOLVER_HPP_
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
 namespace aruwsrc::chassis
 {
 class ChassisSubsystem;
@@ -51,7 +53,6 @@ namespace aruwsrc::algorithms
  * An object that computes the world-relative pitch and yaw turret angles based on CV aim data and
  * odometry measurements.
  */
-
 class OttoBallisticsSolver
 {
 public:
@@ -65,39 +66,45 @@ public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
-     * @param[in] chassisSubsystem Chassis subsystem object, used to get the velocity of the robot.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
+     * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
+     * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
         const aruwsrc::Drivers &drivers,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const chassis::ChassisSubsystem &chassisSubsystem,
         const control::turret::TurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed);
+        const float defaultLaunchSpeed,
+        const uint8_t turretID);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
      * data to compute aim coordinates.
      *
-     * @param[out] pitchAngle The computed pitch angle in the world frame. Not set if aim
-     * coordinates invalid.
-     * @param[out] yawAngle The computed yaw angle in the world frame. Not set if the aim
-     * coordinates invalid.
-     * @return `true` if the computation succeeded, `false` otherwise.
+     * This function verifies that the aim data it uses is valid (i.e.: it contains coords for a
+     * real target and CV is online).
+     *
+     * @note This function may modify `pitchAngle` and `yawAngle` even if no valid solution is
+     * found.
+     *
+     * @param[out] pitchAngle The computed pitch angle in the world frame in radians.
+     * @param[out] yawAngle The computed yaw angle in the world frame in radians.
+     * @return `true` if CV is online, the most recent aim data is valid, and a valid ballistics
+     * solution was found. `false` otherwise.
      */
     bool computeTurretAimAngles(float *pitchAngle, float *yawAngle);
 
 private:
     const Drivers &drivers;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const chassis::ChassisSubsystem &chassisSubsystem;
     const control::turret::TurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
+    const uint8_t turretID;
 };
 }  // namespace aruwsrc::algorithms
 

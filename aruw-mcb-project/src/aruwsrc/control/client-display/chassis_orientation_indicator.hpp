@@ -48,11 +48,14 @@ public:
      * Construct a ClientDisplayCommand.
      *
      * @param[in] drivers Global drivers instance.
+     * @param[in] refSerialTransmitter Transmitter that stores ref serial transmission state for the
+     * protothread that this indicator is used in.
      * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
      * turret and to print turret angles (if turret chassis relative angles are being printed).
      */
     ChassisOrientationIndicator(
-        aruwsrc::Drivers *drivers,
+        aruwsrc::Drivers &drivers,
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
@@ -79,7 +82,7 @@ private:
     /** The length of the animated turret barrel, in pixels. */
     static constexpr uint16_t CHASSIS_BARREL_LENGTH = 90;
 
-    aruwsrc::Drivers *drivers;
+    aruwsrc::Drivers &drivers;
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
     /**

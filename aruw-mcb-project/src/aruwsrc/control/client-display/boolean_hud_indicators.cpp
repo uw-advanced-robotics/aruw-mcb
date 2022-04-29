@@ -20,6 +20,7 @@
 #include "boolean_hud_indicators.hpp"
 
 #include "tap/communication/serial/ref_serial.hpp"
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -42,26 +43,28 @@ static inline void updateGraphicColor(
 }
 
 BooleanHudIndicators::BooleanHudIndicators(
-    aruwsrc::Drivers *drivers,
+    aruwsrc::Drivers &drivers,
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand)
-    : drivers(drivers),
+    : HudIndicator(refSerialTransmitter),
+      drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
-              drivers,
+              refSerialTransmitter,
               &booleanHudIndicatorGraphics[SYSTEMS_CALIBRATING],
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING])>,
               0),
           BooleanHUDIndicator(
-              drivers,
+              refSerialTransmitter,
               &booleanHudIndicatorGraphics[AGITATOR_STATUS_HEALTHY],
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY]),
@@ -83,14 +86,10 @@ modm::ResumableResult<bool> BooleanHudIndicators::sendInitialGraphics()
         RF_CALL(
             booleanHudIndicatorDrawers[booleanHudIndicatorIndexSendInitialGraphics].initialize());
 
-        drivers->refSerial.sendGraphic(
-            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
-        DELAY_REF_GRAPHIC(
-            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
-        drivers->refSerial.sendGraphic(
-            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
-        DELAY_REF_GRAPHIC(
-            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
+        RF_CALL(refSerialTransmitter.sendGraphic(
+            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
+        RF_CALL(refSerialTransmitter.sendGraphic(
+            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
     }
 
     RF_END();
@@ -105,7 +104,7 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
         agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed());
 
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
-        drivers->commandScheduler.isCommandScheduled(&imuCalibrateCommand));
+        drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;
@@ -129,14 +128,14 @@ void BooleanHudIndicators::initialize()
         // config the boolean HUD indicator circle (that will switch colors based on state)
         getUnusedGraphicName(booleanHudIndicatorName);
 
-        RefSerial::configGraphicGenerics(
+        RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]));
 
-        RefSerial::configCircle(
+        RefSerialTransmitter::configCircle(
             BOOLEAN_HUD_INDICATOR_WIDTH,
             BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
             hudIndicatorListCurrY,
@@ -146,14 +145,14 @@ void BooleanHudIndicators::initialize()
         // config the border circle that bounds the booleanHudIndicatorGraphics
         getUnusedGraphicName(booleanHudIndicatorName);
 
-        RefSerial::configGraphicGenerics(
+        RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorStaticGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
 
-        RefSerial::configCircle(
+        RefSerialTransmitter::configCircle(
             BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
             BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
             hudIndicatorListCurrY,
@@ -163,16 +162,16 @@ void BooleanHudIndicators::initialize()
         // config the label associated with the particular indicator
         getUnusedGraphicName(booleanHudIndicatorName);
 
-        RefSerial::configGraphicGenerics(
+        RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorStaticLabelGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
 
         const char *indicatorLabel = std::get<0>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]);
 
-        RefSerial::configCharacterMsg(
+        RefSerialTransmitter::configCharacterMsg(
             BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE,
             BOOLEAN_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH,
             BOOLEAN_HUD_INDICATOR_LIST_CENTER_X -

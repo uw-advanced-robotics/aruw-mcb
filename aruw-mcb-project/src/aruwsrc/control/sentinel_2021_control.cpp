@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_SENTINEL)
+#if defined(TARGET_SENTINEL_2021)
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -30,15 +30,20 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "launcher/friction_wheel_subsystem.hpp"
+#include "launcher/launcher_constants.hpp"
+#include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
-#include "turret/turret_subsystem.hpp"
+#include "turret/cv/sentinel_turret_cv_command.hpp"
+#include "turret/sentinel_turret_subsystem.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
@@ -49,6 +54,8 @@ using namespace aruwsrc::control;
 using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::launcher;
+using namespace aruwsrc::algorithms::odometry;
 using namespace tap::communication::serial;
 
 /*
@@ -61,8 +68,10 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace sentinel_control
 {
-static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::A;
+static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::C;
 static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
+
+aruwsrc::communication::serial::SentinelRequestHandler sentinelRequestHandler(drivers());
 
 /* define subsystems --------------------------------------------------------*/
 AgitatorSubsystem agitator(
@@ -78,17 +87,30 @@ AgitatorSubsystem agitator(
 
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
-aruwsrc::control::launcher::FrictionWheelSubsystem frictionWheels(drivers());
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    0.1f);
 
 // Note: motor "one" is right, "two" is left
 tap::motor::DjiMotor pitchMotor(
     drivers(),
     tap::motor::MOTOR5,
-    CAN_BUS_MOTORS,
+    aruwsrc::control::turret::CAN_BUS_MOTORS,
     false,
     "Pitch Turret");
-tap::motor::DjiMotor yawMotor(drivers(), tap::motor::MOTOR6, CAN_BUS_MOTORS, true, "Yaw Turret");
-TurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    tap::motor::MOTOR6,
+    aruwsrc::control::turret::CAN_BUS_MOTORS,
+    true,
+    "Yaw Turret");
+SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
+
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turretSubsystem, &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
@@ -109,7 +131,7 @@ aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
 // Two identical drive commands since you can't map an identical command to two different mappings
-SentinelDriveManualCommand sentinelDriveManual(drivers(), &sentinelDrive);
+SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
@@ -143,6 +165,20 @@ user::TurretUserControlCommand turretManual(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController);
 
+cv::SentinelTurretCVCommand turretCVCommand(
+    drivers(),
+    &turretSubsystem,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController,
+    agitator,
+    &rotateAgitatorManual,
+    odometrySubsystem,
+    frictionWheels,
+    14.5f,
+    0);
+void selectNewRobotMessageHandler() { turretCVCommand.requestNewTarget(); }
+void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }
+
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
 /* define command mappings --------------------------------------------------*/
@@ -158,7 +194,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     true);
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&sentinelDriveManual, &turretManual},
+    {&sentinelDriveManual1, &turretManual},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchMid(
@@ -173,28 +209,40 @@ void initializeSubsystems()
     sentinelDrive.initialize();
     frictionWheels.initialize();
     turretSubsystem.initialize();
+    odometrySubsystem.initialize();
 }
 
-/* register subsystems here -------------------------------------------------*/
+/* register subsystems here ------------------
+-------------------------------*/
 void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&sentinelDrive);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretSubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentinelCommands(aruwsrc::Drivers *)
+void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
 {
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
+    turretSubsystem.setDefaultCommand(&turretCVCommand);
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turretSubsystem, 0);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
+
+    sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
+    sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
+        &sentinelRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/

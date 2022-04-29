@@ -26,6 +26,7 @@
 #include "hopper_subsystem_mock.hpp"
 #include "oled_display_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
+#include "sentinel_request_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
@@ -83,7 +84,11 @@ ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers)
-    : FrictionWheelSubsystem(drivers)
+    : FrictionWheelSubsystem(
+          drivers,
+          tap::motor::MOTOR1,
+          tap::motor::MOTOR2,
+          tap::can::CanBus::CAN_BUS1)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
@@ -124,6 +129,12 @@ SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
 {
 }
 SentinelDriveSubsystemMock::~SentinelDriveSubsystemMock() {}
+
+SentinelRequestSubsystemMock::SentinelRequestSubsystemMock(aruwsrc::Drivers *drivers)
+    : SentinelRequestSubsystem(drivers)
+{
+}
+SentinelRequestSubsystemMock::~SentinelRequestSubsystemMock() {}
 
 TowSubsystemMock::TowSubsystemMock(
     aruwsrc::Drivers *drivers,

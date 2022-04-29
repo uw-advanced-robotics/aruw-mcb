@@ -19,13 +19,21 @@
 
 #include "vision_hud_indicators.hpp"
 
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
-VisionHudIndicators::VisionHudIndicators(aruwsrc::Drivers *drivers) : drivers(drivers) {}
+VisionHudIndicators::VisionHudIndicators(
+    aruwsrc::Drivers &drivers,
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
+    : HudIndicator(refSerialTransmitter),
+      drivers(drivers)
+{
+}
 
 modm::ResumableResult<bool> VisionHudIndicators::sendInitialGraphics()
 {
@@ -48,21 +56,19 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
 {
     RF_BEGIN(2);
 
-    currVisionTargetStatus = drivers->visionCoprocessor.isCvOnline() &&
-                             drivers->visionCoprocessor.getLastAimData().hasTarget;
+    currVisionTargetStatus = drivers.visionCoprocessor.isCvOnline() &&
+                             drivers.visionCoprocessor.getSomeTurretHasTarget();
 
     if ((updateVisionTargetFoundTimeout.isExpired() ||
          updateVisionTargetFoundTimeout.isStopped()) &&
         prevVisionTargetStatus != currVisionTargetStatus)
     {
         visionTargetFoundGraphics.graphicData[0].operation =
-            currVisionTargetStatus ? Tx::ADD_GRAPHIC : Tx::ADD_GRAPHIC_DELETE;
+            currVisionTargetStatus ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
         visionTargetFoundGraphics.graphicData[1].operation =
-            currVisionTargetStatus ? Tx::ADD_GRAPHIC : Tx::ADD_GRAPHIC_DELETE;
+            currVisionTargetStatus ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
 
-        drivers->refSerial.sendGraphic(&visionTargetFoundGraphics);
-
-        DELAY_REF_GRAPHIC(&visionTargetFoundGraphics);
+        RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetFoundGraphics));
 
         updateVisionTargetFoundTimeout.restart(VISION_TARGET_FOUND_MAX_REFRESH_RATE);
         prevVisionTargetStatus = currVisionTargetStatus;
@@ -94,14 +100,14 @@ void VisionHudIndicators::initializeVisionHudIndicator(
 
     getUnusedGraphicName(hudIndicatorName);
 
-    RefSerial::configGraphicGenerics(
+    RefSerialTransmitter::configGraphicGenerics(
         graphicData,
         hudIndicatorName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         VISION_TARGET_FOUND_COLOR);
 
-    RefSerial::configLine(
+    RefSerialTransmitter::configLine(
         VISION_TARGET_FOUND_SQUARE_WIDTH,
         xBoxLocation,
         VISION_TARGET_FOUND_Y_LOCATION - VISION_TARGET_FOUND_SQUARE_WIDTH / 2,

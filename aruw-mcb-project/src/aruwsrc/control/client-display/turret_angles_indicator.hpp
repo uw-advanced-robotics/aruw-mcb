@@ -20,6 +20,7 @@
 #ifndef TURRET_ANGLES_INDICATOR_HPP_
 #define TURRET_ANGLES_INDICATOR_HPP_
 
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
@@ -50,7 +51,8 @@ public:
      * printed).
      */
     TurretAnglesIndicator(
-        aruwsrc::Drivers *drivers,
+        aruwsrc::Drivers &drivers,
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
@@ -79,7 +81,7 @@ private:
     /** Color of the turret angles message. */
     static constexpr Tx::GraphicColor TURRET_ANGLES_COLOR = Tx::GraphicColor::ORANGE;
 
-    aruwsrc::Drivers *drivers;
+    aruwsrc::Drivers &drivers;
 
     const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem;
 

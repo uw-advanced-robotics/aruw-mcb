@@ -22,34 +22,35 @@
 
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::control::launcher
 {
+#if defined(TARGET_HERO) || defined(ALL_SENTINELS)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
+#else
+static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
+#endif
+
+#if defined(TARGET_SENTINEL_2022)
+static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus TURRET2_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+#else
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+#endif
 
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
 
-static modm::Pid<float>::Parameter LAUNCHER_PID = {
-    /** kp */
-    20.0f,
-    /** ki */
-    0.2f,
-    /** kd */
-    0.0f,
-    /** maxErrorSum */
-    5'000.0f,
-    /**
-     * This max output is measured in the c620 robomaster translated current.
-     * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
-     * The corresponding speed controller output torque current range is
-     * -20 ~ 0 ~ 20 A.
-     */
-    16000.0f};
+static constexpr float LAUNCHER_PID_KP = 20.0f;
+static constexpr float LAUNCHER_PID_KI = 0.2f;
+static constexpr float LAUNCHER_PID_KD = 0.0f;
+static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 
 /**
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,

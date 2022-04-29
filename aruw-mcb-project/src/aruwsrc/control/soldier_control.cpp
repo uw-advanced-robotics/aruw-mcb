@@ -33,6 +33,8 @@
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -84,7 +86,10 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 namespace soldier_control
 {
 /* define subsystems --------------------------------------------------------*/
+aruwsrc::communication::serial::SentinelRequestSubsystem sentinelRequestSubsystem(drivers());
+
 tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+
 tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
@@ -117,8 +122,9 @@ AgitatorSubsystem agitator(
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
-    tap::motor::MOTOR1,
-    tap::motor::MOTOR2,
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     0.1f);
 
@@ -127,6 +133,11 @@ ClientDisplaySubsystem clientDisplay(drivers());
 TurretMCBHopperSubsystem hopperCover(drivers());
 
 /* define commands ----------------------------------------------------------*/
+aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
+    &sentinelRequestSubsystem);
+aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
+    &sentinelRequestSubsystem);
+
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
@@ -180,7 +191,6 @@ cv::TurretCVCommand turretCVCommand(
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
     odometrySubsystem,
-    chassis,
     frictionWheels,
     1,
     1,
@@ -260,8 +270,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     true);
 
 ClientDisplayCommand clientDisplayCommand(
-    drivers(),
-    &clientDisplay,
+    *drivers(),
+    clientDisplay,
     &hopperCover,
     frictionWheels,
     agitator,
@@ -293,6 +303,15 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
+PressCommandMapping gPressedCtrlNotPressed(
+    drivers(),
+    {&sentinelSelectNewRobotCommand},
+    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
+PressCommandMapping gCtrlPressed(
+    drivers(),
+    {&sentinelTargetNewQuadrantCommand},
+    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
+
 ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
@@ -366,6 +385,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&sentinelRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
@@ -377,6 +397,7 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
+    sentinelRequestSubsystem.initialize();
     turret.initialize();
     chassis.initialize();
     odometrySubsystem.initialize();
@@ -398,11 +419,11 @@ void setDefaultSoldierCommands(aruwsrc::Drivers *)
 void startSoldierCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
-    drivers->commandScheduler.addCommand(&clientDisplayCommand);
+    // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -423,6 +444,8 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+    drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&vPressed);
 }
 }  // namespace soldier_control

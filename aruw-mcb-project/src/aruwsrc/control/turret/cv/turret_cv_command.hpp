@@ -77,7 +77,6 @@ public:
      * @param[in] pitchController Pointer to a pitch controller that will be used to control the
      * pitch axis of the turret.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
-     * @param[in] chassisSubsystem Chassis subsystem object, used to get the velocity of the robot.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] userPitchInputScalar When user input is used, this scalar is used to scale the
@@ -86,6 +85,8 @@ public:
      * user input.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
+     * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
+     * for more information.
      */
     TurretCVCommand(
         aruwsrc::Drivers *drivers,
@@ -93,11 +94,11 @@ public:
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const chassis::ChassisSubsystem &chassisSubsystem,
         const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
         const float userPitchInputScalar,
         const float userYawInputScalar,
-        const float defaultLaunchSpeed);
+        const float defaultLaunchSpeed,
+        uint8_t turretID = 0);
 
     void initialize() override;
 
@@ -114,6 +115,8 @@ public:
 private:
     aruwsrc::Drivers *drivers;
 
+    uint8_t turretID;
+
     TurretSubsystem *turretSubsystem;
 
     algorithms::TurretYawControllerInterface *yawController;
@@ -125,8 +128,6 @@ private:
     const float userYawInputScalar;
 
     uint32_t prevTime;
-    const chassis::ChassisSubsystem &chassisSubsystem;
-    void computeTurretAimAngles(float *pitch, float *yaw);
 };
 }  // namespace aruwsrc::control::turret::cv
 

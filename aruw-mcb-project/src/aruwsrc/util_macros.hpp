@@ -28,4 +28,12 @@
 #define ALL_SOLDIERS
 #endif
 
+/**
+ * A helper macro that makes it easier to specify at compile time something that should be true for
+ * all sentinels.
+ */
+#if defined(TARGET_SENTINEL_2021) || defined(TARGET_SENTINEL_2022)
+#define ALL_SENTINELS
+#endif
+
 #endif  // UTIL_MACROS_HPP_

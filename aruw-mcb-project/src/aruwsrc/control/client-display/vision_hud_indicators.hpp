@@ -48,7 +48,9 @@ public:
      *
      * @param[in] drivers Global drivers instance.
      */
-    VisionHudIndicators(aruwsrc::Drivers *drivers);
+    VisionHudIndicators(
+        aruwsrc::Drivers &drivers,
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -70,7 +72,7 @@ private:
     /** The maximum refresh rate of the vision target found squares. */
     static constexpr uint32_t VISION_TARGET_FOUND_MAX_REFRESH_RATE = 250;
 
-    aruwsrc::Drivers *drivers;
+    aruwsrc::Drivers &drivers;
 
     Tx::Graphic2Message visionTargetFoundGraphics;
 

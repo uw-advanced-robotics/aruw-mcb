@@ -38,7 +38,7 @@ USAGE = "Usage: scons <target> [profile=<debug|release|fast>] [robot=TARGET_<ROB
         - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
     \"TARGET_<ROBOT_TYPE>\" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.\n\
         - <ROBOT_TYPE> must be one of the following:\n\
-            - SOLDIER_2021, SOLDIER_2022, DRONE, ENGINEER, SENTINEL, HERO\n\
+            - SOLDIER_2021, SOLDIER_2022, DRONE, ENGINEER, SENTINEL_2021, SENTINEL_2022, HERO\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
 
@@ -63,7 +63,10 @@ def parse_args():
     # and determine modm build path as well as add any extra files to ignore
     if len(COMMAND_LINE_TARGETS) != 0:
         build_target = COMMAND_LINE_TARGETS[0]
-        if lib_to_compile == "test" or build_target in TEST_BUILD_TARGET_ACCEPTED_ARGS:
+        if build_target == "help":
+            print(USAGE)
+            exit(0)
+        elif lib_to_compile == "test" or build_target in TEST_BUILD_TARGET_ACCEPTED_ARGS:
             args["TARGET_ENV"] = "tests"
         elif lib_to_compile == "sim" or build_target in SIM_BUILD_TARGET_ACCEPTED_ARGS:
             args["TARGET_ENV"] = "sim"
@@ -72,10 +75,12 @@ def parse_args():
         else:
             raise Exception("You did not select a valid target.\n" + USAGE)
     else:
-        args["TARGET_ENV"] = "hardware"
+        raise Exception("You must select a valid robot target.\n" + USAGE)
 
     # Extract and validate the build profile (either debug or release)
-    args["BUILD_PROFILE"] = ARGUMENTS.get("profile", "release")
+    default_build_profile = "debug" if args["TARGET_ENV"] == "tests" else "release"
+    args["BUILD_PROFILE"] = ARGUMENTS.get("profile", default_build_profile)
+    ARGUMENTS["profile"] = args["BUILD_PROFILE"]
     if args["BUILD_PROFILE"] not in VALID_BUILD_PROFILES:
         raise Exception("You specified an invalid build profile.\n" + USAGE)
 

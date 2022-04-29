@@ -20,6 +20,7 @@
 #include "chassis_orientation_indicator.hpp"
 
 #include "tap/communication/serial/ref_serial.hpp"
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -28,9 +29,11 @@ using namespace tap::communication::serial;
 namespace aruwsrc::control::client_display
 {
 ChassisOrientationIndicator::ChassisOrientationIndicator(
-    aruwsrc::Drivers *drivers,
+    aruwsrc::Drivers &drivers,
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem)
-    : drivers(drivers),
+    : HudIndicator(refSerialTransmitter),
+      drivers(drivers),
       turretSubsystem(turretSubsystem)
 {
 }
@@ -40,10 +43,9 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::sendInitialGraphics()
     RF_BEGIN(0)
 
     // send initial chassis orientation graphics
-    drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
-    DELAY_REF_GRAPHIC(&chassisOrientationGraphics);
-    chassisOrientationGraphics.graphicData[0].operation = Tx::ADD_GRAPHIC_MODIFY;
-    chassisOrientationGraphics.graphicData[1].operation = Tx::ADD_GRAPHIC_MODIFY;
+    RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
+    chassisOrientationGraphics.graphicData[0].operation = Tx::GRAPHIC_MODIFY;
+    chassisOrientationGraphics.graphicData[1].operation = Tx::GRAPHIC_MODIFY;
 
     RF_END();
 }
@@ -62,15 +64,14 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::update()
     {
         // since chassisOrientation is a pixel coordinate centered around
         // `CHASSIS_CENTER_X/Y`, center the line about these coordinates during configuration
-        RefSerial::configLine(
+        RefSerialTransmitter::configLine(
             CHASSIS_WIDTH,
             CHASSIS_CENTER_X + chassisOrientation.x,
             CHASSIS_CENTER_Y + chassisOrientation.y,
             CHASSIS_CENTER_X - chassisOrientation.x,
             CHASSIS_CENTER_Y - chassisOrientation.y,
             &chassisOrientationGraphics.graphicData[0]);
-        drivers->refSerial.sendGraphic(&chassisOrientationGraphics);
-        DELAY_REF_GRAPHIC(&chassisOrientationGraphics);
+        RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
 
         chassisOrientationPrev = chassisOrientation;
     }
@@ -93,14 +94,14 @@ void ChassisOrientationIndicator::initialize()
 
     // config the chassis graphic
 
-    RefSerial::configGraphicGenerics(
+    RefSerialTransmitter::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[0],
         chassisOrientationName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         CHASSIS_ORIENTATION_COLOR);
 
-    RefSerial::configLine(
+    RefSerialTransmitter::configLine(
         CHASSIS_WIDTH,
         CHASSIS_CENTER_X + chassisOrientation.x,
         CHASSIS_CENTER_Y + chassisOrientation.y,
@@ -112,14 +113,14 @@ void ChassisOrientationIndicator::initialize()
 
     // config the turret graphic
 
-    RefSerial::configGraphicGenerics(
+    RefSerialTransmitter::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[1],
         chassisOrientationName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         CHASSIS_BARREL_COLOR);
 
-    RefSerial::configLine(
+    RefSerialTransmitter::configLine(
         CHASSIS_BARREL_WIDTH,
         CHASSIS_CENTER_X,
         CHASSIS_CENTER_Y,

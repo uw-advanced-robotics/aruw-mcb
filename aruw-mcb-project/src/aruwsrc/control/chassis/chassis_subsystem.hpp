@@ -170,16 +170,7 @@ public:
      *      where vz is rotational velocity. This is the velocity calculated from the chassis's
      *      encoders. Units: m/s
      */
-    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const;
-
-    /**
-     * Transforms the chassis relative velocity of the form <vx, vy, vz> into world relative frame,
-     * given some particular chassis heading (z direction, assumed to be in radians). Transforms
-     * the input matrix chassisRelativeVelocity. Units: m/s
-     */
-    void getVelocityWorldRelative(
-        modm::Matrix<float, 3, 1>& chassisRelativeVelocity,
-        float chassisHeading) const;
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 

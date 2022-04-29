@@ -24,7 +24,6 @@
 
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -39,25 +38,25 @@ TurretCVCommand::TurretCVCommand(
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const chassis::ChassisSubsystem &chassisSubsystem,
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
     const float userPitchInputScalar,
     const float userYawInputScalar,
-    const float defaultLaunchSpeed)
+    const float defaultLaunchSpeed,
+    uint8_t turretID)
     : drivers(drivers),
+      turretID(turretID),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
       ballisticsSolver(
           *drivers,
           odometryInterface,
-          chassisSubsystem,
           *turretSubsystem,
           frictionWheels,
-          defaultLaunchSpeed),
+          defaultLaunchSpeed,
+          turretID),
       userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar),
-      chassisSubsystem(chassisSubsystem)
+      userYawInputScalar(userYawInputScalar)
 {
     addSubsystemRequirement(turretSubsystem);
 }
@@ -77,20 +76,23 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    if (!(drivers->visionCoprocessor.isCvOnline() &&
-          drivers->visionCoprocessor.getLastAimData().hasTarget &&
-          ballisticsSolver.computeTurretAimAngles(&pitchSetpoint, &yawSetpoint)))
+    float targetPitch;
+    float targetYaw;
+    bool ballisticsSolutionAvailable =
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+
+    if (ballisticsSolutionAvailable)
     {
-        // no valid CV data, let user control turret
+        pitchSetpoint = modm::toDegree(targetPitch);
+        yawSetpoint = modm::toDegree(targetYaw);
+    }
+    else
+    {
+        // no valid ballistics solution, let user control turret
         pitchSetpoint +=
             userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
 
         yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
-    }
-    else
-    {
-        pitchSetpoint = modm::toDegree(pitchSetpoint);
-        yawSetpoint = modm::toDegree(yawSetpoint);
     }
 
     uint32_t currTime = getTimeMilliseconds();

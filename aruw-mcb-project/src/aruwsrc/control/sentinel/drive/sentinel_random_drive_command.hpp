@@ -20,7 +20,9 @@
 #ifndef SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
 #define SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
 
-#if defined(TARGET_SENTINEL)
+#include "aruwsrc/util_macros.hpp"
+
+#if defined(ALL_SENTINELS)
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"

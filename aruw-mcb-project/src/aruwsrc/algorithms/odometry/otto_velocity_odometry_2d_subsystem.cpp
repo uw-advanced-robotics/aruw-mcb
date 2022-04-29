@@ -28,7 +28,7 @@ namespace aruwsrc::algorithms::odometry
 OttoVelocityOdometry2DSubsystem::OttoVelocityOdometry2DSubsystem(
     aruwsrc::Drivers* drivers,
     aruwsrc::control::turret::TurretSubsystem* turret,
-    aruwsrc::chassis::ChassisSubsystem* chassis)
+    tap::control::chassis::ChassisSubsystemInterface* chassis)
     : Subsystem(drivers),
       odometryTracker(&orientationObserver, &displacementObserver),
       orientationObserver(drivers, turret),

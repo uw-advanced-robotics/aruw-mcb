@@ -30,6 +30,8 @@
 
 namespace aruwsrc::control::turret
 {
+static constexpr uint8_t NUM_TURRETS = 1;
+
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
@@ -72,7 +74,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
-};  // namespace world_rel_turret_imu
+    .errorDerivativeFloor = 0.0f,
+};
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 #if defined(TARGET_SOLDIER_2021)
@@ -89,6 +92,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
@@ -102,6 +106,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
@@ -115,6 +120,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace world_rel_turret_imu
 
@@ -131,6 +137,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace world_rel_chassis_imu
 
@@ -147,6 +154,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
@@ -160,6 +168,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 2.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace chassis_rel
 }  // namespace aruwsrc::control::turret
