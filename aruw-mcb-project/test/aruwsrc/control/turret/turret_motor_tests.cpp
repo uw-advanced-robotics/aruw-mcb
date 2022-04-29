@@ -386,6 +386,9 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
         {M_TWOPI, -M_TWOPI, -2 * M_TWOPI},
     };
 
+    setEncoder(getEncoderUnwrapped(mc, mc.startAngle));
+    tm.updateMotorAngle();
+
     for (auto [measured, setpoint, expectedErr] : errorMeasurementsToTest)
     {
         setEncoder(getEncoderUnwrapped(mc, measured));

@@ -210,6 +210,16 @@ private:
     /// Associated turret controller interface that is being used by a command to control this motor
     const algorithms::TurretControllerInterface *turretController;
 
+    /**
+     * Offset applied when the motor is turned on. When the turret is turned on, the distance
+     * between the start encoder value and the current encoder value is measured. If the magnitude
+     * of this difference is greater than DjiMotor::ENC_RESOLUTION / 2, an offset of
+     * DjiMotor::ENC_RESOLUTION is applied to measured encoder values to avoid bad angle wrapping.
+     * 
+     * If equal to UINT16_MAX, needs to be re-computed
+     */
+    uint16_t startEncoderOffset = UINT16_MAX;
+
     /// Unwrapped chassis frame setpoint specified by the user and limited to `[config.minAngle,
     /// config.maxAngle]`. Units radians.
     float chassisFrameSetpoint;
