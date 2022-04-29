@@ -302,6 +302,17 @@ cv::SentinelTurretCVCommand turretCVCommand(
     0);
 }  // namespace turret2
 
+void selectNewRobotMessageHandler()
+{
+    turret1::turretCVCommand.requestNewTarget();
+    turret2::turretCVCommand.requestNewTarget();
+}
+void targetNewQuadrantMessageHandler()
+{
+    turret1::turretCVCommand.changeScanningQuadrant();
+    turret2::turretCVCommand.changeScanningQuadrant();
+}
+
 /* define command mappings --------------------------------------------------*/
 
 HoldCommandMapping rightSwitchDown(
@@ -345,9 +356,9 @@ void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turret1::agitator);
     drivers->commandScheduler.registerSubsystem(&turret1::frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turret1::turretSubsystem);
-    // drivers->commandScheduler.registerSubsystem(&turret2::agitator);
-    // drivers->commandScheduler.registerSubsystem(&turret2::frictionWheels);
-    // drivers->commandScheduler.registerSubsystem(&turret2::turretSubsystem);
+    drivers->commandScheduler.registerSubsystem(&turret2::agitator);
+    drivers->commandScheduler.registerSubsystem(&turret2::frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&turret2::turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret1::turretSubsystem, 0);
@@ -370,8 +381,8 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&turret1::agitatorCalibrateCommand);
     drivers->commandScheduler.addCommand(&turret2::agitatorCalibrateCommand);
 
-    // sentinelRequestHandler.attachSelectNewRobotMessageHandler();
-    // sentinelRequestHandler.attachTargetNewQuadrantMessageHandler();
+    sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
+    sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
         &sentinelRequestHandler);

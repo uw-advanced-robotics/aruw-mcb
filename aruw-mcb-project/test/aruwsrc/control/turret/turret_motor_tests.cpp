@@ -199,7 +199,7 @@ TEST_F(TurretMotorTest, setMotorOutput__desired_output_0_when_turret_offline)
 {
     motorOnline = false;
 
-    EXPECT_CALL(motor, setDesiredOutput).Times(0);
+    EXPECT_CALL(motor, setDesiredOutput(0)).Times(1);
 
     turretMotor.setMotorOutput(1000);
 }

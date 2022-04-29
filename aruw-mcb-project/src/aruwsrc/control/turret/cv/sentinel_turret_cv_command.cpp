@@ -180,4 +180,18 @@ void SentinelTurretCVCommand::end(bool)
     turretSubsystem->pitchMotor.setMotorOutput(0);
 }
 
+void SentinelTurretCVCommand::requestNewTarget()
+{
+    // TODO is there anything else the turret or firing system should do?
+    drivers->visionCoprocessor.sendSelectNewTargetMessage();
+}
+
+void SentinelTurretCVCommand::changeScanningQuadrant()
+{
+    // basic quadrant change for proof-of concept, if turret on left side, move right, otherwise
+    // move left
+    const float angleChange = copysignf(M_PI_2, -turretSubsystem->yawMotor.getAngleFromCenter());
+    yawController->setSetpoint(yawController->getSetpoint() + angleChange);
+}
+
 }  // namespace aruwsrc::control::turret::cv

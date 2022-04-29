@@ -64,8 +64,13 @@ public:
     virtual void runController(const uint32_t dt, const float desiredSetpoint) = 0;
 
     /**
-     * @return The controller's setpoint, units radians. **Does not** have to be in the same
-     * reference frame as the TurretMotor's `get<yaw|pitch>Setpoint` functions.
+     * Sets the controller setpoint, but doesn't run the controller.
+     */
+    virtual void setSetpoint(float desiredSetpoint) = 0;
+
+    /**
+     * @return The controller's setpoint, units degrees. **Does not** have to be in the same
+     * reference frame as the TurretSubsystem's `get<yaw|pitch>Setpoint` functions.
      */
     virtual float getSetpoint() const = 0;
 
