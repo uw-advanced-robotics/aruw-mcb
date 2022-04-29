@@ -103,9 +103,9 @@ void TurretCVCommand::execute()
     {
         // no valid ballistics solution, let user control turret
         pitchSetpoint +=
-            userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
+            userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput(turretID);
 
-        yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
+        yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
     }
 
     uint32_t currTime = getTimeMilliseconds();

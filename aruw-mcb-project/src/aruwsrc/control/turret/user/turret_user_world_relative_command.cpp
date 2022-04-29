@@ -32,7 +32,8 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
     algorithms::TurretYawControllerInterface *turretImuYawController,
     algorithms::TurretPitchControllerInterface *turretImuPitchController,
     float userYawInputScalar,
-    float userPitchInputScalar)
+    float userPitchInputScalar,
+    uint8_t turretID)
     : tap::control::ComprisedCommand(drivers),
       turretWRChassisImuCommand(
           drivers,
@@ -40,14 +41,16 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
           chassisImuYawController,
           chassisImuPitchController,
           userYawInputScalar,
-          userPitchInputScalar),
+          userPitchInputScalar,
+          turretID),
       turretWRTurretImuCommand(
           drivers,
           turretSubsystem,
           turretImuYawController,
           turretImuPitchController,
           userYawInputScalar,
-          userPitchInputScalar)
+          userPitchInputScalar,
+          turretID)
 {
     comprisedCommandScheduler.registerSubsystem(turretSubsystem);
     addSubsystemRequirement(turretSubsystem);

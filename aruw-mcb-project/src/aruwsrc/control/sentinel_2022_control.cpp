@@ -220,7 +220,8 @@ user::TurretUserControlCommand turretManual(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+    USER_PITCH_INPUT_SCALAR,
+    0);
 
 cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
@@ -285,7 +286,8 @@ user::TurretUserControlCommand turretManual(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+    USER_PITCH_INPUT_SCALAR,
+    1);
 
 cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
@@ -343,9 +345,9 @@ void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turret1::agitator);
     drivers->commandScheduler.registerSubsystem(&turret1::frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turret1::turretSubsystem);
-    drivers->commandScheduler.registerSubsystem(&turret2::agitator);
-    drivers->commandScheduler.registerSubsystem(&turret2::frictionWheels);
-    drivers->commandScheduler.registerSubsystem(&turret2::turretSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&turret2::agitator);
+    // drivers->commandScheduler.registerSubsystem(&turret2::frictionWheels);
+    // drivers->commandScheduler.registerSubsystem(&turret2::turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret1::turretSubsystem, 0);

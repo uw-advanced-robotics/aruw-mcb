@@ -22,6 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "chassis/chassis_subsystem.hpp"
 
@@ -178,30 +179,55 @@ float ControlOperatorInterface::getChassisRInput()
     return chassisRInputRamp.getValue();
 }
 
-float ControlOperatorInterface::getTurretYawInput()
+float ControlOperatorInterface::getTurretYawInput(uint8_t turretID)
 {
-    return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) +
-           static_cast<float>(limitVal<int16_t>(
-               -drivers->remote.getMouseX(),
-               -USER_MOUSE_YAW_MAX,
-               USER_MOUSE_YAW_MAX)) *
-               USER_MOUSE_YAW_SCALAR;
+    switch (turretID)
+    {
+        case 1:
+            return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) +
+                   static_cast<float>(limitVal<int16_t>(
+                       -drivers->remote.getMouseX(),
+                       -USER_MOUSE_YAW_MAX,
+                       USER_MOUSE_YAW_MAX)) *
+                       USER_MOUSE_YAW_SCALAR;
+        case 2:
+            return -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) +
+                   static_cast<float>(limitVal<int16_t>(
+                       -drivers->remote.getMouseX(),
+                       -USER_MOUSE_YAW_MAX,
+                       USER_MOUSE_YAW_MAX)) *
+                       USER_MOUSE_YAW_SCALAR;
+        default:
+            return 0;
+    }
 }
 
-float ControlOperatorInterface::getTurretPitchInput()
+float ControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
 {
-    return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
-           static_cast<float>(limitVal<int16_t>(
-               drivers->remote.getMouseY(),
-               -USER_MOUSE_PITCH_MAX,
-               USER_MOUSE_PITCH_MAX)) *
-               USER_MOUSE_PITCH_SCALAR;
+    switch (turretID)
+    {
+        case 1:
+            return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
+                   static_cast<float>(limitVal<int16_t>(
+                       drivers->remote.getMouseY(),
+                       -USER_MOUSE_PITCH_MAX,
+                       USER_MOUSE_PITCH_MAX)) *
+                       USER_MOUSE_PITCH_SCALAR;
+        case 2:
+            return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) +
+                   static_cast<float>(limitVal<int16_t>(
+                       drivers->remote.getMouseY(),
+                       -USER_MOUSE_PITCH_MAX,
+                       USER_MOUSE_PITCH_MAX)) *
+                       USER_MOUSE_PITCH_SCALAR;
+        default:
+            return 0;
+    }
 }
 
 float ControlOperatorInterface::getSentinelSpeedInput()
 {
-    return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) *
-           USER_STICK_SENTINEL_DRIVE_SCALAR;
+    return (drivers->remote.getWheel() / 660.0f) * USER_STICK_SENTINEL_DRIVE_SCALAR;
 }
 }  // namespace control
 
