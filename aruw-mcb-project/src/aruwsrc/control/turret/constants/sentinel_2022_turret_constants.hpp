@@ -65,7 +65,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 7370,
+    .startEncoderValue = 7867,
     .minAngle = -3 * M_PI_2 / 4,
     .maxAngle = M_PI / 4,
     .limitMotorAngles = true,
@@ -90,9 +90,9 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 180'000.0f,
-    .ki = 0.1f,
-    .kd = 9'000.0,
+    .kp = 230'000.0f,
+    .ki = 0.0f,
+    .kd = 10'000.0,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
