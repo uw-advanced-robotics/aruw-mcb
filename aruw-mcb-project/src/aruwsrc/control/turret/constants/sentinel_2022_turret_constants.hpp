@@ -18,7 +18,7 @@
  */
 
 #ifndef SENTINEL_2022_TURRET_CONSTANTS_HPP_
-#define SENTINEL_2022_TURRET_CONscoSTANTS_HPP_
+#define SENTINEL_2022_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
