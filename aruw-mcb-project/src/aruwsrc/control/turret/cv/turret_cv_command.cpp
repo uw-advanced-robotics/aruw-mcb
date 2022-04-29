@@ -111,7 +111,8 @@ void TurretCVCommand::execute()
         pitchSetpoint +=
             userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput(turretID);
 
-        yawSetpoint += userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+        yawSetpoint +=
+            userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
     }
 
     uint32_t currTime = getTimeMilliseconds();
