@@ -7,6 +7,8 @@
 #include "tap/control/setpoint/commands/move_absolute_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
+#include "tap/motor/stepper_motor.hpp"
+#include "turret/user/stepper_motor_turret_control_command.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
@@ -40,6 +42,11 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 namespace dart_control
 {
 /* define subsystems ----------------------------------------------------------*/
+tap::motor::StepperMotor pitchMotor(drivers(), false, "pitchMotor", tap::gpio::Digital::OutputPin::E, tap::gpio::Pwm::Pin::X);
+tap::motor::StepperMotor yawMotor(drivers(), false, "yawMotor", tap::gpio::Digital::OutputPin::F, tap::gpio::Pwm::Pin::W);
+
+TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+
 // Agitators
 AgitatorSubsystem agitatorTop(
     drivers(),
@@ -87,6 +94,8 @@ FrictionWheelSubsystem frictionWheelsBottomBack(
     tap::motor::MOTOR3,
     tap::motor::MOTOR4,
     tap::can::CanBus::CAN_BUS2);
+
+
 
 /* define commands ----------------------------------------------------------*/
 // Agitator Commands
@@ -210,6 +219,11 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheelsBottomBack(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 
+aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTurretControlCommand(
+    drivers(),
+    &turret
+);
+
 // Mappings
 HoldCommandMapping bottomPositionOne(
     drivers(),
@@ -265,6 +279,7 @@ void initializeSubsystems()
     frictionWheelsBottomFront.initialize();
     frictionWheelsTopBack.initialize();
     frictionWheelsTopFront.initialize();
+    turret.initialize();
 }
 
 void startDartCommands(aruwsrc::Drivers *drivers)
@@ -279,6 +294,7 @@ void setDefaultDartCommands(aruwsrc::Drivers *)
     frictionWheelsTopBack.setDefaultCommand(&spinFrictionWheelsTopBack);
     frictionWheelsBottomFront.setDefaultCommand(&spinFrictionWheelsBottomFront);
     frictionWheelsBottomBack.setDefaultCommand(&spinFrictionWheelsBottomBack);
+    turret.setDefaultCommand(&stepperMotorTurretControlCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
