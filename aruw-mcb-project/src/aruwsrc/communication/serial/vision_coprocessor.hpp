@@ -203,6 +203,9 @@ private:
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
+        CV_MESSAGE_TYPE_REFEREE_REALTIME_DATA = 3,
+        CV_MESSAGE_TYPE_REFEREE_COMPETITION_RESULT = 4,
+        CV_MESSAGE_TYPE_REFEREE_WARNING = 5,
         CV_MESSAGE_TYPE_ROBOT_ID = 6,
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
@@ -246,6 +249,8 @@ private:
 
     tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
 
+    uint32_t lastSentRefereeWarningTime = 0;
+
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information, and updates the `lastAimData`.
@@ -262,6 +267,9 @@ public:
 #endif
 
     void sendOdometryData();
+    void sendRefereeRealtimeData();
+    void sendRefereeCompetitionResult();
+    void sendRefereeWarning();
     void sendRobotTypeData();
     void sendTimeSyncMessage();
 };

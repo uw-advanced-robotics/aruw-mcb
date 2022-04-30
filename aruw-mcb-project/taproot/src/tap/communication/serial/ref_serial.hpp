@@ -89,7 +89,7 @@ public:
         REF_MESSAGE_TYPE_SITE_EVENT_DATA = 0X101,
         // REF_MESSAGE_TYPE_PROJECTILE_SUPPPLIER_SITE_ACTION = 0x102,
         // REF_MESSAGE_TYPE_PROJECTILE_SUPPLY_REQUESTED = 0x103,
-        // REF_MESSAGE_TYPE_WARNING_DATA = 0x104,
+        REF_MESSAGE_TYPE_WARNING_DATA = 0x104,
         // REF_MESSAGE_TYPE_DART_LAUNCH_OPENING_COUNT = 0x105,
         REF_MESSAGE_TYPE_ROBOT_STATUS = 0x201,
         REF_MESSAGE_TYPE_POWER_AND_HEAT = 0x202,
@@ -178,6 +178,10 @@ private:
      * Decodes ref serial message containing occupation status of various field zones.
      */
     bool decodeToSiteEventData(const ReceivedSerialMessage& message);
+    /**
+     * REF_MESSAGE_TYPE_WARNING_DATA
+     */
+    bool decodeToWarningData(const ReceivedSerialMessage &message);
     /**
      * Decodes ref serial message containing the firing/driving heat limits and cooling
      * rates for the robot.
