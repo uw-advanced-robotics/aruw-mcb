@@ -17,12 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(PLATFORM_HOSTED) && !defined(ROBOT_SIM_HPP_)
+#ifndef ROBOT_SIM_HPP_
 #define ROBOT_SIM_HPP_
+
+#if defined(PLATFORM_HOSTED)
 
 namespace aruwsrc::sim
 {
 void initialize_robot_sim();
 }
+
+#endif
 
 #endif  // ROBOT_SIM_HPP_

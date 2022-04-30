@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef IMU_RX_LISTENER_MOCK_HPP_
-#define IMU_RX_LISTENER_MOCK_HPP_
+#ifndef TURRET_MCB_CAN_COMM_MOCK_HPP_
+#define TURRET_MCB_CAN_COMM_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
@@ -37,8 +37,14 @@ public:
     MOCK_METHOD(float, getPitchVelocity, (), (const override));
     MOCK_METHOD(float, getYaw, (), (const override));
     MOCK_METHOD(float, getYawVelocity, (), (const override));
-    MOCK_METHOD(float, isConnected, (), (const override));
+    MOCK_METHOD(bool, getLimitSwitchDepressed, (), (const override));
+    MOCK_METHOD(bool, isConnected, (), (const override));
+    MOCK_METHOD(void, setOpenHopperCover, (bool), (override));
+    MOCK_METHOD(void, setLaserStatus, (bool), (override));
+    MOCK_METHOD(void, sendImuCalibrationRequest, (), (override));
+    MOCK_METHOD(void, sendData, (), (override));
+    MOCK_METHOD(uint32_t, getIMUDataTimestamp, (), (const override));
 };
 }  // namespace aruwsrc::mock
 
-#endif  // IMU_RX_LISTENER_MOCK_HPP_
+#endif  // TURRET_MCB_CAN_COMM_MOCK_HPP_

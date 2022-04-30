@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OPEN_TURRET_MCB_HOPPER_COVER_COMMAND_
-#define OPEN_TURRET_MCB_HOPPER_COVER_COMMAND_
+#ifndef OPEN_TURRET_MCB_HOPPER_COVER_COMMAND_HPP_
+#define OPEN_TURRET_MCB_HOPPER_COVER_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -50,4 +50,4 @@ private:
 
 }  // namespace aruwsrc::control
 
-#endif  // OPEN_TURRET_MCB_HOPPER_COVER_COMMAND_
+#endif  // OPEN_TURRET_MCB_HOPPER_COVER_COMMAND_HPP_

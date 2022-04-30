@@ -22,7 +22,7 @@
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/remote.hpp"
 
 #include "aruwsrc/drivers.hpp"
@@ -31,7 +31,7 @@
 #include "chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::sensors;
+using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc
 {
@@ -69,7 +69,7 @@ void WiggleDriveCommand::execute()
 
         if (turretYawFromCenter > wiggleParams.turnaroundAngle)
         {
-            if (rotationSign > 0)
+            if (rotationSign < 0)
             {
                 rotationSign = -rotationSign;
                 rotationSpeedRamp.setTarget(rotationSign * wiggleParams.rotationSpeed);
@@ -77,7 +77,7 @@ void WiggleDriveCommand::execute()
         }
         else if (turretYawFromCenter < -wiggleParams.turnaroundAngle)
         {
-            if (rotationSign < 0)
+            if (rotationSign > 0)
             {
                 rotationSign = -rotationSign;
                 rotationSpeedRamp.setTarget(rotationSign * wiggleParams.rotationSpeed);
@@ -95,7 +95,7 @@ void WiggleDriveCommand::execute()
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         // Apply a rotation matrix to the user input so you drive turret
         // relative while wiggling.
-        rotateVector(&x, &y, -modm::toRadian(turretYawFromCenter));
+        rotateVector(&x, &y, modm::toRadian(turretYawFromCenter));
 
         chassis->setDesiredOutput(x, y, r);
     }
@@ -105,7 +105,7 @@ void WiggleDriveCommand::execute()
     }
 }
 
-void WiggleDriveCommand::end(bool) { chassis->setDesiredOutput(0.0f, 0.0f, 0.0f); }
+void WiggleDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool WiggleDriveCommand::isFinished() const { return false; }
 

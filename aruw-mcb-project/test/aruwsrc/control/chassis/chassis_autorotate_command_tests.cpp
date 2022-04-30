@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
@@ -30,218 +31,303 @@ using namespace testing;
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-static constexpr float TEST_WHEEL_SPEED = ChassisSubsystem::MIN_WHEEL_SPEED_SINGLE_MOTOR;
-
-#define DEFAULT_SETUP_TEST(chassisFrontBackIdentical) \
-    aruwsrc::Drivers drivers;                         \
-    NiceMock<ChassisSubsystemMock> chassis(&drivers); \
-    NiceMock<TurretSubsystemMock> turret(&drivers);   \
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret, chassisFrontBackIdentical);
-
-#define SET_USER_INPUT(drivers, x, y, r)                                                  \
-    ON_CALL(drivers.controlOperatorInterface, getChassisXInput).WillByDefault(Return(x)); \
-    ON_CALL(drivers.controlOperatorInterface, getChassisYInput).WillByDefault(Return(y)); \
-    ON_CALL(drivers.controlOperatorInterface, getChassisRInput).WillByDefault(Return(r));
-
-#define SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers)                                        \
-    tap::serial::RefSerialData::Rx::RobotData robotData;                                \
-    ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false)); \
-    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
-
-#define RUN_EXECUTE_TEST_TURRET_OFFLINE(drivers, chassis, cac, x, y, r)            \
-    SET_USER_INPUT(drivers, x, y, r);                                              \
-    EXPECT_CALL(                                                                   \
-        chassis,                                                                   \
-        setDesiredOutput(                                                          \
-            FloatNear(x* TEST_WHEEL_SPEED, 1E-3),                                  \
-            FloatNear(y* TEST_WHEEL_SPEED, 1E-3),                                  \
-            FloatNear(r* TEST_WHEEL_SPEED, 1E-3)));                                \
-    ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1)); \
-    cac.execute();
-
-TEST(ChassisAutorotateCommand, constructor_only_adds_chassis_sub_req)
+class ChassisAutorotateCommandTest : public Test
 {
-    DEFAULT_SETUP_TEST(false);
+protected:
+    ChassisAutorotateCommandTest() : drivers(), chassis(&drivers), turret(&drivers) {}
+
+    void SetUp() override
+    {
+        ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
+        ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+        ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));
+    }
+
+    aruwsrc::Drivers drivers;
+    NiceMock<ChassisSubsystemMock> chassis;
+    NiceMock<TurretSubsystemMock> turret;
+    tap::communication::serial::RefSerialData::Rx::RobotData robotData;
+};
+
+class TurretOfflineTest : public ChassisAutorotateCommandTest,
+                          public WithParamInterface<std::tuple<float, float, float>>
+{
+};
+
+TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
+{
+    ChassisAutorotateCommand cac(&drivers, &chassis, &turret);
+
+    ON_CALL(turret, isOnline).WillByDefault(Return(false));
+
+    ON_CALL(drivers.controlOperatorInterface, getChassisXInput)
+        .WillByDefault(Return(std::get<0>(GetParam())));
+    ON_CALL(drivers.controlOperatorInterface, getChassisYInput)
+        .WillByDefault(Return(std::get<1>(GetParam())));
+    ON_CALL(drivers.controlOperatorInterface, getChassisRInput)
+        .WillByDefault(Return(std::get<2>(GetParam())));
+
+    EXPECT_CALL(
+        chassis,
+        setDesiredOutput(
+            FloatNear(std::get<0>(GetParam()), 1E-3),
+            FloatNear(std::get<1>(GetParam()), 1E-3),
+            FloatNear(std::get<2>(GetParam()), 1E-3)));
+
+    cac.execute();
+}
+
+TEST_F(ChassisAutorotateCommandTest, constructor_only_adds_chassis_sub_req)
+{
+    ChassisAutorotateCommand cac(&drivers, &chassis, &turret);
     EXPECT_EQ(1U << chassis.getGlobalIdentifier(), cac.getRequirementsBitwise());
 }
 
-TEST(ChassisAutorotateCommand, end_sets_chassis_out_0)
+TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 {
-    DEFAULT_SETUP_TEST(false);
+    ChassisAutorotateCommand cac(&drivers, &chassis, &turret);
 
-    EXPECT_CALL(chassis, setDesiredOutput(0, 0, 0)).Times(2);
+    EXPECT_CALL(chassis, setZeroRPM).Times(2);
 
     cac.end(true);
     cac.end(false);
 }
 
-TEST(ChassisAutorotateCommand, isFinished_returns_false)
+TEST_F(ChassisAutorotateCommandTest, isFinished_returns_false)
 {
-    DEFAULT_SETUP_TEST(false);
+    ChassisAutorotateCommand cac(&drivers, &chassis, &turret);
 
     EXPECT_FALSE(cac.isFinished());
 }
 
-TEST(ChassisAutorotateCommand, execute_turret_offline_chassis_rel_driving_no_autorotate)
+INSTANTIATE_TEST_SUITE_P(
+    ChassisAutorotateCommand,
+    TurretOfflineTest,
+    Values(
+        std::tuple<float, float, float>(0, 0, 0),
+        std::tuple<float, float, float>(1000, 0, 1000),
+        std::tuple<float, float, float>(-1000, -1000, 1000),
+        std::tuple<float, float, float>(0, 1000, -1000)));
+
+struct TurretOnlineTestStruct
 {
-    DEFAULT_SETUP_TEST(false);
+    float x = 0;
+    float y = 0;
+    float r = 0;
+    float yawAngle = 0;
+    float yawSetpoint = 0;
+    bool yawLimited = false;
+    ChassisAutorotateCommand::ChassisSymmetry chassisSymmetry =
+        ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE;
+    uint8_t padding[2] = {};  // padding to avoid valgrind errors
+};
 
-    SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers);
-
-    ON_CALL(turret, isOnline).WillByDefault(Return(false));
-
-    RUN_EXECUTE_TEST_TURRET_OFFLINE(drivers, chassis, cac, 0, 0, 0);
-    RUN_EXECUTE_TEST_TURRET_OFFLINE(drivers, chassis, cac, 0, 0, 1);
-    RUN_EXECUTE_TEST_TURRET_OFFLINE(drivers, chassis, cac, 1, 1, 0.5);
-    RUN_EXECUTE_TEST_TURRET_OFFLINE(drivers, chassis, cac, 0, 0, -0.75);
-}
-
-#define SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)      \
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));                                     \
-    ON_CALL(turret, yawLimited).WillByDefault(Return(isYawLimited));                           \
-    ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle) {                 \
-        return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle);                       \
-    });                                                                                        \
-    ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(turretAngleFromCenter));       \
-    ContiguousFloat turretAngleActualContiguous(turretAngleActual, 0, 360);                    \
-    ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(turretAngleActualContiguous)); \
-    ON_CALL(turret, getYawSetpoint).WillByDefault(Return(turretAngleSetpoint));
-
-static void runExecuteTestSuiteTurretOnlineAtTurretAngle(
-    aruwsrc::Drivers& drivers,
-    ChassisSubsystemMock& chassis,
-    TurretSubsystemMock& turret,
-    ChassisAutorotateCommand& cac,
-    float turretAngleActual,
-    float turretAngleSetpoint,
-    bool isYawLimited)
+class TurretOnlineTest : public ChassisAutorotateCommandTest,
+                         public WithParamInterface<TurretOnlineTestStruct>
 {
-    const float turretAngleFromCenter =
-        ContiguousFloat(turretAngleActual - TurretSubsystem::YAW_START_ANGLE, -180, 180).getValue();
-
-    SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)
-
-    auto runTest = [&](float x, float y) {
-        float rotatedX = x;
-        float rotatedY = y;
-        rotateVector(&rotatedX, &rotatedY, -modm::toRadian(turretAngleFromCenter));
-        EXPECT_CALL(
-            chassis,
-            setDesiredOutput(
-                FloatNear(rotatedX * TEST_WHEEL_SPEED, 1E-3),
-                FloatNear(rotatedY * TEST_WHEEL_SPEED, 1E-3),
-                _));
-        SET_USER_INPUT(drivers, x, y, 0);
-        ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));
-        cac.execute();
-    };
-
-    // Try a bunch of different user inputs
-    runTest(0, 0);
-    runTest(0.5, 0);
-    runTest(0, 0.5);
-    runTest(1, 1);
-    runTest(-0.5, -0.5);
-    runTest(-0.5, 0.25);
-}
-
-#define EXECUTE_USER_INPUT_TEST(                                                                                              \
-    turretAngleActualStr,                                                                                                     \
-    turretAngleActual,                                                                                                        \
-    turretAngleSetpointStr,                                                                                                   \
-    turretAngleSetpoint,                                                                                                      \
-    yawLimited)                                                                                                               \
-    TEST(                                                                                                                     \
-        ChassisAutorotateCommand,                                                                                             \
-        execute_turret_online_turret_rel_driving_actual_##turretAngleActualStr##_deg_setpoint_##turretAngleSetpointStr##_deg) \
-    {                                                                                                                         \
-        DEFAULT_SETUP_TEST(false);                                                                                            \
-        SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers);                                                                             \
-        runExecuteTestSuiteTurretOnlineAtTurretAngle(                                                                         \
-            drivers,                                                                                                          \
-            chassis,                                                                                                          \
-            turret,                                                                                                           \
-            cac,                                                                                                              \
-            turretAngleActual,                                                                                                \
-            turretAngleSetpoint,                                                                                              \
-            yawLimited);                                                                                                      \
+public:
+    TurretOnlineTest()
+        : yawAngleFromCenter(
+              ContiguousFloat(GetParam().yawAngle - YAW_START_ANGLE, -180, 180).getValue()),
+          cac(&drivers, &chassis, &turret, GetParam().chassisSymmetry),
+          turretAngleActualContiguous(GetParam().yawAngle, 0, 360)
+    {
     }
 
-EXECUTE_USER_INPUT_TEST(0, 0, 0, 0, true)
-// ensure test passes when setpoint not same as actual
-EXECUTE_USER_INPUT_TEST(0, 0, 20, 20, true)
-EXECUTE_USER_INPUT_TEST(45, 45, 45, 45, true)
-EXECUTE_USER_INPUT_TEST(90, 90, 90, 90, true)
-EXECUTE_USER_INPUT_TEST(180, 180, 180, 180, true)
-EXECUTE_USER_INPUT_TEST(270, 270, 270, 270, true)
-EXECUTE_USER_INPUT_TEST(neg10, -10, neg10, -10, true)
-EXECUTE_USER_INPUT_TEST(neg180, -180, neg180, -180, true)
-EXECUTE_USER_INPUT_TEST(neg270, -270, neg270, -270, true)
-// When angle diff 180 and back/front not identical, test still passes
-EXECUTE_USER_INPUT_TEST(0, 0, 180, 180, false)
-
-static void runExecuteAutorotateValidationTest(
-    aruwsrc::Drivers& drivers,
-    ChassisSubsystemMock& chassis,
-    TurretSubsystemMock& turret,
-    ChassisAutorotateCommand& cac,
-    float turretAngleActual,
-    float turretAngleSetpoint,
-    bool isYawLimited,
-    bool chassisFrontBackIdentical)
-{
-    const float turretAngleFromCenter =
-        ContiguousFloat(turretAngleActual - TurretSubsystem::YAW_START_ANGLE, -180, 180).getValue();
-
-    SET_TURRET_DEFAULTS(turret, turretAngleActual, turretAngleSetpoint, isYawLimited)
-    ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault(Return(1));
-    SET_USER_INPUT(drivers, 0, 0, 0);
-
-    if ((chassisFrontBackIdentical && !isYawLimited &&
-         abs(ContiguousFloat(turretAngleActual - turretAngleSetpoint, 0, 360).getValue()) >
-             (180 - ChassisAutorotateCommand::SETPOINT_AND_CURRENT_YAW_MATCH_THRESHOLD)) ||
-        compareFloatClose(turretAngleFromCenter, 0, 1E-5))
+    void SetUp() override
     {
-        EXPECT_CALL(chassis, setDesiredOutput(_, _, FloatNear(0.0f, 1E-3)));
-        cac.execute();
+        ChassisAutorotateCommandTest::SetUp();
+
+        ON_CALL(drivers.mpu6500, getGz).WillByDefault(Return(0));
+
+        ON_CALL(drivers.controlOperatorInterface, getChassisXInput)
+            .WillByDefault(Return(GetParam().x));
+        ON_CALL(drivers.controlOperatorInterface, getChassisYInput)
+            .WillByDefault(Return(GetParam().y));
+        ON_CALL(drivers.controlOperatorInterface, getChassisRInput)
+            .WillByDefault(Return(GetParam().r));
+
+        ON_CALL(turret, isOnline).WillByDefault(Return(true));
+        ON_CALL(turret, yawLimited).WillByDefault(Return(GetParam().yawLimited));
+        ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(yawAngleFromCenter));
+        ON_CALL(turret, getYawVelocity).WillByDefault(Return(0));
+        ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(turretAngleActualContiguous));
+        ON_CALL(turret, getYawSetpoint).WillByDefault(Return(GetParam().yawSetpoint));
+
+        ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
+            return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);
+        });
+    }
+
+    float yawAngleFromCenter;
+
+    ChassisAutorotateCommand cac;
+    ContiguousFloat turretAngleActualContiguous;
+};
+
+TEST_P(TurretOnlineTest, execute_rotated_xy)
+{
+    float rotatedX = GetParam().x;
+    float rotatedY = GetParam().y;
+    rotateVector(&rotatedX, &rotatedY, modm::toRadian(yawAngleFromCenter));
+
+    EXPECT_CALL(chassis, setDesiredOutput(FloatNear(rotatedX, 1E-3), FloatNear(rotatedY, 1E-3), _));
+
+    cac.execute();
+}
+
+TEST_P(TurretOnlineTest, execute_autorotation_works)
+{
+    bool shouldAutorotate = true;
+
+    std::vector<float> yawAnglesWhereNoAutorotation{0};
+
+    if (!GetParam().yawLimited &&
+        GetParam().chassisSymmetry == ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90)
+    {
+        yawAnglesWhereNoAutorotation.push_back(-90);
+        yawAnglesWhereNoAutorotation.push_back(90);
+        yawAnglesWhereNoAutorotation.push_back(-180);
+        yawAnglesWhereNoAutorotation.push_back(180);
+    }
+    else if (
+        !GetParam().yawLimited &&
+        GetParam().chassisSymmetry == ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180)
+    {
+        yawAnglesWhereNoAutorotation.push_back(-180);
+        yawAnglesWhereNoAutorotation.push_back(180);
+    }
+
+    for (float val : yawAnglesWhereNoAutorotation)
+    {
+        if (compareFloatClose(val, yawAngleFromCenter, 1E-5))
+        {
+            shouldAutorotate = false;
+        }
+    }
+
+    if (GetParam().chassisSymmetry != ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE &&
+        !GetParam().yawLimited &&
+        turretAngleActualContiguous.difference(GetParam().yawSetpoint) >
+            (180 - ChassisAutorotateCommand::TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
+    {
+        shouldAutorotate = false;
+    }
+
+    if (shouldAutorotate)
+    {
+        EXPECT_CALL(chassis, setDesiredOutput(_, _, Not(0.0f)));
     }
     else
     {
-        EXPECT_CALL(chassis, setDesiredOutput(_, _, testing::Not(0.0f)));
-        cac.execute();
+        EXPECT_CALL(chassis, setDesiredOutput(_, _, FloatNear(0.0f, 1E-3)));
     }
+
+    cac.execute();
 }
 
-#define EXECUTE_AUTOROTATE_VALIDATION_TEST(                                                                                                                                                               \
-    turretAngleActualStr,                                                                                                                                                                                 \
-    turretAngleActual,                                                                                                                                                                                    \
-    turretAngleSetpointStr,                                                                                                                                                                               \
-    turretAngleSetpoint,                                                                                                                                                                                  \
-    yawLimited,                                                                                                                                                                                           \
-    chassisFrontBackIdentical)                                                                                                                                                                            \
-    TEST(                                                                                                                                                                                                 \
-        ChassisAutorotateCommand,                                                                                                                                                                         \
-        execute_autorotate_validation_turret_actual_##turretAngleActualStr##_deg_setpoint_##turretAngleSetpointStr##_deg_yawLimited_##yawLimited##_chassisFrontBackIdentical_##chassisFrontBackIdentical) \
-    {                                                                                                                                                                                                     \
-        DEFAULT_SETUP_TEST(chassisFrontBackIdentical);                                                                                                                                                    \
-        SET_DEFAULT_REF_SERIAL_BEHAVIOR(drivers);                                                                                                                                                         \
-        runExecuteAutorotateValidationTest(                                                                                                                                                               \
-            drivers,                                                                                                                                                                                      \
-            chassis,                                                                                                                                                                                      \
-            turret,                                                                                                                                                                                       \
-            cac,                                                                                                                                                                                          \
-            turretAngleActual,                                                                                                                                                                            \
-            turretAngleSetpoint,                                                                                                                                                                          \
-            yawLimited,                                                                                                                                                                                   \
-            chassisFrontBackIdentical);                                                                                                                                                                   \
-    }
-
-EXECUTE_AUTOROTATE_VALIDATION_TEST(0, 0, 0, 0, false, false)
-EXECUTE_AUTOROTATE_VALIDATION_TEST(0, 0, 0, 0, false, true)
-EXECUTE_AUTOROTATE_VALIDATION_TEST(0, 0, 0, 0, true, false)
-EXECUTE_AUTOROTATE_VALIDATION_TEST(0, 0, 0, 0, true, true)
-
-EXECUTE_AUTOROTATE_VALIDATION_TEST(0, 0, 180, 180, false, false)
-EXECUTE_AUTOROTATE_VALIDATION_TEST(0, 0, 180, 180, false, true)
-EXECUTE_AUTOROTATE_VALIDATION_TEST(0, 0, 180, 180, true, false)
-EXECUTE_AUTOROTATE_VALIDATION_TEST(0, 0, 180, 180, true, true)
+INSTANTIATE_TEST_SUITE_P(
+    ChassisAutorotateCommand,
+    TurretOnlineTest,
+    Values(
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = 45,
+            .yawSetpoint = 0,
+            .yawLimited = true,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        },
+        TurretOnlineTestStruct{
+            .x = 10,
+            .y = 10,
+            .r = 10,
+            .yawAngle = 90,
+            .yawSetpoint = 0,
+            .yawLimited = true,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        },
+        TurretOnlineTestStruct{
+            .x = -10,
+            .y = -10,
+            .r = -10,
+            .yawAngle = -45,
+            .yawSetpoint = 0,
+            .yawLimited = true,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        },
+        TurretOnlineTestStruct{
+            .x = -10,
+            .y = 0,
+            .r = 10,
+            .yawAngle = -135,
+            .yawSetpoint = 0,
+            .yawLimited = true,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        },
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = -180,
+            .yawSetpoint = 0,
+            .yawLimited = true,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
+        },
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = 0,
+            .yawSetpoint = 180,
+            .yawLimited = true,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
+        },
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = 0,
+            .yawSetpoint = 180,
+            .yawLimited = false,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
+        },
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = -180,
+            .yawSetpoint = 0,
+            .yawLimited = false,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
+        },
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = 45,
+            .yawSetpoint = -45,
+            .yawLimited = true,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
+        },
+        TurretOnlineTestStruct{
+            .x = 0,
+            .y = 0,
+            .r = 0,
+            .yawAngle = 0,
+            .yawSetpoint = 90,
+            .yawLimited = false,
+            .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
+        }),
+    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
+        std::stringstream ss;
+        ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) << "_r_"
+           << PrintToString(info.param.r) << "_yawAngle_" << PrintToString(info.param.yawAngle)
+           << "_yawSetpoint_" << PrintToString(info.param.yawSetpoint) << "_yawLimited_"
+           << PrintToString(info.param.yawLimited) << "_chassisSymmetry_"
+           << PrintToString(static_cast<int>(info.param.chassisSymmetry));
+        std::string s = ss.str();
+        std::replace(s.begin(), s.end(), '-', '_');
+        return s;
+    });

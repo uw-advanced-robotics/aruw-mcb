@@ -27,52 +27,43 @@
 using aruwsrc::engineer::ManualTowCommand;
 using aruwsrc::mock::TowSubsystemMock;
 using tap::gpio::Digital;
+using namespace testing;
 
 static constexpr Digital::OutputPin LEFT_TOW_PIN = Digital::OutputPin::E;
 static constexpr Digital::OutputPin RIGHT_TOW_PIN = Digital::OutputPin::F;
-static constexpr Digital::InputPin LEFT_TOW_LIMIT_SWITCH_PIN = Digital::InputPin::A;
-static constexpr Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN = Digital::InputPin::B;
+static constexpr Digital::InputPin LEFT_TOW_LIMIT_SWITCH_PIN = Digital::InputPin::B;
+static constexpr Digital::InputPin RIGHT_TOW_LIMIT_SWITCH_PIN = Digital::InputPin::C;
 
-TEST(ManualTowCommand, isFinished_always_returns_false)
+class ManualTowCommandTest : public Test
 {
+protected:
+    ManualTowCommandTest()
+        : ts(&drivers,
+             LEFT_TOW_PIN,
+             RIGHT_TOW_PIN,
+             LEFT_TOW_LIMIT_SWITCH_PIN,
+             RIGHT_TOW_LIMIT_SWITCH_PIN),
+          tc(&ts)
+    {
+    }
+
     aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    ManualTowCommand tc(&ts);
+    TowSubsystemMock ts;
+    ManualTowCommand tc;
+};
 
-    EXPECT_FALSE(tc.isFinished());
-}
+TEST_F(ManualTowCommandTest, isFinished_always_returns_false) { EXPECT_FALSE(tc.isFinished()); }
 
-TEST(ManualTowCommand, initialize_sets_left_and_right_clamped_true)
+TEST_F(ManualTowCommandTest, initialize_sets_left_and_right_clamped_true)
 {
-    aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    ManualTowCommand tc(&ts);
     EXPECT_CALL(ts, setLeftClamped(true));
     EXPECT_CALL(ts, setRightClamped(true));
 
     tc.initialize();
 }
 
-TEST(ManualTowCommand, end_sets_left_and_right_clamped_false)
+TEST_F(ManualTowCommandTest, end_sets_left_and_right_clamped_false)
 {
-    aruwsrc::Drivers drivers;
-    TowSubsystemMock ts(
-        &drivers,
-        LEFT_TOW_PIN,
-        RIGHT_TOW_PIN,
-        LEFT_TOW_LIMIT_SWITCH_PIN,
-        RIGHT_TOW_LIMIT_SWITCH_PIN);
-    ManualTowCommand tc(&ts);
     EXPECT_CALL(ts, setLeftClamped(false)).Times(2);
     EXPECT_CALL(ts, setRightClamped(false)).Times(2);
 

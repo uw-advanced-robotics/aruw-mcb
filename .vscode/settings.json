@@ -79,8 +79,10 @@
     "C_Cpp.default.cppStandard": "c++20",
     "C_Cpp.default.cStandard": "c11",
     "C_Cpp.default.forcedInclude": [
-        "aruw-mcb-project/robot-type/robot_type.hpp"
+        "aruw-mcb-project/robot-type/robot_type.hpp",
+        ".vscode/intellisense_config.h"
     ],
+    "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
     "[markdown]": {
         "editor.wordWrap": "off",
         "editor.quickSuggestions": false,
@@ -88,4 +90,5 @@
             100
         ]
     },
+    "git.autoRepositoryDetection": false,
 }

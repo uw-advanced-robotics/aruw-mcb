@@ -19,10 +19,11 @@
 
 #include "imu_calibrate_command.hpp"
 
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::sensors;
+using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::control::imu
 {
@@ -51,8 +52,8 @@ void ImuCalibrateCommand::initialize()
 {
     calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
     chassis->setDesiredOutput(0, 0, 0);
-    turret->setYawSetpoint(turret::TurretSubsystem::YAW_START_ANGLE);
-    turret->setPitchSetpoint(turret::TurretSubsystem::PITCH_START_ANGLE);
+    turret->setYawSetpoint(turret::YAW_START_ANGLE);
+    turret->setPitchSetpoint(turret::PITCH_START_ANGLE);
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();

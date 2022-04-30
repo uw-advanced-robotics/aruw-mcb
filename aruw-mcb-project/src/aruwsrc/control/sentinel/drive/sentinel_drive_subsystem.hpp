@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUBSYSTEM_SENTINEL_DRIVE_HPP_
-#define SUBSYSTEM_SENTINEL_DRIVE_HPP_
+#ifndef SENTINEL_DRIVE_SUBSYSTEM_HPP_
+#define SENTINEL_DRIVE_SUBSYSTEM_HPP_
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
@@ -50,8 +50,6 @@ public:
     static constexpr float STARTING_ENERGY_BUFFER = 200.0f;
     static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 100.0f;
     static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10;
-    static constexpr uint16_t POWER_CONSUMPTION_THRESHOLD = 5;
-    static constexpr float CURRENT_ALLOCATED_FOR_ENERGY_BUFFER_LIMITING = 15000;
 
     // radius of the wheel in mm
     static constexpr float WHEEL_RADIUS = 35.0f;
@@ -102,6 +100,19 @@ public:
     inline int16_t getRightFrontRpmActual() const override { return rightWheel.getShaftRPM(); }
     inline int16_t getRightBackRpmActual() const override { return 0; }
 
+    inline bool allMotorsOnline() const override
+    {
+        return leftWheel.isMotorOnline() && rightWheel.isMotorOnline();
+    }
+
+    /**
+     * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. Since the sentinel is constrained to a single
+     *      axis, vx and vz are 0. This is the velocity calculated from the chassis's
+     *      encoders. Units: m/s
+     */
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+
 private:
     static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
     static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
@@ -149,4 +160,4 @@ private:
 
 }  // namespace aruwsrc::control::sentinel::drive
 
-#endif
+#endif  // SENTINEL_DRIVE_SUBSYSTEM_HPP_
