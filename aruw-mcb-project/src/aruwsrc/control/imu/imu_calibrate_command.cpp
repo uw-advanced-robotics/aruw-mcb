@@ -69,9 +69,18 @@ static inline bool turretReachedCenterAndNotMoving(
                0.0f,
                turret->getYawVelocity(),
                ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           compareFloatClose(0.0f, turret->getYawAngleFromCenter(), 1) &&
-           (ignorePitch || (compareFloatClose(0.0f, turret->getPitchVelocity(), 1e-2) &&
-                            compareFloatClose(0.0f, turret->getPitchAngleFromCenter(), 1)));
+           compareFloatClose(
+               0.0f,
+               turret->getYawAngleFromCenter(),
+               ImuCalibrateCommand::POSITION_ZERO_THRESHOLD) &&
+           (ignorePitch || (compareFloatClose(
+                                0.0f,
+                                turret->getPitchVelocity(),
+                                ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
+                            compareFloatClose(
+                                0.0f,
+                                turret->getPitchAngleFromCenter(),
+                                ImuCalibrateCommand::POSITION_ZERO_THRESHOLD)));
 }
 
 void ImuCalibrateCommand::execute()

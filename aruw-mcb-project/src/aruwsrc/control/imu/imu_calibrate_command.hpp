@@ -78,7 +78,11 @@ public:
      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
      * in degrees
      */
+#if defined(TARGET_HERO)
+    static constexpr float POSITION_ZERO_THRESHOLD = 3.0f;
+#else
     static constexpr float POSITION_ZERO_THRESHOLD = 1.0f;
+#endif
 
     /**
      * @param[in] drivers A pointer to the global drivers object.
