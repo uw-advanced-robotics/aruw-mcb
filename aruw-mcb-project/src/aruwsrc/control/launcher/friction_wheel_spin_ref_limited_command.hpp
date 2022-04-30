@@ -92,6 +92,8 @@ private:
     const bool alwaysUseDefaultLaunchSpeed;
 
     const Barrel barrel;
+
+    float maxBarrelSpeed = 6;
 };
 }  // namespace aruwsrc::control::launcher
 

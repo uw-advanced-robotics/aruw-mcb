@@ -17,21 +17,25 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_CONSTANTS_HPP_
-#define TURRET_CONSTANTS_HPP_
+#ifndef DART_AGITATOR_CONSTANTS_HPP_
+#define DART_AGITATOR_CONSTANTS_HPP_
 
-#include "aruwsrc/util_macros.hpp"
+#include "modm/math/geometry/angle.hpp"
 
-#if defined(ALL_SOLDIERS) || defined(TARGET_ENGINEER)
-#include "soldier_turret_constants.hpp"
-#elif defined(TARGET_HERO)
-#include "hero_turret_constants.hpp"
-#elif defined(TARGET_DRONE)
-#include "drone_turret_constants.hpp"
-#elif defined(TARGET_SENTINEL_2021)
-#include "sentinel_2021_turret_constants.hpp"
-#else
-#include "sentinel_2022_turret_constants.hpp"
-#endif
+namespace aruwsrc::control::agitator::constants
+{
+static constexpr tap::algorithms::SmoothPidConfig PID_AGITATOR_FEEDER = {
+    .kp = 50'000.0f,
+    .ki = 0.0f,
+    .kd = 50.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 16'000.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 
-#endif  // TURRET_CONSTANTS_HPP_
+static constexpr bool isAgitatorInverted = false;
+static constexpr float AGITATOR_JAMMING_DISTANCE = 10 * M_PI;
+static constexpr bool IS_AGITATOR_INVERTED = false;
+}  // namespace aruwsrc::control::agitator::constants
+
+#endif  // DART_AGITATOR_CONSTANTS_HPP_

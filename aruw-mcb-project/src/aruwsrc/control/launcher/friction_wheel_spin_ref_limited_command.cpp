@@ -19,6 +19,8 @@
 
 #include "friction_wheel_spin_ref_limited_command.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::launcher
@@ -41,26 +43,29 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
 
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
-    if (alwaysUseDefaultLaunchSpeed || !drivers->refSerial.getRefSerialReceivingData())
+    if (alwaysUseDefaultLaunchSpeed)
     {
         frictionWheels->setDesiredLaunchSpeed(defaultLaunchSpeed);
     }
     else
     {
-        uint16_t maxBarrelSpeed = 0;
+        // switch (barrel)
+        // {
+        //     case Barrel::BARREL_17MM_1:
+        //         maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
+        //         break;
+        //     case Barrel::BARREL_17MM_2:
+        //         maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
+        //         break;
+        //     case Barrel::BARREL_42MM:
+        //         maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
+        //         break;
+        // }
 
-        switch (barrel)
-        {
-            case Barrel::BARREL_17MM_1:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
-                break;
-            case Barrel::BARREL_17MM_2:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
-                break;
-            case Barrel::BARREL_42MM:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
-                break;
-        }
+        float wheel = drivers->remote.getWheel();
+
+        maxBarrelSpeed -= wheel / 10000.0f;
+        maxBarrelSpeed = tap::algorithms::limitVal<float>(maxBarrelSpeed, 0, 15);
 
         frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);
     }

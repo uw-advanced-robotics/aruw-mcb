@@ -28,6 +28,8 @@
 #include "sentinel_2022_agitator_constants.hpp"
 #elif defined(TARGET_HERO)
 #include "hero_agitator_constants.hpp"
+#elif defined(TARGET_DART)
+#include "dart_agitator_constants.hpp"
 #endif
 
 #endif  // AGITATOR_CONSTANTS_HPP_
