@@ -167,7 +167,7 @@ void TurretSubsystem::setPitchMotorOutput(float out)
     setMotorOutput(
         pitchMotor,
         out,
-        true,
+        true, 
         currPitchAngle,
         PITCH_MIN_ANGLE - 5.0f,
         PITCH_MAX_ANGLE + 5.0f);

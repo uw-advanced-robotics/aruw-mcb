@@ -63,7 +63,8 @@ void StepperMotor::setDesiredOutput(int32_t desiredOutput)
     {
         drivers->digital.set(direction, true);
     }
-    drivers->pwm.write(abs(desiredOutput), pulse);
+    drivers->pwm.write(0.5, pulse);
+    // bruh
 }
 
 bool StepperMotor::isMotorOnline() const { return true; };

@@ -269,6 +269,7 @@ void registerDartSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&frictionWheelsTopBack);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsBottomFront);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsBottomBack);
+    drivers->commandScheduler.registerSubsystem(&turret);
 }
 
 void initializeSubsystems()
@@ -306,6 +307,7 @@ void registerDartIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&bottomPositionTwo);
     drivers->commandMapper.addMap(&positionZero);
     drivers->commandMapper.addMap(&stopWheels);
+
 }
 }  // namespace dart_control
 namespace aruwsrc::control
