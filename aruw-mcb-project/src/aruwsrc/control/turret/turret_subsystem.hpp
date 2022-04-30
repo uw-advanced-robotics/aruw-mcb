@@ -83,13 +83,15 @@ public:
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig);
 
-    void initialize();
+    void initialize() override;
 
-    void refresh();
+    void refresh() override;
 
     const char* getName() override { return "Turret"; }
 
-    void onHardwareTestStart();
+    void onHardwareTestStart() override;
+
+    mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
 
 #ifdef ENV_UNIT_TESTS
     testing::NiceMock<mock::TurretMotorMock> pitchMotor;

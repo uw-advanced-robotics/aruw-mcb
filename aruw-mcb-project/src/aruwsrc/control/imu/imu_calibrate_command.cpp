@@ -92,7 +92,7 @@ void ImuCalibrateCommand::execute()
             // calibrated. The onboard Mpu6500 will never be in the `IMU_NOT_CONNECTED` state unless
             // the Mpu6500 is shorted (which has never happened). The turret MCB will only be
             // offline if the turret MCB is unplugged.
-            if (turret->yawMotor.isOnline() && turret->pitchMotor.isOnline() &&
+            if (turret->isOnline() &&
                 (drivers->turretMCBCanComm.isConnected() ||
                  (drivers->mpu6500.getImuState() != Mpu6500::ImuState::IMU_NOT_CONNECTED)))
             {
