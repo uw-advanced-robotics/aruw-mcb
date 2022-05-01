@@ -192,8 +192,8 @@ cv::TurretCVCommand turretCVCommand(
     &worldFramePitchTurretImuController,
     odometrySubsystem,
     frictionWheels,
-    1,
-    1,
+    0,
+    0,
     14.5f);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
@@ -203,52 +203,52 @@ CalibrateCommand agitatorCalibrateCommand(&agitator);
 MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     drivers(),
     &agitator,
-    M_PI / 5.0f,
-    50,
+    0,
+    0,
     0,
     true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    140,
-    2,
+    0,
+    0.0,
+    0.0,
+    0,
+    0,
     true,
-    10);
+    0);
 MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
     drivers(),
     &agitator,
-    M_PI / 5.0f,
-    100,
+    0,
+    0,
     0,
     true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    140,
-    2,
+    0,
+    0.0,
+    0.0,
+    0,
+    0,
     true,
-    10);
+    0);
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     drivers(),
     &agitator,
-    M_PI / 5.0f,
-    50,
+    0,
+    0,
     0,
     true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    140,
-    2,
+    0,
+    0.0,
+    0.0,
+    0,
+    0,
     false,
-    10);
+    0);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
-    15.0f,
+    0.0f,
     false,
     aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
 

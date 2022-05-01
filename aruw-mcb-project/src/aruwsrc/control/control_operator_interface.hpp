@@ -44,14 +44,14 @@ public:
     static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / USER_MOUSE_PITCH_MAX);
     static constexpr float CTRL_SCALAR = (1.0f / 4);
     static constexpr float SHIFT_SCALAR = (1.0f / 2);
-    static constexpr float USER_STICK_SENTINEL_DRIVE_SCALAR = 5000.0f;
+    static constexpr float USER_STICK_SENTINEL_DRIVE_SCALAR = 0.0f;
 
 #if defined(TARGET_HERO)
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
-    static constexpr float MAX_ACCELERATION_X = 7'000.0f;
-    static constexpr float MAX_DECELERATION_X = 20'000.0f;
+    static constexpr float MAX_ACCELERATION_X = 0.0f;
+    static constexpr float MAX_DECELERATION_X = 0.0f;
 
     /**
      * Max acceleration in rpm/s^2 of the chassis in the y direction
@@ -62,21 +62,21 @@ public:
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
-    static constexpr float MAX_ACCELERATION_X = 10'000.0f;
-    static constexpr float MAX_DECELERATION_X = 20'000.0f;
+    static constexpr float MAX_ACCELERATION_X = 0.0f;
+    static constexpr float MAX_DECELERATION_X = 0.0f;
 
     /**
      * Max acceleration in rpm/s^2 of the chassis in the y direction
      */
-    static constexpr float MAX_ACCELERATION_Y = 9'000.0f;
-    static constexpr float MAX_DECELERATION_Y = 20'000.0f;
+    static constexpr float MAX_ACCELERATION_Y = 0.0f;
+    static constexpr float MAX_DECELERATION_Y = 0.0f;
 #endif
 
     /**
      * Max acceleration in rpm/s^2 of the chassis in the r direction
      */
-    static constexpr float MAX_ACCELERATION_R = 40'000.0f;
-    static constexpr float MAX_DECELERATION_R = 50'000.0f;
+    static constexpr float MAX_ACCELERATION_R = 0.0f;
+    static constexpr float MAX_DECELERATION_R = 0.0f;
 
     ControlOperatorInterface(aruwsrc::Drivers *drivers) : drivers(drivers) {}
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)

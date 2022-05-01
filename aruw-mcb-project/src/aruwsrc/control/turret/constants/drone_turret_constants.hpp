@@ -36,19 +36,19 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr float YAW_START_ANGLE = 90.0f;
+static constexpr float YAW_START_ANGLE = 0.0f;
 static constexpr float YAW_MIN_ANGLE = 0.0f;
-static constexpr float YAW_MAX_ANGLE = 180.0f;
-static constexpr float PITCH_START_ANGLE = 90.0f;
+static constexpr float YAW_MAX_ANGLE = 0.0f;
+static constexpr float PITCH_START_ANGLE = 0.0f;
 static constexpr float PITCH_MIN_ANGLE = 0.0f;
-static constexpr float PITCH_MAX_ANGLE = 180.0f;
+static constexpr float PITCH_MAX_ANGLE = 0.0f;
 
 static constexpr uint16_t YAW_START_ENCODER_POSITION = 0;
 static constexpr uint16_t PITCH_START_ENCODER_POSITION = 0;
 
 static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 }  // namespace aruwsrc::control::turret
 
 #endif  // DRONE_TURRET_CONSTANTS_HPP_

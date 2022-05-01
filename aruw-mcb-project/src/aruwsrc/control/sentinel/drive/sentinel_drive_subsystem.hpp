@@ -48,8 +48,8 @@ class SentinelDriveSubsystem : public tap::control::chassis::ChassisSubsystemInt
 public:
     /// @see power_limiter.hpp for what these mean
     static constexpr float STARTING_ENERGY_BUFFER = 200.0f;
-    static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 100.0f;
-    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10;
+    static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 0.0f;
+    static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 0;
 
     // radius of the wheel in mm
     static constexpr float WHEEL_RADIUS = 35.0f;
@@ -63,7 +63,7 @@ public:
     /**
      * Length of the sentinel, in mm
      */
-    static constexpr float SENTINEL_LENGTH = 480;
+    static constexpr float SENTINEL_LENGTH = 0;
 
     SentinelDriveSubsystem(
         aruwsrc::Drivers* drivers,
@@ -119,11 +119,11 @@ private:
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
     static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::Pin::S;
 
-    static constexpr float PID_P = 5.0f;
+    static constexpr float PID_P = 0.0f;
     static constexpr float PID_I = 0.0f;
-    static constexpr float PID_D = 0.1f;
+    static constexpr float PID_D = 0.0f;
     static constexpr float PID_MAX_ERROR_SUM = 0.0f;
-    static constexpr float PID_MAX_OUTPUT = 10000;
+    static constexpr float PID_MAX_OUTPUT = 0;
 
     tap::gpio::Digital::InputPin leftLimitSwitch;
     tap::gpio::Digital::InputPin rightLimitSwitch;

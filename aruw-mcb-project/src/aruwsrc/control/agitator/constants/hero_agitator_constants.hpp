@@ -34,11 +34,11 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig PID_HERO_WATERWHEEL = {
-    .kp = 150'000.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
-    .kd = 50.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 16000.0f,
+    .maxOutput = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
@@ -48,11 +48,11 @@ static constexpr bool HERO_WATERWHEEL_INVERTED = false;
 
 // PID terms for the hero kicker
 static constexpr tap::algorithms::SmoothPidConfig PID_HERO_KICKER = {
-    .kp = 100'000.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
-    .kd = 50.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 16000.0f,
+    .maxOutput = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
@@ -66,8 +66,8 @@ static constexpr bool HERO_KICKER_INVERTED = false;
  * setpoint and current angle is > `JAM_DISTANCE_TOLERANCE_WATERWHEEL` radians for >=
  * `JAM_TEMPORAL_TOLERANCE_WATERWHEEL` ms;
  */
-static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = M_PI / 14.0f;
-static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
+static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = 0.0f;
+static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 0.0f;
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // HERO_AGITATOR_CONSTANTS_HPP_

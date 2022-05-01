@@ -91,7 +91,7 @@ int main()
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
+            // PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #if defined(ALL_SOLDIERS) || defined(TARGET_HERO)

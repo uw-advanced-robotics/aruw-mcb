@@ -35,11 +35,11 @@ namespace aruwsrc::control::agitator::constants
 // position PID terms
 // PID terms for soldier
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 200'000.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
-    .kd = 100.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 16000.0f,
+    .maxOutput = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
