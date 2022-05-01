@@ -47,7 +47,7 @@ void TurretMotor::updateMotorAngle()
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
 
-        if (startEncoderOffset == UINT16_MAX)
+        if (startEncoderOffset == INT16_MIN)
         {
             int encoderDiff =
                 static_cast<int>(config.startEncoderValue) - static_cast<int>(encoderUnwrapped);
@@ -93,7 +93,7 @@ void TurretMotor::updateMotorAngle()
         }
 
         lastUpdatedEncoderValue = config.startEncoderValue;
-        startEncoderOffset = UINT16_MAX;
+        startEncoderOffset = INT16_MIN;
 
         chassisFrameMeasuredAngle.setValue(config.startAngle);
     }
