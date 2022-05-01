@@ -215,7 +215,7 @@ private:
      * between the start encoder value and the current encoder value is measured. If the magnitude
      * of this difference is greater than DjiMotor::ENC_RESOLUTION / 2, an offset of
      * DjiMotor::ENC_RESOLUTION is applied to measured encoder values to avoid bad angle wrapping.
-     * 
+     *
      * If equal to UINT16_MAX, needs to be re-computed
      */
     uint16_t startEncoderOffset = UINT16_MAX;
