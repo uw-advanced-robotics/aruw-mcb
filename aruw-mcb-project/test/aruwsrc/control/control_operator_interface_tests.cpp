@@ -277,11 +277,11 @@ INSTANTIATE_TEST_SUITE_P(
     SentinelChassisTest,
     Values(
         std::tuple<float, float>(0, 0),
-        std::tuple<float, float>(-660, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
-        std::tuple<float, float>(660, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(-660, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(660, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
         std::tuple<float, float>(
             330,
-            0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+            -0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
         std::tuple<float, float>(
             -330,
-            -0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR)));
+            0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR)));
