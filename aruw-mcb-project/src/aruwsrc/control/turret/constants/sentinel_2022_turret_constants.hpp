@@ -57,7 +57,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .maxAngle = modm::toRadian(60),
     .limitMotorAngles = true,
 };
-}  // namespace turret2
+}  // namespace turret0
 
 namespace turret1
 {
