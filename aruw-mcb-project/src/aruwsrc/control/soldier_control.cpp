@@ -206,7 +206,7 @@ cv::TurretCVCommand turretCVCommand(
     USER_PITCH_INPUT_SCALAR,
     14.5f);
 
-user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 

@@ -58,7 +58,7 @@ void ChassisAutorotateCommand::updateAutorotateState()
 
     if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
         !yawMotor->getConfig().limitMotorAngles &&
-        turretYawActualSetpointDiff > (180 - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
+        turretYawActualSetpointDiff > (M_PI - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         // If turret setpoint all of a sudden turns around, don't autorotate
         chassisAutorotating = false;
@@ -146,10 +146,7 @@ void ChassisAutorotateCommand::execute()
             rotationLimitedMaxTranslationalSpeed);
 
         // Rotate X and Y depending on turret angle
-        rotateVector(
-            &chassisXDesiredWheelspeed,
-            &chassisYDesiredWheelspeed,
-            modm::toRadian(turretAngleFromCenter));
+        rotateVector(&chassisXDesiredWheelspeed, &chassisYDesiredWheelspeed, turretAngleFromCenter);
 
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,

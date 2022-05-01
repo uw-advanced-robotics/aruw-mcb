@@ -242,7 +242,7 @@ cv::TurretCVCommand turretCVCommand(
     USER_PITCH_INPUT_SCALAR,
     9.5f);
 
-user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),

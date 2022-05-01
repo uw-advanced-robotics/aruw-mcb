@@ -183,7 +183,7 @@ TEST_P(TurretOnlineTest, execute_rotated_xy)
 {
     float rotatedX = GetParam().x;
     float rotatedY = GetParam().y;
-    rotateVector(&rotatedX, &rotatedY, modm::toRadian(yawAngleFromCenter));
+    rotateVector(&rotatedX, &rotatedY, yawAngleFromCenter);
 
     EXPECT_CALL(chassis, setDesiredOutput(FloatNear(rotatedX, 1E-3), FloatNear(rotatedY, 1E-3), _));
 

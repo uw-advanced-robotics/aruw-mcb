@@ -60,9 +60,9 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-static constexpr float TURRET_CG_X = 1;
-static constexpr float TURRET_CG_Z = -0.2;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 3500.0f;
+static constexpr float TURRET_CG_X = -22.23;
+static constexpr float TURRET_CG_Z = 9.96;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 3'500.0f;
 
 namespace world_rel_turret_imu
 {
@@ -80,12 +80,12 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .errorDerivativeFloor = 0.1f,
 };
 
-static tap::algorithms::FuzzyPDConfig YAW_FUZZY_POS_PD_CONFIG{
-    .maxError = 180.0f,            ///< 180 degrees physical max angle error
-    .maxErrorDerivative = 720.0f,  ///< 2 rotations per second max speed of turret
+static tap::algorithms::FuzzyPDConfig YAW_FUZZY_POS_PD_CONFIG = {
+    .maxError = M_PI,                      ///< 180 degrees physical max angle error
+    .maxErrorDerivative = 2.0f * M_TWOPI,  ///< 2 rotations per second max speed of turret
     .fuzzyTable = tap::algorithms::FuzzyPDRuleTable(
         std::array<float, 3>({YAW_POS_PID_CONFIG.kp, YAW_POS_PID_CONFIG.kp, YAW_POS_PID_CONFIG.kp}),
-        std::array<float, 3>({0, 0.1, 0.7})),
+        std::array<float, 3>({0.0f, 0.1f, 0.7f})),
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
