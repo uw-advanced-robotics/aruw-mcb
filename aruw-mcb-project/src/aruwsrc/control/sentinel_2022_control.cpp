@@ -84,7 +84,7 @@ AgitatorSubsystem agitator(
     AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
     aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
     aruwsrc::control::agitator::constants::AGITATOR1_MOTOR_CAN_BUS,
-    aruwsrc::control::agitator::constants::isAgitatorInverted,
+    aruwsrc::control::agitator::constants::IS_AGITATOR_INVERTED,
     aruwsrc::control::agitator::constants::AGITATOR_JAMMING_DISTANCE,
     aruwsrc::control::agitator::constants::JAMMING_TIME,
     true);

@@ -43,7 +43,7 @@ static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
 
 static constexpr tap::can::CanBus AGITATOR1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::can::CanBus AGITATOR2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
-static constexpr bool isAgitatorInverted = false;
+static constexpr bool IS_AGITATOR_INVERTED = false;
 
 /**
  * The jamming constants. Agitator is considered jammed if difference between setpoint
