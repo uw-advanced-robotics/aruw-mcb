@@ -346,16 +346,16 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint_large_min_max_difference_limited
     TurretMotorConfig mc = {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_PI,
+        .minAngle = -M_PI_2,
         .maxAngle = M_PI,
         .limitMotorAngles = true,
     };
     TurretMotor tm(&motor, mc);
 
-    tm.setChassisFrameSetpoint(-M_TWOPI);
-    EXPECT_NEAR(-M_PI, tm.getChassisFrameSetpoint(), 1E-3);
+    tm.setChassisFrameSetpoint(-M_PI_2 - M_PI_4 / 2.0f);
+    EXPECT_NEAR(-M_PI_2, tm.getChassisFrameSetpoint(), 1E-3);
 
-    tm.setChassisFrameSetpoint(M_TWOPI);
+    tm.setChassisFrameSetpoint(M_PI + M_PI_4 / 2.0f);
     EXPECT_NEAR(M_PI, tm.getChassisFrameSetpoint(), 1E-3);
 }
 

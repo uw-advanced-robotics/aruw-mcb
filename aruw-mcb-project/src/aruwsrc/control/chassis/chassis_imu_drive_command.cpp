@@ -85,11 +85,13 @@ void ChassisImuDriveCommand::execute()
                 // doesn't have to be in the if statement but this is more computationally intensive
                 // compared to just shifting the value, so only do this when you actually have to
                 // (which is a very small amount in reality).
+                int status = 0;
                 rotationSetpoint.setValue(
                     tap::algorithms::ContiguousFloat::limitValue(
                         rotationSetpoint,
                         yaw - MAX_ROTATION_ERR,
-                        yaw + MAX_ROTATION_ERR) +
+                        yaw + MAX_ROTATION_ERR,
+                        &status) +
                     chassisRInput);
             }
             else
