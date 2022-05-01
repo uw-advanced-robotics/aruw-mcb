@@ -30,13 +30,15 @@ TurretUserControlCommand::TurretUserControlCommand(
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     float userYawInputScalar,
-    float userPitchInputScalar)
+    float userPitchInputScalar,
+    uint8_t turretID)
     : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
       userYawInputScalar(userYawInputScalar),
-      userPitchInputScalar(userPitchInputScalar)
+      userPitchInputScalar(userPitchInputScalar),
+      turretID(turretID)
 {
     addSubsystemRequirement(turretSubsystem);
 }
@@ -58,24 +60,24 @@ void TurretUserControlCommand::execute()
 
     const float pitchSetpoint =
         pitchController->getSetpoint() +
-        userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput();
+        userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput(turretID);
     pitchController->runController(dt, pitchSetpoint);
 
     const float yawSetpoint =
         yawController->getSetpoint() +
-        userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput();
+        userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
     yawController->runController(dt, yawSetpoint);
 }
 
 bool TurretUserControlCommand::isFinished() const
 {
-    return !pitchController->isOnline() || !yawController->isOnline();
+    return !pitchController->isOnline() && !yawController->isOnline();
 }
 
 void TurretUserControlCommand::end(bool)
 {
-    turretSubsystem->setPitchMotorOutput(0);
-    turretSubsystem->setYawMotorOutput(0);
+    turretSubsystem->yawMotor.setMotorOutput(0);
+    turretSubsystem->pitchMotor.setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::user

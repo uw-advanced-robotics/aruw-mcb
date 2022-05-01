@@ -46,7 +46,7 @@ protected:
         : d(),
           t(&d),
           cs(&d),
-          bc(&d, &cs, &t),
+          bc(&d, &cs, &t.yawMotor),
           yawAngle(std::get<2>(GetParam())),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
@@ -56,8 +56,8 @@ protected:
     void SetUp() override
     {
         ON_CALL(cs, getDesiredRotation).WillByDefault(Return(0));
-        ON_CALL(t, getYawAngleFromCenter()).WillByDefault(ReturnPointee(&yawAngle));
-        ON_CALL(t, isOnline).WillByDefault(Return(true));
+        ON_CALL(t.yawMotor, getAngleFromCenter).WillByDefault(ReturnPointee(&yawAngle));
+        ON_CALL(t.yawMotor, isOnline).WillByDefault(Return(true));
         ON_CALL(d.controlOperatorInterface, getChassisXInput()).WillByDefault(ReturnPointee(&x));
         ON_CALL(d.controlOperatorInterface, getChassisYInput()).WillByDefault(ReturnPointee(&y));
         ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
@@ -71,7 +71,7 @@ protected:
     {
         float rotatedX = x;
         float rotatedY = y;
-        rotateVector(&rotatedX, &rotatedY, modm::toRadian(yawAngle));
+        rotateVector(&rotatedX, &rotatedY, yawAngle);
         EXPECT_CALL(
             cs,
             setDesiredOutput(
@@ -117,6 +117,6 @@ INSTANTIATE_TEST_SUITE_P(
         std::tuple<float, float, float>(BASE_DESIRED_OUT, -BASE_DESIRED_OUT, 0),
         std::tuple<float, float, float>(0, BASE_DESIRED_OUT, 0),
         std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, 0),
-        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, 90),
-        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, -90),
-        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, 180)));
+        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, M_PI_2),
+        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, -M_PI_2),
+        std::tuple<float, float, float>(-BASE_DESIRED_OUT, BASE_DESIRED_OUT, M_PI)));
