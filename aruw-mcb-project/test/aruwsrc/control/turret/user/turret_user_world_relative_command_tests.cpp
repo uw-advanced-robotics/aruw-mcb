@@ -39,16 +39,19 @@ class TurretUserWorldRelativeCommandTest : public Test
 protected:
     TurretUserWorldRelativeCommandTest()
         : turret(&drivers),
-          chassisFramePitchTurretController(&turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          worldFrameYawChassisImuController(&drivers, &turret, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          chassisFramePitchTurretController(&turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          worldFrameYawChassisImuController(
+              &drivers,
+              &turret.yawMotor,
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFramePitchTurretImuController(
               &drivers,
-              &turret,
+              &turret.pitchMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFrameYawTurretImuController(
               &drivers,
-              &turret,
+              &turret.yawMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           turretCmd(
@@ -57,19 +60,32 @@ protected:
               &worldFrameYawChassisImuController,
               &chassisFramePitchTurretController,
               &worldFrameYawTurretImuController,
-              &worldFramePitchTurretImuController),
-          currentYawValue(0, 0, 360),
-          currentPitchValue(0, 0, 360)
+              &worldFramePitchTurretImuController,
+              1,
+              1),
+          currentYawValue(0, 0, M_TWOPI),
+          currentPitchValue(0, 0, M_TWOPI),
+          yawSetpoint(0),
+          pitchSetpoint(0)
     {
     }
 
     void SetUp() override
     {
-        ON_CALL(turret, getCurrentYawValue).WillByDefault(ReturnRef(currentYawValue));
-        ON_CALL(turret, getCurrentPitchValue).WillByDefault(ReturnRef(currentPitchValue));
-        ON_CALL(turret, isOnline).WillByDefault(ReturnPointee(&turretOnline));
+        ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(currentYawValue));
+        ON_CALL(turret.pitchMotor, getChassisFrameMeasuredAngle)
+            .WillByDefault(ReturnRef(currentPitchValue));
+        ON_CALL(turret.yawMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
+        ON_CALL(turret.pitchMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
         ON_CALL(drivers.turretMCBCanComm, isConnected)
             .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));
+        ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnPointee(&yawSetpoint));
+        ON_CALL(turret.pitchMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnPointee(&pitchSetpoint));
+        ON_CALL(turret.yawMotor, getConfig).WillByDefault(ReturnRef(config));
+        ON_CALL(turret.pitchMotor, getConfig).WillByDefault(ReturnRef(config));
     }
 
     Drivers drivers;
@@ -81,8 +97,11 @@ protected:
     TurretUserWorldRelativeCommand turretCmd;
     ContiguousFloat currentYawValue;
     ContiguousFloat currentPitchValue;
+    float yawSetpoint;
+    float pitchSetpoint;
     bool turretOnline = false;
     bool turretMcbCanCommConnected = false;
+    TurretMotorConfig config = {};
 };
 
 TEST_F(TurretUserWorldRelativeCommandTest, isReady_true_if_turret_online_isFinished_opposite)
@@ -128,8 +147,8 @@ TEST_F(TurretUserWorldRelativeCommandTest, end_doesnt_set_des_out_when_no_cmds_s
 {
     turretOnline = true;
 
-    EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(0);
-    EXPECT_CALL(turret, setYawMotorOutput(0)).Times(0);
+    EXPECT_CALL(turret.yawMotor, setMotorOutput(0)).Times(0);
+    EXPECT_CALL(turret.pitchMotor, setMotorOutput(0)).Times(0);
 
     turretCmd.end(true);
 }
@@ -140,8 +159,8 @@ TEST_F(
 {
     turretOnline = true;
 
-    EXPECT_CALL(turret, setPitchMotorOutput(0)).Times(2);
-    EXPECT_CALL(turret, setYawMotorOutput(0)).Times(2);
+    EXPECT_CALL(turret.pitchMotor, setMotorOutput(0)).Times(2);
+    EXPECT_CALL(turret.yawMotor, setMotorOutput(0)).Times(2);
 
     turretMcbCanCommConnected = false;
     turretCmd.initialize();

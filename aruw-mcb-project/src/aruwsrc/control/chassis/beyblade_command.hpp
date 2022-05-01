@@ -22,7 +22,8 @@
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
-#include "tap/control/turret_subsystem_interface.hpp"
+
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 namespace aruwsrc
 {
@@ -42,7 +43,7 @@ public:
     BeybladeCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const tap::control::turret::TurretSubsystemInterface* turret);
+        const aruwsrc::control::turret::TurretMotor* yawMotor);
 
     /**
      * Sets rotational input target on Ramp
@@ -68,7 +69,7 @@ private:
 
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const tap::control::turret::TurretSubsystemInterface* turret;
+    const aruwsrc::control::turret::TurretMotor* yawMotor;
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::chassis
