@@ -44,9 +44,9 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 7867,
-    .minAngle = -3 * M_PI_2 / 4,
-    .maxAngle = M_PI / 4,
+    .startEncoderValue = 4817,
+    .minAngle = -M_PI - modm::toRadian(60),
+    .maxAngle = modm::toRadian(30),
     .limitMotorAngles = true,
 };
 
@@ -66,8 +66,8 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 5455,
-    .minAngle = -M_PI,
-    .maxAngle = M_PI_2,
+    .minAngle = -M_PI_2,
+    .maxAngle = M_PI + modm::toRadian(30),
     .limitMotorAngles = true,
 };
 
