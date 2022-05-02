@@ -108,9 +108,17 @@ tap::motor::DjiMotor yawMotor(
     aruwsrc::control::turret::CAN_BUS_MOTORS,
     true,
     "Yaw Turret");
-SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
+SentinelTurretSubsystem turretSubsystem(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    PITCH_MOTOR_CONFIG,
+    YAW_MOTOR_CONFIG);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turretSubsystem, &sentinelDrive);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(
+    drivers(),
+    &turretSubsystem.yawMotor,
+    &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
@@ -150,11 +158,11 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem,
+    &turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem,
+    &turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands
@@ -163,7 +171,10 @@ user::TurretUserControlCommand turretManual(
     drivers(),
     &turretSubsystem,
     &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
+    &chassisFramePitchTurretController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
+    0);
 
 cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
@@ -176,6 +187,8 @@ cv::SentinelTurretCVCommand turretCVCommand(
     frictionWheels,
     14.5f,
     0);
+void selectNewRobotMessageHandler() { turretCVCommand.requestNewTarget(); }
+void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
@@ -236,9 +249,8 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
 
-    // TODO add callbacks after seninel CV command implemented
-    // sentinelRequestHandler.attachSelectNewRobotMessageHandler();
-    // sentinelRequestHandler.attachTargetNewQuadrantMessageHandler();
+    sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
+    sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
         &sentinelRequestHandler);

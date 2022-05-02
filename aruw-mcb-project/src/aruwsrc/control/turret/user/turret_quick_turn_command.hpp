@@ -46,7 +46,7 @@ class TurretQuickTurnCommand : public tap::control::Command
 public:
     /**
      * @param[in] turretSubsystem Turret whose setpoint to update
-     * @param[in] targetOffsetToTurn Offset angle, in degrees, that the turret setpoint
+     * @param[in] targetOffsetToTurn Offset angle, in radians, that the turret setpoint
      *      will be updated to when this command is run.
      */
     TurretQuickTurnCommand(TurretSubsystem *turretSubsystem, const float targetOffsetToTurn);

@@ -34,7 +34,7 @@ namespace aruwsrc::control::turret::algorithms
  * @param[in] cgZ The center of gravity relative to the center of the turret's pitch pivot point,
  *      in the Z (up/down) direction. The "Z" direction lies perpendicular to the plane that the
  *      turret is pointing. Units in millimeters. Positive is upwards, negative is downwards.
- * @param[in] pitchAngleFromCenter The angle in degrees of the turret pitch, relative to the
+ * @param[in] pitchAngleFromCenter The angle in radians of the turret pitch, relative to the
  *      horizontal plane.
  * @param[in] gravityCompensationMotorOutputMax The maximum output that will be returned by this
  *      function. Should be equivalent to the output to offset gravity when the center of mass lies

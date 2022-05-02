@@ -45,7 +45,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
 
 static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-static constexpr bool isAgitatorInverted = false;
+static constexpr bool IS_AGITATOR_INVERTED = false;
 
 /**
  * The jamming constants. Agitator is considered jammed if difference between setpoint

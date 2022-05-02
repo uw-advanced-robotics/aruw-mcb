@@ -36,7 +36,7 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class TurretMotor;
 }
 
 namespace aruwsrc::control::turret::algorithms
@@ -54,12 +54,12 @@ class WorldFrameYawChassisImuTurretController final : public TurretYawController
 public:
     /**
      * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     WorldFrameYawChassisImuTurretController(
         aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -69,6 +69,8 @@ public:
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
+
+    void setSetpoint(float desiredSetpoint) final;
 
     /**
      * @return The yaw setpoint, in the world frame.
