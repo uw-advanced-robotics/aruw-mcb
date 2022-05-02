@@ -237,8 +237,8 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
     odometryData.chassisOdometry.yaw = 0;
     odometryData.chassisOdometry.roll = 0;
 
-    odometryData.turretOdometry[0].pitch = 45;
-    odometryData.turretOdometry[0].yaw = -30;
+    odometryData.turretOdometry[0].pitch = M_PI_4;
+    odometryData.turretOdometry[0].yaw = -M_PI;
     odometryData.turretOdometry[0].timestamp = 456;
 
     clock.time = odometryData.chassisOdometry.timestamp / 1000;
@@ -260,9 +260,9 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
     for (size_t i = 0; i < turretInterfaces.size(); i++)
     {
         ON_CALL(turretInterfaces[i], getWorldYaw)
-            .WillByDefault(Return(modm::toRadian(odometryData.turretOdometry[i].yaw)));
+            .WillByDefault(Return(odometryData.turretOdometry[i].yaw));
         ON_CALL(turretInterfaces[i], getWorldPitch)
-            .WillByDefault(Return(modm::toRadian(odometryData.turretOdometry[i].pitch)));
+            .WillByDefault(Return(odometryData.turretOdometry[i].pitch));
         ON_CALL(turretInterfaces[i], getLastMeasurementTimeMicros)
             .WillByDefault(Return(odometryData.turretOdometry[i].timestamp));
     }
