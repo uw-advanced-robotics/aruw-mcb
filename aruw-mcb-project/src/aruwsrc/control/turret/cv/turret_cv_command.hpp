@@ -67,6 +67,9 @@ namespace aruwsrc::control::turret::cv
 class TurretCVCommand : public tap::control::Command
 {
 public:
+    static constexpr float YAW_ON_TARGET_ANGLE_TOLERANCE = modm::toRadian(2);
+    static constexpr float PITCH_ON_TARGET_ANGLE_TOLERANCE = modm::toRadian(2);
+
     /**
      * Constructs a TurretCVCommand
      *
@@ -112,6 +115,17 @@ public:
 
     const char *getName() const override { return "turret CV"; }
 
+    bool getTurretID() const { return turretID; }
+
+    /**
+     * @return True if vision is active and the turret CV command has acquired the target and the
+     * turret is within some tolerance of the target. This tolerance is distance based (the further
+     * away the target the closer to the center of the plate the turret must be aiming)
+     *
+     * TODO currently not distance-based  :D make distance based
+     */
+    bool isAimingWithinLaunchingTolerance() const { return withinAimingTolerance; }
+
 private:
     aruwsrc::Drivers *drivers;
 
@@ -128,6 +142,8 @@ private:
     const float userYawInputScalar;
 
     uint32_t prevTime;
+
+    bool withinAimingTolerance = false;
 };
 }  // namespace aruwsrc::control::turret::cv
 

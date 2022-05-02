@@ -104,6 +104,11 @@ void TurretCVCommand::execute()
                 yawSetpoint);
             yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
         }
+
+        withinAimingTolerance = abs(turretSubsystem->yawMotor.getValidChassisMeasurementError()) <
+                                    YAW_ON_TARGET_ANGLE_TOLERANCE &&
+                                abs(turretSubsystem->pitchMotor.getValidChassisMeasurementError()) <
+                                    PITCH_ON_TARGET_ANGLE_TOLERANCE;
     }
     else
     {
@@ -113,6 +118,8 @@ void TurretCVCommand::execute()
 
         yawSetpoint +=
             userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+
+        withinAimingTolerance = false;
     }
 
     uint32_t currTime = getTimeMilliseconds();

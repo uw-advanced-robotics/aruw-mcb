@@ -59,6 +59,7 @@
 #include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
+#include "agitator/move_cv_limited_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -224,20 +225,6 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     2,
     true,
     10);
-MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
-    100,
-    0,
-    true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    140,
-    2,
-    true,
-    10);
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
@@ -254,6 +241,12 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     2,
     false,
     10);
+
+MoveCVLimitedCommand agitatorLaunchCVLimited(
+    *drivers(),
+    agitator,
+    agitatorShootFastNotLimited,
+    turretCVCommand);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
