@@ -28,6 +28,7 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #include "modm/math/geometry/location_2d.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -75,7 +76,7 @@ private:
 
     static constexpr float DT = 0.002f;
 
-// clang-format off
+    // clang-format off
     static constexpr float KF_A[STATES_SQUARED] = {
         1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
         0, 1 , DT           , 0, 0 , 0            ,
@@ -91,12 +92,12 @@ private:
         0, 0, 0, 0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
-        1E1, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E0, 0  , 0  , 0  , 0  ,
-        0  , 0  , 1E0, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E1, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E0, 0  ,
-        0  , 0  , 0  , 0  , 0  , 1E0,
+        10E0, 0    , 0    , 0   , 0    , 0    ,
+        0   , 10E-1, 0    , 0   , 0    , 0    ,
+        0   , 0    , 10E-1, 0   , 0    , 0    ,
+        0   , 0    , 0    , 10E1, 0    , 0    ,
+        0   , 0    , 0    , 0   , 10E-1, 0    ,
+        0   , 0    , 0    , 0   , 0    , 10E-1,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
         1.0, 0  , 0  , 0  ,
@@ -112,7 +113,16 @@ private:
         0  , 0  , 0  , 0  , 1E3, 0  ,
         0  , 0  , 0  , 0  , 0  , 1E3,
     };
-// clang-format on
+    // clang-format on
+
+    /// Max chassis acceleration magnitude measured on the soldier when at 120W power mode, in m/s^2
+    static constexpr float MAX_ACCELERATION = 5.0f;
+
+    static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
+        {
+            {0, 10E-1},
+            {MAX_ACCELERATION, 10E4},
+        };
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
@@ -126,6 +136,13 @@ private:
     modm::Location2D<float> location;
     // Velocity in reference frame
     modm::Vector2f velocity;
+
+    modm::interpolation::Linear<modm::Pair<float, float>> chassisPowerToSpeedInterpolator;
+
+    uint32_t prevTime = 0;
+    modm::Matrix<float, 3, 1> prevChassisVelocity;
+
+    void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
 };
 }  // namespace aruwsrc::algorithms::odometry
 

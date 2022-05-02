@@ -28,7 +28,10 @@ ChassisKFOdometry::ChassisKFOdometry(
     : chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
-      kf(KF_A, KF_C, KF_Q, KF_R, KF_P)
+      kf(KF_A, KF_C, KF_Q, KF_R, KF_P),
+      chassisPowerToSpeedInterpolator(
+          CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
+          MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
     float initialX[static_cast<int>(OdomState::STATES)] = {};
     kf.init(initialX);
@@ -47,6 +50,8 @@ void ChassisKFOdometry::update()
     tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
         chassisVelocity,
         chassisYaw);
+
+    updateMeasurementCovariance(chassisVelocity);
 
     // assume 0 velocity/acceleration in z direction
     float y[static_cast<int>(OdomInput::INPUTS)] = {};
@@ -77,6 +82,35 @@ void ChassisKFOdometry::update()
     location.setPosition(
         x[static_cast<int>(OdomState::POS_X)],
         x[static_cast<int>(OdomState::POS_Y)]);
+}
+
+void ChassisKFOdometry::updateMeasurementCovariance(
+    const modm::Matrix<float, 3, 1>& chassisVelocity)
+{
+    const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
+    const uint32_t dt = curTime - prevTime;
+    prevTime = curTime;
+
+    // return to avoid weird acceleration spike on startup
+    if (prevTime == 0)
+    {
+        return;
+    }
+
+    // compute acceleration
+    const modm::Matrix<float, 3, 1> deltaVelocity = chassisVelocity - prevChassisVelocity;
+    prevChassisVelocity = chassisVelocity;
+
+    const float xAccel = (deltaVelocity[0][0] * 1e6f) / static_cast<float>(dt);
+    const float yAccel = (deltaVelocity[1][0] * 1e6f) / static_cast<float>(dt);
+    const float accelMagnitude = hypot(xAccel, yAccel);
+
+    const float velocityCovariance = chassisPowerToSpeedInterpolator.interpolate(accelMagnitude);
+
+    // set measurement covariance of chassis velocity as measured by the wheels because if
+    // acceleration is large, the likelihood of slippage is greater
+    kf.getMeasurementCovariance()[0] = velocityCovariance;
+    kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::INPUTS) + 2] = velocityCovariance;
 }
 
 }  // namespace aruwsrc::algorithms::odometry
