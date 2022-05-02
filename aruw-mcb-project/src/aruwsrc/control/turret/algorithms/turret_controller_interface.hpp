@@ -22,7 +22,7 @@
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class TurretMotor;
 }
 
 namespace aruwsrc::control::turret::algorithms
@@ -34,18 +34,16 @@ namespace aruwsrc::control::turret::algorithms
  * interface allows you to easily interchange which turret controller is being used for a particular
  * robot.
  *
- * @note All units of setpoints mentioned below are in degrees, the same units that the
- * `TurretSubsystem` uses.
+ * @note All units of setpoints mentioned below are in radians, the same units that the
+ * `TurretMotor` uses.
  */
 class TurretControllerInterface
 {
 public:
     /**
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] TurretMotor A `TurretMotor` object accessible for children objects to use.
      */
-    TurretControllerInterface(TurretSubsystem *turretSubsystem) : turretSubsystem(turretSubsystem)
-    {
-    }
+    TurretControllerInterface(TurretMotor *turretMotor) : turretMotor(turretMotor) {}
 
     /**
      * Initializes the controller, resetting any controllers and configuring any variables that need
@@ -61,7 +59,7 @@ public:
      * @param[in] dt The time difference in milliseconds between previous and current call of
      * `runController`.
      * @param[in] desiredSetpoint The controller's desired setpoint in whatever frame the controller
-     * is operating. Units degrees.
+     * is operating. Units radians.
      */
     virtual void runController(const uint32_t dt, const float desiredSetpoint) = 0;
 
@@ -84,14 +82,14 @@ public:
     virtual bool isOnline() const = 0;
 
 protected:
-    TurretSubsystem *turretSubsystem;
+    TurretMotor *turretMotor;
 };
 
 class TurretPitchControllerInterface : public TurretControllerInterface
 {
 public:
-    TurretPitchControllerInterface(TurretSubsystem *turretSubsystem)
-        : TurretControllerInterface(turretSubsystem)
+    TurretPitchControllerInterface(TurretMotor *turretMotor)
+        : TurretControllerInterface(turretMotor)
     {
     }
 };
@@ -99,8 +97,7 @@ public:
 class TurretYawControllerInterface : public TurretControllerInterface
 {
 public:
-    TurretYawControllerInterface(TurretSubsystem *turretSubsystem)
-        : TurretControllerInterface(turretSubsystem)
+    TurretYawControllerInterface(TurretMotor *turretMotor) : TurretControllerInterface(turretMotor)
     {
     }
 };

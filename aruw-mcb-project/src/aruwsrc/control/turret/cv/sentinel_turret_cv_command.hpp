@@ -68,13 +68,14 @@ class SentinelTurretCVCommand : public tap::control::Command
 {
 public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
-    static constexpr float PITCH_MIN_SCAN_ANGLE = 100.0f;
+    /// (in radians)
+    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(10.0f);
 
     /**
      * Command will shoot when turret pitch and yaw are both respectively within `FIRING_TOLERANCE`
-     * degrees of the ballistics solution.
+     * radians of the ballistics solution.
      */
-    static constexpr float FIRING_TOLERANCE = 0.5f;
+    static constexpr float FIRING_TOLERANCE = modm::toRadian(0.5f);
 
     /**
      * Constructs a TurretCVCommand
@@ -166,9 +167,9 @@ private:
 
     /**
      * Yaw and pitch angle increments that the turret will change by each call
-     * to refresh when the turret is scanning for a target, in degrees.
+     * to refresh when the turret is scanning for a target, in radians.
      */
-    static constexpr float SCAN_DELTA_ANGLE = 0.2f;
+    static constexpr float SCAN_DELTA_ANGLE = modm::toRadian(0.2f);
 
     /**
      * The number of times refresh is called without receiving valid CV data to when
@@ -177,7 +178,7 @@ private:
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
     /**
-     * @return an angle in degrees representing the next "scanning" setpoint
+     * @return an angle in radians representing the next "scanning" setpoint
      */
     float scanForTarget(char axis);
 };

@@ -134,9 +134,9 @@ tap::motor::DoubleDjiMotor yawMotor(
     true,
     "Yaw Front Turret",
     "Yaw Back Turret");
-HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, PITCH_MOTOR_CONFIG, YAW_MOTOR_CONFIG);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret.yawMotor, &chassis);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -144,17 +144,17 @@ aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotComm
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
     &sentinelRequestSubsystem);
 
-ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret);
+ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
 ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &chassis,
-    &turret,
+    &turret.yawMotor,
     ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
-BeybladeCommand beybladeCommand(drivers(), &chassis, &turret);
+BeybladeCommand beybladeCommand(drivers(), &chassis, &turret.yawMotor);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -195,28 +195,28 @@ HeroAgitatorCommand heroAgitatorCommand(
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turret,
+    &turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turret,
+    &turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
     drivers(),
-    &turret,
+    &turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
 algorithms::HeroTurretImuCascadePidTurretController worldFrameYawTurretImuController(
     drivers(),
-    &turret,
+    &turret.yawMotor,
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
     world_rel_turret_imu::YAW_FUZZY_POS_PD_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
     drivers(),
-    &turret,
+    &turret.pitchMotor,
     world_rel_turret_imu::PITCH_POS_PID_CONFIG,
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
@@ -227,7 +227,9 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
-    &worldFramePitchTurretImuController);
+    &worldFramePitchTurretImuController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR);
 
 cv::TurretCVCommand turretCVCommand(
     drivers(),
@@ -236,11 +238,11 @@ cv::TurretCVCommand turretCVCommand(
     &worldFramePitchTurretImuController,
     odometrySubsystem,
     frictionWheels,
-    1,
-    1,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
     9.5f);
 
-user::TurretQuickTurnCommand turretUTurnCommand(&turret, 180.0f);
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),

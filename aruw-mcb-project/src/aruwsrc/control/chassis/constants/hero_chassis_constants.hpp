@@ -37,7 +37,8 @@ namespace aruwsrc::chassis
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {50, 3'500},
-    {120, 6'000}};
+    {120, 6'000},
+};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -75,8 +76,8 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 100.0f;
-static constexpr float AUTOROTATION_PID_KD = 1.0f;
+static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
+static constexpr float AUTOROTATION_PID_KD = 57.3f;
 static constexpr float AUTOROTATION_PID_MAX_P = 2'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;
