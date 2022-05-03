@@ -21,7 +21,6 @@
 
 #include <cassert>
 
-#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
@@ -150,19 +149,14 @@ void VisionCoprocessor::sendOdometryData()
 
     modm::Location2D<float> location = odometryInterface->getCurrentLocation2D();
 
-    float pitch = drivers->mpu6500.getPitch();
-    float roll = drivers->mpu6500.getRoll();
-    // transform the pitch/roll from the chassis frame to the world frame
-    tap::algorithms::rotateVector(&pitch, &roll, location.getOrientation());
-
     // chassis odometry
     odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
-    odometryData->chassisOdometry.pitch = pitch;
-    odometryData->chassisOdometry.roll = roll;
-    odometryData->chassisOdometry.yaw = location.getOrientation();
+    odometryData->chassisOdometry.pitch = 0;
+    odometryData->chassisOdometry.roll = 0;
+    odometryData->chassisOdometry.yaw = 0;
 
     // number of turrets
     odometryData->numTurrets = control::turret::NUM_TURRETS;
