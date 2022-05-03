@@ -19,10 +19,12 @@
 
 #include "move_yellow_card_command.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 namespace aruwsrc::agitator
 {
 MoveYellowCardCommand::MoveYellowCardCommand(
-    aruwsrc::Drivers *drivers,
+    aruwsrc::Drivers &drivers,
     tap::control::Subsystem &dependentSubsystem,
     tap::control::Command &moveCommandNormal,
     tap::control::Command &moveCommandWhenYellowCarded)
@@ -32,15 +34,17 @@ MoveYellowCardCommand::MoveYellowCardCommand(
 {
     addSubsystemRequirement(&dependentSubsystem);
 }
+
 bool MoveYellowCardCommand::isReady()
 {
-    return (isYellowCarded() && moveCommandWhenYellowCarded.isReady()) ||
-           moveCommandNormal.isReady();
+    const bool operatorBlinded = drivers.refSerial.operatorBlinded();
+    return (operatorBlinded && moveCommandWhenYellowCarded.isReady()) ||
+           (!operatorBlinded && moveCommandNormal.isReady());
 }
 
 void MoveYellowCardCommand::initialize()
 {
-    if (isYellowCarded())
+    if (drivers.refSerial.operatorBlinded())
     {
         moveCommandWhenYellowCarded.initialize();
         initializedWhenYellowCarded = true;
@@ -79,11 +83,6 @@ bool MoveYellowCardCommand::isFinished() const
 {
     return initializedWhenYellowCarded ? moveCommandWhenYellowCarded.isFinished()
                                        : moveCommandNormal.isFinished();
-}
-
-bool MoveYellowCardCommand::isYellowCarded() const
-{
-    
 }
 
 }  // namespace aruwsrc::agitator

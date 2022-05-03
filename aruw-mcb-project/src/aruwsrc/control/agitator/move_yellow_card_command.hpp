@@ -33,26 +33,24 @@ class MoveYellowCardCommand : public tap::control::Command
 {
 public:
     MoveYellowCardCommand(
-        aruwsrc::Drivers *drivers,
+        aruwsrc::Drivers &drivers,
         tap::control::Subsystem &dependentSubsystem,
         tap::control::Command &moveCommandNormal,
         tap::control::Command &moveCommandWhenYellowCarded);
 
-    virtual const char *getName() const { return "Move yellow card command"; }
-    virtual bool isReady();
-    virtual void initialize() = 0;
-    virtual void execute() = 0;
-    virtual void end(bool interrupted) = 0;
-    virtual bool isFinished() const = 0;
+    const char *getName() const override { return "Move yellow card command"; }
+    bool isReady() override;
+    void initialize() override;
+    void execute() override;
+    void end(bool interrupted) override;
+    bool isFinished() const override;
 
 private:
-    aruwsrc::Drivers *drivers;
+    aruwsrc::Drivers &drivers;
     tap::control::Command &moveCommandNormal;
     tap::control::Command &moveCommandWhenYellowCarded;
 
     bool initializedWhenYellowCarded = false;
-
-    bool isYellowCarded() const;
 };
 }  // namespace aruwsrc::agitator
 

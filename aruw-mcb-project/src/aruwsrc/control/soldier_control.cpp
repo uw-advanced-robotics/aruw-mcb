@@ -30,7 +30,9 @@
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
+#include "agitator/move_cv_limited_command.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
+#include "agitator/move_yellow_card_command.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
@@ -59,7 +61,6 @@
 #include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
-#include "agitator/move_cv_limited_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -248,6 +249,12 @@ MoveCVLimitedCommand agitatorLaunchCVLimited(
     agitatorShootFastNotLimited,
     turretCVCommand);
 
+MoveYellowCardCommand agitatorLaunchYellowCardCommand(
+    *drivers(),
+    agitator,
+    agitatorShootFastNotLimited,
+    agitatorLaunchCVLimited);
+
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
@@ -293,7 +300,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&agitatorShootFastLimited},
+    {&agitatorLaunchYellowCardCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -325,7 +332,7 @@ HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&agitatorShootFastNotLimited},
+    {&agitatorLaunchYellowCardCommand},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
 HoldCommandMapping rightMousePressed(
