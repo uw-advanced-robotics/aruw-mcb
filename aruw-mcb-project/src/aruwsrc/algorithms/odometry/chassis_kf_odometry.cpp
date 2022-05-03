@@ -105,12 +105,22 @@ void ChassisKFOdometry::updateMeasurementCovariance(
     }
 
     // compute acceleration
-    const modm::Matrix<float, 3, 1> deltaVelocity = chassisVelocity - prevChassisVelocity;
+
+    modm::Vector2f deltaVelocity;
+
+    deltaVelocity.x = tap::algorithms::lowPassFilter(
+        deltaVelocity.x,
+        chassisVelocity[0][0] - prevChassisVelocity[0][0],
+        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
+    deltaVelocity.y = tap::algorithms::lowPassFilter(
+        deltaVelocity.y,
+        chassisVelocity[1][0] - prevChassisVelocity[1][0],
+        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
     prevChassisVelocity = chassisVelocity;
 
-    const float xAccel = (deltaVelocity[0][0] * 1e6f) / static_cast<float>(dt);
-    const float yAccel = (deltaVelocity[1][0] * 1e6f) / static_cast<float>(dt);
-    const float accelMagnitude = hypot(xAccel, yAccel);
+    const float accelMagnitude = deltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
 
     const float velocityCovariance = chassisPowerToSpeedInterpolator.interpolate(accelMagnitude);
 

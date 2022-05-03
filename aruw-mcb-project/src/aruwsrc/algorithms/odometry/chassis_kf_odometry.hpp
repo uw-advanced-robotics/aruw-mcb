@@ -116,13 +116,15 @@ private:
     // clang-format on
 
     /// Max chassis acceleration magnitude measured on the soldier when at 120W power mode, in m/s^2
-    static constexpr float MAX_ACCELERATION = 5.0f;
+    static constexpr float MAX_ACCELERATION = 8.0f;
 
     static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
         {
-            {0, 10E-1},
-            {MAX_ACCELERATION, 10E4},
+            {0, 10E-2},
+            {MAX_ACCELERATION, 10E2 },
         };
+
+    static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
