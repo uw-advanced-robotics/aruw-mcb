@@ -421,6 +421,8 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }
 }  // namespace aruwsrc::control
 
+#ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
+#endif
 
 #endif

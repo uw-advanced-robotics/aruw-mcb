@@ -142,6 +142,8 @@ private:
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
 
+    void updateLocationVelocityFromKF(float chassisYaw);
+
     void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
 };
 }  // namespace aruwsrc::algorithms::odometry

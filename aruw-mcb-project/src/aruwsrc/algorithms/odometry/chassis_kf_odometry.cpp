@@ -51,6 +51,7 @@ void ChassisKFOdometry::update()
         chassisVelocity,
         chassisYaw);
 
+    // the measurement covariance is dynamically updated based on chassis-measured acceleration
     updateMeasurementCovariance(chassisVelocity);
 
     // assume 0 velocity/acceleration in z direction
@@ -72,6 +73,12 @@ void ChassisKFOdometry::update()
     // perform the update, new state matrix now available.
     kf.performUpdate(y);
 
+    // update the location and velocity accessor objects with values from the state vector
+    updateLocationVelocityFromKF(chassisYaw);
+}
+
+void ChassisKFOdometry::updateLocationVelocityFromKF(float chassisYaw)
+{
     const auto& x = kf.getStateMatrix();
 
     // update odometry velocity and orientation
