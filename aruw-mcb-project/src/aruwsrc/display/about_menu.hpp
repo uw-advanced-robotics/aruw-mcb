@@ -19,6 +19,8 @@
 
 #ifndef ABOUT_MENU_
 #define ABOUT_MENU_
+#define xstr(s) str(s)
+#define str(s) #s
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/display/dummy_allocator.hpp"
@@ -34,7 +36,8 @@ namespace aruwsrc::display
 
 
 /**
- * Menu that allows user to see 
+ * Menu that allows user to see information about the robot, who deployed the last code,
+ * and the sha.
  */
 class AboutMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
@@ -52,6 +55,9 @@ public:
     #elif defined(TARGET_HERO)
         static constexpr char ROBOT_NAME[] = "TARGET_HERO";
     #endif
+
+    static constexpr char LAST_USER[] = xstr(BUILD_USERNAME);
+    static constexpr char LAST_SHA[] = xstr(BUILD_SHA);
     
     /** Time between calls to `draw`, which will redraw the about menu. */
     static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
