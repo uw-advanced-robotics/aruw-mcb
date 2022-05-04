@@ -56,9 +56,9 @@ public:
     static constexpr float GEAR_RATIO = 19.0f;
 
     // RMUL length of the rail, in mm
-    static constexpr float RAIL_LENGTH = 2130;
+    // static constexpr float RAIL_LENGTH = 2130;
     // Our length of the rail, in mm
-    // static constexpr float RAIL_LENGTH = 1900;
+    static constexpr float RAIL_LENGTH = 1900;
 
     /**
      * Length of the sentinel, in mm
@@ -83,7 +83,7 @@ public:
 
     mockable void setDesiredRpm(float desRpm);
 
-    mockable float getRpm () ;
+    mockable float getRpm();
 
     void refresh() override;
 

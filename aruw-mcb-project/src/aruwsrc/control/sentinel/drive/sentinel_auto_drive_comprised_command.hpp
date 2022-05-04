@@ -26,8 +26,8 @@
 
 #include "tap/control/comprised_command.hpp"
 
+#include "sentinel_drive_evade_command.hpp"
 #include "sentinel_full_traverse_command.hpp"
-#include "sentinel_random_drive_command.hpp"
 
 namespace aruwsrc::control::sentinel::drive
 {
@@ -55,7 +55,7 @@ private:
     aruwsrc::Drivers *drivers;
     SentinelDriveSubsystem *sentinelChassis;
     SentinelFullTraverseCommand fullTraverse;
-    SentinelRandomDriveCommand randomDrive;
+    SentinelDriveEvadeCommand randomDrive;
     bool evadeMode;
 };
 }  // namespace aruwsrc::control::sentinel::drive
