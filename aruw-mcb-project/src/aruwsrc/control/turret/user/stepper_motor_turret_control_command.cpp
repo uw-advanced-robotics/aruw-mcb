@@ -41,6 +41,7 @@ void StepperMotorTurretControlCommand::initialize()
 
 void StepperMotorTurretControlCommand::execute()
 {
+
     turretSubsystem->setPitchMotorOutput(drivers->controlOperatorInterface.getTurretPitchInput());
 
     turretSubsystem->setYawMotorOutput(drivers->controlOperatorInterface.getTurretYawInput());
