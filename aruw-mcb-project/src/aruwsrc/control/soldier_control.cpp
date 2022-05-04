@@ -26,13 +26,13 @@
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
-#include "tap/control/setpoint/commands/rotate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
+#include "tap/control/velocity/commands/rotate_command.hpp"
+#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/move_cv_limited_command.hpp"
-#include "agitator/move_unjam_ref_limited_command.hpp"
 #include "agitator/multi_shot_handler.hpp"
+#include "agitator/rotate_unjam_ref_limited_command.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
@@ -69,6 +69,7 @@
 #endif
 
 using namespace tap::control::setpoint;
+using namespace tap::control::velocity;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::algorithms::odometry;
@@ -204,9 +205,26 @@ cv::TurretCVCommand turretCVCommand(
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
-RotateCommand agitatorShootFastLimited(
-    &agitator,
+RotateCommand agitatorRotateCommand(
+    agitator,
     aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
+
+UnjamRotateCommand agitatorUnjamCommand(
+    agitator,
+    aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
+
+RotateUnjamRefLimitedCommand agitatorShootFastLimited(
+    *drivers(),
+    agitator,
+    agitatorRotateCommand,
+    agitatorUnjamCommand,
+    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
+
+RotateUnjamComprisedCommand agitatorShootFastUnlimited(
+    *drivers(),
+    agitator,
+    agitatorRotateCommand,
+    agitatorUnjamCommand);
 
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
@@ -288,7 +306,7 @@ HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {},
+    {&agitatorShootFastUnlimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
 HoldCommandMapping rightMousePressed(

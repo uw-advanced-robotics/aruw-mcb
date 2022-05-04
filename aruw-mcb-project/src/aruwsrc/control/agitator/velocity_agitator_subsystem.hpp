@@ -91,7 +91,7 @@ public:
      * @return The calibrated agitator angle, in radians. If the agitator is uncalibrated, 0
      *      radians is returned.
      */
-    mockable float getSetpointMeasured() const override;
+    mockable float getPosition() const override;
 
     /**
      * @return the setpoint tolerance. Returns the maximum distance in radians at which jam
@@ -139,7 +139,8 @@ public:
      */
     mockable inline float getVelocity() override
     {
-        return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / config.gearRatio;
+        return modm::toRadian(
+            6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / config.gearRatio);
     }
 
     void runHardwareTests() override;

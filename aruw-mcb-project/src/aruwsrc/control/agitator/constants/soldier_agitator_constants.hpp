@@ -21,7 +21,7 @@
 #define SOLDIER_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/control/setpoint/commands/rotate_command.hpp"
+#include "tap/control/velocity/commands/rotate_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "../agitator_subsystem_config.hpp"
@@ -63,11 +63,21 @@ static constexpr aruwsrc::agitator::AgitatorSubsystemConfig AGITATOR_CONFIG = {
     .jamLogicEnabled = false,  // TODO change
 };
 
-static constexpr tap::control::setpoint::RotateCommand::Config AGITATOR_ROTATE_CONFIG = {
+static constexpr tap::control::velocity::RotateCommand::Config AGITATOR_ROTATE_CONFIG = {
     .targetDisplacement = M_PI / 5.0f,
     .desiredVelocity = M_TWOPI,
-    .setpointTolerance = M_PI / 20.0f,
+    .velocitySetpointTolerance = M_PI / 20.0f,
 };
+
+static constexpr tap::control::velocity::UnjamRotateCommand::Config AGITATOR_UNJAM_CONFIG = {
+    .unjamDisplacement = M_PI / 10.0f,
+    .unjamVelocity = M_PI,
+    .unjamThreshold = M_PI / 20.0f,
+    .maxWaitTime = 10'000,
+    .targetCycleCount = 3,
+};
+
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
 
 }  // namespace aruwsrc::control::agitator::constants
 

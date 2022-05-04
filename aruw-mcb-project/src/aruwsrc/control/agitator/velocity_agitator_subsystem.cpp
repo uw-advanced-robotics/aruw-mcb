@@ -92,7 +92,7 @@ bool VelocityAgitatorSubsystem::calibrateHere()
     return true;
 }
 
-float VelocityAgitatorSubsystem::getSetpointMeasured() const
+float VelocityAgitatorSubsystem::getPosition() const
 {
     if (!agitatorIsCalibrated)
     {
