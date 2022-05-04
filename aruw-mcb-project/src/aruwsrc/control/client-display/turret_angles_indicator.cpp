@@ -20,7 +20,7 @@
 #include "turret_angles_indicator.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/communication/serial/ref_serial.hpp"
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/drivers.hpp"
@@ -31,9 +31,11 @@ using namespace tap::algorithms;
 namespace aruwsrc::control::client_display
 {
 TurretAnglesIndicator::TurretAnglesIndicator(
-    aruwsrc::Drivers *drivers,
+    aruwsrc::Drivers &drivers,
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem)
-    : drivers(drivers),
+    : HudIndicator(refSerialTransmitter),
+      drivers(drivers),
       robotTurretSubsystem(robotTurretSubsystem)
 {
 }
@@ -43,11 +45,9 @@ modm::ResumableResult<bool> TurretAnglesIndicator::sendInitialGraphics()
     RF_BEGIN(0);
 
     // send turret angle data graphic and associated labels
-    drivers->refSerial.sendGraphic(&turretAnglesGraphic);
-    DELAY_REF_GRAPHIC(&turretAnglesGraphic);
-    turretAnglesGraphic.graphicData.operation = Tx::ADD_GRAPHIC_MODIFY;
-    drivers->refSerial.sendGraphic(&turretAnglesLabelGraphics);
-    DELAY_REF_GRAPHIC(&turretAnglesLabelGraphics);
+    RF_CALL(refSerialTransmitter.sendGraphic(&turretAnglesGraphic));
+    turretAnglesGraphic.graphicData.operation = Tx::GRAPHIC_MODIFY;
+    RF_CALL(refSerialTransmitter.sendGraphic(&turretAnglesLabelGraphics));
 
     RF_END();
 }
@@ -56,8 +56,8 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
 {
     RF_BEGIN(1);
 
-    yaw = robotTurretSubsystem.getWorldYaw();
-    pitch = robotTurretSubsystem.getWorldPitch();
+    yaw = modm::toDegree(robotTurretSubsystem.getWorldYaw());
+    pitch = modm::toDegree(robotTurretSubsystem.getWorldPitch());
 
     if (sendTurretDataTimer.execute() &&
         (!compareFloatClose(prevYaw, yaw, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION) ||
@@ -65,8 +65,7 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
     {
         updateTurretAnglesGraphicMsg();
 
-        drivers->refSerial.sendGraphic(&turretAnglesGraphic);
-        DELAY_REF_GRAPHIC(&turretAnglesGraphic);
+        RF_CALL(refSerialTransmitter.sendGraphic(&turretAnglesGraphic));
 
         prevYaw = yaw;
         prevPitch = pitch;
@@ -80,14 +79,14 @@ void TurretAnglesIndicator::initialize()
     uint8_t turretAnglesName[3];
     getUnusedGraphicName(turretAnglesName);
 
-    RefSerial::configGraphicGenerics(
+    RefSerialTransmitter::configGraphicGenerics(
         &turretAnglesGraphic.graphicData,
         turretAnglesName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         TURRET_ANGLES_COLOR);
 
-    RefSerial::configCharacterMsg(
+    RefSerialTransmitter::configCharacterMsg(
         TURRET_ANGLES_CHAR_SIZE,
         TURRET_ANGLES_CHAR_WIDTH,
         TURRET_ANGLES_START_X,
@@ -97,14 +96,14 @@ void TurretAnglesIndicator::initialize()
 
     turretAnglesName[2]++;
 
-    RefSerial::configGraphicGenerics(
+    RefSerialTransmitter::configGraphicGenerics(
         &turretAnglesLabelGraphics.graphicData,
         turretAnglesName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         TURRET_ANGLES_COLOR);
 
-    RefSerial::configCharacterMsg(
+    RefSerialTransmitter::configCharacterMsg(
         TURRET_ANGLES_CHAR_SIZE,
         TURRET_ANGLES_CHAR_WIDTH,
         TURRET_ANGLES_START_X - strlen("PITCH: ") * TURRET_ANGLES_CHAR_SIZE,

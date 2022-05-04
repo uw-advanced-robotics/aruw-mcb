@@ -27,8 +27,8 @@ TEST(TurretGravityCompensation, computeGravitationalForceOffset_zero_cg_offsets_
 {
     EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 0, 0), 1E-3);
     EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 0, 100), 1E-3);
-    EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 10, 100), 1E-3);
-    EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 30, 100), 1E-3);
+    EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, modm::toRadian(10), 100), 1E-3);
+    EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, modm::toRadian(30), 100), 1E-3);
 }
 
 TEST(
@@ -37,7 +37,7 @@ TEST(
 {
     EXPECT_NEAR(0, computeGravitationalForceOffset(10, 0, 0, 0), 1E-3);
     EXPECT_NEAR(0, computeGravitationalForceOffset(10, 10, 0, 0), 1E-3);
-    EXPECT_NEAR(0, computeGravitationalForceOffset(10, 10, 10, 0), 1E-3);
+    EXPECT_NEAR(0, computeGravitationalForceOffset(10, 10, modm::toRadian(10), 0), 1E-3);
 }
 
 TEST(
@@ -50,7 +50,7 @@ TEST(
     {
         EXPECT_NEAR(
             100 * cos(modm::toRadian(angle)),
-            computeGravitationalForceOffset(10, 0, angle, 100),
+            computeGravitationalForceOffset(10, 0, modm::toRadian(angle), 100),
             1E-3);
     }
 }

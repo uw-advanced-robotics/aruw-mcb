@@ -29,6 +29,7 @@ using namespace aruwsrc::can;
 using namespace aruwsrc;
 using namespace testing;
 using namespace tap::arch::clock;
+using namespace tap::communication::sensors::imu::mpu6500;
 
 TEST(TurretMCBCanComm, sendData_hopper_cover_data)
 {
@@ -159,14 +160,20 @@ TEST(TurretMCBCanComm, receive_turret_data)
     messageToSend = &pitchMessage;
     drivers.canRxHandler.CanRxHandler::pollCanData();
 
-    EXPECT_NEAR((360.0f / UINT16_MAX) * static_cast<int16_t>(0x1234), dut.getYaw(), 1E-5);
     EXPECT_NEAR(
-        static_cast<int16_t>(0x4567) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S,
+        modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x1234),
+        dut.getYaw(),
+        1E-5);
+    EXPECT_NEAR(
+        modm::toRadian(static_cast<int16_t>(0x4567) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
         dut.getYawVelocity(),
         1E-5);
-    EXPECT_NEAR((360.0f / UINT16_MAX) * static_cast<int16_t>(0x4321), dut.getPitch(), 1E-5);
     EXPECT_NEAR(
-        static_cast<int16_t>(0x7654) / tap::sensors::Mpu6500::LSB_D_PER_S_TO_D_PER_S,
+        modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x4321),
+        dut.getPitch(),
+        1E-5);
+    EXPECT_NEAR(
+        modm::toRadian(static_cast<int16_t>(0x7654) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
         dut.getPitchVelocity(),
         1E-5);
     EXPECT_EQ(0X12345678, dut.getIMUDataTimestamp());

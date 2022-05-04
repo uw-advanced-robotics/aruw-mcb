@@ -21,7 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/communication/sensors/mpu6500/mpu6500.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/remote.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -31,7 +31,7 @@
 #include "chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::sensors;
+using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc
 {
@@ -40,10 +40,10 @@ namespace chassis
 BeybladeCommand::BeybladeCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const tap::control::turret::TurretSubsystemInterface* turret)
+    const aruwsrc::control::turret::TurretMotor* yawMotor)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret)
+      yawMotor(yawMotor)
 {
     addSubsystemRequirement(chassis);
 }
@@ -61,10 +61,10 @@ void BeybladeCommand::initialize()
 
 void BeybladeCommand::execute()
 {
-    if (turret->isOnline())
+    if (yawMotor->isOnline())
     {
         // Gets current turret yaw angle
-        float turretYawAngle = turret->getYawAngleFromCenter();
+        float turretYawAngle = yawMotor->getAngleFromCenter();
 
         float x = 0.0f;
         float y = 0.0f;
@@ -102,7 +102,7 @@ void BeybladeCommand::execute()
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, modm::toRadian(turretYawAngle));
+        tap::algorithms::rotateVector(&x, &y, turretYawAngle);
 
         // set outputs
         chassis->setDesiredOutput(x, y, r);

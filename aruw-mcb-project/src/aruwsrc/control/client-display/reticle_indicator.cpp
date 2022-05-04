@@ -19,13 +19,21 @@
 
 #include "reticle_indicator.hpp"
 
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
-ReticleIndicator::ReticleIndicator(aruwsrc::Drivers *drivers) : drivers(drivers) {}
+ReticleIndicator::ReticleIndicator(
+    aruwsrc::Drivers &drivers,
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
+    : HudIndicator(refSerialTransmitter),
+      drivers(drivers)
+{
+}
 
 modm::ResumableResult<bool> ReticleIndicator::sendInitialGraphics()
 {
@@ -34,8 +42,7 @@ modm::ResumableResult<bool> ReticleIndicator::sendInitialGraphics()
     // send reticle
     for (reticleIndex = 0; reticleIndex < MODM_ARRAY_SIZE(reticleMsg); reticleIndex++)
     {
-        drivers->refSerial.sendGraphic(&reticleMsg[reticleIndex]);
-        DELAY_REF_GRAPHIC(&reticleMsg[reticleIndex]);
+        RF_CALL(refSerialTransmitter.sendGraphic(&reticleMsg[reticleIndex]));
     }
 
     RF_END();
@@ -64,10 +71,10 @@ void ReticleIndicator::initialize()
         size_t reticleMsgIndex = i / MODM_ARRAY_SIZE(reticleMsg[0].graphicData);
         size_t graphicDataIndex = i % MODM_ARRAY_SIZE(reticleMsg[0].graphicData);
 
-        RefSerial::configGraphicGenerics(
+        RefSerialTransmitter::configGraphicGenerics(
             &reticleMsg[reticleMsgIndex].graphicData[graphicDataIndex],
             currLineName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]));
 
@@ -85,7 +92,7 @@ void ReticleIndicator::initialize()
         // y coordinate of the horizontal reticle line
         uint16_t y = std::get<1>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]);
 
-        RefSerial::configLine(
+        RefSerialTransmitter::configLine(
             RETICLE_THICKNESS,
             startX,
             y,
@@ -106,15 +113,15 @@ void ReticleIndicator::initialize()
     }
 
     // Add vertical reticle line to connect reticle markers
-    RefSerial::configGraphicGenerics(
+    RefSerialTransmitter::configGraphicGenerics(
         &reticleMsg[NUM_RETICLE_COORDINATES / MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]
              .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)],
         currLineName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         RETICLE_VERTICAL_COLOR);
 
-    RefSerial::configLine(
+    RefSerialTransmitter::configLine(
         RETICLE_THICKNESS,
         SCREEN_WIDTH / 2 + RETICLE_CENTER_X_OFFSET,
         minReticleY,

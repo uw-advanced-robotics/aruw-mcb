@@ -76,10 +76,10 @@ int main()
     aruwsrc::control::initSubsystemCommands(drivers);
 
 #ifdef PLATFORM_HOSTED
-    aruwsrc::sim::initialize_robot_sim();
-    tap::motorsim::SimHandler::resetMotorSims();
-    // Blocking call, waits until Windows Simulator connects.
-    tap::communication::TCPServer::MainServer()->getConnection();
+    // aruwsrc::sim::initialize_robot_sim();
+    // tap::motorsim::SimHandler::resetMotorSims();
+    // // Blocking call, waits until Windows Simulator connects.
+    // tap::communication::TCPServer::MainServer()->getConnection();
 #endif
 
     while (1)

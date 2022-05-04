@@ -32,12 +32,13 @@ TurretQuickTurnCommand::TurretQuickTurnCommand(
     addSubsystemRequirement(turretSubsystem);
 }
 
-bool TurretQuickTurnCommand::isReady() { return turretSubsystem->isOnline(); }
+bool TurretQuickTurnCommand::isReady() { return turretSubsystem->yawMotor.isOnline(); }
 
 void TurretQuickTurnCommand::initialize()
 {
-    turretSubsystem->setYawSetpoint(
-        turretSubsystem->getCurrentYawValue().getValue() + targetOffsetToTurn);
-    turretSubsystem->setPrevRanYawTurretController(nullptr);
+    float newSetpoint =
+        turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue() + targetOffsetToTurn;
+    turretSubsystem->yawMotor.setChassisFrameSetpoint(newSetpoint);
+    turretSubsystem->yawMotor.attachTurretController(nullptr);
 }
 }  // namespace aruwsrc::control::turret::user

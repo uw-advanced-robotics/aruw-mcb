@@ -260,9 +260,9 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
     for (size_t i = 0; i < turretInterfaces.size(); i++)
     {
         ON_CALL(turretInterfaces[i], getWorldYaw)
-            .WillByDefault(Return(odometryData.turretOdometry[i].yaw));
+            .WillByDefault(Return(modm::toRadian(odometryData.turretOdometry[i].yaw)));
         ON_CALL(turretInterfaces[i], getWorldPitch)
-            .WillByDefault(Return(odometryData.turretOdometry[i].pitch));
+            .WillByDefault(Return(modm::toRadian(odometryData.turretOdometry[i].pitch)));
         ON_CALL(turretInterfaces[i], getLastMeasurementTimeMicros)
             .WillByDefault(Return(odometryData.turretOdometry[i].timestamp));
     }
@@ -478,16 +478,15 @@ TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
 
             checkHeaderAndTail<DATA_LEN>(msg);
             EXPECT_EQ(msg.messageType, 11);
-            EXPECT_EQ(getTimeMicroseconds(), *reinterpret_cast<uint32_t *>(msg.data));
-            EXPECT_EQ(77, msg.data[4]);
+            EXPECT_EQ(10'000'000, *reinterpret_cast<uint32_t *>(msg.data));
 
             return length;
         });
 
-    DJISerial::ReceivedSerialMessage syncRequestMessage;
-    syncRequestMessage.header.dataLength = 1;
-    syncRequestMessage.messageType = 10;
-    syncRequestMessage.data[0] = 77;
+    VisionCoprocessor::handleTimeSyncRequest();
 
-    serial.messageReceiveCallback(syncRequestMessage);
+    // the time we send should be the the time when `handleTimeSyncRequest` was sent
+    clock.time += 100;
+
+    serial.sendTimeSyncMessage();
 }

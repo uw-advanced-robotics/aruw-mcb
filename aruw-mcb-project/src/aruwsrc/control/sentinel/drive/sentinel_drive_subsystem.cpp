@@ -47,8 +47,8 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       desiredRpm(0),
-      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
-      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
+      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left sentinel drive motor"),
+      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, true, "right sentinel drive motor"),
       currentSensor(
           {&drivers->analog,
            currentSensorPin,

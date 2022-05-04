@@ -23,7 +23,7 @@
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::sensors;
+using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::control::imu
 {
@@ -52,8 +52,8 @@ void ImuCalibrateCommand::initialize()
 {
     calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
     chassis->setDesiredOutput(0, 0, 0);
-    turret->setYawSetpoint(turret::YAW_START_ANGLE);
-    turret->setPitchSetpoint(turret::PITCH_START_ANGLE);
+    turret->yawMotor.setChassisFrameSetpoint(turret->yawMotor.getConfig().startAngle);
+    turret->pitchMotor.setChassisFrameSetpoint(turret->pitchMotor.getConfig().startAngle);
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
@@ -67,11 +67,20 @@ static inline bool turretReachedCenterAndNotMoving(
 {
     return compareFloatClose(
                0.0f,
-               turret->getYawVelocity(),
+               turret->yawMotor.getChassisFrameVelocity(),
                ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           compareFloatClose(0.0f, turret->getYawAngleFromCenter(), 1) &&
-           (ignorePitch || (compareFloatClose(0.0f, turret->getPitchVelocity(), 1e-2) &&
-                            compareFloatClose(0.0f, turret->getPitchAngleFromCenter(), 1)));
+           compareFloatClose(
+               0.0f,
+               turret->yawMotor.getAngleFromCenter(),
+               ImuCalibrateCommand::POSITION_ZERO_THRESHOLD) &&
+           (ignorePitch || (compareFloatClose(
+                                0.0f,
+                                turret->pitchMotor.getChassisFrameVelocity(),
+                                ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
+                            compareFloatClose(
+                                0.0f,
+                                turret->pitchMotor.getAngleFromCenter(),
+                                ImuCalibrateCommand::POSITION_ZERO_THRESHOLD)));
 }
 
 void ImuCalibrateCommand::execute()
@@ -131,15 +140,15 @@ void ImuCalibrateCommand::execute()
     // don't run pitch controller when turret IMU not on pitch (as there is no need)
     if (turretImuOnPitch)
     {
-        pitchController->runController(dt, turret->getPitchSetpoint());
+        pitchController->runController(dt, turret->pitchMotor.getChassisFrameSetpoint());
     }
-    yawController->runController(dt, turret->getYawSetpoint());
+    yawController->runController(dt, turret->yawMotor.getChassisFrameSetpoint());
 }
 
 void ImuCalibrateCommand::end(bool)
 {
-    turret->setYawMotorOutput(0);
-    turret->setPitchMotorOutput(0);
+    turret->yawMotor.setMotorOutput(0);
+    turret->pitchMotor.setMotorOutput(0);
 }
 
 bool ImuCalibrateCommand::isFinished() const

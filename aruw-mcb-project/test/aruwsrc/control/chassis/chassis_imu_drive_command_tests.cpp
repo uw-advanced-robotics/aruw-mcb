@@ -26,7 +26,7 @@
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
-using namespace tap::sensors;
+using namespace tap::communication::sensors::imu::mpu6500;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc;
 using namespace testing;
@@ -188,7 +188,7 @@ TEST_P(
     imuYaw += 90;
     chassisImuDriveCommand.execute();
 
-    imuYaw = 90 - ChassisImuDriveCommand::MAX_ROTATION_ERR;
+    imuYaw = 90 - modm::toDegree(ChassisImuDriveCommand::MAX_ROTATION_ERR);
     float rotation = INFINITY;
     ON_CALL(chassis, setDesiredOutput).WillByDefault([&](float, float, float r) { rotation = r; });
 
@@ -233,18 +233,18 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_nullptr)
 {
     NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers);
-    ChassisImuDriveCommand chassisImuDriveCommand(&drivers, &chassis, &turret);
+    ChassisImuDriveCommand chassisImuDriveCommand(&drivers, &chassis, &turret.yawMotor);
 
     setupUserInput(MAX_SPEED, 0, 0);
 
     chassisImuDriveCommand.initialize();
 
-    ON_CALL(turret, getYawAngleFromCenter).WillByDefault(Return(45));
-    ON_CALL(turret, isOnline).WillByDefault(Return(true));
+    ON_CALL(turret.yawMotor, getAngleFromCenter).WillByDefault(Return(M_PI_4));
+    ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(true));
 
     float xExpected = MAX_SPEED;
     float yExpected = 0.0f;
-    tap::algorithms::rotateVector(&xExpected, &yExpected, modm::toRadian(45.0f));
+    tap::algorithms::rotateVector(&xExpected, &yExpected, M_PI_4);
 
     EXPECT_CALL(
         chassis,

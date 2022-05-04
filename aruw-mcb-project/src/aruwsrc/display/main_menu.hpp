@@ -20,6 +20,7 @@
 #ifndef MAIN_MENU_HPP_
 #define MAIN_MENU_HPP_
 
+#include "tap/communication/sensors/imu/imu_menu.hpp"
 #include "tap/display/command_scheduler_menu.hpp"
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/display/hardware_test_menu.hpp"
@@ -68,6 +69,7 @@ private:
     tap::display::MotorMenu motorMenu;
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
     tap::display::RefSerialMenu refSerialMenu;
+    tap::communication::sensors::imu::ImuMenu imuMenu;
     TurretMCBMenu turretStatusMenu;
 
     void addImuCalibrateMenuCallback();
@@ -78,6 +80,7 @@ private:
     void addPropertyTableCallback();
     void addCommandSchedulerCallback();
     void addRefSerialMenuCallback();
+    void addImuMenuCallback();
     void addTurretMCBMenuCallback();
 };  // class MainMenu
 }  // namespace display

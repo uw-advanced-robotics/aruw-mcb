@@ -20,6 +20,7 @@
 #include "matrix_hud_indicators.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
 
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -52,14 +53,16 @@ static inline void updateGraphicYLocation(
 }
 
 MatrixHudIndicators::MatrixHudIndicators(
-    aruwsrc::Drivers *drivers,
+    aruwsrc::Drivers &drivers,
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
-    : drivers(drivers),
+    : HudIndicator(refSerialTransmitter),
+      drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       multiShotHandler(multiShotHandler),
@@ -70,22 +73,22 @@ MatrixHudIndicators::MatrixHudIndicators(
       },
       matrixHudIndicatorDrawers{
           StateHUDIndicator<uint16_t>(
-              drivers,
+              refSerialTransmitter,
               &matrixHudIndicatorGraphics[CHASSIS_STATE],
               updateGraphicYLocation,
               0),
           StateHUDIndicator<uint16_t>(
-              drivers,
+              refSerialTransmitter,
               &matrixHudIndicatorGraphics[SHOOTER_STATE],
               updateGraphicYLocation,
               0),
           StateHUDIndicator<uint16_t>(
-              drivers,
+              refSerialTransmitter,
               &matrixHudIndicatorGraphics[FIRING_MODE],
               updateGraphicYLocation,
               0),
           StateHUDIndicator<uint16_t>(
-              drivers,
+              refSerialTransmitter,
               &matrixHudIndicatorGraphics[CV_STATUS],
               updateGraphicYLocation,
               0),
@@ -103,12 +106,12 @@ modm::ResumableResult<bool> MatrixHudIndicators::sendInitialGraphics()
     {
         RF_CALL(matrixHudIndicatorDrawers[matrixHudIndicatorIndex].initialize());
 
-        drivers->refSerial.sendGraphic(&matrixHudLabelAndTitleGraphics[matrixHudIndicatorIndex]);
-        DELAY_REF_GRAPHIC(&matrixHudLabelAndTitleGraphics[matrixHudIndicatorIndex]);
+        RF_CALL(refSerialTransmitter.sendGraphic(
+            &matrixHudLabelAndTitleGraphics[matrixHudIndicatorIndex]));
     }
 
-    drivers->refSerial.sendGraphic(&matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]);
-    DELAY_REF_GRAPHIC(&matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]);
+    RF_CALL(refSerialTransmitter.sendGraphic(
+        &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]));
 
     RF_END();
 }
@@ -134,7 +137,7 @@ void MatrixHudIndicators::updateIndicatorState()
     // update chassis state
     for (size_t i = 0; i < driveCommands.size(); i++)
     {
-        if (drivers->commandScheduler.isCommandScheduled(driveCommands[i]))
+        if (drivers.commandScheduler.isCommandScheduled(driveCommands[i]))
         {
             currDriveCommandIndex = i;
         }
@@ -161,7 +164,7 @@ void MatrixHudIndicators::updateIndicatorState()
             shooterState = ShooterState::LOADING;
         }
 #elif defined(TARGET_HERO)
-        if (!drivers->turretMCBCanComm.getLimitSwitchDepressed())
+        if (!drivers.turretMCBCanComm.getLimitSwitchDepressed())
         {
             shooterState = ShooterState::LOADING;
         }
@@ -175,7 +178,7 @@ void MatrixHudIndicators::updateIndicatorState()
     matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
         static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
 
-    CVStatus cvStatus = drivers->visionCoprocessor.isCvOnline()
+    CVStatus cvStatus = drivers.visionCoprocessor.isCvOnline()
                             ? CVStatus::VISION_COPROCESSOR_CONNECTED
                             : CVStatus::VISION_COPROCESSOR_OFFLINE;
 
@@ -195,16 +198,16 @@ void MatrixHudIndicators::initialize()
     {
         // configure rectangle
 
-        RefSerial::configGraphicGenerics(
+        RefSerialTransmitter::configGraphicGenerics(
             &matrixHudIndicatorGraphics[i].graphicData,
             matrixHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             MATRIX_HUD_INDICATOR_SELECTOR_BOX_COLOR);
 
         getUnusedGraphicName(matrixHudIndicatorName);
 
-        RefSerial::configRectangle(
+        RefSerialTransmitter::configRectangle(
             MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH,
             hudIndicatorListCurrX - 2 * MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1,
             MATRIX_HUD_INDICATOR_LABELS_START_Y - MATRIX_HUD_INDICATOR_CHAR_SIZE -
@@ -217,16 +220,16 @@ void MatrixHudIndicators::initialize()
 
         // configure labels
 
-        RefSerial::configGraphicGenerics(
+        RefSerialTransmitter::configGraphicGenerics(
             &matrixHudLabelAndTitleGraphics[i].graphicData,
             matrixHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             MATRIX_HUD_INDICATOR_LABELS_COLOR);
 
         getUnusedGraphicName(matrixHudIndicatorName);
 
-        RefSerial::configCharacterMsg(
+        RefSerialTransmitter::configCharacterMsg(
             MATRIX_HUD_INDICATOR_CHAR_SIZE,
             MATRIX_HUD_INDICATOR_CHAR_LINE_WIDTH,
             hudIndicatorListCurrX,
@@ -241,10 +244,10 @@ void MatrixHudIndicators::initialize()
     // configure the title (the first row of the matrix indicator, giving meaning to each labeled
     // column)
 
-    RefSerial::configGraphicGenerics(
+    RefSerialTransmitter::configGraphicGenerics(
         &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS].graphicData,
         matrixHudIndicatorName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         MATRIX_HUD_INDICATOR_TITLE_COLOR);
 
@@ -272,7 +275,7 @@ void MatrixHudIndicators::initialize()
         }
     }
 
-    RefSerial::configCharacterMsg(
+    RefSerialTransmitter::configCharacterMsg(
         MATRIX_HUD_INDICATOR_CHAR_SIZE,
         MATRIX_HUD_INDICATOR_CHAR_LINE_WIDTH,
         MATRIX_HUD_INDICATOR_START_X,

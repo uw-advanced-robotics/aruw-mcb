@@ -50,8 +50,8 @@ static constexpr Digital::OutputPin GRABBER_PIN = Digital::OutputPin::E;
 static constexpr Digital::OutputPin X_AXIS_PIN = Digital::OutputPin::F;
 static constexpr Digital::OutputPin TOWER_LEFT_PIN = Digital::OutputPin::G;
 static constexpr Digital::OutputPin TOWER_RIGHT_PIN = Digital::OutputPin::H;
-static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::A;
-static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
+static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::B;
+static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 
 /* define subsystems --------------------------------------------------------*/
 GrabberSubsystem grabber(drivers(), GRABBER_PIN);

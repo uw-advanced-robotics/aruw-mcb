@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,6 +22,8 @@
 
 #include <gmock/gmock.h>
 
+#include "tap/mock/motor_interface_mock.hpp"
+
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 namespace aruwsrc
@@ -36,47 +38,20 @@ public:
 
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, refresh, (), (override));
-    MOCK_METHOD(bool, isOnline, (), (const override));
-    MOCK_METHOD(float, getYawVelocity, (), (const override));
-    MOCK_METHOD(float, getPitchVelocity, (), (const override));
-    MOCK_METHOD(float, getYawAngleFromCenter, (), (const override));
-    MOCK_METHOD(float, getPitchAngleFromCenter, (), (const override));
-    MOCK_METHOD(const tap::algorithms::ContiguousFloat &, getCurrentYawValue, (), (const override));
-    MOCK_METHOD(
-        const tap::algorithms::ContiguousFloat &,
-        getCurrentPitchValue,
-        (),
-        (const override));
-    MOCK_METHOD(void, setYawMotorOutput, (float out), (override));
-    MOCK_METHOD(void, setPitchMotorOutput, (float out), (override));
-    MOCK_METHOD(void, setYawSetpoint, (float target), (override));
-    MOCK_METHOD(void, setPitchSetpoint, (float target), (override));
-    MOCK_METHOD(float, getYawSetpoint, (), (const override));
-    MOCK_METHOD(float, getPitchSetpoint, (), (const override));
-    MOCK_METHOD(void, updateCurrentTurretAngles, (), (override));
-    MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char *, getName, (), (override));
-    MOCK_METHOD(bool, yawLimited, (), (const override));
-    MOCK_METHOD(
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *,
-        getPrevRanPitchTurretController,
-        (),
-        (const override));
-    MOCK_METHOD(
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface *,
-        getPrevRanYawTurretController,
-        (),
-        (const override));
-    MOCK_METHOD(
-        void,
-        setPrevRanPitchTurretController,
-        (aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *),
-        (override));
-    MOCK_METHOD(
-        void,
-        setPrevRanYawTurretController,
-        (aruwsrc::control::turret::algorithms::TurretYawControllerInterface *),
-        (override));
+    MOCK_METHOD(void, onHardwareTestStart, (), (override));
+    MOCK_METHOD(bool, isOnline, (), (const override));
+
+private:
+    static constexpr aruwsrc::control::turret::TurretMotorConfig MOTOR_CONFIG = {
+        .startAngle = M_PI_2,
+        .startEncoderValue = 0,
+        .minAngle = 0,
+        .maxAngle = M_PI,
+        .limitMotorAngles = false,
+    };
+
+    testing::NiceMock<tap::mock::MotorInterfaceMock> m;
 };  // class TurretSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc

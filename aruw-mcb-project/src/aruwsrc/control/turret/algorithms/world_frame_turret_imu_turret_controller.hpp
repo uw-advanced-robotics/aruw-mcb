@@ -23,7 +23,7 @@
 #include <cstdint>
 
 #include "tap/algorithms/contiguous_float.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/fuzzy_pd.hpp"
 
 #include "turret_controller_interface.hpp"
 
@@ -34,7 +34,7 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class TurretMotor;
 }
 
 namespace aruwsrc::control::turret::algorithms
@@ -55,13 +55,13 @@ class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawC
 public:
     /**
      * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] posPidConfig Position PID configuration struct for the controller.
      * @param[in] velPidConfig Velocity PID configuration struct for the controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 
@@ -73,6 +73,8 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    void setSetpoint(float desiredSetpoint) final;
+
     float getSetpoint() const final;
 
     bool isOnline() const final;
@@ -81,6 +83,43 @@ private:
     const aruwsrc::Drivers *drivers;
 
     tap::algorithms::SmoothPid positionPid;
+    tap::algorithms::SmoothPid velocityPid;
+
+    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+};
+
+/**
+ * Band-aid fix since I don't want to fix WorldFrameYawTurretImuCascadePidTurretController's
+ * constructor.
+ */
+class HeroTurretImuCascadePidTurretController final : public TurretYawControllerInterface
+{
+public:
+    HeroTurretImuCascadePidTurretController(
+        const aruwsrc::Drivers *drivers,
+        TurretMotor *yawMotor,
+        const tap::algorithms::SmoothPidConfig &posPidConfig,
+        const tap::algorithms::FuzzyPDConfig &fuzzyPidConfig,
+        const tap::algorithms::SmoothPidConfig &velPidConfig);
+
+    void initialize() final;
+
+    /**
+     * @see TurretControllerInterface for more details.
+     * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
+     */
+    void runController(const uint32_t dt, const float desiredSetpoint) final;
+
+    void setSetpoint(float desiredSetpoint) final;
+
+    float getSetpoint() const final;
+
+    bool isOnline() const final;
+
+private:
+    const aruwsrc::Drivers *drivers;
+
+    tap::algorithms::FuzzyPD positionPid;
     tap::algorithms::SmoothPid velocityPid;
 
     tap::algorithms::ContiguousFloat worldFrameSetpoint;
@@ -103,13 +142,13 @@ class WorldFramePitchTurretImuCascadePidTurretController final
 public:
     /**
      * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] posPidConfig Position PID configuration struct for the controller.
      * @param[in] velPidConfig Velocity PID configuration struct for the controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *pitchMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
 
@@ -120,6 +159,8 @@ public:
      * @param[in] desiredSetpoint The pitch desired setpoint in the world frame.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
+
+    void setSetpoint(float desiredSetpoint) final;
 
     float getSetpoint() const final;
 

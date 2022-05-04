@@ -23,6 +23,9 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "../turret_motor_config.hpp"
+#include "modm/math/geometry/angle.hpp"
+
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
 #error "Do not include this file directly! Use turret_controller_constants.hpp instead."
@@ -32,19 +35,28 @@ namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
 
+static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
+
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr float YAW_START_ANGLE = 90.0f;
-static constexpr float YAW_MIN_ANGLE = 5.0f;
-static constexpr float YAW_MAX_ANGLE = 175.0f;
-static constexpr float PITCH_START_ANGLE = 90.0f;
-static constexpr float PITCH_MIN_ANGLE = 80.0f;
-static constexpr float PITCH_MAX_ANGLE = 165.0f;
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 2801,
+    .minAngle = modm::toRadian(5),
+    .maxAngle = modm::toRadian(175),
+    .limitMotorAngles = true,
+};
 
-static constexpr uint16_t YAW_START_ENCODER_POSITION = 2801;
-static constexpr uint16_t PITCH_START_ENCODER_POSITION = 4035;
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 4035,
+    .minAngle = modm::toRadian(80),
+    .maxAngle = modm::toRadian(165),
+    .limitMotorAngles = true,
+};
 
 static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
@@ -53,29 +65,31 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 4000.0f,
+    .kp = 229'183.1f,
     .ki = 0.0f,
-    .kd = 130.0f,
+    .kd = 7'448.5f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30000.0f,
+    .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 10.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 3400.0f,
+    .kp = 194'805.7f,
     .ki = 0.0f,
-    .kd = 100.0f,
+    .kd = 5'729.6f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30000.0f,
+    .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace chassis_rel
 }  // namespace  aruwsrc::control::turret

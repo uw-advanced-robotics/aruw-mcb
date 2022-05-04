@@ -61,8 +61,14 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed,
           turretID),
-      pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_ANGLE, SCAN_DELTA_ANGLE),
-      yawScanner(YAW_MIN_ANGLE, YAW_MAX_ANGLE, SCAN_DELTA_ANGLE)
+      pitchScanner(
+          PITCH_MIN_SCAN_ANGLE,
+          turretSubsystem->pitchMotor.getConfig().maxAngle,
+          SCAN_DELTA_ANGLE),
+      yawScanner(
+          turretSubsystem->yawMotor.getConfig().minAngle,
+          turretSubsystem->yawMotor.getConfig().maxAngle,
+          SCAN_DELTA_ANGLE)
 {
     assert(firingCommand != nullptr);
     assert(turretSubsystem != nullptr);
@@ -96,18 +102,31 @@ void SentinelTurretCVCommand::execute()
     if (ballisticsSolutionAvailable)
     {
         // Target available
-        pitchSetpoint = modm::toDegree(targetPitch);
-        yawSetpoint = modm::toDegree(targetYaw);
+        pitchSetpoint = targetPitch;
+        yawSetpoint = targetYaw;
+
+        // the setpoint returned by the ballistics solver is between [0, 2*PI)
+        // the desired setpoint is not required to be between [0, 2*PI)
+        // so, find the setpoint that is closest to the unwrapped measured angle
+        // (this is only an issue for turrets w/o a slip ring)
+        if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
+        {
+            // TODO fix for non-chassis frame controllers
+            yawSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
+                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle(),
+                yawSetpoint);
+            yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
+        }
 
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
         if (compareFloatClose(
-                turretSubsystem->getCurrentPitchValue().getValue(),
+                turretSubsystem->pitchMotor.getChassisFrameMeasuredAngle().getValue(),
                 pitchSetpoint,
                 FIRING_TOLERANCE) &&
             compareFloatClose(
-                turretSubsystem->getCurrentYawValue().getValue(),
+                turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue(),
                 yawSetpoint,
                 FIRING_TOLERANCE))
         {
@@ -157,8 +176,22 @@ bool SentinelTurretCVCommand::isFinished() const
 
 void SentinelTurretCVCommand::end(bool)
 {
-    turretSubsystem->setYawMotorOutput(0);
-    turretSubsystem->setPitchMotorOutput(0);
+    turretSubsystem->yawMotor.setMotorOutput(0);
+    turretSubsystem->pitchMotor.setMotorOutput(0);
+}
+
+void SentinelTurretCVCommand::requestNewTarget()
+{
+    // TODO is there anything else the turret or firing system should do?
+    drivers->visionCoprocessor.sendSelectNewTargetMessage();
+}
+
+void SentinelTurretCVCommand::changeScanningQuadrant()
+{
+    // basic quadrant change for proof-of concept, if turret on left side, move right, otherwise
+    // move left
+    const float angleChange = copysignf(M_PI_2, -turretSubsystem->yawMotor.getAngleFromCenter());
+    yawController->setSetpoint(yawController->getSetpoint() + angleChange);
 }
 
 }  // namespace aruwsrc::control::turret::cv

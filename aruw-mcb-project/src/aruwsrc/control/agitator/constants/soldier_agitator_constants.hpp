@@ -34,12 +34,18 @@ namespace aruwsrc::control::agitator::constants
 {
 // position PID terms
 // PID terms for soldier
-static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG =
-    {.kp = 200'000.0f, .ki = 0.0f, .kd = 100.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
+    .kp = 200'000.0f,
+    .ki = 0.0f,
+    .kd = 100.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 16000.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 
 static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr tap::can::CanBus AGITATOR_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-static constexpr bool isAgitatorInverted = false;
+static constexpr bool IS_AGITATOR_INVERTED = false;
 
 /**
  * The jamming constants. Agitator is considered jammed if difference between setpoint

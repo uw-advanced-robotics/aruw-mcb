@@ -31,6 +31,8 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
+#include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
@@ -69,6 +71,8 @@ namespace sentinel_control
 static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::C;
 static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
 
+aruwsrc::communication::serial::SentinelRequestHandler sentinelRequestHandler(drivers());
+
 /* define subsystems --------------------------------------------------------*/
 AgitatorSubsystem agitator(
     drivers(),
@@ -104,9 +108,17 @@ tap::motor::DjiMotor yawMotor(
     aruwsrc::control::turret::CAN_BUS_MOTORS,
     true,
     "Yaw Turret");
-SentinelTurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor);
+SentinelTurretSubsystem turretSubsystem(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    PITCH_MOTOR_CONFIG,
+    YAW_MOTOR_CONFIG);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turretSubsystem, &sentinelDrive);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(
+    drivers(),
+    &turretSubsystem.yawMotor,
+    &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
@@ -146,11 +158,11 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem,
+    &turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem,
+    &turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands
@@ -159,7 +171,10 @@ user::TurretUserControlCommand turretManual(
     drivers(),
     &turretSubsystem,
     &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController);
+    &chassisFramePitchTurretController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
+    0);
 
 cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
@@ -172,6 +187,8 @@ cv::SentinelTurretCVCommand turretCVCommand(
     frictionWheels,
     14.5f,
     0);
+void selectNewRobotMessageHandler() { turretCVCommand.requestNewTarget(); }
+void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
@@ -206,7 +223,8 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
 }
 
-/* register subsystems here -------------------------------------------------*/
+/* register subsystems here ------------------
+-------------------------------*/
 void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
@@ -230,6 +248,12 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
 void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
+
+    sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
+    sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
+        &sentinelRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
