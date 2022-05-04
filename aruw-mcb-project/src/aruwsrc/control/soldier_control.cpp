@@ -26,12 +26,14 @@
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/rotate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
-#include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
+#include "agitator/move_cv_limited_command.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "agitator/multi_shot_handler.hpp"
+#include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
@@ -114,16 +116,10 @@ aruwsrc::chassis::ChassisSubsystem chassis(
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret.yawMotor, &chassis);
 static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
-AgitatorSubsystem agitator(
+VelocityAgitatorSubsystem agitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
-    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
-    aruwsrc::control::agitator::constants::IS_AGITATOR_INVERTED,
-    aruwsrc::control::agitator::constants::AGITATOR_JAMMING_DISTANCE,
-    aruwsrc::control::agitator::constants::JAMMING_TIME,
-    true);
+    aruwsrc::control::agitator::constants::AGITATOR_CONFIG);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
@@ -208,52 +204,12 @@ cv::TurretCVCommand turretCVCommand(
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
-CalibrateCommand agitatorCalibrateCommand(&agitator);
+RotateCommand agitatorShootFastLimited(
+    &agitator,
+    aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
 
-MoveUnjamRefLimitedCommand agitatorShootFastLimited(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    140,
-    2,
-    true,
-    10);
-MoveUnjamRefLimitedCommand agitatorShootSlowLimited(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
-    100,
-    0,
-    true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    140,
-    2,
-    true,
-    10);
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
-MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    140,
-    2,
-    false,
-    10);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -279,18 +235,18 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassisFramePitchTurretController,
     true);
 
-ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    clientDisplay,
-    &hopperCover,
-    frictionWheels,
-    agitator,
-    turret,
-    imuCalibrateCommand,
-    &multiShotHandler,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    &chassisImuDriveCommand);
+// ClientDisplayCommand clientDisplayCommand(
+//     *drivers(),
+//     clientDisplay,
+//     &hopperCover,
+//     frictionWheels,
+//     agitator,
+//     turret,
+//     imuCalibrateCommand,
+//     &multiShotHandler,
+//     &beybladeCommand,
+//     &chassisAutorotateCommand,
+//     &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -332,7 +288,7 @@ HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&agitatorShootFastNotLimited},
+    {},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
 HoldCommandMapping rightMousePressed(
@@ -356,7 +312,7 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
 // server and thus don't know when to start sending the initial HUD graphics.
 PressCommandMapping bCtrlPressedRightSwitchDown(
     drivers(),
-    {&clientDisplayCommand},
+    {},
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,
@@ -428,7 +384,6 @@ void setDefaultSoldierCommands(aruwsrc::Drivers *)
 /* add any starting commands to the scheduler here --------------------------*/
 void startSoldierCommands(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
