@@ -35,9 +35,9 @@ namespace aruwsrc::control::agitator::constants
 // position PID terms
 // PID terms for soldier
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 200'000.0f,
+    .kp = 75'000.0f,
     .ki = 0.0f,
-    .kd = 100.0f,
+    .kd = 25.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
@@ -56,7 +56,7 @@ static constexpr bool IS_AGITATOR_INVERTED = false;
  * This should be positive or else weird behavior can occur
  */
 static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
-static constexpr uint32_t JAMMING_TIME = 70;
+static constexpr uint32_t JAMMING_TIME = 150;
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // SOLDIER_AGITATOR_CONSTANTS_HPP_
