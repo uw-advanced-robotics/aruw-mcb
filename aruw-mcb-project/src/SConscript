@@ -29,7 +29,7 @@ IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/control/*_control.cpp", "aru
 ignored_files = []
 ignored_dirs = []
 try:
-    get_user_name = ((subprocess.check_output(["foo", "config", "user.name"]).decode('UTF-8'))).strip()
+    get_user_name = ((subprocess.check_output(["git", "config", "user.name"]).decode('UTF-8'))).strip()
 except subprocess.CalledProcessError as error:
     get_user_name = "Unknown"
     print(error.output)
