@@ -34,7 +34,6 @@ class Drivers;
 
 namespace aruwsrc::display
 {
-
 /**
  * Menu that allows user to see information about the robot, who deployed the last code,
  * and the sha.
