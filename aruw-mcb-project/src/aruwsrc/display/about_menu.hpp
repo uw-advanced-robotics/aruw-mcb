@@ -51,9 +51,15 @@ public:
     #elif defined(TARGET_ENGINEER)
         static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";
     #elif defined(TARGET_SENTINEL)
-    static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL";
+        static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL";
+    #elif defined(TARGET_SENTINEL_2021)
+        static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL_2021";
+    #elif defined(TARGET_SENTINEL_2022)
+        static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL_2022";
     #elif defined(TARGET_HERO)
         static constexpr char ROBOT_NAME[] = "TARGET_HERO";
+    #else
+        static constexpr char ROBOT_NAME[] = "UNKNOWN";
     #endif
 
     static constexpr char LAST_USER[] = xstr(BUILD_USERNAME);
