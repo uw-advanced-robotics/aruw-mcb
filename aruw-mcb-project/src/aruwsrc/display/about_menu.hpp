@@ -19,21 +19,21 @@
 
 #ifndef ABOUT_MENU_
 #define ABOUT_MENU_
-#define xstr(s) str(s)
-#define str(s) #s
+#define STRINGIFYMACRO(s) MACROSTR(s)
+#define MACROSTR(s) #s
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/display/dummy_allocator.hpp"
+
 #include "modm/ui/menu/abstract_menu.hpp"
 
 namespace aruwsrc
 {
 class Drivers;
-} // namespace aruwsrc
+}  // namespace aruwsrc
 
 namespace aruwsrc::display
 {
-
 
 /**
  * Menu that allows user to see information about the robot, who deployed the last code,
@@ -42,29 +42,29 @@ namespace aruwsrc::display
 class AboutMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-    #if defined(TARGET_SOLDIER_2021)
-        static constexpr char ROBOT_NAME[] = "TARGET_SOLDIER_2021";
-    #elif defined(TARGET_SOLDIER_2022)
-        static constexpr char ROBOT_NAME[] = "TARGET_SOLDIER_2022";
-    #elif defined(TARGET_DRONE)
-        static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
-    #elif defined(TARGET_ENGINEER)
-        static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";
-    #elif defined(TARGET_SENTINEL)
-        static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL";
-    #elif defined(TARGET_SENTINEL_2021)
-        static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL_2021";
-    #elif defined(TARGET_SENTINEL_2022)
-        static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL_2022";
-    #elif defined(TARGET_HERO)
-        static constexpr char ROBOT_NAME[] = "TARGET_HERO";
-    #else
-        static constexpr char ROBOT_NAME[] = "UNKNOWN";
-    #endif
+#if defined(TARGET_SOLDIER_2021)
+    static constexpr char ROBOT_NAME[] = "TARGET_SOLDIER_2021";
+#elif defined(TARGET_SOLDIER_2022)
+    static constexpr char ROBOT_NAME[] = "TARGET_SOLDIER_2022";
+#elif defined(TARGET_DRONE)
+    static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
+#elif defined(TARGET_ENGINEER)
+    static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";
+#elif defined(TARGET_SENTINEL)
+    static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL";
+#elif defined(TARGET_SENTINEL_2021)
+    static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL_2021";
+#elif defined(TARGET_SENTINEL_2022)
+    static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL_2022";
+#elif defined(TARGET_HERO)
+    static constexpr char ROBOT_NAME[] = "TARGET_HERO";
+#else
+    static constexpr char ROBOT_NAME[] = "UNKNOWN";
+#endif
 
-    static constexpr char LAST_USER[] = xstr(BUILD_USERNAME);
-    static constexpr char LAST_SHA[] = xstr(BUILD_SHA);
-    
+    static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
+    static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
+
     /** Time between calls to `draw`, which will redraw the about menu. */
     static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
 
@@ -87,7 +87,6 @@ private:
     aruwsrc::Drivers *drivers;
 
     tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
-
 };
-} // namespace aruw::display
-#endif // ABOUT_MENU_
+}  // namespace aruwsrc::display
+#endif  // ABOUT_MENU_

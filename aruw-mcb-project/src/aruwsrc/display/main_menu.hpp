@@ -29,11 +29,11 @@
 
 #include "modm/ui/menu/standard_menu.hpp"
 
+#include "about_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
 #include "turret_mcb_menu.hpp"
-#include "about_menu.hpp"
 
 namespace aruwsrc
 {

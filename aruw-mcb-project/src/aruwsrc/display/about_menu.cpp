@@ -38,12 +38,9 @@ void AboutMenu::draw()
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
-    display << "Robot Name: " << ROBOT_NAME
-            << modm::endl;
-    display << "Last User: " << LAST_USER
-            << modm::endl;
-    display << "Sha: " << LAST_SHA
-            << modm::endl;
+    display << "Robot Name: " << ROBOT_NAME << modm::endl;
+    display << "Last User: " << LAST_USER << modm::endl;
+    display << "Sha: " << LAST_SHA << modm::endl;
 }
 
 void AboutMenu::update() {}
