@@ -119,7 +119,7 @@ namespace turret1
 VelocityAgitatorSubsystem agitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::turret0::AGITATOR_CONFIG);
+    aruwsrc::control::agitator::constants::turret1::AGITATOR_CONFIG);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
