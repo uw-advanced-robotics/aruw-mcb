@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -37,15 +37,19 @@ UnjamRotateCommand::UnjamRotateCommand(
     : velocitySetpointSubsystem(velocitySetpointSubsystem),
       config(config)
 {
-    this->config.unjamDisplacement = abs(config.unjamDisplacement);
-    this->addSubsystemRequirement(&velocitySetpointSubsystem);
-    unjamRotateTimeout.stop();
+    assert(config.unjamDisplacement > 0);
+    assert(config.targetCycleCount > 0);
+    assert(config.unjamDisplacement > 0);
 
     // max wait time must be > min time it will take to reach the unjam displacement given the unjam
     // velocity
     assert(
         1000.0f * (this->config.unjamDisplacement / this->config.unjamVelocity) <
         this->config.maxWaitTime);
+
+    addSubsystemRequirement(&velocitySetpointSubsystem);
+
+    unjamRotateTimeout.stop();
 }
 
 bool UnjamRotateCommand::isReady() { return velocitySetpointSubsystem.isOnline(); }

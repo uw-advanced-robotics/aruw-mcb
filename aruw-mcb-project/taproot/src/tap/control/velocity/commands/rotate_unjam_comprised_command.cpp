@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -23,6 +23,8 @@
 
 #include "rotate_unjam_comprised_command.hpp"
 
+#include <cassert>
+
 using namespace tap::control;
 
 namespace tap::control::velocity
@@ -30,22 +32,25 @@ namespace tap::control::velocity
 RotateUnjamComprisedCommand::RotateUnjamComprisedCommand(
     tap::Drivers &drivers,
     VelocitySetpointSubsystem &subsystem,
-    tap::control::Command &rotateCommand,
-    tap::control::Command &unjamCommand)
+    RotateCommand &rotateCommand,
+    UnjamRotateCommand &unjamRotateCommand)
     : tap::control::ComprisedCommand(&drivers),
       subsystem(subsystem),
       rotateCommand(rotateCommand),
-      unjamCommand(unjamCommand),
-      unjamSequenceCommencing(false),
-      agitatorDisconnectFault(false)
+      unjamCommand(unjamRotateCommand),
+      unjamSequenceCommencing(false)
 {
-    this->comprisedCommandScheduler.registerSubsystem(&subsystem);
-    this->addSubsystemRequirement(&subsystem);
+    assert(
+        (1UL << subsystem.getGlobalIdentifier()) == rotateCommand.getRequirementsBitwise() &&
+        rotateCommand.getRequirementsBitwise() == unjamCommand.getRequirementsBitwise());
+
+    comprisedCommandScheduler.registerSubsystem(&subsystem);
+    addSubsystemRequirement(&subsystem);
 }
 
 void RotateUnjamComprisedCommand::initialize()
 {
-    this->comprisedCommandScheduler.addCommand(&rotateCommand);
+    comprisedCommandScheduler.addCommand(&rotateCommand);
     unjamSequenceCommencing = false;
 }
 
@@ -58,15 +63,15 @@ void RotateUnjamComprisedCommand::execute()
         // the to scheduler. The rotate forward command will be automatically
         // unscheduled.
         unjamSequenceCommencing = true;
-        this->comprisedCommandScheduler.addCommand(&unjamCommand);
+        comprisedCommandScheduler.addCommand(&unjamCommand);
     }
-    this->comprisedCommandScheduler.run();
+    comprisedCommandScheduler.run();
 }
 
 void RotateUnjamComprisedCommand::end(bool interrupted)
 {
-    this->comprisedCommandScheduler.removeCommand(&unjamCommand, interrupted);
-    this->comprisedCommandScheduler.removeCommand(&rotateCommand, interrupted);
+    comprisedCommandScheduler.removeCommand(&unjamCommand, interrupted);
+    comprisedCommandScheduler.removeCommand(&rotateCommand, interrupted);
 }
 
 bool RotateUnjamComprisedCommand::isFinished() const
@@ -74,8 +79,7 @@ bool RotateUnjamComprisedCommand::isFinished() const
     return (!unjamSequenceCommencing &&
             !comprisedCommandScheduler.isCommandScheduled(&rotateCommand)) ||
            (unjamSequenceCommencing &&
-            !comprisedCommandScheduler.isCommandScheduled(&unjamCommand)) ||
-           agitatorDisconnectFault;
+            !comprisedCommandScheduler.isCommandScheduled(&unjamCommand));
 }
 
 }  // namespace tap::control::velocity

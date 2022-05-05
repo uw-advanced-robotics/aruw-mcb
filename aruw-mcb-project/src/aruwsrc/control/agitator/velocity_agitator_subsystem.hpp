@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -88,7 +88,7 @@ public:
     void setVelocitySetpoint(float velocity) override;
 
     /// @return The agitator velocity in radians / second.
-    mockable inline float getVelocity() override
+    inline float getVelocity() override
     {
         return (agitatorMotor.getShaftRPM() / config.gearRatio) * (M_TWOPI / 60.0f);
     }
@@ -97,13 +97,7 @@ public:
      * @return The calibrated agitator angle, in radians. If the agitator is uncalibrated, 0
      * radians is returned.
      */
-    mockable float getPosition() const override;
-
-    /**
-     * @return the setpoint tolerance. Returns the maximum distance in radians at which jam
-     *      condition will never be triggered.
-     */
-    float getJamSetpointTolerance() const override;
+    float getPosition() const override;
 
     /**
      * Attempts to calibrate the agitator at the current position, such that `getPosition` will
@@ -111,13 +105,13 @@ public:
      *
      * @return `true` if the agitator has been successfully calibrated, `false` otherwise.
      */
-    mockable bool calibrateHere() override;
+    bool calibrateHere() override;
 
     /**
      * @return `true` if the agitator unjam timer has expired, signaling that the agitator has
      * jammed, `false` otherwise.
      */
-    mockable bool isJammed() override { return config.jamLogicEnabled && subsystemJamStatus; }
+    bool isJammed() override { return config.jamLogicEnabled && subsystemJamStatus; }
 
     /**
      * Clear the jam status of the subsystem, indicating that it has been unjammed.
@@ -132,18 +126,18 @@ public:
      * @return `true` if the agitator has been calibrated (`calibrateHere` has been called and the
      * agitator motor is online).
      */
-    mockable inline bool isCalibrated() override { return agitatorIsCalibrated; }
+    inline bool isCalibrated() override { return agitatorIsCalibrated; }
 
     /**
      * @return `true` if the agitator motor is online (i.e.: is connected)
      */
-    mockable inline bool isOnline() override { return agitatorMotor.isMotorOnline(); }
+    inline bool isOnline() override { return agitatorMotor.isMotorOnline(); }
 
     void runHardwareTests() override;
 
     void onHardwareTestStart() override;
 
-    mockable const char* getName() override { return "velocity agitator"; }
+    const char* getName() override { return "velocity agitator"; }
 
 private:
     VelocityAgitatorSubsystemConfig config;

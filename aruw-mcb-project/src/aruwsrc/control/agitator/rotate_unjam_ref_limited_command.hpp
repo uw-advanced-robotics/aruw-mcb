@@ -20,7 +20,9 @@
 #ifndef ROTATE_UNJAM_REF_LIMITED_COMMAND_HPP_
 #define ROTATE_UNJAM_REF_LIMITED_COMMAND_HPP_
 
+#include "tap/control/velocity/commands/rotate_command.hpp"
 #include "tap/control/velocity/commands/rotate_unjam_comprised_command.hpp"
+#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
 
 namespace aruwsrc
 {
@@ -37,19 +39,19 @@ class RotateUnjamRefLimitedCommand : public tap::control::velocity::RotateUnjamC
 {
 public:
     /**
-     * @note: All parameters except for `heatLimiting` and `heatLimitBuffer` are
-     * passed directly to the `tap::control::setpoint::MoveUnjamComprisedCommand`
-     * constructor, so see that class for what those parameters do.
+     * @note: All parameters except for and `heatLimitBuffer` are passed directly to the
+     * `tap::control::setpoint::RotateUnjamComprisedCommand` constructor, so see that class for what
+     * those parameters do.
      *
-     * @param[in] heatLimitBuffer If current_barrel_heat + heatLimitBuffer > barrel_heat_limit
-     *      then command will not be scheduled. i.e.: How close you can get to the
-     *      heat limit before the command won't be scheduled.
+     * @param[in] heatLimitBuffer If current_barrel_heat + heatLimitBuffer > barrel_heat_limit then
+     * command will not be scheduled. i.e.: How close you can get to the heat limit before the
+     * command won't be scheduled.
      */
     RotateUnjamRefLimitedCommand(
         aruwsrc::Drivers &drivers,
         tap::control::velocity::VelocitySetpointSubsystem &subsystem,
-        tap::control::Command &rotateCommand,
-        tap::control::Command &unjamCommand,
+        tap::control::velocity::RotateCommand &rotateCommand,
+        tap::control::velocity::UnjamRotateCommand &unjamCommand,
         uint16_t heatLimitBuffer);
 
     bool isReady() override;
@@ -59,10 +61,6 @@ public:
 private:
     aruwsrc::Drivers &drivers;
 
-    // If current_barrel_heat + heatLimitBuffer > barrel_heat_limit then command
-    // will not be scheduled. (How close to heat limit barrel can get before command
-    // will stop scheduling). Should be _at least_ the heat value of a single launched
-    // projectile if you don't want to overheat from the next shot.
     const uint16_t heatLimitBuffer;
 };
 

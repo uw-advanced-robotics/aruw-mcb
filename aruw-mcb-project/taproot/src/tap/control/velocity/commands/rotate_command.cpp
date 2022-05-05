@@ -36,7 +36,7 @@ RotateCommand::RotateCommand(
     : config(config),
       velocitySetpointSubsystem(velocitySetpointSubsystem)
 {
-    this->addSubsystemRequirement(&velocitySetpointSubsystem);
+    addSubsystemRequirement(&velocitySetpointSubsystem);
 }
 
 void RotateCommand::initialize()
@@ -45,25 +45,12 @@ void RotateCommand::initialize()
     finalTargetPosition = velocitySetpointSubsystem.getPosition() + config.targetDisplacement;
 }
 
-void RotateCommand::execute() {}
-
 void RotateCommand::end(bool) { velocitySetpointSubsystem.setVelocitySetpoint(0); }
 
 bool RotateCommand::isFinished() const
 {
-    // The subsystem is jammed or offline or it is within the setpoint tolerance, the ramp is
-    // finished, and the minimum rotate time is expired.
-    const bool jammedOrOffline =
-        velocitySetpointSubsystem.isJammed() || !velocitySetpointSubsystem.isOnline();
-
-    return jammedOrOffline || withinSetpointTolerance();
-}
-
-bool RotateCommand::withinSetpointTolerance() const
-{
-    return compareFloatClose(
-        velocitySetpointSubsystem.getPosition(),
-        finalTargetPosition,
-        config.velocitySetpointTolerance);
+    // The subsystem is jammed or offline or it is within the setpoint tolerance
+    return velocitySetpointSubsystem.isJammed() || !velocitySetpointSubsystem.isOnline() ||
+           withinSetpointTolerance();
 }
 }  // namespace tap::control::velocity

@@ -30,8 +30,8 @@ namespace aruwsrc::agitator
 RotateUnjamRefLimitedCommand::RotateUnjamRefLimitedCommand(
     aruwsrc::Drivers &drivers,
     VelocitySetpointSubsystem &subsystem,
-    tap::control::Command &rotateCommand,
-    tap::control::Command &unjamCommand,
+    tap::control::velocity::RotateCommand &rotateCommand,
+    tap::control::velocity::UnjamRotateCommand &unjamCommand,
     uint16_t heatLimitBuffer)
     : RotateUnjamComprisedCommand(drivers, subsystem, rotateCommand, unjamCommand),
       drivers(drivers),

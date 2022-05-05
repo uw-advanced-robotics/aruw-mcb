@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -98,15 +98,8 @@ float VelocityAgitatorSubsystem::getPosition() const
     return getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
 }
 
-float VelocityAgitatorSubsystem::getJamSetpointTolerance() const
-{
-    return jamChecker.getJamSetpointTolerance();
-}
-
 float VelocityAgitatorSubsystem::getUncalibratedAgitatorAngle() const
 {
-    // position is equal to the following equation:
-    // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
     return (2.0f * M_PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
            agitatorMotor.getEncoderUnwrapped() / config.gearRatio;
 }

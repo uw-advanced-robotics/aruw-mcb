@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,7 +21,11 @@
 #define SENTINEL_2022_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/control/velocity/commands/rotate_command.hpp"
+#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
 #include "tap/motor/dji_motor.hpp"
+
+#include "../velocity_agitator_subsystem_config.hpp"
 
 // Do not include this file directly: use agitator_constants.hpp instead.
 #ifndef AGITATOR_CONSTANTS_HPP_
@@ -39,22 +43,64 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
+namespace turret0
+{
+static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
+    .gearRatio = 36.0f,
+    .agitatorMotorId = tap::motor::MOTOR7,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
+    .isAgitatorInverted = false,
+    /**
+     * The jamming constants. Agitator is considered jammed if difference between setpoint
+     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
+     *
+     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
+     *
+     * This should be positive or else weird behavior can occur
+     */
+    .jammingVelocityDifference = M_TWOPI,
+    .jammingTime = 100,
+    .jamLogicEnabled = true,
+};
+}
 
-static constexpr tap::can::CanBus AGITATOR1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::can::CanBus AGITATOR2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
-static constexpr bool IS_AGITATOR_INVERTED = false;
+namespace turret1
+{
+static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
+    .gearRatio = 36.0f,
+    .agitatorMotorId = tap::motor::MOTOR7,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+    .isAgitatorInverted = false,
+    /**
+     * The jamming constants. Agitator is considered jammed if difference between setpoint
+     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
+     *
+     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
+     *
+     * This should be positive or else weird behavior can occur
+     */
+    .jammingVelocityDifference = M_TWOPI,
+    .jammingTime = 100,
+    .jamLogicEnabled = true,
+};
+}
 
-/**
- * The jamming constants. Agitator is considered jammed if difference between setpoint
- * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
- *
- * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
- *
- * This should be positive or else weird behavior can occur
- */
-static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
-static constexpr uint32_t JAMMING_TIME = 175;
+static constexpr tap::control::velocity::RotateCommand::Config AGITATOR_ROTATE_CONFIG = {
+    .targetDisplacement = M_TWOPI / 10.0f,
+    .desiredVelocity = 2.0f * M_TWOPI,
+    .velocitySetpointTolerance = M_PI / 20.0f,
+};
+
+static constexpr tap::control::velocity::UnjamRotateCommand::Config AGITATOR_UNJAM_CONFIG = {
+    .unjamDisplacement = M_TWOPI / 10.0f,
+    .unjamVelocity = M_TWOPI / 2.0f,
+    /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
+    /// seconds. Add 100 ms extra tolerance.
+    .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 15.0f) / (M_TWOPI / 4.0f)) + 100,
+    .targetCycleCount = 3,
+};
+
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
 
 }  // namespace aruwsrc::control::agitator::constants
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/velocity/commands/rotate_command.hpp"
+#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "../velocity_agitator_subsystem_config.hpp"
