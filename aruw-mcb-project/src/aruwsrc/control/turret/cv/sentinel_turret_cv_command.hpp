@@ -69,13 +69,32 @@ class SentinelTurretCVCommand : public tap::control::Command
 public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
     /// (in radians)
-    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(10.0f);
+    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-10.0f);
+    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(50.0f);
 
     /**
-     * Command will shoot when turret pitch and yaw are both respectively within `FIRING_TOLERANCE`
-     * radians of the ballistics solution.
+     * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
+     * turret will turn around and start scanning around.
+     */
+    static constexpr float YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX = modm::toRadian(1.0f);
+
+    /**
+     * Command will shoot when turret pitch and yaw are both respectively within
+     * `FIRING_TOLERANCE` radians of the ballistics solution.
      */
     static constexpr float FIRING_TOLERANCE = modm::toRadian(0.5f);
+
+    /**
+     * Yaw and pitch angle increments that the turret will change by each call
+     * to refresh when the turret is scanning for a target, in radians.
+     */
+    static constexpr float SCAN_DELTA_ANGLE = modm::toRadian(0.2f);
+
+    /**
+     * The number of times refresh is called without receiving valid CV data to when
+     * the command will consider the target lost and start tracking.
+     */
+    static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
     /**
      * Constructs a TurretCVCommand
@@ -164,23 +183,6 @@ private:
      * or aiming solution was impossible)
      */
     unsigned int lostTargetCounter = 0;
-
-    /**
-     * Yaw and pitch angle increments that the turret will change by each call
-     * to refresh when the turret is scanning for a target, in radians.
-     */
-    static constexpr float SCAN_DELTA_ANGLE = modm::toRadian(0.2f);
-
-    /**
-     * The number of times refresh is called without receiving valid CV data to when
-     * the command will consider the target lost and start tracking.
-     */
-    static constexpr int AIM_LOST_NUM_COUNTS = 500;
-
-    /**
-     * @return an angle in radians representing the next "scanning" setpoint
-     */
-    float scanForTarget(char axis);
 };
 
 }  // namespace aruwsrc::control::turret::cv
