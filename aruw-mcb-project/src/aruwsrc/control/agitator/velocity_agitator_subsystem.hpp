@@ -82,7 +82,7 @@ public:
 
     /**
      * Sets the velocity setpoint to the specified velocity
-     * 
+     *
      * @param[in] velocity The desired velocity in radians / second.
      */
     void setVelocitySetpoint(float velocity) override;
@@ -153,7 +153,9 @@ private:
     /// The object that runs jam detection.
     tap::control::velocity::VelocityContinuousJamChecker jamChecker;
 
-    /// You can calibrate the agitator, which will set the current agitator angle to zero radians. This value is the starting measured angle offset applied to make the motor angle "0" when `calibrateHere` is called.
+    /// You can calibrate the agitator, which will set the current agitator angle to zero radians.
+    /// This value is the starting measured angle offset applied to make the motor angle "0" when
+    /// `calibrateHere` is called.
     float agitatorCalibratedZeroAngle = 0.0f;
 
     /// Stores the jam state of the subsystem
