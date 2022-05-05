@@ -70,6 +70,9 @@ public:
     static constexpr float YAW_ON_TARGET_ANGLE_TOLERANCE = modm::toRadian(2);
     static constexpr float PITCH_ON_TARGET_ANGLE_TOLERANCE = modm::toRadian(2);
 
+    static constexpr float PLATE_WIDTH = 100.0f;
+    static constexpr float PLATE_HEIGHT = 100.0f;
+
     /**
      * Constructs a TurretCVCommand
      *

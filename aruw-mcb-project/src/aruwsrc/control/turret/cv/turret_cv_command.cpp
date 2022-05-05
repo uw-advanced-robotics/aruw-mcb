@@ -79,8 +79,9 @@ void TurretCVCommand::execute()
 
     float targetPitch;
     float targetYaw;
+    float targetDistance;
     bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance);
 
     if (ballisticsSolutionAvailable)
     {
@@ -105,10 +106,11 @@ void TurretCVCommand::execute()
             yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
         }
 
-        withinAimingTolerance = abs(turretSubsystem->yawMotor.getValidChassisMeasurementError()) <
-                                    YAW_ON_TARGET_ANGLE_TOLERANCE &&
-                                abs(turretSubsystem->pitchMotor.getValidChassisMeasurementError()) <
-                                    PITCH_ON_TARGET_ANGLE_TOLERANCE;
+        withinAimingTolerance =
+            (abs(turretSubsystem->yawMotor.getValidChassisMeasurementError()) <
+             tan(PLATE_WIDTH / targetDistance)) &&
+            (abs(turretSubsystem->pitchMotor.getValidChassisMeasurementError()) <
+             tan(PLATE_HEIGHT / targetDistance));
     }
     else
     {

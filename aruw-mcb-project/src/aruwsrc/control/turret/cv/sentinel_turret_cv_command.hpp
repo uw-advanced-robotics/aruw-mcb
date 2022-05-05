@@ -71,11 +71,8 @@ public:
     /// (in radians)
     static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(10.0f);
 
-    /**
-     * Command will shoot when turret pitch and yaw are both respectively within `FIRING_TOLERANCE`
-     * radians of the ballistics solution.
-     */
-    static constexpr float FIRING_TOLERANCE = modm::toRadian(0.5f);
+    static constexpr float PLATE_WIDTH = 100.0f;
+    static constexpr float PLATE_HEIGHT = 100.0f;
 
     /**
      * Constructs a TurretCVCommand

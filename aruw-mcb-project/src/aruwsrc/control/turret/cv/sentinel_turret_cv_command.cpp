@@ -96,8 +96,9 @@ void SentinelTurretCVCommand::execute()
 
     float targetPitch;
     float targetYaw;
+    float targetDistance;
     bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance);
 
     if (ballisticsSolutionAvailable)
     {
@@ -121,14 +122,10 @@ void SentinelTurretCVCommand::execute()
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
-        if (compareFloatClose(
-                turretSubsystem->pitchMotor.getChassisFrameMeasuredAngle().getValue(),
-                pitchSetpoint,
-                FIRING_TOLERANCE) &&
-            compareFloatClose(
-                turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue(),
-                yawSetpoint,
-                FIRING_TOLERANCE))
+        if ((abs(turretSubsystem->yawMotor.getValidChassisMeasurementError()) <
+             tan(PLATE_WIDTH / targetDistance)) &&
+            (abs(turretSubsystem->pitchMotor.getValidChassisMeasurementError()) <
+             tan(PLATE_HEIGHT / targetDistance)))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
             if (!drivers->commandScheduler.isCommandScheduled(firingCommand))

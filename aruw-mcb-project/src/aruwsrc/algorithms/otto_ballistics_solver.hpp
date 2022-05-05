@@ -93,10 +93,12 @@ public:
      *
      * @param[out] pitchAngle The computed pitch angle in the world frame in radians.
      * @param[out] yawAngle The computed yaw angle in the world frame in radians.
+     * @param[out] targetDistance The computed straight line distance between the turret and target,
+     * in m.
      * @return `true` if CV is online, the most recent aim data is valid, and a valid ballistics
      * solution was found. `false` otherwise.
      */
-    bool computeTurretAimAngles(float *pitchAngle, float *yawAngle);
+    bool computeTurretAimAngles(float *pitchAngle, float *yawAngle, float *targetDistance);
 
 private:
     const Drivers &drivers;
