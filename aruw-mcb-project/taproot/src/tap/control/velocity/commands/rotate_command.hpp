@@ -48,7 +48,7 @@ public:
         float desiredVelocity;
         /// The difference between the current and desired value when the command will be considered
         /// to be complete, in units.
-        float velocitySetpointTolerance;
+        float setpointTolerance;
     };
 
     /**
@@ -86,7 +86,7 @@ private:
         return algorithms::compareFloatClose(
             velocitySetpointSubsystem.getPosition(),
             finalTargetPosition,
-            config.velocitySetpointTolerance);
+            config.setpointTolerance);
     }
 };  // class RotateCommand
 

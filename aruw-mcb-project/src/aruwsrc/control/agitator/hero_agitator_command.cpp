@@ -25,7 +25,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
-#include "agitator_subsystem.hpp"
+#include "velocity_agitator_subsystem.hpp"
 
 using namespace tap::control::setpoint;
 using namespace tap::algorithms;
@@ -35,76 +35,56 @@ namespace aruwsrc
 namespace agitator
 {
 HeroAgitatorCommand::HeroAgitatorCommand(
-    aruwsrc::Drivers* drivers,
-    AgitatorSubsystem* kickerAgitator,
-    AgitatorSubsystem* waterwheelAgitator,
-    const aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheels,
-    const Config& config)
-    : tap::control::ComprisedCommand(drivers),
-      kickerFireCommand(
-          kickerAgitator,
-          config.kickerShootRotateAngle,
-          config.kickerShootRotateTime,
-          0,
-          false,
-          config.kickerShootSetpointTolerance),
-      kickerLoadCommand(
-          kickerAgitator,
-          config.kickerLoadRotateAngle,
-          config.loadRotateTime,
-          0,
-          false,
-          config.kickerLoadSetpointTolerance),
-      waterwheelLoadCommand(
-          drivers,
-          waterwheelAgitator,
-          config.waterwheelLoadRotateAngle,
-          config.loadRotateTime,
-          0,
-          false,
-          config.waterwheelLoadSetpointTolerance,
-          config.waterwheelUnjamDisplacement,
-          config.waterwheelUnjamThreshold,
-          config.waterwheelUnjamMaxWaitTime,
-          2),
+    aruwsrc::Drivers& drivers,
+    const Config& config,
+    VelocityAgitatorSubsystem& kickerAgitator,
+    VelocityAgitatorSubsystem& waterwheelAgitator,
+    const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
+    tap::control::Command& kickerFireCommand,
+    tap::control::Command& kickerLoadCommand,
+    tap::control::Command& waterwheelLoadCommand)
+    : tap::control::ComprisedCommand(&drivers),
       drivers(drivers),
       kickerAgitator(kickerAgitator),
       waterwheelAgitator(waterwheelAgitator),
+      kickerFireCommand(kickerFireCommand),
+      kickerLoadCommand(kickerLoadCommand),
+      waterwheelLoadCommand(waterwheelLoadCommand),
       frictionWheels(frictionWheels),
       heatLimiting(config.heatLimiting),
       heatLimitBuffer(config.heatLimitBuffer)
 {
-    this->comprisedCommandScheduler.registerSubsystem(kickerAgitator);
-    this->comprisedCommandScheduler.registerSubsystem(waterwheelAgitator);
-    this->addSubsystemRequirement(kickerAgitator);
-    this->addSubsystemRequirement(waterwheelAgitator);
+    comprisedCommandScheduler.registerSubsystem(&kickerAgitator);
+    comprisedCommandScheduler.registerSubsystem(&waterwheelAgitator);
+    addSubsystemRequirement(&kickerAgitator);
+    addSubsystemRequirement(&waterwheelAgitator);
 }
 
 bool HeroAgitatorCommand::isReady()
 {
-    const auto& robotData = drivers->refSerial.getRobotData();
+    const auto& robotData = drivers.refSerial.getRobotData();
 
-    return !compareFloatClose(frictionWheels->getDesiredLaunchSpeed(), 0.0f, 1E-5) &&
-           kickerAgitator->isOnline() && waterwheelAgitator->isOnline() &&
-           !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
+    return !compareFloatClose(frictionWheels.getDesiredLaunchSpeed(), 0.0f, 1E-5) &&
+           kickerAgitator.isOnline() && waterwheelAgitator.isOnline() &&
+           !(drivers.refSerial.getRefSerialReceivingData() && heatLimiting &&
              (robotData.turret.heat42 + heatLimitBuffer > robotData.turret.heatLimit42));
 }
 
 bool HeroAgitatorCommand::isFinished() const
 {
-    return compareFloatClose(frictionWheels->getDesiredLaunchSpeed(), 0.0f, 1E-5) ||
-           !waterwheelAgitator->isOnline() || !kickerAgitator->isOnline() || currState == FINISHED;
+    return compareFloatClose(frictionWheels.getDesiredLaunchSpeed(), 0.0f, 1E-5) ||
+           !waterwheelAgitator.isOnline() || !kickerAgitator.isOnline() || currState == FINISHED;
 }
 
 void HeroAgitatorCommand::initialize()
 {
     // Limit switch is active low, so need to negate the reading.
-    if (drivers->turretMCBCanComm.getLimitSwitchDepressed())
+    if (drivers.turretMCBCanComm.getLimitSwitchDepressed())
     {
         currState = SHOOTING;
-        const auto& robotData = drivers->refSerial.getRobotData();
-        startingHeat = drivers->refSerial.getRefSerialReceivingData() ? robotData.turret.heat42 : 0;
-        this->comprisedCommandScheduler.addCommand(&kickerFireCommand);
+        const auto& robotData = drivers.refSerial.getRobotData();
+        startingHeat = drivers.refSerial.getRefSerialReceivingData() ? robotData.turret.heat42 : 0;
+        comprisedCommandScheduler.addCommand(&kickerFireCommand);
     }
     else
     {
@@ -117,15 +97,15 @@ void HeroAgitatorCommand::execute()
     switch (currState)
     {
         case SHOOTING:
-            if ((drivers->refSerial.getRefSerialReceivingData() &&
-                 startingHeat < drivers->refSerial.getRobotData().turret.heat42) ||
+            if ((drivers.refSerial.getRefSerialReceivingData() &&
+                 startingHeat < drivers.refSerial.getRobotData().turret.heat42) ||
                 !comprisedCommandScheduler.isCommandScheduled(&kickerFireCommand))
             {
                 beginLoading();
             }
             break;
         case LOAD:
-            if (drivers->turretMCBCanComm.getLimitSwitchDepressed())
+            if (drivers.turretMCBCanComm.getLimitSwitchDepressed())
             {
                 currState = FINISHED;
             }
@@ -141,22 +121,22 @@ void HeroAgitatorCommand::execute()
     }
     if (currState != FINISHED)
     {
-        this->comprisedCommandScheduler.run();
+        comprisedCommandScheduler.run();
     }
 }
 
 void HeroAgitatorCommand::end(bool interrupted)
 {
-    this->comprisedCommandScheduler.removeCommand(&kickerFireCommand, interrupted);
-    this->comprisedCommandScheduler.removeCommand(&kickerLoadCommand, interrupted);
-    this->comprisedCommandScheduler.removeCommand(&waterwheelLoadCommand, interrupted);
+    comprisedCommandScheduler.removeCommand(&kickerFireCommand, interrupted);
+    comprisedCommandScheduler.removeCommand(&kickerLoadCommand, interrupted);
+    comprisedCommandScheduler.removeCommand(&waterwheelLoadCommand, interrupted);
 }
 
 void HeroAgitatorCommand::beginLoading()
 {
     currState = LOAD;
-    this->comprisedCommandScheduler.addCommand(&kickerLoadCommand);
-    this->comprisedCommandScheduler.addCommand(&waterwheelLoadCommand);
+    comprisedCommandScheduler.addCommand(&kickerLoadCommand);
+    comprisedCommandScheduler.addCommand(&waterwheelLoadCommand);
 }
 
 }  // namespace agitator

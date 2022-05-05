@@ -28,10 +28,12 @@
 #include "tap/control/setpoint/commands/move_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
+#include "tap/control/velocity/commands/rotate_unjam_comprised_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
+#include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
@@ -58,7 +60,7 @@
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
-using namespace tap::control::setpoint;
+using namespace tap::control::velocity;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
@@ -96,27 +98,15 @@ RefereeFeedbackFrictionWheelSubsystem frictionWheels(
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
-AgitatorSubsystem kickerAgitator(
+VelocityAgitatorSubsystem kickerAgitator(
     drivers(),
-    aruwsrc::control::agitator::constants::PID_HERO_KICKER,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    aruwsrc::control::agitator::constants::HERO_KICKER_MOTOR_ID,
-    aruwsrc::control::agitator::constants::HERO_KICKER_MOTOR_CAN_BUS,
-    aruwsrc::control::agitator::constants::HERO_KICKER_INVERTED,
-    0,
-    0,
-    false);
+    aruwsrc::control::agitator::constants::KICKER_PID_CONFIG,
+    aruwsrc::control::agitator::constants::KICKER_AGITATOR_CONFIG);
 
-AgitatorSubsystem waterwheelAgitator(
+VelocityAgitatorSubsystem waterwheelAgitator(
     drivers(),
-    aruwsrc::control::agitator::constants::PID_HERO_WATERWHEEL,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508,
-    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_MOTOR_ID,
-    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_MOTOR_CAN_BUS,
-    aruwsrc::control::agitator::constants::HERO_WATERWHEEL_INVERTED,
-    aruwsrc::control::agitator::constants::JAM_DISTANCE_TOLERANCE_WATERWHEEL,
-    aruwsrc::control::agitator::constants::JAM_TEMPORAL_TOLERANCE_WATERWHEEL,
-    true);
+    aruwsrc::control::agitator::constants::WATERWHEEL_PID_CONFIG,
+    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_CONFIG);
 
 tap::motor::DjiMotor pitchMotor(
     drivers(),
@@ -170,28 +160,37 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
-static constexpr HeroAgitatorCommand::Config heroAgitatorCommandConfig = {
-    .kickerShootRotateAngle = M_PI / 2.0,
-    .kickerShootRotateTime = 75,
-    .kickerShootSetpointTolerance = M_PI / 16.0f,
-    .kickerLoadRotateAngle = M_PI / 2.0,
-    .kickerLoadSetpointTolerance = M_PI / 16.0f,
-    .waterwheelLoadRotateAngle = M_PI / 7.0,
-    .waterwheelLoadSetpointTolerance = M_PI / 16.0f,
-    .loadRotateTime = 200,
-    .waterwheelUnjamDisplacement = M_PI / 14.0,
-    .waterwheelUnjamThreshold = M_PI / 20.0,
-    .waterwheelUnjamMaxWaitTime = 130,
-    .heatLimiting = true,
-    .heatLimitBuffer = 100,
-};
+RotateCommand waterwheelLoadCommand(
+    waterwheelAgitator,
+    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+
+UnjamRotateCommand waterwheelAgitatorUnjamCommand(
+    waterwheelAgitator,
+    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
+
+RotateUnjamComprisedCommand waterwheelLoadUnjamCommand(
+    *drivers(),
+    waterwheelAgitator,
+    waterwheelLoadCommand,
+    waterwheelAgitatorUnjamCommand);
+
+RotateCommand kickerLoadCommand(
+    waterwheelAgitator,
+    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+
+RotateCommand kickerLaunchCommand(
+    waterwheelAgitator,
+    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
 
 HeroAgitatorCommand heroAgitatorCommand(
-    drivers(),
-    &kickerAgitator,
-    &waterwheelAgitator,
-    &frictionWheels,
-    heroAgitatorCommandConfig);
+    *drivers(),
+    aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
+    kickerAgitator,
+    waterwheelAgitator,
+    frictionWheels,
+    kickerLaunchCommand,
+    kickerLoadCommand,
+    waterwheelLoadUnjamCommand);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(

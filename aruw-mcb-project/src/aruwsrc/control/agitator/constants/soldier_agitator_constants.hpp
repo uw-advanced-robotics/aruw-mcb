@@ -68,7 +68,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 static constexpr tap::control::velocity::RotateCommand::Config AGITATOR_ROTATE_CONFIG = {
     .targetDisplacement = M_TWOPI / 10.0f,
     .desiredVelocity = 2.0f * M_TWOPI,
-    .velocitySetpointTolerance = M_PI / 20.0f,
+    .setpointTolerance = M_PI / 20.0f,
 };
 
 static constexpr tap::control::velocity::UnjamRotateCommand::Config AGITATOR_UNJAM_CONFIG = {
