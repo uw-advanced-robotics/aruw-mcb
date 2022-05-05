@@ -29,14 +29,27 @@ class Drivers;
 
 namespace aruwsrc::agitator
 {
+/**
+ * A command that switches between running two commands based on whether or not the operator is
+ * blinded by a yellow card.
+ */
 class MoveYellowCardCommand : public tap::control::Command
 {
 public:
+    /**
+     * @param[in] drivers Reference to a drivers object
+     * @param[in] dependentSubsystem The Subsystem that the Commands depend on
+     * @param[in] normalCommand Command to run when the operator is not blinded by a yellow card.
+     * @param[in] yellowCardCommand Command to run when the operator is blinded by a yellow card.
+     *
+     * @attention The normal command and yellow card command must both have the same dependent
+     * Subsystem, and it must be the passed in dependentSubsystem.
+     */
     MoveYellowCardCommand(
-        aruwsrc::Drivers &drivers,
+        const aruwsrc::Drivers &drivers,
         tap::control::Subsystem &dependentSubsystem,
-        tap::control::Command &moveCommandNormal,
-        tap::control::Command &moveCommandWhenYellowCarded);
+        tap::control::Command &normalCommand,
+        tap::control::Command &yellowCardCommand);
 
     const char *getName() const override { return "Move yellow card command"; }
     bool isReady() override;
@@ -46,9 +59,9 @@ public:
     bool isFinished() const override;
 
 private:
-    aruwsrc::Drivers &drivers;
-    tap::control::Command &moveCommandNormal;
-    tap::control::Command &moveCommandWhenYellowCarded;
+    const aruwsrc::Drivers &drivers;
+    tap::control::Command &normalCommand;
+    tap::control::Command &yellowCardCommand;
 
     bool initializedWhenYellowCarded = false;
 };

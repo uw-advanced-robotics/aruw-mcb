@@ -32,10 +32,20 @@ class Drivers;
 namespace aruwsrc::agitator
 {
 /**
+ * A command that runs a command but only when CV has a target.
  */
 class MoveCVLimitedCommand : public tap::control::Command
 {
 public:
+    /**
+     * Constructs a MoveCVLimitedCommand
+     *
+     * @param[in] drivers A reference to a global drivers object.
+     * @param[in] agitator A subsystem that encapsulates a physical agitator.
+     * @param[in] moveCommand A command that moves the passed in subsystem.
+     * @param[in] turretCVCommand A turret CV command that the command uses to check if the turret
+     * is aiming at the target.
+     */
     MoveCVLimitedCommand(
         aruwsrc::Drivers &drivers,
         tap::control::Subsystem &agitator,

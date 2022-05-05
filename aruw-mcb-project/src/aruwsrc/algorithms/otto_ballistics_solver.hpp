@@ -63,6 +63,9 @@ public:
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
+    static constexpr float HALF_PLATE_WIDTH = 50.0f;
+    static constexpr float HALF_PLATE_HEIGHT = 50.0f;
+
     /**
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] odometryInterface Odometry object, used for position odometry information.

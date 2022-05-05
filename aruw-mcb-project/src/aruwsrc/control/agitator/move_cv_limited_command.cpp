@@ -39,7 +39,7 @@ bool MoveCVLimitedCommand::isReady() { return moveCommand.isReady() && visionAim
 
 bool MoveCVLimitedCommand::isFinished() const
 {
-    return moveCommand.isFinished() && !visionAimingOnTarget();
+    return moveCommand.isFinished() || !visionAimingOnTarget();
 }
 
 bool MoveCVLimitedCommand::visionAimingOnTarget() const

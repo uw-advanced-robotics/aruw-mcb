@@ -108,9 +108,9 @@ void TurretCVCommand::execute()
 
         withinAimingTolerance =
             (abs(turretSubsystem->yawMotor.getValidChassisMeasurementError()) <
-             tan(PLATE_WIDTH / targetDistance)) &&
+             tan(aruwsrc::algorithms::OttoBallisticsSolver::HALF_PLATE_WIDTH / targetDistance)) &&
             (abs(turretSubsystem->pitchMotor.getValidChassisMeasurementError()) <
-             tan(PLATE_HEIGHT / targetDistance));
+             tan(aruwsrc::algorithms::OttoBallisticsSolver::HALF_PLATE_HEIGHT / targetDistance));
     }
     else
     {

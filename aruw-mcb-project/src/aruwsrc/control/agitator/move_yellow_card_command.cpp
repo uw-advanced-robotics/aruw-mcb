@@ -19,51 +19,60 @@
 
 #include "move_yellow_card_command.hpp"
 
+#include <cassert>
+
+#include "tap/control/subsystem.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::agitator
 {
 MoveYellowCardCommand::MoveYellowCardCommand(
-    aruwsrc::Drivers &drivers,
+    const aruwsrc::Drivers &drivers,
     tap::control::Subsystem &dependentSubsystem,
-    tap::control::Command &moveCommandNormal,
-    tap::control::Command &moveCommandWhenYellowCarded)
+    tap::control::Command &normalCommand,
+    tap::control::Command &yellowCardCommand)
     : drivers(drivers),
-      moveCommandNormal(moveCommandNormal),
-      moveCommandWhenYellowCarded(moveCommandWhenYellowCarded)
+      normalCommand(normalCommand),
+      yellowCardCommand(yellowCardCommand)
 {
+    assert(
+        normalCommand.getRequirementsBitwise() == yellowCardCommand.getRequirementsBitwise() &&
+        normalCommand.getRequirementsBitwise() ==
+            (1UL << dependentSubsystem.getGlobalIdentifier()));
     addSubsystemRequirement(&dependentSubsystem);
 }
 
 bool MoveYellowCardCommand::isReady()
 {
     const bool operatorBlinded = drivers.refSerial.operatorBlinded();
-    return (operatorBlinded && moveCommandWhenYellowCarded.isReady()) ||
-           (!operatorBlinded && moveCommandNormal.isReady());
+    return (operatorBlinded && yellowCardCommand.isReady()) ||
+           (!operatorBlinded && normalCommand.isReady());
 }
 
 void MoveYellowCardCommand::initialize()
 {
     if (drivers.refSerial.operatorBlinded())
     {
-        moveCommandWhenYellowCarded.initialize();
+        yellowCardCommand.initialize();
         initializedWhenYellowCarded = true;
     }
     else
     {
-        moveCommandNormal.initialize();
+        normalCommand.initialize();
         initializedWhenYellowCarded = false;
     }
 }
+
 void MoveYellowCardCommand::execute()
 {
     if (initializedWhenYellowCarded)
     {
-        moveCommandWhenYellowCarded.execute();
+        yellowCardCommand.execute();
     }
     else
     {
-        moveCommandNormal.execute();
+        normalCommand.execute();
     }
 }
 
@@ -71,18 +80,18 @@ void MoveYellowCardCommand::end(bool interrupted)
 {
     if (initializedWhenYellowCarded)
     {
-        moveCommandWhenYellowCarded.end(interrupted);
+        yellowCardCommand.end(interrupted);
     }
     else
     {
-        moveCommandNormal.end(interrupted);
+        normalCommand.end(interrupted);
     }
 }
 
 bool MoveYellowCardCommand::isFinished() const
 {
-    return initializedWhenYellowCarded ? moveCommandWhenYellowCarded.isFinished()
-                                       : moveCommandNormal.isFinished();
+    return initializedWhenYellowCarded ? yellowCardCommand.isFinished()
+                                       : normalCommand.isFinished();
 }
 
 }  // namespace aruwsrc::agitator

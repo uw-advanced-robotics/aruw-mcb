@@ -71,9 +71,6 @@ public:
     /// (in radians)
     static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(10.0f);
 
-    static constexpr float PLATE_WIDTH = 100.0f;
-    static constexpr float PLATE_HEIGHT = 100.0f;
-
     /**
      * Constructs a TurretCVCommand
      *
