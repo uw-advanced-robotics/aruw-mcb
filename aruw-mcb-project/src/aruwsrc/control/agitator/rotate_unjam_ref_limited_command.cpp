@@ -45,7 +45,7 @@ bool RotateUnjamRefLimitedCommand::isReady()
 
     return RotateUnjamComprisedCommand::isReady() &&
            !(drivers.refSerial.getRefSerialReceivingData() &&
-             (robotData.turret.heat17ID1 == 0xffff ||
+             (robotData.turret.heat17ID1 != 0xffff &&
               (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1)));
 }
 
@@ -55,8 +55,8 @@ bool RotateUnjamRefLimitedCommand::isFinished() const
 
     return RotateUnjamComprisedCommand::isFinished() ||
            (drivers.refSerial.getRefSerialReceivingData() &&
-            (robotData.turret.heat17ID1 == 0xffff ||
-             (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1)));
+            robotData.turret.heat17ID1 != 0xffff &&
+             (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));
 }
 
 }  // namespace aruwsrc::agitator

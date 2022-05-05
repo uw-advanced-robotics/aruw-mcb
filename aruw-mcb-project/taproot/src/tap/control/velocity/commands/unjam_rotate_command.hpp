@@ -79,7 +79,6 @@ public:
     {
         float unjamDisplacement;
         float unjamVelocity;
-        float unjamThreshold;
         uint32_t maxWaitTime;
         uint16_t targetCycleCount;
     };

@@ -253,18 +253,18 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassisFramePitchTurretController,
     true);
 
-// ClientDisplayCommand clientDisplayCommand(
-//     *drivers(),
-//     clientDisplay,
-//     &hopperCover,
-//     frictionWheels,
-//     agitator,
-//     turret,
-//     imuCalibrateCommand,
-//     &multiShotHandler,
-//     &beybladeCommand,
-//     &chassisAutorotateCommand,
-//     &chassisImuDriveCommand);
+ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    &hopperCover,
+    frictionWheels,
+    agitator,
+    turret,
+    imuCalibrateCommand,
+    &multiShotHandler,
+    &beybladeCommand,
+    &chassisAutorotateCommand,
+    &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings

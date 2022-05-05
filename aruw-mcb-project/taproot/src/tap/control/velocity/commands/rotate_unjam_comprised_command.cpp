@@ -58,7 +58,7 @@ void RotateUnjamComprisedCommand::execute()
         // the to scheduler. The rotate forward command will be automatically
         // unscheduled.
         unjamSequenceCommencing = true;
-        this->comprisedCommandScheduler.addCommand(&rotateCommand);
+        this->comprisedCommandScheduler.addCommand(&unjamCommand);
     }
     this->comprisedCommandScheduler.run();
 }

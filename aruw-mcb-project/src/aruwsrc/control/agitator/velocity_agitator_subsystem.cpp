@@ -42,11 +42,11 @@ namespace aruwsrc::agitator
 VelocityAgitatorSubsystem::VelocityAgitatorSubsystem(
     aruwsrc::Drivers* drivers,
     const tap::algorithms::SmoothPidConfig& pidParams,
-    const AgitatorSubsystemConfig& agitatorSubsystemConfig)
+    const VelocityAgitatorSubsystemConfig& agitatorSubsystemConfig)
     : tap::control::Subsystem(drivers),
       config(agitatorSubsystemConfig),
       velocityPid(pidParams),
-      jamChecker(this, config.jammingDistance, config.jammingTime),
+      jamChecker(this, config.jammingVelocityDifference, config.jammingTime),
       agitatorMotor(
           drivers,
           config.agitatorMotorId,
@@ -54,7 +54,7 @@ VelocityAgitatorSubsystem::VelocityAgitatorSubsystem(
           config.isAgitatorInverted,
           "agitator motor")
 {
-    assert(config.jammingDistance >= 0);
+    assert(config.jammingVelocityDifference >= 0);
 }
 
 void VelocityAgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
@@ -69,10 +69,7 @@ void VelocityAgitatorSubsystem::refresh()
         }
     }
 
-    if (movementEnabled)
-    {
-        runVelocityPidControl();
-    }
+    runVelocityPidControl();
 
     if (jamChecker.check())
     {
@@ -124,7 +121,7 @@ void VelocityAgitatorSubsystem::runVelocityPidControl()
     const uint32_t dt = curTime - prevTime;
     prevTime = curTime;
 
-    const float velocityError = desiredVelocity - getVelocity();
+    const float velocityError = velocitySetpoint - getVelocity();
 
     velocityPid.runControllerDerivateError(velocityError, dt);
 
@@ -135,7 +132,7 @@ void VelocityAgitatorSubsystem::setVelocitySetpoint(float velocity)
 {
     if (agitatorMotor.isMotorOnline())
     {
-        desiredVelocity = velocity;
+        velocitySetpoint = velocity;
     }
 }
 }  // namespace aruwsrc::agitator

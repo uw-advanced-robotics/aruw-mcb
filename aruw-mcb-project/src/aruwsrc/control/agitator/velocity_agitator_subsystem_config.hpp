@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AGITATOR_SUBSYSTEM_CONFIG_HPP_
-#define AGITATOR_SUBSYSTEM_CONFIG_HPP_
+#ifndef VELOCITY_AGITATOR_SUBSYSTEM_CONFIG_HPP_
+#define VELOCITY_AGITATOR_SUBSYSTEM_CONFIG_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -37,7 +37,7 @@ namespace aruwsrc::agitator
  *      the subsystem is considered jammed
  * @param[in] jamLogicEnabled whether or not to enable jam detection
  */
-struct AgitatorSubsystemConfig
+struct VelocityAgitatorSubsystemConfig
 {
     /**
      * Motor gear ratio, so we use shaft angle rather than encoder angle.
@@ -48,7 +48,7 @@ struct AgitatorSubsystemConfig
     tap::can::CanBus agitatorCanBusId;
     bool isAgitatorInverted;
 
-    float jammingDistance;
+    float jammingVelocityDifference;
     uint32_t jammingTime;
 
     /**
@@ -60,4 +60,4 @@ struct AgitatorSubsystemConfig
 };
 }  // namespace aruwsrc::agitator
 
-#endif  // AGITATOR_SUBSYSTEM_CONFIG_HPP_
+#endif  // VELOCITY_AGITATOR_SUBSYSTEM_CONFIG_HPP_

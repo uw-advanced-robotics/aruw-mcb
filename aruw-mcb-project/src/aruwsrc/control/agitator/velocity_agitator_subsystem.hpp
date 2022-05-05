@@ -36,7 +36,7 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-#include "agitator_subsystem_config.hpp"
+#include "velocity_agitator_subsystem_config.hpp"
 
 namespace aruwsrc
 {
@@ -46,10 +46,9 @@ class Drivers;
 namespace aruwsrc::agitator
 {
 /**
- * Subsystem whose primary purpose is to encapsulate an agitator motor
- * that operates using a position controller. While this subsystem provides
- * direct support for agitator control, it is generic enough to be used in a
- * wide variety of senarios.
+ * Subsystem whose primary purpose is to encapsulate an agitator motor that operates using a
+ * velocity controller. Also keeps track of absolute position to allow commands to rotate the
+ * agitator some specific displacement.
  */
 class VelocityAgitatorSubsystem : public tap::control::velocity::VelocitySetpointSubsystem
 {
@@ -60,36 +59,43 @@ public:
     static constexpr float AGITATOR_GEAR_RATIO_M2006 = 36.0f;
     static constexpr float AGITATOR_GEAR_RATIO_GM3508 = 19.0f;
 
-    /// Angle in radians
-    static constexpr float TARGET_TOLERANCE_MOVEMENT_COMPLETE = 0.001f;
-
     /**
-     * Construct an agitator with the passed in PID parameters, gear ratio, and motor-specific
-     * identifiers.
-     *
-     * Jam parameters are not used if jam logic is disabled.
+     * Construct an agitator with the passed in velocity PID parameters, gear ratio, and
+     * agitator-specific configuration.
      *
      * @param[in] drivers pointer to aruwsrc drivers struct
      * @param[in] pidParams Position PID configuration struct for the agitator motor controller.
-     * @param[in] agitatorSubsystemConfig
+     * @param[in] agitatorSubsystemConfig Agitator configuration struct that contains
+     * agitator-specific parameters including motor ID and unjam parameters.
      */
     VelocityAgitatorSubsystem(
         aruwsrc::Drivers* drivers,
         const tap::algorithms::SmoothPidConfig& pidParams,
-        const AgitatorSubsystemConfig& agitatorSubsystemConfig);
+        const VelocityAgitatorSubsystemConfig& agitatorSubsystemConfig);
 
     void initialize() override;
 
     void refresh() override;
 
+    /// @return The velocity setpoint that some command has requested, in radians / second
+    inline float getVelocitySetpoint() const override { return velocitySetpoint; }
+
     /**
-     * @return
+     * Sets the velocity setpoint to the specified velocity
+     * 
+     * @param[in] velocity The desired velocity in radians / second.
      */
-    inline float getVelocitySetpoint() const override { return desiredVelocity; }
+    void setVelocitySetpoint(float velocity) override;
+
+    /// @return The agitator velocity in radians / second.
+    mockable inline float getVelocity() override
+    {
+        return (agitatorMotor.getShaftRPM() / config.gearRatio) * (M_TWOPI / 60.0f);
+    }
 
     /**
      * @return The calibrated agitator angle, in radians. If the agitator is uncalibrated, 0
-     *      radians is returned.
+     * radians is returned.
      */
     mockable float getPosition() const override;
 
@@ -100,32 +106,31 @@ public:
     float getJamSetpointTolerance() const override;
 
     /**
-     * Attempts to calibrate the agitator at the current position, such that
-     * `getCurrentValue` will return 0 radians at this position.
+     * Attempts to calibrate the agitator at the current position, such that `getPosition` will
+     * return 0 radians at this position.
      *
-     * @return `true` if the agitator has been successfully calibrated, `false`
-     *      otherwise.
+     * @return `true` if the agitator has been successfully calibrated, `false` otherwise.
      */
     mockable bool calibrateHere() override;
 
     /**
-     * @return `true` if the agitator unjam timer has expired, signaling that the agitator
-     *      has jammed, `false` otherwise.
+     * @return `true` if the agitator unjam timer has expired, signaling that the agitator has
+     * jammed, `false` otherwise.
      */
     mockable bool isJammed() override { return config.jamLogicEnabled && subsystemJamStatus; }
 
     /**
      * Clear the jam status of the subsystem, indicating that it has been unjammed.
      */
-    void clearJam() override
+    inline void clearJam() override
     {
         subsystemJamStatus = false;
         jamChecker.restart();
     }
 
     /**
-     * @return `true` if the agitator has been calibrated (`calibrateHere` has been
-     *      called and the agitator motor is online).
+     * @return `true` if the agitator has been calibrated (`calibrateHere` has been called and the
+     * agitator motor is online).
      */
     mockable inline bool isCalibrated() override { return agitatorIsCalibrated; }
 
@@ -134,63 +139,42 @@ public:
      */
     mockable inline bool isOnline() override { return agitatorMotor.isMotorOnline(); }
 
-    /**
-     * @return The velocity of the agitator in units of degrees per second.
-     */
-    mockable inline float getVelocity() override
-    {
-        return modm::toRadian(
-            6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / config.gearRatio);
-    }
-
     void runHardwareTests() override;
 
     void onHardwareTestStart() override;
 
-    mockable const char* getName() override { return "Agitator"; }
+    mockable const char* getName() override { return "velocity agitator"; }
 
-    void setVelocitySetpoint(float velocity) override;
+private:
+    VelocityAgitatorSubsystemConfig config;
 
-protected:
+    tap::algorithms::SmoothPid velocityPid;
+
+    /// The object that runs jam detection.
+    tap::control::velocity::VelocityContinuousJamChecker jamChecker;
+
+    /// You can calibrate the agitator, which will set the current agitator angle to zero radians. This value is the starting measured angle offset applied to make the motor angle "0" when `calibrateHere` is called.
+    float agitatorCalibratedZeroAngle = 0.0f;
+
+    /// Stores the jam state of the subsystem
+    bool subsystemJamStatus = false;
+
     /**
      * Whether or not the agitator has been calibrated yet. You should calibrate the agitator
      * before using it.
      */
     bool agitatorIsCalibrated = false;
 
-    void agitatorRunPositionPid();
-
-private:
-    AgitatorSubsystemConfig config;
-
-    tap::algorithms::SmoothPid velocityPid;
-
-    /**
-     * The object that runs jam detection.
-     */
-    tap::control::velocity::VelocityContinuousJamChecker jamChecker;
-
-    /**
-     * You can calibrate the agitator, which will set the current agitator angle to zero radians.
-     */
-    float agitatorCalibratedZeroAngle = 0.0f;
-
-    /**
-     * Stores the jam state of the subsystem
-     */
-    bool subsystemJamStatus = false;
-
+    /// Previous time the velocity controller was called, in milliseconds
     uint32_t prevTime = 0;
 
-    bool movementEnabled = false;
+    /// The velocity setpoint in radians / second
+    float velocitySetpoint = 0;
 
-    float desiredVelocity = 0;
-
-    /**
-     * Get the raw angle of the shaft from the motor
-     */
+    /// Get the raw angle of the shaft from the motor, in radians
     float getUncalibratedAgitatorAngle() const;
 
+    /// Runes the velocity PID controller
     void runVelocityPidControl();
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)

@@ -47,7 +47,7 @@ BooleanHudIndicators::BooleanHudIndicators(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-    aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+    aruwsrc::agitator::VelocityAgitatorSubsystem &agitatorSubsystem,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),

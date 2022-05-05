@@ -38,7 +38,6 @@ UnjamRotateCommand::UnjamRotateCommand(
       config(config)
 {
     this->config.unjamDisplacement = abs(config.unjamDisplacement);
-    this->config.unjamThreshold = abs(config.unjamThreshold);
     this->addSubsystemRequirement(&velocitySetpointSubsystem);
     unjamRotateTimeout.stop();
 
@@ -71,7 +70,7 @@ void UnjamRotateCommand::execute()
     switch (currUnjamState)
     {
         case UNJAM_BACKWARD:
-            if (curPosition <= positionBeforeUnjam - config.unjamThreshold)
+            if (curPosition <= positionBeforeUnjam - config.unjamDisplacement)
             {
                 backwardsCleared = true;
                 beginUnjamForwards();
@@ -82,7 +81,7 @@ void UnjamRotateCommand::execute()
             }
             break;
         case UNJAM_FORWARD:
-            if (curPosition >= positionBeforeUnjam + config.unjamThreshold)
+            if (curPosition >= positionBeforeUnjam)
             {
                 forwardsCleared = true;
                 beginUnjamBackwards();

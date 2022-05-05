@@ -100,7 +100,7 @@ public:
         ClientDisplaySubsystem &clientDisplay,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-        aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+        aruwsrc::agitator::VelocityAgitatorSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::agitator::MultiShotHandler *multiShotHandler,

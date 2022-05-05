@@ -24,7 +24,7 @@
 #include "tap/control/velocity/commands/rotate_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "../agitator_subsystem_config.hpp"
+#include "../velocity_agitator_subsystem_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use agitator_constants.hpp instead.
@@ -37,15 +37,16 @@ namespace aruwsrc::control::agitator::constants
 // position PID terms
 // PID terms for soldier
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 5.0f,
-    .ki = 0.0f,
+    .kp = 5'000.0f,
+    .ki = 2.0f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 5'000.0f,
     .maxOutput = 16'000.0f,
+    .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr aruwsrc::agitator::AgitatorSubsystemConfig AGITATOR_CONFIG = {
+static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
     .agitatorMotorId = tap::motor::MOTOR7,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
@@ -58,22 +59,23 @@ static constexpr aruwsrc::agitator::AgitatorSubsystemConfig AGITATOR_CONFIG = {
      *
      * This should be positive or else weird behavior can occur
      */
-    .jammingDistance = M_PI / 20,
-    .jammingTime = 70,
-    .jamLogicEnabled = false,  // TODO change
+    .jammingVelocityDifference = M_TWOPI,
+    .jammingTime = 100,
+    .jamLogicEnabled = true,
 };
 
 static constexpr tap::control::velocity::RotateCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetDisplacement = M_PI / 5.0f,
-    .desiredVelocity = M_TWOPI,
+    .targetDisplacement = M_TWOPI / 10.0f,
+    .desiredVelocity = 2.0f * M_TWOPI,
     .velocitySetpointTolerance = M_PI / 20.0f,
 };
 
 static constexpr tap::control::velocity::UnjamRotateCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .unjamDisplacement = M_PI / 10.0f,
-    .unjamVelocity = M_PI,
-    .unjamThreshold = M_PI / 20.0f,
-    .maxWaitTime = 10'000,
+    .unjamDisplacement = M_TWOPI / 10.0f,
+    .unjamVelocity = M_TWOPI / 2.0f,
+    /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
+    /// seconds. Add 100 ms extra tolerance.
+    .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 15.0f) / (M_TWOPI / 4.0f)) + 100,
     .targetCycleCount = 3,
 };
 
