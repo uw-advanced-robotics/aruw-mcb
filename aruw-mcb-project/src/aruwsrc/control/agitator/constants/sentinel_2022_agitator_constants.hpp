@@ -73,12 +73,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     /**
-     * The jamming constants. Agitator is considered jammed if difference between setpoint
-     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
-     *
-     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
-     *
-     * This should be positive or else weird behavior can occur
+     * The jamming constants. Agitator is considered jammed if difference between the velocity
+     * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = M_TWOPI,
     .jammingTime = 100,
