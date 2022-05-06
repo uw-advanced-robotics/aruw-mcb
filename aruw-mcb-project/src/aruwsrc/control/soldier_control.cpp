@@ -131,7 +131,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels
     aruwsrc::control::launcher::RIGHT_MOTOR_ID,
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    0.1f);
+    15.0f);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 

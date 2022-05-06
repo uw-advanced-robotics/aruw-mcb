@@ -92,7 +92,7 @@ RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     aruwsrc::control::launcher::RIGHT_MOTOR_ID,
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
-    0.5f);
+    10.0f);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 

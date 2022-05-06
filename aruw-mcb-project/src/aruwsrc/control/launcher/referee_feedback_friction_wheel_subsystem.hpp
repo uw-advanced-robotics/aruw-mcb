@@ -24,6 +24,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "modm/container/deque.hpp"
 
 #include "friction_wheel_subsystem.hpp"
 #include "launch_speed_predictor_interface.hpp"
@@ -33,6 +34,9 @@ namespace aruwsrc::control::launcher
 /**
  * An extension of the `FrictionWheelSubsystem` that implements the `LaunchSpeedPredictorInterface`,
  * using referee system feedback to predict the launch velocity of the projectile.
+ *
+ * @tparam PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE Number of balls to average when estimating the
+ * next projectile velocity.
  */
 class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem,
                                               public LaunchSpeedPredictorInterface
@@ -51,61 +55,42 @@ public:
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-        float bulletSpeedLowPassAlpha);
+        const float defaultFiringSpeed);
 
     /**
      * @return The predicted launch speed of the next projectile in m/s, using measured feedback
      * from the referee system barrel system to dynamically predict the barrel speed based on
      * previous barrel speeds.
      */
-    inline float getPredictedLaunchSpeed() const override final { return predictedLaunchSpeed; }
+    inline float getPredictedLaunchSpeed() const override final
+    {
+        return ballSpeedAveragingTracker.getSize() == 0
+                   ? defaultFiringSpeed
+                   : (pastProjectileVelocitySpeedSummed / ballSpeedAveragingTracker.getSize());
+    }
 
     void refresh() override;
 
 private:
-    const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
-    const float bulletSpeedLowPassAlpha;
+#if defined(TARGET_HERO)
+    static constexpr size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE = 3;
+#else
+    static constexpr size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE = 10;
+#endif
 
-    float predictedLaunchSpeed = 0;
+    const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
+
+    const float defaultFiringSpeed;
+
+    modm::BoundedDeque<float, PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE> ballSpeedAveragingTracker;
+
     float lastDesiredLaunchSpeed = 0;
 
     uint32_t prevLaunchingDataReceiveTimestamp = 0;
 
-    inline void updatePredictedLaunchSpeed()
-    {
-        const float desiredLaunchSpeed = getDesiredLaunchSpeed();
+    float pastProjectileVelocitySpeedSummed = 0;
 
-        // reset averaging if desired launch speed has changed...if we change desired launch speed
-        // from 15 to 30, we should predict the launch speed to be around 30, not 15.
-        if (!tap::algorithms::compareFloatClose(lastDesiredLaunchSpeed, desiredLaunchSpeed, 1E-5))
-        {
-            lastDesiredLaunchSpeed = desiredLaunchSpeed;
-            predictedLaunchSpeed = desiredLaunchSpeed;
-        }
-
-        if (drivers->refSerial.getRefSerialReceivingData())
-        {
-            const auto &turretData = drivers->refSerial.getRobotData().turret;
-
-            // compute average bullet speed if new firing data received from correct mech ID
-            if (prevLaunchingDataReceiveTimestamp !=
-                    turretData.lastReceivedLaunchingInfoTimestamp &&
-                turretData.launchMechanismID == firingSystemMechanismID)
-            {
-                predictedLaunchSpeed = tap::algorithms::lowPassFilter(
-                    predictedLaunchSpeed,
-                    turretData.bulletSpeed,
-                    bulletSpeedLowPassAlpha);
-
-                prevLaunchingDataReceiveTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
-            }
-        }
-        else
-        {
-            // no ref serial feedback, so can't make predictions
-            predictedLaunchSpeed = desiredLaunchSpeed;
-        }
-    }
+    void updatePredictedLaunchSpeed();
 };
 }  // namespace aruwsrc::control::launcher
 

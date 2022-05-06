@@ -27,10 +27,10 @@ RefereeFeedbackFrictionWheelSubsystem::RefereeFeedbackFrictionWheelSubsystem(
     tap::motor::MotorId rightMotorId,
     tap::can::CanBus canBus,
     tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-    float bulletSpeedLowPassAlpha)
+    const float defaultFiringSpeed)
     : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus),
       firingSystemMechanismID(firingSystemMechanismID),
-      bulletSpeedLowPassAlpha(bulletSpeedLowPassAlpha)
+      defaultFiringSpeed(defaultFiringSpeed)
 {
 }
 
@@ -38,5 +38,52 @@ void RefereeFeedbackFrictionWheelSubsystem::refresh()
 {
     FrictionWheelSubsystem::refresh();
     updatePredictedLaunchSpeed();
+}
+
+void RefereeFeedbackFrictionWheelSubsystem::updatePredictedLaunchSpeed()
+{
+    const float desiredLaunchSpeed = getDesiredLaunchSpeed();
+
+    // reset averaging if desired launch speed has changed...if we change desired launch speed
+    // from 15 to 30, we should predict the launch speed to be around 30, not 15.
+    if (!tap::algorithms::compareFloatClose(lastDesiredLaunchSpeed, desiredLaunchSpeed, 1E-5))
+    {
+        lastDesiredLaunchSpeed = desiredLaunchSpeed;
+        pastProjectileVelocitySpeedSummed = 0;
+        ballSpeedAveragingTracker.clear();
+    }
+
+    if (drivers->refSerial.getRefSerialReceivingData())
+    {
+        const auto &turretData = drivers->refSerial.getRobotData().turret;
+
+        // compute average bullet speed if new firing data received from correct mech ID
+        if (prevLaunchingDataReceiveTimestamp != turretData.lastReceivedLaunchingInfoTimestamp &&
+            turretData.launchMechanismID == firingSystemMechanismID)
+        {
+            // firingFreq is the number of projectiles fired when the launch data was received
+
+            for (uint8_t i = 0; i < turretData.firingFreq; i++)
+            {
+                // remove element to make room for new element
+                if (ballSpeedAveragingTracker.isFull())
+                {
+                    pastProjectileVelocitySpeedSummed -= ballSpeedAveragingTracker.getFront();
+                    ballSpeedAveragingTracker.removeFront();
+                }
+
+                // insert new element
+                pastProjectileVelocitySpeedSummed += turretData.bulletSpeed;
+                ballSpeedAveragingTracker.append(turretData.bulletSpeed);
+            }
+
+            prevLaunchingDataReceiveTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
+        }
+    }
+    else
+    {
+        pastProjectileVelocitySpeedSummed = 0;
+        ballSpeedAveragingTracker.clear();
+    }
 }
 }  // namespace aruwsrc::control::launcher
