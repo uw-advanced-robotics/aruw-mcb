@@ -22,6 +22,7 @@
 #include "aruwsrc/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 
 #include "../launcher/friction_wheel_subsystem.hpp"
 
@@ -65,7 +66,7 @@ void AgitatorLimiter::refresh()
         calibrateHere();
     }
 
-    if (frictionWheelSubsystem->getCurrentLaunchSpeed() >= 1000.0f) {
+    if (frictionWheelSubsystem->getCurrentLaunchSpeed() >= frictionWheelSubsystem->getDesiredLaunchSpeed() - 2) {
         agitatorRunPositionPid();
     }
     
