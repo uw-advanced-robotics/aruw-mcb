@@ -23,6 +23,7 @@
 #include "tap/control/comprised_command.hpp"
 #include "tap/control/setpoint/commands/move_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
+#include "tap/control/velocity/interfaces/velocity_setpoint_subsystem.hpp"
 
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 
@@ -35,8 +36,6 @@ class Drivers;
 
 namespace aruwsrc::agitator
 {
-class VelocityAgitatorSubsystem;
-
 /**
  * A command that launches a projectile and loads a new ball into the kicker.
  */
@@ -62,8 +61,8 @@ public:
     HeroAgitatorCommand(
         aruwsrc::Drivers& drivers,
         const Config& config,
-        VelocityAgitatorSubsystem& kickerAgitator,
-        VelocityAgitatorSubsystem& waterwheelAgitator,
+        tap::control::velocity::VelocitySetpointSubsystem& kickerAgitator,
+        tap::control::velocity::VelocitySetpointSubsystem& waterwheelAgitator,
         const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
         tap::control::Command& kickerFireCommand,
         tap::control::Command& kickerLoadCommand,
@@ -115,8 +114,8 @@ private:
     };
 
     aruwsrc::Drivers& drivers;
-    VelocityAgitatorSubsystem& kickerAgitator;
-    VelocityAgitatorSubsystem& waterwheelAgitator;
+    tap::control::velocity::VelocitySetpointSubsystem& kickerAgitator;
+    tap::control::velocity::VelocitySetpointSubsystem& waterwheelAgitator;
 
     tap::control::Command& kickerFireCommand;
     tap::control::Command& kickerLoadCommand;

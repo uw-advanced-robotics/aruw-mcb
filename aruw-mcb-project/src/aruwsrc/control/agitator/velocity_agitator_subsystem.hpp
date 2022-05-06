@@ -88,7 +88,7 @@ public:
     void setVelocitySetpoint(float velocity) override;
 
     /// @return The agitator velocity in radians / second.
-    inline float getVelocity() override
+    inline float getVelocity() const override
     {
         return (agitatorMotor.getShaftRPM() / config.gearRatio) * (M_TWOPI / 60.0f);
     }

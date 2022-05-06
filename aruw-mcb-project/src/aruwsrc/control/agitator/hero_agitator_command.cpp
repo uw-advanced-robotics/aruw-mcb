@@ -19,6 +19,8 @@
 
 #include "hero_agitator_command.hpp"
 
+#include <cassert>
+
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
@@ -37,8 +39,8 @@ namespace agitator
 HeroAgitatorCommand::HeroAgitatorCommand(
     aruwsrc::Drivers& drivers,
     const Config& config,
-    VelocityAgitatorSubsystem& kickerAgitator,
-    VelocityAgitatorSubsystem& waterwheelAgitator,
+    tap::control::velocity::VelocitySetpointSubsystem& kickerAgitator,
+    tap::control::velocity::VelocitySetpointSubsystem& waterwheelAgitator,
     const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
     tap::control::Command& kickerFireCommand,
     tap::control::Command& kickerLoadCommand,
@@ -54,6 +56,16 @@ HeroAgitatorCommand::HeroAgitatorCommand(
       heatLimiting(config.heatLimiting),
       heatLimitBuffer(config.heatLimitBuffer)
 {
+    uint64_t kickerBitwise = 1UL << kickerAgitator.getGlobalIdentifier();
+    uint64_t waterwheelBitwise = 1UL << waterwheelAgitator.getGlobalIdentifier();
+    std::cout << kickerFireCommand.getRequirementsBitwise() << ", "
+              << kickerLoadCommand.getRequirementsBitwise() << ", "
+              << waterwheelLoadCommand.getRequirementsBitwise() << std::endl;
+    assert(
+        kickerBitwise == kickerFireCommand.getRequirementsBitwise() &&
+        kickerBitwise == kickerLoadCommand.getRequirementsBitwise() &&
+        waterwheelBitwise == waterwheelLoadCommand.getRequirementsBitwise());
+
     comprisedCommandScheduler.registerSubsystem(&kickerAgitator);
     comprisedCommandScheduler.registerSubsystem(&waterwheelAgitator);
     addSubsystemRequirement(&kickerAgitator);
