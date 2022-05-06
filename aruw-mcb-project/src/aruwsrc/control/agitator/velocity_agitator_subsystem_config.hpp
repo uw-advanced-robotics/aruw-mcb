@@ -54,6 +54,8 @@ struct VelocityAgitatorSubsystemConfig
     /// A flag which determines whether or not jamming detection is enabled. `true` means enabled,
     /// `false` means disabled.
     bool jamLogicEnabled;
+    /// Velocity PID feed forward term. Scaling factor that converts desired velocity to desired motor output. When using the M308 or the M2006, motor velocity -> motor current is mostly linear since these motors take a desired current as a command. When using a motor that is controlled by sending voltage commands, this term should be 0.
+    float velocityPIDFeedForwardGain;
 };
 }  // namespace aruwsrc::agitator
 

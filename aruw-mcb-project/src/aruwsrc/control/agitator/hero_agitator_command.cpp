@@ -58,9 +58,6 @@ HeroAgitatorCommand::HeroAgitatorCommand(
 {
     uint64_t kickerBitwise = 1UL << kickerAgitator.getGlobalIdentifier();
     uint64_t waterwheelBitwise = 1UL << waterwheelAgitator.getGlobalIdentifier();
-    std::cout << kickerFireCommand.getRequirementsBitwise() << ", "
-              << kickerLoadCommand.getRequirementsBitwise() << ", "
-              << waterwheelLoadCommand.getRequirementsBitwise() << std::endl;
     assert(
         kickerBitwise == kickerFireCommand.getRequirementsBitwise() &&
         kickerBitwise == kickerLoadCommand.getRequirementsBitwise() &&

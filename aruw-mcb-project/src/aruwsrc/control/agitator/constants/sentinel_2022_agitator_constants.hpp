@@ -62,6 +62,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
     .jammingVelocityDifference = M_TWOPI,
     .jammingTime = 100,
     .jamLogicEnabled = true,
+    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
 }
 
@@ -79,6 +80,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
     .jammingVelocityDifference = M_TWOPI,
     .jammingTime = 100,
     .jamLogicEnabled = true,
+    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
 }
 
