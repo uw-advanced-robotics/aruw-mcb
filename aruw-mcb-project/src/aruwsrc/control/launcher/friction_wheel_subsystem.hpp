@@ -72,6 +72,11 @@ public:
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
     /**
+     * @return The estimated launch speed if a ball were to be launched now in m/s.
+     */
+    float getCurrentLaunchSpeed() const;
+
+    /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
     void refresh() override;
@@ -88,7 +93,9 @@ protected:
     aruwsrc::Drivers *drivers;
 
 private:
-    modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
+    modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedToRpmInterpolator;
+
+    modm::interpolation::Linear<modm::Pair<float, float>> rpmToLaunchSpeedInterpolator;
 
     modm::Pid<float> velocityPidLeftWheel;
 

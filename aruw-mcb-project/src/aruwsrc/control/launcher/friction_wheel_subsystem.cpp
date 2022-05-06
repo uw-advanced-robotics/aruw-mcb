@@ -35,7 +35,10 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
     tap::can::CanBus canBus)
     : tap::control::Subsystem(drivers),
       drivers(drivers),
-      launchSpeedLinearInterpolator(
+      launchSpeedToRpmInterpolator(
+          LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+          MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
+      rpmToLaunchSpeedInterpolator(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
       velocityPidLeftWheel(
@@ -70,6 +73,11 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
     drivers->turretMCBCanComm.setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
 }
 
+float FrictionWheelSubsystem::getCurrentLaunchSpeed()
+{
+
+}
+
 void FrictionWheelSubsystem::refresh()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
@@ -97,7 +105,7 @@ void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSp
 
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
-    return launchSpeedLinearInterpolator.interpolate(launchSpeed);
+    return launchSpeedToRpmInterpolator.interpolate(launchSpeed);
 }
 
 }  // namespace aruwsrc::control::launcher

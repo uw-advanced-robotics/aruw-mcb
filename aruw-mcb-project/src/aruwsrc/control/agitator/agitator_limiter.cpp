@@ -65,7 +65,7 @@ void AgitatorLimiter::refresh()
         calibrateHere();
     }
 
-    if (frictionWheelSubsystem->getDesiredLaunchSpeed() >= 45.0f) {
+    if (frictionWheelSubsystem->getCurrentLaunchSpeed() >= 1000.0f) {
         agitatorRunPositionPid();
     }
     
