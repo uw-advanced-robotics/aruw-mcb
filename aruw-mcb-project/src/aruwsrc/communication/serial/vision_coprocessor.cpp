@@ -262,7 +262,7 @@ void VisionCoprocessor::sendRefereeWarning()
         message.messageType = CV_MESSAGE_TYPE_REFEREE_WARNING;
 
         message.data[0] = refereeWarningData.level;
-        message.data[1] = refereeWarningData.foulRobotID;
+        message.data[1] = static_cast<uint8_t>(refereeWarningData.foulRobotID);
 
         message.setCRC16();
         drivers->uart.write(
