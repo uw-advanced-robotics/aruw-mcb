@@ -38,7 +38,7 @@ USAGE = "Usage: scons <target> [profile=<debug|release|fast>] [robot=TARGET_<ROB
         - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
     \"TARGET_<ROBOT_TYPE>\" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.\n\
         - <ROBOT_TYPE> must be one of the following:\n\
-            - SOLDIER_2021, SOLDIER_2022, DRONE, ENGINEER, SENTINEL_2021, SENTINEL_2022, HERO\n\
+            - SOLDIER_2021, SOLDIER_2022, SOLDIERMK4_2022, DRONE, ENGINEER, SENTINEL_2021, SENTINEL_2022, HERO\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
 
