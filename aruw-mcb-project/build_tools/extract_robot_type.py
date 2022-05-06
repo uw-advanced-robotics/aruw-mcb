@@ -22,6 +22,7 @@ from .parse_args import USAGE
 ROBOT_TYPE_FILE     = "robot-type/robot_type.hpp"
 VALID_ROBOT_TYPES   = [ "TARGET_SOLDIER_2021",
                         "TARGET_SOLDIER_2022",
+                        "TARGET_SOLDIERMK4_2022",
                         "TARGET_DRONE",
                         "TARGET_ENGINEER",
                         "TARGET_SENTINEL_2021",
