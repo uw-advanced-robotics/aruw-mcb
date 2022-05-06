@@ -46,7 +46,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
-static constexpr float LAUNCHER_PID_KP = 25.0f;
+static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 0.2f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
