@@ -129,6 +129,14 @@ private:
      * @return A friction wheel RPM that the given `launchSpeed` maps to.
      */
     float launchSpeedToFrictionWheelRpm(float launchSpeed) const;
+
+    /**
+     * @param[in] rpmSpeed Some friction wheel RPM.
+     * @return The launch speed in m/s that the given `rpmSpeed` maps to. The speed will be
+     *      capped between [0, LAUNCH_SPEED_MAX] m/s. If the speed is <= LAUNCH_SPEED_MIN_CUTOFF
+     *      m/s, the speed will be rounded down to 0.
+     */
+    float rpmToLaunchSpeed(float rpmSpeed) const;
 };
 
 }  // namespace aruwsrc::control::launcher

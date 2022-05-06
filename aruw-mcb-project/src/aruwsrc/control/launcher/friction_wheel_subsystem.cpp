@@ -73,9 +73,12 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
     drivers->turretMCBCanComm.setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
 }
 
-float FrictionWheelSubsystem::getCurrentLaunchSpeed()
+float FrictionWheelSubsystem::getCurrentLaunchSpeed() const
 {
-
+    float leftWheelSpeed = rpmToLaunchSpeed(leftWheel.getShaftRPM());
+    float rightWheelSpeed = rpmToLaunchSpeed(rightWheel.getShaftRPM());
+    
+    return (leftWheelSpeed + rightWheelSpeed) / 2;
 }
 
 void FrictionWheelSubsystem::refresh()
@@ -106,6 +109,11 @@ void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSp
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
     return launchSpeedToRpmInterpolator.interpolate(launchSpeed);
+}
+
+float FrictionWheelSubsystem::rpmToLaunchSpeed(float rpmSpeed) const 
+{
+    return rpmToLaunchSpeedInterpolator.interpolate(rpmSpeed);
 }
 
 }  // namespace aruwsrc::control::launcher
