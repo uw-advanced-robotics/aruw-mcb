@@ -227,6 +227,12 @@ private:
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
 
+    /// Time in ms between sending referee real time message.
+    static constexpr uint32_t TIME_BTWN_SENDING_REF_REAL_TIME_DATA = 5'000;
+
+    /// Time in ms between sending competition result status (as reported by the ref system).
+    static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
+
     static VisionCoprocessor* visionCoprocessorInstance;
 
     volatile uint32_t risingEdgeTime = 0;
@@ -248,6 +254,10 @@ private:
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
     tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
+
+    tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
+
+    tap::arch::PeriodicMilliTimer sendCompetitionResultTimeout{TIME_BTWN_SENDING_COMP_RESULT};
 
     uint32_t lastSentRefereeWarningTime = 0;
 
