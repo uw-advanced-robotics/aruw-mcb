@@ -83,10 +83,16 @@ private:
     /// tolerance.
     bool withinSetpointTolerance() const
     {
-        return algorithms::compareFloatClose(
-            velocitySetpointSubsystem.getPosition(),
-            finalTargetPosition,
-            config.setpointTolerance);
+        if (config.targetDisplacement > 0)
+        {
+            return velocitySetpointSubsystem.getPosition() >
+                   finalTargetPosition - config.setpointTolerance;
+        }
+        else
+        {
+            return velocitySetpointSubsystem.getPosition() <
+                   finalTargetPosition + config.setpointTolerance;
+        }
     }
 };  // class RotateCommand
 

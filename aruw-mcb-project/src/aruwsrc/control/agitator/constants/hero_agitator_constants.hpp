@@ -38,9 +38,9 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
-    .kp = 150'000.0f,
+    .kp = 5'000.0f,
     .ki = 0.0f,
-    .kd = 50.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
@@ -58,33 +58,36 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
     .jammingVelocityDifference = M_TWOPI,
     .jammingTime = 100,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+    .velocityPIDFeedForwardGain = 0,
 };
 
 static constexpr float DESIRED_LOAD_TIME_S = 0.2f;
+static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 7.0f;
 
 static constexpr tap::control::velocity::RotateCommand::Config WATERWHEEL_AGITATOR_ROTATE_CONFIG = {
-    .targetDisplacement = M_TWOPI / 7.0f,  ///< waterwheel has 7 holes
-    .desiredVelocity = (M_TWOPI / 7.0f) / DESIRED_LOAD_TIME_S,
-    .setpointTolerance = M_PI / 16.0f,
+    .targetDisplacement = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS,
+    .desiredVelocity = (M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS) / DESIRED_LOAD_TIME_S,
+    .setpointTolerance = M_PI / 32.0f,
 };
 
 static constexpr tap::control::velocity::UnjamRotateCommand::Config
     WATERWHEEL_AGITATOR_UNJAM_CONFIG = {
-        .unjamDisplacement = M_TWOPI / 14.0f,
-        .unjamVelocity = 2.0f * (M_TWOPI / 7.0f),
+        .unjamDisplacement = M_TWOPI / (2.0f * WATERWHEEL_NUM_BALL_POCKETS),
+        .unjamVelocity = 2.0f * (M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS),
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
         /// seconds. Add 100 ms extra tolerance.
-        .maxWaitTime =
-            static_cast<uint32_t>(1000.0f * (M_TWOPI / 14.0f) / (2.0f * (M_TWOPI / 7.0f))) + 100,
+        .maxWaitTime = static_cast<uint32_t>(
+                           1000.0f * (M_TWOPI / (2.0f * WATERWHEEL_NUM_BALL_POCKETS)) /
+                           (2.0f * (M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS))) +
+                       100,
         .targetCycleCount = 1,
 };
 
 // PID terms for the hero kicker
 static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
-    .kp = 100'000.0f,
+    .kp = 5'000.0f,
     .ki = 0.0f,
-    .kd = 50.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
@@ -98,20 +101,21 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITA
     .jammingVelocityDifference = 0,
     .jammingTime = 0,
     .jamLogicEnabled = false,
+    .velocityPIDFeedForwardGain = 0,
 };
 
 static constexpr tap::control::velocity::RotateCommand::Config KICKER_LOAD_AGITATOR_ROTATE_CONFIG =
     {
         .targetDisplacement = M_PI / 2.0f,
         .desiredVelocity = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
-        .setpointTolerance = M_PI / 16.0f,
+        .setpointTolerance = M_PI / 32.0f,
 };
 
 static constexpr tap::control::velocity::RotateCommand::Config KICKER_SHOOT_AGITATOR_ROTATE_CONFIG =
     {
         .targetDisplacement = M_PI / 2.0f,
         .desiredVelocity = 6.0 * M_PI,
-        .setpointTolerance = M_PI / 16.0f,
+        .setpointTolerance = M_PI / 32.0f,
 };
 
 static constexpr aruwsrc::agitator::HeroAgitatorCommand::Config HERO_AGITATOR_COMMAND_CONFIG = {
