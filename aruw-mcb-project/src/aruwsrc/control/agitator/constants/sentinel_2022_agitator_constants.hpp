@@ -31,7 +31,7 @@
 namespace aruwsrc::control::agitator::constants
 {
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 300'000.0f,
+    .kp = 400'000.0f,
     .ki = 0.0f,
     .kd = 50.0f,
     .maxICumulative = 0.0f,
@@ -43,6 +43,19 @@ static constexpr tap::motor::MotorId AGITATOR_MOTOR_ID = tap::motor::MOTOR7;
 
 static constexpr tap::can::CanBus AGITATOR1_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::can::CanBus AGITATOR2_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+static constexpr bool IS_AGITATOR_INVERTED = false;
+
+/**
+ * The jamming constants. Agitator is considered jammed if difference between setpoint
+ * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
+ *
+ * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
+ *
+ * This should be positive or else weird behavior can occur
+ */
+static constexpr float AGITATOR_JAMMING_DISTANCE = M_PI / 20;
+static constexpr uint32_t JAMMING_TIME = 175;
+
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // SENTINEL_AGITATOR_CONSTANTS_HPP_

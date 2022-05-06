@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,13 +22,16 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
+#include "tap/control/subsystem.hpp"
 #include "tap/control/turret_subsystem_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "turret_motor_config.hpp"
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "tap/mock/motor_interface_mock.hpp"
+#include "aruwsrc/mock/turret_motor_mock.hpp"
 #else
-#include "tap/motor/motor_interface.hpp"
+#include "turret_motor.hpp"
 #endif
 
 #include "tap/util_macros.hpp"
@@ -54,21 +57,19 @@ namespace aruwsrc::control::turret
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
  *
  * All angles computed using a right hand coordinate system. In other words, yaw is a value from
- * 0-360 rotated counterclockwise when looking at the turret from above. Pitch is a value from 0-360
- * rotated counterclockwise when looking at the turret from the right side of the turret.
+ * 0-M_TWOPI rotated counterclockwise when looking at the turret from above. Pitch is a value from
+ * 0-M_TWOPI rotated counterclockwise when looking at the turret from the right side of the turret.
  */
-class TurretSubsystem : public tap::control::turret::TurretSubsystemInterface
+class TurretSubsystem : public tap::control::Subsystem
 {
 public:
-    static constexpr float MAX_OUT_6020 = 30'000;
-
     /**
      * Constructs a TurretSubsystem.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
-     * @param[in] limitYaw `true` if the yaw should be limited between `YAW_MIN_ANGLE` and
+     * @param[in] limitMotorAngles `true` if the yaw should be limited between `YAW_MIN_ANGLE` and
      *      `YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
      *      ring).
      * @param[in] chassisFrontBackIdentical `true` if the front and back of the chassis are
@@ -79,9 +80,8 @@ public:
         aruwsrc::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
-        bool limitYaw = true);
-
-    inline bool yawLimited() const override { return limitYaw; }
+        const TurretMotorConfig& pitchMotorConfig,
+        const TurretMotorConfig& yawMotorConfig);
 
     void initialize() override;
 
@@ -91,146 +91,20 @@ public:
 
     void onHardwareTestStart() override;
 
-    /**
-     * @return `true` if both pitch and yaw gimbals are connected.
-     */
-    inline bool isOnline() const override
-    {
-        return yawMotor->isMotorOnline() && pitchMotor->isMotorOnline();
-    }
+    mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
 
-    /**
-     * @return The wrapped yaw angle of the actual yaw gimbal, in degrees in the chassis frame.
-     */
-    inline const tap::algorithms::ContiguousFloat& getCurrentYawValue() const override
-    {
-        return currYawAngle;
-    }
-
-    /**
-     * @return The wrapped pitch angle of the actual pitch gimbal, in degrees in the chassis frame.
-     */
-    inline const tap::algorithms::ContiguousFloat& getCurrentPitchValue() const override
-    {
-        return currPitchAngle;
-    }
-
-    /**
-     * @return The yaw target as set by the user in `setYawSetpoint`, in the chassis frame.
-     */
-    inline float getYawSetpoint() const override { return yawTarget.getValue(); }
-
-    /**
-     * @return The pitch target as set by the user in `setPitchSetpoint`, in the chassis frame.
-     */
-    inline float getPitchSetpoint() const override { return pitchTarget.getValue(); }
-
-    /**
-     * @return The velocity, in degrees / second, of the turret's pitch yaw, in the chassis frame.
-     */
-    inline float getYawVelocity() const override { return getVelocity(yawMotor); }
-
-    /**
-     * @return The velocity, in degrees / second, of the turret's pitch motor, in the chassis frame.
-     */
-    inline float getPitchVelocity() const override { return getVelocity(pitchMotor); }
-
-    /**
-     * Set a target angle in chassis frame, the angle is accordingly limited.
-     * Note that since there is no controller in this subsystem, this target
-     * angle merely acts as a safe way to store an angle when using a position controller.
-     * The command that contains a controller may use the yaw setpoint as it sees fit.
-     */
-    void setYawSetpoint(float target) override;
-
-    /**
-     * @see setYawSetpoint
-     */
-    void setPitchSetpoint(float target) override;
-
-    /**
-     * @return When `chassisFrontBackIdentical == false`, an angle between [-180, 180] that is the
-     *      angle difference of the yaw gimbal from the initial setpoint (`YAW_START_ANGLE`), which
-     *      is assumed to be the center of the chassis, in degrees.
-     */
-    float getYawAngleFromCenter() const override;
-
-    /**
-     * @return An angle between [-180, 180] that is the angle difference of the pitch gimbal
-     *      from `PITCH_START_ANGLE`, in degrees.
-     */
-    float getPitchAngleFromCenter() const override;
-
-    /**
-     * Attempts to set desired yaw output to the passed in value. If the turret is out of
-     * bounds, the output is limited.
-     *
-     * @param[in] out The desired yaw output, limited to `[-30000, 30000]`.
-     */
-    mockable void setYawMotorOutput(float out) override;
-
-    /**
-     * Attempts to set desired pitch output to the passed in value. If the turret is out of
-     * bounds, the output is limited.
-     *
-     * @param[in] out The desired pitch output, limited to `[-30000, 30000]`.
-     */
-    mockable void setPitchMotorOutput(float out) override;
-
-    /**
-     * Reads the raw pitch and yaw angles and updates the wrapped versions of
-     * these angles.
-     */
-    mockable void updateCurrentTurretAngles();
-
-    mockable algorithms::TurretPitchControllerInterface* getPrevRanPitchTurretController() const
-    {
-        return prevRanPitchTurretController;
-    }
-    mockable algorithms::TurretYawControllerInterface* getPrevRanYawTurretController() const
-    {
-        return prevRanYawTurretController;
-    }
-
-    mockable void setPrevRanPitchTurretController(
-        algorithms::TurretPitchControllerInterface* controller)
-    {
-        prevRanPitchTurretController = controller;
-    }
-    mockable void setPrevRanYawTurretController(
-        algorithms::TurretYawControllerInterface* controller)
-    {
-        prevRanYawTurretController = controller;
-    }
+#ifdef ENV_UNIT_TESTS
+    testing::NiceMock<mock::TurretMotorMock> pitchMotor;
+    testing::NiceMock<mock::TurretMotorMock> yawMotor;
+#else
+    /// Associated with and contains logic for controlling the turret's pitch motor
+    TurretMotor pitchMotor;
+    /// Associated with and contains logic for controlling the turret's yaw motor
+    TurretMotor yawMotor;
+#endif
 
 protected:
     Drivers* drivers;
-
-private:
-    tap::algorithms::ContiguousFloat currPitchAngle;
-    tap::algorithms::ContiguousFloat currYawAngle;
-
-    uint16_t pitchEncoderWhenLastUpdated;
-    uint16_t yawEncoderWhenLastUpdated;
-
-    tap::algorithms::ContiguousFloat yawTarget;
-    tap::algorithms::ContiguousFloat pitchTarget;
-
-    bool limitYaw;
-
-    /**
-     * @return velocity of 6020 motor, in degrees / sec
-     */
-    static inline float getVelocity(const tap::motor::MotorInterface* motor)
-    {
-        return 360 / 60 * motor->getShaftRPM();
-    }
-
-    algorithms::TurretPitchControllerInterface* prevRanPitchTurretController = nullptr;
-    algorithms::TurretYawControllerInterface* prevRanYawTurretController = nullptr;
-
-    tap::motor::MotorInterface* pitchMotor;
-    tap::motor::MotorInterface* yawMotor;
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret

@@ -27,7 +27,7 @@ namespace aruwsrc::algorithms::odometry
 // their pointers to the base class (not in that order)
 OttoVelocityOdometry2DSubsystem::OttoVelocityOdometry2DSubsystem(
     aruwsrc::Drivers* drivers,
-    aruwsrc::control::turret::TurretSubsystem* turret,
+    const aruwsrc::control::turret::TurretMotor* turret,
     tap::control::chassis::ChassisSubsystemInterface* chassis)
     : Subsystem(drivers),
       odometryTracker(&orientationObserver, &displacementObserver),

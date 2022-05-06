@@ -144,7 +144,15 @@ bool RefSerial::decodeToGameStatus(const ReceivedSerialMessage& message)
     gameData.gameType = static_cast<Rx::GameType>(0xf & message.data[0]);
     gameData.gameStage = static_cast<Rx::GameStage>(0xf & (message.data[0] >> 4));
     convertFromLittleEndian(&gameData.stageTimeRemaining, message.data + 1);
-    convertFromLittleEndian(&gameData.unixTime, message.data + 3);
+    // reinterpreting as a uint64_t doesn't work, so do this instead
+    gameData.unixTime = static_cast<uint64_t>(message.data[10]) << 56 |
+                        static_cast<uint64_t>(message.data[9]) << 48 |
+                        static_cast<uint64_t>(message.data[8]) << 40 |
+                        static_cast<uint64_t>(message.data[7]) << 32 |
+                        static_cast<uint64_t>(message.data[6]) << 24 |
+                        static_cast<uint64_t>(message.data[5]) << 16 |
+                        static_cast<uint64_t>(message.data[4]) << 8 |
+                        static_cast<uint64_t>(message.data[3]);
     return true;
 }
 
@@ -194,7 +202,7 @@ bool RefSerial::decodeToWarningData(const ReceivedSerialMessage& message)
         return false;
     }
     robotData.refereeWarningData.level = message.data[0];
-    robotData.refereeWarningData.foulRobotID = message.data[1];
+    robotData.refereeWarningData.foulRobotID = static_cast<RobotId>(message.data[1]);
     robotData.refereeWarningData.lastReceivedWarningRobotTime = clock::getTimeMilliseconds();
     return true;
 }
@@ -407,6 +415,19 @@ void RefSerial::attachRobotToRobotMessageHandler(
     }
 
     msgIdToRobotToRobotHandlerMap[msgId] = handler;
+}
+
+bool RefSerial::operatorBlinded() const
+{
+    const uint32_t blindTime = (robotData.refereeWarningData.foulRobotID == robotData.robotId)
+                                   ? Rx::RefereeWarningData::OFFENDING_OPERATOR_BLIND_TIME
+                                   : Rx::RefereeWarningData::NONOFFENDING_OPERATOR_BLIND_TIME;
+
+    const uint32_t lastReceivedWarningRobotTime =
+        robotData.refereeWarningData.lastReceivedWarningRobotTime;
+
+    return getRefSerialReceivingData() && (lastReceivedWarningRobotTime != 0) &&
+           (arch::clock::getTimeMilliseconds() - lastReceivedWarningRobotTime <= blindTime);
 }
 
 }  // namespace tap::communication::serial

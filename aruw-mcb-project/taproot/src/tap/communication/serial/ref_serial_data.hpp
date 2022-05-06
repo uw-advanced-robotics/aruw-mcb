@@ -257,6 +257,14 @@ public:
                                                           ///< message was received
         };
 
+        /**
+         * Ref serial warning data. This informational struct is intended to be updated each time a
+         * yellow or red card has been received.
+         *
+         * When a yellow card is received, the offending Operator will be blocked from seeing
+         * anything for 5 seconds, while the operation interfaces of other operators in the
+         * offending team will be blocked for 2 seconds.
+         */
         struct RefereeWarningData
         {
             uint8_t level;        /**<
@@ -265,9 +273,14 @@ public:
                                    * 2: Red card
                                    * 3: Forfeiture
                                    */
-            uint8_t foulRobotID;  ///< The robot that received the referee warning
+            RobotId foulRobotID;  ///< The robot that received the referee warning
             uint32_t lastReceivedWarningRobotTime = 0;  ///< Last time (in milliseconds) that a
                                                         ///< warning was received.
+
+            /// time in ms that the user will be blinded for when the operator is the offender
+            static constexpr uint32_t OFFENDING_OPERATOR_BLIND_TIME = 5'000;
+            /// time in ms that the user will be blinded for when the operator is not the offender
+            static constexpr uint32_t NONOFFENDING_OPERATOR_BLIND_TIME = 2'000;
         };
 
         struct RobotData

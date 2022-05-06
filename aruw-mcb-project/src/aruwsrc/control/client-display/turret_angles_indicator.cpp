@@ -56,8 +56,8 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
 {
     RF_BEGIN(1);
 
-    yaw = robotTurretSubsystem.getWorldYaw();
-    pitch = robotTurretSubsystem.getWorldPitch();
+    yaw = modm::toDegree(robotTurretSubsystem.getWorldYaw());
+    pitch = modm::toDegree(robotTurretSubsystem.getWorldPitch());
 
     if (sendTurretDataTimer.execute() &&
         (!compareFloatClose(prevYaw, yaw, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION) ||

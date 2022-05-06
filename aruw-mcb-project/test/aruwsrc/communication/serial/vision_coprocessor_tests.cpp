@@ -260,9 +260,9 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
     for (size_t i = 0; i < turretInterfaces.size(); i++)
     {
         ON_CALL(turretInterfaces[i], getWorldYaw)
-            .WillByDefault(Return(odometryData.turretOdometry[i].yaw));
+            .WillByDefault(Return(modm::toRadian(odometryData.turretOdometry[i].yaw)));
         ON_CALL(turretInterfaces[i], getWorldPitch)
-            .WillByDefault(Return(odometryData.turretOdometry[i].pitch));
+            .WillByDefault(Return(modm::toRadian(odometryData.turretOdometry[i].pitch)));
         ON_CALL(turretInterfaces[i], getLastMeasurementTimeMicros)
             .WillByDefault(Return(odometryData.turretOdometry[i].timestamp));
     }
