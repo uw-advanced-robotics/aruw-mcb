@@ -65,7 +65,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawA
                                   ? defaultLaunchSpeed
                                   : frictionWheels.getPredictedLaunchSpeed();
 
-    const Vector2f robotPosition = odometryInterface.getCurrentLocation2D().getPosition();
+    const Vector3f turretPosition = modm::Vector3f(odometryInterface.getCurrentTurretLocation(turretOrigin))
 
     const Vector2f chassisVelocity = odometryInterface.getCurrentVelocity2D();
 
