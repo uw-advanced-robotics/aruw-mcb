@@ -19,12 +19,12 @@
 
 #include "agitator_limiter.hpp"
 
-#include "aruwsrc/drivers.hpp"
-#include "tap/motor/dji_motor.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
-#include "aruwsrc/control/launcher/launcher_constants.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "../launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
+#include "aruwsrc/drivers.hpp"
 
 using namespace tap::control;
 
@@ -41,24 +41,25 @@ AgitatorLimiter::AgitatorLimiter(
     bool isAgitatorInverted,
     float jammingDistance,
     uint32_t jammingTime,
-    bool jamLogicEnabled, 
+    bool jamLogicEnabled,
     aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheelSubsystem)
-    :   tap::control::Subsystem(drivers),
-        aruwsrc::agitator::AgitatorSubsystem(
-            drivers,
-            pidParams,
-            agitatorGearRatio,
-            agitatorMotorId,
-            agitatorCanBusId,
-            isAgitatorInverted,
-            jammingDistance,
-            jammingTime,
-            jamLogicEnabled),
-        jamChecker(this, jammingDistance, jammingTime)
+    : tap::control::Subsystem(drivers),
+      aruwsrc::agitator::AgitatorSubsystem(
+          drivers,
+          pidParams,
+          agitatorGearRatio,
+          agitatorMotorId,
+          agitatorCanBusId,
+          isAgitatorInverted,
+          jammingDistance,
+          jammingTime,
+          jamLogicEnabled),
+      jamChecker(this, jammingDistance, jammingTime),
+      frictionWheelSubsystem(frictionWheelSubsystem)
 {
     assert(jammingDistance >= 0);
 }
-    
+
 void AgitatorLimiter::refresh()
 {
     if (!agitatorIsCalibrated)
@@ -66,15 +67,16 @@ void AgitatorLimiter::refresh()
         calibrateHere();
     }
 
-    if (frictionWheelSubsystem->getCurrentLaunchSpeed() >= frictionWheelSubsystem->getDesiredLaunchSpeed() - 2) {
+    if (frictionWheelSubsystem->getCurrentLaunchSpeed() >= frictionWheelSubsystem->getDesiredLaunchSpeed() - 2)
+    {
         agitatorRunPositionPid();
     }
-    
+
     if (jamChecker.check())
     {
         subsystemJamStatus = true;
     }
 }
 
-}  
-} 
+}  // namespace control::agitator
+}  // namespace aruwsrc

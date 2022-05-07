@@ -39,7 +39,7 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
       rpmToLaunchSpeedInterpolator(
-          LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+          FRICTION_WHEEL_RPM_TO_LAUNCH_SPEED_LUT,
           MODM_ARRAY_SIZE(FRICTION_WHEEL_RPM_TO_LAUNCH_SPEED_LUT)),
       velocityPidLeftWheel(
           LAUNCHER_PID_KP,
@@ -77,7 +77,6 @@ float FrictionWheelSubsystem::getCurrentLaunchSpeed() const
 {
     float leftWheelSpeed = rpmToLaunchSpeed(leftWheel.getShaftRPM());
     float rightWheelSpeed = rpmToLaunchSpeed(rightWheel.getShaftRPM());
-    
     return (leftWheelSpeed + rightWheelSpeed) / 2;
 }
 
