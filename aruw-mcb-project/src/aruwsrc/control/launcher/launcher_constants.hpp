@@ -37,14 +37,14 @@ static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
 #endif
 
 #if defined(TARGET_SENTINEL_2022)
+static constexpr tap::can::CanBus TURRET0_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::can::CanBus TURRET2_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 #else
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #endif
 
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
-static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
+static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
 static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 0.2f;
@@ -72,10 +72,10 @@ static constexpr modm::Pair<float, float> FRICTION_WHEEL_RPM_TO_LAUNCH_SPEED_LUT
 #else
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
-    {15.0f, 4600.0f},
-    {18.0f, 5000.0f},
-    {30.0f, 7200.2f},
-    {32.0f, 8300.0f},
+    {15.0f, 4375.0f},
+    {18.0f, 4750.0f},
+    {30.0f, 7000.2f},
+    {32.0f, 8400.0f},
 };
 static constexpr modm::Pair<float, float> FRICTION_WHEEL_RPM_TO_LAUNCH_SPEED_LUT[] = {
     {0.0f, 0.0f},
