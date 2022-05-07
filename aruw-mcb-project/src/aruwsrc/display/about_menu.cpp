@@ -54,6 +54,6 @@ void AboutMenu::shortButtonPress(modm::MenuButtons::Button button)
     }
 }
 
-bool SplashScreen::hasChanged() { return !drawn; }
+bool AboutMenu::hasChanged() { return !drawn; }
 
 }  // namespace aruwsrc::display
