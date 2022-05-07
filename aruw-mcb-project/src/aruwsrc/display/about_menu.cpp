@@ -41,6 +41,7 @@ void AboutMenu::draw()
     display << "Robot Name: " << ROBOT_NAME << modm::endl;
     display << "Last User: " << LAST_USER << modm::endl;
     display << "Sha: " << LAST_SHA << modm::endl;
+    drawn = true;
 }
 
 void AboutMenu::update() {}
@@ -53,6 +54,6 @@ void AboutMenu::shortButtonPress(modm::MenuButtons::Button button)
     }
 }
 
-bool AboutMenu::hasChanged() { return updatePeriodicTimer.execute(); }
+bool SplashScreen::hasChanged() { return !drawn; }
 
 }  // namespace aruwsrc::display

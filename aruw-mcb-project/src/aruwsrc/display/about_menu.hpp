@@ -17,8 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ABOUT_MENU_
-#define ABOUT_MENU_
+#ifndef ABOUT_MENU_HPP_
+#define ABOUT_MENU_HPP_
+
 #define STRINGIFYMACRO(s) MACROSTR(s)
 #define MACROSTR(s) #s
 
@@ -64,9 +65,6 @@ public:
     static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
     static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
 
-    /** Time between calls to `draw`, which will redraw the about menu. */
-    static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
-
     AboutMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
         aruwsrc::Drivers *drivers);
@@ -79,13 +77,16 @@ public:
     bool hasChanged() override;
 
     static const char *getMenuName() { return "About Menu"; }
+    
+    inline void resetHasChanged() { drawn = false; }
 
 private:
     static constexpr int TURRET_MCB_MENU_ID = 7;
 
     aruwsrc::Drivers *drivers;
+    bool drawn = false;
 
-    tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 };
 }  // namespace aruwsrc::display
-#endif  // ABOUT_MENU_
+
+#endif  // ABOUT_MENU_HPP_
