@@ -40,7 +40,7 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
       rpmToLaunchSpeedInterpolator(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-          MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
+          MODM_ARRAY_SIZE(FRICTION_WHEEL_RPM_TO_LAUNCH_SPEED_LUT)),
       velocityPidLeftWheel(
           LAUNCHER_PID_KP,
           LAUNCHER_PID_KI,
