@@ -176,11 +176,11 @@ RotateUnjamComprisedCommand waterwheelLoadUnjamCommand(
 
 RotateCommand kickerLoadCommand(
     kickerAgitator,
-    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+    aruwsrc::control::agitator::constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 
 RotateCommand kickerLaunchCommand(
     kickerAgitator,
-    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+    aruwsrc::control::agitator::constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
 HeroAgitatorCommand heroAgitatorCommand(
     *drivers(),
@@ -346,13 +346,13 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 void initializeSubsystems()
 {
     sentinelRequestSubsystem.initialize();
-    // chassis.initialize();
+    chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
     clientDisplay.initialize();
     kickerAgitator.initialize();
     waterwheelAgitator.initialize();
-    // turret.initialize();
+    turret.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/

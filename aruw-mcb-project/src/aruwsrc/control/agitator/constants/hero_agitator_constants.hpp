@@ -38,13 +38,20 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
-    .kp = 5'000.0f,
+    .kp = 6'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
 };
+
+static constexpr float DESIRED_LOAD_TIME_S = 0.3f;
+static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 7.0f;
+static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
+static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT =
+    M_TWOPI / (2.0f * WATERWHEEL_NUM_BALL_POCKETS);
+static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.8f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
@@ -55,31 +62,25 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
-    .jammingVelocityDifference = M_TWOPI,
+    .jammingVelocityDifference = WATERWHEEL_TARGET_DISPLACEMENT / (2.0f * DESIRED_LOAD_TIME_S),
     .jammingTime = 100,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 0,
+    .velocityPIDFeedForwardGain = 50.0f,
 };
 
-static constexpr float DESIRED_LOAD_TIME_S = 0.2f;
-static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 7.0f;
-
 static constexpr tap::control::velocity::RotateCommand::Config WATERWHEEL_AGITATOR_ROTATE_CONFIG = {
-    .targetDisplacement = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS,
-    .desiredVelocity = (M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS) / DESIRED_LOAD_TIME_S,
+    .targetDisplacement = WATERWHEEL_TARGET_DISPLACEMENT,
+    .desiredVelocity = WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S,
     .setpointTolerance = M_PI / 32.0f,
 };
 
 static constexpr tap::control::velocity::UnjamRotateCommand::Config
     WATERWHEEL_AGITATOR_UNJAM_CONFIG = {
-        .unjamDisplacement = M_TWOPI / (2.0f * WATERWHEEL_NUM_BALL_POCKETS),
-        .unjamVelocity = 2.0f * (M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS),
+        .unjamDisplacement = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT,
+        .unjamVelocity = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT / WATERWHEEL_TARGET_UNJAM_TIME_S,
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
         /// seconds. Add 100 ms extra tolerance.
-        .maxWaitTime = static_cast<uint32_t>(
-                           1000.0f * (M_TWOPI / (2.0f * WATERWHEEL_NUM_BALL_POCKETS)) /
-                           (2.0f * (M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS))) +
-                       100,
+        .maxWaitTime = static_cast<uint32_t>(1000.0f * WATERWHEEL_TARGET_UNJAM_TIME_S) + 100,
         .targetCycleCount = 1,
 };
 

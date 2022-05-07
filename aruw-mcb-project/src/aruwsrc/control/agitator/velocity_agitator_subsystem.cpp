@@ -118,7 +118,8 @@ void VelocityAgitatorSubsystem::runVelocityPidControl()
 
     velocityPid.runControllerDerivateError(velocityError, dt);
 
-    agitatorMotor.setDesiredOutput(velocityPid.getOutput() + velocitySetpoint * config.velocityPIDFeedForwardGain);
+    agitatorMotor.setDesiredOutput(
+        velocityPid.getOutput() + velocitySetpoint * config.velocityPIDFeedForwardGain);
 }
 
 void VelocityAgitatorSubsystem::setVelocitySetpoint(float velocity)

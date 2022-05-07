@@ -20,10 +20,10 @@
 #include <gtest/gtest.h>
 
 #include "tap/mock/command_mock.hpp"
+#include "tap/mock/velocity_setpoint_subsystem_mock.hpp"
 
 #include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/drivers.hpp"
-#include "tap/mock/velocity_setpoint_subsystem_mock.hpp"
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
 
 using namespace aruwsrc;
@@ -39,12 +39,13 @@ static HeroAgitatorCommand::Config DEFAULT_HERO_AGITATOR_CMD_CONFIG = {
     .heatLimitBuffer = 100,
 };
 
-class CommandWithRequirementsMock :public tap::mock::CommandMock {
-public:
-CommandWithRequirementsMock(uint64_t requirementsBitwise) : tap::mock::CommandMock()
+class CommandWithRequirementsMock : public tap::mock::CommandMock
 {
-    ON_CALL(*this, getRequirementsBitwise).WillByDefault(Return(requirementsBitwise));
-}
+public:
+    CommandWithRequirementsMock(uint64_t requirementsBitwise) : tap::mock::CommandMock()
+    {
+        ON_CALL(*this, getRequirementsBitwise).WillByDefault(Return(requirementsBitwise));
+    }
 };
 
 class HeroAgitatorCommandTest : public Test
@@ -132,7 +133,15 @@ TEST_F(HeroAgitatorCommandTest, isReady_heat_limiting_true_when_heat_limit_below
     agitatorConfig.heatLimiting = true;
 
     // declare new HeroAgitatorCommand that has a custom agitator config
-    HeroAgitatorCommand cmd(drivers, agitatorConfig, kicker, waterwheel, frictionWheels, kickerFireCommand, kickerLoadCommand, waterwheelLoadCommand);
+    HeroAgitatorCommand cmd(
+        drivers,
+        agitatorConfig,
+        kicker,
+        waterwheel,
+        frictionWheels,
+        kickerFireCommand,
+        kickerLoadCommand,
+        waterwheelLoadCommand);
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
@@ -156,7 +165,15 @@ TEST_F(HeroAgitatorCommandTest, isReady_heat_limiting_false_when_heat_limit_abov
     agitatorConfig.heatLimiting = true;
 
     // declare new HeroAgitatorCommand that has a custom agitator config
-    HeroAgitatorCommand cmd(drivers, agitatorConfig, kicker, waterwheel, frictionWheels, kickerFireCommand, kickerLoadCommand, waterwheelLoadCommand);
+    HeroAgitatorCommand cmd(
+        drivers,
+        agitatorConfig,
+        kicker,
+        waterwheel,
+        frictionWheels,
+        kickerFireCommand,
+        kickerLoadCommand,
+        waterwheelLoadCommand);
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
@@ -218,7 +235,8 @@ TEST_F(HeroAgitatorCommandTest, isFinished_true_when_motors_disconnected)
 TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_loading_happens)
 {
     bool limitSwitchDepressed = false;
-    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed).WillByDefault(ReturnPointee(&limitSwitchDepressed));
+    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
+        .WillByDefault(ReturnPointee(&limitSwitchDepressed));
 
     EXPECT_CALL(kickerLoadCommand, initialize).Times(2);
     EXPECT_CALL(waterwheelLoadCommand, initialize).Times(2);
@@ -227,7 +245,7 @@ TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_loading_happens)
     ON_CALL(kickerLoadCommand, isFinished).WillByDefault(Return(true));
     ON_CALL(waterwheelLoadCommand, isReady).WillByDefault(Return(true));
     ON_CALL(waterwheelLoadCommand, isFinished).WillByDefault(Return(true));
-   
+
     cmd.initialize();
 
     cmd.execute();
@@ -243,7 +261,8 @@ TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_loading_happens)
 TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_multiple_load_cycles_happen)
 {
     bool limitSwitchDepressed = false;
-    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed).WillByDefault(ReturnPointee(&limitSwitchDepressed));
+    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
+        .WillByDefault(ReturnPointee(&limitSwitchDepressed));
 
     EXPECT_CALL(kickerLoadCommand, initialize).Times(5);
     EXPECT_CALL(waterwheelLoadCommand, initialize).Times(5);
@@ -252,7 +271,7 @@ TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_multiple_load_cycles_hap
     ON_CALL(kickerLoadCommand, isFinished).WillByDefault(Return(true));
     ON_CALL(waterwheelLoadCommand, isReady).WillByDefault(Return(true));
     ON_CALL(waterwheelLoadCommand, isFinished).WillByDefault(Return(true));
-   
+
     cmd.initialize();
 
     cmd.execute();
@@ -267,7 +286,8 @@ TEST_F(
     execute_ready_to_fire_refserial_offline_firing_happens_then_loading_happens_when_limit_switch_not_depressed)
 {
     bool limitSwitchDepressed = true;
-    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed).WillByDefault(ReturnPointee(&limitSwitchDepressed));
+    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
+        .WillByDefault(ReturnPointee(&limitSwitchDepressed));
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
 
@@ -318,7 +338,8 @@ TEST_F(
     execute_ready_to_fire_refserial_online_firing_stops_when_ref_serial_detected_shot)
 {
     bool limitSwitchDepressed = true;
-    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed).WillByDefault(ReturnPointee(&limitSwitchDepressed));
+    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
+        .WillByDefault(ReturnPointee(&limitSwitchDepressed));
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
     robotData.turret.heatLimit42 = 100;
