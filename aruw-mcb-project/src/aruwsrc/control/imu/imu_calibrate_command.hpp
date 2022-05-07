@@ -41,7 +41,7 @@ namespace aruwsrc::control::imu
  *
  * When this command is scheduled, it performs the following actions:
  * 1. Wait until the turret is online and either the chassis mpu6500 or turret MCB IMU is online.
- * 2. Command the pitch and yaw turret gimbals to move to 90 degrees (forward and flat).
+ * 2. Command the pitch and yaw turret gimbals to move to PI/2 radians (forward and flat).
  * 3. Command the chassis to stay still.
  * 4. Pause until the chassis/turret subsystems are no longer moving.
  * 5. Send a calibration signal to the turret MCB.
@@ -59,7 +59,7 @@ public:
         /** While in this state, the command waits for the turret to be online and the IMUs to be
            online. */
         WAITING_FOR_SYSTEMS_ONLINE,
-        /** While in this state, the command "locks" the turret at 90 degrees (horizontal to the
+        /** While in this state, the command "locks" the turret at PI/2 radians (horizontal to the
            ground). The command then sends a calibration request to the mpu6500 and the
            TurretMCBCanComm class. */
         LOCKING_TURRET,
@@ -71,14 +71,14 @@ public:
     };
 
     /**
-     * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in degrees/s
+     * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
      */
-    static constexpr float VELOCITY_ZERO_THRESHOLD = 1e-2;
+    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
     /**
      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
-     * in degrees
+     * in radians
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = 1.0f;
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
 
     /**
      * @param[in] drivers A pointer to the global drivers object.

@@ -111,14 +111,14 @@ public:
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    mockable float getTurretYawInput();
+    mockable float getTurretYawInput(uint8_t turretID);
 
     /**
      * @returns the value used for turret pitch rotation, between about -1 and 1
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    mockable float getTurretPitchInput();
+    mockable float getTurretPitchInput(uint8_t turretID);
 
     /**
      * @returns the value used for sentiel drive speed, between

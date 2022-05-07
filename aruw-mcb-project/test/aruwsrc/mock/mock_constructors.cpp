@@ -65,8 +65,8 @@ AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 BeybladeCommandMock::BeybladeCommandMock(
     aruwsrc::Drivers *drivers,
     chassis::ChassisSubsystem *chassis,
-    tap::control::turret::TurretSubsystemInterface *turret)
-    : BeybladeCommand(drivers, chassis, turret)
+    aruwsrc::control::turret::TurretMotor *yawMotor)
+    : BeybladeCommand(drivers, chassis, yawMotor)
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
@@ -153,7 +153,7 @@ TowSubsystemMock::TowSubsystemMock(
 TowSubsystemMock::~TowSubsystemMock() {}
 
 TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers)
-    : TurretSubsystem(drivers, nullptr, nullptr)
+    : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG)
 {
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
@@ -169,4 +169,21 @@ VisionCoprocessorMock::VisionCoprocessorMock(aruwsrc::Drivers *drivers)
 {
 }
 VisionCoprocessorMock::~VisionCoprocessorMock() {}
+
+TurretMotorMock::TurretMotorMock(
+    tap::motor::MotorInterface *motor,
+    const control::turret::TurretMotorConfig &motorConfig)
+    : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
+{
+    ON_CALL(*this, getValidMinError).WillByDefault([&](const float measurement) {
+        return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI)
+            .difference(getChassisFrameSetpoint());
+    });
+    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
+        return getValidMinError(getChassisFrameMeasuredAngle().getValue());
+    });
+    ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
+}
+TurretMotorMock::~TurretMotorMock() {}
+
 }  // namespace aruwsrc::mock

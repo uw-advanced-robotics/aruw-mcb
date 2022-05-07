@@ -25,6 +25,7 @@
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 
 #include "modm/architecture/interface/register.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 namespace modm::can
 {
@@ -43,6 +44,9 @@ namespace aruwsrc::can
  * microcontroller. Reads IMU data and sends instructions to the turret microcontroller. Follows the
  * protocol described in the wiki here:
  * https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Turret-MCB-Comm-Protocol.
+ *
+ * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in
+ * degrees are converted to radians by this object.
  */
 class TurretMCBCanComm
 {
@@ -67,22 +71,24 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
-    /** @return turret pitch angle in deg */
+    /** @return turret pitch angle in rad */
     mockable inline float getPitch() const { return lastCompleteImuData.pitch; }
-    /** @return turret pitch angular velocity in deg/sec */
+    /** @return turret pitch angular velocity in rad/sec */
     mockable inline float getPitchVelocity() const
     {
-        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return modm::toRadian(
+            static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
+            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
 
-    /** @return turret yaw angle in degrees */
+    /** @return turret yaw angle in radians */
     mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
-    /** @return turret yaw angular velocity in deg/sec */
+    /** @return turret yaw angular velocity in rad/sec */
     mockable inline float getYawVelocity() const
     {
-        return static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S;
+        return modm::toRadian(
+            static_cast<float>(lastCompleteImuData.rawYawVelocity) /
+            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
 
     mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }

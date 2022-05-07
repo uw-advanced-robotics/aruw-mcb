@@ -45,10 +45,10 @@ void TurretMCBMenu::draw()
     display.printf(
         "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\nPitch (deg): %.2f\nPitch Velocity (deg/s): "
         "%.2f\n",
-        static_cast<double>(drivers->turretMCBCanComm.getYaw()),
-        static_cast<double>(drivers->turretMCBCanComm.getYawVelocity()),
-        static_cast<double>(drivers->turretMCBCanComm.getPitch()),
-        static_cast<double>(drivers->turretMCBCanComm.getPitchVelocity()));
+        static_cast<double>(modm::toDegree(drivers->turretMCBCanComm.getYaw())),
+        static_cast<double>(modm::toDegree(drivers->turretMCBCanComm.getYawVelocity())),
+        static_cast<double>(modm::toDegree(drivers->turretMCBCanComm.getPitch())),
+        static_cast<double>(modm::toDegree(drivers->turretMCBCanComm.getPitchVelocity())));
     display << "IMU latency (us): "
             << (tap::arch::clock::getTimeMicroseconds() -
                 drivers->turretMCBCanComm.getIMUDataTimestamp());

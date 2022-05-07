@@ -28,10 +28,10 @@
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * Transforms the specified `angleToTransform`, a yaw/pitch angle (in degrees) from the chassis
+ * Transforms the specified `angleToTransform`, a yaw/pitch angle (in radians) from the chassis
  * frame to the world frame.
  *
- * @note It is expected that the user wraps the value returned to be between [0, 360)
+ * @note It is expected that the user wraps the value returned to be between [0, M_TWOPI)
  *      (or whatever range they require).
  *
  * @param[in] turretChassisFrameCurrAngle The current chassis relative (gimbal encoder) angle.
@@ -49,10 +49,10 @@ static inline float transformChassisFrameToWorldFrame(
 }
 
 /**
- * Transforms the specified `angleToTransform`, a yaw or pitch angle (in degrees), from the world
+ * Transforms the specified `angleToTransform`, a yaw or pitch angle (in radians), from the world
  * frame to the chassis frame.
  *
- * @note It is expected that the user wraps the value returned to be between [0, 360)
+ * @note It is expected that the user wraps the value returned to be between [0, M_TWOPI)
  *      (or whatever range they require).
  *
  * @param[in] turretChassisFrameCurrAngle The current chassis relative (gimbal encoder) angle.
@@ -71,20 +71,19 @@ static inline float transformWorldFrameValueToChassisFrame(
 
 /**
  * A helper function for the `run*PidYawWorldFrameController` functions below. Updates the passed in
- * `turretSubsystem`'s desired chassis frame setpoint and the passed in `worldFrameYawSetpoint`'.
- * Performs necessary limiting of the `worldFrameYawSetpoint` based on the `turretSubsystem`'s
+ * `yawMotor`'s desired chassis frame setpoint and the passed in `worldFrameYawSetpoint`'.
+ * Performs necessary limiting of the `worldFrameYawSetpoint` based on the `yawMotor`'s
  * min/max yaw setpoints.
  *
  * @param[in] desiredSetpoint The new user-specified world frame turret yaw angle setpoint, in
  *      degrees.
- * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
- *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
- *      PID controller.
- * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in degrees, measured from the
+ * @param[in] chassisFrameYaw The chassis frame yaw angle, in radians, measured by the motor's
+ *      encoder.
+ * @param[in] worldFrameYawAngle The current chassis IMU angle, in radians, measured from the
  *      chassis mounted IMU.
  * @param[out] worldFrameYawSetpoint The limited and wrapped world frame turret yaw setpoint, in
- *      degrees. Set to `desiredSetpoint` and then wrapped/limited as necessary.
- * @param[out] turretSubsystem The turret subsystem whose chassis relative turret yaw angle is
+ *      radians. Set to `desiredSetpoint` and then wrapped/limited as necessary.
+ * @param[out] yawMotor The turret subsystem whose chassis relative turret yaw angle is
  *      updated by this function.
  */
 static inline void updateYawWorldFrameSetpoint(
@@ -92,55 +91,56 @@ static inline void updateYawWorldFrameSetpoint(
     const float chassisFrameYaw,
     const float worldFrameYawAngle,
     tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    TurretMotor *yawMotor)
 {
     worldFrameYawSetpoint->setValue(desiredSetpoint);
 
     // transform target angle from turret imu relative to chassis relative
     // to keep turret/command setpoints synchronized
-    turretSubsystem->setYawSetpoint(transformWorldFrameValueToChassisFrame(
+
+    yawMotor->setChassisFrameSetpoint(transformWorldFrameValueToChassisFrame(
         chassisFrameYaw,
         worldFrameYawAngle,
         worldFrameYawSetpoint->getValue()));
 
-    if (turretSubsystem->yawLimited())
+    if (yawMotor->getConfig().limitMotorAngles)
     {
         // transform angle that is limited by subsystem to world relative again to run the
         // controller
         worldFrameYawSetpoint->setValue(transformChassisFrameToWorldFrame(
             chassisFrameYaw,
             worldFrameYawAngle,
-            turretSubsystem->getYawSetpoint()));
+            yawMotor->getChassisFrameSetpoint()));
     }
 }
 
 WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadePidTurretController(
     const aruwsrc::Drivers *drivers,
-    TurretSubsystem *turretSubsystem,
+    TurretMotor *yawMotor,
     const tap::algorithms::SmoothPidConfig &posPidConfig,
     const tap::algorithms::SmoothPidConfig &velPidConfig)
-    : TurretYawControllerInterface(turretSubsystem),
+    : TurretYawControllerInterface(yawMotor),
       drivers(drivers),
       positionPid(posPidConfig),
       velocityPid(velPidConfig),
-      worldFrameSetpoint(0, 0, 360)
+      worldFrameSetpoint(0, 0, M_TWOPI)
 {
 }
 
 void WorldFrameYawTurretImuCascadePidTurretController::initialize()
 {
-    if (this != turretSubsystem->getPrevRanYawTurretController())
+    if (this != turretMotor->getTurretController())
     {
         positionPid.reset();
         velocityPid.reset();
 
         // Capture initial target angle in chassis frame and transform to world frame.
         worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-            turretSubsystem->getCurrentYawValue().getValue(),
+            turretMotor->getChassisFrameMeasuredAngle().getValue(),
             drivers->turretMCBCanComm.getYaw(),
-            turretSubsystem->getYawSetpoint()));
+            turretMotor->getChassisFrameSetpoint()));
 
-        turretSubsystem->setPrevRanYawTurretController(this);
+        turretMotor->attachTurretController(this);
     }
 }
 
@@ -148,7 +148,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
+    const float chassisFrameYaw = turretMotor->getChassisFrameMeasuredAngle().getValue();
     const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
     const float worldFrameYawVelocity = drivers->turretMCBCanComm.getYawVelocity();
 
@@ -157,7 +157,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
         chassisFrameYaw,
         worldFrameYawAngle,
         &worldFrameSetpoint,
-        turretSubsystem);
+        turretMotor);
 
     // position controller based on imu and yaw gimbal angle,
     // precisely, - (yawActual - worldFrameYawSetpoint), or more obvious,
@@ -169,7 +169,20 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
     float velocityControllerError = positionPidOutput - worldFrameYawVelocity;
     float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
-    turretSubsystem->setYawMotorOutput(velocityPidOutput);
+    turretMotor->setMotorOutput(velocityPidOutput);
+}
+
+void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
+{
+    const float chassisFrameYaw = turretMotor->getChassisFrameMeasuredAngle().getValue();
+    const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
+
+    updateYawWorldFrameSetpoint(
+        desiredSetpoint,
+        chassisFrameYaw,
+        worldFrameYawAngle,
+        &worldFrameSetpoint,
+        turretMotor);
 }
 
 float WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
@@ -179,37 +192,37 @@ float WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
 
 bool WorldFrameYawTurretImuCascadePidTurretController::isOnline() const
 {
-    return turretSubsystem->isOnline() && drivers->turretMCBCanComm.isConnected();
+    return turretMotor->isOnline() && drivers->turretMCBCanComm.isConnected();
 }
 
 HeroTurretImuCascadePidTurretController::HeroTurretImuCascadePidTurretController(
     const aruwsrc::Drivers *drivers,
-    TurretSubsystem *turretSubsystem,
+    TurretMotor *turretMotor,
     const tap::algorithms::SmoothPidConfig &posPidConfig,
     const tap::algorithms::FuzzyPDConfig &fuzzyPidConfig,
     const tap::algorithms::SmoothPidConfig &velPidConfig)
-    : TurretYawControllerInterface(turretSubsystem),
+    : TurretYawControllerInterface(turretMotor),
       drivers(drivers),
       positionPid(fuzzyPidConfig, posPidConfig),
       velocityPid(velPidConfig),
-      worldFrameSetpoint(0, 0, 360)
+      worldFrameSetpoint(0, 0, M_TWOPI)
 {
 }
 
 void HeroTurretImuCascadePidTurretController::initialize()
 {
-    if (this != turretSubsystem->getPrevRanYawTurretController())
+    if (this != turretMotor->getTurretController())
     {
         positionPid.reset();
         velocityPid.reset();
 
         // Capture initial target angle in chassis frame and transform to world frame.
         worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-            turretSubsystem->getCurrentYawValue().getValue(),
+            turretMotor->getChassisFrameMeasuredAngle().getValue(),
             drivers->turretMCBCanComm.getYaw(),
-            turretSubsystem->getYawSetpoint()));
+            turretMotor->getChassisFrameSetpoint()));
 
-        turretSubsystem->setPrevRanYawTurretController(this);
+        turretMotor->attachTurretController(this);
     }
 }
 
@@ -217,7 +230,7 @@ void HeroTurretImuCascadePidTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    const float chassisFrameYaw = turretSubsystem->getCurrentYawValue().getValue();
+    const float chassisFrameYaw = turretMotor->getChassisFrameMeasuredAngle().getValue();
     const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
     const float worldFrameYawVelocity = drivers->turretMCBCanComm.getYawVelocity();
 
@@ -226,7 +239,7 @@ void HeroTurretImuCascadePidTurretController::runController(
         chassisFrameYaw,
         worldFrameYawAngle,
         &worldFrameSetpoint,
-        turretSubsystem);
+        turretMotor);
 
     // position controller based on imu and yaw gimbal angle,
     // precisely, - (yawActual - worldFrameYawSetpoint), or more obvious,
@@ -238,7 +251,20 @@ void HeroTurretImuCascadePidTurretController::runController(
     float velocityControllerError = positionPidOutput - worldFrameYawVelocity;
     float velocityPidOutput = velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
-    turretSubsystem->setYawMotorOutput(velocityPidOutput);
+    turretMotor->setMotorOutput(velocityPidOutput);
+}
+
+void HeroTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
+{
+    const float chassisFrameYaw = turretMotor->getChassisFrameMeasuredAngle().getValue();
+    const float worldFrameYawAngle = drivers->turretMCBCanComm.getYaw();
+
+    updateYawWorldFrameSetpoint(
+        desiredSetpoint,
+        chassisFrameYaw,
+        worldFrameYawAngle,
+        &worldFrameSetpoint,
+        turretMotor);
 }
 
 float HeroTurretImuCascadePidTurretController::getSetpoint() const
@@ -248,77 +274,74 @@ float HeroTurretImuCascadePidTurretController::getSetpoint() const
 
 bool HeroTurretImuCascadePidTurretController::isOnline() const
 {
-    return turretSubsystem->isOnline() && drivers->turretMCBCanComm.isConnected();
+    return turretMotor->isOnline() && drivers->turretMCBCanComm.isConnected();
 }
 
 /**
  * A helper function for the `run*PidPitchWorldFrameController` functions below. Updates the passed
- * in `turretSubsystem`'s desired chassis frame setpoint and the passed in
+ * in `pitchMotor`'s desired chassis frame setpoint and the passed in
  * `worldFramePitchSetpoint`'. Performs necessary limiting of the `worldFramePitchSetpoint` based on
- * the `turretSubsystem`'s min/max pitch setpoints.
+ * the `pitchMotor`'s min/max pitch setpoints.
  *
- * @param[in] desiredSetpoint The new user-specified world frame turret yaw angle setpoint, in
- *      degrees.
- * @param[in] initChassisFrameImuAngle The initial chassis IMU angle, in degrees, measured from the
- *      chassis mounted IMU that is captured upon initialization of the chassis IMU world relative
- *      PID controller.
- * @param[in] currChassisFrameImuAngle The current chassis IMU angle, in degrees, measured from the
- *      chassis mounted IMU.
- * @param[out] worldFrameYawSetpoint The limited and wrapped world frame turret yaw setpoint, in
- *      degrees. Set to `desiredSetpoint` and then wrapped/limited as necessary.
- * @param[out] turretSubsystem The turret subsystem whose chassis relative turret yaw angle is
+ * @param[in] desiredSetpoint The new user-specified world frame turret pitch angle setpoint, in
+ *      radidans.
+ * @param[in] worldFramePitchAngle The world frame pitch angle, as measured by an IMU on the turret,
+ *      in radians.
+ * @param[in] worldFramePitchSetpoint The limited and wrapped world frame turret pitch setpoint, in
+ *      radians. Set to `desiredSetpoint` and then wrapped/limited as necessary.
+ * @param[out] pitchMotor The turret motor whose chassis relative turret pitch angle is
  *      updated by this function.
  */
 static inline void updatePitchWorldFrameSetpoint(
     const float desiredSetpoint,
     const float worldFramePitchAngle,
     tap::algorithms::ContiguousFloat *worldFramePitchSetpoint,
-    tap::control::turret::TurretSubsystemInterface *turretSubsystem)
+    TurretMotor *pitchMotor)
 {
     worldFramePitchSetpoint->setValue(desiredSetpoint);
 
     // Project user desired setpoint that is in world relative to chassis relative
     // to limit the value
-    turretSubsystem->setPitchSetpoint(transformWorldFrameValueToChassisFrame(
-        turretSubsystem->getCurrentPitchValue().getValue(),
+    pitchMotor->setChassisFrameSetpoint(transformWorldFrameValueToChassisFrame(
+        pitchMotor->getChassisFrameMeasuredAngle().getValue(),
         worldFramePitchAngle,
         worldFramePitchSetpoint->getValue()));
 
-    // Project angle limited by the tap::control::turret::TurretSubsystemInterface back to world
+    // Project angle limited by the TurretMotor back to world
     // relative to use the value
     worldFramePitchSetpoint->setValue(transformChassisFrameToWorldFrame(
-        turretSubsystem->getCurrentPitchValue().getValue(),
+        pitchMotor->getChassisFrameMeasuredAngle().getValue(),
         worldFramePitchAngle,
-        turretSubsystem->getPitchSetpoint()));
+        pitchMotor->getChassisFrameSetpoint()));
 }
 
 WorldFramePitchTurretImuCascadePidTurretController::
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        TurretMotor *turretMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig)
-    : TurretPitchControllerInterface(turretSubsystem),
+    : TurretPitchControllerInterface(turretMotor),
       drivers(drivers),
       positionPid(posPidConfig),
       velocityPid(velPidConfig),
-      worldFrameSetpoint(0, 0, 360)
+      worldFrameSetpoint(0, 0, M_TWOPI)
 {
 }
 
 void WorldFramePitchTurretImuCascadePidTurretController::initialize()
 {
-    if (turretSubsystem->getPrevRanPitchTurretController() != this)
+    if (turretMotor->getTurretController() != this)
     {
         positionPid.reset();
         velocityPid.reset();
 
         worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
-            turretSubsystem->getCurrentPitchValue().getValue(),
+            turretMotor->getChassisFrameMeasuredAngle().getValue(),
             drivers->turretMCBCanComm.getPitch(),
-            turretSubsystem->getPitchSetpoint()));
+            turretMotor->getChassisFrameSetpoint()));
 
-        turretSubsystem->setPrevRanPitchTurretController(this);
+        turretMotor->attachTurretController(this);
     }
 }
 
@@ -333,7 +356,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         desiredSetpoint,
         worldFramePitchAngle,
         &worldFrameSetpoint,
-        turretSubsystem);
+        turretMotor);
 
     // Compute error between pitch target and reference angle
     float positionControllerError = -worldFrameSetpoint.difference(worldFramePitchAngle);
@@ -346,10 +369,21 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
     velocityPidOutput += computeGravitationalForceOffset(
         TURRET_CG_X,
         TURRET_CG_Z,
-        -turretSubsystem->getPitchAngleFromCenter(),
+        -turretMotor->getAngleFromCenter(),
         GRAVITY_COMPENSATION_SCALAR);
 
-    turretSubsystem->setPitchMotorOutput(velocityPidOutput);
+    turretMotor->setMotorOutput(velocityPidOutput);
+}
+
+void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
+{
+    const float worldFramePitchAngle = drivers->turretMCBCanComm.getPitch();
+
+    updatePitchWorldFrameSetpoint(
+        desiredSetpoint,
+        worldFramePitchAngle,
+        &worldFrameSetpoint,
+        turretMotor);
 }
 
 float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const
@@ -359,6 +393,6 @@ float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const
 
 bool WorldFramePitchTurretImuCascadePidTurretController::isOnline() const
 {
-    return turretSubsystem->isOnline() && drivers->turretMCBCanComm.isConnected();
+    return turretMotor->isOnline() && drivers->turretMCBCanComm.isConnected();
 }
 }  // namespace aruwsrc::control::turret::algorithms
