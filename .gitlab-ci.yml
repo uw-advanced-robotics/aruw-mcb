@@ -181,6 +181,38 @@ before_script:
     paths:
       - $BUILD_PATH
 
+# Soldier MK4 2022 build
+
+"Soldier MK4 2022: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: SOLDIERMK4_2022
+
+"Soldier MK4 2022: Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: SOLDIERMK4_2022
+
+"Soldier MK4 2022: Test Build":
+  stage: Tests
+  needs: []
+  only: *default_only
+  except: *default_except
+  script:
+    - cd aruw-mcb-project
+    - scons run-tests-gcov profile=fast robot=TARGET_SOLDIERMK4_2022 -j${NUM_JOBS}
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
+    - cd .. && gcovr -g --xml > cobertura.xml
+    - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
+    - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-soldierMK4-tests"
+    reports:
+      cobertura: cobertura.xml
+    expire_in: 2 weeks
+
 # Soldier 2022 build
 
 "Soldier 2022: MCB Build":
