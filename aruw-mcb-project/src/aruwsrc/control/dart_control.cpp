@@ -8,7 +8,6 @@
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/motor/stepper_motor.hpp"
-#include "turret/user/stepper_motor_turret_control_command.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
@@ -20,6 +19,9 @@
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/turret_subsystem.hpp"
+#include "turret/turret_motor.hpp"
+#include "turret/constants/turret_constants.hpp"
+#include "turret/user/stepper_motor_turret_control_command.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::control::turret;
@@ -45,7 +47,9 @@ namespace dart_control
 tap::motor::StepperMotor pitchMotor(drivers(), false, "pitchMotor", tap::gpio::Digital::OutputPin::E, tap::gpio::Pwm::Pin::X);
 tap::motor::StepperMotor yawMotor(drivers(), false, "yawMotor", tap::gpio::Digital::OutputPin::F, tap::gpio::Pwm::Pin::W);
 
-TurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, false);
+TurretSubsystem turretSubsystem(drivers(), &pitchMotor, &yawMotor, PITCH_MOTOR_CONFIG, YAW_MOTOR_CONFIG);
+TurretMotor turretPitchMotor(TurretMotorConfig, tap::motor::StepperMotor pitchMotor);
+TurretMotor turretYawMotor(TurretMotorConfig, tap::motor::StepperMotor yawMotor);
 
 // Agitators
 AgitatorSubsystem agitatorTop(
@@ -221,7 +225,7 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheelsBottomBack(
 
 aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTurretControlCommand(
     drivers(),
-    &turret
+    &turretSubsystem
 );
 
 // Mappings
@@ -269,7 +273,7 @@ void registerDartSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&frictionWheelsTopBack);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsBottomFront);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsBottomBack);
-    drivers->commandScheduler.registerSubsystem(&turret);
+    drivers->commandScheduler.registerSubsystem(&turretSubsystem); 
 }
 
 void initializeSubsystems()
@@ -280,7 +284,7 @@ void initializeSubsystems()
     frictionWheelsBottomFront.initialize();
     frictionWheelsTopBack.initialize();
     frictionWheelsTopFront.initialize();
-    turret.initialize();
+    turretSubsystem.initialize();
 }
 
 void startDartCommands(aruwsrc::Drivers *drivers)
@@ -295,7 +299,7 @@ void setDefaultDartCommands(aruwsrc::Drivers *)
     frictionWheelsTopBack.setDefaultCommand(&spinFrictionWheelsTopBack);
     frictionWheelsBottomFront.setDefaultCommand(&spinFrictionWheelsBottomFront);
     frictionWheelsBottomBack.setDefaultCommand(&spinFrictionWheelsBottomBack);
-    turret.setDefaultCommand(&stepperMotorTurretControlCommand);
+    turretSubsystem.setDefaultCommand(&stepperMotorTurretControlCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/

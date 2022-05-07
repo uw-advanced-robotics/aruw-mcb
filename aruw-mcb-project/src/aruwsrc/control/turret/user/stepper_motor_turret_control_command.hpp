@@ -23,6 +23,7 @@
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
+#include "../turret_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -49,9 +50,7 @@ public:
      * by. Basically mouse sensitivity.
      * @param[in] userPitchInputScalar See userYawInputScalar.
      */
-    StepperMotorTurretControlCommand(
-        aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem);
+    StepperMotorTurretControlCommand(aruwsrc::Drivers *drivers, TurretSubsystem *turretSubsystem);
 
     bool isReady() override;
 
@@ -67,6 +66,8 @@ public:
 
 private:
     aruwsrc::Drivers *drivers;
+    TurretMotor *turretPitchMotor;
+    TurretMotor *turretYawMotor;
     TurretSubsystem *turretSubsystem;
 };
 }  // namespace aruwsrc::control::turret::user

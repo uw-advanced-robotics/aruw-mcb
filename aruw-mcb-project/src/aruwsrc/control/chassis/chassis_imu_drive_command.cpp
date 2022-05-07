@@ -33,12 +33,12 @@ namespace aruwsrc::chassis
 ChassisImuDriveCommand::ChassisImuDriveCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
-    tap::control::turret::TurretSubsystemInterface* turret)
+    const aruwsrc::control::turret::TurretMotor* yawMotor)
     : tap::control::Command(),
       drivers(drivers),
       chassis(chassis),
-      turret(turret),
-      rotationSetpoint(0, 0, 360)
+      yawMotor(yawMotor),
+      rotationSetpoint(0, 0, M_TWOPI)
 {
     addSubsystemRequirement(chassis);
 }
@@ -51,7 +51,7 @@ void ChassisImuDriveCommand::initialize()
 
     if (imuSetpointInitialized)
     {
-        const float yaw = drivers->mpu6500.getYaw();
+        const float yaw = modm::toRadian(drivers->mpu6500.getYaw());
         rotationSetpoint.setValue(yaw);
     }
 
@@ -72,7 +72,7 @@ void ChassisImuDriveCommand::execute()
         }
         else
         {
-            const float yaw = drivers->mpu6500.getYaw();
+            const float yaw = modm::toRadian(drivers->mpu6500.getYaw());
             angleFromDesiredRotation = -rotationSetpoint.difference(yaw);
 
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
@@ -85,11 +85,13 @@ void ChassisImuDriveCommand::execute()
                 // doesn't have to be in the if statement but this is more computationally intensive
                 // compared to just shifting the value, so only do this when you actually have to
                 // (which is a very small amount in reality).
+                int status = 0;
                 rotationSetpoint.setValue(
                     tap::algorithms::ContiguousFloat::limitValue(
                         rotationSetpoint,
                         yaw - MAX_ROTATION_ERR,
-                        yaw + MAX_ROTATION_ERR) +
+                        yaw + MAX_ROTATION_ERR,
+                        &status) +
                     chassisRInput);
             }
             else
@@ -109,7 +111,7 @@ void ChassisImuDriveCommand::execute()
             // run PID controller to attempt to attain the setpoint
             chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
                 angleFromDesiredRotation,
-                targetVelocity - drivers->mpu6500.getGz());
+                targetVelocity - modm::toRadian(drivers->mpu6500.getGz()));
         }
     }
     else
@@ -128,14 +130,14 @@ void ChassisImuDriveCommand::execute()
         &chassisXDesiredWheelspeed,
         &chassisYDesiredWheelspeed);
 
-    if (turret != nullptr && turret->isOnline())
+    if (yawMotor != nullptr && yawMotor->isOnline())
     {
         // rotate X and Y based on turret angle from center so translational motion is relative
         // to the turret
         tap::algorithms::rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            modm::toRadian(turret->getYawAngleFromCenter()));
+            yawMotor->getAngleFromCenter());
     }
     else
     {
@@ -145,7 +147,7 @@ void ChassisImuDriveCommand::execute()
         tap::algorithms::rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            modm::toRadian(angleFromDesiredRotation));
+            angleFromDesiredRotation);
     }
 
     chassis->setDesiredOutput(

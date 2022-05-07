@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DRONE_TURRET_CONSTANTS_HPP_
-#define DRONE_TURRET_CONSTANTS_HPP_
+#ifndef DART_TURRET_CONSTANTS_HPP_
+#define DART_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -34,33 +34,26 @@
 namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
+static constexpr float TURRET_CG_X = -22.23;
+static constexpr float TURRET_CG_Z = 9.96;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 3'500.0f;
 
-static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
-static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
-
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
-
-static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 0,
-    .minAngle = 0,
-    .maxAngle = M_PI,
-    .limitMotorAngles = true,
-};
+/*static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;*/
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 0,
+    .startEncoderValue = 7500,
+    .minAngle = modm::toRadian(65),
+    .maxAngle = modm::toRadian(117),
+    .limitMotorAngles = false,
+};
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 1100,
     .minAngle = 0,
     .maxAngle = M_PI,
-    .limitMotorAngles = true,
+    .limitMotorAngles = false,
 };
-
-static constexpr float TURRET_CG_X = 0;
-static constexpr float TURRET_CG_Z = 0;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 }  // namespace aruwsrc::control::turret
-
-#endif  // DRONE_TURRET_CONSTANTS_HPP_
+#endif

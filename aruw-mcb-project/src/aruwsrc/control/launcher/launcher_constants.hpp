@@ -37,8 +37,8 @@ static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
 #endif
 
 #if defined(TARGET_SENTINEL_2022)
+static constexpr tap::can::CanBus TURRET0_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::can::CanBus TURRET2_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 #else
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #endif
