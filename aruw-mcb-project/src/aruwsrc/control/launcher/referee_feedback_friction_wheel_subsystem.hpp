@@ -65,7 +65,7 @@ public:
     inline float getPredictedLaunchSpeed() const override final
     {
         return ballSpeedAveragingTracker.getSize() == 0
-                   ? defaultFiringSpeed
+                   ? getDesiredLaunchSpeed()
                    : (pastProjectileVelocitySpeedSummed / ballSpeedAveragingTracker.getSize());
     }
 
