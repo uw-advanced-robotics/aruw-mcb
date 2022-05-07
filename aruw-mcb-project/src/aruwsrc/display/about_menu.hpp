@@ -77,7 +77,7 @@ public:
     bool hasChanged() override;
 
     static const char *getMenuName() { return "About Menu"; }
-    
+
     inline void resetHasChanged() { drawn = false; }
 
 private:
@@ -85,7 +85,6 @@ private:
 
     aruwsrc::Drivers *drivers;
     bool drawn = false;
-
 };
 }  // namespace aruwsrc::display
 

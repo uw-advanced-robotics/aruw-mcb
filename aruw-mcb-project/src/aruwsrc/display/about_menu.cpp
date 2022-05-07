@@ -53,7 +53,6 @@ void AboutMenu::shortButtonPress(modm::MenuButtons::Button button)
         this->remove();
     }
 }
-
 bool AboutMenu::hasChanged() { return !drawn; }
 
 }  // namespace aruwsrc::display
