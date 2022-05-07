@@ -90,6 +90,28 @@ static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
  * Radius of the wheels (m).
  */
 static constexpr float WHEEL_RADIUS = 0.076;
+
+#ifdef TARGET_SOLDIER_2021
+/**
+ * Distance from center of the two front wheels (m).
+ */
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
+/**
+ * Distance from center of the front and rear wheels (m).
+ */
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+
+#elif defined(TARGET_SOLDIER_2022)
+
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+
+#elif defined(TARGET_SOLDIERMK4_2022)
+
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+
+#endif
 /**
  * Distance from center of the two front wheels (m).
  */
