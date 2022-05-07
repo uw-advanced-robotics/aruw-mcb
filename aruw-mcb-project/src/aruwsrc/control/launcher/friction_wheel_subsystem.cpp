@@ -110,7 +110,7 @@ float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) c
     return launchSpeedToRpmInterpolator.interpolate(launchSpeed);
 }
 
-float FrictionWheelSubsystem::rpmToLaunchSpeed(float rpmSpeed) const 
+float FrictionWheelSubsystem::rpmToLaunchSpeed(float rpmSpeed) const
 {
     return rpmToLaunchSpeedInterpolator.interpolate(rpmSpeed);
 }

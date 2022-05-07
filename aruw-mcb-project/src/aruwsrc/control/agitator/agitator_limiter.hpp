@@ -31,7 +31,6 @@ class Drivers;
 
 namespace control::agitator
 {
-
 /**
  * CHANGE !!!!!!!!!!!!!!!!!!!!!1
  */
