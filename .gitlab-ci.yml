@@ -196,7 +196,7 @@ before_script:
     ROBOT: SOLDIERMK4_2022
 
 "Soldier MK4 2022: Test Build":
-   extends:
+  extends:
     - .test_build
   variables:
     ROBOT: SOLDIER_2021
