@@ -42,7 +42,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
-};,
+};
 #elif defined(TARGET_SOLDIER_2022)
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .kp = 200'000.0f,
@@ -51,7 +51,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
-};,
+};
 #elif defined(TARGET_SOLDIERMK4_2022)
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .kp = 75'000.0f,
