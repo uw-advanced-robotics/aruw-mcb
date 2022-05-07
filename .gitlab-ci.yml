@@ -181,6 +181,26 @@ before_script:
     paths:
       - $BUILD_PATH
 
+# Soldier MK4 2022 build
+
+"Soldier MK4 2022: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: SOLDIERMK4_2022
+
+"Soldier MK4 2022: Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: SOLDIERMK4_2022
+
+"Soldier MK4 2022: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: SOLDIER_2021
+
 # Soldier 2022 build
 
 "Soldier 2022: MCB Build":
