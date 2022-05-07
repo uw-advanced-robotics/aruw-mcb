@@ -20,15 +20,16 @@
 #ifndef AGITATOR_LIMITER_HPP_
 #define AGITATOR_LIMITER_HPP_
 
-#include "aruwsrc/drivers.hpp"
-#include "agitator_subsystem.hpp"
 #include "../launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
+
+#include "agitator_subsystem.hpp"
 
 namespace aruwsrc
 {
 class Drivers;
 
-namespace control::agitator 
+namespace control::agitator
 {
 
 /**
@@ -39,9 +40,9 @@ class AgitatorLimiter : public aruwsrc::agitator::AgitatorSubsystem
 public:
     /**
      * @param[in] drivers A pointer to the `Drivers` struct.
-     * @param[in] agitatorSubsystem 
+     * @param[in] agitatorSubsystem
      * @param[in] frictionWheelSubsystem
-     * 
+     *
      */
     AgitatorLimiter(
         aruwsrc::Drivers* drivers,
@@ -67,11 +68,11 @@ private:
      * Stores the jam state of the subsystem
      */
     bool subsystemJamStatus = false;
-    
+
     aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheelSubsystem;
-  
-}; // class AgitatorLimiter
-} // namespace control::agitator
-} // namespace aruwsrc
+
+};  // class AgitatorLimiter
+}  // namespace control::agitator
+}  // namespace aruwsrc
 
 #endif  // AGITATOR_LIMITER_HPP_
