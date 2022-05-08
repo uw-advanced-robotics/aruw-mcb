@@ -96,10 +96,10 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#ifdef TARGET_SOLDIER_2021
-    false,
-#else
+#ifdef TARGET_SOLDIER_2022
     true,
+#else
+    false,
 #endif
     "Yaw Turret");
 SoldierTurretSubsystem turret(
@@ -216,16 +216,17 @@ MoveUnjamRefLimitedCommand agitatorShootFastLimited(
     drivers(),
     &agitator,
     M_PI / 5.0f,
-    50,
+    20,
     0,
     true,
     M_PI / 20.0f,
+    0.6f,
     0.4f,
-    0.2f,
-    140,
+    200,
     2,
     true,
     10);
+
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
 MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
@@ -236,9 +237,9 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     0,
     true,
     M_PI / 20.0f,
+    0.6f,
     0.4f,
-    0.2f,
-    140,
+    200,
     2,
     false,
     10);
