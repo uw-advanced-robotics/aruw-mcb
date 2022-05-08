@@ -20,9 +20,9 @@
 #ifndef ROTATE_UNJAM_REF_LIMITED_COMMAND_HPP_
 #define ROTATE_UNJAM_REF_LIMITED_COMMAND_HPP_
 
-#include "tap/control/velocity/commands/rotate_command.hpp"
-#include "tap/control/velocity/commands/rotate_unjam_comprised_command.hpp"
-#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 
 namespace aruwsrc
 {
@@ -35,13 +35,14 @@ namespace aruwsrc::agitator
  * A command that will attempt to rotate an agitator a set amount and unjam if it
  * encounters a jam. This command has the option to be heat limited (in-game "heat")
  */
-class RotateUnjamRefLimitedCommand : public tap::control::velocity::RotateUnjamComprisedCommand
+class RotateUnjamRefLimitedCommand
+    : public tap::control::setpoint::MoveUnjamIntegralComprisedCommand
 {
 public:
     /**
      * @note: All parameters except for and `heatLimitBuffer` are passed directly to the
-     * `tap::control::setpoint::RotateUnjamComprisedCommand` constructor, so see that class for what
-     * those parameters do.
+     * `tap::control::setpoint::MoveUnjamIntegralComprisedCommand` constructor, so see that class
+     * for what those parameters do.
      *
      * @param[in] heatLimitBuffer If current_barrel_heat + heatLimitBuffer > barrel_heat_limit then
      * command will not be scheduled. i.e.: How close you can get to the heat limit before the
@@ -49,9 +50,9 @@ public:
      */
     RotateUnjamRefLimitedCommand(
         aruwsrc::Drivers &drivers,
-        tap::control::velocity::VelocitySetpointSubsystem &subsystem,
-        tap::control::velocity::RotateCommand &rotateCommand,
-        tap::control::velocity::UnjamRotateCommand &unjamCommand,
+        tap::control::setpoint::IntegrableSetpointSubsystem &subsystem,
+        tap::control::setpoint::MoveIntegralCommand &moveIntegralCommand,
+        tap::control::setpoint::UnjamIntegralCommand &unjamCommand,
         uint16_t heatLimitBuffer);
 
     bool isReady() override;

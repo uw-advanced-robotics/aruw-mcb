@@ -24,9 +24,9 @@
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/control/velocity/commands/rotate_command.hpp"
-#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
@@ -48,7 +48,7 @@
 #include "turret/sentinel_turret_subsystem.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
-using namespace tap::control::velocity;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
@@ -117,11 +117,11 @@ OttoVelocityOdometry2DSubsystem odometrySubsystem(
     &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
-RotateCommand agitatorRotateCommand(
+MoveIntegralCommand agitatorRotateCommand(
     agitator,
     aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamRotateCommand agitatorUnjamCommand(
+UnjamIntegralCommand agitatorUnjamCommand(
     agitator,
     aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
 

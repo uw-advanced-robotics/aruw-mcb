@@ -20,7 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "tap/mock/command_mock.hpp"
-#include "tap/mock/velocity_setpoint_subsystem_mock.hpp"
+#include "tap/mock/integrable_setpoint_subsystem_mock.hpp"
 
 #include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -76,8 +76,8 @@ protected:
     }
 
     Drivers drivers;
-    NiceMock<tap::mock::VelocitySetpointSubsystemMock> kicker;
-    NiceMock<tap::mock::VelocitySetpointSubsystemMock> waterwheel;
+    NiceMock<tap::mock::IntegrableSetpointSubsystemMock> kicker;
+    NiceMock<tap::mock::IntegrableSetpointSubsystemMock> waterwheel;
     NiceMock<FrictionWheelSubsystemMock> frictionWheels;
     NiceMock<CommandWithRequirementsMock> kickerFireCommand;
     NiceMock<CommandWithRequirementsMock> kickerLoadCommand;

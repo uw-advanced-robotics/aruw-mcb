@@ -89,7 +89,7 @@ bool VelocityAgitatorSubsystem::calibrateHere()
     return true;
 }
 
-float VelocityAgitatorSubsystem::getPosition() const
+float VelocityAgitatorSubsystem::getCurrentValueIntegral() const
 {
     if (!agitatorIsCalibrated)
     {
@@ -114,7 +114,7 @@ void VelocityAgitatorSubsystem::runVelocityPidControl()
     const uint32_t dt = curTime - prevTime;
     prevTime = curTime;
 
-    const float velocityError = velocitySetpoint - getVelocity();
+    const float velocityError = velocitySetpoint - getCurrentValue();
 
     velocityPid.runControllerDerivateError(velocityError, dt);
 
@@ -122,7 +122,7 @@ void VelocityAgitatorSubsystem::runVelocityPidControl()
         velocityPid.getOutput() + velocitySetpoint * config.velocityPIDFeedForwardGain);
 }
 
-void VelocityAgitatorSubsystem::setVelocitySetpoint(float velocity)
+void VelocityAgitatorSubsystem::setSetpoint(float velocity)
 {
     if (agitatorMotor.isMotorOnline())
     {

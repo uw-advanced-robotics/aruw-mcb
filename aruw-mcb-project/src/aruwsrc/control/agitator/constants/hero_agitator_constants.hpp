@@ -21,8 +21,8 @@
 #define HERO_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/control/velocity/commands/rotate_command.hpp"
-#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "../hero_agitator_command.hpp"
@@ -68,16 +68,17 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
     .velocityPIDFeedForwardGain = 50.0f,
 };
 
-static constexpr tap::control::velocity::RotateCommand::Config WATERWHEEL_AGITATOR_ROTATE_CONFIG = {
-    .targetDisplacement = WATERWHEEL_TARGET_DISPLACEMENT,
-    .desiredVelocity = WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S,
-    .setpointTolerance = M_PI / 32.0f,
+static constexpr tap::control::setpoint::MoveIntegralCommand::Config
+    WATERWHEEL_AGITATOR_ROTATE_CONFIG = {
+        .targetIntegralChange = WATERWHEEL_TARGET_DISPLACEMENT,
+        .desiredSetpoint = TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S,
+        .setpointTolerance = M_PI / 32.0f,
 };
 
-static constexpr tap::control::velocity::UnjamRotateCommand::Config
+static constexpr tap::control::setpoint::UnjamIntegralCommand::Config
     WATERWHEEL_AGITATOR_UNJAM_CONFIG = {
-        .unjamDisplacement = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT,
-        .unjamVelocity = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT / WATERWHEEL_TARGET_UNJAM_TIME_S,
+        .targetUnjamIntegralChange = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT,
+        .desiredSetpoint = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT / WATERWHEEL_TARGET_UNJAM_TIME_S,
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
         /// seconds. Add 100 ms extra tolerance.
         .maxWaitTime = static_cast<uint32_t>(1000.0f * WATERWHEEL_TARGET_UNJAM_TIME_S) + 100,
@@ -105,17 +106,17 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITA
     .velocityPIDFeedForwardGain = 0,
 };
 
-static constexpr tap::control::velocity::RotateCommand::Config KICKER_LOAD_AGITATOR_ROTATE_CONFIG =
-    {
-        .targetDisplacement = M_PI / 2.0f,
-        .desiredVelocity = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
+static constexpr tap::control::setpoint::MoveIntegralCommand::Config
+    KICKER_LOAD_AGITATOR_ROTATE_CONFIG = {
+        .targetIntegralChange = M_PI / 2.0f,
+        .desiredSetpoint = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
         .setpointTolerance = M_PI / 32.0f,
 };
 
-static constexpr tap::control::velocity::RotateCommand::Config KICKER_SHOOT_AGITATOR_ROTATE_CONFIG =
-    {
-        .targetDisplacement = M_PI / 2.0f,
-        .desiredVelocity = 6.0 * M_PI,
+static constexpr tap::control::setpoint::MoveIntegralCommand::Config
+    KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
+        .targetIntegralChange = M_PI / 2.0f,
+        .desiredSetpoint = 6.0 * M_PI,
         .setpointTolerance = M_PI / 32.0f,
 };
 

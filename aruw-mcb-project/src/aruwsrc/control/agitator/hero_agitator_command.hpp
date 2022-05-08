@@ -23,7 +23,7 @@
 #include "tap/control/comprised_command.hpp"
 #include "tap/control/setpoint/commands/move_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
-#include "tap/control/velocity/interfaces/velocity_setpoint_subsystem.hpp"
+#include "tap/control/setpoint/interfaces/integrable_setpoint_subsystem.hpp"
 
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 
@@ -61,8 +61,8 @@ public:
     HeroAgitatorCommand(
         aruwsrc::Drivers& drivers,
         const Config& config,
-        tap::control::velocity::VelocitySetpointSubsystem& kickerAgitator,
-        tap::control::velocity::VelocitySetpointSubsystem& waterwheelAgitator,
+        tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator,
+        tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
         const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
         tap::control::Command& kickerFireCommand,
         tap::control::Command& kickerLoadCommand,
@@ -114,8 +114,8 @@ private:
     };
 
     aruwsrc::Drivers& drivers;
-    tap::control::velocity::VelocitySetpointSubsystem& kickerAgitator;
-    tap::control::velocity::VelocitySetpointSubsystem& waterwheelAgitator;
+    tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator;
+    tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator;
 
     tap::control::Command& kickerFireCommand;
     tap::control::Command& kickerLoadCommand;

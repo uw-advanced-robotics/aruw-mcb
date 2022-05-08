@@ -30,8 +30,8 @@
 #endif
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/control/velocity/algorithms/velocity_continuous_jam_checker.hpp"
-#include "tap/control/velocity/interfaces/velocity_setpoint_subsystem.hpp"
+#include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
+#include "tap/control/setpoint/interfaces/integrable_setpoint_subsystem.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
@@ -50,7 +50,7 @@ namespace aruwsrc::agitator
  * velocity controller. Also keeps track of absolute position to allow commands to rotate the
  * agitator some specific displacement.
  */
-class VelocityAgitatorSubsystem : public tap::control::velocity::VelocitySetpointSubsystem
+class VelocityAgitatorSubsystem : public tap::control::setpoint::IntegrableSetpointSubsystem
 {
 public:
     /**
@@ -77,27 +77,33 @@ public:
 
     void refresh() override;
 
+    void runHardwareTests() override;
+
+    void onHardwareTestStart() override;
+
+    const char* getName() override { return "velocity agitator"; }
+
     /// @return The velocity setpoint that some command has requested, in radians / second
-    inline float getVelocitySetpoint() const override { return velocitySetpoint; }
+    inline float getSetpoint() const override { return velocitySetpoint; }
 
     /**
      * Sets the velocity setpoint to the specified velocity
      *
      * @param[in] velocity The desired velocity in radians / second.
      */
-    void setVelocitySetpoint(float velocity) override;
+    void setSetpoint(float velocity) override;
 
     /// @return The agitator velocity in radians / second.
-    inline float getVelocity() const override
+    inline float getCurrentValue() const override
     {
         return (agitatorMotor.getShaftRPM() / config.gearRatio) * (M_TWOPI / 60.0f);
     }
 
     /**
-     * @return The calibrated agitator angle, in radians. If the agitator is uncalibrated, 0
-     * radians is returned.
+     * Meaningless function that nothing uses
+     * @return 0
      */
-    float getPosition() const override;
+    inline float getJamSetpointTolerance() const override { return 0; }
 
     /**
      * Attempts to calibrate the agitator at the current position, such that `getPosition` will
@@ -133,11 +139,19 @@ public:
      */
     inline bool isOnline() override { return agitatorMotor.isMotorOnline(); }
 
-    void runHardwareTests() override;
+    /**
+     * Since we don't keep track of the derivative of the velocity (since the velocity is the
+     * setpoint), this function will always return 0.
+     *
+     * @return 0
+     */
+    inline float getVelocity() override { return 0; }
 
-    void onHardwareTestStart() override;
-
-    const char* getName() override { return "velocity agitator"; }
+    /**
+     * @return The calibrated agitator angle, in radians. If the agitator is uncalibrated, 0
+     * radians is returned.
+     */
+    float getCurrentValueIntegral() const override;
 
 private:
     VelocityAgitatorSubsystemConfig config;
@@ -145,7 +159,7 @@ private:
     tap::algorithms::SmoothPid velocityPid;
 
     /// The object that runs jam detection.
-    tap::control::velocity::VelocityContinuousJamChecker jamChecker;
+    tap::control::setpoint::SetpointContinuousJamChecker jamChecker;
 
     /// You can calibrate the agitator, which will set the current agitator angle to zero radians.
     /// This value is the starting measured angle offset applied to make the motor angle "0" when

@@ -23,17 +23,17 @@
 
 #include "agitator_subsystem.hpp"
 
-using namespace tap::control::velocity;
+using namespace tap::control::setpoint;
 
 namespace aruwsrc::agitator
 {
 RotateUnjamRefLimitedCommand::RotateUnjamRefLimitedCommand(
     aruwsrc::Drivers &drivers,
-    VelocitySetpointSubsystem &subsystem,
-    tap::control::velocity::RotateCommand &rotateCommand,
-    tap::control::velocity::UnjamRotateCommand &unjamCommand,
+    IntegrableSetpointSubsystem &subsystem,
+    tap::control::setpoint::MoveIntegralCommand &moveIntegralCommand,
+    tap::control::setpoint::UnjamIntegralCommand &unjamCommand,
     uint16_t heatLimitBuffer)
-    : RotateUnjamComprisedCommand(drivers, subsystem, rotateCommand, unjamCommand),
+    : MoveUnjamIntegralComprisedCommand(drivers, subsystem, moveIntegralCommand, unjamCommand),
       drivers(drivers),
       heatLimitBuffer(heatLimitBuffer)
 {
@@ -43,7 +43,7 @@ bool RotateUnjamRefLimitedCommand::isReady()
 {
     const auto &robotData = drivers.refSerial.getRobotData();
 
-    return RotateUnjamComprisedCommand::isReady() &&
+    return MoveUnjamIntegralComprisedCommand::isReady() &&
            !(drivers.refSerial.getRefSerialReceivingData() &&
              (robotData.turret.heat17ID1 != 0xffff &&
               (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1)));
@@ -53,7 +53,7 @@ bool RotateUnjamRefLimitedCommand::isFinished() const
 {
     const auto &robotData = drivers.refSerial.getRobotData();
 
-    return RotateUnjamComprisedCommand::isFinished() ||
+    return MoveUnjamIntegralComprisedCommand::isFinished() ||
            (drivers.refSerial.getRefSerialReceivingData() && robotData.turret.heat17ID1 != 0xffff &&
             (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));
 }

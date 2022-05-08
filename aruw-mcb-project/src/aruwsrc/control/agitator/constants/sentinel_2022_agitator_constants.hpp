@@ -21,8 +21,8 @@
 #define SENTINEL_2022_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/control/velocity/commands/rotate_command.hpp"
-#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "../velocity_agitator_subsystem_config.hpp"
@@ -84,15 +84,15 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 }
 
-static constexpr tap::control::velocity::RotateCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetDisplacement = M_TWOPI / 10.0f,
-    .desiredVelocity = 2.0f * M_TWOPI,
+static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
+    .targetIntegralChange = M_TWOPI / 10.0f,
+    .desiredSetpoint = 2.0f * M_TWOPI,
     .setpointTolerance = M_PI / 20.0f,
 };
 
-static constexpr tap::control::velocity::UnjamRotateCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .unjamDisplacement = M_TWOPI / 10.0f,
-    .unjamVelocity = M_TWOPI / 2.0f,
+static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
+    .targetUnjamIntegralChange = M_TWOPI / 10.0f,
+    .unjamSetpoint = M_TWOPI / 2.0f,
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds. Add 100 ms extra tolerance.
     .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 15.0f) / (M_TWOPI / 4.0f)) + 100,

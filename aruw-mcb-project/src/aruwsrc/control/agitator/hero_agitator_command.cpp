@@ -39,8 +39,8 @@ namespace agitator
 HeroAgitatorCommand::HeroAgitatorCommand(
     aruwsrc::Drivers& drivers,
     const Config& config,
-    tap::control::velocity::VelocitySetpointSubsystem& kickerAgitator,
-    tap::control::velocity::VelocitySetpointSubsystem& waterwheelAgitator,
+    tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator,
+    tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
     const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
     tap::control::Command& kickerFireCommand,
     tap::control::Command& kickerLoadCommand,

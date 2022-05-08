@@ -26,9 +26,9 @@
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/control/velocity/commands/rotate_command.hpp"
-#include "tap/control/velocity/commands/unjam_rotate_command.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/multi_shot_handler.hpp"
@@ -69,7 +69,7 @@
 #endif
 
 using namespace tap::control::setpoint;
-using namespace tap::control::velocity;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::algorithms::odometry;
@@ -205,11 +205,11 @@ cv::TurretCVCommand turretCVCommand(
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
-RotateCommand agitatorRotateCommand(
+MoveIntegralCommand agitatorRotateCommand(
     agitator,
     aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamRotateCommand agitatorUnjamCommand(
+UnjamIntegralCommand agitatorUnjamCommand(
     agitator,
     aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
 
@@ -220,7 +220,7 @@ RotateUnjamRefLimitedCommand agitatorShootFastLimited(
     agitatorUnjamCommand,
     aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
-RotateUnjamComprisedCommand agitatorShootFastUnlimited(
+MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
     *drivers(),
     agitator,
     agitatorRotateCommand,

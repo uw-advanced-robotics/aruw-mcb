@@ -27,8 +27,8 @@
 #include "tap/control/setpoint/commands/move_absolute_command.hpp"
 #include "tap/control/setpoint/commands/move_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/control/velocity/commands/rotate_unjam_comprised_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
@@ -60,7 +60,7 @@
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
-using namespace tap::control::velocity;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
@@ -160,25 +160,25 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
-RotateCommand waterwheelLoadCommand(
+MoveIntegralCommand waterwheelLoadCommand(
     waterwheelAgitator,
     aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
 
-UnjamRotateCommand waterwheelAgitatorUnjamCommand(
+UnjamIntegralCommand waterwheelAgitatorUnjamCommand(
     waterwheelAgitator,
     aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
 
-RotateUnjamComprisedCommand waterwheelLoadUnjamCommand(
+MoveUnjamIntegralComprisedCommand waterwheelLoadUnjamCommand(
     *drivers(),
     waterwheelAgitator,
     waterwheelLoadCommand,
     waterwheelAgitatorUnjamCommand);
 
-RotateCommand kickerLoadCommand(
+MoveIntegralCommand kickerLoadCommand(
     kickerAgitator,
     aruwsrc::control::agitator::constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 
-RotateCommand kickerLaunchCommand(
+MoveIntegralCommand kickerLaunchCommand(
     kickerAgitator,
     aruwsrc::control::agitator::constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 

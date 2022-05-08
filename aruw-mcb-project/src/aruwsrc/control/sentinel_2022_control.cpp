@@ -49,7 +49,7 @@
 #include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
-using namespace tap::control::velocity;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
@@ -163,11 +163,11 @@ SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
 namespace turret0
 {
-RotateCommand agitatorRotateCommand(
+MoveIntegralCommand agitatorRotateCommand(
     agitator,
     aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamRotateCommand agitatorUnjamCommand(
+UnjamIntegralCommand agitatorUnjamCommand(
     agitator,
     aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
 
@@ -178,7 +178,7 @@ RotateUnjamRefLimitedCommand agitatorShootFastLimited(
     agitatorUnjamCommand,
     aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
-RotateUnjamComprisedCommand agitatorShootFastUnlimited(
+MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
     *drivers(),
     agitator,
     agitatorRotateCommand,
@@ -233,11 +233,11 @@ cv::SentinelTurretCVCommand turretCVCommand(
 
 namespace turret1
 {
-RotateCommand agitatorRotateCommand(
+MoveIntegralCommand agitatorRotateCommand(
     agitator,
     aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamRotateCommand agitatorUnjamCommand(
+UnjamIntegralCommand agitatorUnjamCommand(
     agitator,
     aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
 
@@ -248,7 +248,7 @@ RotateUnjamRefLimitedCommand agitatorShootFastLimited(
     agitatorUnjamCommand,
     aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
-RotateUnjamComprisedCommand agitatorShootFastUnlimited(
+MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
     *drivers(),
     agitator,
     agitatorRotateCommand,
