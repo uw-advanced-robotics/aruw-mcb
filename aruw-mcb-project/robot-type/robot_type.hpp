@@ -24,10 +24,10 @@
 // when building (assuming define has been passed in through command line)
 #if defined(TARGET_SOLDIER_2022) || defined(TARGET_SOLDIER_2021) || defined(TARGET_DRONE) ||      \
     defined(TARGET_ENGINEER) || defined(TARGET_SENTINEL_2021) || defined(TARGET_SENTINEL_2022) || \
-    defined(TARGET_HERO)
+    defined(TARGET_HERO) || defined(TARGET_SOLDIERMK4_2022)
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 
-#define TARGET_SOLDIER_2021
+#define TARGET_SOLDIERMK4_2022
 
 #endif
