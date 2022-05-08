@@ -115,14 +115,14 @@ public:
 
     const char *getName() const override { return "turret CV"; }
 
-    bool getTurretID() const { return turretID; }
+    mockable bool getTurretID() const { return turretID; }
 
     /**
      * @return True if vision is active and the turret CV command has acquired the target and the
      * turret is within some tolerance of the target. This tolerance is distance based (the further
      * away the target the closer to the center of the plate the turret must be aiming)
      */
-    bool isAimingWithinLaunchingTolerance() const { return withinAimingTolerance; }
+    mockable bool isAimingWithinLaunchingTolerance() const { return withinAimingTolerance; }
 
 private:
     aruwsrc::Drivers *drivers;
