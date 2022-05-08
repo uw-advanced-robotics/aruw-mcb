@@ -61,21 +61,16 @@ void RefereeFeedbackFrictionWheelSubsystem::updatePredictedLaunchSpeed()
         if (prevLaunchingDataReceiveTimestamp != turretData.lastReceivedLaunchingInfoTimestamp &&
             turretData.launchMechanismID == firingSystemMechanismID)
         {
-            // firingFreq is the number of projectiles fired when the launch data was received
-
-            for (uint8_t i = 0; i < turretData.firingFreq; i++)
+            // remove element to make room for new element
+            if (ballSpeedAveragingTracker.isFull())
             {
-                // remove element to make room for new element
-                if (ballSpeedAveragingTracker.isFull())
-                {
-                    pastProjectileVelocitySpeedSummed -= ballSpeedAveragingTracker.getFront();
-                    ballSpeedAveragingTracker.removeFront();
-                }
-
-                // insert new element
-                pastProjectileVelocitySpeedSummed += turretData.bulletSpeed;
-                ballSpeedAveragingTracker.append(turretData.bulletSpeed);
+                pastProjectileVelocitySpeedSummed -= ballSpeedAveragingTracker.getFront();
+                ballSpeedAveragingTracker.removeFront();
             }
+
+            // insert new element
+            pastProjectileVelocitySpeedSummed += turretData.bulletSpeed;
+            ballSpeedAveragingTracker.append(turretData.bulletSpeed);
 
             prevLaunchingDataReceiveTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
         }
