@@ -63,8 +63,8 @@ public:
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
-    static constexpr float HALF_PLATE_WIDTH = 50.0f;
-    static constexpr float HALF_PLATE_HEIGHT = 50.0f;
+    static constexpr float HALF_PLATE_WIDTH = 0.05f;
+    static constexpr float HALF_PLATE_HEIGHT = 0.05f;
 
     /**
      * @param[in] drivers Pointer to a global drivers object.

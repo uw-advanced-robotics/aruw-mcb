@@ -146,6 +146,7 @@ void TurretCVCommand::end(bool)
 {
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
+    withinAimingTolerance = false;
 }
 
 }  // namespace aruwsrc::control::turret::cv

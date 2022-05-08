@@ -247,13 +247,13 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
 MoveCVLimitedCommand agitatorLaunchCVLimited(
     *drivers(),
     agitator,
-    agitatorShootFastNotLimited,
+    agitatorShootFastLimited,
     turretCVCommand);
 
 MoveYellowCardCommand agitatorLaunchYellowCardCommand(
     *drivers(),
     agitator,
-    agitatorShootFastNotLimited,
+    agitatorShootFastLimited,
     agitatorLaunchCVLimited);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
@@ -327,13 +327,13 @@ ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({R
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&agitatorShootFastLimited},
+    {&agitatorLaunchYellowCardCommand},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
     false,
     1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&agitatorLaunchYellowCardCommand},
+    {&agitatorShootFastNotLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
 HoldCommandMapping rightMousePressed(
