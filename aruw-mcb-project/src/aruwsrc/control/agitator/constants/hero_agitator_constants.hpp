@@ -71,14 +71,14 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     WATERWHEEL_AGITATOR_ROTATE_CONFIG = {
         .targetIntegralChange = WATERWHEEL_TARGET_DISPLACEMENT,
-        .desiredSetpoint = TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S,
+        .desiredSetpoint = WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S,
         .setpointTolerance = M_PI / 32.0f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config
     WATERWHEEL_AGITATOR_UNJAM_CONFIG = {
         .targetUnjamIntegralChange = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT,
-        .desiredSetpoint = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT / WATERWHEEL_TARGET_UNJAM_TIME_S,
+        .unjamSetpoint = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT / WATERWHEEL_TARGET_UNJAM_TIME_S,
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
         /// seconds. Add 100 ms extra tolerance.
         .maxWaitTime = static_cast<uint32_t>(1000.0f * WATERWHEEL_TARGET_UNJAM_TIME_S) + 100,
