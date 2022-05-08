@@ -78,7 +78,6 @@ static constexpr tap::control::velocity::UnjamRotateCommand::Config AGITATOR_UNJ
 };
 
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
-
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // SOLDIER_AGITATOR_CONSTANTS_HPP_

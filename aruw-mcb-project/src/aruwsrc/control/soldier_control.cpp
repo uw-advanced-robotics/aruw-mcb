@@ -97,10 +97,10 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#ifdef TARGET_SOLDIER_2021
-    false,
-#else
+#ifdef TARGET_SOLDIER_2022
     true,
+#else
+    false,
 #endif
     "Yaw Turret");
 SoldierTurretSubsystem turret(
