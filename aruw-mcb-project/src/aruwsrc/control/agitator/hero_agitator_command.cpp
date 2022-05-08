@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -132,8 +134,8 @@ bool HeroAgitatorCommand::isReady()
 
 bool HeroAgitatorCommand::isFinished() const
 {
-    return !kickerAgitator->isOnline() || !waterwheelAgitator->isOnline() ||
-           (currState == FINISHED) || !flywheelsOn(frictionWheels);
+    return !flywheelsOn(frictionWheels) || !kickerAgitator->isOnline() ||
+           !waterwheelAgitator->isOnline() || (currState == FINISHED);
 }
 
 void HeroAgitatorCommand::initialize()
