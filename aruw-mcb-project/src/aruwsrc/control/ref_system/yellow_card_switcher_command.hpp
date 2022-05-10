@@ -17,8 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOVE_YELLOW_CARD_COMMAND_HPP_
-#define MOVE_YELLOW_CARD_COMMAND_HPP_
+#ifndef YELLOW_CARD_SWITCHER_COMMAND_HPP_
+#define YELLOW_CARD_SWITCHER_COMMAND_HPP_
+
+#include <vector>
 
 #include "tap/control/command.hpp"
 
@@ -27,31 +29,31 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::ref_system
 {
 /**
  * A command that switches between running two commands based on whether or not the operator is
  * blinded by a yellow card.
  */
-class MoveYellowCardCommand : public tap::control::Command
+class YellowCardSwitcherCommand : public tap::control::Command
 {
 public:
     /**
      * @param[in] drivers Reference to a drivers object
-     * @param[in] dependentSubsystem The Subsystem that the Commands depend on
+     * @param[in] subsystemRequirements The list of Subsystems that the Commands depend on
      * @param[in] normalCommand Command to run when the operator is not blinded by a yellow card.
      * @param[in] yellowCardCommand Command to run when the operator is blinded by a yellow card.
      *
      * @attention The normal command and yellow card command must both have the same dependent
-     * Subsystem, and it must be the passed in dependentSubsystem.
+     * Subsystem, and it must be the passed in subsystemRequirement.
      */
-    MoveYellowCardCommand(
+    YellowCardSwitcherCommand(
         const aruwsrc::Drivers &drivers,
-        tap::control::Subsystem &dependentSubsystem,
+        const std::vector<tap::control::Subsystem *> &subsystemRequirements,
         tap::control::Command &normalCommand,
         tap::control::Command &yellowCardCommand);
 
-    const char *getName() const override { return "Move yellow card command"; }
+    const char *getName() const override { return "Yellow card switcher command"; }
     bool isReady() override;
     void initialize() override;
     void execute() override;
@@ -63,8 +65,8 @@ private:
     tap::control::Command &normalCommand;
     tap::control::Command &yellowCardCommand;
 
-    bool initializedWhenYellowCarded = false;
+    bool readyWhenYellowCarded = false;
 };
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::ref_system
 
-#endif  // MOVE_YELLOW_CARD_COMMAND_HPP_
+#endif  // YELLOW_CARD_SWITCHER_COMMAND_HPP_

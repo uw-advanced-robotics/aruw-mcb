@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "move_yellow_card_command.hpp"
+#include "yellow_card_switcher_command.hpp"
 
 #include <cassert>
 
@@ -25,48 +25,47 @@
 
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::ref_system
 {
-MoveYellowCardCommand::MoveYellowCardCommand(
+YellowCardSwitcherCommand::YellowCardSwitcherCommand(
     const aruwsrc::Drivers &drivers,
-    tap::control::Subsystem &dependentSubsystem,
+    const std::vector<tap::control::Subsystem *> &subsystemRequirements,
     tap::control::Command &normalCommand,
     tap::control::Command &yellowCardCommand)
     : drivers(drivers),
       normalCommand(normalCommand),
       yellowCardCommand(yellowCardCommand)
 {
-    assert(
-        normalCommand.getRequirementsBitwise() == yellowCardCommand.getRequirementsBitwise() &&
-        normalCommand.getRequirementsBitwise() ==
-            (1UL << dependentSubsystem.getGlobalIdentifier()));
-    addSubsystemRequirement(&dependentSubsystem);
+    for (auto requirement : subsystemRequirements)
+    {
+        addSubsystemRequirement(requirement);
+    }
+    assert(normalCommand.getRequirementsBitwise() == this->getRequirementsBitwise());
+    assert(yellowCardCommand.getRequirementsBitwise() == this->getRequirementsBitwise());
 }
 
-bool MoveYellowCardCommand::isReady()
+bool YellowCardSwitcherCommand::isReady()
 {
-    const bool operatorBlinded = drivers.refSerial.operatorBlinded();
-    return (operatorBlinded && yellowCardCommand.isReady()) ||
-           (!operatorBlinded && normalCommand.isReady());
+    readyWhenYellowCarded = drivers.refSerial.operatorBlinded();
+    return (readyWhenYellowCarded && yellowCardCommand.isReady()) ||
+           (!readyWhenYellowCarded && normalCommand.isReady());
 }
 
-void MoveYellowCardCommand::initialize()
+void YellowCardSwitcherCommand::initialize()
 {
-    if (drivers.refSerial.operatorBlinded())
+    if (readyWhenYellowCarded)
     {
         yellowCardCommand.initialize();
-        initializedWhenYellowCarded = true;
     }
     else
     {
         normalCommand.initialize();
-        initializedWhenYellowCarded = false;
     }
 }
 
-void MoveYellowCardCommand::execute()
+void YellowCardSwitcherCommand::execute()
 {
-    if (initializedWhenYellowCarded)
+    if (readyWhenYellowCarded)
     {
         yellowCardCommand.execute();
     }
@@ -76,9 +75,9 @@ void MoveYellowCardCommand::execute()
     }
 }
 
-void MoveYellowCardCommand::end(bool interrupted)
+void YellowCardSwitcherCommand::end(bool interrupted)
 {
-    if (initializedWhenYellowCarded)
+    if (readyWhenYellowCarded)
     {
         yellowCardCommand.end(interrupted);
     }
@@ -88,10 +87,9 @@ void MoveYellowCardCommand::end(bool interrupted)
     }
 }
 
-bool MoveYellowCardCommand::isFinished() const
+bool YellowCardSwitcherCommand::isFinished() const
 {
-    return initializedWhenYellowCarded ? yellowCardCommand.isFinished()
-                                       : normalCommand.isFinished();
+    return readyWhenYellowCarded ? yellowCardCommand.isFinished() : normalCommand.isFinished();
 }
 
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::ref_system

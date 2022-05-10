@@ -119,10 +119,10 @@ void SentinelTurretCVCommand::execute()
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
-        if ((abs(turretSubsystem->yawMotor.getValidChassisMeasurementError()) <
-             tan(aruwsrc::algorithms::OttoBallisticsSolver::HALF_PLATE_WIDTH / targetDistance)) &&
-            (abs(turretSubsystem->pitchMotor.getValidChassisMeasurementError()) <
-             tan(aruwsrc::algorithms::OttoBallisticsSolver::HALF_PLATE_HEIGHT / targetDistance)))
+        if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+                turretSubsystem->yawMotor.getValidChassisMeasurementError(),
+                turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+                targetDistance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
             if (!drivers->commandScheduler.isCommandScheduled(firingCommand))

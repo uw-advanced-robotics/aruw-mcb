@@ -67,9 +67,6 @@ namespace aruwsrc::control::turret::cv
 class TurretCVCommand : public tap::control::Command
 {
 public:
-    static constexpr float YAW_ON_TARGET_ANGLE_TOLERANCE = modm::toRadian(2);
-    static constexpr float PITCH_ON_TARGET_ANGLE_TOLERANCE = modm::toRadian(2);
-
     /**
      * Constructs a TurretCVCommand
      *

@@ -17,34 +17,40 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "move_cv_limited_command.hpp"
+#include "cv_limited_command.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::turret::cv
 {
-MoveCVLimitedCommand::MoveCVLimitedCommand(
+CVLimitedCommand::CVLimitedCommand(
     aruwsrc::Drivers &drivers,
-    tap::control::Subsystem &agitator,
-    tap::control::Command &moveCommand,
-    const aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand)
+    const std::vector<tap::control::Subsystem *> subsystemRequirements,
+    tap::control::Command &command,
+    const TurretCVCommand &turretCVCommand)
     : drivers(drivers),
-      moveCommand(moveCommand),
+      command(command),
       turretCVCommand(turretCVCommand)
 {
-    addSubsystemRequirement(&agitator);
+    for (auto requirement : subsystemRequirements)
+    {
+        assert(requirement != nullptr);
+        addSubsystemRequirement(requirement);
+    }
+
+    assert(command.getRequirementsBitwise() == this->getRequirementsBitwise());
 }
 
-bool MoveCVLimitedCommand::isReady() { return moveCommand.isReady() && visionAimingOnTarget(); }
+bool CVLimitedCommand::isReady() { return command.isReady() && visionAimingOnTarget(); }
 
-bool MoveCVLimitedCommand::isFinished() const
+bool CVLimitedCommand::isFinished() const
 {
-    return moveCommand.isFinished() || !visionAimingOnTarget();
+    return command.isFinished() || !visionAimingOnTarget();
 }
 
-bool MoveCVLimitedCommand::visionAimingOnTarget() const
+bool CVLimitedCommand::visionAimingOnTarget() const
 {
     return drivers.commandScheduler.isCommandScheduled(&turretCVCommand) &&
            turretCVCommand.isAimingWithinLaunchingTolerance();
 }
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::turret::cv

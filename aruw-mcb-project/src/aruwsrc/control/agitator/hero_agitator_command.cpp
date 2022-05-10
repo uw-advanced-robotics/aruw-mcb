@@ -103,7 +103,7 @@ static inline bool enoughHeatToFire(
            (robotData.turret.heat42 + heatLimitBuffer <= robotData.turret.heatLimit42);
 }
 
-static inline bool readyToRotateIfYellowCarded(
+static inline bool readyToRotate(
     aruwsrc::Drivers& drivers,
     const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand)
 {
@@ -127,7 +127,7 @@ bool HeroAgitatorCommand::isReady()
     return kickerAgitator->isOnline() && waterwheelAgitator->isOnline() &&
            flywheelsOn(frictionWheels) &&
            enoughHeatToFire(*drivers, heatLimiting, robotData, heatLimitBuffer) &&
-           readyToRotateIfYellowCarded(*drivers, turretCVCommand);
+           readyToRotate(*drivers, turretCVCommand);
 }
 
 bool HeroAgitatorCommand::isFinished() const

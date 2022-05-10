@@ -63,8 +63,28 @@ public:
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
-    static constexpr float HALF_PLATE_WIDTH = 0.05f;
-    static constexpr float HALF_PLATE_HEIGHT = 0.05f;
+    /// The width of a small armor plate, in m
+    static constexpr float PLATE_WIDTH = 0.1f;
+    /// The height of a small armor plate, in m
+    static constexpr float PLATE_HEIGHT = 0.1f;
+
+    /**
+     * @return true if the specified yaw and pitch angle errors are small enough such that if a
+     * projectile were to be launched, the projectile would hit a small armor plate at
+     * targetDistance m away.
+     */
+    static inline bool withinAimingTolerance(
+        float yawAngleError,
+        float pitchAngleError,
+        float targetDistance)
+    {
+        return (abs(yawAngleError) < atan2f(
+                                         aruwsrc::algorithms::OttoBallisticsSolver::PLATE_WIDTH,
+                                         2.0f * targetDistance)) &&
+               (abs(pitchAngleError) < atan2f(
+                                           aruwsrc::algorithms::OttoBallisticsSolver::PLATE_HEIGHT,
+                                           2.0f * targetDistance));
+    }
 
     /**
      * @param[in] drivers Pointer to a global drivers object.

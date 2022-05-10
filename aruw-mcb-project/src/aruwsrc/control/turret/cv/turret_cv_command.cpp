@@ -106,11 +106,10 @@ void TurretCVCommand::execute()
             yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
         }
 
-        withinAimingTolerance =
-            (abs(turretSubsystem->yawMotor.getValidChassisMeasurementError()) <
-             tan(aruwsrc::algorithms::OttoBallisticsSolver::HALF_PLATE_WIDTH / targetDistance)) &&
-            (abs(turretSubsystem->pitchMotor.getValidChassisMeasurementError()) <
-             tan(aruwsrc::algorithms::OttoBallisticsSolver::HALF_PLATE_HEIGHT / targetDistance));
+        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+            turretSubsystem->yawMotor.getValidChassisMeasurementError(),
+            turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+            targetDistance);
     }
     else
     {

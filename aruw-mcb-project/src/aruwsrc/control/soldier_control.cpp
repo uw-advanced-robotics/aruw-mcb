@@ -30,9 +30,7 @@
 
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/move_cv_limited_command.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
-#include "agitator/move_yellow_card_command.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
@@ -54,10 +52,12 @@
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "ref_system/yellow_card_switcher_command.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
+#include "turret/cv/cv_limited_command.hpp"
 #include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
@@ -76,6 +76,7 @@ using namespace tap::control;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
+using namespace aruwsrc::control::ref_system;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -244,15 +245,15 @@ MoveUnjamRefLimitedCommand agitatorShootFastNotLimited(
     false,
     10);
 
-MoveCVLimitedCommand agitatorLaunchCVLimited(
+aruwsrc::control::turret::cv::CVLimitedCommand agitatorLaunchCVLimited(
     *drivers(),
-    agitator,
+    {&agitator},
     agitatorShootFastLimited,
     turretCVCommand);
 
-MoveYellowCardCommand agitatorLaunchYellowCardCommand(
+YellowCardSwitcherCommand agitatorLaunchYellowCardCommand(
     *drivers(),
-    agitator,
+    {&agitator},
     agitatorShootFastLimited,
     agitatorLaunchCVLimited);
 
