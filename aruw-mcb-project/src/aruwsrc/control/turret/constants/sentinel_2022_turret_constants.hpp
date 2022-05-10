@@ -44,7 +44,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4817,
+    .startEncoderValue = 6450,
     .minAngle = -M_PI - modm::toRadian(60),
     .maxAngle = modm::toRadian(30),
     .limitMotorAngles = true,
@@ -65,7 +65,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 5455,
+    .startEncoderValue = 7152,
     .minAngle = -M_PI_2,
     .maxAngle = M_PI + modm::toRadian(30),
     .limitMotorAngles = true,
@@ -74,7 +74,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 4096,
-    .minAngle = modm::toRadian(-10),
+    .minAngle = modm::toRadian(-15),
     .maxAngle = modm::toRadian(60),
     .limitMotorAngles = true,
 };
@@ -89,14 +89,16 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 
 namespace chassis_rel
 {
+namespace turret0
+{
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 230'000.0f,
+    .kp = 110'000.0f,
     .ki = 0.0f,
-    .kd = 10'000.0,
+    .kd = 6'000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 10.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -114,6 +116,36 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
+}  // namespace turret0
+
+namespace turret1
+{
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 110'000.0f,
+    .ki = 0.0f,
+    .kd = 6'000.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 30'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
+    .kp = 194'805.7f,
+    .ki = 0.0f,
+    .kd = 5'729.6f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 30'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+}  // namespace turret1
 }  // namespace chassis_rel
 }  // namespace  aruwsrc::control::turret
 

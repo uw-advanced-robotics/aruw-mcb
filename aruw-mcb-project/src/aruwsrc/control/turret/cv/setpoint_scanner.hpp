@@ -71,14 +71,7 @@ public:
             scanningPositive = true;
         }
 
-        if (scanningPositive)
-        {
-            setpoint += delta;
-        }
-        else
-        {
-            setpoint -= delta;
-        }
+        setpoint += scanningPositive ? delta : -delta;
 
         // Bound value between upper and lower bounds
         return tap::algorithms::limitVal(setpoint, lowerBound, upperBound);

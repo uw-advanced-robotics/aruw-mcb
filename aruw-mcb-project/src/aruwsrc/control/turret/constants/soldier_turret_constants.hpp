@@ -58,7 +58,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .maxAngle = modm::toRadian(117),
     .limitMotorAngles = true,
 };
-#else
+#elif defined(TARGET_SOLDIER_2022)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
     .startEncoderValue = 1100,
@@ -72,6 +72,22 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startEncoderValue = 7500,
     .minAngle = modm::toRadian(65),
     .maxAngle = modm::toRadian(117),
+    .limitMotorAngles = true,
+};
+#elif defined(TARGET_SOLDIERMK4_2022)
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 1059,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = false,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 7500,
+    .minAngle = modm::toRadian(50),
+    .maxAngle = modm::toRadian(108),
     .limitMotorAngles = true,
 };
 #endif
