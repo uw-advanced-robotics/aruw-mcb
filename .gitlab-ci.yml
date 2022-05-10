@@ -221,12 +221,13 @@ before_script:
   only: *default_only
   except: *default_except
   script:
-    - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER_2022 -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
-    - cd .. && gcovr -g --xml > cobertura.xml
-    - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
-    - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
+    - cat test_file.txt  
+    # - cd aruw-mcb-project
+    # - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER_2022 -j${NUM_JOBS}
+    # - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
+    # - cd .. && gcovr -g --xml > cobertura.xml
+    # - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
+    # - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
   coverage: '/Total.*\s([.\d]+)%/'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-soldier-tests"
