@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VELOCITY_AGITATOR_SUBSYSTEM
-#define VELOCITY_AGITATOR_SUBSYSTEM
+#ifndef VELOCITY_AGITATOR_SUBSYSTEM_HPP_
+#define VELOCITY_AGITATOR_SUBSYSTEM_HPP_
 
 #include "tap/architecture/conditional_timer.hpp"
 #include "tap/architecture/timeout.hpp"
@@ -199,4 +199,4 @@ private:
 
 }  // namespace aruwsrc::agitator
 
-#endif  // VELOCITY_AGITATOR_SUBSYSTEM
+#endif  // VELOCITY_AGITATOR_SUBSYSTEM_HPP_
