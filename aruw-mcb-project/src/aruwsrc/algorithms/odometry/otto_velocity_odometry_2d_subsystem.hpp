@@ -95,31 +95,7 @@ public:
         return odometryTracker.getYaw();
     }
 
-    /**
-     * @brief Use a given turret origin with the current robot location
-     * to get the location of the turret in the world frame.
-     * 
-     * @param turretOrigin in the robot frame.
-     * 
-     * @return The current turret location in the world frame.
-     */
-    modm::Vector3f getCurrentTurretLocation(modm::Vector3f turretOrigin)
-    {
-        return yawRotation*turretOrigin + modm::Vector3f(getCurrentLocation2D().getPosition(), 0);
-    }
-
 private:
-
-    modm::Matrix3f rotationMatrixXY(float yaw)
-    {
-        float cosYaw = cosf(yaw);
-        float sinYaw = sin(yaw);
-        const float m[9] = {cosYaw, -sinYaw, 0,
-                      sinYaw, cosYaw, 0,
-                      0, 0, 1};
-        return modm::Matrix3f(m);
-    }
-
     tap::algorithms::odometry::Odometry2DTracker odometryTracker;
     OttoChassisWorldYawObserver orientationObserver;
     OttoChassisVelocityDisplacement2DObserver displacementObserver;

@@ -64,6 +64,8 @@ static constexpr float TURRET_CG_X = -22.23;
 static constexpr float TURRET_CG_Z = 9.96;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 3'500.0f;
 
+static constexpr float TURRET_ORIGIN_RELATIVE[NUM_TURRETS][3] = {{0, 0, 0}};
+
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {

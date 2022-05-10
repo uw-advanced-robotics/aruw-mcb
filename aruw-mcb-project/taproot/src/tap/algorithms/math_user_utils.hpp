@@ -28,7 +28,7 @@
 #include <cmath>
 #include <cstring>
 
-#include "modm/math/geometry/angle.hpp"
+#include "modm/math/geometry.hpp"
 
 namespace tap
 {
@@ -140,21 +140,24 @@ float fastInvSqrt(float x);
  */
 void rotateVector(float* x, float* y, float radians);
 
-struct Rotation {
-    public:
-    float yaw;
-    float pitch;
-    float roll;
+/**
+ * A generalized description of a rotation in 3D space.
+ * Used in the 3D implementation of rotateVector().
+ */
+struct Rotation
+{
+    float yaw = 0;
+    float pitch = 0;
+    float roll = 0;
 };
 
 /**
  * Performs a rotation matrix on a given vector about a given axis.
  * 
- * @param vec the 3D vector to be rotated.
- * @param axis the axis about which the rotation occurs.
- * @retval none.
+ * @param vec The 3D vector to be rotated (modifies directly).
+ * @param r The rotation applied to the given vector.
  */
-void rotateVector(modm::Vector3f vec, const float* yaw, const float* pitch, const float* roll);
+void rotateVector(modm::Vector3f* vec, Rotation r);
 
 /**
  * Constexpr ceil

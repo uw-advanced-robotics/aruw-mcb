@@ -19,6 +19,7 @@
 
 #include "otto_ballistics_solver.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 
@@ -26,6 +27,7 @@
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
@@ -47,6 +49,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretID(turretID)
 {
+    turretOrigin = modm::Vector3f(aruwsrc::control::turret::TURRET_ORIGIN_RELATIVE[turretID]);
 }
 
 bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawAngle)
@@ -65,14 +68,15 @@ bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawA
                                   ? defaultLaunchSpeed
                                   : frictionWheels.getPredictedLaunchSpeed();
 
-    const Vector3f turretPosition = modm::Vector3f(odometryInterface.getCurrentTurretLocation(turretOrigin))
+    rotateVector(&turretOrigin, {.yaw = odometryInterface.getYaw()});
+    const modm::Vector3f turretPosition = modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0) + turretOrigin;
 
     const Vector2f chassisVelocity = odometryInterface.getCurrentVelocity2D();
 
     // target state, frame whose axis is at the turret center and z is up
     // assume acceleration of the chassis is 0 since we don't measure it
     ballistics::MeasuredKinematicState targetState = {
-        .position = {aimData.xPos - robotPosition.x, aimData.yPos - robotPosition.y, aimData.zPos},
+        .position = {aimData.xPos - turretPosition.x, aimData.yPos - turretPosition.y, aimData.zPos - turretPosition.z},
         .velocity =
             {aimData.xVel - chassisVelocity.x, aimData.yVel - chassisVelocity.y, aimData.zVel},
         .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis

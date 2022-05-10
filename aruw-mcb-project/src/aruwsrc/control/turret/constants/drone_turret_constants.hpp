@@ -61,6 +61,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
+
+static constexpr float TURRET_ORIGIN_RELATIVE[NUM_TURRETS][3] = {{0, 0, 0}};
 }  // namespace aruwsrc::control::turret
 
 #endif  // DRONE_TURRET_CONSTANTS_HPP_
