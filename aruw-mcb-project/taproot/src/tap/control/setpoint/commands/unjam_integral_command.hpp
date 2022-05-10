@@ -21,8 +21,8 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_UNJAM_MOVE_INTEGRAL_COMMAND_HPP_
-#define TAPROOT_UNJAM_MOVE_INTEGRAL_COMMAND_HPP_
+#ifndef TAPROOT_UNJAM_INTEGRAL_COMMAND_HPP_
+#define TAPROOT_UNJAM_INTEGRAL_COMMAND_HPP_
 
 #include <cstdint>
 
@@ -41,6 +41,9 @@ namespace tap::control::setpoint
  * If the unjam command successfully clears its forward and backward threshold it will
  * will clear the velocity setpoint subsystem's jam and end. If not successful after some number of
  * cycle counts, the command will give up and end without clearing the jam.
+ *
+ * Unlike the unjam command, this command will displace the integral by some amount in
+ * order to facilitate unjamming.
  *
  * Like most velocity commands this one will not schedule/will deschedule if
  * IntegrableSetpointSubsystem goes offline.
@@ -141,4 +144,4 @@ private:
 
 }  // namespace tap::control::setpoint
 
-#endif  // TAPROOT_UNJAM_MOVE_INTEGRAL_COMMAND_HPP_
+#endif  // TAPROOT_UNJAM_INTEGRAL_COMMAND_HPP_
