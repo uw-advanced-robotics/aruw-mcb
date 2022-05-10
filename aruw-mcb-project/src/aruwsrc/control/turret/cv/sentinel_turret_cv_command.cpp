@@ -17,8 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//#include "sentinel.hpp"
-
 #include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
 #include <cassert>
@@ -98,6 +96,8 @@ void SentinelTurretCVCommand::execute()
 
     if (ballisticsSolutionAvailable)
     {
+        lostTargetCounter = 0;
+
         // Target available
         pitchSetpoint = targetPitch;
         yawSetpoint = targetYaw;
@@ -148,8 +148,8 @@ void SentinelTurretCVCommand::execute()
         }
         else
         {
-            pitchSetpoint = pitchScanner.scan(pitchSetpoint);
-            yawSetpoint = yawScanner.scan(yawSetpoint);
+            pitchSetpoint = lowPassFilter(pitchSetpoint, pitchScanner.scan(pitchSetpoint), SCAN_LOW_PASS_ALPHA);
+            yawSetpoint = lowPassFilter(yawSetpoint, yawScanner.scan(yawSetpoint), SCAN_LOW_PASS_ALPHA);
         }
     }
 

@@ -96,6 +96,8 @@ public:
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.1f;
+
     /**
      * Constructs a TurretCVCommand
      *
@@ -137,7 +139,7 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret CV"; }
+    const char *getName() const override { return "sentinel turret CV"; }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
