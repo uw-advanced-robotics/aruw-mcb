@@ -56,7 +56,7 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
         // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we
         // do that here. This doesn't specify which direction positive yaw sweeps.
         float turretWorldYawRadians =
-            modm::Angle::normalize(modm::toRadian(drivers->turretMCBCanComm.getYaw()));
+            modm::Angle::normalize(drivers->turretMCBCanComm.getYaw());
         // Normalized angle in range (-pi, pi)
         float turretChassisYawRadians = turretMotor->getAngleFromCenter();
 

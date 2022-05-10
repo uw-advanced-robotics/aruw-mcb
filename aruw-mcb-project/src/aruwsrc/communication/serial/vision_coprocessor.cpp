@@ -150,10 +150,10 @@ void VisionCoprocessor::sendOdometryData()
 
     modm::Location2D<float> location = odometryInterface->getCurrentLocation2D();
 
-    float pitch = drivers->mpu6500.getPitch();
-    float roll = drivers->mpu6500.getRoll();
+    float pitch = modm::toRadian(drivers->mpu6500.getPitch());
+    float roll = modm::toRadian(drivers->mpu6500.getRoll());
     // transform the pitch/roll from the chassis frame to the world frame
-    tap::algorithms::rotateVector(&pitch, &roll, location.getOrientation());
+    tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);
 
     // chassis odometry
     odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
