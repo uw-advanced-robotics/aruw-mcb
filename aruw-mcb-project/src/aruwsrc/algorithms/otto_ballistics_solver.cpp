@@ -49,7 +49,10 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 {
 }
 
-bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawAngle)
+bool OttoBallisticsSolver::computeTurretAimAngles(
+    float *pitchAngle,
+    float *yawAngle,
+    float *distance)
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
 
@@ -82,6 +85,8 @@ bool OttoBallisticsSolver::computeTurretAimAngles(float *pitchAngle, float *yawA
     uint32_t projectforwardtimedt = tap::arch::clock::getTimeMicroseconds() - aimData.timestamp;
 
     targetState.position = targetState.projectForward(projectforwardtimedt / 1E6f);
+
+    *distance = targetState.position.getLength();
 
     return ballistics::findTargetProjectileIntersection(
         targetState,
