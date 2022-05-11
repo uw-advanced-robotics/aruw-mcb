@@ -96,7 +96,7 @@ public:
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
-    static constexpr float SCAN_LOW_PASS_ALPHA = 0.5f;
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
 
     /**
      * Constructs a TurretCVCommand
@@ -193,6 +193,7 @@ private:
 
     inline void enterScanMode(float yawSetpoint, float pitchSetpoint)
     {
+        lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
         yawScanValue = yawSetpoint;
         pitchScanValue = pitchSetpoint;

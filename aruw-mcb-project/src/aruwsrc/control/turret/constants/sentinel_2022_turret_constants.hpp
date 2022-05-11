@@ -92,22 +92,22 @@ namespace chassis_rel
 namespace turret0
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 110'000.0f,
+    .kp = 70'000.0f,
     .ki = 0.0f,
-    .kd = 6'000.0f,
+    .kd = 3'000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 194'805.7f,
+    .kp = 174'805.7f,
     .ki = 0.0f,
-    .kd = 5'729.6f,
+    .kd = 4'729.6f,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -121,22 +121,22 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 namespace turret1
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 110'000.0f,
+    .kp = 70'000.0f,
     .ki = 0.0f,
-    .kd = 6'000.0f,
+    .kd = 3'000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 194'805.7f,
+    .kp = 174'805.7f,
     .ki = 0.0f,
-    .kd = 5'729.6f,
+    .kd = 4'729.6f,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
