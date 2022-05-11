@@ -62,11 +62,11 @@ public:
      */
     inline float scan(float setpoint)
     {
-        if (setpoint >= upperBound)
+        if (setpoint >= upperBound - 0.1f)
         {
             scanningPositive = false;
         }
-        else if (setpoint <= lowerBound)
+        else if (setpoint <= lowerBound + 0.1f)
         {
             scanningPositive = true;
         }

@@ -80,8 +80,14 @@ void SentinelTurretCVCommand::initialize()
 {
     pitchController->initialize();
     yawController->initialize();
+
     prevTime = getTimeMilliseconds();
+
     drivers->visionCoprocessor.sendSelectNewTargetMessage();
+
+    enterScanMode(
+        turretSubsystem->yawMotor.getChassisFrameSetpoint(),
+        turretSubsystem->pitchMotor.getChassisFrameSetpoint());
 }
 
 void SentinelTurretCVCommand::execute()
@@ -96,7 +102,7 @@ void SentinelTurretCVCommand::execute()
 
     if (ballisticsSolutionAvailable)
     {
-        lostTargetCounter = 0;
+        exitScanMode();
 
         // Target available
         pitchSetpoint = targetPitch;
@@ -148,8 +154,7 @@ void SentinelTurretCVCommand::execute()
         }
         else
         {
-            pitchSetpoint = lowPassFilter(pitchSetpoint, pitchScanner.scan(pitchSetpoint), SCAN_LOW_PASS_ALPHA);
-            yawSetpoint = lowPassFilter(yawSetpoint, yawScanner.scan(yawSetpoint), SCAN_LOW_PASS_ALPHA);
+            performScanIteration(yawSetpoint, pitchSetpoint);
         }
     }
 
@@ -189,6 +194,20 @@ void SentinelTurretCVCommand::changeScanningQuadrant()
     // move left
     const float angleChange = copysignf(M_PI_2, -turretSubsystem->yawMotor.getAngleFromCenter());
     yawController->setSetpoint(yawController->getSetpoint() + angleChange);
+}
+
+void SentinelTurretCVCommand::performScanIteration(float &yawSetpoint, float &pitchSetpoint)
+{
+    if (!scanning)
+    {
+        enterScanMode(yawSetpoint, pitchSetpoint);
+    }
+
+    yawScanValue = yawScanner.scan(yawScanValue);
+    pitchScanValue = pitchScanner.scan(pitchScanValue);
+
+    yawSetpoint = lowPassFilter(yawSetpoint, yawScanValue, SCAN_LOW_PASS_ALPHA);
+    pitchSetpoint = lowPassFilter(pitchSetpoint, pitchScanValue, SCAN_LOW_PASS_ALPHA);
 }
 
 }  // namespace aruwsrc::control::turret::cv
