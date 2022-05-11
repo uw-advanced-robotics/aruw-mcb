@@ -19,10 +19,15 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/mock/odometry_2d_interface_mock.hpp"
+
 #include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/agitator_subsystem_mock.hpp"
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
+#include "aruwsrc/mock/referee_feedback_friction_wheel_subsystem_mock.hpp"
+#include "aruwsrc/mock/turret_cv_command_mock.hpp"
+#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc;
 using namespace aruwsrc::agitator;
@@ -56,19 +61,28 @@ protected:
           kicker(&drivers),
           waterwheel(&drivers),
           frictionWheels(&drivers),
-          cmd(&drivers, &kicker, &waterwheel, &frictionWheels, DEFAULT_HERO_AGITATOR_CMD_CONFIG)
+          turretCVCommand(&drivers, nullptr, nullptr, nullptr, odometry, frictionWheels, 0, 0, 0),
+          cmd(&drivers,
+              &kicker,
+              &waterwheel,
+              frictionWheels,
+              DEFAULT_HERO_AGITATOR_CMD_CONFIG,
+              turretCVCommand)
     {
     }
 
     void SetUp() override
     {
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+        ON_CALL(turretCVCommand, isAimingWithinLaunchingTolerance).WillByDefault(Return(true));
     }
 
     Drivers drivers;
     NiceMock<AgitatorSubsystemMock> kicker;
     NiceMock<AgitatorSubsystemMock> waterwheel;
-    NiceMock<FrictionWheelSubsystemMock> frictionWheels;
+    NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
+    NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
+    NiceMock<aruwsrc::mock::TurretCVCommandMock> turretCVCommand;
     HeroAgitatorCommand cmd;
     RefSerial::Rx::RobotData robotData;
     ClockStub clock;
@@ -120,7 +134,8 @@ TEST_F(HeroAgitatorCommandTest, isReady_heat_limiting_true_when_heat_limit_below
     agitatorConfig.heatLimiting = true;
 
     // declare new HeroAgitatorCommand that has a custom agitator config
-    HeroAgitatorCommand cmd(&drivers, &kicker, &waterwheel, &frictionWheels, agitatorConfig);
+    HeroAgitatorCommand
+        cmd(&drivers, &kicker, &waterwheel, frictionWheels, agitatorConfig, turretCVCommand);
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
@@ -144,7 +159,8 @@ TEST_F(HeroAgitatorCommandTest, isReady_heat_limiting_false_when_heat_limit_abov
     agitatorConfig.heatLimiting = true;
 
     // declare new HeroAgitatorCommand that has a custom agitator config
-    HeroAgitatorCommand cmd(&drivers, &kicker, &waterwheel, &frictionWheels, agitatorConfig);
+    HeroAgitatorCommand
+        cmd(&drivers, &kicker, &waterwheel, frictionWheels, agitatorConfig, turretCVCommand);
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
@@ -187,19 +203,19 @@ TEST_F(HeroAgitatorCommandTest, isFinished_true_when_flywheels_not_on)
 TEST_F(HeroAgitatorCommandTest, isFinished_true_when_motors_disconnected)
 {
     ON_CALL(frictionWheels, getDesiredLaunchSpeed).WillByDefault(Return(20));
-    EXPECT_CALL(kicker, isOnline)
-        .Times(AnyNumber())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
-    EXPECT_CALL(waterwheel, isOnline)
-        .Times(AnyNumber())
-        .WillOnce(Return(true))
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
+
+    bool kickerOnline = false;
+    bool waterwheelOnline = false;
+    ON_CALL(kicker, isOnline).WillByDefault(ReturnPointee(&kickerOnline));
+    ON_CALL(waterwheel, isOnline).WillByDefault(ReturnPointee(&waterwheelOnline));
 
     EXPECT_TRUE(cmd.isFinished());
+
+    waterwheelOnline = true;
     EXPECT_TRUE(cmd.isFinished());
+
+    kickerOnline = true;
+    waterwheelOnline = false;
     EXPECT_TRUE(cmd.isFinished());
 }
 

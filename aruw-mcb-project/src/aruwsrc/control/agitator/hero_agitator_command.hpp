@@ -25,6 +25,7 @@
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 
 using tap::gpio::Digital;
 
@@ -90,8 +91,9 @@ public:
         aruwsrc::Drivers* drivers,
         AgitatorSubsystem* kickerAgitator,
         AgitatorSubsystem* waterwheelAgitator,
-        const aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheels,
-        const Config& config);
+        const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
+        const Config& config,
+        const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand);
 
     /**
      * @return Whether the agitator subsystems are online and heat is below
@@ -131,6 +133,7 @@ public:
     const char* getName() const override { return "hero agitator shoot"; }
 
 private:
+    const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand;
     tap::control::setpoint::MoveCommand kickerFireCommand;
     tap::control::setpoint::MoveCommand kickerLoadCommand;
     tap::control::setpoint::MoveUnjamComprisedCommand waterwheelLoadCommand;
@@ -145,7 +148,7 @@ private:
     aruwsrc::Drivers* drivers;
     AgitatorSubsystem* kickerAgitator;
     AgitatorSubsystem* waterwheelAgitator;
-    const aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheels;
+    const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels;
     HeroAgitatorState currState;
     bool heatLimiting;
     uint16_t heatLimitBuffer;
