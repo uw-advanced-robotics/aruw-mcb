@@ -25,7 +25,7 @@ namespace aruwsrc::control::turret::cv
 {
 CVLimitedCommand::CVLimitedCommand(
     aruwsrc::Drivers &drivers,
-    const std::vector<tap::control::Subsystem *> subsystemRequirements,
+    const std::vector<tap::control::Subsystem *> &subsystemRequirements,
     tap::control::Command &command,
     const TurretCVCommand &turretCVCommand)
     : drivers(drivers),
