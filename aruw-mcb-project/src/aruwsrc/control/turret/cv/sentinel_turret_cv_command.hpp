@@ -20,12 +20,13 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "tap/control/command.hpp"
+#include "tap/control/comprised_command.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "../constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
 #include "setpoint_scanner.hpp"
@@ -64,7 +65,7 @@ namespace aruwsrc::control::turret::cv
  * target (for example, the target is too far away), then user input from the
  * `ControlOperatorInterface` is used to control the turret instead.
  */
-class SentinelTurretCVCommand : public tap::control::Command
+class SentinelTurretCVCommand : public tap::control::ComprisedCommand
 {
 public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
@@ -145,6 +146,7 @@ private:
     aruwsrc::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
+    aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem const* frictionWheels;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;

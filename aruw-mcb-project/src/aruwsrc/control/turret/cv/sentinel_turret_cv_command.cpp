@@ -48,8 +48,10 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
-    : drivers(drivers),
+    : ComprisedCommand(drivers),
+      drivers(drivers),
       turretSubsystem(turretSubsystem),
+      frictionWheels(&frictionWheels),
       yawController(yawController),
       pitchController(pitchController),
       turretID(turretID),
@@ -72,8 +74,10 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     assert(pitchController != nullptr);
     assert(yawController != nullptr);
 
-    addSubsystemRequirement(turretSubsystem);
-    addSubsystemRequirement(&firingSubsystem);
+    this->comprisedCommandScheduler.registerSubsystem(turretSubsystem);
+    this->comprisedCommandScheduler.registerSubsystem(&firingSubsystem);
+    this->addSubsystemRequirement(turretSubsystem);
+    this->addSubsystemRequirement(&firingSubsystem);
 }
 
 bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
@@ -127,7 +131,7 @@ void SentinelTurretCVCommand::execute()
             // Do not re-add command if it's already scheduled as that would interrupt it
             if (!drivers->commandScheduler.isCommandScheduled(firingCommand))
             {
-                drivers->commandScheduler.addCommand(firingCommand);
+                this->comprisedCommandScheduler.addCommand(firingCommand);
             }
         }
     }
