@@ -38,9 +38,11 @@ HeroAgitatorCommand::HeroAgitatorCommand(
     aruwsrc::Drivers* drivers,
     AgitatorSubsystem* kickerAgitator,
     AgitatorSubsystem* waterwheelAgitator,
-    const aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheels,
-    const Config& config)
+    const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
+    const Config& config,
+    const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand)
     : tap::control::ComprisedCommand(drivers),
+      turretCVCommand(turretCVCommand),
       kickerFireCommand(
           kickerAgitator,
           config.kickerShootRotateAngle,
@@ -80,20 +82,58 @@ HeroAgitatorCommand::HeroAgitatorCommand(
     this->addSubsystemRequirement(waterwheelAgitator);
 }
 
+static inline bool flywheelsOn(
+    const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels)
+{
+    return !compareFloatClose(frictionWheels.getDesiredLaunchSpeed(), 0.0f, 1E-5);
+}
+
+static inline bool readyToFire(aruwsrc::Drivers& drivers)
+{
+    return drivers.turretMCBCanComm.getLimitSwitchDepressed();
+}
+
+static inline bool enoughHeatToFire(
+    aruwsrc::Drivers& drivers,
+    bool heatLimiting,
+    const tap::communication::serial::RefSerialData::Rx::RobotData& robotData,
+    uint16_t heatLimitBuffer)
+{
+    return !drivers.refSerial.getRefSerialReceivingData() || !heatLimiting ||
+           (robotData.turret.heat42 + heatLimitBuffer <= robotData.turret.heatLimit42);
+}
+
+static inline bool readyToRotate(
+    aruwsrc::Drivers& drivers,
+    const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand)
+{
+    const bool readyToFire = drivers.turretMCBCanComm.getLimitSwitchDepressed();
+
+    /**
+     * - If not ready to fire, we can rotate the agitators since we won't launch a projectile
+     * - If the operator is not blinded, don't gate rotation
+     * - If the turret CV is not scheduled, also don't gate rotation
+     * - If the turret CV command reports its okay to fire, you can rotate to launch a projectile
+     */
+    return !readyToFire || !drivers.refSerial.operatorBlinded() ||
+           !drivers.commandScheduler.isCommandScheduled(&turretCVCommand) ||
+           turretCVCommand.isAimingWithinLaunchingTolerance();
+}
+
 bool HeroAgitatorCommand::isReady()
 {
     const auto& robotData = drivers->refSerial.getRobotData();
 
-    return !compareFloatClose(frictionWheels->getDesiredLaunchSpeed(), 0.0f, 1E-5) &&
-           kickerAgitator->isOnline() && waterwheelAgitator->isOnline() &&
-           !(drivers->refSerial.getRefSerialReceivingData() && heatLimiting &&
-             (robotData.turret.heat42 + heatLimitBuffer > robotData.turret.heatLimit42));
+    return kickerAgitator->isOnline() && waterwheelAgitator->isOnline() &&
+           flywheelsOn(frictionWheels) &&
+           enoughHeatToFire(*drivers, heatLimiting, robotData, heatLimitBuffer) &&
+           readyToRotate(*drivers, turretCVCommand);
 }
 
 bool HeroAgitatorCommand::isFinished() const
 {
-    return compareFloatClose(frictionWheels->getDesiredLaunchSpeed(), 0.0f, 1E-5) ||
-           !waterwheelAgitator->isOnline() || !kickerAgitator->isOnline() || currState == FINISHED;
+    return !flywheelsOn(frictionWheels) || !kickerAgitator->isOnline() ||
+           !waterwheelAgitator->isOnline() || (currState == FINISHED);
 }
 
 void HeroAgitatorCommand::initialize()

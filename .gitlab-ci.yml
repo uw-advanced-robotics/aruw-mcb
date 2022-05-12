@@ -181,6 +181,26 @@ before_script:
     paths:
       - $BUILD_PATH
 
+# Soldier MK4 2022 build
+
+"Soldier MK4 2022: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: SOLDIERMK4_2022
+
+"Soldier MK4 2022: Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: SOLDIERMK4_2022
+
+"Soldier MK4 2022: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: SOLDIER_2021
+
 # Soldier 2022 build
 
 "Soldier 2022: MCB Build":
@@ -207,10 +227,13 @@ before_script:
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
+  coverage: '/\s+Total:\|(\d+.\d+\%).+\|.+\|.+/'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-soldier-tests"
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
     expire_in: 2 weeks
 
 # Soldier 2021 Build

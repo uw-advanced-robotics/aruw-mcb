@@ -61,13 +61,10 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed,
           turretID),
-      pitchScanner(
-          PITCH_MIN_SCAN_ANGLE,
-          turretSubsystem->pitchMotor.getConfig().maxAngle,
-          SCAN_DELTA_ANGLE),
+      pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(
-          turretSubsystem->yawMotor.getConfig().minAngle,
-          turretSubsystem->yawMotor.getConfig().maxAngle,
+          turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
+          turretSubsystem->yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
           SCAN_DELTA_ANGLE)
 {
     assert(firingCommand != nullptr);
@@ -96,8 +93,9 @@ void SentinelTurretCVCommand::execute()
 
     float targetPitch;
     float targetYaw;
+    float targetDistance;
     bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance);
 
     if (ballisticsSolutionAvailable)
     {
@@ -121,14 +119,10 @@ void SentinelTurretCVCommand::execute()
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
-        if (compareFloatClose(
-                turretSubsystem->pitchMotor.getChassisFrameMeasuredAngle().getValue(),
-                pitchSetpoint,
-                FIRING_TOLERANCE) &&
-            compareFloatClose(
-                turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue(),
-                yawSetpoint,
-                FIRING_TOLERANCE))
+        if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+                turretSubsystem->yawMotor.getValidChassisMeasurementError(),
+                turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+                targetDistance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
             if (!drivers->commandScheduler.isCommandScheduled(firingCommand))

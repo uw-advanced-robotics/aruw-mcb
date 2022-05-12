@@ -44,7 +44,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #endif
 
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
-static constexpr float FRICTION_WHEEL_RAMP_SPEED = 1.0f;
+static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
 static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 0.2f;
@@ -56,20 +56,36 @@ static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.
  */
-#ifdef TARGET_HERO
+#if defined(TARGET_HERO)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {10, 3900.0f},
     {16.0f, 6700.0f},
     {20.0f, 8500.0f},
 };
-#else
+#elif defined(TARGET_SOLDIERMK4_2022)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
-    {15.0f, 4600.0f},
-    {18.0f, 5000.0f},
-    {30.0f, 7200.2f},
-    {32.0f, 8300.0f},
+    {15.0f, 4375.0f},
+    {18.0f, 4750.0f},
+    {30.0f, 7000.0f},
+    {32.0f, 8400.0f},
+};
+#elif defined(TARGET_SOLDIER_2021) || defined(TARGET_SOLDIER_2022) || defined(TARGET_SENTINEL_2022)
+static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+    {0.0f, 0.0f},
+    {15.0f, 4400.0f},
+    {18.0f, 4850.0f},
+    {30.0f, 7100.0f},
+    {32.0f, 8400.0f},
+};
+#else  // TARGET_SENTINEL_2021, TARGET_DRONE, TARGET_ENGINEER
+static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+    {0.0f, 0.0f},
+    {15.0f, 4400.0f},
+    {18.0f, 4850.0f},
+    {30.0f, 7100.0f},
+    {32.0f, 8400.0f},
 };
 #endif
 }  // namespace aruwsrc::control::launcher
