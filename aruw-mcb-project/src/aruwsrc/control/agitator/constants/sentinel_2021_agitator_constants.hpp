@@ -62,7 +62,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
     .targetIntegralChange = M_TWOPI / 10.0f,
     .desiredSetpoint = 2.0f * M_TWOPI,
-    .setpointTolerance = M_PI / 20.0f,
+    .integralSetpointTolerance = M_PI / 20.0f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {

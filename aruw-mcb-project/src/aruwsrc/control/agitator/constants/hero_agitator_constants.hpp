@@ -72,7 +72,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     WATERWHEEL_AGITATOR_ROTATE_CONFIG = {
         .targetIntegralChange = WATERWHEEL_TARGET_DISPLACEMENT,
         .desiredSetpoint = WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S,
-        .setpointTolerance = M_PI / 32.0f,
+        .integralSetpointTolerance = M_PI / 32.0f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config
@@ -110,14 +110,14 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_LOAD_AGITATOR_ROTATE_CONFIG = {
         .targetIntegralChange = M_PI / 2.0f,
         .desiredSetpoint = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
-        .setpointTolerance = M_PI / 32.0f,
+        .integralSetpointTolerance = M_PI / 32.0f,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
         .targetIntegralChange = M_PI / 2.0f,
         .desiredSetpoint = 6.0 * M_PI,
-        .setpointTolerance = M_PI / 32.0f,
+        .integralSetpointTolerance = M_PI / 32.0f,
 };
 
 static constexpr aruwsrc::agitator::HeroAgitatorCommand::Config HERO_AGITATOR_COMMAND_CONFIG = {
