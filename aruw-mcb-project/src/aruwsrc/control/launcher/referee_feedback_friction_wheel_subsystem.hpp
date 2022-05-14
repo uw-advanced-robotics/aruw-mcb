@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/util_macros.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -58,7 +59,10 @@ public:
      * from the referee system barrel system to dynamically predict the barrel speed based on
      * previous barrel speeds.
      */
-    inline float getPredictedLaunchSpeed() const override final { return predictedLaunchSpeed; }
+    inline float getPredictedLaunchSpeed() const override final_mockable
+    {
+        return predictedLaunchSpeed;
+    }
 
     void refresh() override;
 

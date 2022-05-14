@@ -170,29 +170,6 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
-static constexpr HeroAgitatorCommand::Config heroAgitatorCommandConfig = {
-    .kickerShootRotateAngle = M_PI / 2.0,
-    .kickerShootRotateTime = 75,
-    .kickerShootSetpointTolerance = M_PI / 16.0f,
-    .kickerLoadRotateAngle = M_PI / 2.0,
-    .kickerLoadSetpointTolerance = M_PI / 16.0f,
-    .waterwheelLoadRotateAngle = M_PI / 7.0,
-    .waterwheelLoadSetpointTolerance = M_PI / 16.0f,
-    .loadRotateTime = 200,
-    .waterwheelUnjamDisplacement = M_PI / 14.0,
-    .waterwheelUnjamThreshold = M_PI / 20.0,
-    .waterwheelUnjamMaxWaitTime = 130,
-    .heatLimiting = true,
-    .heatLimitBuffer = 100,
-};
-
-HeroAgitatorCommand heroAgitatorCommand(
-    drivers(),
-    &kickerAgitator,
-    &waterwheelAgitator,
-    &frictionWheels,
-    heroAgitatorCommandConfig);
-
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     &turret.pitchMotor,
@@ -264,6 +241,30 @@ ClientDisplayCommand clientDisplayCommand(
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
+
+static constexpr HeroAgitatorCommand::Config heroAgitatorCommandConfig = {
+    .kickerShootRotateAngle = M_PI / 2.0,
+    .kickerShootRotateTime = 75,
+    .kickerShootSetpointTolerance = M_PI / 16.0f,
+    .kickerLoadRotateAngle = M_PI / 2.0,
+    .kickerLoadSetpointTolerance = M_PI / 16.0f,
+    .waterwheelLoadRotateAngle = M_PI / 7.0,
+    .waterwheelLoadSetpointTolerance = M_PI / 16.0f,
+    .loadRotateTime = 200,
+    .waterwheelUnjamDisplacement = M_PI / 14.0,
+    .waterwheelUnjamThreshold = M_PI / 20.0,
+    .waterwheelUnjamMaxWaitTime = 130,
+    .heatLimiting = true,
+    .heatLimitBuffer = 100,
+};
+
+HeroAgitatorCommand heroAgitatorCommand(
+    drivers(),
+    &kickerAgitator,
+    &waterwheelAgitator,
+    frictionWheels,
+    heroAgitatorCommandConfig,
+    turretCVCommand);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(

@@ -79,12 +79,6 @@ public:
     static constexpr float YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX = modm::toRadian(1.0f);
 
     /**
-     * Command will shoot when turret pitch and yaw are both respectively within
-     * `FIRING_TOLERANCE` radians of the ballistics solution.
-     */
-    static constexpr float FIRING_TOLERANCE = modm::toRadian(0.5f);
-
-    /**
      * Yaw and pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
      */
