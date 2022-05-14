@@ -22,8 +22,6 @@
  */
 
 #include "math_user_utils.hpp"
-#include "modm/math/matrix.hpp"
-#include "modm/math/geometry/vector.hpp"
 
 #include <cstdint>
 
