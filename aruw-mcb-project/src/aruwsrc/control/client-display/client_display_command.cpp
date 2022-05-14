@@ -36,7 +36,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     ClientDisplaySubsystem &clientDisplay,
     const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-    aruwsrc::agitator::VelocityAgitatorSubsystem &agitatorSubsystem,
+    tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::agitator::MultiShotHandler *multiShotHandler,

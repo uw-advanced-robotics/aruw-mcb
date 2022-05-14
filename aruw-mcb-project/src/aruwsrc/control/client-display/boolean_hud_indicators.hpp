@@ -61,7 +61,7 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-        aruwsrc::agitator::VelocityAgitatorSubsystem &agitatorSubsystem,
+        tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
@@ -150,7 +150,7 @@ private:
      *
      * Should be `const` but `isJammed` is not `const`.
      */
-    aruwsrc::agitator::VelocityAgitatorSubsystem &agitatorSubsystem;
+    tap::control::setpoint::SetpointSubsystem &agitatorSubsystem;
 
     /**
      * ImuCalbirateCommand that provides information about if the IMUs are being calibrated.

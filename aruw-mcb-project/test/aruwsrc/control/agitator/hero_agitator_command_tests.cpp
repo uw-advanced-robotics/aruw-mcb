@@ -85,7 +85,7 @@ protected:
     Drivers drivers;
     NiceMock<tap::mock::IntegrableSetpointSubsystemMock> kicker;
     NiceMock<tap::mock::IntegrableSetpointSubsystemMock> waterwheel;
-    NiceMock<FrictionWheelSubsystemMock> frictionWheels;
+    NiceMock<RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<CommandWithRequirementsMock> kickerFireCommand;
     NiceMock<CommandWithRequirementsMock> kickerLoadCommand;
     NiceMock<CommandWithRequirementsMock> waterwheelLoadCommand;
