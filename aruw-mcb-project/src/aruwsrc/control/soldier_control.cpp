@@ -64,8 +64,6 @@
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
-#include "tap/motor/motorsim/motor_sim.hpp"
-#include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
 using namespace tap::control::setpoint;
