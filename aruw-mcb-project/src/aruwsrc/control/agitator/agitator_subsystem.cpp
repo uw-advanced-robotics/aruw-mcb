@@ -52,16 +52,16 @@ AgitatorSubsystem::AgitatorSubsystem(
     uint32_t jammingTime,
     bool jamLogicEnabled)
     : tap::control::Subsystem(drivers),
-      agitatorPositionPid(pidParams),
-      jamChecker(this, jammingDistance, jammingTime),
-      gearRatio(agitatorGearRatio),
-      jamLogicEnabled(jamLogicEnabled),
-      agitatorMotor(
+        agitatorMotor(
           drivers,
           agitatorMotorId,
           agitatorCanBusId,
           isAgitatorInverted,
-          "agitator motor")
+          "agitator motor"),
+      agitatorPositionPid(pidParams),
+      jamChecker(this, jammingDistance, jammingTime),
+      gearRatio(agitatorGearRatio),
+      jamLogicEnabled(jamLogicEnabled)
 {
     assert(jammingDistance >= 0);
 }

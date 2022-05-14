@@ -175,6 +175,15 @@ protected:
      */
     bool agitatorIsCalibrated = false;
 
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    testing::NiceMock<tap::mock::DjiMotorMock> agitatorMotor;
+
+protected:
+#else
+    tap::motor::DjiMotor agitatorMotor;
+#endif
+
     void agitatorRunPositionPid();
 
 private:
@@ -220,15 +229,6 @@ private:
      * Get the raw angle of the shaft from the motor
      */
     float getUncalibratedAgitatorAngle() const;
-
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
-    testing::NiceMock<tap::mock::DjiMotorMock> agitatorMotor;
-
-private:
-#else
-    tap::motor::DjiMotor agitatorMotor;
-#endif
 };  // class AgitatorSubsystem
 
 }  // namespace agitator

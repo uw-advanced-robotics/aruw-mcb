@@ -53,6 +53,12 @@ static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 
 /**
+ * 
+ * 
+ */
+static constexpr float LAUNCHER_FRICTION_WHEEL_THRESHOLD = 13.0f;
+
+/**
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.
  */
