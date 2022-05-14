@@ -65,7 +65,7 @@ public:
         tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator,
         tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
         const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
-        const aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand,
+        const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand,
         tap::control::Command& kickerFireCommand,
         tap::control::Command& kickerLoadCommand,
         tap::control::Command& waterwheelLoadCommand);
@@ -123,8 +123,8 @@ private:
     tap::control::Command& kickerLoadCommand;
     tap::control::Command& waterwheelLoadCommand;
 
-    const aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand;
     const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels;
+    const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand;
     HeroAgitatorState currState;
     bool heatLimiting;
     uint16_t heatLimitBuffer;
