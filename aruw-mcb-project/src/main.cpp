@@ -20,9 +20,6 @@
 #ifdef PLATFORM_HOSTED
 /* hosted environment (simulator) includes --------------------------------- */
 #include <iostream>
-
-#include "tap/communication/tcp-server/tcp_server.hpp"
-#include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
 #include "tap/board/board.hpp"
@@ -78,13 +75,6 @@ int main()
     initializeIo(drivers);
     aruwsrc::control::initSubsystemCommands(drivers);
 
-#ifdef PLATFORM_HOSTED
-    // aruwsrc::sim::initialize_robot_sim();
-    // tap::motorsim::SimHandler::resetMotorSims();
-    // // Blocking call, waits until Windows Simulator connects.
-    // tap::communication::TCPServer::MainServer()->getConnection();
-#endif
-
     while (1)
     {
         // do this as fast as you can
@@ -131,10 +121,6 @@ static void initializeIo(aruwsrc::Drivers *drivers)
 
 static void updateIo(aruwsrc::Drivers *drivers)
 {
-#ifdef PLATFORM_HOSTED
-    tap::motorsim::SimHandler::updateSims();
-#endif
-
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
