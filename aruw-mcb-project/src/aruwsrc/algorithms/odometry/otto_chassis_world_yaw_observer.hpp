@@ -65,7 +65,7 @@ public:
      *      Normalized to the range (-pi, pi).
      *
      * @return `true` if valid chassis orientation was available. i.e: true if and only if
-     *      turret->isOnline() && drivers->turretMCBCanComm.isConnected()
+     *      turret->isOnline() && drivers->turretMCBCanCommBus1.isConnected()
      */
     bool getChassisWorldYaw(float* yaw) const final;
 

@@ -55,7 +55,7 @@ class YawWorldFrameTurretImuTurretControllerTest : public WorldFrameTurretImuTur
 protected:
     YawWorldFrameTurretImuTurretControllerTest()
         : turretController(
-              &drivers,
+              drivers.turretMCBCanCommBus1,
               &turretSubsystem.yawMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
@@ -66,8 +66,8 @@ protected:
     {
         ON_CALL(turretSubsystem.yawMotor, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnRef(currentValue));
-        ON_CALL(drivers.turretMCBCanComm, getYaw).WillByDefault(ReturnPointee(&imuValue));
-        ON_CALL(drivers.turretMCBCanComm, getYawVelocity)
+        ON_CALL(drivers.turretMCBCanCommBus1, getYaw).WillByDefault(ReturnPointee(&imuValue));
+        ON_CALL(drivers.turretMCBCanCommBus1, getYawVelocity)
             .WillByDefault(ReturnPointee(&imuVelocity));
         yawMotorConfig.limitMotorAngles = false;
         ON_CALL(turretSubsystem.yawMotor, getConfig).WillByDefault(ReturnRef(yawMotorConfig));
@@ -177,7 +177,7 @@ class PitchWorldFrameTurretImuTurretControllerTest : public WorldFrameTurretImuT
 protected:
     PitchWorldFrameTurretImuTurretControllerTest()
         : turretController(
-              &drivers,
+              drivers.turretMCBCanCommBus1,
               &turretSubsystem.pitchMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
@@ -190,8 +190,8 @@ protected:
         ON_CALL(turretSubsystem.pitchMotor, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnRef(currentValue));
         ON_CALL(turretSubsystem.pitchMotor, getAngleFromCenter).WillByDefault(Return(0));
-        ON_CALL(drivers.turretMCBCanComm, getPitch).WillByDefault(ReturnPointee(&imuValue));
-        ON_CALL(drivers.turretMCBCanComm, getPitchVelocity)
+        ON_CALL(drivers.turretMCBCanCommBus1, getPitch).WillByDefault(ReturnPointee(&imuValue));
+        ON_CALL(drivers.turretMCBCanCommBus1, getPitchVelocity)
             .WillByDefault(ReturnPointee(&imuVelocity));
 
         ON_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint)

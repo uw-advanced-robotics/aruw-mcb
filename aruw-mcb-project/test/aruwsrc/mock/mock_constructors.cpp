@@ -119,8 +119,8 @@ GrabberSubsystemMock::~GrabberSubsystemMock() {}
 OledDisplayMock::OledDisplayMock(aruwsrc::Drivers *drivers) : display::OledDisplay(drivers) {}
 OledDisplayMock::~OledDisplayMock() {}
 
-TurretMCBCanCommMock::TurretMCBCanCommMock(aruwsrc::Drivers *drivers)
-    : can::TurretMCBCanComm(drivers)
+TurretMCBCanCommMock::TurretMCBCanCommMock(aruwsrc::Drivers *drivers, tap::can::CanBus canBus)
+    : can::TurretMCBCanComm(drivers, canBus)
 {
 }
 TurretMCBCanCommMock::~TurretMCBCanCommMock() {}

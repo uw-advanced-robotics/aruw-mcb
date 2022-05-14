@@ -45,7 +45,7 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     // meaningful for the vision system.
     /// @todo in the future we could have the odometry subsystem fall back to using
     /// just chassis IMU and turret when turret IMU is offline.
-    if (!drivers->turretMCBCanComm.isConnected() || !turretMotor->isOnline())
+    if (!drivers->turretMCBCanCommBus1.isConnected() || !turretMotor->isOnline())
     {
         return false;
     }
@@ -55,7 +55,8 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 
         // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we
         // do that here. This doesn't specify which direction positive yaw sweeps.
-        float turretWorldYawRadians = modm::Angle::normalize(drivers->turretMCBCanComm.getYaw());
+        float turretWorldYawRadians =
+            modm::Angle::normalize(drivers->turretMCBCanCommBus1.getYaw());
         // Normalized angle in range (-pi, pi)
         float turretChassisYawRadians = turretMotor->getAngleFromCenter();
 

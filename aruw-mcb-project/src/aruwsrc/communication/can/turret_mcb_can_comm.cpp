@@ -27,30 +27,31 @@
 
 namespace aruwsrc::can
 {
-TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
-    : drivers(drivers),
+TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers, tap::can::CanBus canBus)
+    : canBus(canBus),
+      drivers(drivers),
       yawAngleGyroMessageHandler(
           drivers,
           YAW_RX_CAN_ID,
-          TURRET_MCB_CAN_BUS,
+          canBus,
           this,
           &TurretMCBCanComm::handleYawAngleGyroMessage),
       pitchAngleGyroMessageHandler(
           drivers,
           PITCH_RX_CAN_ID,
-          TURRET_MCB_CAN_BUS,
+          canBus,
           this,
           &TurretMCBCanComm::handlePitchAngleGyroMessage),
       turretStatusRxHandler(
           drivers,
           TURRET_STATUS_RX_CAN_ID,
-          TURRET_MCB_CAN_BUS,
+          canBus,
           this,
           &TurretMCBCanComm::handleTurretMessage),
       timeSynchronizationRxHandler(
           drivers,
           SYNC_RX_CAN_ID,
-          TURRET_MCB_CAN_BUS,
+          canBus,
           this,
           &TurretMCBCanComm::handleTimeSynchronizationRequest),
       txCommandMsgBitmask(),
@@ -138,7 +139,7 @@ void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message
     syncResponseMessage.setExtended(false);
     *reinterpret_cast<uint32_t*>(syncResponseMessage.data) =
         tap::arch::clock::getTimeMicroseconds();
-    drivers->can.sendMessage(TURRET_MCB_CAN_BUS, syncResponseMessage);
+    drivers->can.sendMessage(canBus, syncResponseMessage);
 }
 
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(

@@ -25,12 +25,9 @@
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/fuzzy_pd.hpp"
 
-#include "turret_controller_interface.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "turret_controller_interface.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -60,7 +57,7 @@ public:
      * @param[in] velPidConfig Velocity PID configuration struct for the controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
-        const aruwsrc::Drivers *drivers,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
@@ -80,7 +77,7 @@ public:
     bool isOnline() const final;
 
 private:
-    const aruwsrc::Drivers *drivers;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     tap::algorithms::SmoothPid positionPid;
     tap::algorithms::SmoothPid velocityPid;
@@ -96,7 +93,7 @@ class HeroTurretImuCascadePidTurretController final : public TurretYawController
 {
 public:
     HeroTurretImuCascadePidTurretController(
-        const aruwsrc::Drivers *drivers,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor *yawMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::FuzzyPDConfig &fuzzyPidConfig,
@@ -117,7 +114,7 @@ public:
     bool isOnline() const final;
 
 private:
-    const aruwsrc::Drivers *drivers;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     tap::algorithms::FuzzyPD positionPid;
     tap::algorithms::SmoothPid velocityPid;
@@ -147,7 +144,7 @@ public:
      * @param[in] velPidConfig Velocity PID configuration struct for the controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
-        const aruwsrc::Drivers *drivers,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor *pitchMotor,
         const tap::algorithms::SmoothPidConfig &posPidConfig,
         const tap::algorithms::SmoothPidConfig &velPidConfig);
@@ -167,7 +164,7 @@ public:
     bool isOnline() const final;
 
 private:
-    const aruwsrc::Drivers *drivers;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     tap::algorithms::SmoothPid positionPid;
     tap::algorithms::SmoothPid velocityPid;
