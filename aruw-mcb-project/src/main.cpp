@@ -46,8 +46,11 @@
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
 
+static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
+static constexpr float MAHONY_KP = 0.1f;
+
 /* define timers here -------------------------------------------------------*/
-tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -113,7 +116,7 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->can.initialize();
     drivers->errorController.init();
     drivers->remote.initialize();
-    drivers->mpu6500.init();
+    drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
     drivers->terminalSerial.initialize();
     drivers->oledDisplay.initialize();
