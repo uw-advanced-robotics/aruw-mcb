@@ -345,7 +345,7 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
 // server and thus don't know when to start sending the initial HUD graphics.
 PressCommandMapping bCtrlPressedRightSwitchDown(
     drivers(),
-    {},
+    {&clientDisplayCommand},
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,

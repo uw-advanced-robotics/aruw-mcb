@@ -121,8 +121,8 @@ bool HeroAgitatorCommand::isReady()
 
 bool HeroAgitatorCommand::isFinished() const
 {
-    return compareFloatClose(frictionWheels.getDesiredLaunchSpeed(), 0.0f, 1E-5) ||
-           !waterwheelAgitator.isOnline() || !kickerAgitator.isOnline() || currState == FINISHED;
+    return !flywheelsOn(frictionWheels) || !waterwheelAgitator.isOnline() ||
+           !kickerAgitator.isOnline() || currState == FINISHED;
 }
 
 void HeroAgitatorCommand::initialize()
