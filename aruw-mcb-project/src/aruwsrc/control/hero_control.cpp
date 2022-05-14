@@ -160,38 +160,6 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
 
-MoveIntegralCommand waterwheelLoadCommand(
-    waterwheelAgitator,
-    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
-
-UnjamIntegralCommand waterwheelAgitatorUnjamCommand(
-    waterwheelAgitator,
-    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
-
-MoveUnjamIntegralComprisedCommand waterwheelLoadUnjamCommand(
-    *drivers(),
-    waterwheelAgitator,
-    waterwheelLoadCommand,
-    waterwheelAgitatorUnjamCommand);
-
-MoveIntegralCommand kickerLoadCommand(
-    kickerAgitator,
-    aruwsrc::control::agitator::constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
-
-MoveIntegralCommand kickerLaunchCommand(
-    kickerAgitator,
-    aruwsrc::control::agitator::constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
-
-HeroAgitatorCommand heroAgitatorCommand(
-    *drivers(),
-    aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
-    kickerAgitator,
-    waterwheelAgitator,
-    frictionWheels,
-    kickerLaunchCommand,
-    kickerLoadCommand,
-    waterwheelLoadUnjamCommand);
-
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     &turret.pitchMotor,
@@ -263,6 +231,39 @@ ClientDisplayCommand clientDisplayCommand(
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
+
+MoveIntegralCommand waterwheelLoadCommand(
+    waterwheelAgitator,
+    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+
+UnjamIntegralCommand waterwheelAgitatorUnjamCommand(
+    waterwheelAgitator,
+    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
+
+MoveUnjamIntegralComprisedCommand waterwheelLoadUnjamCommand(
+    *drivers(),
+    waterwheelAgitator,
+    waterwheelLoadCommand,
+    waterwheelAgitatorUnjamCommand);
+
+MoveIntegralCommand kickerLoadCommand(
+    kickerAgitator,
+    aruwsrc::control::agitator::constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
+
+MoveIntegralCommand kickerLaunchCommand(
+    kickerAgitator,
+    aruwsrc::control::agitator::constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
+
+HeroAgitatorCommand heroAgitatorCommand(
+    *drivers(),
+    aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
+    kickerAgitator,
+    waterwheelAgitator,
+    frictionWheels,
+    turretCVCommand,
+    kickerLaunchCommand,
+    kickerLoadCommand,
+    waterwheelLoadUnjamCommand);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(

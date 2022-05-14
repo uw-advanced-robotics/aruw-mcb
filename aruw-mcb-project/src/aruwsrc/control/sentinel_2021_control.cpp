@@ -35,6 +35,7 @@
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
@@ -217,6 +218,8 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
 }
 
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* register subsystems here ------------------
 -------------------------------*/
 void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
@@ -262,6 +265,8 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &sentinel_control::remoteSafeDisconnectFunction);
     sentinel_control::initializeSubsystems();
     sentinel_control::registerSentinelSubsystems(drivers);
     sentinel_control::setDefaultSentinelCommands(drivers);

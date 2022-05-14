@@ -26,6 +26,7 @@
 #include "tap/control/setpoint/interfaces/integrable_setpoint_subsystem.hpp"
 
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 
 using tap::gpio::Digital;
 
@@ -64,6 +65,7 @@ public:
         tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator,
         tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
         const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
+        const aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand,
         tap::control::Command& kickerFireCommand,
         tap::control::Command& kickerLoadCommand,
         tap::control::Command& waterwheelLoadCommand);
@@ -121,6 +123,7 @@ private:
     tap::control::Command& kickerLoadCommand;
     tap::control::Command& waterwheelLoadCommand;
 
+    const aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand;
     const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels;
     HeroAgitatorState currState;
     bool heatLimiting;

@@ -54,10 +54,12 @@
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "ref_system/yellow_card_switcher_command.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
+#include "turret/cv/cv_limited_command.hpp"
 #include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
@@ -77,6 +79,7 @@ using namespace tap::control;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
+using namespace aruwsrc::control::ref_system;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -229,6 +232,18 @@ MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
 
+aruwsrc::control::turret::cv::CVLimitedCommand agitatorLaunchCVLimited(
+    *drivers(),
+    {&agitator},
+    agitatorShootFastLimited,
+    turretCVCommand);
+
+YellowCardSwitcherCommand agitatorLaunchYellowCardCommand(
+    *drivers(),
+    {&agitator},
+    agitatorShootFastLimited,
+    agitatorLaunchCVLimited);
+
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
@@ -274,7 +289,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&agitatorShootFastLimited},
+    {&agitatorLaunchYellowCardCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -300,7 +315,7 @@ ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({R
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&agitatorShootFastLimited},
+    {&agitatorLaunchYellowCardCommand},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
     false,
     1);
