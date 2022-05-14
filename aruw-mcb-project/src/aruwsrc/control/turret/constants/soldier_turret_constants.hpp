@@ -96,7 +96,11 @@ static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
 
-static constexpr float TURRET_ORIGIN_RELATIVE[NUM_TURRETS][3] = {{0, 0, 0}};
+#ifdef TARGET_SOLDIER_2021
+static constexpr float TURRET_ORIGIN_RELATIVE_TO_REALSENSE[NUM_TURRETS][3] = {{0, 0, 0}};
+#else
+static constexpr float TURRET_ORIGIN_RELATIVE_TO_REALSENSE[NUM_TURRETS][3] = {{0, 0, 0}};
+#endif
 
 namespace world_rel_turret_imu
 {

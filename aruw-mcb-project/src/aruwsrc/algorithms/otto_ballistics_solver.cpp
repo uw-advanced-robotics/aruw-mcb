@@ -49,7 +49,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretID(turretID)
 {
-    turretOrigin = modm::Vector3f(aruwsrc::control::turret::TURRET_ORIGIN_RELATIVE[turretID]);
+    turretOrigin = modm::Vector3f(aruwsrc::control::turret::TURRET_ORIGIN_RELATIVE_TO_REALSENSE[turretID]);
 }
 
 bool OttoBallisticsSolver::computeTurretAimAngles(
