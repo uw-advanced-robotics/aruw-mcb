@@ -140,22 +140,6 @@ float fastInvSqrt(float x);
  */
 void rotateVector(float* x, float* y, float radians);
 
-struct Rotation {
-    public:
-    float yaw;
-    float pitch;
-    float roll;
-};
-
-/**
- * Performs a rotation matrix on a given vector about a given axis.
- * 
- * @param vec the 3D vector to be rotated.
- * @param axis the axis about which the rotation occurs.
- * @retval none.
- */
-void rotateVector(modm::Vector3f vec, const float* yaw, const float* pitch, const float* roll);
-
 /**
  * Constexpr ceil
  * (https://stackoverflow.com/questions/31952237/looking-for-a-constexpr-ceil-function).
