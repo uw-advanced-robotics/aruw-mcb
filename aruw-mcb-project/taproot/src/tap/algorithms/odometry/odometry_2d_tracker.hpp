@@ -75,8 +75,6 @@ public:
 
     inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
 
-    inline float getYaw() const final { return chassisYaw; }
-
 private:
     ChassisWorldYawObserverInterface* chassisYawObserver;
     ChassisDisplacementObserverInterface* chassisDisplacementObserver;
@@ -84,8 +82,6 @@ private:
     modm::Location2D<float> location;
     // Velocity in reference frame
     modm::Vector2f velocity;
-    // Chassis yaw orientation in reference frame
-    float chassisYaw;
     // Previous chassis absolute displacement in chassis frame
     modm::Vector<float, 3> prevChassisAbsoluteDisplacement;
     // `true` iff `this` has been updated with valid chassis data at least once.

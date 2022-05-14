@@ -52,11 +52,6 @@ public:
      * @return The current x and y velocity (in m/s).
      */
     virtual modm::Vector2f getCurrentVelocity2D() const = 0;
-
-    /**
-     * @return The current yaw orientation of the chassis int the world frame.
-     */
-    virtual float getYaw() const = 0;
 };
 
 }  // namespace tap::algorithms::odometry
