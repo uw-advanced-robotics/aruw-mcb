@@ -35,8 +35,10 @@ public:
     MOCK_METHOD(void, init, (), (override));
     MOCK_METHOD(float, getPitch, (), (const override));
     MOCK_METHOD(float, getPitchVelocity, (), (const override));
+    MOCK_METHOD(float, getPitchUnwrapped, (), (const override));
     MOCK_METHOD(float, getYaw, (), (const override));
     MOCK_METHOD(float, getYawVelocity, (), (const override));
+    MOCK_METHOD(float, getYawUnwrapped, (), (const override));
     MOCK_METHOD(bool, getLimitSwitchDepressed, (), (const override));
     MOCK_METHOD(bool, isConnected, (), (const override));
     MOCK_METHOD(void, setOpenHopperCover, (bool), (override));

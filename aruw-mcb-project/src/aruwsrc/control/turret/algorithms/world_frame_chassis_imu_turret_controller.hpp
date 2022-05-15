@@ -26,13 +26,9 @@
 #include "tap/algorithms/smooth_pid.hpp"
 
 #include "../turret_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 #include "turret_controller_interface.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret
 {
@@ -72,6 +68,8 @@ public:
 
     void setSetpoint(float desiredSetpoint) final;
 
+    float getMeasurement() const final;
+
     /**
      * @return The yaw setpoint, in the world frame.
      */
@@ -79,14 +77,41 @@ public:
 
     bool isOnline() const final;
 
+    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
+
+    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
+
 private:
     aruwsrc::Drivers *drivers;
 
     tap::algorithms::SmoothPid pid;
 
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+    int revolutions = 0;
+    float prevYaw = 0;
+
+    float worldFrameSetpoint;
 
     float chassisFrameInitImuYawAngle = 0.0f;
+
+    float getMpu6500YawUnwrapped() const
+    {
+        return modm::toRadian(drivers->mpu6500.getYaw()) + M_TWOPI * revolutions;
+    }
+
+    void updateRevolutionCounter()
+    {
+        const float newYaw = modm::toRadian(drivers->mpu6500.getYaw());
+        const float diff = newYaw - prevYaw;
+        prevYaw = newYaw;
+        if (diff < -M_PI)
+        {
+            revolutions++;
+        }
+        else if (diff > M_PI)
+        {
+            revolutions--;
+        }
+    }
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

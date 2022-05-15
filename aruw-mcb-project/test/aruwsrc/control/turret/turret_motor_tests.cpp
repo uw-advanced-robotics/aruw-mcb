@@ -303,8 +303,7 @@ TEST_F(TurretMotorTest, getValidMinError_small_min_max_values)
 
     for (auto [setpoint, measurement, error] : setpointMeasurementErrorPairs)
     {
-        tm.setChassisFrameSetpoint(setpoint);
-        EXPECT_NEAR(error, tm.getValidMinError(measurement), 1E-3);
+        EXPECT_NEAR(error, tm.getValidMinError(setpoint, measurement), 1E-3);
     }
 }
 
@@ -336,8 +335,7 @@ TEST_F(TurretMotorTest, getValidMinError_large_min_max_values)
 
     for (auto [setpoint, measurement, error] : setpointMeasurementErrorPairs)
     {
-        tm.setChassisFrameSetpoint(setpoint);
-        EXPECT_NEAR(error, tm.getValidMinError(measurement), 1E-3);
+        EXPECT_NEAR(error, tm.getValidMinError(setpoint, measurement), 1E-3);
     }
 }
 

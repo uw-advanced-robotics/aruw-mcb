@@ -103,18 +103,13 @@ void SentinelTurretCVCommand::execute()
         pitchSetpoint = targetPitch;
         yawSetpoint = targetYaw;
 
-        // the setpoint returned by the ballistics solver is between [0, 2*PI)
-        // the desired setpoint is not required to be between [0, 2*PI)
-        // so, find the setpoint that is closest to the unwrapped measured angle
-        // (this is only an issue for turrets w/o a slip ring)
-        if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
-        {
-            // TODO fix for non-chassis frame controllers
-            yawSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
-                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle(),
-                yawSetpoint);
-            yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
-        }
+        /**
+         * the setpoint returned by the ballistics solver is between [0, 2*PI)
+         * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
+         * that is closest to the unwrapped measured angle.
+         */
+        turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
+        turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score

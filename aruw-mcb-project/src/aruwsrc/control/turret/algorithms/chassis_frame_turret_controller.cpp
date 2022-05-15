@@ -70,6 +70,11 @@ float ChassisFrameYawTurretController::getSetpoint() const
     return turretMotor->getChassisFrameSetpoint();
 }
 
+float ChassisFrameYawTurretController::getMeasurement() const
+{
+    return turretMotor->getChassisFrameUnwrappedMeasuredAngle();
+}
+
 bool ChassisFrameYawTurretController::isOnline() const { return turretMotor->isOnline(); }
 
 ChassisFramePitchTurretController::ChassisFramePitchTurretController(
@@ -119,6 +124,11 @@ void ChassisFramePitchTurretController::setSetpoint(float desiredSetpoint)
 float ChassisFramePitchTurretController::getSetpoint() const
 {
     return turretMotor->getChassisFrameSetpoint();
+}
+
+float ChassisFramePitchTurretController::getMeasurement() const
+{
+    return turretMotor->getChassisFrameUnwrappedMeasuredAngle();
 }
 
 bool ChassisFramePitchTurretController::isOnline() const { return turretMotor->isOnline(); }
