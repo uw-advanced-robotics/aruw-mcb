@@ -23,6 +23,7 @@
 #include "tap/control/comprised_command.hpp"
 #include "tap/control/setpoint/commands/move_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
+#include "tap/control/setpoint/interfaces/integrable_setpoint_subsystem.hpp"
 
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -36,8 +37,6 @@ class Drivers;
 
 namespace aruwsrc::agitator
 {
-class AgitatorSubsystem;
-
 /**
  * A command that launches a projectile and loads a new ball into the kicker.
  */
@@ -49,33 +48,6 @@ public:
      */
     struct Config
     {
-        /** Amount to rotate the kicker when shooting a projectile (radians). */
-        float kickerShootRotateAngle;
-        /** Time it takes to rotate the kicker when shooting a projectile (ms). */
-        uint32_t kickerShootRotateTime;
-        /** Tolerance within which kicker is considered to have "reached setpoint" when shooting
-         * (radians) @see MoveCommand */
-        float kickerShootSetpointTolerance;
-        /** Amount to rotate the kicker when loading a projectile (radians). */
-        float kickerLoadRotateAngle;
-        /** Tolerance within which kicker is considered to have "reached setpoint" when loading
-         * (radians) @see MoveCommand */
-        float kickerLoadSetpointTolerance;
-        /** Amount to rotate the waterwheel when loading a projectile (radians). */
-        float waterwheelLoadRotateAngle;
-        /** Tolerance within which waterwheel is considered to have reached setpoint when loading
-         * (radians). @see MoveCommand */
-        float waterwheelLoadSetpointTolerance;
-        /** Time it takes to rotate the waterwheel and kicker when loading a projectile (ms). */
-        uint32_t loadRotateTime;
-        /** Unjam displacement of the waterwheel if jamming happens (radians). @see UnjamCommand */
-        float waterwheelUnjamDisplacement;
-        /** Unjam displacement that must be reached both forwards and backwards for waterwheel to be
-         * considered unjammed (radians). @see UnjamCommand */
-        float waterwheelUnjamThreshold;
-        /** Max time that waterwheel will attempt to unjam in one direction before switching and
-         * trying the other direction (ms). @see UnjamCommand */
-        uint32_t waterwheelUnjamMaxWaitTime;
         /** Whether or not the command should limit heat. */
         bool heatLimiting;
         /** Minimum difference between the current heat and max 42mm heat required for this command
@@ -88,12 +60,15 @@ public:
      * agitator rotation configuration params.
      */
     HeroAgitatorCommand(
-        aruwsrc::Drivers* drivers,
-        AgitatorSubsystem* kickerAgitator,
-        AgitatorSubsystem* waterwheelAgitator,
-        const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
+        aruwsrc::Drivers& drivers,
         const Config& config,
-        const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand);
+        tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator,
+        tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
+        const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
+        const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand,
+        tap::control::Command& kickerFireCommand,
+        tap::control::Command& kickerLoadCommand,
+        tap::control::Command& waterwheelLoadCommand);
 
     /**
      * @return Whether the agitator subsystems are online and heat is below
@@ -133,11 +108,6 @@ public:
     const char* getName() const override { return "hero agitator shoot"; }
 
 private:
-    const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand;
-    tap::control::setpoint::MoveCommand kickerFireCommand;
-    tap::control::setpoint::MoveCommand kickerLoadCommand;
-    tap::control::setpoint::MoveUnjamComprisedCommand waterwheelLoadCommand;
-
     enum HeroAgitatorState
     {
         SHOOTING,
@@ -145,10 +115,16 @@ private:
         FINISHED
     };
 
-    aruwsrc::Drivers* drivers;
-    AgitatorSubsystem* kickerAgitator;
-    AgitatorSubsystem* waterwheelAgitator;
+    aruwsrc::Drivers& drivers;
+    tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator;
+    tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator;
+
+    tap::control::Command& kickerFireCommand;
+    tap::control::Command& kickerLoadCommand;
+    tap::control::Command& waterwheelLoadCommand;
+
     const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels;
+    const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand;
     HeroAgitatorState currState;
     bool heatLimiting;
     uint16_t heatLimitBuffer;

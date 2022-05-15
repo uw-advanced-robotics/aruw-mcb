@@ -21,8 +21,12 @@
 #define HERO_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "../hero_agitator_command.hpp"
+#include "../velocity_agitator_subsystem_config.hpp"
 #include "modm/math/geometry.hpp"
 
 // Do not include this file directly: use agitator_constants.hpp instead.
@@ -33,41 +37,93 @@
 namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
-static constexpr tap::algorithms::SmoothPidConfig PID_HERO_WATERWHEEL = {
-    .kp = 150'000.0f,
+static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
+    .kp = 6'000.0f,
     .ki = 0.0f,
-    .kd = 50.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr tap::motor::MotorId HERO_WATERWHEEL_MOTOR_ID = tap::motor::MOTOR4;
-static constexpr tap::can::CanBus HERO_WATERWHEEL_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-static constexpr bool HERO_WATERWHEEL_INVERTED = false;
+static constexpr float DESIRED_LOAD_TIME_S = 0.3f;
+static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 7.0f;
+static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
+static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT =
+    M_TWOPI / (2.0f * WATERWHEEL_NUM_BALL_POCKETS);
+static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.8f;
+
+static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
+    .gearRatio = 36.0f,
+    .agitatorMotorId = tap::motor::MOTOR4,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+    .isAgitatorInverted = false,
+    /**
+     * The jamming constants. Agitator is considered jammed if difference between the velocity
+     * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
+     */
+    .jammingVelocityDifference = WATERWHEEL_TARGET_DISPLACEMENT / (2.0f * DESIRED_LOAD_TIME_S),
+    .jammingTime = 100,
+    .jamLogicEnabled = true,
+    .velocityPIDFeedForwardGain = 50.0f,
+};
+
+static constexpr tap::control::setpoint::MoveIntegralCommand::Config
+    WATERWHEEL_AGITATOR_ROTATE_CONFIG = {
+        .targetIntegralChange = WATERWHEEL_TARGET_DISPLACEMENT,
+        .desiredSetpoint = WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S,
+        .integralSetpointTolerance = M_PI / 32.0f,
+};
+
+static constexpr tap::control::setpoint::UnjamIntegralCommand::Config
+    WATERWHEEL_AGITATOR_UNJAM_CONFIG = {
+        .targetUnjamIntegralChange = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT,
+        .unjamSetpoint = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT / WATERWHEEL_TARGET_UNJAM_TIME_S,
+        /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
+        /// seconds. Add 100 ms extra tolerance.
+        .maxWaitTime = static_cast<uint32_t>(1000.0f * WATERWHEEL_TARGET_UNJAM_TIME_S) + 100,
+        .targetCycleCount = 1,
+};
 
 // PID terms for the hero kicker
-static constexpr tap::algorithms::SmoothPidConfig PID_HERO_KICKER = {
-    .kp = 100'000.0f,
+static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
+    .kp = 5'000.0f,
     .ki = 0.0f,
-    .kd = 50.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16000.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
-// There are two kicker motors that drive the shaft.
-static constexpr tap::motor::MotorId HERO_KICKER_MOTOR_ID = tap::motor::MOTOR8;
-static constexpr tap::can::CanBus HERO_KICKER_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
-static constexpr bool HERO_KICKER_INVERTED = false;
+static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITATOR_CONFIG = {
+    .gearRatio = 36.0f,
+    .agitatorMotorId = tap::motor::MOTOR8,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+    .isAgitatorInverted = false,
+    .jammingVelocityDifference = 0,
+    .jammingTime = 0,
+    .jamLogicEnabled = false,
+    .velocityPIDFeedForwardGain = 0,
+};
 
-/**
- * The jamming constants for waterwheel. Waterwheel is considered jammed if difference between
- * setpoint and current angle is > `JAM_DISTANCE_TOLERANCE_WATERWHEEL` radians for >=
- * `JAM_TEMPORAL_TOLERANCE_WATERWHEEL` ms;
- */
-static constexpr float JAM_DISTANCE_TOLERANCE_WATERWHEEL = M_PI / 14.0f;
-static constexpr uint32_t JAM_TEMPORAL_TOLERANCE_WATERWHEEL = 100.0f;
+static constexpr tap::control::setpoint::MoveIntegralCommand::Config
+    KICKER_LOAD_AGITATOR_ROTATE_CONFIG = {
+        .targetIntegralChange = M_PI / 2.0f,
+        .desiredSetpoint = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
+        .integralSetpointTolerance = M_PI / 32.0f,
+};
+
+static constexpr tap::control::setpoint::MoveIntegralCommand::Config
+    KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
+        .targetIntegralChange = M_PI / 2.0f,
+        .desiredSetpoint = 6.0 * M_PI,
+        .integralSetpointTolerance = M_PI / 32.0f,
+};
+
+static constexpr aruwsrc::agitator::HeroAgitatorCommand::Config HERO_AGITATOR_COMMAND_CONFIG = {
+    .heatLimiting = true,
+    .heatLimitBuffer = 100,
+};
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // HERO_AGITATOR_CONSTANTS_HPP_
