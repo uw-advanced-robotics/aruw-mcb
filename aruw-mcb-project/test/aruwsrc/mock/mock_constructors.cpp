@@ -29,6 +29,7 @@
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_request_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
+#include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
@@ -228,4 +229,11 @@ TurretCVCommandMock::TurretCVCommandMock(
 {
 }
 TurretCVCommandMock::~TurretCVCommandMock() {}
+
+TurretControllerInterfaceMock::TurretControllerInterfaceMock(
+    aruwsrc::control::turret::TurretMotor *turretMotor)
+    : aruwsrc::control::turret::algorithms::TurretControllerInterface(turretMotor)
+{
+}
+TurretControllerInterfaceMock::~TurretControllerInterfaceMock() {}
 }  // namespace aruwsrc::mock

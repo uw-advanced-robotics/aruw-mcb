@@ -221,7 +221,7 @@ public:
      */
     inline void unwrapTargetAngle(float &setpointToUnwrap) const
     {
-        if (turretController == nullptr || config.limitMotorAngles) return;
+        if (turretController == nullptr || !config.limitMotorAngles) return;
 
         setpointToUnwrap = getClosestNonNormalizedSetpointToMeasurement(
             turretController->getMeasurement(),
@@ -239,7 +239,7 @@ private:
     tap::motor::MotorInterface *motor;
 
     /// Associated turret controller interface that is being used by a command to control this motor
-    const algorithms::TurretControllerInterface *turretController;
+    const algorithms::TurretControllerInterface *turretController = nullptr;
 
     /**
      * Offset applied when the motor is turned on. When the turret is turned on, the distance
