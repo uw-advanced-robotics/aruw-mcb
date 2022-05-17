@@ -122,7 +122,7 @@ public:
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+        tap::control::Subsystem &launchingSubsystem,
         Command *const launchingCommand,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,

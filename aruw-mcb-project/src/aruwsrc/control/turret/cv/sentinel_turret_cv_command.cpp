@@ -43,7 +43,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+    tap::control::Subsystem &launchingSubsystem,
     Command *const launchingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
@@ -76,9 +76,9 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     assert(yawController != nullptr);
 
     this->comprisedCommandScheduler.registerSubsystem(turretSubsystem);
-    this->comprisedCommandScheduler.registerSubsystem(&agitatorSubsystem);
+    this->comprisedCommandScheduler.registerSubsystem(&launchingSubsystem);
     this->addSubsystemRequirement(turretSubsystem);
-    this->addSubsystemRequirement(&agitatorSubsystem);
+    this->addSubsystemRequirement(&launchingSubsystem);
 }
 
 bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
