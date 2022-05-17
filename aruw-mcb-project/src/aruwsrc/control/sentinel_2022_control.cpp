@@ -172,20 +172,24 @@ SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
 namespace turret0
 {
+aruwsrc::agitator::MoveUnjamRefLimitedCommandConfig rotateAgitatorManualConfig
+{
+    .moveDisplacement = M_PI / 5.0f,
+    .moveTime = 50,
+    .pauseAfterMoveTime = 0,
+    .setToTargetOnEnd = true,
+    .setpointTolerance = M_PI / 20.0f,
+    .unjamDisplacement = 0.4f,
+    .unjamThreshold = 0.2f,
+    .maxUnjamWaitTime = 300,
+    .unjamCycleCount = 2,
+    .heatLimiting = true,
+    .heatLimitBuffer = 10,
+};
 aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
     drivers(),
     &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    300,
-    2,
-    true,
-    10);
+    rotateAgitatorManualConfig);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -238,20 +242,24 @@ cv::SentinelTurretCVCommand turretCVCommand(
 
 namespace turret1
 {
+aruwsrc::agitator::MoveUnjamRefLimitedCommandConfig rotateAgitatorManualConfig
+{
+    .moveDisplacement = M_PI / 5.0f,
+    .moveTime = 50,
+    .pauseAfterMoveTime = 0,
+    .setToTargetOnEnd = true,
+    .setpointTolerance = M_PI / 16.0f,
+    .unjamDisplacement = M_PI / 2.0f,
+    .unjamThreshold = M_PI / 4.0f,
+    .maxUnjamWaitTime = 130,
+    .unjamCycleCount = 2,
+    .heatLimiting = true,
+    .heatLimitBuffer = 10,
+};
 aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
     drivers(),
     &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    130,
-    2,
-    true,
-    10);
+    rotateAgitatorManualConfig);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 

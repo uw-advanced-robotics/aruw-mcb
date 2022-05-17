@@ -28,6 +28,7 @@
 
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -43,7 +44,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
-    const aruwsrc::agitator::MoveUnjamRefLimitedCommandConfig agitatorCommandConfig,
+    Command *const launchingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
     const float defaultLaunchSpeed,
@@ -55,11 +56,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
       yawController(yawController),
       pitchController(pitchController),
       turretID(turretID),
-      launchingCommand(
-          drivers,
-          &agitatorSubsystem,
-          agitatorCommandConfig
-      ),
+      launchingCommand(launchingCommand),
       ballisticsSolver(
           *drivers,
           odometryInterface,
@@ -73,6 +70,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           turretSubsystem->yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
           SCAN_DELTA_ANGLE)
 {
+    assert(launchingCommand != nullptr);
     assert(turretSubsystem != nullptr);
     assert(pitchController != nullptr);
     assert(yawController != nullptr);
@@ -161,15 +159,15 @@ void SentinelTurretCVCommand::execute()
     attemptingToFire = projectilesShouldLaunch;
     // Do not re-add command if it's already scheduled as that would interrupt it
     if (projectilesShouldLaunch &&
-        !this->comprisedCommandScheduler.isCommandScheduled(&launchingCommand))
+        !this->comprisedCommandScheduler.isCommandScheduled(launchingCommand))
     {
-        this->comprisedCommandScheduler.addCommand(&launchingCommand);
+        this->comprisedCommandScheduler.addCommand(launchingCommand);
         commandAdded = true;
     }
     else if (!projectilesShouldLaunch &&
-            this->comprisedCommandScheduler.isCommandScheduled(&launchingCommand))
+            this->comprisedCommandScheduler.isCommandScheduled(launchingCommand))
     {
-        this->comprisedCommandScheduler.removeCommand(&launchingCommand, true);
+        this->comprisedCommandScheduler.removeCommand(launchingCommand, true);
         commandAdded = false;
     }
 
@@ -184,6 +182,8 @@ void SentinelTurretCVCommand::execute()
     // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
     // and sets the turret subsystem's desired yaw output
     yawController->runController(dt, yawSetpoint);
+
+    comprisedCommandScheduler.run();
 }
 
 bool SentinelTurretCVCommand::isFinished() const
@@ -196,9 +196,9 @@ void SentinelTurretCVCommand::end(bool)
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
 
-    if (this->comprisedCommandScheduler.isCommandScheduled(&launchingCommand))
+    if (this->comprisedCommandScheduler.isCommandScheduled(launchingCommand))
     {
-        this->comprisedCommandScheduler.removeCommand(&launchingCommand, true);
+        this->comprisedCommandScheduler.removeCommand(launchingCommand, true);
         commandAdded = false;
         attemptingToFire = false;
     }

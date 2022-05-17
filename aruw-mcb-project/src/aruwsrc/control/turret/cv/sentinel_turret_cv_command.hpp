@@ -96,7 +96,7 @@ public:
      * The minimum speed of a projectile being launched out of the flywheels (in m/s) 
      * to justify spinning the agitator. This is specific to the sentinel CV command.
      */
-    static constexpr float MINIMUM_FLYWHEEL_SPEED_FOR_LAUNCHING = 0.0f;
+    static constexpr float MINIMUM_FLYWHEEL_SPEED_FOR_LAUNCHING = 10.0f;
 
     /**
      * Constructs a TurretCVCommand
@@ -123,7 +123,7 @@ public:
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
         aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
-        const aruwsrc::agitator::MoveUnjamRefLimitedCommandConfig agitatorCommandConfig,
+        Command *const launchingCommand,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
         const float defaultLaunchSpeed,
@@ -163,7 +163,7 @@ private:
     /**
      * The command to be scheduled when the sentinel is ready to launch.
      */
-    aruwsrc::agitator::MoveUnjamRefLimitedCommand launchingCommand;
+    Command *const launchingCommand;
 
     aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
 

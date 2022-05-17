@@ -187,7 +187,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     agitator,
-    rotateAgitatorManualConfig,
+    &rotateAgitatorManual,
     odometrySubsystem,
     frictionWheels,
     14.5f,
