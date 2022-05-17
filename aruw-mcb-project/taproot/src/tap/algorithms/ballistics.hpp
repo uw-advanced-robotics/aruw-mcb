@@ -113,7 +113,8 @@ bool findTargetProjectileIntersection(
     float bulletVelocity,
     uint8_t numIterations,
     float *turretPitch,
-    float *turretYaw);
+    float *turretYaw,
+    float *projectedTravelTime);
 
 }  // namespace tap::algorithms::ballistics
 

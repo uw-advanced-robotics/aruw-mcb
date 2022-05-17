@@ -59,6 +59,7 @@
 #include "turret/hero_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
+#include "auto-aim/auto_aim_launch_timer.hpp"
 
 using namespace tap::control::setpoint;
 using namespace aruwsrc::chassis;
@@ -69,6 +70,7 @@ using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::launcher;
+using namespace aruwsrc::control::auto_aim;
 using namespace tap::communication::serial;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
@@ -254,6 +256,12 @@ MoveIntegralCommand kickerLaunchCommand(
     kickerAgitator,
     aruwsrc::control::agitator::constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
+AutoAimLaunchTimer autoAimLaunchTimer(
+    50'000, // agitatorTypicalDelayMicroseconds
+    &drivers()->visionCoprocessor,
+    &turretCVCommand.ballisticsSolver
+);
+
 HeroAgitatorCommand heroAgitatorCommand(
     *drivers(),
     aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
@@ -261,6 +269,7 @@ HeroAgitatorCommand heroAgitatorCommand(
     waterwheelAgitator,
     frictionWheels,
     turretCVCommand,
+    autoAimLaunchTimer,
     kickerLaunchCommand,
     kickerLoadCommand,
     waterwheelLoadUnjamCommand);

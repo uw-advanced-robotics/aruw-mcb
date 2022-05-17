@@ -121,7 +121,7 @@ public:
      */
     mockable bool isAimingWithinLaunchingTolerance() const { return withinAimingTolerance; }
 
-private:
+public:
     aruwsrc::Drivers *drivers;
 
     uint8_t turretID;

@@ -27,6 +27,7 @@
 
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 
 using tap::gpio::Digital;
 
@@ -66,9 +67,11 @@ public:
         tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
         const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
         const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand,
+        aruwsrc::control::auto_aim::AutoAimLaunchTimer& autoAimLaunchTimer,
         tap::control::Command& kickerFireCommand,
         tap::control::Command& kickerLoadCommand,
-        tap::control::Command& waterwheelLoadCommand);
+        tap::control::Command& waterwheelLoadCommand
+    );
 
     /**
      * @return Whether the agitator subsystems are online and heat is below
@@ -125,11 +128,14 @@ private:
 
     const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels;
     const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand;
+    aruwsrc::control::auto_aim::AutoAimLaunchTimer& autoAimLaunchTimer;
+
     HeroAgitatorState currState;
     bool heatLimiting;
     uint16_t heatLimitBuffer;
     uint16_t startingHeat;
 
+    aruwsrc::control::auto_aim::AutoAimLaunchTimer::LaunchInclination lastAutoLaunchInclination;// Purely for testing, remove later
     /**
      * Enters the loading state and schedules commands to rotate the kicker
      * and agitator.

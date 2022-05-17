@@ -77,11 +77,9 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    float targetPitch;
-    float targetYaw;
-    float targetDistance;
+    float targetPitch, targetYaw, targetDistance, timeOfFlight;
     bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance);
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance, &timeOfFlight);
 
     if (ballisticsSolutionAvailable)
     {

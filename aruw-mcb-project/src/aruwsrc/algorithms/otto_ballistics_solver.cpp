@@ -52,7 +52,8 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 bool OttoBallisticsSolver::computeTurretAimAngles(
     float *pitchAngle,
     float *yawAngle,
-    float *distance)
+    float *distance,
+    float *timeOfFlight)
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
 
@@ -69,7 +70,6 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
                                   : frictionWheels.getPredictedLaunchSpeed();
 
     const Vector2f robotPosition = odometryInterface.getCurrentLocation2D().getPosition();
-
     const Vector2f chassisVelocity = odometryInterface.getCurrentVelocity2D();
 
     // target state, frame whose axis is at the turret center and z is up
@@ -83,7 +83,6 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
     };
 
     uint32_t projectforwardtimedt = tap::arch::clock::getTimeMicroseconds() - aimData.timestamp;
-
     targetState.position = targetState.projectForward(projectforwardtimedt / 1E6f);
 
     *distance = targetState.position.getLength();
@@ -93,6 +92,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
         launchSpeed,
         3,
         pitchAngle,
-        yawAngle);
+        yawAngle,
+        timeOfFlight);
 }
 }  // namespace aruwsrc::algorithms

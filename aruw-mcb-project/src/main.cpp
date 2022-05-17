@@ -43,11 +43,17 @@
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
 
+#include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
+
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
+namespace hero_control {
+extern aruwsrc::control::auto_aim::AutoAimLaunchTimer autoAimLaunchTimer;
+}
+aruwsrc::control::auto_aim::AutoAimLaunchTimer::LaunchInclination lastAutoLaunchInclination;// Purely for testing, remove later
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -82,6 +88,7 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
+            lastAutoLaunchInclination = hero_control::autoAimLaunchTimer.getCurrentLaunchInclination(0);
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());

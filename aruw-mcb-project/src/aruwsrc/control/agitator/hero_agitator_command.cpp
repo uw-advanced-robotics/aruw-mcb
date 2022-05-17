@@ -26,11 +26,14 @@
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 
 #include "velocity_agitator_subsystem.hpp"
 
 using namespace tap::control::setpoint;
 using namespace tap::algorithms;
+
+using namespace aruwsrc::control::auto_aim;
 
 namespace aruwsrc
 {
@@ -43,9 +46,11 @@ HeroAgitatorCommand::HeroAgitatorCommand(
     tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
     const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheels,
     const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand,
+    aruwsrc::control::auto_aim::AutoAimLaunchTimer& autoAimLaunchTimer,
     tap::control::Command& kickerFireCommand,
     tap::control::Command& kickerLoadCommand,
-    tap::control::Command& waterwheelLoadCommand)
+    tap::control::Command& waterwheelLoadCommand
+    )
     : tap::control::ComprisedCommand(&drivers),
       drivers(drivers),
       kickerAgitator(kickerAgitator),
@@ -55,6 +60,7 @@ HeroAgitatorCommand::HeroAgitatorCommand(
       waterwheelLoadCommand(waterwheelLoadCommand),
       frictionWheels(frictionWheels),
       turretCVCommand(turretCVCommand),
+      autoAimLaunchTimer(autoAimLaunchTimer),
       heatLimiting(config.heatLimiting),
       heatLimitBuffer(config.heatLimitBuffer)
 {
@@ -94,7 +100,8 @@ static inline bool enoughHeatToFire(
 
 static inline bool readyToRotate(
     aruwsrc::Drivers& drivers,
-    const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand)
+    const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand,
+    aruwsrc::control::auto_aim::AutoAimLaunchTimer& autoAimLaunchTimer)
 {
     const bool readyToFire = drivers.turretMCBCanComm.getLimitSwitchDepressed();
 
@@ -104,19 +111,45 @@ static inline bool readyToRotate(
      * - If the turret CV is not scheduled, also don't gate rotation
      * - If the turret CV command reports its okay to fire, you can rotate to launch a projectile
      */
-    return !readyToFire || !drivers.refSerial.operatorBlinded() ||
-           !drivers.commandScheduler.isCommandScheduled(&turretCVCommand) ||
-           turretCVCommand.isAimingWithinLaunchingTolerance();
+    if (!readyToFire) {
+        return true;
+    }
+    
+    // if (!drivers.refSerial.operatorBlinded()) {
+    //     return true;
+    // }
+
+    if (drivers.commandScheduler.isCommandScheduled(&turretCVCommand)) {
+        if (!turretCVCommand.isAimingWithinLaunchingTolerance()) {
+            return false;
+        }
+
+        auto autoLaunchInclination = autoAimLaunchTimer.getCurrentLaunchInclination(0);
+        switch (autoLaunchInclination) {
+            case AutoAimLaunchTimer::LaunchInclination::NO_TARGET:
+                return false;
+            case AutoAimLaunchTimer::LaunchInclination::UNGATED:
+                return true;
+            case AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW:
+                return true;
+            case AutoAimLaunchTimer::LaunchInclination::GATED_DENY:
+                return false;
+        }
+    }
+
+    return false;
 }
 
 bool HeroAgitatorCommand::isReady()
 {
     const auto& robotData = drivers.refSerial.getRobotData();
 
+    lastAutoLaunchInclination = autoAimLaunchTimer.getCurrentLaunchInclination(0); // TODO: testing
+
     return kickerAgitator.isOnline() && waterwheelAgitator.isOnline() &&
            flywheelsOn(frictionWheels) &&
            enoughHeatToFire(drivers, heatLimiting, robotData, heatLimitBuffer) &&
-           readyToRotate(drivers, turretCVCommand);
+           readyToRotate(drivers, turretCVCommand, autoAimLaunchTimer);
 }
 
 bool HeroAgitatorCommand::isFinished() const
