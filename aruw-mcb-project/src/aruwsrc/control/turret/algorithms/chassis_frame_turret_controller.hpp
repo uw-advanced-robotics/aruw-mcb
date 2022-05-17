@@ -60,12 +60,27 @@ public:
 
     void setSetpoint(float desiredSetpoint) final;
 
+    /// @return The chassis frame turret measurement.
+    float getMeasurement() const final;
+
     /**
      * @return The yaw setpoint, in the chassis frame.
      */
     float getSetpoint() const final;
 
     bool isOnline() const final;
+
+    /// Since the controller is in the chassis frame, no frame transformation is required.
+    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    {
+        return controllerFrameAngle;
+    }
+
+    /// Since the controller is in the chassis frame, no frame transformation is required.
+    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    {
+        return chassisFrameAngle;
+    }
 
 private:
     tap::algorithms::SmoothPid pid;
@@ -103,7 +118,22 @@ public:
      */
     float getSetpoint() const final;
 
+    /// @return The chassis frame turret measurement.
+    float getMeasurement() const final;
+
     bool isOnline() const final;
+
+    /// Since the controller is in the chassis frame, no frame transformation is required.
+    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    {
+        return controllerFrameAngle;
+    }
+
+    /// Since the controller is in the chassis frame, no frame transformation is required.
+    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    {
+        return chassisFrameAngle;
+    }
 
 private:
     tap::algorithms::SmoothPid pid;

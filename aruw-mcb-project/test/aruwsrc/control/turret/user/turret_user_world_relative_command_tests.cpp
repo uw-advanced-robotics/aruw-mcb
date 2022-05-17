@@ -44,16 +44,10 @@ protected:
               &drivers,
               &turret.yawMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          worldFramePitchTurretImuController(
-              &drivers,
-              &turret.pitchMotor,
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          worldFrameYawTurretImuController(
-              &drivers,
-              &turret.yawMotor,
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          posPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          velPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          worldFramePitchTurretImuController(&drivers, &turret.pitchMotor, posPid, velPid),
+          worldFrameYawTurretImuController(&drivers, &turret.yawMotor, posPid, velPid),
           turretCmd(
               &drivers,
               &turret,
@@ -92,6 +86,8 @@ protected:
     NiceMock<TurretSubsystemMock> turret;
     ChassisFramePitchTurretController chassisFramePitchTurretController;
     WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController;
+    tap::algorithms::SmoothPid posPid;
+    tap::algorithms::SmoothPid velPid;
     WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController;
     WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
     TurretUserWorldRelativeCommand turretCmd;
@@ -123,7 +119,7 @@ TEST_F(
     turretOnline = true;
 
     // The turret MCB comm will be queried if the turret IMU command is running
-    EXPECT_CALL(drivers.turretMCBCanComm, getYaw).Times(AtLeast(1));
+    EXPECT_CALL(drivers.turretMCBCanComm, getYawUnwrapped).Times(AtLeast(1));
 
     turretCmd.initialize();
     turretCmd.execute();
@@ -137,7 +133,7 @@ TEST_F(
     turretOnline = true;
 
     // The turret MCB comm will be queried if the turret IMU command is running
-    EXPECT_CALL(drivers.turretMCBCanComm, getYaw).Times(0);
+    EXPECT_CALL(drivers.turretMCBCanComm, getYawUnwrapped).Times(0);
 
     turretCmd.initialize();
     turretCmd.execute();

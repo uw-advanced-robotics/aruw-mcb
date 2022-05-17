@@ -170,17 +170,25 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     &turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
     drivers(),
     &turret.pitchMotor,
-    world_rel_turret_imu::PITCH_POS_PID_CONFIG,
-    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+    worldFramePitchTurretImuPosPid,
+    worldFramePitchTurretImuVelPid);
+
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
     drivers(),
     &turret.yawMotor,
-    world_rel_turret_imu::YAW_POS_PID_CONFIG,
-    world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+    worldFrameYawTurretImuPosPid,
+    worldFrameYawTurretImuVelPid);
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
