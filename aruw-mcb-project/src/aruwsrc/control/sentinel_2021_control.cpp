@@ -122,20 +122,24 @@ OttoVelocityOdometry2DSubsystem odometrySubsystem(
     &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
+aruwsrc::agitator::MoveUnjamRefLimitedCommandConfig rotateAgitatorManualConfig
+{
+    .moveDisplacement = M_PI / 5.0f,
+    .moveTime = 50,
+    .pauseAfterMoveTime = 0,
+    .setToTargetOnEnd = true,
+    .setpointTolerance = M_PI / 16.0f,
+    .unjamDisplacement = M_PI / 2.0f,
+    .unjamThreshold = M_PI / 4.0f,
+    .maxUnjamWaitTime = 130,
+    .unjamCycleCount = 2,
+    .heatLimiting = true,
+    .heatLimitBuffer = 10,
+};
 aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
     drivers(),
     &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    130,
-    2,
-    true,
-    10);
+    rotateAgitatorManualConfig);
 
 CalibrateCommand agitatorCalibrateCommand(&agitator);
 
@@ -183,7 +187,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     agitator,
-    &rotateAgitatorManual,
+    rotateAgitatorManualConfig,
     odometrySubsystem,
     frictionWheels,
     14.5f,

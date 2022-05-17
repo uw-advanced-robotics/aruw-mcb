@@ -26,6 +26,7 @@
 #include "../algorithms/turret_controller_interface.hpp"
 #include "../constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/control/agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
@@ -92,6 +93,12 @@ public:
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
     /**
+     * The minimum speed of a projectile being launched out of the flywheels (in m/s) 
+     * to justify spinning the agitator. This is specific to the sentinel CV command.
+     */
+    static constexpr float MINIMUM_FLYWHEEL_SPEED_FOR_LAUNCHING = 0.0f;
+
+    /**
      * Constructs a TurretCVCommand
      *
      * @param[in] drivers Pointer to a global drivers object.
@@ -115,8 +122,8 @@ public:
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        tap::control::Subsystem &firingSubsystem,
-        Command *const firingCommand,
+        aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+        const aruwsrc::agitator::MoveUnjamRefLimitedCommandConfig agitatorCommandConfig,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
         const float defaultLaunchSpeed,
@@ -154,9 +161,9 @@ private:
     const uint8_t turretID;
 
     /**
-     * The command to be scheduled when the sentinel is ready to shoot.
+     * The command to be scheduled when the sentinel is ready to launch.
      */
-    Command *const firingCommand;
+    aruwsrc::agitator::MoveUnjamRefLimitedCommand launchingCommand;
 
     aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
 

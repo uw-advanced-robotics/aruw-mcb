@@ -32,32 +32,22 @@ namespace agitator
 MoveUnjamRefLimitedCommand::MoveUnjamRefLimitedCommand(
     aruwsrc::Drivers *drivers,
     SetpointSubsystem *setpointSubsystem,
-    float moveDisplacement,
-    uint32_t moveTime,
-    uint32_t pauseAfterMoveTime,
-    bool setToTargetOnEnd,
-    float setpointTolerance,
-    float unjamDisplacement,
-    float unjamThreshold,
-    uint32_t maxUnjamWaitTime,
-    uint_fast16_t unjamCycleCount,
-    bool heatLimiting,
-    float heatLimitBuffer)
+    const MoveUnjamRefLimitedCommandConfig config)
     : tap::control::setpoint::MoveUnjamComprisedCommand(
           drivers,
           setpointSubsystem,
-          moveDisplacement,
-          moveTime,
-          pauseAfterMoveTime,
-          setToTargetOnEnd,
-          setpointTolerance,
-          unjamDisplacement,
-          unjamThreshold,
-          maxUnjamWaitTime,
-          unjamCycleCount),
+          config.moveDisplacement,
+          config.moveTime,
+          config.pauseAfterMoveTime,
+          config.setToTargetOnEnd,
+          config.setpointTolerance,
+          config.unjamDisplacement,
+          config.unjamThreshold,
+          config.maxUnjamWaitTime,
+          config.unjamCycleCount),
       drivers(drivers),
-      heatLimiting(heatLimiting),
-      heatLimitBuffer(heatLimitBuffer)
+      heatLimiting(config.heatLimiting),
+      heatLimitBuffer(config.heatLimitBuffer)
 {
 }
 
