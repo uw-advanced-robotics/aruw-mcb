@@ -217,8 +217,8 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
     drivers()->turretMCBCanCommBus2,
     &turretSubsystem.yawMotor,
-    worldFrameYawTurretImuVelPid,
-    worldFrameYawTurretImuPosPid);
+    worldFrameYawTurretImuPosPid,
+    worldFrameYawTurretImuVelPid);
 
 // turret commands
 
@@ -332,7 +332,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
          aruwsrc::control::turret::TurretSubsystem *,
          aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
          aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *>(
-         &drivers()->turretMCBCanCommBus1,
+         &drivers()->turretMCBCanCommBus2,
          &turret0::turretSubsystem,
          &turret0::chassisFrameYawTurretController,
          &turret0::chassisFramePitchTurretController),
@@ -341,7 +341,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
          aruwsrc::control::turret::TurretSubsystem *,
          aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
          aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *>(
-         &drivers()->turretMCBCanCommBus2,
+         &drivers()->turretMCBCanCommBus1,
          &turret1::turretSubsystem,
          &turret1::chassisFrameYawTurretController,
          &turret1::chassisFramePitchTurretController)},
@@ -370,11 +370,10 @@ HoldRepeatCommandMapping rightSwitchUp(
     {&turret0::agitatorShootFastUnlimited, &turret1::agitatorShootFastUnlimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
-HoldRepeatCommandMapping leftSwitchDown(
+HoldCommandMapping leftSwitchDown(
     drivers(),
     {&sentinelDriveManual1, &turret0::turretManual, &turret1::turretManual},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-    true);
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&sentinelDriveManual2},

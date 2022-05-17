@@ -46,8 +46,16 @@ protected:
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           posPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           velPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          worldFramePitchTurretImuController(drivers.turretMCBCanCommBus1, &turret.pitchMotor, posPid, velPid),
-          worldFrameYawTurretImuController(drivers.turretMCBCanCommBus1, &turret.yawMotor, posPid, velPid),
+          worldFramePitchTurretImuController(
+              drivers.turretMCBCanCommBus1,
+              &turret.pitchMotor,
+              posPid,
+              velPid),
+          worldFrameYawTurretImuController(
+              drivers.turretMCBCanCommBus1,
+              &turret.yawMotor,
+              posPid,
+              velPid),
           turretCmd(
               &drivers,
               &turret,

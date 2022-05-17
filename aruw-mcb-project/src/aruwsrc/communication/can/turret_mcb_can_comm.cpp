@@ -30,7 +30,7 @@ namespace aruwsrc::can
 TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers, tap::can::CanBus canBus)
     : canBus(canBus),
       drivers(drivers),
-            currProcessingImuData{},
+      currProcessingImuData{},
       lastCompleteImuData{},
       yawAngleGyroMessageHandler(
           drivers,
@@ -113,8 +113,6 @@ void TurretMCBCanComm::handleYawAngleGyroMessage(const modm::can::Message& messa
     // fill in top 16 bits
     currProcessingImuData.turretDataTimestamp |= static_cast<uint32_t>(angleMessage->timestamp)
                                                  << 16;
-
-    updateRevolutionCounter(currProcessingImuData.yaw, lastCompleteImuData.yaw, yawRevolutions);
 }
 
 void TurretMCBCanComm::handlePitchAngleGyroMessage(const modm::can::Message& message)
@@ -140,6 +138,8 @@ void TurretMCBCanComm::handlePitchAngleGyroMessage(const modm::can::Message& mes
         currProcessingImuData.pitch,
         lastCompleteImuData.pitch,
         pitchRevolutions);
+
+    updateRevolutionCounter(currProcessingImuData.yaw, lastCompleteImuData.yaw, yawRevolutions);
 
     lastCompleteImuData = currProcessingImuData;
 
