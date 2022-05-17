@@ -26,9 +26,7 @@
 #include "../algorithms/turret_controller_interface.hpp"
 #include "../constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/control/agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
-#include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
 #include "setpoint_scanner.hpp"
 
@@ -95,12 +93,6 @@ public:
     static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
 
     /**
-     * The minimum speed of a projectile being launched out of the flywheels (in m/s) 
-     * to justify spinning the agitator. This is specific to the sentinel CV command.
-     */
-    static constexpr float MINIMUM_FLYWHEEL_SPEED_FOR_LAUNCHING = 10.0f;
-
-    /**
      * Constructs a TurretCVCommand
      *
      * @param[in] drivers Pointer to a global drivers object.
@@ -155,7 +147,7 @@ private:
     aruwsrc::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
-    aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem const* frictionWheels;
+    aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem const *frictionWheels;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;

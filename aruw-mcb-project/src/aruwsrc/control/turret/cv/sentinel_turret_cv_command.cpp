@@ -26,7 +26,6 @@
 
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -95,8 +94,6 @@ void SentinelTurretCVCommand::initialize()
         turretSubsystem->pitchMotor.getChassisFrameSetpoint());
 }
 
-bool attemptingToFire = false;
-bool commandAdded = false;
 void SentinelTurretCVCommand::execute()
 {
     float pitchSetpoint = pitchController->getSetpoint();
@@ -136,9 +133,7 @@ void SentinelTurretCVCommand::execute()
         if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
                 turretSubsystem->yawMotor.getValidChassisMeasurementError(),
                 turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
-                targetDistance)
-            &&
-            frictionWheels->getDesiredLaunchSpeed() >= MINIMUM_FLYWHEEL_SPEED_FOR_LAUNCHING)
+                targetDistance))
         {
             projectilesShouldLaunch = true;
         }
@@ -161,19 +156,11 @@ void SentinelTurretCVCommand::execute()
         }
     }
 
-    attemptingToFire = projectilesShouldLaunch;
     // Do not re-add command if it's already scheduled as that would interrupt it
     if (projectilesShouldLaunch &&
         !this->comprisedCommandScheduler.isCommandScheduled(launchingCommand))
     {
         this->comprisedCommandScheduler.addCommand(launchingCommand);
-        commandAdded = true;
-    }
-    else if (!projectilesShouldLaunch &&
-            this->comprisedCommandScheduler.isCommandScheduled(launchingCommand))
-    {
-        this->comprisedCommandScheduler.removeCommand(launchingCommand, true);
-        commandAdded = false;
     }
 
     uint32_t currTime = getTimeMilliseconds();
@@ -200,13 +187,7 @@ void SentinelTurretCVCommand::end(bool)
 {
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
-
-    if (this->comprisedCommandScheduler.isCommandScheduled(launchingCommand))
-    {
-        this->comprisedCommandScheduler.removeCommand(launchingCommand, true);
-        commandAdded = false;
-        attemptingToFire = false;
-    }
+    this->comprisedCommandScheduler.removeCommand(launchingCommand, true);
 }
 
 void SentinelTurretCVCommand::requestNewTarget()
