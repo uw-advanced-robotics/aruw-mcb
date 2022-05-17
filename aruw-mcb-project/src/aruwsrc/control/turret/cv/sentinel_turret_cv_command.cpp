@@ -49,7 +49,6 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     : ComprisedCommand(drivers),
       drivers(drivers),
       turretSubsystem(turretSubsystem),
-      frictionWheels(&frictionWheels),
       yawController(yawController),
       pitchController(pitchController),
       turretID(turretID),

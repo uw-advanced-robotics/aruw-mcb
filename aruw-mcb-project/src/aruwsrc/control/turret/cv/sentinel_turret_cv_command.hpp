@@ -147,7 +147,6 @@ private:
     aruwsrc::Drivers *drivers;
 
     TurretSubsystem *turretSubsystem;
-    aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem const *frictionWheels;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
