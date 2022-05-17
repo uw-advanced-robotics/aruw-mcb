@@ -61,7 +61,7 @@ void VelocityAgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
 
 void VelocityAgitatorSubsystem::refresh()
 {
-    if (!isOnline()) 
+    if (!isOnline())
     {
         agitatorIsCalibrated = false;
     }
