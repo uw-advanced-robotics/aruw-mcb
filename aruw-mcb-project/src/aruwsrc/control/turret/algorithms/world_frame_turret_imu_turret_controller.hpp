@@ -25,12 +25,9 @@
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/fuzzy_pd.hpp"
 
-#include "turret_controller_interface.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "turret_controller_interface.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -60,7 +57,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
-        const aruwsrc::Drivers *drivers,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor *yawMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid);
@@ -86,7 +83,7 @@ public:
     float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
 
 private:
-    const aruwsrc::Drivers *drivers;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;
@@ -116,7 +113,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
-        const aruwsrc::Drivers *drivers,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor *pitchMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid);
@@ -142,7 +139,7 @@ public:
     float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
 
 private:
-    const aruwsrc::Drivers *drivers;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;

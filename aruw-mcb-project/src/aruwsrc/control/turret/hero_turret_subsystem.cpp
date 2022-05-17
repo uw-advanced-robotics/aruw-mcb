@@ -23,13 +23,16 @@
 
 namespace aruwsrc::control::turret
 {
-float HeroTurretSubsystem::getWorldYaw() const { return drivers->turretMCBCanComm.getYaw(); }
+float HeroTurretSubsystem::getWorldYaw() const { return drivers->turretMCBCanCommBus1.getYaw(); }
 
-float HeroTurretSubsystem::getWorldPitch() const { return drivers->turretMCBCanComm.getPitch(); }
+float HeroTurretSubsystem::getWorldPitch() const
+{
+    return drivers->turretMCBCanCommBus1.getPitch();
+}
 
 uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
 {
-    return drivers->turretMCBCanComm.getIMUDataTimestamp();
+    return drivers->turretMCBCanCommBus1.getIMUDataTimestamp();
 }
 
 }  // namespace aruwsrc::control::turret

@@ -40,7 +40,7 @@ MainMenu::MainMenu(
       commandSchedulerMenu(stack, drivers),
       refSerialMenu(stack, drivers),
       imuMenu(stack, &drivers->mpu6500),
-      turretStatusMenu(stack, drivers)
+      turretStatusMenu(stack, drivers->turretMCBCanCommBus1)
 {
 }
 
@@ -148,7 +148,8 @@ void MainMenu::addImuMenuCallback()
 
 void MainMenu::addTurretMCBMenuCallback()
 {
-    TurretMCBMenu* tsm = new (&turretStatusMenu) TurretMCBMenu(getViewStack(), drivers);
+    TurretMCBMenu* tsm =
+        new (&turretStatusMenu) TurretMCBMenu(getViewStack(), drivers->turretMCBCanCommBus1);
     getViewStack()->push(tsm);
 }
 }  // namespace display

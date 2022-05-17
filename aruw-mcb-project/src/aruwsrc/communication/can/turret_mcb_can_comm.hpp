@@ -61,7 +61,7 @@ public:
     };
     MODM_FLAGS8(TxCommandMsgBitmask);
 
-    TurretMCBCanComm(aruwsrc::Drivers* drivers);
+    TurretMCBCanComm(aruwsrc::Drivers* drivers, tap::can::CanBus canBus);
     DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
 
     mockable void init();
@@ -151,7 +151,6 @@ private:
         TURRET_MCB_TX_CAN_ID = 0x1fe,
     };
 
-    static constexpr tap::can::CanBus TURRET_MCB_CAN_BUS = tap::can::CanBus::CAN_BUS1;
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
@@ -189,6 +188,8 @@ private:
         uint32_t turretDataTimestamp;
         uint8_t seq;
     };
+
+    const tap::can::CanBus canBus;
 
     aruwsrc::Drivers* drivers;
 

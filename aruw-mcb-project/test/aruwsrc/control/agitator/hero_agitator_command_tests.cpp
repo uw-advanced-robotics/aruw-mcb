@@ -65,6 +65,7 @@ protected:
           waterwheelLoadCommand(1UL << waterwheel.getGlobalIdentifier()),
           turretCVCommand(&drivers, nullptr, nullptr, nullptr, odometry, frictionWheels, 0, 0, 0),
           cmd(drivers,
+              drivers.turretMCBCanCommBus1,
               DEFAULT_HERO_AGITATOR_CMD_CONFIG,
               kicker,
               waterwheel,
@@ -144,6 +145,7 @@ TEST_F(HeroAgitatorCommandTest, isReady_heat_limiting_true_when_heat_limit_below
     // declare new HeroAgitatorCommand that has a custom agitator config
     HeroAgitatorCommand cmd(
         drivers,
+        drivers.turretMCBCanCommBus1,
         agitatorConfig,
         kicker,
         waterwheel,
@@ -177,6 +179,7 @@ TEST_F(HeroAgitatorCommandTest, isReady_heat_limiting_false_when_heat_limit_abov
     // declare new HeroAgitatorCommand that has a custom agitator config
     HeroAgitatorCommand cmd(
         drivers,
+        drivers.turretMCBCanCommBus1,
         agitatorConfig,
         kicker,
         waterwheel,
@@ -246,7 +249,7 @@ TEST_F(HeroAgitatorCommandTest, isFinished_true_when_motors_disconnected)
 TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_loading_happens)
 {
     bool limitSwitchDepressed = false;
-    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
+    ON_CALL(drivers.turretMCBCanCommBus1, getLimitSwitchDepressed)
         .WillByDefault(ReturnPointee(&limitSwitchDepressed));
 
     EXPECT_CALL(kickerLoadCommand, initialize).Times(2);
@@ -272,7 +275,7 @@ TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_loading_happens)
 TEST_F(HeroAgitatorCommandTest, execute_ball_not_loaded_multiple_load_cycles_happen)
 {
     bool limitSwitchDepressed = false;
-    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
+    ON_CALL(drivers.turretMCBCanCommBus1, getLimitSwitchDepressed)
         .WillByDefault(ReturnPointee(&limitSwitchDepressed));
 
     EXPECT_CALL(kickerLoadCommand, initialize).Times(5);
@@ -297,7 +300,7 @@ TEST_F(
     execute_ready_to_fire_refserial_offline_firing_happens_then_loading_happens_when_limit_switch_not_depressed)
 {
     bool limitSwitchDepressed = true;
-    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
+    ON_CALL(drivers.turretMCBCanCommBus1, getLimitSwitchDepressed)
         .WillByDefault(ReturnPointee(&limitSwitchDepressed));
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
@@ -349,7 +352,7 @@ TEST_F(
     execute_ready_to_fire_refserial_online_firing_stops_when_ref_serial_detected_shot)
 {
     bool limitSwitchDepressed = true;
-    ON_CALL(drivers.turretMCBCanComm, getLimitSwitchDepressed)
+    ON_CALL(drivers.turretMCBCanCommBus1, getLimitSwitchDepressed)
         .WillByDefault(ReturnPointee(&limitSwitchDepressed));
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));

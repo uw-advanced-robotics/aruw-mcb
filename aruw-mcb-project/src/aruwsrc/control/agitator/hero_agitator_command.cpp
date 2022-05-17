@@ -38,6 +38,7 @@ namespace agitator
 {
 HeroAgitatorCommand::HeroAgitatorCommand(
     aruwsrc::Drivers& drivers,
+    const aruwsrc::can::TurretMCBCanComm& turretMCBCanComm,
     const Config& config,
     tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator,
     tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
@@ -48,6 +49,7 @@ HeroAgitatorCommand::HeroAgitatorCommand(
     tap::control::Command& waterwheelLoadCommand)
     : tap::control::ComprisedCommand(&drivers),
       drivers(drivers),
+      turretMCBCanComm(turretMCBCanComm),
       kickerAgitator(kickerAgitator),
       waterwheelAgitator(waterwheelAgitator),
       kickerFireCommand(kickerFireCommand),
@@ -77,11 +79,6 @@ static inline bool flywheelsOn(
     return !compareFloatClose(frictionWheels.getDesiredLaunchSpeed(), 0.0f, 1E-5);
 }
 
-static inline bool readyToFire(aruwsrc::Drivers& drivers)
-{
-    return drivers.turretMCBCanComm.getLimitSwitchDepressed();
-}
-
 static inline bool enoughHeatToFire(
     aruwsrc::Drivers& drivers,
     bool heatLimiting,
@@ -94,9 +91,10 @@ static inline bool enoughHeatToFire(
 
 static inline bool readyToRotate(
     aruwsrc::Drivers& drivers,
+    const aruwsrc::can::TurretMCBCanComm& turretMCBCanComm,
     const aruwsrc::control::turret::cv::TurretCVCommand& turretCVCommand)
 {
-    const bool readyToFire = drivers.turretMCBCanComm.getLimitSwitchDepressed();
+    const bool readyToFire = turretMCBCanComm.getLimitSwitchDepressed();
 
     /**
      * - If not ready to fire, we can rotate the agitators since we won't launch a projectile
@@ -116,7 +114,7 @@ bool HeroAgitatorCommand::isReady()
     return kickerAgitator.isOnline() && waterwheelAgitator.isOnline() &&
            flywheelsOn(frictionWheels) &&
            enoughHeatToFire(drivers, heatLimiting, robotData, heatLimitBuffer) &&
-           readyToRotate(drivers, turretCVCommand);
+           readyToRotate(drivers, turretMCBCanComm, turretCVCommand);
 }
 
 bool HeroAgitatorCommand::isFinished() const
@@ -128,7 +126,7 @@ bool HeroAgitatorCommand::isFinished() const
 void HeroAgitatorCommand::initialize()
 {
     // Limit switch is active low, so need to negate the reading.
-    if (drivers.turretMCBCanComm.getLimitSwitchDepressed())
+    if (turretMCBCanComm.getLimitSwitchDepressed())
     {
         currState = SHOOTING;
         const auto& robotData = drivers.refSerial.getRobotData();
@@ -154,7 +152,7 @@ void HeroAgitatorCommand::execute()
             }
             break;
         case LOAD:
-            if (drivers.turretMCBCanComm.getLimitSwitchDepressed())
+            if (turretMCBCanComm.getLimitSwitchDepressed())
             {
                 currState = FINISHED;
             }

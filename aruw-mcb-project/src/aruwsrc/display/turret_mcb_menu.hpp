@@ -23,12 +23,8 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/display/dummy_allocator.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}  // namespace aruwsrc
 
 namespace aruwsrc::display
 {
@@ -48,7 +44,7 @@ public:
      */
     TurretMCBMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::Drivers *drivers);
+        aruwsrc::can::TurretMCBCanComm &turretMCBCanComm);
 
     void draw() override;
 
@@ -63,7 +59,7 @@ public:
 private:
     static constexpr int TURRET_MCB_MENU_ID = 12;
 
-    aruwsrc::Drivers *drivers;
+    aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 };

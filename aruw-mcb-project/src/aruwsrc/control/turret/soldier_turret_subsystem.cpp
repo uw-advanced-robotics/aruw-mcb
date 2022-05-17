@@ -25,17 +25,17 @@ namespace aruwsrc::control::turret
 {
 float SoldierTurretSubsystem::getWorldYaw() const
 {
-    return TurretSubsystem::drivers->turretMCBCanComm.getYaw();
+    return TurretSubsystem::drivers->turretMCBCanCommBus1.getYaw();
 }
 
 float SoldierTurretSubsystem::getWorldPitch() const
 {
-    return TurretSubsystem::drivers->turretMCBCanComm.getPitch();
+    return TurretSubsystem::drivers->turretMCBCanCommBus1.getPitch();
 }
 
 uint32_t SoldierTurretSubsystem::getLastMeasurementTimeMicros() const
 {
-    return TurretSubsystem::drivers->turretMCBCanComm.getIMUDataTimestamp();
+    return TurretSubsystem::drivers->turretMCBCanCommBus1.getIMUDataTimestamp();
 }
 
 }  // namespace aruwsrc::control::turret

@@ -67,7 +67,7 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 {
     desiredLaunchSpeed = speed;
     desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
-    drivers->turretMCBCanComm.setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
+    drivers->turretMCBCanCommBus1.setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
 }
 
 void FrictionWheelSubsystem::refresh()

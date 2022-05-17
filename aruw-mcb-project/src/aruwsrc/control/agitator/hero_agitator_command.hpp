@@ -25,6 +25,7 @@
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/setpoint/interfaces/integrable_setpoint_subsystem.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 
@@ -61,6 +62,7 @@ public:
      */
     HeroAgitatorCommand(
         aruwsrc::Drivers& drivers,
+        const aruwsrc::can::TurretMCBCanComm& turretMCBCanComm,
         const Config& config,
         tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator,
         tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator,
@@ -116,6 +118,7 @@ private:
     };
 
     aruwsrc::Drivers& drivers;
+    const aruwsrc::can::TurretMCBCanComm& turretMCBCanComm;
     tap::control::setpoint::IntegrableSetpointSubsystem& kickerAgitator;
     tap::control::setpoint::IntegrableSetpointSubsystem& waterwheelAgitator;
 

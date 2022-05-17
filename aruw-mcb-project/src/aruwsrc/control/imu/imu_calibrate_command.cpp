@@ -29,20 +29,29 @@ namespace aruwsrc::control::imu
 {
 ImuCalibrateCommand::ImuCalibrateCommand(
     aruwsrc::Drivers *drivers,
-    turret::TurretSubsystem *turret,
+    const std::vector<std::tuple<
+        aruwsrc::can::TurretMCBCanComm *,
+        turret::TurretSubsystem *,
+        turret::algorithms::ChassisFrameYawTurretController *,
+        turret::algorithms::ChassisFramePitchTurretController *> > &turretsAndControllers,
     chassis::ChassisSubsystem *chassis,
-    turret::algorithms::ChassisFrameYawTurretController *yawController,
-    turret::algorithms::ChassisFramePitchTurretController *pitchController,
     bool turretImuOnPitch)
     : tap::control::Command(),
       drivers(drivers),
-      turret(turret),
+      turretsAndControllers(turretsAndControllers),
       chassis(chassis),
-      yawController(yawController),
-      pitchController(pitchController),
       turretImuOnPitch(turretImuOnPitch)
 {
-    addSubsystemRequirement(turret);
+    for (auto [turretMCBCanComm, turret, yawController, pitchController] : turretsAndControllers)
+    {
+        assert(turretMCBCanComm != nullptr);
+        assert(turret != nullptr);
+        assert(yawController != nullptr);
+        assert(pitchController != nullptr);
+
+        addSubsystemRequirement(turret);
+    }
+
     addSubsystemRequirement(chassis);
 }
 
@@ -51,14 +60,23 @@ bool ImuCalibrateCommand::isReady() { return true; }
 void ImuCalibrateCommand::initialize()
 {
     calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
-    chassis->setDesiredOutput(0, 0, 0);
-    turret->yawMotor.setChassisFrameSetpoint(turret->yawMotor.getConfig().startAngle);
-    turret->pitchMotor.setChassisFrameSetpoint(turret->pitchMotor.getConfig().startAngle);
+
+    if (chassis != nullptr)
+    {
+        chassis->setDesiredOutput(0, 0, 0);
+    }
+
+    for (auto [turretMCBCanComm, turret, yawController, pitchController] : turretsAndControllers)
+    {
+        turret->yawMotor.setChassisFrameSetpoint(turret->yawMotor.getConfig().startAngle);
+        turret->pitchMotor.setChassisFrameSetpoint(turret->pitchMotor.getConfig().startAngle);
+        pitchController->initialize();
+        yawController->initialize();
+    }
+
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
-    pitchController->initialize();
-    yawController->initialize();
 }
 
 static inline bool turretReachedCenterAndNotMoving(
@@ -88,13 +106,23 @@ void ImuCalibrateCommand::execute()
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
+        {
             // Only start calibrating if the turret is online and if there is an IMU online to be
             // calibrated. The onboard Mpu6500 will never be in the `IMU_NOT_CONNECTED` state unless
             // the Mpu6500 is shorted (which has never happened). The turret MCB will only be
             // offline if the turret MCB is unplugged.
-            if (turret->isOnline() &&
-                (drivers->turretMCBCanComm.isConnected() ||
-                 (drivers->mpu6500.getImuState() != Mpu6500::ImuState::IMU_NOT_CONNECTED)))
+            bool turretMCBsReady = true;
+            bool turretsOnline = true;
+
+            for (auto [turretMCBCanComm, turret, yawController, pitchController] :
+                 turretsAndControllers)
+            {
+                turretMCBsReady &= turretMCBCanComm->isConnected();
+                turretsOnline &= turret->isOnline();
+            }
+
+            if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=
+                                                      Mpu6500::ImuState::IMU_NOT_CONNECTED)))
             {
                 calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -102,20 +130,33 @@ void ImuCalibrateCommand::execute()
             }
 
             break;
-
+        }
         case CalibrationState::LOCKING_TURRET:
-            if (calibrationTimer.isExpired() &&
-                turretReachedCenterAndNotMoving(turret, !turretImuOnPitch))
+        {
+            bool turretsNotMoving = true;
+            for (auto [turretMCBCanComm, turret, yawController, pitchController] :
+                 turretsAndControllers)
+            {
+                turretsNotMoving &= turretReachedCenterAndNotMoving(turret, !turretImuOnPitch);
+            }
+
+            if (calibrationTimer.isExpired() && turretsNotMoving)
             {
                 // enter calibration phase
                 calibrationTimer.stop();
-                drivers->turretMCBCanComm.sendImuCalibrationRequest();
+
+                for (auto [turretMCBCanComm, turret, yawController, pitchController] :
+                     turretsAndControllers)
+                {
+                    turretMCBCanComm->sendImuCalibrationRequest();
+                }
+
                 drivers->mpu6500.requestCalibration();
                 calibrationState = CalibrationState::CALIBRATING_IMU;
             }
 
             break;
-
+        }
         case CalibrationState::CALIBRATING_IMU:
             if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED)
             {
@@ -140,15 +181,26 @@ void ImuCalibrateCommand::execute()
     // don't run pitch controller when turret IMU not on pitch (as there is no need)
     if (turretImuOnPitch)
     {
-        pitchController->runController(dt, turret->pitchMotor.getChassisFrameSetpoint());
+        for (auto [turretMCBCanComm, turret, yawController, pitchController] :
+             turretsAndControllers)
+        {
+            pitchController->runController(dt, turret->pitchMotor.getChassisFrameSetpoint());
+        }
     }
-    yawController->runController(dt, turret->yawMotor.getChassisFrameSetpoint());
+
+    for (auto [turretMCBCanComm, turret, yawController, pitchController] : turretsAndControllers)
+    {
+        yawController->runController(dt, turret->yawMotor.getChassisFrameSetpoint());
+    }
 }
 
 void ImuCalibrateCommand::end(bool)
 {
-    turret->yawMotor.setMotorOutput(0);
-    turret->pitchMotor.setMotorOutput(0);
+    for (auto [turretMCBCanComm, turret, yawController, pitchController] : turretsAndControllers)
+    {
+        turret->yawMotor.setMotorOutput(0);
+        turret->pitchMotor.setMotorOutput(0);
+    }
 }
 
 bool ImuCalibrateCommand::isFinished() const

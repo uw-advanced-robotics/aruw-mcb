@@ -180,7 +180,7 @@ tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPid(
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
-    drivers(),
+    drivers()->turretMCBCanCommBus1,
     &turret.yawMotor,
     worldFrameYawTurretImuPosPid,
     worldFrameYawTurretImuVelPid);
@@ -191,7 +191,7 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
-    drivers(),
+    drivers()->turretMCBCanCommBus1,
     &turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
@@ -222,10 +222,18 @@ user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
-    &turret,
+    {
+        std::tuple<
+            aruwsrc::can::TurretMCBCanComm *,
+            aruwsrc::control::turret::TurretSubsystem *,
+            aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
+            aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *>(
+            &drivers()->turretMCBCanCommBus1,
+            &turret,
+            &chassisFrameYawTurretController,
+            &chassisFramePitchTurretController),
+    },
     &chassis,
-    &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController,
     true);
 
 ClientDisplayCommand clientDisplayCommand(
@@ -265,6 +273,7 @@ MoveIntegralCommand kickerLaunchCommand(
 
 HeroAgitatorCommand heroAgitatorCommand(
     *drivers(),
+    drivers()->turretMCBCanCommBus1,
     aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
     kickerAgitator,
     waterwheelAgitator,
