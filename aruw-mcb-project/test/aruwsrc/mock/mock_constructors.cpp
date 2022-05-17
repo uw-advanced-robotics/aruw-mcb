@@ -25,9 +25,11 @@
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
 #include "oled_display_mock.hpp"
+#include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_request_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
+#include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
@@ -92,6 +94,19 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
+
+RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
+    aruwsrc::Drivers *drivers)
+    : RefereeFeedbackFrictionWheelSubsystem(
+          drivers,
+          tap::motor::MOTOR1,
+          tap::motor::MOTOR2,
+          tap::can::CanBus::CAN_BUS1,
+          tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+          1)
+{
+}
+RefereeFeedbackFrictionWheelSubsystemMock::~RefereeFeedbackFrictionWheelSubsystemMock() {}
 
 GrabberSubsystemMock::GrabberSubsystemMock(
     aruwsrc::Drivers *drivers,
@@ -186,4 +201,29 @@ TurretMotorMock::TurretMotorMock(
 }
 TurretMotorMock::~TurretMotorMock() {}
 
+TurretCVCommandMock::TurretCVCommandMock(
+    aruwsrc::Drivers *drivers,
+    aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    const float userPitchInputScalar,
+    const float userYawInputScalar,
+    const float defaultLaunchSpeed,
+    uint8_t turretID)
+    : aruwsrc::control::turret::cv::TurretCVCommand(
+          drivers,
+          turretSubsystem,
+          yawController,
+          pitchController,
+          odometryInterface,
+          frictionWheels,
+          userPitchInputScalar,
+          userYawInputScalar,
+          defaultLaunchSpeed,
+          turretID)
+{
+}
+TurretCVCommandMock::~TurretCVCommandMock() {}
 }  // namespace aruwsrc::mock

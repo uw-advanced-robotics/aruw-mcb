@@ -23,7 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
@@ -61,7 +61,7 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-        aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+        tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
@@ -150,7 +150,7 @@ private:
      *
      * Should be `const` but `isJammed` is not `const`.
      */
-    aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem;
+    tap::control::setpoint::SetpointSubsystem &agitatorSubsystem;
 
     /**
      * ImuCalbirateCommand that provides information about if the IMUs are being calibrated.
