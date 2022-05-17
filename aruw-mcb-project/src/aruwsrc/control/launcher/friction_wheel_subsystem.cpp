@@ -65,7 +65,7 @@ void FrictionWheelSubsystem::initialize()
 
 void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 {
-    desiredLaunchSpeed = speed;
+    desiredLaunchSpeed = std::min(speed, MAX_LAUNCH_SPEED);
     desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
     drivers->turretMCBCanComm.setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
 }

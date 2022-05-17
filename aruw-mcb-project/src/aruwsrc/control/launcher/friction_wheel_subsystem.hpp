@@ -88,6 +88,11 @@ protected:
     aruwsrc::Drivers *drivers;
 
 private:
+    static constexpr float MAX_LAUNCH_SPEED =
+        LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+            [MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]
+                .first;
+
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
     modm::Pid<float> velocityPidLeftWheel;
