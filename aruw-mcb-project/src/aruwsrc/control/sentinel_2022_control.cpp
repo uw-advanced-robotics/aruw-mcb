@@ -91,7 +91,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels
     aruwsrc::control::launcher::LEFT_MOTOR_ID,
     aruwsrc::control::launcher::RIGHT_MOTOR_ID,
     aruwsrc::control::launcher::TURRET0_CAN_BUS_MOTORS,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
     0.1f);
 
 DjiMotor pitchMotor(

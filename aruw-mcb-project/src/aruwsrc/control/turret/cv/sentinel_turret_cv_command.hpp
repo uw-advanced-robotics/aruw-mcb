@@ -92,6 +92,8 @@ public:
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
+
     /**
      * The minimum speed of a projectile being launched out of the flywheels (in m/s) 
      * to justify spinning the agitator. This is specific to the sentinel CV command.
@@ -139,7 +141,7 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret CV"; }
+    const char *getName() const override { return "sentinel turret CV"; }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
@@ -179,13 +181,41 @@ private:
      */
     SetpointScanner yawScanner;
 
+    bool scanning = false;
+
+    float yawScanValue;
+    float pitchScanValue;
+
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
      * and that keeps track of the number of times `refresh` is called when
      * an aiming solution couldn't be found (either because CV had no target
      * or aiming solution was impossible)
      */
-    unsigned int lostTargetCounter = 0;
+    unsigned int lostTargetCounter = AIM_LOST_NUM_COUNTS;
+
+    inline void enterScanMode(float yawSetpoint, float pitchSetpoint)
+    {
+        lostTargetCounter = AIM_LOST_NUM_COUNTS;
+        scanning = true;
+        yawScanValue = yawSetpoint;
+        pitchScanValue = pitchSetpoint;
+    }
+
+    inline void exitScanMode()
+    {
+        scanning = false;
+        lostTargetCounter = 0;
+    }
+
+    /**
+     * Performs a single scan iteration, updating the pitch and yaw setpoints based on the pitch/yaw
+     * setpoint scanners.
+     *
+     * @param[out] yawSetpoint The current yaw setpoint, which this function will update
+     * @param[out] pitchSetpoint The current pitch setpoint, which this function will update
+     */
+    void performScanIteration(float &yawSetpoint, float &pitchSetpoint);
 };
 
 }  // namespace aruwsrc::control::turret::cv
