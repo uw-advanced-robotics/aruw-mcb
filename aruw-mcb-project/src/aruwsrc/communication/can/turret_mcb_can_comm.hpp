@@ -71,7 +71,7 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
-    /** @return turret pitch angle in rad, a value normalized between [-180, 180] */
+    /** @return turret pitch angle in rad, a value normalized between [-pi, pi] */
     mockable inline float getPitch() const { return lastCompleteImuData.pitch; }
     /** @return turret pitch angular velocity in rad/sec */
     mockable inline float getPitchVelocity() const
@@ -90,7 +90,7 @@ public:
         return lastCompleteImuData.pitch + M_TWOPI * static_cast<float>(pitchRevolutions);
     }
 
-    /** @return turret yaw angle in radians */
+    /** @return turret yaw angle in radians, normalized between [-pi, pi] */
     mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
     /** @return turret yaw angular velocity in rad/sec */
     mockable inline float getYawVelocity() const
