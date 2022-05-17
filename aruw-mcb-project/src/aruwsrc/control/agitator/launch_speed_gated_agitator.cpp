@@ -28,7 +28,6 @@
 
 using namespace tap::control;
 
-
 namespace aruwsrc::control::agitator
 {
 LaunchSpeedGatedAgitator::LaunchSpeedGatedAgitator(
@@ -64,12 +63,10 @@ void LaunchSpeedGatedAgitator::refresh()
 {
     AgitatorSubsystem::refresh();
 
-    if (frictionWheelSubsystem->getCurrentLaunchSpeed() <=
-        launchSpeedThreshold)
+    if (frictionWheelSubsystem->getCurrentLaunchSpeed() <= launchSpeedThreshold)
     {
         agitatorMotor.setDesiredOutput(0);
     }
-
 }
 
 }  // namespace aruwsrc::control::agitator

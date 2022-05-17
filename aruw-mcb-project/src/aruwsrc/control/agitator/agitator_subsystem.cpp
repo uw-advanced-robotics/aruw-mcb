@@ -52,7 +52,7 @@ AgitatorSubsystem::AgitatorSubsystem(
     uint32_t jammingTime,
     bool jamLogicEnabled)
     : tap::control::Subsystem(drivers),
-        agitatorMotor(
+      agitatorMotor(
           drivers,
           agitatorMotorId,
           agitatorCanBusId,

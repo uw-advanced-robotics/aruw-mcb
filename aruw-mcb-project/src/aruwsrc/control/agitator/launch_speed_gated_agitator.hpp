@@ -56,7 +56,6 @@ public:
     void refresh() override;
 
 private:
-
     const aruwsrc::control::launcher::FrictionWheelSubsystem* frictionWheelSubsystem;
 
     /**
@@ -65,6 +64,6 @@ private:
     float launchSpeedThreshold;
 
 };  // class LaunchSpeedGatedAgitator
-}  // namespace aruw::control::agitator
+}  // namespace aruwsrc::control::agitator
 
 #endif  // LAUNCH_SPEED_GATED_AGITATOR_HPP_
