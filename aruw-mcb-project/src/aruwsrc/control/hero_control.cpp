@@ -88,13 +88,13 @@ aruwsrc::communication::serial::SentinelRequestSubsystem sentinelRequestSubsyste
 
 ChassisSubsystem chassis(drivers(), ChassisSubsystem::ChassisType::X_DRIVE);
 
-RefereeFeedbackFrictionWheelSubsystem frictionWheels(
-    drivers(),
-    aruwsrc::control::launcher::LEFT_MOTOR_ID,
-    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-    aruwsrc::control::launcher::CAN_BUS_MOTORS,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
-    0.5f);
+RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
