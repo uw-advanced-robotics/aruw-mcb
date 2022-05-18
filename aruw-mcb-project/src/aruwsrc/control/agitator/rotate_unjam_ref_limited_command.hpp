@@ -20,6 +20,7 @@
 #ifndef ROTATE_UNJAM_REF_LIMITED_COMMAND_HPP_
 #define ROTATE_UNJAM_REF_LIMITED_COMMAND_HPP_
 
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
@@ -53,7 +54,8 @@ public:
         tap::control::setpoint::IntegrableSetpointSubsystem &subsystem,
         tap::control::setpoint::MoveIntegralCommand &moveIntegralCommand,
         tap::control::setpoint::UnjamIntegralCommand &unjamCommand,
-        uint16_t heatLimitBuffer);
+        const tap::communication::serial::RefSerialData::Rx::MechanismID turretID,
+        const uint16_t heatLimitBuffer);
 
     bool isReady() override;
 
@@ -62,6 +64,7 @@ public:
 private:
     aruwsrc::Drivers &drivers;
 
+    const tap::communication::serial::RefSerialData::Rx::MechanismID turretID;
     const uint16_t heatLimitBuffer;
 };
 
