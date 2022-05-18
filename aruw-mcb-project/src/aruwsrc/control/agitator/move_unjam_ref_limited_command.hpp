@@ -31,21 +31,6 @@ namespace aruwsrc::agitator
 {
 class AgitatorSubsystem;
 
-struct MoveUnjamRefLimitedCommandConfig
-{
-    float moveDisplacement = 0.0f;
-    uint32_t moveTime = 0;
-    uint32_t pauseAfterMoveTime = 0;
-    bool setToTargetOnEnd = true;
-    float setpointTolerance = 0.0f;
-    float unjamDisplacement = 0.0f;
-    float unjamThreshold = 0.0f;
-    uint32_t maxUnjamWaitTime = 0;
-    uint_fast16_t unjamCycleCount = 0;
-    bool heatLimiting = true;
-    float heatLimitBuffer = 0.0f;
-};
-
 /**
  * A command that will attempt to rotate an agitator a set amount and unjam if it
  * encounters a jam. This command has the option to be heat limited (in-game "heat")
@@ -67,7 +52,17 @@ public:
     MoveUnjamRefLimitedCommand(
         aruwsrc::Drivers* drivers,
         tap::control::setpoint::SetpointSubsystem* setpointSubsystem,
-        const MoveUnjamRefLimitedCommandConfig config);
+        float moveDisplacement,
+        uint32_t moveTime,
+        uint32_t pauseAfterMoveTime,
+        bool setToTargetOnEnd,
+        float setpointTolerance,
+        float unjamDisplacement,
+        float unjamThreshold,
+        uint32_t maxUnjamWaitTime,
+        uint_fast16_t unjamCycleCount,
+        bool heatLimiting,
+        float heatLimitBuffer);
 
     bool isReady() override;
 
