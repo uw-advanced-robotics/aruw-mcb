@@ -40,7 +40,7 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     }
 
     uint32_t now = tap::arch::clock::getTimeMicroseconds();
-    uint32_t goalHitTime = aimData.timestamp + aimData.targetHitTimeOffset + 50'000;
+    uint32_t goalHitTime = aimData.timestamp + aimData.targetHitTimeOffset;
 
     float targetPitch;
     float targetYaw;
@@ -62,7 +62,7 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
     int64_t hitTimeError = goalHitTime - projectedHitTime;
-    if (abs(hitTimeError) < 50'000) {
+    if (abs(hitTimeError) < 30'000) {
         return LaunchInclination::GATED_ALLOW;
     } else {
         return LaunchInclination::GATED_DENY;

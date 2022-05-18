@@ -257,7 +257,7 @@ MoveIntegralCommand kickerLaunchCommand(
     aruwsrc::control::agitator::constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
 AutoAimLaunchTimer autoAimLaunchTimer(
-    50'000, // agitatorTypicalDelayMicroseconds
+    100'000, // agitatorTypicalDelayMicroseconds
     &drivers()->visionCoprocessor,
     &turretCVCommand.ballisticsSolver
 );

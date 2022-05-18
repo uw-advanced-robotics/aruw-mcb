@@ -51,7 +51,7 @@ static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 7.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
 static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT =
     M_TWOPI / (2.0f * WATERWHEEL_NUM_BALL_POCKETS);
-static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.8f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 1.f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
@@ -62,8 +62,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
-    .jammingVelocityDifference = WATERWHEEL_TARGET_DISPLACEMENT / (2.0f * DESIRED_LOAD_TIME_S),
-    .jammingTime = 100,
+    .jammingVelocityDifference = WATERWHEEL_TARGET_DISPLACEMENT / (4.0f * DESIRED_LOAD_TIME_S),
+    .jammingTime = 7500,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 50.0f,
 };
