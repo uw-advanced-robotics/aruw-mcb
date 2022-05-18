@@ -85,13 +85,17 @@ public:
 
     /**
      * @param[in] drivers A pointer to the global drivers object.
+
+
      * @param[in] turretMCBCanComm A list of TurretMCBCanComm objects, whose IMUs will be
      * calibrated.
      * @param[in] turret A `TurretSubsystem` that this command will control (will lock the turret).
-     * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the desired
-     * movement to 0).
      * @param[in] yawController A chassis relative yaw controller used to lock the turret.
      * @param[in] pitchController A chassis relative pitch controller used to lock the turret.
+     *
+     *
+     * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the desired
+     * movement to 0).
      * @param[in] turretImuOnPitch `true` if the turret IMU is mounted on the pitch axis of the
      * turret. In this case the pitch controller doesn't have to reach the horizontal setpoint
      * before calibration is performed.
@@ -102,9 +106,9 @@ public:
             aruwsrc::can::TurretMCBCanComm *,
             turret::TurretSubsystem *,
             turret::algorithms::ChassisFrameYawTurretController *,
-            turret::algorithms::ChassisFramePitchTurretController *> > &turretsAndControllers,
-        chassis::ChassisSubsystem *chassis,
-        bool turretImuOnPitch);
+            turret::algorithms::ChassisFramePitchTurretController *,
+            bool>> &turretsAndControllers,
+        chassis::ChassisSubsystem *chassis);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -145,7 +149,8 @@ private:
         aruwsrc::can::TurretMCBCanComm *,
         turret::TurretSubsystem *,
         turret::algorithms::ChassisFrameYawTurretController *,
-        turret::algorithms::ChassisFramePitchTurretController *> >
+        turret::algorithms::ChassisFramePitchTurretController *,
+        bool>>
         turretsAndControllers;
     chassis::ChassisSubsystem *chassis;
 

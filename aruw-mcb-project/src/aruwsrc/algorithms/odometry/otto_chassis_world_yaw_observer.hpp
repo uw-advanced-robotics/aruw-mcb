@@ -48,9 +48,10 @@ class OttoChassisWorldYawObserver
 public:
     /**
      * @param[in] drivers a pointer to the aruwsrc drivers struct. Used for accessing the
-     *      turretMCB IMU
+     * turretMCB IMU
      * @param[in] turret a pointer to the yaw turret motor used for getting world frame axes. Used
-     * to get yaw angle of chassis relative to turret.
+     * to get yaw angle of chassis relative to turret. This must be the same turret that the IMU on
+     * CAN bus 1 is attached to.
      */
     OttoChassisWorldYawObserver(
         aruwsrc::Drivers* drivers,

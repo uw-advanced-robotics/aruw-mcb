@@ -83,6 +83,11 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace hero_control
 {
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
+
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::communication::serial::SentinelRequestSubsystem sentinelRequestSubsystem(drivers());
 
@@ -175,14 +180,14 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
 algorithms::HeroTurretImuCascadePidTurretController worldFrameYawTurretImuController(
-    drivers()->turretMCBCanCommBus1,
+    getTurretMCBCanComm(),
     &turret.yawMotor,
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
     world_rel_turret_imu::YAW_FUZZY_POS_PD_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
-    drivers()->turretMCBCanCommBus1,
+    getTurretMCBCanComm(),
     &turret.pitchMotor,
     world_rel_turret_imu::PITCH_POS_PID_CONFIG,
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
@@ -218,14 +223,15 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
             aruwsrc::can::TurretMCBCanComm *,
             aruwsrc::control::turret::TurretSubsystem *,
             aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
-            aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *>(
-            &drivers()->turretMCBCanCommBus1,
+            aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *,
+            bool>(
+            &getTurretMCBCanComm(),
             &turret,
             &chassisFrameYawTurretController,
-            &chassisFramePitchTurretController),
+            &chassisFramePitchTurretController,
+            true),
     },
-    &chassis,
-    true);
+    &chassis);
 
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -264,7 +270,7 @@ MoveIntegralCommand kickerLaunchCommand(
 
 HeroAgitatorCommand heroAgitatorCommand(
     *drivers(),
-    drivers()->turretMCBCanCommBus1,
+    getTurretMCBCanComm(),
     aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
     kickerAgitator,
     waterwheelAgitator,
@@ -430,6 +436,8 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }
 }  // namespace aruwsrc::control
 
+#ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
+#endif
 
 #endif

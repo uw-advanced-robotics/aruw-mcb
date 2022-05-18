@@ -33,16 +33,16 @@ ImuCalibrateCommand::ImuCalibrateCommand(
         aruwsrc::can::TurretMCBCanComm *,
         turret::TurretSubsystem *,
         turret::algorithms::ChassisFrameYawTurretController *,
-        turret::algorithms::ChassisFramePitchTurretController *> > &turretsAndControllers,
-    chassis::ChassisSubsystem *chassis,
-    bool turretImuOnPitch)
+        turret::algorithms::ChassisFramePitchTurretController *,
+        bool> > &turretsAndControllers,
+    chassis::ChassisSubsystem *chassis)
     : tap::control::Command(),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
-      chassis(chassis),
-      turretImuOnPitch(turretImuOnPitch)
+      chassis(chassis)
 {
-    for (auto [turretMCBCanComm, turret, yawController, pitchController] : turretsAndControllers)
+    for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
+         turretsAndControllers)
     {
         assert(turretMCBCanComm != nullptr);
         assert(turret != nullptr);
@@ -66,7 +66,8 @@ void ImuCalibrateCommand::initialize()
         chassis->setDesiredOutput(0, 0, 0);
     }
 
-    for (auto [turretMCBCanComm, turret, yawController, pitchController] : turretsAndControllers)
+    for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
+         turretsAndControllers)
     {
         turret->yawMotor.setChassisFrameSetpoint(turret->yawMotor.getConfig().startAngle);
         turret->pitchMotor.setChassisFrameSetpoint(turret->pitchMotor.getConfig().startAngle);
@@ -114,7 +115,7 @@ void ImuCalibrateCommand::execute()
             bool turretMCBsReady = true;
             bool turretsOnline = true;
 
-            for (auto [turretMCBCanComm, turret, yawController, pitchController] :
+            for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
                  turretsAndControllers)
             {
                 turretMCBsReady &= turretMCBCanComm->isConnected();
@@ -134,7 +135,7 @@ void ImuCalibrateCommand::execute()
         case CalibrationState::LOCKING_TURRET:
         {
             bool turretsNotMoving = true;
-            for (auto [turretMCBCanComm, turret, yawController, pitchController] :
+            for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
                  turretsAndControllers)
             {
                 turretsNotMoving &= turretReachedCenterAndNotMoving(turret, !turretImuOnPitch);
@@ -145,7 +146,8 @@ void ImuCalibrateCommand::execute()
                 // enter calibration phase
                 calibrationTimer.stop();
 
-                for (auto [turretMCBCanComm, turret, yawController, pitchController] :
+                for (auto
+                     [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
                      turretsAndControllers)
                 {
                     turretMCBCanComm->sendImuCalibrationRequest();
@@ -181,14 +183,15 @@ void ImuCalibrateCommand::execute()
     // don't run pitch controller when turret IMU not on pitch (as there is no need)
     if (turretImuOnPitch)
     {
-        for (auto [turretMCBCanComm, turret, yawController, pitchController] :
+        for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
              turretsAndControllers)
         {
             pitchController->runController(dt, turret->pitchMotor.getChassisFrameSetpoint());
         }
     }
 
-    for (auto [turretMCBCanComm, turret, yawController, pitchController] : turretsAndControllers)
+    for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
+         turretsAndControllers)
     {
         yawController->runController(dt, turret->yawMotor.getChassisFrameSetpoint());
     }
@@ -196,7 +199,8 @@ void ImuCalibrateCommand::execute()
 
 void ImuCalibrateCommand::end(bool)
 {
-    for (auto [turretMCBCanComm, turret, yawController, pitchController] : turretsAndControllers)
+    for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
+         turretsAndControllers)
     {
         turret->yawMotor.setMotorOutput(0);
         turret->pitchMotor.setMotorOutput(0);

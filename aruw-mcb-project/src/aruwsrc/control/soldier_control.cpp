@@ -89,6 +89,11 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace soldier_control
 {
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
+
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::communication::serial::SentinelRequestSubsystem sentinelRequestSubsystem(drivers());
 
@@ -133,7 +138,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
-TurretMCBHopperSubsystem hopperCover(drivers(), drivers()->turretMCBCanCommBus1);
+TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -171,13 +176,13 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
-    drivers()->turretMCBCanCommBus1,
+    getTurretMCBCanComm(),
     &turret.pitchMotor,
     world_rel_turret_imu::PITCH_POS_PID_CONFIG,
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
-    drivers()->turretMCBCanCommBus1,
+    getTurretMCBCanComm(),
     &turret.yawMotor,
     world_rel_turret_imu::YAW_POS_PID_CONFIG,
     world_rel_turret_imu::YAW_VEL_PID_CONFIG);
@@ -265,14 +270,15 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
             aruwsrc::can::TurretMCBCanComm *,
             aruwsrc::control::turret::TurretSubsystem *,
             aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
-            aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *>(
-            &drivers()->turretMCBCanCommBus1,
+            aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *,
+            bool>(
+            &getTurretMCBCanComm(),
             &turret,
             &chassisFrameYawTurretController,
-            &chassisFramePitchTurretController),
+            &chassisFramePitchTurretController,
+            true),
     },
-    &chassis,
-    true);
+    &chassis);
 
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -468,6 +474,8 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }
 }  // namespace aruwsrc::control
 
+#ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &soldier_control::imuCalibrateCommand; }
+#endif
 
 #endif
