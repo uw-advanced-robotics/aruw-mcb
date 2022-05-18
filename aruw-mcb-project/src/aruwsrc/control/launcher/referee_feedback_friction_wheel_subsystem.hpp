@@ -54,8 +54,7 @@ public:
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-        const float defaultFiringSpeed);
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID);
 
     /**
      * @return The predicted launch speed of the next projectile in m/s, using measured feedback
@@ -79,8 +78,6 @@ private:
 #endif
 
     const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
-
-    const float defaultFiringSpeed;
 
     modm::BoundedDeque<float, PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE> ballSpeedAveragingTracker;
 

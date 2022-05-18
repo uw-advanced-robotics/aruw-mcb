@@ -37,8 +37,7 @@ protected:
               tap::motor::MOTOR1,
               tap::motor::MOTOR2,
               tap::can::CanBus::CAN_BUS1,
-              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-              1)
+              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
     {
     }
 
@@ -126,8 +125,7 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
         tap::motor::MOTOR1,
         tap::motor::MOTOR2,
         tap::can::CanBus::CAN_BUS1,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-        10);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
     robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first;

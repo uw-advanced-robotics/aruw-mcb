@@ -26,11 +26,9 @@ RefereeFeedbackFrictionWheelSubsystem::RefereeFeedbackFrictionWheelSubsystem(
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId,
     tap::can::CanBus canBus,
-    tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-    const float defaultFiringSpeed)
+    tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
     : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus),
-      firingSystemMechanismID(firingSystemMechanismID),
-      defaultFiringSpeed(defaultFiringSpeed)
+      firingSystemMechanismID(firingSystemMechanismID)
 {
 }
 
