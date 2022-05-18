@@ -90,21 +90,11 @@ void TurretCVCommand::execute()
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
-         * the desired setpoint is unwrapped, so find the setpoint that is closest
-         * to the unwrapped measured angle.
-         * Since the world frame controllers don't unwrapping the setpoint to values
-         * outside of [0, 2*PI), we don't have to worry about unwrapping the world
-         * frame controllers.
-         *
-         * TODO fix for non-chassis frame controllers
+         * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
+         * that is closest to the unwrapped measured angle.
          */
-        if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
-        {
-            yawSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
-                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle(),
-                yawSetpoint);
-            yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
-        }
+        turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
+        turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
             turretSubsystem->yawMotor.getValidChassisMeasurementError(),

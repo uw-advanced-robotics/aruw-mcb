@@ -29,6 +29,7 @@
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_request_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
+#include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
@@ -119,8 +120,8 @@ GrabberSubsystemMock::~GrabberSubsystemMock() {}
 OledDisplayMock::OledDisplayMock(aruwsrc::Drivers *drivers) : display::OledDisplay(drivers) {}
 OledDisplayMock::~OledDisplayMock() {}
 
-TurretMCBCanCommMock::TurretMCBCanCommMock(aruwsrc::Drivers *drivers)
-    : can::TurretMCBCanComm(drivers)
+TurretMCBCanCommMock::TurretMCBCanCommMock(aruwsrc::Drivers *drivers, tap::can::CanBus canBus)
+    : can::TurretMCBCanComm(drivers, canBus)
 {
 }
 TurretMCBCanCommMock::~TurretMCBCanCommMock() {}
@@ -190,12 +191,14 @@ TurretMotorMock::TurretMotorMock(
     const control::turret::TurretMotorConfig &motorConfig)
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
-    ON_CALL(*this, getValidMinError).WillByDefault([&](const float measurement) {
-        return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI)
-            .difference(getChassisFrameSetpoint());
-    });
+    ON_CALL(*this, getValidMinError)
+        .WillByDefault([&](const float setpoint, const float measurement) {
+            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
+        });
     ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
-        return getValidMinError(getChassisFrameMeasuredAngle().getValue());
+        return getValidMinError(
+            getChassisFrameSetpoint(),
+            getChassisFrameMeasuredAngle().getValue());
     });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
@@ -226,4 +229,11 @@ TurretCVCommandMock::TurretCVCommandMock(
 {
 }
 TurretCVCommandMock::~TurretCVCommandMock() {}
+
+TurretControllerInterfaceMock::TurretControllerInterfaceMock(
+    aruwsrc::control::turret::TurretMotor *turretMotor)
+    : aruwsrc::control::turret::algorithms::TurretControllerInterface(turretMotor)
+{
+}
+TurretControllerInterfaceMock::~TurretControllerInterfaceMock() {}
 }  // namespace aruwsrc::mock

@@ -88,9 +88,7 @@ void SentinelTurretCVCommand::initialize()
 
     drivers->visionCoprocessor.sendSelectNewTargetMessage();
 
-    enterScanMode(
-        turretSubsystem->yawMotor.getChassisFrameSetpoint(),
-        turretSubsystem->pitchMotor.getChassisFrameSetpoint());
+    enterScanMode(yawController->getSetpoint(), pitchController->getSetpoint());
 }
 
 void SentinelTurretCVCommand::execute()
@@ -112,18 +110,19 @@ void SentinelTurretCVCommand::execute()
         pitchSetpoint = targetPitch;
         yawSetpoint = targetYaw;
 
-        // the setpoint returned by the ballistics solver is between [0, 2*PI)
-        // the desired setpoint is not required to be between [0, 2*PI)
-        // so, find the setpoint that is closest to the unwrapped measured angle
-        // (this is only an issue for turrets w/o a slip ring)
-        if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
+        auto turretController = turretSubsystem->yawMotor.getTurretController();
+        if (turretController != nullptr)
         {
-            // TODO fix for non-chassis frame controllers
-            yawSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
-                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle(),
-                yawSetpoint);
-            yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
+            yawSetpoint = turretController->convertChassisAngleToControllerFrame(yawSetpoint);
         }
+
+        /**
+         * the setpoint returned by the ballistics solver is between [0, 2*PI)
+         * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
+         * that is closest to the unwrapped measured angle.
+         */
+        turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
+        turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
@@ -206,8 +205,15 @@ void SentinelTurretCVCommand::performScanIteration(float &yawSetpoint, float &pi
         enterScanMode(yawSetpoint, pitchSetpoint);
     }
 
-    yawScanValue = yawScanner.scan(yawScanValue);
-    pitchScanValue = pitchScanner.scan(pitchScanValue);
+    float yawScanValue = yawScanner.scan();
+    float pitchScanValue = pitchScanner.scan();
+
+    auto yawController = turretSubsystem->yawMotor.getTurretController();
+
+    if (yawController != nullptr)
+    {
+        yawScanValue = yawController->convertChassisAngleToControllerFrame(yawScanValue);
+    }
 
     yawSetpoint = lowPassFilter(yawSetpoint, yawScanValue, SCAN_LOW_PASS_ALPHA);
     pitchSetpoint = lowPassFilter(pitchSetpoint, pitchScanValue, SCAN_LOW_PASS_ALPHA);

@@ -174,18 +174,27 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     &turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
-algorithms::HeroTurretImuCascadePidTurretController worldFrameYawTurretImuController(
-    drivers(),
-    &turret.yawMotor,
-    world_rel_turret_imu::YAW_POS_PID_CONFIG,
+tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPid(
     world_rel_turret_imu::YAW_FUZZY_POS_PD_CONFIG,
-    world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+    world_rel_turret_imu::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+    drivers()->turretMCBCanCommBus1,
+    &turret.yawMotor,
+    worldFrameYawTurretImuPosPid,
+    worldFrameYawTurretImuVelPid);
+
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
-    drivers(),
+    drivers()->turretMCBCanCommBus1,
     &turret.pitchMotor,
-    world_rel_turret_imu::PITCH_POS_PID_CONFIG,
-    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+    worldFramePitchTurretImuPosPid,
+    worldFramePitchTurretImuVelPid);
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -213,10 +222,18 @@ user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
-    &turret,
+    {
+        std::tuple<
+            aruwsrc::can::TurretMCBCanComm *,
+            aruwsrc::control::turret::TurretSubsystem *,
+            aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
+            aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *>(
+            &drivers()->turretMCBCanCommBus1,
+            &turret,
+            &chassisFrameYawTurretController,
+            &chassisFramePitchTurretController),
+    },
     &chassis,
-    &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController,
     true);
 
 ClientDisplayCommand clientDisplayCommand(
@@ -256,6 +273,7 @@ MoveIntegralCommand kickerLaunchCommand(
 
 HeroAgitatorCommand heroAgitatorCommand(
     *drivers(),
+    drivers()->turretMCBCanCommBus1,
     aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
     kickerAgitator,
     waterwheelAgitator,

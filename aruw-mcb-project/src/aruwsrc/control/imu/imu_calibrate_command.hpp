@@ -20,9 +20,12 @@
 #ifndef IMU_CALIBRATE_COMMAND_HPP_
 #define IMU_CALIBRATE_COMMAND_HPP_
 
+#include <vector>
+
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -82,6 +85,8 @@ public:
 
     /**
      * @param[in] drivers A pointer to the global drivers object.
+     * @param[in] turretMCBCanComm A list of TurretMCBCanComm objects, whose IMUs will be
+     * calibrated.
      * @param[in] turret A `TurretSubsystem` that this command will control (will lock the turret).
      * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the desired
      * movement to 0).
@@ -93,10 +98,12 @@ public:
      */
     ImuCalibrateCommand(
         aruwsrc::Drivers *drivers,
-        turret::TurretSubsystem *turret,
+        const std::vector<std::tuple<
+            aruwsrc::can::TurretMCBCanComm *,
+            turret::TurretSubsystem *,
+            turret::algorithms::ChassisFrameYawTurretController *,
+            turret::algorithms::ChassisFramePitchTurretController *> > &turretsAndControllers,
         chassis::ChassisSubsystem *chassis,
-        turret::algorithms::ChassisFrameYawTurretController *yawController,
-        turret::algorithms::ChassisFramePitchTurretController *pitchController,
         bool turretImuOnPitch);
 
     const char *getName() const override { return "Calibrate IMU"; }
@@ -134,11 +141,13 @@ private:
     static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 20000;
 
     aruwsrc::Drivers *drivers;
-    turret::TurretSubsystem *turret;
+    std::vector<std::tuple<
+        aruwsrc::can::TurretMCBCanComm *,
+        turret::TurretSubsystem *,
+        turret::algorithms::ChassisFrameYawTurretController *,
+        turret::algorithms::ChassisFramePitchTurretController *> >
+        turretsAndControllers;
     chassis::ChassisSubsystem *chassis;
-
-    turret::algorithms::ChassisFrameYawTurretController *yawController;
-    turret::algorithms::ChassisFramePitchTurretController *pitchController;
 
     CalibrationState calibrationState;
 
