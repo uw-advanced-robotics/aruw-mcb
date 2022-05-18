@@ -87,8 +87,11 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
+#if defined(ALL_SOLDIERS) || defined(TARGET_HERO) || defined(TARGET_SENTINEL_2022)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+#endif
+#if defined(TARGET_SENTINEL_2022)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
         }
