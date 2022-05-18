@@ -137,7 +137,8 @@ static inline bool readyToRotate(
         }
     }
 
-    return false;
+    // Normal human control
+    return true;
 }
 
 bool HeroAgitatorCommand::isReady()

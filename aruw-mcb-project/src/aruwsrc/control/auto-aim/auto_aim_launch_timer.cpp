@@ -62,7 +62,7 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
     int64_t hitTimeError = goalHitTime - projectedHitTime;
-    if (abs(hitTimeError) < 30'000) {
+    if (abs(hitTimeError) < aimData.targetIntervalDuration / 2) {
         return LaunchInclination::GATED_ALLOW;
     } else {
         return LaunchInclination::GATED_DENY;
