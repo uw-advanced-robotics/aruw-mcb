@@ -20,6 +20,7 @@
 #if defined(TARGET_HERO)
 
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/conditionally_executed_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -56,6 +57,8 @@
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
+#include "ref_system/yellow_card_switcher_command.hpp"
+#include "turret/cv/cv_limited_command.hpp"
 #include "turret/hero_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
@@ -232,6 +235,13 @@ ClientDisplayCommand clientDisplayCommand(
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
 
+// hero agitator commands
+
+bool limitSwitchDepressed() { return drivers()->turretMCBCanComm.getLimitSwitchDepressed(); }
+bool limitSwitchNotDepressed() { return !limitSwitchDepressed(); }
+
+namespace waterwheel
+{
 MoveIntegralCommand waterwheelLoadCommand(
     waterwheelAgitator,
     aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
@@ -246,24 +256,45 @@ MoveUnjamIntegralComprisedCommand waterwheelLoadUnjamCommand(
     waterwheelLoadCommand,
     waterwheelAgitatorUnjamCommand);
 
+tap::control::ConditionallyExecutedCommand waterwheelLoadLimitSwitchNotDepressed(
+    {&waterwheelAgitator},
+    waterwheelLoadUnjamCommand,
+    limitSwitchNotDepressed);
+}  // namespace waterwheel
+
+namespace kicker
+{
 MoveIntegralCommand kickerLoadCommand(
     kickerAgitator,
     aruwsrc::control::agitator::constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 
+tap::control::ConditionallyExecutedCommand kickerLoadLimitSwitchNotDepressed(
+    {&kickerAgitator},
+    kickerLoadCommand,
+    limitSwitchNotDepressed);
+
+// TODO replace with rotate unjam ref limited command with heat limiting logic fixed in another MR
 MoveIntegralCommand kickerLaunchCommand(
     kickerAgitator,
     aruwsrc::control::agitator::constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
-HeroAgitatorCommand heroAgitatorCommand(
-    *drivers(),
-    aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
-    kickerAgitator,
-    waterwheelAgitator,
-    frictionWheels,
-    turretCVCommand,
+tap::control::ConditionallyExecutedCommand kickerLaunchLimitSwitchDepressed(
+    {&kickerAgitator},
     kickerLaunchCommand,
-    kickerLoadCommand,
-    waterwheelLoadUnjamCommand);
+    limitSwitchDepressed);
+
+aruwsrc::control::turret::cv::CVLimitedCommand agitatorLaunchCVLimited(
+    *drivers(),
+    {&kickerAgitator},
+    kickerLaunchLimitSwitchDepressed,
+    turretCVCommand);
+
+aruwsrc::control::ref_system::YellowCardSwitcherCommand agitatorLaunchYellowCardCommand(
+    *drivers(),
+    {&kickerAgitator},
+    kickerLaunchLimitSwitchDepressed,
+    agitatorLaunchCVLimited);
+}  // namespace kicker
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -272,7 +303,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&heroAgitatorCommand},
+    {&kicker::agitatorLaunchYellowCardCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
@@ -295,7 +326,7 @@ PressCommandMapping gCtrlPressed(
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 PressCommandMapping leftMousePressed(
     drivers(),
-    {&heroAgitatorCommand},
+    {&kicker::agitatorLaunchYellowCardCommand},
     RemoteMapState(RemoteMapState::MouseButton::LEFT));
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -375,6 +406,8 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    waterwheelAgitator.setDefaultCommand(&waterwheel::waterwheelLoadLimitSwitchNotDepressed);
+    kickerAgitator.setDefaultCommand(&kicker::kickerLoadLimitSwitchNotDepressed);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
