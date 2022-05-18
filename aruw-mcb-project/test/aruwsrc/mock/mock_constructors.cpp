@@ -102,8 +102,7 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
           tap::motor::MOTOR1,
           tap::motor::MOTOR2,
           tap::can::CanBus::CAN_BUS1,
-          tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-          1)
+          tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
 }
 RefereeFeedbackFrictionWheelSubsystemMock::~RefereeFeedbackFrictionWheelSubsystemMock() {}
