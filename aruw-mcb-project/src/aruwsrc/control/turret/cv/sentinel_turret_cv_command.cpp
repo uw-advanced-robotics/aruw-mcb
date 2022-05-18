@@ -85,9 +85,7 @@ void SentinelTurretCVCommand::initialize()
 
     drivers->visionCoprocessor.sendSelectNewTargetMessage();
 
-    enterScanMode(
-        turretSubsystem->yawMotor.getChassisFrameSetpoint(),
-        turretSubsystem->pitchMotor.getChassisFrameSetpoint());
+    enterScanMode(yawController->getSetpoint(), pitchController->getSetpoint());
 }
 
 void SentinelTurretCVCommand::execute()
@@ -108,6 +106,12 @@ void SentinelTurretCVCommand::execute()
         // Target available
         pitchSetpoint = targetPitch;
         yawSetpoint = targetYaw;
+
+        auto turretController = turretSubsystem->yawMotor.getTurretController();
+        if (turretController != nullptr)
+        {
+            yawSetpoint = turretController->convertChassisAngleToControllerFrame(yawSetpoint);
+        }
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
@@ -195,8 +199,15 @@ void SentinelTurretCVCommand::performScanIteration(float &yawSetpoint, float &pi
         enterScanMode(yawSetpoint, pitchSetpoint);
     }
 
-    yawScanValue = yawScanner.scan(yawScanValue);
-    pitchScanValue = pitchScanner.scan(pitchScanValue);
+    float yawScanValue = yawScanner.scan();
+    float pitchScanValue = pitchScanner.scan();
+
+    auto yawController = turretSubsystem->yawMotor.getTurretController();
+
+    if (yawController != nullptr)
+    {
+        yawScanValue = yawController->convertChassisAngleToControllerFrame(yawScanValue);
+    }
 
     yawSetpoint = lowPassFilter(yawSetpoint, yawScanValue, SCAN_LOW_PASS_ALPHA);
     pitchSetpoint = lowPassFilter(pitchSetpoint, pitchScanValue, SCAN_LOW_PASS_ALPHA);

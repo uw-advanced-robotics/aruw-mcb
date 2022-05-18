@@ -227,8 +227,8 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
     getTurretMCBCanComm(),
     &turretSubsystem.yawMotor,
-    worldFrameYawTurretImuVelPid,
-    worldFrameYawTurretImuPosPid);
+    worldFrameYawTurretImuPosPid,
+    worldFrameYawTurretImuVelPid);
 
 // turret commands
 
@@ -377,11 +377,10 @@ HoldRepeatCommandMapping rightSwitchUp(
     {&turret0::agitatorShootFastUnlimited, &turret1::agitatorShootFastUnlimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
-HoldRepeatCommandMapping leftSwitchDown(
+HoldCommandMapping leftSwitchDown(
     drivers(),
     {&sentinelDriveManual1, &turret0::turretManual, &turret1::turretManual},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-    true);
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&sentinelDriveManual2},
