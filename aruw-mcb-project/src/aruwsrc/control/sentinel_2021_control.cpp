@@ -24,12 +24,14 @@
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/move_unjam_ref_limited_command.hpp"
+#include "agitator/rotate_unjam_ref_limited_command.hpp"
+#include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
@@ -75,16 +77,10 @@ static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
 aruwsrc::communication::serial::SentinelRequestHandler sentinelRequestHandler(drivers());
 
 /* define subsystems --------------------------------------------------------*/
-AgitatorSubsystem agitator(
+VelocityAgitatorSubsystem agitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
-    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
-    false,
-    M_PI / 10,
-    150,
-    true);
+    aruwsrc::control::agitator::constants::AGITATOR_CONFIG);
 
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
@@ -122,22 +118,20 @@ OttoVelocityOdometry2DSubsystem odometrySubsystem(
     &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    130,
-    2,
-    true,
-    10);
+MoveIntegralCommand agitatorRotateCommand(
+    agitator,
+    aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
 
-CalibrateCommand agitatorCalibrateCommand(&agitator);
+UnjamIntegralCommand agitatorUnjamCommand(
+    agitator,
+    aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
+
+RotateUnjamRefLimitedCommand agitatorShootFastLimited(
+    *drivers(),
+    agitator,
+    agitatorRotateCommand,
+    agitatorUnjamCommand,
+    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
 // Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
@@ -183,7 +177,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     agitator,
-    &rotateAgitatorManual,
+    &agitatorShootFastLimited,
     odometrySubsystem,
     frictionWheels,
     14.5f,
@@ -201,7 +195,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&rotateAgitatorManual},
+    {&agitatorShootFastLimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldRepeatCommandMapping leftSwitchDown(
@@ -250,8 +244,6 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
-
     sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(

@@ -60,19 +60,20 @@ void ImuCalibrateMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
     control::imu::ImuCalibrateCommand *imuCalibrateCommand = getImuCalibrateCommand();
 
-    if (imuCalibrateCommand == nullptr)
-    {
-        return;
-    }
-
     switch (button)
     {
         case modm::MenuButtons::LEFT:
-            drivers->commandScheduler.removeCommand(imuCalibrateCommand, true);
             this->remove();
+            if (imuCalibrateCommand != nullptr)
+            {
+                drivers->commandScheduler.removeCommand(imuCalibrateCommand, true);
+            }
             break;
         case modm::MenuButtons::OK:
-            drivers->commandScheduler.addCommand(imuCalibrateCommand);
+            if (imuCalibrateCommand != nullptr)
+            {
+                drivers->commandScheduler.addCommand(imuCalibrateCommand);
+            }
             break;
         case modm::MenuButtons::RIGHT:
         case modm::MenuButtons::DOWN:

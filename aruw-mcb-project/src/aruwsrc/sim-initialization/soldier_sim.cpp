@@ -21,67 +21,11 @@
 
 #if defined(ALL_SOLDIERS) && defined(PLATFORM_HOSTED)
 
-#include "tap/motor/motorsim/sim_handler.hpp"
-
-#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/launcher/launcher_constants.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
-
 #include "robot_sim.hpp"
 
 namespace aruwsrc::sim
 {
-void initialize_robot_sim()
-{
-    // Register the motor sims for the Agitator subsystem
-    // TODO: Create simulator for correct motor
-    tap::motorsim::SimHandler::registerSim(
-        tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
-        aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID);
-
-    // Register the motor sims for the Chassis subsystem
-    tap::motorsim::MotorSim::MotorType CHASSIS_MOTOR_TYPE =
-        tap::motorsim::MotorSim::MotorType::M3508;
-    tap::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::CAN_BUS_MOTORS,
-        aruwsrc::chassis::LEFT_FRONT_MOTOR_ID);
-    tap::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::CAN_BUS_MOTORS,
-        aruwsrc::chassis::LEFT_BACK_MOTOR_ID);
-    tap::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::CAN_BUS_MOTORS,
-        aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID);
-    tap::motorsim::SimHandler::registerSim(
-        CHASSIS_MOTOR_TYPE,
-        aruwsrc::chassis::CAN_BUS_MOTORS,
-        aruwsrc::chassis::RIGHT_BACK_MOTOR_ID);
-
-    // Register the motor sims for the turret subsystem
-    tap::motorsim::SimHandler::registerSim(
-        tap::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::control::turret::CAN_BUS_MOTORS,
-        aruwsrc::control::turret::PITCH_MOTOR_ID);
-    tap::motorsim::SimHandler::registerSim(
-        tap::motorsim::MotorSim::MotorType::GM6020,
-        aruwsrc::control::turret::CAN_BUS_MOTORS,
-        aruwsrc::control::turret::YAW_MOTOR_ID);
-
-    // Register the motor sims for the Hopper Cover (There aren't any)
-    // Register the motor sims for the Friction Wheels
-    tap::motorsim::SimHandler::registerSim(
-        tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::control::launcher::CAN_BUS_MOTORS,
-        aruwsrc::control::launcher::LEFT_MOTOR_ID);
-    tap::motorsim::SimHandler::registerSim(
-        tap::motorsim::MotorSim::MotorType::M3508,
-        aruwsrc::control::launcher::CAN_BUS_MOTORS,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID);
-}
+void initialize_robot_sim() {}
 }  // namespace aruwsrc::sim
 
 #endif
