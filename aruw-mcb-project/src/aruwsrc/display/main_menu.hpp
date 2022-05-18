@@ -29,6 +29,7 @@
 
 #include "modm/ui/menu/standard_menu.hpp"
 
+#include "about_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
@@ -71,6 +72,7 @@ private:
     tap::display::RefSerialMenu refSerialMenu;
     tap::communication::sensors::imu::ImuMenu imuMenu;
     TurretMCBMenu turretStatusMenu;
+    AboutMenu aboutMenu;
 
     void addImuCalibrateMenuCallback();
     void addCVMenuCallback();
@@ -82,6 +84,7 @@ private:
     void addRefSerialMenuCallback();
     void addImuMenuCallback();
     void addTurretMCBMenuCallback();
+    void addAboutMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

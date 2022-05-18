@@ -40,7 +40,9 @@ MainMenu::MainMenu(
       commandSchedulerMenu(stack, drivers),
       refSerialMenu(stack, drivers),
       imuMenu(stack, &drivers->mpu6500),
-      turretStatusMenu(stack, drivers)
+      turretStatusMenu(stack, drivers),
+      aboutMenu(stack, drivers)
+
 {
 }
 
@@ -86,6 +88,11 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addHardwareTestMenuCallback));
+    addEntry(
+        AboutMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addAboutMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -150,6 +157,12 @@ void MainMenu::addTurretMCBMenuCallback()
 {
     TurretMCBMenu* tsm = new (&turretStatusMenu) TurretMCBMenu(getViewStack(), drivers);
     getViewStack()->push(tsm);
+}
+
+void MainMenu::addAboutMenuCallback()
+{
+    AboutMenu* abtm = new (&aboutMenu) AboutMenu(getViewStack(), drivers);
+    getViewStack()->push(abtm);
 }
 }  // namespace display
 
