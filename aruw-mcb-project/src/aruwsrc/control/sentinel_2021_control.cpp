@@ -91,6 +91,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        nullptr,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Note: motor "one" is right, "two" is left
@@ -111,12 +112,10 @@ SentinelTurretSubsystem turretSubsystem(
     &pitchMotor,
     &yawMotor,
     PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG);
+    YAW_MOTOR_CONFIG,
+    nullptr);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(
-    drivers(),
-    &turretSubsystem.yawMotor,
-    &sentinelDrive);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 MoveIntegralCommand agitatorRotateCommand(

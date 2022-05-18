@@ -100,6 +100,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::TURRET0_CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
 DjiMotor pitchMotor(
@@ -119,7 +120,8 @@ SentinelTurretSubsystem turretSubsystem(
     &pitchMotor,
     &yawMotor,
     aruwsrc::control::turret::turret0::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::turret0::YAW_MOTOR_CONFIG);
+    aruwsrc::control::turret::turret0::YAW_MOTOR_CONFIG,
+    &getTurretMCBCanComm());
 }  // namespace turret0
 
 namespace turret1
@@ -141,6 +143,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::TURRET1_CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 DjiMotor pitchMotor(
@@ -160,12 +163,13 @@ SentinelTurretSubsystem turretSubsystem(
     &pitchMotor,
     &yawMotor,
     aruwsrc::control::turret::turret1::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG);
+    aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG,
+    &getTurretMCBCanComm());
 }  // namespace turret1
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(
     drivers(),
-    &turret1::turretSubsystem.yawMotor,
+    turret1::turretSubsystem,
     &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/

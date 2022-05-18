@@ -23,19 +23,13 @@
 
 namespace aruwsrc::control::turret
 {
-float SoldierTurretSubsystem::getWorldYaw() const
-{
-    return TurretSubsystem::drivers->turretMCBCanCommBus1.getYaw();
-}
+float SoldierTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
 
-float SoldierTurretSubsystem::getWorldPitch() const
-{
-    return TurretSubsystem::drivers->turretMCBCanCommBus1.getPitch();
-}
+float SoldierTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
 
 uint32_t SoldierTurretSubsystem::getLastMeasurementTimeMicros() const
 {
-    return TurretSubsystem::drivers->turretMCBCanCommBus1.getIMUDataTimestamp();
+    return getTurretMCB()->getIMUDataTimestamp();
 }
 
 }  // namespace aruwsrc::control::turret

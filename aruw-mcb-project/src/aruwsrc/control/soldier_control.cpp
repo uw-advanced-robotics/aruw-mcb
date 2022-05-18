@@ -114,13 +114,14 @@ SoldierTurretSubsystem turret(
     &pitchMotor,
     &yawMotor,
     PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG);
+    YAW_MOTOR_CONFIG,
+    &getTurretMCBCanComm());
 
 aruwsrc::chassis::ChassisSubsystem chassis(
     drivers(),
     aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret.yawMotor, &chassis);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turret, &chassis);
 static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 VelocityAgitatorSubsystem agitator(
@@ -135,6 +136,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 ClientDisplaySubsystem clientDisplay(drivers());
