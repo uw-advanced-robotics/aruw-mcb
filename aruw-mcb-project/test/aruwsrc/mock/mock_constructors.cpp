@@ -97,7 +97,7 @@ FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
 RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
     aruwsrc::Drivers *drivers)
-    : RefereeFeedbackFrictionWheelSubsystem(
+    : RefereeFeedbackFrictionWheelSubsystem<10>(
           drivers,
           tap::motor::MOTOR1,
           tap::motor::MOTOR2,
@@ -206,7 +206,7 @@ TurretCVCommandMock::TurretCVCommandMock(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float userPitchInputScalar,
     const float userYawInputScalar,
     const float defaultLaunchSpeed,

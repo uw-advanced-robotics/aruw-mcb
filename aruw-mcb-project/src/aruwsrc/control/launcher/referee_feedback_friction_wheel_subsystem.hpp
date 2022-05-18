@@ -39,6 +39,7 @@ namespace aruwsrc::control::launcher
  * @tparam PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE Number of balls to average when estimating the
  * next projectile velocity.
  */
+template <size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE>
 class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem,
                                               public LaunchSpeedPredictorInterface
 {
@@ -55,7 +56,11 @@ public:
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID);
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
+        : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus),
+          firingSystemMechanismID(firingSystemMechanismID)
+    {
+    }
 
     /**
      * @return The predicted launch speed of the next projectile in m/s, using measured feedback
@@ -69,15 +74,13 @@ public:
                    : (pastProjectileVelocitySpeedSummed / ballSpeedAveragingTracker.getSize());
     }
 
-    void refresh() override;
+    void refresh() override
+    {
+        FrictionWheelSubsystem::refresh();
+        updatePredictedLaunchSpeed();
+    }
 
 private:
-#if defined(TARGET_HERO)
-    static constexpr size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE = 3;
-#else
-    static constexpr size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE = 10;
-#endif
-
     const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
 
     modm::BoundedDeque<float, PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE> ballSpeedAveragingTracker;
@@ -88,7 +91,53 @@ private:
 
     float pastProjectileVelocitySpeedSummed = 0;
 
-    void updatePredictedLaunchSpeed();
+    void updatePredictedLaunchSpeed()
+    {
+        const float desiredLaunchSpeed = getDesiredLaunchSpeed();
+
+        // reset averaging if desired launch speed has changed...if we change desired launch speed
+        // from 15 to 30, we should predict the launch speed to be around 30, not 15.
+        if (!tap::algorithms::compareFloatClose(lastDesiredLaunchSpeed, desiredLaunchSpeed, 1E-5))
+        {
+            lastDesiredLaunchSpeed = desiredLaunchSpeed;
+            pastProjectileVelocitySpeedSummed = 0;
+            ballSpeedAveragingTracker.clear();
+        }
+
+        if (drivers->refSerial.getRefSerialReceivingData())
+        {
+            const auto &turretData = drivers->refSerial.getRobotData().turret;
+
+            // compute average bullet speed if new firing data received from correct mech ID
+            if (prevLaunchingDataReceiveTimestamp !=
+                    turretData.lastReceivedLaunchingInfoTimestamp &&
+                turretData.launchMechanismID == firingSystemMechanismID)
+            {
+                // remove element to make room for new element
+                if (ballSpeedAveragingTracker.isFull())
+                {
+                    pastProjectileVelocitySpeedSummed -= ballSpeedAveragingTracker.getFront();
+                    ballSpeedAveragingTracker.removeFront();
+                }
+
+                const float limitedProjectileSpeed = tap::algorithms::limitVal(
+                    turretData.bulletSpeed,
+                    0.0f,
+                    MAX_MEASURED_LAUNCH_SPEED);
+
+                // insert new element
+                pastProjectileVelocitySpeedSummed += limitedProjectileSpeed;
+                ballSpeedAveragingTracker.append(limitedProjectileSpeed);
+
+                prevLaunchingDataReceiveTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
+            }
+        }
+        else
+        {
+            pastProjectileVelocitySpeedSummed = 0;
+            ballSpeedAveragingTracker.clear();
+        }
+    }
 };
 }  // namespace aruwsrc::control::launcher
 

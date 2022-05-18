@@ -48,7 +48,7 @@ protected:
 
     tap::arch::clock::ClockStub clock;
     Drivers drivers;
-    RefereeFeedbackFrictionWheelSubsystem frictionWheels;
+    RefereeFeedbackFrictionWheelSubsystem<10> frictionWheels;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
@@ -120,7 +120,7 @@ TEST_F(
 
 TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rolling_average)
 {
-    RefereeFeedbackFrictionWheelSubsystem frictionWheelAveraged(
+    RefereeFeedbackFrictionWheelSubsystem<10> frictionWheelAveraged(
         &drivers,
         tap::motor::MOTOR1,
         tap::motor::MOTOR2,
