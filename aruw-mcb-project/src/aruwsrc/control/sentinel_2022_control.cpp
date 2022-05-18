@@ -111,7 +111,8 @@ SentinelTurretSubsystem turretSubsystem(
     &pitchMotor,
     &yawMotor,
     aruwsrc::control::turret::turret0::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::turret0::YAW_MOTOR_CONFIG);
+    aruwsrc::control::turret::turret0::YAW_MOTOR_CONFIG,
+    0);
 }  // namespace turret0
 
 namespace turret1
@@ -146,7 +147,8 @@ SentinelTurretSubsystem turretSubsystem(
     &pitchMotor,
     &yawMotor,
     aruwsrc::control::turret::turret1::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG);
+    aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG,
+    1);
 }  // namespace turret1
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(

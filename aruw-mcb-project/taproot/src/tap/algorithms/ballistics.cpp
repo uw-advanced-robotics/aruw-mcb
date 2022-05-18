@@ -33,7 +33,7 @@ bool computeTravelTime(
     float *travelTime,
     float *turretPitch)
 {
-    float horizontalDist = hypot(targetPosition.x, targetPosition.y);
+    float horizontalDist = hypot(targetPosition.x, targetPosition.y) +  .045;
     float bulletVelocitySquared = powf(bulletVelocity, 2);
     float sqrtTerm = powf(bulletVelocitySquared, 2) -
                      ACCELERATION_GRAVITY * (ACCELERATION_GRAVITY * powf(horizontalDist, 2) +

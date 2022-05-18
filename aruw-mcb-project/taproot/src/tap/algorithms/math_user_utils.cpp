@@ -58,17 +58,17 @@ void tap::algorithms::rotateVector(modm::Vector3f* vec, Rotation r)
 
     cosAng = cosf(r.pitch);
     sinAng = sinf(r.pitch);
-    m = {cosAng, 0, sinAng,
+    float n[9] = {cosAng, 0, sinAng,
          0, 1, 0,
          -sinAng, 0, cosAng};
-    tf = modm::Matrix3f(m);
+    tf = modm::Matrix3f(n);
     *vec = tf*(*vec);
 
     cosAng = cosf(r.roll);
     sinAng = sinf(r.roll);
-    float m[9] = {1, 0, 0,
+    float j[9] = {1, 0, 0,
                   0, cosAng, -sinAng,
                   0, sinAng, cosAng};
-    tf = modm::Matrix3f(m);
+    tf = modm::Matrix3f(j);
     *vec = tf*(*vec);
 }

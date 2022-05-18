@@ -21,7 +21,7 @@
 #define TURRET_ORIENTATION_INTERFACE_HPP_
 
 #include <stdint.h>
-
+#include "modm/math/geometry/vector3.hpp"
 namespace aruwsrc::control::turret
 {
 /**
@@ -50,6 +50,11 @@ public:
      * measurements.
      */
     virtual inline uint32_t getLastMeasurementTimeMicros() const = 0;
+
+    /**
+     *  @return Distance between the turret and the 'origin' in the world frame. units of meters
+     */
+    virtual modm::Vector3f getTurretOffset() const = 0;
 };  // class TurretOrientation
 
 }  // namespace aruwsrc::control::turret

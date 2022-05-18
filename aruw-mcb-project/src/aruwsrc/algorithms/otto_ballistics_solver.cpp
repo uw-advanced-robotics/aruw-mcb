@@ -26,7 +26,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -38,7 +38,7 @@ namespace aruwsrc::algorithms
 OttoBallisticsSolver::OttoBallisticsSolver(
     const Drivers &drivers,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::turret::TurretSubsystem &turretSubsystem,
+    const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
@@ -58,7 +58,6 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
     float *distance)
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
-
     // Verify that CV is actually online and that the aimData had a target
     if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
     {
@@ -85,6 +84,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
         .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
                                                                      // acceleration from IMU
     };
+    targetState.position += turretSubsystem.getTurretOffset();
 
     uint32_t projectforwardtimedt = tap::arch::clock::getTimeMicroseconds() - aimData.timestamp;
 

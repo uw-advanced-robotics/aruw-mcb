@@ -23,7 +23,7 @@
 #include "tap/architecture/clock.hpp"
 
 #include "../algorithms/chassis_frame_turret_controller.hpp"
-#include "../turret_subsystem.hpp"
+#include "../robot_turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -35,7 +35,7 @@ namespace aruwsrc::control::turret::cv
 {
 TurretCVCommand::TurretCVCommand(
     aruwsrc::Drivers *drivers,
-    TurretSubsystem *turretSubsystem,
+    RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,

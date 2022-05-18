@@ -33,6 +33,7 @@ class SoldierTurretSubsystem final : public RobotTurretSubsystem
     float getWorldYaw() const override;
     float getWorldPitch() const override;
     uint32_t getLastMeasurementTimeMicros() const override;
+    modm::Vector3f getTurretOffset() const override{ return modm::Vector3f(0,0,0);};
 };  // class SoldierTurretSubsystem
 
 }  // namespace aruwsrc::control::turret

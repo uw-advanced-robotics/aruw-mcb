@@ -25,6 +25,7 @@
 
 #include "../turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "modm/math/geometry/vector3.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -88,6 +89,7 @@ static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 
 static constexpr float TURRET_ORIGIN_RELATIVE_TO_REALSENSE[NUM_TURRETS][3] = {{0, 0, 0}, {0, 0, 0}};
+static modm::Vector3f DISTANCE_BETWEEN_TURRETS = modm::Vector3f(0.17511, .27905, 0);
 
 namespace chassis_rel
 {
