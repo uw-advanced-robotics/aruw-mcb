@@ -35,23 +35,37 @@ RotateUnjamRefLimitedCommand::RotateUnjamRefLimitedCommand(
     IntegrableSetpointSubsystem &subsystem,
     tap::control::setpoint::MoveIntegralCommand &moveIntegralCommand,
     tap::control::setpoint::UnjamIntegralCommand &unjamCommand,
-    const tap::communication::serial::RefSerialData::Rx::MechanismID turretID,
+    const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
     const uint16_t heatLimitBuffer)
     : MoveUnjamIntegralComprisedCommand(drivers, subsystem, moveIntegralCommand, unjamCommand),
       drivers(drivers),
-      turretID(turretID),
+      firingSystemMechanismID(firingSystemMechanismID),
       heatLimitBuffer(heatLimitBuffer)
 {
 }
 
 bool RotateUnjamRefLimitedCommand::isReady()
 {
+    return MoveUnjamIntegralComprisedCommand::isReady() && enoughHeatToLaunchProjectile();
+}
+
+bool RotateUnjamRefLimitedCommand::isFinished() const
+{
+    return MoveUnjamIntegralComprisedCommand::isFinished() || !enoughHeatToLaunchProjectile();
+}
+
+bool RotateUnjamRefLimitedCommand::enoughHeatToLaunchProjectile() const
+{
+    if (!drivers.refSerial.getRefSerialReceivingData())
+    {
+        return true;
+    }
+
     const auto &robotData = drivers.refSerial.getRobotData();
 
-    uint16_t heat = 0;
-    uint16_t heatLimit = 0;
+    uint16_t heat = 0, heatLimit = 0;
 
-    switch (turretID)
+    switch (firingSystemMechanismID)
     {
         case RefSerialData::Rx::MechanismID::TURRET_17MM_1:
             heat = robotData.turret.heat17ID1;
@@ -66,23 +80,15 @@ bool RotateUnjamRefLimitedCommand::isReady()
             heatLimit = robotData.turret.heatLimit42;
             break;
         default:
-            RAISE_ERROR((&drivers), "invalid turret ID");
+            RAISE_ERROR((&drivers), "invalid barrel mechanism ID");
             // don't perform heat limiting
             heat = 0;
             heatLimit = heatLimitBuffer;
     }
 
-    return MoveUnjamIntegralComprisedCommand::isReady() &&
-           !(drivers.refSerial.getRefSerialReceivingData() && (heat + heatLimitBuffer > heatLimit));
-}
+    const bool heatBelowLimit = heat + heatLimitBuffer <= heatLimit;
 
-bool RotateUnjamRefLimitedCommand::isFinished() const
-{
-    const auto &robotData = drivers.refSerial.getRobotData();
-
-    return MoveUnjamIntegralComprisedCommand::isFinished() ||
-           (drivers.refSerial.getRefSerialReceivingData() && robotData.turret.heat17ID1 != 0xffff &&
-            (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));
+    return !RefSerial::heatAndLimitValid(heat, heatLimit) || heatBelowLimit;
 }
 
 }  // namespace aruwsrc::agitator
