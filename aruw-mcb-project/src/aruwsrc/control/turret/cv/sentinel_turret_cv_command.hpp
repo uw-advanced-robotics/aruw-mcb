@@ -79,12 +79,6 @@ public:
     static constexpr float YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX = modm::toRadian(1.0f);
 
     /**
-     * Command will shoot when turret pitch and yaw are both respectively within
-     * `FIRING_TOLERANCE` radians of the ballistics solution.
-     */
-    static constexpr float FIRING_TOLERANCE = modm::toRadian(0.5f);
-
-    /**
      * Yaw and pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
      */
@@ -95,6 +89,8 @@ public:
      * the command will consider the target lost and start tracking.
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
+
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
 
     /**
      * Constructs a TurretCVCommand
@@ -137,7 +133,7 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret CV"; }
+    const char *getName() const override { return "sentinel turret CV"; }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
@@ -176,13 +172,41 @@ private:
      */
     SetpointScanner yawScanner;
 
+    bool scanning = false;
+
+    float yawScanValue;
+    float pitchScanValue;
+
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
      * and that keeps track of the number of times `refresh` is called when
      * an aiming solution couldn't be found (either because CV had no target
      * or aiming solution was impossible)
      */
-    unsigned int lostTargetCounter = 0;
+    unsigned int lostTargetCounter = AIM_LOST_NUM_COUNTS;
+
+    inline void enterScanMode(float yawSetpoint, float pitchSetpoint)
+    {
+        lostTargetCounter = AIM_LOST_NUM_COUNTS;
+        scanning = true;
+        yawScanValue = yawSetpoint;
+        pitchScanValue = pitchSetpoint;
+    }
+
+    inline void exitScanMode()
+    {
+        scanning = false;
+        lostTargetCounter = 0;
+    }
+
+    /**
+     * Performs a single scan iteration, updating the pitch and yaw setpoints based on the pitch/yaw
+     * setpoint scanners.
+     *
+     * @param[out] yawSetpoint The current yaw setpoint, which this function will update
+     * @param[out] pitchSetpoint The current pitch setpoint, which this function will update
+     */
+    void performScanIteration(float &yawSetpoint, float &pitchSetpoint);
 };
 
 }  // namespace aruwsrc::control::turret::cv

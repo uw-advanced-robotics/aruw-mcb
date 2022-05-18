@@ -17,8 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//#include "sentinel.hpp"
-
 #include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
 #include <cassert>
@@ -82,8 +80,14 @@ void SentinelTurretCVCommand::initialize()
 {
     pitchController->initialize();
     yawController->initialize();
+
     prevTime = getTimeMilliseconds();
+
     drivers->visionCoprocessor.sendSelectNewTargetMessage();
+
+    enterScanMode(
+        turretSubsystem->yawMotor.getChassisFrameSetpoint(),
+        turretSubsystem->pitchMotor.getChassisFrameSetpoint());
 }
 
 void SentinelTurretCVCommand::execute()
@@ -93,11 +97,14 @@ void SentinelTurretCVCommand::execute()
 
     float targetPitch;
     float targetYaw;
+    float targetDistance;
     bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance);
 
     if (ballisticsSolutionAvailable)
     {
+        exitScanMode();
+
         // Target available
         pitchSetpoint = targetPitch;
         yawSetpoint = targetYaw;
@@ -118,14 +125,10 @@ void SentinelTurretCVCommand::execute()
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
-        if (compareFloatClose(
-                turretSubsystem->pitchMotor.getChassisFrameMeasuredAngle().getValue(),
-                pitchSetpoint,
-                FIRING_TOLERANCE) &&
-            compareFloatClose(
-                turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue(),
-                yawSetpoint,
-                FIRING_TOLERANCE))
+        if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+                turretSubsystem->yawMotor.getValidChassisMeasurementError(),
+                turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+                targetDistance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
             if (!drivers->commandScheduler.isCommandScheduled(firingCommand))
@@ -148,8 +151,7 @@ void SentinelTurretCVCommand::execute()
         }
         else
         {
-            pitchSetpoint = pitchScanner.scan(pitchSetpoint);
-            yawSetpoint = yawScanner.scan(yawSetpoint);
+            performScanIteration(yawSetpoint, pitchSetpoint);
         }
     }
 
@@ -189,6 +191,20 @@ void SentinelTurretCVCommand::changeScanningQuadrant()
     // move left
     const float angleChange = copysignf(M_PI_2, -turretSubsystem->yawMotor.getAngleFromCenter());
     yawController->setSetpoint(yawController->getSetpoint() + angleChange);
+}
+
+void SentinelTurretCVCommand::performScanIteration(float &yawSetpoint, float &pitchSetpoint)
+{
+    if (!scanning)
+    {
+        enterScanMode(yawSetpoint, pitchSetpoint);
+    }
+
+    yawScanValue = yawScanner.scan(yawScanValue);
+    pitchScanValue = pitchScanner.scan(pitchScanValue);
+
+    yawSetpoint = lowPassFilter(yawSetpoint, yawScanValue, SCAN_LOW_PASS_ALPHA);
+    pitchSetpoint = lowPassFilter(pitchSetpoint, pitchScanValue, SCAN_LOW_PASS_ALPHA);
 }
 
 }  // namespace aruwsrc::control::turret::cv

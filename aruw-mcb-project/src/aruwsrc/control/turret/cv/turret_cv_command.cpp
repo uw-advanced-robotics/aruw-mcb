@@ -79,8 +79,9 @@ void TurretCVCommand::execute()
 
     float targetPitch;
     float targetYaw;
+    float targetDistance;
     bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance);
 
     if (ballisticsSolutionAvailable)
     {
@@ -104,6 +105,11 @@ void TurretCVCommand::execute()
                 yawSetpoint);
             yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
         }
+
+        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+            turretSubsystem->yawMotor.getValidChassisMeasurementError(),
+            turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+            targetDistance);
     }
     else
     {
@@ -113,6 +119,8 @@ void TurretCVCommand::execute()
 
         yawSetpoint +=
             userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+
+        withinAimingTolerance = false;
     }
 
     uint32_t currTime = getTimeMilliseconds();
@@ -137,6 +145,7 @@ void TurretCVCommand::end(bool)
 {
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
+    withinAimingTolerance = false;
 }
 
 }  // namespace aruwsrc::control::turret::cv

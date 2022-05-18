@@ -30,6 +30,8 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
+#include "agitator/rotate_unjam_ref_limited_command.hpp"
+#include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
@@ -46,6 +48,7 @@
 #include "turret/sentinel_turret_subsystem.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
+using namespace tap::control::setpoint;
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::sentinel::drive;
@@ -78,23 +81,17 @@ SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_S
 
 namespace turret0
 {
-AgitatorSubsystem agitator(
+VelocityAgitatorSubsystem agitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
-    aruwsrc::control::agitator::constants::AGITATOR2_MOTOR_CAN_BUS,
-    false,
-    M_PI / 10,
-    150,
-    true);
+    aruwsrc::control::agitator::constants::turret0::AGITATOR_CONFIG);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
     aruwsrc::control::launcher::LEFT_MOTOR_ID,
     aruwsrc::control::launcher::RIGHT_MOTOR_ID,
     aruwsrc::control::launcher::TURRET0_CAN_BUS_MOTORS,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
 DjiMotor pitchMotor(
     drivers(),
@@ -118,16 +115,10 @@ SentinelTurretSubsystem turretSubsystem(
 
 namespace turret1
 {
-AgitatorSubsystem agitator(
+VelocityAgitatorSubsystem agitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
-    aruwsrc::control::agitator::constants::AGITATOR1_MOTOR_CAN_BUS,
-    aruwsrc::control::agitator::constants::IS_AGITATOR_INVERTED,
-    aruwsrc::control::agitator::constants::AGITATOR_JAMMING_DISTANCE,
-    aruwsrc::control::agitator::constants::JAMMING_TIME,
-    true);
+    aruwsrc::control::agitator::constants::turret1::AGITATOR_CONFIG);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
     drivers(),
@@ -170,22 +161,26 @@ SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
 namespace turret0
 {
-aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 20.0f,
-    0.4f,
-    0.2f,
-    300,
-    2,
-    true,
-    10);
+MoveIntegralCommand agitatorRotateCommand(
+    agitator,
+    aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
 
-CalibrateCommand agitatorCalibrateCommand(&agitator);
+UnjamIntegralCommand agitatorUnjamCommand(
+    agitator,
+    aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
+
+RotateUnjamRefLimitedCommand agitatorShootFastLimited(
+    *drivers(),
+    agitator,
+    agitatorRotateCommand,
+    agitatorUnjamCommand,
+    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
+
+MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
+    *drivers(),
+    agitator,
+    agitatorRotateCommand,
+    agitatorUnjamCommand);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -227,7 +222,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     agitator,
-    &rotateAgitatorManual,
+    &agitatorShootFastUnlimited,
     odometrySubsystem,
     frictionWheels,
     29.5f,
@@ -236,22 +231,26 @@ cv::SentinelTurretCVCommand turretCVCommand(
 
 namespace turret1
 {
-aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    130,
-    2,
-    true,
-    10);
+MoveIntegralCommand agitatorRotateCommand(
+    agitator,
+    aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
 
-CalibrateCommand agitatorCalibrateCommand(&agitator);
+UnjamIntegralCommand agitatorUnjamCommand(
+    agitator,
+    aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
+
+RotateUnjamRefLimitedCommand agitatorShootFastLimited(
+    *drivers(),
+    agitator,
+    agitatorRotateCommand,
+    agitatorUnjamCommand,
+    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
+
+MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
+    *drivers(),
+    agitator,
+    agitatorRotateCommand,
+    agitatorUnjamCommand);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -293,7 +292,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     agitator,
-    &rotateAgitatorManual,
+    &agitatorShootFastUnlimited,
     odometrySubsystem,
     frictionWheels,
     29.5f,
@@ -319,7 +318,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&turret0::rotateAgitatorManual, &turret1::rotateAgitatorManual},
+    {&turret0::agitatorShootFastUnlimited, &turret1::agitatorShootFastUnlimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldRepeatCommandMapping leftSwitchDown(
@@ -376,9 +375,6 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *)
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.addCommand(&turret0::agitatorCalibrateCommand);
-    drivers->commandScheduler.addCommand(&turret1::agitatorCalibrateCommand);
-
     sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
