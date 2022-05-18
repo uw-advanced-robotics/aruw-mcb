@@ -26,7 +26,6 @@
 #include "../algorithms/turret_controller_interface.hpp"
 #include "../constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 
 #include "setpoint_scanner.hpp"
 

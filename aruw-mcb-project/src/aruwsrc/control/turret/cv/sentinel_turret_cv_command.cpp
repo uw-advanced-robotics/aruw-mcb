@@ -101,7 +101,6 @@ void SentinelTurretCVCommand::execute()
     float targetPitch;
     float targetYaw;
     float targetDistance;
-    bool projectilesShouldLaunch = false;
     bool ballisticsSolutionAvailable =
         ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance);
 
@@ -134,7 +133,11 @@ void SentinelTurretCVCommand::execute()
                 turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
                 targetDistance))
         {
-            projectilesShouldLaunch = true;
+            // Do not re-add command if it's already scheduled as that would interrupt it
+            if (!drivers->commandScheduler.isCommandScheduled(launchingCommand))
+            {
+                drivers->commandScheduler.addCommand(launchingCommand);
+            }
         }
     }
     else
@@ -153,13 +156,6 @@ void SentinelTurretCVCommand::execute()
         {
             performScanIteration(yawSetpoint, pitchSetpoint);
         }
-    }
-
-    // Do not re-add command if it's already scheduled as that would interrupt it
-    if (projectilesShouldLaunch &&
-        !this->comprisedCommandScheduler.isCommandScheduled(launchingCommand))
-    {
-        this->comprisedCommandScheduler.addCommand(launchingCommand);
     }
 
     uint32_t currTime = getTimeMilliseconds();
