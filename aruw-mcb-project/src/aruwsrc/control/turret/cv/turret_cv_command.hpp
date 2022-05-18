@@ -95,6 +95,7 @@ public:
         algorithms::TurretPitchControllerInterface *pitchController,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const float userPitchInputScalar,
         const float userYawInputScalar,
         const float defaultLaunchSpeed,
@@ -131,7 +132,7 @@ public:
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
-    aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
 
     const float userPitchInputScalar;
     const float userYawInputScalar;

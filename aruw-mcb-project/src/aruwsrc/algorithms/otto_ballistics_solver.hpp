@@ -78,12 +78,12 @@ public:
         float pitchAngleError,
         float targetDistance)
     {
-        return (abs(yawAngleError) < atan2f(
+        return (abs(yawAngleError) < fabs(atan2f(
                                          aruwsrc::algorithms::OttoBallisticsSolver::PLATE_WIDTH,
-                                         2.0f * targetDistance)) &&
-               (abs(pitchAngleError) < atan2f(
+                                         2.0f * targetDistance))) &&
+               (abs(pitchAngleError) < fabs(atan2f(
                                            aruwsrc::algorithms::OttoBallisticsSolver::PLATE_HEIGHT,
-                                           2.0f * targetDistance));
+                                           2.0f * targetDistance)));
     }
 
     /**

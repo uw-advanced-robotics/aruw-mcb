@@ -63,6 +63,8 @@
 #include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
+#include "auto-aim/auto_aim_launch_timer.hpp"
+#include "agitator/rotate_unjam_ref_limited_cv_gated_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -78,6 +80,7 @@ using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::control::ref_system;
+using namespace aruwsrc::control::auto_aim;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -134,6 +137,22 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels
 ClientDisplaySubsystem clientDisplay(drivers());
 
 TurretMCBHopperSubsystem hopperCover(drivers());
+
+
+
+aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
+          *drivers(),
+          odometrySubsystem,
+          turret,
+          frictionWheels,
+          14.5f,
+          0);
+
+AutoAimLaunchTimer autoAimLaunchTimer(
+    100'000, // agitatorTypicalDelayMicroseconds
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver
+);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -200,6 +219,7 @@ cv::TurretCVCommand turretCVCommand(
     &worldFramePitchTurretImuController,
     odometrySubsystem,
     frictionWheels,
+    &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR,
     14.5f);
@@ -221,6 +241,17 @@ RotateUnjamRefLimitedCommand agitatorShootFastLimited(
     agitatorUnjamCommand,
     aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
+aruwsrc::agitator::RotateUnjamRefLimitedCvGatedCommand agitatorShootFastCvGated(
+    *drivers(),
+    agitator,
+    agitatorRotateCommand,
+    agitatorUnjamCommand,
+    turretCVCommand,
+    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER,
+    autoAimLaunchTimer,
+    0
+    );
+
 MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
     *drivers(),
     agitator,
@@ -233,13 +264,13 @@ MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
 aruwsrc::control::turret::cv::CVLimitedCommand agitatorLaunchCVLimited(
     *drivers(),
     {&agitator},
-    agitatorShootFastLimited,
+    agitatorShootFastCvGated,
     turretCVCommand);
 
 YellowCardSwitcherCommand agitatorLaunchYellowCardCommand(
     *drivers(),
     {&agitator},
-    agitatorShootFastLimited,
+    agitatorShootFastCvGated,
     agitatorLaunchCVLimited);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(

@@ -40,6 +40,7 @@ TurretCVCommand::TurretCVCommand(
     algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
     const float defaultLaunchSpeed,
@@ -49,13 +50,7 @@ TurretCVCommand::TurretCVCommand(
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
-      ballisticsSolver(
-          *drivers,
-          odometryInterface,
-          *turretSubsystem,
-          frictionWheels,
-          defaultLaunchSpeed,
-          turretID),
+      ballisticsSolver(ballisticsSolver),
       userPitchInputScalar(userPitchInputScalar),
       userYawInputScalar(userYawInputScalar)
 {
@@ -79,7 +74,7 @@ void TurretCVCommand::execute()
 
     float targetPitch, targetYaw, targetDistance, timeOfFlight;
     bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance, &timeOfFlight);
+        ballisticsSolver->computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance, &timeOfFlight);
 
     if (ballisticsSolutionAvailable)
     {
@@ -104,9 +99,18 @@ void TurretCVCommand::execute()
             yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
         }
 
+        // if (turretSubsystem->pitchMotor.getConfig().limitMotorAngles)
+        // {
+        //     // pitchSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
+        //     //     turretSubsystem->pitchMotor.getChassisFrameUnwrappedMeasuredAngle(),
+        //     //     pitchSetpoint);
+        //     pitchSetpoint = turretSubsystem->pitchMotor.getSetpointWithinTurretRange(pitchSetpoint);
+        // }
+
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
             turretSubsystem->yawMotor.getValidChassisMeasurementError(),
-            turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+            // fmod(turretSubsystem->pitchMotor.getValidChassisMeasurementError(), M_TWOPI),
+            turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
             targetDistance);
     }
     else

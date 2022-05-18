@@ -39,9 +39,6 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::UNGATED;
     }
 
-    uint32_t now = tap::arch::clock::getTimeMicroseconds();
-    uint32_t goalHitTime = aimData.timestamp + aimData.targetHitTimeOffset;
-
     float targetPitch;
     float targetYaw;
     float targetDistance;
@@ -59,11 +56,21 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     }
 
     uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6;
+    uint32_t now = tap::arch::clock::getTimeMicroseconds();
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
-    int64_t hitTimeError = goalHitTime - projectedHitTime;
+    uint32_t nextPlateTransitTime = aimData.timestamp + aimData.targetHitTimeOffset;
+    uint32_t intervalsProjectAhead = (projectedHitTime - nextPlateTransitTime) / aimData.targetPulseInterval;
+
+    uint32_t intervalEarlyGoalHitTime = nextPlateTransitTime + aimData.targetPulseInterval * intervalsProjectAhead;
+    int64_t intervalEarlyHitTimeError = projectedHitTime - intervalEarlyGoalHitTime;
+
+    uint32_t intervalLateGoalHitTime = intervalEarlyGoalHitTime + aimData.targetPulseInterval;
+    int64_t intervalLateHitTimeError = projectedHitTime - intervalLateGoalHitTime;
+
     uint32_t maxHitTimeError = aimData.targetIntervalDuration / 2;
-    if (abs(hitTimeError) < maxHitTimeError) {
+
+    if (abs(intervalEarlyHitTimeError) < maxHitTimeError || abs(intervalLateHitTimeError) < maxHitTimeError) {
         return LaunchInclination::GATED_ALLOW;
     } else {
         return LaunchInclination::GATED_DENY;

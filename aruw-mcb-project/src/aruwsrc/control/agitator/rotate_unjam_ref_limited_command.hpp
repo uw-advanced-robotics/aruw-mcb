@@ -59,7 +59,7 @@ public:
 
     bool isFinished() const override;
 
-private:
+protected:
     aruwsrc::Drivers &drivers;
 
     const uint16_t heatLimitBuffer;

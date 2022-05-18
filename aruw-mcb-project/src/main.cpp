@@ -50,7 +50,7 @@ static constexpr float MAHONY_KP = 0.1f;
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
-namespace hero_control {
+namespace soldier_control {
 extern aruwsrc::control::auto_aim::AutoAimLaunchTimer autoAimLaunchTimer;
 }
 aruwsrc::control::auto_aim::AutoAimLaunchTimer::LaunchInclination lastAutoLaunchInclination;// Purely for testing, remove later
@@ -88,7 +88,7 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            lastAutoLaunchInclination = hero_control::autoAimLaunchTimer.getCurrentLaunchInclination(0);
+            lastAutoLaunchInclination = soldier_control::autoAimLaunchTimer.getCurrentLaunchInclination(0);
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
