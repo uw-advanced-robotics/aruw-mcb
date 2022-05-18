@@ -51,7 +51,8 @@ class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawC
 {
 public:
     /**
-     * @param[in] drivers A drivers object that will be queried for IMU information.
+     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * information.
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
@@ -107,7 +108,8 @@ class WorldFramePitchTurretImuCascadePidTurretController final
 {
 public:
     /**
-     * @param[in] drivers A drivers object that will be queried for IMU information.
+     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * information.
      * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.

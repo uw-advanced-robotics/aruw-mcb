@@ -214,4 +214,4 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 }  // namespace world_rel_turret_imu
 }  // namespace  aruwsrc::control::turret
 
-#endif  // SENTINEL_TURRET_CONSTANTS_HPP_
+#endif  // SENTINEL_2022_TURRET_CONSTANTS_HPP_
