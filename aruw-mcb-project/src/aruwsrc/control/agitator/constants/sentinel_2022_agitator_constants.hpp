@@ -91,7 +91,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = M_TWOPI / 10.0f,
+    .targetUnjamIntegralChange = 0.1f,
     .unjamSetpoint = M_TWOPI / 2.0f,
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds. Add 100 ms extra tolerance.

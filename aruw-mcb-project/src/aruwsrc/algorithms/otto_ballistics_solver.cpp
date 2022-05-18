@@ -70,15 +70,15 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
                                   ? defaultLaunchSpeed
                                   : frictionWheels.getPredictedLaunchSpeed();
 
-    rotateVector(&turretOrigin, {.yaw = odometryInterface.getYaw()});
-    const modm::Vector3f turretPosition = modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0) + turretOrigin;
+    // rotateVector(&turretOrigin, {.yaw = odometryInterface.getYaw()});
+    const modm::Vector3f robotPosition = modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
 
     const Vector2f chassisVelocity = odometryInterface.getCurrentVelocity2D();
 
     // target state, frame whose axis is at the turret center and z is up
     // assume acceleration of the chassis is 0 since we don't measure it
     ballistics::MeasuredKinematicState targetState = {
-        .position = {aimData.xPos - turretPosition.x, aimData.yPos - turretPosition.y, aimData.zPos - turretPosition.z},
+        .position = {aimData.xPos - robotPosition.x, aimData.yPos - robotPosition.y, aimData.zPos - robotPosition.z},
         .velocity =
             {aimData.xVel - chassisVelocity.x, aimData.yVel - chassisVelocity.y, aimData.zVel},
         .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
