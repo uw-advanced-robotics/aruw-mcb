@@ -32,6 +32,7 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/move_unjam_ref_limited_command.hpp"
 #include "agitator/multi_shot_handler.hpp"
+#include "aruwsrc/algorithms/odometry/acceleration_limited_odometry_2d_tracker.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
@@ -106,8 +107,19 @@ aruwsrc::chassis::ChassisSubsystem chassis(
     drivers(),
     aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
 
+OttoChassisWorldYawObserver orientationObserver(drivers(), &turret);
+/// TODO: remove magic number
+AccelerationLimitedOdometry2DTracker accelLimitedOdometrySubsystem(
+    chassis,
+    orientationObserver,
+    1.0f);
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret, &chassis);
-static inline void refreshOdom() { odometrySubsystem.refresh(); }
+
+static inline void refreshOdom()
+{
+    odometrySubsystem.refresh();
+    accelLimitedOdometrySubsystem.update();
+}
 
 AgitatorSubsystem agitator(
     drivers(),
@@ -421,7 +433,7 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachOdometryInterface(&accelLimitedOdometrySubsystem);
     drivers->turretMCBCanComm.attachImuDataReceivedCallback(refreshOdom);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }

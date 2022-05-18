@@ -54,6 +54,8 @@ public:
      * @param[in] yawObserver reference to a yaw observer measuring the world yaw of the chassis.
      * This defines the orientation of the coordinate frame which this tracker will measure odometry
      * relative to
+     * @param[in] maxAcceleration the max acceleration in m/s^2 that the chassis is capable of even
+     * when slipping
      */
     AccelerationLimitedOdometry2DTracker(
         const tap::control::chassis::ChassisSubsystemInterface& chassis,
@@ -79,7 +81,7 @@ private:
      *
      * @note this function is updates a previous time tracker
      */
-    void updateVelocity(const modm::Matrix<float, 3, 1>& newVelocity3D, float currYaw);
+    void updateVelocity(const modm::Matrix<float, 3, 1>& newVelocity3D, float chassisYaw);
 
     /**
      * Chassis object which this tracker is measuring velocity from.

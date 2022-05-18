@@ -42,7 +42,6 @@ inline void AccelerationLimitedOdometry2DTracker::updateVelocity(
     const modm::Matrix<float, 3, 1>& newVelocity3D,
     float chassisYaw)
 {
-    modm::Matrix<float, 3, 1> newVelocity3D = chassis.getActualVelocityChassisRelative();
     modm::Vector2f newVelocity2D = modm::Vector2f(newVelocity3D[0][0], newVelocity3D[1][0]);
 
     // Rotate new velocity into reference frame
@@ -102,7 +101,8 @@ void AccelerationLimitedOdometry2DTracker::update()
         // Make sure to do velocity updating first
         updateVelocity(newVelocity3D, chassisYaw);
 
-        modm::Vector2f displacement = velocity * dt;
+        // m = m/s * 1 (s) / 1000 (ms)
+        modm::Vector2f displacement = velocity * dt / 1000.0f;
         float newX = location.getX() + displacement.x;
         float newY = location.getY() + displacement.y;
         location.setPosition(newX, newY);

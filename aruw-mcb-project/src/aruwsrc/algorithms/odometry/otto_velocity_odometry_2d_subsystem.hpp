@@ -28,6 +28,7 @@
 
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 #include "otto_chassis_world_yaw_observer.hpp"
+#include "acceleration_limited_odometry_2d_tracker.hpp"
 
 // Forward declarations
 namespace aruwsrc

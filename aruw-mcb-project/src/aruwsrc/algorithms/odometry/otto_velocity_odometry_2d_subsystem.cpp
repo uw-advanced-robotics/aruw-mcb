@@ -40,7 +40,6 @@ void OttoVelocityOdometry2DSubsystem::refresh()
 {
     // Update displacement first, as that is then consumed in odometryTracker
     displacementObserver.update();
-    odometryTracker.update();
 }
 
 }  // namespace aruwsrc::algorithms::odometry
