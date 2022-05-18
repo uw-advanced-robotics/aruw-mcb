@@ -327,28 +327,22 @@ cv::SentinelTurretCVCommand turretCVCommand(
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
-    {std::tuple<
-         aruwsrc::can::TurretMCBCanComm *,
-         aruwsrc::control::turret::TurretSubsystem *,
-         aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
-         aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *,
-         bool>(
-         &turret0::getTurretMCBCanComm(),
-         &turret0::turretSubsystem,
-         &turret0::chassisFrameYawTurretController,
-         &turret0::chassisFramePitchTurretController,
-         false),
-     std::tuple<
-         aruwsrc::can::TurretMCBCanComm *,
-         aruwsrc::control::turret::TurretSubsystem *,
-         aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
-         aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *,
-         bool>(
-         &turret0::getTurretMCBCanComm(),
-         &turret1::turretSubsystem,
-         &turret1::chassisFrameYawTurretController,
-         &turret1::chassisFramePitchTurretController,
-         false)},
+    {
+        {
+            &turret0::getTurretMCBCanComm(),
+            &turret0::turretSubsystem,
+            &turret0::chassisFrameYawTurretController,
+            &turret0::chassisFramePitchTurretController,
+            false,
+        },
+        {
+            &turret0::getTurretMCBCanComm(),
+            &turret1::turretSubsystem,
+            &turret1::chassisFrameYawTurretController,
+            &turret1::chassisFramePitchTurretController,
+            false,
+        },
+    },
     nullptr);
 
 void selectNewRobotMessageHandler()

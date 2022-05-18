@@ -218,19 +218,13 @@ user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
-    {
-        std::tuple<
-            aruwsrc::can::TurretMCBCanComm *,
-            aruwsrc::control::turret::TurretSubsystem *,
-            aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
-            aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *,
-            bool>(
-            &getTurretMCBCanComm(),
-            &turret,
-            &chassisFrameYawTurretController,
-            &chassisFramePitchTurretController,
-            true),
-    },
+    {{
+        &getTurretMCBCanComm(),
+        &turret,
+        &chassisFrameYawTurretController,
+        &chassisFramePitchTurretController,
+        true,
+    }},
     &chassis);
 
 ClientDisplayCommand clientDisplayCommand(
