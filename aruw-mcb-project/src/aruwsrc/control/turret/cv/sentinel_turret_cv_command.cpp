@@ -40,18 +40,19 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    tap::control::Subsystem &firingSubsystem,
-    Command *const firingCommand,
+    tap::control::Subsystem &launchingSubsystem,
+    Command *const launchingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
-    : drivers(drivers),
+    : ComprisedCommand(drivers),
+      drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
       turretID(turretID),
-      firingCommand(firingCommand),
+      launchingCommand(launchingCommand),
       ballisticsSolver(
           *drivers,
           odometryInterface,
@@ -65,13 +66,15 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
           turretSubsystem->yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
           SCAN_DELTA_ANGLE)
 {
-    assert(firingCommand != nullptr);
+    assert(launchingCommand != nullptr);
     assert(turretSubsystem != nullptr);
     assert(pitchController != nullptr);
     assert(yawController != nullptr);
 
-    addSubsystemRequirement(turretSubsystem);
-    addSubsystemRequirement(&firingSubsystem);
+    this->comprisedCommandScheduler.registerSubsystem(turretSubsystem);
+    this->comprisedCommandScheduler.registerSubsystem(&launchingSubsystem);
+    this->addSubsystemRequirement(turretSubsystem);
+    this->addSubsystemRequirement(&launchingSubsystem);
 }
 
 bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
@@ -131,9 +134,9 @@ void SentinelTurretCVCommand::execute()
                 targetDistance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
-            if (!drivers->commandScheduler.isCommandScheduled(firingCommand))
+            if (!drivers->commandScheduler.isCommandScheduled(launchingCommand))
             {
-                drivers->commandScheduler.addCommand(firingCommand);
+                drivers->commandScheduler.addCommand(launchingCommand);
             }
         }
     }
@@ -166,6 +169,8 @@ void SentinelTurretCVCommand::execute()
     // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
     // and sets the turret subsystem's desired yaw output
     yawController->runController(dt, yawSetpoint);
+
+    comprisedCommandScheduler.run();
 }
 
 bool SentinelTurretCVCommand::isFinished() const
@@ -177,6 +182,7 @@ void SentinelTurretCVCommand::end(bool)
 {
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
+    this->comprisedCommandScheduler.removeCommand(launchingCommand, true);
 }
 
 void SentinelTurretCVCommand::requestNewTarget()
