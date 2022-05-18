@@ -86,13 +86,14 @@ VelocityAgitatorSubsystem agitator(
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     aruwsrc::control::agitator::constants::turret0::AGITATOR_CONFIG);
 
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
-    drivers(),
-    aruwsrc::control::launcher::LEFT_MOTOR_ID,
-    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-    aruwsrc::control::launcher::TURRET0_CAN_BUS_MOTORS,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-    0.1f);
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::TURRET0_CAN_BUS_MOTORS,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
 DjiMotor pitchMotor(
     drivers(),
@@ -121,13 +122,14 @@ VelocityAgitatorSubsystem agitator(
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     aruwsrc::control::agitator::constants::turret1::AGITATOR_CONFIG);
 
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
-    drivers(),
-    aruwsrc::control::launcher::LEFT_MOTOR_ID,
-    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-    aruwsrc::control::launcher::TURRET1_CAN_BUS_MOTORS,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    0.1f);
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::TURRET1_CAN_BUS_MOTORS,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 DjiMotor pitchMotor(
     drivers(),
