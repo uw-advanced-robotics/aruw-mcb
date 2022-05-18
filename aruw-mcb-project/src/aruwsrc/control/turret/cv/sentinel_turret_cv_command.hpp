@@ -20,13 +20,12 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "tap/control/command.hpp"
+#include "tap/control/comprised_command.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "../constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
 #include "setpoint_scanner.hpp"
 
@@ -64,7 +63,7 @@ namespace aruwsrc::control::turret::cv
  * target (for example, the target is too far away), then user input from the
  * `ControlOperatorInterface` is used to control the turret instead.
  */
-class SentinelTurretCVCommand : public tap::control::Command
+class SentinelTurretCVCommand : public tap::control::ComprisedCommand
 {
 public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
@@ -116,8 +115,8 @@ public:
         RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        tap::control::Subsystem &firingSubsystem,
-        Command *const firingCommand,
+        tap::control::Subsystem &launchingSubsystem,
+        Command *const launchingCommand,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
         const float defaultLaunchSpeed,
@@ -154,9 +153,9 @@ private:
     const uint8_t turretID;
 
     /**
-     * The command to be scheduled when the sentinel is ready to shoot.
+     * The command to be scheduled when the sentinel is ready to launch.
      */
-    Command *const firingCommand;
+    Command *const launchingCommand;
 
     aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
 
