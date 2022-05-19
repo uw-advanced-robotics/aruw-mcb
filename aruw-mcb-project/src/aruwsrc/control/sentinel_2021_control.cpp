@@ -25,12 +25,12 @@
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/rotate_unjam_ref_limited_command.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
@@ -42,6 +42,9 @@
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
+#include "governor/heat_limit_governor.hpp"
+#include "tap/control/alternate_command.hpp"
+#include "tap/control/conditionally_executed_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
@@ -53,7 +56,9 @@ using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::governor;
 using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
@@ -79,8 +84,8 @@ aruwsrc::communication::serial::SentinelRequestHandler sentinelRequestHandler(dr
 /* define subsystems --------------------------------------------------------*/
 VelocityAgitatorSubsystem agitator(
     drivers(),
-    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::AGITATOR_CONFIG);
+    constants::AGITATOR_PID_CONFIG,
+    constants::AGITATOR_CONFIG);
 
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
@@ -119,21 +124,25 @@ OttoVelocityOdometry2DSubsystem odometrySubsystem(
     &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
-MoveIntegralCommand agitatorRotateCommand(
-    agitator,
-    aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
+MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand agitatorUnjamCommand(
-    agitator,
-    aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
+UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
-RotateUnjamRefLimitedCommand agitatorShootFastLimited(
+MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
     agitator,
-    agitatorRotateCommand,
-    agitatorUnjamCommand,
+    rotateAgitator,
+    unjamAgitator);
+
+// rotates agitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernor(
+    *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
+    constants::HEAT_LIMIT_BUFFER);
+ConditionallyExecutedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor});
 
 // Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
@@ -179,7 +188,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     agitator,
-    &agitatorShootFastLimited,
+    &rotateAndUnjamAgitatorWithHeatLimiting,
     odometrySubsystem,
     frictionWheels,
     14.5f,
@@ -197,7 +206,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&agitatorShootFastLimited},
+    {&rotateAndUnjamAgitatorWithHeatLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldRepeatCommandMapping leftSwitchDown(
