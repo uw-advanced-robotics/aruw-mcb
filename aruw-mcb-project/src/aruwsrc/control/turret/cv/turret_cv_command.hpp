@@ -42,7 +42,7 @@ class RobotTurretSubsystem;
 
 namespace aruwsrc::control::launcher
 {
-class RefereeFeedbackFrictionWheelSubsystem;
+class LaunchSpeedPredictorInterface;
 }
 
 namespace aruwsrc::chassis
@@ -94,7 +94,7 @@ public:
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+        const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float userPitchInputScalar,
         const float userYawInputScalar,
         const float defaultLaunchSpeed,

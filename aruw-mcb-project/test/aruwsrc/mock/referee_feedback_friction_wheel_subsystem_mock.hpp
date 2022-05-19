@@ -28,7 +28,7 @@
 namespace aruwsrc::mock
 {
 class RefereeFeedbackFrictionWheelSubsystemMock
-    : public aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem
+    : public aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<10>
 {
 public:
     RefereeFeedbackFrictionWheelSubsystemMock(aruwsrc::Drivers *drivers);

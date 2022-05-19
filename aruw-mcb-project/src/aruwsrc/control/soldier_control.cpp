@@ -123,13 +123,14 @@ VelocityAgitatorSubsystem agitator(
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     aruwsrc::control::agitator::constants::AGITATOR_CONFIG);
 
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
-    drivers(),
-    aruwsrc::control::launcher::LEFT_MOTOR_ID,
-    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-    aruwsrc::control::launcher::CAN_BUS_MOTORS,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    0.1f);
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -227,6 +228,7 @@ RotateUnjamRefLimitedCommand agitatorShootFastLimited(
     agitator,
     agitatorRotateCommand,
     agitatorUnjamCommand,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
 MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(

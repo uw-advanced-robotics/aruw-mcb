@@ -43,7 +43,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     tap::control::Subsystem &launchingSubsystem,
     Command *const launchingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : ComprisedCommand(drivers),

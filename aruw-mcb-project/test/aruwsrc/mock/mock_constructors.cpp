@@ -98,13 +98,12 @@ FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
 RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
     aruwsrc::Drivers *drivers)
-    : RefereeFeedbackFrictionWheelSubsystem(
+    : RefereeFeedbackFrictionWheelSubsystem<10>(
           drivers,
           tap::motor::MOTOR1,
           tap::motor::MOTOR2,
           tap::can::CanBus::CAN_BUS1,
-          tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-          1)
+          tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
 }
 RefereeFeedbackFrictionWheelSubsystemMock::~RefereeFeedbackFrictionWheelSubsystemMock() {}
@@ -210,7 +209,7 @@ TurretCVCommandMock::TurretCVCommandMock(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float userPitchInputScalar,
     const float userYawInputScalar,
     const float defaultLaunchSpeed,
