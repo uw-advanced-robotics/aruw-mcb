@@ -92,6 +92,8 @@ public:
         TurretMotorConfig pitchMotorConfig;
         TurretMotorConfig yawMotorConfig;
         tap::can::CanBus turretCanBus;
+        bool pitchMotorInverted;
+        uint8_t turretID;
         RefSerialData::Rx::MechanismID turretBarrelMechanismId;
         tap::algorithms::SmoothPidConfig pitchPidConfig;
         tap::algorithms::SmoothPidConfig yawPidConfig;
@@ -109,7 +111,7 @@ public:
               &drivers,
               aruwsrc::control::turret::PITCH_MOTOR_ID,
               config.turretCanBus,
-              false,
+              config.pitchMotorInverted,
               "Pitch Turret"),
           yawMotor(
               &drivers,
@@ -147,7 +149,7 @@ public:
               &chassisFramePitchTurretController,
               USER_YAW_INPUT_SCALAR,
               USER_PITCH_INPUT_SCALAR,
-              0),
+              config.turretID),
           turretCVCommand(
               &drivers,
               &turretSubsystem,
@@ -158,7 +160,7 @@ public:
               odometrySubsystem,
               frictionWheels,
               29.5f,
-              0)
+              config.turretID)
     {
     }
 
@@ -198,6 +200,8 @@ SentinelTurret turretZero(
         .pitchMotorConfig = aruwsrc::control::turret::turret0::PITCH_MOTOR_CONFIG,
         .yawMotorConfig = aruwsrc::control::turret::turret0::YAW_MOTOR_CONFIG,
         .turretCanBus = aruwsrc::control::turret::turret0::CAN_BUS_MOTORS,
+        .pitchMotorInverted = false,
+        .turretID = 0,
         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_2,
         .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turret0::PITCH_PID_CONFIG,
         .yawPidConfig = aruwsrc::control::turret::chassis_rel::turret0::YAW_PID_CONFIG,
@@ -210,6 +214,8 @@ SentinelTurret turretOne(
         .pitchMotorConfig = aruwsrc::control::turret::turret1::PITCH_MOTOR_CONFIG,
         .yawMotorConfig = aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG,
         .turretCanBus = aruwsrc::control::turret::turret1::CAN_BUS_MOTORS,
+        .pitchMotorInverted = true,
+        .turretID = 1,
         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_1,
         .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turret1::PITCH_PID_CONFIG,
         .yawPidConfig = aruwsrc::control::turret::chassis_rel::turret1::YAW_PID_CONFIG,
