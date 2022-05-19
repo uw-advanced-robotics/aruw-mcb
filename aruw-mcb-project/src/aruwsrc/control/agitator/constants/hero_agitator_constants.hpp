@@ -113,7 +113,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = M_PI / 2.0f,
+        .targetIntegralChange = M_PI,
         .desiredSetpoint = 6.0 * M_PI,
         .integralSetpointTolerance = 0,
 };
