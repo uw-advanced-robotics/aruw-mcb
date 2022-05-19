@@ -21,11 +21,14 @@
 #define YELLOW_CARDED_GOVERNOR_HPP_
 
 #include "tap/communication/serial/ref_serial.hpp"
-#include "tap/control/command_governor_interface.hpp"
+#include "tap/control/governor/command_governor_interface.hpp"
 
 namespace aruwsrc::control::governor
 {
-class YellowCardedGovernor : public tap::control::CommandGovernorInterface
+/**
+ * Governor that allows a command to run when the operator is blinded by a yellow card.
+ */
+class YellowCardedGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
     YellowCardedGovernor(tap::communication::serial::RefSerial &refSerial) : refSerial(refSerial) {}

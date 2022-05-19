@@ -22,13 +22,17 @@
 
 #include <cassert>
 
-#include "tap/control/command_governor_interface.hpp"
+#include "tap/control/governor/command_governor_interface.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::governor
 {
-class HeatLimitGovernor : public tap::control::CommandGovernorInterface
+/**
+ * Governor that blocks Commands from running if the referee-reported heat limit is too high. Use to
+ * avoid running commands that cause ref-system overheating.
+ */
+class HeatLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
     HeatLimitGovernor(
@@ -39,14 +43,6 @@ public:
           firingSystemMechanismID(firingSystemMechanismID),
           heatLimitBuffer(heatLimitBuffer)
     {
-        // firing system mech ID must be valid (one of the elements of the enum)
-        assert(
-            firingSystemMechanismID ==
-                tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1 ||
-            firingSystemMechanismID ==
-                tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2 ||
-            firingSystemMechanismID ==
-                tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
     }
 
     bool isReady() final { return enoughHeatToLaunchProjectile(); }

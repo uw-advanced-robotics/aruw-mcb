@@ -20,14 +20,18 @@
 #ifndef CV_ON_TARGET_GOVERNOR_HPP_
 #define CV_ON_TARGET_GOVERNOR_HPP_
 
-#include "tap/control/command_governor_interface.hpp"
+#include "tap/control/governor/command_governor_interface.hpp"
 
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::governor
 {
-class CvOnTargetGovernor : public tap::control::CommandGovernorInterface
+/**
+ * A governor that allows a Command to run when a TurretCVCommand has acquired and is aiming at a
+ * target.
+ */
+class CvOnTargetGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
     CvOnTargetGovernor(

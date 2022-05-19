@@ -20,29 +20,63 @@
 #ifndef LIMIT_SWITCH_DEPRESSED_GOVERNOR_HPP_
 #define LIMIT_SWITCH_DEPRESSED_GOVERNOR_HPP_
 
-#include "tap/control/command_governor_interface.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
+#include "tap/control/governor/command_governor_interface.hpp"
 
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::governor
 {
-class LimitSwitchDepressedGovernor : public tap::control::CommandGovernorInterface
+/**
+ * Governor that allows one to gate a command from running when a turret limit switch based on the
+ * depressed state of a limit switch.
+ *
+ * The governor has two possible behaviors:
+ * 1. It will allow a command to be run when the limit switch is depressed.
+ * 2. The opposite, it will allow the command to be run when the limit switch is released.
+ *
+ * This is specified by the LimitSwitchGovernorBehavior.
+ */
+class LimitSwitchDepressedGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    LimitSwitchDepressedGovernor(aruwsrc::can::TurretMCBCanComm &turretMCB, bool readyWhenDepressed)
-        : turretMCB(turretMCB),
-          readyWhenDepressed(readyWhenDepressed)
+    enum class LimitSwitchGovernorBehavior
+    {
+        READY_WHEN_DEPRESSED,
+        READY_WHEN_RELEASED,
+    };
+
+    /**
+     * @param[in] limitSwitch Reference to the limit switch being used in the governor's behavior.
+     * @param[in] behavior The behavior of the governor, whether or not to allow Commands to run
+     * when the limit switch is depressed or released.
+     */
+    LimitSwitchDepressedGovernor(
+        tap::communication::sensors::limit_switch::LimitSwitchInterface &limitSwitch,
+        LimitSwitchGovernorBehavior behavior)
+        : limitSwitch(limitSwitch),
+          behavior(behavior)
     {
     }
 
-    bool isReady() final { return !readyWhenDepressed ^ turretMCB.getLimitSwitchDepressed(); }
+    bool isReady() final
+    {
+        switch (behavior)
+        {
+            case LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED:
+                return limitSwitch.getLimitSwitchDepressed();
+            case LimitSwitchGovernorBehavior::READY_WHEN_RELEASED:
+                return !limitSwitch.getLimitSwitchDepressed();
+            default:
+                return false;
+        }
+    }
 
     bool isFinished() final { return !isReady(); }
 
 private:
-    aruwsrc::can::TurretMCBCanComm &turretMCB;
-    bool readyWhenDepressed;
+    tap::communication::sensors::limit_switch::LimitSwitchInterface &limitSwitch;
+    LimitSwitchGovernorBehavior behavior;
 };
 }  // namespace aruwsrc::control::governor
 
