@@ -80,7 +80,7 @@ public:
         return std::any_of(
                    commandGovernorList.begin(),
                    commandGovernorList.end(),
-                   [](auto governor) { return governor->isReady(); }) ||
+                   [](auto governor) { return governor->isFinished(); }) ||
                command.isFinished();
     }
 
