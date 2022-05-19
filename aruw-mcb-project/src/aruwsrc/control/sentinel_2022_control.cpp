@@ -176,6 +176,7 @@ RotateUnjamRefLimitedCommand agitatorShootFastLimited(
     agitator,
     agitatorRotateCommand,
     agitatorUnjamCommand,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
     aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
 MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
@@ -246,6 +247,7 @@ RotateUnjamRefLimitedCommand agitatorShootFastLimited(
     agitator,
     agitatorRotateCommand,
     agitatorUnjamCommand,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
 MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(

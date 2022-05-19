@@ -19,10 +19,13 @@
 
 #include "rotate_unjam_ref_limited_command.hpp"
 
+#include "tap/errors/create_errors.hpp"
+
 #include "aruwsrc/drivers.hpp"
 
 #include "agitator_subsystem.hpp"
 
+using namespace tap::communication::serial;
 using namespace tap::control::setpoint;
 
 namespace aruwsrc::agitator
@@ -32,30 +35,60 @@ RotateUnjamRefLimitedCommand::RotateUnjamRefLimitedCommand(
     IntegrableSetpointSubsystem &subsystem,
     tap::control::setpoint::MoveIntegralCommand &moveIntegralCommand,
     tap::control::setpoint::UnjamIntegralCommand &unjamCommand,
-    uint16_t heatLimitBuffer)
+    const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
+    const uint16_t heatLimitBuffer)
     : MoveUnjamIntegralComprisedCommand(drivers, subsystem, moveIntegralCommand, unjamCommand),
       drivers(drivers),
+      firingSystemMechanismID(firingSystemMechanismID),
       heatLimitBuffer(heatLimitBuffer)
 {
 }
 
 bool RotateUnjamRefLimitedCommand::isReady()
 {
-    const auto &robotData = drivers.refSerial.getRobotData();
-
-    return MoveUnjamIntegralComprisedCommand::isReady() &&
-           !(drivers.refSerial.getRefSerialReceivingData() &&
-             (robotData.turret.heat17ID1 != 0xffff &&
-              (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1)));
+    return MoveUnjamIntegralComprisedCommand::isReady() && enoughHeatToLaunchProjectile();
 }
 
 bool RotateUnjamRefLimitedCommand::isFinished() const
 {
+    return MoveUnjamIntegralComprisedCommand::isFinished() || !enoughHeatToLaunchProjectile();
+}
+
+bool RotateUnjamRefLimitedCommand::enoughHeatToLaunchProjectile() const
+{
+    if (!drivers.refSerial.getRefSerialReceivingData())
+    {
+        return true;
+    }
+
     const auto &robotData = drivers.refSerial.getRobotData();
 
-    return MoveUnjamIntegralComprisedCommand::isFinished() ||
-           (drivers.refSerial.getRefSerialReceivingData() && robotData.turret.heat17ID1 != 0xffff &&
-            (robotData.turret.heat17ID1 + heatLimitBuffer > robotData.turret.heatLimit17ID1));
+    uint16_t heat = 0, heatLimit = 0;
+
+    switch (firingSystemMechanismID)
+    {
+        case RefSerialData::Rx::MechanismID::TURRET_17MM_1:
+            heat = robotData.turret.heat17ID1;
+            heatLimit = robotData.turret.heatLimit17ID1;
+            break;
+        case RefSerialData::Rx::MechanismID::TURRET_17MM_2:
+            heat = robotData.turret.heat17ID2;
+            heatLimit = robotData.turret.heatLimit17ID2;
+            break;
+        case RefSerialData::Rx::MechanismID::TURRET_42MM:
+            heat = robotData.turret.heat42;
+            heatLimit = robotData.turret.heatLimit42;
+            break;
+        default:
+            RAISE_ERROR((&drivers), "invalid barrel mechanism ID");
+            // don't perform heat limiting
+            heat = 0;
+            heatLimit = heatLimitBuffer;
+    }
+
+    const bool heatBelowLimit = heat + heatLimitBuffer <= heatLimit;
+
+    return !RefSerial::heatAndLimitValid(heat, heatLimit) || heatBelowLimit;
 }
 
 }  // namespace aruwsrc::agitator
