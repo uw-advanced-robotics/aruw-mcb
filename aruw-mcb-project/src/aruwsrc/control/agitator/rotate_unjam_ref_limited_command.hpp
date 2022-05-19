@@ -20,6 +20,7 @@
 #ifndef ROTATE_UNJAM_REF_LIMITED_COMMAND_HPP_
 #define ROTATE_UNJAM_REF_LIMITED_COMMAND_HPP_
 
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
@@ -44,6 +45,8 @@ public:
      * `tap::control::setpoint::MoveUnjamIntegralComprisedCommand` constructor, so see that class
      * for what those parameters do.
      *
+     * @param[in] firingSystemMechanismID The barrel ID of the referee system speed monitoring
+     * module associated with the particular subsystem that this command controls.
      * @param[in] heatLimitBuffer If current_barrel_heat + heatLimitBuffer > barrel_heat_limit then
      * command will not be scheduled. i.e.: How close you can get to the heat limit before the
      * command won't be scheduled.
@@ -53,7 +56,8 @@ public:
         tap::control::setpoint::IntegrableSetpointSubsystem &subsystem,
         tap::control::setpoint::MoveIntegralCommand &moveIntegralCommand,
         tap::control::setpoint::UnjamIntegralCommand &unjamCommand,
-        uint16_t heatLimitBuffer);
+        const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
+        const uint16_t heatLimitBuffer);
 
     bool isReady() override;
 
@@ -62,7 +66,10 @@ public:
 private:
     aruwsrc::Drivers &drivers;
 
+    const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
     const uint16_t heatLimitBuffer;
+
+    bool enoughHeatToLaunchProjectile() const;
 };
 
 }  // namespace aruwsrc::agitator

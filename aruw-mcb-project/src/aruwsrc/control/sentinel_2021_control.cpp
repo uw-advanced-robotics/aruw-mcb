@@ -132,6 +132,7 @@ RotateUnjamRefLimitedCommand agitatorShootFastLimited(
     agitator,
     agitatorRotateCommand,
     agitatorUnjamCommand,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
 
 // Two identical drive commands since you can't map an identical command to two different mappings
