@@ -45,12 +45,11 @@ static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float DESIRED_LOAD_TIME_S = 0.3f;
+static constexpr float DESIRED_LOAD_TIME_S = 0.6f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 7.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
-static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT =
-    M_TWOPI / (2.0f * WATERWHEEL_NUM_BALL_POCKETS);
-static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.8f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 6.0f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.5f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
@@ -62,7 +61,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = WATERWHEEL_TARGET_DISPLACEMENT / (2.0f * DESIRED_LOAD_TIME_S),
-    .jammingTime = 100,
+    .jammingTime = 200,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 50.0f,
 };
@@ -71,7 +70,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     WATERWHEEL_AGITATOR_ROTATE_CONFIG = {
         .targetIntegralChange = WATERWHEEL_TARGET_DISPLACEMENT,
         .desiredSetpoint = WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S,
-        .integralSetpointTolerance = M_PI / 32.0f,
+        .integralSetpointTolerance = 0,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config
@@ -109,14 +108,14 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_LOAD_AGITATOR_ROTATE_CONFIG = {
         .targetIntegralChange = M_PI / 2.0f,
         .desiredSetpoint = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
-        .integralSetpointTolerance = M_PI / 32.0f,
+        .integralSetpointTolerance = 0,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
         .targetIntegralChange = M_PI / 2.0f,
         .desiredSetpoint = 6.0 * M_PI,
-        .integralSetpointTolerance = M_PI / 32.0f,
+        .integralSetpointTolerance = 0,
 };
 
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 100;
