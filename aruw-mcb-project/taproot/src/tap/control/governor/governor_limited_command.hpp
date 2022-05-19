@@ -25,7 +25,7 @@
 #define TAPROOT_GOVERNOR_LIMITED_COMMAND_HPP_
 
 #include <cassert>
-#include <list>
+#include <array>
 #include <vector>
 
 #include "../command.hpp"
