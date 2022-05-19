@@ -92,7 +92,7 @@ public:
             tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
 
-    inline bool getLimitSwitchDepressed() const final { return limitSwitchDepressed; }
+    inline bool getLimitSwitchDepressed() const final_mockable { return limitSwitchDepressed; }
 
     mockable inline bool isConnected() const
     {
