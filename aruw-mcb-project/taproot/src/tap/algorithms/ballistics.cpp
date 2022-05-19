@@ -33,11 +33,11 @@ bool computeTravelTime(
     float *travelTime,
     float *turretPitch)
 {
-    float horizontalDist = hypot(targetPosition.x, targetPosition.y) + 0.045;
+    float horizontalDist = hypot(targetPosition.x, targetPosition.y);
     float bulletVelocitySquared = powf(bulletVelocity, 2);
     float sqrtTerm = powf(bulletVelocitySquared, 2) -
                      ACCELERATION_GRAVITY * (ACCELERATION_GRAVITY * powf(horizontalDist, 2) +
-                                             2 * (targetPosition.z + 0.2)* bulletVelocitySquared);
+                                             2 * (targetPosition.z)* bulletVelocitySquared);
 
     if (sqrtTerm < 0)
     {
@@ -53,7 +53,7 @@ bool computeTravelTime(
     // trajectory reaches y_f
     if (compareFloatClose(*turretPitch, 0, 1E-2))
     {
-        float sqrtTerm = powf(bulletVelocity, 2.0f) - 2 * ACCELERATION_GRAVITY * (targetPosition.z + 0.2);
+        float sqrtTerm = powf(bulletVelocity, 2.0f) - 2 * ACCELERATION_GRAVITY * (targetPosition.z);
 
         // If there isn't a real-valued root, there is no time where we can reach the target with
         // the given assumptions
