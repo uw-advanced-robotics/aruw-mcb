@@ -90,7 +90,8 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers
           drivers,
           tap::motor::MOTOR1,
           tap::motor::MOTOR2,
-          tap::can::CanBus::CAN_BUS1)
+          tap::can::CanBus::CAN_BUS1,
+          nullptr)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
@@ -102,6 +103,7 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
           tap::motor::MOTOR1,
           tap::motor::MOTOR2,
           tap::can::CanBus::CAN_BUS1,
+          nullptr,
           tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
 }
@@ -167,7 +169,7 @@ TowSubsystemMock::TowSubsystemMock(
 TowSubsystemMock::~TowSubsystemMock() {}
 
 TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers)
-    : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG)
+    : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
 {
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
