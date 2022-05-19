@@ -20,6 +20,7 @@
 #if defined(TARGET_SENTINEL_2021)
 
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -37,14 +38,12 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel/drive/sentinel_drive_manual_command.hpp"
-#include "governor/heat_limit_governor.hpp"
-#include "tap/control/alternate_command.hpp"
-#include "tap/control/conditionally_executed_command.hpp"
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
@@ -53,6 +52,7 @@
 #include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
+using namespace tap::control::governor;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
@@ -139,7 +139,7 @@ HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     constants::HEAT_LIMIT_BUFFER);
-ConditionallyExecutedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
     {&heatLimitGovernor});
@@ -153,14 +153,14 @@ FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     &frictionWheels,
     30.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(

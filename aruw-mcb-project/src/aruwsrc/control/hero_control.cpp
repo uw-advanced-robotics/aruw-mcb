@@ -19,9 +19,9 @@
 
 #if defined(TARGET_HERO)
 
-#include "tap/control/alternate_command.hpp"
 #include "tap/control/command_mapper.hpp"
-#include "tap/control/conditionally_executed_command.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -66,6 +66,7 @@
 #include "turret/user/turret_user_world_relative_command.hpp"
 
 using namespace tap::control::setpoint;
+using namespace tap::control::governor;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
@@ -158,14 +159,14 @@ FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     &frictionWheels,
     10.0f,
     false,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -241,8 +242,12 @@ ClientDisplayCommand clientDisplayCommand(
 
 // hero agitator commands
 
-LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(drivers()->turretMCBCanComm, true);
-LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(drivers()->turretMCBCanComm, false);
+LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(
+    drivers()->turretMCBCanComm,
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
+LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(
+    drivers()->turretMCBCanComm,
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
 namespace waterwheel
 {
@@ -260,7 +265,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     rotateWaterwheel,
     unjamWaterwheel);
 
-ConditionallyExecutedCommand<1> rotateAndUnjamWaterwheelWhenLimitSwitchNotDepressed(
+GovernorLimitedCommand<1> feedWaterwheelWhenBallNotReady(
     {&waterwheelAgitator},
     rotateAndUnjamWaterwheel,
     {&limitSwitchNotDepressedGovernor});
@@ -270,14 +275,14 @@ namespace kicker
 {
 MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 
-tap::control::ConditionallyExecutedCommand<1> loadKickerWhenLimitSwitchNotDepressed(
+GovernorLimitedCommand<1> feedKickerWhenBallNotReady(
     {&kickerAgitator},
     loadKicker,
     {&limitSwitchNotDepressedGovernor});
 
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
-tap::control::ConditionallyExecutedCommand<1> launchKickerWhenLimitSwitchDepressed(
+GovernorLimitedCommand<1> launchKickerWhenBallReady(
     {&kickerAgitator},
     launchKicker,
     {&limitSwitchDepressedGovernor});
@@ -287,14 +292,14 @@ HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
     constants::HEAT_LIMIT_BUFFER);
-ConditionallyExecutedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<1> launchKickerHeatLimited(
     {&kickerAgitator},
-    launchKickerWhenLimitSwitchDepressed,
+    launchKickerWhenBallReady,
     {&heatLimitGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
-ConditionallyExecutedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<2> launchKickerHeatAndCVLimited(
     {&kickerAgitator},
     launchKicker,
     {&heatLimitGovernor, &cvOnTargetGovernor});
@@ -302,10 +307,10 @@ ConditionallyExecutedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
 // switches between normal kickerAgitator rotate and CV limited based on the yellow
 // card governor
 YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
-AlternateCommand<1> agitatorLaunchYellowCardCommand(
+GovernorWithFallbackCommand<1> launchKickerYellowCardSwitcher(
     {&kickerAgitator},
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-    rotateAndUnjamAgitatorWithHeatLimiting,
+    launchKickerHeatAndCVLimited,
+    launchKickerHeatLimited,
     {&yellowCardedGovernor});
 }  // namespace kicker
 
@@ -316,7 +321,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&kicker::agitatorLaunchYellowCardCommand},
+    {&kicker::launchKickerYellowCardSwitcher},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
@@ -339,7 +344,7 @@ PressCommandMapping gCtrlPressed(
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 PressCommandMapping leftMousePressed(
     drivers(),
-    {&kicker::agitatorLaunchYellowCardCommand},
+    {&kicker::launchKickerYellowCardSwitcher},
     RemoteMapState(RemoteMapState::MouseButton::LEFT));
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -419,9 +424,8 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    waterwheelAgitator.setDefaultCommand(
-        &waterwheel::rotateAndUnjamWaterwheelWhenLimitSwitchNotDepressed);
-    kickerAgitator.setDefaultCommand(&kicker::loadKickerWhenLimitSwitchNotDepressed);
+    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
+    kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

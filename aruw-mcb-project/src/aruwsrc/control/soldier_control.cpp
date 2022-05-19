@@ -21,9 +21,9 @@
 
 #ifdef ALL_SOLDIERS
 
-#include "tap/control/alternate_command.hpp"
 #include "tap/control/command_mapper.hpp"
-#include "tap/control/conditionally_executed_command.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -72,7 +72,7 @@
 #endif
 
 using namespace tap::control::setpoint;
-using namespace tap::control::setpoint;
+using namespace tap::control::governor;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::governor;
@@ -227,14 +227,14 @@ HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     constants::HEAT_LIMIT_BUFFER);
-ConditionallyExecutedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
     {&heatLimitGovernor});
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
-ConditionallyExecutedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
     {&heatLimitGovernor, &cvOnTargetGovernor});
@@ -242,7 +242,7 @@ ConditionallyExecutedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
 // switches between normal agitator rotate and CV limited based on the yellow
 // card governor
 YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
-AlternateCommand<1> agitatorLaunchYellowCardCommand(
+GovernorWithFallbackCommand<1> agitatorLaunchYellowCardCommand(
     {&agitator},
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
     rotateAndUnjamAgitatorWithHeatLimiting,
@@ -256,14 +256,14 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheel
     &frictionWheels,
     15.0f,
     false,
-    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 

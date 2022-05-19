@@ -23,10 +23,10 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/geometry/angle.hpp"
-#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
 namespace modm::can
 {
