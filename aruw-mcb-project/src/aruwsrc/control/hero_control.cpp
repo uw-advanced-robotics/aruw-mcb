@@ -277,7 +277,7 @@ tap::control::ConditionallyExecutedCommand<1> loadKickerWhenLimitSwitchNotDepres
 
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
-tap::control::ConditionallyExecutedCommand<1> launchKickerWhenLimitSwitchNotDepressed(
+tap::control::ConditionallyExecutedCommand<1> launchKickerWhenLimitSwitchDepressed(
     {&kickerAgitator},
     launchKicker,
     {&limitSwitchDepressedGovernor});
@@ -289,7 +289,7 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 ConditionallyExecutedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&kickerAgitator},
-    launchKicker,
+    launchKickerWhenLimitSwitchDepressed,
     {&heatLimitGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
