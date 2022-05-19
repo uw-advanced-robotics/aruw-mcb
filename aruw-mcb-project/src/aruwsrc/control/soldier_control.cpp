@@ -81,6 +81,7 @@ using namespace tap::control;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
+using namespace aruwsrc::control::agitator;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -123,8 +124,8 @@ static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
-    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::AGITATOR_CONFIG);
+    constants::AGITATOR_PID_CONFIG,
+    constants::AGITATOR_CONFIG);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
@@ -211,48 +212,40 @@ cv::TurretCVCommand turretCVCommand(
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 // base rotate/unjam commands
+MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
-MoveIntegralCommand agitatorRotateCommand(
-    agitator,
-    aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
-UnjamIntegralCommand agitatorUnjamCommand(
-    agitator,
-    aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
-
-MoveUnjamIntegralComprisedCommand moveUnjamIntegralComprisedCommand(
+MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
     agitator,
-    agitatorRotateCommand,
-    agitatorUnjamCommand);
+    rotateAgitator,
+    unjamAgitator);
 
 // rotates agitator with heat limiting applied
-
-HeatLimitGovernor heatLimitCommandGovernor(
+HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
-ConditionallyExecutedCommand<1> moveUnjamIntegralComprisedCommandHeatLimited(
+    constants::HEAT_LIMIT_BUFFER);
+ConditionallyExecutedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
-    moveUnjamIntegralComprisedCommand,
-    {&heatLimitCommandGovernor});
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor});
 
-// rotates agitator when aiming at target
-
+// rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
-ConditionallyExecutedCommand<1> agitatorLaunchCVLimited(
+ConditionallyExecutedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
-    moveUnjamIntegralComprisedCommandHeatLimited,
-    {&cvOnTargetGovernor});
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor, &cvOnTargetGovernor});
 
 // switches between normal agitator rotate and CV limited based on the yellow
 // card governor
-
 YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
 AlternateCommand<1> agitatorLaunchYellowCardCommand(
     {&agitator},
-    agitatorLaunchCVLimited,
-    moveUnjamIntegralComprisedCommandHeatLimited,
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    rotateAndUnjamAgitatorWithHeatLimiting,
     {&yellowCardedGovernor});
 
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
@@ -335,7 +328,7 @@ HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&moveUnjamIntegralComprisedCommand},
+    {&rotateAndUnjamAgitator},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
 HoldCommandMapping rightMousePressed(

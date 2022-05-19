@@ -19,7 +19,9 @@
 
 #if defined(TARGET_HERO)
 
+#include "tap/control/alternate_command.hpp"
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/conditionally_executed_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -37,7 +39,6 @@
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
-#include "aruwsrc/control/agitator/hero_agitator_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -49,6 +50,10 @@
 #include "chassis/wiggle_drive_command.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
+#include "governor/cv_on_target_governor.hpp"
+#include "governor/heat_limit_governor.hpp"
+#include "governor/limit_switch_depressed_governor.hpp"
+#include "governor/yellow_carded_governor.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -67,6 +72,8 @@ using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
@@ -100,13 +107,13 @@ ClientDisplaySubsystem clientDisplay(drivers());
 
 VelocityAgitatorSubsystem kickerAgitator(
     drivers(),
-    aruwsrc::control::agitator::constants::KICKER_PID_CONFIG,
-    aruwsrc::control::agitator::constants::KICKER_AGITATOR_CONFIG);
+    constants::KICKER_PID_CONFIG,
+    constants::KICKER_AGITATOR_CONFIG);
 
 VelocityAgitatorSubsystem waterwheelAgitator(
     drivers(),
-    aruwsrc::control::agitator::constants::WATERWHEEL_PID_CONFIG,
-    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_CONFIG);
+    constants::WATERWHEEL_PID_CONFIG,
+    constants::WATERWHEEL_AGITATOR_CONFIG);
 
 tap::motor::DjiMotor pitchMotor(
     drivers(),
@@ -232,38 +239,75 @@ ClientDisplayCommand clientDisplayCommand(
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
 
-MoveIntegralCommand waterwheelLoadCommand(
-    waterwheelAgitator,
-    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+// hero agitator commands
 
-UnjamIntegralCommand waterwheelAgitatorUnjamCommand(
-    waterwheelAgitator,
-    aruwsrc::control::agitator::constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
+LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(drivers()->turretMCBCanComm, true);
+LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(drivers()->turretMCBCanComm, false);
 
-MoveUnjamIntegralComprisedCommand waterwheelLoadUnjamCommand(
+namespace waterwheel
+{
+MoveIntegralCommand rotateWaterwheel(
+    waterwheelAgitator,
+    constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+
+UnjamIntegralCommand unjamWaterwheel(
+    waterwheelAgitator,
+    constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
+
+MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     *drivers(),
     waterwheelAgitator,
-    waterwheelLoadCommand,
-    waterwheelAgitatorUnjamCommand);
+    rotateWaterwheel,
+    unjamWaterwheel);
 
-MoveIntegralCommand kickerLoadCommand(
-    kickerAgitator,
-    aruwsrc::control::agitator::constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
+ConditionallyExecutedCommand<1> rotateAndUnjamWaterwheelWhenLimitSwitchNotDepressed(
+    {&waterwheelAgitator},
+    rotateAndUnjamWaterwheel,
+    {&limitSwitchNotDepressedGovernor});
+}  // namespace waterwheel
 
-MoveIntegralCommand kickerLaunchCommand(
-    kickerAgitator,
-    aruwsrc::control::agitator::constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
+namespace kicker
+{
+MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 
-HeroAgitatorCommand heroAgitatorCommand(
+tap::control::ConditionallyExecutedCommand<1> loadKickerWhenLimitSwitchNotDepressed(
+    {&kickerAgitator},
+    loadKicker,
+    {&limitSwitchNotDepressedGovernor});
+
+MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
+
+tap::control::ConditionallyExecutedCommand<1> launchKickerWhenLimitSwitchNotDepressed(
+    {&kickerAgitator},
+    launchKicker,
+    {&limitSwitchDepressedGovernor});
+
+// rotates kickerAgitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernor(
     *drivers(),
-    aruwsrc::control::agitator::constants::HERO_AGITATOR_COMMAND_CONFIG,
-    kickerAgitator,
-    waterwheelAgitator,
-    frictionWheels,
-    turretCVCommand,
-    kickerLaunchCommand,
-    kickerLoadCommand,
-    waterwheelLoadUnjamCommand);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
+    constants::HEAT_LIMIT_BUFFER);
+ConditionallyExecutedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+    {&kickerAgitator},
+    launchKicker,
+    {&heatLimitGovernor});
+
+// rotates kickerAgitator when aiming at target and within heat limit
+CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
+ConditionallyExecutedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+    {&kickerAgitator},
+    launchKicker,
+    {&heatLimitGovernor, &cvOnTargetGovernor});
+
+// switches between normal kickerAgitator rotate and CV limited based on the yellow
+// card governor
+YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
+AlternateCommand<1> agitatorLaunchYellowCardCommand(
+    {&kickerAgitator},
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    rotateAndUnjamAgitatorWithHeatLimiting,
+    {&yellowCardedGovernor});
+}  // namespace kicker
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -272,7 +316,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&heroAgitatorCommand},
+    {&kicker::agitatorLaunchYellowCardCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
@@ -295,7 +339,7 @@ PressCommandMapping gCtrlPressed(
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 PressCommandMapping leftMousePressed(
     drivers(),
-    {&heroAgitatorCommand},
+    {&kicker::agitatorLaunchYellowCardCommand},
     RemoteMapState(RemoteMapState::MouseButton::LEFT));
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -375,6 +419,9 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    waterwheelAgitator.setDefaultCommand(
+        &waterwheel::rotateAndUnjamWaterwheelWhenLimitSwitchNotDepressed);
+    kickerAgitator.setDefaultCommand(&kicker::loadKickerWhenLimitSwitchNotDepressed);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

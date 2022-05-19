@@ -25,7 +25,6 @@
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "../hero_agitator_command.hpp"
 #include "../velocity_agitator_subsystem_config.hpp"
 #include "modm/math/geometry.hpp"
 
@@ -120,10 +119,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
         .integralSetpointTolerance = M_PI / 32.0f,
 };
 
-static constexpr aruwsrc::agitator::HeroAgitatorCommand::Config HERO_AGITATOR_COMMAND_CONFIG = {
-    .heatLimiting = true,
-    .heatLimitBuffer = 100,
-};
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 100;
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // HERO_AGITATOR_CONSTANTS_HPP_
