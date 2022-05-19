@@ -93,9 +93,10 @@ private:
 
         const bool heatBelowLimit = heat + heatLimitBuffer <= heatLimit;
 
-        return !tap::communication::serial::RefSerial::heatAndLimitValid(heat, heatLimit) || heatBelowLimit;
+        return !tap::communication::serial::RefSerial::heatAndLimitValid(heat, heatLimit) ||
+               heatBelowLimit;
     }
 };
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::governor
 
 #endif  //  HEAT_LIMIT_COMMAND_GOVERNOR_HPP_

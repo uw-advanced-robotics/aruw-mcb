@@ -37,6 +37,6 @@ public:
 private:
     tap::communication::serial::RefSerial &refSerial;
 };
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::governor
 
 #endif  // YELLOW_CARDED_GOVERNOR_HPP_

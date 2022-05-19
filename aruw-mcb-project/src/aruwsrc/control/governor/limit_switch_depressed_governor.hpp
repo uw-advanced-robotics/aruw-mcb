@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CV_ON_TARGET_GOVERNOR_HPP_
-#define CV_ON_TARGET_GOVERNOR_HPP_
+#ifndef LIMIT_SWITCH_DEPRESSED_GOVERNOR_HPP_
+#define LIMIT_SWITCH_DEPRESSED_GOVERNOR_HPP_
 
 #include "tap/control/command_governor_interface.hpp"
 
@@ -27,29 +27,23 @@
 
 namespace aruwsrc::control::governor
 {
-class CvOnTargetGovernor : public tap::control::CommandGovernorInterface
+class LimitSwitchDepressedGovernor : public tap::control::CommandGovernorInterface
 {
 public:
-    CvOnTargetGovernor(
-        aruwsrc::Drivers &drivers,
-        aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand)
-        : drivers(drivers),
-          turretCVCommand(turretCVCommand)
+    LimitSwitchDepressedGovernor(aruwsrc::can::TurretMCBCanComm &turretMCB, bool readyWhenDepressed)
+        : turretMCB(turretMCB),
+          readyWhenDepressed(readyWhenDepressed)
     {
     }
 
-    bool isReady() final
-    {
-        return drivers.commandScheduler.isCommandScheduled(&turretCVCommand) &&
-               turretCVCommand.isAimingWithinLaunchingTolerance();
-    }
+    bool isReady() final { return !readyWhenDepressed ^ turretMCB.getLimitSwitchDepressed(); }
 
     bool isFinished() final { return !isReady(); }
 
 private:
-    aruwsrc::Drivers &drivers;
-    aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand;
+    aruwsrc::can::TurretMCBCanComm &turretMCB;
+    bool readyWhenDepressed;
 };
 }  // namespace aruwsrc::control::governor
 
-#endif  // CV_ON_TARGET_GOVERNOR_HPP_
+#endif  // LIMIT_SWITCH_DEPRESSED_GOVERNOR_HPP_
