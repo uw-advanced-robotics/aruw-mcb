@@ -39,7 +39,7 @@ public:
           firingSystemMechanismID(firingSystemMechanismID),
           heatLimitBuffer(heatLimitBuffer)
     {
-        // firing system mech ID must be valid
+        // firing system mech ID must be valid (one of the elements of the enum)
         assert(
             firingSystemMechanismID ==
                 tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1 ||

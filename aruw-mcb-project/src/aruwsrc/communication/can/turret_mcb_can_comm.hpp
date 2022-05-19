@@ -26,6 +26,7 @@
 
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
 namespace modm::can
 {
@@ -48,7 +49,7 @@ namespace aruwsrc::can
  * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in
  * degrees are converted to radians by this object.
  */
-class TurretMCBCanComm
+class TurretMCBCanComm : public tap::communication::sensors::limit_switch::LimitSwitchInterface
 {
 public:
     using ImuDataReceivedCallbackFunc = void (*)();
@@ -91,7 +92,7 @@ public:
             tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
 
-    mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
+    inline bool getLimitSwitchDepressed() const final { return limitSwitchDepressed; }
 
     mockable inline bool isConnected() const
     {

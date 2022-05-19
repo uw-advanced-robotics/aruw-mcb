@@ -21,17 +21,18 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_CONDITIONALLY_EXECUTED_COMMAND_HPP_
-#define TAPROOT_CONDITIONALLY_EXECUTED_COMMAND_HPP_
+#ifndef TAPROOT_GOVERNOR_LIMITED_COMMAND_HPP_
+#define TAPROOT_GOVERNOR_LIMITED_COMMAND_HPP_
 
 #include <cassert>
 #include <list>
 #include <vector>
 
-#include "command.hpp"
+#include "../command.hpp"
+
 #include "command_governor_interface.hpp"
 
-namespace tap::control
+namespace tap::control::governor
 {
 /**
  * A command that runs another command, but will only execute the command when some list of
@@ -41,20 +42,19 @@ namespace tap::control
  * @tparam NUM_CONDITIONS The number of governors in the governor list.
  */
 template <size_t NUM_CONDITIONS>
-class ConditionallyExecutedCommand : public Command
+class GovernorLimitedCommand : public Command
 {
 public:
-    ConditionallyExecutedCommand(
+    GovernorLimitedCommand(
         std::vector<Subsystem *> subRequirements,
         Command &command,
         const std::array<CommandGovernorInterface *, NUM_CONDITIONS> &commandGovernorList)
         : command(command),
           commandGovernorList(commandGovernorList)
     {
-        std::for_each(
-            subRequirements.begin(),
-            subRequirements.end(),
-            [&](auto sub) { addSubsystemRequirement(sub); });
+        std::for_each(subRequirements.begin(), subRequirements.end(), [&](auto sub) {
+            addSubsystemRequirement(sub);
+        });
         assert(command.getRequirementsBitwise() == this->getRequirementsBitwise());
     }
 
@@ -89,6 +89,6 @@ private:
 
     std::array<CommandGovernorInterface *, NUM_CONDITIONS> commandGovernorList;
 };
-}  // namespace tap::control
+}  // namespace tap::control::governor
 
-#endif  // TAPROOT_CONDITIONALLY_EXECUTED_COMMAND_HPP_
+#endif  // TAPROOT_GOVERNOR_LIMITED_COMMAND_HPP_
