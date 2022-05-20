@@ -78,8 +78,7 @@ private:
         }
 
         // otherwise, iterate through message types until you find one that is queued
-        auto nextMessageType = [](SentinelRequestMessageType type)
-        {
+        auto nextMessageType = [](SentinelRequestMessageType type) {
             return static_cast<SentinelRequestMessageType>(
                 (static_cast<uint8_t>(type) + 1) %
                 static_cast<uint8_t>(SentinelRequestMessageType::NUM_MESSAGE_TYPES));
