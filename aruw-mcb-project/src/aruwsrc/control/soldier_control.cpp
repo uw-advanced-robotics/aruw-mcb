@@ -149,7 +149,7 @@ aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
           0);
 
 AutoAimLaunchTimer autoAimLaunchTimer(
-    100'000, // agitatorTypicalDelayMicroseconds
+200'000, // agitatorTypicalDelayMicroseconds
     &drivers()->visionCoprocessor,
     &ballisticsSolver
 );
