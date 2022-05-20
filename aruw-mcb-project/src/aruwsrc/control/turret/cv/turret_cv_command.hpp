@@ -79,6 +79,8 @@ public:
      * @param[in] odometryInterface Odometry object, used for position odometry information.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
+     * @param[in] ballisticsSolver A ballistics computation engine to use for computing aiming
+     * solutions.
      * @param[in] userPitchInputScalar When user input is used, this scalar is used to scale the
      * pitch user input.
      * @param[in] userYawInputScalar When user input is used, this scalar is used to scale the yaw
@@ -95,6 +97,7 @@ public:
         algorithms::TurretPitchControllerInterface *pitchController,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const float userPitchInputScalar,
         const float userYawInputScalar,
         const float defaultLaunchSpeed,
@@ -131,7 +134,7 @@ private:
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
-    aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
 
     const float userPitchInputScalar;
     const float userYawInputScalar;

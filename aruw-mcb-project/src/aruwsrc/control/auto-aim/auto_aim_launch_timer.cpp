@@ -1,0 +1,79 @@
+/*
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "auto_aim_launch_timer.hpp"
+#include <tap/architecture/clock.hpp>
+
+namespace aruwsrc::control::auto_aim
+{
+AutoAimLaunchTimer::AutoAimLaunchTimer(
+    uint32_t agitatorTypicalDelayMicroseconds,
+    aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballistics
+): agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds), visionCoprocessor(visionCoprocessor), ballistics(ballistics) {}
+
+AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclination(uint8_t turretId)
+{
+    auto aimData = this->visionCoprocessor->getLastAimData(turretId);
+    if (!aimData.hasTarget) {
+        return LaunchInclination::NO_TARGET;
+    }
+
+    if (!aimData.recommendUseTimedShots) {
+        return LaunchInclination::UNGATED;
+    }
+
+    float targetPitch;
+    float targetYaw;
+    float targetDistance;
+    float timeOfFlightSeconds;
+    // TODO: avoid re-solving
+    bool ballisticsSolutionAvailable =
+        this->ballistics->computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance, &timeOfFlightSeconds);
+
+    if (!ballisticsSolutionAvailable) {
+        return LaunchInclination::GATED_DENY;
+    }
+
+    if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS) {
+        return LaunchInclination::GATED_DENY;
+    }
+
+    uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6;
+    uint32_t now = tap::arch::clock::getTimeMicroseconds();
+    uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
+
+    uint32_t nextPlateTransitTime = aimData.timestamp + aimData.targetHitTimeOffset;
+    uint32_t intervalsProjectAhead = (projectedHitTime - nextPlateTransitTime) / aimData.targetPulseInterval;
+
+    uint32_t intervalEarlyGoalHitTime = nextPlateTransitTime + aimData.targetPulseInterval * intervalsProjectAhead;
+    int64_t intervalEarlyHitTimeError = projectedHitTime - intervalEarlyGoalHitTime;
+
+    uint32_t intervalLateGoalHitTime = intervalEarlyGoalHitTime + aimData.targetPulseInterval;
+    int64_t intervalLateHitTimeError = projectedHitTime - intervalLateGoalHitTime;
+
+    uint32_t maxHitTimeError = aimData.targetIntervalDuration / 2;
+
+    if (abs(intervalEarlyHitTimeError) < maxHitTimeError || abs(intervalLateHitTimeError) < maxHitTimeError) {
+        return LaunchInclination::GATED_ALLOW;
+    } else {
+        return LaunchInclination::GATED_DENY;
+    }
+}
+}
