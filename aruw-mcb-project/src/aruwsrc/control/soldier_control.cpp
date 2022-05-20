@@ -66,6 +66,7 @@
 #include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -77,6 +78,7 @@ using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
 using namespace tap::control;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
@@ -139,6 +141,15 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 ClientDisplaySubsystem clientDisplay(drivers());
 
 TurretMCBHopperSubsystem hopperCover(drivers());
+
+OttoBallisticsSolver ballisticsSolver(
+    *drivers(),
+    odometrySubsystem,
+    turret,
+    frictionWheels,
+    14.5f, // defaultLaunchSpeed
+    0 // turretID
+);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -205,6 +216,7 @@ cv::TurretCVCommand turretCVCommand(
     &worldFramePitchTurretImuController,
     odometrySubsystem,
     frictionWheels,
+    &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR,
     14.5f);

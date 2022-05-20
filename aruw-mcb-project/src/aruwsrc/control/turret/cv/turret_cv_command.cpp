@@ -40,6 +40,7 @@ TurretCVCommand::TurretCVCommand(
     algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
     const float defaultLaunchSpeed,
@@ -71,7 +72,7 @@ void TurretCVCommand::execute()
     float yawSetpoint = yawController->getSetpoint();
 
     float targetPitch, targetYaw, targetDistance, timeOfFlight;
-    bool ballisticsSolutionAvailable = ballisticsSolver.computeTurretAimAngles(
+    bool ballisticsSolutionAvailable = ballisticsSolver->computeTurretAimAngles(
         &targetPitch,
         &targetYaw,
         &targetDistance,

@@ -89,10 +89,6 @@ public:
         bool recommendUseTimedShots;  ///< Validity of the targetHitTime 
         uint32_t targetHitTimeOffset; ///< Estimated microseconds beyond "timestamp" at which our next shot should ideally hit
         uint32_t targetPulseInterval; ///< Time between plate centers transiting the target point
-
-        bool recommendUseTimedShots;  ///< Validity of the targetHitTime 
-        uint32_t targetHitTimeOffset; ///< Estimated microseconds beyond "timestamp" at which our next shot should ideally hit
-        uint32_t targetPulseInterval; ///< Time between plate centers transiting the target point
         uint32_t targetIntervalDuration; ///< Duration during which the plate is at the target point
     } modm_packed;
 
