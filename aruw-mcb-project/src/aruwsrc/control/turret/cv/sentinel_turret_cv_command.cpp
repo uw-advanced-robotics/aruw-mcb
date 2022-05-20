@@ -44,6 +44,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     Command *const launchingCommand,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : ComprisedCommand(drivers),
@@ -53,13 +54,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
       pitchController(pitchController),
       turretID(turretID),
       launchingCommand(launchingCommand),
-      ballisticsSolver(
-          *drivers,
-          odometryInterface,
-          *turretSubsystem,
-          frictionWheels,
-          defaultLaunchSpeed,
-          turretID),
+      ballisticsSolver(ballisticsSolver),
       pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(
           turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
@@ -99,7 +94,7 @@ void SentinelTurretCVCommand::execute()
     float yawSetpoint = yawController->getSetpoint();
 
     float targetPitch, targetYaw, targetDistance, timeOfFlight;
-    bool ballisticsSolutionAvailable = ballisticsSolver.computeTurretAimAngles(
+    bool ballisticsSolutionAvailable = ballisticsSolver->computeTurretAimAngles(
         &targetPitch,
         &targetYaw,
         &targetDistance,

@@ -105,6 +105,8 @@ public:
      * @param[in] odometryInterface Odometry object, used for position odometry information.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
+     * @param[in] ballisticsSolver A ballistics computation engine to use for computing aiming
+     * solutions.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
      * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
@@ -119,6 +121,7 @@ public:
         Command *const launchingCommand,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const float defaultLaunchSpeed,
         const uint8_t turretID);
 
@@ -157,7 +160,7 @@ private:
      */
     Command *const launchingCommand;
 
-    aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
 
     uint32_t prevTime;
 

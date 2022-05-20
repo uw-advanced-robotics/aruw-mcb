@@ -37,6 +37,7 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -72,6 +73,7 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::agitator;
@@ -135,6 +137,15 @@ tap::motor::DoubleDjiMotor yawMotor(
 HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, PITCH_MOTOR_CONFIG, YAW_MOTOR_CONFIG);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret.yawMotor, &chassis);
+
+OttoBallisticsSolver ballisticsSolver(
+    *drivers(),
+    odometrySubsystem,
+    turret,
+    frictionWheels,
+    9.5f, // defaultLaunchSpeed
+    0 // turretID
+);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -211,11 +222,9 @@ cv::TurretCVCommand turretCVCommand(
     &turret,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
-    odometrySubsystem,
-    frictionWheels,
+    &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR,
-    9.5f);
+    USER_PITCH_INPUT_SCALAR);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
