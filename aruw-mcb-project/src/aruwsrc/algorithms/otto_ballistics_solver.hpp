@@ -134,6 +134,8 @@ private:
     const control::turret::TurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
+
+public:
     const uint8_t turretID;
 };
 }  // namespace aruwsrc::algorithms

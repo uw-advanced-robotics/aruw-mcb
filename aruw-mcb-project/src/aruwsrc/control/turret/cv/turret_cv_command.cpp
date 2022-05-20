@@ -38,21 +38,20 @@ TurretCVCommand::TurretCVCommand(
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
-    const float defaultLaunchSpeed,
     uint8_t turretID)
     : drivers(drivers),
       turretID(turretID),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
+      ballisticsSolver(ballisticsSolver),
       userPitchInputScalar(userPitchInputScalar),
       userYawInputScalar(userYawInputScalar)
 {
+    assert(turretID == ballisticsSolver->turretID);
     addSubsystemRequirement(turretSubsystem);
 }
 
