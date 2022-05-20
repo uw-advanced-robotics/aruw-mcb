@@ -39,6 +39,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "governor/heat_limit_governor.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -134,6 +135,14 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     rotateAgitator,
     unjamAgitator);
 
+// rotates agitator if friction wheels are spinning fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(
+    frictionWheels);
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor});
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
@@ -141,7 +150,7 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
-    rotateAndUnjamAgitator,
+    rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor});
 
 // Two identical drive commands since you can't map an identical command to two different mappings

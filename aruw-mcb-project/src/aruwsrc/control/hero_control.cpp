@@ -54,6 +54,7 @@
 #include "governor/heat_limit_governor.hpp"
 #include "governor/limit_switch_depressed_governor.hpp"
 #include "governor/yellow_carded_governor.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -287,6 +288,14 @@ GovernorLimitedCommand<1> launchKickerWhenBallReady(
     launchKicker,
     {&limitSwitchDepressedGovernor});
 
+// rotates agitator if friction wheels are spinning fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(
+    frictionWheels);
+GovernorLimitedCommand<1> launchKickerWhenBallReadyWhenFrictionWheelsOn(
+    {&agitator},
+    launchKickerWhenBallReady,
+    {&heatLimitGovernor});
+
 // rotates kickerAgitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
@@ -294,7 +303,7 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> launchKickerHeatLimited(
     {&kickerAgitator},
-    launchKickerWhenBallReady,
+    launchKickerWhenBallReadyWhenFrictionWheelsOn,
     {&heatLimitGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
