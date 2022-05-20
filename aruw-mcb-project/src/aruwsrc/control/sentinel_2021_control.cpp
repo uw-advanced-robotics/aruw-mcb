@@ -134,6 +134,14 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     rotateAgitator,
     unjamAgitator);
 
+// rotates agitator if friction wheels are on and going fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(
+     aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel);
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor});
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
@@ -141,7 +149,7 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
-    rotateAndUnjamAgitator,
+    rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor});
 
 // Two identical drive commands since you can't map an identical command to two different mappings

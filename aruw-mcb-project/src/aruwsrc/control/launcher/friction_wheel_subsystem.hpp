@@ -72,6 +72,11 @@ public:
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
     /**
+     * @return The estimated launch speed if a ball were to be launched now in RPM.
+     */
+    float getCurrentFrictionWheelSpeed() const;
+
+    /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
     void refresh() override;

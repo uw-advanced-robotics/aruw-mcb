@@ -54,6 +54,7 @@
 #include "governor/cv_on_target_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "governor/yellow_carded_governor.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "imu/imu_calibrate_command.hpp"
@@ -222,6 +223,14 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     rotateAgitator,
     unjamAgitator);
 
+// rotates agitator if friction wheels are on and going fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(
+     aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel);
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor});
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
@@ -229,14 +238,14 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
-    rotateAndUnjamAgitator,
+    rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor});
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
-    rotateAndUnjamAgitator,
+    rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
 // switches between normal agitator rotate and CV limited based on the yellow
@@ -328,7 +337,7 @@ HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&rotateAndUnjamAgitator},
+    {&rotateAndUnjamAgitatorWhenFrictionWheelsOn},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
 HoldCommandMapping rightMousePressed(
