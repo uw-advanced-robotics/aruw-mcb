@@ -136,7 +136,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 
 // rotates agitator if friction wheels are on and going fast
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(
-     aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel);
+    aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
     {&agitator},
     rotateAndUnjamAgitator,

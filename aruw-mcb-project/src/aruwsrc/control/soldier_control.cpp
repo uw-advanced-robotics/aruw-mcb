@@ -52,9 +52,9 @@
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "governor/cv_on_target_governor.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "governor/yellow_carded_governor.hpp"
-#include "governor/friction_wheels_on_governor.hpp"
 #include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "imu/imu_calibrate_command.hpp"
@@ -225,7 +225,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 
 // rotates agitator if friction wheels are on and going fast
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(
-     aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel);
+    aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
     {&agitator},
     rotateAndUnjamAgitator,

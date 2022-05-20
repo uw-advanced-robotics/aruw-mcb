@@ -20,10 +20,10 @@
 #ifndef FRICTION_WHEELS_ON_GOVERNOR_HPP_
 #define FRICTION_WHEELS_ON_GOVERNOR_HPP_
 
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 
+#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 
 namespace aruwsrc::control::governor
 {
@@ -40,21 +40,20 @@ namespace aruwsrc::control::governor
 class FrictionWheelsOnGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-
     /**
-     * @param[in] 
+     * @param[in]
      * @param[in] behavior The behavior of the governor, whether or not to allow Commands to run
      * when the limit switch is depressed or released.
      */
-    FrictionWheelsOnGovernor(
-        aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel)
+    FrictionWheelsOnGovernor(aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel)
         : frictionWheel(frictionWheel)
     {
     }
 
     bool isReady() final
     {
-        return frictionWheel.getCurrentFrictionWheelSpeed() >= aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].second / 2;
+        return frictionWheel.getCurrentFrictionWheelSpeed() >=
+               aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].second / 2;
     }
 
     bool isFinished() final { return !isReady(); }
