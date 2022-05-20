@@ -201,10 +201,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFramePitchTurretController,
     agitator,
     &rotateAndUnjamAgitatorWithHeatLimiting,
-    odometrySubsystem,
-    frictionWheels,
     &ballisticsSolver,
-    14.5f,
     0);
 void selectNewRobotMessageHandler() { turretCVCommand.requestNewTarget(); }
 void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }

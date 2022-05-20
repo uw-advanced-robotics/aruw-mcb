@@ -167,10 +167,7 @@ public:
               &chassisFramePitchTurretController,
               agitator,
               &rotateAndUnjamAgitatorWithHeatLimiting,
-              odometrySubsystem,
-              frictionWheels,
               &ballisticsSolver,
-              29.5f,
               config.turretID)
     {
     }
