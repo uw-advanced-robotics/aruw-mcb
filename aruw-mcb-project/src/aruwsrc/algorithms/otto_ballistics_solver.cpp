@@ -49,10 +49,13 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 {
 }
 
+float projectedHeightTraveled = 0;
+float targetZTraveled = 0;
+float projectionError = 0;
 bool OttoBallisticsSolver::computeTurretAimAngles(
     float *pitchAngle,
     float *yawAngle,
-    float *distance,
+    float *targetDistance,
     float *timeOfFlight)
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
@@ -87,14 +90,19 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
 
     targetState.position = targetState.projectForward(projectforwardtimedt / 1E6f);
 
-    *distance = targetState.position.getLength();
+    *targetDistance = targetState.position.getLength();
 
-    return ballistics::findTargetProjectileIntersection(
+    bool solved = ballistics::findTargetProjectileIntersection(
         targetState,
         launchSpeed,
         3,
         pitchAngle,
         yawAngle,
         timeOfFlight);
+    
+    projectedHeightTraveled = abs(*timeOfFlight*launchSpeed*sinf(*pitchAngle));
+    targetZTraveled = abs(targetState.position.getZ());
+    projectionError = projectedHeightTraveled - targetZTraveled;
+    return solved;
 }
 }  // namespace aruwsrc::algorithms
