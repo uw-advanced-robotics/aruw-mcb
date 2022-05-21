@@ -39,13 +39,6 @@ UnjamIntegralCommand::UnjamIntegralCommand(
 {
     assert(config.targetUnjamIntegralChange > 0);
     assert(config.targetCycleCount > 0);
-    assert(config.maxWaitTime > 0);
-
-    // max wait time must be > min time it will take to reach the unjam displacement given the unjam
-    // velocity
-    assert(
-        1000.0f * (this->config.targetUnjamIntegralChange / this->config.unjamSetpoint) <
-        this->config.maxWaitTime);
 
     addSubsystemRequirement(&integrableSetpointSubsystem);
 
@@ -56,8 +49,6 @@ bool UnjamIntegralCommand::isReady() { return integrableSetpointSubsystem.isOnli
 
 void UnjamIntegralCommand::initialize()
 {
-    unjamRotateTimeout.restart(config.maxWaitTime);
-
     positionBeforeUnjam = integrableSetpointSubsystem.getCurrentValueIntegral();
 
     forwardsCleared = false;
@@ -74,7 +65,7 @@ void UnjamIntegralCommand::execute()
     switch (currUnjamState)
     {
         case UNJAM_BACKWARD:
-            if (curPosition <= positionBeforeUnjam - config.targetUnjamIntegralChange)
+            if (curPosition <= integrableSetpointSubsystem.getDesiredIntegralSetpoint())
             {
                 backwardsCleared = true;
                 beginUnjamForwards();
@@ -85,7 +76,7 @@ void UnjamIntegralCommand::execute()
             }
             break;
         case UNJAM_FORWARD:
-            if (curPosition >= positionBeforeUnjam)
+            if (curPosition >= integrableSetpointSubsystem.getDesiredIntegralSetpoint())
             {
                 forwardsCleared = true;
                 beginUnjamBackwards();
@@ -123,15 +114,18 @@ bool UnjamIntegralCommand::isFinished() const
 
 void UnjamIntegralCommand::beginUnjamForwards()
 {
-    unjamRotateTimeout.restart(config.maxWaitTime);
     integrableSetpointSubsystem.setSetpoint(config.unjamSetpoint);
+    integrableSetpointSubsystem.setDesiredIntegralSetpoint(positionBeforeUnjam);
+    unjamRotateTimeout.restart(getUnjamRotateTime());
     currUnjamState = UNJAM_FORWARD;
 }
 
 void UnjamIntegralCommand::beginUnjamBackwards()
 {
-    unjamRotateTimeout.restart(config.maxWaitTime);
     integrableSetpointSubsystem.setSetpoint(-config.unjamSetpoint);
+    integrableSetpointSubsystem.setDesiredIntegralSetpoint(
+        positionBeforeUnjam - config.targetUnjamIntegralChange);
+    unjamRotateTimeout.restart(getUnjamRotateTime());
     currUnjamState = UNJAM_BACKWARD;
     backwardsCount += 1;
 }
