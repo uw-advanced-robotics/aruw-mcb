@@ -122,7 +122,7 @@ public:
      * @return `true` if CV is online, the most recent aim data is valid, and a valid ballistics
      * solution was found. `false` otherwise.
      */
-    bool computeTurretAimAngles(
+    mockable bool computeTurretAimAngles(
         float *pitchAngle,
         float *yawAngle,
         float *targetDistance,
