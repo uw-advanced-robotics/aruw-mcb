@@ -152,6 +152,15 @@ public:
     mockable float getValidChassisMeasurementError() const;
 
     /**
+     * Same as getValidChassisMeasurementError, but operates on "wrapped" angles regardless of
+     * turret limit status.
+     * This function should be used for checking tolerances, while
+     * getValidChassisMeasurementErrorWrapped should be used for PID controllers and other
+     * applications that require directionality.
+     */
+    float getValidChassisMeasurementErrorWrapped() const;
+
+    /**
      * @param[in] measurement A turret measurement in the chassis frame, an angle in radians. This
      * can be encoder based (via getChassisFrameMeasuredAngle) or can be measured by some other
      * means (for example, an IMU on the turret that is than transformed to the chassis frame).

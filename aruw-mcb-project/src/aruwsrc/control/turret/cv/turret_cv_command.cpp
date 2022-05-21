@@ -101,8 +101,8 @@ void TurretCVCommand::execute()
         }
 
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-            turretSubsystem->yawMotor.getValidChassisMeasurementError(),
-            turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+            turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
+            turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
             targetDistance);
     }
     else

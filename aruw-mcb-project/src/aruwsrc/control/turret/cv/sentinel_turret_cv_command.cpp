@@ -122,8 +122,8 @@ void SentinelTurretCVCommand::execute()
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
         if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-                turretSubsystem->yawMotor.getValidChassisMeasurementError(),
-                turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+                turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
+                turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
                 targetDistance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it

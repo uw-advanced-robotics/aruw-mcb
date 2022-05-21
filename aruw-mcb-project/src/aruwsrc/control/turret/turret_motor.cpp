@@ -141,6 +141,13 @@ float TurretMotor::getValidChassisMeasurementError() const
     return getValidMinError(chassisFrameUnwrappedMeasurement);
 }
 
+float TurretMotor::getValidChassisMeasurementErrorWrapped() const
+{
+    // equivalent to this - other
+    return ContiguousFloat(chassisFrameUnwrappedMeasurement, 0, M_TWOPI).difference(chassisFrameSetpoint);
+}
+
+
 float TurretMotor::getValidMinError(const float measurement) const
 {
     if (config.limitMotorAngles)

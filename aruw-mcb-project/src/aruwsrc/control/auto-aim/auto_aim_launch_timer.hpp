@@ -36,7 +36,6 @@ class AutoAimLaunchTimer
         aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
         aruwsrc::algorithms::OttoBallisticsSolver *ballistics;
 
-        // std::optional<uint32_t> getTimedShotGoalTimestamp(uint8_t turretId);
     public:
         AutoAimLaunchTimer(uint32_t agitatorTypicalDelayMicroseconds, aruwsrc::serial::VisionCoprocessor *visionCoprocessor, aruwsrc::algorithms::OttoBallisticsSolver *ballistics);
 

@@ -63,14 +63,14 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint32_t intervalsProjectAhead = (projectedHitTime - nextPlateTransitTime) / aimData.targetPulseInterval;
 
     uint32_t intervalEarlyGoalHitTime = nextPlateTransitTime + aimData.targetPulseInterval * intervalsProjectAhead;
-    int64_t intervalEarlyHitTimeError = projectedHitTime - intervalEarlyGoalHitTime;
+    uint32_t intervalEarlyHitTimeError = projectedHitTime - intervalEarlyGoalHitTime;
 
     uint32_t intervalLateGoalHitTime = intervalEarlyGoalHitTime + aimData.targetPulseInterval;
-    int64_t intervalLateHitTimeError = projectedHitTime - intervalLateGoalHitTime;
+    uint32_t intervalLateHitTimeError = intervalLateGoalHitTime - projectedHitTime;
 
     uint32_t maxHitTimeError = aimData.targetIntervalDuration / 2;
 
-    if (abs(intervalEarlyHitTimeError) < maxHitTimeError || abs(intervalLateHitTimeError) < maxHitTimeError) {
+    if (intervalEarlyHitTimeError < maxHitTimeError || intervalLateHitTimeError < maxHitTimeError) {
         return LaunchInclination::GATED_ALLOW;
     } else {
         return LaunchInclination::GATED_DENY;

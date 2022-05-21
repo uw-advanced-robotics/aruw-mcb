@@ -150,6 +150,11 @@ OttoBallisticsSolver ballisticsSolver(
     14.5f, // defaultLaunchSpeed
     0 // turretID
 );
+AutoAimLaunchTimer autoAimLaunchTimer(
+    80'000, // agitatorTypicalDelayMicroseconds
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver
+);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -242,20 +247,15 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernor});
 
 // rotates agitator when aiming at target and within heat limit
-CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
+CvOnTargetGovernor cvOnTargetGovernor(
+    *drivers(),
+    turretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
     {&heatLimitGovernor, &cvOnTargetGovernor});
-
-// switches between normal agitator rotate and CV limited based on the yellow
-// card governor
-YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
-GovernorWithFallbackCommand<1> agitatorLaunchYellowCardCommand(
-    {&agitator},
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-    rotateAndUnjamAgitatorWithHeatLimiting,
-    {&yellowCardedGovernor});
 
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
@@ -305,7 +305,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&agitatorLaunchYellowCardCommand},
+    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -331,7 +331,7 @@ ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({R
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&agitatorLaunchYellowCardCommand},
+    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
     false,
     1);
