@@ -37,8 +37,8 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "governor/heat_limit_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
+#include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
@@ -130,43 +130,38 @@ public:
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
           frictionWheelsOnGovernor(frictionWheels);
-          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
-          rotateAndUnjamAgitatorWhenFrictionWheelsOn(
-              {&agitator}, 
-              rotateAndUnjamAgitator, 
-              {&heatLimitGovernor});
-          rotateAndUnjamAgitatorWithHeatLimiting(
-              {&agitator},
-              rotateAndUnjamAgitator,
-              {&heatLimitGovernor, &frictionWheelsOnGovernor}),
-          spinFrictionWheels(
-              &drivers,
-              &frictionWheels,
-              30.0f,
-              true,
-              config.turretBarrelMechanismId),
-          stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
-          chassisFramePitchTurretController(&turretSubsystem.pitchMotor, config.pitchPidConfig),
-          chassisFrameYawTurretController(&turretSubsystem.yawMotor, config.yawPidConfig),
-          turretManual(
-              &drivers,
-              &turretSubsystem,
-              &chassisFrameYawTurretController,
-              &chassisFramePitchTurretController,
-              USER_YAW_INPUT_SCALAR,
-              USER_PITCH_INPUT_SCALAR,
-              config.turretID),
-          turretCVCommand(
-              &drivers,
-              &turretSubsystem,
-              &chassisFrameYawTurretController,
-              &chassisFramePitchTurretController,
-              agitator,
-              &rotateAndUnjamAgitatorWithHeatLimiting,
-              odometrySubsystem,
-              frictionWheels,
-              29.5f,
-              config.turretID)
+    heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
+        rotateAndUnjamAgitatorWhenFrictionWheelsOn(
+            {&agitator},
+            rotateAndUnjamAgitator,
+            {&heatLimitGovernor});
+    rotateAndUnjamAgitatorWithHeatLimiting(
+        {&agitator},
+        rotateAndUnjamAgitator,
+        {&heatLimitGovernor, &frictionWheelsOnGovernor}),
+        spinFrictionWheels(&drivers, &frictionWheels, 30.0f, true, config.turretBarrelMechanismId),
+        stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
+        chassisFramePitchTurretController(&turretSubsystem.pitchMotor, config.pitchPidConfig),
+        chassisFrameYawTurretController(&turretSubsystem.yawMotor, config.yawPidConfig),
+        turretManual(
+            &drivers,
+            &turretSubsystem,
+            &chassisFrameYawTurretController,
+            &chassisFramePitchTurretController,
+            USER_YAW_INPUT_SCALAR,
+            USER_PITCH_INPUT_SCALAR,
+            config.turretID),
+        turretCVCommand(
+            &drivers,
+            &turretSubsystem,
+            &chassisFrameYawTurretController,
+            &chassisFramePitchTurretController,
+            agitator,
+            &rotateAndUnjamAgitatorWithHeatLimiting,
+            odometrySubsystem,
+            frictionWheels,
+            29.5f,
+            config.turretID)
     {
     }
 

@@ -38,8 +38,8 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "governor/heat_limit_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
+#include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -136,8 +136,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     unjamAgitator);
 
 // rotates agitator if friction wheels are spinning fast
-FrictionWheelsOnGovernor frictionWheelsOnGovernor(
-    frictionWheels);
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
