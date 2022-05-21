@@ -28,7 +28,7 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     FrictionWheelSubsystem *frictionWheels,
     float defaultLaunchSpeed,
     bool alwaysUseDefaultLaunchSpeed,
-    Barrel barrel)
+    tap::communication::serial::RefSerialData::Rx::MechanismID barrel)
     : drivers(drivers),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
@@ -51,13 +51,13 @@ void FrictionWheelSpinRefLimitedCommand::execute()
 
         switch (barrel)
         {
-            case Barrel::BARREL_17MM_1:
+            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
                 maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
                 break;
-            case Barrel::BARREL_17MM_2:
+            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
                 maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
                 break;
-            case Barrel::BARREL_42MM:
+            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
                 maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
                 break;
         }

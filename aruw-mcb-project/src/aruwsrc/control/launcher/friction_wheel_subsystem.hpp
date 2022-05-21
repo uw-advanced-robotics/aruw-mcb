@@ -116,8 +116,6 @@ private:
 
     uint32_t prevTime = 0;
 
-    float predictedLaunchSpeed = 0;
-
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     tap::algorithms::Ramp desiredRpmRamp;
