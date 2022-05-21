@@ -146,6 +146,11 @@ OttoBallisticsSolver ballisticsSolver(
     9.5f, // defaultLaunchSpeed
     0 // turretID
 );
+AutoAimLaunchTimer autoAimLaunchTimer(
+    130'000, // agitatorTypicalDelayMicroseconds
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver
+);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -307,20 +312,15 @@ GovernorLimitedCommand<1> launchKickerHeatLimited(
     {&heatLimitGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
-CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
+CvOnTargetGovernor cvOnTargetGovernor(
+    *drivers(),
+    turretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 GovernorLimitedCommand<2> launchKickerHeatAndCVLimited(
     {&kickerAgitator},
     launchKicker,
     {&heatLimitGovernor, &cvOnTargetGovernor});
-
-// switches between normal kickerAgitator rotate and CV limited based on the yellow
-// card governor
-YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
-GovernorWithFallbackCommand<1> launchKickerYellowCardSwitcher(
-    {&kickerAgitator},
-    launchKickerHeatAndCVLimited,
-    launchKickerHeatLimited,
-    {&yellowCardedGovernor});
 }  // namespace kicker
 
 /* define command mappings --------------------------------------------------*/
@@ -330,7 +330,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&kicker::launchKickerYellowCardSwitcher},
+    {&kicker::launchKickerHeatAndCVLimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
@@ -353,7 +353,7 @@ PressCommandMapping gCtrlPressed(
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 PressCommandMapping leftMousePressed(
     drivers(),
-    {&kicker::launchKickerYellowCardSwitcher},
+    {&kicker::launchKickerHeatAndCVLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT));
 HoldCommandMapping rightMousePressed(
     drivers(),
