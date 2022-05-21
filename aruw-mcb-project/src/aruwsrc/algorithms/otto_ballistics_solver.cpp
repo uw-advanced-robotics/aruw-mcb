@@ -100,7 +100,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
         yawAngle,
         timeOfFlight);
     
-    projectedHeightTraveled = abs(*timeOfFlight*launchSpeed*sinf(*pitchAngle));
+    projectedHeightTraveled = abs(*timeOfFlight * launchSpeed * sinf(*pitchAngle) + 9.81 * 0.5 * (*timeOfFlight)*(*timeOfFlight));
     targetZTraveled = abs(targetState.position.getZ());
     projectionError = projectedHeightTraveled - targetZTraveled;
     return solved;
