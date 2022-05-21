@@ -129,39 +129,40 @@ public:
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
-          frictionWheelsOnGovernor(frictionWheels);
-    heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
-        rotateAndUnjamAgitatorWhenFrictionWheelsOn(
-            {&agitator},
-            rotateAndUnjamAgitator,
-            {&heatLimitGovernor});
-    rotateAndUnjamAgitatorWithHeatLimiting(
-        {&agitator},
-        rotateAndUnjamAgitator,
-        {&heatLimitGovernor, &frictionWheelsOnGovernor}),
-        spinFrictionWheels(&drivers, &frictionWheels, 30.0f, true, config.turretBarrelMechanismId),
-        stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
-        chassisFramePitchTurretController(&turretSubsystem.pitchMotor, config.pitchPidConfig),
-        chassisFrameYawTurretController(&turretSubsystem.yawMotor, config.yawPidConfig),
-        turretManual(
-            &drivers,
-            &turretSubsystem,
-            &chassisFrameYawTurretController,
-            &chassisFramePitchTurretController,
-            USER_YAW_INPUT_SCALAR,
-            USER_PITCH_INPUT_SCALAR,
-            config.turretID),
-        turretCVCommand(
-            &drivers,
-            &turretSubsystem,
-            &chassisFrameYawTurretController,
-            &chassisFramePitchTurretController,
-            agitator,
-            &rotateAndUnjamAgitatorWithHeatLimiting,
-            odometrySubsystem,
-            frictionWheels,
-            29.5f,
-            config.turretID)
+          frictionWheelsOnGovernor(frictionWheels),
+          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
+          rotateAndUnjamAgitatorWithHeatLimiting(
+              {&agitator},
+              rotateAndUnjamAgitator,
+              {&heatLimitGovernor, &frictionWheelsOnGovernor}),
+          spinFrictionWheels(
+              &drivers,
+              &frictionWheels,
+              30.0f,
+              true,
+              config.turretBarrelMechanismId),
+          stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
+          chassisFramePitchTurretController(&turretSubsystem.pitchMotor, config.pitchPidConfig),
+          chassisFrameYawTurretController(&turretSubsystem.yawMotor, config.yawPidConfig),
+          turretManual(
+              &drivers,
+              &turretSubsystem,
+              &chassisFrameYawTurretController,
+              &chassisFramePitchTurretController,
+              USER_YAW_INPUT_SCALAR,
+              USER_PITCH_INPUT_SCALAR,
+              config.turretID),
+          turretCVCommand(
+              &drivers,
+              &turretSubsystem,
+              &chassisFrameYawTurretController,
+              &chassisFramePitchTurretController,
+              agitator,
+              &rotateAndUnjamAgitatorWithHeatLimiting,
+              odometrySubsystem,
+              frictionWheels,
+              29.5f,
+              config.turretID)
     {
     }
 

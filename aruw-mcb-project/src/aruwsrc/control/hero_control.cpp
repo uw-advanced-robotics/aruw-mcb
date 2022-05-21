@@ -283,13 +283,13 @@ GovernorLimitedCommand<1> feedKickerWhenBallNotReady(
 
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
+// rotates agitator if friction wheels are spinning fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+
 GovernorLimitedCommand<1> launchKickerWhenBallReady(
     {&kickerAgitator},
     launchKicker,
     {&limitSwitchDepressedGovernor, &frictionWheelsOnGovernor});
-
-// rotates agitator if friction wheels are spinning fast
-FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
 // rotates kickerAgitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
@@ -298,7 +298,7 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<2> launchKickerHeatLimited(
     {&kickerAgitator},
-    launchKickerWhenBallReadyWhenFrictionWheelsOn,
+    launchKickerWhenBallReady,
     {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit

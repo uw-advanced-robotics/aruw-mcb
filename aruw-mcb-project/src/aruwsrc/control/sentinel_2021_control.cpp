@@ -145,7 +145,7 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOn,
+    rotateAndUnjamAgitator,
     {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
 // Two identical drive commands since you can't map an identical command to two different mappings
