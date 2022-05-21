@@ -286,7 +286,7 @@ MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATO
 // rotates agitator if friction wheels are spinning fast
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
-GovernorLimitedCommand<1> launchKickerWhenBallReady(
+GovernorLimitedCommand<2> launchKickerWhenBallReady(
     {&kickerAgitator},
     launchKicker,
     {&limitSwitchDepressedGovernor, &frictionWheelsOnGovernor});
