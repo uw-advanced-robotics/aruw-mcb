@@ -63,7 +63,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = 1.5f * (M_TWOPI / 10.0f), // TODO tune this, should be a value s.t. a projectile always fires independent of stirrer phase
+    .targetIntegralChange = 1.4f * (M_TWOPI / 10.0f),
     .desiredSetpoint = 2.0f * M_TWOPI,
     .integralSetpointTolerance = M_PI / 20.0f,
 };

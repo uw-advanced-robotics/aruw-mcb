@@ -27,8 +27,9 @@ namespace aruwsrc::control::governor
 {
 /**
  * Governor that halts a Comamnd's execution when the ref serial reports that a projectile has been
- * fired by one of the barrel mechanism IDs. This allows one to have a more consistent firing frequency.
- * 
+ * fired by one of the barrel mechanism IDs. This allows one to have a more consistent firing
+ * frequency.
+ *
  * @note Does not govern whether or not the governed Command can start execution.
  */
 class RefSystemProjectileLaunchedGovernor : public tap::control::governor::CommandGovernorInterface
@@ -36,7 +37,8 @@ class RefSystemProjectileLaunchedGovernor : public tap::control::governor::Comma
 public:
     /**
      * @param[in] refSerial Global RefSerial object.
-     * @param[in] barrelMechanismId The ref system barrel ID to check if a projectile has been fired.
+     * @param[in] barrelMechanismId The ref system barrel ID to check if a projectile has been
+     * fired.
      */
     RefSystemProjectileLaunchedGovernor(
         tap::communication::serial::RefSerial &refSerial,
@@ -48,23 +50,31 @@ public:
 
     bool isReady() final
     {
-        lastTime = getNewTime();
+        lastProjectileLaunchTime = getRecentProjectileLaunchTime();
         return true;
     }
 
-    bool isFinished() final { return getNewTime() != lastTime; }
+    bool isFinished() final
+    {
+        return lastProjectileLaunchTime.has_value() &&
+               getRecentProjectileLaunchTime().value() != lastProjectileLaunchTime.value();
+    }
 
 private:
     tap::communication::serial::RefSerial &refSerial;
     tap::communication::serial::RefSerialData::Rx::MechanismID barrelMechanismId;
-    uint32_t lastTime = 0;
+    std::optional<uint32_t> lastProjectileLaunchTime = 0;
 
-    inline uint32_t getNewTime()
+    inline std::optional<uint32_t> getRecentProjectileLaunchTime()
     {
-        if (refSerial.getRobotData().turret.launchMechanismID != barrelMechanismId ||
-            refSerial.getRefSerialReceivingData())
+        if (!refSerial.getRefSerialReceivingData())
         {
-            return lastTime;
+            return std::nullopt;
+        }
+
+        if (refSerial.getRobotData().turret.launchMechanismID != barrelMechanismId)
+        {
+            return lastProjectileLaunchTime;
         }
 
         return refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
