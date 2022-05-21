@@ -153,6 +153,16 @@ public:
      */
     float getCurrentValueIntegral() const override;
 
+    /**
+     * Sets the desired position of the agitator.
+     * @note This is not used in any of the Subsystem's controller computation. It is purely for
+     * commands to provide a means of passing absolute position information between themselves.
+     */
+    void setDesiredIntegralSetpoint(float integralValue);
+
+    /// @return The desired position as set by `setDesiredIntegralSetpoint`
+    inline float getDesiredIntegralSetpoint() const { return positionSetpoint; }
+
 private:
     VelocityAgitatorSubsystemConfig config;
 
@@ -180,6 +190,9 @@ private:
 
     /// The velocity setpoint in radians / second
     float velocitySetpoint = 0;
+
+    /// The position setpoint in radians
+    float positionSetpoint = 0;
 
     /// Get the raw angle of the shaft from the motor, in radians
     float getUncalibratedAgitatorAngle() const;

@@ -90,6 +90,8 @@ bool VelocityAgitatorSubsystem::calibrateHere()
     }
     agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
     agitatorIsCalibrated = true;
+    velocitySetpoint = 0;
+    positionSetpoint = 0;
     clearJam();
     return true;
 }
@@ -134,4 +136,13 @@ void VelocityAgitatorSubsystem::setSetpoint(float velocity)
         velocitySetpoint = velocity;
     }
 }
+
+void VelocityAgitatorSubsystem::setDesiredIntegralSetpoint(float integralValue)
+{
+    if (agitatorMotor.isMotorOnline())
+    {
+        positionSetpoint = integralValue;
+    }
+}
+
 }  // namespace aruwsrc::agitator
