@@ -74,10 +74,12 @@ public:
                    : (pastProjectileVelocitySpeedSummed / ballSpeedAveragingTracker.getSize());
     }
 
+    float launchSpeed = 0;
     void refresh() override
     {
         FrictionWheelSubsystem::refresh();
         updatePredictedLaunchSpeed();
+        launchSpeed = getPredictedLaunchSpeed();
     }
 
 private:

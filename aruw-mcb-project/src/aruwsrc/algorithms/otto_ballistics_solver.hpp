@@ -135,6 +135,7 @@ private:
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
     const uint8_t turretID;
+    float ballisticsLaunchSpeed = 0;
 };
 }  // namespace aruwsrc::algorithms
 

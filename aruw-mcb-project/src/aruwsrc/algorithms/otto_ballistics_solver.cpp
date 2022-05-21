@@ -52,6 +52,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 float projectedHeightTraveled = 0;
 float targetZTraveled = 0;
 float projectionError = 0;
+// bool sameSign = false;
 bool OttoBallisticsSolver::computeTurretAimAngles(
     float *pitchAngle,
     float *yawAngle,
@@ -71,6 +72,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
     const float launchSpeed = compareFloatClose(frictionWheels.getPredictedLaunchSpeed(), 0, 1E-5)
                                   ? defaultLaunchSpeed
                                   : frictionWheels.getPredictedLaunchSpeed();
+    ballisticsLaunchSpeed = launchSpeed;
 
     const Vector2f robotPosition = odometryInterface.getCurrentLocation2D().getPosition();
 
@@ -103,6 +105,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
     projectedHeightTraveled = abs(*timeOfFlight * launchSpeed * sinf(*pitchAngle) + 9.81 * 0.5 * (*timeOfFlight)*(*timeOfFlight));
     targetZTraveled = abs(targetState.position.getZ());
     projectionError = projectedHeightTraveled - targetZTraveled;
+    // sameSign = (projectedHeightTraveled/(*timeOfFlight * launchSpeed * sinf(*pitchAngle) + 9.81 * 0.5 * (*timeOfFlight)*(*timeOfFlight)))*((targetState.position.getZ())/targetZTraveled) >= 0;
     return solved;
 }
 }  // namespace aruwsrc::algorithms
