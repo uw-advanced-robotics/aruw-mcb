@@ -28,22 +28,18 @@
 namespace aruwsrc::control::governor
 {
 /**
- * Governor that allows one to gate a command from running when a turret limit switch based on the
- * depressed state of a limit switch.
+ * Governor that allows one to gate a command from running when the actual, average friction wheel
+ * speed isn't above a certain threshold.
  *
- * The governor has two possible behaviors:
- * 1. It will allow a command to be run when the limit switch is depressed.
- * 2. The opposite, it will allow the command to be run when the limit switch is released.
+ * The gated command is in regards to the agitator.
  *
- * This is specified by the LimitSwitchGovernorBehavior.
  */
 class FrictionWheelsOnGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
     /**
-     * @param[in]
-     * @param[in] behavior The behavior of the governor, whether or not to allow Commands to run
-     * when the limit switch is depressed or released.
+     * @param[in] frictionWheel Reference to the friction wheel subsystem being used in the
+     * governor's behavior.
      */
     FrictionWheelsOnGovernor(aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel)
         : frictionWheel(frictionWheel)
@@ -63,4 +59,4 @@ private:
 };
 }  // namespace aruwsrc::control::governor
 
-#endif  // LIMIT_SWITCH_DEPRESSED_GOVERNOR_HPP_
+#endif  // FRICTION_WHEELS_ON_GOVERNOR_HPP_
