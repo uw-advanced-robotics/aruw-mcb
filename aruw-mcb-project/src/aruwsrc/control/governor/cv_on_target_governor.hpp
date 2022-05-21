@@ -63,10 +63,14 @@ public:
     bool isReady() final
     {
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
-        bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
         dbgIsRunning = isCvRunning;
+        if (!isCvRunning) {
+            return true;
+        }
+
+        bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
         dbgIsOnTarget = isOnTarget;
-        if (!isCvRunning || !isOnTarget) {
+        if (!isOnTarget) {
             return false;
         }
 
