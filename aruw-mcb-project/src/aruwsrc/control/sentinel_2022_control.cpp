@@ -130,12 +130,15 @@ public:
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
           frictionWheelsOnGovernor(frictionWheels);
-          rotateAndUnjamAgitatorWhenFrictionWheelsOn({&agitator}, rotateAndUnjamAgitator, {&heatLimitGovernor});
           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
+          rotateAndUnjamAgitatorWhenFrictionWheelsOn(
+              {&agitator}, 
+              rotateAndUnjamAgitator, 
+              {&heatLimitGovernor});
           rotateAndUnjamAgitatorWithHeatLimiting(
               {&agitator},
-              rotateAndUnjamAgitatorWhenFrictionWheelsOn,
-              {&heatLimitGovernor}),
+              rotateAndUnjamAgitator,
+              {&heatLimitGovernor, &frictionWheelsOnGovernor}),
           spinFrictionWheels(
               &drivers,
               &frictionWheels,
@@ -181,11 +184,10 @@ public:
 
     // rotates agitator if friction wheels are spinning fast
     FrictionWheelsOnGovernor frictionWheelsOnGovernor;
-    GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn;
 
     // rotates agitator with heat limiting applied
     HeatLimitGovernor heatLimitGovernor;
-    GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting;
+    GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting;
 
     // friction wheel commands
     FrictionWheelSpinRefLimitedCommand spinFrictionWheels;

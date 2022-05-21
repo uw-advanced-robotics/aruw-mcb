@@ -286,25 +286,21 @@ MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATO
 GovernorLimitedCommand<1> launchKickerWhenBallReady(
     {&kickerAgitator},
     launchKicker,
-    {&limitSwitchDepressedGovernor});
+    {&limitSwitchDepressedGovernor, &frictionWheelsOnGovernor});
 
 // rotates agitator if friction wheels are spinning fast
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(
     frictionWheels);
-GovernorLimitedCommand<1> launchKickerWhenBallReadyWhenFrictionWheelsOn(
-    {&agitator},
-    launchKickerWhenBallReady,
-    {&heatLimitGovernor});
 
 // rotates kickerAgitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
     constants::HEAT_LIMIT_BUFFER);
-GovernorLimitedCommand<1> launchKickerHeatLimited(
+GovernorLimitedCommand<2> launchKickerHeatLimited(
     {&kickerAgitator},
     launchKickerWhenBallReadyWhenFrictionWheelsOn,
-    {&heatLimitGovernor});
+    {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);

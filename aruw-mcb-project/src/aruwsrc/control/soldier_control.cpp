@@ -229,7 +229,7 @@ FrictionWheelsOnGovernor frictionWheelsOnGovernor(
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&heatLimitGovernor});
+    {&frictionWheelsOnGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(

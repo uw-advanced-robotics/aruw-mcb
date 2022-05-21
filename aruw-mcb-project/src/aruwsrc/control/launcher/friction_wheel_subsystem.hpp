@@ -72,7 +72,7 @@ public:
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
     /**
-     * @return The estimated launch speed if a ball were to be launched now in RPM.
+     * @return The average measured friction wheel speed of the launcher in RPM.
      */
     float getCurrentFrictionWheelSpeed() const;
 

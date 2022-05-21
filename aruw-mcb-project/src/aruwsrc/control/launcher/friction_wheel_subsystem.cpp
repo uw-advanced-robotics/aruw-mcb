@@ -74,7 +74,7 @@ float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
 {
     float leftWheelSpeed = leftWheel.getShaftRPM();
     float rightWheelSpeed = rightWheel.getShaftRPM();
-    return (leftWheelSpeed + rightWheelSpeed) / 2;
+    return (leftWheelSpeed + rightWheelSpeed) / 2.0f;
 }
 
 void FrictionWheelSubsystem::refresh()
