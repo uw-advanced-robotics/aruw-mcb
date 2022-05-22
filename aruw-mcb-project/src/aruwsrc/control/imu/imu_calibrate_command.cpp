@@ -36,15 +36,14 @@ ImuCalibrateCommand::ImuCalibrateCommand(
       turretsAndControllers(turretsAndControllers),
       chassis(chassis)
 {
-    for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
-         turretsAndControllers)
+    for (auto &config : turretsAndControllers)
     {
-        assert(turretMCBCanComm != nullptr);
-        assert(turret != nullptr);
-        assert(yawController != nullptr);
-        assert(pitchController != nullptr);
+        assert(config.turretMCBCanComm != nullptr);
+        assert(config.turret != nullptr);
+        assert(config.yawController != nullptr);
+        assert(config.pitchController != nullptr);
 
-        addSubsystemRequirement(turret);
+        addSubsystemRequirement(config.turret);
     }
 
     addSubsystemRequirement(chassis);
@@ -61,13 +60,14 @@ void ImuCalibrateCommand::initialize()
         chassis->setDesiredOutput(0, 0, 0);
     }
 
-    for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
-         turretsAndControllers)
+    for (auto &config : turretsAndControllers)
     {
-        turret->yawMotor.setChassisFrameSetpoint(turret->yawMotor.getConfig().startAngle);
-        turret->pitchMotor.setChassisFrameSetpoint(turret->pitchMotor.getConfig().startAngle);
-        pitchController->initialize();
-        yawController->initialize();
+        config.turret->yawMotor.setChassisFrameSetpoint(
+            config.turret->yawMotor.getConfig().startAngle);
+        config.turret->pitchMotor.setChassisFrameSetpoint(
+            config.turret->pitchMotor.getConfig().startAngle);
+        config.pitchController->initialize();
+        config.yawController->initialize();
     }
 
     calibrationLongTimeout.stop();
@@ -110,11 +110,10 @@ void ImuCalibrateCommand::execute()
             bool turretMCBsReady = true;
             bool turretsOnline = true;
 
-            for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
-                 turretsAndControllers)
+            for (auto &config : turretsAndControllers)
             {
-                turretMCBsReady &= turretMCBCanComm->isConnected();
-                turretsOnline &= turret->isOnline();
+                turretMCBsReady &= config.turretMCBCanComm->isConnected();
+                turretsOnline &= config.turret->isOnline();
             }
 
             if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=
@@ -130,10 +129,10 @@ void ImuCalibrateCommand::execute()
         case CalibrationState::LOCKING_TURRET:
         {
             bool turretsNotMoving = true;
-            for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
-                 turretsAndControllers)
+            for (auto &config : turretsAndControllers)
             {
-                turretsNotMoving &= turretReachedCenterAndNotMoving(turret, !turretImuOnPitch);
+                turretsNotMoving &=
+                    turretReachedCenterAndNotMoving(config.turret, !turretImuOnPitch);
             }
 
             if (calibrationTimer.isExpired() && turretsNotMoving)
@@ -141,11 +140,9 @@ void ImuCalibrateCommand::execute()
                 // enter calibration phase
                 calibrationTimer.stop();
 
-                for (auto
-                     [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
-                     turretsAndControllers)
+                for (auto &config : turretsAndControllers)
                 {
-                    turretMCBCanComm->sendImuCalibrationRequest();
+                    config.turretMCBCanComm->sendImuCalibrationRequest();
                 }
 
                 drivers->mpu6500.requestCalibration();
@@ -178,27 +175,26 @@ void ImuCalibrateCommand::execute()
     // don't run pitch controller when turret IMU not on pitch (as there is no need)
     if (turretImuOnPitch)
     {
-        for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
-             turretsAndControllers)
+        for (auto &config : turretsAndControllers)
         {
-            pitchController->runController(dt, turret->pitchMotor.getChassisFrameSetpoint());
+            config.pitchController->runController(
+                dt,
+                config.turret->pitchMotor.getChassisFrameSetpoint());
         }
     }
 
-    for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
-         turretsAndControllers)
+    for (auto &config : turretsAndControllers)
     {
-        yawController->runController(dt, turret->yawMotor.getChassisFrameSetpoint());
+        config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
     }
 }
 
 void ImuCalibrateCommand::end(bool)
 {
-    for (auto [turretMCBCanComm, turret, yawController, pitchController, turretImuOnPitch] :
-         turretsAndControllers)
+    for (auto &config : turretsAndControllers)
     {
-        turret->yawMotor.setMotorOutput(0);
-        turret->pitchMotor.setMotorOutput(0);
+        config.turret->yawMotor.setMotorOutput(0);
+        config.turret->pitchMotor.setMotorOutput(0);
     }
 }
 
