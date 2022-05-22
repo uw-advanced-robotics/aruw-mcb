@@ -143,7 +143,7 @@ HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     constants::HEAT_LIMIT_BUFFER);
-GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
     {&heatLimitGovernor, &frictionWheelsOnGovernor});

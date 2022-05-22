@@ -31,8 +31,7 @@ namespace aruwsrc::control::governor
  * Governor that allows one to gate a command from running when the actual, average friction wheel
  * speed isn't above a certain threshold.
  *
- * The gated command is in regards to the agitator.
- *
+ * Useful for disallowing the agitator from rotating while friction wheels are not on.
  */
 class FrictionWheelsOnGovernor : public tap::control::governor::CommandGovernorInterface
 {
