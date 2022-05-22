@@ -28,6 +28,11 @@ namespace aruwsrc::can
 class TurretMCBCanComm;
 }
 
+namespace aruwsrc::can
+{
+class TurretMCBCanComm;
+}
+
 namespace aruwsrc::control::turret
 {
 /**

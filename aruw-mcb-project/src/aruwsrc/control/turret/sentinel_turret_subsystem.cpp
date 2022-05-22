@@ -34,7 +34,9 @@ namespace aruwsrc::control::turret
         pitchMotor,
         yawMotor,
         pitchMotorConfig, 
-        yawMotorConfig),turretID(turretID){
+        yawMotorConfig,
+        turretMCB),
+        turretID(turretID){
 
         }
 
@@ -67,7 +69,11 @@ modm::Vector3f SentinelTurretSubsystem::getTurretOffset() const
 }
 
 float SentinelTurretSubsystem::getPitchOffset() const
-{
+{   
+    #ifdef TARGET_SENTINEL_2022
     return control::turret::PITCH_YAW_OFFSET;
+    #else
+    return 0;
+    #endif
 }
 }  // namespace aruwsrc::control::turret
