@@ -119,7 +119,8 @@ SentinelTurretSubsystem turretSubsystem(
     &yawMotor,
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
-    nullptr);
+    nullptr,
+    0);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
