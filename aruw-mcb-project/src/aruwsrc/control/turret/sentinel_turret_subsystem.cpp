@@ -28,6 +28,7 @@ namespace aruwsrc::control::turret
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig,
+        const aruwsrc::can::TurretMCBCanComm* turretMCB,
         uint8_t turretID
     ):RobotTurretSubsystem(drivers,
         pitchMotor,

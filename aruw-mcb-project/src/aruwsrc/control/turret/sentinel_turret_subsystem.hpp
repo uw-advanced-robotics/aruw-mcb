@@ -36,6 +36,7 @@ class SentinelTurretSubsystem final : public RobotTurretSubsystem
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig,
+        const aruwsrc::can::TurretMCBCanComm* turretMCB,
         uint8_t turretID);
     float getWorldYaw() const override;
     float getWorldPitch() const override;
