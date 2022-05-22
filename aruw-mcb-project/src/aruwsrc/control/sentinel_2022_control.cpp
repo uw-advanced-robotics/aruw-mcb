@@ -161,7 +161,7 @@ public:
           turretManual(
               &drivers,
               &turretSubsystem,
-              &chassisFrameYawTurretController,
+              &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
               USER_YAW_INPUT_SCALAR,
               USER_PITCH_INPUT_SCALAR,
@@ -169,7 +169,7 @@ public:
           turretCVCommand(
               &drivers,
               &turretSubsystem,
-              &chassisFrameYawTurretController,
+              &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
               agitator,
               &rotateAndUnjamAgitatorWithHeatLimiting,
