@@ -21,6 +21,7 @@
 #define TURRET_ORIENTATION_INTERFACE_HPP_
 
 #include <stdint.h>
+
 #include "modm/math/geometry/vector3.hpp"
 
 namespace aruwsrc::can

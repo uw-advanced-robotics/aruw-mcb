@@ -19,15 +19,15 @@
 
 #include "otto_ballistics_solver.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/ballistics.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
@@ -49,7 +49,6 @@ OttoBallisticsSolver::OttoBallisticsSolver(
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretID(turretID)
 {
-    
 }
 
 bool OttoBallisticsSolver::computeTurretAimAngles(
@@ -73,21 +72,23 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
     // Rotates current turret with chassis yaw, just in case.
     modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
     rotateVector(&turretOffset, {.yaw = odometryInterface.getYaw()});
-    modm::Vector3f turretPosition = modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
-
+    modm::Vector3f turretPosition =
+        modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
 
     const Vector2f chassisVelocity = odometryInterface.getCurrentVelocity2D();
 
     // target state, frame whose axis is at the turret center and z is up
     // assume acceleration of the chassis is 0 since we don't measure it
     ballistics::MeasuredKinematicState targetState = {
-        .position = {aimData.xPos - turretPosition.x, aimData.yPos - turretPosition.y, aimData.zPos - turretPosition.z},
+        .position =
+            {aimData.xPos - turretPosition.x,
+             aimData.yPos - turretPosition.y,
+             aimData.zPos - turretPosition.z},
         .velocity =
             {aimData.xVel - chassisVelocity.x, aimData.yVel - chassisVelocity.y, aimData.zVel},
         .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
                                                                      // acceleration from IMU
     };
-
 
     uint32_t projectforwardtimedt = tap::arch::clock::getTimeMicroseconds() - aimData.timestamp;
 

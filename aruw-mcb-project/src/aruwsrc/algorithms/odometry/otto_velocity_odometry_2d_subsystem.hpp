@@ -90,10 +90,7 @@ public:
         return odometryTracker.getCurrentVelocity2D();
     }
 
-    float getYaw() const override final
-    {
-        return odometryTracker.getYaw();
-    }
+    float getYaw() const override final { return odometryTracker.getYaw(); }
 
 private:
     tap::algorithms::odometry::Odometry2DTracker odometryTracker;
