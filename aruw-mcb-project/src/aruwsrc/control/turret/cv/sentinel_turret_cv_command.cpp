@@ -32,6 +32,7 @@
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
+using namespace aruwsrc::algorithms;
 
 namespace aruwsrc::control::turret::cv
 {
@@ -56,7 +57,6 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
       ballisticsSolver(
           *drivers,
           odometryInterface,
-          *turretSubsystem,
           frictionWheels,
           defaultLaunchSpeed,
           turretID),
@@ -98,20 +98,16 @@ void SentinelTurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    float targetPitch, targetYaw, targetDistance, timeOfFlight;
-    bool ballisticsSolutionAvailable = ballisticsSolver.computeTurretAimAngles(
-        &targetPitch,
-        &targetYaw,
-        &targetDistance,
-        &timeOfFlight);
+    OttoBallisticsSolver::BallisticsSolution ballisticsSolution;
+    ballisticsSolver.computeTurretAimAngles(ballisticsSolution);
 
-    if (ballisticsSolutionAvailable)
+    if (ballisticsSolution.validSolutionFound)
     {
         exitScanMode();
 
         // Target available
-        pitchSetpoint = targetPitch;
-        yawSetpoint = targetYaw;
+        pitchSetpoint = ballisticsSolution.pitchAngle;
+        yawSetpoint = ballisticsSolution.yawAngle;
 
         // the setpoint returned by the ballistics solver is between [0, 2*PI)
         // the desired setpoint is not required to be between [0, 2*PI)
@@ -132,7 +128,7 @@ void SentinelTurretCVCommand::execute()
         if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
                 turretSubsystem->yawMotor.getValidChassisMeasurementError(),
                 turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
-                targetDistance))
+                ballisticsSolution.distance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
             if (!drivers->commandScheduler.isCommandScheduled(launchingCommand))

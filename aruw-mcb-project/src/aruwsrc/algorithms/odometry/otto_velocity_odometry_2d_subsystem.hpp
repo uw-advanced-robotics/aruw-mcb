@@ -63,8 +63,7 @@ namespace aruwsrc::algorithms::odometry
  * @see OttoChassisOrientationGetter
  * @see OttoChassisVelocityGetter
  */
-class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
-                                              public tap::algorithms::odometry::Odometry2DInterface
+class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem, public tap::algorithms::odometry::Odometry2DTracker
 {
 public:
     /**
@@ -80,18 +79,7 @@ public:
 
     void refresh() override;
 
-    modm::Location2D<float> getCurrentLocation2D() const override final
-    {
-        return odometryTracker.getCurrentLocation2D();
-    }
-
-    modm::Vector2f getCurrentVelocity2D() const override final
-    {
-        return odometryTracker.getCurrentVelocity2D();
-    }
-
 private:
-    tap::algorithms::odometry::Odometry2DTracker odometryTracker;
     OttoChassisWorldYawObserver orientationObserver;
     OttoChassisVelocityDisplacement2DObserver displacementObserver;
 };
