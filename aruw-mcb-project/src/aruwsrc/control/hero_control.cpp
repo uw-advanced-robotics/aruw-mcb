@@ -250,6 +250,9 @@ LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(
     drivers()->turretMCBCanComm,
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
+// rotates agitator if friction wheels are spinning fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+
 namespace waterwheel
 {
 MoveIntegralCommand rotateWaterwheel(
@@ -266,25 +269,22 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     rotateWaterwheel,
     unjamWaterwheel);
 
-GovernorLimitedCommand<1> feedWaterwheelWhenBallNotReady(
+GovernorLimitedCommand<2> feedWaterwheelWhenBallNotReady(
     {&waterwheelAgitator},
     rotateAndUnjamWaterwheel,
-    {&limitSwitchNotDepressedGovernor});
+    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
 }  // namespace waterwheel
 
 namespace kicker
 {
 MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 
-GovernorLimitedCommand<1> feedKickerWhenBallNotReady(
+GovernorLimitedCommand<2> feedKickerWhenBallNotReady(
     {&kickerAgitator},
     loadKicker,
-    {&limitSwitchNotDepressedGovernor});
+    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
 
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
-
-// rotates agitator if friction wheels are spinning fast
-FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
 GovernorLimitedCommand<2> launchKickerWhenBallReady(
     {&kickerAgitator},

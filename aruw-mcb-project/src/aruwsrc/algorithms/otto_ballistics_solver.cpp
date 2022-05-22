@@ -52,7 +52,8 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 bool OttoBallisticsSolver::computeTurretAimAngles(
     float *pitchAngle,
     float *yawAngle,
-    float *distance)
+    float *distance,
+    float *timeOfFlight)
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
 
@@ -93,6 +94,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
         launchSpeed,
         3,
         pitchAngle,
-        yawAngle);
+        yawAngle,
+        timeOfFlight);
 }
 }  // namespace aruwsrc::algorithms
