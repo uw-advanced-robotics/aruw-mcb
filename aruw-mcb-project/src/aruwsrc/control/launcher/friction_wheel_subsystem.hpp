@@ -85,6 +85,18 @@ public:
     const char *getName() override { return "Friction wheels"; }
 
 protected:
+    /// The maximum launch speed that the user can request. The launch speed is limited between [0,
+    /// MAX_DESIRED_LAUNCH_SPEED].
+    static constexpr float MAX_DESIRED_LAUNCH_SPEED =
+        LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+            [MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]
+                .first;
+
+    /// The maximum measured launch speed if the max desired launch speed is requested. This is a
+    /// large overestimate on purpose--it is useful for providing an upper bound on the possible
+    /// measured launch speed in case the measured launch speed is garbage.
+    static constexpr float MAX_MEASURED_LAUNCH_SPEED = MAX_DESIRED_LAUNCH_SPEED + 10.0f;
+
     aruwsrc::Drivers *drivers;
 
 private:
@@ -97,8 +109,6 @@ private:
     float desiredLaunchSpeed;
 
     uint32_t prevTime = 0;
-
-    float predictedLaunchSpeed = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
