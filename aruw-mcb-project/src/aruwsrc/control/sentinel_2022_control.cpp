@@ -126,7 +126,8 @@ public:
               &pitchMotor,
               &yawMotor,
               config.pitchMotorConfig,
-              config.yawMotorConfig),
+              config.yawMotorConfig,
+              config.turretID),
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
@@ -264,8 +265,7 @@ HoldRepeatCommandMapping rightSwitchUp(
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&sentinelDriveManual1, &turretZero.turretManual, &turretOne.turretManual},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-    true);
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&sentinelDriveManual2},
