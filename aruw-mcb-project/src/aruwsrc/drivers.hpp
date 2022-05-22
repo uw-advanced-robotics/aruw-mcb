@@ -50,7 +50,7 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          visionCoprocessor(this),
+          visionCoprocessor(),
           oledDisplay(this),
           turretMCBCanComm(this),
           mpu6500TerminalSerialHandler(this, &this->mpu6500)

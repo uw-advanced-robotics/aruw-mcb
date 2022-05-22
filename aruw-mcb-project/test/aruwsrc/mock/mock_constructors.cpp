@@ -205,6 +205,7 @@ TurretCVCommandMock::TurretCVCommandMock(
     aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
     uint8_t turretID)
@@ -213,6 +214,7 @@ TurretCVCommandMock::TurretCVCommandMock(
           turretSubsystem,
           yawController,
           pitchController,
+          ballisticsSolver,
           userPitchInputScalar,
           userYawInputScalar,
           turretID)

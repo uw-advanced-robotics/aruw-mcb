@@ -33,7 +33,7 @@ using namespace aruwsrc::control::auto_aim;
 class AutoAimLaunchTimerTest : public Test
 {
 protected:
-    AutoAimLaunchTimerTest();
+    AutoAimLaunchTimerTest() {};
 
     void SetUp() override {}
 
