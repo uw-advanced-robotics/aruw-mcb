@@ -78,6 +78,11 @@ public:
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
     /**
+     * @return The average measured friction wheel speed of the launcher in RPM.
+     */
+    float getCurrentFrictionWheelSpeed() const;
+
+    /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
     void refresh() override;

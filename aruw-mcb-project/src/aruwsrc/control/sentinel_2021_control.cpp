@@ -38,6 +38,7 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
@@ -133,15 +134,18 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     rotateAgitator,
     unjamAgitator);
 
+// rotates agitator if friction wheels are spinning fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     constants::HEAT_LIMIT_BUFFER);
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&heatLimitGovernor});
+    {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
 // Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);

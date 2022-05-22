@@ -51,6 +51,7 @@
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "governor/cv_on_target_governor.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "governor/limit_switch_depressed_governor.hpp"
 #include "governor/yellow_carded_governor.hpp"
@@ -273,6 +274,9 @@ LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(
     getTurretMCBCanComm(),
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
+// rotates agitator if friction wheels are spinning fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+
 namespace waterwheel
 {
 MoveIntegralCommand rotateWaterwheel(
@@ -289,37 +293,37 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     rotateWaterwheel,
     unjamWaterwheel);
 
-GovernorLimitedCommand<1> feedWaterwheelWhenBallNotReady(
+GovernorLimitedCommand<2> feedWaterwheelWhenBallNotReady(
     {&waterwheelAgitator},
     rotateAndUnjamWaterwheel,
-    {&limitSwitchNotDepressedGovernor});
+    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
 }  // namespace waterwheel
 
 namespace kicker
 {
 MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 
-GovernorLimitedCommand<1> feedKickerWhenBallNotReady(
+GovernorLimitedCommand<2> feedKickerWhenBallNotReady(
     {&kickerAgitator},
     loadKicker,
-    {&limitSwitchNotDepressedGovernor});
+    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
 
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
-GovernorLimitedCommand<1> launchKickerWhenBallReady(
+GovernorLimitedCommand<2> launchKickerWhenBallReady(
     {&kickerAgitator},
     launchKicker,
-    {&limitSwitchDepressedGovernor});
+    {&limitSwitchDepressedGovernor, &frictionWheelsOnGovernor});
 
 // rotates kickerAgitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
     constants::HEAT_LIMIT_BUFFER);
-GovernorLimitedCommand<1> launchKickerHeatLimited(
+GovernorLimitedCommand<2> launchKickerHeatLimited(
     {&kickerAgitator},
     launchKickerWhenBallReady,
-    {&heatLimitGovernor});
+    {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);

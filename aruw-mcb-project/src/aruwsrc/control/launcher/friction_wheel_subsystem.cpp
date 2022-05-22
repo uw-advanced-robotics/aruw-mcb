@@ -75,6 +75,13 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
     }
 }
 
+float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
+{
+    float leftWheelSpeed = leftWheel.getShaftRPM();
+    float rightWheelSpeed = rightWheel.getShaftRPM();
+    return (leftWheelSpeed + rightWheelSpeed) / 2.0f;
+}
+
 void FrictionWheelSubsystem::refresh()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
