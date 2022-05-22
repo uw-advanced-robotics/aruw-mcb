@@ -118,8 +118,8 @@ void SentinelTurretCVCommand::execute()
          * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
          * that is closest to the unwrapped measured angle.
          */
-        turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
-        turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
+        yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
+        pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
