@@ -232,7 +232,7 @@ TurretCVCommandMock::TurretCVCommandMock(
 TurretCVCommandMock::~TurretCVCommandMock() {}
 
 TurretControllerInterfaceMock::TurretControllerInterfaceMock(
-    aruwsrc::control::turret::TurretMotor *turretMotor)
+    aruwsrc::control::turret::TurretMotor &turretMotor)
     : aruwsrc::control::turret::algorithms::TurretControllerInterface(turretMotor)
 {
 }

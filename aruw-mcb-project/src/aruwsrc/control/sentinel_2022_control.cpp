@@ -147,13 +147,13 @@ public:
               true,
               config.turretBarrelMechanismId),
           stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
-          chassisFramePitchTurretController(&turretSubsystem.pitchMotor, config.pitchPidConfig),
-          chassisFrameYawTurretController(&turretSubsystem.yawMotor, config.yawPidConfig),
+          chassisFramePitchTurretController(turretSubsystem.pitchMotor, config.pitchPidConfig),
+          chassisFrameYawTurretController(turretSubsystem.yawMotor, config.yawPidConfig),
           worldFrameYawTurretImuPosPid(config.yawPosPidConfig),
           worldFrameYawTurretImuVelPid(config.yawVelPidConfig),
           worldFrameYawTurretImuController(
               config.turretMCBCanComm,
-              &turretSubsystem.yawMotor,
+              turretSubsystem.yawMotor,
               worldFrameYawTurretImuPosPid,
               worldFrameYawTurretImuVelPid),
           turretManual(

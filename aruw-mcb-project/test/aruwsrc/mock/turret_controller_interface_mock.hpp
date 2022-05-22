@@ -33,7 +33,7 @@ public:
     /**
      * @param[in] TurretMotor A `TurretMotor` object accessible for children objects to use.
      */
-    TurretControllerInterfaceMock(aruwsrc::control::turret::TurretMotor *turretMotor);
+    TurretControllerInterfaceMock(aruwsrc::control::turret::TurretMotor &turretMotor);
     virtual ~TurretControllerInterfaceMock();
 
     MOCK_METHOD(void, initialize, (), (override));

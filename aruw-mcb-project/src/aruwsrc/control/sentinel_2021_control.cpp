@@ -163,11 +163,11 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem.pitchMotor,
+    turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem.yawMotor,
+    turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands

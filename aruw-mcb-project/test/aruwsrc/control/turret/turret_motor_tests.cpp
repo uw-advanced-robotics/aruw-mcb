@@ -468,7 +468,7 @@ class UnwrapTargetAngleTest
       public WithParamInterface<std::tuple<UnwrapTargetAngleTestValues, TurretMotorConfig>>
 {
 protected:
-    UnwrapTargetAngleTest() : tm(&motor, std::get<1>(GetParam())), turretController(&tm) {}
+    UnwrapTargetAngleTest() : tm(&motor, std::get<1>(GetParam())), turretController(tm) {}
 
     void SetUp() override
     {

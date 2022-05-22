@@ -182,12 +182,13 @@ private:
 
     struct ImuData
     {
-        float yaw;
-        int16_t rawYawVelocity;
-        float pitch;
-        int16_t rawPitchVelocity;
-        uint32_t turretDataTimestamp;
-        uint8_t seq;
+        float yaw;                     ///< Normalized yaw value, between [-pi, pi]
+        int16_t rawYawVelocity;        ///< Raw yaw velocity, in counts per second
+        float pitch;                   ///< Normalized pitch value, between [-pi, pi]
+        int16_t rawPitchVelocity;      ///< Raw pitch velocity, in counts per second
+        uint32_t turretDataTimestamp;  ///< Timestamp that the IMU data was measured on the
+                                       ///< turret MCB
+        uint8_t seq;                   ///< Sequence number for synchronizing pitch/yaw messages
     };
 
     const tap::can::CanBus canBus;

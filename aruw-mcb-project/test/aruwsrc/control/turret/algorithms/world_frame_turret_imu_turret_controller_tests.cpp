@@ -111,7 +111,7 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runYawPidController_world_frame_
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -147,7 +147,7 @@ TEST_F(
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -165,7 +165,7 @@ TEST_F(
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -188,7 +188,7 @@ TEST_F(
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -211,7 +211,7 @@ TEST_F(
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -235,7 +235,7 @@ TEST_F(
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -258,7 +258,7 @@ TEST_F(
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -280,7 +280,7 @@ TEST_F(
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -319,7 +319,7 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runPitchPidController_world_fram
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -355,7 +355,7 @@ TEST_F(
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -373,7 +373,7 @@ TEST_F(
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -396,7 +396,7 @@ TEST_F(
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -419,7 +419,7 @@ TEST_F(
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -443,7 +443,7 @@ TEST_F(
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -466,7 +466,7 @@ TEST_F(
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 
@@ -488,7 +488,7 @@ TEST_F(
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
         drivers.turretMCBCanCommBus1,
-        &turretMotor,
+        turretMotor,
         posPid,
         velPid);
 

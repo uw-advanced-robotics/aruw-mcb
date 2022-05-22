@@ -59,7 +59,7 @@ public:
      */
     WorldFrameYawTurretImuCascadePidTurretController(
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
-        TurretMotor *yawMotor,
+        TurretMotor &yawMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid);
 
@@ -71,10 +71,14 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    /// Sets the world frame yaw angle setpoint, refer to top level documentation for more details.
     void setSetpoint(float desiredSetpoint) final;
 
+    /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
     float getSetpoint() const final;
 
+    /// @return World frame yaw angle measurement, refer to top level documentation for more
+    /// details.
     float getMeasurement() const final;
 
     bool isOnline() const final;
@@ -116,7 +120,7 @@ public:
      */
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
-        TurretMotor *pitchMotor,
+        TurretMotor &pitchMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid);
 
@@ -128,10 +132,14 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    /// Sets the world frame pitch angle setpoint, refer to top level documentation for more
+    /// details.
     void setSetpoint(float desiredSetpoint) final;
 
+    /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
     float getSetpoint() const final;
 
+    /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
     float getMeasurement() const final;
 
     bool isOnline() const final;
