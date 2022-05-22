@@ -21,6 +21,7 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -38,6 +39,7 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "governor/cv_has_target_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -48,8 +50,10 @@
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
-#include "turret/cv/sentinel_turret_cv_command.hpp"
+#include "turret/cv/turret_cv_command.hpp"
+#include "turret/cv/turret_scan_command.hpp"
 #include "turret/sentinel_turret_subsystem.hpp"
+#include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
@@ -185,19 +189,38 @@ user::TurretUserControlCommand turretManual(
     USER_PITCH_INPUT_SCALAR,
     0);
 
-cv::SentinelTurretCVCommand turretCVCommand(
+cv::TurretCVCommand turretCVCommand(
     drivers(),
     &turretSubsystem,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
-    agitator,
-    &rotateAndUnjamAgitatorWithHeatLimiting,
     odometrySubsystem,
     frictionWheels,
-    14.5f,
-    0);
-void selectNewRobotMessageHandler() { turretCVCommand.requestNewTarget(); }
-void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
+    29.5f);
+
+cv::TurretScanCommand turretScanCommand(
+    turretSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController,
+    TURRET_SCAN_CONFIG);
+
+CvHasTargetGovernor cvHasTargetGovernor(drivers()->visionCoprocessor, 0);
+tap::control::governor::GovernorWithFallbackCommand<1> turretCVWithScanFallback(
+    {&turretSubsystem},
+    turretCVCommand,
+    turretScanCommand,
+    {&cvHasTargetGovernor});
+
+user::TurretQuickTurnCommand turretUturnCommand(&turretSubsystem, M_PI);
+
+void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
+
+void targetNewQuadrantMessageHandler()
+{
+    drivers()->commandScheduler.addCommand(&turretUturnCommand);
+}
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
@@ -250,7 +273,7 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
 {
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    turretSubsystem.setDefaultCommand(&turretCVCommand);
+    turretSubsystem.setDefaultCommand(&turretCVWithScanFallback);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretSubsystem, 0);
 }

@@ -23,6 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "../cv/turret_scan_command.hpp"
 #include "../turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -56,6 +57,23 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .minAngle = modm::toRadian(-10),
     .maxAngle = modm::toRadian(75),
     .limitMotorAngles = true,
+};
+
+static constexpr cv::TurretScanCommand::Config TURRET_SCAN_CONFIG = {
+    .scanLowPassAlpha = 0.007f,
+    .aimLostNumCounts = 500,
+    .pitchScanConfig =
+        {
+            .lowerBound = PITCH_MOTOR_CONFIG.minAngle,
+            .upperBound = PITCH_MOTOR_CONFIG.maxAngle,
+            .delta = modm::toRadian(0.2f),
+        },
+    .yawScanConfig =
+        {
+            .lowerBound = YAW_MOTOR_CONFIG.minAngle + modm::toRadian(1),
+            .upperBound = YAW_MOTOR_CONFIG.maxAngle - modm::toRadian(1),
+            .delta = modm::toRadian(0.2f),
+        },
 };
 
 static constexpr float TURRET_CG_X = 0;

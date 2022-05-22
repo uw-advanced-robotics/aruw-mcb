@@ -80,8 +80,10 @@ void TurretScanCommand::execute()
         float pitchScanValue =
             pitchController.convertChassisAngleToControllerFrame(pitchScanner.scan());
 
-        yawScanValue = lowPassFilter(yawScanValue, yawScanValue, config.scanLowPassAlpha);
-        pitchScanValue = lowPassFilter(pitchScanValue, pitchScanValue, config.scanLowPassAlpha);
+        yawScanValue =
+            lowPassFilter(yawController.getSetpoint(), yawScanValue, config.scanLowPassAlpha);
+        pitchScanValue =
+            lowPassFilter(pitchController.getSetpoint(), pitchScanValue, config.scanLowPassAlpha);
 
         yawController.runController(dt, yawScanValue);
         pitchController.runController(dt, pitchScanValue);
