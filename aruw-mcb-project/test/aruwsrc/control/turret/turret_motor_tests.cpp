@@ -481,7 +481,7 @@ protected:
     void runUnwrapTargetAngleTest()
     {
         float unwrappedTargetAngle = std::get<0>(GetParam()).targetAngle;
-        tm.unwrapTargetAngle(unwrappedTargetAngle);
+        unwrappedTargetAngle = tm.unwrapTargetAngle(unwrappedTargetAngle);
 
         if (std::get<1>(GetParam()).limitMotorAngles && tm.getTurretController() != nullptr)
         {

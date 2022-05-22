@@ -77,11 +77,12 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    float targetPitch;
-    float targetYaw;
-    float targetDistance;
-    bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance);
+    float targetPitch, targetYaw, targetDistance, timeOfFlight;
+    bool ballisticsSolutionAvailable = ballisticsSolver.computeTurretAimAngles(
+        &targetPitch,
+        &targetYaw,
+        &targetDistance,
+        &timeOfFlight);
 
     if (ballisticsSolutionAvailable)
     {
@@ -93,8 +94,8 @@ void TurretCVCommand::execute()
          * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
          * that is closest to the unwrapped measured angle.
          */
-        turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
-        turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
+        yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
+        pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
             turretSubsystem->yawMotor.getValidChassisMeasurementError(),
