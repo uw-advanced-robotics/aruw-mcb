@@ -101,6 +101,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
         3,
         pitchAngle,
         yawAngle,
-        timeOfFlight);
+        timeOfFlight,
+        turretSubsystem.getPitchOffset());
 }
 }  // namespace aruwsrc::algorithms

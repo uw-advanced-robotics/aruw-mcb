@@ -89,7 +89,8 @@ static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -3000.0f;
 
 // The distance from turret 0 to turret 1
-static modm::Vector3f DISTANCE_BETWEEN_TURRETS = modm::Vector3f(-0.17511, -.27905, 0);
+static modm::Vector3f DISTANCE_BETWEEN_TURRETS = modm::Vector3f(-0.17511f, -.27905f, 0.0f);
+static constexpr float PITCH_YAW_OFFSET = 0.045f;
 
 namespace chassis_rel
 {

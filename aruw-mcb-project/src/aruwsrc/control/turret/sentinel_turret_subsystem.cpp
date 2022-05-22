@@ -64,4 +64,9 @@ modm::Vector3f SentinelTurretSubsystem::getTurretOffset() const
     return modm::Vector3f(0,0,0);
     #endif
 }
+
+float SentinelTurretSubsystem::getPitchOffset() const
+{
+    return control::turret::PITCH_YAW_OFFSET;
+}
 }  // namespace aruwsrc::control::turret

@@ -41,6 +41,7 @@ class SentinelTurretSubsystem final : public RobotTurretSubsystem
     float getWorldPitch() const override;
     uint32_t getLastMeasurementTimeMicros() const override;
     modm::Vector3f getTurretOffset() const override;
+    float getPitchOffset() const override;
     private: 
     uint8_t turretID;
 };  // class SentinelTurretSubsystem
