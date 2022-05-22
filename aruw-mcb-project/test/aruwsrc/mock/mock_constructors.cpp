@@ -25,6 +25,7 @@
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
 #include "oled_display_mock.hpp"
+#include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_request_subsystem_mock.hpp"
@@ -221,4 +222,22 @@ TurretCVCommandMock::TurretCVCommandMock(
 {
 }
 TurretCVCommandMock::~TurretCVCommandMock() {}
+
+
+
+OttoBallisticsSolverMock::OttoBallisticsSolverMock(
+        const aruwsrc::Drivers &drivers,
+        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        const control::turret::TurretSubsystem &turretSubsystem,
+        const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        const float defaultLaunchSpeed,
+        const uint8_t turretID)
+    : aruwsrc::algorithms::OttoBallisticsSolver(
+        drivers,
+        odometryInterface,
+        turretSubsystem,
+        frictionWheels,
+        defaultLaunchSpeed,
+        turretID
+    ) {};
 }  // namespace aruwsrc::mock

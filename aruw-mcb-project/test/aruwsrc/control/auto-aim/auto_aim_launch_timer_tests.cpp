@@ -33,10 +33,14 @@ using namespace aruwsrc::control::auto_aim;
 class AutoAimLaunchTimerTest : public Test
 {
 protected:
-    AutoAimLaunchTimerTest() {};
+    AutoAimLaunchTimerTest() : ballistics(
+        &drivers,
+        
+    ) {};
 
     void SetUp() override {}
 
+    Drivers drivers;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballistics;
 };
