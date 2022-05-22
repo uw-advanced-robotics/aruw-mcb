@@ -40,8 +40,8 @@ TurretCVCommand::TurretCVCommand(
     algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const float userPitchInputScalar,
     const float userYawInputScalar,
+    const float userPitchInputScalar,
     const float defaultLaunchSpeed,
     uint8_t turretID)
     : drivers(drivers),
@@ -56,8 +56,8 @@ TurretCVCommand::TurretCVCommand(
           frictionWheels,
           defaultLaunchSpeed,
           turretID),
-      userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar)
+      userYawInputScalar(userYawInputScalar),
+      userPitchInputScalar(userPitchInputScalar)
 {
     addSubsystemRequirement(turretSubsystem);
 }

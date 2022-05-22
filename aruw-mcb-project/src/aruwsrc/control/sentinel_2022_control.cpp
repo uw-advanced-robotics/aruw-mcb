@@ -21,6 +21,7 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -37,6 +38,7 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "governor/cv_has_target_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "imu/imu_calibrate_command.hpp"
@@ -48,8 +50,9 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
-#include "turret/cv/sentinel_turret_cv_command.hpp"
+#include "turret/cv/turret_cv_command.hpp"
 #include "turret/sentinel_turret_subsystem.hpp"
+#include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::governor;
@@ -103,6 +106,7 @@ public:
         tap::algorithms::SmoothPidConfig yawPosPidConfig;
         tap::algorithms::SmoothPidConfig yawVelPidConfig;
         aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
+        cv::TurretScanCommand::Config turretScanConfig;
     };
 
     SentinelTurret(aruwsrc::Drivers &drivers, const Config &config)
@@ -166,17 +170,29 @@ public:
               USER_YAW_INPUT_SCALAR,
               USER_PITCH_INPUT_SCALAR,
               config.turretID),
+          turretScanCommand(
+              turretSubsystem,
+              worldFrameYawTurretImuController,
+              chassisFramePitchTurretController,
+              config.turretScanConfig),
           turretCVCommand(
               &drivers,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
-              agitator,
-              &rotateAndUnjamAgitatorWithHeatLimiting,
               odometrySubsystem,
               frictionWheels,
+              USER_YAW_INPUT_SCALAR,
+              USER_PITCH_INPUT_SCALAR,
               29.5f,
-              config.turretID)
+              config.turretID),
+          cvHasTargetGovernor(drivers.visionCoprocessor, config.turretID),
+          turretCVWithScanFallback(
+              {&turretSubsystem},
+              turretCVCommand,
+              turretScanCommand,
+              {&cvHasTargetGovernor}),
+          turretUturnCommand(&turretSubsystem, M_PI)
     {
     }
 
@@ -213,7 +229,13 @@ public:
 
     // turret commands
     user::TurretUserControlCommand turretManual;
-    cv::SentinelTurretCVCommand turretCVCommand;
+
+    cv::TurretScanCommand turretScanCommand;
+    cv::TurretCVCommand turretCVCommand;
+    CvHasTargetGovernor cvHasTargetGovernor;
+    tap::control::governor::GovernorWithFallbackCommand<1> turretCVWithScanFallback;
+
+    user::TurretQuickTurnCommand turretUturnCommand;
 };
 
 SentinelTurret turretZero(
@@ -231,6 +253,7 @@ SentinelTurret turretZero(
         .yawPosPidConfig = world_rel_turret_imu::turret0::YAW_POS_PID_CONFIG,
         .yawVelPidConfig = world_rel_turret_imu::turret0::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
+        .turretScanConfig = turret0::TURRET_SCAN_CONFIG,
     });
 
 SentinelTurret turretOne(
@@ -248,6 +271,7 @@ SentinelTurret turretOne(
         .yawPosPidConfig = world_rel_turret_imu::turret1::YAW_POS_PID_CONFIG,
         .yawVelPidConfig = world_rel_turret_imu::turret1::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus1,
+        .turretScanConfig = turret1::TURRET_SCAN_CONFIG,
     });
 
 /* define subsystems --------------------------------------------------------*/
@@ -285,15 +309,12 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     },
     nullptr);
 
-void selectNewRobotMessageHandler()
-{
-    turretZero.turretCVCommand.requestNewTarget();
-    turretOne.turretCVCommand.requestNewTarget();
-}
+void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
+
 void targetNewQuadrantMessageHandler()
 {
-    turretZero.turretCVCommand.changeScanningQuadrant();
-    turretOne.turretCVCommand.changeScanningQuadrant();
+    drivers()->commandScheduler.addCommand(&turretZero.turretUturnCommand);
+    drivers()->commandScheduler.addCommand(&turretOne.turretUturnCommand);
 }
 
 /* define command mappings --------------------------------------------------*/
@@ -354,8 +375,8 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *)
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
     turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
-    turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
-    turretOne.turretSubsystem.setDefaultCommand(&turretOne.turretCVCommand);
+    turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVWithScanFallback);
+    turretOne.turretSubsystem.setDefaultCommand(&turretOne.turretCVWithScanFallback);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
