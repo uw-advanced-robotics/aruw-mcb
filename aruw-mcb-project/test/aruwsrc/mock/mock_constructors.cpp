@@ -205,22 +205,16 @@ TurretCVCommandMock::TurretCVCommandMock(
     aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float userPitchInputScalar,
     const float userYawInputScalar,
-    const float defaultLaunchSpeed,
     uint8_t turretID)
     : aruwsrc::control::turret::cv::TurretCVCommand(
           drivers,
           turretSubsystem,
           yawController,
           pitchController,
-          odometryInterface,
-          frictionWheels,
           userPitchInputScalar,
           userYawInputScalar,
-          defaultLaunchSpeed,
           turretID)
 {
 }

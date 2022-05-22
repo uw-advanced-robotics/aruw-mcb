@@ -47,7 +47,7 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_no_target_from_coproc
     aimData.hasTarget = 0;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0))
-        .WillOnce(Return(aimData));
+        .WillOnce(ReturnPointee(&aimData));
 
     AutoAimLaunchTimer timer(100, &visionCoprocessor, &ballistics);
     auto result = timer.getCurrentLaunchInclination(0);
