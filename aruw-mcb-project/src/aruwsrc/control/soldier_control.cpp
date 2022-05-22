@@ -52,6 +52,7 @@
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "governor/cv_on_target_governor.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "governor/ref_system_projectile_launched_governor.hpp"
 #include "governor/yellow_carded_governor.hpp"
@@ -226,10 +227,11 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
     drivers()->refSerial,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorUntilProjectileLaunched(
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&refSystemProjectileLaunchedGovernor});
+    {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
@@ -238,14 +240,14 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
-    rotateAndUnjamAgitatorUntilProjectileLaunched,
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor});
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
-    rotateAndUnjamAgitatorUntilProjectileLaunched,
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
 // switches between normal agitator rotate and CV limited based on the yellow
@@ -337,7 +339,7 @@ HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&rotateAndUnjamAgitatorUntilProjectileLaunched},
+    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
 HoldCommandMapping rightMousePressed(
