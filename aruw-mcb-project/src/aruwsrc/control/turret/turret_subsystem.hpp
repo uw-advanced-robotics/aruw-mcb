@@ -44,6 +44,11 @@ namespace aruwsrc
 class Drivers;
 }
 
+namespace aruwsrc::can
+{
+class TurretMCBCanComm;
+}
+
 namespace aruwsrc::control::turret::algorithms
 {
 class TurretPitchControllerInterface;
@@ -69,19 +74,14 @@ public:
      * @param[in] drivers Pointer to a drivers singleton object.
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
-     * @param[in] limitMotorAngles `true` if the yaw should be limited between `YAW_MIN_ANGLE` and
-     *      `YAW_MAX_ANGLE` and `false` if the yaw should not be limited (if you have a slip
-     *      ring).
-     * @param[in] chassisFrontBackIdentical `true` if the front and back of the chassis are
-     *      interchangable, indicating that `YAW_START_ANGLE` is identical to `YAW_START_ANGLE +
-     *      180` in terms of relation to the chassis.
      */
     explicit TurretSubsystem(
         aruwsrc::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
-        const TurretMotorConfig& yawMotorConfig);
+        const TurretMotorConfig& yawMotorConfig,
+        const aruwsrc::can::TurretMCBCanComm* turretMCB);
 
     void initialize() override;
 
@@ -92,6 +92,8 @@ public:
     void onHardwareTestStart() override;
 
     mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
+
+    const inline aruwsrc::can::TurretMCBCanComm* getTurretMCB() const { return turretMCB; }
 
 #ifdef ENV_UNIT_TESTS
     testing::NiceMock<mock::TurretMotorMock> pitchMotor;
@@ -105,6 +107,7 @@ public:
 
 protected:
     Drivers* drivers;
+    const aruwsrc::can::TurretMCBCanComm* turretMCB;
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret

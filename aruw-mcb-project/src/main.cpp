@@ -87,8 +87,11 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
-            PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
+#if defined(ALL_SOLDIERS) || defined(TARGET_HERO) || defined(TARGET_SENTINEL_2022)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+#endif
+#if defined(TARGET_SENTINEL_2022)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
         }
@@ -114,8 +117,11 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->djiMotorTerminalSerialHandler.init();
     drivers->visionCoprocessor.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
-#if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
-    drivers->turretMCBCanComm.init();
+#if defined(ALL_SOLDIERS) || defined(TARGET_HERO) || defined(TARGET_SENTINEL_2022)
+    drivers->turretMCBCanCommBus1.init();
+#endif
+#if defined(TARGET_SENTINEL_2022)
+    drivers->turretMCBCanCommBus2.init();
 #endif
 }
 

@@ -56,8 +56,9 @@ public:
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,
+        aruwsrc::can::TurretMCBCanComm *turretMCB,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus),
+        : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }

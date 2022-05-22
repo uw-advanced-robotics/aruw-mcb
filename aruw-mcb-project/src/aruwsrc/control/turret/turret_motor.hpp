@@ -170,7 +170,7 @@ public:
      * @note Before calling this function, you **must** first set the chassis frame setpoint before
      * calling this function (i.e. call `setChassisFrameSetpoint`).
      */
-    mockable float getValidMinError(const float measurement) const;
+    mockable float getValidMinError(const float setpoint, const float measurement) const;
 
     /**
      * "Unwraps" a normalized (between [0, 2PI)) angle. Does so in such a way that setpoint returned
@@ -201,6 +201,44 @@ public:
      */
     float getSetpointWithinTurretRange(float setpoint) const;
 
+    int16_t getMotorOutput() const { return motor->getOutputDesired(); }
+
+    /**
+     * Takes in a normalized setpoint and "unnormalizes" it. Finds an equivalent unwrapped setpoint
+     * that is closest to the TurretMotor's measured angle that is also within bounds of the min/max
+     * angles.
+     *
+     * @note This function assumes that if the TurretMotor's angle is not limited, this function
+     * does not need to perform any updates of setpointToUnwrap since the turret controller will
+     * normalize both the setpoint and measurement before performing computation.
+     *
+     * @note A TurretController must be attached to the TurretMotor in order for this function to do
+     * anything. If a TurretController is not associated, we don't know how to convert the
+     * setpointToUnwrap into the chassis reference frame.
+     *
+     * @param[in] setpointToUnwrap Setpoint to update, a setpoint angle measurement in radians in
+     * the same reference frame as the attached turretController's reference frame.
+     * @return The updated setpointToUnwrap, or the same setpointToUnwrap if no updating necessary
+     * or if the notes above apply.
+     */
+    inline float unwrapTargetAngle(float setpointToUnwrap) const
+    {
+        if (turretController == nullptr || !config.limitMotorAngles)
+        {
+            return setpointToUnwrap;
+        }
+
+        setpointToUnwrap = getClosestNonNormalizedSetpointToMeasurement(
+            turretController->getMeasurement(),
+            setpointToUnwrap);
+
+        setpointToUnwrap =
+            turretController->convertChassisAngleToControllerFrame(getSetpointWithinTurretRange(
+                turretController->convertControllerAngleToChassisFrame(setpointToUnwrap)));
+
+        return setpointToUnwrap;
+    }
+
 private:
     const TurretMotorConfig config;
 
@@ -208,7 +246,7 @@ private:
     tap::motor::MotorInterface *motor;
 
     /// Associated turret controller interface that is being used by a command to control this motor
-    const algorithms::TurretControllerInterface *turretController;
+    const algorithms::TurretControllerInterface *turretController = nullptr;
 
     /**
      * Offset applied when the motor is turned on. When the turret is turned on, the distance

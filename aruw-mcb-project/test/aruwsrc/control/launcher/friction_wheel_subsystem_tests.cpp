@@ -35,7 +35,8 @@ protected:
               &drivers,
               tap::motor::MOTOR1,
               tap::motor::MOTOR2,
-              tap::can::CanBus::CAN_BUS1)
+              tap::can::CanBus::CAN_BUS1,
+              nullptr)
     {
     }
 

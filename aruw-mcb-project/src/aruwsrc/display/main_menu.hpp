@@ -71,7 +71,8 @@ private:
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
     tap::display::RefSerialMenu refSerialMenu;
     tap::communication::sensors::imu::ImuMenu imuMenu;
-    TurretMCBMenu turretStatusMenu;
+    TurretMCBMenu turretStatusMenuBus1;
+    TurretMCBMenu turretStatusMenuBus2;
     AboutMenu aboutMenu;
 
     void addImuCalibrateMenuCallback();
@@ -83,7 +84,8 @@ private:
     void addCommandSchedulerCallback();
     void addRefSerialMenuCallback();
     void addImuMenuCallback();
-    void addTurretMCBMenuCallback();
+    void addTurretMCBMenuBus1Callback();
+    void addTurretMCBMenuBus2Callback();
     void addAboutMenuCallback();
 };  // class MainMenu
 }  // namespace display

@@ -97,6 +97,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        nullptr,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Note: motor "one" is right, "two" is left
@@ -117,12 +118,10 @@ SentinelTurretSubsystem turretSubsystem(
     &pitchMotor,
     &yawMotor,
     PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG);
+    YAW_MOTOR_CONFIG,
+    nullptr);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(
-    drivers(),
-    &turretSubsystem.yawMotor,
-    &sentinelDrive);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -168,11 +167,11 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem.pitchMotor,
+    turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem.yawMotor,
+    turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands
