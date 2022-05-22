@@ -201,7 +201,6 @@ public:
     // turret controllers
     algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController;
     algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController;
-    algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
 
     tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid;
     tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid;
