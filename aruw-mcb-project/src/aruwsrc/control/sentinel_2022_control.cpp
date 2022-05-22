@@ -37,6 +37,7 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -128,11 +129,12 @@ public:
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
+          frictionWheelsOnGovernor(frictionWheels),
           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           rotateAndUnjamAgitatorWithHeatLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
-              {&heatLimitGovernor}),
+              {&heatLimitGovernor, &frictionWheelsOnGovernor}),
           spinFrictionWheels(
               &drivers,
               &frictionWheels,
@@ -176,9 +178,12 @@ public:
     UnjamIntegralCommand unjamAgitator;
     MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
 
+    // rotates agitator if friction wheels are spinning fast
+    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
+
     // rotates agitator with heat limiting applied
     HeatLimitGovernor heatLimitGovernor;
-    GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting;
+    GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting;
 
     // friction wheel commands
     FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
