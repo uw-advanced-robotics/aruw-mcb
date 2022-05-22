@@ -36,7 +36,7 @@ class Drivers;
 }
 namespace aruwsrc::control::turret
 {
-class TurretMotor;
+class TurretSubsystem;
 }
 
 namespace tap::control::chassis
@@ -74,7 +74,7 @@ public:
      */
     OttoVelocityOdometry2DSubsystem(
         aruwsrc::Drivers* drivers,
-        const aruwsrc::control::turret::TurretMotor* turret,
+        const aruwsrc::control::turret::TurretSubsystem& turret,
         tap::control::chassis::ChassisSubsystemInterface* chassis);
 
     void refresh() override;

@@ -59,6 +59,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           refSerialTransmitter,
           hopperSubsystem,
           frictionWheelSubsystem,
+          robotTurretSubsystem,
           multiShotHandler,
           chassisBeybladeCmd,
           chassisAutorotateCmd,

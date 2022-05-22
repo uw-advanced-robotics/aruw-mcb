@@ -43,7 +43,7 @@ public:
     /**
      * @param[in] TurretMotor A `TurretMotor` object accessible for children objects to use.
      */
-    TurretControllerInterface(TurretMotor *turretMotor) : turretMotor(turretMotor) {}
+    TurretControllerInterface(TurretMotor &turretMotor) : turretMotor(turretMotor) {}
 
     /**
      * Initializes the controller, resetting any controllers and configuring any variables that need
@@ -69,10 +69,17 @@ public:
     virtual void setSetpoint(float desiredSetpoint) = 0;
 
     /**
-     * @return The controller's setpoint, units degrees. **Does not** have to be in the same
+     * @return The controller's setpoint, units radians. **Does not** have to be in the same
      * reference frame as the TurretSubsystem's `get<yaw|pitch>Setpoint` functions.
      */
     virtual float getSetpoint() const = 0;
+
+    /**
+     * @return The controller's measurement (current value of the system), units radians. **Does
+     * not** have to be in the same reference frame as the TurretMotor's `getChassisFrame*`
+     * functions. Does not need to be normalized.
+     */
+    virtual float getMeasurement() const = 0;
 
     /**
      * @return `false` if the turret controller should not be running, whether this is because the
@@ -81,14 +88,36 @@ public:
      */
     virtual bool isOnline() const = 0;
 
+    /**
+     * Converts the passed in controllerFrameAngle from the controller frame to the chassis frame of
+     * reference.
+     *
+     * @param[in] controllerFrameAngle Some angle (in radians) in the controller frame. Not required
+     * to be normalized.
+     * @return The controllerFrameAngle converted to the chassis frame, a value in radians that is
+     * not required to be normalized.
+     */
+    virtual float convertControllerAngleToChassisFrame(float controllerFrameAngle) const = 0;
+
+    /**
+     * Converts the passed in controllerFrameAngle from the chassis frame to the controller frame of
+     * reference.
+     *
+     * @param[in] chassisFrameAngle Some angle (in radians) in the chassis frame. Not required
+     * to be normalized.
+     * @return The chassisFrameAngle converted to the controller frame, a value in radians that is
+     * not required to be normalized.
+     */
+    virtual float convertChassisAngleToControllerFrame(float chassisFrameAngle) const = 0;
+
 protected:
-    TurretMotor *turretMotor;
+    TurretMotor &turretMotor;
 };
 
 class TurretPitchControllerInterface : public TurretControllerInterface
 {
 public:
-    TurretPitchControllerInterface(TurretMotor *turretMotor)
+    TurretPitchControllerInterface(TurretMotor &turretMotor)
         : TurretControllerInterface(turretMotor)
     {
     }
@@ -97,7 +126,7 @@ public:
 class TurretYawControllerInterface : public TurretControllerInterface
 {
 public:
-    TurretYawControllerInterface(TurretMotor *turretMotor) : TurretControllerInterface(turretMotor)
+    TurretYawControllerInterface(TurretMotor &turretMotor) : TurretControllerInterface(turretMotor)
     {
     }
 };

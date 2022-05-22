@@ -19,6 +19,8 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/mock/dji_motor_mock.hpp"
+
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -36,289 +38,465 @@ class WorldFrameTurretImuTurretControllerTest : public Test
 {
 protected:
     WorldFrameTurretImuTurretControllerTest()
-        : turretSubsystem(&drivers),
-          worldFrameSetpoint(0, 0, M_TWOPI),
-          currentValue(0, 0, M_TWOPI)
+        : posPid({100, 0, 0, 0, 100, 1, 0, 1, 0, 0}),
+          velPid({100, 0, 0, 0, 100, 1, 0, 1, 0, 0}),
+          motorConfig{.limitMotorAngles = false},
+          djiMotor(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "motor")
     {
+    }
+
+    void SetUp() override
+    {
+        ON_CALL(djiMotor, isMotorOnline).WillByDefault(Return(true));
+        ON_CALL(djiMotor, getEncoderUnwrapped).WillByDefault([&]() {
+            return chassisFrameUnwrappedMeasurement * tap::motor::DjiMotor::ENC_RESOLUTION /
+                   M_TWOPI;
+        });
+        ON_CALL(djiMotor, setDesiredOutput).WillByDefault([&](int32_t desiredOutput) {
+            return djiMotor.DjiMotor::setDesiredOutput(desiredOutput);
+        });
+        ON_CALL(djiMotor, getOutputDesired).WillByDefault([&]() {
+            return djiMotor.DjiMotor::getOutputDesired();
+        });
+
+        ON_CALL(drivers.turretMCBCanCommBus1, getYawUnwrapped)
+            .WillByDefault(ReturnPointee(&turretFrameImuValue));
+        ON_CALL(drivers.turretMCBCanCommBus1, getYawVelocity)
+            .WillByDefault(ReturnPointee(&turretFrameImuVelocity));
+
+        ON_CALL(drivers.turretMCBCanCommBus1, getPitchUnwrapped)
+            .WillByDefault(ReturnPointee(&turretFrameImuValue));
+        ON_CALL(drivers.turretMCBCanCommBus1, getPitchVelocity)
+            .WillByDefault(ReturnPointee(&turretFrameImuVelocity));
+    }
+
+    void setDefaultMotorBehavior(NiceMock<TurretMotorMock> &turretMotor)
+    {
+        ON_CALL(turretMotor, getChassisFrameUnwrappedMeasuredAngle)
+            .WillByDefault(ReturnPointee(&chassisFrameUnwrappedMeasurement));
+
+        ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(motorConfig));
+
+        ON_CALL(turretMotor, setChassisFrameSetpoint).WillByDefault([&](float setpoint) {
+            turretMotor.TurretMotor::setChassisFrameSetpoint(setpoint);
+        });
+
+        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault([&]() {
+            return turretMotor.TurretMotor::getChassisFrameSetpoint();
+        });
     }
 
     Drivers drivers;
-    NiceMock<TurretSubsystemMock> turretSubsystem;
-    ContiguousFloat worldFrameSetpoint;
-    ContiguousFloat currentValue;
-    float imuValue = 0;
-    float imuVelocity = 0;
+    tap::algorithms::SmoothPid posPid;
+    tap::algorithms::SmoothPid velPid;
+    float chassisFrameUnwrappedMeasurement = 0;
+    float turretFrameImuValue = 0;
+    float turretFrameImuVelocity = 0;
+    TurretMotorConfig motorConfig;
+    NiceMock<tap::mock::DjiMotorMock> djiMotor;
 };
 
-class YawWorldFrameTurretImuTurretControllerTest : public WorldFrameTurretImuTurretControllerTest
+TEST_F(WorldFrameTurretImuTurretControllerTest, runYawPidController_world_frame_setpoint_limited)
 {
-protected:
-    YawWorldFrameTurretImuTurretControllerTest()
-        : turretController(
-              &drivers,
-              &turretSubsystem.yawMotor,
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
-    {
-    }
+    motorConfig = {
+        .startAngle = 0,
+        .startEncoderValue = 0,
+        .minAngle = -M_TWOPI,
+        .maxAngle = M_TWOPI,
+        .limitMotorAngles = true,
+    };
 
-    void SetUp() override
-    {
-        ON_CALL(turretSubsystem.yawMotor, getChassisFrameMeasuredAngle)
-            .WillByDefault(ReturnRef(currentValue));
-        ON_CALL(drivers.turretMCBCanComm, getYaw).WillByDefault(ReturnPointee(&imuValue));
-        ON_CALL(drivers.turretMCBCanComm, getYawVelocity)
-            .WillByDefault(ReturnPointee(&imuVelocity));
-        yawMotorConfig.limitMotorAngles = false;
-        ON_CALL(turretSubsystem.yawMotor, getConfig).WillByDefault(ReturnRef(yawMotorConfig));
-    }
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController;
-    TurretMotorConfig yawMotorConfig;
-};
+    WorldFrameYawTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
 
-TEST_F(
-    YawWorldFrameTurretImuTurretControllerTest,
-    runYawPidController_chassis_not_moving_setpoint_actual_identical_0_out)
-{
-    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(0));
+    turretController.runController(1, -2.0f * M_TWOPI);
+
+    EXPECT_NEAR(-M_TWOPI, turretController.getSetpoint(), 1e-5f);
+
+    turretController.runController(1, 2.0f * M_TWOPI);
+
+    EXPECT_NEAR(M_TWOPI, turretController.getSetpoint(), 1e-5f);
+
+    turretFrameImuValue = 2.0f * M_TWOPI;
 
     turretController.runController(1, 0);
+
+    EXPECT_NEAR(M_TWOPI, turretController.getSetpoint(), 1e-5f);
+
+    turretFrameImuValue = 0;
+    chassisFrameUnwrappedMeasurement = 2.0f * M_TWOPI;
+    turretMotor.updateMotorAngle();
+
+    turretController.runController(1, 0);
+
+    EXPECT_NEAR(-M_TWOPI, turretController.getSetpoint(), 1e-5f);
 }
 
 TEST_F(
-    YawWorldFrameTurretImuTurretControllerTest,
+    WorldFrameTurretImuTurretControllerTest,
+    runYawPidController_chassis_not_moving_setpoint_actual_identical_0_out)
+{
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
+
+    WorldFrameYawTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    turretController.runController(1, 0);
+
+    EXPECT_EQ(0, turretMotor.getMotorOutput());
+}
+
+TEST_F(
+    WorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_not_moving_setpoint_gt_actual_output_positive)
 {
-    // User input > current angle, output should be positive
-    currentValue.setValue(modm::toRadian(80));
-    imuValue = modm::toRadian(modm::toRadian(80));
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Gt(0)));
+    WorldFrameYawTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    // User input > current angle, output should be positive
+    chassisFrameUnwrappedMeasurement = modm::toRadian(80);
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = modm::toRadian(80);
 
     turretController.runController(1, M_PI_2);
+
+    EXPECT_GT(turretMotor.getMotorOutput(), 0);
 }
 
 TEST_F(
-    YawWorldFrameTurretImuTurretControllerTest,
+    WorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_not_moving_setpoint_lt_actual_output_negative)
 {
-    // Setpoint < current angle, output should be negative
-    currentValue.setValue(modm::toRadian(110));
-    imuValue = modm::toRadian(110);
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Lt(0)));
+    WorldFrameYawTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    // Setpoint < current angle, output should be negative
+    chassisFrameUnwrappedMeasurement = modm::toRadian(110);
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = modm::toRadian(110);
 
     turretController.runController(1, modm::toRadian(modm::toRadian(100)));
+
+    EXPECT_LT(turretMotor.getMotorOutput(), 0);
 }
 
 TEST_F(
-    YawWorldFrameTurretImuTurretControllerTest,
+    WorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_rotated_positive_direction_world_setpoint_and_actual_equal_0_output)
 {
-    // chassis frame yaw value modm::toRadian(80), so chassis moved +10 degrees
-    currentValue.setValue(modm::toRadian(modm::toRadian(80)));
-    // user input in world frame still equal to imu yaw, so output 0
-    imuValue = M_PI_2;
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(0));
+    WorldFrameYawTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    // chassis frame yaw value modm::toRadian(80), so chassis moved +10 degrees
+    chassisFrameUnwrappedMeasurement = modm::toRadian(80);
+    turretMotor.updateMotorAngle();
+    // user input in world frame still equal to imu yaw, so output 0
+    turretFrameImuValue = M_PI_2;
 
     turretController.runController(1, M_PI_2);
+
+    EXPECT_EQ(turretMotor.getMotorOutput(), 0);
 }
 
 TEST_F(
-    YawWorldFrameTurretImuTurretControllerTest,
+    WorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_rotated_negative_direction_world_setpoint_and_actual_equal_0_output)
 {
-    // yaw value modm::toRadian(100), so chassis moved -10 degrees
-    currentValue.setValue(modm::toRadian(100));
-    imuValue = M_PI_2;
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(0));
+    WorldFrameYawTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    // yaw value modm::toRadian(100), so chassis moved -10 degrees
+    chassisFrameUnwrappedMeasurement = modm::toRadian(100);
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = M_PI_2;
 
     turretController.runController(1, M_PI_2);
+
+    EXPECT_EQ(turretMotor.getMotorOutput(), 0);
 }
 
 TEST_F(
-    YawWorldFrameTurretImuTurretControllerTest,
+    WorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_rotated_positive_direction_world_setpoint_lt_actual_negative_output)
 {
-    currentValue.setValue(M_PI_2);
-    imuValue = modm::toRadian(100);
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Lt(0)));
+    WorldFrameYawTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    chassisFrameUnwrappedMeasurement = M_PI_2;
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = modm::toRadian(100);
 
     turretController.runController(1, M_PI_2);
+
+    EXPECT_LT(turretMotor.getMotorOutput(), 0);
 }
 
 TEST_F(
-    YawWorldFrameTurretImuTurretControllerTest,
+    WorldFrameTurretImuTurretControllerTest,
     runYawPidController_chassis_rotated_negative_direction_world_setpoint_gt_actual_positive_output)
 {
-    currentValue.setValue(M_PI_2);
-    imuValue = modm::toRadian(80);
-    EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Gt(0)));
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
+
+    WorldFrameYawTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    chassisFrameUnwrappedMeasurement = M_PI_2;
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = modm::toRadian(80);
 
     turretController.runController(1, M_PI_2);
+
+    EXPECT_GT(turretMotor.getMotorOutput(), 0);
 }
 
-#define SETUP_PITCH_TEST()                                   \
-    Drivers drivers;                                         \
-    NiceMock<TurretSubsystemMock> turretSubsystem(&drivers); \
-    ;                                                        \
-    float turretSetpoint = 0;                                \
-    ContiguousFloat worldFramePitchSetpoint(0, 0, M_TWOPI);  \
-    ContiguousFloat currentValue(0, 0, M_TWOPI);             \
-    float imuValue = 0;                                      \
-    float imuVelocity = 0;
+// Pitch controller tests
 
-class PitchWorldFrameTurretImuTurretControllerTest : public WorldFrameTurretImuTurretControllerTest
-{
-protected:
-    PitchWorldFrameTurretImuTurretControllerTest()
-        : turretController(
-              &drivers,
-              &turretSubsystem.pitchMotor,
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          chassisFrameSetpoint(0)
-    {
-    }
-
-    void SetUp() override
-    {
-        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameMeasuredAngle)
-            .WillByDefault(ReturnRef(currentValue));
-        ON_CALL(turretSubsystem.pitchMotor, getAngleFromCenter).WillByDefault(Return(0));
-        ON_CALL(drivers.turretMCBCanComm, getPitch).WillByDefault(ReturnPointee(&imuValue));
-        ON_CALL(drivers.turretMCBCanComm, getPitchVelocity)
-            .WillByDefault(ReturnPointee(&imuVelocity));
-
-        ON_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint)
-            .WillByDefault([&](float setpoint) { chassisFrameSetpoint = setpoint; });
-        ON_CALL(turretSubsystem.pitchMotor, getChassisFrameSetpoint)
-            .WillByDefault(ReturnPointee(&chassisFrameSetpoint));
-    }
-
-    static inline float transformWorldFrameValueToChassisFrame(
-        const float turretChassisFrameCurrAngle,
-        const float turretWorldFrameCurrAngle,
-        const float angleToTransform)
-    {
-        return turretChassisFrameCurrAngle + (angleToTransform - turretWorldFrameCurrAngle);
-    }
-
-    float getPitchSetpoint()
-    {
-        return transformWorldFrameValueToChassisFrame(
-            currentValue.getValue(),
-            imuValue,
-            turretSetpoint);
-    }
-
-    float turretSetpoint = 0;
-    bool yawLimited = false;
-    WorldFramePitchTurretImuCascadePidTurretController turretController;
-
-private:
-    float chassisFrameSetpoint;
-};
-
-static float computeCGOffset(float pitchAngleFromCenter = 0.0f)
+static int16_t computeCGOffset(float pitchAngleFromCenter)
 {
     return computeGravitationalForceOffset(
         TURRET_CG_X,
         TURRET_CG_Z,
-        pitchAngleFromCenter,
+        -pitchAngleFromCenter,
         GRAVITY_COMPENSATION_SCALAR);
 }
 
-TEST_F(
-    PitchWorldFrameTurretImuTurretControllerTest,
-    runPitchPidController_chassis_moving_world_frame_stationary_output_0)
+TEST_F(WorldFrameTurretImuTurretControllerTest, runPitchPidController_world_frame_setpoint_limited)
 {
-    InSequence seq;
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset()));
+    motorConfig = {
+        .startAngle = 0,
+        .startEncoderValue = 0,
+        .minAngle = -M_TWOPI,
+        .maxAngle = M_TWOPI,
+        .limitMotorAngles = true,
+    };
 
-    turretSetpoint = M_PI_2;
-    imuValue = M_PI_2;
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    currentValue.setValue(M_PI_2);
-    turretController.runController(1, turretSetpoint);
+    WorldFramePitchTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
 
-    currentValue.setValue(modm::toRadian(100));
-    turretController.runController(1, turretSetpoint);
+    turretController.runController(1, -2.0f * M_TWOPI);
 
-    currentValue.setValue(modm::toRadian(80));
-    turretController.runController(1, turretSetpoint);
+    EXPECT_NEAR(-M_TWOPI, turretController.getSetpoint(), 1e-5f);
+
+    turretController.runController(1, 2.0f * M_TWOPI);
+
+    EXPECT_NEAR(M_TWOPI, turretController.getSetpoint(), 1e-5f);
+
+    turretFrameImuValue = 2.0f * M_TWOPI;
+
+    turretController.runController(1, 0);
+
+    EXPECT_NEAR(M_TWOPI, turretController.getSetpoint(), 1e-5f);
+
+    turretFrameImuValue = 0;
+    chassisFrameUnwrappedMeasurement = 2.0f * M_TWOPI;
+    turretMotor.updateMotorAngle();
+
+    turretController.runController(1, 0);
+
+    EXPECT_NEAR(-M_TWOPI, turretController.getSetpoint(), 1e-5f);
 }
 
 TEST_F(
-    PitchWorldFrameTurretImuTurretControllerTest,
-    runPitchPidController_chassis_tilted_up_world_setpoint_gt_actual_output_positive)
+    WorldFrameTurretImuTurretControllerTest,
+    runPitchPidController_chassis_not_moving_setpoint_actual_identical_0_out)
 {
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Gt(computeCGOffset())));
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    turretSetpoint = modm::toRadian(110);
-    currentValue.setValue(M_PI_2);
-    imuValue = M_PI_2;
+    WorldFramePitchTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
 
-    turretController.runController(1, turretSetpoint);
+    turretController.runController(1, 0);
+
+    EXPECT_EQ(computeCGOffset(turretMotor.getAngleFromCenter()), turretMotor.getMotorOutput());
 }
 
 TEST_F(
-    PitchWorldFrameTurretImuTurretControllerTest,
-    runPitchPidController_chassis_tilted_up_world_setpoint_lt_actual_output_negative)
+    WorldFrameTurretImuTurretControllerTest,
+    runPitchPidController_chassis_not_moving_setpoint_gt_actual_output_positive)
 {
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Lt(computeCGOffset())));
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    turretSetpoint = modm::toRadian(80);
-    currentValue.setValue(M_PI_2);
-    imuValue = M_PI_2;
+    WorldFramePitchTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
 
-    turretController.runController(1, turretSetpoint);
+    // User input > current angle, output should be positive
+    chassisFrameUnwrappedMeasurement = modm::toRadian(80);
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = modm::toRadian(80);
+
+    turretController.runController(1, M_PI_2);
+
+    EXPECT_GT(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
 }
 
 TEST_F(
-    PitchWorldFrameTurretImuTurretControllerTest,
-    runPitchPidController_chassis_tilted_down_world_setpoint_gt_actual_output_positive)
+    WorldFrameTurretImuTurretControllerTest,
+    runPitchPidController_chassis_not_moving_setpoint_lt_actual_output_negative)
 {
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Gt(computeCGOffset())));
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    turretSetpoint = M_PI_2;
-    currentValue.setValue(M_PI_2);
-    imuValue = modm::toRadian(-10);
+    WorldFramePitchTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
 
-    turretController.runController(1, turretSetpoint);
+    // Setpoint < current angle, output should be negative
+    chassisFrameUnwrappedMeasurement = modm::toRadian(110);
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = modm::toRadian(110);
+
+    turretController.runController(1, modm::toRadian(modm::toRadian(100)));
+
+    EXPECT_LT(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
 }
 
 TEST_F(
-    PitchWorldFrameTurretImuTurretControllerTest,
-    runPitchPidController_chassis_tilted_down_world_setpoint_lt_actual_output_negative)
+    WorldFrameTurretImuTurretControllerTest,
+    runPitchPidController_chassis_rotated_positive_direction_world_setpoint_and_actual_equal_0_output)
 {
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(Lt(computeCGOffset())));
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    turretSetpoint = modm::toRadian(70);
-    currentValue.setValue(M_PI_2);
-    imuValue = M_PI_2;
+    WorldFramePitchTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
 
-    turretController.runController(1, turretSetpoint);
+    // chassis frame yaw value modm::toRadian(80), so chassis moved +10 degrees
+    chassisFrameUnwrappedMeasurement = modm::toRadian(80);
+    turretMotor.updateMotorAngle();
+    // user input in world frame still equal to imu yaw, so output 0
+    turretFrameImuValue = M_PI_2;
+
+    turretController.runController(1, M_PI_2);
+
+    EXPECT_EQ(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
 }
 
 TEST_F(
-    PitchWorldFrameTurretImuTurretControllerTest,
-    runPitchPidController_chassis_moved_world_frame_stationary_output_0)
+    WorldFrameTurretImuTurretControllerTest,
+    runPitchPidController_chassis_rotated_negative_direction_world_setpoint_and_actual_equal_0_output)
 {
-    EXPECT_CALL(turretSubsystem.pitchMotor, setMotorOutput(computeCGOffset())).Times(2);
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
 
-    turretSetpoint = M_PI_2;
-    currentValue.setValue(modm::toRadian(modm::toRadian(80)));
-    imuValue = M_PI_2;
-    turretController.runController(1, turretSetpoint);
+    WorldFramePitchTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
 
-    imuValue = M_PI_2;
-    currentValue.setValue(modm::toRadian(100));
-    turretController.runController(1, turretSetpoint);
+    // yaw value modm::toRadian(100), so chassis moved -10 degrees
+    chassisFrameUnwrappedMeasurement = modm::toRadian(100);
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = M_PI_2;
+
+    turretController.runController(1, M_PI_2);
+
+    EXPECT_EQ(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
+}
+
+TEST_F(
+    WorldFrameTurretImuTurretControllerTest,
+    runPitchPidController_chassis_rotated_positive_direction_world_setpoint_lt_actual_negative_output)
+{
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
+
+    WorldFramePitchTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    chassisFrameUnwrappedMeasurement = M_PI_2;
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = modm::toRadian(100);
+
+    turretController.runController(1, M_PI_2);
+
+    EXPECT_LT(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
+}
+
+TEST_F(
+    WorldFrameTurretImuTurretControllerTest,
+    runPitchPidController_chassis_rotated_negative_direction_world_setpoint_gt_actual_positive_output)
+{
+    TurretMotor turretMotor(&djiMotor, motorConfig);
+    turretMotor.updateMotorAngle();
+
+    WorldFramePitchTurretImuCascadePidTurretController turretController(
+        drivers.turretMCBCanCommBus1,
+        turretMotor,
+        posPid,
+        velPid);
+
+    chassisFrameUnwrappedMeasurement = M_PI_2;
+    turretMotor.updateMotorAngle();
+    turretFrameImuValue = modm::toRadian(80);
+
+    turretController.runController(1, M_PI_2);
+
+    EXPECT_GT(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
 }
