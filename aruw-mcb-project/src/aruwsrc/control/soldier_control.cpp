@@ -22,17 +22,19 @@
 #ifdef ALL_SOLDIERS
 
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/multi_shot_handler.hpp"
-#include "agitator/rotate_unjam_ref_limited_command.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
@@ -49,17 +51,19 @@
 #include "chassis/chassis_subsystem.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
+#include "governor/cv_on_target_governor.hpp"
+#include "governor/heat_limit_governor.hpp"
+#include "governor/ref_system_projectile_launched_governor.hpp"
+#include "governor/yellow_carded_governor.hpp"
 #include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
-#include "ref_system/yellow_card_switcher_command.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
-#include "turret/cv/cv_limited_command.hpp"
 #include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
@@ -69,15 +73,16 @@
 #endif
 
 using namespace tap::control::setpoint;
-using namespace tap::control::setpoint;
+using namespace tap::control::governor;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::governor;
 using namespace aruwsrc::algorithms::odometry;
 using namespace tap::control;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
-using namespace aruwsrc::control::ref_system;
+using namespace aruwsrc::control::agitator;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -120,8 +125,8 @@ static inline void refreshOdom() { odometrySubsystem.refresh(); }
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
-    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::AGITATOR_CONFIG);
+    constants::AGITATOR_PID_CONFIG,
+    constants::AGITATOR_CONFIG);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
@@ -215,56 +220,67 @@ cv::TurretCVCommand turretCVCommand(
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
-MoveIntegralCommand agitatorRotateCommand(
-    agitator,
-    aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
+// base rotate/unjam commands
+MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand agitatorUnjamCommand(
-    agitator,
-    aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
+UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
-RotateUnjamRefLimitedCommand agitatorShootFastLimited(
+MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
     agitator,
-    agitatorRotateCommand,
-    agitatorUnjamCommand,
+    rotateAgitator,
+    unjamAgitator);
+
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
+    drivers()->refSerial,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorUntilProjectileLaunched(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&refSystemProjectileLaunchedGovernor});
+
+// rotates agitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernor(
+    *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
+    constants::HEAT_LIMIT_BUFFER);
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+    {&agitator},
+    rotateAndUnjamAgitatorUntilProjectileLaunched,
+    {&heatLimitGovernor});
 
-MoveUnjamIntegralComprisedCommand agitatorShootFastUnlimited(
-    *drivers(),
-    agitator,
-    agitatorRotateCommand,
-    agitatorUnjamCommand);
+// rotates agitator when aiming at target and within heat limit
+CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+    {&agitator},
+    rotateAndUnjamAgitatorUntilProjectileLaunched,
+    {&heatLimitGovernor, &cvOnTargetGovernor});
+
+// switches between normal agitator rotate and CV limited based on the yellow
+// card governor
+YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
+GovernorWithFallbackCommand<1> agitatorLaunchYellowCardCommand(
+    {&agitator},
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    rotateAndUnjamAgitatorWithHeatLimiting,
+    {&yellowCardedGovernor});
 
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
-
-aruwsrc::control::turret::cv::CVLimitedCommand agitatorLaunchCVLimited(
-    *drivers(),
-    {&agitator},
-    agitatorShootFastLimited,
-    turretCVCommand);
-
-YellowCardSwitcherCommand agitatorLaunchYellowCardCommand(
-    *drivers(),
-    {&agitator},
-    agitatorShootFastLimited,
-    agitatorLaunchCVLimited);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
     15.0f,
     false,
-    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 
@@ -337,7 +353,7 @@ HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     1);
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
-    {&agitatorShootFastUnlimited},
+    {&rotateAndUnjamAgitatorUntilProjectileLaunched},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
     true);
 HoldCommandMapping rightMousePressed(

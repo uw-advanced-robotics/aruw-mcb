@@ -55,7 +55,8 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 bool OttoBallisticsSolver::computeTurretAimAngles(
     float *pitchAngle,
     float *yawAngle,
-    float *distance)
+    float *distance,
+    float *timeOfFlight)
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
     // Verify that CV is actually online and that the aimData had a target
@@ -97,6 +98,7 @@ bool OttoBallisticsSolver::computeTurretAimAngles(
         launchSpeed,
         3,
         pitchAngle,
-        yawAngle);
+        yawAngle,
+        timeOfFlight);
 }
 }  // namespace aruwsrc::algorithms
