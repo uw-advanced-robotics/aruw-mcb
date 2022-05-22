@@ -47,15 +47,15 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 {
 }
 
-void OttoBallisticsSolver::computeTurretAimAngles(BallisticsSolution &solution)
+void OttoBallisticsSolver::computeTurretAimAngles(std::optional<BallisticsSolution> &solution)
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
 
     // Verify that CV is actually online and that the aimData had a target
     if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
     {
-        lastComputedSolution.validSolutionFound = false;
-        solution.validSolutionFound = false;
+        solution = std::nullopt;
+        lastComputedSolution = std::nullopt;
         return;
     }
 
@@ -93,15 +93,18 @@ void OttoBallisticsSolver::computeTurretAimAngles(BallisticsSolution &solution)
         // for a target "now" rather than whenever the camera saw the target
         targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
 
-        lastComputedSolution.distance = targetState.position.getLength();
+        lastComputedSolution->distance = targetState.position.getLength();
 
-        lastComputedSolution.validSolutionFound = ballistics::findTargetProjectileIntersection(
-            targetState,
-            launchSpeed,
-            3,
-            &lastComputedSolution.pitchAngle,
-            &lastComputedSolution.yawAngle,
-            &lastComputedSolution.timeOfFlight);
+        if (!ballistics::findTargetProjectileIntersection(
+                targetState,
+                launchSpeed,
+                3,
+                &lastComputedSolution->pitchAngle,
+                &lastComputedSolution->yawAngle,
+                &lastComputedSolution->timeOfFlight))
+        {
+            lastComputedSolution = std::nullopt;
+        }
     }
 
     solution = lastComputedSolution;

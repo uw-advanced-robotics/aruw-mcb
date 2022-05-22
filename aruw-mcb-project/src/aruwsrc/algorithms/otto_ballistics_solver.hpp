@@ -20,6 +20,8 @@
 #ifndef OTTO_BALLISTICS_SOLVER_HPP_
 #define OTTO_BALLISTICS_SOLVER_HPP_
 
+#include <optional>
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::chassis
@@ -66,11 +68,6 @@ public:
         float distance;
         /// The expected time-of-flight until impact (in seconds).
         float timeOfFlight;
-        /**
-         * `true` if CV is online, the most recent aim data is valid, and a valid ballistics
-         * solution was found. `false` otherwise.
-         */
-        bool validSolutionFound;
     };
 
     /**
@@ -130,7 +127,7 @@ public:
      * @param[out] solution The ballistics solution computed. Will potentially update any of the
      * fields even if the solution's validSolutionFound function is false
      */
-    void computeTurretAimAngles(BallisticsSolution &solution);
+    void computeTurretAimAngles(std::optional<BallisticsSolution> &solution);
 
 private:
     const Drivers &drivers;
@@ -141,7 +138,7 @@ private:
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
-    BallisticsSolution lastComputedSolution = {};
+    std::optional<BallisticsSolution> lastComputedSolution = {};
 };
 }  // namespace aruwsrc::algorithms
 

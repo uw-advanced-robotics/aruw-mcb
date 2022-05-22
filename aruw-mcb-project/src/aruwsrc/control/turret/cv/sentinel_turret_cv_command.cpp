@@ -54,12 +54,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
       pitchController(pitchController),
       turretID(turretID),
       launchingCommand(launchingCommand),
-      ballisticsSolver(
-          *drivers,
-          odometryInterface,
-          frictionWheels,
-          defaultLaunchSpeed,
-          turretID),
+      ballisticsSolver(*drivers, odometryInterface, frictionWheels, defaultLaunchSpeed, turretID),
       pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(
           turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
@@ -98,16 +93,16 @@ void SentinelTurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    OttoBallisticsSolver::BallisticsSolution ballisticsSolution;
+    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution;
     ballisticsSolver.computeTurretAimAngles(ballisticsSolution);
 
-    if (ballisticsSolution.validSolutionFound)
+    if (ballisticsSolution != std::nullopt)
     {
         exitScanMode();
 
         // Target available
-        pitchSetpoint = ballisticsSolution.pitchAngle;
-        yawSetpoint = ballisticsSolution.yawAngle;
+        pitchSetpoint = ballisticsSolution->pitchAngle;
+        yawSetpoint = ballisticsSolution->yawAngle;
 
         // the setpoint returned by the ballistics solver is between [0, 2*PI)
         // the desired setpoint is not required to be between [0, 2*PI)
@@ -128,7 +123,7 @@ void SentinelTurretCVCommand::execute()
         if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
                 turretSubsystem->yawMotor.getValidChassisMeasurementError(),
                 turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
-                ballisticsSolution.distance))
+                ballisticsSolution->distance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
             if (!drivers->commandScheduler.isCommandScheduled(launchingCommand))
