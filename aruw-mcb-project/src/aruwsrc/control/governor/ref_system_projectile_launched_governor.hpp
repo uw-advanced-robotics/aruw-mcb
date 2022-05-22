@@ -20,6 +20,8 @@
 #ifndef REF_SYSTEM_PROJECTILE_LAUNCHED_GOVERNOR_HPP_
 #define REF_SYSTEM_PROJECTILE_LAUNCHED_GOVERNOR_HPP_
 
+#include <optional>
+
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 

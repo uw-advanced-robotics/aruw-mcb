@@ -68,7 +68,7 @@ class PitchControllerTest : public ChassisFrameTurretControllerTest
 {
 protected:
     PitchControllerTest()
-        : turretController(&turretSubsystem.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
+        : turretController(turretSubsystem.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
     {
     }
 
@@ -78,8 +78,7 @@ protected:
 class YawControllerTest : public ChassisFrameTurretControllerTest
 {
 protected:
-    YawControllerTest()
-        : turretController(&turretSubsystem.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
+    YawControllerTest() : turretController(turretSubsystem.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
     {
     }
 
