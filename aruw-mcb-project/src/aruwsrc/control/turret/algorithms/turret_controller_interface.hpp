@@ -43,7 +43,7 @@ public:
     /**
      * @param[in] TurretMotor A `TurretMotor` object accessible for children objects to use.
      */
-    TurretControllerInterface(TurretMotor *turretMotor) : turretMotor(turretMotor) {}
+    TurretControllerInterface(TurretMotor &turretMotor) : turretMotor(turretMotor) {}
 
     /**
      * Initializes the controller, resetting any controllers and configuring any variables that need
@@ -75,9 +75,9 @@ public:
     virtual float getSetpoint() const = 0;
 
     /**
-     * @return The controller's measurement, units radians. **Does not** have to be in the same
-     * reference frame as the TurretMotor's `getChassisFrame*` functions. Does not need to be
-     * normalized.
+     * @return The controller's measurement (current value of the system), units radians. **Does
+     * not** have to be in the same reference frame as the TurretMotor's `getChassisFrame*`
+     * functions. Does not need to be normalized.
      */
     virtual float getMeasurement() const = 0;
 
@@ -111,13 +111,13 @@ public:
     virtual float convertChassisAngleToControllerFrame(float chassisFrameAngle) const = 0;
 
 protected:
-    TurretMotor *turretMotor;
+    TurretMotor &turretMotor;
 };
 
 class TurretPitchControllerInterface : public TurretControllerInterface
 {
 public:
-    TurretPitchControllerInterface(TurretMotor *turretMotor)
+    TurretPitchControllerInterface(TurretMotor &turretMotor)
         : TurretControllerInterface(turretMotor)
     {
     }
@@ -126,7 +126,7 @@ public:
 class TurretYawControllerInterface : public TurretControllerInterface
 {
 public:
-    TurretYawControllerInterface(TurretMotor *turretMotor) : TurretControllerInterface(turretMotor)
+    TurretYawControllerInterface(TurretMotor &turretMotor) : TurretControllerInterface(turretMotor)
     {
     }
 };

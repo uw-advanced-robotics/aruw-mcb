@@ -39,6 +39,11 @@ namespace aruwsrc
 class Drivers;
 }
 
+namespace aruwsrc::can
+{
+class TurretMCBCanComm;
+}
+
 namespace aruwsrc::control::launcher
 {
 /**
@@ -55,7 +60,8 @@ public:
         aruwsrc::Drivers *drivers,
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
-        tap::can::CanBus canBus);
+        tap::can::CanBus canBus,
+        aruwsrc::can::TurretMCBCanComm *turretMCB);
 
     void initialize() override;
 
@@ -129,6 +135,8 @@ private:
     tap::motor::DjiMotor leftWheel;
     tap::motor::DjiMotor rightWheel;
 #endif
+
+    aruwsrc::can::TurretMCBCanComm *turretMCB;
 
     /**
      * @param[in] launchSpeed Some launch speed in m/s. The speed will be

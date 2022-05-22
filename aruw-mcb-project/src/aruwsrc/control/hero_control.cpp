@@ -92,6 +92,11 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace hero_control
 {
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
+
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::communication::serial::SentinelRequestSubsystem sentinelRequestSubsystem(drivers());
 
@@ -103,6 +108,7 @@ RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_A
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 ClientDisplaySubsystem clientDisplay(drivers());
@@ -133,9 +139,15 @@ tap::motor::DoubleDjiMotor yawMotor(
     true,
     "Yaw Front Turret",
     "Yaw Back Turret");
-HeroTurretSubsystem turret(drivers(), &pitchMotor, &yawMotor, PITCH_MOTOR_CONFIG, YAW_MOTOR_CONFIG);
+HeroTurretSubsystem turret(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    PITCH_MOTOR_CONFIG,
+    YAW_MOTOR_CONFIG,
+    &getTurretMCBCanComm());
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), &turret.yawMotor, &chassis);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turret, &chassis);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -171,16 +183,16 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turret.pitchMotor,
+    turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turret.yawMotor,
+    turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
-    drivers(),
-    &turret.yawMotor,
+    *drivers(),
+    turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
 tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPid(
@@ -189,8 +201,8 @@ tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPid(
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
-    drivers()->turretMCBCanCommBus1,
-    &turret.yawMotor,
+    getTurretMCBCanComm(),
+    turret.yawMotor,
     worldFrameYawTurretImuPosPid,
     worldFrameYawTurretImuVelPid);
 
@@ -200,8 +212,8 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
-    drivers()->turretMCBCanCommBus1,
-    &turret.pitchMotor,
+    getTurretMCBCanComm(),
+    turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
 
@@ -231,19 +243,14 @@ user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
-    {
-        std::tuple<
-            aruwsrc::can::TurretMCBCanComm *,
-            aruwsrc::control::turret::TurretSubsystem *,
-            aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *,
-            aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *>(
-            &drivers()->turretMCBCanCommBus1,
-            &turret,
-            &chassisFrameYawTurretController,
-            &chassisFramePitchTurretController),
-    },
-    &chassis,
-    true);
+    {{
+        &getTurretMCBCanComm(),
+        &turret,
+        &chassisFrameYawTurretController,
+        &chassisFramePitchTurretController,
+        true,
+    }},
+    &chassis);
 
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -261,10 +268,10 @@ ClientDisplayCommand clientDisplayCommand(
 // hero agitator commands
 
 LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(
-    drivers()->turretMCBCanComm,
+    getTurretMCBCanComm(),
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
 LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(
-    drivers()->turretMCBCanComm,
+    getTurretMCBCanComm(),
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
 // rotates agitator if friction wheels are spinning fast
@@ -493,6 +500,8 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }
 }  // namespace aruwsrc::control
 
+#ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
+#endif
 
 #endif

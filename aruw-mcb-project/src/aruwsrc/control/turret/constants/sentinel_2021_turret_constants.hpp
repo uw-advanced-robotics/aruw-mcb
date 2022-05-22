@@ -94,4 +94,4 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 }  // namespace chassis_rel
 }  // namespace  aruwsrc::control::turret
 
-#endif  // SENTINEL_TURRET_CONSTANTS_HPP_
+#endif  // SENTINEL_2021_TURRET_CONSTANTS_HPP_

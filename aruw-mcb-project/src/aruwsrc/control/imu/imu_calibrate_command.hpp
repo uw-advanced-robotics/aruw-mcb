@@ -83,28 +83,35 @@ public:
      */
     static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
 
+    struct TurretIMUCalibrationConfig
+    {
+        /// The turret mounted IMU to be calibrated.
+        aruwsrc::can::TurretMCBCanComm *turretMCBCanComm;
+        /// A `TurretSubsystem` that this command will control (will lock the turret).
+        turret::TurretSubsystem *turret;
+        /// A chassis relative yaw controller used to lock the turret.
+        turret::algorithms::ChassisFrameYawTurretController *yawController;
+        /// A chassis relative pitch controller used to lock the turret.
+        turret::algorithms::ChassisFramePitchTurretController *pitchController;
+        /**
+         * `true` if the turret IMU is mounted on the pitch axis of the
+         * turret. In this case the pitch controller doesn't have to reach the horizontal setpoint
+         * before calibration is performed.
+         */
+        bool turretImuOnPitch;
+    };
+
     /**
      * @param[in] drivers A pointer to the global drivers object.
-     * @param[in] turretMCBCanComm A list of TurretMCBCanComm objects, whose IMUs will be
-     * calibrated.
-     * @param[in] turret A `TurretSubsystem` that this command will control (will lock the turret).
+     * @param[in] turretsAndControllers A list of TurretIMUCalibrationConfig structs containing
+     * turret and turret IMU information necessary for calibrating the IMU
      * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the desired
      * movement to 0).
-     * @param[in] yawController A chassis relative yaw controller used to lock the turret.
-     * @param[in] pitchController A chassis relative pitch controller used to lock the turret.
-     * @param[in] turretImuOnPitch `true` if the turret IMU is mounted on the pitch axis of the
-     * turret. In this case the pitch controller doesn't have to reach the horizontal setpoint
-     * before calibration is performed.
      */
     ImuCalibrateCommand(
         aruwsrc::Drivers *drivers,
-        const std::vector<std::tuple<
-            aruwsrc::can::TurretMCBCanComm *,
-            turret::TurretSubsystem *,
-            turret::algorithms::ChassisFrameYawTurretController *,
-            turret::algorithms::ChassisFramePitchTurretController *> > &turretsAndControllers,
-        chassis::ChassisSubsystem *chassis,
-        bool turretImuOnPitch);
+        const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
+        chassis::ChassisSubsystem *chassis);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -141,12 +148,7 @@ private:
     static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 20000;
 
     aruwsrc::Drivers *drivers;
-    std::vector<std::tuple<
-        aruwsrc::can::TurretMCBCanComm *,
-        turret::TurretSubsystem *,
-        turret::algorithms::ChassisFrameYawTurretController *,
-        turret::algorithms::ChassisFramePitchTurretController *> >
-        turretsAndControllers;
+    std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
     chassis::ChassisSubsystem *chassis;
 
     CalibrationState calibrationState;

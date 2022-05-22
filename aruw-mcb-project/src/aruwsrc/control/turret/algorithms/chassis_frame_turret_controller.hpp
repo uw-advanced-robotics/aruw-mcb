@@ -47,7 +47,7 @@ public:
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFrameYawTurretController(
-        TurretMotor *yawMotor,
+        TurretMotor &yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -60,7 +60,8 @@ public:
 
     void setSetpoint(float desiredSetpoint) final;
 
-    /// @return The chassis frame turret measurement.
+    /// @return The chassis frame yaw turret measurement, refer to top level documentation for more
+    /// details.
     float getMeasurement() const final;
 
     /**
@@ -100,7 +101,7 @@ public:
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFramePitchTurretController(
-        TurretMotor *pitchMotor,
+        TurretMotor &pitchMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -118,19 +119,20 @@ public:
      */
     float getSetpoint() const final;
 
-    /// @return The chassis frame turret measurement.
+    /// @return The chassis frame pitch turret measurement, refer to top level documentation for
+    /// more details.
     float getMeasurement() const final;
 
     bool isOnline() const final;
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
     {
         return controllerFrameAngle;
     }
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
     {
         return chassisFrameAngle;
     }

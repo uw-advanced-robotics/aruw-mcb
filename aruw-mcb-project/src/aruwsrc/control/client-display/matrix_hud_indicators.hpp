@@ -30,6 +30,7 @@
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 #include "hud_indicator.hpp"
 
@@ -84,6 +85,7 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+        const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
         const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
@@ -184,6 +186,8 @@ private:
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
 
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem;
+
+    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
 
     const aruwsrc::agitator::MultiShotHandler *multiShotHandler;
 

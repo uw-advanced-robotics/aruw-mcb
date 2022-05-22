@@ -216,12 +216,17 @@ public:
      * anything. If a TurretController is not associated, we don't know how to convert the
      * setpointToUnwrap into the chassis reference frame.
      *
-     * @param[out] setpointToUnwrap Setpoint to update, a setpoint angle measurement in radians in
+     * @param[in] setpointToUnwrap Setpoint to update, a setpoint angle measurement in radians in
      * the same reference frame as the attached turretController's reference frame.
+     * @return The updated setpointToUnwrap, or the same setpointToUnwrap if no updating necessary
+     * or if the notes above apply.
      */
-    inline void unwrapTargetAngle(float &setpointToUnwrap) const
+    inline float unwrapTargetAngle(float setpointToUnwrap) const
     {
-        if (turretController == nullptr || !config.limitMotorAngles) return;
+        if (turretController == nullptr || !config.limitMotorAngles)
+        {
+            return setpointToUnwrap;
+        }
 
         setpointToUnwrap = getClosestNonNormalizedSetpointToMeasurement(
             turretController->getMeasurement(),
@@ -230,6 +235,8 @@ public:
         setpointToUnwrap =
             turretController->convertChassisAngleToControllerFrame(getSetpointWithinTurretRange(
                 turretController->convertControllerAngleToChassisFrame(setpointToUnwrap)));
+
+        return setpointToUnwrap;
     }
 
 private:

@@ -22,6 +22,12 @@
 
 #include <stdint.h>
 #include "modm/math/geometry/vector3.hpp"
+
+namespace aruwsrc::can
+{
+class TurretMCBCanComm;
+}
+
 namespace aruwsrc::control::turret
 {
 /**

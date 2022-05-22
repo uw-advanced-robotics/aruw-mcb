@@ -39,6 +39,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "governor/heat_limit_governor.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
@@ -99,6 +100,9 @@ public:
         RefSerialData::Rx::MechanismID turretBarrelMechanismId;
         tap::algorithms::SmoothPidConfig pitchPidConfig;
         tap::algorithms::SmoothPidConfig yawPidConfig;
+        tap::algorithms::SmoothPidConfig yawPosPidConfig;
+        tap::algorithms::SmoothPidConfig yawVelPidConfig;
+        aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
     };
 
     SentinelTurret(aruwsrc::Drivers &drivers, const Config &config)
@@ -108,6 +112,7 @@ public:
               LEFT_MOTOR_ID,
               RIGHT_MOTOR_ID,
               config.turretCanBus,
+              &config.turretMCBCanComm,
               config.turretBarrelMechanismId),
           pitchMotor(
               &drivers,
@@ -127,6 +132,7 @@ public:
               &yawMotor,
               config.pitchMotorConfig,
               config.yawMotorConfig,
+              &config.turretMCBCanComm,
               config.turretID),
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
@@ -143,12 +149,19 @@ public:
               true,
               config.turretBarrelMechanismId),
           stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
-          chassisFramePitchTurretController(&turretSubsystem.pitchMotor, config.pitchPidConfig),
-          chassisFrameYawTurretController(&turretSubsystem.yawMotor, config.yawPidConfig),
+          chassisFramePitchTurretController(turretSubsystem.pitchMotor, config.pitchPidConfig),
+          chassisFrameYawTurretController(turretSubsystem.yawMotor, config.yawPidConfig),
+          worldFrameYawTurretImuPosPid(config.yawPosPidConfig),
+          worldFrameYawTurretImuVelPid(config.yawVelPidConfig),
+          worldFrameYawTurretImuController(
+              config.turretMCBCanComm,
+              turretSubsystem.yawMotor,
+              worldFrameYawTurretImuPosPid,
+              worldFrameYawTurretImuVelPid),
           turretManual(
               &drivers,
               &turretSubsystem,
-              &chassisFrameYawTurretController,
+              &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
               USER_YAW_INPUT_SCALAR,
               USER_PITCH_INPUT_SCALAR,
@@ -156,7 +169,7 @@ public:
           turretCVCommand(
               &drivers,
               &turretSubsystem,
-              &chassisFrameYawTurretController,
+              &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
               agitator,
               &rotateAndUnjamAgitatorWithHeatLimiting,
@@ -191,6 +204,10 @@ public:
     algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController;
     algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController;
 
+    tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid;
+    tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid;
+    algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
+
     // turret commands
     user::TurretUserControlCommand turretManual;
     cv::SentinelTurretCVCommand turretCVCommand;
@@ -208,6 +225,9 @@ SentinelTurret turretZero(
         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_2,
         .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turret0::PITCH_PID_CONFIG,
         .yawPidConfig = aruwsrc::control::turret::chassis_rel::turret0::YAW_PID_CONFIG,
+        .yawPosPidConfig = world_rel_turret_imu::turret0::YAW_POS_PID_CONFIG,
+        .yawVelPidConfig = world_rel_turret_imu::turret0::YAW_VEL_PID_CONFIG,
+        .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
     });
 
 SentinelTurret turretOne(
@@ -222,6 +242,9 @@ SentinelTurret turretOne(
         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_1,
         .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turret1::PITCH_PID_CONFIG,
         .yawPidConfig = aruwsrc::control::turret::chassis_rel::turret1::YAW_PID_CONFIG,
+        .yawPosPidConfig = world_rel_turret_imu::turret1::YAW_POS_PID_CONFIG,
+        .yawVelPidConfig = world_rel_turret_imu::turret1::YAW_VEL_PID_CONFIG,
+        .turretMCBCanComm = drivers()->turretMCBCanCommBus1,
     });
 
 /* define subsystems --------------------------------------------------------*/
@@ -229,7 +252,7 @@ SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_S
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(
     drivers(),
-    &turretOne.turretSubsystem.yawMotor,
+    turretOne.turretSubsystem,
     &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
@@ -238,6 +261,26 @@ SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
 SentinelDriveManualCommand sentinelDriveManual2(drivers(), &sentinelDrive);
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
+
+imu::ImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    {
+        {
+            &drivers()->turretMCBCanCommBus2,
+            &turretZero.turretSubsystem,
+            &turretZero.chassisFrameYawTurretController,
+            &turretZero.chassisFramePitchTurretController,
+            false,
+        },
+        {
+            &drivers()->turretMCBCanCommBus1,
+            &turretOne.turretSubsystem,
+            &turretOne.chassisFrameYawTurretController,
+            &turretOne.chassisFramePitchTurretController,
+            false,
+        },
+    },
+    nullptr);
 
 void selectNewRobotMessageHandler()
 {

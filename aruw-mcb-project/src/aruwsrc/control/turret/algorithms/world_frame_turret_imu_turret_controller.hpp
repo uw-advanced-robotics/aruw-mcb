@@ -51,14 +51,15 @@ class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawC
 {
 public:
     /**
-     * @param[in] drivers A drivers object that will be queried for IMU information.
+     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * information.
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
-        TurretMotor *yawMotor,
+        TurretMotor &yawMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid);
 
@@ -70,10 +71,14 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    /// Sets the world frame yaw angle setpoint, refer to top level documentation for more details.
     void setSetpoint(float desiredSetpoint) final;
 
+    /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
     float getSetpoint() const final;
 
+    /// @return World frame yaw angle measurement, refer to top level documentation for more
+    /// details.
     float getMeasurement() const final;
 
     bool isOnline() const final;
@@ -107,14 +112,15 @@ class WorldFramePitchTurretImuCascadePidTurretController final
 {
 public:
     /**
-     * @param[in] drivers A drivers object that will be queried for IMU information.
+     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * information.
      * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
-        TurretMotor *pitchMotor,
+        TurretMotor &pitchMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid);
 
@@ -126,10 +132,14 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    /// Sets the world frame pitch angle setpoint, refer to top level documentation for more
+    /// details.
     void setSetpoint(float desiredSetpoint) final;
 
+    /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
     float getSetpoint() const final;
 
+    /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
     float getMeasurement() const final;
 
     bool isOnline() const final;

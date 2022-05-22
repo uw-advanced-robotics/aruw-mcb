@@ -43,7 +43,7 @@ protected:
 
     WorldFrameChassisImuTurretControllerTest()
         : turretMotor(&motor, TURRET_MOTOR_CONFIG),
-          turretController(&drivers, &turretMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          turretController(drivers, turretMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           chassisFrameMeasured(0),
           chassisFrameSetpoint(0)
     {

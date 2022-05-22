@@ -39,21 +39,21 @@ class TurretUserWorldRelativeCommandTest : public Test
 protected:
     TurretUserWorldRelativeCommandTest()
         : turret(&drivers),
-          chassisFramePitchTurretController(&turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          chassisFramePitchTurretController(turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFrameYawChassisImuController(
-              &drivers,
-              &turret.yawMotor,
+              drivers,
+              turret.yawMotor,
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           posPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           velPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFramePitchTurretImuController(
               drivers.turretMCBCanCommBus1,
-              &turret.pitchMotor,
+              turret.pitchMotor,
               posPid,
               velPid),
           worldFrameYawTurretImuController(
               drivers.turretMCBCanCommBus1,
-              &turret.yawMotor,
+              turret.yawMotor,
               posPid,
               velPid),
           turretCmd(
