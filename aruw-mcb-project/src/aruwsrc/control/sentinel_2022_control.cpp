@@ -111,6 +111,7 @@ public:
               LEFT_MOTOR_ID,
               RIGHT_MOTOR_ID,
               config.turretCanBus,
+              &config.turretMCBCanComm,
               config.turretBarrelMechanismId),
           pitchMotor(
               &drivers,
@@ -129,7 +130,8 @@ public:
               &pitchMotor,
               &yawMotor,
               config.pitchMotorConfig,
-              config.yawMotorConfig),
+              config.yawMotorConfig,
+              &config.turretMCBCanComm),
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
@@ -199,6 +201,7 @@ public:
     // turret controllers
     algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController;
     algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController;
+    algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
 
     tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid;
     tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid;
@@ -221,8 +224,8 @@ SentinelTurret turretZero(
         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_2,
         .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turret0::PITCH_PID_CONFIG,
         .yawPidConfig = aruwsrc::control::turret::chassis_rel::turret0::YAW_PID_CONFIG,
-        .yawPosPidConfig = aruwsrc::control::turret::world_rel_turret_imu::turret0::YAW_POS_PID_CONFIG,
-        .yawVelPidConfig = aruwsrc::control::turret::world_rel_turret_imu::turret0::YAW_VEL_PID_CONFIG,
+        .yawPosPidConfig = world_rel_turret_imu::turret0::YAW_POS_PID_CONFIG,
+        .yawVelPidConfig = world_rel_turret_imu::turret0::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
     });
 
@@ -248,7 +251,7 @@ SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_S
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(
     drivers(),
-    &turretOne.turretSubsystem.yawMotor,
+    turretOne.turretSubsystem,
     &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
