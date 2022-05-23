@@ -32,6 +32,7 @@
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
+using namespace aruwsrc::algorithms;
 
 namespace aruwsrc::control::turret::cv
 {
@@ -53,13 +54,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
       pitchController(pitchController),
       turretID(turretID),
       launchingCommand(launchingCommand),
-      ballisticsSolver(
-          *drivers,
-          odometryInterface,
-          *turretSubsystem,
-          frictionWheels,
-          defaultLaunchSpeed,
-          turretID),
+      ballisticsSolver(*drivers, odometryInterface, frictionWheels, defaultLaunchSpeed, turretID),
       pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(
           turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
@@ -96,20 +91,16 @@ void SentinelTurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    float targetPitch, targetYaw, targetDistance, timeOfFlight;
-    bool ballisticsSolutionAvailable = ballisticsSolver.computeTurretAimAngles(
-        &targetPitch,
-        &targetYaw,
-        &targetDistance,
-        &timeOfFlight);
+    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
+        ballisticsSolver.computeTurretAimAngles();
 
-    if (ballisticsSolutionAvailable)
+    if (ballisticsSolution != std::nullopt)
     {
         exitScanMode();
 
         // Target available
-        pitchSetpoint = targetPitch;
-        yawSetpoint = targetYaw;
+        pitchSetpoint = ballisticsSolution->pitchAngle;
+        yawSetpoint = ballisticsSolution->yawAngle;
 
         auto turretController = turretSubsystem->yawMotor.getTurretController();
         if (turretController != nullptr)
@@ -131,7 +122,7 @@ void SentinelTurretCVCommand::execute()
         if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
                 turretSubsystem->yawMotor.getValidChassisMeasurementError(),
                 turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
-                targetDistance))
+                ballisticsSolution->distance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
             if (!drivers->commandScheduler.isCommandScheduled(launchingCommand))
