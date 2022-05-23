@@ -240,4 +240,6 @@ OttoBallisticsSolverMock::OttoBallisticsSolverMock(
         defaultLaunchSpeed,
         turretID
     ) {};
+
+    OttoBallisticsSolverMock::~OttoBallisticsSolverMock() {};
 }  // namespace aruwsrc::mock
