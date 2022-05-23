@@ -124,85 +124,53 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_failed_ballistics_ret
 }
 
 
-TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_timing_exactly_on_target_upon_receipt_allows_fire)
-{
-    static constexpr uint32_t TIME_MICROS = 1'000'000;
-
-    static constexpr uint32_t AGITATOR_LATENCY_MICROS = 100'000;
-    static constexpr uint32_t FLIGHT_LATENCY_MICROS = 200'000;
-    static constexpr uint32_t TIME_SINCE_MESSAGE_RECEIPT = 300'000;
-
-    ClockStub clock;
-    clock.time = TIME_MICROS / 1000;
-
-    VisionCoprocessor::TurretAimData aimData;
-    aimData.hasTarget = true;
-    aimData.recommendUseTimedShots = true;
-    aimData.targetHitTimeOffset = TIME_SINCE_MESSAGE_RECEIPT + AGITATOR_LATENCY_MICROS + FLIGHT_LATENCY_MICROS;
-    aimData.targetPulseInterval = REALLY_LONG_TIME;
-    aimData.targetIntervalDuration = 2;
-    aimData.timestamp = TIME_MICROS - TIME_SINCE_MESSAGE_RECEIPT;
-
-    EXPECT_CALL(visionCoprocessor, getLastAimData(0))
-        .WillOnce(ReturnPointee(&aimData));
-
-    EXPECT_CALL(ballistics, computeTurretAimAngles)
-        .WillOnce([&](float *pitch, float *yaw, float *distance, float *timeOfFlight) { *timeOfFlight = FLIGHT_LATENCY_MICROS / 1'000'000.; return true; } );
-
-    AutoAimLaunchTimer timer(AGITATOR_LATENCY_MICROS, &visionCoprocessor, &ballistics);
-    auto result = timer.getCurrentLaunchInclination(0);
-
-    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW, result);
-}
-
-
-TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_shot_in_early_half_of_window_allows_fire)
-{
-    static constexpr uint32_t TIME_MICROS = 1'000'000;
-
-    static constexpr uint32_t AGITATOR_LATENCY_MICROS = 100'000;
-    static constexpr uint32_t FLIGHT_LATENCY_MICROS = 200'000;
-    static constexpr uint32_t TIME_SINCE_MESSAGE_RECEIPT = 300'000;
-
-    ClockStub clock;
-    clock.time = TIME_MICROS / 1000;
-
-    VisionCoprocessor::TurretAimData aimData;
-    aimData.hasTarget = true;
-    aimData.recommendUseTimedShots = true;
-    aimData.targetHitTimeOffset = TIME_SINCE_MESSAGE_RECEIPT + AGITATOR_LATENCY_MICROS + FLIGHT_LATENCY_MICROS - HIT_TIME_ERROR_MICROS;
-    aimData.targetPulseInterval = REALLY_LONG_TIME;
-    aimData.targetIntervalDuration = 10;
-    aimData.timestamp = TIME_MICROS - TIME_SINCE_MESSAGE_RECEIPT;
-
-    EXPECT_CALL(visionCoprocessor, getLastAimData(0))
-        .WillOnce(ReturnPointee(&aimData));
-
-    EXPECT_CALL(ballistics, computeTurretAimAngles)
-        .WillOnce([&](float *pitch, float *yaw, float *distance, float *timeOfFlight) { *timeOfFlight = FLIGHT_LATENCY_MICROS / 1'000'000.; return true; } );
-
-    AutoAimLaunchTimer timer(AGITATOR_LATENCY_MICROS, &visionCoprocessor, &ballistics);
-    auto result = timer.getCurrentLaunchInclination(0);
-
-    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW, result);
-}
-
-
 // TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_timing_exactly_on_target_upon_receipt_allows_fire)
 // {
 //     static constexpr uint32_t TIME_MICROS = 1'000'000;
 
 //     static constexpr uint32_t AGITATOR_LATENCY_MICROS = 100'000;
 //     static constexpr uint32_t FLIGHT_LATENCY_MICROS = 200'000;
-//     static constexpr uint32_t TIME_SINCE_MESSAGE_RECEIPT = AGITATOR_LATENCY_MICROS + FLIGHT_LATENCY_MICROS;
+//     static constexpr uint32_t TIME_SINCE_MESSAGE_RECEIPT = 300'000;
 
 //     ClockStub clock;
 //     clock.time = TIME_MICROS / 1000;
 
 //     VisionCoprocessor::TurretAimData aimData;
-//     aimData.hasTarget = 1;
-//     aimData.recommendUseTimedShots = 1;
-//     aimData.targetHitTimeOffset = 0;
+//     aimData.hasTarget = true;
+//     aimData.recommendUseTimedShots = true;
+//     aimData.targetHitTimeOffset = TIME_SINCE_MESSAGE_RECEIPT + AGITATOR_LATENCY_MICROS + FLIGHT_LATENCY_MICROS;
+//     aimData.targetPulseInterval = REALLY_LONG_TIME;
+//     aimData.targetIntervalDuration = 2;
+//     aimData.timestamp = TIME_MICROS - TIME_SINCE_MESSAGE_RECEIPT;
+
+//     EXPECT_CALL(visionCoprocessor, getLastAimData(0))
+//         .WillOnce(ReturnPointee(&aimData));
+
+//     EXPECT_CALL(ballistics, computeTurretAimAngles)
+//         .WillOnce([&](float *pitch, float *yaw, float *distance, float *timeOfFlight) { *timeOfFlight = FLIGHT_LATENCY_MICROS / 1'000'000.; return true; } );
+
+//     AutoAimLaunchTimer timer(AGITATOR_LATENCY_MICROS, &visionCoprocessor, &ballistics);
+//     auto result = timer.getCurrentLaunchInclination(0);
+
+//     ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW, result);
+// }
+
+
+// TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_shot_in_early_half_of_window_allows_fire)
+// {
+//     static constexpr uint32_t TIME_MICROS = 1'000'000;
+
+//     static constexpr uint32_t AGITATOR_LATENCY_MICROS = 100'000;
+//     static constexpr uint32_t FLIGHT_LATENCY_MICROS = 200'000;
+//     static constexpr uint32_t TIME_SINCE_MESSAGE_RECEIPT = 300'000;
+
+//     ClockStub clock;
+//     clock.time = TIME_MICROS / 1000;
+
+//     VisionCoprocessor::TurretAimData aimData;
+//     aimData.hasTarget = true;
+//     aimData.recommendUseTimedShots = true;
+//     aimData.targetHitTimeOffset = TIME_SINCE_MESSAGE_RECEIPT + AGITATOR_LATENCY_MICROS + FLIGHT_LATENCY_MICROS - HIT_TIME_ERROR_MICROS;
 //     aimData.targetPulseInterval = REALLY_LONG_TIME;
 //     aimData.targetIntervalDuration = 10;
 //     aimData.timestamp = TIME_MICROS - TIME_SINCE_MESSAGE_RECEIPT;
@@ -218,3 +186,24 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_shot_in_early_half_of
 
 //     ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW, result);
 // }
+
+
+// struct TestParameters {
+
+// }
+
+class AutoAimLaunchTimerTestParameterizedFixture :public ::testing::TestWithParam<int> {
+};
+
+TEST_P(AutoAimLaunchTimerTestParameterizedFixture, foo)
+{
+    int x = GetParam();
+    ASSERT_NE(5, x);
+}
+
+INSTANTIATE_TEST_CASE_P(
+        FFFF,
+        AutoAimLaunchTimerTestParameterizedFixture,
+        ::testing::Values(
+                1, 711, 1989, 2013, 5
+        ));
