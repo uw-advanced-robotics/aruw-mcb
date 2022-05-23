@@ -98,6 +98,8 @@ public:
         bool hasTarget;      ///< Whether or not the xavier has a target.
         uint32_t timestamp;  ///< Timestamp in microseconds.
 
+        uint32_t firerate;   ///< Firerate of sentry (low 0 - 3 high)
+
         bool recommendUseTimedShots;   ///< Validity of the targetHitTime
         uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our
                                        ///< next shot should ideally hit
