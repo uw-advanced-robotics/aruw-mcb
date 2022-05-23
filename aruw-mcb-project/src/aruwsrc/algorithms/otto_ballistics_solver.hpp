@@ -92,6 +92,11 @@ public:
         float pitchAngleError,
         float targetDistance)
     {
+        if (targetDistance < 0)
+        {
+            return false;
+        }
+
         return (abs(yawAngleError) < atan2f(
                                          aruwsrc::algorithms::OttoBallisticsSolver::PLATE_WIDTH,
                                          2.0f * targetDistance)) &&

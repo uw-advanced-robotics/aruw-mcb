@@ -63,7 +63,8 @@ namespace aruwsrc::algorithms::odometry
  * @see OttoChassisOrientationGetter
  * @see OttoChassisVelocityGetter
  */
-class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem, public tap::algorithms::odometry::Odometry2DTracker
+class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
+                                              public tap::algorithms::odometry::Odometry2DTracker
 {
 public:
     /**

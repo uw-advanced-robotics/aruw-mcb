@@ -87,12 +87,15 @@ void OttoBallisticsSolver::computeTurretAimAngles(std::optional<BallisticsSoluti
         };
 
         // time in microseconds to project the target position ahead by
-        uint32_t projectForwardTimeDt = tap::arch::clock::getTimeMicroseconds() - aimData.timestamp;
+        int64_t projectForwardTimeDt =
+            static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
+            static_cast<int64_t>(aimData.timestamp);
 
         // project the target position forward in time s.t. we are computing a ballistics solution
         // for a target "now" rather than whenever the camera saw the target
         targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
 
+        lastComputedSolution = BallisticsSolution();
         lastComputedSolution->distance = targetState.position.getLength();
 
         if (!ballistics::findTargetProjectileIntersection(
