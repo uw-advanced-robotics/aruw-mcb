@@ -36,65 +36,80 @@ namespace aruwsrc::algorithms
 OttoBallisticsSolver::OttoBallisticsSolver(
     const Drivers &drivers,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::turret::TurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : drivers(drivers),
       odometryInterface(odometryInterface),
-      turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretID(turretID)
 {
 }
 
-bool OttoBallisticsSolver::computeTurretAimAngles(
-    float *pitchAngle,
-    float *yawAngle,
-    float *distance,
-    float *timeOfFlight)
+std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
+    computeTurretAimAngles()
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
 
     // Verify that CV is actually online and that the aimData had a target
     if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
     {
-        return false;
+        lastComputedSolution = std::nullopt;
+        return std::nullopt;
     }
 
-    // if the friction wheel launch speed is 0, use a default launch speed so ballistics gives a
-    // reasonable computation
-    const float launchSpeed = compareFloatClose(frictionWheels.getPredictedLaunchSpeed(), 0, 1E-5)
-                                  ? defaultLaunchSpeed
-                                  : frictionWheels.getPredictedLaunchSpeed();
+    if (lastAimDataTimestamp != aimData.timestamp ||
+        lastOdometryTimestamp != odometryInterface.getLastComputedOdometryTime())
+    {
+        lastAimDataTimestamp = aimData.timestamp;
+        lastOdometryTimestamp = odometryInterface.getLastComputedOdometryTime();
 
-    const Vector2f robotPosition = odometryInterface.getCurrentLocation2D().getPosition();
+        // if the friction wheel launch speed is 0, use a default launch speed so ballistics
+        // gives a reasonable computation
+        float launchSpeed = frictionWheels.getPredictedLaunchSpeed();
+        if (compareFloatClose(launchSpeed, 0.0f, 1e-5f))
+        {
+            launchSpeed = defaultLaunchSpeed;
+        }
 
-    const Vector2f chassisVelocity = odometryInterface.getCurrentVelocity2D();
+        const Vector2f robotPos = odometryInterface.getCurrentLocation2D().getPosition();
 
-    // target state, frame whose axis is at the turret center and z is up
-    // assume acceleration of the chassis is 0 since we don't measure it
-    ballistics::MeasuredKinematicState targetState = {
-        .position = {aimData.xPos - robotPosition.x, aimData.yPos - robotPosition.y, aimData.zPos},
-        .velocity =
-            {aimData.xVel - chassisVelocity.x, aimData.yVel - chassisVelocity.y, aimData.zVel},
-        .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
-                                                                     // acceleration from IMU
-    };
+        const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
 
-    uint32_t projectforwardtimedt = tap::arch::clock::getTimeMicroseconds() - aimData.timestamp;
+        // target state, frame whose axis is at the turret center and z is up
+        // assume acceleration of the chassis is 0 since we don't measure it
+        ballistics::MeasuredKinematicState targetState = {
+            .position = {aimData.xPos - robotPos.x, aimData.yPos - robotPos.y, aimData.zPos},
+            .velocity = {aimData.xVel - chassisVel.x, aimData.yVel - chassisVel.y, aimData.zVel},
+            // TODO consider using chassis acceleration from IMU
+            .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},
+        };
 
-    targetState.position = targetState.projectForward(projectforwardtimedt / 1E6f);
+        // time in microseconds to project the target position ahead by
+        int64_t projectForwardTimeDt =
+            static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
+            static_cast<int64_t>(aimData.timestamp);
 
-    *distance = targetState.position.getLength();
+        // project the target position forward in time s.t. we are computing a ballistics solution
+        // for a target "now" rather than whenever the camera saw the target
+        targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
 
-    return ballistics::findTargetProjectileIntersection(
-        targetState,
-        launchSpeed,
-        3,
-        pitchAngle,
-        yawAngle,
-        timeOfFlight);
+        lastComputedSolution = BallisticsSolution();
+        lastComputedSolution->distance = targetState.position.getLength();
+
+        if (!ballistics::findTargetProjectileIntersection(
+                targetState,
+                launchSpeed,
+                3,
+                &lastComputedSolution->pitchAngle,
+                &lastComputedSolution->yawAngle,
+                &lastComputedSolution->timeOfFlight))
+        {
+            lastComputedSolution = std::nullopt;
+        }
+    }
+
+    return lastComputedSolution;
 }
 }  // namespace aruwsrc::algorithms
