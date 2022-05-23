@@ -44,6 +44,7 @@
 #include "governor/cv_online_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
+#include "governor/fire_rate_limit_governor.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -215,22 +216,21 @@ public:
     DjiMotor pitchMotor;
     DjiMotor yawMotor;
     SentinelTurretSubsystem turretSubsystem;
+
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
 
-    // friction wheel commands
-    FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
-    FrictionWheelSpinRefLimitedCommand stopFrictionWheels;
+    // unjam commands
+    MoveIntegralCommand rotateAgitator;
+    UnjamIntegralCommand unjamAgitator;
+    MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
 
-    // turret controllers
-    algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController;
-    algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController;
+    // rotates agitator if friction wheels are spinning fast
+    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
 
-    tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid;
-    tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid;
-    algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
+    // rotates agitator with heat limiting applied
 
-    // turret commands
+    // limits fire rate
     user::TurretUserControlCommand turretManual;
 
     cv::SentinelTurretCVCommand turretCVCommand;
