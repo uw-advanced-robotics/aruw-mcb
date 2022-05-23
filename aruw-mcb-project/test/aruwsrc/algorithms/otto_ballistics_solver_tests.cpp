@@ -136,14 +136,14 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_cv_offline)
 {
     cvOnline = false;
 
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     EXPECT_FALSE(solution.has_value());
 }
 
 TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aim_data_invalid)
 {
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     aimData.hasTarget = false;
 
@@ -154,7 +154,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
 {
     aimData.xPos = 2;
 
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     // if timestamps had changed solution would be valid
     EXPECT_FALSE(solution.has_value());
@@ -167,7 +167,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
 
     lastComputedOdomTime = 100;
 
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     EXPECT_TRUE(solution.has_value());
     EXPECT_NEAR(2, solution->distance, 1e-5);
@@ -181,7 +181,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
 
     clock.time = 100;
 
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     EXPECT_TRUE(solution.has_value());
     EXPECT_NEAR(2, solution->distance, 1e-5);
@@ -197,7 +197,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 
     clock.time = 100;
 
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     EXPECT_TRUE(solution.has_value());
     EXPECT_NEAR(4, solution->distance, 1e-5);
@@ -215,12 +215,12 @@ TEST_F(
 
     EXPECT_CALL(odometry, getCurrentLocation2D).Times(1);
 
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     EXPECT_TRUE(solution.has_value());
     EXPECT_NEAR(2, solution->distance, 1e-5);
 
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     EXPECT_TRUE(solution.has_value());
     EXPECT_NEAR(2, solution->distance, 1e-5);
@@ -234,7 +234,7 @@ TEST_F(OttoBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid
 
     clock.time = 100;
 
-    solver.computeTurretAimAngles(solution);
+    solution = solver.computeTurretAimAngles();
 
     EXPECT_FALSE(solution.has_value());
 }

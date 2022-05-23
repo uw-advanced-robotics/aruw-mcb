@@ -47,16 +47,16 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 {
 }
 
-void OttoBallisticsSolver::computeTurretAimAngles(std::optional<BallisticsSolution> &solution)
+std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
+    computeTurretAimAngles()
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
 
     // Verify that CV is actually online and that the aimData had a target
     if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
     {
-        solution = std::nullopt;
         lastComputedSolution = std::nullopt;
-        return;
+        return std::nullopt;
     }
 
     if (lastAimDataTimestamp != aimData.timestamp ||
@@ -110,6 +110,6 @@ void OttoBallisticsSolver::computeTurretAimAngles(std::optional<BallisticsSoluti
         }
     }
 
-    solution = lastComputedSolution;
+    return lastComputedSolution;
 }
 }  // namespace aruwsrc::algorithms
