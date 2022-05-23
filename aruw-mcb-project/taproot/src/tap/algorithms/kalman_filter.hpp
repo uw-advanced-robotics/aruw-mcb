@@ -102,10 +102,10 @@ public:
     const std::array<float, STATES> &getStateMatrix() const { return xHat.data; }
 
     /**
-     * @return Modifiable pointer to measurement covariance array so the covariance can be modified at
-     * runtime if need be.
+     * @return Modifiable pointer to measurement covariance array so the covariance can be modified
+     * at runtime if need be.
      */
-    inline std::array<float, INPUTS*INPUTS> &getMeasurementCovariance() { return R.data; }
+    inline std::array<float, INPUTS * INPUTS> &getMeasurementCovariance() { return R.data; }
 
 private:
     /**

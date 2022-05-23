@@ -119,40 +119,27 @@ void TurretMotor::setChassisFrameSetpoint(float setpoint)
 
     if (config.limitMotorAngles)
     {
-        int status = 0;
-        ContiguousFloat::limitValue(
-            ContiguousFloat(chassisFrameSetpoint, 0, M_TWOPI),
-            config.minAngle,
-            config.maxAngle,
-            &status);
-        if (status == 1)
-        {
-            chassisFrameSetpoint = config.minAngle;
-        }
-        else if (status == 2)
-        {
-            chassisFrameSetpoint = config.maxAngle;
-        }
+        chassisFrameSetpoint = limitVal(chassisFrameSetpoint, config.minAngle, config.maxAngle);
     }
 }
 
 float TurretMotor::getValidChassisMeasurementError() const
 {
-    return getValidMinError(chassisFrameUnwrappedMeasurement);
+    return getValidMinError(chassisFrameSetpoint, chassisFrameUnwrappedMeasurement);
 }
 
-float TurretMotor::getValidMinError(const float measurement) const
+float TurretMotor::getValidMinError(const float setpoint, const float measurement) const
 {
     if (config.limitMotorAngles)
     {
         // the error is absolute
-        return chassisFrameSetpoint - measurement;
+        return setpoint - measurement;
     }
     else
     {
         // the error can be wrapped around the unit circle
         // equivalent to this - other
-        return ContiguousFloat(measurement, 0, M_TWOPI).difference(chassisFrameSetpoint);
+        return ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
     }
 }
 

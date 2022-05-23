@@ -29,6 +29,7 @@
 #include "chassis_kf_odometry.hpp"
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 #include "otto_chassis_world_yaw_observer.hpp"
+#include "chassis_kf_odometry.hpp"
 
 // Forward declarations
 namespace aruwsrc
@@ -37,7 +38,7 @@ class Drivers;
 }
 namespace aruwsrc::control::turret
 {
-class TurretMotor;
+class TurretSubsystem;
 }
 
 namespace tap::control::chassis
@@ -65,7 +66,7 @@ namespace aruwsrc::algorithms::odometry
  * @see OttoChassisVelocityGetter
  */
 class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
-                                              public tap::algorithms::odometry::Odometry2DInterface
+                                              public ChassisKFOdometry
 {
 public:
     /**
@@ -75,25 +76,14 @@ public:
      * @param[in] chassis pointer to aruwsrc ChassisSubsystem
      */
     OttoVelocityOdometry2DSubsystem(
-        aruwsrc::Drivers* drivers,
-        const aruwsrc::control::turret::TurretMotor* turret,
-        tap::control::chassis::ChassisSubsystemInterface* chassis);
+        aruwsrc::Drivers& drivers,
+        const aruwsrc::control::turret::TurretSubsystem& turret,
+        tap::control::chassis::ChassisSubsystemInterface& chassis);
 
     void refresh() override;
 
-    modm::Location2D<float> getCurrentLocation2D() const override final
-    {
-        return odometryTracker.getCurrentLocation2D();
-    }
-
-    modm::Vector2f getCurrentVelocity2D() const override final
-    {
-        return odometryTracker.getCurrentVelocity2D();
-    }
-
 private:
     OttoChassisWorldYawObserver orientationObserver;
-    ChassisKFOdometry odometryTracker;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

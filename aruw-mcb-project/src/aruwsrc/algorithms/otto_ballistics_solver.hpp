@@ -20,6 +20,8 @@
 #ifndef OTTO_BALLISTICS_SOLVER_HPP_
 #define OTTO_BALLISTICS_SOLVER_HPP_
 
+#include <optional>
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::chassis
@@ -56,12 +58,52 @@ namespace aruwsrc::algorithms
 class OttoBallisticsSolver
 {
 public:
+    struct BallisticsSolution
+    {
+        /// The computed straight line distance between the turret and target, in m.
+        float pitchAngle;
+        /// The computed yaw angle in the world frame in radians.
+        float yawAngle;
+        /// The computed pitch angle in the world frame in radians.
+        float distance;
+        /// The expected time-of-flight until impact (in seconds).
+        float timeOfFlight;
+    };
+
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`. This
      * function is an iterative ballistics solver, so this represents how many iterations to
      * perform the ballistics computation.
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
+
+    /// The width of a small armor plate, in m
+    static constexpr float PLATE_WIDTH = 0.1f;
+    /// The height of a small armor plate, in m
+    static constexpr float PLATE_HEIGHT = 0.1f;
+
+    /**
+     * @return true if the specified yaw and pitch angle errors are small enough such that if a
+     * projectile were to be launched, the projectile would hit a small armor plate at
+     * targetDistance m away.
+     */
+    static inline bool withinAimingTolerance(
+        float yawAngleError,
+        float pitchAngleError,
+        float targetDistance)
+    {
+        if (targetDistance < 0)
+        {
+            return false;
+        }
+
+        return (abs(yawAngleError) < atan2f(
+                                         aruwsrc::algorithms::OttoBallisticsSolver::PLATE_WIDTH,
+                                         2.0f * targetDistance)) &&
+               (abs(pitchAngleError) < atan2f(
+                                           aruwsrc::algorithms::OttoBallisticsSolver::PLATE_HEIGHT,
+                                           2.0f * targetDistance));
+    }
 
     /**
      * @param[in] drivers Pointer to a global drivers object.
@@ -76,7 +118,6 @@ public:
     OttoBallisticsSolver(
         const aruwsrc::Drivers &drivers,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::TurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID);
@@ -88,23 +129,21 @@ public:
      * This function verifies that the aim data it uses is valid (i.e.: it contains coords for a
      * real target and CV is online).
      *
-     * @note This function may modify `pitchAngle` and `yawAngle` even if no valid solution is
-     * found.
-     *
-     * @param[out] pitchAngle The computed pitch angle in the world frame in radians.
-     * @param[out] yawAngle The computed yaw angle in the world frame in radians.
-     * @return `true` if CV is online, the most recent aim data is valid, and a valid ballistics
-     * solution was found. `false` otherwise.
+     * @param[out] solution The ballistics solution computed. Will potentially update any of the
+     * fields even if the solution's validSolutionFound function is false
      */
-    bool computeTurretAimAngles(float *pitchAngle, float *yawAngle);
+    std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
     const Drivers &drivers;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const control::turret::TurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
     const uint8_t turretID;
+
+    uint32_t lastAimDataTimestamp = 0;
+    uint32_t lastOdometryTimestamp = 0;
+    std::optional<BallisticsSolution> lastComputedSolution = {};
 };
 }  // namespace aruwsrc::algorithms
 

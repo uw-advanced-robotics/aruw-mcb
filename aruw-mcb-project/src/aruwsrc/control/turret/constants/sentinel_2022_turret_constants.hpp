@@ -44,7 +44,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 6450,
+    .startEncoderValue = 7655,
     .minAngle = -M_PI - modm::toRadian(60),
     .maxAngle = modm::toRadian(30),
     .limitMotorAngles = true,
@@ -65,7 +65,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 7152,
+    .startEncoderValue = 1050,
     .minAngle = -M_PI_2,
     .maxAngle = M_PI + modm::toRadian(30),
     .limitMotorAngles = true,
@@ -73,7 +73,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4096,
+    .startEncoderValue = 1365,
     .minAngle = modm::toRadian(-15),
     .maxAngle = modm::toRadian(60),
     .limitMotorAngles = true,
@@ -83,32 +83,32 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr float TURRET_CG_X = 0;
-static constexpr float TURRET_CG_Z = 0;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
+static constexpr float TURRET_CG_X = -48.14f;
+static constexpr float TURRET_CG_Z = 9.45f;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 7'200.0f;
 
 namespace chassis_rel
 {
 namespace turret0
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 110'000.0f,
+    .kp = 70'000.0f,
     .ki = 0.0f,
-    .kd = 6'000.0f,
+    .kd = 3'000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 194'805.7f,
-    .ki = 0.0f,
-    .kd = 5'729.6f,
-    .maxICumulative = 0.0f,
+    .kp = 180'000.0f,
+    .ki = 1'000.0f,
+    .kd = 3'500.0f,
+    .maxICumulative = 3'000.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
@@ -121,23 +121,23 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 namespace turret1
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 110'000.0f,
+    .kp = 70'000.0f,
     .ki = 0.0f,
-    .kd = 6'000.0f,
+    .kd = 3'000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 194'805.7f,
-    .ki = 0.0f,
-    .kd = 5'729.6f,
-    .maxICumulative = 0.0f,
+    .kp = 180'000.0f,
+    .ki = 1'000.0f,
+    .kd = 3'500.0f,
+    .maxICumulative = 3'000.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
@@ -147,6 +147,71 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 };
 }  // namespace turret1
 }  // namespace chassis_rel
+
+namespace world_rel_turret_imu
+{
+namespace turret0
+{
+static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
+    .kp = 18.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 10'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
+    .kp = 40'000.0f,
+    .ki = 286.5f,
+    .kd = 0.0f,
+    .maxICumulative = 2'000.0f,
+    .maxOutput = 30'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+}  // namespace turret0
+
+namespace turret1
+{
+static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
+    .kp = 18.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 10'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
+    .kp = 40'000.0f,
+    .ki = 286.5f,
+    .kd = 0.0f,
+    .maxICumulative = 2'000.0f,
+    .maxOutput = 30'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+}  // namespace turret1
+}  // namespace world_rel_turret_imu
 }  // namespace  aruwsrc::control::turret
 
-#endif  // SENTINEL_TURRET_CONSTANTS_HPP_
+#endif  // SENTINEL_2022_TURRET_CONSTANTS_HPP_

@@ -44,6 +44,8 @@ public:
 
     inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
 
+    inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
+
     void update();
 
 private:
