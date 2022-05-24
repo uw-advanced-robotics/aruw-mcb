@@ -39,6 +39,11 @@ namespace aruwsrc
 class Drivers;
 }
 
+namespace aruwsrc::can
+{
+class TurretMCBCanComm;
+}
+
 namespace aruwsrc::control::launcher
 {
 /**
@@ -55,7 +60,8 @@ public:
         aruwsrc::Drivers *drivers,
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
-        tap::can::CanBus canBus);
+        tap::can::CanBus canBus,
+        aruwsrc::can::TurretMCBCanComm *turretMCB);
 
     void initialize() override;
 
@@ -70,6 +76,11 @@ public:
     mockable void setDesiredLaunchSpeed(float speed);
 
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
+
+    /**
+     * @return The average measured friction wheel speed of the launcher in RPM.
+     */
+    float getCurrentFrictionWheelSpeed() const;
 
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
@@ -124,6 +135,8 @@ private:
     tap::motor::DjiMotor leftWheel;
     tap::motor::DjiMotor rightWheel;
 #endif
+
+    aruwsrc::can::TurretMCBCanComm *turretMCB;
 
     /**
      * @param[in] launchSpeed Some launch speed in m/s. The speed will be

@@ -40,8 +40,8 @@ class TurretUserControlCommandTest : public Test
 protected:
     TurretUserControlCommandTest()
         : turret(&drivers),
-          pitchController(&turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          yawController(&turret.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          pitchController(turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          yawController(turret.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           turretCmd(&drivers, &turret, &yawController, &pitchController, 1, 1)
     {
     }

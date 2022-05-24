@@ -26,13 +26,9 @@
 #include "tap/algorithms/smooth_pid.hpp"
 
 #include "../turret_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 #include "turret_controller_interface.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret
 {
@@ -48,6 +44,9 @@ namespace aruwsrc::control::turret::algorithms
  * frame turret angle.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
+ *
+ * @note Upon initialization of the controller, the world frame zero point is set to the current IMU
+ * yaw angle.
  */
 class WorldFrameYawChassisImuTurretController final : public TurretYawControllerInterface
 {
@@ -58,8 +57,8 @@ public:
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     WorldFrameYawChassisImuTurretController(
-        aruwsrc::Drivers *drivers,
-        TurretMotor *yawMotor,
+        aruwsrc::Drivers &drivers,
+        TurretMotor &yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -70,7 +69,12 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
     void setSetpoint(float desiredSetpoint) final;
+
+    /// @return world frame yaw angle measurement, refer to top level documentation for more
+    /// details.
+    float getMeasurement() const final;
 
     /**
      * @return The yaw setpoint, in the world frame.
@@ -79,14 +83,46 @@ public:
 
     bool isOnline() const final;
 
+    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
+
+    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
+
 private:
-    aruwsrc::Drivers *drivers;
+    aruwsrc::Drivers &drivers;
 
     tap::algorithms::SmoothPid pid;
 
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+    int revolutions = 0;
+    float prevYaw = 0;
+
+    float worldFrameSetpoint = 0;
 
     float chassisFrameInitImuYawAngle = 0.0f;
+
+    float getMpu6500YawUnwrapped() const
+    {
+        return modm::toRadian(drivers.mpu6500.getYaw()) + M_TWOPI * revolutions;
+    }
+
+    /**
+     * Updates the mpu6500 yaw revolution counter and the prevYaw value (which is used to update the
+     * revolution counter). This is the only function that should be used to update `prevYaw` or
+     * `revolutions`.
+     */
+    void updateRevolutionCounter()
+    {
+        const float newYaw = modm::toRadian(drivers.mpu6500.getYaw());
+        const float diff = newYaw - prevYaw;
+        prevYaw = newYaw;
+        if (diff < -M_PI)
+        {
+            revolutions++;
+        }
+        else if (diff > M_PI)
+        {
+            revolutions--;
+        }
+    }
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

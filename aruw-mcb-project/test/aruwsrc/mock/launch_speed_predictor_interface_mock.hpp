@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,19 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hero_turret_subsystem.hpp"
+#ifndef LAUNCH_SPEED_PREDICTOR_INTERFACE_MOCK_HPP_
+#define LAUNCH_SPEED_PREDICTOR_INTERFACE_MOCK_HPP_
 
-#include "aruwsrc/drivers.hpp"
+#include <gmock/gmock.h>
 
-namespace aruwsrc::control::turret
+#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
+
+namespace aruwsrc::mock
 {
-float HeroTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
-
-float HeroTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
-
-uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
+class LaunchSpeedPredictorInterfaceMock
+    : public aruwsrc::control::launcher::LaunchSpeedPredictorInterface
 {
-    return getTurretMCB()->getIMUDataTimestamp();
-}
+public:
+    MOCK_METHOD(float, getPredictedLaunchSpeed, (), (const override));
+};
+}  // namespace aruwsrc::mock
 
-}  // namespace aruwsrc::control::turret
+#endif  // LAUNCH_SPEED_PREDICTOR_INTERFACE_MOCK_HPP_

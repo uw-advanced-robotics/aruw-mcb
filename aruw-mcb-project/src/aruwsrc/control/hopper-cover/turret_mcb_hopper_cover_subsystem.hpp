@@ -38,22 +38,24 @@ namespace aruwsrc::control
 class TurretMCBHopperSubsystem : public tap::control::Subsystem
 {
 public:
-    TurretMCBHopperSubsystem(aruwsrc::Drivers *drivers)
+    TurretMCBHopperSubsystem(
+        aruwsrc::Drivers *drivers,
+        aruwsrc::can::TurretMCBCanComm &turretMCBCanComm)
         : tap::control::Subsystem(drivers),
-          drivers(drivers)
+          turretMCBCanComm(turretMCBCanComm)
     {
     }
 
     mockable void setOpen()
     {
         hopperOpen = true;
-        drivers->turretMCBCanComm.setOpenHopperCover(true);
+        turretMCBCanComm.setOpenHopperCover(true);
     }
 
     mockable void setClose()
     {
         hopperOpen = false;
-        drivers->turretMCBCanComm.setOpenHopperCover(false);
+        turretMCBCanComm.setOpenHopperCover(false);
     }
 
     void refresh() override {}
@@ -69,7 +71,7 @@ public:
     bool getIsHopperOpen() const { return hopperOpen; }
 
 private:
-    aruwsrc::Drivers *drivers;
+    aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     bool hopperOpen = false;
 };

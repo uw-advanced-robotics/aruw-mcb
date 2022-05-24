@@ -68,8 +68,8 @@ class SentinelTurretCVCommand : public tap::control::ComprisedCommand
 public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
     /// (in radians)
-    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-10.0f);
-    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(50.0f);
+    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-15.0f);
+    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(60.0f);
 
     /**
      * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
@@ -168,9 +168,6 @@ private:
 
     bool scanning = false;
 
-    float yawScanValue;
-    float pitchScanValue;
-
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
      * and that keeps track of the number of times `refresh` is called when
@@ -181,10 +178,15 @@ private:
 
     inline void enterScanMode(float yawSetpoint, float pitchSetpoint)
     {
+        if (yawController != nullptr)
+        {
+            yawSetpoint = yawController->convertControllerAngleToChassisFrame(yawSetpoint);
+        }
+
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
-        yawScanValue = yawSetpoint;
-        pitchScanValue = pitchSetpoint;
+        yawScanner.setScanSetpoint(yawSetpoint);
+        pitchScanner.setScanSetpoint(pitchSetpoint);
     }
 
     inline void exitScanMode()
