@@ -71,17 +71,17 @@ public:
      */
     struct TurretAimData
     {
-        float xPos{0};       ///< x position of the target (in m).
-        float yPos{0};       ///< y position of the target (in m).
-        float zPos{0};       ///< z position of the target (in m).
+        float xPos;          ///< x position of the target (in m).
+        float yPos;          ///< y position of the target (in m).
+        float zPos;          ///< z position of the target (in m).
 
-        float xVel{0};       ///< x velocity of the target (in m/s).
-        float yVel{0};       ///< y velocity of the target (in m/s).
-        float zVel{0};       ///< z velocity of the target (in m/s).
+        float xVel;          ///< x velocity of the target (in m/s).
+        float yVel;          ///< y velocity of the target (in m/s).
+        float zVel;          ///< z velocity of the target (in m/s).
 
-        float xAcc{0};       ///< x acceleration of the target (in m/s^2).
-        float yAcc{0};       ///< y acceleration of the target (in m/s^2).
-        float zAcc{0};       ///< z acceleration of the target (in m/s^2).
+        float xAcc;          ///< x acceleration of the target (in m/s^2).
+        float yAcc;          ///< y acceleration of the target (in m/s^2).
+        float zAcc;          ///< z acceleration of the target (in m/s^2).
 
         bool hasTarget;      ///< Whether or not the xavier has a target.
         uint32_t timestamp;  ///< Timestamp in microseconds.

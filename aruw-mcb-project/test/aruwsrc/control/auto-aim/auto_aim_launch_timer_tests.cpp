@@ -117,6 +117,17 @@ static constexpr uint32_t SMALL_TIMING_ERROR = 10;
 // factor could be zero.
 static constexpr uint32_t FLOATING_POINT_FUDGE_MICROS = 1;
 
+struct TestParamsAimData
+{
+    bool hasTarget;
+    uint32_t timestamp;
+
+    bool recommendUseTimedShots;
+    uint32_t targetHitTimeOffset;
+    uint32_t targetPulseInterval;
+    uint32_t targetIntervalDuration;
+};
+
 struct TestParams {
     uint8_t turretNumber = 0;
 
@@ -125,7 +136,7 @@ struct TestParams {
     bool ballisticsSuccess = true;
     uint32_t ballisticsTimeOfFlight;
 
-    VisionCoprocessor::TurretAimData aimData;
+    TestParamsAimData aimData;
 
     AutoAimLaunchTimer::LaunchInclination expectedResult;
 };
@@ -140,8 +151,28 @@ TEST_P(AutoAimLaunchTimerTestParameterizedFixture, getCurrentLaunchInclination_c
     ClockStub clock;
     clock.time = TIME_MICROS / 1000;
 
+    VisionCoprocessor::TurretAimData aimData = {
+        .xPos{0},
+        .yPos{0},
+        .zPos{0},
+
+        .xVel{0},
+        .yVel{0},
+        .zVel{0},
+
+        .xAcc{0},
+        .yAcc{0},
+        .zAcc{0},
+
+        .hasTarget{params.aimData.hasTarget},
+        .timestamp{params.aimData.timestamp},
+
+        .recommendUseTimedShots{params.aimData.recommendUseTimedShots},
+        .targetHitTimeOffset{params.aimData.targetHitTimeOffset},
+        .targetIntervalDuration{params.aimData.targetIntervalDuration},
+    };
     EXPECT_CALL(visionCoprocessor, getLastAimData(params.turretNumber))
-        .WillOnce(ReturnPointee(&params.aimData));
+        .WillOnce(ReturnPointee(&aimData));
 
     std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsResult;
     if (params.ballisticsSuccess) {
