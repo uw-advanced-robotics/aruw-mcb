@@ -39,6 +39,10 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::UNGATED;
     }
 
+    if (aimData.targetPulseInterval == 0) {
+        return LaunchInclination::GATED_DENY;
+    }
+
     auto ballisticsSolution = ballistics->computeTurretAimAngles();
     if (!ballisticsSolution.has_value()) {
         return LaunchInclination::GATED_DENY;

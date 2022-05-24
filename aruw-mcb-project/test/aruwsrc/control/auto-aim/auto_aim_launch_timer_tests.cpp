@@ -105,6 +105,26 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_valid_non_timed_targe
     ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::UNGATED, result);
 }
 
+TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_zero_interval_returns_deny)
+{
+    VisionCoprocessor::TurretAimData aimData;
+    aimData.hasTarget = 1;
+    aimData.recommendUseTimedShots = 1;
+    aimData.targetHitTimeOffset = 100;
+    aimData.targetIntervalDuration = 100;
+    aimData.targetPulseInterval = 0;
+
+    EXPECT_CALL(visionCoprocessor, getLastAimData(0))
+        .WillOnce(ReturnPointee(&aimData));
+
+    EXPECT_CALL(ballistics, computeTurretAimAngles).Times(0);
+
+    AutoAimLaunchTimer timer(100, &visionCoprocessor, &ballistics);
+    auto result = timer.getCurrentLaunchInclination(0);
+
+    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_DENY, result);
+}
+
 static constexpr uint32_t TIME_MICROS = 1'000'000;
 
 static constexpr uint32_t DEFAULT_AGITATOR_LATENCY_MICROS = 100'000;
@@ -169,6 +189,7 @@ TEST_P(AutoAimLaunchTimerTestParameterizedFixture, getCurrentLaunchInclination_c
 
         .recommendUseTimedShots{params.aimData.recommendUseTimedShots},
         .targetHitTimeOffset{params.aimData.targetHitTimeOffset},
+        .targetPulseInterval{params.aimData.targetPulseInterval},
         .targetIntervalDuration{params.aimData.targetIntervalDuration},
     };
     EXPECT_CALL(visionCoprocessor, getLastAimData(params.turretNumber))
