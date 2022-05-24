@@ -192,18 +192,35 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_failed_ballistics_ret
 
 // }
 
-class AutoAimLaunchTimerTestParameterizedFixture :public ::testing::TestWithParam<int> {
+static constexpr uint32_t TIME_MICROS = 1'000'000;
+
+static constexpr uint32_t AGITATOR_LATENCY_MICROS = 100'000;
+static constexpr uint32_t FLIGHT_LATENCY_MICROS = 200'000;
+static constexpr uint32_t TIME_SINCE_MESSAGE_RECEIPT = 300'000;
+
+struct TestParams {
+    uint8_t turretNumber = 0;
+
+    VisionCoprocessor::TurretAimData aimData;
+
+    uint32_t ballisticsTimeOfFlight;
+    bool ballisticsSuccess = true;
+};
+
+class AutoAimLaunchTimerTestParameterizedFixture :public ::testing::TestWithParam<TestParams> {
 };
 
 TEST_P(AutoAimLaunchTimerTestParameterizedFixture, foo)
 {
-    int x = GetParam();
-    ASSERT_NE(5, x);
+    auto x = GetParam();
+    ASSERT_EQ(5, x.foo);
+    ASSERT_EQ(x.bar, 5);
 }
 
+TestParams xxxx = { .foo = 5, .bar = xxxx.foo };
 INSTANTIATE_TEST_CASE_P(
         FFFF,
         AutoAimLaunchTimerTestParameterizedFixture,
         ::testing::Values(
-                1, 711, 1989, 2013, 5
+                xxxx
         ));
