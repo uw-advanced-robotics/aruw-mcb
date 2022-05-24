@@ -132,7 +132,7 @@ public:
      * @param[out] solution The ballistics solution computed. Will potentially update any of the
      * fields even if the solution's validSolutionFound function is false
      */
-    std::optional<BallisticsSolution> computeTurretAimAngles();
+    mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
     const Drivers &drivers;

@@ -26,19 +26,22 @@
 
 namespace aruwsrc::mock
 {
-class OttoBallisticsSolverMock : public aruwsrc::algorithms::OttoBallisticsSolver
+namespace{
+    using namespace aruwsrc::algorithms;
+}
+
+class OttoBallisticsSolverMock : public OttoBallisticsSolver
 {
 public:
     OttoBallisticsSolverMock(
         const aruwsrc::Drivers &drivers,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::TurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID);
     virtual ~OttoBallisticsSolverMock();
 
-    MOCK_METHOD(bool, computeTurretAimAngles, (float*, float*, float*, float*), (override));
+    MOCK_METHOD(std::optional<OttoBallisticsSolver::BallisticsSolution>, computeTurretAimAngles, (), (override));
 };  // class OttoBallisticsSolverMock
 }  // namespace aruwsrc::mock
 

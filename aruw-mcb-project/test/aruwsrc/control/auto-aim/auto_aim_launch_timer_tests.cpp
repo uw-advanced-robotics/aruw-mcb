@@ -28,11 +28,13 @@
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace testing;
 using namespace aruwsrc::serial;
 using namespace aruwsrc::control::auto_aim;
+using namespace aruwsrc::algorithms;
 using namespace tap::arch::clock;
 
 // 20 minutes
@@ -41,10 +43,9 @@ static constexpr uint32_t REALLY_LONG_TIME = 20 * 60 * 1'000'000;
 class AutoAimLaunchTimerTest : public Test
 {
 protected:
-    AutoAimLaunchTimerTest() : turret(&drivers), frictionWheels(&drivers), ballistics(
+    AutoAimLaunchTimerTest(): frictionWheels(&drivers), ballistics(
         drivers,
         odometry,
-        turret,
         frictionWheels,
         0,
         0
@@ -55,7 +56,6 @@ protected:
     // Contrived deps due to unfortunate mock structure
     aruwsrc::Drivers drivers;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
-    NiceMock<aruwsrc::mock::TurretSubsystemMock> turret;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
 
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
@@ -143,8 +143,20 @@ TEST_P(AutoAimLaunchTimerTestParameterizedFixture, getCurrentLaunchInclination_c
     EXPECT_CALL(visionCoprocessor, getLastAimData(params.turretNumber))
         .WillOnce(ReturnPointee(&params.aimData));
 
-    EXPECT_CALL(ballistics, computeTurretAimAngles)
-        .WillOnce([&](float*, float*, float*, float *timeOfFlight) { *timeOfFlight = params.ballisticsTimeOfFlight / 1'000'000.; return params.ballisticsSuccess; } );
+    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsResult;
+    if (params.ballisticsSuccess) {
+        ballisticsResult = {
+            .pitchAngle {0},
+            .yawAngle {0},
+            .distance {0},
+            .timeOfFlight = params.ballisticsTimeOfFlight / 1'000'000.f,
+        };
+    }
+    else {
+        ballisticsResult = std::nullopt;
+    }
+
+    EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(ballisticsResult));
 
     AutoAimLaunchTimer timer(params.agitatorLatencyMicros, &visionCoprocessor, &ballistics);
     auto result = timer.getCurrentLaunchInclination(params.turretNumber);

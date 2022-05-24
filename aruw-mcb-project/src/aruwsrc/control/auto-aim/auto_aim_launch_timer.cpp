@@ -39,18 +39,12 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::UNGATED;
     }
 
-    float targetPitch;
-    float targetYaw;
-    float targetDistance;
-    float timeOfFlightSeconds;
-    // TODO: avoid re-solving
-    bool ballisticsSolutionAvailable =
-        this->ballistics->computeTurretAimAngles(&targetPitch, &targetYaw, &targetDistance, &timeOfFlightSeconds);
-
-    if (!ballisticsSolutionAvailable) {
+    auto ballisticsSolution = ballistics->computeTurretAimAngles();
+    if (!ballisticsSolution.has_value()) {
         return LaunchInclination::GATED_DENY;
     }
 
+    float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
     if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS) {
         return LaunchInclination::GATED_DENY;
     }
