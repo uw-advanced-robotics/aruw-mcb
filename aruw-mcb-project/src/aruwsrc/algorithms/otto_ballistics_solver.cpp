@@ -78,7 +78,6 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // Rotates current turret with chassis yaw, just in case.
         modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
-        float chassisYaw = odometryInterface.getYaw();
         rotateVector(&turretOffset, {.yaw = odometryInterface.getYaw()});
         modm::Vector3f turretPosition =
             modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
