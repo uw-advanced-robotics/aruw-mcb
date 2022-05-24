@@ -44,6 +44,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const uint8_t turretID)
     : drivers(drivers),
       odometryInterface(odometryInterface),
+      turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretID(turretID)
@@ -77,11 +78,10 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // Rotates current turret with chassis yaw, just in case.
         modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
+        float chassisYaw = odometryInterface.getYaw();
         rotateVector(&turretOffset, {.yaw = odometryInterface.getYaw()});
         modm::Vector3f turretPosition =
             modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
-
-        const Vector2f robotPos = odometryInterface.getCurrentLocation2D().getPosition();
 
         const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
 
@@ -93,7 +93,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
                 aimData.yPos - turretPosition.y,
                 aimData.zPos - turretPosition.z},
             .velocity =
-                {aimData.xVel - chassisVelocity.x, aimData.yVel - chassisVelocity.y, aimData.zVel},
+                {aimData.xVel - chassisVel.x, aimData.yVel - chassisVel.y, aimData.zVel},
             .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
                                                                         // acceleration from IMU
         };
