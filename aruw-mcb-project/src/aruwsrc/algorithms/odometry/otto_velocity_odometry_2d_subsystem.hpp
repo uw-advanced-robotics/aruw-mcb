@@ -80,18 +80,6 @@ public:
 
     void refresh() override;
 
-    modm::Location2D<float> getCurrentLocation2D() const override final
-    {
-        return odometryTracker.getCurrentLocation2D();
-    }
-
-    modm::Vector2f getCurrentVelocity2D() const override final
-    {
-        return odometryTracker.getCurrentVelocity2D();
-    }
-
-    float getYaw() const override final { return odometryTracker.getYaw(); }
-
 private:
     OttoChassisWorldYawObserver orientationObserver;
     OttoChassisVelocityDisplacement2DObserver displacementObserver;
