@@ -137,6 +137,7 @@ public:
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
+          frictionWheelsOnGovernor(frictionWheels),
           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           rotateAndUnjamAgitatorWithHeatLimiting(
               {&agitator},
@@ -145,7 +146,7 @@ public:
           spinFrictionWheels(
               &drivers,
               &frictionWheels,
-              30.0f,
+              15.0f,
               true,
               config.turretBarrelMechanismId),
           stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
@@ -175,7 +176,7 @@ public:
               &rotateAndUnjamAgitatorWithHeatLimiting,
               odometrySubsystem,
               frictionWheels,
-              29.5f,
+              14.5f,
               config.turretID)
     {
     }
