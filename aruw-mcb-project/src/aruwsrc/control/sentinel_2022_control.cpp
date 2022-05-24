@@ -192,6 +192,9 @@ public:
     UnjamIntegralCommand unjamAgitator;
     MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
 
+    // rotates agitator if friction wheels are spinning fast
+    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
+
     // rotates agitator with heat limiting applied
     HeatLimitGovernor heatLimitGovernor;
     GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting;
