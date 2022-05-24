@@ -166,7 +166,8 @@ TEST_P(AutoAimLaunchTimerTestParameterizedFixture, getCurrentLaunchInclination_c
     ASSERT_EQ(params.expectedResult, result);
 }
 
-static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_ALLOWS_FIRE {
+// First window: exactly on target
+static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_NARROW_ALLOWS_FIRE {
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS,
     .aimData {
         .hasTarget = true,
@@ -178,7 +179,20 @@ static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_ALLOWS
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
+static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_WIDE_ALLOWS_FIRE {
+    .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS,
+    .aimData {
+        .hasTarget = true,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .recommendUseTimedShots = true,
+        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+        .targetPulseInterval = REALLY_LONG_TIME,
+        .targetIntervalDuration = 600'000,
+    },
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
+};
 
+// First window: edge cases
 static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE {
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS - SMALL_TIMING_ERROR,
     .aimData {
@@ -197,7 +211,6 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_LATE_HALF_OF_FIRST_WINDOW_ALLOWS
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 
-
 static constexpr TestParams TEST_TIMING_SHOT_TOO_EARLY_IN_FIRST_WINDOW_DENIES_FIRE {
     .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight - 1,
     .aimData = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE.aimData,
@@ -209,16 +222,90 @@ static constexpr TestParams TEST_TIMING_SHOT_TOO_LATE_IN_FIRST_WINDOW_DENIES_FIR
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_DENY,
 };
 
+// Second window: edge cases
+static constexpr uint32_t LARGE_PULSE_INTERVAL_MICROS = 600'000; 
+static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE {
+    .ballisticsTimeOfFlight = LARGE_PULSE_INTERVAL_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS - SMALL_TIMING_ERROR,
+    .aimData {
+        .hasTarget = true,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .recommendUseTimedShots = true,
+        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+        .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
+        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 2,
+    },
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
+};
+static constexpr TestParams TEST_TIMING_SHOT_IN_LATE_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE {
+    .ballisticsTimeOfFlight = LARGE_PULSE_INTERVAL_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS + SMALL_TIMING_ERROR,
+    .aimData = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE.aimData,
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
+};
+
+
+static constexpr TestParams TEST_TIMING_SHOT_TOO_EARLY_IN_SECOND_WINDOW_DENIES_FIRE {
+    .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight - 2,
+    .aimData = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE.aimData,
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_DENY,
+};
+static constexpr TestParams TEST_TIMING_SHOT_TOO_LATE_IN_SECOND_WINDOW_DENIES_FIRE {
+    .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_LATE_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight + 2,
+    .aimData = TEST_TIMING_SHOT_IN_LATE_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE.aimData,
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_DENY,
+};
+
+
+// Third window: edge cases
+static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE {
+    .ballisticsTimeOfFlight = LARGE_PULSE_INTERVAL_MICROS * 2 + DEFAULT_FLIGHT_LATENCY_MICROS - SMALL_TIMING_ERROR,
+    .aimData {
+        .hasTarget = true,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .recommendUseTimedShots = true,
+        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+        .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
+        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 2,
+    },
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
+};
+static constexpr TestParams TEST_TIMING_SHOT_IN_LATE_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE {
+    .ballisticsTimeOfFlight = LARGE_PULSE_INTERVAL_MICROS * 2 + DEFAULT_FLIGHT_LATENCY_MICROS + SMALL_TIMING_ERROR,
+    .aimData = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE.aimData,
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
+};
+
+
+static constexpr TestParams TEST_TIMING_SHOT_TOO_EARLY_IN_THIRD_WINDOW_DENIES_FIRE {
+    .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight - 2,
+    .aimData = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE.aimData,
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_DENY,
+};
+static constexpr TestParams TEST_TIMING_SHOT_TOO_LATE_IN_THIRD_WINDOW_DENIES_FIRE {
+    .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_LATE_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight + 2,
+    .aimData = TEST_TIMING_SHOT_IN_LATE_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE.aimData,
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_DENY,
+};
 
 
 INSTANTIATE_TEST_CASE_P(
         AutoAimLaunchTimerTestParameterized,
         AutoAimLaunchTimerTestParameterizedFixture,
         ::testing::Values(
-                TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_ALLOWS_FIRE,
+                TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_NARROW_ALLOWS_FIRE,
+                TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_WIDE_ALLOWS_FIRE,
+
                 TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE,
                 TEST_TIMING_SHOT_IN_LATE_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE,
                 TEST_TIMING_SHOT_TOO_EARLY_IN_FIRST_WINDOW_DENIES_FIRE,
-                TEST_TIMING_SHOT_TOO_LATE_IN_FIRST_WINDOW_DENIES_FIRE
-                // TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_ALLOWS_FIRE,
+                TEST_TIMING_SHOT_TOO_LATE_IN_FIRST_WINDOW_DENIES_FIRE,
+
+                TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE,
+                TEST_TIMING_SHOT_IN_LATE_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE,
+                TEST_TIMING_SHOT_TOO_EARLY_IN_SECOND_WINDOW_DENIES_FIRE,
+                TEST_TIMING_SHOT_TOO_LATE_IN_SECOND_WINDOW_DENIES_FIRE,
+
+                TEST_TIMING_SHOT_IN_EARLY_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE,
+                TEST_TIMING_SHOT_IN_LATE_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE,
+                TEST_TIMING_SHOT_TOO_EARLY_IN_THIRD_WINDOW_DENIES_FIRE,
+                TEST_TIMING_SHOT_TOO_LATE_IN_THIRD_WINDOW_DENIES_FIRE
         ));
