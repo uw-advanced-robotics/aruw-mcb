@@ -64,7 +64,7 @@ namespace aruwsrc::algorithms::odometry
  * @see OttoChassisVelocityGetter
  */
 class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
-                                              public tap::algorithms::odometry::Odometry2DInterface
+                                              public tap::algorithms::odometry::Odometry2DTracker
 {
 public:
     /**
@@ -93,7 +93,6 @@ public:
     float getYaw() const override final { return odometryTracker.getYaw(); }
 
 private:
-    tap::algorithms::odometry::Odometry2DTracker odometryTracker;
     OttoChassisWorldYawObserver orientationObserver;
     OttoChassisVelocityDisplacement2DObserver displacementObserver;
 };

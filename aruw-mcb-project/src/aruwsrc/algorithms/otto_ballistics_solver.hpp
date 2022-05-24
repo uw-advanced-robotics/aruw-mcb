@@ -20,6 +20,8 @@
 #ifndef OTTO_BALLISTICS_SOLVER_HPP_
 #define OTTO_BALLISTICS_SOLVER_HPP_
 
+#include <optional>
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::chassis
@@ -56,6 +58,18 @@ namespace aruwsrc::algorithms
 class OttoBallisticsSolver
 {
 public:
+    struct BallisticsSolution
+    {
+        /// The computed straight line distance between the turret and target, in m.
+        float pitchAngle;
+        /// The computed yaw angle in the world frame in radians.
+        float yawAngle;
+        /// The computed pitch angle in the world frame in radians.
+        float distance;
+        /// The expected time-of-flight until impact (in seconds).
+        float timeOfFlight;
+    };
+
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`. This
      * function is an iterative ballistics solver, so this represents how many iterations to
@@ -78,6 +92,11 @@ public:
         float pitchAngleError,
         float targetDistance)
     {
+        if (targetDistance < 0)
+        {
+            return false;
+        }
+
         return (abs(yawAngleError) < atan2f(
                                          aruwsrc::algorithms::OttoBallisticsSolver::PLATE_WIDTH,
                                          2.0f * targetDistance)) &&
@@ -111,22 +130,10 @@ public:
      * This function verifies that the aim data it uses is valid (i.e.: it contains coords for a
      * real target and CV is online).
      *
-     * @note This function may modify `pitchAngle` and `yawAngle` even if no valid solution is
-     * found.
-     *
-     * @param[out] pitchAngle The computed pitch angle in the world frame in radians.
-     * @param[out] yawAngle The computed yaw angle in the world frame in radians.
-     * @param[out] targetDistance The computed straight line distance between the turret and target,
-     * in m.
-     * @param[out] timeOfFlight The expected time-of-flight until impact (in seconds).
-     * @return `true` if CV is online, the most recent aim data is valid, and a valid ballistics
-     * solution was found. `false` otherwise.
+     * @param[out] solution The ballistics solution computed. Will potentially update any of the
+     * fields even if the solution's validSolutionFound function is false
      */
-    bool computeTurretAimAngles(
-        float *pitchAngle,
-        float *yawAngle,
-        float *targetDistance,
-        float *timeOfFlight);
+    std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
     const Drivers &drivers;
@@ -136,6 +143,10 @@ private:
     const float defaultLaunchSpeed;
     const uint8_t turretID;
     modm::Vector3f turretOrigin;
+
+    uint32_t lastAimDataTimestamp = 0;
+    uint32_t lastOdometryTimestamp = 0;
+    std::optional<BallisticsSolution> lastComputedSolution = {};
 };
 }  // namespace aruwsrc::algorithms
 

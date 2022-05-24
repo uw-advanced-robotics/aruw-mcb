@@ -30,6 +30,7 @@
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
+using namespace aruwsrc::algorithms;
 
 namespace aruwsrc::control::turret::cv
 {
@@ -49,13 +50,7 @@ TurretCVCommand::TurretCVCommand(
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
-      ballisticsSolver(
-          *drivers,
-          odometryInterface,
-          *turretSubsystem,
-          frictionWheels,
-          defaultLaunchSpeed,
-          turretID),
+      ballisticsSolver(*drivers, odometryInterface, frictionWheels, defaultLaunchSpeed, turretID),
       userPitchInputScalar(userPitchInputScalar),
       userYawInputScalar(userYawInputScalar)
 {
@@ -77,17 +72,13 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    float targetPitch, targetYaw, targetDistance, timeOfFlight;
-    bool ballisticsSolutionAvailable = ballisticsSolver.computeTurretAimAngles(
-        &targetPitch,
-        &targetYaw,
-        &targetDistance,
-        &timeOfFlight);
+    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
+        ballisticsSolver.computeTurretAimAngles();
 
-    if (ballisticsSolutionAvailable)
+    if (ballisticsSolution != std::nullopt)
     {
-        pitchSetpoint = targetPitch;
-        yawSetpoint = targetYaw;
+        pitchSetpoint = ballisticsSolution->pitchAngle;
+        yawSetpoint = ballisticsSolution->yawAngle;
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
@@ -100,7 +91,7 @@ void TurretCVCommand::execute()
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
             turretSubsystem->yawMotor.getValidChassisMeasurementError(),
             turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
-            targetDistance);
+            ballisticsSolution->distance);
     }
     else
     {
