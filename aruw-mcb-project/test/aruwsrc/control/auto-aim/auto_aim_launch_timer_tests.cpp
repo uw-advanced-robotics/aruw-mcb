@@ -210,7 +210,7 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOW
         .recommendUseTimedShots = true,
         .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
         .targetPulseInterval = REALLY_LONG_TIME,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 2,
+        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
@@ -221,12 +221,12 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_LATE_HALF_OF_FIRST_WINDOW_ALLOWS
 };
 
 static constexpr TestParams TEST_TIMING_SHOT_TOO_EARLY_IN_FIRST_WINDOW_DENIES_FIRE {
-    .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight - 1,
+    .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight - 2,
     .aimData = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE.aimData,
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_DENY,
 };
 static constexpr TestParams TEST_TIMING_SHOT_TOO_LATE_IN_FIRST_WINDOW_DENIES_FIRE {
-    .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_LATE_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight + 1,
+    .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_LATE_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight + 2,
     .aimData = TEST_TIMING_SHOT_IN_LATE_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE.aimData,
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_DENY,
 };
@@ -241,7 +241,7 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLO
         .recommendUseTimedShots = true,
         .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
         .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 2,
+        .targetIntervalDuration = SMALL_TIMING_ERROR * 2,
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
@@ -250,7 +250,6 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_LATE_HALF_OF_SECOND_WINDOW_ALLOW
     .aimData = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE.aimData,
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
-
 
 static constexpr TestParams TEST_TIMING_SHOT_TOO_EARLY_IN_SECOND_WINDOW_DENIES_FIRE {
     .ballisticsTimeOfFlight = TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE.ballisticsTimeOfFlight - 2,
@@ -306,7 +305,7 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_WITH
         .recommendUseTimedShots = true,
         .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
         .targetPulseInterval = SMALL_PULSE_INTERVAL_MICROS,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 2,
+        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };

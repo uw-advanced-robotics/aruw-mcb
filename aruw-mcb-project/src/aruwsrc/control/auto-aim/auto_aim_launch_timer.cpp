@@ -60,17 +60,15 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
     uint32_t nextPlateTransitTime = aimData.timestamp + aimData.targetHitTimeOffset;
-    uint32_t intervalsProjectAhead = (projectedHitTime - nextPlateTransitTime) / aimData.targetPulseInterval;
+    int64_t projectedHitTimeAfterFirstWindow = int64_t(projectedHitTime) - nextPlateTransitTime;
 
-    uint32_t intervalEarlyGoalHitTime = nextPlateTransitTime + aimData.targetPulseInterval * intervalsProjectAhead;
-    uint32_t intervalEarlyHitTimeError = projectedHitTime - intervalEarlyGoalHitTime;
-
-    uint32_t intervalLateGoalHitTime = intervalEarlyGoalHitTime + aimData.targetPulseInterval;
-    uint32_t intervalLateHitTimeError = intervalLateGoalHitTime - projectedHitTime;
+    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % aimData.targetPulseInterval;
+    if (offsetInFiringWindow < 0) {
+        offsetInFiringWindow += aimData.targetPulseInterval;
+    }
 
     uint32_t maxHitTimeError = aimData.targetIntervalDuration / 2;
-
-    if (intervalEarlyHitTimeError < maxHitTimeError || intervalLateHitTimeError < maxHitTimeError) {
+    if (offsetInFiringWindow <= maxHitTimeError || offsetInFiringWindow >= aimData.targetPulseInterval - maxHitTimeError) {
         return LaunchInclination::GATED_ALLOW;
     } else {
         return LaunchInclination::GATED_DENY;
