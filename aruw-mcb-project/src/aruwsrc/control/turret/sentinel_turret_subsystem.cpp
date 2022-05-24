@@ -66,7 +66,7 @@ modm::Vector3f SentinelTurretSubsystem::getTurretOffset() const
     }
     else
     {
-        return control::turret::DISTANCE_BETWEEN_TURRETS;
+        return control::turret::OFFSET_TURRET_0_TO_TURRET_1;
     }
 #else
     return modm::Vector3f(0, 0, 0);

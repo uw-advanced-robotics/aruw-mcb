@@ -29,11 +29,6 @@ namespace aruwsrc::can
 class TurretMCBCanComm;
 }
 
-namespace aruwsrc::can
-{
-class TurretMCBCanComm;
-}
-
 namespace aruwsrc::control::turret
 {
 /**
@@ -64,7 +59,8 @@ public:
     virtual inline uint32_t getLastMeasurementTimeMicros() const = 0;
 
     /**
-     *  @return Distance between the turret and the 'origin' in the world frame. units of meters
+     *  @return Distance between the turret and the chassis origin in the chassis frame. units of
+     * meters
      */
     virtual modm::Vector3f getTurretOffset() const = 0;
 

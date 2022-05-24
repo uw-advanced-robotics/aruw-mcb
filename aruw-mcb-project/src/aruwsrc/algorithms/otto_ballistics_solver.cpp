@@ -76,11 +76,28 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
             launchSpeed = defaultLaunchSpeed;
         }
 
-        // Rotates current turret with chassis yaw, just in case.
-        modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
-        rotateVector(&turretOffset, {.yaw = odometryInterface.getYaw()});
+        // defines the turret where the chassis is, under the assumption that the chassis origin and
+        // turret origin coincide
         modm::Vector3f turretPosition =
             modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
+
+        // Puts turret in it's place on the chassis
+        // turretOffset is 0, so turret center and chassis center are coincident;
+        if (turretSubsystem.getTurretOffset() != modm::Vector3f(0.0f, 0.0f, 0.0f))
+        {
+            // make this in here to minimize resource usage I guess
+            modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
+            // yaw is 0, so chassis frame and world frame share orientation. They may not share
+            // translation, so we still need to add that.
+            if (compareFloatClose(odometryInterface.getYaw(), 0.0f, 1e-5f))
+            {
+                // Assume that z is parallel to yaw and needs not adjusting.
+                // This breaks if the robot rolls, but we'd need to implement 3D odometry anyways
+                // soooo not my problem!
+                rotateVector(&turretOffset.x, &turretOffset.y, odometryInterface.getYaw());
+            }
+            turretPosition += turretOffset;
+        }
 
         const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
 
@@ -89,12 +106,12 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         ballistics::MeasuredKinematicState targetState = {
             .position =
                 {aimData.xPos - turretPosition.x,
-                aimData.yPos - turretPosition.y,
-                aimData.zPos - turretPosition.z},
-            .velocity =
-                {aimData.xVel - chassisVel.x, aimData.yVel - chassisVel.y, aimData.zVel},
-            .acceleration = {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
-                                                                        // acceleration from IMU
+                 aimData.yPos - turretPosition.y,
+                 aimData.zPos - turretPosition.z},
+            .velocity = {aimData.xVel - chassisVel.x, aimData.yVel - chassisVel.y, aimData.zVel},
+            .acceleration =
+                {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
+                                                             // acceleration from IMU
         };
 
         // time in microseconds to project the target position ahead by

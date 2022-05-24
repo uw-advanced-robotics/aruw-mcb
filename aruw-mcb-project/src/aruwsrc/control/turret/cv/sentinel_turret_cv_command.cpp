@@ -54,7 +54,13 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
       pitchController(pitchController),
       turretID(turretID),
       launchingCommand(launchingCommand),
-      ballisticsSolver(*drivers, odometryInterface, *turretSubsystem, frictionWheels, defaultLaunchSpeed, turretID),
+      ballisticsSolver(
+          *drivers,
+          odometryInterface,
+          *turretSubsystem,
+          frictionWheels,
+          defaultLaunchSpeed,
+          turretID),
       pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(
           turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,

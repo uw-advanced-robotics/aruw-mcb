@@ -194,7 +194,7 @@ public:
 
     // rotates agitator with heat limiting applied
     HeatLimitGovernor heatLimitGovernor;
-    GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting;
+    GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting;
 
     // friction wheel commands
     FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
