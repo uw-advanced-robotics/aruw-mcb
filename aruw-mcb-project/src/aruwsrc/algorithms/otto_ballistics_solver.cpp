@@ -81,9 +81,9 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         modm::Vector3f turretPosition =
             modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
 
-        // Puts turret in it's place on the chassis
-        // turretOffset is 0, so turret center and chassis center are coincident;
-        if (turretSubsystem.getTurretOffset() != modm::Vector3f(0.0f, 0.0f, 0.0f))
+        // Puts turret in it's place in world frame
+        // If no offset, skip all offsetting
+        if (turretSubsystem.getTurretOffset() != modm::Vector3f(0, 0, 0))
         {
             // make this in here to minimize resource usage I guess
             modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
@@ -93,7 +93,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
             {
                 // Assume that z is parallel to yaw and needs not adjusting.
                 // This breaks if the robot rolls, but we'd need to implement 3D odometry anyways
-                // soooo not my problem!
+                // soooo not my problem! For now, skips 3D vector rotation.
                 rotateVector(&turretOffset.x, &turretOffset.y, odometryInterface.getYaw());
             }
             turretPosition += turretOffset;
