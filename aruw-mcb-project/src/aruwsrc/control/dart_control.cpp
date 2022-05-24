@@ -107,7 +107,7 @@ static constexpr float AGITATOR_TARGET_ANGLE_ZERO = 0;
 
 static constexpr float AGITATOR_TARGET_ANGLE_ONE = 8 * M_PI;
 
-static constexpr float AGITATOR_TARGET_ANGLE_TWO = 17.5 * M_PI;
+static constexpr float AGITATOR_TARGET_ANGLE_TWO = 130;
 
 static constexpr uint32_t AGITATOR_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
 
@@ -134,7 +134,7 @@ MoveAbsoluteCommand agitatorTopMoveCommandOne(
     true);
 
 MoveAbsoluteCommand agitatorTopMoveCommandTwo(
-    &agitatorTop,
+    &agitatorTop, 
     AGITATOR_TARGET_ANGLE_TWO,
     AGITATOR_ANGULAR_SPEED,
     AGITATOR_TOLERANCE,
@@ -225,7 +225,7 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheelsBottomBack(
 
 aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTurretControlCommand(
     drivers(),
-    &turretSubsystem
+    turretSubsystem
 );
 
 // Mappings

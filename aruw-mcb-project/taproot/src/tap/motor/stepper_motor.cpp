@@ -51,7 +51,7 @@ StepperMotor::StepperMotor(
 
 void StepperMotor::initialize()
 {
-    drivers->pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 100);
+    drivers->pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 250);
 }
 
 void StepperMotor::setDesiredOutput(int32_t desiredOutput)

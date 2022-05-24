@@ -50,7 +50,7 @@ public:
      * by. Basically mouse sensitivity.
      * @param[in] userPitchInputScalar See userYawInputScalar.
      */
-    StepperMotorTurretControlCommand(aruwsrc::Drivers *drivers, TurretSubsystem *turretSubsystem);
+    StepperMotorTurretControlCommand(aruwsrc::Drivers *drivers, TurretSubsystem& turretSubsystem);
 
     bool isReady() override;
 
@@ -66,9 +66,8 @@ public:
 
 private:
     aruwsrc::Drivers *drivers;
-    TurretMotor *turretPitchMotor;
-    TurretMotor *turretYawMotor;
-    TurretSubsystem *turretSubsystem;
+    TurretMotor& turretPitchMotor;
+    TurretMotor& turretYawMotor;
 };
 }  // namespace aruwsrc::control::turret::user
 

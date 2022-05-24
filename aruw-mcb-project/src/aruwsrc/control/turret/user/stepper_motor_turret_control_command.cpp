@@ -26,11 +26,12 @@ namespace aruwsrc::control::turret::user
 {
 StepperMotorTurretControlCommand::StepperMotorTurretControlCommand(
     aruwsrc::Drivers *drivers,
-    TurretSubsystem *turretSubsystem)
+    TurretSubsystem& turretSubsystem)
     : drivers(drivers),
-      turretSubsystem(turretSubsystem)
+      turretPitchMotor(turretSubsystem.pitchMotor),
+      turretYawMotor(turretSubsystem.yawMotor)
 {
-    addSubsystemRequirement(turretSubsystem);
+    addSubsystemRequirement(&turretSubsystem);
 }
 
 bool StepperMotorTurretControlCommand::isReady() { return !isFinished(); }
@@ -39,9 +40,9 @@ void StepperMotorTurretControlCommand::initialize() {}
 
 void StepperMotorTurretControlCommand::execute()
 {
-    turretSubsystem->pitchMotor.setMotorOutput(
+    turretPitchMotor.setMotorOutput(
         drivers->controlOperatorInterface.getTurretPitchInput(0));
-    turretSubsystem->yawMotor.setMotorOutput(
+    turretYawMotor.setMotorOutput(
         drivers->controlOperatorInterface.getTurretYawInput(0));
 }
 
@@ -49,8 +50,8 @@ bool StepperMotorTurretControlCommand::isFinished() const { return false; }
 
 void StepperMotorTurretControlCommand::end(bool)
 {
-    turretPitchMotor->setMotorOutput(0);
-    turretYawMotor->setMotorOutput(0);
+    turretPitchMotor.setMotorOutput(0);
+    turretYawMotor.setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::user
