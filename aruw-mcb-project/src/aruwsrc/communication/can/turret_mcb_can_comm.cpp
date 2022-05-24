@@ -32,6 +32,8 @@ TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers, tap::can::CanBus c
       drivers(drivers),
       currProcessingImuData{},
       lastCompleteImuData{},
+      yawRevolutions(0),
+      pitchRevolutions(0),
       yawAngleGyroMessageHandler(
           drivers,
           YAW_RX_CAN_ID,

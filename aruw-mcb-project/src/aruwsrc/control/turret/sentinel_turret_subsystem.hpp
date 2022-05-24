@@ -29,19 +29,22 @@ namespace aruwsrc::control::turret
  */
 class SentinelTurretSubsystem final : public RobotTurretSubsystem
 {
-    public:
+public:
     SentinelTurretSubsystem(
         aruwsrc::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig,
+        const aruwsrc::can::TurretMCBCanComm* turretMCB,
         uint8_t turretID);
     float getWorldYaw() const override;
     float getWorldPitch() const override;
     uint32_t getLastMeasurementTimeMicros() const override;
     modm::Vector3f getTurretOffset() const override;
-    private: 
+    float getPitchOffset() const override;
+
+private:
     uint8_t turretID;
 };  // class SentinelTurretSubsystem
 

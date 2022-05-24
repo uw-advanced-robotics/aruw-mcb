@@ -18,24 +18,29 @@
  */
 
 #include "sentinel_turret_subsystem.hpp"
+
 #include "constants/turret_constants.hpp"
 
 namespace aruwsrc::control::turret
 {
-    SentinelTurretSubsystem::SentinelTurretSubsystem(
-        aruwsrc::Drivers* drivers,
-        tap::motor::MotorInterface* pitchMotor,
-        tap::motor::MotorInterface* yawMotor,
-        const TurretMotorConfig& pitchMotorConfig,
-        const TurretMotorConfig& yawMotorConfig,
-        uint8_t turretID
-    ):RobotTurretSubsystem(drivers,
-        pitchMotor,
-        yawMotor,
-        pitchMotorConfig, 
-        yawMotorConfig),turretID(turretID){
-
-        }
+SentinelTurretSubsystem::SentinelTurretSubsystem(
+    aruwsrc::Drivers* drivers,
+    tap::motor::MotorInterface* pitchMotor,
+    tap::motor::MotorInterface* yawMotor,
+    const TurretMotorConfig& pitchMotorConfig,
+    const TurretMotorConfig& yawMotorConfig,
+    const aruwsrc::can::TurretMCBCanComm* turretMCB,
+    uint8_t turretID)
+    : RobotTurretSubsystem(
+          drivers,
+          pitchMotor,
+          yawMotor,
+          pitchMotorConfig,
+          yawMotorConfig,
+          turretMCB),
+      turretID(turretID)
+{
+}
 
 float SentinelTurretSubsystem::getWorldYaw() const
 {
@@ -53,15 +58,27 @@ uint32_t SentinelTurretSubsystem::getLastMeasurementTimeMicros() const
 }
 
 modm::Vector3f SentinelTurretSubsystem::getTurretOffset() const
-{   
-    #ifdef TARGET_SENTINEL_2022
-    if (turretID == 1) {
-        return modm::Vector3f(0,0,0);
-    } else {
+{
+#ifdef TARGET_SENTINEL_2022
+    if (turretID == 1)
+    {
+        return modm::Vector3f(0, 0, 0);
+    }
+    else
+    {
         return control::turret::DISTANCE_BETWEEN_TURRETS;
     }
-    #else
-    return modm::Vector3f(0,0,0);
-    #endif
+#else
+    return modm::Vector3f(0, 0, 0);
+#endif
+}
+
+float SentinelTurretSubsystem::getPitchOffset() const
+{
+#ifdef TARGET_SENTINEL_2022
+    return control::turret::PITCH_YAW_OFFSET;
+#else
+    return 0;
+#endif
 }
 }  // namespace aruwsrc::control::turret

@@ -25,6 +25,7 @@
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "modm/container/deque.hpp"
 
 #include "friction_wheel_subsystem.hpp"
 #include "launch_speed_predictor_interface.hpp"
@@ -34,7 +35,11 @@ namespace aruwsrc::control::launcher
 /**
  * An extension of the `FrictionWheelSubsystem` that implements the `LaunchSpeedPredictorInterface`,
  * using referee system feedback to predict the launch velocity of the projectile.
+ *
+ * @tparam PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE Number of balls to average when estimating the
+ * next projectile velocity.
  */
+template <size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE>
 class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem,
                                               public LaunchSpeedPredictorInterface
 {
@@ -51,8 +56,12 @@ public:
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-        float bulletSpeedLowPassAlpha);
+        aruwsrc::can::TurretMCBCanComm *turretMCB,
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
+        : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus, turretMCB),
+          firingSystemMechanismID(firingSystemMechanismID)
+    {
+    }
 
     /**
      * @return The predicted launch speed of the next projectile in m/s, using measured feedback
@@ -61,21 +70,29 @@ public:
      */
     inline float getPredictedLaunchSpeed() const override final_mockable
     {
-        return predictedLaunchSpeed;
+        return ballSpeedAveragingTracker.getSize() == 0
+                   ? getDesiredLaunchSpeed()
+                   : (pastProjectileVelocitySpeedSummed / ballSpeedAveragingTracker.getSize());
     }
 
-    void refresh() override;
+    void refresh() override
+    {
+        FrictionWheelSubsystem::refresh();
+        updatePredictedLaunchSpeed();
+    }
 
 private:
     const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
-    const float bulletSpeedLowPassAlpha;
 
-    float predictedLaunchSpeed = 0;
+    modm::BoundedDeque<float, PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE> ballSpeedAveragingTracker;
+
     float lastDesiredLaunchSpeed = 0;
 
     uint32_t prevLaunchingDataReceiveTimestamp = 0;
 
-    inline void updatePredictedLaunchSpeed()
+    float pastProjectileVelocitySpeedSummed = 0;
+
+    void updatePredictedLaunchSpeed()
     {
         const float desiredLaunchSpeed = getDesiredLaunchSpeed();
 
@@ -84,7 +101,8 @@ private:
         if (!tap::algorithms::compareFloatClose(lastDesiredLaunchSpeed, desiredLaunchSpeed, 1E-5))
         {
             lastDesiredLaunchSpeed = desiredLaunchSpeed;
-            predictedLaunchSpeed = desiredLaunchSpeed;
+            pastProjectileVelocitySpeedSummed = 0;
+            ballSpeedAveragingTracker.clear();
         }
 
         if (drivers->refSerial.getRefSerialReceivingData())
@@ -96,18 +114,29 @@ private:
                     turretData.lastReceivedLaunchingInfoTimestamp &&
                 turretData.launchMechanismID == firingSystemMechanismID)
             {
-                predictedLaunchSpeed = tap::algorithms::lowPassFilter(
-                    predictedLaunchSpeed,
+                // remove element to make room for new element
+                if (ballSpeedAveragingTracker.isFull())
+                {
+                    pastProjectileVelocitySpeedSummed -= ballSpeedAveragingTracker.getFront();
+                    ballSpeedAveragingTracker.removeFront();
+                }
+
+                const float limitedProjectileSpeed = tap::algorithms::limitVal(
                     turretData.bulletSpeed,
-                    bulletSpeedLowPassAlpha);
+                    0.0f,
+                    MAX_MEASURED_LAUNCH_SPEED);
+
+                // insert new element
+                pastProjectileVelocitySpeedSummed += limitedProjectileSpeed;
+                ballSpeedAveragingTracker.append(limitedProjectileSpeed);
 
                 prevLaunchingDataReceiveTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
             }
         }
         else
         {
-            // no ref serial feedback, so can't make predictions
-            predictedLaunchSpeed = desiredLaunchSpeed;
+            pastProjectileVelocitySpeedSummed = 0;
+            ballSpeedAveragingTracker.clear();
         }
     }
 };

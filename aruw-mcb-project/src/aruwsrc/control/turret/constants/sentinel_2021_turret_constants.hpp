@@ -62,8 +62,6 @@ static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
 
-static constexpr float TURRET_ORIGIN_RELATIVE_TO_REALSENSE[NUM_TURRETS][3] = {{0, 0, 0}};
-
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
@@ -96,4 +94,4 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 }  // namespace chassis_rel
 }  // namespace  aruwsrc::control::turret
 
-#endif  // SENTINEL_TURRET_CONSTANTS_HPP_
+#endif  // SENTINEL_2021_TURRET_CONSTANTS_HPP_

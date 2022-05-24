@@ -23,6 +23,7 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/geometry/angle.hpp"
@@ -48,7 +49,7 @@ namespace aruwsrc::can
  * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in
  * degrees are converted to radians by this object.
  */
-class TurretMCBCanComm
+class TurretMCBCanComm : public tap::communication::sensors::limit_switch::LimitSwitchInterface
 {
 public:
     using ImuDataReceivedCallbackFunc = void (*)();
@@ -109,7 +110,7 @@ public:
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
     }
 
-    mockable inline bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
+    inline bool getLimitSwitchDepressed() const final_mockable { return limitSwitchDepressed; }
 
     mockable inline bool isConnected() const
     {
@@ -181,12 +182,13 @@ private:
 
     struct ImuData
     {
-        float yaw;
-        int16_t rawYawVelocity;
-        float pitch;
-        int16_t rawPitchVelocity;
-        uint32_t turretDataTimestamp;
-        uint8_t seq;
+        float yaw;                     ///< Normalized yaw value, between [-pi, pi]
+        int16_t rawYawVelocity;        ///< Raw yaw velocity, in counts per second
+        float pitch;                   ///< Normalized pitch value, between [-pi, pi]
+        int16_t rawPitchVelocity;      ///< Raw pitch velocity, in counts per second
+        uint32_t turretDataTimestamp;  ///< Timestamp that the IMU data was measured on the
+                                       ///< turret MCB
+        uint8_t seq;                   ///< Sequence number for synchronizing pitch/yaw messages
     };
 
     const tap::can::CanBus canBus;

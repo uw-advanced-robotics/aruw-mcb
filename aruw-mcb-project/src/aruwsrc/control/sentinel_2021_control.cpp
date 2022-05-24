@@ -20,23 +20,26 @@
 #if defined(TARGET_SENTINEL_2021)
 
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/rotate_unjam_ref_limited_command.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
+#include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -50,10 +53,13 @@
 #include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
+using namespace tap::control::governor;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::governor;
 using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
@@ -79,18 +85,20 @@ aruwsrc::communication::serial::SentinelRequestHandler sentinelRequestHandler(dr
 /* define subsystems --------------------------------------------------------*/
 VelocityAgitatorSubsystem agitator(
     drivers(),
-    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::AGITATOR_CONFIG);
+    constants::AGITATOR_PID_CONFIG,
+    constants::AGITATOR_CONFIG);
 
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
-    drivers(),
-    aruwsrc::control::launcher::LEFT_MOTOR_ID,
-    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-    aruwsrc::control::launcher::CAN_BUS_MOTORS,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    0.1f);
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        nullptr,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Note: motor "one" is right, "two" is left
 tap::motor::DjiMotor pitchMotor(
@@ -110,28 +118,35 @@ SentinelTurretSubsystem turretSubsystem(
     &pitchMotor,
     &yawMotor,
     PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG);
+    YAW_MOTOR_CONFIG,
+    nullptr,
+    0);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(
-    drivers(),
-    &turretSubsystem.yawMotor,
-    &sentinelDrive);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
-MoveIntegralCommand agitatorRotateCommand(
-    agitator,
-    aruwsrc::control::agitator::constants::AGITATOR_ROTATE_CONFIG);
+MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand agitatorUnjamCommand(
-    agitator,
-    aruwsrc::control::agitator::constants::AGITATOR_UNJAM_CONFIG);
+UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
-RotateUnjamRefLimitedCommand agitatorShootFastLimited(
+MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
     agitator,
-    agitatorRotateCommand,
-    agitatorUnjamCommand,
-    aruwsrc::control::agitator::constants::HEAT_LIMIT_BUFFER);
+    rotateAgitator,
+    unjamAgitator);
+
+// rotates agitator if friction wheels are spinning fast
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+
+// rotates agitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernor(
+    *drivers(),
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    constants::HEAT_LIMIT_BUFFER);
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
 // Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
@@ -142,22 +157,22 @@ FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     &frictionWheels,
     30.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem.pitchMotor,
+    turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem.yawMotor,
+    turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
 // turret commands
@@ -177,7 +192,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     agitator,
-    &agitatorShootFastLimited,
+    &rotateAndUnjamAgitatorWithHeatLimiting,
     odometrySubsystem,
     frictionWheels,
     14.5f,
@@ -195,7 +210,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&agitatorShootFastLimited},
+    {&rotateAndUnjamAgitatorWithHeatLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldRepeatCommandMapping leftSwitchDown(

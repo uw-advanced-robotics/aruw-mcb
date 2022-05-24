@@ -57,6 +57,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
     const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
@@ -65,6 +66,7 @@ MatrixHudIndicators::MatrixHudIndicators(
       drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
+      turretSubsystem(turretSubsystem),
       multiShotHandler(multiShotHandler),
       driveCommands{
           chassisBeybladeCmd,
@@ -164,7 +166,9 @@ void MatrixHudIndicators::updateIndicatorState()
             shooterState = ShooterState::LOADING;
         }
 #elif defined(TARGET_HERO)
-        if (!drivers.turretMCBCanCommBus1.getLimitSwitchDepressed())
+        auto turretMCB = turretSubsystem.getTurretMCB();
+        assert(turretMCB != nullptr);
+        if (!turretMCB->getLimitSwitchDepressed())
         {
             shooterState = ShooterState::LOADING;
         }

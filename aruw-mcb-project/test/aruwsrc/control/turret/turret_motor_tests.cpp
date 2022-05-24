@@ -468,7 +468,7 @@ class UnwrapTargetAngleTest
       public WithParamInterface<std::tuple<UnwrapTargetAngleTestValues, TurretMotorConfig>>
 {
 protected:
-    UnwrapTargetAngleTest() : tm(&motor, std::get<1>(GetParam())), turretController(&tm) {}
+    UnwrapTargetAngleTest() : tm(&motor, std::get<1>(GetParam())), turretController(tm) {}
 
     void SetUp() override
     {
@@ -481,7 +481,7 @@ protected:
     void runUnwrapTargetAngleTest()
     {
         float unwrappedTargetAngle = std::get<0>(GetParam()).targetAngle;
-        tm.unwrapTargetAngle(unwrappedTargetAngle);
+        unwrappedTargetAngle = tm.unwrapTargetAngle(unwrappedTargetAngle);
 
         if (std::get<1>(GetParam()).limitMotorAngles && tm.getTurretController() != nullptr)
         {

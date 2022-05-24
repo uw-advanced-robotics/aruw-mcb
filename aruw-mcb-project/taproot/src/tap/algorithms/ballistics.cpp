@@ -31,13 +31,14 @@ bool computeTravelTime(
     const modm::Vector3f &targetPosition,
     float bulletVelocity,
     float *travelTime,
-    float *turretPitch)
+    float *turretPitch,
+    const float pitchAxisOffset)
 {
-    float horizontalDist = hypot(targetPosition.x, targetPosition.y);
+    float horizontalDist = hypot(targetPosition.x, targetPosition.y) + pitchAxisOffset;
     float bulletVelocitySquared = powf(bulletVelocity, 2);
     float sqrtTerm = powf(bulletVelocitySquared, 2) -
                      ACCELERATION_GRAVITY * (ACCELERATION_GRAVITY * powf(horizontalDist, 2) +
-                                             2 * (targetPosition.z)* bulletVelocitySquared);
+                                             2 * targetPosition.z * bulletVelocitySquared);
 
     if (sqrtTerm < 0)
     {
@@ -53,7 +54,7 @@ bool computeTravelTime(
     // trajectory reaches y_f
     if (compareFloatClose(*turretPitch, 0, 1E-2))
     {
-        float sqrtTerm = powf(bulletVelocity, 2.0f) - 2 * ACCELERATION_GRAVITY * (targetPosition.z);
+        float sqrtTerm = powf(bulletVelocity, 2.0f) - 2 * ACCELERATION_GRAVITY * targetPosition.z;
 
         // If there isn't a real-valued root, there is no time where we can reach the target with
         // the given assumptions
@@ -77,10 +78,11 @@ bool findTargetProjectileIntersection(
     float bulletVelocity,
     uint8_t numIterations,
     float *turretPitch,
-    float *turretYaw)
+    float *turretYaw,
+    float *projectedTravelTime,
+    const float pitchAxisOffset)
 {
     modm::Vector3f projectedTargetPosition = targetInitialState.position;
-    float projectedTravelTime;
 
     if (projectedTargetPosition.x == 0 && projectedTargetPosition.y == 0 &&
         projectedTargetPosition.z == 0)
@@ -93,12 +95,13 @@ bool findTargetProjectileIntersection(
         if (!computeTravelTime(
                 projectedTargetPosition,
                 bulletVelocity,
-                &projectedTravelTime,
-                turretPitch))
+                projectedTravelTime,
+                turretPitch,
+                pitchAxisOffset))
         {
             return false;
         }
-        projectedTargetPosition = targetInitialState.projectForward(projectedTravelTime);
+        projectedTargetPosition = targetInitialState.projectForward(*projectedTravelTime);
     }
 
     *turretYaw = atan2f(projectedTargetPosition.y, projectedTargetPosition.x);
