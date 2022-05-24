@@ -188,6 +188,19 @@ static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_WIDE_A
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 
+static constexpr TestParams TEST_TIMING_WITHIN_WINDOW_LARGER_THAN_INTERVAL_ALLOWS_FIRE {
+    .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS,
+    .aimData {
+        .hasTarget = true,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .recommendUseTimedShots = true,
+        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+        .targetPulseInterval = 100'000,
+        .targetIntervalDuration = 600'000,
+    },
+    .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
+};
+
 // First window: edge cases
 static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE {
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS - SMALL_TIMING_ERROR,
@@ -323,6 +336,7 @@ INSTANTIATE_TEST_CASE_P(
 
                 TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_NARROW_ALLOWS_FIRE,
                 TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_WIDE_ALLOWS_FIRE,
+                TEST_TIMING_WITHIN_WINDOW_LARGER_THAN_INTERVAL_ALLOWS_FIRE,
 
                 TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE,
                 TEST_TIMING_SHOT_IN_LATE_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE,
