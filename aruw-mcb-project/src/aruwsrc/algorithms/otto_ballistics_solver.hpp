@@ -140,12 +140,12 @@ private:
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
 
-public:
-    const uint8_t turretID;
-
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
+
+public:
+    const uint8_t turretID;
 };
 }  // namespace aruwsrc::algorithms
 
