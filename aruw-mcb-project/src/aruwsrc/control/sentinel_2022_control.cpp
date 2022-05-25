@@ -142,7 +142,7 @@ public:
           rotateAndUnjamAgitatorWithHeatLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
-              {&heatLimitGovernor}),
+              {&heatLimitGovernor, &frictionWheelsOnGovernor}),
           spinFrictionWheels(
               &drivers,
               &frictionWheels,
