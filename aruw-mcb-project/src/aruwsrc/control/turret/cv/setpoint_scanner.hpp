@@ -68,6 +68,10 @@ public:
      */
     inline float scan()
     {
+        // increment setpoint
+        setpoint += scanningPositive ? config.delta : -config.delta;
+
+        // check if setpoint has reached min/max boundaries
         if (setpoint >= config.upperBound)
         {
             scanningPositive = false;
@@ -77,10 +81,10 @@ public:
             scanningPositive = true;
         }
 
-        setpoint += scanningPositive ? config.delta : -config.delta;
-
         // Bound value between upper and lower bounds
-        return tap::algorithms::limitVal(setpoint, config.lowerBound, config.upperBound);
+        setpoint = tap::algorithms::limitVal(setpoint, config.lowerBound, config.upperBound);
+
+        return setpoint;
     }
 
 private:

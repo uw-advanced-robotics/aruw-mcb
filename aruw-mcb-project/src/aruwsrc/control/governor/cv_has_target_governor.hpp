@@ -27,8 +27,12 @@
 namespace aruwsrc::control::governor
 {
 /**
- * A governor that allows a Command to run when a TurretCVCommand has acquired and is aiming at a
- * target.
+ * A governor that allows a Command to execute when the vision coprocessor is connected and some
+ * specified turret has a target.
+ *
+ * This governor serves a different purpose than the `CvOnTargetGovernor`. This governor purely
+ * checks if vision has a target, whereas the `CvOnTargetGovernor` governor checks if a projectile
+ * launched at the acquired target will hit it.
  */
 class CvHasTargetGovernor : public tap::control::governor::CommandGovernorInterface
 {
