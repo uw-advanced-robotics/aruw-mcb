@@ -168,8 +168,6 @@ private:
      * Timeout used to determine if we should give up on calibration.
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
-
-    bool turretImuOnPitch;
 };
 }  // namespace aruwsrc::control::imu
 
