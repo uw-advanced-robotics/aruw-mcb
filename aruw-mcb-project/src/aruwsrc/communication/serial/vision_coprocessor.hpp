@@ -174,6 +174,16 @@ public:
         return hasTarget;
     }
 
+    mockable inline bool getSomeTurretUsingTimedShots() const
+    {
+        bool hasTarget = false;
+        for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
+        {
+            hasTarget |= lastAimData[i].hasTarget && lastAimData[i].recommendUseTimedShots;
+        }
+        return hasTarget;
+    }
+
     mockable inline void attachOdometryInterface(
         tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
     {
