@@ -25,6 +25,18 @@
 
 namespace aruwsrc::control::auto_aim
 {
+/**
+ * A middleman between incoming vision coprocessor data and aim commands. Uses auto-aim obervations
+ * to discriminate between four possible firing objectives at the current time. Chooses either
+ * "no target" mode, indicating that there is no current target; "ungated" mode, which means no
+ * further timing information is available; "gated allow", indicating that timing information
+ * recommends firing right now; or "gated deny", which means that the vision system does not
+ * currently recommend firing.
+ * 
+ * Gating indicators are expected to vary at high frequency, as they use anticipated ballistics
+ * time-of-flight and other delays to identify whether a projectile fired right now is expected to
+ * hit a plate.
+ */
 class AutoAimLaunchTimer
 {
 public:
