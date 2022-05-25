@@ -379,10 +379,14 @@ PressCommandMapping gCtrlPressed(
     drivers(),
     {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-PressCommandMapping leftMousePressed(
+PressCommandMapping leftMousePressedNoCv(
     drivers(),
     {&kicker::launchKickerHeatAndCVLimited},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT));
+    RemoteMapState({RemoteMapState::MouseButton::LEFT}, {RemoteMapState::MouseButton::RIGHT}));
+PressHoldCommandMapping leftMousePressedAndCv(
+    drivers(),
+    {&kicker::launchKickerHeatAndCVLimited},
+    RemoteMapState({RemoteMapState::MouseButton::LEFT, RemoteMapState::MouseButton::RIGHT}));
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
@@ -479,7 +483,8 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressed);
+    drivers->commandMapper.addMap(&leftMousePressedNoCv);
+    drivers->commandMapper.addMap(&leftMousePressedAndCv);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
