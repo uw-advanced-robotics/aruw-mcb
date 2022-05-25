@@ -60,6 +60,17 @@ public:
         aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
         aruwsrc::algorithms::OttoBallisticsSolver *ballistics);
 
+    /**
+     * Compute a firing inclination for the current time and specified turret.
+     * 
+     * Uses the most recent aim data received for the chosen turret; if recency is desired,
+     * callers should check whether the vision coprocessor is considered "online" before using this
+     * method.
+     *
+     * @param[in] turretId the index of the desired turret.
+     *
+     * @return the computed LaunchInclination for time "now"
+     */
     LaunchInclination getCurrentLaunchInclination(uint8_t turretId);
 
 };  // class AutoAimLaunchTimer
