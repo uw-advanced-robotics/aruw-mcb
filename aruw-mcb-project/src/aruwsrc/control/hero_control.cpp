@@ -155,14 +155,13 @@ OttoBallisticsSolver ballisticsSolver(
     *drivers(),
     odometrySubsystem,
     frictionWheels,
-    9.5f, // defaultLaunchSpeed
-    0 // turretID
+    9.5f,  // defaultLaunchSpeed
+    0      // turretID
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
-    130'000, // agitatorTypicalDelayMicroseconds
+    130'000,  // agitatorTypicalDelayMicroseconds
     &drivers()->visionCoprocessor,
-    &ballisticsSolver
-);
+    &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(

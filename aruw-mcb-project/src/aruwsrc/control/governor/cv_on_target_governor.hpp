@@ -31,11 +31,13 @@ bool dbgIsRunning, dbgIsOnTarget;
 
 namespace aruwsrc::control::governor
 {
-namespace {
+namespace
+{
 using namespace aruwsrc::control::auto_aim;
 }
 
-enum class CvOnTargetGovernorMode {
+enum class CvOnTargetGovernorMode
+{
     ON_TARGET,
     ON_TARGET_AND_GATED
 };
@@ -51,8 +53,7 @@ public:
         aruwsrc::Drivers &drivers,
         aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand,
         AutoAimLaunchTimer &launchTimer,
-        CvOnTargetGovernorMode mode
-        )
+        CvOnTargetGovernorMode mode)
         : drivers(drivers),
           turretCVCommand(turretCVCommand),
           launchTimer(launchTimer),
@@ -64,23 +65,28 @@ public:
     {
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
         dbgIsRunning = isCvRunning;
-        if (!isCvRunning) {
+        if (!isCvRunning)
+        {
             return true;
         }
 
         bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
         dbgIsOnTarget = isOnTarget;
-        if (!isOnTarget) {
+        if (!isOnTarget)
+        {
             return false;
         }
 
         return isGateSatisfied();
     }
 
-    bool isGateSatisfied() {
-        auto autoLaunchInclination = launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
+    bool isGateSatisfied()
+    {
+        auto autoLaunchInclination =
+            launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
         inclination = autoLaunchInclination;
-        switch (autoLaunchInclination) {
+        switch (autoLaunchInclination)
+        {
             case AutoAimLaunchTimer::LaunchInclination::NO_TARGET:
                 return false;
             case AutoAimLaunchTimer::LaunchInclination::UNGATED:

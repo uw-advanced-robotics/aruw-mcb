@@ -20,26 +20,35 @@
 #ifndef AUTO_AIM_LAUNCH_TIMER_HPP_
 #define AUTO_AIM_LAUNCH_TIMER_HPP_
 
-#include <aruwsrc/communication/serial/vision_coprocessor.hpp>
 #include <aruwsrc/algorithms/otto_ballistics_solver.hpp>
+#include <aruwsrc/communication/serial/vision_coprocessor.hpp>
 
 namespace aruwsrc::control::auto_aim
 {
 class AutoAimLaunchTimer
 {
-    public:
-        enum class LaunchInclination { NO_TARGET, UNGATED, GATED_DENY, GATED_ALLOW };
-        static constexpr float MAX_ALLOWED_FLIGHT_TIME_SECS = 2.f;
+public:
+    enum class LaunchInclination
+    {
+        NO_TARGET,
+        UNGATED,
+        GATED_DENY,
+        GATED_ALLOW
+    };
+    static constexpr float MAX_ALLOWED_FLIGHT_TIME_SECS = 2.f;
 
-    private:
-        uint32_t agitatorTypicalDelayMicroseconds;
-        aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
-        aruwsrc::algorithms::OttoBallisticsSolver *ballistics;
+private:
+    uint32_t agitatorTypicalDelayMicroseconds;
+    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
+    aruwsrc::algorithms::OttoBallisticsSolver *ballistics;
 
-    public:
-        AutoAimLaunchTimer(uint32_t agitatorTypicalDelayMicroseconds, aruwsrc::serial::VisionCoprocessor *visionCoprocessor, aruwsrc::algorithms::OttoBallisticsSolver *ballistics);
+public:
+    AutoAimLaunchTimer(
+        uint32_t agitatorTypicalDelayMicroseconds,
+        aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
+        aruwsrc::algorithms::OttoBallisticsSolver *ballistics);
 
-        LaunchInclination getCurrentLaunchInclination(uint8_t turretId);
+    LaunchInclination getCurrentLaunchInclination(uint8_t turretId);
 
 };  // class AutoAimLaunchTimer
 

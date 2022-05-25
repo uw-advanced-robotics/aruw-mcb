@@ -26,8 +26,9 @@
 
 namespace aruwsrc::mock
 {
-namespace{
-    using namespace aruwsrc::algorithms;
+namespace
+{
+using namespace aruwsrc::algorithms;
 }
 
 class OttoBallisticsSolverMock : public OttoBallisticsSolver
@@ -41,7 +42,11 @@ public:
         const uint8_t turretID);
     virtual ~OttoBallisticsSolverMock();
 
-    MOCK_METHOD(std::optional<OttoBallisticsSolver::BallisticsSolution>, computeTurretAimAngles, (), (override));
+    MOCK_METHOD(
+        std::optional<OttoBallisticsSolver::BallisticsSolution>,
+        computeTurretAimAngles,
+        (),
+        (override));
 };  // class OttoBallisticsSolverMock
 }  // namespace aruwsrc::mock
 

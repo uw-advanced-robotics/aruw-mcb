@@ -37,6 +37,7 @@
 #include "agitator/multi_shot_handler.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -67,7 +68,6 @@
 #include "turret/soldier_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -154,14 +154,13 @@ OttoBallisticsSolver ballisticsSolver(
     *drivers(),
     odometrySubsystem,
     frictionWheels,
-    14.5f, // defaultLaunchSpeed
-    0 // turretID
+    14.5f,  // defaultLaunchSpeed
+    0       // turretID
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
-    80'000, // agitatorTypicalDelayMicroseconds
+    80'000,  // agitatorTypicalDelayMicroseconds
     &drivers()->visionCoprocessor,
-    &ballisticsSolver
-);
+    &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(

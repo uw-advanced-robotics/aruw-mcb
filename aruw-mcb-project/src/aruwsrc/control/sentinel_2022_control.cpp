@@ -139,9 +139,8 @@ public:
               drivers,
               odometrySubsystem,
               frictionWheels,
-              29.5f, // defaultLaunchSpeed
-              config.turretID
-          ),
+              29.5f,  // defaultLaunchSpeed
+              config.turretID),
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),

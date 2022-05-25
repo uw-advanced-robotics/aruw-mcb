@@ -58,12 +58,13 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
 
     {
         bool hasTarget = drivers.visionCoprocessor.isCvOnline() &&
-                        drivers.visionCoprocessor.getSomeTurretHasTarget();
+                         drivers.visionCoprocessor.getSomeTurretHasTarget();
 
         if (hasTarget)
         {
             bool shotTimingMode = drivers.visionCoprocessor.getSomeTurretUsingTimedShots();
-            newVisionIndicatorColor = shotTimingMode ? Tx::GraphicColor::ORANGE : Tx::GraphicColor::GREEN;
+            newVisionIndicatorColor =
+                shotTimingMode ? Tx::GraphicColor::ORANGE : Tx::GraphicColor::GREEN;
         }
         else
         {
@@ -71,9 +72,12 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
         }
     }
 
-    if (newVisionIndicatorColor.has_value()) {
-        visionTargetFoundGraphics.graphicData[0].color =  static_cast<uint8_t>(*newVisionIndicatorColor);
-        visionTargetFoundGraphics.graphicData[1].color =  static_cast<uint8_t>(*newVisionIndicatorColor);
+    if (newVisionIndicatorColor.has_value())
+    {
+        visionTargetFoundGraphics.graphicData[0].color =
+            static_cast<uint8_t>(*newVisionIndicatorColor);
+        visionTargetFoundGraphics.graphicData[1].color =
+            static_cast<uint8_t>(*newVisionIndicatorColor);
     }
 
     if ((updateVisionTargetFoundTimeout.isExpired() ||
@@ -84,7 +88,8 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
             bool wasPresent = prevVisionIndicatorColor.has_value();
             bool isPresent = newVisionIndicatorColor.has_value();
             auto presenceChanged = !wasPresent || !isPresent;
-            auto operation = presenceChanged ? (isPresent ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE) : Tx::GRAPHIC_MODIFY;
+            auto operation = presenceChanged ? (isPresent ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE)
+                                             : Tx::GRAPHIC_MODIFY;
             visionTargetFoundGraphics.graphicData[0].operation = operation;
             visionTargetFoundGraphics.graphicData[1].operation = operation;
         }

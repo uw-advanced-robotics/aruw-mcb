@@ -182,10 +182,7 @@ XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Dig
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
-VisionCoprocessorMock::VisionCoprocessorMock()
-    : serial::VisionCoprocessor(nullptr)
-{
-}
+VisionCoprocessorMock::VisionCoprocessorMock() : serial::VisionCoprocessor(nullptr) {}
 VisionCoprocessorMock::~VisionCoprocessorMock() {}
 
 TurretMotorMock::TurretMotorMock(
@@ -228,22 +225,20 @@ TurretCVCommandMock::TurretCVCommandMock(
 }
 TurretCVCommandMock::~TurretCVCommandMock() {}
 
-
 OttoBallisticsSolverMock::OttoBallisticsSolverMock(
-        const aruwsrc::Drivers &drivers,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed,
-        const uint8_t turretID)
+    const aruwsrc::Drivers &drivers,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const float defaultLaunchSpeed,
+    const uint8_t turretID)
     : aruwsrc::algorithms::OttoBallisticsSolver(
-        drivers,
-        odometryInterface,
-        frictionWheels,
-        defaultLaunchSpeed,
-        turretID
-    ) {};
+          drivers,
+          odometryInterface,
+          frictionWheels,
+          defaultLaunchSpeed,
+          turretID){};
 
-    OttoBallisticsSolverMock::~OttoBallisticsSolverMock() {};
+OttoBallisticsSolverMock::~OttoBallisticsSolverMock(){};
 
 TurretControllerInterfaceMock::TurretControllerInterfaceMock(
     aruwsrc::control::turret::TurretMotor &turretMotor)
