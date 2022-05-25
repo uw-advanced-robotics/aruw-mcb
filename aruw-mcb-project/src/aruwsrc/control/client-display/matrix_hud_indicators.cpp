@@ -58,7 +58,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
-    const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+    const aruwsrc::agitator::MultiShotCommandMapping *multiShotCommandMapping,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
@@ -67,7 +67,7 @@ MatrixHudIndicators::MatrixHudIndicators(
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       turretSubsystem(turretSubsystem),
-      multiShotHandler(multiShotHandler),
+      MultiShotCommandMapping(multiShotCommandMapping),
       driveCommands{
           chassisBeybladeCmd,
           chassisAutorotateCmd,
@@ -179,8 +179,9 @@ void MatrixHudIndicators::updateIndicatorState()
         getIndicatorYCoordinate(static_cast<int>(shooterState)));
 
     // update firing mode
-    matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
-        static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
+    matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(
+        getIndicatorYCoordinate(static_cast<int>(
+            MultiShotCommandMapping == nullptr ? 0 : MultiShotCommandMapping->getShooterState())));
 
     CVStatus cvStatus = drivers.visionCoprocessor.isCvOnline()
                             ? CVStatus::VISION_COPROCESSOR_CONNECTED

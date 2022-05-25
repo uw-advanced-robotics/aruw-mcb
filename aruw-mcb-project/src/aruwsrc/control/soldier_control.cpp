@@ -34,7 +34,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/multi_shot_handler.hpp"
+#include "agitator/multi_shot_command_mapping.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
@@ -274,9 +274,6 @@ GovernorWithFallbackCommand<1> agitatorLaunchYellowCardCommand(
     rotateAndUnjamAgitatorWithHeatLimiting,
     {&yellowCardedGovernor});
 
-extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
-MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
-
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
@@ -304,6 +301,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
+extern MultiShotCommandMapping leftMousePressedShiftNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
     clientDisplay,
@@ -312,7 +310,7 @@ ClientDisplayCommand clientDisplayCommand(
     agitator,
     turret,
     imuCalibrateCommand,
-    &multiShotHandler,
+    &leftMousePressedShiftNotPressed,
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
@@ -349,12 +347,12 @@ PressCommandMapping gCtrlPressed(
 
 ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
+MultiShotCommandMapping leftMousePressedShiftNotPressed(
+    agitatorLaunchYellowCardCommand,
+    agitatorLaunchYellowCardCommand,
+    agitatorLaunchYellowCardCommand,
     drivers(),
-    {&agitatorLaunchYellowCardCommand},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
-    false,
-    1);
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
@@ -404,15 +402,15 @@ PressCommandMapping xPressed(
     RemoteMapState({Remote::Key::X}));
 
 CycleStateCommandMapping<
-    MultiShotHandler::ShooterState,
-    MultiShotHandler::NUM_SHOOTER_STATES,
-    MultiShotHandler>
+    MultiShotCommandMapping::ShooterState,
+    MultiShotCommandMapping::NUM_SHOOTER_STATES,
+    MultiShotCommandMapping>
     vPressed(
         drivers(),
         RemoteMapState({Remote::Key::V}),
-        MultiShotHandler::SINGLE,
-        &multiShotHandler,
-        &MultiShotHandler::setShooterState);
+        MultiShotCommandMapping::SINGLE,
+        &leftMousePressedShiftNotPressed,
+        &MultiShotCommandMapping::setShooterState);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
