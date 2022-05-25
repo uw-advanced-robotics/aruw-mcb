@@ -78,6 +78,13 @@ public:
     static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
 #endif
 
+    enum class FireRate{
+        ZERO = 0,
+        LOW = 1,
+        MEDIUM = 2,
+        HIGH = 3,
+    };
+
     /**
      * AutoAim data to receive from Jetson.
      */
@@ -98,7 +105,7 @@ public:
         bool hasTarget;      ///< Whether or not the xavier has a target.
         uint32_t timestamp;  ///< Timestamp in microseconds.
 
-        uint32_t firerate;   ///< Firerate of sentry (low 0 - 3 high)
+        uint8_t firerate;   ///< Firerate of sentry (low 0 - 3 high)
 
         bool recommendUseTimedShots;   ///< Validity of the targetHitTime
         uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our

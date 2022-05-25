@@ -24,20 +24,26 @@
 #include "modm/processing/timer/periodic_timer.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 
 namespace aruwsrc::control::governor
 {
 /**
- * A governor that allows a Command to run when a TurretCVCommand has acquired and is aiming at a
- * target.
+ * A governor that allows a Command to run based on an internal timer and information from the vision
+ * processor that dictates firerate
  */
 class CvHasTargetGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    CvHasTargetGovernor(aruwsrc::serial::VisionCoprocessor &visionCoprocessor, uint8_t turretID)
-        : visionCoprocessor(visionCoprocessor),
-          turretID(turretID),
+    CvHasTargetGovernor(
+        aruwsrc::Drivers &drivers, 
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor, 
+        uint8_t turretID)
+        : drivers(drivers),
+          visionCoprocessor(visionCoprocessor),
+          turretID(turretID)
     {
     }
 
@@ -48,42 +54,50 @@ public:
 
     bool isReady() final
     {
-        return isTimerFinished();
+        if(isTimerFinished()) {
+            restartTimer();
+            return true;
+        }
+        return false;
     }
 
-    bool isFinished() final { return !isReady(); }
+    bool isFinished() final { return false; }
 
 private:
+    aruwsrc::Drivers &drivers;
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     uint8_t turretID;
 
     tap::arch::MilliTimeout timer;
-    uint32_t firerateMs1 = 3;
-    uint32_t firerateMs2 = 2;
-    uint32_t firerateMs3 = 1;
+    static constexpr float LOW_RPS = 3;
+    static constexpr float MID_RPS = 10;
+    static constexpr float HIGH_RPS = 20;
 
     bool isTimerFinished() {
-        if(visionCoprocessor.getLastAimData(turretID).firerate == 0) return false;
-        return timer.isExpired();
+        return 
+            drivers.refSerial.getRefSerialReceivingData() || 
+            (visionCoprocessor.getLastAimData(turretID).firerate !=  0 && timer.isExpired());
     }
 
     void restartTimer() {
         switch(visionCoprocessor.getLastAimData(turretID).firerate) {
-            case 0:
+            case 0: // don't fire
                 break;
-            case 1:
-                timer.restart(firerateMs1);
+            case 1: // low fire rate
+                timer.restart(rpsToPeriodMS(LOW_RPS));
                 break;
-            case 2:
-                timer.restart(firerateMs2);
+            case 2: // medium fire rate
+                timer.restart(rpsToPeriodMS(MID_RPS));
                 break;
-            case 3:
-                timer.restart(firerateMs3);
+            case 3: // high fire rate
+                timer.restart(rpsToPeriodMS(HIGH_RPS));
                 break;
             default:
-                //TODO add error message here
+                timer.restart(0);
         }
     }
+
+    static inline constexpr uint32_t rpsToPeriodMS(float rps) { return (1000.0f / rps); }
 
 };
 }  // namespace aruwsrc::control::governor
