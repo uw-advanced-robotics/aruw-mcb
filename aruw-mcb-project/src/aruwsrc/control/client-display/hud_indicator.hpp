@@ -20,6 +20,9 @@
 #ifndef HUD_INDICATOR_HPP_
 #define HUD_INDICATOR_HPP_
 
+#include <array>
+#include <optional>
+
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
@@ -70,14 +73,20 @@ public:
 
 protected:
     /**
+     * Largest graphic name possible that getUnusedGraphicName will return
+     */
+    static constexpr uint32_t MAX_GRAPHIC_NAME = 0xffffff;
+
+    /**
      * Graphics must have unique 3 byte names. Utility function for getting a graphic name that is
      * currently unused. Use this function exclusively to avoid graphic name clashes.
      *
      * If no list names are available (all are in use), won't set the graphicName.
      *
      * @param[out] graphicName Array to put an unused list name in.
+     *
      */
-    static void getUnusedGraphicName(uint8_t graphicName[3]);
+    static std::optional<std::array<uint8_t, 3>> getUnusedGraphicName();
 
     static uint32_t currGraphicName;
 

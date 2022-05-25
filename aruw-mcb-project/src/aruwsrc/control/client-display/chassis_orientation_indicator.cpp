@@ -21,6 +21,7 @@
 
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -90,14 +91,19 @@ void ChassisOrientationIndicator::initialize()
     chassisOrientation.set(0, CHASSIS_LENGTH / 2);
     chassisOrientationPrev = chassisOrientation;
 
-    uint8_t chassisOrientationName[3];
-    getUnusedGraphicName(chassisOrientationName);
+    auto chassisOrientationName = getUnusedGraphicName();
+
+    if (!chassisOrientationName.has_value())
+    {
+        RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+        return;
+    }
 
     // config the chassis graphic
 
     RefSerialTransmitter::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[0],
-        chassisOrientationName,
+        chassisOrientationName->data(),
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         CHASSIS_ORIENTATION_COLOR);
@@ -110,13 +116,19 @@ void ChassisOrientationIndicator::initialize()
         CHASSIS_CENTER_Y - chassisOrientation.y,
         &chassisOrientationGraphics.graphicData[0]);
 
-    getUnusedGraphicName(chassisOrientationName);
+    chassisOrientationName = getUnusedGraphicName();
+
+    if (!chassisOrientationName.has_value())
+    {
+        RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+        return;
+    }
 
     // config the turret graphic
 
     RefSerialTransmitter::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[1],
-        chassisOrientationName,
+        chassisOrientationName->data(),
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         CHASSIS_BARREL_COLOR);

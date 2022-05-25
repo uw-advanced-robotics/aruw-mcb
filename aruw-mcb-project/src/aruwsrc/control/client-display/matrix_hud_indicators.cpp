@@ -21,6 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -40,7 +41,7 @@ namespace aruwsrc::control::client_display
  */
 static inline void updateGraphicYLocation(
     uint16_t location,
-    RefSerialData::Tx::Graphic1Message *graphic)
+    RefSerialData::Tx::Graphic1Message* graphic)
 {
     modm_assert(
         graphic->graphicData.endY >= graphic->graphicData.startY,
@@ -53,15 +54,15 @@ static inline void updateGraphicYLocation(
 }
 
 MatrixHudIndicators::MatrixHudIndicators(
-    aruwsrc::Drivers &drivers,
-    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
-    const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
-    const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
-    const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
-    const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
+    aruwsrc::Drivers& drivers,
+    tap::communication::serial::RefSerialTransmitter& refSerialTransmitter,
+    const aruwsrc::control::TurretMCBHopperSubsystem* hopperSubsystem,
+    const aruwsrc::control::launcher::FrictionWheelSubsystem& frictionWheelSubsystem,
+    const aruwsrc::control::turret::TurretSubsystem& turretSubsystem,
+    const aruwsrc::agitator::MultiShotHandler* multiShotHandler,
+    const aruwsrc::chassis::BeybladeCommand* chassisBeybladeCmd,
+    const aruwsrc::chassis::ChassisAutorotateCommand* chassisAutorotateCmd,
+    const aruwsrc::chassis::ChassisImuDriveCommand* chassisImuDriveCommand)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       hopperSubsystem(hopperSubsystem),
@@ -192,8 +193,13 @@ void MatrixHudIndicators::updateIndicatorState()
 
 void MatrixHudIndicators::initialize()
 {
-    uint8_t matrixHudIndicatorName[3];
-    getUnusedGraphicName(matrixHudIndicatorName);
+    auto matrixHudIndicatorName = getUnusedGraphicName();
+
+    if (!matrixHudIndicatorName.has_value())
+    {
+        RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+        return;
+    }
 
     uint16_t hudIndicatorListCurrX = MATRIX_HUD_INDICATOR_START_X;
 
@@ -204,12 +210,18 @@ void MatrixHudIndicators::initialize()
 
         RefSerialTransmitter::configGraphicGenerics(
             &matrixHudIndicatorGraphics[i].graphicData,
-            matrixHudIndicatorName,
+            matrixHudIndicatorName->data(),
             Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             MATRIX_HUD_INDICATOR_SELECTOR_BOX_COLOR);
 
-        getUnusedGraphicName(matrixHudIndicatorName);
+        matrixHudIndicatorName = getUnusedGraphicName();
+
+        if (!matrixHudIndicatorName.has_value())
+        {
+            RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+            return;
+        }
 
         RefSerialTransmitter::configRectangle(
             MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH,
@@ -226,12 +238,18 @@ void MatrixHudIndicators::initialize()
 
         RefSerialTransmitter::configGraphicGenerics(
             &matrixHudLabelAndTitleGraphics[i].graphicData,
-            matrixHudIndicatorName,
+            matrixHudIndicatorName->data(),
             Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             MATRIX_HUD_INDICATOR_LABELS_COLOR);
 
-        getUnusedGraphicName(matrixHudIndicatorName);
+        matrixHudIndicatorName = getUnusedGraphicName();
+
+        if (!matrixHudIndicatorName.has_value())
+        {
+            RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+            return;
+        }
 
         RefSerialTransmitter::configCharacterMsg(
             MATRIX_HUD_INDICATOR_CHAR_SIZE,
@@ -250,13 +268,13 @@ void MatrixHudIndicators::initialize()
 
     RefSerialTransmitter::configGraphicGenerics(
         &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS].graphicData,
-        matrixHudIndicatorName,
+        matrixHudIndicatorName->data(),
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         MATRIX_HUD_INDICATOR_TITLE_COLOR);
 
     char positionHudGraphicTitles[30];
-    char *currHudGraphicTitlePos = positionHudGraphicTitles;
+    char* currHudGraphicTitlePos = positionHudGraphicTitles;
 
     static constexpr int spacesBetweenCols =
         MATRIX_HUD_INDICATOR_DIST_BTWN_INDICATOR_COLS / MATRIX_HUD_INDICATOR_CHAR_SIZE;

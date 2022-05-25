@@ -22,6 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -76,12 +77,17 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
 
 void TurretAnglesIndicator::initialize()
 {
-    uint8_t turretAnglesName[3];
-    getUnusedGraphicName(turretAnglesName);
+    auto turretAnglesName = getUnusedGraphicName();
+
+    if (!turretAnglesName.has_value())
+    {
+        RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+        return;
+    }
 
     RefSerialTransmitter::configGraphicGenerics(
         &turretAnglesGraphic.graphicData,
-        turretAnglesName,
+        turretAnglesName->data(),
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         TURRET_ANGLES_COLOR);
@@ -94,11 +100,17 @@ void TurretAnglesIndicator::initialize()
         "0\n\n0",
         &turretAnglesGraphic);
 
-    turretAnglesName[2]++;
+    turretAnglesName = getUnusedGraphicName();
+
+    if (!turretAnglesName.has_value())
+    {
+        RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+        return;
+    }
 
     RefSerialTransmitter::configGraphicGenerics(
         &turretAnglesLabelGraphics.graphicData,
-        turretAnglesName,
+        turretAnglesName->data(),
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         TURRET_ANGLES_COLOR);

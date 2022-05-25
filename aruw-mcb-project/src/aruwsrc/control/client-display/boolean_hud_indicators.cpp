@@ -21,6 +21,7 @@
 
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -119,18 +120,23 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
 
 void BooleanHudIndicators::initialize()
 {
-    uint8_t booleanHudIndicatorName[3] = {};
     uint16_t hudIndicatorListCurrY = BOOLEAN_HUD_INDICATOR_LIST_START_Y;
 
     // Configure hopper cover hud indicator
     for (int i = 0; i < NUM_BOOLEAN_HUD_INDICATORS; i++)
     {
         // config the boolean HUD indicator circle (that will switch colors based on state)
-        getUnusedGraphicName(booleanHudIndicatorName);
+        auto booleanHudIndicatorName = getUnusedGraphicName();
+
+        if (!booleanHudIndicatorName.has_value())
+        {
+            RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+            return;
+        }
 
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorGraphics[i].graphicData,
-            booleanHudIndicatorName,
+            booleanHudIndicatorName->data(),
             Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]));
@@ -143,11 +149,17 @@ void BooleanHudIndicators::initialize()
             &booleanHudIndicatorGraphics[i].graphicData);
 
         // config the border circle that bounds the booleanHudIndicatorGraphics
-        getUnusedGraphicName(booleanHudIndicatorName);
+        booleanHudIndicatorName = getUnusedGraphicName();
+
+        if (!booleanHudIndicatorName.has_value())
+        {
+            RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+            return;
+        }
 
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorStaticGraphics[i].graphicData,
-            booleanHudIndicatorName,
+            booleanHudIndicatorName->data(),
             Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
@@ -160,11 +172,17 @@ void BooleanHudIndicators::initialize()
             &booleanHudIndicatorStaticGraphics[i].graphicData);
 
         // config the label associated with the particular indicator
-        getUnusedGraphicName(booleanHudIndicatorName);
+        booleanHudIndicatorName = getUnusedGraphicName();
+
+        if (!booleanHudIndicatorName.has_value())
+        {
+            RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+            return;
+        }
 
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorStaticLabelGraphics[i].graphicData,
-            booleanHudIndicatorName,
+            booleanHudIndicatorName->data(),
             Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_LABEL_COLOR);

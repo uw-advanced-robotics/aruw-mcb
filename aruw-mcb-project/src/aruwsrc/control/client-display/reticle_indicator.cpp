@@ -20,6 +20,7 @@
 #include "reticle_indicator.hpp"
 
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -56,8 +57,13 @@ modm::ResumableResult<bool> ReticleIndicator::update()
 
 void ReticleIndicator::initialize()
 {
-    uint8_t currLineName[3];
-    getUnusedGraphicName(currLineName);
+    auto currLineName = getUnusedGraphicName();
+
+    if (!currLineName.has_value())
+    {
+        RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+        return;
+    }
 
     // Add reticle markers
     uint16_t maxReticleY = 0;
@@ -73,12 +79,18 @@ void ReticleIndicator::initialize()
 
         RefSerialTransmitter::configGraphicGenerics(
             &reticleMsg[reticleMsgIndex].graphicData[graphicDataIndex],
-            currLineName,
+            currLineName->data(),
             Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[i]));
 
-        getUnusedGraphicName(currLineName);
+        currLineName = getUnusedGraphicName();
+
+        if (!currLineName.has_value())
+        {
+            RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+            return;
+        }
 
         // center of the reticle, in pixels
         uint16_t reticleXCenter = static_cast<int>(SCREEN_WIDTH / 2) + RETICLE_CENTER_X_OFFSET;
@@ -116,7 +128,7 @@ void ReticleIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &reticleMsg[NUM_RETICLE_COORDINATES / MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]
              .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)],
-        currLineName,
+        currLineName->data(),
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         RETICLE_VERTICAL_COLOR);

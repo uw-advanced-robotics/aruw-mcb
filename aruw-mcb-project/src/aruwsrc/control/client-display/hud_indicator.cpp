@@ -32,18 +32,20 @@ HudIndicator::HudIndicator(tap::communication::serial::RefSerialTransmitter &ref
 
 void HudIndicator::resetGraphicNameGenerator() { currGraphicName = 0; }
 
-void HudIndicator::getUnusedGraphicName(uint8_t graphicName[3])
+std::optional<std::array<uint8_t, 3>> HudIndicator::getUnusedGraphicName()
 {
-    if (currGraphicName > 0xffffff)
+    if (currGraphicName > MAX_GRAPHIC_NAME)
     {
-        return;
+        return std::nullopt;
     }
     else
     {
-        graphicName[0] = static_cast<uint8_t>((currGraphicName >> 16) & 0xff);
-        graphicName[1] = static_cast<uint8_t>((currGraphicName >> 8) & 0xff);
-        graphicName[2] = static_cast<uint8_t>(currGraphicName & 0xff);
+        std::optional<std::array<uint8_t, 3>> graphicName;
+        (*graphicName)[0] = static_cast<uint8_t>((currGraphicName >> 16) & 0xff);
+        (*graphicName)[1] = static_cast<uint8_t>((currGraphicName >> 8) & 0xff);
+        (*graphicName)[2] = static_cast<uint8_t>(currGraphicName & 0xff);
         currGraphicName++;
+        return graphicName;
     }
 }
 

@@ -20,6 +20,7 @@
 #include "vision_hud_indicators.hpp"
 
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -96,13 +97,17 @@ void VisionHudIndicators::initializeVisionHudIndicator(
     Tx::GraphicData *graphicData,
     int xBoxLocation)
 {
-    uint8_t hudIndicatorName[3] = {};
+    auto hudIndicatorName = getUnusedGraphicName();
 
-    getUnusedGraphicName(hudIndicatorName);
+    if (!hudIndicatorName.has_value())
+    {
+        RAISE_ERROR((&drivers), "getUnusedGraphicName failed");
+        return;
+    }
 
     RefSerialTransmitter::configGraphicGenerics(
         graphicData,
-        hudIndicatorName,
+        hudIndicatorName->data(),
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         VISION_TARGET_FOUND_COLOR);
