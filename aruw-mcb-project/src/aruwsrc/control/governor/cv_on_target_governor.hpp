@@ -26,9 +26,6 @@
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers.hpp"
 
-aruwsrc::control::auto_aim::AutoAimLaunchTimer::LaunchInclination inclination;
-bool dbgIsRunning, dbgIsOnTarget;
-
 namespace aruwsrc::control::governor
 {
 namespace
@@ -61,17 +58,23 @@ public:
     {
     }
 
+    void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
+    bool getGovernorEnabled() const { return this->enabled; }
+
     bool isReady() final
     {
+        if (!enabled)
+        {
+            return true;
+        }
+
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
-        dbgIsRunning = isCvRunning;
         if (!isCvRunning)
         {
             return true;
         }
 
         bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
-        dbgIsOnTarget = isOnTarget;
         if (!isOnTarget)
         {
             return false;
@@ -84,7 +87,6 @@ public:
     {
         auto autoLaunchInclination =
             launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
-        inclination = autoLaunchInclination;
         switch (autoLaunchInclination)
         {
             case AutoAimLaunchTimer::LaunchInclination::NO_TARGET:
@@ -113,6 +115,7 @@ private:
     aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand;
     AutoAimLaunchTimer &launchTimer;
     const CvOnTargetGovernorMode mode;
+    bool enabled = true;
 };
 }  // namespace aruwsrc::control::governor
 

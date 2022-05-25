@@ -75,6 +75,7 @@
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
+using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::governor;
@@ -297,8 +298,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
-
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
@@ -319,6 +318,7 @@ ClientDisplayCommand clientDisplayCommand(
     turret,
     imuCalibrateCommand,
     &multiShotHandler,
+    &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
@@ -327,7 +327,7 @@ ClientDisplayCommand clientDisplayCommand(
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
     drivers(),
-    {&openHopperCommand, &stopFrictionWheels},
+    {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
@@ -353,7 +353,13 @@ PressCommandMapping gCtrlPressed(
     {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 
-ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
+CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+    drivers(),
+    RemoteMapState({Remote::Key::R}),
+    true,
+    &cvOnTargetGovernor,
+    &CvOnTargetGovernor::setGovernorEnabled);
+
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
@@ -473,7 +479,7 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&rToggled);
+    drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);

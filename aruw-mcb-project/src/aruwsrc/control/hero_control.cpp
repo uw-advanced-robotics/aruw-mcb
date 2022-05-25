@@ -67,6 +67,8 @@
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
+#include "cycle_state_command_mapping.hpp"
+
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace aruwsrc::chassis;
@@ -264,19 +266,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
-ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    clientDisplay,
-    nullptr,
-    frictionWheels,
-    waterwheelAgitator,
-    turret,
-    imuCalibrateCommand,
-    nullptr,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    &chassisImuDriveCommand);
-
 // hero agitator commands
 
 LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(
@@ -336,6 +325,20 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     launchKicker,
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
+
+ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    nullptr,
+    frictionWheels,
+    waterwheelAgitator,
+    turret,
+    imuCalibrateCommand,
+    nullptr,
+    &kicker::cvOnTargetGovernor,
+    &beybladeCommand,
+    &chassisAutorotateCommand,
+    &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -411,6 +414,12 @@ PressCommandMapping xPressed(
     drivers(),
     {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
+CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+    drivers(),
+    RemoteMapState({Remote::Key::R}),
+    true,
+    &kicker::cvOnTargetGovernor,
+    &CvOnTargetGovernor::setGovernorEnabled);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -478,6 +487,7 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
+    drivers->commandMapper.addMap(&rPressed);
 }
 }  // namespace hero_control
 
