@@ -154,7 +154,6 @@ OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turret, &chassis);
 OttoBallisticsSolver ballisticsSolver(
     *drivers(),
     odometrySubsystem,
-    turret,
     frictionWheels,
     9.5f, // defaultLaunchSpeed
     0 // turretID
@@ -334,6 +333,7 @@ HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
     constants::HEAT_LIMIT_BUFFER);
+// TODO: unused?
 GovernorLimitedCommand<2> launchKickerHeatLimited(
     {&kickerAgitator},
     launchKickerWhenBallReady,
