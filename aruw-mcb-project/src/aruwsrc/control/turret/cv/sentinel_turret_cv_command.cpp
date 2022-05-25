@@ -43,9 +43,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     algorithms::TurretPitchControllerInterface *pitchController,
     tap::control::Subsystem &launchingSubsystem,
     Command *const launchingCommand,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const float defaultLaunchSpeed,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const uint8_t turretID)
     : ComprisedCommand(drivers),
       drivers(drivers),
@@ -54,7 +52,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
       pitchController(pitchController),
       turretID(turretID),
       launchingCommand(launchingCommand),
-      ballisticsSolver(*drivers, odometryInterface, frictionWheels, defaultLaunchSpeed, turretID),
+      ballisticsSolver(ballisticsSolver),
       pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(
           turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
@@ -65,6 +63,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     assert(turretSubsystem != nullptr);
     assert(pitchController != nullptr);
     assert(yawController != nullptr);
+    assert(ballisticsSolver != nullptr);
 
     this->comprisedCommandScheduler.registerSubsystem(turretSubsystem);
     this->comprisedCommandScheduler.registerSubsystem(&launchingSubsystem);
@@ -92,7 +91,7 @@ void SentinelTurretCVCommand::execute()
     float yawSetpoint = yawController->getSetpoint();
 
     std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
-        ballisticsSolver.computeTurretAimAngles();
+        ballisticsSolver->computeTurretAimAngles();
 
     if (ballisticsSolution != std::nullopt)
     {
@@ -120,8 +119,8 @@ void SentinelTurretCVCommand::execute()
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
         if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-                turretSubsystem->yawMotor.getValidChassisMeasurementError(),
-                turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+                turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
+                turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
                 ballisticsSolution->distance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it

@@ -22,11 +22,23 @@
 
 #include "tap/control/governor/command_governor_interface.hpp"
 
+#include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::governor
 {
+namespace
+{
+using namespace aruwsrc::control::auto_aim;
+}
+
+enum class CvOnTargetGovernorMode
+{
+    ON_TARGET,
+    ON_TARGET_AND_GATED
+};
+
 /**
  * A governor that allows a Command to run when a TurretCVCommand has acquired and is aiming at a
  * target.
@@ -36,23 +48,74 @@ class CvOnTargetGovernor : public tap::control::governor::CommandGovernorInterfa
 public:
     CvOnTargetGovernor(
         aruwsrc::Drivers &drivers,
-        aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand)
+        aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand,
+        AutoAimLaunchTimer &launchTimer,
+        CvOnTargetGovernorMode mode)
         : drivers(drivers),
-          turretCVCommand(turretCVCommand)
+          turretCVCommand(turretCVCommand),
+          launchTimer(launchTimer),
+          mode(mode)
     {
     }
+
+    void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
+    bool getGovernorEnabled() const { return this->enabled; }
 
     bool isReady() final
     {
-        return drivers.commandScheduler.isCommandScheduled(&turretCVCommand) &&
-               turretCVCommand.isAimingWithinLaunchingTolerance();
+        if (!enabled)
+        {
+            return true;
+        }
+
+        bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
+        if (!isCvRunning)
+        {
+            return true;
+        }
+
+        bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
+        if (!isOnTarget)
+        {
+            return false;
+        }
+
+        return isGateSatisfied();
     }
 
-    bool isFinished() final { return !isReady(); }
+    bool isGateSatisfied()
+    {
+        auto autoLaunchInclination =
+            launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
+        switch (autoLaunchInclination)
+        {
+            case AutoAimLaunchTimer::LaunchInclination::NO_TARGET:
+                return false;
+            case AutoAimLaunchTimer::LaunchInclination::UNGATED:
+                return true;
+            case AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW:
+                return true;
+            case AutoAimLaunchTimer::LaunchInclination::GATED_DENY:
+                bool ignoreDenyGates = mode != CvOnTargetGovernorMode::ON_TARGET_AND_GATED;
+                return ignoreDenyGates;
+        }
+
+        return false;
+    }
+
+    bool isFinished() final
+    {
+        // Once started, CV will not stop the target command; it is allowed to run to completion.
+        // This enables firing a whole round, or burst, without interruption.
+        return false;
+    }
 
 private:
     aruwsrc::Drivers &drivers;
     aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand;
+    AutoAimLaunchTimer &launchTimer;
+    const CvOnTargetGovernorMode mode;
+    bool enabled = true;
 };
 }  // namespace aruwsrc::control::governor
 

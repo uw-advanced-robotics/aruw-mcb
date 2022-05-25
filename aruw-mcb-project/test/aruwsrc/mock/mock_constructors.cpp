@@ -25,6 +25,7 @@
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
 #include "oled_display_mock.hpp"
+#include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_request_subsystem_mock.hpp"
@@ -210,26 +211,37 @@ TurretCVCommandMock::TurretCVCommandMock(
     aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
-    const float defaultLaunchSpeed,
     uint8_t turretID)
     : aruwsrc::control::turret::cv::TurretCVCommand(
           drivers,
           turretSubsystem,
           yawController,
           pitchController,
-          odometryInterface,
-          frictionWheels,
+          ballisticsSolver,
           userPitchInputScalar,
           userYawInputScalar,
-          defaultLaunchSpeed,
           turretID)
 {
 }
 TurretCVCommandMock::~TurretCVCommandMock() {}
+
+OttoBallisticsSolverMock::OttoBallisticsSolverMock(
+    const aruwsrc::Drivers &drivers,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const float defaultLaunchSpeed,
+    const uint8_t turretID)
+    : aruwsrc::algorithms::OttoBallisticsSolver(
+          drivers,
+          odometryInterface,
+          frictionWheels,
+          defaultLaunchSpeed,
+          turretID){};
+
+OttoBallisticsSolverMock::~OttoBallisticsSolverMock(){};
 
 TurretControllerInterfaceMock::TurretControllerInterfaceMock(
     aruwsrc::control::turret::TurretMotor &turretMotor)
@@ -237,4 +249,5 @@ TurretControllerInterfaceMock::TurretControllerInterfaceMock(
 {
 }
 TurretControllerInterfaceMock::~TurretControllerInterfaceMock() {}
+
 }  // namespace aruwsrc::mock
