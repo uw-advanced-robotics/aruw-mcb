@@ -32,7 +32,7 @@ namespace aruwsrc::control::auto_aim
  * further timing information is available; "gated allow", indicating that timing information
  * recommends firing right now; or "gated deny", which means that the vision system does not
  * currently recommend firing.
- * 
+ *
  * Gating indicators are expected to vary at high frequency, as they use anticipated ballistics
  * time-of-flight and other delays to identify whether a projectile fired right now is expected to
  * hit a plate.
@@ -62,7 +62,7 @@ public:
 
     /**
      * Compute a firing inclination for the current time and specified turret.
-     * 
+     *
      * Uses the most recent aim data received for the chosen turret; if recency is desired,
      * callers should check whether the vision coprocessor is considered "online" before using this
      * method.

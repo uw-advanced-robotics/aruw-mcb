@@ -69,7 +69,8 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
     uint32_t nextPlateTransitTime = aimData.timestamp + aimData.targetHitTimeOffset;
-    int64_t projectedHitTimeAfterFirstWindow = int64_t(projectedHitTime) - int64_t(nextPlateTransitTime);
+    int64_t projectedHitTimeAfterFirstWindow =
+        int64_t(projectedHitTime) - int64_t(nextPlateTransitTime);
 
     int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % aimData.targetPulseInterval;
     if (offsetInFiringWindow < 0)
