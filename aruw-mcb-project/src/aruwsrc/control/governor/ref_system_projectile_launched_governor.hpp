@@ -25,6 +25,11 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 
+namespace
+{
+using namespace tap::communication::serial;
+}
+
 namespace aruwsrc::control::governor
 {
 /**
@@ -43,8 +48,8 @@ public:
      * fired.
      */
     RefSystemProjectileLaunchedGovernor(
-        tap::communication::serial::RefSerial &refSerial,
-        tap::communication::serial::RefSerialData::Rx::MechanismID barrelMechanismId)
+        RefSerial &refSerial,
+        RefSerialData::Rx::MechanismID barrelMechanismId)
         : refSerial(refSerial),
           barrelMechanismId(barrelMechanismId)
     {
@@ -63,8 +68,8 @@ public:
     }
 
 private:
-    tap::communication::serial::RefSerial &refSerial;
-    tap::communication::serial::RefSerialData::Rx::MechanismID barrelMechanismId;
+    RefSerial &refSerial;
+    RefSerialData::Rx::MechanismID barrelMechanismId;
     std::optional<uint32_t> lastProjectileLaunchTime = 0;
 
     inline std::optional<uint32_t> getRecentProjectileLaunchTime()
@@ -74,12 +79,14 @@ private:
             return std::nullopt;
         }
 
-        if (refSerial.getRobotData().turret.launchMechanismID != barrelMechanismId)
+        if (refSerial.getRobotData().turret.lastLaunchMechanismID != barrelMechanismId)
         {
             return lastProjectileLaunchTime;
         }
 
-        return refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
+        return refSerial.getRobotData()
+            .turret.lastReceivedLaunchingInfoTimestamp[RefSerialData::Rx::getNormalizedMechanismID(
+                barrelMechanismId)];
     }
 };
 }  // namespace aruwsrc::control::governor

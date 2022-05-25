@@ -32,6 +32,11 @@
 
 namespace aruwsrc::control::launcher
 {
+namespace
+{
+using namespace tap::communication::serial;
+}
+
 /**
  * An extension of the `FrictionWheelSubsystem` that implements the `LaunchSpeedPredictorInterface`,
  * using referee system feedback to predict the launch velocity of the projectile.
@@ -57,7 +62,7 @@ public:
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,
         aruwsrc::can::TurretMCBCanComm *turretMCB,
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
+        RefSerialData::Rx::MechanismID firingSystemMechanismID)
         : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
@@ -82,7 +87,7 @@ public:
     }
 
 private:
-    const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
+    const RefSerialData::Rx::MechanismID firingSystemMechanismID;
 
     modm::BoundedDeque<float, PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE> ballSpeedAveragingTracker;
 
@@ -109,10 +114,12 @@ private:
         {
             const auto &turretData = drivers->refSerial.getRobotData().turret;
 
+            uint8_t normalizedMechID =
+                RefSerialData::Rx::getNormalizedMechanismID(firingSystemMechanismID);
+
             // compute average bullet speed if new firing data received from correct mech ID
             if (prevLaunchingDataReceiveTimestamp !=
-                    turretData.lastReceivedLaunchingInfoTimestamp &&
-                turretData.launchMechanismID == firingSystemMechanismID)
+                turretData.lastReceivedLaunchingInfoTimestamp[normalizedMechID])
             {
                 // remove element to make room for new element
                 if (ballSpeedAveragingTracker.isFull())
@@ -122,7 +129,7 @@ private:
                 }
 
                 const float limitedProjectileSpeed = tap::algorithms::limitVal(
-                    turretData.bulletSpeed,
+                    turretData.bulletSpeed[normalizedMechID],
                     0.0f,
                     MAX_MEASURED_LAUNCH_SPEED);
 
@@ -130,7 +137,8 @@ private:
                 pastProjectileVelocitySpeedSummed += limitedProjectileSpeed;
                 ballSpeedAveragingTracker.append(limitedProjectileSpeed);
 
-                prevLaunchingDataReceiveTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
+                prevLaunchingDataReceiveTimestamp =
+                    turretData.lastReceivedLaunchingInfoTimestamp[normalizedMechID];
             }
         }
         else
