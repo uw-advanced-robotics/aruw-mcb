@@ -45,6 +45,7 @@ class AutoAimLaunchTimerTest : public Test
 protected:
     AutoAimLaunchTimerTest()
         : frictionWheels(&drivers),
+          visionCoprocessor(&drivers),
           ballistics(drivers, odometry, frictionWheels, 0, 0){};
 
     void SetUp() override {}
