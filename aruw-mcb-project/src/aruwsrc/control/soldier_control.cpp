@@ -159,7 +159,7 @@ OttoBallisticsSolver ballisticsSolver(
     0       // turretID
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
-    AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
