@@ -182,7 +182,10 @@ XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Dig
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
-VisionCoprocessorMock::VisionCoprocessorMock() : serial::VisionCoprocessor(nullptr) {}
+VisionCoprocessorMock::VisionCoprocessorMock(aruwsrc::Drivers *drivers)
+    : serial::VisionCoprocessor(drivers)
+{
+}
 VisionCoprocessorMock::~VisionCoprocessorMock() {}
 
 TurretMotorMock::TurretMotorMock(

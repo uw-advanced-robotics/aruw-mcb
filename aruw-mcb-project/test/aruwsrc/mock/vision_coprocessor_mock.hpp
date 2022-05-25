@@ -31,7 +31,7 @@ namespace mock
 class VisionCoprocessorMock : public serial::VisionCoprocessor
 {
 public:
-    VisionCoprocessorMock();
+    VisionCoprocessorMock(aruwsrc::Drivers *drivers);
     virtual ~VisionCoprocessorMock();
 
     MOCK_METHOD(void, initializeCV, (), (override));
