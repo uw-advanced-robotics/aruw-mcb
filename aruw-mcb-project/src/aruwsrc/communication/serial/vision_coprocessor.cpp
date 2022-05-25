@@ -55,6 +55,13 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     assert(visionCoprocessorInstance == nullptr);
 #endif
     visionCoprocessorInstance = this;
+
+    // Initialize all aim state to be invalid/unknown
+    for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
+    {
+        this->lastAimData[i].hasTarget = 0;
+        this->lastAimData[i].timestamp = 0;
+    }
 }
 
 VisionCoprocessor::~VisionCoprocessor() { visionCoprocessorInstance = nullptr; }
