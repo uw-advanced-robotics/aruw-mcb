@@ -86,7 +86,7 @@ static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr float TURRET_CG_X = -48.14f;
 static constexpr float TURRET_CG_Z = 9.45f;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 7'200.0f;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 8'000.0f;
 
 // The distance from turret 0 to turret 1 in meters
 static modm::Vector3f OFFSET_TURRET_0_TO_TURRET_1 = modm::Vector3f(-0.17511f, -.27905f, 0.0f);
@@ -110,9 +110,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 180'000.0f,
-    .ki = 1'000.0f,
-    .kd = 3'500.0f,
+    .kp = 100'000.0f,
+    .ki = 50.0f,
+    .kd = 2'500.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -139,9 +139,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 180'000.0f,
-    .ki = 1'000.0f,
-    .kd = 3'500.0f,
+    .kp = 100'000.0f,
+    .ki = 50.0f,
+    .kd = 2'500.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
