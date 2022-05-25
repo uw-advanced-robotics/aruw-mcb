@@ -80,9 +80,6 @@ private:
 
     tap::arch::MilliTimeout updateVisionTargetFoundTimeout;
 
-    // bool prevVisionIndicatorPresence = false;
-    // bool newVisionIndicatorPresence = false;
-
     std::optional<Tx::GraphicColor> prevVisionIndicatorColor = std::nullopt;
     std::optional<Tx::GraphicColor> newVisionIndicatorColor = std::nullopt;
 
