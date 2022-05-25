@@ -345,10 +345,10 @@ CvOnTargetGovernor cvOnTargetGovernor(
     turretCVCommand,
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
-GovernorLimitedCommand<2> launchKickerHeatAndCVLimited(
+GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&kickerAgitator},
     launchKicker,
-    {&heatLimitGovernor, &cvOnTargetGovernor});
+    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
 /* define command mappings --------------------------------------------------*/
