@@ -52,6 +52,8 @@ TurretCVCommand::TurretCVCommand(
       userPitchInputScalar(userPitchInputScalar),
       userYawInputScalar(userYawInputScalar)
 {
+    assert(ballisticsSolver != nullptr);
+
     assert(turretID == ballisticsSolver->turretID);
     addSubsystemRequirement(turretSubsystem);
 }

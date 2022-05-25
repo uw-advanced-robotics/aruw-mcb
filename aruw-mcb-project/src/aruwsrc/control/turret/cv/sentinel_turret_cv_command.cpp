@@ -63,6 +63,7 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     assert(turretSubsystem != nullptr);
     assert(pitchController != nullptr);
     assert(yawController != nullptr);
+    assert(ballisticsSolver != nullptr);
 
     this->comprisedCommandScheduler.registerSubsystem(turretSubsystem);
     this->comprisedCommandScheduler.registerSubsystem(&launchingSubsystem);
