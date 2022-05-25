@@ -22,8 +22,6 @@
  */
 
 #include "math_user_utils.hpp"
-#include "modm/math/matrix.hpp"
-#include "modm/math/geometry/vector.hpp"
 
 #include <cstdint>
 
@@ -44,31 +42,4 @@ void tap::algorithms::rotateVector(float* x, float* y, float radians)
     float x_temp = *x;
     *x = (*x) * cosf(radians) - *y * sinf(radians);
     *y = x_temp * sinf(radians) + *y * cosf(radians);
-}
-
-void tap::algorithms::rotateVector(modm::Vector3f* vec, Rotation r)
-{
-    float cosAng = cosf(r.yaw);
-    float sinAng = sinf(r.yaw);
-    float m[9] = {cosAng, -sinAng, 0,
-                  sinAng, cosAng, 0,
-                  0, 0, 1};
-    modm::Matrix3f tf = modm::Matrix3f(m);
-    *vec = tf*(*vec);
-
-    cosAng = cosf(r.pitch);
-    sinAng = sinf(r.pitch);
-    float n[9] = {cosAng, 0, sinAng,
-         0, 1, 0,
-         -sinAng, 0, cosAng};
-    tf = modm::Matrix3f(n);
-    *vec = tf*(*vec);
-
-    cosAng = cosf(r.roll);
-    sinAng = sinf(r.roll);
-    float j[9] = {1, 0, 0,
-                  0, cosAng, -sinAng,
-                  0, sinAng, cosAng};
-    tf = modm::Matrix3f(j);
-    *vec = tf*(*vec);
 }
