@@ -54,7 +54,7 @@ public:
     virtual modm::Vector2f getCurrentVelocity2D() const = 0;
 
     /**
-     * @return The current yaw orientation of the chassis in the world frame.
+     * @return The current yaw orientation of the chassis in the world frame in radians.
      */
     virtual float getYaw() const = 0;
 
