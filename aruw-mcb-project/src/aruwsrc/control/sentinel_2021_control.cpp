@@ -123,7 +123,7 @@ SentinelTurretSubsystem turretSubsystem(
     YAW_MOTOR_CONFIG,
     nullptr);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(*drivers(), turretSubsystem, sentinelDrive);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);

@@ -261,9 +261,9 @@ SentinelTurret turretOne(
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
+    drivers(),
     turretOne.turretSubsystem,
-    sentinelDrive);
+    &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 // Two identical drive commands since you can't map an identical command to two different mappings
