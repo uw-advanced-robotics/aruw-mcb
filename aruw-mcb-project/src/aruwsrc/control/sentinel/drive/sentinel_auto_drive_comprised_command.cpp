@@ -38,8 +38,8 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelChassis(sentinelChassis),
-      randomDrive1(sentinelChassis, 0.3),
-      randomDrive2(sentinelChassis, 0.6),
+      evadeDrive1(sentinelChassis, 0.3),
+      evadeDrive2(sentinelChassis, 0.6),
       evadeMode(false)
 {
     addSubsystemRequirement(sentinelChassis);
