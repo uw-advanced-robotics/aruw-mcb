@@ -83,7 +83,7 @@ private:
         0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
-        1E1, 0  , 0  ,
+        1E0, 0  , 0  ,
         0  , 1E0, 0  ,
         0  , 0  , 1E0,
     }; // TODO: Tune for sentinel 2022
