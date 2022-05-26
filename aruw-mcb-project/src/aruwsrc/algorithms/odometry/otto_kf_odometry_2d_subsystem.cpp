@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_velocity_odometry_2d_subsystem.hpp"
+#include "otto_kf_odometry_2d_subsystem.hpp"
 
 #include "aruwsrc/drivers.hpp"
 
@@ -25,21 +25,16 @@ namespace aruwsrc::algorithms::odometry
 {
 // Yep that's all this constructor does, is construct the right getters and pass
 // their pointers to the base class (not in that order)
-OttoVelocityOdometry2DSubsystem::OttoVelocityOdometry2DSubsystem(
-    aruwsrc::Drivers* drivers,
-    const aruwsrc::control::turret::TurretSubsystem& turret,
-    tap::control::chassis::ChassisSubsystemInterface* chassis)
-    : Subsystem(drivers),
-      Odometry2DTracker(&orientationObserver, &displacementObserver),
-      orientationObserver(drivers, turret),
-      displacementObserver(chassis)
+OttoKFOdometry2DSubsystem::OttoKFOdometry2DSubsystem(
+    aruwsrc::Drivers &drivers,
+    const aruwsrc::control::turret::TurretSubsystem &turret,
+    tap::control::chassis::ChassisSubsystemInterface &chassis)
+    : Subsystem(&drivers),
+      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500),
+      orientationObserver(&drivers, turret)
 {
 }
 
-void OttoVelocityOdometry2DSubsystem::refresh()
-{
-    displacementObserver.update();
-    update();
-}
+void OttoKFOdometry2DSubsystem::refresh() { update(); }
 
 }  // namespace aruwsrc::algorithms::odometry

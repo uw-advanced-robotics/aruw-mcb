@@ -36,7 +36,7 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
@@ -129,7 +129,7 @@ aruwsrc::chassis::ChassisSubsystem chassis(
     drivers(),
     aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
+OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
