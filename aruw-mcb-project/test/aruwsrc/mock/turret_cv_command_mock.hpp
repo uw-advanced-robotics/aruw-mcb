@@ -31,7 +31,7 @@ class TurretCVCommandMock : public aruwsrc::control::turret::cv::TurretCVCommand
 public:
     TurretCVCommandMock(
         aruwsrc::Drivers *drivers,
-        aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
+        aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,

@@ -33,6 +33,7 @@
 #include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
+#include "robot_turret_subsystem_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
 
 // A file for listing all mock constructors and destructors since doing
@@ -175,6 +176,12 @@ TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers)
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
+RobotTurretSubsystemMock::RobotTurretSubsystemMock(aruwsrc::Drivers *drivers)
+    : RobotTurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
+{
+}
+RobotTurretSubsystemMock::~RobotTurretSubsystemMock() {}
+
 XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::XAxisSubsystem(drivers, pin)
 {
@@ -207,7 +214,7 @@ TurretMotorMock::~TurretMotorMock() {}
 
 TurretCVCommandMock::TurretCVCommandMock(
     aruwsrc::Drivers *drivers,
-    aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
+    aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
