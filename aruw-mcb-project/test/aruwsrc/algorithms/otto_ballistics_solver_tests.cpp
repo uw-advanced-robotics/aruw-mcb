@@ -19,8 +19,8 @@
 
 #include <gtest/gtest.h>
 
-#include "tap/mock/odometry_2d_interface_mock.hpp"
 #include "tap/architecture/clock.hpp"
+#include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -100,7 +100,11 @@ INSTANTIATE_TEST_SUITE_P(
 class OttoBallisticsSolverTest : public Test
 {
 protected:
-    OttoBallisticsSolverTest() : turret(&drivers), solver(drivers, odometry, turret, launcher, 15, 0) {}
+    OttoBallisticsSolverTest()
+        : turret(&drivers),
+          solver(drivers, odometry, turret, launcher, 15, 0)
+    {
+    }
 
     void SetUp() override
     {

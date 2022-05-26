@@ -143,8 +143,6 @@ private:
     const float defaultLaunchSpeed;
     modm::Vector3f turretOrigin;
 
-
-
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};

@@ -27,6 +27,7 @@
 #include "oled_display_mock.hpp"
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
+#include "robot_turret_subsystem_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_request_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
@@ -34,7 +35,6 @@
 #include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_subsystem_mock.hpp"
-#include "robot_turret_subsystem_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
 
 // A file for listing all mock constructors and destructors since doing
@@ -238,12 +238,14 @@ TurretCVCommandMock::~TurretCVCommandMock() {}
 OttoBallisticsSolverMock::OttoBallisticsSolverMock(
     const aruwsrc::Drivers &drivers,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : aruwsrc::algorithms::OttoBallisticsSolver(
           drivers,
           odometryInterface,
+          turretSubsystem,
           frictionWheels,
           defaultLaunchSpeed,
           turretID){};
