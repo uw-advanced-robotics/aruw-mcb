@@ -32,7 +32,7 @@
 #include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/sentinel_otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
@@ -86,7 +86,7 @@ static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 aruwsrc::communication::serial::SentinelRequestHandler sentinelRequestHandler(drivers());
 
 // forward declare before sentinel turret to be used in turret CV command
-extern OttoVelocityOdometry2DSubsystem odometrySubsystem;
+extern SentinelOttoVelocityOdometry2DSubsystem odometrySubsystem;
 
 class SentinelTurret
 {
@@ -260,9 +260,8 @@ SentinelTurret turretOne(
 /* define subsystems --------------------------------------------------------*/
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(
+SentinelOttoVelocityOdometry2DSubsystem odometrySubsystem(
     *drivers(),
-    turretOne.turretSubsystem,
     sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
