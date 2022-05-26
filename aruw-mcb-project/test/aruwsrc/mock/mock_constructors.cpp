@@ -27,6 +27,7 @@
 #include "oled_display_mock.hpp"
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
+#include "robot_turret_subsystem_mock.hpp"
 #include "sentinel_drive_subsystem_mock.hpp"
 #include "sentinel_request_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
@@ -176,6 +177,12 @@ TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers)
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
+RobotTurretSubsystemMock::RobotTurretSubsystemMock(aruwsrc::Drivers *drivers)
+    : RobotTurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
+{
+}
+RobotTurretSubsystemMock::~RobotTurretSubsystemMock() {}
+
 XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::XAxisSubsystem(drivers, pin)
 {
@@ -208,7 +215,7 @@ TurretMotorMock::~TurretMotorMock() {}
 
 TurretCVCommandMock::TurretCVCommandMock(
     aruwsrc::Drivers *drivers,
-    aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
+    aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
@@ -231,12 +238,14 @@ TurretCVCommandMock::~TurretCVCommandMock() {}
 OttoBallisticsSolverMock::OttoBallisticsSolverMock(
     const aruwsrc::Drivers &drivers,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : aruwsrc::algorithms::OttoBallisticsSolver(
           drivers,
           odometryInterface,
+          turretSubsystem,
           frictionWheels,
           defaultLaunchSpeed,
           turretID){};
