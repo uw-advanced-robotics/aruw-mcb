@@ -180,6 +180,7 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
 OttoBallisticsSolver ballisticsSolver(
     *drivers(),
     odometrySubsystem,
+    turretSubsystem,
     frictionWheels,
     29.5f,  // defaultLaunchSpeed
     0       // turretID
