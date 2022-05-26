@@ -19,6 +19,8 @@
 
 #include "chassis_kf_odometry.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
 namespace aruwsrc::algorithms::odometry
 {
 ChassisKFOdometry::ChassisKFOdometry(
@@ -33,7 +35,7 @@ ChassisKFOdometry::ChassisKFOdometry(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
-    float initialX[static_cast<int>(OdomState::STATES)] = {};
+    float initialX[int(OdomState::STATES)] = {};
     kf.init(initialX);
 }
 
@@ -55,20 +57,22 @@ void ChassisKFOdometry::update()
     updateMeasurementCovariance(chassisVelocity);
 
     // assume 0 velocity/acceleration in z direction
-    float y[static_cast<int>(OdomInput::INPUTS)] = {};
-    y[static_cast<int>(OdomInput::VEL_X)] = chassisVelocity[0][0];
-    y[static_cast<int>(OdomInput::VEL_Y)] = chassisVelocity[1][0];
+    float y[int(OdomInput::INPUTS)] = {};
+    y[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
+    y[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
     // This is mounting-specific, the MCB is mounted in such a way that the accelerometer's Y
     // component corresponds to the X component and the X component corresponds to the chassis Y
     // acceleration component.
-    y[static_cast<int>(OdomInput::ACC_X)] = imu.getAy();
-    y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAx();
+    y[int(OdomInput::ACC_X)] = imu.getAx();
+    y[int(OdomInput::ACC_Y)] = imu.getAy();
 
-    // acceleration in chassis frame, rotate to be in world frame
+    // acceleration in MCB frame, rotate to chassis frame
     tap::algorithms::rotateVector(
-        &y[static_cast<int>(OdomInput::ACC_X)],
-        &y[static_cast<int>(OdomInput::ACC_Y)],
-        chassisYaw);
+        &y[int(OdomInput::ACC_X)],
+        &y[int(OdomInput::ACC_Y)],
+        serial::VisionCoprocessor::MCB_ROTATION_OFFSET);
+    // acceleration in chassis frame, rotate to be in world frame
+    tap::algorithms::rotateVector(&y[int(OdomInput::ACC_X)], &y[int(OdomInput::ACC_Y)], chassisYaw);
 
     // perform the update, new state matrix now available.
     kf.performUpdate(y);
@@ -82,13 +86,11 @@ void ChassisKFOdometry::updateLocationVelocityFromKF(float chassisYaw)
     const auto& x = kf.getStateVectorAsMatrix();
 
     // update odometry velocity and orientation
-    velocity.x = x[static_cast<int>(OdomState::VEL_X)];
-    velocity.y = x[static_cast<int>(OdomState::VEL_Y)];
+    velocity.x = x[int(OdomState::VEL_X)];
+    velocity.y = x[int(OdomState::VEL_Y)];
 
     location.setOrientation(chassisYaw);
-    location.setPosition(
-        x[static_cast<int>(OdomState::POS_X)],
-        x[static_cast<int>(OdomState::POS_Y)]);
+    location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
 }
 
 void ChassisKFOdometry::updateMeasurementCovariance(

@@ -94,12 +94,12 @@ private:
         0, 0, 0, 0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
-        1E0, 0   , 0   , 0  , 0   , 0   ,
-        0  , 1E-1, 0   , 0  , 0   , 0   ,
-        0  , 0   , 1E-1, 0  , 0   , 0   ,
-        0  , 0   , 0   , 1E1, 0   , 0   ,
-        0  , 0   , 0   , 0  , 1E-1, 0   ,
-        0  , 0   , 0   , 0  , 0   , 1E-1,
+        1E1, 0  , 0   , 0  , 0  , 0   ,
+        0  , 1E0, 0   , 0  , 0  , 0   ,
+        0  , 0  , 1E-1, 0  , 0  , 0   ,
+        0  , 0  , 0   , 1E1, 0  , 0   ,
+        0  , 0  , 0   , 0  , 1E0, 0   ,
+        0  , 0  , 0   , 0  , 0  , 1E-1,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
         1.0, 0  , 0  , 0  ,
@@ -122,7 +122,7 @@ private:
 
     static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
         {
-            {0, 1E-2},
+            {0, 1E0},
             {MAX_ACCELERATION, 1E2},
         };
 
@@ -131,7 +131,6 @@ private:
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
-
 
     tap::algorithms::KalmanFilter<int(OdomState::STATES), int(OdomInput::INPUTS)> kf;
 
@@ -143,7 +142,8 @@ private:
     // Chassis measured change in velocity
     modm::Vector2f chassisMeasuredDeltaVelocity;
 
-    modm::interpolation::Linear<modm::Pair<float, float>> chassisAccelerationToMeasurementCovInterpolator;
+    modm::interpolation::Linear<modm::Pair<float, float>>
+        chassisAccelerationToMeasurementCovInterpolator;
 
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
