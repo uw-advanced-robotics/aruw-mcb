@@ -29,7 +29,7 @@ ChassisKFOdometry::ChassisKFOdometry(
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P),
-      chassisPowerToSpeedInterpolator(
+      chassisAccelerationToMeasurementCovInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
@@ -79,7 +79,7 @@ void ChassisKFOdometry::update()
 
 void ChassisKFOdometry::updateLocationVelocityFromKF(float chassisYaw)
 {
-    const auto& x = kf.getStateMatrix();
+    const auto& x = kf.getStateVectorAsMatrix();
 
     // update odometry velocity and orientation
     velocity.x = x[static_cast<int>(OdomState::VEL_X)];
@@ -106,23 +106,23 @@ void ChassisKFOdometry::updateMeasurementCovariance(
 
     // compute acceleration
 
-    modm::Vector2f deltaVelocity;
-
-    deltaVelocity.x = tap::algorithms::lowPassFilter(
-        deltaVelocity.x,
+    chassisMeasuredDeltaVelocity.x = tap::algorithms::lowPassFilter(
+        chassisMeasuredDeltaVelocity.x,
         chassisVelocity[0][0] - prevChassisVelocity[0][0],
         CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
 
-    deltaVelocity.y = tap::algorithms::lowPassFilter(
-        deltaVelocity.y,
+    chassisMeasuredDeltaVelocity.y = tap::algorithms::lowPassFilter(
+        chassisMeasuredDeltaVelocity.y,
         chassisVelocity[1][0] - prevChassisVelocity[1][0],
         CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
 
     prevChassisVelocity = chassisVelocity;
 
-    const float accelMagnitude = deltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
+    const float accelMagnitude =
+        chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
 
-    const float velocityCovariance = chassisPowerToSpeedInterpolator.interpolate(accelMagnitude);
+    const float velocityCovariance =
+        chassisAccelerationToMeasurementCovInterpolator.interpolate(accelMagnitude);
 
     // set measurement covariance of chassis velocity as measured by the wheels because if
     // acceleration is large, the likelihood of slippage is greater

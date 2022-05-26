@@ -29,7 +29,6 @@
 #include "chassis_kf_odometry.hpp"
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 #include "otto_chassis_world_yaw_observer.hpp"
-#include "chassis_kf_odometry.hpp"
 
 // Forward declarations
 namespace aruwsrc
