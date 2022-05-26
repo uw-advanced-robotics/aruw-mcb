@@ -27,7 +27,6 @@
 namespace aruwsrc::mock
 {
 class SentinelDriveSubsystemMock : public control::sentinel::drive::SentinelDriveSubsystem
-
 { 
 public:
     SentinelDriveSubsystemMock(

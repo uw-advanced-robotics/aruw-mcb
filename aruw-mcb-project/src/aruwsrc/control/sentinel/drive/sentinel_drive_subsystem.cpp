@@ -84,7 +84,7 @@ void SentinelDriveSubsystem::initialize()
 
 void SentinelDriveSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
 
-float SentinelDriveSubsystem::getRpm() { return desiredRpm; }
+float SentinelDriveSubsystem::getDesiredRpm() { return desiredRpm; }
 
 modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelative() const
 {

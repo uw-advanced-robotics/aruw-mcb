@@ -38,8 +38,8 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelChassis(sentinelChassis),
-      evadeDrive1(sentinelChassis, 0.3),
-      evadeDrive2(sentinelChassis, 0.6),
+      evadeSlow(sentinelChassis, 0.3),
+      evadeFast(sentinelChassis, 0.7),
       evadeMode(false)
 {
     addSubsystemRequirement(sentinelChassis);
@@ -48,7 +48,7 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
 
 void SentinelAutoDriveComprisedCommand::initialize()
 {
-    comprisedCommandScheduler.addCommand(&evadeDrive1);
+    comprisedCommandScheduler.addCommand(&evadeSlow);
 }
 
 void SentinelAutoDriveComprisedCommand::execute()
@@ -59,15 +59,15 @@ void SentinelAutoDriveComprisedCommand::execute()
     {
         if (!evadeMode)
         {
-            comprisedCommandScheduler.removeCommand(&evadeDrive1, true);
-            comprisedCommandScheduler.addCommand(&evadeDrive2);
+            comprisedCommandScheduler.removeCommand(&evadeSlow, true);
+            comprisedCommandScheduler.addCommand(&evadeFast);
             evadeMode = true;
         }
     }
     else if (compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) && evadeMode)
     {
-        comprisedCommandScheduler.removeCommand(&evadeDrive2, true);
-        comprisedCommandScheduler.addCommand(&evadeDrive1);
+        comprisedCommandScheduler.removeCommand(&evadeFast, true);
+        comprisedCommandScheduler.addCommand(&evadeSlow);
         evadeMode = false;
     }
 
@@ -76,8 +76,8 @@ void SentinelAutoDriveComprisedCommand::execute()
 
 void SentinelAutoDriveComprisedCommand::end(bool interrupted)
 {
-    comprisedCommandScheduler.removeCommand(&evadeDrive1, interrupted);
-    comprisedCommandScheduler.removeCommand(&evadeDrive2, interrupted);
+    comprisedCommandScheduler.removeCommand(&evadeSlow, interrupted);
+    comprisedCommandScheduler.removeCommand(&evadeFast, interrupted);
 }
 
 bool SentinelAutoDriveComprisedCommand::isFinished() const { return false; }
