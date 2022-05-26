@@ -132,18 +132,20 @@ public:
      * @param[out] solution The ballistics solution computed. Will potentially update any of the
      * fields even if the solution's validSolutionFound function is false
      */
-    std::optional<BallisticsSolution> computeTurretAimAngles();
+    mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
     const Drivers &drivers;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
-    const uint8_t turretID;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
+
+public:
+    const uint8_t turretID;
 };
 }  // namespace aruwsrc::algorithms
 

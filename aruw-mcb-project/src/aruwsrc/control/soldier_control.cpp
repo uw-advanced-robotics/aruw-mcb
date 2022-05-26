@@ -37,6 +37,7 @@
 #include "agitator/multi_shot_handler.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -55,7 +56,6 @@
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "governor/ref_system_projectile_launched_governor.hpp"
-#include "governor/yellow_carded_governor.hpp"
 #include "hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "imu/imu_calibrate_command.hpp"
@@ -75,10 +75,12 @@
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
+using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
 using namespace tap::control;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
@@ -147,6 +149,18 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 ClientDisplaySubsystem clientDisplay(drivers());
 
 TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
+
+OttoBallisticsSolver ballisticsSolver(
+    *drivers(),
+    odometrySubsystem,
+    frictionWheels,
+    14.5f,  // defaultLaunchSpeed
+    0       // turretID
+);
+AutoAimLaunchTimer autoAimLaunchTimer(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -219,11 +233,9 @@ cv::TurretCVCommand turretCVCommand(
     &turret,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
-    odometrySubsystem,
-    frictionWheels,
+    &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR,
-    14.5f);
+    USER_PITCH_INPUT_SCALAR);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
@@ -258,20 +270,15 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernor});
 
 // rotates agitator when aiming at target and within heat limit
-CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
+CvOnTargetGovernor cvOnTargetGovernor(
+    *drivers(),
+    turretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
-
-// switches between normal agitator rotate and CV limited based on the yellow
-// card governor
-YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
-GovernorWithFallbackCommand<1> agitatorLaunchYellowCardCommand(
-    {&agitator},
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-    rotateAndUnjamAgitatorWithHeatLimiting,
-    {&yellowCardedGovernor});
 
 extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
 MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
@@ -289,8 +296,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     0.0f,
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-OpenTurretMCBHopperCoverCommand openHopperCommand(&hopperCover);
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
@@ -312,6 +317,7 @@ ClientDisplayCommand clientDisplayCommand(
     turret,
     imuCalibrateCommand,
     &multiShotHandler,
+    &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand);
@@ -320,11 +326,11 @@ ClientDisplayCommand clientDisplayCommand(
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
     drivers(),
-    {&openHopperCommand, &stopFrictionWheels},
+    {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&agitatorLaunchYellowCardCommand},
+    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -346,11 +352,17 @@ PressCommandMapping gCtrlPressed(
     {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 
-ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
+CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+    drivers(),
+    RemoteMapState({Remote::Key::R}),
+    true,
+    &cvOnTargetGovernor,
+    &CvOnTargetGovernor::setGovernorEnabled);
+
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
     drivers(),
-    {&agitatorLaunchYellowCardCommand},
+    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
     false,
     1);
@@ -466,7 +478,7 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&rToggled);
+    drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedShiftPressed);

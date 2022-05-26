@@ -37,6 +37,7 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -66,6 +67,8 @@
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
+#include "cycle_state_command_mapping.hpp"
+
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace aruwsrc::chassis;
@@ -73,6 +76,7 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::agitator;
@@ -148,6 +152,18 @@ HeroTurretSubsystem turret(
     &getTurretMCBCanComm());
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
+
+OttoBallisticsSolver ballisticsSolver(
+    *drivers(),
+    odometrySubsystem,
+    frictionWheels,
+    9.5f,  // defaultLaunchSpeed
+    0      // turretID
+);
+AutoAimLaunchTimer autoAimLaunchTimer(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
@@ -233,11 +249,9 @@ cv::TurretCVCommand turretCVCommand(
     &turret,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
-    odometrySubsystem,
-    frictionWheels,
+    &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR,
-    9.5f);
+    USER_PITCH_INPUT_SCALAR);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
@@ -251,19 +265,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         true,
     }},
     &chassis);
-
-ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    clientDisplay,
-    nullptr,
-    frictionWheels,
-    waterwheelAgitator,
-    turret,
-    imuCalibrateCommand,
-    nullptr,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    &chassisImuDriveCommand);
 
 // hero agitator commands
 
@@ -308,39 +309,36 @@ GovernorLimitedCommand<2> feedKickerWhenBallNotReady(
     loadKicker,
     {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
 
-MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
-
-GovernorLimitedCommand<2> launchKickerWhenBallReady(
-    {&kickerAgitator},
-    launchKicker,
-    {&limitSwitchDepressedGovernor, &frictionWheelsOnGovernor});
-
-// rotates kickerAgitator with heat limiting applied
+// rotates kickerAgitator when aiming at target and within heat limit
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
     constants::HEAT_LIMIT_BUFFER);
-GovernorLimitedCommand<2> launchKickerHeatLimited(
-    {&kickerAgitator},
-    launchKickerWhenBallReady,
-    {&heatLimitGovernor, &frictionWheelsOnGovernor});
-
-// rotates kickerAgitator when aiming at target and within heat limit
-CvOnTargetGovernor cvOnTargetGovernor(*drivers(), turretCVCommand);
-GovernorLimitedCommand<2> launchKickerHeatAndCVLimited(
+CvOnTargetGovernor cvOnTargetGovernor(
+    *drivers(),
+    turretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
+GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&kickerAgitator},
     launchKicker,
-    {&heatLimitGovernor, &cvOnTargetGovernor});
-
-// switches between normal kickerAgitator rotate and CV limited based on the yellow
-// card governor
-YellowCardedGovernor yellowCardedGovernor(drivers()->refSerial);
-GovernorWithFallbackCommand<1> launchKickerYellowCardSwitcher(
-    {&kickerAgitator},
-    launchKickerHeatAndCVLimited,
-    launchKickerHeatLimited,
-    {&yellowCardedGovernor});
+    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
+
+ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    nullptr,
+    frictionWheels,
+    waterwheelAgitator,
+    turret,
+    imuCalibrateCommand,
+    nullptr,
+    &kicker::cvOnTargetGovernor,
+    &beybladeCommand,
+    &chassisAutorotateCommand,
+    &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -349,7 +347,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&kicker::launchKickerYellowCardSwitcher},
+    {&kicker::launchKickerHeatAndCVLimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
@@ -372,7 +370,7 @@ PressCommandMapping gCtrlPressed(
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 PressCommandMapping leftMousePressed(
     drivers(),
-    {&kicker::launchKickerYellowCardSwitcher},
+    {&kicker::launchKickerHeatAndCVLimited},
     RemoteMapState(RemoteMapState::MouseButton::LEFT));
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -416,6 +414,12 @@ PressCommandMapping xPressed(
     drivers(),
     {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
+CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+    drivers(),
+    RemoteMapState({Remote::Key::R}),
+    true,
+    &kicker::cvOnTargetGovernor,
+    &CvOnTargetGovernor::setGovernorEnabled);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -483,6 +487,7 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
+    drivers->commandMapper.addMap(&rPressed);
 }
 }  // namespace hero_control
 

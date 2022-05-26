@@ -94,6 +94,13 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {32.0f, 8400.0f},
 };
 #endif
+
+#if defined(ALL_SOLDIERS)
+constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
+#elif defined(TARGET_HERO)
+constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
+#endif
+
 }  // namespace aruwsrc::control::launcher
 
 #endif  // LAUNCHER_CONSTANTS_HPP_
