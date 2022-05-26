@@ -351,8 +351,8 @@ void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 1);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 0);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
