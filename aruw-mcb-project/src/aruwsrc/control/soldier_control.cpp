@@ -154,6 +154,7 @@ TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
 OttoBallisticsSolver ballisticsSolver(
     *drivers(),
     odometrySubsystem,
+    turret,
     frictionWheels,
     14.5f,  // defaultLaunchSpeed
     0       // turretID

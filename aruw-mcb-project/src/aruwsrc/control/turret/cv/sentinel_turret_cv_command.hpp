@@ -41,7 +41,7 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class RobotTurretSubsystem;
 }
 
 namespace aruwsrc::control::launcher
@@ -115,7 +115,7 @@ public:
      */
     SentinelTurretCVCommand(
         aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
         tap::control::Subsystem &launchingSubsystem,
@@ -146,7 +146,7 @@ public:
 private:
     aruwsrc::Drivers *drivers;
 
-    TurretSubsystem *turretSubsystem;
+    RobotTurretSubsystem *turretSubsystem;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
