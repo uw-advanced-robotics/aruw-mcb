@@ -155,7 +155,7 @@ public:
           spinFrictionWheels(
               &drivers,
               &frictionWheels,
-              15.0f,
+              30.0f,
               true,
               config.turretBarrelMechanismId),
           stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
