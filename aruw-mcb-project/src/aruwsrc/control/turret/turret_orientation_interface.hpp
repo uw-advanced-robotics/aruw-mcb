@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "modm/math/geometry/vector3.hpp"
+
 namespace aruwsrc::can
 {
 class TurretMCBCanComm;
@@ -55,6 +57,17 @@ public:
      * measurements.
      */
     virtual inline uint32_t getLastMeasurementTimeMicros() const = 0;
+
+    /**
+     *  @return Distance between the turret and the chassis origin in the chassis frame. units of
+     * meters
+     */
+    virtual modm::Vector3f getTurretOffset() const = 0;
+
+    /**
+     * @return Distance between the pitch axis and the yaw axis in the X-Y plane. Units meters
+     */
+    virtual inline float getPitchOffset() const = 0;
 };  // class TurretOrientation
 
 }  // namespace aruwsrc::control::turret

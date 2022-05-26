@@ -134,10 +134,12 @@ public:
               &yawMotor,
               config.pitchMotorConfig,
               config.yawMotorConfig,
-              &config.turretMCBCanComm),
+              &config.turretMCBCanComm,
+              config.turretID),
           ballisticsSolver(
               drivers,
               odometrySubsystem,
+              turretSubsystem,
               frictionWheels,
               29.5f,  // defaultLaunchSpeed
               config.turretID),

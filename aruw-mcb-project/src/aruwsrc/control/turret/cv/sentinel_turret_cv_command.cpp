@@ -24,8 +24,8 @@
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/architecture/clock.hpp"
 
-#include "../turret_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/sentinel_otto_velocity_odometry_2d_subsystem.hpp"
+#include "../robot_turret_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -38,7 +38,7 @@ namespace aruwsrc::control::turret::cv
 {
 SentinelTurretCVCommand::SentinelTurretCVCommand(
     aruwsrc::Drivers *drivers,
-    TurretSubsystem *turretSubsystem,
+    RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     tap::control::Subsystem &launchingSubsystem,
