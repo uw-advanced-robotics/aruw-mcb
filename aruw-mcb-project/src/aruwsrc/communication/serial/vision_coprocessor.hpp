@@ -66,6 +66,18 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
+#if defined(TARGET_HERO) || defined(TARGET_SOLDIERMK4_2022)
+    /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
+     *  The IMU Faces to the left of the 'R' on the Type A MCB
+     *  0 Rotation corresponds with a 0 rotation of the chassis
+     */
+    // MCB has power inlet facing forward
+    static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
+#else
+    // MCB has power inlet facing backwards
+    static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
+#endif
+
     /**
      * AutoAim data to receive from Jetson.
      */
@@ -234,17 +246,6 @@ private:
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
     };
-#if defined(TARGET_HERO) || defined(TARGET_SOLDIERMK4_2022)
-    /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
-     *  The IMU Faces to the left of the 'R' on the Type A MCB
-     *  0 Rotation corresponds with a 0 rotation of the chassis
-     */
-    // MCB has power inlet facing forward
-    static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
-#else
-    // MCB has power inlet facing nackwards
-    static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
-#endif
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
