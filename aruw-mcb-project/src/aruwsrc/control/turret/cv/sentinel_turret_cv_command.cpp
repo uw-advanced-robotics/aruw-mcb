@@ -17,8 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//#include "sentinel.hpp"
-
 #include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
 #include <cassert>
@@ -34,6 +32,7 @@
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
+using namespace aruwsrc::algorithms;
 
 namespace aruwsrc::control::turret::cv
 {
@@ -42,41 +41,34 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    tap::control::Subsystem &firingSubsystem,
-    Command *const firingCommand,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
-    const float defaultLaunchSpeed,
+    tap::control::Subsystem &launchingSubsystem,
+    Command *const launchingCommand,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const uint8_t turretID)
-    : drivers(drivers),
+    : ComprisedCommand(drivers),
+      drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
       turretID(turretID),
-      firingCommand(firingCommand),
-      ballisticsSolver(
-          *drivers,
-          odometryInterface,
-          *turretSubsystem,
-          frictionWheels,
-          defaultLaunchSpeed,
-          turretID),
-      pitchScanner(
-          PITCH_MIN_SCAN_ANGLE,
-          turretSubsystem->pitchMotor.getConfig().maxAngle,
-          SCAN_DELTA_ANGLE),
+      launchingCommand(launchingCommand),
+      ballisticsSolver(ballisticsSolver),
+      pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, SCAN_DELTA_ANGLE),
       yawScanner(
-          turretSubsystem->yawMotor.getConfig().minAngle,
-          turretSubsystem->yawMotor.getConfig().maxAngle,
+          turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
+          turretSubsystem->yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
           SCAN_DELTA_ANGLE)
 {
-    assert(firingCommand != nullptr);
+    assert(launchingCommand != nullptr);
     assert(turretSubsystem != nullptr);
     assert(pitchController != nullptr);
     assert(yawController != nullptr);
+    assert(ballisticsSolver != nullptr);
 
-    addSubsystemRequirement(turretSubsystem);
-    addSubsystemRequirement(&firingSubsystem);
+    this->comprisedCommandScheduler.registerSubsystem(turretSubsystem);
+    this->comprisedCommandScheduler.registerSubsystem(&launchingSubsystem);
+    this->addSubsystemRequirement(turretSubsystem);
+    this->addSubsystemRequirement(&launchingSubsystem);
 }
 
 bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
@@ -85,8 +77,12 @@ void SentinelTurretCVCommand::initialize()
 {
     pitchController->initialize();
     yawController->initialize();
+
     prevTime = getTimeMilliseconds();
+
     drivers->visionCoprocessor.sendSelectNewTargetMessage();
+
+    enterScanMode(yawController->getSetpoint(), pitchController->getSetpoint());
 }
 
 void SentinelTurretCVCommand::execute()
@@ -94,46 +90,43 @@ void SentinelTurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    float targetPitch;
-    float targetYaw;
-    bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
+        ballisticsSolver->computeTurretAimAngles();
 
-    if (ballisticsSolutionAvailable)
+    if (ballisticsSolution != std::nullopt)
     {
-        // Target available
-        pitchSetpoint = targetPitch;
-        yawSetpoint = targetYaw;
+        exitScanMode();
 
-        // the setpoint returned by the ballistics solver is between [0, 2*PI)
-        // the desired setpoint is not required to be between [0, 2*PI)
-        // so, find the setpoint that is closest to the unwrapped measured angle
-        // (this is only an issue for turrets w/o a slip ring)
-        if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
+        // Target available
+        pitchSetpoint = ballisticsSolution->pitchAngle;
+        yawSetpoint = ballisticsSolution->yawAngle;
+
+        auto turretController = turretSubsystem->yawMotor.getTurretController();
+        if (turretController != nullptr)
         {
-            // TODO fix for non-chassis frame controllers
-            yawSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
-                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle(),
-                yawSetpoint);
-            yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
+            yawSetpoint = turretController->convertChassisAngleToControllerFrame(yawSetpoint);
         }
+
+        /**
+         * the setpoint returned by the ballistics solver is between [0, 2*PI)
+         * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
+         * that is closest to the unwrapped measured angle.
+         */
+        yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
+        pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         // Check if we are aiming within tolerance, if so fire
         /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
         /// to indicate whether it's worth firing at
-        if (compareFloatClose(
-                turretSubsystem->pitchMotor.getChassisFrameMeasuredAngle().getValue(),
-                pitchSetpoint,
-                FIRING_TOLERANCE) &&
-            compareFloatClose(
-                turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue(),
-                yawSetpoint,
-                FIRING_TOLERANCE))
+        if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+                turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
+                turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
+                ballisticsSolution->distance))
         {
             // Do not re-add command if it's already scheduled as that would interrupt it
-            if (!drivers->commandScheduler.isCommandScheduled(firingCommand))
+            if (!drivers->commandScheduler.isCommandScheduled(launchingCommand))
             {
-                drivers->commandScheduler.addCommand(firingCommand);
+                drivers->commandScheduler.addCommand(launchingCommand);
             }
         }
     }
@@ -151,8 +144,7 @@ void SentinelTurretCVCommand::execute()
         }
         else
         {
-            pitchSetpoint = pitchScanner.scan(pitchSetpoint);
-            yawSetpoint = yawScanner.scan(yawSetpoint);
+            performScanIteration(yawSetpoint, pitchSetpoint);
         }
     }
 
@@ -167,6 +159,8 @@ void SentinelTurretCVCommand::execute()
     // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
     // and sets the turret subsystem's desired yaw output
     yawController->runController(dt, yawSetpoint);
+
+    comprisedCommandScheduler.run();
 }
 
 bool SentinelTurretCVCommand::isFinished() const
@@ -178,6 +172,7 @@ void SentinelTurretCVCommand::end(bool)
 {
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
+    this->comprisedCommandScheduler.removeCommand(launchingCommand, true);
 }
 
 void SentinelTurretCVCommand::requestNewTarget()
@@ -192,6 +187,27 @@ void SentinelTurretCVCommand::changeScanningQuadrant()
     // move left
     const float angleChange = copysignf(M_PI_2, -turretSubsystem->yawMotor.getAngleFromCenter());
     yawController->setSetpoint(yawController->getSetpoint() + angleChange);
+}
+
+void SentinelTurretCVCommand::performScanIteration(float &yawSetpoint, float &pitchSetpoint)
+{
+    if (!scanning)
+    {
+        enterScanMode(yawSetpoint, pitchSetpoint);
+    }
+
+    float yawScanValue = yawScanner.scan();
+    float pitchScanValue = pitchScanner.scan();
+
+    auto yawController = turretSubsystem->yawMotor.getTurretController();
+
+    if (yawController != nullptr)
+    {
+        yawScanValue = yawController->convertChassisAngleToControllerFrame(yawScanValue);
+    }
+
+    yawSetpoint = lowPassFilter(yawSetpoint, yawScanValue, SCAN_LOW_PASS_ALPHA);
+    pitchSetpoint = lowPassFilter(pitchSetpoint, pitchScanValue, SCAN_LOW_PASS_ALPHA);
 }
 
 }  // namespace aruwsrc::control::turret::cv

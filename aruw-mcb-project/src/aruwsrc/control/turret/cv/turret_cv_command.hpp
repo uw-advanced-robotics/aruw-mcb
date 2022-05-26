@@ -42,7 +42,7 @@ class TurretSubsystem;
 
 namespace aruwsrc::control::launcher
 {
-class RefereeFeedbackFrictionWheelSubsystem;
+class LaunchSpeedPredictorInterface;
 }
 
 namespace aruwsrc::chassis
@@ -76,15 +76,12 @@ public:
      * axis of the turret.
      * @param[in] pitchController Pointer to a pitch controller that will be used to control the
      * pitch axis of the turret.
-     * @param[in] odometryInterface Odometry object, used for position odometry information.
-     * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
-     * a target is a function of how fast a projectile is launched at.
+     * @param[in] ballisticsSolver A ballistics computation engine to use for computing aiming
+     * solutions.
      * @param[in] userPitchInputScalar When user input is used, this scalar is used to scale the
      * pitch user input.
      * @param[in] userYawInputScalar When user input is used, this scalar is used to scale the yaw
      * user input.
-     * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
-     * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
      * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
      * for more information.
      */
@@ -93,11 +90,9 @@ public:
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const float userPitchInputScalar,
         const float userYawInputScalar,
-        const float defaultLaunchSpeed,
         uint8_t turretID = 0);
 
     void initialize() override;
@@ -112,6 +107,15 @@ public:
 
     const char *getName() const override { return "turret CV"; }
 
+    mockable bool getTurretID() const { return turretID; }
+
+    /**
+     * @return True if vision is active and the turret CV command has acquired the target and the
+     * turret is within some tolerance of the target. This tolerance is distance based (the further
+     * away the target the closer to the center of the plate the turret must be aiming)
+     */
+    mockable bool isAimingWithinLaunchingTolerance() const { return withinAimingTolerance; }
+
 private:
     aruwsrc::Drivers *drivers;
 
@@ -122,12 +126,14 @@ private:
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
-    aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
 
     const float userPitchInputScalar;
     const float userYawInputScalar;
 
     uint32_t prevTime;
+
+    bool withinAimingTolerance = false;
 };
 }  // namespace aruwsrc::control::turret::cv
 

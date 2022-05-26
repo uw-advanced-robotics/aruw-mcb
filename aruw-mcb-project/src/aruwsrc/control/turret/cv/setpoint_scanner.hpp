@@ -49,18 +49,20 @@ public:
         : lowerBound(lowerBound),
           upperBound(upperBound),
           delta(delta),
-          scanningPositive(true)
+          scanningPositive(true),
+          setpoint(0)
     {
         assert(lowerBound <= upperBound);
     }
 
+    inline void setScanSetpoint(float set) { setpoint = set; }
+
     /**
      * Update the setpoint by the delta and return the new setpoint.
      *
-     * @param setpoint the current setpoint
      * @return the setpoint after being updated
      */
-    inline float scan(float setpoint)
+    inline float scan()
     {
         if (setpoint >= upperBound)
         {
@@ -71,14 +73,7 @@ public:
             scanningPositive = true;
         }
 
-        if (scanningPositive)
-        {
-            setpoint += delta;
-        }
-        else
-        {
-            setpoint -= delta;
-        }
+        setpoint += scanningPositive ? delta : -delta;
 
         // Bound value between upper and lower bounds
         return tap::algorithms::limitVal(setpoint, lowerBound, upperBound);
@@ -89,6 +84,7 @@ private:
     const float upperBound;
     const float delta;
     bool scanningPositive;
+    float setpoint;
 };
 
 }  // namespace aruwsrc::control::turret::cv

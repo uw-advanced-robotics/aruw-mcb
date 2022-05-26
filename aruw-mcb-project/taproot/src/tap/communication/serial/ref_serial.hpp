@@ -149,15 +149,24 @@ public:
      * Used by `RefSerialTransmitter`. It is necessary to acquire this lock to coordinate sending
      * ref serial data from different protothreads.
      */
-    void acquireTransmissionSemaphore() { transmissionSemaphore.acquire(); }
+    mockable void acquireTransmissionSemaphore() { transmissionSemaphore.acquire(); }
 
-    void releaseTransmissionSemaphore() { transmissionSemaphore.release(); }
+    mockable void releaseTransmissionSemaphore() { transmissionSemaphore.release(); }
 
     /**
      * @return True if the robot operator is blinded, false otherwise. Also return false if the
      * referee system is offline.
      */
     bool operatorBlinded() const;
+
+    /**
+     * @return True if the specified heat and heatLimit values are "valid". These values are valid
+     * if they aren't 0xffff and if the heatLimit is not 0.
+     */
+    static inline bool heatAndLimitValid(uint16_t heat, uint16_t heatLimit)
+    {
+        return heat != 0xffff && heatLimit != 0xffff && heatLimit != 0;
+    }
 
 private:
     Rx::RobotData robotData;

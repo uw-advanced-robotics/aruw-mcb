@@ -30,6 +30,7 @@
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
+using namespace aruwsrc::algorithms;
 
 namespace aruwsrc::control::turret::cv
 {
@@ -38,27 +39,22 @@ TurretCVCommand::TurretCVCommand(
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
-    const float defaultLaunchSpeed,
     uint8_t turretID)
     : drivers(drivers),
       turretID(turretID),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
-      ballisticsSolver(
-          *drivers,
-          odometryInterface,
-          *turretSubsystem,
-          frictionWheels,
-          defaultLaunchSpeed,
-          turretID),
+      ballisticsSolver(ballisticsSolver),
       userPitchInputScalar(userPitchInputScalar),
       userYawInputScalar(userYawInputScalar)
 {
+    assert(ballisticsSolver != nullptr);
+
+    assert(turretID == ballisticsSolver->turretID);
     addSubsystemRequirement(turretSubsystem);
 }
 
@@ -77,33 +73,26 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    float targetPitch;
-    float targetYaw;
-    bool ballisticsSolutionAvailable =
-        ballisticsSolver.computeTurretAimAngles(&targetPitch, &targetYaw);
+    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
+        ballisticsSolver->computeTurretAimAngles();
 
-    if (ballisticsSolutionAvailable)
+    if (ballisticsSolution != std::nullopt)
     {
-        pitchSetpoint = targetPitch;
-        yawSetpoint = targetYaw;
+        pitchSetpoint = ballisticsSolution->pitchAngle;
+        yawSetpoint = ballisticsSolution->yawAngle;
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
-         * the desired setpoint is unwrapped, so find the setpoint that is closest
-         * to the unwrapped measured angle.
-         * Since the world frame controllers don't unwrapping the setpoint to values
-         * outside of [0, 2*PI), we don't have to worry about unwrapping the world
-         * frame controllers.
-         *
-         * TODO fix for non-chassis frame controllers
+         * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
+         * that is closest to the unwrapped measured angle.
          */
-        if (turretSubsystem->yawMotor.getConfig().limitMotorAngles)
-        {
-            yawSetpoint = TurretMotor::getClosestNonNormalizedSetpointToMeasurement(
-                turretSubsystem->yawMotor.getChassisFrameUnwrappedMeasuredAngle(),
-                yawSetpoint);
-            yawSetpoint = turretSubsystem->yawMotor.getSetpointWithinTurretRange(yawSetpoint);
-        }
+        yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
+        pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
+
+        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+            turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
+            turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
+            ballisticsSolution->distance);
     }
     else
     {
@@ -113,6 +102,8 @@ void TurretCVCommand::execute()
 
         yawSetpoint +=
             userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+
+        withinAimingTolerance = false;
     }
 
     uint32_t currTime = getTimeMilliseconds();
@@ -137,6 +128,7 @@ void TurretCVCommand::end(bool)
 {
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
+    withinAimingTolerance = false;
 }
 
 }  // namespace aruwsrc::control::turret::cv

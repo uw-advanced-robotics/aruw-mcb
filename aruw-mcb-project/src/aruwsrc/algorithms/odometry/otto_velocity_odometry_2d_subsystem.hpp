@@ -36,7 +36,7 @@ class Drivers;
 }
 namespace aruwsrc::control::turret
 {
-class TurretMotor;
+class TurretSubsystem;
 }
 
 namespace tap::control::chassis
@@ -64,7 +64,7 @@ namespace aruwsrc::algorithms::odometry
  * @see OttoChassisVelocityGetter
  */
 class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
-                                              public tap::algorithms::odometry::Odometry2DInterface
+                                              public tap::algorithms::odometry::Odometry2DTracker
 {
 public:
     /**
@@ -75,23 +75,12 @@ public:
      */
     OttoVelocityOdometry2DSubsystem(
         aruwsrc::Drivers* drivers,
-        const aruwsrc::control::turret::TurretMotor* turret,
+        const aruwsrc::control::turret::TurretSubsystem& turret,
         tap::control::chassis::ChassisSubsystemInterface* chassis);
 
     void refresh() override;
 
-    modm::Location2D<float> getCurrentLocation2D() const override final
-    {
-        return odometryTracker.getCurrentLocation2D();
-    }
-
-    modm::Vector2f getCurrentVelocity2D() const override final
-    {
-        return odometryTracker.getCurrentVelocity2D();
-    }
-
 private:
-    tap::algorithms::odometry::Odometry2DTracker odometryTracker;
     OttoChassisWorldYawObserver orientationObserver;
     OttoChassisVelocityDisplacement2DObserver displacementObserver;
 };

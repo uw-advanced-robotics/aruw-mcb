@@ -20,13 +20,12 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "tap/control/command.hpp"
+#include "tap/control/comprised_command.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "../constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/control/turret/cv/sentinel_turret_cv_command.hpp"
 
 #include "setpoint_scanner.hpp"
 
@@ -47,7 +46,7 @@ class TurretSubsystem;
 
 namespace aruwsrc::control::launcher
 {
-class RefereeFeedbackFrictionWheelSubsystem;
+class LaunchSpeedPredictorInterface;
 }
 
 namespace aruwsrc::control::turret::cv
@@ -64,18 +63,33 @@ namespace aruwsrc::control::turret::cv
  * target (for example, the target is too far away), then user input from the
  * `ControlOperatorInterface` is used to control the turret instead.
  */
-class SentinelTurretCVCommand : public tap::control::Command
+class SentinelTurretCVCommand : public tap::control::ComprisedCommand
 {
 public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
     /// (in radians)
-    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(10.0f);
+    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-15.0f);
+    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(60.0f);
 
     /**
-     * Command will shoot when turret pitch and yaw are both respectively within `FIRING_TOLERANCE`
-     * radians of the ballistics solution.
+     * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
+     * turret will turn around and start scanning around.
      */
-    static constexpr float FIRING_TOLERANCE = modm::toRadian(0.5f);
+    static constexpr float YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX = modm::toRadian(1.0f);
+
+    /**
+     * Yaw and pitch angle increments that the turret will change by each call
+     * to refresh when the turret is scanning for a target, in radians.
+     */
+    static constexpr float SCAN_DELTA_ANGLE = modm::toRadian(0.2f);
+
+    /**
+     * The number of times refresh is called without receiving valid CV data to when
+     * the command will consider the target lost and start tracking.
+     */
+    static constexpr int AIM_LOST_NUM_COUNTS = 500;
+
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
 
     /**
      * Constructs a TurretCVCommand
@@ -88,11 +102,8 @@ public:
      * pitch axis of the turret.
      * @param[in] firingCommand Pointer to command to schedule when this command deems it's time to
      * shoot.
-     * @param[in] odometryInterface Odometry object, used for position odometry information.
-     * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
-     * a target is a function of how fast a projectile is launched at.
-     * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
-     * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
+     * @param[in] ballisticsSolver A ballistics computation engine to use for computing aiming
+     * solutions.
      * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
      * for more information.
      */
@@ -101,11 +112,9 @@ public:
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        tap::control::Subsystem &firingSubsystem,
-        Command *const firingCommand,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::launcher::RefereeFeedbackFrictionWheelSubsystem &frictionWheels,
-        const float defaultLaunchSpeed,
+        tap::control::Subsystem &launchingSubsystem,
+        Command *const launchingCommand,
+        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const uint8_t turretID);
 
     void initialize() override;
@@ -118,7 +127,7 @@ public:
 
     void end(bool) override;
 
-    const char *getName() const override { return "turret CV"; }
+    const char *getName() const override { return "sentinel turret CV"; }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
@@ -139,11 +148,11 @@ private:
     const uint8_t turretID;
 
     /**
-     * The command to be scheduled when the sentinel is ready to shoot.
+     * The command to be scheduled when the sentinel is ready to launch.
      */
-    Command *const firingCommand;
+    Command *const launchingCommand;
 
-    aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
 
     uint32_t prevTime;
 
@@ -157,30 +166,43 @@ private:
      */
     SetpointScanner yawScanner;
 
+    bool scanning = false;
+
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
      * and that keeps track of the number of times `refresh` is called when
      * an aiming solution couldn't be found (either because CV had no target
      * or aiming solution was impossible)
      */
-    unsigned int lostTargetCounter = 0;
+    unsigned int lostTargetCounter = AIM_LOST_NUM_COUNTS;
+
+    inline void enterScanMode(float yawSetpoint, float pitchSetpoint)
+    {
+        if (yawController != nullptr)
+        {
+            yawSetpoint = yawController->convertControllerAngleToChassisFrame(yawSetpoint);
+        }
+
+        lostTargetCounter = AIM_LOST_NUM_COUNTS;
+        scanning = true;
+        yawScanner.setScanSetpoint(yawSetpoint);
+        pitchScanner.setScanSetpoint(pitchSetpoint);
+    }
+
+    inline void exitScanMode()
+    {
+        scanning = false;
+        lostTargetCounter = 0;
+    }
 
     /**
-     * Yaw and pitch angle increments that the turret will change by each call
-     * to refresh when the turret is scanning for a target, in radians.
+     * Performs a single scan iteration, updating the pitch and yaw setpoints based on the pitch/yaw
+     * setpoint scanners.
+     *
+     * @param[out] yawSetpoint The current yaw setpoint, which this function will update
+     * @param[out] pitchSetpoint The current pitch setpoint, which this function will update
      */
-    static constexpr float SCAN_DELTA_ANGLE = modm::toRadian(0.2f);
-
-    /**
-     * The number of times refresh is called without receiving valid CV data to when
-     * the command will consider the target lost and start tracking.
-     */
-    static constexpr int AIM_LOST_NUM_COUNTS = 500;
-
-    /**
-     * @return an angle in radians representing the next "scanning" setpoint
-     */
-    float scanForTarget(char axis);
+    void performScanIteration(float &yawSetpoint, float &pitchSetpoint);
 };
 
 }  // namespace aruwsrc::control::turret::cv
