@@ -28,6 +28,7 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -73,6 +74,9 @@ public:
      * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
      * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the
      * HUD).
+     * @param[in] cvOnTargetGovernor This governor is checked to see whether or not projectile
+     * launching is being gated by CV. May be nullptr if no governor exists in the system (in which
+     * case it is assumed that no CV launch limiting is being performed).
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
      * never be selected as the current chassis command in the HUD.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
@@ -87,6 +91,7 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
         const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+        const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
@@ -151,7 +156,7 @@ private:
             {"CHAS", "BEYB\nFLLW\nMIMU"},
             {"SHOT", "REDY\nLOAD\nFOFF"},
             {"FIRE", "SNGL\nBRST\nFULL"},
-            {"CV  ", "ONLN\nOFFL"}};
+            {"CV  ", "GATE\nNOGT\nOFFL"}};
 
     /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
     static constexpr int NUM_CHASSIS_STATES = 4;
@@ -175,8 +180,12 @@ private:
      * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[CV_STATUS]. */
     enum class CVStatus
     {
-        /** The vision coprocessor is connected, but no target is detected. */
-        VISION_COPROCESSOR_CONNECTED,
+        /** The vision coprocessor is connected and is in the mode where vision gates projectiles
+           from launching. */
+        VISION_COPROCESSOR_GATED_PROJECTILE_LAUNCH = 0,
+        /** The vision coprocessor is connected and is freely allowing the user to fire
+         * projectiles. */
+        VISION_COPROCESSOR_NO_PROJECTILE_GATING,
         /** The vision coprocessor is offline. */
         VISION_COPROCESSOR_OFFLINE,
     };
@@ -190,6 +199,8 @@ private:
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
 
     const aruwsrc::agitator::MultiShotHandler *multiShotHandler;
+
+    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor;
 
     /**
      * List of commands that will be checked for in the scheduler when determining which drive

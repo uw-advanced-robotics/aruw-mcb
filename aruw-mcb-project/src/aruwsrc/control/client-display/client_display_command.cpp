@@ -40,6 +40,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
@@ -61,6 +62,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           frictionWheelSubsystem,
           robotTurretSubsystem,
           multiShotHandler,
+          cvOnTargetManager,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
           chassisImuDriveCommand),

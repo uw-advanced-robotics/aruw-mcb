@@ -35,11 +35,14 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "governor/cv_has_target_governor.hpp"
+#include "governor/cv_on_target_governor.hpp"
+#include "governor/cv_online_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -69,6 +72,7 @@ using namespace tap::motor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
 
 /*
@@ -128,28 +132,6 @@ SentinelTurretSubsystem turretSubsystem(
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
-MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
-
-UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
-
-MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
-    *drivers(),
-    agitator,
-    rotateAgitator,
-    unjamAgitator);
-
-// rotates agitator if friction wheels are spinning fast
-FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
-
-// rotates agitator with heat limiting applied
-HeatLimitGovernor heatLimitGovernor(
-    *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    constants::HEAT_LIMIT_BUFFER);
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting(
-    {&agitator},
-    rotateAndUnjamAgitator,
-    {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
 // Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
@@ -178,6 +160,18 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
+OttoBallisticsSolver ballisticsSolver(
+    *drivers(),
+    odometrySubsystem,
+    frictionWheels,
+    29.5f,  // defaultLaunchSpeed
+    0       // turretID
+);
+AutoAimLaunchTimer autoAimLaunchTimer(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver);
+
 // turret commands
 
 user::TurretUserControlCommand turretManual(
@@ -194,8 +188,7 @@ cv::TurretCVCommand turretCVCommand(
     &turretSubsystem,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
-    odometrySubsystem,
-    frictionWheels,
+    &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR,
     29.5f);
@@ -215,6 +208,47 @@ tap::control::governor::GovernorWithFallbackCommand<1> turretCVWithScanFallback(
 
 user::TurretQuickTurnCommand turretUturnCommand(&turretSubsystem, M_PI);
 
+// base agitator commands
+
+MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
+
+UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
+
+MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
+    *drivers(),
+    agitator,
+    rotateAgitator,
+    unjamAgitator);
+
+// agitator related governors
+
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+
+HeatLimitGovernor heatLimitGovernor(
+    *drivers(),
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    constants::HEAT_LIMIT_BUFFER);
+
+CvOnTargetGovernor cvOnTargetGovernor(
+    *drivers(),
+    turretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+
+CvOnlineGovernor cvOnlineGovernor(drivers()->visionCoprocessor, 0);
+
+// agitator governor limited commands
+
+GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor, &cvOnlineGovernor});
+
+GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCvLimiting(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
+
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
 void targetNewQuadrantMessageHandler()
@@ -232,7 +266,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&rotateAndUnjamAgitatorWithHeatLimiting},
+    {&rotateAndUnjamAgitatorWithHeatAndCvLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldRepeatCommandMapping leftSwitchDown(
@@ -274,6 +308,7 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turretSubsystem.setDefaultCommand(&turretCVWithScanFallback);
+    agitator.setDefaultCommand(&rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretSubsystem, 0);
 }
