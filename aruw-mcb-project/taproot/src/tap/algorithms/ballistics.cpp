@@ -31,9 +31,10 @@ bool computeTravelTime(
     const modm::Vector3f &targetPosition,
     float bulletVelocity,
     float *travelTime,
-    float *turretPitch)
+    float *turretPitch,
+    const float pitchAxisOffset)
 {
-    float horizontalDist = hypot(targetPosition.x, targetPosition.y);
+    float horizontalDist = hypot(targetPosition.x, targetPosition.y) + pitchAxisOffset;
     float bulletVelocitySquared = powf(bulletVelocity, 2);
     float sqrtTerm = powf(bulletVelocitySquared, 2) -
                      ACCELERATION_GRAVITY * (ACCELERATION_GRAVITY * powf(horizontalDist, 2) +
@@ -78,7 +79,8 @@ bool findTargetProjectileIntersection(
     uint8_t numIterations,
     float *turretPitch,
     float *turretYaw,
-    float *projectedTravelTime)
+    float *projectedTravelTime,
+    const float pitchAxisOffset)
 {
     modm::Vector3f projectedTargetPosition = targetInitialState.position;
 
@@ -94,7 +96,8 @@ bool findTargetProjectileIntersection(
                 projectedTargetPosition,
                 bulletVelocity,
                 projectedTravelTime,
-                turretPitch))
+                turretPitch,
+                pitchAxisOffset))
         {
             return false;
         }

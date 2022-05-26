@@ -19,11 +19,13 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/architecture/clock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
+#include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 
 using namespace testing;
 using namespace aruwsrc::algorithms;
@@ -98,7 +100,11 @@ INSTANTIATE_TEST_SUITE_P(
 class OttoBallisticsSolverTest : public Test
 {
 protected:
-    OttoBallisticsSolverTest() : solver(drivers, odometry, launcher, 15, 0) {}
+    OttoBallisticsSolverTest()
+        : turret(&drivers),
+          solver(drivers, odometry, turret, launcher, 15, 0)
+    {
+    }
 
     void SetUp() override
     {
@@ -118,6 +124,7 @@ protected:
     aruwsrc::Drivers drivers;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
+    NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
 
     OttoBallisticsSolver solver;
 

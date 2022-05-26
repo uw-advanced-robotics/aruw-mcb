@@ -75,28 +75,31 @@ MatrixHudIndicators::MatrixHudIndicators(
           chassisAutorotateCmd,
           chassisImuDriveCommand,
       },
-      matrixHudIndicatorDrawers{
-          StateHUDIndicator<uint16_t>(
-              refSerialTransmitter,
-              &matrixHudIndicatorGraphics[CHASSIS_STATE],
-              updateGraphicYLocation,
-              0),
-          StateHUDIndicator<uint16_t>(
-              refSerialTransmitter,
-              &matrixHudIndicatorGraphics[SHOOTER_STATE],
-              updateGraphicYLocation,
-              0),
-          StateHUDIndicator<uint16_t>(
-              refSerialTransmitter,
-              &matrixHudIndicatorGraphics[FIRING_MODE],
-              updateGraphicYLocation,
-              0),
-          StateHUDIndicator<uint16_t>(
-              refSerialTransmitter,
-              &matrixHudIndicatorGraphics[CV_STATUS],
-              updateGraphicYLocation,
-              0),
-      }
+      matrixHudIndicatorDrawers
+{
+    StateHUDIndicator<uint16_t>(
+        refSerialTransmitter,
+        &matrixHudIndicatorGraphics[CHASSIS_STATE],
+        updateGraphicYLocation,
+        0),
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[SHOOTER_STATE],
+            updateGraphicYLocation,
+            0),
+#if defined(DISPLAY_FIRING_MODE)
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[FIRING_MODE],
+            updateGraphicYLocation,
+            0),
+#endif
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[CV_STATUS],
+            updateGraphicYLocation,
+            0),
+}
 {
 }
 
@@ -180,9 +183,11 @@ void MatrixHudIndicators::updateIndicatorState()
     matrixHudIndicatorDrawers[SHOOTER_STATE].setIndicatorState(
         getIndicatorYCoordinate(static_cast<int>(shooterState)));
 
+#if defined(DISPLAY_FIRING_MODE)
     // update firing mode
     matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
         static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
+#endif
 
     CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;
 
