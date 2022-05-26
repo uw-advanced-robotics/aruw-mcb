@@ -132,7 +132,7 @@ void ImuCalibrateCommand::execute()
             for (auto &config : turretsAndControllers)
             {
                 turretsNotMoving &=
-                    turretReachedCenterAndNotMoving(config.turret, !turretImuOnPitch);
+                    turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
             }
 
             if (calibrationTimer.isExpired() && turretsNotMoving)
@@ -172,19 +172,15 @@ void ImuCalibrateCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    // don't run pitch controller when turret IMU not on pitch (as there is no need)
-    if (turretImuOnPitch)
+    for (auto &config : turretsAndControllers)
     {
-        for (auto &config : turretsAndControllers)
+        // don't run pitch controller when turret IMU not on pitch (as there is no need)
+        if (config.turretImuOnPitch)
         {
             config.pitchController->runController(
                 dt,
                 config.turret->pitchMotor.getChassisFrameSetpoint());
         }
-    }
-
-    for (auto &config : turretsAndControllers)
-    {
         config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
     }
 }

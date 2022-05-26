@@ -103,6 +103,10 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
             .zAcc = 9,
             .hasTarget = false,
             .timestamp = 1234,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
     initAndRunAutoAimRxTest(aimData);
 }
@@ -122,6 +126,10 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
             .zAcc = -9,
             .hasTarget = false,
             .timestamp = 1234,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
     initAndRunAutoAimRxTest(aimData);
 }
@@ -141,6 +149,10 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
             .zAcc = 0.35,
             .hasTarget = false,
             .timestamp = 1234,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
     initAndRunAutoAimRxTest(aimData);
 }
@@ -160,6 +172,10 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
             .zAcc = 123456789.0f,
             .hasTarget = false,
             .timestamp = 1234,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
 
     initAndRunAutoAimRxTest(aimData);
@@ -180,6 +196,10 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
             .zAcc = -14.2,
             .hasTarget = true,
             .timestamp = 1234,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
 
     // if there are > 1 turret, fill in aim data
