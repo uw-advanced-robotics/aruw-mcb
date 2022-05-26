@@ -348,10 +348,11 @@ PressCommandMapping gCtrlPressed(
 ToggleCommandMapping rToggled(drivers(), {&openHopperCommand}, RemoteMapState({Remote::Key::R}));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 MultiShotCommandMapping leftMousePressedShiftNotPressed(
+    *drivers(),
     agitatorLaunchYellowCardCommand,
     agitatorLaunchYellowCardCommand,
     agitatorLaunchYellowCardCommand,
-    drivers(),
+    turretCVCommand,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}));
 HoldRepeatCommandMapping leftMousePressedShiftPressed(
     drivers(),

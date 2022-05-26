@@ -189,7 +189,7 @@ private:
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
 
-    const aruwsrc::agitator::MultiShotCommandMapping *MultiShotCommandMapping;
+    const aruwsrc::agitator::MultiShotCommandMapping *multiShotCommandMapping;
 
     /**
      * List of commands that will be checked for in the scheduler when determining which drive

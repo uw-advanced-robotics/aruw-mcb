@@ -67,7 +67,7 @@ MatrixHudIndicators::MatrixHudIndicators(
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       turretSubsystem(turretSubsystem),
-      MultiShotCommandMapping(multiShotCommandMapping),
+      multiShotCommandMapping(multiShotCommandMapping),
       driveCommands{
           chassisBeybladeCmd,
           chassisAutorotateCmd,
@@ -181,7 +181,7 @@ void MatrixHudIndicators::updateIndicatorState()
     // update firing mode
     matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(
         getIndicatorYCoordinate(static_cast<int>(
-            MultiShotCommandMapping == nullptr ? 0 : MultiShotCommandMapping->getShooterState())));
+            multiShotCommandMapping == nullptr ? 0 : multiShotCommandMapping->getShooterState())));
 
     CVStatus cvStatus = drivers.visionCoprocessor.isCvOnline()
                             ? CVStatus::VISION_COPROCESSOR_CONNECTED

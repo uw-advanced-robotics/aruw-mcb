@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef multi_shot_command_mapping_HPP_
-#define multi_shot_command_mapping_HPP_
+#ifndef MULTI_SHOT_COMMAND_MAPPING_HPP_
+#define MULTI_SHOT_COMMAND_MAPPING_HPP_
 
 #include <cassert>
 
@@ -117,4 +117,4 @@ private:
 
 }  // namespace aruwsrc::agitator
 
-#endif  // multi_shot_command_mapping_HPP_
+#endif  // MULTI_SHOT_COMMAND_MAPPING_HPP_
