@@ -103,6 +103,10 @@ public:
     void initialize() override final;
 
 private:
+#if defined(ALL_SOLDIERS)
+#define DISPLAY_FIRING_MODE
+#endif
+
     /** The color of the title row of the matrix HUD indicator. */
     static constexpr Tx::GraphicColor MATRIX_HUD_INDICATOR_TITLE_COLOR = Tx::GraphicColor::GREEN;
     /** The color of the labels in the HUD matrix. */
@@ -135,8 +139,10 @@ private:
         CHASSIS_STATE = 0,
         /** The current reloading and flywheel state of the firing system. */
         SHOOTER_STATE,
+#if defined(DISPLAY_FIRING_MODE)
         /** The current projectile launching state (single, burst, full auto). TODO */
         FIRING_MODE,
+#endif
         /** The current state of CV. */
         CV_STATUS,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
@@ -155,8 +161,11 @@ private:
         *MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[NUM_MATRIX_HUD_INDICATORS][2] = {
             {"CHAS", "BEYB\nFLLW\nMIMU"},
             {"SHOT", "REDY\nLOAD\nFOFF"},
+#if defined(DISPLAY_FIRING_MODE)
             {"FIRE", "SNGL\nBRST\nFULL"},
-            {"CV  ", "GATE\nNOGT\nOFFL"}};
+#endif
+            {"CV  ", "GATE\nNOGT\nOFFL"}
+        };
 
     /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
     static constexpr int NUM_CHASSIS_STATES = 4;
