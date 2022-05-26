@@ -38,7 +38,7 @@ class SentinelDriveEvadeCommand : public tap::control::Command
  */
 {
 public:
-    explicit SentinelDriveEvadeCommand(SentinelDriveSubsystem* subsystem);
+    explicit SentinelDriveEvadeCommand(SentinelDriveSubsystem* subsystem, float speed);
 
     void initialize() override;
 
@@ -55,18 +55,21 @@ private:
     static const int16_t MAX_RPM = 7000;
     static const int16_t CHANGE_TIME_INTERVAL = 750;
     static constexpr float LARGE_ARMOR_PLATE_WIDTH = 200.0f;
-    static constexpr float MAX_DISTANCE = LARGE_ARMOR_PLATE_WIDTH + 100;
-    static constexpr float TURNAROUND_BUFFER = 0.25f * SentinelDriveSubsystem::RAIL_LENGTH;
+    static constexpr float MAX_DISTANCE = LARGE_ARMOR_PLATE_WIDTH + 300;
+    static constexpr float TURNAROUND_BUFFER = 0.2f * SentinelDriveSubsystem::RAIL_LENGTH;
 
     float currentRPM;
     float positionWhenDirectionChanged;
     bool prevAuto = true;
     int randDistance;
+    float speedFactor;
 
     SentinelDriveSubsystem* sentinelDriveSubsystem;
     tap::arch::MilliTimeout changeVelocityTimer;
 
     float portableRandom();
+    void randomRPM(int min, int max);
+    float randomVal(int min, int max);
 };
 
 }  // namespace aruwsrc::control::sentinel::drive

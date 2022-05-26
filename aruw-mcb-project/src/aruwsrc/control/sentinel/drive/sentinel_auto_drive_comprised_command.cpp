@@ -38,8 +38,8 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelChassis(sentinelChassis),
-      fullTraverse(sentinelChassis),
-      randomDrive(sentinelChassis),
+      randomDrive1(sentinelChassis, 0.3),
+      randomDrive2(sentinelChassis, 0.6),
       evadeMode(false)
 {
     addSubsystemRequirement(sentinelChassis);
@@ -48,7 +48,7 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
 
 void SentinelAutoDriveComprisedCommand::initialize()
 {
-    comprisedCommandScheduler.addCommand(&fullTraverse);
+    comprisedCommandScheduler.addCommand(&evadeDrive1);
 }
 
 void SentinelAutoDriveComprisedCommand::execute()
@@ -59,15 +59,15 @@ void SentinelAutoDriveComprisedCommand::execute()
     {
         if (!evadeMode)
         {
-            comprisedCommandScheduler.removeCommand(&fullTraverse, true);
-            comprisedCommandScheduler.addCommand(&randomDrive);
+            comprisedCommandScheduler.removeCommand(&evadeDrive1, true);
+            comprisedCommandScheduler.addCommand(&evadeDrive2);
             evadeMode = true;
         }
     }
     else if (compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) && evadeMode)
     {
-        comprisedCommandScheduler.removeCommand(&randomDrive, true);
-        comprisedCommandScheduler.addCommand(&fullTraverse);
+        comprisedCommandScheduler.removeCommand(&evadeDrive2, true);
+        comprisedCommandScheduler.addCommand(&evadeDrive1);
         evadeMode = false;
     }
 
@@ -76,8 +76,8 @@ void SentinelAutoDriveComprisedCommand::execute()
 
 void SentinelAutoDriveComprisedCommand::end(bool interrupted)
 {
-    comprisedCommandScheduler.removeCommand(&fullTraverse, interrupted);
-    comprisedCommandScheduler.removeCommand(&randomDrive, interrupted);
+    comprisedCommandScheduler.removeCommand(&evadeDrive1, interrupted);
+    comprisedCommandScheduler.removeCommand(&evadeDrive2, interrupted);
 }
 
 bool SentinelAutoDriveComprisedCommand::isFinished() const { return false; }

@@ -23,6 +23,7 @@
 
 #include "sentinel_drive_evade_command.hpp"
 #include "sentinel_drive_subsystem.hpp"
+#include <cstdlib>
 
 #ifndef PLATFORM_HOSTED
 using modm::platform::RandomNumberGenerator;
@@ -32,10 +33,11 @@ using tap::control::Subsystem;
 
 namespace aruwsrc::control::sentinel::drive
 {
-SentinelDriveEvadeCommand::SentinelDriveEvadeCommand(SentinelDriveSubsystem* subsystem)
+SentinelDriveEvadeCommand::SentinelDriveEvadeCommand(SentinelDriveSubsystem* subsystem, float speed)
     : sentinelDriveSubsystem(subsystem)
 {
     addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
+    speedFactor = speed;
 }
 
 void SentinelDriveEvadeCommand::initialize()
@@ -44,6 +46,8 @@ void SentinelDriveEvadeCommand::initialize()
     randDistance = LARGE_ARMOR_PLATE_WIDTH;
 }
 
+int counter = 0;
+int counter2 = 0;
 void SentinelDriveEvadeCommand::execute()
 {
     float newPos = sentinelDriveSubsystem->absolutePosition();
@@ -51,18 +55,12 @@ void SentinelDriveEvadeCommand::execute()
     // required distance, generate a new random RPM and random distance.
     if (abs(positionWhenDirectionChanged - newPos) >= randDistance || prevAuto)
     {
+        counter++;
         prevAuto = false;
         positionWhenDirectionChanged = sentinelDriveSubsystem->absolutePosition();
 
-        uint32_t randVal = portableRandom();
-        currentRPM = randVal % (MAX_RPM - MIN_RPM + 1) + MIN_RPM;
-
-        uint32_t rand = portableRandom();
-        randDistance =
-            rand % (int)(MAX_DISTANCE - LARGE_ARMOR_PLATE_WIDTH + 1) + (int)LARGE_ARMOR_PLATE_WIDTH;
-
-        float sentinelRPM = sentinelDriveSubsystem->getRpm();
-        currentRPM = copysignf(currentRPM, -sentinelRPM);
+        randomRPM(MIN_RPM*speedFactor, MAX_RPM*speedFactor);
+        randDistance = (int)randomVal((int)LARGE_ARMOR_PLATE_WIDTH, (int)MAX_DISTANCE);
     }
 
     // reverse direction if close to the end of the rail
@@ -72,7 +70,13 @@ void SentinelDriveEvadeCommand::execute()
                                         SentinelDriveSubsystem::SENTINEL_LENGTH -
                                         TURNAROUND_BUFFER))
     {
-        currentRPM = -currentRPM;
+        
+        counter2++;
+
+        positionWhenDirectionChanged = sentinelDriveSubsystem->absolutePosition();
+        randomRPM(MIN_RPM*speedFactor, MAX_RPM*speedFactor);
+        randDistance = (int)randomVal((int)(SentinelDriveSubsystem::RAIL_LENGTH/2 - TURNAROUND_BUFFER), (int)(SentinelDriveSubsystem::RAIL_LENGTH - 3*TURNAROUND_BUFFER));
+        
     }
 
     sentinelDriveSubsystem->setDesiredRpm(currentRPM);
@@ -99,6 +103,18 @@ float SentinelDriveEvadeCommand::portableRandom()
 #endif
 }
 
+void SentinelDriveEvadeCommand::randomRPM(int min, int max)
+{
+    currentRPM = randomVal(min, max);
+    float sentinelRPM = sentinelDriveSubsystem->getRpm();
+    currentRPM = copysignf(currentRPM, -sentinelRPM);
+}
+
+float SentinelDriveEvadeCommand::randomVal(int min, int max)
+{
+    uint32_t randVal = portableRandom();
+    return randVal % (max - min + 1) + min;
+}
 }  // namespace aruwsrc::control::sentinel::drive
 
 #endif

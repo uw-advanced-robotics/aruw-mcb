@@ -54,8 +54,8 @@ private:
     static constexpr float RANDOM_DRIVE_DPS_THRESHOLD = 5;
     aruwsrc::Drivers *drivers;
     SentinelDriveSubsystem *sentinelChassis;
-    SentinelFullTraverseCommand fullTraverse;
-    SentinelDriveEvadeCommand randomDrive;
+    SentinelDriveEvadeCommand evadeDrive1;
+    SentinelDriveEvadeCommand evadeDrive2;
     bool evadeMode;
 };
 }  // namespace aruwsrc::control::sentinel::drive
