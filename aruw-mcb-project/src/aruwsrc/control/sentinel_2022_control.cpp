@@ -33,6 +33,7 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -66,6 +67,7 @@ using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
 
 /*
@@ -132,7 +134,12 @@ public:
               &yawMotor,
               config.pitchMotorConfig,
               config.yawMotorConfig,
-              &config.turretMCBCanComm,
+              &config.turretMCBCanComm),
+          ballisticsSolver(
+              drivers,
+              odometrySubsystem,
+              frictionWheels,
+              29.5f,  // defaultLaunchSpeed
               config.turretID),
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
@@ -174,9 +181,7 @@ public:
               &chassisFramePitchTurretController,
               agitator,
               &rotateAndUnjamAgitatorWithHeatLimiting,
-              odometrySubsystem,
-              frictionWheels,
-              14.5f,
+              &ballisticsSolver,
               config.turretID)
     {
     }
@@ -187,6 +192,7 @@ public:
     DjiMotor pitchMotor;
     DjiMotor yawMotor;
     SentinelTurretSubsystem turretSubsystem;
+    OttoBallisticsSolver ballisticsSolver;
 
     // unjam commands
     MoveIntegralCommand rotateAgitator;

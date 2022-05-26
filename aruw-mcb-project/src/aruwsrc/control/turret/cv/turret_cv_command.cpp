@@ -39,27 +39,22 @@ TurretCVCommand::TurretCVCommand(
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
-    const float defaultLaunchSpeed,
     uint8_t turretID)
     : drivers(drivers),
       turretID(turretID),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
-      ballisticsSolver(
-          *drivers,
-          odometryInterface,
-          *turretSubsystem,
-          frictionWheels,
-          defaultLaunchSpeed,
-          turretID),
+      ballisticsSolver(ballisticsSolver),
       userPitchInputScalar(userPitchInputScalar),
       userYawInputScalar(userYawInputScalar)
 {
+    assert(ballisticsSolver != nullptr);
+
+    assert(turretID == ballisticsSolver->turretID);
     addSubsystemRequirement(turretSubsystem);
 }
 
@@ -79,7 +74,7 @@ void TurretCVCommand::execute()
     float yawSetpoint = yawController->getSetpoint();
 
     std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
-        ballisticsSolver.computeTurretAimAngles();
+        ballisticsSolver->computeTurretAimAngles();
 
     if (ballisticsSolution != std::nullopt)
     {
@@ -95,8 +90,8 @@ void TurretCVCommand::execute()
         pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-            turretSubsystem->yawMotor.getValidChassisMeasurementError(),
-            turretSubsystem->pitchMotor.getValidChassisMeasurementError(),
+            turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
+            turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
             ballisticsSolution->distance);
     }
     else

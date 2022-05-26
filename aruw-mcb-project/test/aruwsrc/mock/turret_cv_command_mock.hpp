@@ -34,11 +34,9 @@ public:
         aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const float userPitchInputScalar,
         const float userYawInputScalar,
-        const float defaultLaunchSpeed,
         uint8_t turretID = 0);
     virtual ~TurretCVCommandMock();
 

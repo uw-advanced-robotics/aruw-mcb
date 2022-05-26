@@ -34,6 +34,7 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -65,6 +66,7 @@ using namespace tap::motor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
 
 /*
@@ -175,6 +177,14 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
+OttoBallisticsSolver ballisticsSolver(
+    *drivers(),
+    odometrySubsystem,
+    frictionWheels,
+    29.5f,  // defaultLaunchSpeed
+    0       // turretID
+);
+
 // turret commands
 
 user::TurretUserControlCommand turretManual(
@@ -193,9 +203,7 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &chassisFramePitchTurretController,
     agitator,
     &rotateAndUnjamAgitatorWithHeatLimiting,
-    odometrySubsystem,
-    frictionWheels,
-    14.5f,
+    &ballisticsSolver,
     0);
 void selectNewRobotMessageHandler() { turretCVCommand.requestNewTarget(); }
 void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }

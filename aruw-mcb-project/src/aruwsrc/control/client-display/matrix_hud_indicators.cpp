@@ -59,6 +59,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
     const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
@@ -68,6 +69,7 @@ MatrixHudIndicators::MatrixHudIndicators(
       frictionWheelSubsystem(frictionWheelSubsystem),
       turretSubsystem(turretSubsystem),
       multiShotHandler(multiShotHandler),
+      cvOnTargetGovernor(cvOnTargetGovernor),
       driveCommands{
           chassisBeybladeCmd,
           chassisAutorotateCmd,
@@ -182,9 +184,21 @@ void MatrixHudIndicators::updateIndicatorState()
     matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
         static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
 
-    CVStatus cvStatus = drivers.visionCoprocessor.isCvOnline()
-                            ? CVStatus::VISION_COPROCESSOR_CONNECTED
-                            : CVStatus::VISION_COPROCESSOR_OFFLINE;
+    CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;
+
+    if (drivers.visionCoprocessor.isCvOnline())
+    {
+        if (cvOnTargetGovernor == nullptr)
+        {
+            cvStatus = CVStatus::VISION_COPROCESSOR_NO_PROJECTILE_GATING;
+        }
+        else
+        {
+            cvStatus = cvOnTargetGovernor->getGovernorEnabled()
+                           ? CVStatus::VISION_COPROCESSOR_GATED_PROJECTILE_LAUNCH
+                           : CVStatus::VISION_COPROCESSOR_NO_PROJECTILE_GATING;
+        }
+    }
 
     matrixHudIndicatorDrawers[CV_STATUS].setIndicatorState(
         getIndicatorYCoordinate(static_cast<int>(cvStatus)));
