@@ -163,9 +163,15 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
+#ifdef ALL_SENTINELS
+    odometryData->chassisOdometry.pitch = 0;
+    odometryData->chassisOdometry.roll = 0;
+    odometryData->chassisOdometry.yaw = 0;
+#else
     odometryData->chassisOdometry.pitch = pitch;
     odometryData->chassisOdometry.roll = roll;
     odometryData->chassisOdometry.yaw = location.getOrientation();
+#endif
 
     // number of turrets
     odometryData->numTurrets = control::turret::NUM_TURRETS;
