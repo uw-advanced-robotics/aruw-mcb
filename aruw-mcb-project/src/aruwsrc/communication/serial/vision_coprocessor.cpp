@@ -25,6 +25,7 @@
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
@@ -163,7 +164,7 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
-#ifdef ALL_SENTINELS
+#if defined(ALL_SENTINELS)
     odometryData->chassisOdometry.pitch = 0;
     odometryData->chassisOdometry.roll = 0;
     odometryData->chassisOdometry.yaw = 0;

@@ -40,8 +40,8 @@ TurretCVCommand::TurretCVCommand(
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
-    const float userPitchInputScalar,
     const float userYawInputScalar,
+    const float userPitchInputScalar,
     uint8_t turretID)
     : drivers(drivers),
       turretID(turretID),
@@ -49,8 +49,8 @@ TurretCVCommand::TurretCVCommand(
       yawController(yawController),
       pitchController(pitchController),
       ballisticsSolver(ballisticsSolver),
-      userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar)
+      userYawInputScalar(userYawInputScalar),
+      userPitchInputScalar(userPitchInputScalar)
 {
     assert(ballisticsSolver != nullptr);
 
