@@ -70,19 +70,25 @@ public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
     /// (in radians)
     static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-15.0f);
-    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(60.0f);
+    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(50.0f);
 
     /**
      * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
      * turret will turn around and start scanning around.
      */
-    static constexpr float YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX = modm::toRadian(1.0f);
+    static constexpr float YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX = modm::toRadian(0.5f);
 
     /**
-     * Yaw and pitch angle increments that the turret will change by each call
+     * Pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
      */
-    static constexpr float SCAN_DELTA_ANGLE = modm::toRadian(0.2f);
+    static constexpr float PITCH_SCAN_DELTA_ANGLE = modm::toRadian(0.4f);
+
+    /**
+     * Yaw angle increments that the turret will change by each call
+     * to refresh when the turret is scanning for a target, in radians.
+     */
+    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.3f);
 
     /**
      * The number of times refresh is called without receiving valid CV data to when
@@ -90,7 +96,7 @@ public:
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
-    static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.013f;
 
     /**
      * Constructs a TurretCVCommand
