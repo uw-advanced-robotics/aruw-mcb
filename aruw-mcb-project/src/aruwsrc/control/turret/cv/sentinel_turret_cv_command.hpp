@@ -20,7 +20,7 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
-#include "tap/control/comprised_command.hpp"
+#include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
@@ -28,6 +28,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 
 #include "setpoint_scanner.hpp"
+#include "turret_cv_command_interface.hpp"
 
 namespace tap::control::odometry
 {
@@ -41,7 +42,7 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class RobotTurretSubsystem;
 }
 
 namespace aruwsrc::control::launcher
@@ -63,7 +64,7 @@ namespace aruwsrc::control::turret::cv
  * target (for example, the target is too far away), then user input from the
  * `ControlOperatorInterface` is used to control the turret instead.
  */
-class SentinelTurretCVCommand : public tap::control::ComprisedCommand
+class SentinelTurretCVCommand : public TurretCVCommandInterface
 {
 public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
@@ -109,11 +110,9 @@ public:
      */
     SentinelTurretCVCommand(
         aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        tap::control::Subsystem &launchingSubsystem,
-        Command *const launchingCommand,
         aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const uint8_t turretID);
 
@@ -137,20 +136,24 @@ public:
     /// of it.
     void changeScanningQuadrant();
 
+    bool getTurretID() const override { return turretID; }
+
+    /**
+     * @return True if vision is active and the turret CV command has acquired the target and the
+     * turret is within some tolerance of the target. This tolerance is distance based (the further
+     * away the target the closer to the center of the plate the turret must be aiming)
+     */
+    bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
+
 private:
     aruwsrc::Drivers *drivers;
 
-    TurretSubsystem *turretSubsystem;
+    RobotTurretSubsystem *turretSubsystem;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
     const uint8_t turretID;
-
-    /**
-     * The command to be scheduled when the sentinel is ready to launch.
-     */
-    Command *const launchingCommand;
 
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
 
@@ -167,6 +170,8 @@ private:
     SetpointScanner yawScanner;
 
     bool scanning = false;
+
+    bool withinAimingTolerance = false;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target

@@ -31,7 +31,7 @@ class ChassisSubsystem;
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class RobotTurretSubsystem;
 }
 
 namespace aruwsrc
@@ -118,6 +118,7 @@ public:
     OttoBallisticsSolver(
         const aruwsrc::Drivers &drivers,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID);
@@ -137,8 +138,10 @@ public:
 private:
     const Drivers &drivers;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
+    const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
+    modm::Vector3f turretOrigin;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;

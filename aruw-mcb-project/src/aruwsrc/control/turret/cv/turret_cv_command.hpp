@@ -25,6 +25,8 @@
 #include "../algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 
+#include "turret_cv_command_interface.hpp"
+
 namespace tap::control::odometry
 {
 class Odometry2DInterface;
@@ -37,7 +39,7 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class RobotTurretSubsystem;
 }
 
 namespace aruwsrc::control::launcher
@@ -64,7 +66,7 @@ namespace aruwsrc::control::turret::cv
  * target (for example, the target is too far away), then user input from the
  * `ControlOperatorInterface` is used to control the turret instead.
  */
-class TurretCVCommand : public tap::control::Command
+class TurretCVCommand : public TurretCVCommandInterface
 {
 public:
     /**
@@ -78,21 +80,21 @@ public:
      * pitch axis of the turret.
      * @param[in] ballisticsSolver A ballistics computation engine to use for computing aiming
      * solutions.
-     * @param[in] userPitchInputScalar When user input is used, this scalar is used to scale the
-     * pitch user input.
      * @param[in] userYawInputScalar When user input is used, this scalar is used to scale the yaw
      * user input.
+     * @param[in] userPitchInputScalar When user input is used, this scalar is used to scale the
+     * pitch user input.
      * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
      * for more information.
      */
     TurretCVCommand(
         aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
+        RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
         aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
-        const float userPitchInputScalar,
         const float userYawInputScalar,
+        const float userPitchInputScalar,
         uint8_t turretID = 0);
 
     void initialize() override;
@@ -107,29 +109,29 @@ public:
 
     const char *getName() const override { return "turret CV"; }
 
-    mockable bool getTurretID() const { return turretID; }
+    bool getTurretID() const override { return turretID; }
 
     /**
      * @return True if vision is active and the turret CV command has acquired the target and the
      * turret is within some tolerance of the target. This tolerance is distance based (the further
      * away the target the closer to the center of the plate the turret must be aiming)
      */
-    mockable bool isAimingWithinLaunchingTolerance() const { return withinAimingTolerance; }
+    bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
 
 private:
     aruwsrc::Drivers *drivers;
 
     uint8_t turretID;
 
-    TurretSubsystem *turretSubsystem;
+    RobotTurretSubsystem *turretSubsystem;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
 
-    const float userPitchInputScalar;
     const float userYawInputScalar;
+    const float userPitchInputScalar;
 
     uint32_t prevTime;
 

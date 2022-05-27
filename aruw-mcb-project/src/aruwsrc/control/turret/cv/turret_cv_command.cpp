@@ -23,7 +23,7 @@
 #include "tap/architecture/clock.hpp"
 
 #include "../algorithms/chassis_frame_turret_controller.hpp"
-#include "../turret_subsystem.hpp"
+#include "../robot_turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -36,12 +36,12 @@ namespace aruwsrc::control::turret::cv
 {
 TurretCVCommand::TurretCVCommand(
     aruwsrc::Drivers *drivers,
-    TurretSubsystem *turretSubsystem,
+    RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
-    const float userPitchInputScalar,
     const float userYawInputScalar,
+    const float userPitchInputScalar,
     uint8_t turretID)
     : drivers(drivers),
       turretID(turretID),
@@ -49,8 +49,8 @@ TurretCVCommand::TurretCVCommand(
       yawController(yawController),
       pitchController(pitchController),
       ballisticsSolver(ballisticsSolver),
-      userPitchInputScalar(userPitchInputScalar),
-      userYawInputScalar(userYawInputScalar)
+      userYawInputScalar(userYawInputScalar),
+      userPitchInputScalar(userPitchInputScalar)
 {
     assert(ballisticsSolver != nullptr);
 

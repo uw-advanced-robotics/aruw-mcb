@@ -156,6 +156,7 @@ OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 OttoBallisticsSolver ballisticsSolver(
     *drivers(),
     odometrySubsystem,
+    turret,
     frictionWheels,
     9.5f,  // defaultLaunchSpeed
     0      // turretID

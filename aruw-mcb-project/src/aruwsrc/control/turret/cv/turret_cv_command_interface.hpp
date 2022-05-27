@@ -17,24 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
-#define TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
+#ifndef TURRET_CV_COMMAND_INTERFACE_HPP_
+#define TURRET_CV_COMMAND_INTERFACE_HPP_
 
-#include <gmock/gmock.h>
+#include "tap/control/command.hpp"
 
-#include "aruwsrc/control/turret/turret_orientation_interface.hpp"
-
-namespace aruwsrc::mock
+namespace aruwsrc::control::turret::cv
 {
-class TurretOrientationInterfaceMock : public control::turret::TurretOrientationInterface
+class TurretCVCommandInterface : public tap::control::Command
 {
 public:
-    MOCK_METHOD(float, getWorldYaw, (), (const override));
-    MOCK_METHOD(float, getWorldPitch, (), (const override));
-    MOCK_METHOD(uint32_t, getLastMeasurementTimeMicros, (), (const override));
-    MOCK_METHOD(modm::Vector3f, getTurretOffset, (), (const override));
-    MOCK_METHOD(float, getPitchOffset, (), (const override));
+    virtual bool getTurretID() const = 0;
+    virtual bool isAimingWithinLaunchingTolerance() const = 0;
 };
-}  // namespace aruwsrc::mock
+}  // namespace aruwsrc::control::turret::cv
 
-#endif  // TURRET_ORIENTATION_INTERFACE_MOCK_HPP_
+#endif  // TURRET_CV_COMMAND_INTERFACE_HPP_
