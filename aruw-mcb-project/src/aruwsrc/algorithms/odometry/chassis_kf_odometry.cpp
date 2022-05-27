@@ -41,9 +41,9 @@ ChassisKFOdometry::ChassisKFOdometry(
 
 void ChassisKFOdometry::update()
 {
-    float chassisYaw = 0;
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
     {
+        chassisYaw = 0;
         return;
     }
 

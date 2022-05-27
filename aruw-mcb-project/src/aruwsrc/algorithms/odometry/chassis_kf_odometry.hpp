@@ -54,6 +54,8 @@ public:
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
+    inline float getYaw() const override { return chassisYaw; }
+
     void update();
 
 private:
@@ -148,6 +150,8 @@ private:
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
+    // Chassis yaw orientation in world frame (radians)
+    float chassisYaw = 0;
 
     /// Chassis measured change in velocity since the last time `update` was called, in the chassis
     /// frame
