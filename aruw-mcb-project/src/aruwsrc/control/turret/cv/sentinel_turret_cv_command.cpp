@@ -115,6 +115,7 @@ void SentinelTurretCVCommand::execute()
     else
     {
         // Target unavailable
+        withinAimingTolerance = false;
 
         // See how recently we lost target
         if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
@@ -152,6 +153,7 @@ void SentinelTurretCVCommand::end(bool)
 {
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
+    withinAimingTolerance = false;
 }
 
 void SentinelTurretCVCommand::requestNewTarget()

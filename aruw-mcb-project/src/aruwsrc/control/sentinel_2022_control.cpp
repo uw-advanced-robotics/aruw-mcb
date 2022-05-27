@@ -110,7 +110,6 @@ public:
         tap::algorithms::SmoothPidConfig yawPosPidConfig;
         tap::algorithms::SmoothPidConfig yawVelPidConfig;
         aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
-        cv::TurretScanCommand::Config turretScanConfig;
     };
 
     SentinelTurret(aruwsrc::Drivers &drivers, const Config &config)
@@ -269,7 +268,6 @@ SentinelTurret turretZero(
         .yawPosPidConfig = world_rel_turret_imu::turret0::YAW_POS_PID_CONFIG,
         .yawVelPidConfig = world_rel_turret_imu::turret0::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
-        .turretScanConfig = turret0::TURRET_SCAN_CONFIG,
     });
 
 SentinelTurret turretOne(
@@ -287,7 +285,6 @@ SentinelTurret turretOne(
         .yawPosPidConfig = world_rel_turret_imu::turret1::YAW_POS_PID_CONFIG,
         .yawVelPidConfig = world_rel_turret_imu::turret1::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus1,
-        .turretScanConfig = turret1::TURRET_SCAN_CONFIG,
     });
 
 /* define subsystems --------------------------------------------------------*/

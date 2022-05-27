@@ -53,8 +53,7 @@
 #include "sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
-#include "turret/cv/turret_cv_command.hpp"
-#include "turret/cv/turret_scan_command.hpp"
+#include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/sentinel_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_control_command.hpp"
@@ -185,28 +184,13 @@ user::TurretUserControlCommand turretManual(
     USER_PITCH_INPUT_SCALAR,
     0);
 
-cv::TurretCVCommand turretCVCommand(
+cv::SentinelTurretCVCommand turretCVCommand(
     drivers(),
     &turretSubsystem,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     &ballisticsSolver,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR,
-    29.5f);
-
-cv::TurretScanCommand turretScanCommand(
-    turretSubsystem,
-    chassisFrameYawTurretController,
-    chassisFramePitchTurretController,
-    TURRET_SCAN_CONFIG);
-
-CvHasTargetGovernor cvHasTargetGovernor(drivers()->visionCoprocessor, 0);
-tap::control::governor::GovernorWithFallbackCommand<1> turretCVWithScanFallback(
-    {&turretSubsystem},
-    turretCVCommand,
-    turretScanCommand,
-    {&cvHasTargetGovernor});
+    0);
 
 user::TurretQuickTurnCommand turretUturnCommand(&turretSubsystem, M_PI);
 
@@ -237,7 +221,7 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-CvOnlineGovernor cvOnlineGovernor(drivers()->visionCoprocessor, 0);
+CvOnlineGovernor cvOnlineGovernor(*drivers(), turretCVCommand);
 
 // agitator governor limited commands
 
@@ -309,7 +293,7 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
 {
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    turretSubsystem.setDefaultCommand(&turretCVWithScanFallback);
+    turretSubsystem.setDefaultCommand(&turretCVCommand);
     agitator.setDefaultCommand(&rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretSubsystem, 0);
