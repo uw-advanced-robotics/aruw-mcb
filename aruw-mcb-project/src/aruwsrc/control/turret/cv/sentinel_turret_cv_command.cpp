@@ -93,11 +93,8 @@ void SentinelTurretCVCommand::execute()
         pitchSetpoint = ballisticsSolution->pitchAngle;
         yawSetpoint = ballisticsSolution->yawAngle;
 
-        auto turretController = turretSubsystem->yawMotor.getTurretController();
-        if (turretController != nullptr)
-        {
-            yawSetpoint = turretController->convertChassisAngleToControllerFrame(yawSetpoint);
-        }
+        yawSetpoint = yawController->convertChassisAngleToControllerFrame(yawSetpoint);
+        pitchSetpoint = pitchController->convertChassisAngleToControllerFrame(pitchSetpoint);
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
@@ -113,7 +110,7 @@ void SentinelTurretCVCommand::execute()
             ballisticsSolution->distance);
     }
     else
-    {
+    {   
         // Target unavailable
         withinAimingTolerance = false;
 

@@ -28,6 +28,6 @@
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 
-#define TARGET_SOLDIERMK4_2022
+#define TARGET_SENTINEL_2022
 
 #endif
