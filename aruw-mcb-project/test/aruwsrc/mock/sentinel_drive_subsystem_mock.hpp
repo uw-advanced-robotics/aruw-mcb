@@ -27,7 +27,7 @@
 namespace aruwsrc::mock
 {
 class SentinelDriveSubsystemMock : public control::sentinel::drive::SentinelDriveSubsystem
-{ 
+{
 public:
     SentinelDriveSubsystemMock(
         aruwsrc::Drivers *drivers,
@@ -38,7 +38,7 @@ public:
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(float, absolutePosition, (), (override));
     MOCK_METHOD(void, setDesiredRpm, (float), (override));
-    MOCK_METHOD(float, getRpm, (), (override));
+    MOCK_METHOD(float, getDesiredRpm, (), (override));
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char *, getName, (), (override));

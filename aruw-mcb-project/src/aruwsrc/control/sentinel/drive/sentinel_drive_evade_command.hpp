@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
-#define SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
+#ifndef SENTINEL_DRIVE_EVADE_COMMAND_HPP_
+#define SENTINEL_DRIVE_EVADE_COMMAND_HPP_
 
 #include "aruwsrc/util_macros.hpp"
 
@@ -76,4 +76,4 @@ private:
 
 #endif
 
-#endif  // SENTINEL_RANDOM_DRIVE_COMMAND_HPP_
+#endif  // SENTINEL_DRIVE_EVADE_COMMAND_HPP_

@@ -45,6 +45,10 @@ SentinelDriveEvadeCommand::SentinelDriveEvadeCommand(
 
 void SentinelDriveEvadeCommand::initialize()
 {
+#ifndef PLATFORM_HOSTED
+    RandomNumberGenerator::enable();
+#endif
+
     changeDirection(
         MIN_RPM * speedFactor,
         MAX_RPM * speedFactor,
@@ -91,7 +95,6 @@ bool SentinelDriveEvadeCommand::isFinished() const { return false; }
 uint32_t SentinelDriveEvadeCommand::portableRandom()
 {
 #ifndef PLATFORM_HOSTED
-    RandomNumberGenerator::enable();
     if (RandomNumberGenerator::isReady())
     {
         return RandomNumberGenerator::getValue();
