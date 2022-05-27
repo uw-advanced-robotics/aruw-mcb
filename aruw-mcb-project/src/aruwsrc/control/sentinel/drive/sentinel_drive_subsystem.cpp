@@ -93,6 +93,8 @@ void SentinelDriveSubsystem::initialize()
 
 void SentinelDriveSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
 
+float SentinelDriveSubsystem::getDesiredRpm() { return desiredRpm; }
+
 modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelative() const
 {
     static constexpr float C = 2 * M_PI * WHEEL_RADIUS / 1000.0f;
