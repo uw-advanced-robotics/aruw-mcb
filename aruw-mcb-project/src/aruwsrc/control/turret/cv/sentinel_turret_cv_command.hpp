@@ -145,6 +145,8 @@ public:
      */
     bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
 
+    float fff=0;
+
 private:
     aruwsrc::Drivers *drivers;
 

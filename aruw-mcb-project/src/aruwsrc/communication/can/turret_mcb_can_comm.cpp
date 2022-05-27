@@ -82,8 +82,8 @@ void TurretMCBCanComm::sendData()
 
         if (txCommandMsgBitmask.any(TxCommandMsgBitmask::RECALIBRATE_IMU))
         {
-            yawRevolutions = 0;
-            pitchRevolutions = 0;
+            yawRevolutions = 100;
+            pitchRevolutions = 100;
         }
 
         // set this calibrate flag to false so the calibrate command is only sent once
@@ -92,8 +92,8 @@ void TurretMCBCanComm::sendData()
 
     if (!isConnected())
     {
-        yawRevolutions = 0;
-        pitchRevolutions = 0;
+        yawRevolutions = 100;
+        pitchRevolutions = 100;
     }
 }
 

@@ -171,7 +171,7 @@ public:
           turretManual(
               &drivers,
               &turretSubsystem,
-              &worldFrameYawTurretImuController,
+              &chassisFrameYawTurretController,
               &chassisFramePitchTurretController,
               USER_YAW_INPUT_SCALAR,
               USER_PITCH_INPUT_SCALAR,
@@ -179,7 +179,7 @@ public:
           turretCVCommand(
               &drivers,
               &turretSubsystem,
-              &worldFrameYawTurretImuController,
+              &chassisFrameYawTurretController,
               &chassisFramePitchTurretController,
               &ballisticsSolver,
               config.turretID),

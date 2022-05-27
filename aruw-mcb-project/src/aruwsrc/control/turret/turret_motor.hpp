@@ -230,13 +230,20 @@ public:
      * @return The updated setpointToUnwrap, or the same setpointToUnwrap if no updating necessary
      * or if the notes above apply.
      */
-    inline float unwrapTargetAngle(float setpointToUnwrap) const
+    float measure=0;
+    float setpoint = 0;
+
+    inline float unwrapTargetAngle(float setpointToUnwrap) 
     {
+        setpoint = setpointToUnwrap;
+        measure = turretController->getMeasurement();
+
         if (turretController == nullptr || !config.limitMotorAngles)
         {
             return setpointToUnwrap;
         }
 
+        // controller frame value
         setpointToUnwrap = getClosestNonNormalizedSetpointToMeasurement(
             turretController->getMeasurement(),
             setpointToUnwrap);

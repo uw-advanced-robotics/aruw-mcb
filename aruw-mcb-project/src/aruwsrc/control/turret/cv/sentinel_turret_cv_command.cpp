@@ -89,15 +89,15 @@ void SentinelTurretCVCommand::execute()
     {
         exitScanMode();
 
-        // Target available
+        // Target available, in chassis frame
         pitchSetpoint = ballisticsSolution->pitchAngle;
         yawSetpoint = ballisticsSolution->yawAngle;
 
-        auto turretController = turretSubsystem->yawMotor.getTurretController();
-        if (turretController != nullptr)
-        {
-            yawSetpoint = turretController->convertChassisAngleToControllerFrame(yawSetpoint);
-        }
+        fff=yawSetpoint;
+
+        // convert chassis frame angle to turret frame
+        pitchSetpoint = pitchController->convertChassisAngleToControllerFrame(pitchSetpoint);
+        yawSetpoint = yawController->convertChassisAngleToControllerFrame(yawSetpoint);
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
