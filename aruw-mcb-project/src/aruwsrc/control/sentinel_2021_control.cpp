@@ -148,6 +148,11 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 // rotates agitator if friction wheels are spinning fast
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
+// stops command execution if projectile is being launched
+RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor(
+    drivers()->refSerial,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
@@ -157,11 +162,6 @@ GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &refSysProjLaunchedGovernor});
-
-// stops command execution if projectile is being launched
-RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor(
-    refSerial,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);

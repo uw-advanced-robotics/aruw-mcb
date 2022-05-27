@@ -159,10 +159,10 @@ public:
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
           frictionWheelsOnGovernor(frictionWheels),
-          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           refSysProjLaunchedGovernor(
               drivers.refSerial,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1),
+          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           rotateAndUnjamAgitatorWithHeatLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
@@ -247,12 +247,12 @@ public:
     // rotates agitator if friction wheels are spinning fast
     FrictionWheelsOnGovernor frictionWheelsOnGovernor;
 
+    // stops command execution if projectile is being launched
+    RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor;
+
     // rotates agitator with heat limiting applied
     HeatLimitGovernor heatLimitGovernor;
     GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatLimiting;
-
-    // stops command execution if projectile is being launched
-    RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor;
 
     // friction wheel commands
     FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
