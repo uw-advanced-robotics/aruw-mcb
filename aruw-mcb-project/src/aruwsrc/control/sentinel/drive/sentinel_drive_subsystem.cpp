@@ -39,7 +39,9 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
     tap::gpio::Digital::InputPin leftLimitSwitch,
     tap::gpio::Digital::InputPin rightLimitSwitch,
     tap::motor::MotorId leftMotorId,
+#if defined(TARGET_SENTINEL_2021)
     tap::motor::MotorId rightMotorId,
+#endif
     tap::gpio::Analog::Pin currentSensorPin)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       leftLimitSwitch(leftLimitSwitch),
@@ -48,7 +50,9 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       desiredRpm(0),
       leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left sentinel drive motor"),
+#if defined(TARGET_SENTINEL_2021)
       rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, true, "right sentinel drive motor"),
+#endif
       currentSensor(
           {&drivers->analog,
            currentSensorPin,
@@ -63,7 +67,9 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
           ENERGY_BUFFER_CRIT_THRESHOLD)
 {
     chassisMotors[0] = &leftWheel;
+#if defined(TARGET_SENTINEL_2021)
     chassisMotors[1] = &rightWheel;
+#endif
 }
 
 void SentinelDriveSubsystem::initialize()
@@ -78,8 +84,11 @@ void SentinelDriveSubsystem::initialize()
     drivers->digital.configureInputPullMode(
         rightLimitSwitch,
         tap::gpio::Digital::InputPullMode::PullDown);
-    leftWheel.initialize();
-    rightWheel.initialize();
+
+    for (size_t i = 0; i < NUM_CHASSIS_MOTORS; i++)
+    {
+        chassisMotors[i]->initialize();
+    }
 }
 
 void SentinelDriveSubsystem::setDesiredRpm(float desRpm) { desiredRpm = desRpm; }
@@ -88,8 +97,7 @@ modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelati
 {
     static constexpr float C = 2 * M_PI * WHEEL_RADIUS / 1000.0f;
     static constexpr float RPM_TO_MPS = C / (60.0f * GEAR_RATIO);
-    float wheelVelRPM =
-        leftWheel.getShaftRPM();  // (leftWheel.getShaftRPM() + rightWheel.getShaftRPM()) / 2.0f;
+    float wheelVelRPM = leftWheel.getShaftRPM();
 
     modm::Matrix<float, 3, 1> wheelVelMat;
     wheelVelMat[0][0] = 0;
@@ -102,8 +110,10 @@ void SentinelDriveSubsystem::refresh()
 {
     velocityPidLeftWheel.update(desiredRpm - leftWheel.getShaftRPM());
     leftWheel.setDesiredOutput(velocityPidLeftWheel.getValue());
+#if defined(TARGET_SENTINEL_2021)
     velocityPidRightWheel.update(desiredRpm - rightWheel.getShaftRPM());
     rightWheel.setDesiredOutput(velocityPidRightWheel.getValue());
+#endif
     currentSensor.update();
     float powerLimitFrac = powerLimiter.getPowerLimitRatio();
 
@@ -122,6 +132,7 @@ void SentinelDriveSubsystem::refresh()
 
 float SentinelDriveSubsystem::absolutePosition()
 {
+#if defined(TARGET_SENTINEL_2021)
     float leftPosition = distanceFromEncoder(&leftWheel) - leftWheelZeroRailOffset;
     float rightPosition = distanceFromEncoder(&rightWheel) - rightWheelZeroRailOffset;
     float average = 0.0f;
@@ -145,6 +156,14 @@ float SentinelDriveSubsystem::absolutePosition()
         average = 0.0f;
     }
     return average;
+#else
+    if (!leftWheel.isMotorOnline())
+    {
+        RAISE_ERROR(drivers, "left sentinel drive motor offline");
+        return 0;
+    }
+    return distanceFromEncoder(&leftWheel) - leftWheelZeroRailOffset;
+#endif
 }
 
 // Resets the encoder offset used to determine position of the sentinel on the rail depending on
@@ -158,12 +177,16 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
     if (!drivers->digital.read(leftLimitSwitch))
     {
         leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel);
+#if defined(TARGET_SENTINEL_2021)
         rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel);
+#endif
     }
     else if (drivers->digital.read(rightLimitSwitch))
     {
         leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
+#if defined(TARGET_SENTINEL_2021)
         rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
+#endif
     }
 }
 
@@ -178,14 +201,10 @@ float SentinelDriveSubsystem::distanceFromEncoder(tap::motor::DjiMotor* motor)
     return numberOfRotations * 2.0f * M_PI * WHEEL_RADIUS / GEAR_RATIO;
 }
 
-void SentinelDriveSubsystem::runHardwareTests()
-{
-    if (rightWheel.getShaftRPM() > 400.0f && leftWheel.getShaftRPM() > 400.0f)
-        this->setHardwareTestsComplete();
-}
+void SentinelDriveSubsystem::runHardwareTests() {}
 
-void SentinelDriveSubsystem::onHardwareTestStart() { this->setDesiredRpm(500.0f); }
+void SentinelDriveSubsystem::onHardwareTestStart() {}
 
-void SentinelDriveSubsystem::onHardwareTestComplete() { this->setDesiredRpm(0.0f); }
+void SentinelDriveSubsystem::onHardwareTestComplete() {}
 
 }  // namespace aruwsrc::control::sentinel::drive
