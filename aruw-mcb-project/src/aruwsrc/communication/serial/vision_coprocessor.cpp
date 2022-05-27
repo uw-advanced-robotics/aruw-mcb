@@ -167,11 +167,12 @@ void VisionCoprocessor::sendOdometryData()
 #if defined(ALL_SENTINELS)
     odometryData->chassisOdometry.pitch = 0;
     odometryData->chassisOdometry.roll = 0;
+    odometryData->chassisOdometry.yaw = 0;
 #else
     odometryData->chassisOdometry.pitch = pitch;
     odometryData->chassisOdometry.roll = roll;
-#endif
     odometryData->chassisOdometry.yaw = location.getOrientation();
+#endif
 
     // number of turrets
     odometryData->numTurrets = control::turret::NUM_TURRETS;
