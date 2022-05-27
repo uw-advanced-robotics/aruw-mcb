@@ -53,7 +53,7 @@
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "turret/constants/turret_constants.hpp"
-#include "turret/cv/turret_cv_command.hpp"
+#include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/sentinel_turret_subsystem.hpp"
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_control_command.hpp"
@@ -177,26 +177,13 @@ public:
               USER_YAW_INPUT_SCALAR,
               USER_PITCH_INPUT_SCALAR,
               config.turretID),
-          turretScanCommand(
-              turretSubsystem,
-              worldFrameYawTurretImuController,
-              chassisFramePitchTurretController,
-              config.turretScanConfig),
           turretCVCommand(
               &drivers,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
               &ballisticsSolver,
-              USER_YAW_INPUT_SCALAR,
-              USER_PITCH_INPUT_SCALAR,
               config.turretID),
-          cvHasTargetGovernor(drivers.visionCoprocessor, config.turretID),
-          turretCVWithScanFallback(
-              {&turretSubsystem},
-              turretCVCommand,
-              turretScanCommand,
-              {&cvHasTargetGovernor}),
           turretUturnCommand(&turretSubsystem, M_PI),
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
@@ -208,7 +195,7 @@ public:
               turretCVCommand,
               autoAimLaunchTimer,
               CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
-          cvOnlineGovernor(drivers.visionCoprocessor, config.turretID),
+          cvOnlineGovernor(drivers, turretCVCommand),
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,
@@ -247,10 +234,7 @@ public:
     // turret commands
     user::TurretUserControlCommand turretManual;
 
-    cv::TurretScanCommand turretScanCommand;
-    cv::TurretCVCommand turretCVCommand;
-    CvHasTargetGovernor cvHasTargetGovernor;
-    tap::control::governor::GovernorWithFallbackCommand<1> turretCVWithScanFallback;
+    cv::SentinelTurretCVCommand turretCVCommand;
 
     user::TurretQuickTurnCommand turretUturnCommand;
 
@@ -407,8 +391,8 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *)
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
     turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
-    turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVWithScanFallback);
-    turretOne.turretSubsystem.setDefaultCommand(&turretOne.turretCVWithScanFallback);
+    turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
+    turretOne.turretSubsystem.setDefaultCommand(&turretOne.turretCVCommand);
     turretZero.agitator.setDefaultCommand(
         &turretZero.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
     turretOne.agitator.setDefaultCommand(
