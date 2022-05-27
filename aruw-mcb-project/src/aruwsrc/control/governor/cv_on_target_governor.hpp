@@ -23,7 +23,7 @@
 #include "tap/control/governor/command_governor_interface.hpp"
 
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
-#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::governor
@@ -48,7 +48,7 @@ class CvOnTargetGovernor : public tap::control::governor::CommandGovernorInterfa
 public:
     CvOnTargetGovernor(
         aruwsrc::Drivers &drivers,
-        aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand,
+        aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         AutoAimLaunchTimer &launchTimer,
         CvOnTargetGovernorMode mode)
         : drivers(drivers),
@@ -112,7 +112,7 @@ public:
 
 private:
     aruwsrc::Drivers &drivers;
-    aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand;
+    aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     AutoAimLaunchTimer &launchTimer;
     const CvOnTargetGovernorMode mode;
     bool enabled = true;

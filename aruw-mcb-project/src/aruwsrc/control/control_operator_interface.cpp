@@ -37,11 +37,7 @@ float ControlOperatorInterface::applyChassisSpeedScaling(float value)
 {
     if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
-        value *= CTRL_SCALAR;
-    }
-    if (drivers->remote.keyPressed(Remote::Key::SHIFT))
-    {
-        value *= SHIFT_SCALAR;
+        value *= SPEED_REDUCTION_SCALAR;
     }
 
     return value;

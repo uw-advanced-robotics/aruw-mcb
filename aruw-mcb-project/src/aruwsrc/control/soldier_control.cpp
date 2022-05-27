@@ -36,7 +36,7 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
@@ -129,8 +129,7 @@ aruwsrc::chassis::ChassisSubsystem chassis(
     drivers(),
     aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turret, &chassis);
-static inline void refreshOdom() { odometrySubsystem.refresh(); }
+OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
@@ -282,8 +281,8 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
-extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
-MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
+extern HoldRepeatCommandMapping leftMousePressedBNotPressed;
+MultiShotHandler multiShotHandler(&leftMousePressedBNotPressed, 3);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -362,16 +361,16 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &CvOnTargetGovernor::setGovernorEnabled);
 
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
+HoldRepeatCommandMapping leftMousePressedBNotPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     false,
     1);
-HoldRepeatCommandMapping leftMousePressedShiftPressed(
+HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
     true);
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -440,6 +439,7 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -469,7 +469,6 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    getTurretMCBCanComm().attachImuDataReceivedCallback(refreshOdom);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
@@ -482,8 +481,8 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);

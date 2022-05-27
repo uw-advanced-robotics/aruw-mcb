@@ -95,10 +95,12 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 };
 #endif
 
-#if defined(ALL_SOLDIERS)
-constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
+#if defined(ALL_SOLDIERS) || defined(TARGET_SENTINEL_2021)
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #elif defined(TARGET_HERO)
-constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
+#elif defined(TARGET_SENTINEL_2022)
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #endif
 
 }  // namespace aruwsrc::control::launcher
