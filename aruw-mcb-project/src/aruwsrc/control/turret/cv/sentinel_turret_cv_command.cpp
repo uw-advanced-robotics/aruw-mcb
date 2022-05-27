@@ -110,7 +110,7 @@ void SentinelTurretCVCommand::execute()
             ballisticsSolution->distance);
     }
     else
-    {   
+    {
         // Target unavailable
         withinAimingTolerance = false;
 
