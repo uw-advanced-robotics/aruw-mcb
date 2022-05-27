@@ -282,8 +282,8 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
-extern HoldRepeatCommandMapping leftMousePressedShiftNotPressed;
-MultiShotHandler multiShotHandler(&leftMousePressedShiftNotPressed, 3);
+extern HoldRepeatCommandMapping leftMousePressedBNotPressed;
+MultiShotHandler multiShotHandler(&leftMousePressedBNotPressed, 3);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -362,16 +362,16 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &CvOnTargetGovernor::setGovernorEnabled);
 
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-HoldRepeatCommandMapping leftMousePressedShiftNotPressed(
+HoldRepeatCommandMapping leftMousePressedBNotPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::SHIFT}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     false,
     1);
-HoldRepeatCommandMapping leftMousePressedShiftPressed(
+HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::SHIFT}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
     true);
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -482,8 +482,8 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&leftMousePressedShiftNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedShiftPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
