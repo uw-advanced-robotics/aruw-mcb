@@ -36,7 +36,7 @@
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
@@ -129,8 +129,7 @@ aruwsrc::chassis::ChassisSubsystem chassis(
     drivers(),
     aruwsrc::chassis::ChassisSubsystem::ChassisType::MECANUM);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turret, &chassis);
-static inline void refreshOdom() { odometrySubsystem.refresh(); }
+OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
@@ -440,6 +439,7 @@ void registerSoldierSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -469,7 +469,6 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    getTurretMCBCanComm().attachImuDataReceivedCallback(refreshOdom);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
