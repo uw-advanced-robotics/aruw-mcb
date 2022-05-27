@@ -46,6 +46,7 @@
 #include "governor/fire_rate_limit_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
+#include "governor/ref_system_projectile_launched_governor.hpp"
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -154,6 +155,18 @@ public:
               aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
               &drivers.visionCoprocessor,
               &ballisticsSolver),
+          rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
+          unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
+          rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
+          frictionWheelsOnGovernor(frictionWheels),
+          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
+          refSysProjLaunchedGovernor(
+              drivers.refSerial,
+              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1),
+          rotateAndUnjamAgitatorWithHeatLimiting(
+              {&agitator},
+              rotateAndUnjamAgitator,
+              {&heatLimitGovernor, &frictionWheelsOnGovernor, &refSysProjLaunchedGovernor}),
           spinFrictionWheels(
               &drivers,
               &frictionWheels,
@@ -226,6 +239,20 @@ public:
 
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
+    // unjam commands
+    MoveIntegralCommand rotateAgitator;
+    UnjamIntegralCommand unjamAgitator;
+    MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
+
+    // rotates agitator if friction wheels are spinning fast
+    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
+
+    // rotates agitator with heat limiting applied
+    HeatLimitGovernor heatLimitGovernor;
+    GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatLimiting;
+
+    // stops command execution if projectile is being launched
+    RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor;
 
     // friction wheel commands
     FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
