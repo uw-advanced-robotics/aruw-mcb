@@ -108,6 +108,9 @@ modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelati
 
 void SentinelDriveSubsystem::refresh()
 {
+    // constantly poll the limit switches, resetting offset if needed
+    resetOffsetFromLimitSwitch();
+
     velocityPidLeftWheel.update(desiredRpm - leftWheel.getShaftRPM());
     leftWheel.setDesiredOutput(velocityPidLeftWheel.getValue());
 #if defined(TARGET_SENTINEL_2021)
@@ -126,8 +129,6 @@ void SentinelDriveSubsystem::refresh()
     {
         chassisMotors[i]->setDesiredOutput(chassisMotors[i]->getOutputDesired() * powerLimitFrac);
     }
-    // constantly poll the limit switches, resetting offset if needed
-    resetOffsetFromLimitSwitch();
 }
 
 float SentinelDriveSubsystem::absolutePosition()
@@ -173,8 +174,7 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 {
     // DigitalPin where limit switch is placed
 
-    // Note: the left limit switch is active low
-    if (!drivers->digital.read(leftLimitSwitch))
+    if (drivers->digital.read(leftLimitSwitch))
     {
         leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel);
 #if defined(TARGET_SENTINEL_2021)
