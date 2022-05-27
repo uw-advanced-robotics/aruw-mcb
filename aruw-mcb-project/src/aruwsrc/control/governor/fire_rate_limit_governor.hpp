@@ -54,11 +54,7 @@ public:
 
     bool isReady() final
     {
-        if(isTimerFinished()) {
-            restartTimer();
-            return true;
-        }
-        return false;
+        return isTimerFinished();
     }
 
     bool isFinished() final { return false; }
@@ -76,23 +72,25 @@ private:
     bool isTimerFinished() {
         return 
             drivers.refSerial.getRefSerialReceivingData() || 
-            (visionCoprocessor.getLastAimData(turretID).firerate !=  0 && timer.isExpired());
+            (visionCoprocessor.getLastAimData(turretID).firerate != aruwsrc::serial::VisionCoprocessor::FireRate::ZERO  
+            && timer.isExpired());
     }
 
     void restartTimer() {
         switch(visionCoprocessor.getLastAimData(turretID).firerate) {
-            case 0: // don't fire
+            case aruwsrc::serial::VisionCoprocessor::FireRate::ZERO: // don't fire
                 break;
-            case 1: // low fire rate
+            case aruwsrc::serial::VisionCoprocessor::FireRate::LOW: // low fire rate
                 timer.restart(rpsToPeriodMS(LOW_RPS));
                 break;
-            case 2: // medium fire rate
+            case aruwsrc::serial::VisionCoprocessor::FireRate::MEDIUM: // medium fire rate
                 timer.restart(rpsToPeriodMS(MID_RPS));
                 break;
-            case 3: // high fire rate
+            case aruwsrc::serial::VisionCoprocessor::FireRate::HIGH: // high fire rate
                 timer.restart(rpsToPeriodMS(HIGH_RPS));
                 break;
             default:
+                RAISE_ERROR((&drivers), "Firerate throwing unexpected value");
                 timer.restart(0);
         }
     }

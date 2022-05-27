@@ -78,7 +78,7 @@ public:
     static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
 #endif
 
-    enum class FireRate{
+    enum class FireRate:uint8_t{
         ZERO = 0,
         LOW = 1,
         MEDIUM = 2,
@@ -105,7 +105,7 @@ public:
         bool hasTarget;      ///< Whether or not the xavier has a target.
         uint32_t timestamp;  ///< Timestamp in microseconds.
 
-        uint8_t firerate;   ///< Firerate of sentry (low 0 - 3 high)
+        FireRate firerate;   ///< Firerate of sentry (low 0 - 3 high)
 
         bool recommendUseTimedShots;   ///< Validity of the targetHitTime
         uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our
@@ -113,7 +113,6 @@ public:
         uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point
         uint32_t
             targetIntervalDuration;  ///< Duration during which the plate is at the target point
-    } modm_packed;
 
     /**
      * Chassis odometry data to send to Jetson.
