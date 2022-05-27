@@ -30,7 +30,7 @@ ChassisKFOdometry::ChassisKFOdometry(
     : chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
-      kf(KF_A, KF_C, KF_Q, KF_R, KF_P),
+      kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
@@ -115,6 +115,8 @@ void ChassisKFOdometry::updateMeasurementCovariance(
 
     prevChassisVelocity = chassisVelocity;
 
+    // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
+    // convert dt in microseconds to seconds
     const float accelMagnitude =
         chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
 
