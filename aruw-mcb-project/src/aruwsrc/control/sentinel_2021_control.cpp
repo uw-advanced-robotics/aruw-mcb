@@ -127,7 +127,8 @@ SentinelTurretSubsystem turretSubsystem(
     &yawMotor,
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
-    nullptr);
+    nullptr,
+    0);
 
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
@@ -163,6 +164,7 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
 OttoBallisticsSolver ballisticsSolver(
     *drivers(),
     odometrySubsystem,
+    turretSubsystem,
     frictionWheels,
     29.5f,  // defaultLaunchSpeed
     0       // turretID
