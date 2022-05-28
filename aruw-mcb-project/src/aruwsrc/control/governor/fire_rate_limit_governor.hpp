@@ -25,6 +25,7 @@
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "modm/processing/timer/periodic_timer.hpp"
 
@@ -50,28 +51,38 @@ public:
     FireRateLimitGovernor(
         aruwsrc::Drivers &drivers,
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         uint8_t turretID)
         : drivers(drivers),
           visionCoprocessor(visionCoprocessor),
+          turretCVCommand(turretCVCommand),
           turretID(turretID)
-    {}
+    {
+    }
 
     void initialize() final { restartTimer(); }
 
     bool isReady() final
     {
-        if (!visionCoprocessor.isCvOnline())
+        if (!drivers.commandScheduler.isCommandScheduled(&turretCVCommand))
         {
-            // Don't limit if CV is disconnected.
+            // Don't limit firing if in manual fire mode
             return true;
         }
 
-        if (timer.isStopped()) {
+        if (!visionCoprocessor.isCvOnline())
+        {
+            // We're in CV mode; prevent firing altogether if CV offline
+            return false;
+        }
+
+        if (timer.isStopped())
+        {
             restartTimer();
         }
 
         if (visionCoprocessor.getLastAimData(turretID).firerate ==
-                   aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
+            aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
         {
             return false;
         }
@@ -89,6 +100,7 @@ public:
 private:
     aruwsrc::Drivers &drivers;
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     uint8_t turretID;
 
     tap::arch::MilliTimeout timer;

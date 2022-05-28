@@ -196,7 +196,11 @@ public:
               autoAimLaunchTimer,
               CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
           cvOnlineGovernor(drivers, turretCVCommand),
-          cvFireRateLimitGovernor(drivers, drivers.visionCoprocessor, config.turretID),
+          cvFireRateLimitGovernor(
+              drivers,
+              drivers.visionCoprocessor,
+              turretCVCommand,
+              config.turretID),
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,
