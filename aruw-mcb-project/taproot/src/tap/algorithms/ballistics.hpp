@@ -127,18 +127,24 @@ bool findTargetProjectileIntersection(
 
 struct AirResistanceProperties
 {
-    inline static float cd; //drag coefficient
-    inline static float mass; //units kg
-    inline static float diameter; //units m
+    float cd; //drag coefficient
+    float mass; //units kg
+    float diameter; //units m
     
-    inline static float area()
+    inline float area()
     {
-        return M_PI_4 * diameter;
+        return M_PI_4 * powf(diameter,2);
     }
 };
 const AirResistanceProperties DRAG_17 = {0.47f, 0.0032f, 0.0168f};
 const AirResistanceProperties DRAG_42 = {0.24f, 0.041f, 0.0425f};
 const float RHO = 1.225; //air density
+
+float findDraggedVelocity(
+    float travelTime,
+    float bulletVelocity,
+    AirResistanceProperties airResistanceProperties
+);
 
 }  // namespace tap::algorithms::ballistics
 

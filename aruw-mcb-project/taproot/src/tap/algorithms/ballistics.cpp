@@ -113,10 +113,10 @@ bool findTargetProjectileIntersection(
 float findDraggedVelocity(
     float travelTime,
     float bulletVelocity,
-    const AirResistanceProperties airResistanceProperties
+    AirResistanceProperties airResistanceProperties
 )
 {
     const float acceleration = (RHO * powf(bulletVelocity, 2) * airResistanceProperties.cd * airResistanceProperties.area()) / (2 * airResistanceProperties.mass);
-    return (bulletVelocity * (bulletVelocity - acceleration * travelTime)) / 2;
+    return (bulletVelocity + (bulletVelocity - acceleration * travelTime)) / 2;
 }
 }  // namespace tap::algorithms::ballistics
