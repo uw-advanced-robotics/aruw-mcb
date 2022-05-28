@@ -196,17 +196,22 @@ public:
               autoAimLaunchTimer,
               CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
           cvOnlineGovernor(drivers, turretCVCommand),
+          cvFireRateLimitGovernor(drivers, drivers.visionCoprocessor, config.turretID),
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,
               {&heatLimitGovernor,
                &frictionWheelsOnGovernor,
                &cvOnTargetGovernor,
-               &cvOnlineGovernor}),
+               &cvOnlineGovernor,
+               &cvFireRateLimitGovernor}),
           rotateAndUnjamAgitatorWithHeatAndCvLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
-              {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor})
+              {&heatLimitGovernor,
+               &frictionWheelsOnGovernor,
+               &cvOnTargetGovernor,
+               &cvFireRateLimitGovernor})
     {
     }
 
@@ -250,10 +255,11 @@ public:
     HeatLimitGovernor heatLimitGovernor;
     CvOnTargetGovernor cvOnTargetGovernor;
     CvOnlineGovernor cvOnlineGovernor;
+    FireRateLimitGovernor cvFireRateLimitGovernor;
 
     // agitator governor limited commands
-    GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
-    GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
+    GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
+    GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
 };
 
 SentinelTurret turretZero(
