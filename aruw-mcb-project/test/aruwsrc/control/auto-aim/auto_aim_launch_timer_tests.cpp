@@ -188,6 +188,8 @@ TEST_P(
         .hasTarget{params.aimData.hasTarget},
         .timestamp{params.aimData.timestamp},
 
+        .firerate{VisionCoprocessor::FireRate::ZERO},
+
         .recommendUseTimedShots{params.aimData.recommendUseTimedShots},
         .targetHitTimeOffset{params.aimData.targetHitTimeOffset},
         .targetPulseInterval{params.aimData.targetPulseInterval},
