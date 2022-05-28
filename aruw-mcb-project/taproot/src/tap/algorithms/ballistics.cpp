@@ -34,6 +34,7 @@ bool computeTravelTime(
     float *turretPitch,
     const float pitchAxisOffset)
 {
+    bulletVelocity = findDraggedVelocity(*travelTime, bulletVelocity, DRAG_17);
     float horizontalDist = hypot(targetPosition.x, targetPosition.y) + pitchAxisOffset;
     float bulletVelocitySquared = powf(bulletVelocity, 2);
     float sqrtTerm = powf(bulletVelocitySquared, 2) -
@@ -109,4 +110,13 @@ bool findTargetProjectileIntersection(
     return !isnan(*turretPitch) && !isnan(*turretYaw);
 }
 
+float findDraggedVelocity(
+    float travelTime,
+    float bulletVelocity,
+    const AirResistanceProperties airResistanceProperties
+)
+{
+    const float acceleration = (RHO * powf(bulletVelocity, 2) * airResistanceProperties.cd * airResistanceProperties.area()) / (2 * airResistanceProperties.mass);
+    return (bulletVelocity * (bulletVelocity - acceleration * travelTime)) / 2;
+}
 }  // namespace tap::algorithms::ballistics
