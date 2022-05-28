@@ -220,16 +220,6 @@ public:
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
 
-    // unjam commands
-    MoveIntegralCommand rotateAgitator;
-    UnjamIntegralCommand unjamAgitator;
-    MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
-
-    // rotates agitator if friction wheels are spinning fast
-    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
-
-    // rotates agitator with heat limiting applied
-
     // limits fire rate
     user::TurretUserControlCommand turretManual;
 

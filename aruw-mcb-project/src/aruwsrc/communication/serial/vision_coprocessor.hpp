@@ -113,6 +113,7 @@ public:
         uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point
         uint32_t
             targetIntervalDuration;  ///< Duration during which the plate is at the target point
+    };
 
     /**
      * Chassis odometry data to send to Jetson.

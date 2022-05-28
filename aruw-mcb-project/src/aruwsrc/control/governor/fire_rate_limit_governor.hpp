@@ -34,10 +34,10 @@ namespace aruwsrc::control::governor
  * A governor that allows a Command to run based on an internal timer and information from the vision
  * processor that dictates firerate
  */
-class CvHasTargetGovernor : public tap::control::governor::CommandGovernorInterface
+class FireRateLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    CvHasTargetGovernor(
+    FireRateLimitGovernor(
         aruwsrc::Drivers &drivers, 
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor, 
         uint8_t turretID)
