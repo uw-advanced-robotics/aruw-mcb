@@ -220,6 +220,19 @@ public:
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
 
+    // friction wheel commands
+    FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
+    FrictionWheelSpinRefLimitedCommand stopFrictionWheels;
+
+    // turret controllers
+    algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController;
+    algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController;
+
+    tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid;
+    tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid;
+    algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
+
+    // turret commands
     // limits fire rate
     user::TurretUserControlCommand turretManual;
 
