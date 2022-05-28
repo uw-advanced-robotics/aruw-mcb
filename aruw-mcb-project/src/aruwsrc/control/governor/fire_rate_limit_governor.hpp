@@ -108,6 +108,11 @@ private:
     static constexpr float MID_RPS = 10;
     static constexpr float HIGH_RPS = 20;
 
+    /**
+     * Converts a rounds-per-second value (i.e., Hz) to a period in milliseconds.
+     */
+    static inline constexpr uint32_t rpsToPeriodMS(float rps) { return (1000.0f / rps); }
+
     void restartTimer()
     {
         switch (visionCoprocessor.getLastAimData(turretID).firerate)
@@ -128,8 +133,6 @@ private:
                 break;
         }
     }
-
-    static inline constexpr uint32_t rpsToPeriodMS(float rps) { return (1000.0f / rps); }
 };
 }  // namespace aruwsrc::control::governor
 
