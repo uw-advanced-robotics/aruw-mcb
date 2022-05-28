@@ -369,10 +369,11 @@ PressCommandMapping gCtrlPressed(
     drivers(),
     {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-PressCommandMapping leftMousePressed(
+HoldRepeatCommandMapping leftMousePressed(
     drivers(),
     {&kicker::launchKickerHeatAndCVLimited},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT));
+    RemoteMapState(RemoteMapState::MouseButton::LEFT),
+    false);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},

@@ -83,7 +83,7 @@ static constexpr tap::control::setpoint::UnjamIntegralCommand::Config
         .unjamSetpoint = WATERWHEEL_TARGET_UNJAM_DISPLACEMENT / WATERWHEEL_TARGET_UNJAM_TIME_S,
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
         /// seconds. Add 500 ms extra tolerance.
-        .maxWaitTime = static_cast<uint32_t>(1000.0f * WATERWHEEL_TARGET_UNJAM_TIME_S) + 500,
+        .maxWaitTime = static_cast<uint32_t>(1000.0f * WATERWHEEL_TARGET_UNJAM_TIME_S) + 2000,
         .targetCycleCount = 3,
 };
 
