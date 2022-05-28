@@ -48,13 +48,15 @@ public:
     bool isReady() final
     {
         return frictionWheel.getCurrentFrictionWheelSpeed() >=
-               aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].second / 2;
+               frictionWheel.getDesiredFrictionWheelSpeed() * MINIMUM_SPEED_THRESHOLD_FRACTION;
     }
 
     bool isFinished() final { return !isReady(); }
 
 private:
     aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel;
+
+    static constexpr float MINIMUM_SPEED_THRESHOLD_FRACTION = 0.8;
 };
 }  // namespace aruwsrc::control::governor
 

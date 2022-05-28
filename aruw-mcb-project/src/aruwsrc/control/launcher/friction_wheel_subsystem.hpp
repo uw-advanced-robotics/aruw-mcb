@@ -77,6 +77,11 @@ public:
 
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
+    mockable float getDesiredFrictionWheelSpeed() const
+    {
+        return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed);
+    }
+
     /**
      * @return The average measured friction wheel speed of the launcher in RPM.
      */
