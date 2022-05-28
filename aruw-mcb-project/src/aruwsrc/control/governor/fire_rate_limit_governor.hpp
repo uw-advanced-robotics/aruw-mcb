@@ -54,8 +54,7 @@ public:
         : drivers(drivers),
           visionCoprocessor(visionCoprocessor),
           turretID(turretID)
-    {
-    }
+    {}
 
     void initialize() final { restartTimer(); }
 
@@ -67,9 +66,17 @@ public:
             return true;
         }
 
-        return visionCoprocessor.getLastAimData(turretID).firerate !=
-                   aruwsrc::serial::VisionCoprocessor::FireRate::ZERO &&
-               timer.isExpired();
+        if (timer.isStopped()) {
+            restartTimer();
+        }
+
+        if (visionCoprocessor.getLastAimData(turretID).firerate ==
+                   aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
+        {
+            return false;
+        }
+
+        return timer.isExpired();
     }
 
     bool isFinished() final
@@ -94,7 +101,6 @@ private:
         switch (visionCoprocessor.getLastAimData(turretID).firerate)
         {
             case aruwsrc::serial::VisionCoprocessor::FireRate::ZERO:  // don't fire
-                timer.stop();
                 break;
             case aruwsrc::serial::VisionCoprocessor::FireRate::LOW:  // low fire rate
                 timer.restart(rpsToPeriodMS(LOW_RPS));
@@ -107,7 +113,6 @@ private:
                 break;
             default:
                 RAISE_ERROR((&drivers), "Illegal fire rate value encountered");
-                timer.stop();
                 break;
         }
     }
