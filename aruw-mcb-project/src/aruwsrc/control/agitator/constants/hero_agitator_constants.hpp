@@ -62,7 +62,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
      */
     .jammingVelocityDifference = 0.75f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
     .jammingTime = 300,
-    .jamLogicEnabled = true,
+    .jamLogicEnabled = false,
     .velocityPIDFeedForwardGain = 50.0f,
 };
 
