@@ -32,11 +32,21 @@ namespace aruwsrc::control::governor
 {
 /**
  * A governor that allows a Command to run based on an internal timer and information from the
- * vision processor that dictates firerate
+ * vision processor that dictates fire rate.
+ *
+ * Limits the frequency with which the underlying command is scheduled to be at most the last
+ * "fire rate" suggestion provided by the Vision Coprocessor for this turret.
+ *
+ * If CV is disconnected, does not limit fire.
  */
 class FireRateLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
+    /**
+     * @param[in] drivers Pointer to global drivers object.
+     * @param[in] visionCoprocessor Vision coprocessor communicator.
+     * @param[in] turretID ID of the turret that this governor controls
+     */
     FireRateLimitGovernor(
         aruwsrc::Drivers &drivers,
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
@@ -49,9 +59,25 @@ public:
 
     void initialize() final { restartTimer(); }
 
-    bool isReady() final { return isTimerFinished(); }
+    bool isReady() final
+    {
+        if (!visionCoprocessor.isCvOnline())
+        {
+            // Don't limit if CV is disconnected.
+            return true;
+        }
 
-    bool isFinished() final { return false; }
+        return visionCoprocessor.getLastAimData(turretID).firerate !=
+                   aruwsrc::serial::VisionCoprocessor::FireRate::ZERO &&
+               timer.isExpired();
+    }
+
+    bool isFinished() final
+    {
+        // Never explicitly force the command to stop. We assume that it will fire at most one shot
+        // then end by itself.
+        return false;
+    }
 
 private:
     aruwsrc::Drivers &drivers;
@@ -63,19 +89,12 @@ private:
     static constexpr float MID_RPS = 10;
     static constexpr float HIGH_RPS = 20;
 
-    bool isTimerFinished()
-    {
-        return drivers.refSerial.getRefSerialReceivingData() ||
-               (visionCoprocessor.getLastAimData(turretID).firerate !=
-                    aruwsrc::serial::VisionCoprocessor::FireRate::ZERO &&
-                timer.isExpired());
-    }
-
     void restartTimer()
     {
         switch (visionCoprocessor.getLastAimData(turretID).firerate)
         {
             case aruwsrc::serial::VisionCoprocessor::FireRate::ZERO:  // don't fire
+                timer.stop();
                 break;
             case aruwsrc::serial::VisionCoprocessor::FireRate::LOW:  // low fire rate
                 timer.restart(rpsToPeriodMS(LOW_RPS));
@@ -87,8 +106,9 @@ private:
                 timer.restart(rpsToPeriodMS(HIGH_RPS));
                 break;
             default:
-                RAISE_ERROR((&drivers), "Firerate throwing unexpected value");
-                timer.restart(0);
+                RAISE_ERROR((&drivers), "Illegal fire rate value encountered");
+                timer.stop();
+                break;
         }
     }
 
