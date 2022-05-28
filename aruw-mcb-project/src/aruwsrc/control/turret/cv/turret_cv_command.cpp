@@ -89,9 +89,13 @@ void TurretCVCommand::execute()
         yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
         pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
+        auto differenceWrapped = [](float measurement, float setpoint) {
+            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
+        };
+
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-            turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
-            turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
+            differenceWrapped(yawController->getMeasurement(), yawSetpoint),
+            differenceWrapped(pitchController->getMeasurement(), pitchSetpoint),
             ballisticsSolution->distance);
     }
     else
