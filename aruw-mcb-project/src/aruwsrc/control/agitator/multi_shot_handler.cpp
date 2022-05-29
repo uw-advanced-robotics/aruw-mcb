@@ -23,7 +23,7 @@ namespace aruwsrc::control::agitator
 {
 MultiShotHandler::MultiShotHandler(
     tap::control::HoldRepeatCommandMapping &commandMapping,
-    ManualFireRateLimiter &manaulFireRateLimiter,
+    FireRateManager &manaulFireRateLimiter,
     int burstCount)
     : commandMapping(commandMapping),
       manaulFireRateLimiter(manaulFireRateLimiter),

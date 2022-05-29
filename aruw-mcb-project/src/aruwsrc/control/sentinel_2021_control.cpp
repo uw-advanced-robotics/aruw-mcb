@@ -40,9 +40,11 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "auto-aim/auto_aim_fire_rate_manager.hpp"
 #include "governor/cv_has_target_governor.hpp"
 #include "governor/cv_on_target_governor.hpp"
 #include "governor/cv_online_governor.hpp"
+#include "governor/fire_rate_limit_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -223,17 +225,24 @@ CvOnTargetGovernor cvOnTargetGovernor(
 
 CvOnlineGovernor cvOnlineGovernor(*drivers(), turretCVCommand);
 
+AutoAimFireRateManager autoAimFireRateManager(*drivers(), turretCVCommand, 0);
+FireRateLimitGovernor fireRateLimitGovernor(autoAimFireRateManager);
+
 // agitator governor limited commands
 
-GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
+GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor, &cvOnlineGovernor});
+    {&heatLimitGovernor,
+     &frictionWheelsOnGovernor,
+     &cvOnTargetGovernor,
+     &cvOnlineGovernor,
+     &fireRateLimitGovernor});
 
-GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCvLimiting(
+GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
+    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor, &fireRateLimitGovernor});
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 

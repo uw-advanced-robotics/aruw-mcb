@@ -20,31 +20,41 @@
 #ifndef FIRE_RATE_MANAGER_HPP_
 #define FIRE_RATE_MANAGER_HPP_
 
-#include "tap/architecture/clock.hpp"
-#include "tap/architecture/timeout.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+
+#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 
 namespace aruwsrc::control::agitator
 {
-class FireRateManager
+/**
+ * A storage class that contains a `fireRate` that can be set by calling `setFireRate`.
+ */
+class FireRateManager : public control::governor::FireRateManagerInterface
 {
 public:
-    /**
-     * This function must be called each time a projectile has been launched.
-     *
-     * @param[in] launchPeriod A period in milliseconds that projectiles will be limited to being
-     * launched at. Projectiles can be launched at a longer period than the one specified, this is
-     * simply an upper bound on the rate of fire.
-     */
-    inline void setProjectileLaunched(uint32_t newLaunchPeriod) { timer.restart(newLaunchPeriod); }
+    FireRateManager() {}
+
+    inline void setFireRate(float fireRate) { this->fireRate = fireRate; }
+
+    /// @return the set fire rate period (time distance between launching projectiles)
+    inline uint32_t getFireRatePeriod() final { return rpsToPeriodMS(fireRate); }
 
     /**
-     * @return True if the manager deems that a projectile may be launched based on fire rate
-     * limiting.
+     * Unless the fire rate is 0, always returns `FireRateReadinessState::READY_USE_RATE_LIMITING`
+     * since the manager will always be ready to rate limit using the provided fireRate.
      */
-    inline bool isReadyToLaunchProjectile() { return timer.isExpired() || timer.isStopped(); }
+    inline control::governor::FireRateReadinessState getFireRateReadinessState() final
+    {
+        if (tap::algorithms::compareFloatClose(fireRate, 0, 1E-5))
+        {
+            return control::governor::FireRateReadinessState::NOT_READY;
+        }
+
+        return control::governor::FireRateReadinessState::READY_USE_RATE_LIMITING;
+    }
 
 private:
-    tap::arch::MilliTimeout timer;
+    float fireRate = 0;
 };
 }  // namespace aruwsrc::control::agitator
 

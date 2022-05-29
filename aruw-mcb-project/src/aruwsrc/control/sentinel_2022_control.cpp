@@ -39,6 +39,7 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "auto-aim/auto_aim_fire_rate_manager.hpp"
 #include "governor/cv_has_target_governor.hpp"
 #include "governor/cv_on_target_governor.hpp"
 #include "governor/cv_online_governor.hpp"
@@ -196,11 +197,8 @@ public:
               autoAimLaunchTimer,
               CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
           cvOnlineGovernor(drivers, turretCVCommand),
-          cvFireRateLimitGovernor(
-              drivers,
-              drivers.visionCoprocessor,
-              turretCVCommand,
-              config.turretID),
+          autoAimFireRateManager(drivers, turretCVCommand, config.turretID),
+          fireRateLimitGovernor(autoAimFireRateManager),
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,
@@ -208,14 +206,14 @@ public:
                &frictionWheelsOnGovernor,
                &cvOnTargetGovernor,
                &cvOnlineGovernor,
-               &cvFireRateLimitGovernor}),
+               &fireRateLimitGovernor}),
           rotateAndUnjamAgitatorWithHeatAndCvLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
               {&heatLimitGovernor,
                &frictionWheelsOnGovernor,
                &cvOnTargetGovernor,
-               &cvFireRateLimitGovernor})
+               &fireRateLimitGovernor})
     {
     }
 
@@ -259,7 +257,8 @@ public:
     HeatLimitGovernor heatLimitGovernor;
     CvOnTargetGovernor cvOnTargetGovernor;
     CvOnlineGovernor cvOnlineGovernor;
-    FireRateLimitGovernor cvFireRateLimitGovernor;
+    AutoAimFireRateManager autoAimFireRateManager;
+    FireRateLimitGovernor fireRateLimitGovernor;
 
     // agitator governor limited commands
     GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;

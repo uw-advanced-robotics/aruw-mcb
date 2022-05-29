@@ -17,12 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AUTO_AIM_FIRE_RATE_LIMITER_HPP_
-#define AUTO_AIM_FIRE_RATE_LIMITER_HPP_
+#ifndef AUTO_AIM_FIRE_RATE_MANAGER_HPP_
+#define AUTO_AIM_FIRE_RATE_MANAGER_HPP_
 
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -34,7 +35,7 @@ namespace aruwsrc::control::auto_aim
  *
  * If CV is disconnected, does not limit fire.
  */
-class AutoAimFireRateLimiter
+class AutoAimFireRateManager : public control::governor::FireRateManagerInterface
 {
 public:
     static constexpr float LOW_RPS = 3;
@@ -43,82 +44,66 @@ public:
 
     /**
      * @param[in] drivers Pointer to global drivers object.
-     * @param[in] visionCoprocessor Vision coprocessor communicator.
+     * @param[in] turretCVCommand
      * @param[in] turretID ID of the turret that this governor controls
      */
-    AutoAimFireRateLimiter(
+    AutoAimFireRateManager(
         aruwsrc::Drivers &drivers,
-        const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         const uint8_t turretID)
         : drivers(drivers),
-          visionCoprocessor(visionCoprocessor),
           turretCVCommand(turretCVCommand),
           turretID(turretID)
     {
     }
 
-    inline uint32_t getFireRatePeriod(aruwsrc::serial::VisionCoprocessor::FireRate fireRate)
+    inline uint32_t getFireRatePeriod() final
     {
-        float fireRateRps = 0;
-
-        auto fireRate = visionCoprocessor.getLastAimData(turretID).firerate;
+        auto fireRate = drivers.visionCoprocessor.getLastAimData(turretID).firerate;
         switch (fireRate)
         {
             case aruwsrc::serial::VisionCoprocessor::FireRate::ZERO:
-                return UINT32_MAX;
+                return 0;
             case aruwsrc::serial::VisionCoprocessor::FireRate::LOW:
-                fireRateRps = LOW_RPS;
-                break;
+                return rpsToPeriodMS(LOW_RPS);
             case aruwsrc::serial::VisionCoprocessor::FireRate::MEDIUM:
-                fireRateRps = MID_RPS;
-                break;
+                return rpsToPeriodMS(MID_RPS);
             case aruwsrc::serial::VisionCoprocessor::FireRate::HIGH:
-                fireRateRps = HIGH_RPS;
-                break;
+                return rpsToPeriodMS(HIGH_RPS);
             default:
                 RAISE_ERROR((&drivers), "Illegal fire rate value encountered");
-                fireRateRps = 0;
-                break;
+                return 0;
         }
-
-        return rpsToPeriodMS(fireRateRps);
     }
 
-    inline bool fireRateReady()
+    inline control::governor::FireRateReadinessState getFireRateReadinessState() final
     {
         if (!drivers.commandScheduler.isCommandScheduled(&turretCVCommand))
         {
             // Don't limit firing if in manual fire mode
-            return true;
+            return control::governor::FireRateReadinessState::READY_IGNORE_RATE_LIMITING;
         }
 
-        if (!visionCoprocessor.isCvOnline())
+        if (!drivers.visionCoprocessor.isCvOnline())
         {
             // We're in CV mode; prevent firing altogether if CV offline
-            return false;
+            return control::governor::FireRateReadinessState::NOT_READY;
         }
 
-        if (visionCoprocessor.getLastAimData(turretID).firerate ==
+        if (drivers.visionCoprocessor.getLastAimData(turretID).firerate ==
             aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
         {
-            return false;
+            return control::governor::FireRateReadinessState::NOT_READY;
         }
 
-        return true;
+        return control::governor::FireRateReadinessState::READY_USE_RATE_LIMITING;
     }
 
 private:
     aruwsrc::Drivers &drivers;
-    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     const uint8_t turretID;
-
-    /**
-     * Converts a rounds-per-second value (i.e., Hz) to a period in milliseconds.
-     */
-    static inline constexpr uint32_t rpsToPeriodMS(float rps) { return (1000.0f / rps); }
 };
 }  // namespace aruwsrc::control::auto_aim
 
-#endif  // AUTO_AIM_FIRE_RATE_LIMITER_HPP_
+#endif  // AUTO_AIM_FIRE_RATE_MANAGER_HPP_

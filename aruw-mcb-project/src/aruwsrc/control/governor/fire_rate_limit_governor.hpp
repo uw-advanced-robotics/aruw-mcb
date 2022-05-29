@@ -22,10 +22,47 @@
 
 #include "tap/control/governor/command_governor_interface.hpp"
 
-#include "aruwsrc/control/agitator/fire_rate_manager.hpp"
+#include "aruwsrc/control/agitator/fire_rate_timer_manager.hpp"
 
 namespace aruwsrc::control::governor
 {
+enum class FireRateReadinessState
+{
+    READY_IGNORE_RATE_LIMITING = 0,
+    READY_USE_RATE_LIMITING,
+    NOT_READY,
+};
+
+/**
+ * An interface that can be implemented to convey fire rate information to the
+ * FireRateLimitGovernor.
+ */
+class FireRateManagerInterface
+{
+public:
+    /// @return the fire rate period (time distance between launching projectiles)
+    virtual uint32_t getFireRatePeriod() = 0;
+
+    /// @return the readiness state of the
+    virtual FireRateReadinessState getFireRateReadinessState() = 0;
+
+protected:
+    /**
+     * Converts a rounds-per-second value (i.e., Hz) to a period in milliseconds.
+     */
+    static inline constexpr uint32_t rpsToPeriodMS(float rps)
+    {
+        if (rps == 0)
+        {
+            return UINT32_MAX;
+        }
+        else
+        {
+            return 1000.0f / rps;
+        }
+    }
+};
+
 /**
  * A governor that allows a Command to run based on an internal timer and information from the
  * vision processor that dictates fire rate.
@@ -35,38 +72,36 @@ namespace aruwsrc::control::governor
  *
  * If CV is disconnected, does not limit fire.
  */
-template <typename T>
 class FireRateLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    using GetFireRatePeriodFn = uint32_t (T::*)();
-    using FireRateReadyFn = bool (T::*)();
-
-    FireRateLimitGovernor(
-        T &fireRateLimiter,
-        GetFireRatePeriodFn getFireRatePeriod,
-        FireRateReadyFn fireRateReady)
-        : fireRateLimiter(fireRateLimiter),
-          getFireRatePeriod(getFireRatePeriod),
-          fireRateReady(fireRateReady)
+    FireRateLimitGovernor(FireRateManagerInterface &fireRateManager)
+        : fireRateManager(fireRateManager)
     {
     }
 
     void initialize() final
     {
-        uint32_t fireRatePeriod = fireRateLimiter.getFireRatePeriod();
+        uint32_t fireRatePeriod = fireRateManager.getFireRatePeriod();
 
-        fireRateManager.setProjectileLaunched(fireRatePeriod);
+        fireRateTimerManager.setProjectileLaunched(fireRatePeriod);
     }
 
     bool isReady() final
     {
-        if (!fireRateLimiter.fireRateReady())
-        {
-            return false;
-        }
+        auto readinessState = fireRateManager.getFireRateReadinessState();
 
-        return fireRateManager.isReadyToLaunchProjectile();
+        switch (readinessState)
+        {
+            case FireRateReadinessState::READY_IGNORE_RATE_LIMITING:
+                return true;
+            case FireRateReadinessState::READY_USE_RATE_LIMITING:
+                return fireRateTimerManager.isReadyToLaunchProjectile();
+            case FireRateReadinessState::NOT_READY:
+                return false;
+            default:
+                return false;
+        }
     }
 
     bool isFinished() final
@@ -77,10 +112,8 @@ public:
     }
 
 private:
-    T &fireRateLimiter;
-    GetFireRatePeriodFn getFireRatePeriod;
-    FireRateReadyFn fireRateReady;
-    aruwsrc::control::agitator::FireRateManager fireRateManager;
+    FireRateManagerInterface &fireRateManager;
+    control::agitator::FireRateTimerManager fireRateTimerManager;
 };
 }  // namespace aruwsrc::control::governor
 

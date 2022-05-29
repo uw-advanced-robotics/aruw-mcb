@@ -22,7 +22,7 @@
 
 #include "tap/control/hold_repeat_command_mapping.hpp"
 
-#include "manual_fire_rate_limiter.hpp"
+#include "fire_rate_manager.hpp"
 
 namespace aruwsrc
 {
@@ -62,7 +62,7 @@ public:
      */
     MultiShotHandler(
         tap::control::HoldRepeatCommandMapping &commandMapping,
-        ManualFireRateLimiter &manaulFireRateLimiter,
+        FireRateManager &manaulFireRateLimiter,
         int burstCount);
 
     void setShooterState(ShooterState state);
@@ -71,7 +71,7 @@ public:
 
 private:
     tap::control::HoldRepeatCommandMapping &commandMapping;
-    ManualFireRateLimiter &manaulFireRateLimiter;
+    FireRateManager &manaulFireRateLimiter;
     const int burstCount;
     ShooterState state = SINGLE;
 };
