@@ -33,12 +33,13 @@ namespace aruwsrc::control::agitator
 {
 /**
  * Class that stores and allows the user to set some ShooterState. Possible shooter states include
- * single, burst, or full auto mode.
+ * single, 10 Hz, or 20 Hz full auto mode.
  *
  * The MultiShotHandler has an associated HoldRepeatCommandMapping. When the shooter state is set,
- * the HoldRepeatCommandMapping's `maxTiemsToSchedule` is updated. Thus, assuming the
- * HoldRepeatCommandMapping is associated with some command that launches a projectile, this class
- * will control the "state" of the shooter.
+ * the HoldRepeatCommandMapping's `maxTiemsToSchedule` is updated. Furthermore, a this object
+ * modifies the fire rate of a FireRateManager, which is used to determine the fire rate of the
+ * launcher. Thus, assuming the HoldRepeatCommandMapping is associated with some command that
+ * launches a projectile, this class will control the "state" of the shooter.
  */
 class MultiShotHandler
 {

@@ -21,6 +21,7 @@
 #define FIRE_RATE_MANAGER_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/util_macros.hpp"
 
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 
@@ -34,16 +35,16 @@ class FireRateManager : public control::governor::FireRateManagerInterface
 public:
     FireRateManager() {}
 
-    inline void setFireRate(float fireRate) { this->fireRate = fireRate; }
+    mockable inline void setFireRate(float fireRate) { this->fireRate = std::max(0.0f, fireRate); }
 
     /// @return the set fire rate period (time distance between launching projectiles)
-    inline uint32_t getFireRatePeriod() final { return rpsToPeriodMS(fireRate); }
+    inline uint32_t getFireRatePeriod() final_mockable { return rpsToPeriodMS(fireRate); }
 
     /**
      * Unless the fire rate is 0, always returns `FireRateReadinessState::READY_USE_RATE_LIMITING`
      * since the manager will always be ready to rate limit using the provided fireRate.
      */
-    inline control::governor::FireRateReadinessState getFireRateReadinessState() final
+    inline control::governor::FireRateReadinessState getFireRateReadinessState() final_mockable
     {
         if (tap::algorithms::compareFloatClose(fireRate, 0, 1E-5))
         {

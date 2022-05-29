@@ -23,9 +23,10 @@
 
 #include "aruwsrc/control/agitator/multi_shot_handler.hpp"
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/mock/fire_rate_manager_mock.hpp"
 
 using namespace testing;
-using namespace aruwsrc::agitator;
+using namespace aruwsrc::control::agitator;
 
 class MultiShotHandlerTest : public Test
 {
@@ -36,7 +37,7 @@ protected:
               std::vector<tap::control::Command *>(),
               tap::control::RemoteMapState(),
               false),
-          multiShotHandler(&cmdMapping, 3)
+          multiShotHandler(cmdMapping, fireRateManager, 3)
     {
     }
 
@@ -44,6 +45,7 @@ protected:
 
     tap::Drivers drivers;
     NiceMock<tap::mock::HoldRepeatCommandMappingMock> cmdMapping;
+    NiceMock<aruwsrc::mock::FireRateManagerMock> fireRateManager;
     MultiShotHandler multiShotHandler;
 };
 
@@ -58,12 +60,21 @@ TEST_F(MultiShotHandlerTest, getShooterState_matches_setShooterState)
 
 TEST_F(MultiShotHandlerTest, setShooterState_updates_cmdMapping)
 {
-    InSequence seq;
-    EXPECT_CALL(cmdMapping, setMaxTimesToSchedule(1));
-    EXPECT_CALL(cmdMapping, setMaxTimesToSchedule(3));
-    EXPECT_CALL(cmdMapping, setMaxTimesToSchedule(-1));
+    {
+        InSequence seq;
+        EXPECT_CALL(cmdMapping, setMaxTimesToSchedule(1));
+        EXPECT_CALL(cmdMapping, setMaxTimesToSchedule(-1));
+        EXPECT_CALL(cmdMapping, setMaxTimesToSchedule(-1));
+    }
+
+    {
+        InSequence seq;
+        EXPECT_CALL(fireRateManager, setFireRate(20));
+        EXPECT_CALL(fireRateManager, setFireRate(10));
+        EXPECT_CALL(fireRateManager, setFireRate(20));
+    }
 
     multiShotHandler.setShooterState(MultiShotHandler::SINGLE);
-    multiShotHandler.setShooterState(MultiShotHandler::BURST);
-    multiShotHandler.setShooterState(MultiShotHandler::FULL_AUTO);
+    multiShotHandler.setShooterState(MultiShotHandler::FULL_AUTO_10HZ);
+    multiShotHandler.setShooterState(MultiShotHandler::FULL_AUTO_20HZ);
 }

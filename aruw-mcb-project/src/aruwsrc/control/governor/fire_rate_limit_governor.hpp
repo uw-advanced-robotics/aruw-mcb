@@ -58,7 +58,7 @@ protected:
         }
         else
         {
-            return 1000.0f / rps;
+            return round(1000.0f / rps);
         }
     }
 };
