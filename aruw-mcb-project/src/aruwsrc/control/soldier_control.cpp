@@ -34,6 +34,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
+#include "agitator/manual_fire_rate_limiter.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
@@ -53,6 +54,7 @@
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "governor/cv_on_target_governor.hpp"
+#include "governor/fire_rate_limit_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "governor/ref_system_projectile_launched_governor.hpp"
@@ -255,10 +257,15 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
     drivers()->refSerial,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
+ManualFireRateLimiter manualFireRateLimiter;
+FireRateLimitGovernor<ManualFireRateLimiter> fireRateLimitGovernor(
+    manualFireRateLimiter,
+    &ManualFireRateLimiter::getFireRatePeriod,
+    &ManualFireRateLimiter::fireRateReady);
+GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor});
+    {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor, &fireRateLimitGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
@@ -282,7 +289,7 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
 extern HoldRepeatCommandMapping leftMousePressedBNotPressed;
-MultiShotHandler multiShotHandler(&leftMousePressedBNotPressed, 3);
+MultiShotHandler multiShotHandler(leftMousePressedBNotPressed, manualFireRateLimiter, 3);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),

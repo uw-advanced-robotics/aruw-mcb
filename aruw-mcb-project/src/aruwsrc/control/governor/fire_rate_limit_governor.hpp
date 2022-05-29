@@ -20,14 +20,9 @@
 #ifndef FIRE_RATE_LIMIT_GOVERNOR_HPP_
 #define FIRE_RATE_LIMIT_GOVERNOR_HPP_
 
-#include "tap/architecture/periodic_timer.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
-#include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
-#include "aruwsrc/drivers.hpp"
-#include "modm/processing/timer/periodic_timer.hpp"
+#include "aruwsrc/control/agitator/fire_rate_manager.hpp"
 
 namespace aruwsrc::control::governor
 {
@@ -40,54 +35,38 @@ namespace aruwsrc::control::governor
  *
  * If CV is disconnected, does not limit fire.
  */
+template <typename T>
 class FireRateLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    /**
-     * @param[in] drivers Pointer to global drivers object.
-     * @param[in] visionCoprocessor Vision coprocessor communicator.
-     * @param[in] turretID ID of the turret that this governor controls
-     */
+    using GetFireRatePeriodFn = uint32_t (T::*)();
+    using FireRateReadyFn = bool (T::*)();
+
     FireRateLimitGovernor(
-        aruwsrc::Drivers &drivers,
-        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
-        uint8_t turretID)
-        : drivers(drivers),
-          visionCoprocessor(visionCoprocessor),
-          turretCVCommand(turretCVCommand),
-          turretID(turretID)
+        T &fireRateLimiter,
+        GetFireRatePeriodFn getFireRatePeriod,
+        FireRateReadyFn fireRateReady)
+        : fireRateLimiter(fireRateLimiter),
+          getFireRatePeriod(getFireRatePeriod),
+          fireRateReady(fireRateReady)
     {
     }
 
-    void initialize() final { restartTimer(); }
+    void initialize() final
+    {
+        uint32_t fireRatePeriod = fireRateLimiter.getFireRatePeriod();
+
+        fireRateManager.setProjectileLaunched(fireRatePeriod);
+    }
 
     bool isReady() final
     {
-        if (!drivers.commandScheduler.isCommandScheduled(&turretCVCommand))
-        {
-            // Don't limit firing if in manual fire mode
-            return true;
-        }
-
-        if (!visionCoprocessor.isCvOnline())
-        {
-            // We're in CV mode; prevent firing altogether if CV offline
-            return false;
-        }
-
-        if (timer.isStopped())
-        {
-            restartTimer();
-        }
-
-        if (visionCoprocessor.getLastAimData(turretID).firerate ==
-            aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
+        if (!fireRateLimiter.fireRateReady())
         {
             return false;
         }
 
-        return timer.isExpired();
+        return fireRateManager.isReadyToLaunchProjectile();
     }
 
     bool isFinished() final
@@ -98,41 +77,10 @@ public:
     }
 
 private:
-    aruwsrc::Drivers &drivers;
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
-    uint8_t turretID;
-
-    tap::arch::MilliTimeout timer;
-    static constexpr float LOW_RPS = 3;
-    static constexpr float MID_RPS = 10;
-    static constexpr float HIGH_RPS = 20;
-
-    /**
-     * Converts a rounds-per-second value (i.e., Hz) to a period in milliseconds.
-     */
-    static inline constexpr uint32_t rpsToPeriodMS(float rps) { return (1000.0f / rps); }
-
-    void restartTimer()
-    {
-        switch (visionCoprocessor.getLastAimData(turretID).firerate)
-        {
-            case aruwsrc::serial::VisionCoprocessor::FireRate::ZERO:  // don't fire
-                break;
-            case aruwsrc::serial::VisionCoprocessor::FireRate::LOW:  // low fire rate
-                timer.restart(rpsToPeriodMS(LOW_RPS));
-                break;
-            case aruwsrc::serial::VisionCoprocessor::FireRate::MEDIUM:  // medium fire rate
-                timer.restart(rpsToPeriodMS(MID_RPS));
-                break;
-            case aruwsrc::serial::VisionCoprocessor::FireRate::HIGH:  // high fire rate
-                timer.restart(rpsToPeriodMS(HIGH_RPS));
-                break;
-            default:
-                RAISE_ERROR((&drivers), "Illegal fire rate value encountered");
-                break;
-        }
-    }
+    T &fireRateLimiter;
+    GetFireRatePeriodFn getFireRatePeriod;
+    FireRateReadyFn fireRateReady;
+    aruwsrc::control::agitator::FireRateManager fireRateManager;
 };
 }  // namespace aruwsrc::control::governor
 

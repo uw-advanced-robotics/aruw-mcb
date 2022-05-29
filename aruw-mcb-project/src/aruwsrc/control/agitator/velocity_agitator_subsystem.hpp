@@ -30,7 +30,7 @@
 #endif
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
+#include "tap/control/setpoint/algorithms/setpoint_integral_continuous_jam_checker.hpp"
 #include "tap/control/setpoint/interfaces/integrable_setpoint_subsystem.hpp"
 #include "tap/util_macros.hpp"
 
@@ -159,7 +159,7 @@ private:
     tap::algorithms::SmoothPid velocityPid;
 
     /// The object that runs jam detection.
-    tap::control::setpoint::SetpointContinuousJamChecker jamChecker;
+    tap::control::setpoint::SetpointIntegralContinuousJamChecker jamChecker;
 
     /// You can calibrate the agitator, which will set the current agitator angle to zero radians.
     /// This value is the starting measured angle offset applied to make the motor angle "0" when

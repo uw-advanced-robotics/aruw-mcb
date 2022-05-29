@@ -22,12 +22,14 @@
 
 #include "tap/control/hold_repeat_command_mapping.hpp"
 
+#include "manual_fire_rate_limiter.hpp"
+
 namespace aruwsrc
 {
 class Drivers;
 }
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::agitator
 {
 /**
  * Class that stores and allows the user to set some ShooterState. Possible shooter states include
@@ -48,8 +50,8 @@ public:
     enum ShooterState : uint8_t
     {
         SINGLE = 0,
-        BURST,
-        FULL_AUTO,
+        FULL_AUTO_10HZ,
+        FULL_AUTO_20HZ,
         NUM_SHOOTER_STATES,
     };
 
@@ -58,18 +60,22 @@ public:
      * update.
      * @param[in] burstCount What to set `maxTimesToSchedule` to when in burst mode.
      */
-    MultiShotHandler(tap::control::HoldRepeatCommandMapping *commandMapping, int burstCount);
+    MultiShotHandler(
+        tap::control::HoldRepeatCommandMapping &commandMapping,
+        ManualFireRateLimiter &manaulFireRateLimiter,
+        int burstCount);
 
     void setShooterState(ShooterState state);
 
     ShooterState getShooterState() const { return state; }
 
 private:
-    tap::control::HoldRepeatCommandMapping *commandMapping;
+    tap::control::HoldRepeatCommandMapping &commandMapping;
+    ManualFireRateLimiter &manaulFireRateLimiter;
     const int burstCount;
     ShooterState state = SINGLE;
 };
 
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::agitator
 
 #endif  // MULTI_SHOT_HANDLER_HPP_

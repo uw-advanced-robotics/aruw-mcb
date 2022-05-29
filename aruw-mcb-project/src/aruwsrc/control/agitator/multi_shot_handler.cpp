@@ -19,12 +19,14 @@
 
 #include "multi_shot_handler.hpp"
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::agitator
 {
 MultiShotHandler::MultiShotHandler(
-    tap::control::HoldRepeatCommandMapping *commandMapping,
+    tap::control::HoldRepeatCommandMapping &commandMapping,
+    ManualFireRateLimiter &manaulFireRateLimiter,
     int burstCount)
     : commandMapping(commandMapping),
+      manaulFireRateLimiter(manaulFireRateLimiter),
       burstCount(burstCount)
 {
 }
@@ -32,21 +34,28 @@ MultiShotHandler::MultiShotHandler(
 void MultiShotHandler::setShooterState(ShooterState state)
 {
     int timesToReschedule = 0;
+    float fireRate;
     this->state = state;
     switch (state)
     {
         case SINGLE:
             timesToReschedule = 1;
+            fireRate = 20;
             break;
-        case BURST:
-            timesToReschedule = burstCount;
-            break;
-        case FULL_AUTO:
+        case FULL_AUTO_10HZ:
             timesToReschedule = -1;
+            fireRate = 10;
+            break;
+        case FULL_AUTO_20HZ:
+            timesToReschedule = -1;
+            fireRate = 20;
             break;
         default:
+            fireRate = 20;
             break;
     }
-    commandMapping->setMaxTimesToSchedule(timesToReschedule);
+
+    commandMapping.setMaxTimesToSchedule(timesToReschedule);
+    manaulFireRateLimiter.setFireRate(fireRate);
 }
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::agitator

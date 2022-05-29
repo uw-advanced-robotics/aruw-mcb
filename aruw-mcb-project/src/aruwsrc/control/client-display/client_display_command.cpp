@@ -39,7 +39,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+    const aruwsrc::control::agitator::MultiShotHandler *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,

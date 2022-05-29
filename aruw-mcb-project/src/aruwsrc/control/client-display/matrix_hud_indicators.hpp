@@ -90,7 +90,7 @@ public:
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
-        const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+        const aruwsrc::control::agitator::MultiShotHandler *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
@@ -162,7 +162,7 @@ private:
             {"CHAS", "BEYB\nFLLW\nMIMU"},
             {"SHOT", "REDY\nLOAD\nFOFF"},
 #if defined(DISPLAY_FIRING_MODE)
-            {"FIRE", "SNGL\nBRST\nFULL"},
+            {"FIRE", "SNGL\n10Hz\n20Hz"},
 #endif
             {"CV  ", "GATE\nNOGT\nOFFL"}
         };
@@ -207,7 +207,7 @@ private:
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
 
-    const aruwsrc::agitator::MultiShotHandler *multiShotHandler;
+    const aruwsrc::control::agitator::MultiShotHandler *multiShotHandler;
 
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor;
 
