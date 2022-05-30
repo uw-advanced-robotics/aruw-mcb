@@ -372,7 +372,7 @@ MultiShotHandler leftMousePressedBNotPressed(
     *drivers(),
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    fireRateManager,
+    &fireRateManager,
     cvOnTargetGovernor);
 
 HoldRepeatCommandMapping leftMousePressedBPressed(

@@ -25,7 +25,7 @@ MultiShotHandler::MultiShotHandler(
     aruwsrc::Drivers &drivers,
     tap::control::Command &launchCommand,
     const tap::control::RemoteMapState &rms,
-    FireRateManager &fireRateManager,
+    FireRateManager *fireRateManager,
     governor::CvOnTargetGovernor &cvOnTargetGovernor)
     : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
       fireRateManager(fireRateManager),
@@ -36,8 +36,8 @@ MultiShotHandler::MultiShotHandler(
 void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState &currState)
 {
     int timesToReschedule = 0;
+
     float fireRate;
-    this->state = state;
     switch (state)
     {
         case SINGLE:
@@ -57,13 +57,17 @@ void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState 
             break;
     }
 
+    if (fireRateManager != nullptr)
+    {
+        fireRateManager->setFireRate(fireRate);
+    }
+
     if (cvOnTargetGovernor.isGovernorGating())
     {
         timesToReschedule = -1;
     }
 
     setMaxTimesToSchedule(timesToReschedule);
-    fireRateManager.setFireRate(fireRate);
 
     tap::control::HoldRepeatCommandMapping::executeCommandMapping(currState);
 }

@@ -66,7 +66,7 @@ public:
         aruwsrc::Drivers &drivers,
         tap::control::Command &launchCommand,
         const tap::control::RemoteMapState &rms,
-        FireRateManager &fireRateManager,
+        FireRateManager *fireRateManager,
         governor::CvOnTargetGovernor &cvOnTargetGovernor);
 
     void setShooterState(ShooterState state) { this->state = state; }
@@ -76,7 +76,7 @@ public:
     void executeCommandMapping(const tap::control::RemoteMapState &currState);
 
 private:
-    FireRateManager &fireRateManager;
+    FireRateManager *fireRateManager;
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
 
     ShooterState state = SINGLE;

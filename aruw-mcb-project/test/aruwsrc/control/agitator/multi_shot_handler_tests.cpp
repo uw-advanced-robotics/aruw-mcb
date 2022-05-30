@@ -68,7 +68,7 @@ protected:
               turretCvCommand,
               launchTimer,
               aruwsrc::control::governor::CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
-          multiShotHandler(drivers, cmd, defaultRms, fireRateManager, cvOnTargetGovernor)
+          multiShotHandler(drivers, cmd, defaultRms, &fireRateManager, cvOnTargetGovernor)
     {
     }
 
