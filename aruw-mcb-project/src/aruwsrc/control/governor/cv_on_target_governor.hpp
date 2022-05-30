@@ -59,17 +59,23 @@ public:
     }
 
     void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
-    bool getGovernorEnabled() const { return this->enabled; }
+
+    /**
+     * @return true if gating is being performed
+     */
+    bool isGovernorGating() const
+    {
+        bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
+
+        bool ungated = launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID()) ==
+                       AutoAimLaunchTimer::LaunchInclination::UNGATED;
+
+        return enabled && isCvRunning && !ungated;
+    }
 
     bool isReady() final
     {
-        if (!enabled)
-        {
-            return true;
-        }
-
-        bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
-        if (!isCvRunning)
+        if (!isGovernorGating())
         {
             return true;
         }

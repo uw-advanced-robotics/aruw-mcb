@@ -34,7 +34,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/fire_rate_manager.hpp"
+#include "agitator/cv_gated_fire_rate_manager.hpp"
 #include "agitator/multi_shot_handler.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
@@ -256,9 +256,13 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
     drivers()->refSerial,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
-FireRateManager manualFireRateLimiter;
-FireRateLimitGovernor fireRateLimitGovernor(manualFireRateLimiter);
+
+extern CvOnTargetGovernor cvOnTargetGovernor;
+CvGatedFireRateManager fireRateManager(cvOnTargetGovernor);
+FireRateLimitGovernor fireRateLimitGovernor(fireRateManager);
+
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
@@ -286,7 +290,7 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
 extern HoldRepeatCommandMapping leftMousePressedBNotPressed;
-MultiShotHandler multiShotHandler(leftMousePressedBNotPressed, manualFireRateLimiter, 3);
+MultiShotHandler multiShotHandler(leftMousePressedBNotPressed, fireRateManager, 3);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),

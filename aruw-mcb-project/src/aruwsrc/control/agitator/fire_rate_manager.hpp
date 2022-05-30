@@ -38,13 +38,13 @@ public:
     mockable inline void setFireRate(float fireRate) { this->fireRate = std::max(0.0f, fireRate); }
 
     /// @return the set fire rate period (time distance between launching projectiles)
-    inline uint32_t getFireRatePeriod() final_mockable { return rpsToPeriodMS(fireRate); }
+    inline uint32_t getFireRatePeriod() override { return rpsToPeriodMS(fireRate); }
 
     /**
      * Unless the fire rate is 0, always returns `FireRateReadinessState::READY_USE_RATE_LIMITING`
      * since the manager will always be ready to rate limit using the provided fireRate.
      */
-    inline control::governor::FireRateReadinessState getFireRateReadinessState() final_mockable
+    inline control::governor::FireRateReadinessState getFireRateReadinessState() override
     {
         if (tap::algorithms::compareFloatClose(fireRate, 0, 1E-5))
         {
