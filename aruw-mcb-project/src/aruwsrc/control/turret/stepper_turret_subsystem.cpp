@@ -30,9 +30,9 @@ StepperTurretSubsystem::StepperTurretSubsystem(
     aruwsrc::Drivers *drivers,
     StepperMotorInterface &pitchMotor,
     StepperMotorInterface &yawMotor,
-    const TurretMotorConfig &pitchMotorConfig,
+    const TurretMotorConfig &pitchMotorConfig, // JENNY_TODO: do i even need these configs????
     const TurretMotorConfig &yawMotorConfig)
-    : tap::control::Subsystem(drivers),
+    : tap::control::Subsystem(drivers), // JENNY_TODO:w hy is this giving me an error
       pitchMotor(pitchMotor),
       yawMotor(yawMotor),
       drivers(drivers)
@@ -42,14 +42,14 @@ StepperTurretSubsystem::StepperTurretSubsystem(
 
 void StepperTurretSubsystem::initialize()
 {
-    // TODO: wat do i put here ..huh
+    // JENNY_TODO: wat do i put here ..huh
     yawMotor.calibrateOrigin(0);
     pitchMotor.calibrateOrigin(0);
 }
 
 void StepperTurretSubsystem::refresh()
 {
-    // TODO: wat do i put here.. i need to refresh the StepperMotorInterface instances ?
+    // JENNY_TODO: wat do i put here.. i need to refresh the StepperMotorInterface instances ?
     yawMotor.refresh(); // ???????????
     pitchMotor.refresh();
 }

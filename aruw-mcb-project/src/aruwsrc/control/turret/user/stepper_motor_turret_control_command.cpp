@@ -39,7 +39,7 @@ void StepperMotorTurretControlCommand::initialize() {}
 
 void StepperMotorTurretControlCommand::execute()
 {
-    // TODO: check if this is right????? how 2 use w controller
+    // JENNY_TODO: check if this is right????? how 2 use w controller
     turretPitchMotor.moveSteps(
         drivers->controlOperatorInterface.getTurretPitchInput(0));
     turretYawMotor.moveSteps(
@@ -50,7 +50,7 @@ bool StepperMotorTurretControlCommand::isFinished() const { return false; }
 
 void StepperMotorTurretControlCommand::end(bool)
 {
-    // TODO: wat is this supposed 2 be
+    // JENNY_TODO: wat is this supposed 2 be
     turretPitchMotor.setDesiredPosition(0);
     turretYawMotor.setDesiredPosition(0);
 }
