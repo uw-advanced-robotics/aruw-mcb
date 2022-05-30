@@ -229,7 +229,7 @@ aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTur
 );
 
 // Mappings
-HoldCommandMapping bottomPositionOne(
+HoldCommandMapping bottomPositionOne( // TODO: rename
     drivers(),
     {&agitatorBottomMoveCommandOne},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
@@ -254,7 +254,7 @@ HoldCommandMapping positionZero(
     {&agitatorTopMoveCommandZero, &agitatorBottomMoveCommandZero},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-HoldCommandMapping stopWheels( // TODO: rename
+HoldCommandMapping stopWheels( // TODO: rename this 
     drivers(),
     {&stopFrictionWheelsBottomBack,
      &stopFrictionWheelsBottomFront,
