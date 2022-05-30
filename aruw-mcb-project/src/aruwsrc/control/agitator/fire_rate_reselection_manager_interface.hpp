@@ -26,9 +26,11 @@ namespace aruwsrc::control::agitator
 {
 enum class FireRateReadinessState
 {
-    NOT_READY = 0,
-    READY_IGNORE_RATE_LIMITING,
-    READY_USE_RATE_LIMITING,
+    NOT_READY = 0,               /// Projectiles should not be launched
+    READY_IGNORE_RATE_LIMITING,  ///< Projectiles should be launched with disregard to fire rate
+                                 ///< limiting
+    READY_USE_RATE_LIMITING,  ///< Projectiles should be launched and limited to the specified fire
+                              ///< rate
 };
 
 /**
@@ -44,16 +46,15 @@ public:
     /// @return the fire rate period (time distance between launching projectiles)
     virtual uint32_t getFireRatePeriod() = 0;
 
-    /// @return the readiness state of the
+    /// @return the readiness state of the manager
     virtual FireRateReadinessState getFireRateReadinessState() = 0;
 
-protected:
     /**
      * Converts a rounds-per-second value (i.e., Hz) to a period in milliseconds.
      */
     static inline constexpr uint32_t rpsToPeriodMS(float rps)
     {
-        if (rps == 0)
+        if (rps <= 0)
         {
             return UINT32_MAX;
         }
