@@ -105,9 +105,9 @@ FrictionWheelSubsystem frictionWheelsBottomBack(
 // Agitator Commands
 static constexpr float AGITATOR_TARGET_ANGLE_ZERO = 0;
 
-static constexpr float AGITATOR_TARGET_ANGLE_ONE = 8 * M_PI;
+static constexpr float AGITATOR_TARGET_ANGLE_ONE = 7 * M_PI;
 
-static constexpr float AGITATOR_TARGET_ANGLE_TWO = 130;
+static constexpr float AGITATOR_TARGET_ANGLE_TWO = 12 * M_PI;
 
 static constexpr uint32_t AGITATOR_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
 
@@ -254,12 +254,14 @@ HoldCommandMapping positionZero(
     {&agitatorTopMoveCommandZero, &agitatorBottomMoveCommandZero},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-HoldCommandMapping stopWheels(
+HoldCommandMapping stopWheels( // TODO: rename
     drivers(),
     {&stopFrictionWheelsBottomBack,
      &stopFrictionWheelsBottomFront,
      &stopFrictionWheelsTopBack,
-     &stopFrictionWheelsTopFront},
+     &stopFrictionWheelsTopFront,
+     &agitatorTopMoveCommandZero,
+     &agitatorBottomMoveCommandZero},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 // Safe disconnect function
