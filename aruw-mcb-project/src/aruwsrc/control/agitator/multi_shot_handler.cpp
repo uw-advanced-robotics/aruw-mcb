@@ -22,16 +22,18 @@
 namespace aruwsrc::control::agitator
 {
 MultiShotHandler::MultiShotHandler(
-    tap::control::HoldRepeatCommandMapping &commandMapping,
-    FireRateManager &manaulFireRateLimiter,
-    int burstCount)
-    : commandMapping(commandMapping),
-      manaulFireRateLimiter(manaulFireRateLimiter),
-      burstCount(burstCount)
+    aruwsrc::Drivers &drivers,
+    tap::control::Command &launchCommand,
+    const tap::control::RemoteMapState &rms,
+    FireRateManager &fireRateManager,
+    governor::CvOnTargetGovernor &cvOnTargetGovernor)
+    : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
+      fireRateManager(fireRateManager),
+      cvOnTargetGovernor(cvOnTargetGovernor)
 {
 }
 
-void MultiShotHandler::setShooterState(ShooterState state)
+void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState &currState)
 {
     int timesToReschedule = 0;
     float fireRate;
@@ -55,7 +57,14 @@ void MultiShotHandler::setShooterState(ShooterState state)
             break;
     }
 
-    commandMapping.setMaxTimesToSchedule(timesToReschedule);
-    manaulFireRateLimiter.setFireRate(fireRate);
+    if (cvOnTargetGovernor.isGovernorGating())
+    {
+        timesToReschedule = -1;
+    }
+
+    setMaxTimesToSchedule(timesToReschedule);
+    fireRateManager.setFireRate(fireRate);
+
+    tap::control::HoldRepeatCommandMapping::executeCommandMapping(currState);
 }
 }  // namespace aruwsrc::control::agitator

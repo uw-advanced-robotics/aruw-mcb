@@ -289,9 +289,6 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
-extern HoldRepeatCommandMapping leftMousePressedBNotPressed;
-MultiShotHandler multiShotHandler(leftMousePressedBNotPressed, fireRateManager, 3);
-
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
@@ -317,6 +314,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
+extern MultiShotHandler leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
     clientDisplay,
@@ -325,7 +323,7 @@ ClientDisplayCommand clientDisplayCommand(
     agitator,
     turret,
     imuCalibrateCommand,
-    &multiShotHandler,
+    &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
@@ -369,12 +367,14 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &CvOnTargetGovernor::setGovernorEnabled);
 
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-HoldRepeatCommandMapping leftMousePressedBNotPressed(
-    drivers(),
-    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+
+MultiShotHandler leftMousePressedBNotPressed(
+    *drivers(),
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    false,
-    1);
+    fireRateManager,
+    cvOnTargetGovernor);
+
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
@@ -431,7 +431,7 @@ CycleStateCommandMapping<
         drivers(),
         RemoteMapState({Remote::Key::V}),
         MultiShotHandler::SINGLE,
-        &multiShotHandler,
+        &leftMousePressedBNotPressed,
         &MultiShotHandler::setShooterState);
 
 // Safe disconnect function

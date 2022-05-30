@@ -20,8 +20,9 @@
 #ifndef FIRE_RATE_LIMIT_GOVERNOR_HPP_
 #define FIRE_RATE_LIMIT_GOVERNOR_HPP_
 
-#include "tap/control/governor/command_governor_interface.hpp"
 #include <cmath>
+
+#include "tap/control/governor/command_governor_interface.hpp"
 
 #include "aruwsrc/control/agitator/fire_rate_timer_manager.hpp"
 

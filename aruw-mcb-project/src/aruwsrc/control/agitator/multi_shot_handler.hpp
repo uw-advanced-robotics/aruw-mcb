@@ -22,6 +22,8 @@
 
 #include "tap/control/hold_repeat_command_mapping.hpp"
 
+#include "aruwsrc/control/governor/cv_on_target_governor.hpp"
+
 #include "fire_rate_manager.hpp"
 
 namespace aruwsrc
@@ -41,7 +43,7 @@ namespace aruwsrc::control::agitator
  * launcher. Thus, assuming the HoldRepeatCommandMapping is associated with some command that
  * launches a projectile, this class will control the "state" of the shooter.
  */
-class MultiShotHandler
+class MultiShotHandler : public tap::control::HoldRepeatCommandMapping
 {
 public:
     /**
@@ -59,21 +61,24 @@ public:
     /**
      * @param[in] commandMapping The HoldRepeatCommandMapping whose `maxTimesToSchedule` variable to
      * update.
-     * @param[in] burstCount What to set `maxTimesToSchedule` to when in burst mode.
      */
     MultiShotHandler(
-        tap::control::HoldRepeatCommandMapping &commandMapping,
-        FireRateManager &manaulFireRateLimiter,
-        int burstCount);
+        aruwsrc::Drivers &drivers,
+        tap::control::Command &launchCommand,
+        const tap::control::RemoteMapState &rms,
+        FireRateManager &fireRateManager,
+        governor::CvOnTargetGovernor &cvOnTargetGovernor);
 
-    void setShooterState(ShooterState state);
+    void setShooterState(ShooterState state) { this->state = state; }
 
     ShooterState getShooterState() const { return state; }
 
+    void executeCommandMapping(const tap::control::RemoteMapState &currState);
+
 private:
-    tap::control::HoldRepeatCommandMapping &commandMapping;
-    FireRateManager &manaulFireRateLimiter;
-    const int burstCount;
+    FireRateManager &fireRateManager;
+    governor::CvOnTargetGovernor &cvOnTargetGovernor;
+
     ShooterState state = SINGLE;
 };
 

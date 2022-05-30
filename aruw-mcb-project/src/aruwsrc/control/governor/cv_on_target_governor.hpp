@@ -58,12 +58,12 @@ public:
     {
     }
 
-    void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
+    mockable void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
 
     /**
      * @return true if gating is being performed
      */
-    bool isGovernorGating() const
+    mockable bool isGovernorGating() const
     {
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
 
@@ -73,7 +73,7 @@ public:
         return enabled && isCvRunning && !ungated;
     }
 
-    bool isReady() final
+    bool isReady() final_mockable
     {
         if (!isGovernorGating())
         {
@@ -89,7 +89,7 @@ public:
         return isGateSatisfied();
     }
 
-    bool isGateSatisfied()
+    mockable bool isGateSatisfied()
     {
         auto autoLaunchInclination =
             launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
@@ -109,7 +109,7 @@ public:
         return false;
     }
 
-    bool isFinished() final
+    bool isFinished() final_mockable
     {
         // Once started, CV will not stop the target command; it is allowed to run to completion.
         // This enables firing a whole round, or burst, without interruption.

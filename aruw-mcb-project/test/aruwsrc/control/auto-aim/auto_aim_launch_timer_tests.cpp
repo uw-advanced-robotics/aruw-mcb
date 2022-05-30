@@ -133,7 +133,7 @@ static constexpr uint32_t SMALL_TIMING_ERROR = 10;
 // were removed, this factor could be zero.
 static constexpr uint32_t FLOATING_POINT_FUDGE_MICROS = 1;
 
-namespace auto_aim // Must be in a namespace so the operator<< can be discovered by googletest
+namespace auto_aim  // Must be in a namespace so the operator<< can be discovered by googletest
 {
 struct TestParamsAimData
 {
@@ -147,9 +147,9 @@ struct TestParamsAimData
 
     friend std::ostream& operator<<(std::ostream& os, const TestParamsAimData& p)
     {
-        return os << "{" << p.hasTarget << ", " << p.timestamp << ", "
-                  << p.recommendUseTimedShots << ", " << p.targetHitTimeOffset << ", "
-                  << p.targetPulseInterval << ", " << p.targetIntervalDuration << "}";
+        return os << "{" << p.hasTarget << ", " << p.timestamp << ", " << p.recommendUseTimedShots
+                  << ", " << p.targetHitTimeOffset << ", " << p.targetPulseInterval << ", "
+                  << p.targetIntervalDuration << "}";
     }
 };
 
@@ -169,11 +169,11 @@ struct TestParams
     friend std::ostream& operator<<(std::ostream& os, const TestParams& p)
     {
         return os << "{" << int(p.turretNumber) << ", " << p.agitatorLatencyMicros << ", "
-                  << p.ballisticsSuccess << ", " << p.ballisticsTimeOfFlight << ", "
-                  << p.aimData << uint8_t(p.expectedResult) << "}";
+                  << p.ballisticsSuccess << ", " << p.ballisticsTimeOfFlight << ", " << p.aimData
+                  << uint8_t(p.expectedResult) << "}";
     }
 };
-}  // namespace foo
+}  // namespace auto_aim
 
 using namespace auto_aim;
 
