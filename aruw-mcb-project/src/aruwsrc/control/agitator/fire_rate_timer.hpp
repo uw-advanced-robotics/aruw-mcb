@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FIRE_RATE_TIMER_MANAGER_HPP_
-#define FIRE_RATE_TIMER_MANAGER_HPP_
+#ifndef FIRE_RATE_TIMER_HPP_
+#define FIRE_RATE_TIMER_HPP_
 
 #include "tap/architecture/clock.hpp"
 
@@ -28,15 +28,15 @@ namespace aruwsrc::control::agitator
  * A utility class that may be used to limit the fire rate vai checking if a projectile may be
  * launched given the time difference between the current time and when the last projectile was
  * fired. Check `isReadyToLaunchProjectile` before launching a projectile, then call
- * `setProjectileLaunched` once the projectile has been launched.
+ * `registerNewLaunchedProjectile` once the projectile has been launched.
  */
-class FireRateTimerManager
+class FireRateTimer
 {
 public:
     /**
      * This function must be called each time a projectile has been launched.
      */
-    inline void setProjectileLaunched()
+    inline void registerNewLaunchedProjectile()
     {
         this->lastProjectileLaunchTime = tap::arch::clock::getTimeMilliseconds();
     }
@@ -69,4 +69,4 @@ private:
 };
 }  // namespace aruwsrc::control::agitator
 
-#endif  // FIRE_RATE_TIMER_MANAGER_HPP_
+#endif  // FIRE_RATE_TIMER_HPP_

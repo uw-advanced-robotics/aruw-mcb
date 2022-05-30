@@ -23,7 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/control/agitator/multi_shot_handler.hpp"
+#include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -90,7 +90,7 @@ public:
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
-        const aruwsrc::control::agitator::MultiShotHandler *multiShotHandler,
+        const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
@@ -207,7 +207,7 @@ private:
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
 
-    const aruwsrc::control::agitator::MultiShotHandler *multiShotHandler;
+    const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler;
 
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor;
 

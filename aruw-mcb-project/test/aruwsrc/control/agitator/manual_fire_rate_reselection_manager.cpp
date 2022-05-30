@@ -17,18 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
+#include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 
-#include "aruwsrc/control/agitator/fire_rate_manager.hpp"
+#include <gtest/gtest.h>
 
 using namespace testing;
 using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::control::governor;
 
-TEST(FireRateManagerTest, getFireRatePeriod_setFireRate_not_called_returns_uint32_max)
+TEST(
+    ManualFireRateReselectionManagerTest,
+    getFireRatePeriod_setFireRate_not_called_returns_uint32_max)
 {
-    FireRateManager fireRateManager;
-    EXPECT_NEAR(UINT32_MAX, fireRateManager.getFireRatePeriod(), 1E-5);
+    ManualFireRateReselectionManager manualFireRateReselectionManager;
+    EXPECT_NEAR(UINT32_MAX, manualFireRateReselectionManager.getFireRatePeriod(), 1E-5);
 }
 
 struct TestParams
@@ -38,26 +39,31 @@ struct TestParams
     FireRateReadinessState expectedReadinessState;
 };
 
-class FireRateManagerParameterizedTest : public TestWithParam<TestParams>
+class ManualFireRateReselectionManagerParameterizedTest : public TestWithParam<TestParams>
 {
 protected:
-    FireRateManager fireRateManager;
+    ManualFireRateReselectionManager manualFireRateReselectionManager;
 };
 
-TEST_P(FireRateManagerParameterizedTest, getFireRatePeriod)
+TEST_P(ManualFireRateReselectionManagerParameterizedTest, getFireRatePeriod)
 {
-    fireRateManager.setFireRate(GetParam().fireRate);
+    manualFireRateReselectionManager.setFireRate(GetParam().fireRate);
 
-    EXPECT_NEAR(GetParam().expectedFireRatePeriod, fireRateManager.getFireRatePeriod(), 1E-5);
+    EXPECT_NEAR(
+        GetParam().expectedFireRatePeriod,
+        manualFireRateReselectionManager.getFireRatePeriod(),
+        1E-5);
 }
 
-TEST_P(FireRateManagerParameterizedTest, getFireRateReadinessState)
+TEST_P(ManualFireRateReselectionManagerParameterizedTest, getFireRateReadinessState)
 {
-    FireRateManager fireRateManager;
+    ManualFireRateReselectionManager manualFireRateReselectionManager;
 
-    fireRateManager.setFireRate(GetParam().fireRate);
+    manualFireRateReselectionManager.setFireRate(GetParam().fireRate);
 
-    EXPECT_EQ(GetParam().expectedReadinessState, fireRateManager.getFireRateReadinessState());
+    EXPECT_EQ(
+        GetParam().expectedReadinessState,
+        manualFireRateReselectionManager.getFireRateReadinessState());
 }
 
 static constexpr TestParams TEST_NEGATIVE_FIRE_RATE = {
@@ -91,8 +97,8 @@ static constexpr TestParams TEST_FIRE_RATE_ROUNDS_UP_TO_NEAREST_INT = {
 };
 
 INSTANTIATE_TEST_CASE_P(
-    FireRateManagerTest,
-    FireRateManagerParameterizedTest,
+    ManualFireRateReselectionManagerTest,
+    ManualFireRateReselectionManagerParameterizedTest,
     Values(
         TEST_NEGATIVE_FIRE_RATE,
         TEST_ZERO_FIRE_RATE,

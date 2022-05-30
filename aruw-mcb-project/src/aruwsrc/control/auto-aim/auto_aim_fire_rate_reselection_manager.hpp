@@ -17,13 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AUTO_AIM_FIRE_RATE_MANAGER_HPP_
-#define AUTO_AIM_FIRE_RATE_MANAGER_HPP_
+#ifndef AUTO_AIM_FIRE_RATE_RESELECTION_MANAGER_HPP_
+#define AUTO_AIM_FIRE_RATE_RESELECTION_MANAGER_HPP_
 
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
+#include "aruwsrc/control/agitator/fire_rate_reselection_manager_interface.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -35,7 +35,8 @@ namespace aruwsrc::control::auto_aim
  *
  * If CV is disconnected, does not limit fire.
  */
-class AutoAimFireRateManager : public control::governor::FireRateManagerInterface
+class AutoAimFireRateReselectionManager
+    : public control::agitator::FireRateReselectionManagerInterface
 {
 public:
     static constexpr float LOW_RPS = 3;
@@ -47,7 +48,7 @@ public:
      * @param[in] turretCVCommand
      * @param[in] turretID ID of the turret that this governor controls
      */
-    AutoAimFireRateManager(
+    AutoAimFireRateReselectionManager(
         aruwsrc::Drivers &drivers,
         const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         const uint8_t turretID)
@@ -76,27 +77,27 @@ public:
         }
     }
 
-    inline control::governor::FireRateReadinessState getFireRateReadinessState() final
+    inline control::agitator::FireRateReadinessState getFireRateReadinessState() final
     {
         if (!drivers.commandScheduler.isCommandScheduled(&turretCVCommand))
         {
             // Don't limit firing if in manual fire mode
-            return control::governor::FireRateReadinessState::READY_IGNORE_RATE_LIMITING;
+            return control::agitator::FireRateReadinessState::READY_IGNORE_RATE_LIMITING;
         }
 
         if (!drivers.visionCoprocessor.isCvOnline())
         {
             // We're in CV mode; prevent firing altogether if CV offline
-            return control::governor::FireRateReadinessState::NOT_READY;
+            return control::agitator::FireRateReadinessState::NOT_READY;
         }
 
         if (drivers.visionCoprocessor.getLastAimData(turretID).firerate ==
             aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
         {
-            return control::governor::FireRateReadinessState::NOT_READY;
+            return control::agitator::FireRateReadinessState::NOT_READY;
         }
 
-        return control::governor::FireRateReadinessState::READY_USE_RATE_LIMITING;
+        return control::agitator::FireRateReadinessState::READY_USE_RATE_LIMITING;
     }
 
 private:
@@ -106,4 +107,4 @@ private:
 };
 }  // namespace aruwsrc::control::auto_aim
 
-#endif  // AUTO_AIM_FIRE_RATE_MANAGER_HPP_
+#endif  // AUTO_AIM_FIRE_RATE_RESELECTION_MANAGER_HPP_

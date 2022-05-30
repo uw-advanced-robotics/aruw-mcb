@@ -17,15 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "multi_shot_handler.hpp"
+#include "multi_shot_cv_command_mapping.hpp"
 
 namespace aruwsrc::control::agitator
 {
-MultiShotHandler::MultiShotHandler(
+MultiShotCvCommandMapping::MultiShotCvCommandMapping(
     aruwsrc::Drivers &drivers,
     tap::control::Command &launchCommand,
     const tap::control::RemoteMapState &rms,
-    FireRateManager *fireRateManager,
+    std::optional<ManualFireRateReselectionManager *> fireRateManager,
     governor::CvOnTargetGovernor &cvOnTargetGovernor)
     : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
       fireRateManager(fireRateManager),
@@ -33,7 +33,7 @@ MultiShotHandler::MultiShotHandler(
 {
 }
 
-void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState &currState)
+void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::RemoteMapState &currState)
 {
     int timesToReschedule = 0;
 
@@ -42,7 +42,7 @@ void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState 
     {
         case SINGLE:
             timesToReschedule = 1;
-            fireRate = FireRateManager::MAX_FIRERATE_RPS;
+            fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
             break;
         case FULL_AUTO_10HZ:
             timesToReschedule = -1;
@@ -50,21 +50,22 @@ void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState 
             break;
         case FULL_AUTO:
             timesToReschedule = -1;
-            fireRate = FireRateManager::MAX_FIRERATE_RPS;
+            fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
             break;
         default:
-            fireRate = FireRateManager::MAX_FIRERATE_RPS;
+            fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
             break;
-    }
-
-    if (fireRateManager != nullptr)
-    {
-        fireRateManager->setFireRate(fireRate);
     }
 
     if (cvOnTargetGovernor.isGovernorGating())
     {
         timesToReschedule = -1;
+        fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+    }
+
+    if (fireRateManager.has_value())
+    {
+        fireRateManager.value()->setFireRate(fireRate);
     }
 
     setMaxTimesToSchedule(timesToReschedule);

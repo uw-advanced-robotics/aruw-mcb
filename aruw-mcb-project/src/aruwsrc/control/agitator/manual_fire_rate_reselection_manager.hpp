@@ -17,23 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FIRE_RATE_MANAGER_HPP_
-#define FIRE_RATE_MANAGER_HPP_
+#ifndef MANUAL_FIRE_RATE_RESELECTION_MANAGER_HPP_
+#define MANUAL_FIRE_RATE_RESELECTION_MANAGER_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
+#include "fire_rate_reselection_manager_interface.hpp"
 
 namespace aruwsrc::control::agitator
 {
 /**
  * A storage class that contains a `fireRate` that can be set by calling `setFireRate`.
  */
-class FireRateManager : public control::governor::FireRateManagerInterface
+class ManualFireRateReselectionManager
+    : public control::agitator::FireRateReselectionManagerInterface
 {
 public:
-    FireRateManager() {}
+    ManualFireRateReselectionManager() {}
 
     mockable inline void setFireRate(float fireRate) { this->fireRate = std::max(0.0f, fireRate); }
 
@@ -44,14 +45,14 @@ public:
      * Unless the fire rate is 0, always returns `FireRateReadinessState::READY_USE_RATE_LIMITING`
      * since the manager will always be ready to rate limit using the provided fireRate.
      */
-    inline control::governor::FireRateReadinessState getFireRateReadinessState() override
+    inline control::agitator::FireRateReadinessState getFireRateReadinessState() override
     {
         if (tap::algorithms::compareFloatClose(fireRate, 0, 1E-5))
         {
-            return control::governor::FireRateReadinessState::NOT_READY;
+            return control::agitator::FireRateReadinessState::NOT_READY;
         }
 
-        return control::governor::FireRateReadinessState::READY_USE_RATE_LIMITING;
+        return control::agitator::FireRateReadinessState::READY_USE_RATE_LIMITING;
     }
 
 private:
@@ -59,4 +60,4 @@ private:
 };
 }  // namespace aruwsrc::control::agitator
 
-#endif  // FIRE_RATE_MANAGER_HPP_
+#endif  // MANUAL_FIRE_RATE_RESELECTION_MANAGER_HPP_

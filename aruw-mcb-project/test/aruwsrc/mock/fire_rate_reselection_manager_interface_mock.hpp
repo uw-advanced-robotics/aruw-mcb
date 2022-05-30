@@ -17,26 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FIRE_RATE_MANAGER_MOCK_HPP_
-#define FIRE_RATE_MANAGER_MOCK_HPP_
+#ifndef FIRE_RATE_RESELECTION_MANAGER_INTERFACE_MOCK_HPP_
+#define FIRE_RATE_RESELECTION_MANAGER_INTERFACE_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/agitator/fire_rate_manager.hpp"
+#include "aruwsrc/control/agitator/fire_rate_reselection_manager_interface.hpp"
 
 namespace aruwsrc::mock
 {
-class FireRateManagerMock : public control::agitator::FireRateManager
+class FireRateReselectionManagerInterfaceMock
+    : public control::agitator::FireRateReselectionManagerInterface
 {
 public:
-    MOCK_METHOD(void, setFireRate, (float), (override));
     MOCK_METHOD(uint32_t, getFireRatePeriod, (), (override));
     MOCK_METHOD(
-        control::governor::FireRateReadinessState,
+        control::agitator::FireRateReadinessState,
         getFireRateReadinessState,
         (),
         (override));
 };
 }  // namespace aruwsrc::mock
 
-#endif  // FIRE_RATE_MANAGER_MOCK_HPP_
+#endif  // FIRE_RATE_RESELECTION_MANAGER_INTERFACE_MOCK_HPP_

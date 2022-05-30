@@ -22,7 +22,7 @@
 #include "tap/mock/motor_interface_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
-#include "aruwsrc/control/auto-aim/auto_aim_fire_rate_manager.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
@@ -34,7 +34,7 @@
 using namespace testing;
 using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::serial;
-using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::agitator;
 
 class AutoAimFireRateManagerTest : public Test
 {
@@ -81,7 +81,7 @@ private:
 
 protected:
     NiceMock<aruwsrc::mock::TurretCVCommandMock> turretCvCommand;
-    AutoAimFireRateManager fireRateManager;
+    AutoAimFireRateReselectionManager fireRateManager;
     VisionCoprocessor::TurretAimData aimData = {};
 };
 
@@ -155,15 +155,15 @@ TEST_P(AutoAimFireRateManagerTestParameterized, getFireRatePeriod)
 static constexpr TestParams TEST_ZERO_FIRERATE{0, VisionCoprocessor::FireRate::ZERO};
 
 static TestParams TEST_LOW_FIRERATE{
-    uint32_t(round(1000.0f / AutoAimFireRateManager::LOW_RPS)),
+    uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::LOW_RPS)),
     VisionCoprocessor::FireRate::LOW};
 
 static TestParams TEST_MID_FIRERATE{
-    uint32_t(round(1000.0f / AutoAimFireRateManager::MID_RPS)),
+    uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::MID_RPS)),
     VisionCoprocessor::FireRate::MEDIUM};
 
 static TestParams TEST_HIGH_FIRERATE{
-    uint32_t(round(1000.0f / AutoAimFireRateManager::HIGH_RPS)),
+    uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::HIGH_RPS)),
     VisionCoprocessor::FireRate::HIGH};
 
 INSTANTIATE_TEST_CASE_P(

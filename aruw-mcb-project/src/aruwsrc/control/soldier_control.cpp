@@ -34,8 +34,8 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/cv_gated_fire_rate_manager.hpp"
-#include "agitator/multi_shot_handler.hpp"
+#include "agitator/manual_fire_rate_reselection_manager.hpp"
+#include "agitator/multi_shot_cv_command_mapping.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
@@ -259,9 +259,8 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
-extern CvOnTargetGovernor cvOnTargetGovernor;
-CvGatedFireRateManager fireRateManager(cvOnTargetGovernor);
-FireRateLimitGovernor fireRateLimitGovernor(fireRateManager);
+ManualFireRateReselectionManager manualFireRateReselectionManager;
+FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
@@ -314,7 +313,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
-extern MultiShotHandler leftMousePressedBNotPressed;
+extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
     clientDisplay,
@@ -368,11 +367,11 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
 
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
-MultiShotHandler leftMousePressedBNotPressed(
+MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    &fireRateManager,
+    &manualFireRateReselectionManager,
     cvOnTargetGovernor);
 
 HoldRepeatCommandMapping leftMousePressedBPressed(
@@ -424,15 +423,15 @@ PressCommandMapping xPressed(
     RemoteMapState({Remote::Key::X}));
 
 CycleStateCommandMapping<
-    MultiShotHandler::ShooterState,
-    MultiShotHandler::NUM_SHOOTER_STATES,
-    MultiShotHandler>
+    MultiShotCvCommandMapping::ShooterState,
+    MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
+    MultiShotCvCommandMapping>
     vPressed(
         drivers(),
         RemoteMapState({Remote::Key::V}),
-        MultiShotHandler::SINGLE,
+        MultiShotCvCommandMapping::SINGLE,
         &leftMousePressedBNotPressed,
-        &MultiShotHandler::setShooterState);
+        &MultiShotCvCommandMapping::setShooterState);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

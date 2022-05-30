@@ -369,11 +369,11 @@ PressCommandMapping gCtrlPressed(
     drivers(),
     {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-MultiShotHandler leftMousePressed(
+MultiShotCvCommandMapping leftMousePressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
     RemoteMapState(RemoteMapState::MouseButton::LEFT),
-    nullptr,
+    std::nullopt,
     kicker::cvOnTargetGovernor);
 HoldCommandMapping rightMousePressed(
     drivers(),

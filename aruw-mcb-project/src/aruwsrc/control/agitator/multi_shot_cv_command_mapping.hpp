@@ -20,11 +20,13 @@
 #ifndef MULTI_SHOT_HANDLER_HPP_
 #define MULTI_SHOT_HANDLER_HPP_
 
+#include <optional>
+
 #include "tap/control/hold_repeat_command_mapping.hpp"
 
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 
-#include "fire_rate_manager.hpp"
+#include "manual_fire_rate_reselection_manager.hpp"
 
 namespace aruwsrc
 {
@@ -37,13 +39,14 @@ namespace aruwsrc::control::agitator
  * Class that stores and allows the user to set some ShooterState. Possible shooter states include
  * single, 10 Hz, or 20 Hz full auto mode.
  *
- * The MultiShotHandler has an associated HoldRepeatCommandMapping. When the shooter state is set,
- * the HoldRepeatCommandMapping's `maxTiemsToSchedule` is updated. Furthermore, a this object
- * modifies the fire rate of a FireRateManager, which is used to determine the fire rate of the
- * launcher. Thus, assuming the HoldRepeatCommandMapping is associated with some command that
- * launches a projectile, this class will control the "state" of the shooter.
+ * This object is a HoldRepeatCommandMapping. It will update its `maxTimesToSchedule` based on the
+ * ShooterState. Furthermore, this object modifies the fire rate of a
+ * ManualFireRateReselectionManager.
+ *
+ * If vision is running, the fire rate should not be limited and the launcher should be in full auto
+ * mode, so this object checks the state of a CvOnTargetGovernor before setting the fire rate.
  */
-class MultiShotHandler : public tap::control::HoldRepeatCommandMapping
+class MultiShotCvCommandMapping : public tap::control::HoldRepeatCommandMapping
 {
 public:
     /**
@@ -62,11 +65,11 @@ public:
      * @param[in] commandMapping The HoldRepeatCommandMapping whose `maxTimesToSchedule` variable to
      * update.
      */
-    MultiShotHandler(
+    MultiShotCvCommandMapping(
         aruwsrc::Drivers &drivers,
         tap::control::Command &launchCommand,
         const tap::control::RemoteMapState &rms,
-        FireRateManager *fireRateManager,
+        std::optional<ManualFireRateReselectionManager *> fireRateManager,
         governor::CvOnTargetGovernor &cvOnTargetGovernor);
 
     void setShooterState(ShooterState state) { this->state = state; }
@@ -76,7 +79,7 @@ public:
     void executeCommandMapping(const tap::control::RemoteMapState &currState);
 
 private:
-    FireRateManager *fireRateManager;
+    std::optional<ManualFireRateReselectionManager *> fireRateManager;
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
 
     ShooterState state = SINGLE;

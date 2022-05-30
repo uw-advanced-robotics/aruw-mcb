@@ -20,54 +20,13 @@
 #ifndef FIRE_RATE_LIMIT_GOVERNOR_HPP_
 #define FIRE_RATE_LIMIT_GOVERNOR_HPP_
 
-#include <cmath>
-
 #include "tap/control/governor/command_governor_interface.hpp"
 
-#include "aruwsrc/control/agitator/fire_rate_timer_manager.hpp"
+#include "aruwsrc/control/agitator/fire_rate_reselection_manager_interface.hpp"
+#include "aruwsrc/control/agitator/fire_rate_timer.hpp"
 
 namespace aruwsrc::control::governor
 {
-enum class FireRateReadinessState
-{
-    READY_IGNORE_RATE_LIMITING = 0,
-    READY_USE_RATE_LIMITING,
-    NOT_READY,
-};
-
-/**
- * An interface that can be implemented to convey fire rate information to the
- * FireRateLimitGovernor.
- */
-class FireRateManagerInterface
-{
-public:
-    /// Max fire rate in rounds/second
-    static constexpr float MAX_FIRERATE_RPS = 1000.0f;
-
-    /// @return the fire rate period (time distance between launching projectiles)
-    virtual uint32_t getFireRatePeriod() = 0;
-
-    /// @return the readiness state of the
-    virtual FireRateReadinessState getFireRateReadinessState() = 0;
-
-protected:
-    /**
-     * Converts a rounds-per-second value (i.e., Hz) to a period in milliseconds.
-     */
-    static inline constexpr uint32_t rpsToPeriodMS(float rps)
-    {
-        if (rps == 0)
-        {
-            return UINT32_MAX;
-        }
-        else
-        {
-            return round(1000.0f / rps);
-        }
-    }
-};
-
 /**
  * A governor that allows a Command to run based on an internal timer and information from the
  * vision processor that dictates fire rate.
@@ -80,12 +39,12 @@ protected:
 class FireRateLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    FireRateLimitGovernor(FireRateManagerInterface &fireRateManager)
+    FireRateLimitGovernor(agitator::FireRateReselectionManagerInterface &fireRateManager)
         : fireRateManager(fireRateManager)
     {
     }
 
-    void initialize() final { fireRateTimerManager.setProjectileLaunched(); }
+    void initialize() final { fireRateTimerManager.registerNewLaunchedProjectile(); }
 
     bool isReady() final
     {
@@ -95,11 +54,11 @@ public:
         auto readinessState = fireRateManager.getFireRateReadinessState();
         switch (readinessState)
         {
-            case FireRateReadinessState::READY_IGNORE_RATE_LIMITING:
+            case agitator::FireRateReadinessState::READY_IGNORE_RATE_LIMITING:
                 return true;
-            case FireRateReadinessState::READY_USE_RATE_LIMITING:
+            case agitator::FireRateReadinessState::READY_USE_RATE_LIMITING:
                 return fireRateTimerManager.isReadyToLaunchProjectile();
-            case FireRateReadinessState::NOT_READY:
+            case agitator::FireRateReadinessState::NOT_READY:
                 return false;
             default:
                 return false;
@@ -114,8 +73,8 @@ public:
     }
 
 private:
-    FireRateManagerInterface &fireRateManager;
-    control::agitator::FireRateTimerManager fireRateTimerManager;
+    agitator::FireRateReselectionManagerInterface &fireRateManager;
+    control::agitator::FireRateTimer fireRateTimerManager;
 };
 }  // namespace aruwsrc::control::governor
 

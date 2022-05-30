@@ -65,12 +65,14 @@ public:
      */
     mockable bool isGovernorGating() const
     {
+        bool isCvOnline = drivers.visionCoprocessor.isCvOnline();
+
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
 
         bool ungated = launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID()) ==
                        AutoAimLaunchTimer::LaunchInclination::UNGATED;
 
-        return enabled && isCvRunning && !ungated;
+        return isCvOnline && enabled && isCvRunning && !ungated;
     }
 
     bool isReady() final_mockable

@@ -39,7 +39,7 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "auto-aim/auto_aim_fire_rate_manager.hpp"
+#include "auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "governor/cv_has_target_governor.hpp"
 #include "governor/cv_on_target_governor.hpp"
 #include "governor/cv_online_governor.hpp"
@@ -257,7 +257,7 @@ public:
     HeatLimitGovernor heatLimitGovernor;
     CvOnTargetGovernor cvOnTargetGovernor;
     CvOnlineGovernor cvOnlineGovernor;
-    AutoAimFireRateManager autoAimFireRateManager;
+    AutoAimFireRateReselectionManager autoAimFireRateManager;
     FireRateLimitGovernor fireRateLimitGovernor;
 
     // agitator governor limited commands

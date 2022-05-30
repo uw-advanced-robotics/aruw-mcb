@@ -20,17 +20,18 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
-#include "aruwsrc/mock/fire_rate_manager_interface_mock.hpp"
+#include "aruwsrc/mock/fire_rate_reselection_manager_interface_mock.hpp"
 
 using namespace testing;
 using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::agitator;
 
 class FireRateLimitGovernorTest : public Test
 {
 protected:
     FireRateLimitGovernorTest() : governor(fireRateManager) {}
 
-    NiceMock<aruwsrc::mock::FireRateManagerInterfaceMock> fireRateManager;
+    NiceMock<aruwsrc::mock::FireRateReselectionManagerInterfaceMock> fireRateManager;
     FireRateLimitGovernor governor;
     tap::arch::clock::ClockStub clock;
 };
