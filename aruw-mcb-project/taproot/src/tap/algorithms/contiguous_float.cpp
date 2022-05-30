@@ -103,19 +103,17 @@ void ContiguousFloat::shiftValue(const float& shiftMagnitude)
 float ContiguousFloat::limitValue(
     const ContiguousFloat& valueToLimit,
     const float& min,
-    const float& max,
-    int* status)
+    const float& max)
 {
     ContiguousFloat minContig(min, valueToLimit.lowerBound, valueToLimit.upperBound);
     ContiguousFloat maxContig(max, valueToLimit.lowerBound, valueToLimit.upperBound);
-    return limitValue(valueToLimit, minContig, maxContig, status);
+    return limitValue(valueToLimit, minContig, maxContig);
 }
 
 float ContiguousFloat::limitValue(
     const ContiguousFloat& valueToLimit,
     const ContiguousFloat& min,
-    const ContiguousFloat& max,
-    int* status)
+    const ContiguousFloat& max)
 {
     if (min.getValue() == max.getValue())
     {
@@ -128,21 +126,10 @@ float ContiguousFloat::limitValue(
     {
         float targetMinDifference = fabs(valueToLimit.difference(min));
         float targetMaxDifference = fabs(valueToLimit.difference(max));
-
-        if (targetMinDifference < targetMaxDifference)
-        {
-            *status = 1;
-            return min.getValue();
-        }
-        else
-        {
-            *status = 2;
-            return max.getValue();
-        }
+        return targetMinDifference < targetMaxDifference ? min.getValue() : max.getValue();
     }
     else
     {
-        *status = 0;
         return valueToLimit.getValue();
     }
 }

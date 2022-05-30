@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -33,8 +33,6 @@ namespace tap
 {
 namespace motor
 {
-static constexpr uint16_t ENC_RESOLUTION = 1600;
-
 StepperMotor::StepperMotor(
     Drivers* drivers,
     bool motorInverted,
@@ -51,7 +49,7 @@ StepperMotor::StepperMotor(
 
 void StepperMotor::initialize()
 {
-    drivers->pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 250);
+    drivers->pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 100);
 }
 
 void StepperMotor::setDesiredOutput(int32_t desiredOutput)

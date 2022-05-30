@@ -19,19 +19,18 @@
 
 #include "stepper_motor_turret_control_command.hpp"
 
-#include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::turret::user
 {
 StepperMotorTurretControlCommand::StepperMotorTurretControlCommand(
     aruwsrc::Drivers *drivers,
-    TurretSubsystem& turretSubsystem)
+    StepperTurretSubsystem& stepperTurretSubsystem)
     : drivers(drivers),
-      turretPitchMotor(turretSubsystem.pitchMotor),
-      turretYawMotor(turretSubsystem.yawMotor)
+      turretPitchMotor(stepperTurretSubsystem.pitchMotor),
+      turretYawMotor(stepperTurretSubsystem.yawMotor)
 {
-    addSubsystemRequirement(&turretSubsystem);
+    addSubsystemRequirement(&stepperTurretSubsystem);
 }
 
 bool StepperMotorTurretControlCommand::isReady() { return !isFinished(); }
@@ -40,9 +39,10 @@ void StepperMotorTurretControlCommand::initialize() {}
 
 void StepperMotorTurretControlCommand::execute()
 {
-    turretPitchMotor.setMotorOutput(
+    // TODO: check if this is right????? how 2 use w controller
+    turretPitchMotor.moveSteps(
         drivers->controlOperatorInterface.getTurretPitchInput(0));
-    turretYawMotor.setMotorOutput(
+    turretYawMotor.moveSteps(
         drivers->controlOperatorInterface.getTurretYawInput(0));
 }
 
@@ -50,8 +50,9 @@ bool StepperMotorTurretControlCommand::isFinished() const { return false; }
 
 void StepperMotorTurretControlCommand::end(bool)
 {
-    turretPitchMotor.setMotorOutput(0);
-    turretYawMotor.setMotorOutput(0);
+    // TODO: wat is this supposed 2 be
+    turretPitchMotor.setDesiredPosition(0);
+    turretYawMotor.setDesiredPosition(0);
 }
 
 }  // namespace aruwsrc::control::turret::user
