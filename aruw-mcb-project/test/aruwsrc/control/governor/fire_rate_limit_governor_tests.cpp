@@ -117,15 +117,18 @@ static constexpr TestParams TEST_FIRE_RATE_MANAGER_NOT_READY = {
 static constexpr TestParams TEST_FIRE_RATE_MANAGER_USE_RATE_LIMITING = {
     .expectIsReady = true,
     .fireRateReadinessState = FireRateReadinessState::READY_USE_RATE_LIMITING,
+    .fireRatePeriod = 0,
 };
 
 static constexpr TestParams TEST_FIRE_RATE_MANAGER_ISREADY_WITHIN_FIRE_RATE_PERIOD = {
+    .expectIsReady = false,
     .fireRatePeriod = 10,
     .timeWhenInitializeCalled = 0,
     .timeWhenIsReadyCalled = 5,
 };
 
 static constexpr TestParams TEST_FIRE_RATE_MANAGER_ISREADY_OUTSIDE_OF_FIRE_RATE_PERIOD = {
+    .expectIsReady = false,
     .fireRatePeriod = 10,
     .timeWhenInitializeCalled = 0,
     .timeWhenIsReadyCalled = 10,
@@ -133,6 +136,7 @@ static constexpr TestParams TEST_FIRE_RATE_MANAGER_ISREADY_OUTSIDE_OF_FIRE_RATE_
 
 static constexpr TestParams
     TEST_FIRE_RATE_MANAGER_ISREADY_OUTSIDE_OF_FIRE_RATE_PERIOD_NONZERO_INITIALIZE_TIME = {
+        .expectIsReady = false,
         .fireRatePeriod = 10,
         .timeWhenInitializeCalled = 20,
         .timeWhenIsReadyCalled = 35,

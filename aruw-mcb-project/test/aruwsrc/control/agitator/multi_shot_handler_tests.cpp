@@ -43,9 +43,7 @@ class MultiShotHandlerTest : public Test
 {
 protected:
     MultiShotHandlerTest()
-        :
-
-          yawMotor(&yawM, {}),
+        : yawMotor(&yawM, {}),
           pitchMotor(&pitM, {}),
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),
@@ -117,7 +115,7 @@ TEST_F(MultiShotHandlerTest, setShooterState_single_adds_command_once)
 
     EXPECT_CALL(drivers.commandScheduler, addCommand).Times(1);
 
-    EXPECT_CALL(fireRateManager, setFireRate(20)).Times(4);
+    EXPECT_CALL(fireRateManager, setFireRate(FireRateManager::MAX_FIRERATE_RPS)).Times(4);
 
     multiShotHandler.setShooterState(MultiShotHandler::SINGLE);
 
@@ -127,14 +125,14 @@ TEST_F(MultiShotHandlerTest, setShooterState_single_adds_command_once)
     multiShotHandler.executeCommandMapping(defaultRms);
 }
 
-TEST_F(MultiShotHandlerTest, setShooterState_10hz_20hz_repeatedly_adds_commands)
+TEST_F(MultiShotHandlerTest, setShooterState_10hz_full_repeatedly_adds_commands)
 {
     ON_CALL(cvOnTargetGovernor, isGovernorGating).WillByDefault(Return(false));
 
     {
         InSequence seq;
         EXPECT_CALL(fireRateManager, setFireRate(10)).Times(4);
-        EXPECT_CALL(fireRateManager, setFireRate(20)).Times(4);
+        EXPECT_CALL(fireRateManager, setFireRate(FireRateManager::MAX_FIRERATE_RPS)).Times(4);
     }
 
     EXPECT_CALL(drivers.commandScheduler, addCommand).Times(8);

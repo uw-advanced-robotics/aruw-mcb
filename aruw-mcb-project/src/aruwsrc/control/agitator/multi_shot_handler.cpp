@@ -42,7 +42,7 @@ void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState 
     {
         case SINGLE:
             timesToReschedule = 1;
-            fireRate = 1000;
+            fireRate = FireRateManager::MAX_FIRERATE_RPS;
             break;
         case FULL_AUTO_10HZ:
             timesToReschedule = -1;
@@ -50,10 +50,10 @@ void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState 
             break;
         case FULL_AUTO:
             timesToReschedule = -1;
-            fireRate = 1000;
+            fireRate = FireRateManager::MAX_FIRERATE_RPS;
             break;
         default:
-            fireRate = 1000;
+            fireRate = FireRateManager::MAX_FIRERATE_RPS;
             break;
     }
 

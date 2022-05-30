@@ -42,6 +42,9 @@ enum class FireRateReadinessState
 class FireRateManagerInterface
 {
 public:
+    /// Max fire rate in rounds/second
+    static constexpr float MAX_FIRERATE_RPS = 1000.0f;
+
     /// @return the fire rate period (time distance between launching projectiles)
     virtual uint32_t getFireRatePeriod() = 0;
 
@@ -82,10 +85,7 @@ public:
     {
     }
 
-    void initialize() final
-    {
-        fireRateTimerManager.setProjectileLaunched();
-    }
+    void initialize() final { fireRateTimerManager.setProjectileLaunched(); }
 
     bool isReady() final
     {
