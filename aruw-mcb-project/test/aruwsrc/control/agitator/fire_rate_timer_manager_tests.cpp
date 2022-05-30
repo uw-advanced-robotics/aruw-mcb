@@ -38,7 +38,8 @@ TEST_F(FireRateTimerManagerTest, isReadyToLaunchProjectile_initially_true)
 
 TEST_F(FireRateTimerManagerTest, isReadyToLaunchProjectile_false_after_setProjectileLaunched)
 {
-    fireRateTimerManager.setProjectileLaunched(10);
+    fireRateTimerManager.setProjectileLaunchPeriod(10);
+    fireRateTimerManager.setProjectileLaunched();
     EXPECT_FALSE(fireRateTimerManager.isReadyToLaunchProjectile());
 }
 
@@ -46,14 +47,14 @@ TEST_F(
     FireRateTimerManagerTest,
     isReadyToLaunchProjectile_false_when_setProjectileLaunched_launch_period_not_complete)
 {
-    fireRateTimerManager.setProjectileLaunched(100);
+    fireRateTimerManager.setProjectileLaunchPeriod(100);
     clock.time += 50;
     EXPECT_FALSE(fireRateTimerManager.isReadyToLaunchProjectile());
 }
 
 TEST_F(FireRateTimerManagerTest, isReadyToLaunchProjectile_true_after_newLaunchPeriod_expired)
 {
-    fireRateTimerManager.setProjectileLaunched(100);
+    fireRateTimerManager.setProjectileLaunchPeriod(100);
     clock.time += 100;
     EXPECT_TRUE(fireRateTimerManager.isReadyToLaunchProjectile());
 }
@@ -62,11 +63,18 @@ TEST_F(
     FireRateTimerManagerTest,
     multiple_calls_to_setProjectileLaunched_newLaunchPeriod_used_each_time)
 {
-    fireRateTimerManager.setProjectileLaunched(100);
+    fireRateTimerManager.setProjectileLaunchPeriod(100);
+
     clock.time += 100;
-    fireRateTimerManager.setProjectileLaunched(1000);
+
+    fireRateTimerManager.setProjectileLaunchPeriod(1000);
+    fireRateTimerManager.setProjectileLaunched();
+
     clock.time += 100;
+
     EXPECT_FALSE(fireRateTimerManager.isReadyToLaunchProjectile());
+
     clock.time += 900;
+
     EXPECT_TRUE(fireRateTimerManager.isReadyToLaunchProjectile());
 }

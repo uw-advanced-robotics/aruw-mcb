@@ -146,7 +146,7 @@ TEST_F(MultiShotHandlerTest, setShooterState_10hz_20hz_repeatedly_adds_commands)
     multiShotHandler.executeCommandMapping(defaultRms);
     multiShotHandler.executeCommandMapping(defaultRms);
 
-    multiShotHandler.setShooterState(MultiShotHandler::FULL_AUTO_20HZ);
+    multiShotHandler.setShooterState(MultiShotHandler::FULL_AUTO);
 
     multiShotHandler.executeCommandMapping(defaultRms);
     multiShotHandler.executeCommandMapping(defaultRms);

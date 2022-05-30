@@ -21,7 +21,6 @@
 #define FIRE_RATE_TIMER_MANAGER_HPP_
 
 #include "tap/architecture/clock.hpp"
-#include "tap/architecture/timeout.hpp"
 
 namespace aruwsrc::control::agitator
 {
@@ -36,21 +35,37 @@ class FireRateTimerManager
 public:
     /**
      * This function must be called each time a projectile has been launched.
-     *
-     * @param[in] launchPeriod A period in milliseconds that projectiles will be limited to being
-     * launched at. Projectiles can be launched at a longer period than the one specified, this is
-     * simply an upper bound on the rate of fire.
      */
-    inline void setProjectileLaunched(uint32_t newLaunchPeriod) { timer.restart(newLaunchPeriod); }
+    inline void setProjectileLaunched()
+    {
+        this->lastProjectileLaunchTime = tap::arch::clock::getTimeMilliseconds();
+    }
 
     /**
      * @return True if the manager deems that a projectile may be launched based on fire rate
      * limiting.
      */
-    inline bool isReadyToLaunchProjectile() { return timer.isExpired() || timer.isStopped(); }
+    inline bool isReadyToLaunchProjectile() const
+    {
+        return tap::arch::clock::getTimeMilliseconds() - this->lastProjectileLaunchTime >=
+               this->launchPeriod;
+    }
+
+    /**
+     * Sets the projectile launch period.
+     *
+     * @param[in] launchPeriod A period in milliseconds that projectiles will be limited to being
+     * launched at. Projectiles can be launched at a longer period than the one specified, this is
+     * simply an upper bound on the rate of fire.
+     */
+    inline void setProjectileLaunchPeriod(uint32_t launchPeriod)
+    {
+        this->launchPeriod = launchPeriod;
+    }
 
 private:
-    tap::arch::MilliTimeout timer;
+    uint32_t lastProjectileLaunchTime = 0;
+    uint32_t launchPeriod = 0;
 };
 }  // namespace aruwsrc::control::agitator
 

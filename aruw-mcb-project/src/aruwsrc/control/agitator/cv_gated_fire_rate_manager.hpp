@@ -56,7 +56,6 @@ public:
 
 private:
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
-    float fireRate = 0;
 };
 }  // namespace aruwsrc::control::agitator
 

@@ -84,15 +84,15 @@ public:
 
     void initialize() final
     {
-        uint32_t fireRatePeriod = fireRateManager.getFireRatePeriod();
-
-        fireRateTimerManager.setProjectileLaunched(fireRatePeriod);
+        fireRateTimerManager.setProjectileLaunched();
     }
 
     bool isReady() final
     {
-        auto readinessState = fireRateManager.getFireRateReadinessState();
+        uint32_t fireRatePeriod = fireRateManager.getFireRatePeriod();
+        fireRateTimerManager.setProjectileLaunchPeriod(fireRatePeriod);
 
+        auto readinessState = fireRateManager.getFireRateReadinessState();
         switch (readinessState)
         {
             case FireRateReadinessState::READY_IGNORE_RATE_LIMITING:

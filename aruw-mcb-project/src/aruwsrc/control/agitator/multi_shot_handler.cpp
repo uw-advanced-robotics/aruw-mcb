@@ -42,18 +42,18 @@ void MultiShotHandler::executeCommandMapping(const tap::control::RemoteMapState 
     {
         case SINGLE:
             timesToReschedule = 1;
-            fireRate = 20;
+            fireRate = 1000;
             break;
         case FULL_AUTO_10HZ:
             timesToReschedule = -1;
             fireRate = 10;
             break;
-        case FULL_AUTO_20HZ:
+        case FULL_AUTO:
             timesToReschedule = -1;
-            fireRate = 20;
+            fireRate = 1000;
             break;
         default:
-            fireRate = 20;
+            fireRate = 1000;
             break;
     }
 

@@ -54,7 +54,7 @@ public:
     {
         SINGLE = 0,
         FULL_AUTO_10HZ,
-        FULL_AUTO_20HZ,
+        FULL_AUTO,
         NUM_SHOOTER_STATES,
     };
 
