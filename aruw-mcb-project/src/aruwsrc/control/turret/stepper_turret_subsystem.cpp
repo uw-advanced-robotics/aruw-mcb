@@ -18,7 +18,7 @@
  */
 
 #include "stepper_turret_subsystem.hpp"
-
+#include "aruwsrc/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
 using namespace tap::motor;
@@ -29,9 +29,7 @@ namespace aruwsrc::control::turret
 StepperTurretSubsystem::StepperTurretSubsystem(
     aruwsrc::Drivers *drivers,
     StepperMotorInterface &pitchMotor,
-    StepperMotorInterface &yawMotor,
-    const TurretMotorConfig &pitchMotorConfig, // JENNY_TODO: do i even need these configs????
-    const TurretMotorConfig &yawMotorConfig)
+    StepperMotorInterface &yawMotor)
     : tap::control::Subsystem(drivers), // JENNY_TODO:w hy is this giving me an error
       pitchMotor(pitchMotor),
       yawMotor(yawMotor),

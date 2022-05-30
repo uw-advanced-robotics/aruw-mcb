@@ -21,23 +21,34 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
-#define TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#ifndef TAPROOT_INTEGRABLE_SETPOINT_SUBSYSTEM_HPP_
+#define TAPROOT_INTEGRABLE_SETPOINT_SUBSYSTEM_HPP_
 
-#include <gmock/gmock.h>
+#include "setpoint_subsystem.hpp"
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-
-namespace tap::mock
+namespace tap
 {
-class Odometry2DInterfaceMock : public algorithms::odometry::Odometry2DInterface
+// Forward declaration
+class Drivers;
+}  // namespace tap
+
+namespace tap::control::setpoint
+{
+/**
+ * An extension of the SetpointSubsystem. Identical to the SetpointSubsystem except that the
+ * setpoint is assumed to be integrable. As such, an additional getCurrentValueIntegral abstract
+ * function must be implemented by those who choose to extend this class.
+ */
+class IntegrableSetpointSubsystem : public virtual SetpointSubsystem
 {
 public:
-    MOCK_METHOD(modm::Location2D<float>, getCurrentLocation2D, (), (const override));
-    MOCK_METHOD(modm::Vector2f, getCurrentVelocity2D, (), (const override));
-    MOCK_METHOD(uint32_t, getLastComputedOdometryTime, (), (const override));
-    MOCK_METHOD(float, getYaw, (), (const override));
+    /**
+     * @return The current integral value of the setpoint, a measurement with units `units *
+     * seconds` (units of setpoint integrated with respect to time)
+     */
+    virtual float getCurrentValueIntegral() const = 0;
 };
-}  // namespace tap::mock
 
-#endif  // TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+}  // namespace tap::control::setpoint
+
+#endif  // TAPROOT_INTEGRABLE_SETPOINT_SUBSYSTEM_HPP_

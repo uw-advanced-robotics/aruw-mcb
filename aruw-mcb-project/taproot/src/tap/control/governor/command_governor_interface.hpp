@@ -21,23 +21,26 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
-#define TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#ifndef TAPROOT_COMMAND_GOVERNOR_INTERFACE_HPP_
+#define TAPROOT_COMMAND_GOVERNOR_INTERFACE_HPP_
 
-#include <gmock/gmock.h>
-
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-
-namespace tap::mock
+namespace tap::control::governor
 {
-class Odometry2DInterfaceMock : public algorithms::odometry::Odometry2DInterface
+/**
+ * An interface that is used to gate the execution of a Command. Override this interface to gate
+ * various commands based on some conditional logic. For example, create a sub-class of this
+ * interface and have isReady return true when the ref system indicates you have enough heat to
+ * launch a projectile. Then, use a GovernorLimitedCommand to only run a command that launches
+ * a projectile when the CommandGovernorInterface sub-object you created is true.
+ */
+class CommandGovernorInterface
 {
 public:
-    MOCK_METHOD(modm::Location2D<float>, getCurrentLocation2D, (), (const override));
-    MOCK_METHOD(modm::Vector2f, getCurrentVelocity2D, (), (const override));
-    MOCK_METHOD(uint32_t, getLastComputedOdometryTime, (), (const override));
-    MOCK_METHOD(float, getYaw, (), (const override));
+    /// Returns true if the Command being governed by the governor may execute.
+    virtual bool isReady() = 0;
+    /// Returns true if the Command being governed by the governor should stop executing.
+    virtual bool isFinished() = 0;
 };
-}  // namespace tap::mock
+}  // namespace tap::control::governor
 
-#endif  // TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#endif  // TAPROOT_COMMAND_GOVERNOR_INTERFACE_HPP_

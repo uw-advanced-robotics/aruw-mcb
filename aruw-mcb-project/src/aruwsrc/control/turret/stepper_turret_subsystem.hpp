@@ -55,9 +55,7 @@ public:
     explicit StepperTurretSubsystem(
         aruwsrc::Drivers* drivers,
         tap::motor::StepperMotorInterface& pitchMotor,
-        tap::motor::StepperMotorInterface& yawMotor,
-        const TurretMotorConfig& pitchMotorConfig,
-        const TurretMotorConfig& yawMotorConfig);
+        tap::motor::StepperMotorInterface& yawMotor);
             
     void initialize() override;
 
@@ -69,15 +67,16 @@ public:
 
     mockable inline bool isOnline() const { return true;}; // JENNY_TODO : check if this is right...coz i deleted the TurretMotors
 
-protected:
-    Drivers* drivers;
-    
+public:
     // Associated with and contains logic for controlling the stepper motor pitch.
     tap::motor::StepperMotorInterface& pitchMotor;
     // Associated with and contains logic for controlling the stepper motor yaw.
     tap::motor::StepperMotorInterface& yawMotor;
+
+protected:
+    Drivers* drivers;
 };
 
 } // namespace aruwsrc::control::turret
 
-#endif STEPPER_TURRET_SUBSYSTEM_HPP_
+#endif // STEPPER_TURRET_SUBSYSTEM_HPP_

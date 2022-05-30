@@ -21,23 +21,33 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
-#define TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#ifndef TAPROOT_IMU_INTERFACE_MOCK_HPP_
+#define TAPROOT_IMU_INTERFACE_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 
 namespace tap::mock
 {
-class Odometry2DInterfaceMock : public algorithms::odometry::Odometry2DInterface
+class ImuInterfaceMock : public tap::communication::sensors::imu::ImuInterface
 {
 public:
-    MOCK_METHOD(modm::Location2D<float>, getCurrentLocation2D, (), (const override));
-    MOCK_METHOD(modm::Vector2f, getCurrentVelocity2D, (), (const override));
-    MOCK_METHOD(uint32_t, getLastComputedOdometryTime, (), (const override));
-    MOCK_METHOD(float, getYaw, (), (const override));
+    ImuInterfaceMock();
+    virtual ~ImuInterfaceMock();
+
+    MOCK_METHOD(const char *, getName, (), (const override));
+    MOCK_METHOD(float, getAx, (), (override));
+    MOCK_METHOD(float, getAy, (), (override));
+    MOCK_METHOD(float, getAz, (), (override));
+    MOCK_METHOD(float, getGx, (), (override));
+    MOCK_METHOD(float, getGy, (), (override));
+    MOCK_METHOD(float, getGz, (), (override));
+    MOCK_METHOD(float, getTemp, (), (override));
+    MOCK_METHOD(float, getYaw, (), (override));
+    MOCK_METHOD(float, getPitch, (), (override));
+    MOCK_METHOD(float, getRoll, (), (override));
 };
 }  // namespace tap::mock
 
-#endif  // TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#endif  // TAPROOT_IMU_INTERFACE_MOCK_HPP_
