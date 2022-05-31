@@ -66,22 +66,44 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
+#if defined(TARGET_HERO) || defined(TARGET_SOLDIERMK4_2022)
+    /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
+     *  The IMU Faces to the left of the 'R' on the Type A MCB
+     *  0 Rotation corresponds with a 0 rotation of the chassis
+     */
+    // MCB has power inlet facing forward
+    static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
+#else
+    // MCB has power inlet facing backwards
+    static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
+#endif
+
     /**
      * AutoAim data to receive from Jetson.
      */
     struct TurretAimData
     {
-        float xPos;          ///< x position of the target (in m).
-        float yPos;          ///< y position of the target (in m).
-        float zPos;          ///< z position of the target (in m).
-        float xVel;          ///< x velocity of the target (in m/s).
-        float yVel;          ///< y velocity of the target (in m/s).
-        float zVel;          ///< z velocity of the target (in m/s).
-        float xAcc;          ///< x acceleration of the target (in m/s^2).
-        float yAcc;          ///< y acceleration of the target (in m/s^2).
-        float zAcc;          ///< z acceleration of the target (in m/s^2).
+        float xPos;  ///< x position of the target (in m).
+        float yPos;  ///< y position of the target (in m).
+        float zPos;  ///< z position of the target (in m).
+
+        float xVel;  ///< x velocity of the target (in m/s).
+        float yVel;  ///< y velocity of the target (in m/s).
+        float zVel;  ///< z velocity of the target (in m/s).
+
+        float xAcc;  ///< x acceleration of the target (in m/s^2).
+        float yAcc;  ///< y acceleration of the target (in m/s^2).
+        float zAcc;  ///< z acceleration of the target (in m/s^2).
+
         bool hasTarget;      ///< Whether or not the xavier has a target.
         uint32_t timestamp;  ///< Timestamp in microseconds.
+
+        bool recommendUseTimedShots;   ///< Validity of the targetHitTime
+        uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our
+                                       ///< next shot should ideally hit
+        uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point
+        uint32_t
+            targetIntervalDuration;  ///< Duration during which the plate is at the target point
     } modm_packed;
 
     /**
@@ -162,6 +184,16 @@ public:
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
             hasTarget |= lastAimData[i].hasTarget;
+        }
+        return hasTarget;
+    }
+
+    mockable inline bool getSomeTurretUsingTimedShots() const
+    {
+        bool hasTarget = false;
+        for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
+        {
+            hasTarget |= lastAimData[i].hasTarget && lastAimData[i].recommendUseTimedShots;
         }
         return hasTarget;
     }

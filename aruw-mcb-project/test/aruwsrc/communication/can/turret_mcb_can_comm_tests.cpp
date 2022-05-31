@@ -36,7 +36,7 @@ TEST(TurretMCBCanComm, sendData_hopper_cover_data)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     modm::can::Message blankMsg(0x1fe, 1, {0}, false);
     modm::can::Message filledMsg(0x1fe, 1, {1}, false);
@@ -58,7 +58,7 @@ TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     modm::can::Message blankMsg(0x1fe, 1, {0}, false);
     modm::can::Message filledMsg(0x1fe, 1, {0b10}, false);
@@ -79,7 +79,7 @@ TEST(TurretMCBCanComm, sendData_laser_data)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     modm::can::Message blankMsg(0x1fe, 1, {0}, false);
     modm::can::Message filledMsg(0x1fe, 1, {0b100}, false);
@@ -101,7 +101,7 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
         .WillByDefault([&](tap::can::CanRxListener* const listener) {
@@ -127,7 +127,7 @@ TEST(TurretMCBCanComm, receive_turret_data)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
         .WillByDefault([&](tap::can::CanRxListener* const listener) {
@@ -191,7 +191,7 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
     clock.time = 10'000;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
         .WillByDefault([&](tap::can::CanRxListener* const listener) {

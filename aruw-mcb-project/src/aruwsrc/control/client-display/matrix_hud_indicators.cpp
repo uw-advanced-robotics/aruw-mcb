@@ -57,7 +57,9 @@ MatrixHudIndicators::MatrixHudIndicators(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
     const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
@@ -65,34 +67,39 @@ MatrixHudIndicators::MatrixHudIndicators(
       drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
+      turretSubsystem(turretSubsystem),
       multiShotHandler(multiShotHandler),
+      cvOnTargetGovernor(cvOnTargetGovernor),
       driveCommands{
           chassisBeybladeCmd,
           chassisAutorotateCmd,
           chassisImuDriveCommand,
       },
-      matrixHudIndicatorDrawers{
-          StateHUDIndicator<uint16_t>(
-              refSerialTransmitter,
-              &matrixHudIndicatorGraphics[CHASSIS_STATE],
-              updateGraphicYLocation,
-              0),
-          StateHUDIndicator<uint16_t>(
-              refSerialTransmitter,
-              &matrixHudIndicatorGraphics[SHOOTER_STATE],
-              updateGraphicYLocation,
-              0),
-          StateHUDIndicator<uint16_t>(
-              refSerialTransmitter,
-              &matrixHudIndicatorGraphics[FIRING_MODE],
-              updateGraphicYLocation,
-              0),
-          StateHUDIndicator<uint16_t>(
-              refSerialTransmitter,
-              &matrixHudIndicatorGraphics[CV_STATUS],
-              updateGraphicYLocation,
-              0),
-      }
+      matrixHudIndicatorDrawers
+{
+    StateHUDIndicator<uint16_t>(
+        refSerialTransmitter,
+        &matrixHudIndicatorGraphics[CHASSIS_STATE],
+        updateGraphicYLocation,
+        0),
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[SHOOTER_STATE],
+            updateGraphicYLocation,
+            0),
+#if defined(DISPLAY_FIRING_MODE)
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[FIRING_MODE],
+            updateGraphicYLocation,
+            0),
+#endif
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[CV_STATUS],
+            updateGraphicYLocation,
+            0),
+}
 {
 }
 
@@ -164,7 +171,9 @@ void MatrixHudIndicators::updateIndicatorState()
             shooterState = ShooterState::LOADING;
         }
 #elif defined(TARGET_HERO)
-        if (!drivers.turretMCBCanComm.getLimitSwitchDepressed())
+        auto turretMCB = turretSubsystem.getTurretMCB();
+        assert(turretMCB != nullptr);
+        if (!turretMCB->getLimitSwitchDepressed())
         {
             shooterState = ShooterState::LOADING;
         }
@@ -174,13 +183,27 @@ void MatrixHudIndicators::updateIndicatorState()
     matrixHudIndicatorDrawers[SHOOTER_STATE].setIndicatorState(
         getIndicatorYCoordinate(static_cast<int>(shooterState)));
 
+#if defined(DISPLAY_FIRING_MODE)
     // update firing mode
     matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
         static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
+#endif
 
-    CVStatus cvStatus = drivers.visionCoprocessor.isCvOnline()
-                            ? CVStatus::VISION_COPROCESSOR_CONNECTED
-                            : CVStatus::VISION_COPROCESSOR_OFFLINE;
+    CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;
+
+    if (drivers.visionCoprocessor.isCvOnline())
+    {
+        if (cvOnTargetGovernor == nullptr)
+        {
+            cvStatus = CVStatus::VISION_COPROCESSOR_NO_PROJECTILE_GATING;
+        }
+        else
+        {
+            cvStatus = cvOnTargetGovernor->getGovernorEnabled()
+                           ? CVStatus::VISION_COPROCESSOR_GATED_PROJECTILE_LAUNCH
+                           : CVStatus::VISION_COPROCESSOR_NO_PROJECTILE_GATING;
+        }
+    }
 
     matrixHudIndicatorDrawers[CV_STATUS].setIndicatorState(
         getIndicatorYCoordinate(static_cast<int>(cvStatus)));

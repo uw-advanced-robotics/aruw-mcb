@@ -60,7 +60,7 @@ public:
         (const override));
     MOCK_METHOD(const control::turret::TurretMotorConfig &, getConfig, (), (const override));
     MOCK_METHOD(float, getValidChassisMeasurementError, (), (const override));
-    MOCK_METHOD(float, getValidMinError, (const float), (const override));
+    MOCK_METHOD(float, getValidMinError, (const float, const float), (const override));
 
 private:
     aruwsrc::control::turret::TurretMotorConfig defaultConfig;

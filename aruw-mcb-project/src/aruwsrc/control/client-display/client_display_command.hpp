@@ -88,6 +88,7 @@ public:
      * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
      * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the
      * HUD).
+     * @param[in] cvOnTargetManager @see MatrixHudIndicators
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
      * never be selected as the current chassis command.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
@@ -100,10 +101,11 @@ public:
         ClientDisplaySubsystem &clientDisplay,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-        aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+        tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+        const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);

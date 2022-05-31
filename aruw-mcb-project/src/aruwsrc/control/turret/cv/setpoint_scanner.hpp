@@ -38,57 +38,59 @@ namespace aruwsrc::control::turret::cv
 class SetpointScanner
 {
 public:
+    /// Config struct to pass to constructor
+    struct Config
+    {
+        /// lowerBound the lower bound to bounce the setpoint within
+        float lowerBound;
+        /// upperBound the upper bound to bounce the setpoint within
+        float upperBound;
+        /// the step to update the setpoint by every time scan() is called
+        float delta;
+    };
+
     /**
      * Create a SetpointScanner
      *
-     * @param lowerBound the lower bound to bounce the setpoint within
-     * @param upperBound the upper bound to bounce the setpoint within
-     * @param delta the step to update the setpoint by every time scan() is called
+     * @param[in] config SetpointScanner Config struct
      */
-    SetpointScanner(float lowerBound, float upperBound, float delta)
-        : lowerBound(lowerBound),
-          upperBound(upperBound),
-          delta(delta),
-          scanningPositive(true)
+    SetpointScanner(const Config &config) : config(config), scanningPositive(true), setpoint(0)
     {
-        assert(lowerBound <= upperBound);
+        assert(config.lowerBound <= config.upperBound);
     }
+
+    inline void setScanSetpoint(float set) { setpoint = set; }
 
     /**
      * Update the setpoint by the delta and return the new setpoint.
      *
-     * @param setpoint the current setpoint
      * @return the setpoint after being updated
      */
-    inline float scan(float setpoint)
+    inline float scan()
     {
-        if (setpoint >= upperBound)
+        // increment setpoint
+        setpoint += scanningPositive ? config.delta : -config.delta;
+
+        // check if setpoint has reached min/max boundaries
+        if (setpoint >= config.upperBound)
         {
             scanningPositive = false;
         }
-        else if (setpoint <= lowerBound)
+        else if (setpoint <= config.lowerBound)
         {
             scanningPositive = true;
         }
 
-        if (scanningPositive)
-        {
-            setpoint += delta;
-        }
-        else
-        {
-            setpoint -= delta;
-        }
-
         // Bound value between upper and lower bounds
-        return tap::algorithms::limitVal(setpoint, lowerBound, upperBound);
+        setpoint = tap::algorithms::limitVal(setpoint, config.lowerBound, config.upperBound);
+
+        return setpoint;
     }
 
 private:
-    const float lowerBound;
-    const float upperBound;
-    const float delta;
+    const Config config;
     bool scanningPositive;
+    float setpoint;
 };
 
 }  // namespace aruwsrc::control::turret::cv

@@ -20,20 +20,31 @@
 #if defined(TARGET_SENTINEL_2021)
 
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "agitator/agitator_subsystem.hpp"
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/move_unjam_ref_limited_command.hpp"
+#include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "governor/cv_has_target_governor.hpp"
+#include "governor/cv_on_target_governor.hpp"
+#include "governor/cv_online_governor.hpp"
+#include "governor/friction_wheels_on_governor.hpp"
+#include "governor/heat_limit_governor.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/launcher_constants.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -44,18 +55,23 @@
 #include "turret/constants/turret_constants.hpp"
 #include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/sentinel_turret_subsystem.hpp"
+#include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::setpoint;
+using namespace tap::control::governor;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::sentinel::drive;
 using namespace tap::gpio;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::governor;
 using namespace tap::control;
 using namespace tap::motor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
 
 /*
@@ -74,26 +90,22 @@ static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::B;
 aruwsrc::communication::serial::SentinelRequestHandler sentinelRequestHandler(drivers());
 
 /* define subsystems --------------------------------------------------------*/
-AgitatorSubsystem agitator(
+VelocityAgitatorSubsystem agitator(
     drivers(),
-    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    AgitatorSubsystem::AGITATOR_GEAR_RATIO_M2006,
-    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_ID,
-    aruwsrc::control::agitator::constants::AGITATOR_MOTOR_CAN_BUS,
-    false,
-    M_PI / 10,
-    150,
-    true);
+    constants::AGITATOR_PID_CONFIG,
+    constants::AGITATOR_CONFIG);
 
 SentinelDriveSubsystem sentinelDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
 
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem frictionWheels(
-    drivers(),
-    aruwsrc::control::launcher::LEFT_MOTOR_ID,
-    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-    aruwsrc::control::launcher::CAN_BUS_MOTORS,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    0.1f);
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        nullptr,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Note: motor "one" is right, "two" is left
 tap::motor::DjiMotor pitchMotor(
@@ -113,30 +125,13 @@ SentinelTurretSubsystem turretSubsystem(
     &pitchMotor,
     &yawMotor,
     PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG);
+    YAW_MOTOR_CONFIG,
+    nullptr,
+    0);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(
-    drivers(),
-    &turretSubsystem.yawMotor,
-    &sentinelDrive);
+OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::agitator::MoveUnjamRefLimitedCommand rotateAgitatorManual(
-    drivers(),
-    &agitator,
-    M_PI / 5.0f,
-    50,
-    0,
-    true,
-    M_PI / 16.0f,
-    M_PI / 2.0f,
-    M_PI / 4.0f,
-    130,
-    2,
-    true,
-    10);
-
-CalibrateCommand agitatorCalibrateCommand(&agitator);
 
 // Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
@@ -147,23 +142,36 @@ FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     &frictionWheels,
     30.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    &turretSubsystem.pitchMotor,
+    turretSubsystem.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    &turretSubsystem.yawMotor,
+    turretSubsystem.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
+
+OttoBallisticsSolver ballisticsSolver(
+    *drivers(),
+    odometrySubsystem,
+    turretSubsystem,
+    frictionWheels,
+    29.5f,  // defaultLaunchSpeed
+    0       // turretID
+);
+AutoAimLaunchTimer autoAimLaunchTimer(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver);
 
 // turret commands
 
@@ -181,14 +189,58 @@ cv::SentinelTurretCVCommand turretCVCommand(
     &turretSubsystem,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
-    agitator,
-    &rotateAgitatorManual,
-    odometrySubsystem,
-    frictionWheels,
-    14.5f,
+    &ballisticsSolver,
     0);
-void selectNewRobotMessageHandler() { turretCVCommand.requestNewTarget(); }
-void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }
+
+user::TurretQuickTurnCommand turretUturnCommand(&turretSubsystem, M_PI);
+
+// base agitator commands
+
+MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
+
+UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
+
+MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
+    *drivers(),
+    agitator,
+    rotateAgitator,
+    unjamAgitator);
+
+// agitator related governors
+
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+
+HeatLimitGovernor heatLimitGovernor(
+    *drivers(),
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    constants::HEAT_LIMIT_BUFFER);
+
+CvOnTargetGovernor cvOnTargetGovernor(
+    *drivers(),
+    turretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+
+CvOnlineGovernor cvOnlineGovernor(*drivers(), turretCVCommand);
+
+// agitator governor limited commands
+
+GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor, &cvOnlineGovernor});
+
+GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCvLimiting(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
+
+void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
+
+void targetNewQuadrantMessageHandler()
+{
+    drivers()->commandScheduler.addCommand(&turretUturnCommand);
+}
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
@@ -200,7 +252,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&rotateAgitatorManual},
+    {&rotateAndUnjamAgitatorWithHeatAndCvLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldRepeatCommandMapping leftSwitchDown(
@@ -223,6 +275,8 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
 }
 
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* register subsystems here ------------------
 -------------------------------*/
 void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
@@ -240,6 +294,7 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
     sentinelDrive.setDefaultCommand(&sentinelAutoDrive);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turretSubsystem.setDefaultCommand(&turretCVCommand);
+    agitator.setDefaultCommand(&rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretSubsystem, 0);
 }
@@ -247,8 +302,6 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *drivers)
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.addCommand(&agitatorCalibrateCommand);
-
     sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
@@ -270,6 +323,8 @@ namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &sentinel_control::remoteSafeDisconnectFunction);
     sentinel_control::initializeSubsystems();
     sentinel_control::registerSentinelSubsystems(drivers);
     sentinel_control::setDefaultSentinelCommands(drivers);

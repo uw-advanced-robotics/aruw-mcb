@@ -32,6 +32,8 @@ public:
     MOCK_METHOD(float, getWorldYaw, (), (const override));
     MOCK_METHOD(float, getWorldPitch, (), (const override));
     MOCK_METHOD(uint32_t, getLastMeasurementTimeMicros, (), (const override));
+    MOCK_METHOD(modm::Vector3f, getTurretOffset, (), (const override));
+    MOCK_METHOD(float, getPitchOffset, (), (const override));
 };
 }  // namespace aruwsrc::mock
 

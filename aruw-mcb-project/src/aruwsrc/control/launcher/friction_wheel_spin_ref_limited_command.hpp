@@ -20,6 +20,7 @@
 #ifndef FRICTION_WHEEL_SPIN_REF_LIMITED_COMMAND_HPP_
 #define FRICTION_WHEEL_SPIN_REF_LIMITED_COMMAND_HPP_
 
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/control/command.hpp"
 
 #include "friction_wheel_subsystem.hpp"
@@ -43,17 +44,6 @@ class FrictionWheelSpinRefLimitedCommand : public tap::control::Command
 {
 public:
     /**
-     * An enum that represents the 3 different barrel types, either the 1st or 2nd 17mm barrels or
-     * the 42mm barrel.
-     */
-    enum class Barrel
-    {
-        BARREL_17MM_1,
-        BARREL_17MM_2,
-        BARREL_42MM,
-    };
-
-    /**
      * @param[in] drivers A pointer to the global drivers object.
      * @param[in] frictionWheels The friction wheel subsystem that this command
      *      "owns".
@@ -70,7 +60,7 @@ public:
         FrictionWheelSubsystem *frictionWheels,
         float defaultLaunchSpeed,
         bool alwaysUseDefaultLaunchSpeed,
-        Barrel barrel);
+        tap::communication::serial::RefSerialData::Rx::MechanismID barrel);
 
     void initialize() override {}
 
@@ -91,9 +81,7 @@ private:
 
     const bool alwaysUseDefaultLaunchSpeed;
 
-    const Barrel barrel;
-
-    float maxBarrelSpeed = 6;
+    const tap::communication::serial::RefSerialData::Rx::MechanismID barrel;
 };
 }  // namespace aruwsrc::control::launcher
 
