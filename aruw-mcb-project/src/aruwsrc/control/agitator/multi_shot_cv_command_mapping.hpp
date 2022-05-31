@@ -36,15 +36,16 @@ class Drivers;
 namespace aruwsrc::control::agitator
 {
 /**
- * Class that stores and allows the user to set some ShooterState. Possible shooter states include
+ * Class that stores and allows the user to set some LaunchMode. Possible launch states include
  * single, 10 Hz, or 20 Hz full auto mode.
  *
- * This object is a HoldRepeatCommandMapping. It will update its `maxTimesToSchedule` based on the
- * ShooterState. Furthermore, this object modifies the fire rate of a
- * ManualFireRateReselectionManager.
+ * This object is a HoldRepeatCommandMapping. An instance of this object should be added to the
+ * global CommandMapper to use it. This object contains a launch Command that it will schedule. This
+ * object controls the fire rate and firing frequency of the launch Command based on the launch
+ * mode.
  *
  * If vision is running, the fire rate should not be limited and the launcher should be in full auto
- * mode, so this object checks the state of a CvOnTargetGovernor before setting the fire rate.
+ * mode, so this object checks the launchMode of a CvOnTargetGovernor before setting the fire rate.
  */
 class MultiShotCvCommandMapping : public tap::control::HoldRepeatCommandMapping
 {
@@ -53,7 +54,7 @@ public:
      * State of the shooting mechanism, how many times the associated command mapping should
      * reschedule the command when the mapping is met.
      */
-    enum ShooterState : uint8_t
+    enum LaunchMode : uint8_t
     {
         SINGLE = 0,
         FULL_AUTO_10HZ,
@@ -62,27 +63,40 @@ public:
     };
 
     /**
-     * @param[in] commandMapping The HoldRepeatCommandMapping whose `maxTimesToSchedule` variable to
-     * update.
+     * @param[in] drivers Reference to global drivers object.
+     * @param[in] launchCommand Command that when scheduled launches a single projectile.
+     * @param[in] rms The remote mapping that controls when the launch command should be scheduled.
+     * @param[in] fireRateReselectionManager An optional argument, the fire rate reselection manager
+     * that controls the fire rate of the launch command. If provided, the manager's fire rate is
+     * updated based on the current LaunchMode.
+     * @param[in] cvOnTargetGovernor The governor whose state will be used to override the current
+     * LaunchMode. This allows us to override user-defined launch mode when CV is controlling the
+     * launching frequency.
      */
     MultiShotCvCommandMapping(
         aruwsrc::Drivers &drivers,
         tap::control::Command &launchCommand,
         const tap::control::RemoteMapState &rms,
-        std::optional<ManualFireRateReselectionManager *> fireRateManager,
+        std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
         governor::CvOnTargetGovernor &cvOnTargetGovernor);
 
-    void setShooterState(ShooterState state) { this->state = state; }
+    void setShooterState(LaunchMode mode)
+    {
+        if (mode < NUM_SHOOTER_STATES)
+        {
+            this->launchMode = mode;
+        }
+    }
 
-    ShooterState getShooterState() const { return state; }
+    LaunchMode getLaunchMode() const { return launchMode; }
 
     void executeCommandMapping(const tap::control::RemoteMapState &currState);
 
 private:
-    std::optional<ManualFireRateReselectionManager *> fireRateManager;
+    std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager;
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
 
-    ShooterState state = SINGLE;
+    LaunchMode launchMode = SINGLE;
 };
 
 }  // namespace aruwsrc::control::agitator

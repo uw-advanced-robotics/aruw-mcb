@@ -423,7 +423,7 @@ PressCommandMapping xPressed(
     RemoteMapState({Remote::Key::X}));
 
 CycleStateCommandMapping<
-    MultiShotCvCommandMapping::ShooterState,
+    MultiShotCvCommandMapping::LaunchMode,
     MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
     MultiShotCvCommandMapping>
     vPressed(

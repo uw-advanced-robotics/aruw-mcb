@@ -49,8 +49,11 @@ public:
     /// @return the readiness state of the manager
     virtual FireRateReadinessState getFireRateReadinessState() = 0;
 
+protected:
     /**
      * Converts a rounds-per-second value (i.e., Hz) to a period in milliseconds.
+     *
+     * @note if rps <= 0, the period will be set to UINT32_MAX.
      */
     static inline constexpr uint32_t rpsToPeriodMS(float rps)
     {

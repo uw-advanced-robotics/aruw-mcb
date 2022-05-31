@@ -61,7 +61,9 @@ public:
     mockable void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
 
     /**
-     * @return true if gating is being performed
+     * @return true if gating is being performed. If gating is being performed, projectiles will be
+     * launched at times when the CV system decides they should be. Otherwise, the system will not
+     * be gated and projectiles may be launched independently of CV logic.
      */
     mockable bool isGovernorGating() const
     {

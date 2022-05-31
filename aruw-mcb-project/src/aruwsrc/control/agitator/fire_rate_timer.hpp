@@ -25,7 +25,7 @@
 namespace aruwsrc::control::agitator
 {
 /**
- * A utility class that may be used to limit the fire rate vai checking if a projectile may be
+ * A utility class that may be used to limit the fire rate via checking if a projectile may be
  * launched given the time difference between the current time and when the last projectile was
  * fired. Check `isReadyToLaunchProjectile` before launching a projectile, then call
  * `registerNewLaunchedProjectile` once the projectile has been launched.

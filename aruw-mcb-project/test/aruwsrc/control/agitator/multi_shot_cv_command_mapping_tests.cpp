@@ -107,8 +107,8 @@ TEST_F(MultiShotCvCommandMappingTest, getShooterState_matches_setShooterState)
          i++)
     {
         multiShotCommandMapping.setShooterState(
-            static_cast<MultiShotCvCommandMapping::ShooterState>(i));
-        EXPECT_EQ(i, multiShotCommandMapping.getShooterState());
+            static_cast<MultiShotCvCommandMapping::LaunchMode>(i));
+        EXPECT_EQ(i, multiShotCommandMapping.getLaunchMode());
     }
 }
 
@@ -172,5 +172,21 @@ TEST_F(
     multiShotCommandMapping.executeCommandMapping(defaultRms);
     multiShotCommandMapping.executeCommandMapping(defaultRms);
     multiShotCommandMapping.executeCommandMapping(defaultRms);
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+}
+
+TEST_F(
+    MultiShotCvCommandMappingTest,
+    executeCommandMapping_fireReselection_manager_missing_doesnt_crash)
+{
+    ON_CALL(cvOnTargetGovernor, isGovernorGating).WillByDefault(Return(false));
+
+    MultiShotCvCommandMapping multiShotCommandMapping(
+        drivers,
+        cmd,
+        defaultRms,
+        std::nullopt,
+        cvOnTargetGovernor);
+
     multiShotCommandMapping.executeCommandMapping(defaultRms);
 }

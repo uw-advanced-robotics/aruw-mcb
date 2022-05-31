@@ -28,7 +28,9 @@
 namespace aruwsrc::control::agitator
 {
 /**
- * A storage class that contains a `fireRate` that can be set by calling `setFireRate`.
+ * A container that stores a fire rate. The container will limit any specified fire rate to >= 0.
+ * This object implements the FireRateReselectionManagerInterface and will be ready to fire whenever
+ * the fire rate is > 0.
  */
 class ManualFireRateReselectionManager
     : public control::agitator::FireRateReselectionManagerInterface
@@ -39,13 +41,13 @@ public:
     mockable inline void setFireRate(float fireRate) { this->fireRate = std::max(0.0f, fireRate); }
 
     /// @return the set fire rate period (time distance between launching projectiles)
-    inline uint32_t getFireRatePeriod() override { return rpsToPeriodMS(fireRate); }
+    inline uint32_t getFireRatePeriod() final_mockable { return rpsToPeriodMS(fireRate); }
 
     /**
      * Unless the fire rate is 0, always returns `FireRateReadinessState::READY_USE_RATE_LIMITING`
      * since the manager will always be ready to rate limit using the provided fireRate.
      */
-    inline control::agitator::FireRateReadinessState getFireRateReadinessState() override
+    inline control::agitator::FireRateReadinessState getFireRateReadinessState() final_mockable
     {
         if (tap::algorithms::compareFloatClose(fireRate, 0, 1E-5))
         {

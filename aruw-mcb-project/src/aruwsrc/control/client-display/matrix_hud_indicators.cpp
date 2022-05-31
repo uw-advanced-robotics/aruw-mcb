@@ -186,7 +186,7 @@ void MatrixHudIndicators::updateIndicatorState()
 #if defined(DISPLAY_FIRING_MODE)
     // update firing mode
     matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
-        static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
+        static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getLaunchMode())));
 #endif
 
     CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;

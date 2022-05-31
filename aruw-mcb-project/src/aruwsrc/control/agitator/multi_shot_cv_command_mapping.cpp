@@ -25,10 +25,10 @@ MultiShotCvCommandMapping::MultiShotCvCommandMapping(
     aruwsrc::Drivers &drivers,
     tap::control::Command &launchCommand,
     const tap::control::RemoteMapState &rms,
-    std::optional<ManualFireRateReselectionManager *> fireRateManager,
+    std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
     governor::CvOnTargetGovernor &cvOnTargetGovernor)
     : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
-      fireRateManager(fireRateManager),
+      fireRateReselectionManager(fireRateReselectionManager),
       cvOnTargetGovernor(cvOnTargetGovernor)
 {
 }
@@ -38,7 +38,9 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
     int timesToReschedule = 0;
 
     float fireRate;
-    switch (state)
+
+    auto launchMode = cvOnTargetGovernor.isGovernorGating() ? FULL_AUTO : this->launchMode;
+    switch (launchMode)
     {
         case SINGLE:
             timesToReschedule = 1;
@@ -53,19 +55,13 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
             break;
         default:
-            fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+            assert(false);
             break;
     }
 
-    if (cvOnTargetGovernor.isGovernorGating())
+    if (fireRateReselectionManager.has_value())
     {
-        timesToReschedule = -1;
-        fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
-    }
-
-    if (fireRateManager.has_value())
-    {
-        fireRateManager.value()->setFireRate(fireRate);
+        fireRateReselectionManager.value()->setFireRate(fireRate);
     }
 
     setMaxTimesToSchedule(timesToReschedule);
