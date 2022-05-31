@@ -39,25 +39,30 @@ namespace aruwsrc::control::governor
 class FireRateLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    FireRateLimitGovernor(agitator::FireRateReselectionManagerInterface &fireRateManager)
-        : fireRateManager(fireRateManager)
+    /**
+     * @param[in] fireRateReselectionManager Object that reports a specified projectile rate of fire
+     * and a projectile rate of fire readiness state that this governor uses to determine if a
+     * projectile should be launched.
+     */
+    FireRateLimitGovernor(agitator::FireRateReselectionManagerInterface &fireRateReselectionManager)
+        : fireRateReselectionManager(fireRateReselectionManager)
     {
     }
 
-    void initialize() final { fireRateTimerManager.registerNewLaunchedProjectile(); }
+    void initialize() final { fireRateTimer.registerNewLaunchedProjectile(); }
 
     bool isReady() final
     {
-        uint32_t fireRatePeriod = fireRateManager.getFireRatePeriod();
-        fireRateTimerManager.setProjectileLaunchPeriod(fireRatePeriod);
+        uint32_t fireRatePeriod = fireRateReselectionManager.getFireRatePeriod();
+        fireRateTimer.setProjectileLaunchPeriod(fireRatePeriod);
 
-        auto readinessState = fireRateManager.getFireRateReadinessState();
+        auto readinessState = fireRateReselectionManager.getFireRateReadinessState();
         switch (readinessState)
         {
             case agitator::FireRateReadinessState::READY_IGNORE_RATE_LIMITING:
                 return true;
             case agitator::FireRateReadinessState::READY_USE_RATE_LIMITING:
-                return fireRateTimerManager.isReadyToLaunchProjectile();
+                return fireRateTimer.isReadyToLaunchProjectile();
             case agitator::FireRateReadinessState::NOT_READY:
                 return false;
             default:
@@ -73,8 +78,8 @@ public:
     }
 
 private:
-    agitator::FireRateReselectionManagerInterface &fireRateManager;
-    control::agitator::FireRateTimer fireRateTimerManager;
+    agitator::FireRateReselectionManagerInterface &fireRateReselectionManager;
+    control::agitator::FireRateTimer fireRateTimer;
 };
 }  // namespace aruwsrc::control::governor
 
