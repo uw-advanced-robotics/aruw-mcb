@@ -92,9 +92,9 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 };
 #endif
 
-static constexpr float TURRET_CG_X = 0;
-static constexpr float TURRET_CG_Z = 0;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
+static constexpr float TURRET_CG_X = 30.17;
+static constexpr float TURRET_CG_Z = 34.02;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 7000;
 
 namespace world_rel_turret_imu
 {
