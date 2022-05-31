@@ -58,7 +58,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
-    const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+    const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
@@ -186,7 +186,7 @@ void MatrixHudIndicators::updateIndicatorState()
 #if defined(DISPLAY_FIRING_MODE)
     // update firing mode
     matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
-        static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getShooterState())));
+        static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getLaunchMode())));
 #endif
 
     CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;
@@ -199,7 +199,7 @@ void MatrixHudIndicators::updateIndicatorState()
         }
         else
         {
-            cvStatus = cvOnTargetGovernor->getGovernorEnabled()
+            cvStatus = cvOnTargetGovernor->isGovernorGating()
                            ? CVStatus::VISION_COPROCESSOR_GATED_PROJECTILE_LAUNCH
                            : CVStatus::VISION_COPROCESSOR_NO_PROJECTILE_GATING;
         }

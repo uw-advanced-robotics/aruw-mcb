@@ -69,7 +69,15 @@ public:
                command.isReady();
     }
 
-    void initialize() override { command.initialize(); }
+    void initialize() override
+    {
+        command.initialize();
+
+        for (auto governor : commandGovernorList)
+        {
+            governor->onGovernedCommandInitialized();
+        }
+    }
 
     void execute() override { command.execute(); }
 

@@ -21,6 +21,7 @@
 #include "beyblade_command_mock.hpp"
 #include "chassis_drive_command_mock.hpp"
 #include "chassis_subsystem_mock.hpp"
+#include "cv_on_target_governor_mock.hpp"
 #include "friction_wheel_subsystem_mock.hpp"
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
@@ -258,5 +259,14 @@ TurretControllerInterfaceMock::TurretControllerInterfaceMock(
 {
 }
 TurretControllerInterfaceMock::~TurretControllerInterfaceMock() {}
+
+CvOnTargetGovernorMock::CvOnTargetGovernorMock(
+    aruwsrc::Drivers &drivers,
+    aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
+    aruwsrc::control::governor::AutoAimLaunchTimer &launchTimer,
+    aruwsrc::control::governor::CvOnTargetGovernorMode mode)
+    : aruwsrc::control::governor::CvOnTargetGovernor(drivers, turretCVCommand, launchTimer, mode)
+{
+}
 
 }  // namespace aruwsrc::mock

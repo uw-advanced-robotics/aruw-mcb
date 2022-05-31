@@ -72,6 +72,7 @@ static void initAndRunAutoAimRxTest(
         EXPECT_EQ(expectedAimData[i].zAcc, callbackData.zAcc);
         EXPECT_EQ(expectedAimData[i].hasTarget, callbackData.hasTarget);
         EXPECT_EQ(expectedAimData[i].timestamp, callbackData.timestamp);
+        EXPECT_EQ(expectedAimData[i].firerate, callbackData.firerate);
     }
 }
 
@@ -103,6 +104,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
             .zAcc = 9,
             .hasTarget = false,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
             .recommendUseTimedShots = false,
             .targetHitTimeOffset = 0,
             .targetPulseInterval = 0,
@@ -126,6 +128,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
             .zAcc = -9,
             .hasTarget = false,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
             .recommendUseTimedShots = false,
             .targetHitTimeOffset = 0,
             .targetPulseInterval = 0,
@@ -149,6 +152,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
             .zAcc = 0.35,
             .hasTarget = false,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
             .recommendUseTimedShots = false,
             .targetHitTimeOffset = 0,
             .targetPulseInterval = 0,
@@ -172,6 +176,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
             .zAcc = 123456789.0f,
             .hasTarget = false,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
             .recommendUseTimedShots = false,
             .targetHitTimeOffset = 0,
             .targetPulseInterval = 0,
@@ -196,6 +201,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
             .zAcc = -14.2,
             .hasTarget = true,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
             .recommendUseTimedShots = false,
             .targetHitTimeOffset = 0,
             .targetPulseInterval = 0,
@@ -216,6 +222,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
         aimData[i].yAcc++;
         aimData[i].zAcc++;
         aimData[i].timestamp++;
+        aimData[i].firerate = (VisionCoprocessor::FireRate)((uint8_t)aimData[i].firerate + 1);
     }
 
     initAndRunAutoAimRxTest(aimData);
