@@ -401,13 +401,7 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
 PressCommandMapping bCtrlPressed(
     drivers(),
     {&clientDisplayCommand},
-    RemoteMapState(
-        Remote::SwitchState::UNKNOWN,
-        Remote::SwitchState::UNKNOWN,
-        {Remote::Key::CTRL, Remote::Key::B},
-        {},
-        false,
-        false));
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
 PressCommandMapping qPressed(
     drivers(),
