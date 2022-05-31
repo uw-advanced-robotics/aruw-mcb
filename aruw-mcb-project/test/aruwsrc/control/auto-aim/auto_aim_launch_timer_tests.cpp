@@ -133,6 +133,8 @@ static constexpr uint32_t SMALL_TIMING_ERROR = 10;
 // were removed, this factor could be zero.
 static constexpr uint32_t FLOATING_POINT_FUDGE_MICROS = 1;
 
+namespace auto_aim  // Must be in a namespace so the operator<< can be discovered by googletest
+{
 struct TestParamsAimData
 {
     bool hasTarget;
@@ -142,6 +144,13 @@ struct TestParamsAimData
     uint32_t targetHitTimeOffset;
     uint32_t targetPulseInterval;
     uint32_t targetIntervalDuration;
+
+    friend std::ostream& operator<<(std::ostream& os, const TestParamsAimData& p)
+    {
+        return os << "{" << p.hasTarget << ", " << p.timestamp << ", " << p.recommendUseTimedShots
+                  << ", " << p.targetHitTimeOffset << ", " << p.targetPulseInterval << ", "
+                  << p.targetIntervalDuration << "}";
+    }
 };
 
 struct TestParams
@@ -156,7 +165,17 @@ struct TestParams
     TestParamsAimData aimData;
 
     AutoAimLaunchTimer::LaunchInclination expectedResult;
+
+    friend std::ostream& operator<<(std::ostream& os, const TestParams& p)
+    {
+        return os << "{" << int(p.turretNumber) << ", " << p.agitatorLatencyMicros << ", "
+                  << p.ballisticsSuccess << ", " << p.ballisticsTimeOfFlight << ", " << p.aimData
+                  << uint8_t(p.expectedResult) << "}";
+    }
 };
+}  // namespace auto_aim
+
+using namespace auto_aim;
 
 class AutoAimLaunchTimerTestParameterizedFixture : public ::testing::WithParamInterface<TestParams>,
                                                    public AutoAimLaunchTimerTest
@@ -187,6 +206,8 @@ TEST_P(
 
         .hasTarget{params.aimData.hasTarget},
         .timestamp{params.aimData.timestamp},
+
+        .firerate{VisionCoprocessor::FireRate::ZERO},
 
         .recommendUseTimedShots{params.aimData.recommendUseTimedShots},
         .targetHitTimeOffset{params.aimData.targetHitTimeOffset},

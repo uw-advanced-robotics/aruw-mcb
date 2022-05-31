@@ -39,9 +39,11 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "governor/cv_has_target_governor.hpp"
 #include "governor/cv_on_target_governor.hpp"
 #include "governor/cv_online_governor.hpp"
+#include "governor/fire_rate_limit_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "imu/imu_calibrate_command.hpp"
@@ -195,17 +197,23 @@ public:
               autoAimLaunchTimer,
               CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
           cvOnlineGovernor(drivers, turretCVCommand),
+          autoAimFireRateManager(drivers, turretCVCommand, config.turretID),
+          fireRateLimitGovernor(autoAimFireRateManager),
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,
               {&heatLimitGovernor,
                &frictionWheelsOnGovernor,
                &cvOnTargetGovernor,
-               &cvOnlineGovernor}),
+               &cvOnlineGovernor,
+               &fireRateLimitGovernor}),
           rotateAndUnjamAgitatorWithHeatAndCvLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
-              {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor})
+              {&heatLimitGovernor,
+               &frictionWheelsOnGovernor,
+               &cvOnTargetGovernor,
+               &fireRateLimitGovernor})
     {
     }
 
@@ -215,6 +223,7 @@ public:
     DjiMotor pitchMotor;
     DjiMotor yawMotor;
     SentinelTurretSubsystem turretSubsystem;
+
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
 
@@ -231,6 +240,7 @@ public:
     algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
 
     // turret commands
+    // limits fire rate
     user::TurretUserControlCommand turretManual;
 
     cv::SentinelTurretCVCommand turretCVCommand;
@@ -247,10 +257,12 @@ public:
     HeatLimitGovernor heatLimitGovernor;
     CvOnTargetGovernor cvOnTargetGovernor;
     CvOnlineGovernor cvOnlineGovernor;
+    AutoAimFireRateReselectionManager autoAimFireRateManager;
+    FireRateLimitGovernor fireRateLimitGovernor;
 
     // agitator governor limited commands
-    GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
-    GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
+    GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
+    GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
 };
 
 SentinelTurret turretZero(
