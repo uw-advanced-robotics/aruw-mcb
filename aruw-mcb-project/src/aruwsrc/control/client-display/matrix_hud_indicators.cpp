@@ -199,7 +199,7 @@ void MatrixHudIndicators::updateIndicatorState()
         }
         else
         {
-            cvStatus = cvOnTargetGovernor->isGovernorGating()
+            cvStatus = cvOnTargetGovernor->isGoverEnabled()
                            ? CVStatus::VISION_COPROCESSOR_GATED_PROJECTILE_LAUNCH
                            : CVStatus::VISION_COPROCESSOR_NO_PROJECTILE_GATING;
         }
