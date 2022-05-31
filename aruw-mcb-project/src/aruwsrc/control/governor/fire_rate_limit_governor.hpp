@@ -49,7 +49,7 @@ public:
     {
     }
 
-    void initialize() final { fireRateTimer.registerNewLaunchedProjectile(); }
+    void onGovernedCommandInitialized() final { fireRateTimer.registerNewLaunchedProjectile(); }
 
     bool isReady() final
     {

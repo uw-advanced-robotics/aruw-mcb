@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MULTI_SHOT_HANDLER_HPP_
-#define MULTI_SHOT_HANDLER_HPP_
+#ifndef MULTI_SHOT_CV_COMMAND_MAPPING_HPP_
+#define MULTI_SHOT_CV_COMMAND_MAPPING_HPP_
 
 #include <optional>
 
@@ -101,4 +101,4 @@ private:
 
 }  // namespace aruwsrc::control::agitator
 
-#endif  // MULTI_SHOT_HANDLER_HPP_
+#endif  // MULTI_SHOT_CV_COMMAND_MAPPING_HPP_

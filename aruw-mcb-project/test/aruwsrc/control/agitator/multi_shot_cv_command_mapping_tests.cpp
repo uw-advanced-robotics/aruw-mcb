@@ -30,7 +30,7 @@
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/cv_on_target_governor_mock.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
-#include "aruwsrc/mock/manual_fire_reate_reselection_manager_mock.hpp"
+#include "aruwsrc/mock/manual_fire_rate_reselection_manager_mock.hpp"
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"

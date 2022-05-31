@@ -80,11 +80,11 @@ TEST_P(FireRateLimitGovernorParameterizedTest, isReady)
     EXPECT_EQ(GetParam().expectIsReady, governor.isReady());
 }
 
-TEST_P(FireRateLimitGovernorParameterizedTest, initialize)
+TEST_P(FireRateLimitGovernorParameterizedTest, onGovernedCommandInitialized)
 {
     clock.time = GetParam().timeWhenInitializeCalled;
 
-    governor.initialize();
+    governor.onGovernedCommandInitialized();
 
     clock.time = GetParam().timeWhenIsReadyCalled;
 

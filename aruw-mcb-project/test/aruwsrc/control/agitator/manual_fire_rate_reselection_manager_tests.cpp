@@ -17,9 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
-
 #include <gtest/gtest.h>
+
+#include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 
 using namespace testing;
 using namespace aruwsrc::control::agitator;
