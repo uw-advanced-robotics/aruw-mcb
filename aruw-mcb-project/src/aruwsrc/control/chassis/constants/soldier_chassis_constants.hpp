@@ -120,7 +120,7 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
  * @see `GIMBAL_X_OFFSET`.
  */
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
-static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
+static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 /**
  * Fraction of max chassis speed that will be applied to rotation when beyblading
