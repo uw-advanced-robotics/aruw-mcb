@@ -11,7 +11,6 @@
 #include "tap/motor/generic_stepper_motor_driver.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
-#include "agitator/move_unjam_ref_limited_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers.hpp"
@@ -81,25 +80,29 @@ FrictionWheelSubsystem frictionWheelsTopFront(
     drivers(),
     tap::motor::MOTOR1,
     tap::motor::MOTOR2,
-    tap::can::CanBus::CAN_BUS1);
+    tap::can::CanBus::CAN_BUS1,
+    nullptr);
 
 FrictionWheelSubsystem frictionWheelsTopBack(
     drivers(),
     tap::motor::MOTOR3,
     tap::motor::MOTOR4,
-    tap::can::CanBus::CAN_BUS1);
+    tap::can::CanBus::CAN_BUS1,
+    nullptr);
 
 FrictionWheelSubsystem frictionWheelsBottomFront(
     drivers(),
     tap::motor::MOTOR1,
     tap::motor::MOTOR2,
-    tap::can::CanBus::CAN_BUS2);
+    tap::can::CanBus::CAN_BUS2,
+    nullptr);
 
 FrictionWheelSubsystem frictionWheelsBottomBack(
     drivers(),
     tap::motor::MOTOR3,
     tap::motor::MOTOR4,
-    tap::can::CanBus::CAN_BUS2);
+    tap::can::CanBus::CAN_BUS2,
+    nullptr);
 
 
 
@@ -173,28 +176,28 @@ FrictionWheelSpinRefLimitedCommand spinFrictionWheelsTopBack(
     &frictionWheelsTopBack,
     15.0f,
     false,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1); // TODO: add mechanism ID that means no mechanism
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheelsTopFront(
     drivers(),
     &frictionWheelsTopFront,
     15.0f,
     false,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheelsBottomFront(
     drivers(),
     &frictionWheelsBottomFront,
     15.0f,
     false,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheelsBottomBack(
     drivers(),
     &frictionWheelsBottomBack,
     15.0f,
     false,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Stopping Friction Wheels
 FrictionWheelSpinRefLimitedCommand stopFrictionWheelsTopFront(
@@ -202,28 +205,28 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheelsTopFront(
     &frictionWheelsTopFront,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheelsTopBack(
     drivers(),
     &frictionWheelsTopBack,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheelsBottomFront(
     drivers(),
     &frictionWheelsBottomFront,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheelsBottomBack(
     drivers(),
     &frictionWheelsBottomBack,
     0.0f,
     true,
-    FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTurretControlCommand(
     drivers(),
