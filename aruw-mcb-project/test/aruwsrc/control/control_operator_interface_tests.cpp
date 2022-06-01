@@ -63,7 +63,7 @@ protected:
 static constexpr float MAX_CHASSIS_SPEED =
     aruwsrc::chassis::CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
 
-using COIChassisTuple = std::tuple<float, bool, bool, bool, bool, float>;
+using COIChassisTuple = std::tuple<float, bool, bool, bool, float>;
 
 class ChassisTest : public ControlOperatorInterfaceTest, public WithParamInterface<COIChassisTuple>
 {
@@ -76,13 +76,11 @@ TEST_P(ChassisTest, getChassisXInput_settles_to_des_rpm)
     float remoteVal = std::get<0>(params);
     bool wPressed = std::get<1>(params);
     bool sPressed = std::get<2>(params);
-    bool shiftPressed = std::get<3>(params);
-    bool ctrlPressed = std::get<4>(params);
-    float expectedValue = std::get<5>(params);
+    bool ctrlPressed = std::get<3>(params);
+    float expectedValue = std::get<4>(params);
 
     ON_CALL(drivers.remote, keyPressed(Remote::Key::W)).WillByDefault(Return(wPressed));
     ON_CALL(drivers.remote, keyPressed(Remote::Key::S)).WillByDefault(Return(sPressed));
-    ON_CALL(drivers.remote, keyPressed(Remote::Key::SHIFT)).WillByDefault(Return(shiftPressed));
     ON_CALL(drivers.remote, keyPressed(Remote::Key::CTRL)).WillByDefault(Return(ctrlPressed));
     ON_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_VERTICAL))
         .WillByDefault(Return(remoteVal));
@@ -106,13 +104,11 @@ TEST_P(ChassisTest, getChassisYInput_settles_to_des_rpm)
     float remoteVal = std::get<0>(params);
     bool aPressed = std::get<1>(params);
     bool dPressed = std::get<2>(params);
-    bool shiftPressed = std::get<3>(params);
-    bool ctrlPressed = std::get<4>(params);
-    float expectedValue = std::get<5>(params);
+    bool ctrlPressed = std::get<3>(params);
+    float expectedValue = std::get<4>(params);
 
     ON_CALL(drivers.remote, keyPressed(Remote::Key::A)).WillByDefault(Return(aPressed));
     ON_CALL(drivers.remote, keyPressed(Remote::Key::D)).WillByDefault(Return(dPressed));
-    ON_CALL(drivers.remote, keyPressed(Remote::Key::SHIFT)).WillByDefault(Return(shiftPressed));
     ON_CALL(drivers.remote, keyPressed(Remote::Key::CTRL)).WillByDefault(Return(ctrlPressed));
     ON_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_HORIZONTAL))
         .WillByDefault(Return(-remoteVal));
@@ -134,13 +130,11 @@ TEST_P(ChassisTest, getChassisRInput_settles_to_des_rpm)
     float remoteVal = std::get<0>(params);
     bool qPressed = std::get<1>(params);
     bool ePressed = std::get<2>(params);
-    bool shiftPressed = std::get<3>(params);
-    bool ctrlPressed = std::get<4>(params);
-    float expectedValue = std::get<5>(params);
+    bool ctrlPressed = std::get<3>(params);
+    float expectedValue = std::get<4>(params);
 
     ON_CALL(drivers.remote, keyPressed(Remote::Key::Q)).WillByDefault(Return(qPressed));
     ON_CALL(drivers.remote, keyPressed(Remote::Key::E)).WillByDefault(Return(ePressed));
-    ON_CALL(drivers.remote, keyPressed(Remote::Key::SHIFT)).WillByDefault(Return(shiftPressed));
     ON_CALL(drivers.remote, keyPressed(Remote::Key::CTRL)).WillByDefault(Return(ctrlPressed));
     ON_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_HORIZONTAL))
         .WillByDefault(Return(-remoteVal));
@@ -152,15 +146,11 @@ TEST_P(ChassisTest, getChassisRInput_settles_to_des_rpm)
         operatorInterface.getChassisRInput();
     }
 
-    // Do this to compensate for the fact that rotation doesn't account for shift/ctrl (this is on
+    // Do this to compensate for the fact that rotation doesn't account for ctrl (this is on
     // purpose)
-    if (shiftPressed)
-    {
-        expectedValue /= 0.5f;
-    }
     if (ctrlPressed)
     {
-        expectedValue /= 0.25f;
+        expectedValue /= ControlOperatorInterface::SPEED_REDUCTION_SCALAR;
     }
 
     EXPECT_NEAR(expectedValue, operatorInterface.getChassisRInput(), 1E-3);
@@ -170,16 +160,19 @@ INSTANTIATE_TEST_SUITE_P(
     ControlOperatorInterface,
     ChassisTest,
     Values(
-        COIChassisTuple(0, false, false, false, false, 0),
-        COIChassisTuple(0, true, false, false, false, MAX_CHASSIS_SPEED),
-        COIChassisTuple(0, true, true, false, false, 0),
-        COIChassisTuple(0, false, true, false, false, -MAX_CHASSIS_SPEED),
-        COIChassisTuple(1, false, false, false, false, MAX_CHASSIS_SPEED),
-        COIChassisTuple(1, false, true, false, false, 0),
-        COIChassisTuple(0, true, false, true, false, MAX_CHASSIS_SPEED * 0.5),
-        COIChassisTuple(0, true, false, false, true, MAX_CHASSIS_SPEED * 0.25),
-        COIChassisTuple(0, true, false, true, true, MAX_CHASSIS_SPEED * 0.25 * 0.5),
-        COIChassisTuple(0.5, false, false, false, false, MAX_CHASSIS_SPEED * 0.5)));
+        COIChassisTuple(0, false, false, false, 0),
+        COIChassisTuple(0, true, false, false, MAX_CHASSIS_SPEED),
+        COIChassisTuple(0, true, true, false, 0),
+        COIChassisTuple(0, false, true, false, -MAX_CHASSIS_SPEED),
+        COIChassisTuple(1, false, false, false, MAX_CHASSIS_SPEED),
+        COIChassisTuple(1, false, true, false, 0),
+        COIChassisTuple(
+            0,
+            true,
+            false,
+            true,
+            MAX_CHASSIS_SPEED* ControlOperatorInterface::SPEED_REDUCTION_SCALAR),
+        COIChassisTuple(0.5, false, false, false, 0.5f * MAX_CHASSIS_SPEED)));
 
 class TurretTest : public ControlOperatorInterfaceTest,
                    public WithParamInterface<std::tuple<float, int16_t, float>>
@@ -198,7 +191,22 @@ TEST_P(TurretTest, getTurretYawInput_returns_user_input)
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_HORIZONTAL))
         .WillOnce(Return(remoteInput));
 
-    EXPECT_NEAR(expectedValue, operatorInterface.getTurretYawInput(), 1E-3);
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretYawInput(0), 1E-3);
+}
+
+TEST_P(TurretTest, getTurretYawInput_turret2_returns_user_input)
+{
+    auto params = GetParam();
+
+    float remoteInput = std::get<0>(params);
+    int16_t mouseInput = std::get<1>(params);
+    float expectedValue = std::get<2>(params);
+
+    EXPECT_CALL(drivers.remote, getMouseX).WillOnce(Return(mouseInput));
+    EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_HORIZONTAL))
+        .WillOnce(Return(remoteInput));
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretYawInput(1), 1E-3);
 }
 
 TEST_P(TurretTest, getTurretPitchInput_returns_user_input)
@@ -213,7 +221,22 @@ TEST_P(TurretTest, getTurretPitchInput_returns_user_input)
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_VERTICAL))
         .WillOnce(Return(remoteInput));
 
-    EXPECT_NEAR(expectedValue, operatorInterface.getTurretPitchInput(), 1E-3);
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretPitchInput(0), 1E-3);
+}
+
+TEST_P(TurretTest, getTurretPitchInput_turret2_returns_user_input)
+{
+    auto params = GetParam();
+
+    float remoteInput = std::get<0>(params);
+    int16_t mouseInput = std::get<1>(params);
+    float expectedValue = std::get<2>(params);
+
+    EXPECT_CALL(drivers.remote, getMouseY).WillOnce(Return(-mouseInput));
+    EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_VERTICAL))
+        .WillOnce(Return(remoteInput));
+
+    EXPECT_NEAR(expectedValue, operatorInterface.getTurretPitchInput(1), 1E-3);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -237,7 +260,7 @@ class SentinelChassisTest : public ControlOperatorInterfaceTest,
 
 TEST_P(SentinelChassisTest, getSentinelSpeedInput_retuns_user_input)
 {
-    ON_CALL(drivers.remote, getChannel).WillByDefault(Return(std::get<0>(GetParam())));
+    ON_CALL(drivers.remote, getWheel).WillByDefault(Return(std::get<0>(GetParam())));
 
     EXPECT_NEAR(std::get<1>(GetParam()), operatorInterface.getSentinelSpeedInput(), 1E-3);
 }
@@ -247,11 +270,11 @@ INSTANTIATE_TEST_SUITE_P(
     SentinelChassisTest,
     Values(
         std::tuple<float, float>(0, 0),
-        std::tuple<float, float>(-1, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
-        std::tuple<float, float>(1, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(-660, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(660, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
         std::tuple<float, float>(
-            0.5,
-            0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+            330,
+            -0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
         std::tuple<float, float>(
-            -0.5,
-            -0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR)));
+            -330,
+            0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR)));

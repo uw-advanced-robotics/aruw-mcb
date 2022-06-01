@@ -48,13 +48,14 @@ class OttoChassisWorldYawObserver
 public:
     /**
      * @param[in] drivers a pointer to the aruwsrc drivers struct. Used for accessing the
-     *      turretMCB IMU
-     * @param[in] turret a pointer to the turret used for getting world frame axes. Used to get
-     *      yaw angle of chassis relative to turret.
+     * turretMCB IMU
+     * @param[in] turretSubsystem a reference to the turret used for getting world frame axes. Used
+     * to get yaw angle of chassis relative to turret. This must be the same turret that the IMU on
+     * CAN bus 1 is attached to.
      */
     OttoChassisWorldYawObserver(
         aruwsrc::Drivers* drivers,
-        aruwsrc::control::turret::TurretSubsystem* turret);
+        const aruwsrc::control::turret::TurretSubsystem& turretSubsystem);
 
     /**
      * Get the current chassis yaw in radians.
@@ -65,13 +66,13 @@ public:
      *      Normalized to the range (-pi, pi).
      *
      * @return `true` if valid chassis orientation was available. i.e: true if and only if
-     *      turret->isOnline() && drivers->turretMCBCanComm.isConnected()
+     *      turret->isOnline() && turretSubsystem.getChassisMCB()->isConnected()
      */
     bool getChassisWorldYaw(float* yaw) const final;
 
 private:
     aruwsrc::Drivers* drivers;
-    aruwsrc::control::turret::TurretSubsystem* turret;
+    const aruwsrc::control::turret::TurretSubsystem& turretSubsystem;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

@@ -42,8 +42,7 @@ public:
     static constexpr int16_t USER_MOUSE_PITCH_MAX = 1000;
     static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / USER_MOUSE_YAW_MAX);
     static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / USER_MOUSE_PITCH_MAX);
-    static constexpr float CTRL_SCALAR = (1.0f / 4);
-    static constexpr float SHIFT_SCALAR = (1.0f / 2);
+    static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
     static constexpr float USER_STICK_SENTINEL_DRIVE_SCALAR = 5000.0f;
 
 #if defined(TARGET_HERO)
@@ -111,14 +110,14 @@ public:
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    mockable float getTurretYawInput();
+    mockable float getTurretYawInput(uint8_t turretID);
 
     /**
      * @returns the value used for turret pitch rotation, between about -1 and 1
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    mockable float getTurretPitchInput();
+    mockable float getTurretPitchInput(uint8_t turretID);
 
     /**
      * @returns the value used for sentiel drive speed, between

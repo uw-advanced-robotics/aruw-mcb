@@ -35,8 +35,14 @@ namespace aruwsrc::chassis
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] =
-    {{50, 4'500}, {60, 5'700}, {70, 6'400}, {80, 6'700}, {100, 7'000}, {120, 8'000}};
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
+    {50, 4'500},
+    {60, 5'700},
+    {70, 6'400},
+    {80, 6'700},
+    {100, 7'000},
+    {120, 8'000},
+};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -73,8 +79,8 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 100.0f;
-static constexpr float AUTOROTATION_PID_KD = 1.0f;
+static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
+static constexpr float AUTOROTATION_PID_KD = 57.3f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
@@ -84,6 +90,8 @@ static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
  * Radius of the wheels (m).
  */
 static constexpr float WHEEL_RADIUS = 0.076;
+
+#ifdef TARGET_SOLDIER_2021
 /**
  * Distance from center of the two front wheels (m).
  */
@@ -92,7 +100,19 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
  * Distance from center of the front and rear wheels (m).
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
-/**
+
+#elif defined(TARGET_SOLDIER_2022)
+
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+
+#elif defined(TARGET_SOLDIERMK4_2022)
+
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+
+#endif
+/*
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
  */
 static constexpr float GIMBAL_X_OFFSET = 0.0f;

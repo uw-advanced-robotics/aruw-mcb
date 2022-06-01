@@ -27,10 +27,10 @@ namespace aruwsrc::algorithms::odometry
 // their pointers to the base class (not necessarily in that order)
 OttoVelocityOdometry2DSubsystem::OttoVelocityOdometry2DSubsystem(
     aruwsrc::Drivers* drivers,
-    aruwsrc::control::turret::TurretSubsystem* turret,
+    const aruwsrc::control::turret::TurretSubsystem& turret,
     tap::control::chassis::ChassisSubsystemInterface* chassis)
     : Subsystem(drivers),
-      odometryTracker(&orientationObserver, &displacementObserver),
+      Odometry2DTracker(&orientationObserver, &displacementObserver),
       orientationObserver(drivers, turret),
       displacementObserver(chassis)
 {
@@ -40,6 +40,7 @@ void OttoVelocityOdometry2DSubsystem::refresh()
 {
     // Update displacement first, as that is then consumed in odometryTracker
     displacementObserver.update();
+    update();
 }
 
 }  // namespace aruwsrc::algorithms::odometry

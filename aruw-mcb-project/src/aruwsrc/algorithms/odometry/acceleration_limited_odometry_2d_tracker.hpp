@@ -23,6 +23,7 @@
 #include <cstdint>
 
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
+#include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 
 #include "modm/math/geometry/location_2d.hpp"
@@ -32,11 +33,6 @@
 namespace tap::control::chassis
 {
 class ChassisSubsystemInterface;
-}
-
-namespace tap::algorithms::odometry
-{
-class ChassisWorldYawObserverInterface;
 }
 
 namespace aruwsrc::algorithms::odometry
@@ -71,6 +67,21 @@ public:
     modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
     modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
+
+    virtual float getYaw() const
+    {
+        float yaw;
+        if (!yawObserver.getChassisWorldYaw(&yaw))
+        {
+            return 0;
+        }
+        else
+        {
+            return yaw;
+        }
+    }
+
+    virtual uint32_t getLastComputedOdometryTime() const { return prevLocationUpdateTime; }
 
 private:
     /**

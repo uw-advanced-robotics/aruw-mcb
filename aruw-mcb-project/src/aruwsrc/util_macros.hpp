@@ -24,7 +24,7 @@
  * Define a helper macro that makes it easier to specify at compile time something that should be
  * true for all soldiers.
  */
-#if defined(TARGET_SOLDIER_2021) || defined(TARGET_SOLDIER_2022)
+#if defined(TARGET_SOLDIER_2021) || defined(TARGET_SOLDIER_2022) || defined(TARGET_SOLDIERMK4_2022)
 #define ALL_SOLDIERS
 #endif
 

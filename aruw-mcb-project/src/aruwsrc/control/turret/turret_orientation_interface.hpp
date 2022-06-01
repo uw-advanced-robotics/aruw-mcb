@@ -22,25 +22,32 @@
 
 #include <stdint.h>
 
+#include "modm/math/geometry/vector3.hpp"
+
+namespace aruwsrc::can
+{
+class TurretMCBCanComm;
+}
+
 namespace aruwsrc::control::turret
 {
 /**
  * An interface that provides turret world yaw and pitch.
  *
  * All angles computed using a right hand coordinate system. In other words, yaw is a value from
- * 0-360 rotated counterclockwise when looking at the turret from above. Pitch is a value from 0-360
- * rotated counterclockwise when looking at the turret from the right side of the turret.
+ * 0-M_TWOPI rotated counterclockwise when looking at the turret from above. Pitch is a value from
+ * 0-M_TWOPI rotated counterclockwise when looking at the turret from the right side of the turret.
  */
 class TurretOrientationInterface
 {
 public:
     /**
-     * @return An angle between [0, 360] that is the world-relative angle of the
+     * @return An angle between [0, M_TWOPI] that is the world-relative angle of the
      * turret counterclockwise when looking at the turret from above.
      */
     virtual inline float getWorldYaw() const = 0;
     /**
-     * @return An angle between [0, 360] that is the world-relative angle of the
+     * @return An angle between [0, M_TWOPI] that is the world-relative angle of the
      * turret counterclockwise when looking at the turret from the right side.
      */
     virtual inline float getWorldPitch() const = 0;
@@ -50,6 +57,17 @@ public:
      * measurements.
      */
     virtual inline uint32_t getLastMeasurementTimeMicros() const = 0;
+
+    /**
+     *  @return Distance between the turret and the chassis origin in the chassis frame. units of
+     * meters
+     */
+    virtual modm::Vector3f getTurretOffset() const = 0;
+
+    /**
+     * @return Distance between the pitch axis and the yaw axis in the X-Y plane. Units meters
+     */
+    virtual inline float getPitchOffset() const = 0;
 };  // class TurretOrientation
 
 }  // namespace aruwsrc::control::turret

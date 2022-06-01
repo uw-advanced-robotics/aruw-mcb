@@ -28,7 +28,7 @@
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class TurretMotor;
 }
 
 namespace aruwsrc::control::turret::algorithms
@@ -43,11 +43,11 @@ class ChassisFrameYawTurretController final : public TurretYawControllerInterfac
 {
 public:
     /**
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFrameYawTurretController(
-        TurretSubsystem *turretSubsystem,
+        TurretMotor &yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -58,12 +58,30 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    void setSetpoint(float desiredSetpoint) final;
+
+    /// @return The chassis frame yaw turret measurement, refer to top level documentation for more
+    /// details.
+    float getMeasurement() const final;
+
     /**
      * @return The yaw setpoint, in the chassis frame.
      */
     float getSetpoint() const final;
 
     bool isOnline() const final;
+
+    /// Since the controller is in the chassis frame, no frame transformation is required.
+    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    {
+        return controllerFrameAngle;
+    }
+
+    /// Since the controller is in the chassis frame, no frame transformation is required.
+    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    {
+        return chassisFrameAngle;
+    }
 
 private:
     tap::algorithms::SmoothPid pid;
@@ -79,11 +97,11 @@ class ChassisFramePitchTurretController final : public TurretPitchControllerInte
 {
 public:
     /**
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
+     * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     ChassisFramePitchTurretController(
-        TurretSubsystem *turretSubsystem,
+        TurretMotor &pitchMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -94,12 +112,30 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    void setSetpoint(float desiredSetpoint) final;
+
     /**
      * @return The pitch setpoint, in the chassis frame.
      */
     float getSetpoint() const final;
 
+    /// @return The chassis frame pitch turret measurement, refer to top level documentation for
+    /// more details.
+    float getMeasurement() const final;
+
     bool isOnline() const final;
+
+    /// Since the controller is in the chassis frame, no frame transformation is required.
+    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    {
+        return controllerFrameAngle;
+    }
+
+    /// Since the controller is in the chassis frame, no frame transformation is required.
+    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    {
+        return chassisFrameAngle;
+    }
 
 private:
     tap::algorithms::SmoothPid pid;

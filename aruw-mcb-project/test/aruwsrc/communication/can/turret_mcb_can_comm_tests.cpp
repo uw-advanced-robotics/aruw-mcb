@@ -36,7 +36,7 @@ TEST(TurretMCBCanComm, sendData_hopper_cover_data)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     modm::can::Message blankMsg(0x1fe, 1, {0}, false);
     modm::can::Message filledMsg(0x1fe, 1, {1}, false);
@@ -58,7 +58,7 @@ TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     modm::can::Message blankMsg(0x1fe, 1, {0}, false);
     modm::can::Message filledMsg(0x1fe, 1, {0b10}, false);
@@ -79,7 +79,7 @@ TEST(TurretMCBCanComm, sendData_laser_data)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     modm::can::Message blankMsg(0x1fe, 1, {0}, false);
     modm::can::Message filledMsg(0x1fe, 1, {0b100}, false);
@@ -101,7 +101,7 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
         .WillByDefault([&](tap::can::CanRxListener* const listener) {
@@ -127,7 +127,7 @@ TEST(TurretMCBCanComm, receive_turret_data)
     ClockStub clock;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
         .WillByDefault([&](tap::can::CanRxListener* const listener) {
@@ -160,14 +160,20 @@ TEST(TurretMCBCanComm, receive_turret_data)
     messageToSend = &pitchMessage;
     drivers.canRxHandler.CanRxHandler::pollCanData();
 
-    EXPECT_NEAR((360.0f / UINT16_MAX) * static_cast<int16_t>(0x1234), dut.getYaw(), 1E-5);
     EXPECT_NEAR(
-        static_cast<int16_t>(0x4567) / Mpu6500::LSB_D_PER_S_TO_D_PER_S,
+        modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x1234),
+        dut.getYaw(),
+        1E-5);
+    EXPECT_NEAR(
+        modm::toRadian(static_cast<int16_t>(0x4567) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
         dut.getYawVelocity(),
         1E-5);
-    EXPECT_NEAR((360.0f / UINT16_MAX) * static_cast<int16_t>(0x4321), dut.getPitch(), 1E-5);
     EXPECT_NEAR(
-        static_cast<int16_t>(0x7654) / Mpu6500::LSB_D_PER_S_TO_D_PER_S,
+        modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x4321),
+        dut.getPitch(),
+        1E-5);
+    EXPECT_NEAR(
+        modm::toRadian(static_cast<int16_t>(0x7654) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
         dut.getPitchVelocity(),
         1E-5);
     EXPECT_EQ(0X12345678, dut.getIMUDataTimestamp());
@@ -185,7 +191,7 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
     clock.time = 10'000;
 
     Drivers drivers;
-    TurretMCBCanComm dut(&drivers);
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
         .WillByDefault([&](tap::can::CanRxListener* const listener) {

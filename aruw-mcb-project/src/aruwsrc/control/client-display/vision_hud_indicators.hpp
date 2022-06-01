@@ -20,6 +20,8 @@
 #ifndef VISION_HUD_INDICATORS_HPP_
 #define VISION_HUD_INDICATORS_HPP_
 
+#include <optional>
+
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
@@ -78,8 +80,8 @@ private:
 
     tap::arch::MilliTimeout updateVisionTargetFoundTimeout;
 
-    bool prevVisionTargetStatus = false;
-    bool currVisionTargetStatus = false;
+    std::optional<Tx::GraphicColor> prevVisionIndicatorColor = std::nullopt;
+    std::optional<Tx::GraphicColor> newVisionIndicatorColor = std::nullopt;
 
     modm::ResumableResult<bool> updateVisionTargetStatus();
 

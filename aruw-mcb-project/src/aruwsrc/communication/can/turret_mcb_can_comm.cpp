@@ -27,30 +27,35 @@
 
 namespace aruwsrc::can
 {
-TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers)
-    : drivers(drivers),
+TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers, tap::can::CanBus canBus)
+    : canBus(canBus),
+      drivers(drivers),
+      currProcessingImuData{},
+      lastCompleteImuData{},
+      yawRevolutions(0),
+      pitchRevolutions(0),
       yawAngleGyroMessageHandler(
           drivers,
           YAW_RX_CAN_ID,
-          TURRET_MCB_CAN_BUS,
+          canBus,
           this,
           &TurretMCBCanComm::handleYawAngleGyroMessage),
       pitchAngleGyroMessageHandler(
           drivers,
           PITCH_RX_CAN_ID,
-          TURRET_MCB_CAN_BUS,
+          canBus,
           this,
           &TurretMCBCanComm::handlePitchAngleGyroMessage),
       turretStatusRxHandler(
           drivers,
           TURRET_STATUS_RX_CAN_ID,
-          TURRET_MCB_CAN_BUS,
+          canBus,
           this,
           &TurretMCBCanComm::handleTurretMessage),
       timeSynchronizationRxHandler(
           drivers,
           SYNC_RX_CAN_ID,
-          TURRET_MCB_CAN_BUS,
+          canBus,
           this,
           &TurretMCBCanComm::handleTimeSynchronizationRequest),
       txCommandMsgBitmask(),
@@ -75,8 +80,20 @@ void TurretMCBCanComm::sendData()
         txMsg.data[0] = txCommandMsgBitmask.value;
         drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, txMsg);
 
+        if (txCommandMsgBitmask.any(TxCommandMsgBitmask::RECALIBRATE_IMU))
+        {
+            yawRevolutions = 0;
+            pitchRevolutions = 0;
+        }
+
         // set this calibrate flag to false so the calibrate command is only sent once
         txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU);
+    }
+
+    if (!isConnected())
+    {
+        yawRevolutions = 0;
+        pitchRevolutions = 0;
     }
 }
 
@@ -89,8 +106,8 @@ void TurretMCBCanComm::handleYawAngleGyroMessage(const modm::can::Message& messa
 
     const AngleMessageData* angleMessage = reinterpret_cast<const AngleMessageData*>(message.data);
 
-    currProcessingImuData.yaw =
-        static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION;
+    currProcessingImuData.yaw = modm::toRadian(
+        static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
     currProcessingImuData.rawYawVelocity = angleMessage->angleAngularVelocityRaw;
     currProcessingImuData.seq = angleMessage->seq;
     // clear top 16 bits
@@ -111,13 +128,20 @@ void TurretMCBCanComm::handlePitchAngleGyroMessage(const modm::can::Message& mes
         return;
     }
 
-    currProcessingImuData.pitch =
-        static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION;
+    currProcessingImuData.pitch = modm::toRadian(
+        static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
     currProcessingImuData.rawPitchVelocity = angleMessage->angleAngularVelocityRaw;
     // clear bottom 16 bits
     currProcessingImuData.turretDataTimestamp &= 0xffff0000;
     // fill in bottom 16 bits
     currProcessingImuData.turretDataTimestamp |= static_cast<uint32_t>(angleMessage->timestamp);
+
+    updateRevolutionCounter(
+        currProcessingImuData.pitch,
+        lastCompleteImuData.pitch,
+        pitchRevolutions);
+
+    updateRevolutionCounter(currProcessingImuData.yaw, lastCompleteImuData.yaw, yawRevolutions);
 
     lastCompleteImuData = currProcessingImuData;
 
@@ -138,7 +162,7 @@ void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message
     syncResponseMessage.setExtended(false);
     *reinterpret_cast<uint32_t*>(syncResponseMessage.data) =
         tap::arch::clock::getTimeMicroseconds();
-    drivers->can.sendMessage(TURRET_MCB_CAN_BUS, syncResponseMessage);
+    drivers->can.sendMessage(canBus, syncResponseMessage);
 }
 
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(
