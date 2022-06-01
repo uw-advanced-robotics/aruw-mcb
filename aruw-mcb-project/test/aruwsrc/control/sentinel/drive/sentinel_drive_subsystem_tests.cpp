@@ -50,7 +50,9 @@ protected:
 TEST_F(SentinelDriveSubsystemTest, initialize_initializes_both_motors_and_configs_pins)
 {
     EXPECT_CALL(sentinelDrive.leftWheel, initialize);
+#if defined(TARGET_SENTINEL_2021)
     EXPECT_CALL(sentinelDrive.rightWheel, initialize);
+#endif
     EXPECT_CALL(drivers.digital, configureInputPullMode(LEFT_LIMIT_SWITCH, _));
     EXPECT_CALL(drivers.digital, configureInputPullMode(RIGHT_LIMIT_SWITCH, _));
 
@@ -71,11 +73,14 @@ TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_0_when_motors_offlin
 {
     EXPECT_CALL(drivers.errorController, addToErrorList);
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(false));
+#if defined(TARGET_SENTINEL_2021)
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(false));
+#endif
 
     EXPECT_NEAR(0.0f, sentinelDrive.absolutePosition(), 1E-3);
 }
 
+#if defined(TARGET_SENTINEL_2021)
 TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_right_pos_when_left_not_connected)
 {
     static constexpr int ENC_TICKS = 1000;
@@ -125,17 +130,23 @@ TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_wheel_avg_when_both_
     rightEncUnwrapped = 20'000;
     EXPECT_NEAR(calculatePosition(20'000), sentinelDrive.absolutePosition(), 1E-3);
 }
+#endif
 
 TEST_F(SentinelDriveSubsystemTest, desired_output_reasonable_for_various_setpoints)
 {
+#if defined(TARGET_SENTINEL_2021)
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(true));
+#endif
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(true));
 
     int16_t shaftRpm = 0;
 
+#if defined(TARGET_SENTINEL_2021)
     ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(ReturnPointee(&shaftRpm));
+#endif
     ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(ReturnPointee(&shaftRpm));
 
+#if defined(TARGET_SENTINEL_2021)
     {
         InSequence sequence;
         EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(0));
@@ -144,6 +155,7 @@ TEST_F(SentinelDriveSubsystemTest, desired_output_reasonable_for_various_setpoin
         EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(Lt(0)));
         EXPECT_CALL(sentinelDrive.rightWheel, setDesiredOutput(Gt(0)));
     }
+#endif
 
     {
         InSequence sequence;
@@ -178,41 +190,4 @@ TEST_F(SentinelDriveSubsystemTest, desired_output_reasonable_for_various_setpoin
     sentinelDrive.setDesiredRpm(0);
     shaftRpm = -1000;
     sentinelDrive.refresh();
-}
-
-TEST_F(SentinelDriveSubsystemTest, runHardwareTests_sets_complete_if_shaftRPM_large)
-{
-    int16_t leftShaftRpm = 0;
-    int16_t rightShaftRpm = 0;
-
-    ON_CALL(sentinelDrive.rightWheel, getShaftRPM).WillByDefault(ReturnPointee(&leftShaftRpm));
-    ON_CALL(sentinelDrive.leftWheel, getShaftRPM).WillByDefault(ReturnPointee(&rightShaftRpm));
-
-    // large negative, tests not complete
-    leftShaftRpm = -1'000;
-    rightShaftRpm = -1'000;
-    sentinelDrive.runHardwareTests();
-
-    EXPECT_FALSE(sentinelDrive.isHardwareTestComplete());
-
-    // small positive, tests not complete
-    leftShaftRpm = 10;
-    rightShaftRpm = 10;
-    sentinelDrive.runHardwareTests();
-
-    EXPECT_FALSE(sentinelDrive.isHardwareTestComplete());
-
-    // one small positive, tests not complete
-    leftShaftRpm = 10;
-    rightShaftRpm = 10'000;
-    sentinelDrive.runHardwareTests();
-
-    EXPECT_FALSE(sentinelDrive.isHardwareTestComplete());
-
-    // two large positive, tests complete
-    leftShaftRpm = 10'000;
-    rightShaftRpm = 10'000;
-    sentinelDrive.runHardwareTests();
-
-    EXPECT_TRUE(sentinelDrive.isHardwareTestComplete());
 }

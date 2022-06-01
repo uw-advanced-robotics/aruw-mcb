@@ -108,8 +108,7 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(drivers.refSerial, getRefSerialReceivingData)
-            .WillByDefault(ReturnPointee(&cvOnline));
+        ON_CALL(drivers.visionCoprocessor, isCvOnline).WillByDefault(ReturnPointee(&cvOnline));
 
         ON_CALL(drivers.visionCoprocessor, getLastAimData).WillByDefault(ReturnRef(aimData));
 

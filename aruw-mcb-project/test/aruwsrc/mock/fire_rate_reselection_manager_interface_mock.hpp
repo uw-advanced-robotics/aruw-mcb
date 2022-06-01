@@ -17,22 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_kf_odometry_2d_subsystem.hpp"
+#ifndef FIRE_RATE_RESELECTION_MANAGER_INTERFACE_MOCK_HPP_
+#define FIRE_RATE_RESELECTION_MANAGER_INTERFACE_MOCK_HPP_
 
-#include "aruwsrc/drivers.hpp"
+#include <gmock/gmock.h>
 
-namespace aruwsrc::algorithms::odometry
+#include "aruwsrc/control/agitator/fire_rate_reselection_manager_interface.hpp"
+
+namespace aruwsrc::mock
 {
-OttoKFOdometry2DSubsystem::OttoKFOdometry2DSubsystem(
-    aruwsrc::Drivers &drivers,
-    const aruwsrc::control::turret::TurretSubsystem &turret,
-    tap::control::chassis::ChassisSubsystemInterface &chassis)
-    : Subsystem(&drivers),
-      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500),
-      orientationObserver(&drivers, turret)
+class FireRateReselectionManagerInterfaceMock
+    : public control::agitator::FireRateReselectionManagerInterface
 {
-}
+public:
+    MOCK_METHOD(uint32_t, getFireRatePeriod, (), (override));
+    MOCK_METHOD(
+        control::agitator::FireRateReadinessState,
+        getFireRateReadinessState,
+        (),
+        (override));
+};
+}  // namespace aruwsrc::mock
 
-void OttoKFOdometry2DSubsystem::refresh() { update(); }
-
-}  // namespace aruwsrc::algorithms::odometry
+#endif  // FIRE_RATE_RESELECTION_MANAGER_INTERFACE_MOCK_HPP_

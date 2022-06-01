@@ -60,9 +60,9 @@ public:
     static constexpr float GEAR_RATIO = 19.0f;
 
     // RMUL length of the rail, in mm
-    static constexpr float RAIL_LENGTH = 2130;
+    // static constexpr float RAIL_LENGTH = 2130;
     // Our length of the rail, in mm
-    // static constexpr float RAIL_LENGTH = 1900;
+    static constexpr float RAIL_LENGTH = 1900;
 
     /**
      * Length of the sentinel, in mm
@@ -74,7 +74,9 @@ public:
         tap::gpio::Digital::InputPin leftLimitSwitch,
         tap::gpio::Digital::InputPin rightLimitSwitch,
         tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,
+#if defined(TARGET_SENTINEL_2021)
         tap::motor::MotorId rightMotorId = RIGHT_MOTOR_ID,
+#endif
         tap::gpio::Analog::Pin currentSensorPin = CURRENT_SENSOR_PIN);
 
     void initialize() override;
@@ -87,6 +89,8 @@ public:
 
     mockable void setDesiredRpm(float desRpm);
 
+    mockable float getDesiredRpm();
+
     void refresh() override;
 
     void runHardwareTests() override;
@@ -97,16 +101,28 @@ public:
 
     const char* getName() override { return "Sentinel Drive"; }
 
-    inline int getNumChassisMotors() const override { return 2; }
+    inline int getNumChassisMotors() const override { return NUM_CHASSIS_MOTORS; }
 
     inline int16_t getLeftFrontRpmActual() const override { return leftWheel.getShaftRPM(); }
     inline int16_t getLeftBackRpmActual() const override { return 0; }
-    inline int16_t getRightFrontRpmActual() const override { return rightWheel.getShaftRPM(); }
+    inline int16_t getRightFrontRpmActual() const override
+    {
+#if defined(TARGET_SENTINEL_2021)
+        return rightWheel.getShaftRPM();
+#else
+        return 0;
+#endif
+    }
     inline int16_t getRightBackRpmActual() const override { return 0; }
 
     inline bool allMotorsOnline() const override
     {
-        return leftWheel.isMotorOnline() && rightWheel.isMotorOnline();
+        bool allOnline = true;
+        for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
+        {
+            allOnline &= chassisMotors[i]->isMotorOnline();
+        }
+        return allOnline;
     }
 
     /**
@@ -122,8 +138,7 @@ private:
     static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
     static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 #else
-    static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR4;
-    static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR3;
+    static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR3;
 #endif
     static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
     static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::Pin::S;
@@ -152,15 +167,25 @@ private:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     testing::NiceMock<tap::mock::DjiMotorMock> leftWheel;
+#if defined(TARGET_SENTINEL_2021)
     testing::NiceMock<tap::mock::DjiMotorMock> rightWheel;
+#endif
 
 private:
 #else
     tap::motor::DjiMotor leftWheel;
+#if defined(TARGET_SENTINEL_2021)
     tap::motor::DjiMotor rightWheel;
 #endif
+#endif
 
-    tap::motor::DjiMotor* chassisMotors[2];
+#if defined(TARGET_SENTINEL_2021)
+    static constexpr int NUM_CHASSIS_MOTORS = 2;
+#else
+    static constexpr int NUM_CHASSIS_MOTORS = 1;
+#endif
+
+    tap::motor::DjiMotor* chassisMotors[NUM_CHASSIS_MOTORS];
 
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
 

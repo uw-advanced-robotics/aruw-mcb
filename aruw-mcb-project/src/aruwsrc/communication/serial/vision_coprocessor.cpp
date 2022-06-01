@@ -25,6 +25,7 @@
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
@@ -78,9 +79,13 @@ void VisionCoprocessor::initializeCV()
 #endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-
+#if defined(TARGET_HERO)
+    drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
+    drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 900'000>();
+#else
     drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 1'000'000>();
     drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 1'000'000>();
+#endif
 }
 
 void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
@@ -163,9 +168,15 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
+#if defined(ALL_SENTINELS)
+    odometryData->chassisOdometry.pitch = 0;
+    odometryData->chassisOdometry.roll = 0;
+    odometryData->chassisOdometry.yaw = 0;
+#else
     odometryData->chassisOdometry.pitch = pitch;
     odometryData->chassisOdometry.roll = roll;
     odometryData->chassisOdometry.yaw = location.getOrientation();
+#endif
 
     // number of turrets
     odometryData->numTurrets = control::turret::NUM_TURRETS;

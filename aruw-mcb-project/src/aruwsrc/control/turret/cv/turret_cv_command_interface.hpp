@@ -17,22 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_kf_odometry_2d_subsystem.hpp"
+#ifndef TURRET_CV_COMMAND_INTERFACE_HPP_
+#define TURRET_CV_COMMAND_INTERFACE_HPP_
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/control/command.hpp"
 
-namespace aruwsrc::algorithms::odometry
+namespace aruwsrc::control::turret::cv
 {
-OttoKFOdometry2DSubsystem::OttoKFOdometry2DSubsystem(
-    aruwsrc::Drivers &drivers,
-    const aruwsrc::control::turret::TurretSubsystem &turret,
-    tap::control::chassis::ChassisSubsystemInterface &chassis)
-    : Subsystem(&drivers),
-      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500),
-      orientationObserver(&drivers, turret)
+class TurretCVCommandInterface : public tap::control::Command
 {
-}
+public:
+    virtual bool getTurretID() const = 0;
+    virtual bool isAimingWithinLaunchingTolerance() const = 0;
+};
+}  // namespace aruwsrc::control::turret::cv
 
-void OttoKFOdometry2DSubsystem::refresh() { update(); }
-
-}  // namespace aruwsrc::algorithms::odometry
+#endif  // TURRET_CV_COMMAND_INTERFACE_HPP_

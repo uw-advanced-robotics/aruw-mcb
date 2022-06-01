@@ -23,7 +23,7 @@
 #include "tap/control/governor/command_governor_interface.hpp"
 
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
-#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::governor
@@ -48,7 +48,7 @@ class CvOnTargetGovernor : public tap::control::governor::CommandGovernorInterfa
 public:
     CvOnTargetGovernor(
         aruwsrc::Drivers &drivers,
-        aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand,
+        aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         AutoAimLaunchTimer &launchTimer,
         CvOnTargetGovernorMode mode)
         : drivers(drivers),
@@ -58,18 +58,30 @@ public:
     {
     }
 
-    void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
-    bool getGovernorEnabled() const { return this->enabled; }
+    mockable void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
 
-    bool isReady() final
+    mockable bool isGoverEnabled() const { return this->enabled; }
+
+    /**
+     * @return true if gating is being performed. If gating is being performed, projectiles will be
+     * launched at times when the CV system decides they should be. Otherwise, the system will not
+     * be gated and projectiles may be launched independently of CV logic.
+     */
+    mockable bool isGovernorGating() const
     {
-        if (!enabled)
-        {
-            return true;
-        }
+        bool isCvOnline = drivers.visionCoprocessor.isCvOnline();
 
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
-        if (!isCvRunning)
+
+        bool ungated = launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID()) ==
+                       AutoAimLaunchTimer::LaunchInclination::UNGATED;
+
+        return isCvOnline && enabled && isCvRunning && !ungated;
+    }
+
+    bool isReady() final_mockable
+    {
+        if (!isGovernorGating())
         {
             return true;
         }
@@ -83,7 +95,7 @@ public:
         return isGateSatisfied();
     }
 
-    bool isGateSatisfied()
+    mockable bool isGateSatisfied()
     {
         auto autoLaunchInclination =
             launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
@@ -103,7 +115,7 @@ public:
         return false;
     }
 
-    bool isFinished() final
+    bool isFinished() final_mockable
     {
         // Once started, CV will not stop the target command; it is allowed to run to completion.
         // This enables firing a whole round, or burst, without interruption.
@@ -112,7 +124,7 @@ public:
 
 private:
     aruwsrc::Drivers &drivers;
-    aruwsrc::control::turret::cv::TurretCVCommand &turretCVCommand;
+    aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     AutoAimLaunchTimer &launchTimer;
     const CvOnTargetGovernorMode mode;
     bool enabled = true;

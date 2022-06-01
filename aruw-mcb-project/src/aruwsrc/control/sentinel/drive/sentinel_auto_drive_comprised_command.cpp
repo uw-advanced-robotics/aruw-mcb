@@ -38,8 +38,8 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
       sentinelChassis(sentinelChassis),
-      fullTraverse(sentinelChassis),
-      randomDrive(sentinelChassis),
+      evadeSlow(sentinelChassis, 0.5),
+      evadeFast(sentinelChassis, 1.0),
       evadeMode(false)
 {
     addSubsystemRequirement(sentinelChassis);
@@ -48,7 +48,7 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
 
 void SentinelAutoDriveComprisedCommand::initialize()
 {
-    comprisedCommandScheduler.addCommand(&fullTraverse);
+    comprisedCommandScheduler.addCommand(&evadeSlow);
 }
 
 void SentinelAutoDriveComprisedCommand::execute()
@@ -59,15 +59,15 @@ void SentinelAutoDriveComprisedCommand::execute()
     {
         if (!evadeMode)
         {
-            comprisedCommandScheduler.removeCommand(&fullTraverse, true);
-            comprisedCommandScheduler.addCommand(&randomDrive);
+            comprisedCommandScheduler.removeCommand(&evadeSlow, true);
+            comprisedCommandScheduler.addCommand(&evadeFast);
             evadeMode = true;
         }
     }
     else if (compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) && evadeMode)
     {
-        comprisedCommandScheduler.removeCommand(&randomDrive, true);
-        comprisedCommandScheduler.addCommand(&fullTraverse);
+        comprisedCommandScheduler.removeCommand(&evadeFast, true);
+        comprisedCommandScheduler.addCommand(&evadeSlow);
         evadeMode = false;
     }
 
@@ -76,8 +76,8 @@ void SentinelAutoDriveComprisedCommand::execute()
 
 void SentinelAutoDriveComprisedCommand::end(bool interrupted)
 {
-    comprisedCommandScheduler.removeCommand(&fullTraverse, interrupted);
-    comprisedCommandScheduler.removeCommand(&randomDrive, interrupted);
+    comprisedCommandScheduler.removeCommand(&evadeSlow, interrupted);
+    comprisedCommandScheduler.removeCommand(&evadeFast, interrupted);
 }
 
 bool SentinelAutoDriveComprisedCommand::isFinished() const { return false; }

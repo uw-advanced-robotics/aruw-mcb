@@ -32,6 +32,14 @@
 
 namespace aruwsrc::algorithms::odometry
 {
+/**
+ * An odometry interface that uses a kalman filter to measure odometry. This class is designed
+ * specifically for robots whose chassis does not measure absolute position (i.e. all ground
+ * robots). For those robots that measure chassis position directly (sentinel, for example), a
+ * tweaked version of the kalman filter used in this implementation should be used.
+ *
+ * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
+ */
 class ChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
@@ -46,9 +54,9 @@ public:
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
+    inline float getYaw() const override { return chassisYaw; }
     void update();
 
-private:
     enum class OdomState
     {
         POS_X = 0,
@@ -57,7 +65,7 @@ private:
         POS_Y,
         VEL_Y,
         ACC_Y,
-        STATES,
+        NUM_STATES,
     };
 
     enum class OdomInput
@@ -66,16 +74,17 @@ private:
         ACC_X,
         VEL_Y,
         ACC_Y,
-        INPUTS,
+        NUM_INPUTS,
     };
 
     static constexpr int STATES_SQUARED =
-        static_cast<int>(OdomState::STATES) * static_cast<int>(OdomState::STATES);
+        static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
     static constexpr int INPUTS_SQUARED =
-        static_cast<int>(OdomInput::INPUTS) * static_cast<int>(OdomInput::INPUTS);
+        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
     static constexpr int INPUTS_MULT_STATES =
-        static_cast<int>(OdomInput::INPUTS) * static_cast<int>(OdomState::STATES);
+        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
 
+    /// Assumed time difference between calls to `update`, in seconds
     static constexpr float DT = 0.002f;
 
     // clang-format off
@@ -107,7 +116,7 @@ private:
         0  , 0  , 1.0, 0  ,
         0  , 0  , 0  , 1.2,
     };
-    static constexpr float KF_P[STATES_SQUARED] = {
+    static constexpr float KF_P0[STATES_SQUARED] = {
         1E3, 0  , 0  , 0  , 0  , 0  ,
         0  , 1E3, 0  , 0  , 0  , 0  ,
         0  , 0  , 1E3, 0  , 0  , 0  ,
@@ -116,8 +125,9 @@ private:
         0  , 0  , 0  , 0  , 0  , 1E3,
     };
     // clang-format on
-
-    /// Max chassis acceleration magnitude measured on the soldier when at 120W power mode, in m/s^2
+    
+    /// Max chassis acceleration magnitude measured on the soldier when at 120W power mode, in
+    /// m/s^2. Also works for hero since it has an acceleration on the same order of magnitude.
     static constexpr float MAX_ACCELERATION = 8.0f;
 
     static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
@@ -132,23 +142,27 @@ private:
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
 
-    tap::algorithms::KalmanFilter<int(OdomState::STATES), int(OdomInput::INPUTS)> kf;
+    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
-    // Location in reference frame
+    /// Chassis location in the world frame
     modm::Location2D<float> location;
-    // Velocity in reference frame
+    /// Chassis velocity in the world frame
     modm::Vector2f velocity;
+    // Chassis yaw orientation in world frame (radians)
+    float chassisYaw = 0;
 
-    // Chassis measured change in velocity
+    /// Chassis measured change in velocity since the last time `update` was called, in the chassis
+    /// frame
     modm::Vector2f chassisMeasuredDeltaVelocity;
 
     modm::interpolation::Linear<modm::Pair<float, float>>
-        chassisAccelerationToMeasurementCovInterpolator;
+        chassisAccelerationToMeasurementCovarianceInterpolator;
 
+    /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
 
-    void updateLocationVelocityFromKF(float chassisYaw);
+    void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
 };

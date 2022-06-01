@@ -41,34 +41,26 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    tap::control::Subsystem &launchingSubsystem,
-    Command *const launchingCommand,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const uint8_t turretID)
-    : ComprisedCommand(drivers),
-      drivers(drivers),
+    : drivers(drivers),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
       turretID(turretID),
-      launchingCommand(launchingCommand),
       ballisticsSolver(ballisticsSolver),
-      pitchScanner(PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, SCAN_DELTA_ANGLE),
+      pitchScanner({PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, PITCH_SCAN_DELTA_ANGLE}),
       yawScanner(
-          turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
-          turretSubsystem->yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
-          SCAN_DELTA_ANGLE)
+          {turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
+           turretSubsystem->yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
+           YAW_SCAN_DELTA_ANGLE})
 {
-    assert(launchingCommand != nullptr);
     assert(turretSubsystem != nullptr);
     assert(pitchController != nullptr);
     assert(yawController != nullptr);
     assert(ballisticsSolver != nullptr);
 
-    this->comprisedCommandScheduler.registerSubsystem(turretSubsystem);
-    this->comprisedCommandScheduler.registerSubsystem(&launchingSubsystem);
     this->addSubsystemRequirement(turretSubsystem);
-    this->addSubsystemRequirement(&launchingSubsystem);
 }
 
 bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
@@ -101,11 +93,8 @@ void SentinelTurretCVCommand::execute()
         pitchSetpoint = ballisticsSolution->pitchAngle;
         yawSetpoint = ballisticsSolution->yawAngle;
 
-        auto turretController = turretSubsystem->yawMotor.getTurretController();
-        if (turretController != nullptr)
-        {
-            yawSetpoint = turretController->convertChassisAngleToControllerFrame(yawSetpoint);
-        }
+        yawSetpoint = yawController->convertChassisAngleToControllerFrame(yawSetpoint);
+        pitchSetpoint = pitchController->convertChassisAngleToControllerFrame(pitchSetpoint);
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
@@ -115,24 +104,15 @@ void SentinelTurretCVCommand::execute()
         yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
         pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
-        // Check if we are aiming within tolerance, if so fire
-        /// TODO: This should be updated to be smarter at some point. Ideally CV sends some score
-        /// to indicate whether it's worth firing at
-        if (aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-                turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
-                turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
-                ballisticsSolution->distance))
-        {
-            // Do not re-add command if it's already scheduled as that would interrupt it
-            if (!drivers->commandScheduler.isCommandScheduled(launchingCommand))
-            {
-                drivers->commandScheduler.addCommand(launchingCommand);
-            }
-        }
+        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+            turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
+            turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
+            ballisticsSolution->distance);
     }
     else
     {
         // Target unavailable
+        withinAimingTolerance = false;
 
         // See how recently we lost target
         if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
@@ -159,8 +139,6 @@ void SentinelTurretCVCommand::execute()
     // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
     // and sets the turret subsystem's desired yaw output
     yawController->runController(dt, yawSetpoint);
-
-    comprisedCommandScheduler.run();
 }
 
 bool SentinelTurretCVCommand::isFinished() const
@@ -172,7 +150,7 @@ void SentinelTurretCVCommand::end(bool)
 {
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
-    this->comprisedCommandScheduler.removeCommand(launchingCommand, true);
+    withinAimingTolerance = false;
 }
 
 void SentinelTurretCVCommand::requestNewTarget()

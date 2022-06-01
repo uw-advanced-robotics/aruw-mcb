@@ -21,6 +21,7 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -38,6 +39,11 @@
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "governor/cv_has_target_governor.hpp"
+#include "governor/cv_on_target_governor.hpp"
+#include "governor/cv_online_governor.hpp"
+#include "governor/fire_rate_limit_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "imu/imu_calibrate_command.hpp"
@@ -51,6 +57,7 @@
 #include "turret/constants/turret_constants.hpp"
 #include "turret/cv/sentinel_turret_cv_command.hpp"
 #include "turret/sentinel_turret_subsystem.hpp"
+#include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_control_command.hpp"
 
 using namespace tap::control::governor;
@@ -143,15 +150,10 @@ public:
               frictionWheels,
               29.5f,  // defaultLaunchSpeed
               config.turretID),
-          rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
-          unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
-          rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
-          frictionWheelsOnGovernor(frictionWheels),
-          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
-          rotateAndUnjamAgitatorWithHeatLimiting(
-              {&agitator},
-              rotateAndUnjamAgitator,
-              {&heatLimitGovernor, &frictionWheelsOnGovernor}),
+          autoAimLaunchTimer(
+              aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+              &drivers.visionCoprocessor,
+              &ballisticsSolver),
           spinFrictionWheels(
               &drivers,
               &frictionWheels,
@@ -181,10 +183,37 @@ public:
               &turretSubsystem,
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
-              agitator,
-              &rotateAndUnjamAgitatorWithHeatLimiting,
               &ballisticsSolver,
-              config.turretID)
+              config.turretID),
+          turretUturnCommand(&turretSubsystem, M_PI),
+          rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
+          unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
+          rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
+          frictionWheelsOnGovernor(frictionWheels),
+          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
+          cvOnTargetGovernor(
+              drivers,
+              turretCVCommand,
+              autoAimLaunchTimer,
+              CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
+          cvOnlineGovernor(drivers, turretCVCommand),
+          autoAimFireRateManager(drivers, turretCVCommand, config.turretID),
+          fireRateLimitGovernor(autoAimFireRateManager),
+          rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
+              {&agitator},
+              rotateAndUnjamAgitator,
+              {&heatLimitGovernor,
+               &frictionWheelsOnGovernor,
+               &cvOnTargetGovernor,
+               &cvOnlineGovernor,
+               &fireRateLimitGovernor}),
+          rotateAndUnjamAgitatorWithHeatAndCvLimiting(
+              {&agitator},
+              rotateAndUnjamAgitator,
+              {&heatLimitGovernor,
+               &frictionWheelsOnGovernor,
+               &cvOnTargetGovernor,
+               &fireRateLimitGovernor})
     {
     }
 
@@ -194,19 +223,9 @@ public:
     DjiMotor pitchMotor;
     DjiMotor yawMotor;
     SentinelTurretSubsystem turretSubsystem;
+
     OttoBallisticsSolver ballisticsSolver;
-
-    // unjam commands
-    MoveIntegralCommand rotateAgitator;
-    UnjamIntegralCommand unjamAgitator;
-    MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
-
-    // rotates agitator if friction wheels are spinning fast
-    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
-
-    // rotates agitator with heat limiting applied
-    HeatLimitGovernor heatLimitGovernor;
-    GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatLimiting;
+    AutoAimLaunchTimer autoAimLaunchTimer;
 
     // friction wheel commands
     FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
@@ -221,8 +240,29 @@ public:
     algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
 
     // turret commands
+    // limits fire rate
     user::TurretUserControlCommand turretManual;
+
     cv::SentinelTurretCVCommand turretCVCommand;
+
+    user::TurretQuickTurnCommand turretUturnCommand;
+
+    // base agitator commands
+    MoveIntegralCommand rotateAgitator;
+    UnjamIntegralCommand unjamAgitator;
+    MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
+
+    // agitator related governors
+    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
+    HeatLimitGovernor heatLimitGovernor;
+    CvOnTargetGovernor cvOnTargetGovernor;
+    CvOnlineGovernor cvOnlineGovernor;
+    AutoAimFireRateReselectionManager autoAimFireRateManager;
+    FireRateLimitGovernor fireRateLimitGovernor;
+
+    // agitator governor limited commands
+    GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
+    GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
 };
 
 SentinelTurret turretZero(
@@ -293,15 +333,12 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     },
     nullptr);
 
-void selectNewRobotMessageHandler()
-{
-    turretZero.turretCVCommand.requestNewTarget();
-    turretOne.turretCVCommand.requestNewTarget();
-}
+void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
+
 void targetNewQuadrantMessageHandler()
 {
-    turretZero.turretCVCommand.changeScanningQuadrant();
-    turretOne.turretCVCommand.changeScanningQuadrant();
+    drivers()->commandScheduler.addCommand(&turretZero.turretUturnCommand);
+    drivers()->commandScheduler.addCommand(&turretOne.turretUturnCommand);
 }
 
 /* define command mappings --------------------------------------------------*/
@@ -312,8 +349,8 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&turretZero.rotateAndUnjamAgitatorWithHeatLimiting,
-     &turretOne.rotateAndUnjamAgitatorWithHeatLimiting},
+    {&turretZero.rotateAndUnjamAgitatorWithHeatAndCvLimiting,
+     &turretOne.rotateAndUnjamAgitatorWithHeatAndCvLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -364,6 +401,10 @@ void setDefaultSentinelCommands(aruwsrc::Drivers *)
     turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
     turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
     turretOne.turretSubsystem.setDefaultCommand(&turretOne.turretCVCommand);
+    turretZero.agitator.setDefaultCommand(
+        &turretZero.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
+    turretOne.agitator.setDefaultCommand(
+        &turretOne.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
