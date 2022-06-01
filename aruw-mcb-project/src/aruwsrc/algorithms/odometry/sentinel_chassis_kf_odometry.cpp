@@ -26,54 +26,50 @@ SentinelChassisKFOdometry::SentinelChassisKFOdometry(
     tap::communication::sensors::imu::ImuInterface& imu)
     : chassisSubsystem(chassisSubsystem),
       imu(imu),
-      kf(KF_A, KF_C, KF_Q, KF_R, KF_P),
-      chassisAccelerationToCovarianceInterpolator(
+      kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
+      chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
-    float initialX[static_cast<int>(OdomState::STATES)] = {};
+    float initialX[static_cast<int>(OdomState::NUM_STATES)] = {};
     kf.init(initialX);
 }
 
 void SentinelChassisKFOdometry::update()
 {
-    // get chassis relative velocity
+    // Get chassis velocity as measured by the motor encoders.
+    // Since the sentinel chassis only moves in one direction,
+    // this measurement is in the world frame.
     auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
 
     // the measurement covariance is dynamically updated based on chassis-measured acceleration
     updateMeasurementCovariance(chassisVelocity[0][1]);
 
     // assume 0 velocity/acceleration in z direction
-    float y[static_cast<int>(OdomInput::INPUTS)] = {};
+    float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
     y[static_cast<int>(OdomInput::POS_Y)] = chassisVelocity[0][1];
-    // This is mounting-specific, the MCB is mounted in such a way that the accelerometer's Y
-    // component corresponds to the X component and the X component corresponds to the chassis Y
-    // acceleration component.
     y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
 
-    // perform the update, new state matrix now available.
+    // Update the Kalman filter. A new state estimate is available after this call.
     kf.performUpdate(y);
 
-    // update the location and velocity accessor objects with values from the state vector
-    updateLocationVelocityFromKF();
+    // Update the location and velocity accessor objects with values from the state vector
+    updateChassisStateFromKF();
 }
 
-void SentinelChassisKFOdometry::updateLocationVelocityFromKF()
+void SentinelChassisKFOdometry::updateChassisStateFromKF()
 {
-    const auto& x = kf.getStateMatrix();
+    const auto& x = kf.getStateVectorAsMatrix();
 
     // update odometry velocity and orientation
     velocity.x = 0;
     velocity.y = x[static_cast<int>(OdomState::VEL_Y)];
 
     location.setOrientation(0);
-    location.setPosition(
-        0,
-        x[static_cast<int>(OdomState::POS_Y)]);
+    location.setPosition(0, x[static_cast<int>(OdomState::POS_Y)]);
 }
 
-void SentinelChassisKFOdometry::updateMeasurementCovariance(
-    const float& chassisVelocity)
+void SentinelChassisKFOdometry::updateMeasurementCovariance(const float& chassisVelocity)
 {
     const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
     const uint32_t dt = curTime - prevTime;
@@ -87,21 +83,25 @@ void SentinelChassisKFOdometry::updateMeasurementCovariance(
 
     // compute acceleration
 
-    deltaVelocity = tap::algorithms::lowPassFilter(
-        deltaVelocity,
+    chassisMeasuredDeltaVelocity = tap::algorithms::lowPassFilter(
+        chassisMeasuredDeltaVelocity,
         chassisVelocity - prevChassisVelocity,
         CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
 
     prevChassisVelocity = chassisVelocity;
 
-    const float accelMagnitude = deltaVelocity * 1E6 / static_cast<float>(dt);
+    // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
+    // convert dt in microseconds to seconds
+    const float accelMagnitude = chassisMeasuredDeltaVelocity * 1E6 / static_cast<float>(dt);
 
-    const float velocityCovariance = chassisAccelerationToCovarianceInterpolator.interpolate(accelMagnitude);
+    const float velocityCovariance =
+        chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
 
     // set measurement covariance of chassis velocity as measured by the wheels because if
     // acceleration is large, the likelihood of slippage is greater
     kf.getMeasurementCovariance()[0] = velocityCovariance;
-    kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::INPUTS) + 2] = velocityCovariance;
+    kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
+        velocityCovariance;
 }
 
 }  // namespace aruwsrc::algorithms::odometry

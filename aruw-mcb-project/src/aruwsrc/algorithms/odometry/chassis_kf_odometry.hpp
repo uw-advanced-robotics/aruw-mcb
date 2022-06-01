@@ -125,7 +125,7 @@ public:
         0  , 0  , 0  , 0  , 0  , 1E3,
     };
     // clang-format on
-    
+
     /// Max chassis acceleration magnitude measured on the soldier when at 120W power mode, in
     /// m/s^2. Also works for hero since it has an acceleration on the same order of magnitude.
     static constexpr float MAX_ACCELERATION = 8.0f;

@@ -34,9 +34,6 @@ SentinelOttoVelocityOdometry2DSubsystem::SentinelOttoVelocityOdometry2DSubsystem
 {
 }
 
-void SentinelOttoVelocityOdometry2DSubsystem::refresh()
-{
-    update();
-}
+void SentinelOttoVelocityOdometry2DSubsystem::refresh() { update(); }
 
 }  // namespace aruwsrc::algorithms::odometry

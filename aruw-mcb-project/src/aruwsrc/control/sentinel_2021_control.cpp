@@ -131,7 +131,10 @@ SentinelTurretSubsystem turretSubsystem(
     nullptr,
     0);
 
-SentinelOttoVelocityOdometry2DSubsystem odometrySubsystem(*drivers(), turretSubsystem, sentinelDrive);
+SentinelOttoVelocityOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    turretSubsystem,
+    sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
 

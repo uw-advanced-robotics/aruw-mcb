@@ -127,7 +127,7 @@ void ChassisKFOdometry::updateMeasurementCovariance(
     // acceleration is large, the likelihood of slippage is greater
     kf.getMeasurementCovariance()[0] = velocityCovariance;
     kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
-            velocityCovariance;
+        velocityCovariance;
 }
 
 }  // namespace aruwsrc::algorithms::odometry
