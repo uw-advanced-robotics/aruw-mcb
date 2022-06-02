@@ -110,7 +110,7 @@ FrictionWheelSubsystem frictionWheelsBottomBack(
 // Agitator Commands
 static constexpr float AGITATOR_TARGET_ANGLE_ZERO = 0;
 
-static constexpr float AGITATOR_TARGET_ANGLE_ONE = 8 * M_PI;
+static constexpr float AGITATOR_TARGET_ANGLE_ONE = 7 * M_PI;
 
 static constexpr float AGITATOR_TARGET_ANGLE_TWO = 12 * M_PI;
 
