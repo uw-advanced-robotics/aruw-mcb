@@ -53,8 +53,6 @@ void StepperTurretSubsystem::refresh()
 }
 
 void StepperTurretSubsystem::onHardwareTestStart() {
-    yawMotor.calibrateOrigin(0);
-    pitchMotor.calibrateOrigin(0);
     yawMotor.setDesiredPosition(0);
     pitchMotor.setDesiredPosition(0);
 }
