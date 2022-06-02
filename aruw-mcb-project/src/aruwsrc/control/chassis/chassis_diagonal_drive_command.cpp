@@ -17,62 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "chassis_autorotate_command.hpp"
-
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/communication/serial/remote.hpp"
-
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "chassis_diagonal_drive_command.hpp"
 #include "aruwsrc/drivers.hpp"
-
-#include "chassis_rel_drive.hpp"
-#include "chassis_subsystem.hpp"
-
-using namespace tap::algorithms;
-using namespace aruwsrc::control::turret;
+#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+#include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 
 namespace aruwsrc::chassis
 {
-ChassisAutorotateCommand::ChassisAutorotateCommand(
+ChassisDiagonalDriveCommand::ChassisDiagonalDriveCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     ChassisSymmetry chassisSymmetry)
-    : drivers(drivers),
-      chassis(chassis),
-      yawMotor(yawMotor),
-      chassisSymmetry(chassisSymmetry),
-      chassisAutorotating(true)
+    : ChassisAutorotateCommand(drivers, chassis, yawMotor, chassisSymmetry)
 {
-    addSubsystemRequirement(chassis);
+    // subsystem requirement added by base class
+    assert(chassisSymmetry == ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 }
 
-void ChassisAutorotateCommand::initialize()
-{
-    desiredRotationAverage = chassis->getDesiredRotation();
-}
-
-void ChassisAutorotateCommand::updateAutorotateState()
-{
-    float turretYawActualSetpointDiff = abs(yawMotor->getValidChassisMeasurementError());
-
-    if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
-        !yawMotor->getConfig().limitMotorAngles &&
-        turretYawActualSetpointDiff > (M_PI - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
-    {
-        // If turret setpoint all of a sudden turns around, don't autorotate
-        chassisAutorotating = false;
-    }
-    else if (
-        !chassisAutorotating &&
-        turretYawActualSetpointDiff < TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION)
-    {
-        // Once the turret setpoint/target have reached each other, start turning again
-        chassisAutorotating = true;
-    }
-}
-
-void ChassisAutorotateCommand::execute()
+void ChassisDiagonalDriveCommand::execute()
 {
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
@@ -101,10 +65,19 @@ void ChassisAutorotateCommand::execute()
                         break;
                 }
             }
-
             float angleFromCenterForChassisAutorotate =
                 ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
                     .getValue();
+            if (!drivers->controlOperatorInterface.isSlowMode())
+            {
+                if (const auto relative_velocity = chassis->getActualVelocityChassisRelative();
+                    hypot(relative_velocity[0][0], relative_velocity[1][0]) >
+                    AUTOROTATION_DIAGONAL_SPEED)
+                {
+                    angleFromCenterForChassisAutorotate =
+                        ContiguousFloat(turretAngleFromCenter, -M_PI_2, M_PI_2).getValue() + M_PI_4;
+                }
+            }
 
             // PD controller to find desired rotational component of the chassis control
             float desiredRotation = chassis->chassisSpeedRotationPID(
@@ -158,9 +131,5 @@ void ChassisAutorotateCommand::execute()
         ChassisRelDrive::onExecute(drivers, chassis);
     }
 }
-
-void ChassisAutorotateCommand::end(bool) { chassis->setZeroRPM(); }
-
-bool ChassisAutorotateCommand::isFinished() const { return false; }
 
 }  // namespace aruwsrc::chassis

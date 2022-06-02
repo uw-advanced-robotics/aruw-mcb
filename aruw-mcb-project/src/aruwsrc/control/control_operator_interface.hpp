@@ -125,6 +125,12 @@ public:
      */
     mockable float getSentinelSpeedInput();
 
+    /** 
+     * @returns whether or not the key to disable diagonal drive is pressed.
+     * The key is shared with the speed scaling key.
+     */
+    bool isSlowMode();
+
 private:
     aruwsrc::Drivers *drivers;
 
@@ -144,6 +150,7 @@ private:
     uint32_t prevChassisYInputCalledTime = 0;
     uint32_t prevChassisRInputCalledTime = 0;
 
+    bool slowModeOn = false;
     /**
      * Scales `value` when ctrl/shift are pressed and returns the scaled value.
      */

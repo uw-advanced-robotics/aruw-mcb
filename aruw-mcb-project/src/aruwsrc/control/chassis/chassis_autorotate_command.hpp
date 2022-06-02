@@ -23,7 +23,7 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
-using namespace tap::algorithms;
+
 namespace aruwsrc
 {
 class Drivers;
@@ -85,7 +85,7 @@ public:
 
     const char* getName() const override { return "chassis autorotate"; }
 
-private:
+protected:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
@@ -110,15 +110,6 @@ private:
      */
     bool chassisAutorotating;
 
-#ifdef TARGET_HERO
-    /**
-     * 'true' if the chassis is allowed to rotate to a 45 degree angle to drive diagonally after
-     * reaching a certain speed
-     */
-    const bool chassisDiagonalDrive = true;
-#else
-    const bool chassisDiagonalDrive = false;
-#endif
     void updateAutorotateState();
 };  // class ChassisAutorotateCommand
 

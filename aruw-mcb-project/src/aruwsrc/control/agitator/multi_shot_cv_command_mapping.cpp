@@ -37,7 +37,7 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
 {
     int timesToReschedule = 0;
 
-    float fireRate;
+    float fireRate = 0.0f;
 
     auto launchMode = cvOnTargetGovernor.isGovernorGating() ? FULL_AUTO : this->launchMode;
     switch (launchMode)
