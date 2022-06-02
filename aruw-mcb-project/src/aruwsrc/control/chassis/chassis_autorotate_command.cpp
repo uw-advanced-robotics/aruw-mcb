@@ -96,6 +96,9 @@ void ChassisAutorotateCommand::execute()
                     case ChassisSymmetry::SYMMETRICAL_90:
                         maxAngleFromCenter = M_PI_4;
                         break;
+                    case ChassisSymmetry::SYMMETRICAL_45:
+                        maxAngleFromCenter = M_PI_4 / 2.0f;
+                        break;
                     case ChassisSymmetry::SYMMETRICAL_NONE:
                     default:
                         break;

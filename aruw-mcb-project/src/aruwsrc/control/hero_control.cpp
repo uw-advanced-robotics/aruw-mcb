@@ -180,7 +180,7 @@ ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_45);
 
 BeybladeCommand beybladeCommand(drivers(), &chassis, &turret.yawMotor);
 
