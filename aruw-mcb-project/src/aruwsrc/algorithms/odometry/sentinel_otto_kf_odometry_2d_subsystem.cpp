@@ -26,7 +26,7 @@ namespace aruwsrc::algorithms::odometry
 SentinelOttoKFOdometry2DSubsystem::SentinelOttoKFOdometry2DSubsystem(
         aruwsrc::Drivers& drivers,
         const aruwsrc::control::turret::TurretSubsystem& turret,
-        tap::control::chassis::ChassisSubsystemInterface& chassis)
+        aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& chassis)
         : Subsystem(&drivers),
         SentinelChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500),
         orientationObserver(&drivers, turret)

@@ -85,7 +85,7 @@ public:
      * Returns absolute position of the sentinel, relative to the left end of the rail (when rail
      * is viewed from the front)
      */
-    mockable float absolutePosition();
+    mockable float absolutePosition() const;
 
     mockable void setDesiredRpm(float desRpm);
 
@@ -162,7 +162,7 @@ private:
 
     void resetOffsetFromLimitSwitch();
 
-    float distanceFromEncoder(tap::motor::DjiMotor* motor);
+    float distanceFromEncoder(const tap::motor::DjiMotor* motor) const;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

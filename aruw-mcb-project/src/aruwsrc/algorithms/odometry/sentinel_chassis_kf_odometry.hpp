@@ -38,23 +38,25 @@ namespace aruwsrc::algorithms::odometry
  *
  * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
  */
-class SentinelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class SentinelChassisKFOdometry
 {
 public:
     SentinelChassisKFOdometry(
-        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+        const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& driveSubsystem,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu);
 
-    inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
-
-    inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
-
-    inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
-
-    inline float getYaw() const override { return chassisYaw; }
-
     void update();
+
+    /// Chassis location in the world frame
+    modm::Location2D<float> location;
+    /// Chassis velocity in the world frame
+    modm::Vector2f velocity;
+    /// Chassis yaw orientation in world frame (radians)
+    float chassisYaw = 0;
+
+    /// Previous time `update` was called, in microseconds
+    uint32_t prevTime = 0;
 
 private:
     enum class OdomState
@@ -122,7 +124,7 @@ private:
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA =
         0.01f;  // TODO: Tune for sentinel 2022
 
-    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
+    const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& driveSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
 
@@ -131,13 +133,6 @@ private:
         static_cast<int>(OdomInput::NUM_INPUTS)>
         kf;
 
-    /// Chassis location in the world frame
-    modm::Location2D<float> location;
-    /// Chassis velocity in the world frame
-    modm::Vector2f velocity;
-    /// Chassis yaw orientation in world frame (radians)
-    float chassisYaw = 0;
-
     /// Chassis-measured change in velocity since the last time `update` was called, in the chassis
     /// frame
     float chassisMeasuredDeltaVelocity;
@@ -145,8 +140,6 @@ private:
     modm::interpolation::Linear<modm::Pair<float, float>>
         chassisAccelerationToMeasurementCovarianceInterpolator;
 
-    /// Previous time `update` was called, in microseconds
-    uint32_t prevTime = 0;
     float prevChassisVelocity;
 
     void updateChassisStateFromKF();

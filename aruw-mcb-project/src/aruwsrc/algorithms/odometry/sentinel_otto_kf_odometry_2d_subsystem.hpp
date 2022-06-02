@@ -26,6 +26,8 @@
 
 #include "modm/math/geometry/location_2d.hpp"
 
+#include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
+
 #include "sentinel_chassis_kf_odometry.hpp"
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 #include "otto_chassis_world_yaw_observer.hpp"
@@ -56,6 +58,7 @@ namespace aruwsrc::algorithms::odometry
  * @see ChassisKFOdometry
  */
 class SentinelOttoKFOdometry2DSubsystem final : public tap::control::Subsystem,
+                                                public tap::algorithms::odometry::Odometry2DInterface,
                                                 public SentinelChassisKFOdometry
 {
 public:
@@ -68,8 +71,15 @@ public:
     SentinelOttoKFOdometry2DSubsystem(
         aruwsrc::Drivers& drivers,
         const aruwsrc::control::turret::TurretSubsystem& turret,
-        tap::control::chassis::ChassisSubsystemInterface& chassis);
+        aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& chassis);
 
+    inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
+
+    inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
+
+    inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
+
+    inline float getYaw() const override { return chassisYaw; }
     
     void refresh() override;
 

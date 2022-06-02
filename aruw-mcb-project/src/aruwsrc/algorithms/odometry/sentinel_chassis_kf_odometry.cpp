@@ -17,15 +17,17 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
+
 #include "sentinel_chassis_kf_odometry.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 SentinelChassisKFOdometry::SentinelChassisKFOdometry(
-    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+    const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& driveSubsystem,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu)
-    : chassisSubsystem(chassisSubsystem),
+    : driveSubsystem(driveSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
@@ -42,20 +44,19 @@ void SentinelChassisKFOdometry::update()
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
     {
         chassisYaw = 0;
-        return;
     }
 
     // Get chassis velocity as measured by the motor encoders.
     // Since the sentinel chassis only moves in one direction,
     // this measurement is in the world frame.
-    auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
+    auto chassisVelocity = driveSubsystem.getActualVelocityChassisRelative();
 
     // the measurement covariance is dynamically updated based on chassis-measured acceleration
     updateMeasurementCovariance(chassisVelocity[0][1]);
 
     // assume 0 velocity/acceleration in z direction
     float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
-    y[static_cast<int>(OdomInput::POS_Y)] = chassisVelocity[0][1];
+    y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.absolutePosition();
     y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
 
     // Update the Kalman filter. A new state estimate is available after this call.
