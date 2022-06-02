@@ -18,10 +18,11 @@
  */
 
 #include "chassis_diagonal_drive_command.hpp"
-#include "aruwsrc/drivers.hpp"
+
+#include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
+#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -70,8 +71,8 @@ void ChassisDiagonalDriveCommand::execute()
                     .getValue();
             if (!drivers->controlOperatorInterface.isSlowMode())
             {
-                if (const auto relative_velocity = chassis->getActualVelocityChassisRelative();
-                    hypot(relative_velocity[0][0], relative_velocity[1][0]) >
+                if (const auto chassisVelocity = chassis->getActualVelocityChassisRelative();
+                    hypot(chassisVelocity[0][0], chassisVelocity[1][0]) >
                     AUTOROTATION_DIAGONAL_SPEED)
                 {
                     angleFromCenterForChassisAutorotate =

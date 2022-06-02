@@ -125,7 +125,7 @@ public:
      */
     mockable float getSentinelSpeedInput();
 
-    /** 
+    /**
      * @returns whether or not the key to disable diagonal drive is pressed.
      * The key is shared with the speed scaling key.
      */
