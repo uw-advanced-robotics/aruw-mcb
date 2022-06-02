@@ -129,7 +129,6 @@ private:
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
-    TurretAnglesIndicator turretAnglesIndicator;
     VisionHudIndicators visionHudIndicators;
 
     bool run();
