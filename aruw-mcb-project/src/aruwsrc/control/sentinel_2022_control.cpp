@@ -161,7 +161,7 @@ public:
           frictionWheelsOnGovernor(frictionWheels),
           refSysProjLaunchedGovernor(
               drivers.refSerial,
-              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1),
+              config.turretBarrelMechanismId),
           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           rotateAndUnjamAgitatorWithHeatLimiting(
               {&agitator},
