@@ -72,9 +72,9 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 #elif defined(TARGET_SOLDIERMK4_2022)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
-    {15.0f, 4425.0f},
+    {15.0f, 4325.0f},
     {18.0f, 4800.0f},
-    {30.0f, 7150.0f},
+    {30.0f, 6900.0f},
     {32.0f, 8400.0f},
 };
 #elif defined(TARGET_SOLDIER_2021) || defined(TARGET_SOLDIER_2022) || defined(TARGET_SENTINEL_2022)
