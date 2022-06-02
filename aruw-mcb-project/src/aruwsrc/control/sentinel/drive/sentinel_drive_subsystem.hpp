@@ -67,7 +67,7 @@ public:
     /**
      * Length of the sentinel, in mm
      */
-    static constexpr float SENTINEL_LENGTH = 480;
+    static constexpr float SENTINEL_LENGTH = 600;
 
     SentinelDriveSubsystem(
         aruwsrc::Drivers* drivers,

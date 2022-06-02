@@ -52,24 +52,50 @@ public:
     const char* getName() const override { return "sentinel random drive"; }
 
 private:
-    static const int16_t MIN_RPM = 5000;
-    static const int16_t MAX_RPM = 7000;
+    static const int32_t MIN_RPM = 5000;
+    static const int32_t MAX_RPM = 7000;
     static const int16_t CHANGE_TIME_INTERVAL = 750;
     static constexpr float LARGE_ARMOR_PLATE_WIDTH = 200.0f;
     static constexpr float MAX_TRAVERSE_DISTANCE = LARGE_ARMOR_PLATE_WIDTH + 300;
-    static constexpr float TURNAROUND_BUFFER = 0.2f * SentinelDriveSubsystem::RAIL_LENGTH;
-
-    float currentRPM = 0;
-    float positionWhenDirectionChanged = 0;
-    int randDistance = 0;
+    static constexpr float TURNAROUND_BUFFER =
+        0.2f * (SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH);
 
     SentinelDriveSubsystem* sentinelDriveSubsystem;
     const float speedFactor;
 
-    uint32_t portableRandom();
-    void changeDirection(int minRPM, int maxRPM, int64_t minDist, int64_t maxDist);
-    void setCurrentRPM(int min, int max);
-    float getRandomVal(int64_t min, int64_t max);
+    /// Position in millimeters where the sentinel was when it last changed direction
+    float positionWhenDirectionChanged = 0;
+
+    /// Distance to drive, in millimeters
+    float distanceToDrive = 0;
+
+    void reverseDirection(int32_t minDistance, int32_t maxDistance);
+
+    void reverseDirectionIfCloseToEnd(float absolutePosition);
+
+    inline int32_t getMinDesiredRpm() const { return round(MIN_RPM * speedFactor); }
+
+    inline int32_t getMaxDesiredRpm() const { return round(MAX_RPM * speedFactor); }
+
+    static uint32_t getRandomInteger();
+
+    int32_t getRandomIntegerBetweenBounds(int32_t min, int32_t max) const;
+
+    int32_t getNewDesiredRpm(int32_t min, int32_t max) const;
+
+    static inline bool nearStartOfRail(float currentPosition)
+    {
+        return currentPosition < TURNAROUND_BUFFER;
+    }
+
+    static inline bool nearEndOfRail(float currentPosition)
+    {
+        static constexpr float RAIL_END_POSITION_WITH_TURNAROUND_BUFFER =
+            SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH -
+            TURNAROUND_BUFFER;
+
+        return currentPosition > RAIL_END_POSITION_WITH_TURNAROUND_BUFFER;
+    }
 };
 
 }  // namespace aruwsrc::control::sentinel::drive

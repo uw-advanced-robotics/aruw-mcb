@@ -49,9 +49,9 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       desiredRpm(0),
-      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left sentinel drive motor"),
+      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
 #if defined(TARGET_SENTINEL_2021)
-      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, true, "right sentinel drive motor"),
+      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
 #endif
       currentSensor(
           {&drivers->analog,
@@ -178,16 +178,16 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 
     if (drivers->digital.read(leftLimitSwitch))
     {
-        leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel);
+        leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
 #if defined(TARGET_SENTINEL_2021)
-        rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel);
+        rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
 #endif
     }
     else if (drivers->digital.read(rightLimitSwitch))
     {
-        leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
+        leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel);
 #if defined(TARGET_SENTINEL_2021)
-        rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
+        rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel);
 #endif
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -37,47 +37,73 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     SentinelDriveSubsystem *sentinelChassis)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
-      sentinelChassis(sentinelChassis),
-      evadeSlow(sentinelChassis, 0.5),
-      evadeFast(sentinelChassis, 1.0),
-      evadeMode(false)
+      agressiveEvadeCommand(sentinelChassis, 0.3),
+      passiveEvadeCommand(sentinelChassis, 0.7),
+      moveToFarRightCommand(
+          *sentinelChassis,
+          SentinelDriveToSideCommand::SentinelRailSide::CLOSE_RAIL,
+          MOVE_TO_RIGHT_DRIVE_SPEED_RPM)
 {
     addSubsystemRequirement(sentinelChassis);
-    comprisedCommandScheduler.registerSubsystem(sentinelChassis);
+    this->comprisedCommandScheduler.registerSubsystem(sentinelChassis);
+    this->agressiveEvadeTimer.stop();
 }
 
-void SentinelAutoDriveComprisedCommand::initialize()
-{
-    comprisedCommandScheduler.addCommand(&evadeSlow);
-}
+void SentinelAutoDriveComprisedCommand::initialize() {}
 
 void SentinelAutoDriveComprisedCommand::execute()
 {
-    const auto &robotData = drivers->refSerial.getRobotData();
-
-    if (robotData.receivedDps > RANDOM_DRIVE_DPS_THRESHOLD)
+    if (!drivers->refSerial.getRefSerialReceivingData())
     {
-        if (!evadeMode)
+        if (!this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
         {
-            comprisedCommandScheduler.removeCommand(&evadeSlow, true);
-            comprisedCommandScheduler.addCommand(&evadeFast);
-            evadeMode = true;
+            this->comprisedCommandScheduler.addCommand(&this->passiveEvadeCommand);
         }
     }
-    else if (compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) && evadeMode)
+    else
     {
-        comprisedCommandScheduler.removeCommand(&evadeFast, true);
-        comprisedCommandScheduler.addCommand(&evadeSlow);
-        evadeMode = false;
+        const auto &robotData = drivers->refSerial.getRobotData();
+
+        if (robotData.maxHp == robotData.currentHp)
+        {
+            // move to right of rail when no damage taken
+            this->comprisedCommandScheduler.removeCommand(&this->agressiveEvadeCommand, false);
+            this->comprisedCommandScheduler.removeCommand(&this->passiveEvadeCommand, false);
+
+            if (!this->comprisedCommandScheduler.isCommandScheduled(&this->moveToFarRightCommand))
+            {
+                this->comprisedCommandScheduler.addCommand(&this->moveToFarRightCommand);
+            }
+        }
+        else
+        {
+            if (robotData.receivedDps > AGRESSIVE_EVADE_DPS_THRESHOLD)
+            {
+                if (!this->comprisedCommandScheduler.isCommandScheduled(
+                        &this->agressiveEvadeCommand))
+                {
+                    this->comprisedCommandScheduler.addCommand(&this->agressiveEvadeCommand);
+
+                    this->agressiveEvadeTimer.restart(MIN_TIME_SPENT_AGRESSIVELY_EVADING);
+                }
+            }
+            else if (
+                compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) &&
+                this->comprisedCommandScheduler.isCommandScheduled(&this->agressiveEvadeCommand) &&
+                this->agressiveEvadeTimer.isExpired())
+            {
+                this->comprisedCommandScheduler.addCommand(&this->passiveEvadeCommand);
+            }
+        }
     }
 
-    comprisedCommandScheduler.run();
+    this->comprisedCommandScheduler.run();
 }
 
 void SentinelAutoDriveComprisedCommand::end(bool interrupted)
 {
-    comprisedCommandScheduler.removeCommand(&evadeSlow, interrupted);
-    comprisedCommandScheduler.removeCommand(&evadeFast, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&this->agressiveEvadeCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&this->passiveEvadeCommand, interrupted);
 }
 
 bool SentinelAutoDriveComprisedCommand::isFinished() const { return false; }

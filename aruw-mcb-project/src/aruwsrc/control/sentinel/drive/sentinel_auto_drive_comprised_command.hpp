@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -24,9 +24,11 @@
 
 #if defined(ALL_SENTINELS)
 
+#include "tap/architecture/timeout.hpp"
 #include "tap/control/comprised_command.hpp"
 
 #include "sentinel_drive_evade_command.hpp"
+#include "sentinel_drive_to_side_command.hpp"
 #include "sentinel_full_traverse_command.hpp"
 
 namespace aruwsrc::control::sentinel::drive
@@ -51,12 +53,15 @@ public:
     bool isFinished() const override;
 
 private:
-    static constexpr float RANDOM_DRIVE_DPS_THRESHOLD = 5;
+    static constexpr float AGRESSIVE_EVADE_DPS_THRESHOLD = 5;
+    static constexpr uint32_t MIN_TIME_SPENT_AGRESSIVELY_EVADING = 2'000;
+    static constexpr float MOVE_TO_RIGHT_DRIVE_SPEED_RPM = 3'000;
+
     aruwsrc::Drivers *drivers;
-    SentinelDriveSubsystem *sentinelChassis;
-    SentinelDriveEvadeCommand evadeSlow;
-    SentinelDriveEvadeCommand evadeFast;
-    bool evadeMode;
+    tap::arch::MilliTimeout agressiveEvadeTimer;
+    SentinelDriveEvadeCommand agressiveEvadeCommand;
+    SentinelDriveEvadeCommand passiveEvadeCommand;
+    SentinelDriveToSideCommand moveToFarRightCommand;
 };
 }  // namespace aruwsrc::control::sentinel::drive
 
