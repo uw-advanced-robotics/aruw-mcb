@@ -115,11 +115,11 @@ private:
     static constexpr float MAX_ACCELERATION = 8.0f;  // TODO: Tune for sentinel 2022
 
     // TODO: Tune for sentinel 2022
-    static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
-        {
-            {0, 10E-2},
-            {MAX_ACCELERATION, 10E2},
-        };
+    // static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
+    //     {
+    //         {0, 10E-2},
+    //         {MAX_ACCELERATION, 10E2},
+    //     };
 
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA =
         0.01f;  // TODO: Tune for sentinel 2022
@@ -133,18 +133,18 @@ private:
         static_cast<int>(OdomInput::NUM_INPUTS)>
         kf;
 
-    /// Chassis-measured change in velocity since the last time `update` was called, in the chassis
-    /// frame
-    float chassisMeasuredDeltaVelocity;
+    // /// Chassis-measured change in velocity since the last time `update` was called, in the chassis
+    // /// frame
+    // float chassisMeasuredDeltaVelocity;
 
-    modm::interpolation::Linear<modm::Pair<float, float>>
-        chassisAccelerationToMeasurementCovarianceInterpolator;
+    // modm::interpolation::Linear<modm::Pair<float, float>>
+    //     chassisAccelerationToMeasurementCovarianceInterpolator;
 
-    float prevChassisVelocity;
+    // float prevChassisVelocity;
 
     void updateChassisStateFromKF();
 
-    void updateMeasurementCovariance(const float& chassisVelocity);
+    // void updateMeasurementCovariance(const float& chassisVelocity);
 };
 }  // namespace aruwsrc::algorithms::odometry
 
