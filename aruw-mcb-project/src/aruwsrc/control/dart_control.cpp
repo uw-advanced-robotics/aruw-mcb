@@ -49,8 +49,6 @@ tap::motor::GenericStepperMotorDriver pitchMotor(drivers(), tap::gpio::Digital::
 tap::motor::GenericStepperMotorDriver yawMotor(drivers(), tap::gpio::Digital::OutputPin::F, tap::gpio::Digital::OutputPin::H);
 
 StepperTurretSubsystem stepperTurretSubsystem(drivers(), pitchMotor, yawMotor);
-// TurretMotor turretPitchMotor(TurretMotorConfig, tap::motor::StepperMotor pitchMotor);   JENNY_TODO: do i even need this stuff......???
-// TurretMotor turretYawMotor(TurretMotorConfig, tap::motor::StepperMotor yawMotor);
 
 // Agitators
 AgitatorSubsystem agitatorTop(
