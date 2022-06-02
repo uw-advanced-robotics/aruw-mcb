@@ -27,9 +27,10 @@
 
 #include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
-
 using namespace tap::algorithms;
+
 using namespace aruwsrc::control::turret;
+using namespace tap::communication::serial;
 
 namespace aruwsrc::chassis
 {
@@ -71,7 +72,7 @@ void ChassisAutorotateCommand::updateAutorotateState()
         chassisAutorotating = true;
     }
 }
-
+float A1 = 0;
 void ChassisAutorotateCommand::execute()
 {
     // calculate pid for chassis rotation
@@ -96,18 +97,24 @@ void ChassisAutorotateCommand::execute()
                     case ChassisSymmetry::SYMMETRICAL_90:
                         maxAngleFromCenter = M_PI_4;
                         break;
-                    case ChassisSymmetry::SYMMETRICAL_45:
-                        maxAngleFromCenter = M_PI_4 / 2.0f;
-                        break;
                     case ChassisSymmetry::SYMMETRICAL_NONE:
                     default:
                         break;
                 }
             }
-
             float angleFromCenterForChassisAutorotate =
                 ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
                     .getValue();
+            if (chassisDiagonalDrive && !drivers->remote.keyPressed(Remote::Key::CTRL))
+            {
+                if (const auto relative_velocity = chassis->getActualVelocityChassisRelative();
+                    hypot(relative_velocity[0][0], relative_velocity[1][0]) >
+                    AUTOROTATION_DIAGONAL_SPEED)
+                {
+                    angleFromCenterForChassisAutorotate =
+                        ContiguousFloat(turretAngleFromCenter, -M_PI_2, M_PI_2).getValue() + M_PI_4;
+                }
+            }
 
             // PD controller to find desired rotational component of the chassis control
             float desiredRotation = chassis->chassisSpeedRotationPID(
