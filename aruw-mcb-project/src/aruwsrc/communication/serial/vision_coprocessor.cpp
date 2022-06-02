@@ -69,7 +69,8 @@ VisionCoprocessor::~VisionCoprocessor() { visionCoprocessorInstance = nullptr; }
 
 void VisionCoprocessor::initializeCV()
 {
-#ifndef PLATFORM_HOSTED
+#define DISABLE_TIME_SYNC_INTERRUPT
+#if !defined(PLATFORM_HOSTED) && !defined(DISABLE_TIME_SYNC_INTERRUPT)
     // Set up the interrupt for the vision coprocessor sync handler
     VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
     VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterruptVector(0);
@@ -77,6 +78,7 @@ void VisionCoprocessor::initializeCV()
     VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
         modm::platform::Gpio::InputTrigger::RisingEdge);
 #endif
+
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
 #if defined(TARGET_HERO)
