@@ -17,15 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/util_macros.hpp"
-
-#if defined(ALL_SENTINELS)
+#include "sentinel_auto_drive_comprised_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 
-#include "sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel_drive_subsystem.hpp"
 
 using namespace tap::algorithms;
@@ -46,7 +44,7 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
 {
     addSubsystemRequirement(sentinelChassis);
     this->comprisedCommandScheduler.registerSubsystem(sentinelChassis);
-    this->agressiveEvadeTimer.stop();
+    this->agressiveEvadeTimer.restart(0);
 }
 
 void SentinelAutoDriveComprisedCommand::initialize() {}
@@ -67,9 +65,6 @@ void SentinelAutoDriveComprisedCommand::execute()
         if (robotData.maxHp == robotData.currentHp)
         {
             // move to right of rail when no damage taken
-            this->comprisedCommandScheduler.removeCommand(&this->agressiveEvadeCommand, false);
-            this->comprisedCommandScheduler.removeCommand(&this->passiveEvadeCommand, false);
-
             if (!this->comprisedCommandScheduler.isCommandScheduled(&this->moveToFarRightCommand))
             {
                 this->comprisedCommandScheduler.addCommand(&this->moveToFarRightCommand);
@@ -77,20 +72,18 @@ void SentinelAutoDriveComprisedCommand::execute()
         }
         else
         {
-            if (robotData.receivedDps > AGRESSIVE_EVADE_DPS_THRESHOLD)
+            // move agressively when taking damage
+            if (robotData.receivedDps > AGRESSIVE_EVADE_DPS_THRESHOLD &&
+                !this->comprisedCommandScheduler.isCommandScheduled(&this->agressiveEvadeCommand))
             {
-                if (!this->comprisedCommandScheduler.isCommandScheduled(
-                        &this->agressiveEvadeCommand))
-                {
-                    this->comprisedCommandScheduler.addCommand(&this->agressiveEvadeCommand);
+                this->comprisedCommandScheduler.addCommand(&this->agressiveEvadeCommand);
 
-                    this->agressiveEvadeTimer.restart(MIN_TIME_SPENT_AGRESSIVELY_EVADING);
-                }
+                this->agressiveEvadeTimer.restart(MIN_TIME_SPENT_AGRESSIVELY_EVADING);
             }
             else if (
                 compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) &&
-                this->comprisedCommandScheduler.isCommandScheduled(&this->agressiveEvadeCommand) &&
-                this->agressiveEvadeTimer.isExpired())
+                this->agressiveEvadeTimer.isExpired() &&
+                !this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
             {
                 this->comprisedCommandScheduler.addCommand(&this->passiveEvadeCommand);
             }
@@ -104,10 +97,9 @@ void SentinelAutoDriveComprisedCommand::end(bool interrupted)
 {
     this->comprisedCommandScheduler.removeCommand(&this->agressiveEvadeCommand, interrupted);
     this->comprisedCommandScheduler.removeCommand(&this->passiveEvadeCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&this->moveToFarRightCommand, interrupted);
 }
 
 bool SentinelAutoDriveComprisedCommand::isFinished() const { return false; }
 
 }  // namespace aruwsrc::control::sentinel::drive
-
-#endif

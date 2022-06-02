@@ -156,7 +156,7 @@ private:
 
     modm::Pid<float> velocityPidRightWheel;
 
-    float desiredRpm;
+    float desiredRpm = 0;
     float leftWheelZeroRailOffset = 0;
     float rightWheelZeroRailOffset = 0;
 

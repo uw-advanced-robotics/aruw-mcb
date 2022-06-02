@@ -20,12 +20,10 @@
 #ifndef SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_
 #define SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_
 
-#include "aruwsrc/util_macros.hpp"
-
-#if defined(ALL_SENTINELS)
-
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/comprised_command.hpp"
+
+#include "aruwsrc/util_macros.hpp"
 
 #include "sentinel_drive_evade_command.hpp"
 #include "sentinel_drive_to_side_command.hpp"
@@ -64,7 +62,5 @@ private:
     SentinelDriveToSideCommand moveToFarRightCommand;
 };
 }  // namespace aruwsrc::control::sentinel::drive
-
-#endif
 
 #endif  // SENTINEL_AUTO_DRIVE_COMPRISED_COMMAND_HPP_

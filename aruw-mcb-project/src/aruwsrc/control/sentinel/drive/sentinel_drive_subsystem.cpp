@@ -48,7 +48,6 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       rightLimitSwitch(rightLimitSwitch),
       velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-      desiredRpm(0),
       leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
 #if defined(TARGET_SENTINEL_2021)
       rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
@@ -103,7 +102,7 @@ modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelati
 
     modm::Matrix<float, 3, 1> wheelVelMat;
     wheelVelMat[0][0] = 0;
-    wheelVelMat[0][1] = -wheelVelRPM * RPM_TO_MPS;
+    wheelVelMat[0][1] = wheelVelRPM * RPM_TO_MPS;
     wheelVelMat[0][2] = 0;
     return wheelVelMat;
 }
