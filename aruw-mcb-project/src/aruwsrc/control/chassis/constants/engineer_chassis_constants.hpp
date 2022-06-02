@@ -83,6 +83,12 @@ static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
+/**
+ * Speed at which the chassis switches from symmetrical driving to diagonal driving, for a holonomic
+ * X-Drive (m/s) NOT USEFUL FOR ENGINEER
+ */
+static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
+
 // mechanical chassis constants
 /**
  * Radius of the wheels (m)
