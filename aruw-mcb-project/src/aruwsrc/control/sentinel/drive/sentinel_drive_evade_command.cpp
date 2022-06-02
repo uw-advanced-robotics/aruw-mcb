@@ -58,15 +58,17 @@ void SentinelDriveEvadeCommand::reverseDirectionIfCloseToEnd(float currentPositi
 
     float desiredDriveSpeed = this->sentinelDriveSubsystem->getDesiredRpm();
 
-    if ((nearStartOfRail(currentPosition) && desiredDriveSpeed <= 0) ||
-        (nearEndOfRail(currentPosition) && desiredDriveSpeed >= 0))
+    if ((SentinelDriveSubsystem::nearStartOfRail(currentPosition, TURNAROUND_BUFFER) &&
+         desiredDriveSpeed <= 0) ||
+        (SentinelDriveSubsystem::nearEndOfRail(currentPosition, TURNAROUND_BUFFER) &&
+         desiredDriveSpeed >= 0))
     {
         // robot must move past the halfway point of rail.
         float distanceFromCenter = abs(HALF_RAIL_LENGTH - HALF_SENTINEL_LENGTH - currentPosition);
 
         float distanceFromFarRail = 0;
 
-        if (nearStartOfRail(currentPosition))
+        if (SentinelDriveSubsystem::nearStartOfRail(currentPosition, TURNAROUND_BUFFER))
         {
             distanceFromFarRail =
                 abs(SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH -

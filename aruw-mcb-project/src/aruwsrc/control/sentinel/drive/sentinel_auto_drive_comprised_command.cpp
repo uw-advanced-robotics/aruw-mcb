@@ -35,14 +35,14 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     SentinelDriveSubsystem *sentinelChassis)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
-      agressiveEvadeCommand(sentinelChassis, 0.3),
-      passiveEvadeCommand(sentinelChassis, 0.7),
+      agressiveEvadeCommand(sentinelChassis, 1.0),
+      passiveEvadeCommand(sentinelChassis, 0.5),
       moveToFarRightCommand(
           *sentinelChassis,
           SentinelDriveToSideCommand::SentinelRailSide::CLOSE_RAIL,
           MOVE_TO_RIGHT_DRIVE_SPEED_RPM)
 {
-    addSubsystemRequirement(sentinelChassis);
+    this->addSubsystemRequirement(sentinelChassis);
     this->comprisedCommandScheduler.registerSubsystem(sentinelChassis);
     this->agressiveEvadeTimer.restart(0);
 }
@@ -51,7 +51,7 @@ void SentinelAutoDriveComprisedCommand::initialize() {}
 
 void SentinelAutoDriveComprisedCommand::execute()
 {
-    if (!drivers->refSerial.getRefSerialReceivingData())
+    if (!this->drivers->refSerial.getRefSerialReceivingData())
     {
         if (!this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
         {
@@ -60,7 +60,7 @@ void SentinelAutoDriveComprisedCommand::execute()
     }
     else
     {
-        const auto &robotData = drivers->refSerial.getRobotData();
+        const auto &robotData = this->drivers->refSerial.getRobotData();
 
         if (robotData.maxHp == robotData.currentHp)
         {

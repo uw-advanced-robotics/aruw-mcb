@@ -110,13 +110,17 @@ modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelati
 void SentinelDriveSubsystem::refresh()
 {
     // constantly poll the limit switches, resetting offset if needed
-    resetOffsetFromLimitSwitch();
+    this->resetOffsetFromLimitSwitch();
 
-    velocityPidLeftWheel.update(desiredRpm - leftWheel.getShaftRPM());
-    leftWheel.setDesiredOutput(velocityPidLeftWheel.getValue());
+    float speedReductionScalar =
+        computeEndOfRailSpeedReductionScalar(this->desiredRpm, this->absolutePosition());
+    float scaledDesiredRpm = speedReductionScalar * this->desiredRpm;
+
+    this->velocityPidLeftWheel.update(scaledDesiredRpm - this->leftWheel.getShaftRPM());
+    this->leftWheel.setDesiredOutput(this->velocityPidLeftWheel.getValue());
 #if defined(TARGET_SENTINEL_2021)
-    velocityPidRightWheel.update(desiredRpm - rightWheel.getShaftRPM());
-    rightWheel.setDesiredOutput(velocityPidRightWheel.getValue());
+    this->velocityPidRightWheel.update(scaledDesiredRpm - this->rightWheel.getShaftRPM());
+    this->rightWheel.setDesiredOutput(this->velocityPidRightWheel.getValue());
 #endif
     currentSensor.update();
     float powerLimitFrac = powerLimiter.getPowerLimitRatio();

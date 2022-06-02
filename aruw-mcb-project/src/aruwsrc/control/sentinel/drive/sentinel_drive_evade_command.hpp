@@ -37,11 +37,21 @@ namespace aruwsrc::control::sentinel::drive
 class SentinelDriveEvadeCommand : public tap::control::Command
 {
 public:
-    static constexpr int32_t MIN_RPM = 5000;
-    static constexpr int32_t MAX_RPM = 7000;
+    /// Minimum random drive speed, in RPM
+    static constexpr int32_t MIN_RPM = 7'000;
+    /// Maximum random drive speed, in RPM
+    static constexpr int32_t MAX_RPM = 8'000;
+    /// Width of a large armor plate, in mm. Used as the minimum traverse distance. A random
+    /// distance between this and MAX_TRAVERSE_DISTANCE will be choosen by the sentinel when it is
+    /// not in the turnaround buffer.
     static constexpr float LARGE_ARMOR_PLATE_WIDTH = 200.0f;
+    /// Max distance that the sentinel will randomly travel when not in the turnaround buffer, in
+    /// mm.
     static constexpr float MAX_TRAVERSE_DISTANCE = LARGE_ARMOR_PLATE_WIDTH + 300;
-    static constexpr float TURNAROUND_BUFFER = 300.0f;
+    /// Distance in mm from either side of the rail within which the sentinel will turn around to
+    /// avoid slamming into the sides. When turning around in the turnaround buffer, the sentinel
+    /// will travel past the centerpoint of the rail.
+    static constexpr float TURNAROUND_BUFFER = 150.0f;
 
     /**
      * @param[in] sentinelDriveSubsystem The drive subsystem this Command is controlling.
@@ -68,7 +78,7 @@ public:
 
 private:
     SentinelDriveSubsystem* sentinelDriveSubsystem;
-    const float speedFactor;
+    float speedFactor;
 
     /// Position in millimeters where the sentinel was when it last changed direction
     float positionWhenDirectionChanged = 0;
@@ -137,30 +147,6 @@ private:
     {
         int32_t randomValue = getRandomIntegerBetweenBounds(min, max);
         return copysign(randomValue, -currentDesiredRpm);
-    }
-
-    /**
-     * @param[in] currentPosition The current position of the sentinel chassis, in millimeters.
-     * @return true if the sentinel is near the start of the rail (as indicated by the
-     * `currentPosition`).
-     */
-    static inline bool nearStartOfRail(float currentPosition)
-    {
-        return currentPosition <= TURNAROUND_BUFFER;
-    }
-
-    /**
-     * @param[in] currentPosition The current position of the sentinel chassis, in millimeters.
-     * @return true if the sentinel is near the end of the rail (as indicated by the
-     * `currentPosition`).
-     */
-    static inline bool nearEndOfRail(float currentPosition)
-    {
-        static constexpr float RAIL_END_POSITION_WITH_TURNAROUND_BUFFER =
-            SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH -
-            TURNAROUND_BUFFER;
-
-        return currentPosition >= RAIL_END_POSITION_WITH_TURNAROUND_BUFFER;
     }
 };
 
