@@ -54,8 +54,6 @@ public:
         SYMMETRICAL_180,
         /** Front, back, left, and right are symmetrical. */
         SYMMETRICAL_90,
-        /** Splits into 45 degree segments */
-        SYMMETRICAL_45,
     };
 
     /**
