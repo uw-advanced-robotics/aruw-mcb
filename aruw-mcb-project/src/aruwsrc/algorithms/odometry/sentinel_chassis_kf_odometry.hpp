@@ -43,6 +43,7 @@ class SentinelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DIn
 public:
     SentinelChassisKFOdometry(
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+        tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
@@ -50,6 +51,8 @@ public:
     inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
+
+    inline float getYaw() const override { return chassisYaw; }
 
     void update();
 
@@ -120,6 +123,7 @@ private:
         0.01f;  // TODO: Tune for sentinel 2022
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
 
     tap::algorithms::KalmanFilter<
@@ -127,10 +131,12 @@ private:
         static_cast<int>(OdomInput::NUM_INPUTS)>
         kf;
 
-    // Location in reference frame
+    /// Chassis location in the world frame
     modm::Location2D<float> location;
-    // Velocity in reference frame
+    /// Chassis velocity in the world frame
     modm::Vector2f velocity;
+    /// Chassis yaw orientation in world frame (radians)
+    float chassisYaw = 0;
 
     /// Chassis-measured change in velocity since the last time `update` was called, in the chassis
     /// frame

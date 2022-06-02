@@ -28,7 +28,6 @@
 
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 #include "otto_chassis_world_yaw_observer.hpp"
-#include "sentinel_chassis_kf_odometry.hpp"
 
 // Forward declarations
 namespace aruwsrc
@@ -65,7 +64,7 @@ namespace aruwsrc::algorithms::odometry
  * @see OttoChassisVelocityGetter
  */
 class SentinelOttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
-                                                      public SentinelChassisKFOdometry
+                                              public tap::algorithms::odometry::Odometry2DTracker
 {
 public:
     /**
@@ -75,10 +74,15 @@ public:
      * @param[in] chassis pointer to aruwsrc ChassisSubsystem
      */
     SentinelOttoVelocityOdometry2DSubsystem(
-        aruwsrc::Drivers& drivers,
-        tap::control::chassis::ChassisSubsystemInterface& chassis);
+        aruwsrc::Drivers* drivers,
+        const aruwsrc::control::turret::TurretSubsystem& turret,
+        tap::control::chassis::ChassisSubsystemInterface* chassis);
 
     void refresh() override;
+
+private:
+    OttoChassisWorldYawObserver orientationObserver;
+    OttoChassisVelocityDisplacement2DObserver displacementObserver;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

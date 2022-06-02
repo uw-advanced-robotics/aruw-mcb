@@ -23,8 +23,10 @@ namespace aruwsrc::algorithms::odometry
 {
 SentinelChassisKFOdometry::SentinelChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu)
     : chassisSubsystem(chassisSubsystem),
+      chassisYawObserver(chassisYawObserver),
       imu(imu),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisAccelerationToMeasurementCovarianceInterpolator(
@@ -37,6 +39,12 @@ SentinelChassisKFOdometry::SentinelChassisKFOdometry(
 
 void SentinelChassisKFOdometry::update()
 {
+    if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
+    {
+        chassisYaw = 0;
+        return;
+    }
+
     // Get chassis velocity as measured by the motor encoders.
     // Since the sentinel chassis only moves in one direction,
     // this measurement is in the world frame.
