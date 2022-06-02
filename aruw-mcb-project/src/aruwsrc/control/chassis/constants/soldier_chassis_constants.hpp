@@ -103,8 +103,8 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 #elif defined(TARGET_SOLDIER_2022)
 
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.340f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
 
 #elif defined(TARGET_SOLDIERMK4_2022)
 
