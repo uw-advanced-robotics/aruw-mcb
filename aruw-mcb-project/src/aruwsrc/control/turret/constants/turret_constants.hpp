@@ -22,6 +22,8 @@
 
 #include "aruwsrc/util_macros.hpp"
 
+// TODO: remove all of these #error calls
+
 #if defined(ALL_SOLDIERS) || defined(TARGET_ENGINEER)
 #include "soldier_turret_constants.hpp"
 #elif defined(TARGET_HERO)
@@ -34,6 +36,8 @@
 #include "dart_turret_constants.hpp"
 #elif defined(TARGET_SENTINEL_2022)
 #include "sentinel_2022_turret_constants.hpp"
+#else 
+#error Unexpected target
 #endif
 
 #endif  // TURRET_CONSTANTS_HPP_
