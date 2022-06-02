@@ -25,8 +25,6 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/util_macros.hpp"
-
 #include "sentinel_drive_subsystem.hpp"
 
 namespace aruwsrc::control::sentinel::drive
@@ -43,8 +41,7 @@ public:
     static constexpr int32_t MAX_RPM = 7000;
     static constexpr float LARGE_ARMOR_PLATE_WIDTH = 200.0f;
     static constexpr float MAX_TRAVERSE_DISTANCE = LARGE_ARMOR_PLATE_WIDTH + 300;
-    static constexpr float TURNAROUND_BUFFER =
-        0.2f * (SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH);
+    static constexpr float TURNAROUND_BUFFER = 300.0f;
 
     /**
      * @param[in] sentinelDriveSubsystem The drive subsystem this Command is controlling.
@@ -63,7 +60,7 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "sentinel random drive"; }
+    const char* getName() const override { return "sentinel drive evade"; }
 
     /// @return The current distance to drive from the position when the direction changed, in
     /// millimeters.

@@ -19,8 +19,6 @@
 
 #include "sentinel_drive_evade_command.hpp"
 
-#include "aruwsrc/util_macros.hpp"
-
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelDriveEvadeCommand::SentinelDriveEvadeCommand(
