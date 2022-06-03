@@ -47,8 +47,9 @@ public:
 
     bool isReady() final
     {
-        return frictionWheel.getCurrentFrictionWheelSpeed() >=
-               frictionWheel.getDesiredFrictionWheelSpeed() * MINIMUM_SPEED_THRESHOLD_FRACTION;
+        return frictionWheel.getDesiredFrictionWheelSpeed() != 0 &&
+               frictionWheel.getCurrentFrictionWheelSpeed() >=
+                   frictionWheel.getDesiredFrictionWheelSpeed() * MINIMUM_SPEED_THRESHOLD_FRACTION;
     }
 
     bool isFinished() final { return !isReady(); }
