@@ -37,6 +37,7 @@ ChassisDiagonalDriveCommand::ChassisDiagonalDriveCommand(
     // ensures that we are 90 degree symmetrical. This only works for holonomic chasses.
     assert(chassisSymmetry == ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 }
+
 float ChassisDiagonalDriveCommand::computeAngleFromCenterForAutorotation(
     float turretAngleFromCenter,
     float maxAngleFromCenter)
