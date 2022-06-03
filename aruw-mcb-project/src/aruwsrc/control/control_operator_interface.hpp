@@ -150,7 +150,6 @@ private:
     uint32_t prevChassisYInputCalledTime = 0;
     uint32_t prevChassisRInputCalledTime = 0;
 
-    bool slowModeOn = false;
     /**
      * Scales `value` when ctrl/shift are pressed and returns the scaled value.
      */

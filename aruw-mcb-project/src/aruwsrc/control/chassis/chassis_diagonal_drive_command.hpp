@@ -50,9 +50,10 @@ public:
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         ChassisSymmetry chassisSymmetry);
 
-    void execute() override;
-
     const char* getName() const override { return "chassis diagonal drive"; }
+
+private:
+    float computeAngleFromCenterForAutorotation(float turretAngleFromCenter) override;
 
 };  // class ChassisAutorotateCommand
 
