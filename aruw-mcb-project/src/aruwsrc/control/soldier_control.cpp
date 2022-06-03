@@ -34,7 +34,8 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
-#include "agitator/multi_shot_handler.hpp"
+#include "agitator/manual_fire_rate_reselection_manager.hpp"
+#include "agitator/multi_shot_cv_command_mapping.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
@@ -53,6 +54,7 @@
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "governor/cv_on_target_governor.hpp"
+#include "governor/fire_rate_limit_governor.hpp"
 #include "governor/friction_wheels_on_governor.hpp"
 #include "governor/heat_limit_governor.hpp"
 #include "governor/ref_system_projectile_launched_governor.hpp"
@@ -254,11 +256,16 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
     drivers()->refSerial,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
+
+ManualFireRateReselectionManager manualFireRateReselectionManager;
+FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
+
+GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor});
+    {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor, &fireRateLimitGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
@@ -280,9 +287,6 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
-
-extern HoldRepeatCommandMapping leftMousePressedBNotPressed;
-MultiShotHandler multiShotHandler(&leftMousePressedBNotPressed, 3);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -309,6 +313,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
+extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
     clientDisplay,
@@ -317,7 +322,7 @@ ClientDisplayCommand clientDisplayCommand(
     agitator,
     turret,
     imuCalibrateCommand,
-    &multiShotHandler,
+    &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
@@ -361,12 +366,14 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &CvOnTargetGovernor::setGovernorEnabled);
 
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-HoldRepeatCommandMapping leftMousePressedBNotPressed(
-    drivers(),
-    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+
+MultiShotCvCommandMapping leftMousePressedBNotPressed(
+    *drivers(),
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    false,
-    1);
+    &manualFireRateReselectionManager,
+    cvOnTargetGovernor);
+
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
@@ -391,16 +398,10 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
 // The user can press b+ctrl when the remote right switch is in the down position to restart the
 // client display command. This is necessary since we don't know when the robot is connected to the
 // server and thus don't know when to start sending the initial HUD graphics.
-PressCommandMapping bCtrlPressedRightSwitchDown(
+PressCommandMapping bCtrlPressed(
     drivers(),
     {&clientDisplayCommand},
-    RemoteMapState(
-        Remote::SwitchState::UNKNOWN,
-        Remote::SwitchState::DOWN,
-        {Remote::Key::CTRL, Remote::Key::B},
-        {},
-        false,
-        false));
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
 PressCommandMapping qPressed(
     drivers(),
@@ -416,15 +417,15 @@ PressCommandMapping xPressed(
     RemoteMapState({Remote::Key::X}));
 
 CycleStateCommandMapping<
-    MultiShotHandler::ShooterState,
-    MultiShotHandler::NUM_SHOOTER_STATES,
-    MultiShotHandler>
+    MultiShotCvCommandMapping::LaunchMode,
+    MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
+    MultiShotCvCommandMapping>
     vPressed(
         drivers(),
         RemoteMapState({Remote::Key::V}),
-        MultiShotHandler::SINGLE,
-        &multiShotHandler,
-        &MultiShotHandler::setShooterState);
+        MultiShotCvCommandMapping::SINGLE,
+        &leftMousePressedBNotPressed,
+        &MultiShotCvCommandMapping::setShooterState);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -486,7 +487,7 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    drivers->commandMapper.addMap(&bCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressed);
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
