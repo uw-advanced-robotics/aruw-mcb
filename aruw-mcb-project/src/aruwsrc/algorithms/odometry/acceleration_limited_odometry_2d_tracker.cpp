@@ -95,18 +95,24 @@ void AccelerationLimitedOdometry2DTracker::update()
     float chassisYaw;
     bool validOrientationAvailable = yawObserver.getChassisWorldYaw(&chassisYaw);
 
-    if (validOrientationAvailable && chassis.allMotorsOnline())
+    if (validOrientationAvailable)
     {
-        modm::Matrix<float, 3, 1> newVelocity3D = chassis.getActualVelocityChassisRelative();
-        // Make sure to do velocity updating first
-        updateVelocity(newVelocity3D, chassisYaw);
-
-        // m = m/s * 1 (s) / 1000 (ms)
-        modm::Vector2f displacement = velocity * dt / 1000.0f;
-        float newX = location.getX() + displacement.x;
-        float newY = location.getY() + displacement.y;
-        location.setPosition(newX, newY);
         location.setOrientation(chassisYaw);
+        if (chassis.allMotorsOnline())
+        {
+            modm::Matrix<float, 3, 1> newVelocity3D = chassis.getActualVelocityChassisRelative();
+            // Make sure to do velocity updating first
+            updateVelocity(newVelocity3D, chassisYaw);
+
+            // m = m/s * 1 (s) / 1000 (ms)
+            modm::Vector2f displacement = velocity * dt / 1000.0f;
+            float newX = location.getX() + displacement.x;
+            float newY = location.getY() + displacement.y;
+            location.setPosition(newX, newY);
+            location.setOrientation(chassisYaw);
+        }
+    } else {
+        location.setOrientation(0);
     }
 }
 

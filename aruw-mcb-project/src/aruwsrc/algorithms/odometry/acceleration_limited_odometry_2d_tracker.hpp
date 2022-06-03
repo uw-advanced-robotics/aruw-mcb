@@ -70,15 +70,7 @@ public:
 
     virtual float getYaw() const
     {
-        float yaw;
-        if (!yawObserver.getChassisWorldYaw(&yaw))
-        {
-            return 0;
-        }
-        else
-        {
-            return yaw;
-        }
+        return location.getOrientation();
     }
 
     virtual uint32_t getLastComputedOdometryTime() const { return prevLocationUpdateTime; }

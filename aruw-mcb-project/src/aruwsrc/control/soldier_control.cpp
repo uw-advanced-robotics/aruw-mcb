@@ -135,16 +135,15 @@ aruwsrc::chassis::ChassisSubsystem chassis(
 
 OttoChassisWorldYawObserver orientationObserver(drivers(), turret);
 /// TODO: remove magic number
-AccelerationLimitedOdometry2DTracker accelLimitedOdometrySubsystem(
+AccelerationLimitedOdometry2DTracker accelLimitedOdometryTracker(
     chassis,
     orientationObserver,
-    1.0f);
+    1.75f);
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
 static inline void refreshOdom()
 {
-    odometrySubsystem.refresh();
-    accelLimitedOdometrySubsystem.update();
+    accelLimitedOdometryTracker.update();
 }
 
 VelocityAgitatorSubsystem agitator(
@@ -168,7 +167,7 @@ TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
 
 OttoBallisticsSolver ballisticsSolver(
     *drivers(),
-    odometrySubsystem,
+    accelLimitedOdometryTracker,
     turret,
     frictionWheels,
     14.5f,  // defaultLaunchSpeed
@@ -484,7 +483,7 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     getTurretMCBCanComm().attachImuDataReceivedCallback(refreshOdom);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachOdometryInterface(&accelLimitedOdometryTracker);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 }
 
