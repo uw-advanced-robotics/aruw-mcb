@@ -102,12 +102,6 @@ protected:
     ChassisSymmetry chassisSymmetry;
 
     /**
-     * The maximum angle to allow the turret to deviate from the symmetrical 'forwardses' before
-     * 'forwards' changes to a different side of the chassis.
-     */
-    float maxAngleFromCenter;
-
-    /**
      * `true` if the chassis is currently actually autorotating, `false` otherwise
      * (in which case on rotation may happen). Autorotation may not happen if the
      * user requests a user input that moves the turret from the front of the chassis
@@ -120,9 +114,13 @@ protected:
      * Computes the setpoint to autorotate the chassis towards
      *
      * @param turretAngleFromCenter the current angle of the turret relative to the chassis
+     * @param maxAngleFromCenter the maximum angle difference to either side before the autorotation
+     * setpoint swaps
      * @return how much to rotate the chassis to get it aligned with the turret
      */
-    virtual float computeAngleFromCenterForAutorotation(float turretAngleFromCenter);
+    virtual float computeAngleFromCenterForAutorotation(
+        float turretAngleFromCenter,
+        float maxAngleFromCenter);
 
     void updateAutorotateState();
 };  // class ChassisAutorotateCommand

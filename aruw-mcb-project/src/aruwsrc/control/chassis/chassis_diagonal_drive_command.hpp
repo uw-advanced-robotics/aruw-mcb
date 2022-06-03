@@ -53,7 +53,9 @@ public:
     const char* getName() const override { return "chassis diagonal drive"; }
 
 private:
-    float computeAngleFromCenterForAutorotation(float turretAngleFromCenter) override;
+    float computeAngleFromCenterForAutorotation(
+        float turretAngleFromCenter,
+        float maxAngleFromCenter) override;
 
 };  // class ChassisAutorotateCommand
 

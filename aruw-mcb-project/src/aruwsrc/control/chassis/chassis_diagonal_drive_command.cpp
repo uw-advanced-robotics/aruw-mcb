@@ -38,7 +38,8 @@ ChassisDiagonalDriveCommand::ChassisDiagonalDriveCommand(
     assert(chassisSymmetry == ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 }
 float ChassisDiagonalDriveCommand::computeAngleFromCenterForAutorotation(
-    float turretAngleFromCenter)
+    float turretAngleFromCenter,
+    float maxAngleFromCenter)
 {
     float angleFromCenterForChassisAutorotate = 0.0f;
 

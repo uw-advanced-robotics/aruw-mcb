@@ -72,11 +72,14 @@ void ChassisAutorotateCommand::updateAutorotateState()
     }
 }
 
-float ChassisAutorotateCommand::computeAngleFromCenterForAutorotation(float turretAngleFromCenter)
+float ChassisAutorotateCommand::computeAngleFromCenterForAutorotation(
+    float turretAngleFromCenter,
+    float maxAngleFromCenter)
 {
     return ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
         .getValue();
 }
+
 void ChassisAutorotateCommand::execute()
 {
     // calculate pid for chassis rotation
@@ -89,7 +92,7 @@ void ChassisAutorotateCommand::execute()
 
         if (chassisAutorotating)
         {
-            maxAngleFromCenter = M_PI;
+            float maxAngleFromCenter = M_PI;
 
             if (!yawMotor->getConfig().limitMotorAngles)
             {
@@ -107,7 +110,7 @@ void ChassisAutorotateCommand::execute()
                 }
             }
             float angleFromCenterForChassisAutorotate =
-                computeAngleFromCenterForAutorotation(turretAngleFromCenter);
+                computeAngleFromCenterForAutorotation(turretAngleFromCenter, maxAngleFromCenter);
             // PD controller to find desired rotational component of the chassis control
             float desiredRotation = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
