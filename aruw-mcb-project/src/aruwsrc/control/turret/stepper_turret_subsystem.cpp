@@ -18,8 +18,10 @@
  */
 
 #include "stepper_turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+
 #include "tap/errors/create_errors.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 using namespace tap::motor;
 using namespace tap::algorithms;
@@ -30,7 +32,7 @@ StepperTurretSubsystem::StepperTurretSubsystem(
     aruwsrc::Drivers *drivers,
     StepperMotorInterface &pitchMotor,
     StepperMotorInterface &yawMotor)
-    : tap::control::Subsystem(drivers), 
+    : tap::control::Subsystem(drivers),
       pitchMotor(pitchMotor),
       yawMotor(yawMotor),
       drivers(drivers)
@@ -46,11 +48,12 @@ void StepperTurretSubsystem::initialize()
 
 void StepperTurretSubsystem::refresh()
 {
-    yawMotor.refresh(); 
+    yawMotor.refresh();
     pitchMotor.refresh();
 }
 
-void StepperTurretSubsystem::onHardwareTestStart() {
+void StepperTurretSubsystem::onHardwareTestStart()
+{
     yawMotor.setDesiredPosition(0);
     pitchMotor.setDesiredPosition(0);
 }

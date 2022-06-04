@@ -63,7 +63,6 @@ void TurretSubsystem::refresh()
 {
     yawMotor.updateMotorAngle();
     pitchMotor.updateMotorAngle();
-
 }
 
 void TurretSubsystem::onHardwareTestStart()

@@ -28,7 +28,7 @@
 #include "soldier_turret_constants.hpp"
 #elif defined(TARGET_HERO)
 #include "hero_turret_constants.hpp"
-#elif defined(TARGET_DRONE) 
+#elif defined(TARGET_DRONE)
 #include "drone_turret_constants.hpp"
 #elif defined(TARGET_SENTINEL_2021)
 #include "sentinel_2021_turret_constants.hpp"
@@ -36,7 +36,7 @@
 #include "dart_turret_constants.hpp"
 #elif defined(TARGET_SENTINEL_2022)
 #include "sentinel_2022_turret_constants.hpp"
-#else 
+#else
 #error Unexpected target
 #endif
 

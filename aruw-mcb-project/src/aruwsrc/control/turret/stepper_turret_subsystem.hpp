@@ -21,8 +21,8 @@
 #define STEPPER_TURRET_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
-#include "tap/motor/stepper_motor_interface.hpp"
 #include "tap/control/turret_subsystem_interface.hpp"
+#include "tap/motor/stepper_motor_interface.hpp"
 
 #include "turret_motor_config.hpp"
 
@@ -41,11 +41,11 @@ namespace aruwsrc::control::turret
 {
 class StepperTurretSubsystem : public tap::control::Subsystem
 {
-/**
- * Stores software necessary for interacting with stepper motors.
- */
+    /**
+     * Stores software necessary for interacting with stepper motors.
+     */
 public:
-   /**
+    /**
      * Constructs a StepperTurretSubsystem.
      *
      * @param[in] drivers Pointer to a drivers singleton object.
@@ -56,7 +56,7 @@ public:
         aruwsrc::Drivers* drivers,
         tap::motor::StepperMotorInterface& pitchMotor,
         tap::motor::StepperMotorInterface& yawMotor);
-            
+
     void initialize() override;
 
     void refresh() override;
@@ -65,7 +65,10 @@ public:
 
     void onHardwareTestStart() override;
 
-    mockable inline bool isOnline() const { return true;}; // JENNY_TODO : check if this is right...coz i deleted the TurretMotors
+    mockable inline bool isOnline() const
+    {
+        return true;
+    };  // JENNY_TODO : check if this is right...coz i deleted the TurretMotors
 
 public:
     // Associated with and contains logic for controlling the stepper motor pitch.
@@ -77,6 +80,6 @@ protected:
     Drivers* drivers;
 };
 
-} // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::turret
 
-#endif // STEPPER_TURRET_SUBSYSTEM_HPP_
+#endif  // STEPPER_TURRET_SUBSYSTEM_HPP_

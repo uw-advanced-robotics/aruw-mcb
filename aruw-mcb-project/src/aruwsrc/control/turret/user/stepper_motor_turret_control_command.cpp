@@ -24,7 +24,7 @@
 namespace aruwsrc::control::turret::user
 {
 StepperMotorTurretControlCommand::StepperMotorTurretControlCommand(
-    aruwsrc::Drivers *drivers,
+    aruwsrc::Drivers* drivers,
     StepperTurretSubsystem& stepperTurretSubsystem)
     : drivers(drivers),
       turretPitchMotor(stepperTurretSubsystem.pitchMotor),
@@ -40,10 +40,31 @@ void StepperMotorTurretControlCommand::initialize() {}
 void StepperMotorTurretControlCommand::execute()
 {
     // JENNY_TODO: check if this is right????? how 2 use w controller
-    turretPitchMotor.moveSteps(
-        drivers->controlOperatorInterface.getTurretPitchInput(0));
-    turretYawMotor.moveSteps(
-        drivers->controlOperatorInterface.getTurretYawInput(0));
+    yawAccumulator += drivers->controlOperatorInterface.getTurretYawInput(0);
+    // TODO: currently directions inverted here for yaw motor. Future best way to do this
+    // is to make GenericStepperMotorDriver have a `isInverted` property
+    if (yawAccumulator > STEP_THRESHOLD)
+    {
+        turretYawMotor.setDesiredPosition(turretYawMotor.getDesiredPosition() - 1);
+        yawAccumulator = 0;
+    }
+    else if (yawAccumulator < STEP_THRESHOLD)
+    {
+        turretYawMotor.setDesiredPosition(turretYawMotor.getDesiredPosition() + 1);
+        yawAccumulator = 0;
+    }
+
+    pitchAccumulator += drivers->controlOperatorInterface.getTurretPitchInput(0);
+    if (pitchAccumulator > STEP_THRESHOLD)
+    {
+        turretPitchMotor.setDesiredPosition(turretPitchMotor.getDesiredPosition() + 1);
+        pitchAccumulator = 0;
+    }
+    else if (pitchAccumulator < STEP_THRESHOLD)
+    {
+        turretPitchMotor.setDesiredPosition(turretPitchMotor.getDesiredPosition() - 1);
+        pitchAccumulator = 0;
+    }
 }
 
 bool StepperMotorTurretControlCommand::isFinished() const { return false; }

@@ -6,9 +6,9 @@
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_absolute_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
+#include "tap/motor/generic_stepper_motor_driver.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/motor/stepper_motor.hpp"
-#include "tap/motor/generic_stepper_motor_driver.hpp"
 
 #include "agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -16,12 +16,12 @@
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/util_macros.hpp"
-#include "launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "launcher/friction_wheel_spin_user_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
-#include "turret/turret_subsystem.hpp"
+#include "turret/constants/turret_constants.hpp"
 #include "turret/stepper_turret_subsystem.hpp"
 #include "turret/turret_motor.hpp"
-#include "turret/constants/turret_constants.hpp"
+#include "turret/turret_subsystem.hpp"
 #include "turret/user/stepper_motor_turret_control_command.hpp"
 
 using namespace tap::control::setpoint;
@@ -45,8 +45,14 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 namespace dart_control
 {
 /* define subsystems ----------------------------------------------------------*/
-tap::motor::GenericStepperMotorDriver pitchMotor(drivers(), tap::gpio::Digital::OutputPin::E, tap::gpio::Digital::OutputPin::G);
-tap::motor::GenericStepperMotorDriver yawMotor(drivers(), tap::gpio::Digital::OutputPin::F, tap::gpio::Digital::OutputPin::H);
+tap::motor::GenericStepperMotorDriver pitchMotor(
+    drivers(),
+    tap::gpio::Digital::OutputPin::E,
+    tap::gpio::Digital::OutputPin::G);
+tap::motor::GenericStepperMotorDriver yawMotor(
+    drivers(),
+    tap::gpio::Digital::OutputPin::F,
+    tap::gpio::Digital::OutputPin::H);
 
 StepperTurretSubsystem stepperTurretSubsystem(drivers(), pitchMotor, yawMotor);
 
@@ -102,8 +108,6 @@ FrictionWheelSubsystem frictionWheelsBottomBack(
     tap::can::CanBus::CAN_BUS2,
     nullptr);
 
-
-
 /* define commands ----------------------------------------------------------*/
 // Agitator Commands
 static constexpr float AGITATOR_TARGET_ANGLE_ZERO = 0;
@@ -137,7 +141,7 @@ MoveAbsoluteCommand agitatorTopMoveCommandOne(
     true);
 
 MoveAbsoluteCommand agitatorTopMoveCommandTwo(
-    &agitatorTop, 
+    &agitatorTop,
     AGITATOR_TARGET_ANGLE_TWO,
     AGITATOR_ANGULAR_SPEED,
     AGITATOR_TOLERANCE,
@@ -169,67 +173,58 @@ MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
     true);
 
 // Starting Friction Wheels
-FrictionWheelSpinRefLimitedCommand spinFrictionWheelsTopBack(
+FrictionWheelSpinUserLimitedCommand spinFrictionWheelsTopBack(
     drivers(),
     &frictionWheelsTopBack,
     15.0f,
-    false,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1); // TODO: add mechanism ID that means no mechanism
+    15.0f);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheelsTopFront(
+FrictionWheelSpinUserLimitedCommand spinFrictionWheelsTopFront(
     drivers(),
     &frictionWheelsTopFront,
     15.0f,
-    false,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    15.0f);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheelsBottomFront(
+FrictionWheelSpinUserLimitedCommand spinFrictionWheelsBottomFront(
     drivers(),
     &frictionWheelsBottomFront,
     15.0f,
-    false,
-     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    15.0f);
 
-FrictionWheelSpinRefLimitedCommand spinFrictionWheelsBottomBack(
+FrictionWheelSpinUserLimitedCommand spinFrictionWheelsBottomBack(
     drivers(),
     &frictionWheelsBottomBack,
     15.0f,
-    false,
-     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    15.0f);
 
 // Stopping Friction Wheels
-FrictionWheelSpinRefLimitedCommand stopFrictionWheelsTopFront(
+FrictionWheelSpinUserLimitedCommand stopFrictionWheelsTopFront(
     drivers(),
     &frictionWheelsTopFront,
     0.0f,
-    true,
-     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    0.0f);
 
-FrictionWheelSpinRefLimitedCommand stopFrictionWheelsTopBack(
+FrictionWheelSpinUserLimitedCommand stopFrictionWheelsTopBack(
     drivers(),
     &frictionWheelsTopBack,
     0.0f,
-    true,
-     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    0.0f);
 
-FrictionWheelSpinRefLimitedCommand stopFrictionWheelsBottomFront(
+FrictionWheelSpinUserLimitedCommand stopFrictionWheelsBottomFront(
     drivers(),
     &frictionWheelsBottomFront,
     0.0f,
-    true,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    0.0f);
 
-FrictionWheelSpinRefLimitedCommand stopFrictionWheelsBottomBack(
+FrictionWheelSpinUserLimitedCommand stopFrictionWheelsBottomBack(
     drivers(),
     &frictionWheelsBottomBack,
     0.0f,
-    true,
-     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    0.0f);
 
 aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTurretControlCommand(
     drivers(),
-    stepperTurretSubsystem
-);
+    stepperTurretSubsystem);
 
 // Mappings
 HoldCommandMapping bottomPositionOne(
@@ -278,7 +273,7 @@ void registerDartSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&frictionWheelsTopBack);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsBottomFront);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsBottomBack);
-    drivers->commandScheduler.registerSubsystem(&stepperTurretSubsystem); 
+    drivers->commandScheduler.registerSubsystem(&stepperTurretSubsystem);
 }
 
 void initializeSubsystems()
@@ -316,7 +311,6 @@ void registerDartIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&bottomPositionTwo);
     drivers->commandMapper.addMap(&positionZero);
     drivers->commandMapper.addMap(&stopWheels);
-
 }
 }  // namespace dart_control
 namespace aruwsrc::control

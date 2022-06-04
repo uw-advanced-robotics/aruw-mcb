@@ -40,6 +40,12 @@ class StepperMotorTurretControlCommand : public tap::control::Command
 {
 public:
     /**
+     * Accumulator threshold before we take a step. Must be between 0 and 1.
+     */
+    static constexpr float STEP_THRESHOLD = 0.8;
+    static_assert(0.0f <= STEP_THRESHOLD && STEP_THRESHOLD <= 1.0f);
+
+    /**
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] turretSubsystem Pointer to the sentinel turret to control.
      * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
@@ -56,7 +62,7 @@ public:
 
     bool isReady() override;
 
-    const char* getName() const override { return "User turret control"; }
+    const char* getName() const override { return "Stepper turret control"; }
 
     void initialize() override;
 
@@ -70,6 +76,18 @@ private:
     aruwsrc::Drivers* drivers;
     tap::motor::StepperMotorInterface& turretPitchMotor;
     tap::motor::StepperMotorInterface& turretYawMotor;
+
+    /**
+     * Used for fine yaw control. Accumulates yaw input over time, when checked and greater than
+     * STEP_THRESHOLD then we take a step and this its value is set to 0.
+     */
+    float yawAccumulator = 0.0f;
+
+    /**
+     * Used for fine pitch control. Accumulates yaw input over time, should be set
+     * back to 0 when checked and greater than STEP_THRESHOLD
+     */
+    float pitchAccumulator = 0.0f;
 };
 }  // namespace aruwsrc::control::turret::user
 
