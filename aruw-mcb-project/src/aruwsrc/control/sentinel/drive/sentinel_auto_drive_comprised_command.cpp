@@ -35,7 +35,7 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     SentinelDriveSubsystem *sentinelChassis)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
-      agressiveEvadeCommand(sentinelChassis, 1.0),
+      aggressiveEvadeCommand(sentinelChassis, 1.0),
       passiveEvadeCommand(sentinelChassis, 0.5),
       moveToFarRightCommand(
           *sentinelChassis,
@@ -44,7 +44,7 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
 {
     this->addSubsystemRequirement(sentinelChassis);
     this->comprisedCommandScheduler.registerSubsystem(sentinelChassis);
-    this->agressiveEvadeTimer.restart(0);
+    this->aggressiveEvadeTimer.restart(0);
 }
 
 void SentinelAutoDriveComprisedCommand::initialize() {}
@@ -88,15 +88,15 @@ void SentinelAutoDriveComprisedCommand::execute()
         if (this->userRequestDriveMovement)
         {
             if (shouldMoveAgressively &&
-                !this->comprisedCommandScheduler.isCommandScheduled(&this->agressiveEvadeCommand))
+                !this->comprisedCommandScheduler.isCommandScheduled(&this->aggressiveEvadeCommand))
             {
-                this->comprisedCommandScheduler.addCommand(&this->agressiveEvadeCommand);
+                this->comprisedCommandScheduler.addCommand(&this->aggressiveEvadeCommand);
 
-                this->agressiveEvadeTimer.restart(MIN_TIME_SPENT_AGGRESSIVELY_EVADING);
+                this->aggressiveEvadeTimer.restart(MIN_TIME_SPENT_AGGRESSIVELY_EVADING);
             }
             else if (
                 compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) &&
-                this->agressiveEvadeTimer.isExpired())
+                this->aggressiveEvadeTimer.isExpired())
             {
                 scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
             }
@@ -112,7 +112,7 @@ void SentinelAutoDriveComprisedCommand::execute()
 
 void SentinelAutoDriveComprisedCommand::end(bool interrupted)
 {
-    this->comprisedCommandScheduler.removeCommand(&this->agressiveEvadeCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&this->aggressiveEvadeCommand, interrupted);
     this->comprisedCommandScheduler.removeCommand(&this->passiveEvadeCommand, interrupted);
     this->comprisedCommandScheduler.removeCommand(&this->moveToFarRightCommand, interrupted);
 }

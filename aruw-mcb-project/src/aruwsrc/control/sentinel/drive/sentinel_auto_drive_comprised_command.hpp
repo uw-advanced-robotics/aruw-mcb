@@ -62,8 +62,8 @@ private:
     static constexpr float MOVE_TO_RIGHT_DRIVE_SPEED_RPM = 3'000;
 
     aruwsrc::Drivers *drivers;
-    tap::arch::MilliTimeout agressiveEvadeTimer;
-    SentinelDriveEvadeCommand agressiveEvadeCommand;
+    tap::arch::MilliTimeout aggressiveEvadeTimer;
+    SentinelDriveEvadeCommand aggressiveEvadeCommand;
     SentinelDriveEvadeCommand passiveEvadeCommand;
     SentinelDriveToSideCommand moveToFarRightCommand;
 

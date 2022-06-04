@@ -27,8 +27,7 @@
 namespace aruwsrc::control::sentinel::drive
 {
 /**
- * Command that takes command of the sentinel chassis and moves the sentinel to one of the rail
- * sides.
+ * Command that drives the sentinel chassis to a specified side of the rail.
  */
 class SentinelDriveToSideCommand : public tap::control::Command
 {

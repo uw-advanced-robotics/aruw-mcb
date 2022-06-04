@@ -88,9 +88,9 @@ private:
 
     /**
      * Updates the sentinel drive subsystem such that it drives in the opposite direction that it is
-     * currently driving. The distanceToDrive and sentinel desired RPM will be updated to some
-     * random values. The random distance choosen wil lbe from `[minDistance, maxDistance)` and the
-     * random speed will be between `speedFactor * [MIN_RPM, MAX_RPM)`.
+     * currently driving. The `distanceToDrive` and `sentinelDriveSubsystem`'s `desiredRpm` will be
+     * updated to some random values. The random distance choosen will be from `[minDistance,
+     * maxDistance)` and the random speed will be between `speedFactor * [MIN_RPM, MAX_RPM)`.
      *
      * @param[in] minDistance Minimum random distance to drive, in millimeters.
      * @param[in] maxDistance Maximum random distance to drive, in millimeters.
