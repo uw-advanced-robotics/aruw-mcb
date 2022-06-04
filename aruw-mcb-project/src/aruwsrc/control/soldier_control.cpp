@@ -166,7 +166,7 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
+aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMovementCommand(
     &sentinelRequestSubsystem);
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
     &sentinelRequestSubsystem);
@@ -351,7 +351,7 @@ HoldCommandMapping leftSwitchUp(
 // Keyboard/Mouse related mappings
 PressCommandMapping gPressedCtrlNotPressed(
     drivers(),
-    {&sentinelSelectNewRobotCommand},
+    {&sentinelToggleDriveMovementCommand},
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),

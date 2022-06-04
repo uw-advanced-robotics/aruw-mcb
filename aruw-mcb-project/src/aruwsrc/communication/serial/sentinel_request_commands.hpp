@@ -26,6 +26,29 @@
 
 namespace aruwsrc::communication::serial
 {
+class ToggleDriveMovementCommand : public tap::control::Command
+{
+public:
+    ToggleDriveMovementCommand(SentinelRequestSubsystem *sentinelRequestSubsystem)
+        : sub(sentinelRequestSubsystem)
+    {
+        this->addSubsystemRequirement(sentinelRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "toggle drive movement"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        sub->queueRequest(SentinelRequestMessageType::TOGGLE_DRIVE_MOVEMENT);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentinelRequestSubsystem *sub;
+};
+
 class SelectNewRobotCommand : public tap::control::Command
 {
 public:

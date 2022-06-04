@@ -342,6 +342,8 @@ void targetNewQuadrantMessageHandler()
     drivers()->commandScheduler.addCommand(&turretOne.turretUturnCommand);
 }
 
+void toggleDriveMovementMessageHandler() { sentinelAutoDrive.toggleDriveMovement(); }
+
 /* define command mappings --------------------------------------------------*/
 
 HoldCommandMapping rightSwitchDown(
@@ -415,6 +417,8 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
 
     sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+    sentinelRequestHandler.attachToggleDriveMovementMessageHandler(
+        toggleDriveMovementMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
         &sentinelRequestHandler);

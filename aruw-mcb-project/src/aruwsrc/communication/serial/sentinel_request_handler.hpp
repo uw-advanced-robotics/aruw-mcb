@@ -60,11 +60,16 @@ public:
     {
         targetNewQuadrantMessageHandler = callback;
     }
+    void attachToggleDriveMovementMessageHandler(MessageReceivedCallback callback)
+    {
+        toggleDriveMovementMessageHandler = callback;
+    }
 
 private:
     aruwsrc::Drivers *drivers;
     MessageReceivedCallback selectNewRobotMessageHandler = nullptr;
     MessageReceivedCallback targetNewQuadrantMessageHandler = nullptr;
+    MessageReceivedCallback toggleDriveMovementMessageHandler = nullptr;
 };
 }  // namespace aruwsrc::communication::serial
 

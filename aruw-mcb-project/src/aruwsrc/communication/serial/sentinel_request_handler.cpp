@@ -44,6 +44,9 @@ void SentinelRequestHandler::operator()(
         case SentinelRequestMessageType::TARGET_NEW_QUADRANT:
             if (targetNewQuadrantMessageHandler != nullptr) targetNewQuadrantMessageHandler();
             break;
+        case SentinelRequestMessageType::TOGGLE_DRIVE_MOVEMENT:
+            if (toggleDriveMovementMessageHandler != nullptr) toggleDriveMovementMessageHandler();
+            break;
         default:
             RAISE_ERROR(drivers, "invalid message sentinel request message type");
             break;

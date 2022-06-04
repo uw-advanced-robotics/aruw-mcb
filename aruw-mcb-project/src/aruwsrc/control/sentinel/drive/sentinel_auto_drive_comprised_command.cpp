@@ -53,7 +53,14 @@ void SentinelAutoDriveComprisedCommand::execute()
 {
     if (!this->drivers->refSerial.getRefSerialReceivingData())
     {
-        if (!this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
+        if (!this->userRequestDriveMovement)
+        {
+            if (!this->comprisedCommandScheduler.isCommandScheduled(&this->moveToFarRightCommand))
+            {
+                this->comprisedCommandScheduler.addCommand(&this->moveToFarRightCommand);
+            }
+        }
+        else if (!this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
         {
             this->comprisedCommandScheduler.addCommand(&this->passiveEvadeCommand);
         }
@@ -82,10 +89,20 @@ void SentinelAutoDriveComprisedCommand::execute()
             }
             else if (
                 compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) &&
-                this->agressiveEvadeTimer.isExpired() &&
-                !this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
+                this->agressiveEvadeTimer.isExpired())
             {
-                this->comprisedCommandScheduler.addCommand(&this->passiveEvadeCommand);
+                if (!this->userRequestDriveMovement)
+                {
+                    if (!this->comprisedCommandScheduler.isCommandScheduled(
+                            &this->moveToFarRightCommand))
+                    {
+                        this->comprisedCommandScheduler.addCommand(&this->moveToFarRightCommand);
+                    }
+                }
+                if (!this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
+                {
+                    this->comprisedCommandScheduler.addCommand(&this->passiveEvadeCommand);
+                }
             }
         }
     }
