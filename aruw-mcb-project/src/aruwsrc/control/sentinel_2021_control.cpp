@@ -135,33 +135,6 @@ SentinelTurretSubsystem turretSubsystem(
 OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
 
 /* define commands ----------------------------------------------------------*/
-MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
-
-UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
-
-MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
-    *drivers(),
-    agitator,
-    rotateAgitator,
-    unjamAgitator);
-
-// rotates agitator if friction wheels are spinning fast
-FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
-
-// stops command execution if projectile is being launched
-RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor(
-    drivers()->refSerial,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-// rotates agitator with heat limiting applied
-HeatLimitGovernor heatLimitGovernor(
-    *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    constants::HEAT_LIMIT_BUFFER);
-GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatLimiting(
-    {&agitator},
-    rotateAndUnjamAgitator,
-    {&heatLimitGovernor, &frictionWheelsOnGovernor, &refSysProjLaunchedGovernor});
 
 // Two identical drive commands since you can't map an identical command to two different mappings
 SentinelDriveManualCommand sentinelDriveManual1(drivers(), &sentinelDrive);
@@ -240,6 +213,10 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
+RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor(
+    drivers()->refSerial,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
@@ -258,19 +235,24 @@ FireRateLimitGovernor fireRateLimitGovernor(autoAimFireRateReselectionManager);
 
 // agitator governor limited commands
 
-GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
+GovernorLimitedCommand<6> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
     {&agitator},
     rotateAndUnjamAgitator,
     {&heatLimitGovernor,
      &frictionWheelsOnGovernor,
      &cvOnTargetGovernor,
      &cvOnlineGovernor,
-     &fireRateLimitGovernor});
+     &fireRateLimitGovernor,
+     &refSysProjLaunchedGovernor});
 
-GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting(
+GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimiting(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor, &fireRateLimitGovernor});
+    {&heatLimitGovernor,
+     &frictionWheelsOnGovernor,
+     &cvOnTargetGovernor,
+     &fireRateLimitGovernor,
+     &refSysProjLaunchedGovernor});
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
