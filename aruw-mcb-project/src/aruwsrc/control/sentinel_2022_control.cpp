@@ -158,13 +158,6 @@ public:
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
-          frictionWheelsOnGovernor(frictionWheels),
-          refSysProjLaunchedGovernor(drivers.refSerial, config.turretBarrelMechanismId),
-          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
-          rotateAndUnjamAgitatorWithHeatLimiting(
-              {&agitator},
-              rotateAndUnjamAgitator,
-              {&heatLimitGovernor, &frictionWheelsOnGovernor, &refSysProjLaunchedGovernor}),
           spinFrictionWheels(
               &drivers,
               &frictionWheels,
@@ -197,10 +190,8 @@ public:
               &ballisticsSolver,
               config.turretID),
           turretUturnCommand(&turretSubsystem, M_PI),
-          rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
-          unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
-          rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
           frictionWheelsOnGovernor(frictionWheels),
+          refSysProjLaunchedGovernor(drivers.refSerial, config.turretBarrelMechanismId),
           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           cvOnTargetGovernor(
               drivers,
@@ -213,18 +204,24 @@ public:
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,
-              {&heatLimitGovernor,
-               &frictionWheelsOnGovernor,
+              {&frictionWheelsOnGovernor,
+               &refSysProjLaunchedGovernor,
+               &heatLimitGovernor,
                &cvOnTargetGovernor,
                &cvOnlineGovernor,
                &fireRateLimitGovernor}),
           rotateAndUnjamAgitatorWithHeatAndCvLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
-              {&heatLimitGovernor,
-               &frictionWheelsOnGovernor,
+              {&frictionWheelsOnGovernor,
+               &refSysProjLaunchedGovernor,
+               &heatLimitGovernor,
                &cvOnTargetGovernor,
-               &fireRateLimitGovernor})
+               &fireRateLimitGovernor}),
+          rotateAndUnjamAgitatorWithHeatLimiting(
+              {&agitator},
+              rotateAndUnjamAgitator,
+              {&heatLimitGovernor, &frictionWheelsOnGovernor, &refSysProjLaunchedGovernor})
     {
     }
 
@@ -237,20 +234,11 @@ public:
 
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
+
     // unjam commands
     MoveIntegralCommand rotateAgitator;
     UnjamIntegralCommand unjamAgitator;
     MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
-
-    // rotates agitator if friction wheels are spinning fast
-    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
-
-    // stops command execution if projectile is being launched
-    RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor;
-
-    // rotates agitator with heat limiting applied
-    HeatLimitGovernor heatLimitGovernor;
-    GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatLimiting;
 
     // friction wheel commands
     FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
@@ -272,13 +260,9 @@ public:
 
     user::TurretQuickTurnCommand turretUturnCommand;
 
-    // base agitator commands
-    MoveIntegralCommand rotateAgitator;
-    UnjamIntegralCommand unjamAgitator;
-    MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
-
     // agitator related governors
     FrictionWheelsOnGovernor frictionWheelsOnGovernor;
+    RefSystemProjectileLaunchedGovernor refSysProjLaunchedGovernor;
     HeatLimitGovernor heatLimitGovernor;
     CvOnTargetGovernor cvOnTargetGovernor;
     CvOnlineGovernor cvOnlineGovernor;
@@ -286,8 +270,9 @@ public:
     FireRateLimitGovernor fireRateLimitGovernor;
 
     // agitator governor limited commands
-    GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
-    GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
+    GovernorLimitedCommand<6> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
+    GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
+    GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatLimiting;
 };
 
 SentinelTurret turretZero(
