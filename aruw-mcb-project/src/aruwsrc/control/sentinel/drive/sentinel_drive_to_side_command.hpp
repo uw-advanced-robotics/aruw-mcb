@@ -26,17 +26,23 @@
 
 namespace aruwsrc::control::sentinel::drive
 {
+/**
+ * Command that takes command of the sentinel chassis and moves the sentinel to one of the rail
+ * sides.
+ */
 class SentinelDriveToSideCommand : public tap::control::Command
 {
 public:
-    /// The fraction of the traversable rail length which is considered to be "near" the end of the rail multiplied by the traversable rail length.
+    /// The fraction of the traversable rail length which is considered to be "near" the end of the
+    /// rail multiplied by the traversable rail length.
     static constexpr float RAIL_LENGTH_END_THRESHOLD =
         0.05f * (SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH);
 
     enum class SentinelRailSide : uint8_t
     {
-        CLOSE_RAIL,
-        FAR_RAIL,
+        CLOSE_RAIL,  ///< The rail side at 0 mm as defined by sentinel odometry
+        FAR_RAIL,  ///< The rail side at SentinelDriveSubsystem::RAIL_LENGTH as defined by sentinel
+                   ///< odometry
     };
 
     SentinelDriveToSideCommand(
@@ -57,6 +63,12 @@ private:
     const SentinelRailSide railSide;
     const float movementSpeedRpm;
 
+    /**
+     * @param[in] railSide The side of the rail that the sentinel should be near.
+     * @param[in] sentinelPosition The current position of the sentinel along the rail.
+     * @return true if the sentinel is close enough to the end of the rail that it is considered to
+     * be at the end of the rail.
+     */
     static inline bool withinRailEnd(SentinelRailSide railSide, float sentinelPosition)
     {
         switch (railSide)

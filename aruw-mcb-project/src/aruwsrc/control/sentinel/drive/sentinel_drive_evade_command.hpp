@@ -86,8 +86,25 @@ private:
     /// Distance to drive, in millimeters
     float distanceToDrive = 0;
 
+    /**
+     * Updates the sentinel drive subsystem such that it drives in the opposite direction that it is
+     * currently driving. The distanceToDrive and sentinel desired RPM will be updated to some
+     * random values. The random distance choosen wil lbe from `[minDistance, maxDistance)` and the
+     * random speed will be between `speedFactor * [MIN_RPM, MAX_RPM)`.
+     *
+     * @param[in] minDistance Minimum random distance to drive, in millimeters.
+     * @param[in] maxDistance Maximum random distance to drive, in millimeters.
+     */
     void reverseDirectionForRandomDistance(int32_t minDistance, int32_t maxDistance);
 
+    /**
+     * Checks the distance from the end of the rail and reverses the direction of the sentinel if it
+     * is close to either end of the rail. Will set the `distanceToDrive` such that the sentinel
+     * will drive to at least the middle of the rail.
+     *
+     * @param[in] currentPosition The current position of the sentinel along the rail, in
+     * millimeters.
+     */
     void reverseDirectionIfCloseToEnd(float currentPosition);
 
     /// @return the minimum desired RPM as determined by the specified speedFactor passed in upon

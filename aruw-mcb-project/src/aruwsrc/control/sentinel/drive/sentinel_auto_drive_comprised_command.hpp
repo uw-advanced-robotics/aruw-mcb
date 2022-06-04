@@ -53,7 +53,8 @@ public:
 private:
     /// Threshold in damage per second above which the robot will enter aggressive drive mode.
     static constexpr float AGGRESSIVE_EVADE_DPS_THRESHOLD = 5;
-    /// Minimum time in milliseconds spent aggressively driving when aggressive drive mode is entered.
+    /// Minimum time in milliseconds spent aggressively driving when aggressive drive mode is
+    /// entered.
     static constexpr uint32_t MIN_TIME_SPENT_AGGRESSIVELY_EVADING = 5'000;
     /// Speed in wheel RPM at which the sentinel will drive to the right side of the rail.
     static constexpr float MOVE_TO_RIGHT_DRIVE_SPEED_RPM = 3'000;

@@ -22,12 +22,12 @@
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelDriveEvadeCommand::SentinelDriveEvadeCommand(
-    SentinelDriveSubsystem* subsystem,
+    SentinelDriveSubsystem* sentinelDriveSubsystem,
     float speedFraction)
-    : sentinelDriveSubsystem(subsystem),
+    : sentinelDriveSubsystem(sentinelDriveSubsystem),
       speedFactor(speedFraction)
 {
-    this->addSubsystemRequirement(subsystem);
+    this->addSubsystemRequirement(sentinelDriveSubsystem);
 }
 
 void SentinelDriveEvadeCommand::initialize()
@@ -36,7 +36,7 @@ void SentinelDriveEvadeCommand::initialize()
     modm::platform::RandomNumberGenerator::enable();
 #endif
 
-    this->reverseDirection(LARGE_ARMOR_PLATE_WIDTH, MAX_TRAVERSE_DISTANCE);
+    this->reverseDirectionForRandomDistance(LARGE_ARMOR_PLATE_WIDTH, MAX_TRAVERSE_DISTANCE);
 }
 
 void SentinelDriveEvadeCommand::execute()
@@ -45,10 +45,30 @@ void SentinelDriveEvadeCommand::execute()
 
     if (this->hasTraveledDistanceToDrive(currentPosition))
     {
-        this->reverseDirection(LARGE_ARMOR_PLATE_WIDTH, MAX_TRAVERSE_DISTANCE);
+        this->reverseDirectionForRandomDistance(LARGE_ARMOR_PLATE_WIDTH, MAX_TRAVERSE_DISTANCE);
     }
 
     this->reverseDirectionIfCloseToEnd(currentPosition);
+}
+
+void SentinelDriveEvadeCommand::end(bool) { this->sentinelDriveSubsystem->setDesiredRpm(0); }
+
+bool SentinelDriveEvadeCommand::isFinished() const { return false; }
+
+void SentinelDriveEvadeCommand::reverseDirectionForRandomDistance(
+    int32_t minDistance,
+    int32_t maxDistance)
+{
+    this->positionWhenDirectionChanged = this->sentinelDriveSubsystem->absolutePosition();
+
+    auto newDesiredRpm = getNewDesiredRpm(
+        getMinDesiredRpm(),
+        getMaxDesiredRpm(),
+        this->sentinelDriveSubsystem->getDesiredRpm());
+
+    this->sentinelDriveSubsystem->setDesiredRpm(newDesiredRpm);
+
+    this->distanceToDrive = getRandomIntegerBetweenBounds(minDistance, maxDistance);
 }
 
 void SentinelDriveEvadeCommand::reverseDirectionIfCloseToEnd(float currentPosition)
@@ -79,26 +99,8 @@ void SentinelDriveEvadeCommand::reverseDirectionIfCloseToEnd(float currentPositi
             distanceFromFarRail = abs(currentPosition);
         }
 
-        this->reverseDirection(distanceFromCenter, distanceFromFarRail);
+        this->reverseDirectionForRandomDistance(distanceFromCenter, distanceFromFarRail);
     }
-}
-
-void SentinelDriveEvadeCommand::end(bool) { this->sentinelDriveSubsystem->setDesiredRpm(0); }
-
-bool SentinelDriveEvadeCommand::isFinished() const { return false; }
-
-void SentinelDriveEvadeCommand::reverseDirection(int32_t minDistance, int32_t maxDistance)
-{
-    this->positionWhenDirectionChanged = this->sentinelDriveSubsystem->absolutePosition();
-
-    auto newDesiredRpm = getNewDesiredRpm(
-        getMinDesiredRpm(),
-        getMaxDesiredRpm(),
-        this->sentinelDriveSubsystem->getDesiredRpm());
-
-    this->sentinelDriveSubsystem->setDesiredRpm(newDesiredRpm);
-
-    this->distanceToDrive = getRandomIntegerBetweenBounds(minDistance, maxDistance);
 }
 
 }  // namespace aruwsrc::control::sentinel::drive

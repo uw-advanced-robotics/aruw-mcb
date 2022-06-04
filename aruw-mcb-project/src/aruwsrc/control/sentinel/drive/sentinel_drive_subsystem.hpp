@@ -255,9 +255,8 @@ private:
                 (RAIL_LENGTH - SENTINEL_LENGTH - currentPosition) / SPEED_REDUCTION_RAIL_BUFFER;
         }
 
-        desiredRpmNearRailSidesScalar = std::max(
-            desiredRpmNearRailSidesScalar,
-            MINIMUM_SPEED_REDUCTION_NEAR_RAIL_SIDES_FRACTION);
+        desiredRpmNearRailSidesScalar =
+            std::max(desiredRpmNearRailSidesScalar, MINIMUM_SENTINEL_SPEED_MULTIPLIER);
 
         return desiredRpmNearRailSidesScalar;
     }
