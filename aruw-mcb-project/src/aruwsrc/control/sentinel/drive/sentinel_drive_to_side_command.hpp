@@ -29,6 +29,7 @@ namespace aruwsrc::control::sentinel::drive
 class SentinelDriveToSideCommand : public tap::control::Command
 {
 public:
+    /// The fraction of the traversable rail length which is considered to be "near" the end of the rail multiplied by the traversable rail length.
     static constexpr float RAIL_LENGTH_END_THRESHOLD =
         0.05f * (SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH);
 

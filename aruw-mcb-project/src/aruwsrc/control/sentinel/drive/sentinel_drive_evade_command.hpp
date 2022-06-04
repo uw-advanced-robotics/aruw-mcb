@@ -86,7 +86,7 @@ private:
     /// Distance to drive, in millimeters
     float distanceToDrive = 0;
 
-    void reverseDirection(int32_t minDistance, int32_t maxDistance);
+    void reverseDirectionForRandomDistance(int32_t minDistance, int32_t maxDistance);
 
     void reverseDirectionIfCloseToEnd(float currentPosition);
 

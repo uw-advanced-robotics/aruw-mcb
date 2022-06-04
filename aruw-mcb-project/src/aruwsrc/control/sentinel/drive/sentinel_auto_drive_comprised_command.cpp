@@ -62,7 +62,7 @@ void SentinelAutoDriveComprisedCommand::execute()
     {
         const auto &robotData = this->drivers->refSerial.getRobotData();
 
-        if (robotData.maxHp == robotData.currentHp)
+        if (robotData.currentHp == robotData.maxHp)
         {
             // move to right of rail when no damage taken
             if (!this->comprisedCommandScheduler.isCommandScheduled(&this->moveToFarRightCommand))

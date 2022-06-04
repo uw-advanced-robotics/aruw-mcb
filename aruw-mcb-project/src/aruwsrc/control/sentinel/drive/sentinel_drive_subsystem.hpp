@@ -70,12 +70,11 @@ public:
     // Our length of the rail, in mm
     static constexpr float RAIL_LENGTH = 1900;
 
-    /// Distance from either end of the rail, in millimeters whereby the sentinel will cut its speed
+    /// Distance from either end of the rail (in mm) at which the sentinel will cut its speed
     /// to avoid ramming into the wall.
     static constexpr float SPEED_REDUCTION_RAIL_BUFFER = 600.0f;
-    /// Minimum fraction that will be applied to the desiredRpm during speed reduction near the
-    /// sides of the rail
-    static constexpr float MINIMUM_SPEED_REDUCTION_NEAR_RAIL_SIDES_FRACTION = 0.1f;
+    /// Lowest allowable chassis speed scaling when close to the sides of the rail.
+    static constexpr float MINIMUM_SENTINEL_SPEED_MULTIPLIER = 0.1f;
 
     SentinelDriveSubsystem(
         aruwsrc::Drivers* drivers,

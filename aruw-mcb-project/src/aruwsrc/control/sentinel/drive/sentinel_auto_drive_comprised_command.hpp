@@ -51,11 +51,11 @@ public:
     bool isFinished() const override;
 
 private:
-    /// Threshold in damage per second upon which the robot will enter agressive drive mode
-    static constexpr float AGRESSIVE_EVADE_DPS_THRESHOLD = 5;
-    /// Minimum time in milliseconds spent agressively driving when agressive drive mode is entered
-    static constexpr uint32_t MIN_TIME_SPENT_AGRESSIVELY_EVADING = 5'000;
-    /// Speed in wheel RPM at which the sentinel will drive ot the right of the rail
+    /// Threshold in damage per second above which the robot will enter aggressive drive mode.
+    static constexpr float AGGRESSIVE_EVADE_DPS_THRESHOLD = 5;
+    /// Minimum time in milliseconds spent aggressively driving when aggressive drive mode is entered.
+    static constexpr uint32_t MIN_TIME_SPENT_AGGRESSIVELY_EVADING = 5'000;
+    /// Speed in wheel RPM at which the sentinel will drive to the right side of the rail.
     static constexpr float MOVE_TO_RIGHT_DRIVE_SPEED_RPM = 3'000;
 
     aruwsrc::Drivers *drivers;
