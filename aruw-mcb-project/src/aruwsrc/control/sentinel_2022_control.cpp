@@ -159,9 +159,7 @@ public:
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
           frictionWheelsOnGovernor(frictionWheels),
-          refSysProjLaunchedGovernor(
-              drivers.refSerial,
-              config.turretBarrelMechanismId),
+          refSysProjLaunchedGovernor(drivers.refSerial, config.turretBarrelMechanismId),
           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           rotateAndUnjamAgitatorWithHeatLimiting(
               {&agitator},
