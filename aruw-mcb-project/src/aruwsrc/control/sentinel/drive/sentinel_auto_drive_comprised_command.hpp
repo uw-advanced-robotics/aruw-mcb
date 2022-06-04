@@ -52,6 +52,8 @@ public:
 
     void toggleDriveMovement() { this->userRequestDriveMovement = !this->userRequestDriveMovement; }
 
+    bool getMovementStatus() const { return this->userRequestDriveMovement; }
+
 private:
     /// Threshold in damage per second above which the robot will enter aggressive drive mode.
     static constexpr float AGGRESSIVE_EVADE_DPS_THRESHOLD = 5;

@@ -70,7 +70,6 @@ public:
 
     void initialize() override final;
 
-private:
     /** X pixel coordinate that the boolean hud indicator circles will be centered around. */
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LIST_CENTER_X = 280;
     /** Starting y value where boolean hud indicator circles will start. The top most circle in the
@@ -98,6 +97,7 @@ private:
     /** The character line width of the textual label associated with the boolean HUD indicators */
     static constexpr uint16_t BOOLEAN_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH = 3;
 
+private:
     /** Tuple that contains the name of the boolean indicator, the color when the indicator is
      * `true` or on, and the color when the indicator is `false` or off. */
     using BooleanHUDIndicatorTuple = std::tuple<const char *, Tx::GraphicColor, Tx::GraphicColor>;
