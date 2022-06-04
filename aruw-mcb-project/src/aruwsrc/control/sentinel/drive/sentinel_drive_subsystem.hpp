@@ -57,7 +57,7 @@ public:
 #else
     static constexpr float WHEEL_RADIUS = 44.45f;
 #endif
-    static constexpr float GEAR_RATIO = 19.0f;
+    static constexpr float GEAR_RATIO = (3591.0f / 187.0f);
 
     // RMUL length of the rail, in mm
     // static constexpr float RAIL_LENGTH = 2130;
