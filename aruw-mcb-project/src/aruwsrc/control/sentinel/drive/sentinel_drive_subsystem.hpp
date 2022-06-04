@@ -82,7 +82,7 @@ public:
     void initialize() override;
 
     /**
-     * Returns absolute position of the sentinel, relative to the left end of the rail (when rail
+     * Returns absolute position (in mm) of the sentinel, relative to the left end of the rail (when rail
      * is viewed from the front)
      */
     mockable float absolutePosition() const;

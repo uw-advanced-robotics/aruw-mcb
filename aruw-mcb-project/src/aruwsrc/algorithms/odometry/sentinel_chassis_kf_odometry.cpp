@@ -56,7 +56,8 @@ void SentinelChassisKFOdometry::update()
 
     // assume 0 velocity/acceleration in z direction
     float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
-    y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.absolutePosition();
+    // Absolute position given in mm, so we should convert back to meters
+    y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.absolutePosition()*1E-3;
     y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
 
     // Update the Kalman filter. A new state estimate is available after this call.
