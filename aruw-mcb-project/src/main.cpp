@@ -93,7 +93,10 @@ int main()
 #if defined(TARGET_SENTINEL_2022)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
+
+#ifndef TARGET_DART
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
         }
         modm::delay_us(10);
     }

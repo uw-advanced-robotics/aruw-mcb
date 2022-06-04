@@ -48,7 +48,7 @@ void FrictionWheelSpinUserLimitedCommand::execute()
 
     // TODO: fix magic number
     launchSpeed -= wheel / 10000.0f;
-    launchSpeed = tap::algorithms::limitVal<float>(launchSpeed, 0, 15);
+    launchSpeed = tap::algorithms::limitVal<float>(launchSpeed, 0, speedLimit);
 
     frictionWheels->setDesiredLaunchSpeed(launchSpeed);
 }

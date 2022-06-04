@@ -21,6 +21,13 @@
 
 #include "aruwsrc/drivers.hpp"
 
+void __assert_func(const char *, int, const char *, const char *)
+{
+    __asm__("BKPT");
+    while (true) {
+    }
+}
+
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(

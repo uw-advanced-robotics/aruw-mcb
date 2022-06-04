@@ -45,12 +45,12 @@ void StepperMotorTurretControlCommand::execute()
     // is to make GenericStepperMotorDriver have a `isInverted` property
     if (yawAccumulator > STEP_THRESHOLD)
     {
-        turretYawMotor.setDesiredPosition(turretYawMotor.getDesiredPosition() - 1);
+        turretYawMotor.setDesiredPosition(turretYawMotor.getDesiredPosition() + 1);
         yawAccumulator = 0;
     }
-    else if (yawAccumulator < STEP_THRESHOLD)
+    else if (yawAccumulator < -STEP_THRESHOLD)
     {
-        turretYawMotor.setDesiredPosition(turretYawMotor.getDesiredPosition() + 1);
+        turretYawMotor.setDesiredPosition(turretYawMotor.getDesiredPosition() - 1);
         yawAccumulator = 0;
     }
 
@@ -60,7 +60,7 @@ void StepperMotorTurretControlCommand::execute()
         turretPitchMotor.setDesiredPosition(turretPitchMotor.getDesiredPosition() + 1);
         pitchAccumulator = 0;
     }
-    else if (pitchAccumulator < STEP_THRESHOLD)
+    else if (pitchAccumulator < -STEP_THRESHOLD)
     {
         turretPitchMotor.setDesiredPosition(turretPitchMotor.getDesiredPosition() - 1);
         pitchAccumulator = 0;
@@ -69,11 +69,6 @@ void StepperMotorTurretControlCommand::execute()
 
 bool StepperMotorTurretControlCommand::isFinished() const { return false; }
 
-void StepperMotorTurretControlCommand::end(bool)
-{
-    // JENNY_TODO: wat is this supposed 2 be
-    turretPitchMotor.setDesiredPosition(0);
-    turretYawMotor.setDesiredPosition(0);
-}
+void StepperMotorTurretControlCommand::end(bool) {}
 
 }  // namespace aruwsrc::control::turret::user
