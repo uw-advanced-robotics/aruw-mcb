@@ -63,28 +63,31 @@ void SentinelAutoDriveComprisedCommand::execute()
 {
     if (!this->drivers->refSerial.getRefSerialReceivingData())
     {
-        if (!this->userRequestDriveMovement)
+        // not receiving ref serial data, toggle between passive evasion and moving to the far right
+        // and stopping
+        if (this->userRequestDriveMovement)
         {
-            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
         }
         else
         {
-            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
         }
     }
     else
     {
         const auto &robotData = this->drivers->refSerial.getRobotData();
 
-        if (robotData.currentHp == robotData.maxHp)
+        // override user requests to stop moving if agressively evading
+        bool shouldMoveAgressively = robotData.receivedDps > AGGRESSIVE_EVADE_DPS_THRESHOLD;
+        if (shouldMoveAgressively)
         {
-            // move to right of rail when no damage taken
-            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
+            this->userRequestDriveMovement = true;
         }
-        else
+
+        if (this->userRequestDriveMovement)
         {
-            // move agressively when taking damage
-            if (robotData.receivedDps > AGGRESSIVE_EVADE_DPS_THRESHOLD &&
+            if (shouldMoveAgressively &&
                 !this->comprisedCommandScheduler.isCommandScheduled(&this->agressiveEvadeCommand))
             {
                 this->comprisedCommandScheduler.addCommand(&this->agressiveEvadeCommand);
@@ -95,15 +98,12 @@ void SentinelAutoDriveComprisedCommand::execute()
                 compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) &&
                 this->agressiveEvadeTimer.isExpired())
             {
-                if (!this->userRequestDriveMovement)
-                {
-                    scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
-                }
-                else
-                {
-                    scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
-                }
+                scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
             }
+        }
+        else
+        {
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
         }
     }
 
