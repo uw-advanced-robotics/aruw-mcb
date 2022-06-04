@@ -49,20 +49,27 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
 
 void SentinelAutoDriveComprisedCommand::initialize() {}
 
+static void scheduleIfNotScheduled(
+    tap::control::CommandScheduler &scheduler,
+    tap::control::Command *cmd)
+{
+    if (!scheduler.isCommandScheduled(cmd))
+    {
+        scheduler.addCommand(cmd);
+    }
+}
+
 void SentinelAutoDriveComprisedCommand::execute()
 {
     if (!this->drivers->refSerial.getRefSerialReceivingData())
     {
         if (!this->userRequestDriveMovement)
         {
-            if (!this->comprisedCommandScheduler.isCommandScheduled(&this->moveToFarRightCommand))
-            {
-                this->comprisedCommandScheduler.addCommand(&this->moveToFarRightCommand);
-            }
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
         }
-        else if (!this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
+        else
         {
-            this->comprisedCommandScheduler.addCommand(&this->passiveEvadeCommand);
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
         }
     }
     else
@@ -72,10 +79,7 @@ void SentinelAutoDriveComprisedCommand::execute()
         if (robotData.currentHp == robotData.maxHp)
         {
             // move to right of rail when no damage taken
-            if (!this->comprisedCommandScheduler.isCommandScheduled(&this->moveToFarRightCommand))
-            {
-                this->comprisedCommandScheduler.addCommand(&this->moveToFarRightCommand);
-            }
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
         }
         else
         {
@@ -93,15 +97,11 @@ void SentinelAutoDriveComprisedCommand::execute()
             {
                 if (!this->userRequestDriveMovement)
                 {
-                    if (!this->comprisedCommandScheduler.isCommandScheduled(
-                            &this->moveToFarRightCommand))
-                    {
-                        this->comprisedCommandScheduler.addCommand(&this->moveToFarRightCommand);
-                    }
+                    scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
                 }
-                if (!this->comprisedCommandScheduler.isCommandScheduled(&this->passiveEvadeCommand))
+                else
                 {
-                    this->comprisedCommandScheduler.addCommand(&this->passiveEvadeCommand);
+                    scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
                 }
             }
         }
