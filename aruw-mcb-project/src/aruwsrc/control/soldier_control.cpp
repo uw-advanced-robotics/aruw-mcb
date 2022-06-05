@@ -63,6 +63,7 @@
 #include "imu/imu_calibrate_command.hpp"
 #include "launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_response_handler.hpp"
 #include "turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
@@ -313,6 +314,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
+aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler;
+
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -326,7 +329,8 @@ ClientDisplayCommand clientDisplayCommand(
     &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand);
+    &chassisImuDriveCommand,
+    sentinelResponseHandler);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -477,6 +481,10 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTINEL_RESPONSE_MESSAGE_ID,
+        &sentinelResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/

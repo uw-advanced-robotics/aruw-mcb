@@ -23,6 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+#include "aruwsrc/communication/serial/sentinel_response_handler.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
@@ -62,7 +63,8 @@ public:
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
-        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand);
+        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+        const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -111,6 +113,8 @@ private:
         SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
+        /** Indicates whether or not the sentinel is moving. */
+        SENTINEL_DRIVE_STATUS,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -129,6 +133,10 @@ private:
                 Tx::GraphicColor::GREEN),        // Green when not calibrating
             BooleanHUDIndicatorTuple(
                 "AGI ",
+                Tx::GraphicColor::GREEN,
+                Tx::GraphicColor::PURPLISH_RED),
+            BooleanHUDIndicatorTuple(
+                "SEN DRIVE ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };
@@ -156,6 +164,8 @@ private:
      * ImuCalbirateCommand that provides information about if the IMUs are being calibrated.
      */
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
+
+    const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler;
 
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,
