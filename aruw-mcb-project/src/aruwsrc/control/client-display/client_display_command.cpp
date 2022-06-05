@@ -69,7 +69,6 @@ ClientDisplayCommand::ClientDisplayCommand(
           chassisAutorotateCmd,
           chassisImuDriveCommand),
       reticleIndicator(drivers, refSerialTransmitter),
-      turretAnglesIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       visionHudIndicators(drivers, refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
@@ -83,7 +82,6 @@ void ClientDisplayCommand::initialize()
     chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
-    turretAnglesIndicator.initialize();
     visionHudIndicators.initialize();
 }
 
@@ -99,7 +97,6 @@ bool ClientDisplayCommand::run()
     PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
-    PT_CALL(turretAnglesIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
 
     while (true)
@@ -108,7 +105,6 @@ bool ClientDisplayCommand::run()
         PT_CALL(chassisOrientationIndicator.update());
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
-        PT_CALL(turretAnglesIndicator.update());
         PT_CALL(visionHudIndicators.update());
         PT_YIELD();
     }
