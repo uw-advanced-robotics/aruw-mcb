@@ -33,9 +33,19 @@ class Drivers;
 
 namespace aruwsrc::communication::serial
 {
+/**
+ * Subsystem that handles responding to sentinel requests. Currently, this subsystem only handles
+ * sending the current drive status of the sentinel. In other words, the sentinel will send to other
+ * robots whether or not it is automatically moving or not.
+ */
 class SentinelResponseSubsystem : public tap::control::Subsystem, ::modm::pt::Protothread
 {
 public:
+    /**
+     * @param[in] drivers Reference to a global drivers instance.
+     * @param[in] driveCommand A reference to a global `SentinelAutoDriveComprisedCommand`. Used to
+     * check if the robot is driving or not.
+     */
     SentinelResponseSubsystem(
         aruwsrc::Drivers &drivers,
         aruwsrc::control::sentinel::drive::SentinelAutoDriveComprisedCommand &driveCommand);
@@ -54,6 +64,7 @@ private:
 
     bool run();
 
+    /// @return True if the `driveCommand` is scheduled and the command is in the moving state.
     bool getDriveStatus();
 };
 }  // namespace aruwsrc::communication::serial

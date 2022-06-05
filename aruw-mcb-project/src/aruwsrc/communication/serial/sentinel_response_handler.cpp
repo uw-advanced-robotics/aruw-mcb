@@ -24,6 +24,12 @@ namespace aruwsrc::communication::serial
 void SentinelResponseHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
+    if (message.header.dataLength !=
+        sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + 1)
+    {
+        return;
+    }
+
     this->sentinelMoving = static_cast<bool>(
         message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 }

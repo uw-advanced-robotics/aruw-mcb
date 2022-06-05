@@ -24,6 +24,9 @@
 
 namespace aruwsrc::communication::serial
 {
+/**
+ * Handles message sent from the sentinel and received by other robots.
+ */
 class SentinelResponseHandler
     : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
 {
@@ -31,6 +34,7 @@ public:
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
 
+    /// @return True if the sentinel reports that it is moving, false otherwise.
     inline bool getSentinelMoving() const { return this->sentinelMoving; }
 
 private:
