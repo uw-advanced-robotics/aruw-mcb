@@ -39,10 +39,8 @@ void StepperMotorTurretControlCommand::initialize() {}
 
 void StepperMotorTurretControlCommand::execute()
 {
-    // JENNY_TODO: check if this is right????? how 2 use w controller
-    yawAccumulator += drivers->controlOperatorInterface.getTurretYawInput(0);
-    // TODO: currently directions inverted here for yaw motor. Future best way to do this
-    // is to make GenericStepperMotorDriver have a `isInverted` property
+    yawAccumulator += drivers->controlOperatorInterface.getTurretYawInput(TURRET_ID);
+
     if (yawAccumulator > STEP_THRESHOLD)
     {
         turretYawMotor.setDesiredPosition(turretYawMotor.getDesiredPosition() + 1);
@@ -54,7 +52,7 @@ void StepperMotorTurretControlCommand::execute()
         yawAccumulator = 0;
     }
 
-    pitchAccumulator += drivers->controlOperatorInterface.getTurretPitchInput(0);
+    pitchAccumulator += drivers->controlOperatorInterface.getTurretPitchInput(TURRET_ID);
     if (pitchAccumulator > STEP_THRESHOLD)
     {
         turretPitchMotor.setDesiredPosition(turretPitchMotor.getDesiredPosition() + 1);

@@ -46,15 +46,14 @@ public:
     static_assert(0.0f <= STEP_THRESHOLD && STEP_THRESHOLD <= 1.0f);
 
     /**
+     * Turret ID for the purposes of interfacing with control operator interface. ID of 0 gives us
+     * the right joystick for control which we want.
+     */
+    static constexpr int TURRET_ID = 0;
+
+    /**
      * @param[in] drivers Pointer to a global drivers object.
-     * @param[in] turretSubsystem Pointer to the sentinel turret to control.
-     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
-     * axis of the turret.
-     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
-     * pitch axis of the turret.
-     * @param[in] userYawInputScalar Value to scale the user input from `ControlOperatorInterface`
-     * by. Basically mouse sensitivity.
-     * @param[in] userPitchInputScalar See userYawInputScalar.
+     * @param[in] stepperTurretSubsystem Pointer to the stepper turret to control.
      */
     StepperMotorTurretControlCommand(
         aruwsrc::Drivers* drivers,
@@ -72,7 +71,7 @@ public:
 
     void end(bool) override;
 
-private:
+protected:
     aruwsrc::Drivers* drivers;
     tap::motor::StepperMotorInterface& turretPitchMotor;
     tap::motor::StepperMotorInterface& turretYawMotor;
@@ -89,6 +88,41 @@ private:
      */
     float pitchAccumulator = 0.0f;
 };
+
+/**
+ * Stepper motor turret control command but adds an offset to the desired pitch setpoint
+ * when scheduled and removes it when descheduled.
+ *
+ * Originally designed for the ARUW dart system, where the barrel needed to pitch up by
+ * a constant offset when using the lower barrel. Used to get around weird command mapping/state
+ * restrictions.
+ */
+class PitchOffsetStepperMotorTurretControlCommand : public StepperMotorTurretControlCommand
+{
+public:
+    /**
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] stepperTurretSubsystem Pointer to the stepper turret to control.
+     * @param[in] pitchOffset the pitch offset to use when this command is scheduled and remove when
+     *  this command is descheduled
+     */
+    PitchOffsetStepperMotorTurretControlCommand(
+        aruwsrc::Drivers* drivers,
+        StepperTurretSubsystem& stepperTurretSubsystem,
+        int pitchOffset)
+        : StepperMotorTurretControlCommand(drivers, stepperTurretSubsystem),
+          pitchOffset(pitchOffset)
+    {
+    }
+
+    void initialize() override { turretPitchMotor.moveSteps(pitchOffset); }
+
+    void end(bool) override { turretPitchMotor.moveSteps(-pitchOffset); }
+
+private:
+    const int pitchOffset;
+};
+
 }  // namespace aruwsrc::control::turret::user
 
-#endif  // TURRET_USER_CONTROL_COMMAND_HPP_
+#endif  // STEPPER_MOTOR_TURRET_CONTROL_COMMAND_HPP_

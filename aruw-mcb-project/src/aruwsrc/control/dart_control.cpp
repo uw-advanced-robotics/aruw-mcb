@@ -173,29 +173,31 @@ MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
     true);
 
 // Starting Friction Wheels
+static constexpr float MAX_FRICTION_WHEEL_SPEED = 15.0f;
+
 FrictionWheelSpinUserLimitedCommand spinFrictionWheelsTopBack(
     drivers(),
     &frictionWheelsTopBack,
-    15.0f,
-    15.0f);
+    MAX_FRICTION_WHEEL_SPEED,
+    MAX_FRICTION_WHEEL_SPEED);
 
 FrictionWheelSpinUserLimitedCommand spinFrictionWheelsTopFront(
     drivers(),
     &frictionWheelsTopFront,
-    15.0f,
-    15.0f);
+    MAX_FRICTION_WHEEL_SPEED,
+    MAX_FRICTION_WHEEL_SPEED);
 
 FrictionWheelSpinUserLimitedCommand spinFrictionWheelsBottomFront(
     drivers(),
     &frictionWheelsBottomFront,
-    15.0f,
-    15.0f);
+    MAX_FRICTION_WHEEL_SPEED,
+    MAX_FRICTION_WHEEL_SPEED);
 
 FrictionWheelSpinUserLimitedCommand spinFrictionWheelsBottomBack(
     drivers(),
     &frictionWheelsBottomBack,
-    15.0f,
-    15.0f);
+    MAX_FRICTION_WHEEL_SPEED,
+    MAX_FRICTION_WHEEL_SPEED);
 
 // Stopping Friction Wheels
 FrictionWheelSpinUserLimitedCommand stopFrictionWheelsTopFront(
@@ -226,6 +228,14 @@ aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTur
     drivers(),
     stepperTurretSubsystem);
 
+// Number of steps to pitch up when lower barrel is active
+static constexpr int PITCH_UP_STEPS = 200;
+aruwsrc::control::turret::user::
+    PitchOffsetStepperMotorTurretControlCommand lowerBarrelTurretControlCommand(
+        drivers(),
+        stepperTurretSubsystem,
+        PITCH_UP_STEPS);
+
 // Mappings
 HoldCommandMapping bottomPositionOne(
     drivers(),
@@ -251,6 +261,12 @@ HoldCommandMapping positionZero(
     drivers(),
     {&agitatorTopMoveCommandZero, &agitatorBottomMoveCommandZero},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+// Lower barrel is active when right switch is up
+HoldCommandMapping rightSwitchUp(
+    drivers(),
+    {&lowerBarrelTurretControlCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 HoldCommandMapping stopWheels(
     drivers(),
@@ -310,6 +326,7 @@ void registerDartIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&bottomPositionOne);
     drivers->commandMapper.addMap(&bottomPositionTwo);
     drivers->commandMapper.addMap(&positionZero);
+    drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&stopWheels);
 }
 }  // namespace dart_control
