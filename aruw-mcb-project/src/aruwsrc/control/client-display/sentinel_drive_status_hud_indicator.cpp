@@ -43,13 +43,21 @@ modm::ResumableResult<bool> SentinelDriveStatusHudIndicator::sendInitialGraphics
 {
     RF_BEGIN(0)
 
-    for (i = 0; i < MODM_ARRAY_SIZE(this->indicatorText); i++)
+    for (i = 0; i < size_t(RobotHudsToUpdate::NUM_ROBOT_HUDS); i++)
     {
-        RF_CALL(this->refSerialTransmitter.sendGraphic(&this->indicatorText[i], false));
-        RF_CALL(this->refSerialTransmitter.sendGraphic(&this->indicatorCircleOutline[i], false));
-        RF_CALL(this->refSerialTransmitter.sendGraphic(&this->indicatorCircle[i], false));
+        this->indicatorCircle[i].graphicData.operation = Tx::GraphicOperation::GRAPHIC_ADD;
+
+        this->configFrameIdForSpecificRobot(
+            &this->indicatorCircle[i],
+            this->indicatorCircle[i].interactiveHeader.receiverId);
+
+        RF_CALL(this->refSerialTransmitter.sendGraphic(&this->indicatorText[i], false, true));
+        RF_CALL(
+            this->refSerialTransmitter.sendGraphic(&this->indicatorCircleOutline[i], false, true));
+        RF_CALL(this->refSerialTransmitter.sendGraphic(&this->indicatorCircle[i], false, true));
 
         this->indicatorCircle[i].graphicData.operation = Tx::GraphicOperation::GRAPHIC_MODIFY;
+
         this->configFrameIdForSpecificRobot(
             &this->indicatorCircle[i],
             this->indicatorCircle[i].interactiveHeader.receiverId);
@@ -64,34 +72,25 @@ modm::ResumableResult<bool> SentinelDriveStatusHudIndicator::update()
 
     if (resendBaseGraphicDataTimer.execute())
     {
-        for (i = 0; i < MODM_ARRAY_SIZE(this->indicatorCircle); i++)
+        RF_CALL(sendInitialGraphics());
+    }
+    else if (this->getChassisMovementStatus() != this->prevChassisMovementStatus)
+    {
+        this->prevChassisMovementStatus = this->getChassisMovementStatus();
+
+        for (i = 0; i < size_t(RobotHudsToUpdate::NUM_ROBOT_HUDS); i++)
         {
-            this->indicatorCircle[i].graphicData.operation = Tx::GraphicOperation::GRAPHIC_ADD;
+            // update color and re-configure frame header
+
+            this->indicatorCircle[i].graphicData.color = static_cast<uint8_t>(
+                this->prevChassisMovementStatus ? SENTINEL_DRIVE_MOVING
+                                                : SENTINEL_DRIVE_NOT_MOVING);
+
             this->configFrameIdForSpecificRobot(
                 &this->indicatorCircle[i],
                 this->indicatorCircle[i].interactiveHeader.receiverId);
-        }
 
-        sendInitialGraphics();
-    }
-    else if (this->drivers.commandScheduler.isCommandScheduled(&this->command))
-    {
-        if (this->getChassisMovementStatus() != this->prevChassisMovementStatus)
-        {
-            this->prevChassisMovementStatus = this->getChassisMovementStatus();
-
-            for (i = 0; i < MODM_ARRAY_SIZE(this->indicatorCircle); i++)
-            {
-                this->indicatorCircle[i].graphicData.color = static_cast<uint8_t>(
-                    this->prevChassisMovementStatus ? Tx::GraphicColor::GREEN
-                                                    : Tx::GraphicColor::PURPLISH_RED);
-
-                this->configFrameIdForSpecificRobot(
-                    &this->indicatorCircle[i],
-                    this->indicatorCircle[i].interactiveHeader.receiverId);
-
-                RF_CALL(this->refSerialTransmitter.sendGraphic(&this->indicatorCircle[i], false));
-            }
+            RF_CALL(this->refSerialTransmitter.sendGraphic(&this->indicatorCircle[i], false, true));
         }
     }
 
@@ -105,7 +104,7 @@ static uint16_t getRobotClientID(RefSerialTransmitter::RobotId robotId)
 
 void SentinelDriveStatusHudIndicator::initialize()
 {
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(this->indicatorCircle); i++)
+    for (size_t i = 0; i < size_t(RobotHudsToUpdate::NUM_ROBOT_HUDS); i++)
     {
         uint8_t booleanHudIndicatorName[3] = {};
         // Hack to avoid conflicting hud indicators when sending to other robot HUDs
@@ -120,12 +119,12 @@ void SentinelDriveStatusHudIndicator::initialize()
             booleanHudIndicatorName,
             Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
-            Tx::GraphicColor::PURPLISH_RED);
+            SENTINEL_DRIVE_NOT_MOVING);
 
         RefSerialTransmitter::configCircle(
             BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_WIDTH,
             BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-            660,
+            SENTINEL_DRIVE_STATUS_Y,
             BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_RADIUS,
             &this->indicatorCircle[i].graphicData);
 
@@ -143,7 +142,7 @@ void SentinelDriveStatusHudIndicator::initialize()
         RefSerialTransmitter::configCircle(
             BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
             BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-            660,
+            SENTINEL_DRIVE_STATUS_Y,
             BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
             &this->indicatorCircleOutline[i].graphicData);
 
@@ -168,33 +167,21 @@ void SentinelDriveStatusHudIndicator::initialize()
                     BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE -
                 BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS -
                 BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH / 2,
-            660 + BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE / 2,
+            SENTINEL_DRIVE_STATUS_Y +
+                BooleanHudIndicators::BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE / 2,
             indicatorLabel,
             &this->indicatorText[i]);
+
+        // configure frame IDs for the messages that need to be sent
+        auto teamRobotId = drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
+            ROBOT_HUD_TO_UPDATE_TO_ROBOT_ID_MAP[i]);
+
+        uint16_t robotClientId = getRobotClientID(teamRobotId);
+
+        this->configFrameIdForSpecificRobot(&this->indicatorCircle[i], robotClientId);
+        this->configFrameIdForSpecificRobot(&this->indicatorCircleOutline[i], robotClientId);
+        this->configFrameIdForSpecificRobot(&this->indicatorText[i], robotClientId);
     }
-
-    uint16_t heroRobotId = 0;
-    uint16_t soldierRobotId = 0;
-
-    if (RefSerialData::isBlueTeam(drivers.refSerial.getRobotData().robotId))
-    {
-        heroRobotId = getRobotClientID(RobotId::BLUE_HERO);
-        soldierRobotId = getRobotClientID(RobotId::BLUE_SOLDIER_1);
-    }
-    else
-    {
-        heroRobotId = getRobotClientID(RobotId::RED_HERO);
-        soldierRobotId = getRobotClientID(RobotId::RED_SOLDIER_1);
-    }
-
-    this->configFrameIdForSpecificRobot(&this->indicatorCircle[0], heroRobotId);
-    this->configFrameIdForSpecificRobot(&this->indicatorCircle[1], soldierRobotId);
-
-    this->configFrameIdForSpecificRobot(&this->indicatorCircleOutline[0], heroRobotId);
-    this->configFrameIdForSpecificRobot(&this->indicatorCircleOutline[1], soldierRobotId);
-
-    this->configFrameIdForSpecificRobot(&this->indicatorText[0], heroRobotId);
-    this->configFrameIdForSpecificRobot(&this->indicatorText[1], soldierRobotId);
 }
 
 bool SentinelDriveStatusHudIndicator::getChassisMovementStatus() const

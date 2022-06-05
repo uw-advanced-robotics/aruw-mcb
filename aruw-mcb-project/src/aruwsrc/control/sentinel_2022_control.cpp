@@ -345,7 +345,7 @@ void targetNewQuadrantMessageHandler()
 
 void toggleDriveMovementMessageHandler() { sentinelAutoDrive.toggleDriveMovement(); }
 
-aruwsrc::control::client_display::SentinelClientDisplaySubsystem clientDisplaySubsystem(
+aruwsrc::control::client_display::SentinelClientDisplaySubsystem sentinelClientDisplaySubsystem(
     *drivers(),
     sentinelAutoDrive);
 
@@ -381,7 +381,7 @@ void initializeSubsystems()
     turretOne.frictionWheels.initialize();
     turretOne.turretSubsystem.initialize();
     odometrySubsystem.initialize();
-    clientDisplaySubsystem.initialize();
+    sentinelClientDisplaySubsystem.initialize();
 }
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -397,7 +397,7 @@ void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->commandScheduler.registerSubsystem(&clientDisplaySubsystem);
+    drivers->commandScheduler.registerSubsystem(&sentinelClientDisplaySubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);

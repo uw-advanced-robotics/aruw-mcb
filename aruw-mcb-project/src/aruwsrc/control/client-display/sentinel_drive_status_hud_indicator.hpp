@@ -39,6 +39,22 @@ class SentinelDriveStatusHudIndicator : public aruwsrc::control::client_display:
                                         protected modm::Resumable<2>
 {
 public:
+    static constexpr uint16_t SENTINEL_DRIVE_STATUS_Y = 660;
+    static constexpr Tx::GraphicColor SENTINEL_DRIVE_MOVING = Tx::GraphicColor::GREEN;
+    static constexpr Tx::GraphicColor SENTINEL_DRIVE_NOT_MOVING = Tx::GraphicColor::PURPLISH_RED;
+
+    enum class RobotHudsToUpdate
+    {
+        SOLDIER_3 = 0,
+        HERO,
+        NUM_ROBOT_HUDS,
+    };
+
+    static constexpr RobotId ROBOT_HUD_TO_UPDATE_TO_ROBOT_ID_MAP[] = {
+        RobotId::RED_SOLDIER_1,
+        RobotId::RED_HERO,
+    };
+
     SentinelDriveStatusHudIndicator(
         aruwsrc::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
@@ -55,9 +71,9 @@ private:
 
     const aruwsrc::control::sentinel::drive::SentinelAutoDriveComprisedCommand &command;
 
-    Tx::GraphicCharacterMessage indicatorText[2];
-    Tx::Graphic1Message indicatorCircleOutline[2];
-    Tx::Graphic1Message indicatorCircle[2];
+    Tx::GraphicCharacterMessage indicatorText[size_t(RobotHudsToUpdate::NUM_ROBOT_HUDS)];
+    Tx::Graphic1Message indicatorCircleOutline[size_t(RobotHudsToUpdate::NUM_ROBOT_HUDS)];
+    Tx::Graphic1Message indicatorCircle[size_t(RobotHudsToUpdate::NUM_ROBOT_HUDS)];
 
     size_t i = 0;
 
