@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -48,10 +48,9 @@ SentinelDriveSubsystem::SentinelDriveSubsystem(
       rightLimitSwitch(rightLimitSwitch),
       velocityPidLeftWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
       velocityPidRightWheel(PID_P, PID_I, PID_D, PID_MAX_ERROR_SUM, PID_MAX_OUTPUT),
-      desiredRpm(0),
-      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, true, "left sentinel drive motor"),
+      leftWheel(drivers, leftMotorId, CAN_BUS_MOTORS, false, "left sentinel drive motor"),
 #if defined(TARGET_SENTINEL_2021)
-      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, true, "right sentinel drive motor"),
+      rightWheel(drivers, rightMotorId, CAN_BUS_MOTORS, false, "right sentinel drive motor"),
 #endif
       currentSensor(
           {&drivers->analog,
@@ -103,7 +102,7 @@ modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelati
 
     modm::Matrix<float, 3, 1> wheelVelMat;
     wheelVelMat[0][0] = 0;
-    wheelVelMat[0][1] = -wheelVelRPM * RPM_TO_MPS;
+    wheelVelMat[0][1] = wheelVelRPM * RPM_TO_MPS;
     wheelVelMat[0][2] = 0;
     return wheelVelMat;
 }
@@ -111,13 +110,17 @@ modm::Matrix<float, 3, 1> SentinelDriveSubsystem::getActualVelocityChassisRelati
 void SentinelDriveSubsystem::refresh()
 {
     // constantly poll the limit switches, resetting offset if needed
-    resetOffsetFromLimitSwitch();
+    this->resetOffsetFromLimitSwitch();
 
-    velocityPidLeftWheel.update(desiredRpm - leftWheel.getShaftRPM());
-    leftWheel.setDesiredOutput(velocityPidLeftWheel.getValue());
+    float speedReductionScalar =
+        computeEndOfRailSpeedReductionScalar(this->desiredRpm, this->absolutePosition());
+    float scaledDesiredRpm = speedReductionScalar * this->desiredRpm;
+
+    this->velocityPidLeftWheel.update(scaledDesiredRpm - this->leftWheel.getShaftRPM());
+    this->leftWheel.setDesiredOutput(this->velocityPidLeftWheel.getValue());
 #if defined(TARGET_SENTINEL_2021)
-    velocityPidRightWheel.update(desiredRpm - rightWheel.getShaftRPM());
-    rightWheel.setDesiredOutput(velocityPidRightWheel.getValue());
+    this->velocityPidRightWheel.update(scaledDesiredRpm - this->rightWheel.getShaftRPM());
+    this->rightWheel.setDesiredOutput(this->velocityPidRightWheel.getValue());
 #endif
     currentSensor.update();
     float powerLimitFrac = powerLimiter.getPowerLimitRatio();
@@ -178,16 +181,16 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 
     if (drivers->digital.read(leftLimitSwitch))
     {
-        leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel);
+        leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
 #if defined(TARGET_SENTINEL_2021)
-        rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel);
+        rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
 #endif
     }
     else if (drivers->digital.read(rightLimitSwitch))
     {
-        leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
+        leftWheelZeroRailOffset = distanceFromEncoder(&leftWheel);
 #if defined(TARGET_SENTINEL_2021)
-        rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel) - RAIL_LENGTH + SENTINEL_LENGTH;
+        rightWheelZeroRailOffset = distanceFromEncoder(&rightWheel);
 #endif
     }
 }

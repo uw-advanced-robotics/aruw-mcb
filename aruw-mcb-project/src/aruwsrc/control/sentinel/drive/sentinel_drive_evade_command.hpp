@@ -20,9 +20,7 @@
 #ifndef SENTINEL_DRIVE_EVADE_COMMAND_HPP_
 #define SENTINEL_DRIVE_EVADE_COMMAND_HPP_
 
-#include "aruwsrc/util_macros.hpp"
-
-#if defined(ALL_SENTINELS)
+#include <cassert>
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
@@ -32,48 +30,143 @@
 namespace aruwsrc::control::sentinel::drive
 {
 /*
- * A command that causes the robot to move a random distance
- * at a random RPM (always in the opposite direction). Takes parameter speedFraction,
- * which scales the speed of the random movement accordingly.
+ * A command that causes the robot to move a random distance at a random RPM (always in the opposite
+ * direction). Takes parameter speedFraction, which scales the speed of the random movement
+ * accordingly.
  */
 class SentinelDriveEvadeCommand : public tap::control::Command
 {
 public:
-    explicit SentinelDriveEvadeCommand(SentinelDriveSubsystem* subsystem, float speedFraction);
+    /// Minimum random drive speed, in RPM
+    static constexpr int32_t MIN_RPM = 7'000;
+    /// Maximum random drive speed, in RPM
+    static constexpr int32_t MAX_RPM = 8'000;
+    /// Width of a large armor plate, in mm. Used as the minimum traverse distance. A random
+    /// distance between this and MAX_TRAVERSE_DISTANCE will be choosen by the sentinel when it is
+    /// not in the turnaround buffer.
+    static constexpr float LARGE_ARMOR_PLATE_WIDTH = 200.0f;
+    /// Max distance that the sentinel will randomly travel when not in the turnaround buffer, in
+    /// mm.
+    static constexpr float MAX_TRAVERSE_DISTANCE = LARGE_ARMOR_PLATE_WIDTH + 300;
+    /// Distance in mm from either side of the rail within which the sentinel will turn around to
+    /// avoid slamming into the sides. When turning around in the turnaround buffer, the sentinel
+    /// will travel past the centerpoint of the rail.
+    static constexpr float TURNAROUND_BUFFER = 150.0f;
+
+    /**
+     * @param[in] sentinelDriveSubsystem The drive subsystem this Command is controlling.
+     * @param[in] speedFraction A fraction that scales the speed of the random movement. This value
+     * must be between [0, 1].
+     */
+    explicit SentinelDriveEvadeCommand(
+        SentinelDriveSubsystem* sentinelDriveSubsystem,
+        float speedFraction);
 
     void initialize() override;
 
     void execute() override;
 
-    void end(bool interrupted) override;
+    void end(bool) override;
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "sentinel random drive"; }
+    const char* getName() const override { return "sentinel drive evade"; }
+
+    /// @return The current distance to drive from the position when the direction changed, in
+    /// millimeters.
+    float getDistanceToDrive() const { return this->distanceToDrive; }
 
 private:
-    static const int16_t MIN_RPM = 5000;
-    static const int16_t MAX_RPM = 7000;
-    static const int16_t CHANGE_TIME_INTERVAL = 750;
-    static constexpr float LARGE_ARMOR_PLATE_WIDTH = 200.0f;
-    static constexpr float MAX_TRAVERSE_DISTANCE = LARGE_ARMOR_PLATE_WIDTH + 300;
-    static constexpr float TURNAROUND_BUFFER = 0.2f * SentinelDriveSubsystem::RAIL_LENGTH;
-
-    float currentRPM = 0;
-    float positionWhenDirectionChanged = 0;
-    int randDistance = 0;
-
     SentinelDriveSubsystem* sentinelDriveSubsystem;
-    const float speedFactor;
+    float speedFactor;
 
-    uint32_t portableRandom();
-    void changeDirection(int minRPM, int maxRPM, int64_t minDist, int64_t maxDist);
-    void setCurrentRPM(int min, int max);
-    float getRandomVal(int64_t min, int64_t max);
+    /// Position in millimeters where the sentinel was when it last changed direction
+    float positionWhenDirectionChanged = 0;
+
+    /// Distance to drive, in millimeters
+    float distanceToDrive = 0;
+
+    /**
+     * Updates the sentinel drive subsystem such that it drives in the opposite direction that it is
+     * currently driving. The `distanceToDrive` and `sentinelDriveSubsystem`'s `desiredRpm` will be
+     * updated to some random values. The random distance choosen will be from `[minDistance,
+     * maxDistance)` and the random speed will be between `speedFactor * [MIN_RPM, MAX_RPM)`.
+     *
+     * @param[in] minDistance Minimum random distance to drive, in millimeters.
+     * @param[in] maxDistance Maximum random distance to drive, in millimeters.
+     */
+    void reverseDirectionForRandomDistance(int32_t minDistance, int32_t maxDistance);
+
+    /**
+     * Checks the distance from the end of the rail and reverses the direction of the sentinel if it
+     * is close to either end of the rail. Will set the `distanceToDrive` such that the sentinel
+     * will drive to at least the middle of the rail.
+     *
+     * @param[in] currentPosition The current position of the sentinel along the rail, in
+     * millimeters.
+     */
+    void reverseDirectionIfCloseToEnd(float currentPosition);
+
+    /// @return the minimum desired RPM as determined by the specified speedFactor passed in upon
+    /// constructon
+    inline int32_t getMinDesiredRpm() const { return round(MIN_RPM * speedFactor); }
+
+    /// @return the minimum desired RPM as determined by the specified speedFactor passed in upon
+    /// constructon
+    inline int32_t getMaxDesiredRpm() const { return round(MAX_RPM * speedFactor); }
+
+    /**
+     * @param[in] currentPosition The current position of the sentinel chassis, in millimeters.
+     * @return True if the sentinel has traveled distanceToDrive.
+     */
+    inline bool hasTraveledDistanceToDrive(float currentPosition) const
+    {
+        return abs(this->positionWhenDirectionChanged - currentPosition) >= this->distanceToDrive;
+    }
+
+    static uint32_t getRandomInteger()
+    {
+#ifndef PLATFORM_HOSTED
+        if (modm::platform::RandomNumberGenerator::isReady())
+        {
+            return modm::platform::RandomNumberGenerator::getValue();
+        }
+        else
+        {
+            return 0;
+        }
+#else
+        return 0;
+#endif
+    }
+
+    /// @return a random integer within `[min, max)`. `min` must be <= `max`.
+    static inline int32_t getRandomIntegerBetweenBounds(int32_t min, int32_t max)
+    {
+        assert(min <= max);
+
+        uint32_t range = max - min;
+        uint32_t randomValue = getRandomInteger();
+        uint32_t randomValueWithinRange = randomValue % range;
+
+        return static_cast<int32_t>(randomValueWithinRange) + min;
+    }
+
+    /**
+     * @param[in] min Min chassis speed, in wheel RPM.
+     * @param[in] max Max chassis speed, in wheel RPM.
+     * @param[in] currentDesiredRpm The current desired chassis speed, in wheel RPM.
+     *
+     * @return a new random desired RPM between `[min, max)` that has the opposite sign of the
+     * specified `currentDesiredRpm`.
+     */
+    static inline int32_t getNewDesiredRpm(int32_t min, int32_t max, float currentDesiredRpm)
+    {
+        int32_t randomValue = getRandomIntegerBetweenBounds(min, max);
+        return copysign(randomValue, -currentDesiredRpm);
+    }
 };
 
 }  // namespace aruwsrc::control::sentinel::drive
-
-#endif
 
 #endif  // SENTINEL_DRIVE_EVADE_COMMAND_HPP_
