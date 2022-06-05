@@ -20,27 +20,30 @@
 #ifndef SENTINEL_RESPONSE_SUBSYSTEM_HPP_
 #define SENTINEL_RESPONSE_SUBSYSTEM_HPP_
 
-#include "tap/control/subsystem.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
-#include "modm/processing/protothread.hpp"
+#include "tap/control/subsystem.hpp"
+
 #include "aruwsrc/control/sentinel/drive/sentinel_auto_drive_comprised_command.hpp"
+#include "modm/processing/protothread.hpp"
 
 namespace aruwsrc
 {
 class Drivers;
 }
 
-namespace aruwsrc::communication::serial {
+namespace aruwsrc::communication::serial
+{
 class SentinelResponseSubsystem : public tap::control::Subsystem, ::modm::pt::Protothread
 {
 public:
-SentinelResponseSubsystem(aruwsrc::Drivers &drivers,
-    aruwsrc::control::sentinel::drive::SentinelAutoDriveComprisedCommand &driveCommand);
+    SentinelResponseSubsystem(
+        aruwsrc::Drivers &drivers,
+        aruwsrc::control::sentinel::drive::SentinelAutoDriveComprisedCommand &driveCommand);
 
     void refresh() override;
 
 private:
-aruwsrc::Drivers &drivers;
+    aruwsrc::Drivers &drivers;
     aruwsrc::control::sentinel::drive::SentinelAutoDriveComprisedCommand &driveCommand;
 
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
@@ -53,6 +56,6 @@ aruwsrc::Drivers &drivers;
 
     bool getDriveStatus();
 };
-}
+}  // namespace aruwsrc::communication::serial
 
 #endif  //  SENTINEL_RESPONSE_SUBSYSTEM_HPP_

@@ -40,6 +40,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_response_handler.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -327,6 +328,8 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
+aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler;
+
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
     clientDisplay,
@@ -339,7 +342,8 @@ ClientDisplayCommand clientDisplayCommand(
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand);
+    &chassisImuDriveCommand,
+    sentinelResponseHandler);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -470,6 +474,10 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTINEL_RESPONSE_MESSAGE_ID,
+        &sentinelResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/

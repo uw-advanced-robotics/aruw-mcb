@@ -22,8 +22,11 @@
 
 #include "tap/communication/serial/ref_serial.hpp"
 
-namespace aruwsrc::communication::serial {
-class SentinelResponseHandler:public tap::communication::serial::RefSerial::RobotToRobotMessageHandler{
+namespace aruwsrc::communication::serial
+{
+class SentinelResponseHandler
+    : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
+{
 public:
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
@@ -33,5 +36,5 @@ public:
 private:
     bool sentinelMoving = true;
 };
-}
+}  // namespace aruwsrc::communication::serial
 #endif  // SENTINEL_RESPONSE_HANDLER_HPP_
