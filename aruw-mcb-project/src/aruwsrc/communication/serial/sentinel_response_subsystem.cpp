@@ -37,8 +37,6 @@ SentinelResponseSubsystem::SentinelResponseSubsystem(
 
 void SentinelResponseSubsystem::refresh() { this->run(); }
 
-bool moving=false;
-
 bool SentinelResponseSubsystem::run()
 {
     PT_BEGIN();
@@ -47,20 +45,20 @@ bool SentinelResponseSubsystem::run()
 
     while (true)
     {
-        if (this->sentinelMoving != moving)
+        if (this->sentinelMoving != this->getDriveStatus())
         {
-            this->sentinelMoving = moving;
+            this->sentinelMoving = this->getDriveStatus();
 
             this->robotToRobotMessage.dataAndCRC16[0] = static_cast<uint8_t>(this->sentinelMoving);
 
-            // PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
-            //     &this->robotToRobotMessage,
-            //     SENTINEL_RESPONSE_MESSAGE_ID,
-            //     drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
-            //         tap::communication::serial::RefSerialData::RobotId::BLUE_HERO),
-            //     1));
-
             PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
+                &this->robotToRobotMessage,
+                SENTINEL_RESPONSE_MESSAGE_ID,
+                drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
+                    tap::communication::serial::RefSerialData::RobotId::BLUE_HERO),
+                1));
+
+            PT_CALL(this->refSerialTransmitter.sendRobotToRobotMsg(
                 &this->robotToRobotMessage,
                 SENTINEL_RESPONSE_MESSAGE_ID,
                 drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
