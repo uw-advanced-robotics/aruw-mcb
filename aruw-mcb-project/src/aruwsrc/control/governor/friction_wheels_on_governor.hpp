@@ -21,7 +21,7 @@
 #define FRICTION_WHEELS_ON_GOVERNOR_HPP_
 
 #include "tap/control/governor/command_governor_interface.hpp"
-
+#include "tap/algorithms/math_user_utils.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 
@@ -47,7 +47,7 @@ public:
 
     bool isReady() final
     {
-        return frictionWheel.getDesiredFrictionWheelSpeed() != 0 &&
+        return !tap::algorithms::compareFloatClose(frictionWheel.getDesiredFrictionWheelSpeed(), 0.0f,1) &&
                frictionWheel.getCurrentFrictionWheelSpeed() >=
                    frictionWheel.getDesiredFrictionWheelSpeed() * MINIMUM_SPEED_THRESHOLD_FRACTION;
     }
