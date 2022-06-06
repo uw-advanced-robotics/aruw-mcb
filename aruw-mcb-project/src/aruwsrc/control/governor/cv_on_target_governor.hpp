@@ -73,10 +73,7 @@ public:
 
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
 
-        bool ungated = launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID()) ==
-                       AutoAimLaunchTimer::LaunchInclination::UNGATED;
-
-        return isCvOnline && enabled && isCvRunning && !ungated;
+        return isCvOnline && enabled && isCvRunning;
     }
 
     bool isReady() final_mockable
