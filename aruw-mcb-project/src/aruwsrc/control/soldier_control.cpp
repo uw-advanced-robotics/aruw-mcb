@@ -168,9 +168,9 @@ AutoAimLaunchTimer autoAimLaunchTimer(
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMovementCommand(
-    &sentinelRequestSubsystem);
+    sentinelRequestSubsystem);
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
-    &sentinelRequestSubsystem);
+    sentinelRequestSubsystem);
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -314,7 +314,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
-aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler;
+aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler(*drivers());
 
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(

@@ -49,7 +49,7 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
 
 void SentinelAutoDriveComprisedCommand::initialize() {}
 
-static void scheduleIfNotScheduled(
+static inline void scheduleIfNotScheduled(
     tap::control::CommandScheduler &scheduler,
     tap::control::Command *cmd)
 {

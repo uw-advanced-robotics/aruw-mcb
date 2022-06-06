@@ -94,6 +94,8 @@ public:
      * will never be selected as the current chassis command.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command.
+     * @param[in] sentinelResponseHandler Global sentinel response handler that contains the current
+     * movement state of the sentinel.
      */
     ClientDisplayCommand(
         aruwsrc::Drivers &drivers,

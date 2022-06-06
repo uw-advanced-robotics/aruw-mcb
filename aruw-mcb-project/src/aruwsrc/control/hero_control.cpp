@@ -169,9 +169,9 @@ AutoAimLaunchTimer autoAimLaunchTimer(
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMovementCommand(
-    &sentinelRequestSubsystem);
+    sentinelRequestSubsystem);
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
-    &sentinelRequestSubsystem);
+    sentinelRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
@@ -328,7 +328,7 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
-aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler;
+aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler(*drivers());
 
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),

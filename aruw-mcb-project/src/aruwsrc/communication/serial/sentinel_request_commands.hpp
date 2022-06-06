@@ -26,70 +26,76 @@
 
 namespace aruwsrc::communication::serial
 {
+/**
+ * Command that is scheduled once that queues the toggle drive movement SentinelRequestMessageType.
+ */
 class ToggleDriveMovementCommand : public tap::control::Command
 {
 public:
-    ToggleDriveMovementCommand(SentinelRequestSubsystem *sentinelRequestSubsystem)
+    ToggleDriveMovementCommand(SentinelRequestSubsystem &sentinelRequestSubsystem)
         : sub(sentinelRequestSubsystem)
     {
-        this->addSubsystemRequirement(sentinelRequestSubsystem);
+        this->addSubsystemRequirement(&sentinelRequestSubsystem);
     }
 
     virtual const char *getName() const { return "toggle drive movement"; }
     virtual bool isReady() { return true; }
     virtual void initialize()
     {
-        sub->queueRequest(SentinelRequestMessageType::TOGGLE_DRIVE_MOVEMENT);
+        this->sub.queueRequest(SentinelRequestMessageType::TOGGLE_DRIVE_MOVEMENT);
     }
     virtual void execute() {}
     virtual void end(bool) {}
     virtual bool isFinished() const { return true; }
 
 private:
-    SentinelRequestSubsystem *sub;
+    SentinelRequestSubsystem &sub;
 };
 
+/**
+ * Command that is scheduled once and queues the select new robot SentinelRequestMessageType.
+ */
 class SelectNewRobotCommand : public tap::control::Command
 {
 public:
-    SelectNewRobotCommand(SentinelRequestSubsystem *sentinelRequestSubsystem)
+    SelectNewRobotCommand(SentinelRequestSubsystem &sentinelRequestSubsystem)
         : sub(sentinelRequestSubsystem)
     {
-        addSubsystemRequirement(sentinelRequestSubsystem);
+        addSubsystemRequirement(&sentinelRequestSubsystem);
     }
 
     virtual const char *getName() const { return "select new robot"; }
     virtual bool isReady() { return true; }
-    virtual void initialize() { sub->queueRequest(SentinelRequestMessageType::SELECT_NEW_ROBOT); }
+    virtual void initialize() { sub.queueRequest(SentinelRequestMessageType::SELECT_NEW_ROBOT); }
     virtual void execute() {}
     virtual void end(bool) {}
     virtual bool isFinished() const { return true; }
 
 private:
-    SentinelRequestSubsystem *sub;
+    SentinelRequestSubsystem &sub;
 };
 
+/**
+ * Command that is scheduled once that queues the target new quadrant SentinelRequestMessageType.
+ */
 class TargetNewQuadrantCommand : public tap::control::Command
 {
 public:
-    TargetNewQuadrantCommand(SentinelRequestSubsystem *sentinelRequestSubsystem)
+    TargetNewQuadrantCommand(SentinelRequestSubsystem &sentinelRequestSubsystem)
         : sub(sentinelRequestSubsystem)
     {
-        addSubsystemRequirement(sentinelRequestSubsystem);
+        addSubsystemRequirement(&sentinelRequestSubsystem);
     }
 
     virtual const char *getName() const { return "target new quadrant"; }
     virtual bool isReady() { return true; }
-    virtual void initialize()
-    {
-        sub->queueRequest(SentinelRequestMessageType::TARGET_NEW_QUADRANT);
-    }
+    virtual void initialize() { sub.queueRequest(SentinelRequestMessageType::TARGET_NEW_QUADRANT); }
     virtual void execute() {}
     virtual void end(bool) {}
     virtual bool isFinished() const { return true; }
 
 private:
-    SentinelRequestSubsystem *sub;
+    SentinelRequestSubsystem &sub;
 };
 }  // namespace aruwsrc::communication::serial
 

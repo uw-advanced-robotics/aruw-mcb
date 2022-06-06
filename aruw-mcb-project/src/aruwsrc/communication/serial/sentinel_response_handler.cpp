@@ -19,14 +19,21 @@
 
 #include "sentinel_response_handler.hpp"
 
+#include "tap/errors/create_errors.hpp"
+
+#include "aruwsrc/drivers.hpp"
+
 namespace aruwsrc::communication::serial
 {
+SentinelResponseHandler::SentinelResponseHandler(aruwsrc::Drivers &drivers) : drivers(drivers) {}
+
 void SentinelResponseHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
     if (message.header.dataLength !=
         sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + 1)
     {
+        RAISE_ERROR((&drivers), "message length incorrect");
         return;
     }
 

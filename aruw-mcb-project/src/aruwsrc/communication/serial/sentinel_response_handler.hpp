@@ -22,6 +22,11 @@
 
 #include "tap/communication/serial/ref_serial.hpp"
 
+namespace aruwsrc
+{
+class Drivers;
+}
+
 namespace aruwsrc::communication::serial
 {
 /**
@@ -31,6 +36,8 @@ class SentinelResponseHandler
     : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
 {
 public:
+    SentinelResponseHandler(aruwsrc::Drivers &drivers);
+
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
 
@@ -38,6 +45,8 @@ public:
     inline bool getSentinelMoving() const { return this->sentinelMoving; }
 
 private:
+    aruwsrc::Drivers &drivers;
+
     bool sentinelMoving = true;
 };
 }  // namespace aruwsrc::communication::serial

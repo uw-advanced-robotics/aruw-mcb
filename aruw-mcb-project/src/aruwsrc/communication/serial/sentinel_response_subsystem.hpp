@@ -58,6 +58,7 @@ private:
 
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
 
+    /// Message to be sent by the sentinel to other robots.
     tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
 
     bool sentinelMoving = true;

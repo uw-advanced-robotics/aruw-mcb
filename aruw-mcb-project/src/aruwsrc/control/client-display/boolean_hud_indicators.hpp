@@ -56,6 +56,8 @@ public:
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
      * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
      * calibrated.
+     * @param[in] sentinelResponseHandler Global sentinel response handler that contains the current
+     * movement state of the sentinel.
      */
     BooleanHudIndicators(
         aruwsrc::Drivers &drivers,
@@ -165,6 +167,10 @@ private:
      */
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
 
+    /**
+     * SentinelResponseHandler that provides information about whether or not the sentinel is
+     * moving.
+     */
     const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler;
 
     /**
