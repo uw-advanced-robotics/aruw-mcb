@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -72,6 +72,14 @@ void ChassisAutorotateCommand::updateAutorotateState()
     }
 }
 
+float ChassisAutorotateCommand::computeAngleFromCenterForAutorotation(
+    float turretAngleFromCenter,
+    float maxAngleFromCenter)
+{
+    return ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
+        .getValue();
+}
+
 void ChassisAutorotateCommand::execute()
 {
     // calculate pid for chassis rotation
@@ -101,11 +109,8 @@ void ChassisAutorotateCommand::execute()
                         break;
                 }
             }
-
             float angleFromCenterForChassisAutorotate =
-                ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
-                    .getValue();
-
+                computeAngleFromCenterForAutorotation(turretAngleFromCenter, maxAngleFromCenter);
             // PD controller to find desired rotational component of the chassis control
             float desiredRotation = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
@@ -120,8 +125,8 @@ void ChassisAutorotateCommand::execute()
                 1.0f - abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
                 AUTOROTATION_MIN_SMOOTHING_ALPHA);
 
-            // low pass filter the desiredRotation to avoid radical changes in the desired rotation
-            // when far away from where we are centering the chassis around
+            // low pass filter the desiredRotation to avoid radical changes in the desired
+            // rotation when far away from where we are centering the chassis around
             desiredRotationAverage =
                 lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
@@ -130,8 +135,8 @@ void ChassisAutorotateCommand::execute()
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        // the x/y translational speed is limited to this value, this means when rotation is large,
-        // the translational speed will be clamped to a smaller value to compensate
+        // the x/y translational speed is limited to this value, this means when rotation is
+        // large, the translational speed will be clamped to a smaller value to compensate
         float rotationLimitedMaxTranslationalSpeed =
             maxWheelSpeed * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
 
