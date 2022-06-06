@@ -64,7 +64,9 @@ public:
 
     /**
      * @return true if gating is being performed. If gating is being performed, projectiles will be
-     * launched at times when the CV system decides they should be. Otherwise, the system will not
+     * launched if the CV system decides they should be. The criteria are: 1. CV is onine and
+     * connected. 2. the robot is executing the CV command. 3. CV Gating mode is enabled.
+     * Otherwise, the system will not
      * be gated and projectiles may be launched independently of CV logic.
      */
     mockable bool isGovernorGating() const
@@ -74,6 +76,16 @@ public:
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
 
         return isCvOnline && enabled && isCvRunning;
+    }
+    
+    /**
+     * @return true if gating is being performed and vision has deemed shot timing active.
+     */
+    mockable bool inShotTimingMode() const
+    {
+        bool gating = launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID()) ==
+                      AutoAimLaunchTimer::LaunchInclination::UNGATED;
+        return isGovernorGating() && !gating;
     }
 
     bool isReady() final_mockable
