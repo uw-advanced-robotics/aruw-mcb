@@ -36,8 +36,8 @@ namespace aruwsrc::chassis
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 3'500},
-    {120, 6'000},
+    {50, 3'750},
+    {120, 6'500},
 };
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
@@ -82,6 +82,12 @@ static constexpr float AUTOROTATION_PID_MAX_P = 2'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
+
+/**
+ * Speed at which the chassis switches from symmetrical driving to diagonal driving, for a holonomic
+ * X-Drive (m/s)
+ */
+static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.7f;
 
 // mechanical chassis constants
 /**

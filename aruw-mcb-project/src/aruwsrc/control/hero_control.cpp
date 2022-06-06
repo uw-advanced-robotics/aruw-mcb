@@ -44,7 +44,7 @@
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
-#include "chassis/chassis_autorotate_command.hpp"
+#include "chassis/chassis_diagonal_drive_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_imu_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
@@ -176,7 +176,7 @@ ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMo
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(
+ChassisDiagonalDriveCommand chassisDiagonalDriveCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
@@ -338,7 +338,7 @@ ClientDisplayCommand clientDisplayCommand(
     nullptr,
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
-    &chassisAutorotateCommand,
+    &chassisDiagonalDriveCommand,
     &chassisImuDriveCommand);
 
 /* define command mappings --------------------------------------------------*/
@@ -415,7 +415,7 @@ PressCommandMapping ePressed(
     RemoteMapState({Remote::Key::E}));
 PressCommandMapping xPressed(
     drivers(),
-    {&chassisAutorotateCommand},
+    {&chassisDiagonalDriveCommand},
     RemoteMapState({Remote::Key::X}));
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
@@ -456,7 +456,7 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands(aruwsrc::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
+    chassis.setDefaultCommand(&chassisDiagonalDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
