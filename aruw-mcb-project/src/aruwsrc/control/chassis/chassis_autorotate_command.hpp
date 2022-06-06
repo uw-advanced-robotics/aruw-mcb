@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -85,7 +85,7 @@ public:
 
     const char* getName() const override { return "chassis autorotate"; }
 
-private:
+protected:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
@@ -109,6 +109,18 @@ private:
      * reason to autorotate until the turret is done turning around.
      */
     bool chassisAutorotating;
+
+    /**
+     * Computes the setpoint to autorotate the chassis towards
+     *
+     * @param turretAngleFromCenter the current angle of the turret relative to the chassis
+     * @param maxAngleFromCenter the maximum angle difference to either side before the autorotation
+     * setpoint swaps
+     * @return how much to rotate the chassis to get it aligned with the turret
+     */
+    virtual float computeAngleFromCenterForAutorotation(
+        float turretAngleFromCenter,
+        float maxAngleFromCenter);
 
     void updateAutorotateState();
 };  // class ChassisAutorotateCommand
