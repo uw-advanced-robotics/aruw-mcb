@@ -92,16 +92,16 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 };
 #endif
 
-static constexpr float TURRET_CG_X = 0;
-static constexpr float TURRET_CG_Z = 0;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
+static constexpr float TURRET_CG_X = 30.17;
+static constexpr float TURRET_CG_Z = 34.02;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 7000;
 
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 22.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 0.3f,
     .maxICumulative = 0.0f,
     .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -113,8 +113,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 40'107.0f,
-    .ki = 286.5f,
+    .kp = 20'000.0f,
+    .ki = 100.0f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
     .maxOutput = 30'000.0f,
@@ -128,9 +128,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .kp = 22.0f,
-    .ki = 0.0f,
+    .ki = 0.02f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 0.5f,
     .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
@@ -141,7 +141,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 16'042.8f,
+    .kp = 16'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,

@@ -37,7 +37,6 @@
 #include "chassis_orientation_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
-#include "turret_angles_indicator.hpp"
 #include "vision_hud_indicators.hpp"
 
 namespace tap::control
@@ -104,7 +103,7 @@ public:
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+        const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
@@ -129,7 +128,6 @@ private:
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
-    TurretAnglesIndicator turretAnglesIndicator;
     VisionHudIndicators visionHudIndicators;
 
     bool run();
