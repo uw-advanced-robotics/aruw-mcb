@@ -114,7 +114,7 @@ TEST_F(MultiShotCvCommandMappingTest, getShooterState_matches_setShooterState)
 
 TEST_F(MultiShotCvCommandMappingTest, setShooterState_single_adds_command_once)
 {
-    ON_CALL(cvOnTargetGovernor, isGovernorGating).WillByDefault(Return(false));
+    ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(false));
 
     EXPECT_CALL(drivers.commandScheduler, addCommand).Times(1);
 
@@ -131,7 +131,7 @@ TEST_F(MultiShotCvCommandMappingTest, setShooterState_single_adds_command_once)
 
 TEST_F(MultiShotCvCommandMappingTest, setShooterState_10hz_full_repeatedly_adds_commands)
 {
-    ON_CALL(cvOnTargetGovernor, isGovernorGating).WillByDefault(Return(false));
+    ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(false));
 
     {
         InSequence seq;
@@ -163,7 +163,7 @@ TEST_F(
     MultiShotCvCommandMappingTest,
     setShooterState_governor_gating_single_shot_repeatedly_adds_commands)
 {
-    ON_CALL(cvOnTargetGovernor, isGovernorGating).WillByDefault(Return(true));
+    ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(true));
 
     EXPECT_CALL(drivers.commandScheduler, addCommand).Times(4);
 
@@ -179,7 +179,7 @@ TEST_F(
     MultiShotCvCommandMappingTest,
     executeCommandMapping_fireReselection_manager_missing_doesnt_crash)
 {
-    ON_CALL(cvOnTargetGovernor, isGovernorGating).WillByDefault(Return(false));
+    ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(false));
 
     MultiShotCvCommandMapping multiShotCommandMapping(
         drivers,
