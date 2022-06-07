@@ -126,7 +126,10 @@ void SentinelTurretCVCommand::execute()
         }
         else
         {
-            performScanIteration(yawSetpoint, pitchSetpoint);
+            if (ignoreTargetTimeout.isExpired())
+            {
+                performScanIteration(yawSetpoint, pitchSetpoint);
+            }
         }
     }
 
@@ -163,13 +166,13 @@ void SentinelTurretCVCommand::requestNewTarget()
 
 void SentinelTurretCVCommand::changeScanningQuadrant()
 {
-    float currentYawAngle = turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue();
+    float currentYawAngle = yawController->getSetpoint();
 
     float newSetpoint =
         tap::algorithms::ContiguousFloat(currentYawAngle + M_PI, 0, M_TWOPI).getValue();
     newSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(newSetpoint);
-    turretSubsystem->yawMotor.setChassisFrameSetpoint(newSetpoint);
-
+    yawController->setSetpoint(newSetpoint);
+    exitScanMode();
     ignoreTargetTimeout.restart(TIME_TO_IGNORE_TARGETS_WHILE_TURNING_AROUND_MS);
 }
 
