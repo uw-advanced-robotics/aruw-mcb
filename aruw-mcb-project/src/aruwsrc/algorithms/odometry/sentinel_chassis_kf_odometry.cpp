@@ -35,7 +35,7 @@ SentinelChassisKFOdometry::SentinelChassisKFOdometry(
     //       CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
     //       MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
-    float initialX[static_cast<int>(OdomState::NUM_STATES)] = {};
+    float initialX[static_cast<int>(OdomState::NUM_STATES)] = {driveSubsystem.absolutePosition(), 0, 0};
     kf.init(initialX);
 }
 
@@ -55,7 +55,7 @@ void SentinelChassisKFOdometry::update()
     // updateMeasurementCovariance(chassisVelocity[0][1]);
 
     // assume 0 velocity/acceleration in z direction
-    float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
+    // float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
     // Absolute position given in mm, so we should convert back to meters
     y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.absolutePosition()*1E-3;
     y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
