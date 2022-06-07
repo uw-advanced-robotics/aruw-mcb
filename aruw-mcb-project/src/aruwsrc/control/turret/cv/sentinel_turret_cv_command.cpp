@@ -61,6 +61,8 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     assert(ballisticsSolver != nullptr);
 
     this->addSubsystemRequirement(turretSubsystem);
+
+    ignoreTargetTimeout.restart(0);
 }
 
 bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
@@ -85,7 +87,7 @@ void SentinelTurretCVCommand::execute()
     std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
         ballisticsSolver->computeTurretAimAngles();
 
-    if (ballisticsSolution != std::nullopt)
+    if (ignoreTargetTimeout.isExpired() && ballisticsSolution != std::nullopt)
     {
         exitScanMode();
 
@@ -161,10 +163,14 @@ void SentinelTurretCVCommand::requestNewTarget()
 
 void SentinelTurretCVCommand::changeScanningQuadrant()
 {
-    // basic quadrant change for proof-of concept, if turret on left side, move right, otherwise
-    // move left
-    const float angleChange = copysignf(M_PI_2, -turretSubsystem->yawMotor.getAngleFromCenter());
-    yawController->setSetpoint(yawController->getSetpoint() + angleChange);
+    float currentYawAngle = turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue();
+
+    float newSetpoint =
+        tap::algorithms::ContiguousFloat(currentYawAngle + M_PI, 0, M_TWOPI).getValue();
+    newSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(newSetpoint);
+    turretSubsystem->yawMotor.setChassisFrameSetpoint(newSetpoint);
+
+    ignoreTargetTimeout.restart(TIME_TO_IGNORE_TARGETS_WHILE_TURNING_AROUND_MS);
 }
 
 void SentinelTurretCVCommand::performScanIteration(float &yawSetpoint, float &pitchSetpoint)

@@ -248,7 +248,7 @@ void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNew
 
 void targetNewQuadrantMessageHandler()
 {
-    drivers()->commandScheduler.addCommand(&turretUturnCommand);
+    turretSubsystem.turretCVCommand.changeScanningQuadrant();
 }
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);

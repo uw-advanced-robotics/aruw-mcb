@@ -339,8 +339,8 @@ void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNew
 
 void targetNewQuadrantMessageHandler()
 {
-    drivers()->commandScheduler.addCommand(&turretZero.turretUturnCommand);
-    drivers()->commandScheduler.addCommand(&turretOne.turretUturnCommand);
+    turretZero.turretCVCommand.changeScanningQuadrant();
+    turretOne.turretCVCommand.changeScanningQuadrant();
 }
 
 void toggleDriveMovementMessageHandler() { sentinelAutoDrive.toggleDriveMovement(); }
