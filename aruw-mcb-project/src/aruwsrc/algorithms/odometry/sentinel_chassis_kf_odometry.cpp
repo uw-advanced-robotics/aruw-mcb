@@ -60,6 +60,10 @@ void SentinelChassisKFOdometry::update()
     y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.absolutePosition()*1E-3;
     y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
 
+    accel[0] = imu.getAx();
+    accel[1] = imu.getAy();
+    accel[2] = imu.getAz();
+
     // Update the Kalman filter. A new state estimate is available after this call.
     kf.performUpdate(y);
 
