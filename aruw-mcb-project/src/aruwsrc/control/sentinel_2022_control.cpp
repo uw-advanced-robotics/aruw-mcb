@@ -432,6 +432,8 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 
+    sentinelRequestHandler.attachPauseProjectileLaunchingMessageHandler(
+        pauseProjectileLaunchMessageHandler);
     sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     sentinelRequestHandler.attachToggleDriveMovementMessageHandler(
