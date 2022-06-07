@@ -172,6 +172,9 @@ aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMo
     sentinelRequestSubsystem);
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
     sentinelRequestSubsystem);
+aruwsrc::communication::serial::
+    PauseProjectileLaunchingCommand sentinelPauseProjectileLaunchingCommand(
+        sentinelRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
@@ -365,14 +368,18 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-PressCommandMapping gPressedCtrlNotPressed(
+PressCommandMapping gPressedCtrlShiftNotPressed(
     drivers(),
     {&sentinelToggleDriveMovementCommand},
-    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
-PressCommandMapping gCtrlPressed(
+    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL, Remote::Key::SHIFT}));
+PressCommandMapping gCtrlPressedShiftNotPressed(
     drivers(),
     {&sentinelTargetNewQuadrantCommand},
-    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
+    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}, {Remote::Key::SHIFT}));
+PressCommandMapping gShiftPressedCtrlNotPressed(
+    drivers(),
+    {&sentinelPauseProjectileLaunchingCommand},
+    RemoteMapState({Remote::Key::G, Remote::Key::SHIFT}, {Remote::Key::CTRL}));
 MultiShotCvCommandMapping leftMousePressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
@@ -496,8 +503,9 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&gCtrlPressed);
+    drivers->commandMapper.addMap(&gPressedCtrlShiftNotPressed);
+    drivers->commandMapper.addMap(&gCtrlPressedShiftNotPressed);
+    drivers->commandMapper.addMap(&gShiftPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&rPressed);
 }
 }  // namespace hero_control

@@ -103,6 +103,10 @@ static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #endif
 
+#if defined(ALL_SENTINELS)
+static constexpr uint32_t AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME = 3'000;
+#endif
+
 }  // namespace aruwsrc::control::launcher
 
 #endif  // LAUNCHER_CONSTANTS_HPP_

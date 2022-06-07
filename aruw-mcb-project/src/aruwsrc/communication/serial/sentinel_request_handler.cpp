@@ -56,6 +56,12 @@ void SentinelRequestHandler::operator()(
                 toggleDriveMovementMessageHandler();
             }
             break;
+        case SentinelRequestMessageType::PAUSE_PROJECTILE_LAUNCHING:
+            if (pauseProjectileLaunchingHandler != nullptr)
+            {
+                pauseProjectileLaunchingHandler();
+            }
+            break;
         default:
             RAISE_ERROR(drivers, "invalid message sentinel request message type");
             break;
