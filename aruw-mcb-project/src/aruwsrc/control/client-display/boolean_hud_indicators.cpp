@@ -48,13 +48,15 @@ BooleanHudIndicators::BooleanHudIndicators(
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
-    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand)
+    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+    const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
+      sentinelResponseHandler(sentinelResponseHandler),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               refSerialTransmitter,
@@ -69,6 +71,13 @@ BooleanHudIndicators::BooleanHudIndicators(
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY])>,
+              0),
+          BooleanHUDIndicator(
+              refSerialTransmitter,
+              &booleanHudIndicatorGraphics[SENTINEL_DRIVE_STATUS],
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTINEL_DRIVE_STATUS]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTINEL_DRIVE_STATUS])>,
               0),
       }
 {
@@ -105,6 +114,9 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
 
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand));
+
+    booleanHudIndicatorDrawers[SENTINEL_DRIVE_STATUS].setIndicatorState(
+        sentinelResponseHandler.getSentinelMoving());
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;
