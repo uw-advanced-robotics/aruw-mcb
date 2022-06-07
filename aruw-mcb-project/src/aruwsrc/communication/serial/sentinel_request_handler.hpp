@@ -36,6 +36,8 @@ namespace aruwsrc::communication::serial
  *   doesn't switch target.
  * - Target new quadrant: The sentinel will stop targeting and move the turret backwards if it is
  *   pointing forward or forward if it is pointing backwards.
+ * - Toggle drive movement: The sentinel will switch between driving evasively and driving to the
+ *   right of the rail and stopping.
  *
  * Message structure:
  * - byte 1: message type
@@ -60,11 +62,16 @@ public:
     {
         targetNewQuadrantMessageHandler = callback;
     }
+    void attachToggleDriveMovementMessageHandler(MessageReceivedCallback callback)
+    {
+        toggleDriveMovementMessageHandler = callback;
+    }
 
 private:
     aruwsrc::Drivers *drivers;
     MessageReceivedCallback selectNewRobotMessageHandler = nullptr;
     MessageReceivedCallback targetNewQuadrantMessageHandler = nullptr;
+    MessageReceivedCallback toggleDriveMovementMessageHandler = nullptr;
 };
 }  // namespace aruwsrc::communication::serial
 
