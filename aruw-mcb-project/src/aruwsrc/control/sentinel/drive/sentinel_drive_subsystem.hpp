@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -54,20 +54,27 @@ public:
     // radius of the wheel in mm
 #ifdef TARGET_SENTINEL_2021
     static constexpr float WHEEL_RADIUS = 35.0f;
+    /**
+     * Length of the sentinel, in mm
+     */
+    static constexpr float SENTINEL_LENGTH = 480.0f;
 #else
     static constexpr float WHEEL_RADIUS = 44.45f;
+    static constexpr float SENTINEL_LENGTH = 600.0f;
 #endif
-    static constexpr float GEAR_RATIO = (3591.0f / 187.0f);
+
+    static constexpr float GEAR_RATIO = 3591.0f / 187.0f;
 
     // RMUL length of the rail, in mm
     // static constexpr float RAIL_LENGTH = 2130;
     // Our length of the rail, in mm
     static constexpr float RAIL_LENGTH = 1900;
 
-    /**
-     * Length of the sentinel, in mm
-     */
-    static constexpr float SENTINEL_LENGTH = 480;
+    /// Distance from either end of the rail (in mm) at which the sentinel will cut its speed
+    /// to avoid ramming into the wall.
+    static constexpr float SPEED_REDUCTION_RAIL_BUFFER = 600.0f;
+    /// Lowest allowable chassis speed scaling when close to the sides of the rail.
+    static constexpr float MINIMUM_SENTINEL_SPEED_MULTIPLIER = 0.1f;
 
     SentinelDriveSubsystem(
         aruwsrc::Drivers* drivers,
@@ -133,6 +140,34 @@ public:
      */
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
+    /**
+     * @param[in] currentPosition The current position of the sentinel chassis, in millimeters.
+     * @param[in] nearStartOfRailBuffer The distance in millimeters from the start of the rail
+     * by which the sentinel will be considered to be near the start of the rail.
+     * @return true if the sentinel is near the start of the rail (as indicated by the
+     * `currentPosition`).
+     */
+    static inline bool nearStartOfRail(float currentPosition, float nearStartOfRailBuffer)
+    {
+        return currentPosition <= nearStartOfRailBuffer;
+    }
+
+    /**
+     * @param[in] currentPosition The current position of the sentinel chassis, in millimeters.
+     * @param[in] nearEndOfRailBuffer The distance in millimeters from the start of the rail
+     * by which the sentinel will be considered to be near the end of the rail.
+     * @return true if the sentinel is near the end of the rail (as indicated by the
+     * `currentPosition`).
+     */
+    static inline bool nearEndOfRail(float currentPosition, float nearEndOfRailBuffer)
+    {
+        float railEndPositionWithTurnaroundBuffer = SentinelDriveSubsystem::RAIL_LENGTH -
+                                                    SentinelDriveSubsystem::SENTINEL_LENGTH -
+                                                    nearEndOfRailBuffer;
+
+        return currentPosition >= railEndPositionWithTurnaroundBuffer;
+    }
+
 private:
 #if defined(TARGET_SENTINEL_2021)
     static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
@@ -156,7 +191,7 @@ private:
 
     modm::Pid<float> velocityPidRightWheel;
 
-    float desiredRpm;
+    float desiredRpm = 0;
     float leftWheelZeroRailOffset = 0;
     float rightWheelZeroRailOffset = 0;
 
@@ -190,6 +225,41 @@ private:
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
 
     tap::control::chassis::PowerLimiter powerLimiter;
+
+    /**
+     * Computes a scalar that should be applied to the desiredRpm that is based on how close the
+     * sentinel is to the side of the rail. This scalar is applied to reduce the speed at which the
+     * sentinel runs into the side of the rail.
+     *
+     * @param[in] desiredRpm The desired wheel speed of the chassis motors in RPM.
+     * @param[in] currentPosition The current position of the sentinel on the rail, in mm.
+     * @return A scalar between [0, 1] that the desiredRpm should be multiplied by.
+     */
+    static inline float computeEndOfRailSpeedReductionScalar(
+        float desiredRpm,
+        float currentPosition)
+    {
+        // Scalar between [0, 1] that we scale the desiredRpm by to slow down the sentinel near the
+        // ends of the rail
+        float desiredRpmNearRailSidesScalar = 1.0f;
+
+        currentPosition = tap::algorithms::limitVal<float>(currentPosition, 0, RAIL_LENGTH);
+
+        if (nearStartOfRail(currentPosition, SPEED_REDUCTION_RAIL_BUFFER) && desiredRpm <= 0)
+        {
+            desiredRpmNearRailSidesScalar = currentPosition / SPEED_REDUCTION_RAIL_BUFFER;
+        }
+        else if (nearEndOfRail(currentPosition, SPEED_REDUCTION_RAIL_BUFFER) && desiredRpm >= 0)
+        {
+            desiredRpmNearRailSidesScalar =
+                (RAIL_LENGTH - SENTINEL_LENGTH - currentPosition) / SPEED_REDUCTION_RAIL_BUFFER;
+        }
+
+        desiredRpmNearRailSidesScalar =
+            std::max(desiredRpmNearRailSidesScalar, MINIMUM_SENTINEL_SPEED_MULTIPLIER);
+
+        return desiredRpmNearRailSidesScalar;
+    }
 };
 
 }  // namespace aruwsrc::control::sentinel::drive
