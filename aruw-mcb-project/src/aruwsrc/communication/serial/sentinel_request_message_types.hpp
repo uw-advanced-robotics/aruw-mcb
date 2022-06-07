@@ -33,7 +33,6 @@ enum class SentinelRequestMessageType : uint8_t
     SELECT_NEW_ROBOT = 0,
     TARGET_NEW_QUADRANT,
     TOGGLE_DRIVE_MOVEMENT,
-    PAUSE_PROJECTILE_LAUNCHING,
     NUM_MESSAGE_TYPES,
 };
 }  // namespace aruwsrc::communication::serial

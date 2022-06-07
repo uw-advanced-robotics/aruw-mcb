@@ -38,7 +38,6 @@
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
 #include "aruwsrc/communication/serial/sentinel_response_subsystem.hpp"
-#include "aruwsrc/control/governor/pause_command_governor.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
@@ -201,7 +200,6 @@ public:
           cvOnlineGovernor(drivers, turretCVCommand),
           autoAimFireRateManager(drivers, turretCVCommand, config.turretID),
           fireRateLimitGovernor(autoAimFireRateManager),
-          pauseCommandGovernor(AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME),
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,
@@ -209,8 +207,7 @@ public:
                &frictionWheelsOnGovernor,
                &cvOnTargetGovernor,
                &cvOnlineGovernor,
-               &fireRateLimitGovernor,
-               &pauseCommandGovernor}),
+               &fireRateLimitGovernor}),
           rotateAndUnjamAgitatorWithHeatAndCvLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
@@ -263,10 +260,9 @@ public:
     CvOnlineGovernor cvOnlineGovernor;
     AutoAimFireRateReselectionManager autoAimFireRateManager;
     FireRateLimitGovernor fireRateLimitGovernor;
-    PauseCommandGovernor pauseCommandGovernor;
 
     // agitator governor limited commands
-    GovernorLimitedCommand<6> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
+    GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
     GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
 };
 
@@ -349,12 +345,6 @@ void targetNewQuadrantMessageHandler()
 
 void toggleDriveMovementMessageHandler() { sentinelAutoDrive.toggleDriveMovement(); }
 
-void pauseProjectileLaunchMessageHandler()
-{
-    turretZero.pauseCommandGovernor.initiatePause();
-    turretOne.pauseCommandGovernor.initiatePause();
-}
-
 aruwsrc::communication::serial::SentinelResponseSubsystem sentinelResponseSubsystem(
     *drivers(),
     sentinelAutoDrive);
@@ -432,8 +422,6 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 
-    sentinelRequestHandler.attachPauseProjectileLaunchingMessageHandler(
-        pauseProjectileLaunchMessageHandler);
     sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
     sentinelRequestHandler.attachToggleDriveMovementMessageHandler(
