@@ -39,6 +39,7 @@ SentinelChassisKFOdometry::SentinelChassisKFOdometry(
     kf.init(initialX);
 }
 
+float accelY = 0;
 void SentinelChassisKFOdometry::update()
 {
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
@@ -58,11 +59,10 @@ void SentinelChassisKFOdometry::update()
     // float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
     // Absolute position given in mm, so we should convert back to meters
     y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.absolutePosition()*1E-3;
+    y[static_cast<int>(OdomInput::VEL_Y)] = driveSubsystem.getActualVelocityChassisRelative()[1][0];
     y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
 
-    accel[0] = imu.getAx();
-    accel[1] = imu.getAy();
-    accel[2] = imu.getAz();
+    accelY = imu.getAy();
 
     // Update the Kalman filter. A new state estimate is available after this call.
     kf.performUpdate(y);

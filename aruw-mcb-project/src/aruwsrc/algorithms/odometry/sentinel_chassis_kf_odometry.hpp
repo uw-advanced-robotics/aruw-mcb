@@ -70,6 +70,7 @@ private:
     enum class OdomInput
     {
         POS_Y = 0,
+        VEL_Y,
         ACC_Y,
         NUM_INPUTS,
     };
@@ -92,16 +93,18 @@ private:
     };
     static constexpr float KF_C[INPUTS_MULT_STATES] = {
         1, 0, 0,
+        0, 1, 0,
         0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
         1E0, 0  , 0  ,
         0  , 1E0, 0  ,
         0  , 0  , 1E0,
-    }; // TODO: Tune for sentinel 2022
+    };
     static constexpr float KF_R[INPUTS_SQUARED] = {
-        1.0, 0  ,
-        0  , 0.002,
+        1.0, 0  , 0  ,
+        0  , 1.0, 0  ,
+        0  , 0  , 1E6,
     }; // TODO: Tune for sentinel 2022
     static constexpr float KF_P0[STATES_SQUARED] = {
         1E3, 0  , 0  ,
@@ -134,7 +137,6 @@ private:
         kf;
     
     float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
-    float accel[3] = {};
 
     // /// Chassis-measured change in velocity since the last time `update` was called, in the chassis
     // /// frame
