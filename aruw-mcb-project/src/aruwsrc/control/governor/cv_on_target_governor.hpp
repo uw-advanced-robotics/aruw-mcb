@@ -77,7 +77,7 @@ public:
 
         return isCvOnline && enabled && isCvRunning;
     }
-    
+
     /**
      * @return true if gating is being performed and vision has deemed shot timing active.
      */
