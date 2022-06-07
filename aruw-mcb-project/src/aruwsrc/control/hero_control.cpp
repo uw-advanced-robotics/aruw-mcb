@@ -114,7 +114,7 @@ RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_A
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
