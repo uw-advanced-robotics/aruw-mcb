@@ -124,12 +124,9 @@ void SentinelTurretCVCommand::execute()
             // Pitch and yaw setpoint already at reasonable default value
             // by this point
         }
-        else
+        else if (ignoreTargetTimeout.isExpired())
         {
-            if (ignoreTargetTimeout.isExpired())
-            {
-                performScanIteration(yawSetpoint, pitchSetpoint);
-            }
+            performScanIteration(yawSetpoint, pitchSetpoint);
         }
     }
 
