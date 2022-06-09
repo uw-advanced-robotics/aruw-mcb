@@ -387,7 +387,7 @@ HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&kicker::launchKickerNoHeatLimiting},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-    true);
+    false);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
