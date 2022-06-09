@@ -40,11 +40,12 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_response_handler.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
-#include "chassis/chassis_autorotate_command.hpp"
+#include "chassis/chassis_diagonal_drive_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_imu_drive_command.hpp"
 #include "chassis/chassis_subsystem.hpp"
@@ -113,7 +114,7 @@ RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_A
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -167,16 +168,16 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
-    &sentinelRequestSubsystem);
+aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMovementCommand(
+    sentinelRequestSubsystem);
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
-    &sentinelRequestSubsystem);
+    sentinelRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
 
-ChassisAutorotateCommand chassisAutorotateCommand(
+ChassisDiagonalDriveCommand chassisDiagonalDriveCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
@@ -327,6 +328,8 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
+aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler(*drivers());
+
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
     clientDisplay,
@@ -338,8 +341,9 @@ ClientDisplayCommand clientDisplayCommand(
     nullptr,
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
-    &chassisAutorotateCommand,
-    &chassisImuDriveCommand);
+    &chassisDiagonalDriveCommand,
+    &chassisImuDriveCommand,
+    sentinelResponseHandler);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -363,7 +367,7 @@ HoldCommandMapping leftSwitchUp(
 // Keyboard/Mouse related mappings
 PressCommandMapping gPressedCtrlNotPressed(
     drivers(),
-    {&sentinelSelectNewRobotCommand},
+    {&sentinelToggleDriveMovementCommand},
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),
@@ -415,7 +419,7 @@ PressCommandMapping ePressed(
     RemoteMapState({Remote::Key::E}));
 PressCommandMapping xPressed(
     drivers(),
-    {&chassisAutorotateCommand},
+    {&chassisDiagonalDriveCommand},
     RemoteMapState({Remote::Key::X}));
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
@@ -456,7 +460,7 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands(aruwsrc::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
+    chassis.setDefaultCommand(&chassisDiagonalDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
@@ -470,6 +474,10 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTINEL_RESPONSE_MESSAGE_ID,
+        &sentinelResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/

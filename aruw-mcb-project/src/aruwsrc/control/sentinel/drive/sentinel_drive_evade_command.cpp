@@ -17,120 +17,90 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/util_macros.hpp"
-
-#if defined(ALL_SENTINELS)
-
-#include <cstdlib>
-
 #include "sentinel_drive_evade_command.hpp"
-#include "sentinel_drive_subsystem.hpp"
-
-#ifndef PLATFORM_HOSTED
-using modm::platform::RandomNumberGenerator;
-#endif
-
-using tap::control::Subsystem;
 
 namespace aruwsrc::control::sentinel::drive
 {
 SentinelDriveEvadeCommand::SentinelDriveEvadeCommand(
-    SentinelDriveSubsystem* subsystem,
+    SentinelDriveSubsystem* sentinelDriveSubsystem,
     float speedFraction)
-    : sentinelDriveSubsystem(subsystem),
+    : sentinelDriveSubsystem(sentinelDriveSubsystem),
       speedFactor(speedFraction)
 {
-    addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
+    this->addSubsystemRequirement(sentinelDriveSubsystem);
 }
 
 void SentinelDriveEvadeCommand::initialize()
 {
 #ifndef PLATFORM_HOSTED
-    RandomNumberGenerator::enable();
+    modm::platform::RandomNumberGenerator::enable();
 #endif
 
-    changeDirection(
-        MIN_RPM * speedFactor,
-        MAX_RPM * speedFactor,
-        LARGE_ARMOR_PLATE_WIDTH,
-        MAX_TRAVERSE_DISTANCE);
+    this->reverseDirectionForRandomDistance(LARGE_ARMOR_PLATE_WIDTH, MAX_TRAVERSE_DISTANCE);
 }
 
 void SentinelDriveEvadeCommand::execute()
 {
-    float newPos = sentinelDriveSubsystem->absolutePosition();
-    // If the robot has gone at least the required distance, generate a new random RPM and random
-    // distance.
-    if (abs(positionWhenDirectionChanged - newPos) >= randDistance)
+    float currentPosition = this->sentinelDriveSubsystem->absolutePosition();
+
+    if (this->hasTraveledDistanceToDrive(currentPosition))
     {
-        changeDirection(
-            MIN_RPM * speedFactor,
-            MAX_RPM * speedFactor,
-            LARGE_ARMOR_PLATE_WIDTH,
-            MAX_TRAVERSE_DISTANCE);
+        this->reverseDirectionForRandomDistance(LARGE_ARMOR_PLATE_WIDTH, MAX_TRAVERSE_DISTANCE);
     }
 
-    // reverse direction if close to the end of the rail, robot must move past the halfway point of
-    // rail.
-    float curPos = sentinelDriveSubsystem->absolutePosition();
-    if ((currentRPM < 0 && curPos < TURNAROUND_BUFFER) ||
-        (currentRPM > 0 && curPos > SentinelDriveSubsystem::RAIL_LENGTH -
-                                        SentinelDriveSubsystem::SENTINEL_LENGTH -
-                                        TURNAROUND_BUFFER))
-    {
-        changeDirection(
-            MIN_RPM * speedFactor,
-            MAX_RPM * speedFactor,
-            SentinelDriveSubsystem::RAIL_LENGTH / 2 - TURNAROUND_BUFFER,
-            SentinelDriveSubsystem::RAIL_LENGTH - 3 * TURNAROUND_BUFFER);
-    }
-
-    sentinelDriveSubsystem->setDesiredRpm(currentRPM);
+    this->reverseDirectionIfCloseToEnd(currentPosition);
 }
 
-void SentinelDriveEvadeCommand::end(bool) { sentinelDriveSubsystem->setDesiredRpm(0); }
+void SentinelDriveEvadeCommand::end(bool) { this->sentinelDriveSubsystem->setDesiredRpm(0); }
 
 bool SentinelDriveEvadeCommand::isFinished() const { return false; }
 
-uint32_t SentinelDriveEvadeCommand::portableRandom()
+void SentinelDriveEvadeCommand::reverseDirectionForRandomDistance(
+    int32_t minDistance,
+    int32_t maxDistance)
 {
-#ifndef PLATFORM_HOSTED
-    if (RandomNumberGenerator::isReady())
+    this->positionWhenDirectionChanged = this->sentinelDriveSubsystem->absolutePosition();
+
+    auto newDesiredRpm = getNewDesiredRpm(
+        getMinDesiredRpm(),
+        getMaxDesiredRpm(),
+        this->sentinelDriveSubsystem->getDesiredRpm());
+
+    this->sentinelDriveSubsystem->setDesiredRpm(newDesiredRpm);
+
+    this->distanceToDrive = getRandomIntegerBetweenBounds(minDistance, maxDistance);
+}
+
+void SentinelDriveEvadeCommand::reverseDirectionIfCloseToEnd(float currentPosition)
+{
+    static constexpr float HALF_RAIL_LENGTH = SentinelDriveSubsystem::RAIL_LENGTH / 2.0f;
+    static constexpr float HALF_SENTINEL_LENGTH = SentinelDriveSubsystem::SENTINEL_LENGTH / 2.0f;
+
+    float desiredDriveSpeed = this->sentinelDriveSubsystem->getDesiredRpm();
+
+    if ((SentinelDriveSubsystem::nearStartOfRail(currentPosition, TURNAROUND_BUFFER) &&
+         desiredDriveSpeed <= 0) ||
+        (SentinelDriveSubsystem::nearEndOfRail(currentPosition, TURNAROUND_BUFFER) &&
+         desiredDriveSpeed >= 0))
     {
-        return RandomNumberGenerator::getValue();
+        // robot must move past the halfway point of rail.
+        float distanceFromCenter = abs(HALF_RAIL_LENGTH - HALF_SENTINEL_LENGTH - currentPosition);
+
+        float distanceFromFarRail = 0;
+
+        if (SentinelDriveSubsystem::nearStartOfRail(currentPosition, TURNAROUND_BUFFER))
+        {
+            distanceFromFarRail =
+                abs(SentinelDriveSubsystem::RAIL_LENGTH - SentinelDriveSubsystem::SENTINEL_LENGTH -
+                    currentPosition);
+        }
+        else
+        {
+            distanceFromFarRail = abs(currentPosition);
+        }
+
+        this->reverseDirectionForRandomDistance(distanceFromCenter, distanceFromFarRail);
     }
-    else
-    {
-        return 0;
-    }
-#else
-    return 0;
-#endif
 }
 
-void SentinelDriveEvadeCommand::changeDirection(
-    int minRPM,
-    int maxRPM,
-    int64_t minDist,
-    int64_t maxDist)
-{
-    positionWhenDirectionChanged = sentinelDriveSubsystem->absolutePosition();
-    setCurrentRPM(minRPM, maxRPM);
-    randDistance = getRandomVal(minDist, maxDist);
-}
-
-void SentinelDriveEvadeCommand::setCurrentRPM(int min, int max)
-{
-    currentRPM = getRandomVal(min, max);
-    float sentinelRPM = sentinelDriveSubsystem->getDesiredRpm();
-    currentRPM = copysignf(currentRPM, -sentinelRPM);
-}
-
-float SentinelDriveEvadeCommand::getRandomVal(int64_t min, int64_t max)
-{
-    uint32_t randVal = portableRandom();
-    return int64_t(randVal) % (max - min + 1) + min;
-}
 }  // namespace aruwsrc::control::sentinel::drive
-
-#endif

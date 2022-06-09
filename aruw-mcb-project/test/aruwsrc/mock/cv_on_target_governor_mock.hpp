@@ -38,6 +38,7 @@ public:
     MOCK_METHOD(void, setGovernorEnabled, (bool), (override));
     MOCK_METHOD(bool, isGovernorEnabled, (), (const override));
     MOCK_METHOD(bool, isGovernorGating, (), (const override));
+    MOCK_METHOD(bool, inShotTimingMode, (), (const override));
     MOCK_METHOD(bool, isReady, (), (override));
     MOCK_METHOD(bool, isGateSatisfied, (), (override));
     MOCK_METHOD(bool, isFinished, (), (override));

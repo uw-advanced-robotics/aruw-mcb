@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,15 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/util_macros.hpp"
-
-#if defined(ALL_SENTINELS)
+#include "sentinel_auto_drive_comprised_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 
-#include "sentinel_auto_drive_comprised_command.hpp"
 #include "sentinel_drive_subsystem.hpp"
 
 using namespace tap::algorithms;
@@ -37,51 +35,88 @@ SentinelAutoDriveComprisedCommand::SentinelAutoDriveComprisedCommand(
     SentinelDriveSubsystem *sentinelChassis)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),
-      sentinelChassis(sentinelChassis),
-      evadeSlow(sentinelChassis, 0.5),
-      evadeFast(sentinelChassis, 1.0),
-      evadeMode(false)
+      aggressiveEvadeCommand(sentinelChassis, 1.0),
+      passiveEvadeCommand(sentinelChassis, 0.5),
+      moveToFarRightCommand(
+          *sentinelChassis,
+          SentinelDriveToSideCommand::SentinelRailSide::CLOSE_RAIL,
+          MOVE_TO_RIGHT_DRIVE_SPEED_RPM)
 {
-    addSubsystemRequirement(sentinelChassis);
-    comprisedCommandScheduler.registerSubsystem(sentinelChassis);
+    this->addSubsystemRequirement(sentinelChassis);
+    this->comprisedCommandScheduler.registerSubsystem(sentinelChassis);
+    this->aggressiveEvadeTimer.restart(0);
 }
 
-void SentinelAutoDriveComprisedCommand::initialize()
+void SentinelAutoDriveComprisedCommand::initialize() {}
+
+static inline void scheduleIfNotScheduled(
+    tap::control::CommandScheduler &scheduler,
+    tap::control::Command *cmd)
 {
-    comprisedCommandScheduler.addCommand(&evadeSlow);
+    if (!scheduler.isCommandScheduled(cmd))
+    {
+        scheduler.addCommand(cmd);
+    }
 }
 
 void SentinelAutoDriveComprisedCommand::execute()
 {
-    const auto &robotData = drivers->refSerial.getRobotData();
-
-    if (robotData.receivedDps > RANDOM_DRIVE_DPS_THRESHOLD)
+    if (!this->drivers->refSerial.getRefSerialReceivingData())
     {
-        if (!evadeMode)
+        // not receiving ref serial data, toggle between passive evasion and moving to the far right
+        // and stopping
+        if (this->userRequestDriveMovement)
         {
-            comprisedCommandScheduler.removeCommand(&evadeSlow, true);
-            comprisedCommandScheduler.addCommand(&evadeFast);
-            evadeMode = true;
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
+        }
+        else
+        {
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
         }
     }
-    else if (compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) && evadeMode)
+    else
     {
-        comprisedCommandScheduler.removeCommand(&evadeFast, true);
-        comprisedCommandScheduler.addCommand(&evadeSlow);
-        evadeMode = false;
+        const auto &robotData = this->drivers->refSerial.getRobotData();
+
+        // override user requests to stop moving if agressively evading
+        bool shouldMoveAgressively = robotData.receivedDps > AGGRESSIVE_EVADE_DPS_THRESHOLD;
+        if (shouldMoveAgressively)
+        {
+            this->userRequestDriveMovement = true;
+        }
+
+        if (this->userRequestDriveMovement)
+        {
+            if (shouldMoveAgressively &&
+                !this->comprisedCommandScheduler.isCommandScheduled(&this->aggressiveEvadeCommand))
+            {
+                this->comprisedCommandScheduler.addCommand(&this->aggressiveEvadeCommand);
+
+                this->aggressiveEvadeTimer.restart(MIN_TIME_SPENT_AGGRESSIVELY_EVADING);
+            }
+            else if (
+                compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) &&
+                this->aggressiveEvadeTimer.isExpired())
+            {
+                scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
+            }
+        }
+        else
+        {
+            scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->moveToFarRightCommand);
+        }
     }
 
-    comprisedCommandScheduler.run();
+    this->comprisedCommandScheduler.run();
 }
 
 void SentinelAutoDriveComprisedCommand::end(bool interrupted)
 {
-    comprisedCommandScheduler.removeCommand(&evadeSlow, interrupted);
-    comprisedCommandScheduler.removeCommand(&evadeFast, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&this->aggressiveEvadeCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&this->passiveEvadeCommand, interrupted);
+    this->comprisedCommandScheduler.removeCommand(&this->moveToFarRightCommand, interrupted);
 }
 
 bool SentinelAutoDriveComprisedCommand::isFinished() const { return false; }
 
 }  // namespace aruwsrc::control::sentinel::drive
-
-#endif

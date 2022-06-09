@@ -34,19 +34,36 @@ protected:
     aruwsrc::mock::SentinelRequestSubsystemMock subsystem;
 };
 
+class ToggleDriveMovementCommandTest : public SentinelRequestCommandsTest
+{
+protected:
+    ToggleDriveMovementCommandTest() : cmd(subsystem) {}
+    ToggleDriveMovementCommand cmd;
+};
+
 class SelectNewRobotCommandTest : public SentinelRequestCommandsTest
 {
 protected:
-    SelectNewRobotCommandTest() : cmd(&subsystem) {}
+    SelectNewRobotCommandTest() : cmd(subsystem) {}
     SelectNewRobotCommand cmd;
 };
 
 class TargetNewQuadrantCommandTest : public SentinelRequestCommandsTest
 {
 protected:
-    TargetNewQuadrantCommandTest() : cmd(&subsystem) {}
+    TargetNewQuadrantCommandTest() : cmd(subsystem) {}
     TargetNewQuadrantCommand cmd;
 };
+
+TEST_F(ToggleDriveMovementCommandTest, isReady_true) { EXPECT_TRUE(cmd.isReady()); }
+
+TEST_F(ToggleDriveMovementCommandTest, isFinished_true) { EXPECT_TRUE(cmd.isFinished()); }
+
+TEST_F(ToggleDriveMovementCommandTest, initialize_queues_command)
+{
+    EXPECT_CALL(subsystem, queueRequest(SentinelRequestMessageType::TOGGLE_DRIVE_MOVEMENT));
+    cmd.initialize();
+}
 
 TEST_F(SelectNewRobotCommandTest, isReady_true) { EXPECT_TRUE(cmd.isReady()); }
 

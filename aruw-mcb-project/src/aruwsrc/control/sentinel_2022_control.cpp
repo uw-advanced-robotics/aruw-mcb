@@ -37,6 +37,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
+#include "aruwsrc/communication/serial/sentinel_response_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
@@ -342,6 +343,12 @@ void targetNewQuadrantMessageHandler()
     drivers()->commandScheduler.addCommand(&turretOne.turretUturnCommand);
 }
 
+void toggleDriveMovementMessageHandler() { sentinelAutoDrive.toggleDriveMovement(); }
+
+aruwsrc::communication::serial::SentinelResponseSubsystem sentinelResponseSubsystem(
+    *drivers(),
+    sentinelAutoDrive);
+
 /* define command mappings --------------------------------------------------*/
 
 HoldCommandMapping rightSwitchDown(
@@ -374,6 +381,7 @@ void initializeSubsystems()
     turretOne.frictionWheels.initialize();
     turretOne.turretSubsystem.initialize();
     odometrySubsystem.initialize();
+    sentinelResponseSubsystem.initialize();
 }
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -389,6 +397,7 @@ void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&sentinelResponseSubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
@@ -415,6 +424,8 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
 
     sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+    sentinelRequestHandler.attachToggleDriveMovementMessageHandler(
+        toggleDriveMovementMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
         &sentinelRequestHandler);

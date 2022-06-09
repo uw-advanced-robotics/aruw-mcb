@@ -35,12 +35,16 @@ namespace control
 {
 float ControlOperatorInterface::applyChassisSpeedScaling(float value)
 {
-    if (drivers->remote.keyPressed(Remote::Key::CTRL))
+    if (isSlowMode())
     {
         value *= SPEED_REDUCTION_SCALAR;
     }
-
     return value;
+}
+
+bool ControlOperatorInterface::isSlowMode()
+{
+    return drivers->remote.keyPressed(Remote::Key::CTRL);
 }
 
 /**

@@ -90,6 +90,7 @@ bool VelocityAgitatorSubsystem::calibrateHere()
     }
     agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
     agitatorIsCalibrated = true;
+    velocitySetpoint = 0.0f;
     clearJam();
     return true;
 }

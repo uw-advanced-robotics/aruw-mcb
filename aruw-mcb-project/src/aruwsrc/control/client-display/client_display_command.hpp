@@ -37,7 +37,6 @@
 #include "chassis_orientation_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
-#include "turret_angles_indicator.hpp"
 #include "vision_hud_indicators.hpp"
 
 namespace tap::control
@@ -95,6 +94,8 @@ public:
      * will never be selected as the current chassis command.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command.
+     * @param[in] sentinelResponseHandler Global sentinel response handler that contains the current
+     * movement state of the sentinel.
      */
     ClientDisplayCommand(
         aruwsrc::Drivers &drivers,
@@ -108,7 +109,8 @@ public:
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler);
 
     const char *getName() const override { return "client display"; }
 
@@ -129,7 +131,6 @@ private:
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
-    TurretAnglesIndicator turretAnglesIndicator;
     VisionHudIndicators visionHudIndicators;
 
     bool run();
