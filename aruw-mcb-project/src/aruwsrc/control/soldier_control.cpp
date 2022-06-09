@@ -382,7 +382,7 @@ HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-    true);
+    false);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},

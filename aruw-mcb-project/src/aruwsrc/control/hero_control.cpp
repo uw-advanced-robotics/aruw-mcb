@@ -114,7 +114,7 @@ RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_A
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -159,7 +159,7 @@ OttoBallisticsSolver ballisticsSolver(
     odometrySubsystem,
     turret,
     frictionWheels,
-    9.5f,  // defaultLaunchSpeed
+    9.0f,  // defaultLaunchSpeed
     0      // turretID
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
@@ -322,6 +322,10 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
+GovernorLimitedCommand<1> launchKickerNoHeatLimiting(
+    {&kickerAgitator},
+    launchKicker,
+    {&frictionWheelsOnGovernor});
 GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&kickerAgitator},
     launchKicker,
@@ -373,12 +377,17 @@ PressCommandMapping gCtrlPressed(
     drivers(),
     {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-MultiShotCvCommandMapping leftMousePressed(
+MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     std::nullopt,
     kicker::cvOnTargetGovernor);
+HoldRepeatCommandMapping leftMousePressedBPressed(
+    drivers(),
+    {&kicker::launchKickerNoHeatLimiting},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+    false);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
@@ -399,16 +408,11 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
 // The user can press b+ctrl when the remote right switch is in the down position to restart the
 // client display command. This is necessary since we don't know when the robot is connected to the
 // server and thus don't know when to start sending the initial HUD graphics.
-PressCommandMapping bCtrlPressedRightSwitchDown(
+PressCommandMapping bCtrlPressed(
     drivers(),
     {&clientDisplayCommand},
-    RemoteMapState(
-        Remote::SwitchState::UNKNOWN,
-        Remote::SwitchState::DOWN,
-        {Remote::Key::CTRL, Remote::Key::B},
-        {},
-        false,
-        false));
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+
 PressCommandMapping qPressed(
     drivers(),
     {&chassisImuDriveCommand},
@@ -485,14 +489,15 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressed);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    drivers->commandMapper.addMap(&bCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressed);
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
