@@ -201,7 +201,8 @@ public:
           cvOnlineGovernor(drivers, turretCVCommand),
           autoAimFireRateManager(drivers, turretCVCommand, config.turretID),
           fireRateLimitGovernor(autoAimFireRateManager),
-          pauseCommandGovernor(AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME),
+          pauseCommandGovernor(
+              aruwsrc::control::agitator::constants::AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME),
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,

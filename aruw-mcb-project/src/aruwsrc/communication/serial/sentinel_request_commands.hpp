@@ -39,7 +39,7 @@ public:
         this->addSubsystemRequirement(&sentinelRequestSubsystem);
     }
 
-    virtual const char *getName() const { return "toggle drive movement"; }
+    virtual const char *getName() const { return "pause projectile launching"; }
     virtual bool isReady() { return true; }
     virtual void initialize()
     {
