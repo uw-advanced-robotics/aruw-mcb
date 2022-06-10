@@ -20,6 +20,7 @@
 #ifndef SENTINEL_TURRET_CV_COMMAND_HPP_
 #define SENTINEL_TURRET_CV_COMMAND_HPP_
 
+#include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
@@ -97,6 +98,11 @@ public:
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
     static constexpr float SCAN_LOW_PASS_ALPHA = 0.013f;
+
+    /**
+     * Time to ignore aim requests while the turret is u-turning to aim at a new quadrant.
+     */
+    static constexpr uint32_t TIME_TO_IGNORE_TARGETS_WHILE_TURNING_AROUND_MS = 1'000;
 
     /**
      * Constructs a TurretCVCommand
@@ -178,6 +184,8 @@ private:
     bool scanning = false;
 
     bool withinAimingTolerance = false;
+
+    tap::arch::MilliTimeout ignoreTargetTimeout;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
