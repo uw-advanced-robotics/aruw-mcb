@@ -66,12 +66,17 @@ public:
     {
         toggleDriveMovementMessageHandler = callback;
     }
+    void attachPauseProjectileLaunchingMessageHandler(MessageReceivedCallback callback)
+    {
+        pauseProjectileLaunchingHandler = callback;
+    }
 
 private:
     aruwsrc::Drivers *drivers;
     MessageReceivedCallback selectNewRobotMessageHandler = nullptr;
     MessageReceivedCallback targetNewQuadrantMessageHandler = nullptr;
     MessageReceivedCallback toggleDriveMovementMessageHandler = nullptr;
+    MessageReceivedCallback pauseProjectileLaunchingHandler = nullptr;
 };
 }  // namespace aruwsrc::communication::serial
 

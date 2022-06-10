@@ -27,6 +27,33 @@
 namespace aruwsrc::communication::serial
 {
 /**
+ * Command that is scheduled once that queues the pause projectile launching
+ * SentinelRequestMessageType.
+ */
+class PauseProjectileLaunchingCommand : public tap::control::Command
+{
+public:
+    PauseProjectileLaunchingCommand(SentinelRequestSubsystem &sentinelRequestSubsystem)
+        : sub(sentinelRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentinelRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "pause projectile launching"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentinelRequestMessageType::PAUSE_PROJECTILE_LAUNCHING);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentinelRequestSubsystem &sub;
+};
+
+/**
  * Command that is scheduled once that queues the toggle drive movement SentinelRequestMessageType.
  */
 class ToggleDriveMovementCommand : public tap::control::Command
