@@ -172,6 +172,9 @@ aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMo
     sentinelRequestSubsystem);
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
     sentinelRequestSubsystem);
+aruwsrc::communication::serial::
+    PauseProjectileLaunchingCommand sentinelPauseProjectileLaunchingCommand(
+        sentinelRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
@@ -369,13 +372,17 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-PressCommandMapping gPressedCtrlNotPressed(
+PressCommandMapping cPressed(
     drivers(),
     {&sentinelToggleDriveMovementCommand},
+    RemoteMapState({Remote::Key::C}));
+PressCommandMapping gPressedCtrlNotPressed(
+    drivers(),
+    {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),
-    {&sentinelTargetNewQuadrantCommand},
+    {&sentinelPauseProjectileLaunchingCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
@@ -501,6 +508,7 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&rPressed);
