@@ -79,7 +79,6 @@ void VisionCoprocessor::initializeCV()
         modm::platform::Gpio::InputTrigger::RisingEdge);
 #endif
 
-
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
 #if defined(TARGET_HERO)
     drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
