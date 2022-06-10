@@ -57,7 +57,7 @@ public:
      * Agitator gear ratios of different motors, for determining shaft rotation angle.
      */
     static constexpr float AGITATOR_GEAR_RATIO_M2006 = 36.0f;
-    static constexpr float AGITATOR_GEAR_RATIO_GM3508 = 19.0f;
+    static constexpr float AGITATOR_GEAR_RATIO_GM3508 = (3591.0f / 187.0f);
 
     /**
      * Construct an agitator with the passed in velocity PID parameters, gear ratio, and

@@ -20,6 +20,7 @@
 #ifndef FRICTION_WHEELS_ON_GOVERNOR_HPP_
 #define FRICTION_WHEELS_ON_GOVERNOR_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
@@ -47,14 +48,20 @@ public:
 
     bool isReady() final
     {
-        return frictionWheel.getCurrentFrictionWheelSpeed() >=
-               aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].second / 2;
+        return !tap::algorithms::compareFloatClose(
+                   frictionWheel.getDesiredFrictionWheelSpeed(),
+                   0.0f,
+                   1) &&
+               frictionWheel.getCurrentFrictionWheelSpeed() >=
+                   frictionWheel.getDesiredFrictionWheelSpeed() * MINIMUM_SPEED_THRESHOLD_FRACTION;
     }
 
     bool isFinished() final { return !isReady(); }
 
 private:
     aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel;
+
+    static constexpr float MINIMUM_SPEED_THRESHOLD_FRACTION = 0.8;
 };
 }  // namespace aruwsrc::control::governor
 

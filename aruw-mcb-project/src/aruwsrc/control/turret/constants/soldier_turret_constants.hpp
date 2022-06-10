@@ -70,8 +70,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
     .startEncoderValue = 7500,
-    .minAngle = modm::toRadian(65),
-    .maxAngle = modm::toRadian(117),
+    .minAngle = modm::toRadian(60),
+    .maxAngle = modm::toRadian(115),
     .limitMotorAngles = true,
 };
 #elif defined(TARGET_SOLDIERMK4_2022)
