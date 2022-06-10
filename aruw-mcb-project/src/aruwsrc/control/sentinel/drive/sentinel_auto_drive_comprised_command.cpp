@@ -77,19 +77,19 @@ void SentinelAutoDriveComprisedCommand::execute()
         else
         {
             // move aggressively when taking damage
-            // if (robotData.receivedDps > AGGRESSIVE_EVADE_DPS_THRESHOLD &&
-            //     !this->comprisedCommandScheduler.isCommandScheduled(&this->aggressiveEvadeCommand))
-            // {
-            //     this->comprisedCommandScheduler.addCommand(&this->aggressiveEvadeCommand);
+            if (robotData.receivedDps > AGGRESSIVE_EVADE_DPS_THRESHOLD &&
+                !this->comprisedCommandScheduler.isCommandScheduled(&this->aggressiveEvadeCommand))
+            {
+                this->comprisedCommandScheduler.addCommand(&this->aggressiveEvadeCommand);
 
-            //     this->aggressiveEvadeTimer.restart(MIN_TIME_SPENT_AGGRESSIVELY_EVADING);
-            // }
-            // else if (
-            //     compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) &&
-            //     this->aggressiveEvadeTimer.isExpired())
-            // {
+                this->aggressiveEvadeTimer.restart(MIN_TIME_SPENT_AGGRESSIVELY_EVADING);
+            }
+            else if (
+                compareFloatClose(robotData.receivedDps, 0.0f, 1E-5) &&
+                this->aggressiveEvadeTimer.isExpired())
+            {
                 scheduleIfNotScheduled(this->comprisedCommandScheduler, &this->passiveEvadeCommand);
-            // }
+            }
         }
     }
 
