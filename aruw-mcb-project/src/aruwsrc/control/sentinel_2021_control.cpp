@@ -246,10 +246,7 @@ GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting(
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
-void targetNewQuadrantMessageHandler()
-{
-    drivers()->commandScheduler.addCommand(&turretUturnCommand);
-}
+void targetNewQuadrantMessageHandler() { turretCVCommand.changeScanningQuadrant(); }
 
 SentinelAutoDriveComprisedCommand sentinelAutoDrive(drivers(), &sentinelDrive);
 
