@@ -40,6 +40,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_response_handler.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -158,7 +159,7 @@ OttoBallisticsSolver ballisticsSolver(
     odometrySubsystem,
     turret,
     frictionWheels,
-    9.5f,  // defaultLaunchSpeed
+    9.0f,  // defaultLaunchSpeed
     0      // turretID
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
@@ -167,10 +168,13 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
-    &sentinelRequestSubsystem);
+aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMovementCommand(
+    sentinelRequestSubsystem);
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
-    &sentinelRequestSubsystem);
+    sentinelRequestSubsystem);
+aruwsrc::communication::serial::
+    PauseProjectileLaunchingCommand sentinelPauseProjectileLaunchingCommand(
+        sentinelRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
@@ -321,11 +325,17 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
+GovernorLimitedCommand<1> launchKickerNoHeatLimiting(
+    {&kickerAgitator},
+    launchKicker,
+    {&frictionWheelsOnGovernor});
 GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&kickerAgitator},
     launchKicker,
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
+
+aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler(*drivers());
 
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -339,7 +349,8 @@ ClientDisplayCommand clientDisplayCommand(
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
     &chassisDiagonalDriveCommand,
-    &chassisImuDriveCommand);
+    &chassisImuDriveCommand,
+    sentinelResponseHandler);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -361,20 +372,29 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
+PressCommandMapping cPressed(
+    drivers(),
+    {&sentinelToggleDriveMovementCommand},
+    RemoteMapState({Remote::Key::C}));
 PressCommandMapping gPressedCtrlNotPressed(
     drivers(),
-    {&sentinelSelectNewRobotCommand},
+    {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),
-    {&sentinelTargetNewQuadrantCommand},
+    {&sentinelPauseProjectileLaunchingCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-MultiShotCvCommandMapping leftMousePressed(
+MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     std::nullopt,
     kicker::cvOnTargetGovernor);
+HoldRepeatCommandMapping leftMousePressedBPressed(
+    drivers(),
+    {&kicker::launchKickerNoHeatLimiting},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+    false);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
@@ -395,16 +415,11 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
 // The user can press b+ctrl when the remote right switch is in the down position to restart the
 // client display command. This is necessary since we don't know when the robot is connected to the
 // server and thus don't know when to start sending the initial HUD graphics.
-PressCommandMapping bCtrlPressedRightSwitchDown(
+PressCommandMapping bCtrlPressed(
     drivers(),
     {&clientDisplayCommand},
-    RemoteMapState(
-        Remote::SwitchState::UNKNOWN,
-        Remote::SwitchState::DOWN,
-        {Remote::Key::CTRL, Remote::Key::B},
-        {},
-        false,
-        false));
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+
 PressCommandMapping qPressed(
     drivers(),
     {&chassisImuDriveCommand},
@@ -470,6 +485,10 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTINEL_RESPONSE_MESSAGE_ID,
+        &sentinelResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -477,17 +496,19 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressed);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    drivers->commandMapper.addMap(&bCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressed);
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&rPressed);

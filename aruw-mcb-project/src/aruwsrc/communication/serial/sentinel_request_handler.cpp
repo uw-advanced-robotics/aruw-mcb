@@ -39,10 +39,28 @@ void SentinelRequestHandler::operator()(
     switch (type)
     {
         case SentinelRequestMessageType::SELECT_NEW_ROBOT:
-            if (selectNewRobotMessageHandler != nullptr) selectNewRobotMessageHandler();
+            if (selectNewRobotMessageHandler != nullptr)
+            {
+                selectNewRobotMessageHandler();
+            }
             break;
         case SentinelRequestMessageType::TARGET_NEW_QUADRANT:
-            if (targetNewQuadrantMessageHandler != nullptr) targetNewQuadrantMessageHandler();
+            if (targetNewQuadrantMessageHandler != nullptr)
+            {
+                targetNewQuadrantMessageHandler();
+            }
+            break;
+        case SentinelRequestMessageType::TOGGLE_DRIVE_MOVEMENT:
+            if (toggleDriveMovementMessageHandler != nullptr)
+            {
+                toggleDriveMovementMessageHandler();
+            }
+            break;
+        case SentinelRequestMessageType::PAUSE_PROJECTILE_LAUNCHING:
+            if (pauseProjectileLaunchingHandler != nullptr)
+            {
+                pauseProjectileLaunchingHandler();
+            }
             break;
         default:
             RAISE_ERROR(drivers, "invalid message sentinel request message type");

@@ -17,25 +17,37 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTINEL_REQUEST_MESSAGE_TYPES_HPP_
-#define SENTINEL_REQUEST_MESSAGE_TYPES_HPP_
+#ifndef SENTINEL_RESPONSE_HANDLER_HPP_
+#define SENTINEL_RESPONSE_HANDLER_HPP_
 
-#include <cinttypes>
+#include "tap/communication/serial/ref_serial.hpp"
+
+namespace aruwsrc
+{
+class Drivers;
+}
 
 namespace aruwsrc::communication::serial
 {
-static constexpr uint16_t SENTINEL_REQUEST_ROBOT_ID = 0x200;
-
-static constexpr uint16_t SENTINEL_RESPONSE_MESSAGE_ID = 0x201;
-
-enum class SentinelRequestMessageType : uint8_t
+/**
+ * Handles message sent from the sentinel and received by other robots.
+ */
+class SentinelResponseHandler
+    : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
 {
-    SELECT_NEW_ROBOT = 0,
-    TARGET_NEW_QUADRANT,
-    TOGGLE_DRIVE_MOVEMENT,
-    PAUSE_PROJECTILE_LAUNCHING,
-    NUM_MESSAGE_TYPES,
+public:
+    SentinelResponseHandler(aruwsrc::Drivers &drivers);
+
+    void operator()(
+        const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
+
+    /// @return True if the sentinel reports that it is moving, false otherwise.
+    inline bool getSentinelMoving() const { return this->sentinelMoving; }
+
+private:
+    aruwsrc::Drivers &drivers;
+
+    bool sentinelMoving = true;
 };
 }  // namespace aruwsrc::communication::serial
-
-#endif  //  SENTINEL_REQUEST_MESSAGE_TYPES_HPP_
+#endif  // SENTINEL_RESPONSE_HANDLER_HPP_

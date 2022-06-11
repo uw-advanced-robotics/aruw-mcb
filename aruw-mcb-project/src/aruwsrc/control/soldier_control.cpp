@@ -41,6 +41,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentinel_response_handler.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -166,10 +167,13 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::SelectNewRobotCommand sentinelSelectNewRobotCommand(
-    &sentinelRequestSubsystem);
+aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMovementCommand(
+    sentinelRequestSubsystem);
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
-    &sentinelRequestSubsystem);
+    sentinelRequestSubsystem);
+aruwsrc::communication::serial::
+    PauseProjectileLaunchingCommand sentinelPauseProjectileLaunchingCommand(
+        sentinelRequestSubsystem);
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -313,6 +317,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
+aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler(*drivers());
+
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -326,7 +332,8 @@ ClientDisplayCommand clientDisplayCommand(
     &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand);
+    &chassisImuDriveCommand,
+    sentinelResponseHandler);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -349,13 +356,17 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
+PressCommandMapping cPressed(
+    drivers(),
+    {&sentinelToggleDriveMovementCommand},
+    RemoteMapState({Remote::Key::C}));
 PressCommandMapping gPressedCtrlNotPressed(
     drivers(),
-    {&sentinelSelectNewRobotCommand},
+    {&sentinelTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),
-    {&sentinelTargetNewQuadrantCommand},
+    {&sentinelPauseProjectileLaunchingCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
@@ -378,7 +389,7 @@ HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-    true);
+    false);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
@@ -471,6 +482,10 @@ void startSoldierCommands(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTINEL_RESPONSE_MESSAGE_ID,
+        &sentinelResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -491,6 +506,7 @@ void registerSoldierIoMappings(aruwsrc::Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&vPressed);

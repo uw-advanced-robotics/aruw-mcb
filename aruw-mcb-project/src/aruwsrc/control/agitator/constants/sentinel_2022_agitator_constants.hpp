@@ -101,6 +101,10 @@ static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_U
 
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
 
+/// Time in milliseconds to pause launching projectiles when the user requests the projectile
+/// launcher to be paused
+static constexpr uint32_t AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME = 8'000;
+
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // SENTINEL_AGITATOR_CONSTANTS_HPP_

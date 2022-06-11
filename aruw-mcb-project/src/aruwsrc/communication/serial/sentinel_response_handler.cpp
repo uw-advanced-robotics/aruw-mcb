@@ -17,25 +17,27 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTINEL_REQUEST_MESSAGE_TYPES_HPP_
-#define SENTINEL_REQUEST_MESSAGE_TYPES_HPP_
+#include "sentinel_response_handler.hpp"
 
-#include <cinttypes>
+#include "tap/errors/create_errors.hpp"
+
+#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::communication::serial
 {
-static constexpr uint16_t SENTINEL_REQUEST_ROBOT_ID = 0x200;
+SentinelResponseHandler::SentinelResponseHandler(aruwsrc::Drivers &drivers) : drivers(drivers) {}
 
-static constexpr uint16_t SENTINEL_RESPONSE_MESSAGE_ID = 0x201;
-
-enum class SentinelRequestMessageType : uint8_t
+void SentinelResponseHandler::operator()(
+    const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
-    SELECT_NEW_ROBOT = 0,
-    TARGET_NEW_QUADRANT,
-    TOGGLE_DRIVE_MOVEMENT,
-    PAUSE_PROJECTILE_LAUNCHING,
-    NUM_MESSAGE_TYPES,
-};
-}  // namespace aruwsrc::communication::serial
+    if (message.header.dataLength !=
+        sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + 1)
+    {
+        RAISE_ERROR((&drivers), "message length incorrect");
+        return;
+    }
 
-#endif  //  SENTINEL_REQUEST_MESSAGE_TYPES_HPP_
+    this->sentinelMoving = static_cast<bool>(
+        message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
+}
+}  // namespace aruwsrc::communication::serial

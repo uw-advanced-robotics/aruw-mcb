@@ -37,6 +37,8 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
+#include "aruwsrc/communication/serial/sentinel_response_subsystem.hpp"
+#include "aruwsrc/control/governor/pause_command_governor.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
@@ -199,6 +201,8 @@ public:
           cvOnlineGovernor(drivers, turretCVCommand),
           autoAimFireRateManager(drivers, turretCVCommand, config.turretID),
           fireRateLimitGovernor(autoAimFireRateManager),
+          pauseCommandGovernor(
+              aruwsrc::control::agitator::constants::AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME),
           rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
               {&agitator},
               rotateAndUnjamAgitator,
@@ -206,7 +210,8 @@ public:
                &frictionWheelsOnGovernor,
                &cvOnTargetGovernor,
                &cvOnlineGovernor,
-               &fireRateLimitGovernor}),
+               &fireRateLimitGovernor,
+               &pauseCommandGovernor}),
           rotateAndUnjamAgitatorWithHeatAndCvLimiting(
               {&agitator},
               rotateAndUnjamAgitator,
@@ -259,9 +264,10 @@ public:
     CvOnlineGovernor cvOnlineGovernor;
     AutoAimFireRateReselectionManager autoAimFireRateManager;
     FireRateLimitGovernor fireRateLimitGovernor;
+    PauseCommandGovernor pauseCommandGovernor;
 
     // agitator governor limited commands
-    GovernorLimitedCommand<5> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
+    GovernorLimitedCommand<6> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
     GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
 };
 
@@ -335,9 +341,21 @@ void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNew
 
 void targetNewQuadrantMessageHandler()
 {
-    drivers()->commandScheduler.addCommand(&turretZero.turretUturnCommand);
-    drivers()->commandScheduler.addCommand(&turretOne.turretUturnCommand);
+    turretZero.turretCVCommand.changeScanningQuadrant();
+    turretOne.turretCVCommand.changeScanningQuadrant();
 }
+
+void toggleDriveMovementMessageHandler() { sentinelAutoDrive.toggleDriveMovement(); }
+
+void pauseProjectileLaunchMessageHandler()
+{
+    turretZero.pauseCommandGovernor.initiatePause();
+    turretOne.pauseCommandGovernor.initiatePause();
+}
+
+aruwsrc::communication::serial::SentinelResponseSubsystem sentinelResponseSubsystem(
+    *drivers(),
+    sentinelAutoDrive);
 
 /* define command mappings --------------------------------------------------*/
 
@@ -371,6 +389,7 @@ void initializeSubsystems()
     turretOne.frictionWheels.initialize();
     turretOne.turretSubsystem.initialize();
     odometrySubsystem.initialize();
+    sentinelResponseSubsystem.initialize();
 }
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -386,6 +405,7 @@ void registerSentinelSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&sentinelResponseSubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
@@ -410,8 +430,12 @@ void startSentinelCommands(aruwsrc::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 
+    sentinelRequestHandler.attachPauseProjectileLaunchingMessageHandler(
+        pauseProjectileLaunchMessageHandler);
     sentinelRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentinelRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+    sentinelRequestHandler.attachToggleDriveMovementMessageHandler(
+        toggleDriveMovementMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTINEL_REQUEST_ROBOT_ID,
         &sentinelRequestHandler);

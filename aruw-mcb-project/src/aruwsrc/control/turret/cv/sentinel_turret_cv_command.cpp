@@ -61,6 +61,8 @@ SentinelTurretCVCommand::SentinelTurretCVCommand(
     assert(ballisticsSolver != nullptr);
 
     this->addSubsystemRequirement(turretSubsystem);
+
+    ignoreTargetTimeout.restart(0);
 }
 
 bool SentinelTurretCVCommand::isReady() { return !isFinished(); }
@@ -85,7 +87,7 @@ void SentinelTurretCVCommand::execute()
     std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
         ballisticsSolver->computeTurretAimAngles();
 
-    if (ballisticsSolution != std::nullopt)
+    if (ignoreTargetTimeout.isExpired() && ballisticsSolution != std::nullopt)
     {
         exitScanMode();
 
@@ -104,9 +106,13 @@ void SentinelTurretCVCommand::execute()
         yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
         pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
+        auto differenceWrapped = [](float measurement, float setpoint) {
+            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
+        };
+
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-            turretSubsystem->yawMotor.getValidChassisMeasurementErrorWrapped(),
-            turretSubsystem->pitchMotor.getValidChassisMeasurementErrorWrapped(),
+            differenceWrapped(yawController->getMeasurement(), yawSetpoint),
+            differenceWrapped(pitchController->getMeasurement(), pitchSetpoint),
             ballisticsSolution->distance);
     }
     else
@@ -122,7 +128,7 @@ void SentinelTurretCVCommand::execute()
             // Pitch and yaw setpoint already at reasonable default value
             // by this point
         }
-        else
+        else if (ignoreTargetTimeout.isExpired())
         {
             performScanIteration(yawSetpoint, pitchSetpoint);
         }
@@ -161,10 +167,14 @@ void SentinelTurretCVCommand::requestNewTarget()
 
 void SentinelTurretCVCommand::changeScanningQuadrant()
 {
-    // basic quadrant change for proof-of concept, if turret on left side, move right, otherwise
-    // move left
-    const float angleChange = copysignf(M_PI_2, -turretSubsystem->yawMotor.getAngleFromCenter());
-    yawController->setSetpoint(yawController->getSetpoint() + angleChange);
+    float currentYawAngle = yawController->getSetpoint();
+
+    float newSetpoint =
+        tap::algorithms::ContiguousFloat(currentYawAngle + M_PI, 0, M_TWOPI).getValue();
+    newSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(newSetpoint);
+    yawController->setSetpoint(newSetpoint);
+    exitScanMode();
+    ignoreTargetTimeout.restart(TIME_TO_IGNORE_TARGETS_WHILE_TURNING_AROUND_MS);
 }
 
 void SentinelTurretCVCommand::performScanIteration(float &yawSetpoint, float &pitchSetpoint)

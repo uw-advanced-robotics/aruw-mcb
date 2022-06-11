@@ -37,7 +37,7 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
-    .kp = 7'000.0f,
+    .kp = 3'600.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -45,14 +45,14 @@ static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float DESIRED_LOAD_TIME_S = 0.6f;
+static constexpr float DESIRED_LOAD_TIME_S = 0.3f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 7.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
 static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 6.0f;
-static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.3f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.02f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
+    .gearRatio = 19.0f,
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -63,7 +63,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
     .jammingVelocityDifference = 0.75f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
     .jammingTime = 300,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 50.0f,
+    .velocityPIDFeedForwardGain = 60.0f,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
