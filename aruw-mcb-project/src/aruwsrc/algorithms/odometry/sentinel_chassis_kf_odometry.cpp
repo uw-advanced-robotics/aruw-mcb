@@ -17,29 +17,32 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
-
 #include "sentinel_chassis_kf_odometry.hpp"
+
+#include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
+#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 SentinelChassisKFOdometry::SentinelChassisKFOdometry(
+    aruwsrc::Drivers& drivers,
     const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& driveSubsystem,
-    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
-    tap::communication::sensors::imu::ImuInterface& imu)
+    const aruwsrc::control::turret::TurretSubsystem& turret)
     : driveSubsystem(driveSubsystem),
-      chassisYawObserver(chassisYawObserver),
-      imu(imu),
+      chassisYawObserver(&drivers, turret),
+      imu(drivers.mpu6500),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
-    //   chassisAccelerationToMeasurementCovarianceInterpolator(
-    //       CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
-    //       MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
+//   chassisAccelerationToMeasurementCovarianceInterpolator(
+//       CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
+//       MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
-    float initialX[static_cast<int>(OdomState::NUM_STATES)] = {driveSubsystem.absolutePosition(), 0, 0};
+    float initialX[static_cast<int>(OdomState::NUM_STATES)] = {
+        driveSubsystem.getAbsolutePosition(),
+        0,
+        0};
     kf.init(initialX);
 }
 
-float accelY = 0;
 void SentinelChassisKFOdometry::update()
 {
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
@@ -58,11 +61,9 @@ void SentinelChassisKFOdometry::update()
     // assume 0 velocity/acceleration in z direction
     // float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
     // Absolute position given in mm, so we should convert back to meters
-    y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.absolutePosition()*1E-3;
+    y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.getAbsolutePosition() * 1E-3;
     y[static_cast<int>(OdomInput::VEL_Y)] = driveSubsystem.getActualVelocityChassisRelative()[1][0];
     y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
-
-    accelY = imu.getAy();
 
     // Update the Kalman filter. A new state estimate is available after this call.
     kf.performUpdate(y);
@@ -104,7 +105,8 @@ void SentinelChassisKFOdometry::updateChassisStateFromKF()
 
 //     prevChassisVelocity = chassisVelocity;
 
-//     // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
+//     // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units
+//     m/s^2,
 //     // convert dt in microseconds to seconds
 //     const float accelMagnitude = chassisMeasuredDeltaVelocity * 1E6 / static_cast<float>(dt);
 

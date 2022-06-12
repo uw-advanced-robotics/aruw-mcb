@@ -55,8 +55,10 @@ public:
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
     inline float getYaw() const override { return chassisYaw; }
+
     void update();
 
+private:
     enum class OdomState
     {
         POS_X = 0,

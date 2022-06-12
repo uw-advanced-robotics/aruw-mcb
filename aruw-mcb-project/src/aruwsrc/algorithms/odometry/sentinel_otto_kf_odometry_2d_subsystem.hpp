@@ -24,13 +24,12 @@
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
+#include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
-#include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
-
-#include "sentinel_chassis_kf_odometry.hpp"
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 #include "otto_chassis_world_yaw_observer.hpp"
+#include "sentinel_chassis_kf_odometry.hpp"
 
 // Forward declarations
 namespace aruwsrc
@@ -58,33 +57,21 @@ namespace aruwsrc::algorithms::odometry
  * @see ChassisKFOdometry
  */
 class SentinelOttoKFOdometry2DSubsystem final : public tap::control::Subsystem,
-                                                public tap::algorithms::odometry::Odometry2DInterface,
                                                 public SentinelChassisKFOdometry
 {
 public:
     /**
-     * @param[in] drivers pointer to aruwsrc drivers
-     * @param[in] turret pointer to a TurretMotor object, @see OttoChassisWorldYawObserver for how
-     * it is used
-     * @param[in] chassis pointer to aruwsrc ChassisSubsystem
+     * @param[in] drivers reference to aruwsrc drivers
+     * @param[in] chassis const reference to aruwsrc SentinelDriveSubsystem
+     * @param[in] turret const reference to a TurretMotor object, @see OttoChassisWorldYawObserver
+     * for how it is used
      */
     SentinelOttoKFOdometry2DSubsystem(
         aruwsrc::Drivers& drivers,
-        const aruwsrc::control::turret::TurretSubsystem& turret,
-        aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& chassis);
+        const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& chassis,
+        const aruwsrc::control::turret::TurretSubsystem& turret);
 
-    inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
-
-    inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
-
-    inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
-
-    inline float getYaw() const override { return chassisYaw; }
-    
     void refresh() override;
-
-private:
-    OttoChassisWorldYawObserver orientationObserver;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

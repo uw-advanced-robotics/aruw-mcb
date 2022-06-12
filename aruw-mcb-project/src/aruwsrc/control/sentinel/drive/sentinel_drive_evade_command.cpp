@@ -41,7 +41,7 @@ void SentinelDriveEvadeCommand::initialize()
 
 void SentinelDriveEvadeCommand::execute()
 {
-    float currentPosition = this->sentinelDriveSubsystem->absolutePosition();
+    float currentPosition = this->sentinelDriveSubsystem->getAbsolutePosition();
 
     if (this->hasTraveledDistanceToDrive(currentPosition))
     {
@@ -59,7 +59,7 @@ void SentinelDriveEvadeCommand::reverseDirectionForRandomDistance(
     int32_t minDistance,
     int32_t maxDistance)
 {
-    this->positionWhenDirectionChanged = this->sentinelDriveSubsystem->absolutePosition();
+    this->positionWhenDirectionChanged = this->sentinelDriveSubsystem->getAbsolutePosition();
 
     auto newDesiredRpm = getNewDesiredRpm(
         getMinDesiredRpm(),

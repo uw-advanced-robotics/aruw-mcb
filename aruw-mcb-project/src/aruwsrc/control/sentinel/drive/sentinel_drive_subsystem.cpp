@@ -113,7 +113,7 @@ void SentinelDriveSubsystem::refresh()
     this->resetOffsetFromLimitSwitch();
 
     float speedReductionScalar =
-        computeEndOfRailSpeedReductionScalar(this->desiredRpm, this->absolutePosition());
+        computeEndOfRailSpeedReductionScalar(this->desiredRpm, this->getAbsolutePosition());
     float scaledDesiredRpm = speedReductionScalar * this->desiredRpm;
 
     this->velocityPidLeftWheel.update(scaledDesiredRpm - this->leftWheel.getShaftRPM());
@@ -136,7 +136,7 @@ void SentinelDriveSubsystem::refresh()
     }
 }
 
-float SentinelDriveSubsystem::absolutePosition() const
+float SentinelDriveSubsystem::getAbsolutePosition() const
 {
 #if defined(TARGET_SENTINEL_2021)
     float leftPosition = distanceFromEncoder(&leftWheel) - leftWheelZeroRailOffset;

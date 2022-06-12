@@ -89,10 +89,10 @@ public:
     void initialize() override;
 
     /**
-     * Returns absolute position (in mm) of the sentinel, relative to the left end of the rail (when rail
-     * is viewed from the front)
+     * Returns absolute position (in mm) of the sentinel, relative to the left end of the rail (when
+     * rail is viewed from the front)
      */
-    mockable float absolutePosition() const;
+    mockable float getAbsolutePosition() const;
 
     mockable void setDesiredRpm(float desRpm);
 
