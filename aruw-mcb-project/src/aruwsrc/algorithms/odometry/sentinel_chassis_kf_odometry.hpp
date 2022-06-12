@@ -43,9 +43,20 @@ namespace aruwsrc::algorithms::odometry
 class SentinelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
+    /**
+     * @param[in] drivers: A reference to the drivers object. Used to obtain chassis IMU
+     * measurements from the mpu6500 onboard the MCB, as well as to construct an
+     * `OttoChassisWorldYawObserver` so that this class can be an `Odometry2DInterface`.
+     * @param[in] chassis: A const reference to the sentinel drive subsystem. Used to fetch
+     * velocity and absolute position measurements from the encoders (and limit switches for the latter).
+     * @param[in] turret: A const reference to the turret subsystem from which odometry should be tracked.
+     * In general, the only purpose of this is to produce yaw measurements, which for this implementation
+     * does not affect the calculated kinematic state of the sentinel chassis. However, it is needed for inheritance
+     * since an `OttoChassisWorldYawObserver` is needed to qualify this class as an `Odometry2DInterface`.
+     */
     SentinelChassisKFOdometry(
         aruwsrc::Drivers& drivers,
-        const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& driveSubsystem,
+        const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& chassis,
         const aruwsrc::control::turret::TurretSubsystem& turret);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
@@ -123,45 +134,16 @@ private:
     };
     // clang-format on
 
-    /// Max chassis acceleration magnitude measured on the sentinel when at 120W power mode, in
-    /// m/s^2
-    static constexpr float MAX_ACCELERATION = 8.0f;  // TODO: Tune for sentinel 2022
-
-    // TODO: Tune for sentinel 2022
-    // static constexpr modm::Pair<float, float>
-    // CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
-    //     {
-    //         {0, 10E-2},
-    //         {MAX_ACCELERATION, 10E2},
-    //     };
-
-    static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA =
-        0.01f;  // TODO: Tune for sentinel 2022
-
-    const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& driveSubsystem;
+    const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& chassis;
     aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver chassisYawObserver;
-    tap::communication::sensors::imu::ImuInterface& imu;
+    tap::communication::sensors::imu::ImuInterface& chassisIMU;
 
     tap::algorithms::KalmanFilter<
         static_cast<int>(OdomState::NUM_STATES),
         static_cast<int>(OdomInput::NUM_INPUTS)>
         kf;
 
-    float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
-
-    // /// Chassis-measured change in velocity since the last time `update` was called, in the
-    // chassis
-    // /// frame
-    // float chassisMeasuredDeltaVelocity;
-
-    // modm::interpolation::Linear<modm::Pair<float, float>>
-    //     chassisAccelerationToMeasurementCovarianceInterpolator;
-
-    // float prevChassisVelocity;
-
     void updateChassisStateFromKF();
-
-    // void updateMeasurementCovariance(const float& chassisVelocity);
 };
 }  // namespace aruwsrc::algorithms::odometry
 

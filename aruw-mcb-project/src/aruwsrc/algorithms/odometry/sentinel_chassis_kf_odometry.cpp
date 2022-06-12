@@ -25,18 +25,15 @@ namespace aruwsrc::algorithms::odometry
 {
 SentinelChassisKFOdometry::SentinelChassisKFOdometry(
     aruwsrc::Drivers& drivers,
-    const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& driveSubsystem,
+    const aruwsrc::control::sentinel::drive::SentinelDriveSubsystem& chassis,
     const aruwsrc::control::turret::TurretSubsystem& turret)
-    : driveSubsystem(driveSubsystem),
+    : chassis(chassis),
       chassisYawObserver(&drivers, turret),
-      imu(drivers.mpu6500),
+      chassisIMU(drivers.mpu6500),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
-//   chassisAccelerationToMeasurementCovarianceInterpolator(
-//       CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
-//       MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
     float initialX[static_cast<int>(OdomState::NUM_STATES)] = {
-        driveSubsystem.getAbsolutePosition(),
+        chassis.getAbsolutePosition(),
         0,
         0};
     kf.init(initialX);
@@ -49,25 +46,18 @@ void SentinelChassisKFOdometry::update()
         chassisYaw = 0;
     }
 
-    // // Get chassis velocity as measured by the motor encoders.
-    // // Since the sentinel chassis only moves in one direction,
-    // // this measurement is in the world frame.
-    // auto chassisVelocity = driveSubsystem.getActualVelocityChassisRelative();
+    // Assume 0 velocity/acceleration in z direction.
+    float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
 
-    // // the measurement covariance is dynamically updated based on chassis-measured acceleration
-    // updateMeasurementCovariance(chassisVelocity[0][1]);
-
-    // assume 0 velocity/acceleration in z direction
-    // float y[static_cast<int>(OdomInput::NUM_INPUTS)] = {};
-    // Absolute position given in mm, so we should convert back to meters
-    y[static_cast<int>(OdomInput::POS_Y)] = driveSubsystem.getAbsolutePosition() * 1E-3;
-    y[static_cast<int>(OdomInput::VEL_Y)] = driveSubsystem.getActualVelocityChassisRelative()[1][0];
-    y[static_cast<int>(OdomInput::ACC_Y)] = imu.getAy();
+    // Absolute position is given in mm, so we should convert back to meters.
+    y[static_cast<int>(OdomInput::POS_Y)] = chassis.getAbsolutePosition() * 1E-3;
+    y[static_cast<int>(OdomInput::VEL_Y)] = chassis.getActualVelocityChassisRelative()[1][0];
+    y[static_cast<int>(OdomInput::ACC_Y)] = chassisIMU.getAy();
 
     // Update the Kalman filter. A new state estimate is available after this call.
     kf.performUpdate(y);
 
-    // Update the location and velocity accessor objects with values from the state vector
+    // Update the location and velocity accessor objects with values from the state vector.
     updateChassisStateFromKF();
 }
 
@@ -75,48 +65,14 @@ void SentinelChassisKFOdometry::updateChassisStateFromKF()
 {
     const auto& x = kf.getStateVectorAsMatrix();
 
-    // update odometry velocity and orientation
+    // Update odometry velocity.
     velocity.x = 0;
     velocity.y = x[static_cast<int>(OdomState::VEL_Y)];
 
+    // Update chassis orientation.
+    // For this implementation, we assume that the sentinel chassis does not yaw on the rail.
     location.setOrientation(0);
     location.setPosition(0, x[static_cast<int>(OdomState::POS_Y)]);
 }
-
-// void SentinelChassisKFOdometry::updateMeasurementCovariance(const float& chassisVelocity)
-// {
-//     const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
-//     const uint32_t dt = curTime - prevTime;
-//     prevTime = curTime;
-
-//     // return to avoid weird acceleration spike on startup
-//     if (prevTime == 0)
-//     {
-//         return;
-//     }
-
-//     // compute acceleration
-
-//     chassisMeasuredDeltaVelocity = tap::algorithms::lowPassFilter(
-//         chassisMeasuredDeltaVelocity,
-//         chassisVelocity - prevChassisVelocity,
-//         CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-//     prevChassisVelocity = chassisVelocity;
-
-//     // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units
-//     m/s^2,
-//     // convert dt in microseconds to seconds
-//     const float accelMagnitude = chassisMeasuredDeltaVelocity * 1E6 / static_cast<float>(dt);
-
-//     const float velocityCovariance =
-//         chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
-
-//     // set measurement covariance of chassis velocity as measured by the wheels because if
-//     // acceleration is large, the likelihood of slippage is greater
-//     kf.getMeasurementCovariance()[0] = velocityCovariance;
-//     kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
-//         velocityCovariance;
-// }
 
 }  // namespace aruwsrc::algorithms::odometry
