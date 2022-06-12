@@ -32,10 +32,7 @@ SentinelChassisKFOdometry::SentinelChassisKFOdometry(
       chassisIMU(drivers.mpu6500),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
 {
-    float initialX[static_cast<int>(OdomState::NUM_STATES)] = {
-        chassis.getAbsolutePosition(),
-        0,
-        0};
+    float initialX[static_cast<int>(OdomState::NUM_STATES)] = {chassis.getAbsolutePosition(), 0, 0};
     kf.init(initialX);
 }
 

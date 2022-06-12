@@ -48,11 +48,13 @@ public:
      * measurements from the mpu6500 onboard the MCB, as well as to construct an
      * `OttoChassisWorldYawObserver` so that this class can be an `Odometry2DInterface`.
      * @param[in] chassis: A const reference to the sentinel drive subsystem. Used to fetch
-     * velocity and absolute position measurements from the encoders (and limit switches for the latter).
-     * @param[in] turret: A const reference to the turret subsystem from which odometry should be tracked.
-     * In general, the only purpose of this is to produce yaw measurements, which for this implementation
-     * does not affect the calculated kinematic state of the sentinel chassis. However, it is needed for inheritance
-     * since an `OttoChassisWorldYawObserver` is needed to qualify this class as an `Odometry2DInterface`.
+     * velocity and absolute position measurements from the encoders (and limit switches for the
+     * latter).
+     * @param[in] turret: A const reference to the turret subsystem from which odometry should be
+     * tracked. In general, the only purpose of this is to produce yaw measurements, which for this
+     * implementation does not affect the calculated kinematic state of the sentinel chassis.
+     * However, it is needed for inheritance since an `OttoChassisWorldYawObserver` is needed to
+     * qualify this class as an `Odometry2DInterface`.
      */
     SentinelChassisKFOdometry(
         aruwsrc::Drivers& drivers,
