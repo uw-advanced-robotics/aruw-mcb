@@ -38,7 +38,7 @@ SentinelDriveToSideCommand::SentinelDriveToSideCommand(
 bool SentinelDriveToSideCommand::isReady()
 {
     return this->sentinelChassis.allMotorsOnline() &&
-           !this->withinRailEnd(this->railSide, this->sentinelChassis.absolutePosition());
+           !this->withinRailEnd(this->railSide, this->sentinelChassis.getAbsolutePosition());
 }
 
 void SentinelDriveToSideCommand::initialize()
@@ -53,7 +53,7 @@ void SentinelDriveToSideCommand::end(bool) { this->sentinelChassis.setDesiredRpm
 
 bool SentinelDriveToSideCommand::isFinished() const
 {
-    return this->withinRailEnd(this->railSide, this->sentinelChassis.absolutePosition());
+    return this->withinRailEnd(this->railSide, this->sentinelChassis.getAbsolutePosition());
 }
 
 }  // namespace aruwsrc::control::sentinel::drive

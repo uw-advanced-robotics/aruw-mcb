@@ -34,7 +34,7 @@
 
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/sentinel_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentinel_request_message_types.hpp"
@@ -131,7 +131,7 @@ SentinelTurretSubsystem turretSubsystem(
     nullptr,
     0);
 
-OttoVelocityOdometry2DSubsystem odometrySubsystem(drivers(), turretSubsystem, &sentinelDrive);
+SentinelOttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), sentinelDrive, turretSubsystem);
 
 /* define commands ----------------------------------------------------------*/
 

@@ -69,7 +69,7 @@ TEST_F(SentinelDriveSubsystemTest, initialize_with_same_input_pins_raises_error)
     sentinelDrive.initialize();
 }
 
-TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_0_when_motors_offline)
+TEST_F(SentinelDriveSubsystemTest, getAbsolutePosition_returns_0_when_motors_offline)
 {
     EXPECT_CALL(drivers.errorController, addToErrorList);
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(false));
@@ -77,11 +77,11 @@ TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_0_when_motors_offlin
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(false));
 #endif
 
-    EXPECT_NEAR(0.0f, sentinelDrive.absolutePosition(), 1E-3);
+    EXPECT_NEAR(0.0f, sentinelDrive.getAbsolutePosition(), 1E-3);
 }
 
 #if defined(TARGET_SENTINEL_2021)
-TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_right_pos_when_left_not_connected)
+TEST_F(SentinelDriveSubsystemTest, getAbsolutePosition_returns_right_pos_when_left_not_connected)
 {
     static constexpr int ENC_TICKS = 1000;
 
@@ -90,10 +90,10 @@ TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_right_pos_when_left_
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(true));
     ON_CALL(sentinelDrive.rightWheel, getEncoderUnwrapped).WillByDefault(Return(ENC_TICKS));
 
-    EXPECT_NEAR(calculatePosition(ENC_TICKS), sentinelDrive.absolutePosition(), 1E-3);
+    EXPECT_NEAR(calculatePosition(ENC_TICKS), sentinelDrive.getAbsolutePosition(), 1E-3);
 }
 
-TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_left_pos_when_right_not_connected)
+TEST_F(SentinelDriveSubsystemTest, getAbsolutePosition_returns_left_pos_when_right_not_connected)
 {
     static constexpr int ENC_TICKS = 1000;
 
@@ -102,10 +102,10 @@ TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_left_pos_when_right_
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(true));
     ON_CALL(sentinelDrive.leftWheel, getEncoderUnwrapped).WillByDefault(Return(ENC_TICKS));
 
-    EXPECT_NEAR(calculatePosition(ENC_TICKS), sentinelDrive.absolutePosition(), 1E-3);
+    EXPECT_NEAR(calculatePosition(ENC_TICKS), sentinelDrive.getAbsolutePosition(), 1E-3);
 }
 
-TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_wheel_avg_when_both_connected)
+TEST_F(SentinelDriveSubsystemTest, getAbsolutePosition_returns_wheel_avg_when_both_connected)
 {
     ON_CALL(sentinelDrive.rightWheel, isMotorOnline).WillByDefault(Return(true));
     ON_CALL(sentinelDrive.leftWheel, isMotorOnline).WillByDefault(Return(true));
@@ -120,15 +120,15 @@ TEST_F(SentinelDriveSubsystemTest, absolutePosition_returns_wheel_avg_when_both_
 
     leftEncUnwrapped = 2000;
     rightEncUnwrapped = 100;
-    EXPECT_NEAR(calculatePosition((2'000 + 100) / 2), sentinelDrive.absolutePosition(), 1E-3);
+    EXPECT_NEAR(calculatePosition((2'000 + 100) / 2), sentinelDrive.getAbsolutePosition(), 1E-3);
 
     leftEncUnwrapped = 2'000;
     rightEncUnwrapped = -2'000;
-    EXPECT_NEAR(calculatePosition(0), sentinelDrive.absolutePosition(), 1E-3);
+    EXPECT_NEAR(calculatePosition(0), sentinelDrive.getAbsolutePosition(), 1E-3);
 
     leftEncUnwrapped = 20'000;
     rightEncUnwrapped = 20'000;
-    EXPECT_NEAR(calculatePosition(20'000), sentinelDrive.absolutePosition(), 1E-3);
+    EXPECT_NEAR(calculatePosition(20'000), sentinelDrive.getAbsolutePosition(), 1E-3);
 }
 #endif
 

@@ -44,7 +44,7 @@ void SentinelFullTraverseCommand::initialize()
 
 void SentinelFullTraverseCommand::execute()
 {
-    float curPos = subsystemSentinelDrive->absolutePosition();
+    float curPos = subsystemSentinelDrive->getAbsolutePosition();
     // reverse direction if close to the end of the rail
     if (velocityTargetGenerator.getValue() < 0 && curPos < TURNAROUND_BUFFER)
     {

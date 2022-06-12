@@ -113,7 +113,7 @@ void SentinelDriveSubsystem::refresh()
     this->resetOffsetFromLimitSwitch();
 
     float speedReductionScalar =
-        computeEndOfRailSpeedReductionScalar(this->desiredRpm, this->absolutePosition());
+        computeEndOfRailSpeedReductionScalar(this->desiredRpm, this->getAbsolutePosition());
     float scaledDesiredRpm = speedReductionScalar * this->desiredRpm;
 
     this->velocityPidLeftWheel.update(scaledDesiredRpm - this->leftWheel.getShaftRPM());
@@ -136,7 +136,7 @@ void SentinelDriveSubsystem::refresh()
     }
 }
 
-float SentinelDriveSubsystem::absolutePosition()
+float SentinelDriveSubsystem::getAbsolutePosition() const
 {
 #if defined(TARGET_SENTINEL_2021)
     float leftPosition = distanceFromEncoder(&leftWheel) - leftWheelZeroRailOffset;
@@ -199,7 +199,7 @@ void SentinelDriveSubsystem::resetOffsetFromLimitSwitch()
 // with respect to the encoders
 // Equation used: Arc Length = Angle * radius
 // Here we get the shaft angle from the getEncoderUnwrapped function
-float SentinelDriveSubsystem::distanceFromEncoder(tap::motor::DjiMotor* motor)
+float SentinelDriveSubsystem::distanceFromEncoder(const tap::motor::DjiMotor* motor) const
 {
     float unwrappedAngle = motor->getEncoderUnwrapped();
     float numberOfRotations = unwrappedAngle / (tap::motor::DjiMotor::ENC_RESOLUTION);
