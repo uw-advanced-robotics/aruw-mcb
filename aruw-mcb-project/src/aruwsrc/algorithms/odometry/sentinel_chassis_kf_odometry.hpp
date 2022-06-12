@@ -27,6 +27,7 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"

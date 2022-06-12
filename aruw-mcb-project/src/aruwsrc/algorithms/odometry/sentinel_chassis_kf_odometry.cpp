@@ -19,7 +19,6 @@
 
 #include "sentinel_chassis_kf_odometry.hpp"
 
-#include "aruwsrc/control/sentinel/drive/sentinel_drive_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::algorithms::odometry
