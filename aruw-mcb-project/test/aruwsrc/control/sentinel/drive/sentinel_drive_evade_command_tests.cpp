@@ -43,7 +43,7 @@ protected:
 
         ON_CALL(sub, getDesiredRpm).WillByDefault(ReturnPointee(&desiredRpm));
 
-        ON_CALL(sub, absolutePosition).WillByDefault(ReturnPointee(&position));
+        ON_CALL(sub, getAbsolutePosition).WillByDefault(ReturnPointee(&position));
     }
 
 private:

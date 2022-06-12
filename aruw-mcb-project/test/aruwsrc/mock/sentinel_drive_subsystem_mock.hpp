@@ -36,7 +36,7 @@ public:
     virtual ~SentinelDriveSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(float, absolutePosition, (), (override));
+    MOCK_METHOD(float, getAbsolutePosition, (), (const override));
     MOCK_METHOD(void, setDesiredRpm, (float), (override));
     MOCK_METHOD(float, getDesiredRpm, (), (override));
     MOCK_METHOD(void, refresh, (), (override));
