@@ -90,14 +90,14 @@ protected:
 };
 
 /**
- * Stepper motor turret control command but adds an offset to the desired pitch setpoint
+ * Stepper motor turret control command but adds an offset to the desired setpoint
  * when scheduled and removes it when descheduled.
  *
  * Originally designed for the ARUW dart system, where the barrel needed to pitch up by
  * a constant offset when using the lower barrel. Used to get around weird command mapping/state
  * restrictions.
  */
-class PitchOffsetStepperMotorTurretControlCommand : public StepperMotorTurretControlCommand
+class OffsetStepperMotorTurretControlCommand : public StepperMotorTurretControlCommand
 {
 public:
     /**
@@ -105,22 +105,35 @@ public:
      * @param[in] stepperTurretSubsystem Pointer to the stepper turret to control.
      * @param[in] pitchOffset the pitch offset to use when this command is scheduled and remove when
      *  this command is descheduled
+     * @param[in] yawOffset the yaw offset to use when this command is scheduled and removed thwne
+     * this command is unscheduled
      */
-    PitchOffsetStepperMotorTurretControlCommand(
+    OffsetStepperMotorTurretControlCommand(
         aruwsrc::Drivers* drivers,
         StepperTurretSubsystem& stepperTurretSubsystem,
-        int pitchOffset)
+        int pitchOffset,
+        int yawOffset)
         : StepperMotorTurretControlCommand(drivers, stepperTurretSubsystem),
-          pitchOffset(pitchOffset)
+          pitchOffset(pitchOffset),
+          yawOffset(yawOffset)
     {
     }
 
-    void initialize() override { turretPitchMotor.moveSteps(pitchOffset); }
+    void initialize() override
+    {
+        turretPitchMotor.moveSteps(pitchOffset);
+        turretYawMotor.moveSteps(yawOffset);
+    }
 
-    void end(bool) override { turretPitchMotor.moveSteps(-pitchOffset); }
+    void end(bool) override
+    {
+        turretPitchMotor.moveSteps(-pitchOffset);
+        turretYawMotor.moveSteps(-yawOffset);
+    }
 
 private:
-    const int pitchOffset;
+    int pitchOffset;
+    int yawOffset;
 };
 
 }  // namespace aruwsrc::control::turret::user
