@@ -19,6 +19,8 @@
 
 #include "turret_user_control_command.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
+
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
@@ -58,14 +60,18 @@ void TurretUserControlCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    const float pitchSetpoint =
-        pitchController->getSetpoint() +
+    float humanPitchInput =
         userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput(turretID);
+    humanPitchInput = tap::algorithms::lowPassFilter(prevPitchInput, humanPitchInput, 0.75);
+    prevPitchInput = humanPitchInput;
+    float pitchSetpoint = pitchController->getSetpoint() + humanPitchInput;
     pitchController->runController(dt, pitchSetpoint);
 
-    const float yawSetpoint =
-        yawController->getSetpoint() +
-        userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+    float humanYawInput =
+        userPitchInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+    humanYawInput = tap::algorithms::lowPassFilter(prevYawInput, humanYawInput, 0.75);
+    prevYawInput = humanYawInput;
+    float yawSetpoint = yawController->getSetpoint() + humanYawInput;
     yawController->runController(dt, yawSetpoint);
 }
 

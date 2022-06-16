@@ -35,8 +35,8 @@ namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
 
-static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
-static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
+static constexpr float USER_YAW_INPUT_SCALAR = 0.04f;
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.04f;
 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
@@ -99,9 +99,9 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 7000;
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 22.0f,
+    .kp = 35.0f,
     .ki = 0.0f,
-    .kd = 0.3f,
+    .kd = 0.9f,
     .maxICumulative = 0.0f,
     .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -117,7 +117,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .ki = 100.0f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = 30'000.0f, 
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -127,9 +127,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 22.0f,
+    .kp = 35.0f,
     .ki = 0.02f,
-    .kd = 0.0f,
+    .kd = 0.6f,
     .maxICumulative = 0.5f,
     .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,

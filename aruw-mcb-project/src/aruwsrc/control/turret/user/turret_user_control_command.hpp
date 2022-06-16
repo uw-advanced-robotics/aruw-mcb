@@ -76,6 +76,8 @@ private:
     TurretSubsystem *turretSubsystem;
 
     uint32_t prevTime = 0;
+    float prevYawInput = 0;
+    float prevPitchInput = 0;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
