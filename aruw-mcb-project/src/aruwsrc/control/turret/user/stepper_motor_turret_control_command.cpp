@@ -39,7 +39,7 @@ void StepperMotorTurretControlCommand::initialize() {}
 
 void StepperMotorTurretControlCommand::execute()
 {
-    yawAccumulator += drivers->controlOperatorInterface.getTurretYawInput(TURRET_ID);
+    yawAccumulator += drivers->controlOperatorInterface.getTurretYawInput(0);
 
     if (yawAccumulator > STEP_THRESHOLD)
     {
@@ -52,7 +52,7 @@ void StepperMotorTurretControlCommand::execute()
         yawAccumulator = 0;
     }
 
-    pitchAccumulator += drivers->controlOperatorInterface.getTurretPitchInput(TURRET_ID);
+    pitchAccumulator += drivers->controlOperatorInterface.getTurretPitchInput(1);
     if (pitchAccumulator > STEP_THRESHOLD)
     {
         turretPitchMotor.setDesiredPosition(turretPitchMotor.getDesiredPosition() + 1);
