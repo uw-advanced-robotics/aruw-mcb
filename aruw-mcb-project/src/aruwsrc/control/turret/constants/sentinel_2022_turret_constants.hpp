@@ -54,7 +54,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 0,
-    .minAngle = modm::toRadian(-10),
+    .minAngle = modm::toRadian(-15),
     .maxAngle = modm::toRadian(60),
     .limitMotorAngles = true,
 };
