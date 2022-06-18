@@ -173,7 +173,7 @@ MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
     true);
 
 // Starting Friction Wheels
-static constexpr float MAX_FRICTION_WHEEL_SPEED = 14.0f;
+static constexpr float MAX_FRICTION_WHEEL_SPEED = 15.0f;
 
 FrictionWheelSpinUserLimitedCommand spinFrictionWheelsTopBack(
     drivers(),
@@ -231,12 +231,16 @@ aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTur
 // Number of steps to pitch up when lower barrel is active
 static constexpr int PITCH_UP_STEPS = -600;
 static constexpr int YAW_OFFSET_STEPS = 15;
+static constexpr int YAW_OFFSET_CORRECTION_STEPS = 1;
+static constexpr int YAW_OFFSET_CORRECTION_CHANCE = 1;
 aruwsrc::control::turret::user::
     OffsetStepperMotorTurretControlCommand lowerBarrelTurretControlCommand(
         drivers(),
         stepperTurretSubsystem,
         PITCH_UP_STEPS,
-        YAW_OFFSET_STEPS);
+        YAW_OFFSET_STEPS,
+        YAW_OFFSET_CORRECTION_STEPS,
+        YAW_OFFSET_CORRECTION_CHANCE);
 
 // Mappings
 HoldCommandMapping bottomPositionOne(

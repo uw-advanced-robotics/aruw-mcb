@@ -112,10 +112,16 @@ public:
         aruwsrc::Drivers* drivers,
         StepperTurretSubsystem& stepperTurretSubsystem,
         int pitchOffset,
-        int yawOffset)
+        int yawOffset,
+        int yawOffsetCorrection,
+        int yawOffsetCorrectionChance)
         : StepperMotorTurretControlCommand(drivers, stepperTurretSubsystem),
           pitchOffset(pitchOffset),
-          yawOffset(yawOffset)
+          yawOffset(yawOffset),
+          yawOffsetCorrection(yawOffsetCorrection),
+          yawOffsetCorrectionChance(yawOffsetCorrectionChance),
+          offsetCounter(0)
+
     {
     }
 
@@ -128,12 +134,21 @@ public:
     void end(bool) override
     {
         turretPitchMotor.moveSteps(-pitchOffset);
+       if(offsetCounter == 0) {
+        turretYawMotor.moveSteps(-yawOffset-yawOffsetCorrection);
+       }
+       else {
         turretYawMotor.moveSteps(-yawOffset);
+       }
+       offsetCounter = (offsetCounter+1)%yawOffsetCorrectionChance;
     }
 
 private:
     int pitchOffset;
     int yawOffset;
+    int yawOffsetCorrection;
+    int offsetCounter;
+    int yawOffsetCorrectionChance;
 };
 
 }  // namespace aruwsrc::control::turret::user
