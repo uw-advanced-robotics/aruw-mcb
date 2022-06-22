@@ -141,7 +141,7 @@ MoveAbsoluteCommand agitatorTopMoveCommandOne(
     AGITATOR_TOLERANCE,
     true,
     true,
-    timeDelayAfterMoving = TIME_DELAY_AFTER_MOVING);
+    TIME_DELAY_AFTER_MOVING);
 
 MoveAbsoluteCommand agitatorTopMoveCommandTwo(
     &agitatorTop,
@@ -166,7 +166,7 @@ MoveAbsoluteCommand agitatorBottomMoveCommandOne(
     AGITATOR_TOLERANCE,
     true,
     true,
-    timeDelayAfterMoving = TIME_DELAY_AFTER_MOVING);
+    TIME_DELAY_AFTER_MOVING);
 
 MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
     &agitatorBottom,
@@ -233,18 +233,31 @@ aruwsrc::control::turret::user::StepperMotorTurretControlCommand stepperMotorTur
     stepperTurretSubsystem);
 
 // Number of steps to pitch up when lower barrel is active
-static constexpr int PITCH_UP_STEPS = -600;
-static constexpr int YAW_OFFSET_STEPS = 15;
-static constexpr int YAW_OFFSET_CORRECTION_STEPS = 1;
-static constexpr int YAW_OFFSET_CORRECTION_CHANCE = 1;
+static constexpr int PITCH_UP_STEPS = -1000;
+static constexpr int YAW_OFFSET_STEPS = 20;
+static constexpr int UPPER_BARREL_YAW_OFFSET_STEPS = 0;
+static constexpr int UPPER_BARREL_PITCH_OFFSET_STEPS = 0;
+static constexpr int LOWER_BARREL_YAW_OFFSET_STEPS = 0;
+static constexpr int LOWER_BARREL_PITCH_OFFSET_STEPS = 0;
 aruwsrc::control::turret::user::
     OffsetStepperMotorTurretControlCommand lowerBarrelTurretControlCommand(
         drivers(),
         stepperTurretSubsystem,
         PITCH_UP_STEPS,
-        YAW_OFFSET_STEPS,
-        YAW_OFFSET_CORRECTION_STEPS,
-        YAW_OFFSET_CORRECTION_CHANCE);
+        YAW_OFFSET_STEPS);
+
+aruwsrc::control::turret::user::
+    OffsetStepperMotorTurretControlCommand agitatorTopMoveCommandOne(
+        drivers(),
+        stepperTurretSubsystem,
+        UPPER_BARREL_PITCH_OFFSET_STEPS,
+        UPPER_BARREL_YAW_OFFSET_STEPS);
+aruwsrc::control::turret::user::
+    OffsetStepperMotorTurretControlCommand agitatorBottomMoveCommandOne(
+        drivers(),
+        stepperTurretSubsystem,
+        UPPER_BARREL_PITCH_OFFSET_STEPS,
+        UPPER_BARREL_YAW_OFFSET_STEPS);
 
 // Mappings
 HoldCommandMapping bottomPositionOne(
