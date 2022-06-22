@@ -134,14 +134,17 @@ public:
     void end(bool) override
     {
         turretPitchMotor.moveSteps(-pitchOffset);
-       if(offsetCounter == 0) {
-        turretYawMotor.moveSteps(-yawOffset-yawOffsetCorrection);
-       }
-       else {
-        turretYawMotor.moveSteps(-yawOffset);
-       }
-       offsetCounter = (offsetCounter+1)%yawOffsetCorrectionChance;
-    }
+        if (offsetCounter == 0)
+        {
+            turretYawMotor.moveSteps(-yawOffset - yawOffsetCorrection);
+        }
+        else
+        {
+            turretYawMotor.moveSteps(-yawOffset);
+        }
+        offsetCounter = (offsetCounter + 1) % yawOffsetCorrectionChance;
+    }  // If there is a difference between forward and backward offset, this allows for a janky
+       // partial step difference in offsets to compensate
 
 private:
     int pitchOffset;

@@ -124,6 +124,8 @@ CalibrateCommand agitatorTopCalibrateCommand(&agitatorTop);
 
 CalibrateCommand agitatorBottomCalibrateCommand(&agitatorBottom);
 
+static constexpr float TIME_DELAY_AFTER_MOVING = 500;  //Milliseconds
+
 MoveAbsoluteCommand agitatorTopMoveCommandZero(
     &agitatorTop,
     AGITATOR_TARGET_ANGLE_ZERO,
@@ -138,7 +140,8 @@ MoveAbsoluteCommand agitatorTopMoveCommandOne(
     AGITATOR_ANGULAR_SPEED,
     AGITATOR_TOLERANCE,
     true,
-    true);
+    true,
+    timeDelayAfterMoving = TIME_DELAY_AFTER_MOVING);
 
 MoveAbsoluteCommand agitatorTopMoveCommandTwo(
     &agitatorTop,
@@ -162,7 +165,8 @@ MoveAbsoluteCommand agitatorBottomMoveCommandOne(
     AGITATOR_ANGULAR_SPEED,
     AGITATOR_TOLERANCE,
     true,
-    true);
+    true,
+    timeDelayAfterMoving = TIME_DELAY_AFTER_MOVING);
 
 MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
     &agitatorBottom,
@@ -173,7 +177,7 @@ MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
     true);
 
 // Starting Friction Wheels
-static constexpr float MAX_FRICTION_WHEEL_SPEED = 15.0f;
+static constexpr float MAX_FRICTION_WHEEL_SPEED = 14.3f;
 
 FrictionWheelSpinUserLimitedCommand spinFrictionWheelsTopBack(
     drivers(),
