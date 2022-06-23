@@ -35,7 +35,7 @@
 namespace aruwsrc::control::agitator::constants
 {
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 2'000.0f,
+    .kp = 3'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 5'000.0f,
@@ -60,9 +60,9 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * This should be positive or else weird behavior can occur
      */
     .jammingVelocityDifference = 1.5f * M_TWOPI,
-    .jammingTime = 200,
+    .jammingTime = 250,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 450.0f / M_TWOPI,
+    .velocityPIDFeedForwardGain = 550.0f / M_TWOPI,
 };
 }
 
@@ -78,9 +78,9 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = 1.5f * M_TWOPI,
-    .jammingTime = 200,
+    .jammingTime = 250,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+    .velocityPIDFeedForwardGain = 550.0f / M_TWOPI,
 };
 }
 
@@ -91,11 +91,11 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = M_TWOPI / 7.5f,
-    .unjamSetpoint = M_TWOPI / 1.0f,
+    .targetUnjamIntegralChange = M_TWOPI / 20.0f,
+    .unjamSetpoint = M_TWOPI / 2.0f,
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds. Add 100 ms extra tolerance.
-    .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 7.5f) / (M_TWOPI / 1.0f)) + 100,
+    .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 20.0f) / (M_TWOPI / 2.0f)) + 100,
     .targetCycleCount = 1,
 };
 
