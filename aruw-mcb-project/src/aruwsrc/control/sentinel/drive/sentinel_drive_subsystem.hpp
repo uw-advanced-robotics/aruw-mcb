@@ -66,9 +66,9 @@ public:
     static constexpr float GEAR_RATIO = 3591.0f / 187.0f;
 
     // RMUL length of the rail, in mm
-    // static constexpr float RAIL_LENGTH = 2130;
+    static constexpr float RAIL_LENGTH = 2130;
     // Our length of the rail, in mm
-    static constexpr float RAIL_LENGTH = 1900;
+    // static constexpr float RAIL_LENGTH = 1900;
 
     /// Distance from either end of the rail (in mm) at which the sentinel will cut its speed
     /// to avoid ramming into the wall.
