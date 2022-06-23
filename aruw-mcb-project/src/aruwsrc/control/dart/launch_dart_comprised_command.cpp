@@ -39,13 +39,14 @@ namespace aruwsrc::control::dart
         true,
         true
     ),
-    timeDelayAfterMoving(offsetConfig.timeDelayAfterMoving),
     moveToOffsetPosition(
         drivers,
         turret,
         offsetConfig.pitchOffsetSteps,
         offsetConfig.yawOffsetSteps
-    )
+    ),
+    shouldMoveToOffsetPositionAfterLaunch(offsetConfig.shouldMoveToOffsetPositionAfterLaunch),
+    timeDelayAfterLaunching(offsetConfig.timeDelayAfterLaunching)
     { }
 
     void LaunchDartComprisedCommand::initialize()
@@ -58,38 +59,51 @@ namespace aruwsrc::control::dart
     {
         switch(state)
         {
-            case LAUNCH_DART_ONE:
+            case CommandState::LAUNCH_DART_ONE:
+            {
                 if (!comprisedCommandScheduler.isCommandScheduled(&moveSledToLaunchPosition))
                 {
-                    comprisedCommandScheduler.addCommand(&moveToOffsetPosition);
-                    state = MOVE_TO_OFFSET_POSITION;
+                    if (shouldMoveToOffsetPositionAfterLaunch)
+                    {
+                        prevTime = tap::arch::clock::getTimeMilliseconds();
+                        timeInWaiting = 0.0f;
+                        state = CommandState::WAIT;
+                    }
+                    else
+                    {
+                        state = CommandState::FINISHED;
+                    }
                 }
                 break;
-            case MOVE_TO_OFFSET_POSITION:
-                if (!comprisedCommandScheduler.isCommandScheduled(&moveToOffsetPosition))
-                {
-                    prevTime = tap::arch::clock::getTimeMilliseconds();
-                    timeInWaiting = 0.0f;
-                    state = WAIT;
-                }
-                break;
-            case WAIT:
+            }
+            case CommandState::WAIT:
+            {
                 float currentTime = tap::arch::clock::getTimeMilliseconds();
                 timeInWaiting += currentTime - prevTime;
                 prevTime = currentTime;
-                if (timeInWaiting >= timeDelayAfterMoving)
+                if (timeInWaiting >= timeDelayAfterLaunching)
                 {
-                    state = FINISHED;
+                    comprisedCommandScheduler.addCommand(&moveToOffsetPosition);
+                    state = CommandState::MOVE_TO_OFFSET_POSITION;
                 }
                 break;
-            case FINISHED:
+            }
+            case CommandState::MOVE_TO_OFFSET_POSITION:
+            {
+                if (!comprisedCommandScheduler.isCommandScheduled(&moveToOffsetPosition))
+                {
+                    state = CommandState::FINISHED;
+                }
+                break;
+            }
+            case CommandState::FINISHED:
                 break;
         }
     }
 
     bool LaunchDartComprisedCommand::isFinished() const
     {
-        return state == FINISHED;
+        return state == CommandState::FINISHED;
     }
 
     void LaunchDartComprisedCommand::end(bool interrupted)

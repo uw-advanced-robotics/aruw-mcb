@@ -125,7 +125,7 @@ CalibrateCommand agitatorTopCalibrateCommand(&agitatorTop);
 
 CalibrateCommand agitatorBottomCalibrateCommand(&agitatorBottom);
 
-static constexpr float TIME_DELAY_AFTER_MOVING = 500;  //Milliseconds
+static constexpr float TIME_DELAY_AFTER_LAUNCHING = 500;  //Milliseconds
 
 dart::LaunchDartComprisedCommand launchFirstDartTopBarrelCommand(
     drivers(),
@@ -136,11 +136,11 @@ dart::LaunchDartComprisedCommand launchFirstDartTopBarrelCommand(
         .agitatorAngularSpeed = AGITATOR_ANGULAR_SPEED,
         .agitatorSetpointTolerance = AGITATOR_TOLERANCE,
     },
-    offsetConfig=
     {
-        .yawOffset = 0,
-        .pitchOffset = 0,
-        .timeDelayAfterMoving = TIME_DELAY_AFTER_MOVING
+        .shouldMoveToOffsetPositionAfterLaunch = true,
+        .yawOffsetSteps = 0,
+        .pitchOffsetSteps = 0,
+        .timeDelayAfterLaunching = TIME_DELAY_AFTER_LAUNCHING
     }
 );
 
@@ -164,11 +164,11 @@ dart::LaunchDartComprisedCommand launchFirstDartBottomBarrelCommand(
         .agitatorAngularSpeed = AGITATOR_ANGULAR_SPEED,
         .agitatorSetpointTolerance = AGITATOR_TOLERANCE,
     },
-    offsetConfig=
     {
-        .yawOffset = 0,
-        .pitchOffset = 0,
-        .timeDelayAfterMoving = TIME_DELAY_AFTER_MOVING
+        .shouldMoveToOffsetPositionAfterLaunch = true,
+        .yawOffsetSteps = 0,
+        .pitchOffsetSteps = 0,
+        .timeDelayAfterLaunching = TIME_DELAY_AFTER_LAUNCHING
     }
 );
 
@@ -198,7 +198,7 @@ MoveAbsoluteCommand agitatorTopMoveCommandZero(
 //     AGITATOR_TOLERANCE,
 //     true,
 //     true,
-//     TIME_DELAY_AFTER_MOVING);
+//     TIME_DELAY_AFTER_LAUNCHING);
 
 // MoveAbsoluteCommand agitatorTopMoveCommandTwo(
 //     &agitatorTop,
@@ -223,7 +223,7 @@ MoveAbsoluteCommand agitatorBottomMoveCommandZero(
 //     AGITATOR_TOLERANCE,
 //     true,
 //     true,
-//     TIME_DELAY_AFTER_MOVING);
+//     TIME_DELAY_AFTER_LAUNCHING);
 
 // MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
 //     &agitatorBottom,

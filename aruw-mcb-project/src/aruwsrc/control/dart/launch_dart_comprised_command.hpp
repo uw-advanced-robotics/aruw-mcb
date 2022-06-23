@@ -38,9 +38,10 @@ struct LaunchDartComprisedCommandConfig
 };
 struct LaunchDartOffsetConfig
 {
+    bool shouldMoveToOffsetPositionAfterLaunch;
     int32_t yawOffsetSteps;
     int32_t pitchOffsetSteps;
-    float timeDelayAfterMoving; // Milliseconds
+    float timeDelayAfterLaunching; // Milliseconds
 };
 
 /**
@@ -55,9 +56,9 @@ struct LaunchDartOffsetConfig
 class LaunchDartComprisedCommand : public tap::control::ComprisedCommand
 {
 public:
-
     /**
-     * @brief Construct a new Launch Darts Comprised Command object.
+     * @brief Construct a new Launch Darts Comprised Command object
+     * with an offset for the next dart.
      * 
      * @param[in] drivers: A reference to the `drivers` singleton instance.
      * @param[in] turret: A reference to the `StepperTurretSubsystem`
@@ -76,15 +77,15 @@ public:
         aruwsrc::control::turret::StepperTurretSubsystem& turret,
         aruwsrc::agitator::AgitatorSubsystem& sled,
         LaunchDartComprisedCommandConfig config,
-        LaunchDartOffsetConfig offsetConfig=
-        {
+        LaunchDartOffsetConfig offsetConfig = {
+            .shouldMoveToOffsetPositionAfterLaunch = false,
             .yawOffsetSteps = 0,
             .pitchOffsetSteps = 0,
-            .timeDelayAfterMoving = 0.0f
+            .timeDelayAfterLaunching = 0.0f
         }
     );
 
-    const char *getName() const override { return "launch darts"; }
+    const char *getName() const override { return "launch dart command"; }
     void initialize() override;
     void execute() override;
     void end(bool interrupted) override;
@@ -107,10 +108,11 @@ private:
     tap::control::setpoint::MoveAbsoluteCommand moveSledToLaunchPosition;
     aruwsrc::control::turret::user::OffsetStepperMotorTurretControlCommand moveToOffsetPosition;
 
-    float timeDelayAfterMoving;
+    float shouldMoveToOffsetPositionAfterLaunch;
+    float timeDelayAfterLaunching;
 
-    float timeInWaiting = 0.0f;
-    float prevTime = 0.0f;
+    float timeInWaiting;
+    float prevTime;
 };
 }
 
