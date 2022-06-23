@@ -47,7 +47,13 @@ namespace aruwsrc::control::dart
     ),
     shouldMoveToOffsetPositionAfterLaunch(offsetConfig.shouldMoveToOffsetPositionAfterLaunch),
     timeDelayAfterLaunching(offsetConfig.timeDelayAfterLaunching)
-    { }
+    {
+        addSubsystemRequirement(&turret);
+        addSubsystemRequirement(&sled);
+
+        comprisedCommandScheduler.registerSubsystem(&turret);
+        comprisedCommandScheduler.registerSubsystem(&sled);
+    }
 
     void LaunchDartComprisedCommand::initialize()
     {
