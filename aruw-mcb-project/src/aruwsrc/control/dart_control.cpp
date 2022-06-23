@@ -16,6 +16,7 @@
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/util_macros.hpp"
+#include "dart/launch_dart_comprised_command.hpp"
 #include "launcher/friction_wheel_spin_user_limited_command.hpp"
 #include "launcher/friction_wheel_subsystem.hpp"
 #include "turret/constants/turret_constants.hpp"
@@ -126,6 +127,62 @@ CalibrateCommand agitatorBottomCalibrateCommand(&agitatorBottom);
 
 static constexpr float TIME_DELAY_AFTER_MOVING = 500;  //Milliseconds
 
+dart::LaunchDartComprisedCommand launchFirstDartTopBarrelCommand(
+    drivers(),
+    stepperTurretSubsystem,
+    agitatorTop,
+    {
+        .agitatorSetpoint = AGITATOR_TARGET_ANGLE_ONE,
+        .agitatorAngularSpeed = AGITATOR_ANGULAR_SPEED,
+        .agitatorSetpointTolerance = AGITATOR_TOLERANCE,
+    },
+    offsetConfig=
+    {
+        .yawOffset = 0,
+        .pitchOffset = 0,
+        .timeDelayAfterMoving = TIME_DELAY_AFTER_MOVING
+    }
+);
+
+dart::LaunchDartComprisedCommand launchSecondDartTopBarrelCommand(
+    drivers(),
+    stepperTurretSubsystem,
+    agitatorTop,
+    {
+        .agitatorSetpoint = AGITATOR_TARGET_ANGLE_TWO,
+        .agitatorAngularSpeed = AGITATOR_ANGULAR_SPEED,
+        .agitatorSetpointTolerance = AGITATOR_TOLERANCE,
+    }
+);
+
+dart::LaunchDartComprisedCommand launchFirstDartBottomBarrelCommand(
+    drivers(),
+    stepperTurretSubsystem,
+    agitatorBottom,
+    {
+        .agitatorSetpoint = AGITATOR_TARGET_ANGLE_ONE,
+        .agitatorAngularSpeed = AGITATOR_ANGULAR_SPEED,
+        .agitatorSetpointTolerance = AGITATOR_TOLERANCE,
+    },
+    offsetConfig=
+    {
+        .yawOffset = 0,
+        .pitchOffset = 0,
+        .timeDelayAfterMoving = TIME_DELAY_AFTER_MOVING
+    }
+);
+
+dart::LaunchDartComprisedCommand launchSecondDartBottomBarrelCommand(
+    drivers(),
+    stepperTurretSubsystem,
+    agitatorBottom,
+    {
+        .agitatorSetpoint = AGITATOR_TARGET_ANGLE_TWO,
+        .agitatorAngularSpeed = AGITATOR_ANGULAR_SPEED,
+        .agitatorSetpointTolerance = AGITATOR_TOLERANCE,
+    }
+);
+
 MoveAbsoluteCommand agitatorTopMoveCommandZero(
     &agitatorTop,
     AGITATOR_TARGET_ANGLE_ZERO,
@@ -134,22 +191,22 @@ MoveAbsoluteCommand agitatorTopMoveCommandZero(
     true,
     true);
 
-MoveAbsoluteCommand agitatorTopMoveCommandOne(
-    &agitatorTop,
-    AGITATOR_TARGET_ANGLE_ONE,
-    AGITATOR_ANGULAR_SPEED,
-    AGITATOR_TOLERANCE,
-    true,
-    true,
-    TIME_DELAY_AFTER_MOVING);
+// MoveAbsoluteCommand agitatorTopMoveCommandOne(
+//     &agitatorTop,
+//     AGITATOR_TARGET_ANGLE_ONE,
+//     AGITATOR_ANGULAR_SPEED,
+//     AGITATOR_TOLERANCE,
+//     true,
+//     true,
+//     TIME_DELAY_AFTER_MOVING);
 
-MoveAbsoluteCommand agitatorTopMoveCommandTwo(
-    &agitatorTop,
-    AGITATOR_TARGET_ANGLE_TWO,
-    AGITATOR_ANGULAR_SPEED,
-    AGITATOR_TOLERANCE,
-    true,
-    true);
+// MoveAbsoluteCommand agitatorTopMoveCommandTwo(
+//     &agitatorTop,
+//     AGITATOR_TARGET_ANGLE_TWO,
+//     AGITATOR_ANGULAR_SPEED,
+//     AGITATOR_TOLERANCE,
+//     true,
+//     true);
 
 MoveAbsoluteCommand agitatorBottomMoveCommandZero(
     &agitatorBottom,
@@ -159,22 +216,22 @@ MoveAbsoluteCommand agitatorBottomMoveCommandZero(
     true,
     true);
 
-MoveAbsoluteCommand agitatorBottomMoveCommandOne(
-    &agitatorBottom,
-    AGITATOR_TARGET_ANGLE_ONE,
-    AGITATOR_ANGULAR_SPEED,
-    AGITATOR_TOLERANCE,
-    true,
-    true,
-    TIME_DELAY_AFTER_MOVING);
+// MoveAbsoluteCommand agitatorBottomMoveCommandOne(
+//     &agitatorBottom,
+//     AGITATOR_TARGET_ANGLE_ONE,
+//     AGITATOR_ANGULAR_SPEED,
+//     AGITATOR_TOLERANCE,
+//     true,
+//     true,
+//     TIME_DELAY_AFTER_MOVING);
 
-MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
-    &agitatorBottom,
-    AGITATOR_TARGET_ANGLE_TWO,
-    AGITATOR_ANGULAR_SPEED,
-    AGITATOR_TOLERANCE,
-    true,
-    true);
+// MoveAbsoluteCommand agitatorBottomMoveCommandTwo(
+//     &agitatorBottom,
+//     AGITATOR_TARGET_ANGLE_TWO,
+//     AGITATOR_ANGULAR_SPEED,
+//     AGITATOR_TOLERANCE,
+//     true,
+//     true);
 
 // Starting Friction Wheels
 static constexpr float MAX_FRICTION_WHEEL_SPEED = 14.3f;
@@ -262,23 +319,23 @@ aruwsrc::control::turret::user::
 // Mappings
 HoldCommandMapping bottomPositionOne(
     drivers(),
-    {&agitatorBottomMoveCommandOne},
+    {&launchFirstDartBottomBarrelCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 HoldCommandMapping bottomPositionTwo(
     drivers(),
-    {&agitatorBottomMoveCommandTwo},
+    {&launchSecondDartBottomBarrelCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
-
-HoldCommandMapping topPositionTwo(
-    drivers(),
-    {&agitatorTopMoveCommandTwo},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 HoldCommandMapping topPositionOne(
     drivers(),
-    {&agitatorTopMoveCommandOne},
+    {&launchFirstDartBottomBarrelCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+
+HoldCommandMapping topPositionTwo(
+    drivers(),
+    {&launchSecondDartTopBarrelCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 HoldCommandMapping positionZero(
     drivers(),
