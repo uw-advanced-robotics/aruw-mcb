@@ -35,7 +35,7 @@
 namespace aruwsrc::control::agitator::constants
 {
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 5'000.0f,
+    .kp = 3'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 5'000.0f,
