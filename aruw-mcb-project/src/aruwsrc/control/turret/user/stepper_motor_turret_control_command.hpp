@@ -119,11 +119,9 @@ public:
           pitchOffset(pitchOffset),
           yawOffset(yawOffset),
           yawOffsetCorrection(yawOffsetCorrection),
-          yawOffsetCorrectionChance(yawOffsetCorrectionChance),
-          offsetCounter(0)
-
-    {
-    }
+          offsetCounter(0),
+          yawOffsetCorrectionChance(yawOffsetCorrectionChance)
+    { }
 
     void initialize() override
     {
