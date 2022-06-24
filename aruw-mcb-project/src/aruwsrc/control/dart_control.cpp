@@ -329,7 +329,7 @@ HoldCommandMapping bottomPositionTwo(
 
 HoldCommandMapping topPositionOne(
     drivers(),
-    {&launchFirstDartBottomBarrelCommand},
+    {&launchFirstDartTopBarrelCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 HoldCommandMapping topPositionTwo(

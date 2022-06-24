@@ -70,8 +70,7 @@ public:
         float speed,
         float setpointTolerance,
         bool shouldAutomaticallyClearJam,
-        bool setSetpointToTargetOnEnd,
-        float timeDelayAfterMoving = 0.0f);
+        bool setSetpointToTargetOnEnd);
 
     const char* getName() const override { return "move absolute"; }
 
@@ -109,14 +108,6 @@ private:
     bool automaticallyClearJam;
 
     bool setSetpointToTargetOnEnd;
-
-    float timeDelayAfterMoving;
-
-    bool waiting = false;
-
-    float timeWaiting = 0.0f;
-
-    float prevTime = 0.0f;
 };  // class MoveAbsoluteCommand
 
 }  // namespace setpoint

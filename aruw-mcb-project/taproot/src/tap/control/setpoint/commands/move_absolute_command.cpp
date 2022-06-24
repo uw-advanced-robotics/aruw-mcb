@@ -38,15 +38,13 @@ MoveAbsoluteCommand::MoveAbsoluteCommand(
     float speed,
     float setpointTolerance,
     bool automaticallyClearJam,
-    bool setSetpointToTargetOnEnd,
-    float timeDelayAfterMoving)
+    bool setSetpointToTargetOnEnd)
     : setpointSubsystem(setpointSubsystem),
       setpoint(setpoint),
       speed(speed),
       setpointTolerance(setpointTolerance),
       automaticallyClearJam(automaticallyClearJam),
-      setSetpointToTargetOnEnd(setSetpointToTargetOnEnd),
-      timeDelayAfterMoving(timeDelayAfterMoving)
+      setSetpointToTargetOnEnd(setSetpointToTargetOnEnd)
 {
     this->addSubsystemRequirement(setpointSubsystem);
 }
@@ -80,31 +78,13 @@ void MoveAbsoluteCommand::execute()
 
     // We can assume that subsystem is connected, otherwise end will be called.
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    if (rampToSetpoint.isTargetReached() &&
-        algorithms::compareFloatClose(
-            setpointSubsystem->getCurrentValue(),
-            rampToSetpoint.getTarget(),
-            setpointTolerance) &&
-        !waiting)
-    {
-        waiting = true;
-        prevTime = currTime;
-    }
-    else if (waiting)
-    {
-        timeWaiting += currTime - prevTime;
-        prevTime = currTime;
-    }
-    else
-    {
-        // Divide by 1'000 to get setpoint-units because speed is in setpoint-units/second
-        // and time interval is in milliseconds. (milliseconds * 1/1000 (second/millisecond) *
-        // (setpoint-units/second))  = 1/1000 setpoint-units as our conversion
-        rampToSetpoint.update((static_cast<float>(currTime - prevMoveTime) * speed) / 1000.0f);
-        prevMoveTime = currTime;
+    // Divide by 1'000 to get setpoint-units because speed is in setpoint-units/second
+    // and time interval is in milliseconds. (milliseconds * 1/1000 (second/millisecond) *
+    // (setpoint-units/second))  = 1/1000 setpoint-units as our conversion
+    rampToSetpoint.update((static_cast<float>(currTime - prevMoveTime) * speed) / 1000.0f);
+    prevMoveTime = currTime;
 
-        setpointSubsystem->setSetpoint(rampToSetpoint.getValue());
-    }
+    setpointSubsystem->setSetpoint(rampToSetpoint.getValue());
 }
 
 void MoveAbsoluteCommand::end(bool)
@@ -131,12 +111,10 @@ bool MoveAbsoluteCommand::isFinished() const
     // Command is finished if we've reached target or if our subsystem is jammed
     // or offline
     return setpointSubsystem->isJammed() || !setpointSubsystem->isOnline() ||
-           (rampToSetpoint.isTargetReached() &&
-            algorithms::compareFloatClose(
-                setpointSubsystem->getCurrentValue(),
-                rampToSetpoint.getTarget(),
-                setpointTolerance) &&
-            timeWaiting >= timeDelayAfterMoving);
+           (rampToSetpoint.isTargetReached() && algorithms::compareFloatClose(
+                                                    setpointSubsystem->getCurrentValue(),
+                                                    rampToSetpoint.getTarget(),
+                                                    setpointTolerance));
 }
 
 }  // namespace setpoint

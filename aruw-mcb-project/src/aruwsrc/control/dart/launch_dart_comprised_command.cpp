@@ -85,9 +85,7 @@ namespace aruwsrc::control::dart
             case CommandState::WAIT:
             {
                 float currentTime = tap::arch::clock::getTimeMilliseconds();
-                timeInWaiting += currentTime - prevTime;
-                prevTime = currentTime;
-                if (timeInWaiting >= timeDelayAfterLaunching)
+                if (currentTime - prevTime >= timeDelayAfterLaunching)
                 {
                     comprisedCommandScheduler.addCommand(&moveToOffsetPosition);
                     state = CommandState::MOVE_TO_OFFSET_POSITION;
@@ -96,14 +94,8 @@ namespace aruwsrc::control::dart
             }
             case CommandState::MOVE_TO_OFFSET_POSITION:
             {
-                if (!comprisedCommandScheduler.isCommandScheduled(&moveToOffsetPosition))
-                {
-                    state = CommandState::FINISHED;
-                }
                 break;
             }
-            case CommandState::FINISHED:
-                break;
         }
     }
 
