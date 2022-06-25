@@ -238,6 +238,17 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
 
+tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPidCv(
+    world_rel_turret_imu::YAW_FUZZY_POS_PD_AUTO_AIM_CONFIG,
+    world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
+    getTurretMCBCanComm(),
+    turret.yawMotor,
+    worldFrameYawTurretImuPosPidCv,
+    worldFrameYawTurretImuVelPidCv);
+
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
@@ -252,7 +263,7 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
 cv::TurretCVCommand turretCVCommand(
     drivers(),
     &turret,
-    &worldFrameYawTurretImuController,
+    &worldFrameYawTurretImuControllerCv,
     &worldFramePitchTurretImuController,
     &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
