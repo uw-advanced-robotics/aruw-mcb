@@ -45,6 +45,7 @@
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
+#include "aruwsrc/control/scoped_smooth_pid_configuration_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "chassis/beyblade_command.hpp"
@@ -235,7 +236,7 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
-cv::TurretCVCommand turretCVCommand(
+cv::TurretCVCommand turretCVCommandInner(
     drivers(),
     &turret,
     &worldFrameYawTurretImuController,
@@ -243,6 +244,12 @@ cv::TurretCVCommand turretCVCommand(
     &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
+
+ScopedSmoothPidConfigurationCommand turretCVCommand(
+    &turretCVCommandInner,
+    &worldFrameYawTurretImuPosPid,
+    &world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG
+);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 

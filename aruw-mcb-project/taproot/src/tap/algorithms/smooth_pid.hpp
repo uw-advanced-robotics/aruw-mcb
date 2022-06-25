@@ -82,6 +82,9 @@ public:
     inline void setMaxOutput(float maxOutput) { config.maxOutput = maxOutput; }
     inline void setErrDeadzone(float errDeadzone) { config.errDeadzone = errDeadzone; }
 
+    inline void setConfig(SmoothPidConfig& newConfig) { config = newConfig; }
+    inline SmoothPidConfig getConfig() { return config; }
+
 private:
     // gains and constants, to be set by the user
     SmoothPidConfig config;
