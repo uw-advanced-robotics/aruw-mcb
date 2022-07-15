@@ -188,10 +188,8 @@ void VisionCoprocessor::sendOdometryData()
         assert(turretOrientationInterfaces[i] != nullptr);
         odometryData->turretOdometry[i].timestamp =
             turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
-        odometryData->turretOdometry[i].pitch =
-            modm::toDegree(turretOrientationInterfaces[i]->getWorldPitch());
-        odometryData->turretOdometry[i].yaw =
-            modm::toDegree(turretOrientationInterfaces[i]->getWorldYaw());
+        odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
+        odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
     }
 
     odometryMessage.setCRC16();
