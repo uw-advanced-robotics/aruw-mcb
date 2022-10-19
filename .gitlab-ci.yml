@@ -317,19 +317,19 @@ before_script:
 
 # Sentry (Beehive) build
 
-"Sentinel 2022: MCB Build":
+"Sentry: MCB Build":
   extends:
     - .mcb_build
   variables:
     ROBOT: SENTRY_BEEHIVE
 
-"Sentinel 2022: Sim Build":
+"Sentry: Sim Build":
   extends:
     - .sim_build
   variables:
     ROBOT: SENTRY_BEEHIVE
 
-"Sentinel 2022: Test Build":
+"Sentry: Test Build":
   extends:
     - .test_build
   variables:
