@@ -73,7 +73,7 @@ before_script:
             aruwsrc/drivers_singleton.hpp
             aruwsrc/control/engineer_control.cpp
             aruwsrc/control/sentry_control.cpp
-            aruwsrc/control/soldier_control.cpp
+            aruwsrc/control/standard_control.cpp
             aruwsrc/control/drone_control.cpp
             aruwsrc/control/hero_control.cpp
             main.cpp
