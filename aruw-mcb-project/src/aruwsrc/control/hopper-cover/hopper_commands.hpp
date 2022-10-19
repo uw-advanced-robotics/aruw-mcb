@@ -40,28 +40,28 @@ namespace control
  * move and set it there. With this approach regardless of disconnects
  * and recalibrations we can hope to utilize the full hopper range of motion.
  */
-class SoldierOpenHopperCommand : public tap::control::setpoint::MoveAbsoluteCommand
+class StandardOpenHopperCommand : public tap::control::setpoint::MoveAbsoluteCommand
 {
 public:
     // 3.12 revolutions
-    static constexpr float SOLDIER_OPEN_HOPPER_TARGET_ANGLE = 3.12 * M_PI;
+    static constexpr float STANDARD_OPEN_HOPPER_TARGET_ANGLE = 3.12 * M_PI;
     // 5000 milliradians/second
-    static constexpr uint32_t SOLDIER_OPEN_HOPPER_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
+    static constexpr uint32_t STANDARD_OPEN_HOPPER_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
     // Allowable error in radians within which motor will consider target angle reached.
-    static constexpr float SOLDIER_OPEN_HOPPER_TOLERANCE = 0.05f;
+    static constexpr float STANDARD_OPEN_HOPPER_TOLERANCE = 0.05f;
     // Whether or not the command should clear jam on end (based on how we want this command
     // to work the answer is yes, so `true`)
-    static constexpr bool SOLDIER_OPEN_HOPPER_CLEAR_JAM = true;
+    static constexpr bool STANDARD_OPEN_HOPPER_CLEAR_JAM = true;
     // Whether or not the command should set subsystem setpoint to ideal target on end
-    static constexpr bool SOLDIER_OPEN_HOPPER_SET_SETPOINT_TO_TARGET_ON_END = false;
-    SoldierOpenHopperCommand(tap::control::setpoint::SetpointSubsystem* agitator)
+    static constexpr bool STANDARD_OPEN_HOPPER_SET_SETPOINT_TO_TARGET_ON_END = false;
+    StandardOpenHopperCommand(tap::control::setpoint::SetpointSubsystem* agitator)
         : tap::control::setpoint::MoveAbsoluteCommand(
               agitator,
-              SOLDIER_OPEN_HOPPER_TARGET_ANGLE,
-              SOLDIER_OPEN_HOPPER_ANGULAR_SPEED,
-              SOLDIER_OPEN_HOPPER_TOLERANCE,
-              SOLDIER_OPEN_HOPPER_CLEAR_JAM,
-              SOLDIER_OPEN_HOPPER_SET_SETPOINT_TO_TARGET_ON_END)
+              STANDARD_OPEN_HOPPER_TARGET_ANGLE,
+              STANDARD_OPEN_HOPPER_ANGULAR_SPEED,
+              STANDARD_OPEN_HOPPER_TOLERANCE,
+              STANDARD_OPEN_HOPPER_CLEAR_JAM,
+              STANDARD_OPEN_HOPPER_SET_SETPOINT_TO_TARGET_ON_END)
     {
     }
 
@@ -70,7 +70,7 @@ public:
      * a motor failure.
      */
     bool isFinished() const override { return !setpointSubsystem->isOnline(); }
-};  // class SoldierOpenHopperCommand
+};  // class StandardOpenHopperCommand
 
 /**
  * Use overly large target angle to keep moving agitator in one direction until
@@ -81,29 +81,29 @@ public:
  * of motion) we set desired position to current position and continuously
  * return `false` from isFinished.
  */
-class SoldierCloseHopperCommand : public tap::control::setpoint::MoveAbsoluteCommand
+class StandardCloseHopperCommand : public tap::control::setpoint::MoveAbsoluteCommand
 {
 public:
     // 0 revolutions
-    static constexpr float SOLDIER_CLOSE_HOPPER_TARGET_ANGLE = 0;
+    static constexpr float STANDARD_CLOSE_HOPPER_TARGET_ANGLE = 0;
     // 5000 milliradians/second
-    static constexpr uint32_t SOLDIER_CLOSE_HOPPER_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
+    static constexpr uint32_t STANDARD_CLOSE_HOPPER_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
     // Allowable error in radians within which motor will consider target angle reached.
-    static constexpr float SOLDIER_CLOSE_HOPPER_TOLERANCE = 0.05f;
+    static constexpr float STANDARD_CLOSE_HOPPER_TOLERANCE = 0.05f;
     // Whether or not the command should clear jam on end (based on how we want this command
     // to work the answer is yes, so `true`)
-    static constexpr bool SOLDIER_CLOSE_HOPPER_CLEAR_JAM = true;
+    static constexpr bool STANDARD_CLOSE_HOPPER_CLEAR_JAM = true;
     // Whether or not the command should set subsystem setpoint to ideal target on end
-    static constexpr bool SOLDIER_CLOSE_HOPPER_SET_SETPOINT_TO_TARGET_ON_END = false;
+    static constexpr bool STANDARD_CLOSE_HOPPER_SET_SETPOINT_TO_TARGET_ON_END = false;
 
-    SoldierCloseHopperCommand(tap::control::setpoint::SetpointSubsystem* agitator)
+    StandardCloseHopperCommand(tap::control::setpoint::SetpointSubsystem* agitator)
         : tap::control::setpoint::MoveAbsoluteCommand(
               agitator,
-              SOLDIER_CLOSE_HOPPER_TARGET_ANGLE,
-              SOLDIER_CLOSE_HOPPER_ANGULAR_SPEED,
-              SOLDIER_CLOSE_HOPPER_TOLERANCE,
-              SOLDIER_CLOSE_HOPPER_CLEAR_JAM,
-              SOLDIER_CLOSE_HOPPER_SET_SETPOINT_TO_TARGET_ON_END)
+              STANDARD_CLOSE_HOPPER_TARGET_ANGLE,
+              STANDARD_CLOSE_HOPPER_ANGULAR_SPEED,
+              STANDARD_CLOSE_HOPPER_TOLERANCE,
+              STANDARD_CLOSE_HOPPER_CLEAR_JAM,
+              STANDARD_CLOSE_HOPPER_SET_SETPOINT_TO_TARGET_ON_END)
     {
     }
 
@@ -116,10 +116,10 @@ public:
         float currAngle = setpointSubsystem->getCurrentValue();
         return !tap::algorithms::compareFloatClose(
             currAngle,
-            SOLDIER_CLOSE_HOPPER_TARGET_ANGLE,
-            SOLDIER_CLOSE_HOPPER_TOLERANCE);
+            STANDARD_CLOSE_HOPPER_TARGET_ANGLE,
+            STANDARD_CLOSE_HOPPER_TOLERANCE);
     }
-};  // class SoldierCloseHopperCommand
+};  // class StandardCloseHopperCommand
 
 }  // namespace control
 

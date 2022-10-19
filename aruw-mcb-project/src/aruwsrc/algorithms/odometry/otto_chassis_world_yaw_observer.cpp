@@ -37,7 +37,7 @@ OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
 bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     /// @todo fix this in the future, should use some sort of interface
-#if defined(ALL_SENTINELS)
+#if defined(ALL_SENTRIES)
     *output = 0;
     return true;
 #else

@@ -80,7 +80,7 @@ void VisionCoprocessor::initializeCV()
 #endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-#if defined(TARGET_HERO)
+#if defined(TARGET_HERO_CYCLONE)
     drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
     drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 900'000>();
 #else
@@ -169,7 +169,7 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
-#if defined(ALL_SENTINELS)
+#if defined(ALL_SENTRIES)
     odometryData->chassisOdometry.pitch = 0;
     odometryData->chassisOdometry.roll = 0;
     odometryData->chassisOdometry.yaw = 0;

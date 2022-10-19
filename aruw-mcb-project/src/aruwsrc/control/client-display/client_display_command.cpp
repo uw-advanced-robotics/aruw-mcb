@@ -44,7 +44,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler)
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
     : Command(),
       drivers(drivers),
       refSerialTransmitter(&drivers),
@@ -55,7 +55,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           frictionWheelSubsystem,
           agitatorSubsystem,
           imuCalibrateCommand,
-          sentinelResponseHandler),
+          sentryResponseHandler),
       chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(
           drivers,
