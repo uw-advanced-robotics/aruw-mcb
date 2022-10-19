@@ -254,7 +254,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::tuple<float, int16_t, float>(1, INT16_MIN + 1, 0)));
 
 class SentryChassisTest : public ControlOperatorInterfaceTest,
-                            public WithParamInterface<std::tuple<float, float>>
+                          public WithParamInterface<std::tuple<float, float>>
 {
 };
 

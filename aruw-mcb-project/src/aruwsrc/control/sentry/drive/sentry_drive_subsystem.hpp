@@ -101,10 +101,7 @@ public:
 
     inline int16_t getLeftFrontRpmActual() const override { return leftWheel.getShaftRPM(); }
     inline int16_t getLeftBackRpmActual() const override { return 0; }
-    inline int16_t getRightFrontRpmActual() const override
-    {
-        return 0;
-    }
+    inline int16_t getRightFrontRpmActual() const override { return 0; }
     inline int16_t getRightBackRpmActual() const override { return 0; }
 
     inline bool allMotorsOnline() const override

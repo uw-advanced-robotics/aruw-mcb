@@ -57,7 +57,7 @@ namespace aruwsrc::algorithms::odometry
  * @see ChassisKFOdometry
  */
 class SentryOttoKFOdometry2DSubsystem final : public tap::control::Subsystem,
-                                                public SentryChassisKFOdometry
+                                              public SentryChassisKFOdometry
 {
 public:
     /**

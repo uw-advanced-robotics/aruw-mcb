@@ -62,18 +62,14 @@ TEST_F(SentryDriveEvadeCommandTest, initiailze_sets_new_desired_rpm)
     cmd.initialize();
 }
 
-TEST_F(
-    SentryDriveEvadeCommandTest,
-    initialize_sets_positive_desired_rpm_if_currently_negative_rpm)
+TEST_F(SentryDriveEvadeCommandTest, initialize_sets_positive_desired_rpm_if_currently_negative_rpm)
 {
     ON_CALL(sub, getDesiredRpm).WillByDefault(Return(-SentryDriveEvadeCommand::MIN_RPM));
     EXPECT_CALL(sub, setDesiredRpm(SentryDriveEvadeCommand::MIN_RPM));
     cmd.initialize();
 }
 
-TEST_F(
-    SentryDriveEvadeCommandTest,
-    initialize_sets_negative_desired_rpm_if_currently_positive_rpm)
+TEST_F(SentryDriveEvadeCommandTest, initialize_sets_negative_desired_rpm_if_currently_positive_rpm)
 {
     ON_CALL(sub, getDesiredRpm).WillByDefault(Return(SentryDriveEvadeCommand::MIN_RPM));
     EXPECT_CALL(sub, setDesiredRpm(-SentryDriveEvadeCommand::MIN_RPM));
@@ -236,8 +232,7 @@ TEST_F(
     cmd.execute();
 
     EXPECT_NEAR(
-        (SentryDriveSubsystem::RAIL_LENGTH - SentryDriveSubsystem::SENTRY_LENGTH) / 2 -
-            position,
+        (SentryDriveSubsystem::RAIL_LENGTH - SentryDriveSubsystem::SENTRY_LENGTH) / 2 - position,
         cmd.getDistanceToDrive(),
         1E-5);
 }

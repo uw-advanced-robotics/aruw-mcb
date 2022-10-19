@@ -43,8 +43,7 @@ void SentryDriveManualCommand::initialize() {}
 
 void SentryDriveManualCommand::execute()
 {
-    subsystemSentryDrive->setDesiredRpm(
-        drivers->controlOperatorInterface.getSentrySpeedInput());
+    subsystemSentryDrive->setDesiredRpm(drivers->controlOperatorInterface.getSentrySpeedInput());
 }
 
 void SentryDriveManualCommand::end(bool) { subsystemSentryDrive->setDesiredRpm(0); }

@@ -437,8 +437,7 @@ void startSentryCommands(aruwsrc::Drivers *drivers)
         pauseProjectileLaunchMessageHandler);
     sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
-    sentryRequestHandler.attachToggleDriveMovementMessageHandler(
-        toggleDriveMovementMessageHandler);
+    sentryRequestHandler.attachToggleDriveMovementMessageHandler(toggleDriveMovementMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
         &sentryRequestHandler);
@@ -469,10 +468,7 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }  // namespace aruwsrc::control
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand()
-{
-    return &sentry_control::imuCalibrateCommand;
-}
+imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand; }
 #endif
 
 #endif

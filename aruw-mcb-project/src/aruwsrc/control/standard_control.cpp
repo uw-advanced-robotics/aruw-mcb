@@ -172,8 +172,7 @@ aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMove
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentryTargetNewQuadrantCommand(
     sentryRequestSubsystem);
 aruwsrc::communication::serial::
-    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(
-        sentryRequestSubsystem);
+    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -528,7 +527,10 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
 }  // namespace aruwsrc::control
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &standard_control::imuCalibrateCommand; }
+imu::ImuCalibrateCommand *getImuCalibrateCommand()
+{
+    return &standard_control::imuCalibrateCommand;
+}
 #endif
 
 #endif

@@ -173,8 +173,7 @@ aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMove
 aruwsrc::communication::serial::TargetNewQuadrantCommand sentryTargetNewQuadrantCommand(
     sentryRequestSubsystem);
 aruwsrc::communication::serial::
-    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(
-        sentryRequestSubsystem);
+    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 

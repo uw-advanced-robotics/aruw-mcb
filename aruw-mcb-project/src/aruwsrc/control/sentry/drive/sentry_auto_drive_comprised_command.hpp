@@ -40,9 +40,7 @@ class SentryDriveSubsystem;
 class SentryAutoDriveComprisedCommand : public tap::control::ComprisedCommand
 {
 public:
-    SentryAutoDriveComprisedCommand(
-        aruwsrc::Drivers *drivers,
-        SentryDriveSubsystem *sentryChassis);
+    SentryAutoDriveComprisedCommand(aruwsrc::Drivers *drivers, SentryDriveSubsystem *sentryChassis);
 
     const char *getName() const override { return "sentry random drive"; }
     void initialize() override;

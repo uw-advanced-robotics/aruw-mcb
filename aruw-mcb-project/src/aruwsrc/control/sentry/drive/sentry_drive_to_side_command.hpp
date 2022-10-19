@@ -40,8 +40,8 @@ public:
     enum class SentryRailSide : uint8_t
     {
         CLOSE_RAIL,  ///< The rail side at 0 mm as defined by sentry odometry
-        FAR_RAIL,  ///< The rail side at SentryDriveSubsystem::RAIL_LENGTH as defined by sentry
-                   ///< odometry
+        FAR_RAIL,    ///< The rail side at SentryDriveSubsystem::RAIL_LENGTH as defined by sentry
+                     ///< odometry
     };
 
     SentryDriveToSideCommand(
@@ -76,8 +76,8 @@ private:
                 return sentryPosition <= RAIL_LENGTH_END_THRESHOLD;
             case SentryRailSide::FAR_RAIL:
                 return sentryPosition >= SentryDriveSubsystem::RAIL_LENGTH -
-                                               SentryDriveSubsystem::SENTRY_LENGTH -
-                                               RAIL_LENGTH_END_THRESHOLD;
+                                             SentryDriveSubsystem::SENTRY_LENGTH -
+                                             RAIL_LENGTH_END_THRESHOLD;
             default:
                 return false;
         }

@@ -51,9 +51,9 @@ void SentryFullTraverseCommand::execute()
         velocityTargetGenerator.setTarget(MAX_DESIRED_TRAVERSE_SPEED);
     }
     else if (
-        velocityTargetGenerator.getValue() > 0 &&
-        curPos > SentryDriveSubsystem::RAIL_LENGTH - SentryDriveSubsystem::SENTRY_LENGTH -
-                     TURNAROUND_BUFFER)
+        velocityTargetGenerator.getValue() > 0 && curPos > SentryDriveSubsystem::RAIL_LENGTH -
+                                                               SentryDriveSubsystem::SENTRY_LENGTH -
+                                                               TURNAROUND_BUFFER)
     {
         velocityTargetGenerator.setTarget(-MAX_DESIRED_TRAVERSE_SPEED);
     }
