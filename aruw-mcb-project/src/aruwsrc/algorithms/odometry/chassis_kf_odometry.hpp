@@ -35,7 +35,7 @@ namespace aruwsrc::algorithms::odometry
 /**
  * An odometry interface that uses a kalman filter to measure odometry. This class is designed
  * specifically for robots whose chassis does not measure absolute position (i.e. all ground
- * robots). For those robots that measure chassis position directly (sentinel, for example), a
+ * robots). For those robots that measure chassis position directly (sentry, for example), a
  * tweaked version of the kalman filter used in this implementation should be used.
  *
  * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
@@ -128,7 +128,7 @@ private:
     };
     // clang-format on
 
-    /// Max chassis acceleration magnitude measured on the soldier when at 120W power mode, in
+    /// Max chassis acceleration magnitude measured on the standard when at 120W power mode, in
     /// m/s^2. Also works for hero since it has an acceleration on the same order of magnitude.
     static constexpr float MAX_ACCELERATION = 8.0f;
 

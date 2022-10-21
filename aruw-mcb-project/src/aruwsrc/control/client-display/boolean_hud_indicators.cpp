@@ -49,14 +49,14 @@ BooleanHudIndicators::BooleanHudIndicators(
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler)
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
-      sentinelResponseHandler(sentinelResponseHandler),
+      sentryResponseHandler(sentryResponseHandler),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               refSerialTransmitter,
@@ -74,10 +74,10 @@ BooleanHudIndicators::BooleanHudIndicators(
               0),
           BooleanHUDIndicator(
               refSerialTransmitter,
-              &booleanHudIndicatorGraphics[SENTINEL_DRIVE_STATUS],
+              &booleanHudIndicatorGraphics[SENTRY_DRIVE_STATUS],
               updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTINEL_DRIVE_STATUS]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTINEL_DRIVE_STATUS])>,
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS])>,
               0),
       }
 {
@@ -115,8 +115,8 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
-    booleanHudIndicatorDrawers[SENTINEL_DRIVE_STATUS].setIndicatorState(
-        sentinelResponseHandler.getSentinelMoving());
+    booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
+        sentryResponseHandler.getSentryMoving());
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;

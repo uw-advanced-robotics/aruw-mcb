@@ -24,9 +24,9 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-#if defined(ALL_SOLDIERS)
-#include "soldier_chassis_constants.hpp"
-#elif defined(TARGET_HERO)
+#if defined(ALL_STANDARDS)
+#include "standard_chassis_constants.hpp"
+#elif defined(TARGET_HERO_CYCLONE)
 #include "hero_chassis_constants.hpp"
 #else  // by default use engineer constants (for robots that don't use them)
 #include "engineer_chassis_constants.hpp"

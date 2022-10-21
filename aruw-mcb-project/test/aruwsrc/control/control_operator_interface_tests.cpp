@@ -253,28 +253,28 @@ INSTANTIATE_TEST_SUITE_P(
         std::tuple<float, int16_t, float>(0, INT16_MAX - 1, -1),
         std::tuple<float, int16_t, float>(1, INT16_MIN + 1, 0)));
 
-class SentinelChassisTest : public ControlOperatorInterfaceTest,
-                            public WithParamInterface<std::tuple<float, float>>
+class SentryChassisTest : public ControlOperatorInterfaceTest,
+                          public WithParamInterface<std::tuple<float, float>>
 {
 };
 
-TEST_P(SentinelChassisTest, getSentinelSpeedInput_retuns_user_input)
+TEST_P(SentryChassisTest, getSentrySpeedInput_retuns_user_input)
 {
     ON_CALL(drivers.remote, getWheel).WillByDefault(Return(std::get<0>(GetParam())));
 
-    EXPECT_NEAR(std::get<1>(GetParam()), operatorInterface.getSentinelSpeedInput(), 1E-3);
+    EXPECT_NEAR(std::get<1>(GetParam()), operatorInterface.getSentrySpeedInput(), 1E-3);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     ControlOperatorInterface,
-    SentinelChassisTest,
+    SentryChassisTest,
     Values(
         std::tuple<float, float>(0, 0),
-        std::tuple<float, float>(-660, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
-        std::tuple<float, float>(660, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(-660, ControlOperatorInterface::USER_STICK_SENTRY_DRIVE_SCALAR),
+        std::tuple<float, float>(660, -ControlOperatorInterface::USER_STICK_SENTRY_DRIVE_SCALAR),
         std::tuple<float, float>(
             330,
-            -0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+            -0.5 * ControlOperatorInterface::USER_STICK_SENTRY_DRIVE_SCALAR),
         std::tuple<float, float>(
             -330,
-            0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR)));
+            0.5 * ControlOperatorInterface::USER_STICK_SENTRY_DRIVE_SCALAR)));

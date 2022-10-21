@@ -103,7 +103,7 @@ public:
     void initialize() override final;
 
 private:
-#if defined(ALL_SOLDIERS)
+#if defined(ALL_STANDARDS)
 #define DISPLAY_FIRING_MODE
 #endif
 

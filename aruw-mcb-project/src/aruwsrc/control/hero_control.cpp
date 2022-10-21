@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO)
+#if defined(TARGET_HERO_CYCLONE)
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -38,9 +38,9 @@
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/communication/serial/sentinel_request_commands.hpp"
-#include "aruwsrc/communication/serial/sentinel_request_subsystem.hpp"
-#include "aruwsrc/communication/serial/sentinel_response_handler.hpp"
+#include "aruwsrc/communication/serial/sentry_request_commands.hpp"
+#include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -103,7 +103,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-aruwsrc::communication::serial::SentinelRequestSubsystem sentinelRequestSubsystem(drivers());
+aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
 ChassisSubsystem chassis(drivers(), ChassisSubsystem::ChassisType::X_DRIVE);
 
@@ -168,13 +168,12 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::ToggleDriveMovementCommand sentinelToggleDriveMovementCommand(
-    sentinelRequestSubsystem);
-aruwsrc::communication::serial::TargetNewQuadrantCommand sentinelTargetNewQuadrantCommand(
-    sentinelRequestSubsystem);
+aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMovementCommand(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::TargetNewQuadrantCommand sentryTargetNewQuadrantCommand(
+    sentryRequestSubsystem);
 aruwsrc::communication::serial::
-    PauseProjectileLaunchingCommand sentinelPauseProjectileLaunchingCommand(
-        sentinelRequestSubsystem);
+    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
 
@@ -335,7 +334,7 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
-aruwsrc::communication::serial::SentinelResponseHandler sentinelResponseHandler(*drivers());
+aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -350,7 +349,7 @@ ClientDisplayCommand clientDisplayCommand(
     &beybladeCommand,
     &chassisDiagonalDriveCommand,
     &chassisImuDriveCommand,
-    sentinelResponseHandler);
+    sentryResponseHandler);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -374,15 +373,15 @@ HoldCommandMapping leftSwitchUp(
 // Keyboard/Mouse related mappings
 PressCommandMapping cPressed(
     drivers(),
-    {&sentinelToggleDriveMovementCommand},
+    {&sentryToggleDriveMovementCommand},
     RemoteMapState({Remote::Key::C}));
 PressCommandMapping gPressedCtrlNotPressed(
     drivers(),
-    {&sentinelTargetNewQuadrantCommand},
+    {&sentryTargetNewQuadrantCommand},
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),
-    {&sentinelPauseProjectileLaunchingCommand},
+    {&sentryPauseProjectileLaunchingCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
@@ -445,7 +444,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    sentinelRequestSubsystem.initialize();
+    sentryRequestSubsystem.initialize();
     chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
@@ -458,7 +457,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&sentinelRequestSubsystem);
+    drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -487,8 +486,8 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 
     drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTINEL_RESPONSE_MESSAGE_ID,
-        &sentinelResponseHandler);
+        aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
+        &sentryResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/

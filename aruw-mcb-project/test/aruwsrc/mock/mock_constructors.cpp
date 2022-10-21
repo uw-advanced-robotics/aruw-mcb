@@ -29,8 +29,8 @@
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
-#include "sentinel_drive_subsystem_mock.hpp"
-#include "sentinel_request_subsystem_mock.hpp"
+#include "sentry_drive_subsystem_mock.hpp"
+#include "sentry_request_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
 #include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
@@ -141,20 +141,20 @@ HopperSubsystemMock::HopperSubsystemMock(
 }
 HopperSubsystemMock::~HopperSubsystemMock() {}
 
-SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
+SentryDriveSubsystemMock::SentryDriveSubsystemMock(
     aruwsrc::Drivers *drivers,
     tap::gpio::Digital::InputPin leftLimitSwitch,
     tap::gpio::Digital::InputPin rightLimitSwitch)
-    : control::sentinel::drive::SentinelDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
+    : control::sentry::drive::SentryDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
 {
 }
-SentinelDriveSubsystemMock::~SentinelDriveSubsystemMock() {}
+SentryDriveSubsystemMock::~SentryDriveSubsystemMock() {}
 
-SentinelRequestSubsystemMock::SentinelRequestSubsystemMock(aruwsrc::Drivers *drivers)
-    : SentinelRequestSubsystem(drivers)
+SentryRequestSubsystemMock::SentryRequestSubsystemMock(aruwsrc::Drivers *drivers)
+    : SentryRequestSubsystem(drivers)
 {
 }
-SentinelRequestSubsystemMock::~SentinelRequestSubsystemMock() {}
+SentryRequestSubsystemMock::~SentryRequestSubsystemMock() {}
 
 TowSubsystemMock::TowSubsystemMock(
     aruwsrc::Drivers *drivers,
