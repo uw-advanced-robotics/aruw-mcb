@@ -46,10 +46,10 @@ namespace control
 class HopperSubsystem : public tap::control::Subsystem
 {
 public:
-#if defined(ALL_SOLDIERS)
-    static constexpr float SOLDIER_HOPPER_OPEN_PWM = 0.21f;
-    static constexpr float SOLDIER_HOPPER_CLOSE_PWM = 0.11f;
-    static constexpr float SOLDIER_PWM_RAMP_SPEED = 0.001f;
+#if defined(ALL_STANDARDS)
+    static constexpr float STANDARD_HOPPER_OPEN_PWM = 0.21f;
+    static constexpr float STANDARD_HOPPER_CLOSE_PWM = 0.11f;
+    static constexpr float STANDARD_PWM_RAMP_SPEED = 0.001f;
 #endif
 
     /*

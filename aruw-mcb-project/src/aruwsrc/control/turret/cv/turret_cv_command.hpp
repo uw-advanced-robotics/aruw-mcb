@@ -58,7 +58,7 @@ namespace aruwsrc::control::turret::cv
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turret accordingly using a position PID controller.
  *
- * This command, unlike the `SentinelTurretCVCommand`, is not responsible for firing projectiles
+ * This command, unlike the `SentryTurretCVCommand`, is not responsible for firing projectiles
  * when the auto aim system determines it should fire. Nor does this class scan the turret back and
  * forth.
  *

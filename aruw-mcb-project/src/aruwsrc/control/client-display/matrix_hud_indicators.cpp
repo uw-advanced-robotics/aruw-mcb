@@ -165,12 +165,12 @@ void MatrixHudIndicators::updateIndicatorState()
 
     if (shooterState == ShooterState::READY_TO_FIRE)
     {
-#if defined(ALL_SOLDIERS)
+#if defined(ALL_STANDARDS)
         if (hopperSubsystem != nullptr && hopperSubsystem->getIsHopperOpen())
         {
             shooterState = ShooterState::LOADING;
         }
-#elif defined(TARGET_HERO)
+#elif defined(TARGET_HERO_CYCLONE)
         auto turretMCB = turretSubsystem.getTurretMCB();
         assert(turretMCB != nullptr);
         if (!turretMCB->getLimitSwitchDepressed())
