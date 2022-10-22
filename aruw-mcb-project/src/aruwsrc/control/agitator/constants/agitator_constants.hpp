@@ -20,13 +20,11 @@
 #ifndef AGITATOR_CONSTANTS_HPP_
 #define AGITATOR_CONSTANTS_HPP_
 
-#if defined(ALL_SOLDIERS)
-#include "soldier_agitator_constants.hpp"
-#elif defined(TARGET_SENTINEL_2021)
-#include "sentinel_2021_agitator_constants.hpp"
-#elif defined(TARGET_SENTINEL_2022)
-#include "sentinel_2022_agitator_constants.hpp"
-#elif defined(TARGET_HERO)
+#if defined(ALL_STANDARDS)
+#include "standard_agitator_constants.hpp"
+#elif defined(TARGET_SENTRY_BEEHIVE)
+#include "sentry_beehive_agitator_constants.hpp"
+#elif defined(TARGET_HERO_CYCLONE)
 #include "hero_agitator_constants.hpp"
 #endif
 
