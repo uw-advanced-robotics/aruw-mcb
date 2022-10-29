@@ -205,6 +205,8 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
     world_rel_turret_imu::PITCH_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
+    world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
@@ -212,6 +214,12 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
+    worldFramePitchTurretImuVelPid);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+    getTurretMCBCanComm(),
+    turret.pitchMotor,
+    worldFramePitchTurretImuPosPidCv,
     worldFramePitchTurretImuVelPid);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
@@ -248,7 +256,7 @@ cv::TurretCVCommand turretCVCommand(
     drivers(),
     &turret,
     &worldFrameYawTurretImuControllerCv,
-    &worldFramePitchTurretImuController,
+    &worldFramePitchTurretImuControllerCv,
     &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
