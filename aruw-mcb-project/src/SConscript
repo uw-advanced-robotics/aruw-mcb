@@ -23,9 +23,9 @@ Import("sources")
 
 
 # Don't compile this stuff when testing
-IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/control/*_control.cpp", "aruwsrc/sim-initialization/*_sim.cpp", "aruw-mcb-project/src/aruwsrc/drivers.hpp", "aruwsrc/drivers_singleton.hpp", "aruwsrc/drivers_singleton.cpp", ]
+IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/control/*_control.cpp", "aruwsrc/sim-initialization/*_sim.cpp",]
 
-ignored_files = []
+ignored_files = ["aruwsrc/drivers.hpp", "aruwsrc/drivers_singleton.hpp", "aruwsrc/drivers_singleton.cpp"]
 ignored_dirs = []
 
 if args["TARGET_ENV"] == "tests":
