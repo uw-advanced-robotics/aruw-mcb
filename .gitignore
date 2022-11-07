@@ -8,6 +8,7 @@ project.xml.log
 
 .vscode/.cortex-debug.peripherals.state.json
 .vscode/.cortex-debug.registers.state.json
+.vscode/settings.json
 .sconsign.dblite
 
 .robot_type.txt
