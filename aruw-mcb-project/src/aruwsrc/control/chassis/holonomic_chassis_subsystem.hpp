@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CHASSIS_SUBSYSTEM_HPP_
-#define CHASSIS_SUBSYSTEM_HPP_
+#ifndef HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
+#define HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
@@ -209,7 +209,7 @@ private:
         static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
         return mat * ratio;
     }
-};  // class ChassisSubsystem
+};  // class HolonomicChassisSubsystem
 
 }  // namespace chassis
 
