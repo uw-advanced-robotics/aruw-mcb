@@ -61,12 +61,6 @@ namespace chassis
 class HolonomicChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
-    enum class ChassisType
-    {
-        MECANUM = 0,
-        X_DRIVE = 1,
-    };
-
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
      */
@@ -98,11 +92,6 @@ public:
 
     HolonomicChassisSubsystem(
         aruwsrc::Drivers* drivers,
-        ChassisType chassisType,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     void initialize() override;
@@ -172,17 +161,10 @@ public:
      */
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
-    inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
+    int getNumChassisMotors() const override {}
 
-    inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
-    inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
-    inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
-    inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
-
-    inline bool allMotorsOnline() const override
+     bool allMotorsOnline() const override
     {
-        return leftFrontMotor.isMotorOnline() && rightFrontMotor.isMotorOnline() &&
-               leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
 
     void onHardwareTestStart() override;
@@ -203,9 +185,6 @@ private:
         RB = 3,
     };
 
-    // wheel velocity PID variables
-    modm::Pid<float> velocityPid[4];
-
     /**
      * Stores the desired RPM of each of the motors in a matrix, indexed by WheelRPMIndex
      */
@@ -215,44 +194,16 @@ private:
 
     float desiredRotation = 0;
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
-    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
-
-private:
-#else
-    // motors
-    tap::motor::DjiMotor leftFrontMotor;
-    tap::motor::DjiMotor leftBackMotor;
-    tap::motor::DjiMotor rightFrontMotor;
-    tap::motor::DjiMotor rightBackMotor;
-#endif
-
-    tap::motor::DjiMotor* motors[4];
-
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
-
-    /**
-     * When you input desired x, y, an r values, this function translates
-     * and sets the RPM of individual chassis motors.
-     */
-    void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
-
-    void updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        tap::motor::DjiMotor* const motor,
-        float desiredRpm);
 
     void limitChassisPower();
 
     /**
      * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
      */
+    [[deprecated]]
     inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
     {
         static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
