@@ -24,7 +24,9 @@
 #include "swerve_module.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+
 #include "aruwsrc/drivers.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 
 using namespace tap::algorithms;
@@ -51,6 +53,7 @@ SwerveModule::SwerveModule(
           CAN_BUS_MOTORS,
           swerveModuleConfig.azimuthMotorInverted,
           "Azimuth motor"),
+      config(swerveModuleConfig),
       drivePid(
           swerveModuleConfig.drivePidKp,
           swerveModuleConfig.drivePidKi,
@@ -68,9 +71,24 @@ SwerveModule::SwerveModule(
 
 void SwerveModule::setDesiredState(float metersPerSecond, float radianOutput) {}
 
-float SwerveModule::getVelocity() {}
+float SwerveModule::getVelocity() { 
+
+    return 3; }
 
 float SwerveModule::getAngle() {}
+
+float SwerveModule::mpsToRpm(float mps){
+        static constexpr float WHEEL_DIAMETER_M = 0.076f;
+        static constexpr float WHEEL_CIRCUMFERANCE_M = M_PI * WHEEL_DIAMETER_M;
+        static constexpr float SEC_PER_M = 60.0f;
+
+        return (mps / WHEEL_CIRCUMFERANCE_M) * SEC_PER_M * config.driveMotorGearing;
+}
+
+float SwerveModule::rpmToMps(float rpm){
+    
+}
+
 
 }  // namespace chassis
 }  // namespace aruwsrc
