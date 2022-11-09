@@ -57,7 +57,7 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
 {
 }
 
-float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
+/* float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
     // P
     float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
@@ -75,7 +75,7 @@ float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError
         AUTOROTATION_PID_MAX_OUTPUT);
 
     return wheelRotationSpeed;
-}
+} */
 
 float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
     float chassisRotationDesiredWheelspeed)
@@ -102,9 +102,9 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
         rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
-}
+} */
 
-modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
+/* modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
     return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
