@@ -69,6 +69,11 @@ SwerveModule::SwerveModule(
 {
 }
 
+void SwerveModule::intialize(){
+    driveMotor.initialize();
+    azimuthMotor.initialize();
+}
+
 void SwerveModule::setDesiredState(float metersPerSecond, float radianOutput) {}
 
 float SwerveModule::getVelocity() { 
@@ -88,6 +93,8 @@ float SwerveModule::mpsToRpm(float mps){
 float SwerveModule::rpmToMps(float rpm){
     
 }
+
+
 
 
 }  // namespace chassis
