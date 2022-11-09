@@ -115,7 +115,7 @@ public:
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
      */
-    mockable void setZeroRPM();
+    mockable inline void setZeroRPM(){ desiredWheelRPM = desiredWheelRPM.zeroMatrix();}
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
