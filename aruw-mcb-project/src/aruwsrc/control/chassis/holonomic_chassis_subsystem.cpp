@@ -40,42 +40,42 @@ modm::Pair<int, float> HolonomicChassisSubsystem::lastComputedMaxWheelSpeed =
 
 HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     aruwsrc::Drivers* drivers,
-    ChassisType chassisType,
-    tap::motor::MotorId leftFrontMotorId,
-    tap::motor::MotorId leftBackMotorId,
-    tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId,
+    // ChassisType chassisType,
+    // tap::motor::MotorId leftFrontMotorId,
+    // tap::motor::MotorId leftBackMotorId,
+    // tap::motor::MotorId rightFrontMotorId,
+    // tap::motor::MotorId rightBackMotorId,
     tap::gpio::Analog::Pin currentPin)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
-      velocityPid{
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT)},
-      leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
-      leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
-      rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
-      rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor"),
+    //   velocityPid{
+    //       modm::Pid<float>(
+    //           VELOCITY_PID_KP,
+    //           VELOCITY_PID_KI,
+    //           VELOCITY_PID_KD,
+    //           VELOCITY_PID_MAX_ERROR_SUM,
+    //           VELOCITY_PID_MAX_OUTPUT),
+    //       modm::Pid<float>(
+    //           VELOCITY_PID_KP,
+    //           VELOCITY_PID_KI,
+    //           VELOCITY_PID_KD,
+    //           VELOCITY_PID_MAX_ERROR_SUM,
+    //           VELOCITY_PID_MAX_OUTPUT),
+    //       modm::Pid<float>(
+    //           VELOCITY_PID_KP,
+    //           VELOCITY_PID_KI,
+    //           VELOCITY_PID_KD,
+    //           VELOCITY_PID_MAX_ERROR_SUM,
+    //           VELOCITY_PID_MAX_OUTPUT),
+    //       modm::Pid<float>(
+    //           VELOCITY_PID_KP,
+    //           VELOCITY_PID_KI,
+    //           VELOCITY_PID_KD,
+    //           VELOCITY_PID_MAX_ERROR_SUM,
+    //           VELOCITY_PID_MAX_OUTPUT)},
+    //   leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
+    //   leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
+    //   rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
+    //   rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor"),
       currentSensor(
           {&drivers->analog,
            currentPin,
@@ -90,7 +90,7 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
           ENERGY_BUFFER_CRIT_THRESHOLD)
 {
 
-    switch (chassisType)
+    /* switch (chassisType)
     {
         case ChassisType::MECANUM:
             wheelVelToChassisVelMat[X][LF] = 1;
@@ -126,18 +126,18 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;
     motors[LB] = &leftBackMotor;
-    motors[RB] = &rightBackMotor;
+    motors[RB] = &rightBackMotor;*/
 }
 
-void HolonomicChassisSubsystem::initialize()
+/* void HolonomicChassisSubsystem::initialize()
 {
     for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
     {
         motors[i]->initialize();
     }
-}
+} */
 
-void HolonomicChassisSubsystem::setDesiredOutput(float x, float y, float r)
+/* void HolonomicChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
     mecanumDriveCalculate(
         x,
@@ -146,11 +146,11 @@ void HolonomicChassisSubsystem::setDesiredOutput(float x, float y, float r)
         HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
-}
+} */
 
-void HolonomicChassisSubsystem::setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
+// void HolonomicChassisSubsystem::setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
-void HolonomicChassisSubsystem::refresh()
+/* void HolonomicChassisSubsystem::refresh()
 {
     for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
     {
@@ -158,9 +158,9 @@ void HolonomicChassisSubsystem::refresh()
     }
 
     limitChassisPower();
-}
+} */
 
-void HolonomicChassisSubsystem::limitChassisPower()
+/* void HolonomicChassisSubsystem::limitChassisPower()
 {
     static constexpr size_t NUM_MOTORS = MODM_ARRAY_SIZE(motors);
 
@@ -203,9 +203,9 @@ void HolonomicChassisSubsystem::limitChassisPower()
             limitVal(NUM_MOTORS * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
         motors[i]->setDesiredOutput(motors[i]->getOutputDesired() * modifiedPowerLimitFrac);
     }
-}
+} */
 
-void HolonomicChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
+/* void HolonomicChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
 {
     // this is the distance between the center of the chassis to the wheel
     float chassisRotationRatio = sqrtf(
@@ -242,18 +242,18 @@ void HolonomicChassisSubsystem::mecanumDriveCalculate(float x, float y, float r,
         maxWheelSpeed);
 
     desiredRotation = r;
-}
+} */
 
-void HolonomicChassisSubsystem::updateMotorRpmPid(
+/* void HolonomicChassisSubsystem::updateMotorRpmPid(
     modm::Pid<float>* pid,
     tap::motor::DjiMotor* const motor,
     float desiredRpm)
 {
     pid->update(desiredRpm - motor->getShaftRPM());
     motor->setDesiredOutput(pid->getValue());
-}
+} */
 
-float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
+/* float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
     // P
     float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
@@ -271,9 +271,9 @@ float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError
         AUTOROTATION_PID_MAX_OUTPUT);
 
     return wheelRotationSpeed;
-}
+} */
 
-float HolonomicChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
+/* float HolonomicChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
 {
     // what we will multiply x and y speed by to take into account rotation
     float rTranslationalGain = 1.0f;
@@ -297,14 +297,14 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(float chassi
         rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
-}
+} */
 
-modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
+/* modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
     return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
-}
+} */
 
-modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getActualVelocityChassisRelative() const
+/* modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getActualVelocityChassisRelative() const
 {
     modm::Matrix<float, MODM_ARRAY_SIZE(motors), 1> wheelVelocity;
 
@@ -313,9 +313,9 @@ modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getActualVelocityChassisRel
     wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
     wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
-}
+} */
 
-void HolonomicChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
+// void HolonomicChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
 
 }  // namespace chassis
 
