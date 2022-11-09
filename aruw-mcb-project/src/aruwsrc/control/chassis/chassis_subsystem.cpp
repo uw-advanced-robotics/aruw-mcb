@@ -89,9 +89,6 @@ ChassisSubsystem::ChassisSubsystem(
           ENERGY_BUFFER_LIMIT_THRESHOLD,
           ENERGY_BUFFER_CRIT_THRESHOLD)
 {
-    constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-                            ? 1
-                            : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 
     switch (chassisType)
     {
@@ -104,10 +101,10 @@ ChassisSubsystem::ChassisSubsystem(
             wheelVelToChassisVelMat[Y][RF] = -1;
             wheelVelToChassisVelMat[Y][LB] = 1;
             wheelVelToChassisVelMat[Y][RB] = 1;
-            wheelVelToChassisVelMat[R][LF] = -1.0 / A;
-            wheelVelToChassisVelMat[R][RF] = -1.0 / A;
-            wheelVelToChassisVelMat[R][LB] = -1.0 / A;
-            wheelVelToChassisVelMat[R][RB] = -1.0 / A;
+            wheelVelToChassisVelMat[R][LF] = -1.0 / WHEELBASE_HYPOTENUSE;
+            wheelVelToChassisVelMat[R][RF] = -1.0 / WHEELBASE_HYPOTENUSE;
+            wheelVelToChassisVelMat[R][LB] = -1.0 / WHEELBASE_HYPOTENUSE;
+            wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_HYPOTENUSE;
             wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
             break;
         case ChassisType::X_DRIVE:
@@ -119,10 +116,10 @@ ChassisSubsystem::ChassisSubsystem(
             wheelVelToChassisVelMat[Y][RF] = -sqrtf(2);
             wheelVelToChassisVelMat[Y][LB] = sqrtf(2);
             wheelVelToChassisVelMat[Y][RB] = sqrtf(2);
-            wheelVelToChassisVelMat[R][LF] = -1.0 / (2.0 * A);
-            wheelVelToChassisVelMat[R][RF] = -1.0 / (2.0 * A);
-            wheelVelToChassisVelMat[R][LB] = -1.0 / (2.0 * A);
-            wheelVelToChassisVelMat[R][RB] = -1.0 / (2.0 * A);
+            wheelVelToChassisVelMat[R][RF] = -1.0 / (2.0 * WHEELBASE_HYPOTENUSE);
+            wheelVelToChassisVelMat[R][LF] = -1.0 / (2.0 * WHEELBASE_HYPOTENUSE);
+            wheelVelToChassisVelMat[R][LB] = -1.0 / (2.0 * WHEELBASE_HYPOTENUSE);
+            wheelVelToChassisVelMat[R][RB] = -1.0 / (2.0 * WHEELBASE_HYPOTENUSE);
             wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
             break;
     }
