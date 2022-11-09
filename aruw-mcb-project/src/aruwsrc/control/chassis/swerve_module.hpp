@@ -85,6 +85,8 @@ public:
 
     float getAngle();
 
+    void intialize();
+
 private:
     modm::Pid<float> drivePid;
     modm::Pid<float> azimuthPid;
