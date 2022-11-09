@@ -89,6 +89,9 @@ private:
     modm::Pid<float> drivePid;
     modm::Pid<float> azimuthPid;
 
+    float mpsToRpm(float mps);
+    float rpmToMps(float rpm);
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     testing::NiceMock<tap::mock::DjiMotorMock> driveMotor;
@@ -99,6 +102,7 @@ private:
     // motors
     Motor driveMotor;
     Motor azimuthMotor;
+    SwerveModuleConfig config;
 
 #endif
 };  // class SwerveModule
