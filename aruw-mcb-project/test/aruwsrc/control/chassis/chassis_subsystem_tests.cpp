@@ -46,7 +46,7 @@ static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_
 class ChassisSubsystemTest : public Test
 {
 protected:
-    ChassisSubsystemTest() : chassis(&drivers, ChassisSubsystem::ChassisType::MECANUM) {}
+    ChassisSubsystemTest() : chassis(&drivers, HolonomicChassisSubsystem::ChassisType::MECANUM) {}
 
     void SetUp() override
     {
@@ -55,7 +55,7 @@ protected:
     }
 
     aruwsrc::Drivers drivers;
-    ChassisSubsystem chassis;
+    HolonomicChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
@@ -279,7 +279,7 @@ VelocityGetterParam velocityGetterValuesToTest[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    ChassisSubsystem,
+    HolonomicChassisSubsystem,
     VelocityGetterTest,
     ValuesIn(velocityGetterValuesToTest));
 
@@ -290,7 +290,7 @@ class MaxWheelSpeedGetterTest : public TestWithParam<std::tuple<bool, int, float
 TEST_P(MaxWheelSpeedGetterTest, getMaxWheelSpeed)
 {
     float maxWheelSpeed =
-        ChassisSubsystem::getMaxWheelSpeed(std::get<0>(GetParam()), std::get<1>(GetParam()));
+        HolonomicChassisSubsystem::getMaxWheelSpeed(std::get<0>(GetParam()), std::get<1>(GetParam()));
 
     EXPECT_NEAR(std::get<2>(GetParam()), maxWheelSpeed, 1E-3);
 }
@@ -316,7 +316,7 @@ std::tuple<bool, int, float> maxWheelSpeedValuesToTest[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    ChassisSubsystem,
+    HolonomicChassisSubsystem,
     MaxWheelSpeedGetterTest,
     ValuesIn(maxWheelSpeedValuesToTest));
 
@@ -399,6 +399,6 @@ ActualVelocityParam actualVelocityValuesToTest[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    ChassisSubsystem,
+    HolonomicChassisSubsystem,
     ActualVelocityTest,
     ValuesIn(actualVelocityValuesToTest));

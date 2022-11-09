@@ -21,7 +21,7 @@
  * Copyright (c) 2019 Sanger_X
  */
 
-#include "chassis_subsystem.hpp"
+#include "holonomic_chassis_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
@@ -35,10 +35,10 @@ namespace aruwsrc
 {
 namespace chassis
 {
-modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
+modm::Pair<int, float> HolonomicChassisSubsystem::lastComputedMaxWheelSpeed =
     CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
 
-ChassisSubsystem::ChassisSubsystem(
+HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     aruwsrc::Drivers* drivers,
     ChassisType chassisType,
     tap::motor::MotorId leftFrontMotorId,
@@ -129,7 +129,7 @@ ChassisSubsystem::ChassisSubsystem(
     motors[RB] = &rightBackMotor;
 }
 
-void ChassisSubsystem::initialize()
+void HolonomicChassisSubsystem::initialize()
 {
     for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
     {
@@ -137,20 +137,20 @@ void ChassisSubsystem::initialize()
     }
 }
 
-void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
+void HolonomicChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
     mecanumDriveCalculate(
         x,
         y,
         r,
-        ChassisSubsystem::getMaxWheelSpeed(
+        HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
-void ChassisSubsystem::setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
+void HolonomicChassisSubsystem::setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
-void ChassisSubsystem::refresh()
+void HolonomicChassisSubsystem::refresh()
 {
     for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
     {
@@ -160,7 +160,7 @@ void ChassisSubsystem::refresh()
     limitChassisPower();
 }
 
-void ChassisSubsystem::limitChassisPower()
+void HolonomicChassisSubsystem::limitChassisPower()
 {
     static constexpr size_t NUM_MOTORS = MODM_ARRAY_SIZE(motors);
 
@@ -205,7 +205,7 @@ void ChassisSubsystem::limitChassisPower()
     }
 }
 
-void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
+void HolonomicChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
 {
     // this is the distance between the center of the chassis to the wheel
     float chassisRotationRatio = sqrtf(
@@ -244,7 +244,7 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
     desiredRotation = r;
 }
 
-void ChassisSubsystem::updateMotorRpmPid(
+void HolonomicChassisSubsystem::updateMotorRpmPid(
     modm::Pid<float>* pid,
     tap::motor::DjiMotor* const motor,
     float desiredRpm)
@@ -253,7 +253,7 @@ void ChassisSubsystem::updateMotorRpmPid(
     motor->setDesiredOutput(pid->getValue());
 }
 
-float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
+float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
     // P
     float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
@@ -273,7 +273,7 @@ float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float e
     return wheelRotationSpeed;
 }
 
-float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
+float HolonomicChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
 {
     // what we will multiply x and y speed by to take into account rotation
     float rTranslationalGain = 1.0f;
@@ -283,7 +283,7 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     // MIN_ROTATION_THRESHOLD
     if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
     {
-        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
+        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
@@ -299,12 +299,12 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-modm::Matrix<float, 3, 1> ChassisSubsystem::getDesiredVelocityChassisRelative() const
+modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
     return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
 
-modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() const
+modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getActualVelocityChassisRelative() const
 {
     modm::Matrix<float, MODM_ARRAY_SIZE(motors), 1> wheelVelocity;
 
@@ -315,7 +315,7 @@ modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() c
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
 }
 
-void ChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
+void HolonomicChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
 
 }  // namespace chassis
 

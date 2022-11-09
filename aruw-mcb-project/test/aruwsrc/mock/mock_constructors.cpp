@@ -70,21 +70,21 @@ AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 
 BeybladeCommandMock::BeybladeCommandMock(
     aruwsrc::Drivers *drivers,
-    chassis::ChassisSubsystem *chassis,
+    chassis::HolonomicChassisSubsystem *chassis,
     aruwsrc::control::turret::TurretMotor *yawMotor)
     : BeybladeCommand(drivers, chassis, yawMotor)
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
 
-ChassisDriveCommandMock::ChassisDriveCommandMock(aruwsrc::Drivers *d, chassis::ChassisSubsystem *cs)
+ChassisDriveCommandMock::ChassisDriveCommandMock(aruwsrc::Drivers *d, chassis::HolonomicChassisSubsystem *cs)
     : chassis::ChassisDriveCommand(d, cs)
 {
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
 ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
-    : ChassisSubsystem(drivers, chassis::ChassisSubsystem::ChassisType::MECANUM)
+    : HolonomicChassisSubsystem(drivers, chassis::HolonomicChassisSubsystem::ChassisType::MECANUM)
 {
 }
 ChassisSubsystemMock::~ChassisSubsystemMock() {}

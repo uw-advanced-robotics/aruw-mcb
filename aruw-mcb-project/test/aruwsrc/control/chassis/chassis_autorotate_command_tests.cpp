@@ -169,7 +169,7 @@ public:
             .WillByDefault(ReturnPointee(&GetParam().yawSetpoint));
 
         ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
-            return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);
+            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d);
         });
     }
 

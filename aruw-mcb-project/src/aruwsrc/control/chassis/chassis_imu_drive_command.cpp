@@ -24,7 +24,7 @@
 #include "aruwsrc/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "chassis_subsystem.hpp"
+#include "holonomic_chassis_subsystem.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
@@ -32,7 +32,7 @@ namespace aruwsrc::chassis
 {
 ChassisImuDriveCommand::ChassisImuDriveCommand(
     aruwsrc::Drivers* drivers,
-    ChassisSubsystem* chassis,
+    HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor)
     : tap::control::Command(),
       drivers(drivers),
