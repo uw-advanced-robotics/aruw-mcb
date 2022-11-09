@@ -21,7 +21,7 @@
 #define SWERVE_MODULE_HPP_
 
 #include "tap/motor/m3508_constants.hpp"
-
+#include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -41,6 +41,30 @@ namespace aruwsrc
 {
 namespace chassis
 {
+
+struct SwerveModuleConfig
+{
+    // Whether any motor is inverted
+    bool driveMotorInverted, azimuthMotorInverted;
+    // Gear ratios for motors
+    float driveMotorGearing, azimuthMotorGearing;
+
+    float drivePidKp = 0.0f;
+    float drivePidKi = 0.0f;
+    float drivePidKd = 0.0f;
+    float drivePidMaxIntergalErrorSum = 0.0f;
+    float drivePidMaxOutput = 16'384.0f;
+    float drivePidFeedForwardConstant = 0.0f;
+
+    float azimuthPidKp = 0.0f;
+    float azimuthPidKi = 0.0f;
+    float azimuthPidKd = 0.0f;
+    float azimuthPidMaxIntergalErrorSum = 0.0f;
+    float azimuthPidMaxOutput = 16'384.0f;
+    float azimuthPidFeedForwardConstant = 0.0f;
+
+};
+
 /**
  *
  * This class encapsultes a swerve module using two motors.
@@ -49,23 +73,11 @@ namespace chassis
  */
 class SwerveModule
 {
-    struct SwerveModuleConfig
-    {
-        // Whether any motor is inverted
-        bool driveMotorInverted, azimuthMotorInverted;
-        // Gear ratios for motors
-        float driveMotorGearing, azimuthMotorGearing;
-
-        
-
-
-    };
-
 public:
-    SwerveModule(
+    SwerveModule(aruwsrc::Drivers* drivers,
         tap::motor::MotorId driveMotorId,
         tap::motor::MotorId azimuthMotorId,
-        const SwerveModuleConfig& swerveModuleConfig);
+        SwerveModuleConfig& swerveModuleConfig);
 
     void setDesiredState(float metersPerSecond, float radianOutput);
 
