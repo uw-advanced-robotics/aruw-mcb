@@ -58,7 +58,7 @@ namespace chassis
  * coordinate is to the left of the robot, and positive z is up. Also, the chassis rotation is
  * positive when rotating counterclockwise around the z axis.
  */
-class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
+class HolonomicChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
     enum class ChassisType
@@ -96,7 +96,7 @@ public:
         return lastComputedMaxWheelSpeed.second;
     }
 
-    ChassisSubsystem(
+    HolonomicChassisSubsystem(
         aruwsrc::Drivers* drivers,
         ChassisType chassisType,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
@@ -264,4 +264,4 @@ private:
 
 }  // namespace aruwsrc
 
-#endif  // CHASSIS_SUBSYSTEM_HPP_
+#endif  // HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_

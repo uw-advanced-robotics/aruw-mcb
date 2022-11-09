@@ -28,7 +28,7 @@ namespace aruwsrc
 {
 namespace mock
 {
-class ChassisSubsystemMock : public aruwsrc::chassis::ChassisSubsystem
+class ChassisSubsystemMock : public aruwsrc::chassis::HolonomicChassisSubsystem
 {
 public:
     ChassisSubsystemMock(aruwsrc::Drivers *drivers);
