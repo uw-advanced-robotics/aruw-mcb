@@ -21,10 +21,10 @@
 #define SWERVE_MODULE_HPP_
 
 #include "tap/motor/m3508_constants.hpp"
+
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
-
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -48,7 +48,7 @@ struct SwerveModuleConfig
 {
     const float WHEEL_DIAMETER_M = 0.076f;
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
-    
+
     // Whether any motor is inverted
     const bool driveMotorInverted, azimuthMotorInverted;
     // Gear ratios for motors
@@ -67,7 +67,6 @@ struct SwerveModuleConfig
     const float azimuthPidMaxIntegralErrorSum = 0.0f;
     const float azimuthPidMaxOutput = 16'384.0f;
     const float azimuthPidFeedForwardConstant = 0.0f;
-
 };
 
 /**
@@ -79,7 +78,8 @@ struct SwerveModuleConfig
 class SwerveModule
 {
 public:
-    SwerveModule(aruwsrc::Drivers* drivers,
+    SwerveModule(
+        aruwsrc::Drivers* drivers,
         tap::motor::MotorId driveMotorId,
         tap::motor::MotorId azimuthMotorId,
         SwerveModuleConfig& swerveModuleConfig);
@@ -95,16 +95,8 @@ public:
     void refresh();
 
 private:
-
     float mpsToRpm(float mps);
     float rpmToMps(float rpm);
-
-    modm::Pid<float> drivePid;
-    modm::Pid<float> azimuthPid;
-
-    float speedSetpoint, rotationSetpoint;
-    SwerveModuleConfig config;
-
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
@@ -116,6 +108,12 @@ private:
     // motors
     Motor driveMotor;
     Motor azimuthMotor;
+
+    modm::Pid<float> drivePid;
+    modm::Pid<float> azimuthPid;
+
+    float speedSetpoint, rotationSetpoint;
+    SwerveModuleConfig config;
 
 #endif
 };  // class SwerveModule
