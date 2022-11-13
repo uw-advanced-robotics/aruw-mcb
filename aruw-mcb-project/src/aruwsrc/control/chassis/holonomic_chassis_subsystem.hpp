@@ -94,7 +94,7 @@ public:
         aruwsrc::Drivers* drivers,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
-    void initialize() override;
+    virtual void initialize() override;
 
     /**
      * Updates the desired wheel RPM based on the passed in x, y, and r components of
@@ -109,7 +109,7 @@ public:
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    mockable void setDesiredOutput(float x, float y, float r);
+    mockable virtual void setDesiredOutput(float x, float y, float r);
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
@@ -126,9 +126,9 @@ public:
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    mockable float chassisSpeedRotationPID(float currentAngleError, float errD);
+    virtual float chassisSpeedRotationPID(float currentAngleError, float errD);
 
-    void refresh() override;
+    virtual void refresh() override;
 
     /**
      * When the desired rotational wheel speed is large, you can slow down your translational speed
@@ -141,7 +141,7 @@ public:
      * chassisRotationDesiredWheelspeed. You then multiply your desired translational RPM by this
      * value.
      */
-    mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
+    mockable virtual float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
     const char* getName() override { return "Chassis"; }
 
@@ -152,26 +152,16 @@ public:
      * @note Equations slightly modified from this paper:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-    modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+   virtual modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
-    /**
-     * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
-     *      where vz is rotational velocity. This is the velocity calculated from the chassis's
-     *      encoders. Units: m/s
-     */
-    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+    virtual int getNumChassisMotors() const override {}
 
-    int getNumChassisMotors() const override {}
+    virtual bool allMotorsOnline() const override {}
 
-     bool allMotorsOnline() const override
-    {
-    }
+    virtual void onHardwareTestStart() override;
 
-    void onHardwareTestStart() override;
+    mockable virtual float getDesiredRotation() const { return desiredRotation; }
 
-    mockable float getDesiredRotation() const { return desiredRotation; }
-
-private:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     /**
@@ -198,7 +188,7 @@ private:
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
-    void limitChassisPower();
+    virtual void limitChassisPower();
 
     /**
      * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
