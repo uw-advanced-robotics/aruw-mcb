@@ -28,7 +28,6 @@
 #include "aruwsrc/drivers.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-
 using namespace tap::algorithms;
 
 namespace aruwsrc
@@ -58,44 +57,79 @@ SwerveModule::SwerveModule(
           swerveModuleConfig.drivePidKp,
           swerveModuleConfig.drivePidKi,
           swerveModuleConfig.drivePidKd,
-          swerveModuleConfig.drivePidMaxIntergalErrorSum,
+          swerveModuleConfig.drivePidMaxIntegralErrorSum,
           swerveModuleConfig.drivePidMaxOutput),
       azimuthPid(
           swerveModuleConfig.azimuthPidKp,
           swerveModuleConfig.azimuthPidKi,
           swerveModuleConfig.azimuthPidKd,
-          swerveModuleConfig.azimuthPidMaxIntergalErrorSum,
+          swerveModuleConfig.azimuthPidMaxIntegralErrorSum,
           swerveModuleConfig.azimuthPidMaxOutput)
 {
+    rotationSetpoint = 0;
 }
 
-void SwerveModule::intialize(){
+void SwerveModule::intialize()
+{
     driveMotor.initialize();
     azimuthMotor.initialize();
 }
 
-void SwerveModule::setDesiredState(float metersPerSecond, float radianOutput) {}
-
-float SwerveModule::getVelocity() { 
-
-    return 3; }
-
-float SwerveModule::getAngle() {}
-
-float SwerveModule::mpsToRpm(float mps){
-        static constexpr float WHEEL_DIAMETER_M = 0.076f;
-        static constexpr float WHEEL_CIRCUMFERANCE_M = M_PI * WHEEL_DIAMETER_M;
-        static constexpr float SEC_PER_M = 60.0f;
-
-        return (mps / WHEEL_CIRCUMFERANCE_M) * SEC_PER_M * config.driveMotorGearing;
+void SwerveModule::setDesiredState(float metersPerSecond, float radianTarget)
+{
+    if (abs(radianTarget - getAngle()) > M_PI_2)
+    {
+        metersPerSecond = -metersPerSecond;
+        radianTarget += M_PI;
+    }
+    speedSetpoint = metersPerSecond;
+    rotationSetpoint = radianTarget;
 }
 
-float SwerveModule::rpmToMps(float rpm){
-    
+/**
+ * Compares current mps to desired mps and adds that adjustment to previous goalSetpoint
+ * Compares current degree to desired degree and updates based on that 
+ */
+void SwerveModule::refresh()
+{
+    drivePid.update(speedSetpoint - getVelocity());
+    driveMotor.setDesiredOutput(drivePid.getValue());
+
+    azimuthPid.update(rotationSetpoint - getAngle());
+    azimuthMotor.setDesiredOutput(azimuthPid.getValue());
 }
 
+/**
+ * Returns MPS of the wheel
+ */
+float SwerveModule::getVelocity()
+{
+    float currentMotorRPM = driveMotor.getShaftRPM();
+    float wheelMPS = rpmToMps(currentMotorRPM);
+    return wheelMPS;
+}
 
+/**
+ * This returns Radian position of motor, CCW+
+ */
+float SwerveModule::getAngle()
+{
+    float motorEncoderPositionDegree =
+        azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderWrapped());
+    return modm::toRadian(motorEncoderPositionDegree / config.azimuthMotorGearing);
+}
 
+float SwerveModule::mpsToRpm(float mps)
+{
+    float SEC_PER_M = 60.0f;
+    return (mps / config.WHEEL_CIRCUMFRENCE_M) * SEC_PER_M * config.driveMotorGearing;
+}
+
+float SwerveModule::rpmToMps(float rpm)
+{
+    float SEC_PER_M = 60.0f;
+    return rpm / SEC_PER_M / config.driveMotorGearing * config.WHEEL_CIRCUMFRENCE_M;
+}
 
 }  // namespace chassis
 }  // namespace aruwsrc
