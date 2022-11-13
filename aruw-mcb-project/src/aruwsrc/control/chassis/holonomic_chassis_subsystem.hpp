@@ -123,7 +123,9 @@ public:
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    mockable float chassisSpeedRotationPID(float currentAngleError, float errD);
+    virtual float chassisSpeedRotationPID(float currentAngleError, float errD);
+
+    virtual void refresh() override;
 
     /**
      * When the desired rotational wheel speed is large, you can slow down your translational speed
@@ -136,7 +138,9 @@ public:
      * chassisRotationDesiredWheelspeed. You then multiply your desired translational RPM by this
      * value.
      */
-    mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
+    mockable virtual float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
+
+    const char* getName() override { return "Chassis"; }
 
     /**
      * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
@@ -145,11 +149,13 @@ public:
      * @note Equations slightly modified from this paper:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-    mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+   virtual modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
     mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
+    virtual int getNumChassisMotors() const override {}
 
     const char* getName() override { return "Chassis"; }
+    virtual bool allMotorsOnline() const override {}
 
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 

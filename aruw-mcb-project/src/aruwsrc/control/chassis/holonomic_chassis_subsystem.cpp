@@ -75,7 +75,7 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
         AUTOROTATION_PID_MAX_OUTPUT);
 
     return wheelRotationSpeed;
-} */
+}
 
 float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
     float chassisRotationDesiredWheelspeed)
@@ -102,12 +102,14 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
         rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
-} */
+}
 
-/* modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
+modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
     return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
+
+void HolonomicChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
 
 }  // namespace chassis
 

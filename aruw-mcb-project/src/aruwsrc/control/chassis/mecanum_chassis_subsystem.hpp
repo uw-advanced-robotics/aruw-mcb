@@ -48,11 +48,47 @@ class MecanumChassisSubsystem : public Holonomic4MotorChassisSubsystem
 public:
     MecanumChassisSubsystem(
         aruwsrc::Drivers* drivers,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
+        tap::motor::MotorId leftFrontMotorId,
+        tap::motor::MotorId leftBackMotorId,
+        tap::motor::MotorId rightFrontMotorId,
+        tap::motor::MotorId rightBackMotorId,
+        tap::gpio::Analog::Pin currentPin);
+
+    inline bool allMotorsOnline() const override
+    {
+        return leftFrontMotor.isMotorOnline() && rightFrontMotor.isMotorOnline() &&
+               leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
+    }
+
+	inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
+
+	private:
+
+    // wheel velocity PID variables
+    modm::Pid<float> velocityPid[4];
+
+	// ✨ the motors ✨
+	tap::motor::DjiMotor* motors[4];
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
+
+private:
+#else
+    // motors
+    tap::motor::DjiMotor leftFrontMotor;
+    tap::motor::DjiMotor leftBackMotor;
+    tap::motor::DjiMotor rightFrontMotor;
+    tap::motor::DjiMotor rightBackMotor;
+#endif
+
+
+
+
 };
 
 }  // namespace chassis
