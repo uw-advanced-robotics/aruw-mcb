@@ -125,8 +125,6 @@ public:
      */
     virtual float chassisSpeedRotationPID(float currentAngleError, float errD);
 
-    virtual void refresh() override;
-
     /**
      * When the desired rotational wheel speed is large, you can slow down your translational speed
      * to make a tighter and more controllable turn. This function that can be used to scale down
@@ -139,6 +137,10 @@ public:
      * value.
      */
     mockable virtual float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
+
+    modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const override;
+
+    void onHardwareTestStart() override;
 
     const char* getName() override { return "Chassis"; }
 
