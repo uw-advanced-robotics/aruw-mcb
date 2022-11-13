@@ -42,7 +42,7 @@ namespace chassis
 class MecanumChassisSubsystem : public HolonomicChassisSubsystem
 {
 public:
-    MecanumChassisSubsystem::MecanumChassisSubsystem(
+    MecanumChassisSubsystem(
         aruwsrc::Drivers* drivers,
         tap::motor::MotorId leftFrontMotorId,
         tap::motor::MotorId leftBackMotorId,

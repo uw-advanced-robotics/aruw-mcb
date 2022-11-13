@@ -52,7 +52,6 @@ SwerveModule::SwerveModule(
           CAN_BUS_MOTORS,
           swerveModuleConfig.azimuthMotorInverted,
           "Azimuth motor"),
-      config(swerveModuleConfig),
       drivePid(
           swerveModuleConfig.drivePidKp,
           swerveModuleConfig.drivePidKi,
@@ -64,7 +63,8 @@ SwerveModule::SwerveModule(
           swerveModuleConfig.azimuthPidKi,
           swerveModuleConfig.azimuthPidKd,
           swerveModuleConfig.azimuthPidMaxIntegralErrorSum,
-          swerveModuleConfig.azimuthPidMaxOutput)
+          swerveModuleConfig.azimuthPidMaxOutput),
+      config(swerveModuleConfig)
 {
     rotationSetpoint = 0;
 }
@@ -88,7 +88,7 @@ void SwerveModule::setDesiredState(float metersPerSecond, float radianTarget)
 
 /**
  * Compares current mps to desired mps and adds that adjustment to previous goalSetpoint
- * Compares current degree to desired degree and updates based on that 
+ * Compares current degree to desired degree and updates based on that
  */
 void SwerveModule::refresh()
 {

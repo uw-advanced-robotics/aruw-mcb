@@ -94,8 +94,6 @@ public:
         aruwsrc::Drivers* drivers,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
-    virtual void initialize() override;
-
     /**
      * Updates the desired wheel RPM based on the passed in x, y, and r components of
      * movement. See the class comment for x and y terminology (should be in right hand coordinate
@@ -128,8 +126,6 @@ public:
      */
     virtual float chassisSpeedRotationPID(float currentAngleError, float errD);
 
-    virtual void refresh() override;
-
     /**
      * When the desired rotational wheel speed is large, you can slow down your translational speed
      * to make a tighter and more controllable turn. This function that can be used to scale down
@@ -143,22 +139,11 @@ public:
      */
     mockable virtual float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
+    modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const override;
+
+    void onHardwareTestStart() override;
+
     const char* getName() override { return "Chassis"; }
-
-    /**
-     * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
-     *      where vz is rotational velocity. This is the desired velocity calculated before any
-     *      sort of limiting occurs (other than base max RPM limiting). Units: m/s
-     * @note Equations slightly modified from this paper:
-     *      https://www.hindawi.com/journals/js/2015/347379/.
-     */
-   virtual modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
-
-    virtual int getNumChassisMotors() const override {}
-
-    virtual bool allMotorsOnline() const override {}
-
-    virtual void onHardwareTestStart() override;
 
     mockable virtual float getDesiredRotation() const { return desiredRotation; }
 
