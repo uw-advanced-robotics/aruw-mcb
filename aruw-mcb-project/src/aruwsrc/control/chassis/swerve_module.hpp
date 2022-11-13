@@ -23,6 +23,8 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
+#include "modm/math/geometry/angle.hpp"
+
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -44,24 +46,27 @@ namespace chassis
 
 struct SwerveModuleConfig
 {
+    const float WHEEL_DIAMETER_M = 0.076f;
+    const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
+    
     // Whether any motor is inverted
-    bool driveMotorInverted, azimuthMotorInverted;
+    const bool driveMotorInverted, azimuthMotorInverted;
     // Gear ratios for motors
-    float driveMotorGearing, azimuthMotorGearing;
+    const float driveMotorGearing, azimuthMotorGearing;
 
-    float drivePidKp = 0.0f;
-    float drivePidKi = 0.0f;
-    float drivePidKd = 0.0f;
-    float drivePidMaxIntergalErrorSum = 0.0f;
-    float drivePidMaxOutput = 16'384.0f;
-    float drivePidFeedForwardConstant = 0.0f;
+    const float drivePidKp = 0.0f;
+    const float drivePidKi = 0.0f;
+    const float drivePidKd = 0.0f;
+    const float drivePidMaxIntegralErrorSum = 0.0f;
+    const float drivePidMaxOutput = 16'384.0f;
+    const float drivePidFeedForwardConstant = 0.0f;
 
-    float azimuthPidKp = 0.0f;
-    float azimuthPidKi = 0.0f;
-    float azimuthPidKd = 0.0f;
-    float azimuthPidMaxIntergalErrorSum = 0.0f;
-    float azimuthPidMaxOutput = 16'384.0f;
-    float azimuthPidFeedForwardConstant = 0.0f;
+    const float azimuthPidKp = 0.0f;
+    const float azimuthPidKi = 0.0f;
+    const float azimuthPidKd = 0.0f;
+    const float azimuthPidMaxIntegralErrorSum = 0.0f;
+    const float azimuthPidMaxOutput = 16'384.0f;
+    const float azimuthPidFeedForwardConstant = 0.0f;
 
 };
 
@@ -87,12 +92,19 @@ public:
 
     void intialize();
 
+    void refresh();
+
 private:
-    modm::Pid<float> drivePid;
-    modm::Pid<float> azimuthPid;
 
     float mpsToRpm(float mps);
     float rpmToMps(float rpm);
+
+    modm::Pid<float> drivePid;
+    modm::Pid<float> azimuthPid;
+
+    float speedSetpoint, rotationSetpoint;
+    SwerveModuleConfig config;
+
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
@@ -104,7 +116,6 @@ private:
     // motors
     Motor driveMotor;
     Motor azimuthMotor;
-    SwerveModuleConfig config;
 
 #endif
 };  // class SwerveModule
