@@ -27,6 +27,8 @@
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 
+#include "constants/chassis_constants.hpp"
+
 #include "holonomic_chassis_subsystem.hpp"
 
 namespace aruwsrc
@@ -44,17 +46,22 @@ class MecanumChassisSubsystem : public HolonomicChassisSubsystem
 public:
     MecanumChassisSubsystem(
         aruwsrc::Drivers* drivers,
-        tap::motor::MotorId leftFrontMotorId,
-        tap::motor::MotorId leftBackMotorId,
-        tap::motor::MotorId rightFrontMotorId,
-        tap::motor::MotorId rightBackMotorId,
-        tap::gpio::Analog::Pin currentPin);
+        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
+        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
+        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
+        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     inline bool allMotorsOnline() const override
     {
         return leftFrontMotor.isMotorOnline() && rightFrontMotor.isMotorOnline() &&
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
+
+    inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
+    inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
+    inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
+    inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
 
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
@@ -78,6 +85,7 @@ public:
     void refresh() override;
 
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+
 
 private:
     // wheel velocity PID variables

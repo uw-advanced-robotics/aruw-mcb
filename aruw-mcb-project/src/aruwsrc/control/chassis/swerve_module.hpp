@@ -98,6 +98,8 @@ private:
     float mpsToRpm(float mps);
     float rpmToMps(float rpm);
 
+    float optimizeAngle(float desiredAngle);
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     testing::NiceMock<tap::mock::DjiMotorMock> driveMotor;
