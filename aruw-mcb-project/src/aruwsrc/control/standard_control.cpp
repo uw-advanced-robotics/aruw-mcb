@@ -51,7 +51,7 @@
 #include "chassis/chassis_autorotate_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_imu_drive_command.hpp"
-#include "chassis/holonomic_chassis_subsystem.hpp"
+#include "chassis/mecanum_chassis_subsystem.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "governor/cv_on_target_governor.hpp"
@@ -128,9 +128,8 @@ StandardTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-aruwsrc::chassis::HolonomicChassisSubsystem chassis(
-    drivers(),
-    aruwsrc::chassis::HolonomicChassisSubsystem::ChassisType::MECANUM);
+aruwsrc::chassis::MecanumChassisSubsystem chassis(
+    drivers());
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 

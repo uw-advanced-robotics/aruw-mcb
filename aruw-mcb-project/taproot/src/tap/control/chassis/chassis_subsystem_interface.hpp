@@ -43,17 +43,17 @@ public:
     /**
      * @return the number of chassis motors
      */
-    virtual inline int getNumChassisMotors() const = 0;
+    virtual int getNumChassisMotors() const;
 
-    virtual inline int16_t getLeftFrontRpmActual() const = 0;
-    virtual inline int16_t getLeftBackRpmActual() const = 0;
-    virtual inline int16_t getRightFrontRpmActual() const = 0;
-    virtual inline int16_t getRightBackRpmActual() const = 0;
+    virtual int16_t getLeftFrontRpmActual() const;
+    virtual int16_t getLeftBackRpmActual() const;
+    virtual int16_t getRightFrontRpmActual() const;
+    virtual int16_t getRightBackRpmActual() const;
 
     /**
      * @return `true` iff all motors are online
      */
-    virtual inline bool allMotorsOnline() const = 0;
+    virtual bool allMotorsOnline() const;
 
     /**
      * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
@@ -69,7 +69,7 @@ public:
      *      where vz is rotational velocity. This is the velocity calculated from the chassis's
      *      encoders. Units: m/s
      */
-    virtual modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const = 0;
+    virtual modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const;
 
     /**
      * Transforms the chassis relative velocity of the form <vx, vy, vz> (where z is an

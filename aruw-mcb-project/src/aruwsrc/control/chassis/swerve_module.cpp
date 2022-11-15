@@ -77,7 +77,8 @@ void SwerveModule::intialize()
 
 void SwerveModule::setDesiredState(float metersPerSecond, float radianTarget)
 {
-    if (abs(radianTarget - getAngle()) > M_PI_2)
+    radianTarget = optimizeAngle(radianTarget);
+    if (abs(modm::toDegree(radianTarget - getAngle())) >= 90)
     {
         metersPerSecond = -metersPerSecond;
         radianTarget += M_PI;
@@ -115,7 +116,7 @@ float SwerveModule::getVelocity()
 float SwerveModule::getAngle()
 {
     float motorEncoderPositionDegree =
-        azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderWrapped());
+        azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped());
     return modm::toRadian(motorEncoderPositionDegree / config.azimuthMotorGearing);
 }
 
@@ -129,6 +130,19 @@ float SwerveModule::rpmToMps(float rpm)
 {
     float SEC_PER_M = 60.0f;
     return rpm / SEC_PER_M / config.driveMotorGearing * config.WHEEL_CIRCUMFRENCE_M;
+}
+
+float SwerveModule::optimizeAngle(float desiredAngle)
+{
+    desiredAngle = modm::toDegree(desiredAngle);
+    float rotationScalar = modm::toDegree(getAngle()) / 360;
+    desiredAngle = desiredAngle + rotationScalar * 360;
+    if (abs(desiredAngle - modm::toDegree(getAngle()) > 180))
+    {
+        // minus cuz if less than you'ld want to add but this would return a negative with get sign
+        desiredAngle = desiredAngle - getSign(desiredAngle - modm::toDegree(getAngle()) * 360);
+    }
+    return modm::toRadian(desiredAngle);
 }
 
 }  // namespace chassis
