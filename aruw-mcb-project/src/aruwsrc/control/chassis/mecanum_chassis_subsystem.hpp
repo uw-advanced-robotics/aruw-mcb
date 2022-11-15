@@ -29,7 +29,7 @@
 
 #include "constants/chassis_constants.hpp"
 
-#include "holonomic_4_motor_chassis_subsystem.hpp"
+#include "holonomic_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -48,11 +48,11 @@ class MecanumChassisSubsystem : public Holonomic4MotorChassisSubsystem
 public:
     MecanumChassisSubsystem(
         aruwsrc::Drivers* drivers,
-        tap::motor::MotorId leftFrontMotorId,
-        tap::motor::MotorId leftBackMotorId,
-        tap::motor::MotorId rightFrontMotorId,
-        tap::motor::MotorId rightBackMotorId,
-        tap::gpio::Analog::Pin currentPin);
+        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
+        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
+        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
+        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     inline bool allMotorsOnline() const override
     {
@@ -60,10 +60,31 @@ public:
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
 
-	inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
+    inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
-	private:
+    void initialize() override;
 
+    void setDesiredOutput(float x, float y, float r) override;
+
+    /**
+     * When you input desired x, y, an r values, this function translates
+     * and sets the RPM of individual chassis motors.
+     */
+    void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
+
+    void updateMotorRpmPid(
+        modm::Pid<float>* pid,
+        tap::motor::DjiMotor* const motor,
+        float desiredRpm);
+
+    void limitChassisPower() override;
+
+    void refresh() override;
+
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+
+
+private:
     // wheel velocity PID variables
     modm::Pid<float> velocityPid[4];
 

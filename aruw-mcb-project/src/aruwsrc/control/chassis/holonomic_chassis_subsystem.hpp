@@ -123,7 +123,7 @@ public:
      *
      * @retval a desired rotation speed (wheel speed)
      */
-    virtual float chassisSpeedRotationPID(float currentAngleError, float errD);
+    mockable float chassisSpeedRotationPID(float currentAngleError, float errD);
 
     /**
      * When the desired rotational wheel speed is large, you can slow down your translational speed
@@ -136,7 +136,7 @@ public:
      * chassisRotationDesiredWheelspeed. You then multiply your desired translational RPM by this
      * value.
      */
-    mockable virtual float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
+    mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const override;
 

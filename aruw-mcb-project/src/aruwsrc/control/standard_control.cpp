@@ -128,7 +128,8 @@ StandardTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers());
+aruwsrc::chassis::MecanumChassisSubsystem chassis(
+    drivers());
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
