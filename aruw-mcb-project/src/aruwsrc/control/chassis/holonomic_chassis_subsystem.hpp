@@ -112,7 +112,7 @@ public:
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
      */
-    mockable void setZeroRPM();
+    mockable inline void setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
@@ -138,9 +138,9 @@ public:
      */
     mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
-    modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const override;
+    mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const override;
 
-    void onHardwareTestStart() override;
+    mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 
     const char* getName() override { return "Chassis"; }
 
@@ -192,8 +192,8 @@ public:
     /**
      * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
      */
-    [[deprecated]]
-    inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
+    [[deprecated]] inline modm::Matrix<float, 4, 1> convertRawRPM(
+        const modm::Matrix<float, 4, 1>& mat) const
     {
         static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
         return mat * ratio;
