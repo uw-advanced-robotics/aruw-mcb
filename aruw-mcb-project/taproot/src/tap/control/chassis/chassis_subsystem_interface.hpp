@@ -51,7 +51,7 @@ public:
     virtual int16_t getRightBackRpmActual() const;
 
     /**
-     * @return `true` iff all motors are online
+     * @return `true` if all motors are online
      */
     virtual bool allMotorsOnline() const;
 

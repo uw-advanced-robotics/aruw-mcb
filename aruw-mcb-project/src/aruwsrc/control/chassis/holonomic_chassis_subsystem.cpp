@@ -109,8 +109,6 @@ modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRe
     return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
 
-void HolonomicChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
-
 }  // namespace chassis
 
 }  // namespace aruwsrc

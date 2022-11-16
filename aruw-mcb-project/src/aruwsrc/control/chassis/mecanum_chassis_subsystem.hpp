@@ -40,7 +40,9 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
+/**
+ * Encapsulates a chassis with mecanum wheels in standard layout
+ */
 class MecanumChassisSubsystem : public HolonomicChassisSubsystem
 {
 public:
@@ -58,6 +60,7 @@ public:
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
 
+
     inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
     inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
     inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
@@ -69,8 +72,15 @@ public:
 
     void setDesiredOutput(float x, float y, float r) override;
 
+    void limitChassisPower() override;
+
+    void refresh() override;
+
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+
+private:
     /**
-     * When you input desired x, y, an r values, this function translates
+     * When you input desired x, y, an r rpm, this function translates
      * and sets the RPM of individual chassis motors.
      */
     void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
@@ -80,14 +90,6 @@ public:
         tap::motor::DjiMotor* const motor,
         float desiredRpm);
 
-    void limitChassisPower() override;
-
-    void refresh() override;
-
-    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
-
-
-private:
     // wheel velocity PID variables
     modm::Pid<float> velocityPid[4];
 

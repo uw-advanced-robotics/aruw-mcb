@@ -97,7 +97,7 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
 
 void MecanumChassisSubsystem::initialize()
 {
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
+    for (size_t i = 0; i < getNumChassisMotors(); i++)
     {
         motors[i]->initialize();
     }
@@ -109,14 +109,14 @@ void MecanumChassisSubsystem::setDesiredOutput(float x, float y, float r)
         x,
         y,
         r,
-        HolonomicChassisSubsystem::getMaxWheelSpeed(
+        getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
 void MecanumChassisSubsystem::refresh()
 {
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
+    for (size_t i = 0; i < getNumChassisMotors(); i++)
     {
         updateMotorRpmPid(&velocityPid[i], motors[i], *desiredWheelRPM[i]);
     }
@@ -126,7 +126,7 @@ void MecanumChassisSubsystem::refresh()
 
 void MecanumChassisSubsystem::limitChassisPower()
 {
-    static constexpr size_t NUM_MOTORS = MODM_ARRAY_SIZE(motors);
+    size_t NUM_MOTORS = getNumChassisMotors();
 
     // use power limiting object to compute initial power limiting fraction
     currentSensor.update();
