@@ -97,7 +97,7 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
 
 void MecanumChassisSubsystem::initialize()
 {
-    for (size_t i = 0; i < getNumChassisMotors(); i++)
+    for (int i = 0; i < getNumChassisMotors(); i++)
     {
         motors[i]->initialize();
     }
@@ -116,7 +116,7 @@ void MecanumChassisSubsystem::setDesiredOutput(float x, float y, float r)
 
 void MecanumChassisSubsystem::refresh()
 {
-    for (size_t i = 0; i < getNumChassisMotors(); i++)
+    for (int i = 0; i < getNumChassisMotors(); i++)
     {
         updateMotorRpmPid(&velocityPid[i], motors[i], *desiredWheelRPM[i]);
     }
@@ -126,7 +126,7 @@ void MecanumChassisSubsystem::refresh()
 
 void MecanumChassisSubsystem::limitChassisPower()
 {
-    size_t NUM_MOTORS = getNumChassisMotors();
+    int NUM_MOTORS = getNumChassisMotors();
 
     // use power limiting object to compute initial power limiting fraction
     currentSensor.update();
@@ -140,7 +140,7 @@ void MecanumChassisSubsystem::limitChassisPower()
 
     // total velocity error for all wheels
     float totalError = 0.0f;
-    for (size_t i = 0; i < NUM_MOTORS; i++)
+    for (int i = 0; i < NUM_MOTORS; i++)
     {
         totalError += abs(velocityPid[i].getLastError());
     }
@@ -149,7 +149,7 @@ void MecanumChassisSubsystem::limitChassisPower()
 
     // compute modified power limiting fraction based on velocity PID error
     // motors with greater error should be allocated a larger fraction of the powerLimitFrac
-    for (size_t i = 0; i < NUM_MOTORS; i++)
+    for (int i = 0; i < NUM_MOTORS; i++)
     {
         // Compared to the other wheels, fraction of how much velocity PID error there is for a
         // single motor. Some value between [0, 1]. The sum of all computed velocityErrorFrac

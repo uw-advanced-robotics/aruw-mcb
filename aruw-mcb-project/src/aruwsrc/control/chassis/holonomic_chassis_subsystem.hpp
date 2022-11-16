@@ -51,7 +51,7 @@ namespace chassis
 {
 /**
  * Abstract subsystem for a holonomic chassis
- * 
+ *
  * The chassis is in a right handed coordinate system with the x coordinate pointing torwards the
  * front of the chassis. As such, when looking down at the robot from above, the positive y
  * coordinate is to the left of the robot, and positive z is up. Also, the chassis rotation is
@@ -106,7 +106,7 @@ public:
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    mockable virtual void setDesiredOutput(float x, float y, float r);
+    mockable virtual void setDesiredOutput(float x, float y, float r) = 0;
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
@@ -172,7 +172,7 @@ public:
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
-    virtual void limitChassisPower();
+    virtual void limitChassisPower() = 0;
 
     /**
      * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
