@@ -152,7 +152,7 @@ void MecanumChassisSubsystem::limitChassisPower()
     for (size_t i = 0; i < NUM_MOTORS; i++)
     {
         // Compared to the other wheels, fraction of how much velocity PID error there is for a
-        // single motor. Some value between [0, 1]. The sume of all computed velocityErrorFrac
+        // single motor. Some value between [0, 1]. The sum of all computed velocityErrorFrac
         // values for all motors is 1.
         float velocityErrorFrac = totalErrorZero
                                       ? (1.0f / NUM_MOTORS)
