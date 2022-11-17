@@ -214,7 +214,7 @@ void MecanumChassisSubsystem::updateMotorRpmPid(
     float desiredRpm)
 {
     pid->update(desiredRpm - motor->getShaftRPM());
-    motor->setDesiredOutput(pid->getValue());
+    motor->setDesiredOutput(motor->getOutputDesired() + pid->getValue());
 }
 
 modm::Matrix<float, 3, 1> MecanumChassisSubsystem::getActualVelocityChassisRelative() const
