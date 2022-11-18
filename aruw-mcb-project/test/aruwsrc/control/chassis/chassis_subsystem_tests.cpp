@@ -21,7 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
@@ -46,7 +46,7 @@ static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_
 class ChassisSubsystemTest : public Test
 {
 protected:
-    ChassisSubsystemTest() : chassis(&drivers, HolonomicChassisSubsystem::ChassisType::MECANUM) {}
+    ChassisSubsystemTest() : chassis(&drivers) {}
 
     void SetUp() override
     {
@@ -55,7 +55,7 @@ protected:
     }
 
     aruwsrc::Drivers drivers;
-    HolonomicChassisSubsystem chassis;
+    MecanumChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
