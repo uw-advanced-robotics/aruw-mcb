@@ -29,7 +29,7 @@
 
 #include "constants/chassis_constants.hpp"
 
-#include "holonomic_chassis_subsystem.hpp"
+#include "holonomic_4_motor_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -43,7 +43,7 @@ namespace chassis
 /**
  * Encapsulates a chassis with mecanum wheels in standard layout
  */
-class MecanumChassisSubsystem : public HolonomicChassisSubsystem
+class MecanumChassisSubsystem : public Holonomic4MotorChassisSubsystem
 {
 public:
     MecanumChassisSubsystem(
@@ -53,64 +53,6 @@ public:
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
         tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
-
-    inline bool allMotorsOnline() const override
-    {
-        return leftFrontMotor.isMotorOnline() && rightFrontMotor.isMotorOnline() &&
-               leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
-    }
-
-
-    inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
-    inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
-    inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
-    inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
-
-    inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
-
-    void initialize() override;
-
-    void setDesiredOutput(float x, float y, float r) override;
-
-    void limitChassisPower() override;
-
-    void refresh() override;
-
-    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
-
-private:
-    /**
-     * When you input desired x, y, an r rpm, this function translates
-     * and sets the RPM of individual chassis motors.
-     */
-    void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
-
-    void updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        tap::motor::DjiMotor* const motor,
-        float desiredRpm);
-
-    // wheel velocity PID variables
-    modm::Pid<float> velocityPid[4];
-
-    // ✨ the motors ✨
-    tap::motor::DjiMotor* motors[4];
-
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
-    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
-
-private:
-#else
-    // motors
-    tap::motor::DjiMotor leftFrontMotor;
-    tap::motor::DjiMotor leftBackMotor;
-    tap::motor::DjiMotor rightFrontMotor;
-    tap::motor::DjiMotor rightBackMotor;
-#endif
 };
 
 }  // namespace chassis
