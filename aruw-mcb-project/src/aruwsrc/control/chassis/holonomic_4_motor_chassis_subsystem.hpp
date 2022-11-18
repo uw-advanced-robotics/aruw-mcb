@@ -60,7 +60,6 @@ public:
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
 
-
     inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
     inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
     inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }

@@ -37,7 +37,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId leftFrontMotorId,
@@ -156,7 +155,11 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     }
 }
 
-void Holonomic4MotorChassisSubsystem::calculateOutput(float x, float y, float r, float maxWheelSpeed)
+void Holonomic4MotorChassisSubsystem::calculateOutput(
+    float x,
+    float y,
+    float r,
+    float maxWheelSpeed)
 {
     // this is the distance between the center of the chassis to the wheel
     float chassisRotationRatio = sqrtf(

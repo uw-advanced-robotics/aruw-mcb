@@ -77,8 +77,8 @@ float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError
     return wheelRotationSpeed;
 }
 
-float HolonomicChassisSubsystem::calculateRotationTranslationalGain(float
-chassisRotationDesiredWheelspeed)
+float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
+    float chassisRotationDesiredWheelspeed)
 {
     // what we will multiply x and y speed by to take into account rotation
     float rTranslationalGain = 1.0f;
