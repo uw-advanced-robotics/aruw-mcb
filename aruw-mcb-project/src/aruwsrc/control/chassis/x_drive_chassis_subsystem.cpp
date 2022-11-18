@@ -45,7 +45,13 @@ XDriveChassisSubsystem::XDriveChassisSubsystem(
     tap::motor::MotorId rightFrontMotorId,
     tap::motor::MotorId rightBackMotorId,
     tap::gpio::Analog::Pin currentPin)
-    : Holonomic4MotorChassisSubsystem(drivers, leftFrontMotorId, leftBackMotorId, rightFrontMotorId, rightBackMotorId, currentPin)
+    : Holonomic4MotorChassisSubsystem(
+          drivers,
+          leftFrontMotorId,
+          leftBackMotorId,
+          rightFrontMotorId,
+          rightBackMotorId,
+          currentPin)
 {
     wheelVelToChassisVelMat[X][LF] = 1;
     wheelVelToChassisVelMat[X][RF] = -1;

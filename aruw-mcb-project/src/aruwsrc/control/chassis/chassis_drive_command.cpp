@@ -31,7 +31,9 @@ namespace aruwsrc
 {
 namespace chassis
 {
-ChassisDriveCommand::ChassisDriveCommand(aruwsrc::Drivers* drivers, HolonomicChassisSubsystem* chassis)
+ChassisDriveCommand::ChassisDriveCommand(
+    aruwsrc::Drivers* drivers,
+    HolonomicChassisSubsystem* chassis)
     : drivers(drivers),
       chassis(chassis)
 {
