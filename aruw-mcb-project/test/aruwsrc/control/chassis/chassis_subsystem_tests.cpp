@@ -289,8 +289,9 @@ class MaxWheelSpeedGetterTest : public TestWithParam<std::tuple<bool, int, float
 
 TEST_P(MaxWheelSpeedGetterTest, getMaxWheelSpeed)
 {
-    float maxWheelSpeed =
-        HolonomicChassisSubsystem::getMaxWheelSpeed(std::get<0>(GetParam()), std::get<1>(GetParam()));
+    float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        std::get<0>(GetParam()),
+        std::get<1>(GetParam()));
 
     EXPECT_NEAR(std::get<2>(GetParam()), maxWheelSpeed, 1E-3);
 }
