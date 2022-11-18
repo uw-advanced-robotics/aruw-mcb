@@ -204,7 +204,7 @@ void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(
     float desiredRpm)
 {
     pid->update(desiredRpm - motor->getShaftRPM());
-    motor->setDesiredOutput(motor->getOutputDesired() + pid->getValue());
+    motor->setDesiredOutput(pid->getValue());
 }
 
 modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getActualVelocityChassisRelative() const
