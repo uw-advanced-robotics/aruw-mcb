@@ -37,7 +37,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 XDriveChassisSubsystem::XDriveChassisSubsystem(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId leftFrontMotorId,

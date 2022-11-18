@@ -77,7 +77,9 @@ BeybladeCommandMock::BeybladeCommandMock(
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
 
-ChassisDriveCommandMock::ChassisDriveCommandMock(aruwsrc::Drivers *d, chassis::HolonomicChassisSubsystem *cs)
+ChassisDriveCommandMock::ChassisDriveCommandMock(
+    aruwsrc::Drivers *d,
+    chassis::HolonomicChassisSubsystem *cs)
     : chassis::ChassisDriveCommand(d, cs)
 {
 }
@@ -202,14 +204,18 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const float setpoint, const float measurement) {
-            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
-        });
-    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
-        return getValidMinError(
-            getChassisFrameSetpoint(),
-            getChassisFrameMeasuredAngle().getValue());
-    });
+        .WillByDefault(
+            [&](const float setpoint, const float measurement) {
+                return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI)
+                    .difference(setpoint);
+            });
+    ON_CALL(*this, getValidChassisMeasurementError)
+        .WillByDefault(
+            [&]() {
+                return getValidMinError(
+                    getChassisFrameSetpoint(),
+                    getChassisFrameMeasuredAngle().getValue());
+            });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
 TurretMotorMock::~TurretMotorMock() {}

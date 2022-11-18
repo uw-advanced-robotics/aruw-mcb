@@ -33,7 +33,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 MecanumChassisSubsystem::MecanumChassisSubsystem(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId leftFrontMotorId,
@@ -41,7 +40,13 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
     tap::motor::MotorId rightFrontMotorId,
     tap::motor::MotorId rightBackMotorId,
     tap::gpio::Analog::Pin currentPin)
-    : Holonomic4MotorChassisSubsystem(drivers, leftFrontMotorId, leftBackMotorId, rightFrontMotorId, rightBackMotorId, currentPin)
+    : Holonomic4MotorChassisSubsystem(
+          drivers,
+          leftFrontMotorId,
+          leftBackMotorId,
+          rightFrontMotorId,
+          rightBackMotorId,
+          currentPin)
 {
     wheelVelToChassisVelMat[X][LF] = 1;
     wheelVelToChassisVelMat[X][RF] = -1;
@@ -57,7 +62,6 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
     wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_HYPOTENUSE;
     wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
 }
-
 
 }  // namespace chassis
 
