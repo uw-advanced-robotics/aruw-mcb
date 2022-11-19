@@ -69,7 +69,7 @@ public:
 
     void initialize() override;
 
-    void setDesiredOutput(float x, float y, float r);
+    void setDesiredOutput(float x, float y, float r) override;
 
     void limitChassisPower() override;
 
