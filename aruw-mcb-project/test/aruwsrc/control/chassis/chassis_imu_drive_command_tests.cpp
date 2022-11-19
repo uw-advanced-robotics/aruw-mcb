@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
@@ -36,7 +37,7 @@ static constexpr float MAX_SPEED = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
 class ChassisImuDriveCommandTest : public Test
 {
 protected:
-    ChassisImuDriveCommandTest() : drivers(), chassis(&drivers), robotData{} {}
+    ChassisImuDriveCommandTest() : drivers(), chassis(chassis::MecanumChassisSubsystem(&drivers)), robotData{} {}
 
     void SetUp() override
     {
