@@ -51,18 +51,9 @@ public:
     virtual inline int16_t getRightBackRpmActual() const = 0;
 
     /**
-     * @return `true` if all motors are online
+     * @return `true` iff all motors are online
      */
     virtual inline bool allMotorsOnline() const = 0;
-
-    /**
-     * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
-     *      where vz is rotational velocity. This is the desired velocity calculated before any
-     *      sort of limiting occurs (other than base max RPM limiting). Units: m/s
-     * @note Equations slightly modified from this paper:
-     *      https://www.hindawi.com/journals/js/2015/347379/.
-     */
-    virtual inline modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const = 0;
 
     /**
      * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,

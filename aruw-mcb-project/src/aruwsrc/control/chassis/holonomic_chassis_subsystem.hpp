@@ -138,7 +138,14 @@ public:
      */
     mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
-    mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const override;
+    /**
+     * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the desired velocity calculated before any
+     *      sort of limiting occurs (other than base max RPM limiting). Units: m/s
+     * @note Equations slightly modified from this paper:
+     *      https://www.hindawi.com/journals/js/2015/347379/.
+     */
+    mockable inline modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
     mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 
