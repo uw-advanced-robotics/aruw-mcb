@@ -39,7 +39,7 @@ class ChassisAutorotateCommandTest : public Test
 protected:
     ChassisAutorotateCommandTest()
         : drivers(),
-          chassis(chassis::MecanumChassisSubsystem(&drivers)),
+          chassis(MecanumChassisSubsystem(&drivers)),
           turret(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
     {

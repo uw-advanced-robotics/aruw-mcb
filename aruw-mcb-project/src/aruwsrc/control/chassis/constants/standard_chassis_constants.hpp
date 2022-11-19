@@ -123,7 +123,7 @@ static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
         ? 1
         : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
-        
+
 /*
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
  */
